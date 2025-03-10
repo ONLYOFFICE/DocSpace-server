@@ -44,8 +44,6 @@ public class FileUtilityConfiguration(IConfiguration configuration)
     public readonly List<string> ExtsCoAuthoring = configuration.GetSection("files:docservice:coauthor-docs").Get<List<string>>() ?? [];
     public readonly string MasterFormExtension = configuration["files:docservice:internal-form"] ?? ".docxf";
     public readonly List<LogoColor> LogoColors = configuration.GetSection("logocolors").Get<List<LogoColor>>() ?? [];
-    private readonly string _signatureSecret = configuration["files:docservice:secret:value"];
-    private readonly string _signatureHeader = configuration["files:docservice:secret:header"];
     private readonly string _forceSave = configuration["files:docservice:forcesave"];
     public readonly int MaxPinnedRooms = int.Parse(configuration["files:pin"] ?? "10");
     public readonly Dictionary<FileType, string> InternalExtension = new()
@@ -55,32 +53,6 @@ public class FileUtilityConfiguration(IConfiguration configuration)
                 { FileType.Presentation, configuration["files:docservice:internal-ppt"] ?? ".pptx" },
                 { FileType.Pdf, configuration["files:docservice:internal-pdf"] ?? ".pdf" }
         };
-    
-    internal string GetSignatureSecret()
-    {
-        var result = _signatureSecret ?? "";
-
-        var regex = new Regex(@"^\s+$");
-
-        if (regex.IsMatch(result))
-        {
-            result = "";
-        }
-
-        return result;
-    }
-
-    internal string GetSignatureHeader()
-    {
-        var result = (_signatureHeader ?? "").Trim();
-        if (string.IsNullOrEmpty(result))
-        {
-            result = "Authorization";
-        }
-
-        return result;
-    }
-
 
     internal bool GetCanForcesave()
     {
@@ -97,25 +69,47 @@ public class LogoColor
 
 public enum Accessibility
 {
+    [SwaggerEnum("Image view")]
     ImageView,
+
+    [SwaggerEnum("Media view")]
     MediaView,
+
+    [SwaggerEnum("Web view")]
     WebView,
+
+    [SwaggerEnum("Web edit")]
     WebEdit,
+
+    [SwaggerEnum("Web review")]
     WebReview,
+
+    [SwaggerEnum("Web custom filter editing")]
     WebCustomFilterEditing,
+
+    [SwaggerEnum("Web restricted editing")]
     WebRestrictedEditing,
+
+    [SwaggerEnum("Web comment")]
     WebComment,
+
+    [SwaggerEnum("CoAuhtoring")]
     CoAuhtoring,
+
+    [SwaggerEnum("Can convert")]
     CanConvert,
+
+    [SwaggerEnum("Must convert")]
     MustConvert
 }
 
 [Scope]
 public class FileUtility(
-    FileUtilityConfiguration fileUtilityConfiguration,
-    FilesLinkUtility filesLinkUtility,
-    IDbContextFactory<FilesDbContext> dbContextFactory)
-{
+        FileUtilityConfiguration fileUtilityConfiguration,
+        FilesLinkUtility filesLinkUtility,
+        IDbContextFactory<FilesDbContext> dbContextFactory,
+        DaoFactory daoFactory)
+    {
     #region method
 
     public static string GetFileExtension(string fileName)
@@ -264,7 +258,7 @@ public class FileUtility(
         return ExtsMediaPreviewed.Exists(r => r.Equals(ext, StringComparison.OrdinalIgnoreCase));
     }
 
-    private bool GetWebViewAccessibility(string fileName)
+    public bool GetWebViewAccessibility(string fileName)
     {
         var ext = GetFileExtension(fileName).ToLower();
         return !ext.Equals(".pdf") && ExtsWebPreviewed.Contains(ext);
@@ -314,6 +308,11 @@ public class FileUtility(
 
     public async Task<bool> CanConvert<T>(File<T> file)
     {
+        var folderDao = daoFactory.GetCacheFolderDao<T>();
+        if (await DocSpaceHelper.IsWatermarkEnabled(file, folderDao))
+        {
+            return false;
+        }
         var ext = GetFileExtension(file.Title);
         return (await GetExtsConvertibleAsync()).ContainsKey(ext);
     }
@@ -541,7 +540,7 @@ public class FileUtility(
                 ".bmp", ".cod", ".gif", ".ief", ".jpe", ".jpeg", ".jpg",
                 ".jfif", ".tiff", ".tif", ".cmx", ".ico", ".pnm", ".pbm",
                 ".png", ".ppm", ".rgb", ".svg", ".xbm", ".xpm", ".xwd",
-                ".svgt", ".svgy", ".gdraw", ".webp"
+                ".svgt", ".svgy", ".gdraw", ".webp", ".heic"
             }.ToImmutableList();
 
     public static readonly ImmutableList<string> ExtsSpreadsheet = new List<string>
@@ -591,9 +590,13 @@ public class FileUtility(
                 ".xlt", ".xltm", ".xltx",
                 ".pot", ".potm", ".potx"
     }.ToImmutableList();
+
+    public const string WatermarkedDocumentExt = ".pdf";
+
     public Dictionary<FileType, string> InternalExtension => fileUtilityConfiguration.InternalExtension;
 
     public string MasterFormExtension { get => fileUtilityConfiguration.MasterFormExtension; }
+
     public enum CsvDelimiter
     {
         None = 0,
@@ -603,12 +606,6 @@ public class FileUtility(
         Comma = 4,
         Space = 5
     }
-    public string SignatureSecret { get => GetSignatureSecret(); }
-    public string SignatureHeader { get => GetSignatureHeader(); }
-
-    private string GetSignatureSecret() => fileUtilityConfiguration.GetSignatureSecret();
-
-    private string GetSignatureHeader() => fileUtilityConfiguration.GetSignatureHeader();
 
     public bool GetCanForcesave() => fileUtilityConfiguration.GetCanForcesave();
 

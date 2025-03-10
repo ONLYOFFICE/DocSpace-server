@@ -90,7 +90,7 @@ public class SubscriptionServiceCache
 
     public static string GetKey(int tenant, string sourceId, string actionId)
     {
-        return string.Format("sub/{0}/{1}/{2}", tenant, sourceId, actionId);
+        return $"sub/{tenant}/{sourceId}/{actionId}";
     }
 }
 
@@ -222,8 +222,8 @@ internal class SubscriptionsStore
     {
         var objId = objectId ?? string.Empty;
         return recipientId != null ?
-            _recordsByRec.TryGetValue(recipientId, out var value) ? value.ToList() : new List<SubscriptionRecord>() :
-            _recordsByObj.TryGetValue(objId, out var value1) ? value1.ToList() : new List<SubscriptionRecord>();
+            _recordsByRec.TryGetValue(recipientId, out var value) ? value.ToList() : [] : 
+            _recordsByObj.TryGetValue(objId, out var value1) ? value1.ToList() : [];
     }
 
     public SubscriptionRecord GetSubscription(string recipientId, string objectId)
@@ -263,7 +263,7 @@ internal class SubscriptionsStore
     {
         return string.IsNullOrEmpty(recipientId) ?
             _methods.ToList() :
-            _methodsByRec.TryGetValue(recipientId, out var value) ? value.ToList() : new List<SubscriptionMethod>();
+            _methodsByRec.TryGetValue(recipientId, out var value) ? value.ToList() : [];
     }
 
     public void SetSubscriptionMethod(SubscriptionMethod m)

@@ -26,11 +26,14 @@
 
 namespace ASC.Core.Tenants;
 
-/// <summary>
-/// </summary>
 public enum TenantTrustedDomainsType
 {
+    [SwaggerEnum("None")]
     None,
+
+    [SwaggerEnum("Custom")]
     Custom,
+
+    [SwaggerEnum("All")]
     All
 }

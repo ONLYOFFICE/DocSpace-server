@@ -27,20 +27,23 @@
 namespace ASC.Data.Backup.ApiModels;
 
 /// <summary>
+/// Backup parameters
 /// </summary>
 public class BackupDto
 {
-    /// <summary>Storage type</summary>
-    /// <type>System.String, System</type>
-    /// <example>Documents</example>
-    public string StorageType { get; set; }
+    /// <summary>
+    /// Storage type
+    /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public BackupStorageType? StorageType { get; set; }
 
-    /// <summary>Storage parameters</summary>
-    /// <type>System.Collections.Generic.IEnumerable{ASC.Api.Collections.ItemKeyValuePair{System.Object, System.Object}}, System.Collections.Generic</type>
+    /// <summary>
+    /// Storage parameters
+    /// </summary>
     public IEnumerable<ItemKeyValuePair<object, object>> StorageParams { get; set; }
 
-    /// <summary>Specifies if a dump will be created or not</summary>
-    /// <type>System.Boolean, System</type>
-    /// <example>true</example>
+    /// <summary>
+    /// Specifies if a dump will be created or not
+    /// </summary>
     public bool Dump { get; set; }
 }

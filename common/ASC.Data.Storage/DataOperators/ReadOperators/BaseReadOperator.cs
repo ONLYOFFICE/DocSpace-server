@@ -34,6 +34,11 @@ public abstract class BaseReadOperator: IDataReadOperator
         return _tmpdir;
     }
 
+    public void SetFolder(string folder)
+    {
+        _tmpdir = folder;
+    }
+
     public Stream GetEntry(string key)
     {
         var filePath = Path.Combine(_tmpdir, key);

@@ -46,12 +46,12 @@ class RoleProvider(IServiceProvider serviceProvider) : IRoleProvider
             {
                 roles = (await serviceProvider.GetService<UserManager>()
                                    .GetUserGroupsAsync(account.ID, IncludeType.Distinct | IncludeType.InParent))
-                                   .Select(g => (IRole)g)
+                                   .Select(IRole (g) => g)
                                    .ToList();
             }
         }
         
-        if (roles.Any(r => r.ID == AuthConstants.Collaborator.ID || r.ID == AuthConstants.User.ID))
+        if (roles.Any(r => r.ID == AuthConstants.User.ID || r.ID == AuthConstants.Guest.ID))
         {
             roles = roles.Where(r => r.ID != AuthConstants.RoomAdmin.ID).ToList();
         }

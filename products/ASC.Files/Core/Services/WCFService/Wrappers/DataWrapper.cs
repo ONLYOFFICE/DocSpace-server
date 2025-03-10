@@ -36,6 +36,8 @@ public class DataWrapper<T>
 
     [JsonPropertyName("folder_info")]
     public Folder<T> FolderInfo { get; init; }
+    
+    public Folder<T> ParentRoom { get; init; }
 
     public int New { get; init; }
 }

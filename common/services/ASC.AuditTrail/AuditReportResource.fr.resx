@@ -802,4 +802,73 @@
   <data name="FormSubmit" xml:space="preserve">
     <value>Utilisateurs [{0}]. Formulaire soumis : {1}</value>
   </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Exportation de l'index des salles sauvegardé dans les Documents</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Invitation envoyée à nouveau : {0}</value>
+  </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>Fichier : {0}. Index changé de {1} à {2}</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Dossier : {0}. L'index est changé de {1} à {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Dossier : {0}. Index réorganisés</value>
+  </data>
+  <data name="OAuthModule" xml:space="preserve">
+    <value>OAuth</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Salle : {0}. Téléchargement restreint désactivé</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Salle : {0}. Téléchargement restreint activé</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Indexation de la salle désactivée</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Indexation de la salle activée</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>Durée de vie désactivée</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>La durée de vie est définie. Valeur : {0}. Période : {1}. Suppression définitive : {2}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Salle : {0}. Filigrane désactivé</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Salle : {0}. Filigrane activé</value>
+  </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>L'activation du client {0} a été modifiée</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>La visibilité du client {0} a été modifiée</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Client créé</value>
+  </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Client {0} supprimé</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>Code d'autorisation généré pour le client {0}</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>Jeton d'accès personnel généré pour le client {0}</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>Secret du client {0} régénéré</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Accès du client {0} révoqué</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>Client {0} mis à jour</value>
+  </data>
 </root>

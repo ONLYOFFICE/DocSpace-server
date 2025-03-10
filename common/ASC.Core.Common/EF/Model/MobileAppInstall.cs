@@ -28,6 +28,7 @@ namespace ASC.Core.Common.EF.Model;
 
 public class MobileAppInstall
 {
+    [MaxLength(255)]
     public string UserEmail { get; set; }
     public int AppType { get; set; }
     public DateTime RegisteredOn { get; set; }
@@ -57,7 +58,7 @@ public static class MobileAppInstallExtension
 
             entity.Property(e => e.UserEmail)
                 .HasColumnName("user_email")
-                .HasColumnType("varchar(255)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -75,24 +76,42 @@ public static class MobileAppInstallExtension
                 .HasColumnType("datetime");
         });
     }
+
     public static void PgSqlAddMobileAppInstall(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<MobileAppInstall>(entity =>
         {
+            // Define the composite primary key for PostgreSQL
             entity.HasKey(e => new { e.UserEmail, e.AppType })
-                .HasName("mobile_app_install_pkey");
+                .HasName("pk_mobile_app_install");
 
-            entity.ToTable("mobile_app_install", "onlyoffice");
+            // Map the table name in PostgreSQL
+            entity.ToTable("mobile_app_install");
 
+            // Configure the UserEmail property
             entity.Property(e => e.UserEmail)
                 .HasColumnName("user_email")
-                .HasMaxLength(255);
+                .HasColumnType("varchar") // Use varchar for strings
+                .HasMaxLength(255) // Respect the MaxLength attribute
+                .IsRequired(); // Ensure it is not null
 
-            entity.Property(e => e.AppType).HasColumnName("app_type");
+            // Configure the AppType property
+            entity.Property(e => e.AppType)
+                .HasColumnName("app_type")
+                .IsRequired(); // Ensure it is not null
 
-            entity.Property(e => e.LastSign).HasColumnName("last_sign");
+            // Configure the RegisteredOn property
+            entity.Property(e => e.RegisteredOn)
+                .HasColumnName("registered_on")
+                .HasColumnType("timestamptz") // Use timestamp for date-time in PostgreSQL
+                .IsRequired(); // Ensure it is not null
 
-            entity.Property(e => e.RegisteredOn).HasColumnName("registered_on");
+            // Configure the LastSign property
+            entity.Property(e => e.LastSign)
+                .HasColumnName("last_sign")
+                .HasColumnType("timestamptz") // Optional date-time column
+                .IsRequired(false) // Not required (nullable)
+                .HasDefaultValue(null); // Default value is NULL
         });
     }
 }

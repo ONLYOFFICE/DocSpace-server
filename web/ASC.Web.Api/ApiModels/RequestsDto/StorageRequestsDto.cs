@@ -27,14 +27,17 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
+/// Storage settings request parameters
 /// </summary>
 public class StorageRequestsDto
 {
-    /// <summary>Storage name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Storage name
+    /// </summary>
     public string Module { get; set; }
 
-    /// <summary>Storage properties</summary>
-    /// <type>System.Collections.Generic.IEnumerable{ASC.Api.Collections.ItemKeyValuePair{System.String, System.String}}, System.Collections.Generic</type>
+    /// <summary>
+    /// Storage properties
+    /// </summary>
     public IEnumerable<ItemKeyValuePair<string, string>> Props { get; set; }
 }

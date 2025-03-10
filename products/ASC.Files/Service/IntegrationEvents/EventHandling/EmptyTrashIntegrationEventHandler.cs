@@ -24,14 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Web.Files.Services.WCFService.FileOperations;
-
 namespace ASC.Files.Service.IntegrationEvents.EventHandling;
 
 [Scope]
 public class EmptyTrashIntegrationEventHandler(
     ILogger<DeleteIntegrationEventHandler> logger,
-    FileOperationsManager fileOperationsManager,
+    FileOperationsManager<FileDeleteOperation> fileOperationsManager,
     TenantManager tenantManager,
     SecurityContext securityContext) : IIntegrationEventHandler<EmptyTrashIntegrationEvent>
 {
@@ -44,7 +42,7 @@ public class EmptyTrashIntegrationEventHandler(
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
             await tenantManager.SetCurrentTenantAsync(@event.TenantId);
             await securityContext.AuthenticateMeWithoutCookieAsync(@event.TenantId, @event.CreateBy);
-            await fileOperationsManager.Enqueue<FileDeleteOperation, FileDeleteOperationData<string>, FileDeleteOperationData<int>>(@event.TaskId, @event.ThirdPartyData, @event.Data);
+            await fileOperationsManager.Enqueue(@event.TaskId, @event.ThirdPartyData, @event.Data);
         }
     }
 }

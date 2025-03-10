@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.Core.Thirdparty;
+
 namespace ASC.Data.Backup.Tasks;
 
 public class RestoreDbModuleTask : PortalTaskBase
@@ -106,6 +108,10 @@ public class RestoreDbModuleTask : PortalTaskBase
         SetColumns(connection, tableInfo);
 
         await using var stream = _reader.GetEntry(KeyHelper.GetTableZipKey(_module, tableInfo.Name));
+        if (stream == null)
+        {
+            throw new InvalidOperationException(tableInfo.Name + " not found");
+        }
         var lowImportanceRelations = _module
             .TableRelations
             .Where(r => string.Equals(r.ParentTable, tableInfo.Name, StringComparison.InvariantCultureIgnoreCase))
@@ -140,15 +146,18 @@ public class RestoreDbModuleTask : PortalTaskBase
                     newIdValue = _columnMapper.GetMapping(tableInfo.Name, tableInfo.IdColumn, oldIdValue);
                     if (newIdValue == null)
                     {
-                        if (tableInfo.IdType == IdType.Guid)
+                        switch (tableInfo.IdType)
                         {
-                            newIdValue = Guid.NewGuid().ToString("D");
-                        }
-                        else if (tableInfo.IdType == IdType.Integer)
-                        {
-                            var command = connection.CreateCommand();
-                            command.CommandText = $"select max({tableInfo.IdColumn}) from {tableInfo.Name};";
-                            newIdValue = (int)await command.WithTimeout(120).ExecuteScalarAsync() + 1;
+                            case IdType.Guid:
+                                newIdValue = Guid.NewGuid().ToString("D");
+                                break;
+                            case IdType.Integer:
+                                {
+                                    var command = connection.CreateCommand();
+                                    command.CommandText = $"select max({tableInfo.IdColumn}) from {tableInfo.Name};";
+                                    newIdValue = (int)await command.WithTimeout(120).ExecuteScalarAsync() + 1;
+                                    break;
+                                }
                         }
                     }
                     if (newIdValue != null)

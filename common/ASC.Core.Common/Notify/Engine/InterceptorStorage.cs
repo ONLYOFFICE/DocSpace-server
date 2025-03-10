@@ -29,7 +29,7 @@ namespace ASC.Notify.Engine;
 class InterceptorStorage
 {
     private readonly string _callContextPrefix = "InterceptorStorage.CALLCONTEXT_KEY." + Guid.NewGuid();
-    private readonly object _syncRoot = new();
+    private readonly Lock _syncRoot = new();
     private readonly Dictionary<string, ISendInterceptor> _globalInterceptors = new(10);
 
     private Dictionary<string, ISendInterceptor> CallInterceptors
@@ -91,12 +91,7 @@ class InterceptorStorage
         RemoveInternal(name, _globalInterceptors);
     }
 
-    public void Clear()
-    {
-        Clear(InterceptorLifetime.Call | InterceptorLifetime.Global);
-    }
-
-    public void Clear(InterceptorLifetime lifetime)
+    public void Clear(InterceptorLifetime lifetime = InterceptorLifetime.Call | InterceptorLifetime.Global)
     {
         lock (_syncRoot)
         {

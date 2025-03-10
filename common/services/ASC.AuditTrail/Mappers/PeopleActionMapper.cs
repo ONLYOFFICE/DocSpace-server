@@ -34,7 +34,7 @@ internal class PeopleActionMapper : IProductActionMapper
         new GroupsActionMapper()
     ];
 
-    public ProductType Product { get; } = ProductType.People;
+    public ProductType Product => ProductType.People;
 }
 
 internal class UsersActionMapper : IModuleActionMapper
@@ -81,8 +81,7 @@ internal class UsersActionMapper : IModuleActionMapper
             { MessageAction.UserLinkedSocialAccount, ActionType.Link },
             { MessageAction.UserUnlinkedSocialAccount, ActionType.Unlink },
             {
-                ActionType.Send,
-                new[] { MessageAction.UserSentActivationInstructions, MessageAction.UserSentDeleteInstructions, MessageAction.SentInviteInstructions }
+                ActionType.Send, [MessageAction.UserSentActivationInstructions, MessageAction.UserSentDeleteInstructions, MessageAction.SentInviteInstructions]
             },
             { MessageAction.UserUpdatedPassword, ActionType.Update },
             { MessageAction.UserSentEmailChangeInstructions, new MessageMaps("UserSentEmailInstructions", ActionType.Send, ProductType.People, Module, EntryType.User) },

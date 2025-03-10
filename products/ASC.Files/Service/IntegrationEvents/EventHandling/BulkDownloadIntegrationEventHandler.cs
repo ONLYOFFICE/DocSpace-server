@@ -24,14 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Web.Files.Services.WCFService.FileOperations;
-
 namespace ASC.Files.Service.IntegrationEvents.EventHandling;
 
 [Scope]
 public class BulkDownloadIntegrationEventHandler(
     ILogger<BulkDownloadIntegrationEvent> logger,
-    FileOperationsManager fileOperationsManager,
+    FileOperationsManager<FileDownloadOperation> fileOperationsManager,
     TenantManager tenantManager,
     SecurityContext securityContext,
     AuthManager authManager)
@@ -45,7 +43,7 @@ public class BulkDownloadIntegrationEventHandler(
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
             await tenantManager.SetCurrentTenantAsync(@event.TenantId);
             await securityContext.AuthenticateMeWithoutCookieAsync(await authManager.GetAccountByIDAsync(@event.TenantId, @event.CreateBy), session: @event.CreateBy);
-            await fileOperationsManager.Enqueue<FileDownloadOperation, FileDownloadOperationData<string>, FileDownloadOperationData<int>>(@event.TaskId, @event.ThirdPartyData, @event.Data);
+            await fileOperationsManager.Enqueue(@event.TaskId, @event.ThirdPartyData, @event.Data);
         }
     }
 }

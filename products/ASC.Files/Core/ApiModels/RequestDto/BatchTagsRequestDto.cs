@@ -27,10 +27,31 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// Request parameters for adding tags
 /// </summary>
 public class BatchTagsRequestDto
 {
-    /// <summary>Tag names</summary>
-    /// <type>System.Collections.Generic.IEnumerable{System.String}, System.Collections.Generic</type>
+    /// <summary>
+    /// Tag names
+    /// </summary>
     public IEnumerable<string> Names { get; set; }
+}
+
+
+/// <summary>
+/// Request parameters for adding tags
+/// </summary>
+public class BatchTagsRequestDto<T>
+{
+    /// <summary>
+    /// Room Id
+    /// </summary>
+    [FromRoute(Name = "id")]
+    public T Id { get; set; }
+
+    /// <summary>
+    /// Batch tags
+    /// </summary>
+    [FromBody]
+    public BatchTagsRequestDto BatchTags { get; set; }
 }

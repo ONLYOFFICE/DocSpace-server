@@ -27,22 +27,39 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// Request parameters for saving file edits
 /// </summary>
-public class SaveEditingRequestDto : IModelWithFile
+public class SaveEditingRequestDto<T> : IModelWithFile
 {
-    /// <summary>File extension</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// File ID
+    /// </summary>
+    [FromRoute(Name = "fileId")]
+    public T FileId { get; set; }
+
+    /// <summary>
+    /// File extension
+    /// </summary>
+    [FromForm(Name = "FileExtension")]
+    [SwaggerSchemaCustom(Example = ".txt")]
     public string FileExtension { get; set; }
 
-    /// <summary>URI to download a file</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// URI to download a file
+    /// </summary>
+    [FromForm(Name = "DownloadUri")]
     public string DownloadUri { get; set; }
 
-    /// <summary>Request file stream</summary>
-    /// <type>Microsoft.AspNetCore.Http.IFormFile, Microsoft.AspNetCore.Http</type>
+    /// <summary>
+    /// Request file stream
+    /// </summary>
+    [FromForm(Name = "File")]
     public IFormFile File { get; set; }
 
-    /// <summary>Specifies whether to force save a file or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether to force save a file or not
+    /// </summary>
+    [FromForm(Name = "Forcesave")]
     public bool Forcesave { get; set; }
 }
+

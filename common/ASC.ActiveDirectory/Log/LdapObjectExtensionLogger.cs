@@ -27,10 +27,10 @@
 namespace ASC.ActiveDirectory.Log;
 internal static partial class LdapObjectExtensionLogger
 {
-    [LoggerMessage(Level = LogLevel.Error, Message = "Can't get attribute from ldap object (attr = {attribute}, dn = {dn})")]
+    [LoggerMessage(LogLevel.Error, "Can't get attribute from ldap object (attr = {attribute}, dn = {dn})")]
     public static partial void ErrorCanNotGetAttribute(this ILogger<LdapObjectExtension> logger, string attribute, string dn,Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Can't get attributes from ldap object (attr = {attribute}, dn = {dn})")]
+    [LoggerMessage(LogLevel.Error, "Can't get attributes from ldap object (attr = {attribute}, dn = {dn})")]
     public static partial void ErrorCanNotGetAttributes(this ILogger<LdapObjectExtension> logger, string attribute, string dn, Exception exception);
 
 }

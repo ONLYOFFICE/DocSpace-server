@@ -54,3 +54,4 @@ licenses.csv
 publish/
 
 .idea
+common/*/docker-entrypoint.py

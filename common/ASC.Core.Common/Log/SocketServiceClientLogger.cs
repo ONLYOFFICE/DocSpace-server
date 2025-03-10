@@ -27,9 +27,9 @@
 namespace ASC.Core.Common.Log;
 internal static partial class SocketServiceClientLogger
 {
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Method:{method}, Data:{data}")]
+    [LoggerMessage(LogLevel.Debug, "Method:{method}, Data:{data}")]
     public static partial void DebugMakeRequest(this ILogger<SocketServiceClient> logger, string method, string data);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Service Error")]
+    [LoggerMessage(LogLevel.Error, "Service Error")]
     public static partial void ErrorService(this ILogger<SocketServiceClient> logger, Exception exception);
 }

@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Common.EF.Context;
 
-public partial class TenantDbContext(DbContextOptions<TenantDbContext> options) : DbContext(options)
+public partial class TenantDbContext(DbContextOptions<TenantDbContext> options) : BaseDbContext(options)
 {
     public DbSet<DbTenant> Tenants { get; set; }
     public DbSet<DbTenantVersion> TenantVersion { get; set; }

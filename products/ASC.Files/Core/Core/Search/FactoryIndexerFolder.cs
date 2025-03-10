@@ -70,7 +70,7 @@ public class FactoryIndexerFolder(ILoggerProvider options,
                     if (j >= settings.Threads)
                     {
                         Task.WaitAll(tasks.ToArray());
-                        tasks = new List<Task>();
+                        tasks = [];
                         j = 0;
                     }
                 }
@@ -131,7 +131,7 @@ public class FactoryIndexerFolder(ILoggerProvider options,
 
                 var count = Queries.FoldersCount(filesDbContext, lastIndexed);
 
-                return new(count, maxId, minId);
+                return new ValueTuple<int, int, int>(count, maxId, minId);
             }
         }
 }

@@ -27,15 +27,42 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// Parameters for creating an HTML file
 /// </summary>
-public class CreateTextOrHtmlFileRequestDto
+public class CreateTextOrHtmlFile
 {
-    /// <summary>File title</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// File title
+    /// </summary>
+    [Required]
+    [StringLength(165)]
     public string Title { get; set; }
 
-    /// <summary>File contents</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// File contents
+    /// </summary>
     public string Content { get; set; }
+
+    /// <summary>
+    /// Create new if exist
+    /// </summary>
     public bool CreateNewIfExist { get; set; }
+}
+
+/// <summary>
+/// Request parameters for creating an HTML file
+/// </summary>
+public class CreateTextOrHtmlFileRequestDto<T>
+{
+    /// <summary>
+    /// Folder ID
+    /// </summary>
+    [FromRoute(Name = "folderId")]
+    public T FolderId { get; set; }
+
+    /// <summary>
+    /// File
+    /// </summary>
+    [FromBody]
+    public CreateTextOrHtmlFile File { get; set; }
 }

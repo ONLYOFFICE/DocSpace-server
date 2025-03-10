@@ -20,23 +20,15 @@
         </dependency>
         <dependency>
             <groupId>com.asc</groupId>
+            <artifactId>common-messaging</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.asc</groupId>
             <artifactId>registration-domain</artifactId>
         </dependency>
         <dependency>
             <groupId>com.asc</groupId>
             <artifactId>registration-service</artifactId>
-        </dependency>
-
-        <!-- Spring AMQP Dependencies -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-amqp</artifactId>
-        </dependency>
-
-        <!-- Spring IoC Dependency -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
         </dependency>
 
         <!-- Testing Dependencies -->

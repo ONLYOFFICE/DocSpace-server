@@ -35,7 +35,7 @@ public static class Validate
 
     public static T IfNull<T>(this T item, Func<T> func) where T : class
     {
-        return item.If(x => x == default(T), func);
+        return item.If(x => x == null, func);
     }
 
     public static T ThrowIfNull<T>(this T item, Exception e) where T : class
@@ -43,18 +43,13 @@ public static class Validate
         return item.IfNull(() => throw e);
     }
 
-    public static T NotFoundIfNull<T>(this T item) where T : class
-    {
-        return NotFoundIfNull(item, "Item not found");
-    }
-
-    public static T NotFoundIfNull<T>(this T item, string message) where T : class
+    public static T NotFoundIfNull<T>(this T item, string message = "Item not found") where T : class
     {
         return item.IfNull(() => throw new ItemNotFoundException(message));
     }
 
     public static T? NullIfDefault<T>(this T item) where T : struct
     {
-        return EqualityComparer<T>.Default.Equals(item, default) ? default(T?) : item;
+        return EqualityComparer<T>.Default.Equals(item, default) ? null : item;
     }
 }

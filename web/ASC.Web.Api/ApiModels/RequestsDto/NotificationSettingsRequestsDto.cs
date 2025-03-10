@@ -27,17 +27,30 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
+/// Notification settings request parameters
 /// </summary>
 public class NotificationSettingsRequestsDto
 {
-    /// <summary>Notification type (Badges, RoomsActivity, DailyFeed, UsefullTips)</summary>
-    /// <type>ASC.Web.Core.Notify.NotificationType, ASC.Web.Core</type>
+    /// <summary>
+    /// Notification type
+    /// </summary>
     public NotificationType Type { get; set; }
 
-
-    /// <summary>Specifies if the notification type is enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the notification type is enabled or not
+    /// </summary>
     public bool IsEnabled { get; set; }
 }
 
 
+/// <summary>
+/// 
+/// </summary>
+public class NotificationTypeRequestsDto
+{
+    /// <summary>
+    /// Notification type (Badges, RoomsActivity, DailyFeed, UsefullTips)
+    /// </summary>
+    [FromRoute(Name = "type")]
+    public NotificationType Type { get; set; }
+}

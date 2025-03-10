@@ -30,15 +30,20 @@ namespace ASC.Core.Common.Core;
 public enum GroupSortType
 {
     Title,
-    Manager
+    Manager,
+    MembersCount
 }
 
 [EnumExtensions]
 public enum UserSortType
 {
     FirstName,
+    LastName,
+    DisplayName,
     Type,
     Email,
     Department,
-    UsedSpace
+    UsedSpace,
+    CreatedBy,
+    RegistrationDate
 }

@@ -162,4 +162,52 @@
   <data name="MigrationProjectFiles" xml:space="preserve">
     <value>Migrācijas projektu faili</value>
   </data>
+  <data name="CanNotAddUserInGroup" xml:space="preserve">
+    <value>Nevarēja pievienot lietotāju {0} grupai {1}</value>
+  </data>
+  <data name="CanNotCreateFile" xml:space="preserve">
+    <value>Nevarēja izveidot failu {0}</value>
+  </data>
+  <data name="CanNotImportUser" xml:space="preserve">
+    <value>Nevarēja importēt lietotāju</value>
+  </data>
+  <data name="CanNotImportUserFiles" xml:space="preserve">
+    <value>Nevarēja importēt lietotāja failus</value>
+  </data>
+  <data name="CanNotParseArchive" xml:space="preserve">
+    <value>Nevarēja parsēt {0} arhīvu</value>
+  </data>
+  <data name="CanNotParseArchives" xml:space="preserve">
+    <value>Neizdevās parsēt arhīvus</value>
+  </data>
+  <data name="CanNotParseUser" xml:space="preserve">
+    <value>Nevarēja parsēt lietotāju {0}</value>
+  </data>
+  <data name="CanNotReadInfoFile" xml:space="preserve">
+    <value>Nevarēja nolasīt informācijas failu no {0}</value>
+  </data>
+  <data name="CanNotShare" xml:space="preserve">
+    <value>Nevarēja kopīgot ierakstu {0} ar {1}</value>
+  </data>
+  <data name="CanNotToUnzip" xml:space="preserve">
+    <value>Nevarēja atarhivēt {0}</value>
+  </data>
+  <data name="CreateFile" xml:space="preserve">
+    <value>Izveidot failu {0}</value>
+  </data>
+  <data name="CreateFolder" xml:space="preserve">
+    <value>Izveidot mapi {0}</value>
+  </data>
+  <data name="CreateShareRoom" xml:space="preserve">
+    <value>izveidot koplietotu telpu {0}</value>
+  </data>
+  <data name="СanNotImportCommonFiles" xml:space="preserve">
+    <value>Nevarēja importēt kopīgos failus</value>
+  </data>
+  <data name="СanNotImportProjectFiles" xml:space="preserve">
+    <value>Nevarēja importēt projekta failus</value>
+  </data>
+  <data name="СreateRootFolder" xml:space="preserve">
+    <value>Izveidot saknes mapi</value>
+  </data>
 </root>

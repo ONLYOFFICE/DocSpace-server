@@ -32,9 +32,15 @@ public class DbRoomSettings
     public int TenantId { get; set; }
     public bool Private { get; set; }
     public bool HasLogo { get; set; }
+    [MaxLength(6)]
     public string Color { get; set; }
+    [MaxLength(50)]
+    public string Cover { get; set; }
     public bool Indexing { get; set; }
     public long Quota { get; set; }
+    public DbRoomWatermark Watermark { get; set; }
+    public bool DenyDownload { get; set; }
+    public DbRoomDataLifetime Lifetime { get; set; }
     public bool Stealth { get; set; }
     public DbTenant Tenant { get; set; }
     public DbFolder Room { get; set; }
@@ -74,9 +80,21 @@ public static class DbRoomSettingsExtension
             
             entity.Property(e => e.Indexing).HasColumnName("indexing").HasDefaultValueSql("0");
 
+            entity.Property(e => e.Watermark)
+                .HasColumnName("watermark")
+                .HasColumnType("json")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
+
             entity.Property(e => e.Color)
                 .HasColumnName("color")
-                .HasColumnType("char(6)")
+                .HasColumnType("char")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
+            
+            entity.Property(e => e.Cover)      
+                .HasColumnName("cover")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -85,6 +103,14 @@ public static class DbRoomSettingsExtension
             entity.Property(e => e.Quota)
                 .HasColumnName("quota")
                 .HasDefaultValueSql("'-2'");
+
+            entity.Property(e => e.Lifetime)
+                .HasColumnName("lifetime")
+                .HasColumnType("json")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
+            
+            entity.Property(e => e.DenyDownload).HasColumnName("deny_download").HasDefaultValueSql("0");
             
             entity.Property(e => e.Stealth).HasColumnName("stealth").HasDefaultValueSql("0");
         });
@@ -92,6 +118,54 @@ public static class DbRoomSettingsExtension
 
     private static void PgSqlAddDbRoomSettings(this ModelBuilder modelBuilder)
     {
-        throw new NotImplementedException();
+        modelBuilder.Entity<DbRoomSettings>(entity =>
+        {
+            entity.ToTable("files_room_settings");
+
+            entity.HasKey(e => new { e.TenantId, e.RoomId })
+                .HasName("pk_files_room_settings");
+
+            entity.Property(e => e.RoomId)
+                .HasColumnName("room_id");
+
+            entity.Property(e => e.Private)
+                .HasColumnName("private")
+                .HasDefaultValueSql("false");
+
+            entity.Property(e => e.HasLogo)
+                .HasColumnName("has_logo")
+                .HasDefaultValueSql("false");
+
+            entity.Property(e => e.Indexing)
+                .HasColumnName("indexing")
+                .HasDefaultValueSql("false");
+
+            entity.Property(e => e.Watermark)
+                .HasColumnName("watermark")
+                .HasColumnType("jsonb");
+
+            entity.Property(e => e.Color)
+                .HasColumnName("color")
+                .HasColumnType("char(6)");
+
+            entity.Property(e => e.Cover)
+                .HasColumnName("cover")
+                .HasColumnType("varchar(50)");
+
+            entity.Property(e => e.TenantId)
+                .HasColumnName("tenant_id");
+
+            entity.Property(e => e.Quota)
+                .HasColumnName("quota")
+                .HasDefaultValueSql("-2");
+
+            entity.Property(e => e.Lifetime)
+                .HasColumnName("lifetime")
+                .HasColumnType("jsonb");
+
+            entity.Property(e => e.DenyDownload)
+                .HasColumnName("deny_download")
+                .HasDefaultValueSql("false");
+        });
     }
 }

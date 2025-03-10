@@ -832,12 +832,12 @@ public static class MimeMapping
                 return (string)entry.Key;
             }
 
-            if (!_mimeSynonyms.ContainsKey(mime))
+            if (!_mimeSynonyms.TryGetValue(mime, out var synonym))
             {
                 continue;
             }
 
-            if (_mimeSynonyms[mime].Contains(mimeMapping.ToLowerInvariant()))
+            if (synonym.Contains(mimeMapping.ToLowerInvariant()))
             {
                 return (string)entry.Key;
             }

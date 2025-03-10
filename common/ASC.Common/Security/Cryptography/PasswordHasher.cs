@@ -29,10 +29,26 @@ namespace ASC.Security.Cryptography;
 [Singleton]
 public class PasswordHasher
 {
+    /// <summary>
+    /// Size
+    /// </summary>
     public int Size { get; private set; }
+
+    /// <summary>
+    /// Iterations
+    /// </summary>
     public int Iterations { get; private set; }
+
+    /// <summary>
+    /// Salt
+    /// </summary>
     public string Salt { get; private set; }
 
+    public PasswordHasher()
+    {
+        
+    }
+    
     public PasswordHasher(IConfiguration configuration, MachinePseudoKeys machinePseudoKeys)
     {
         if (!int.TryParse(configuration["core:password:size"], out var size))

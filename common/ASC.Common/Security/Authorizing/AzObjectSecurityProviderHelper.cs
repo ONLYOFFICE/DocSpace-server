@@ -68,7 +68,7 @@ public class AzObjectSecurityProviderHelper
 
     public bool NextInherit()
     {
-        if (_currSecObjProvider == null || !_currSecObjProvider.InheritSupported)
+        if (_currSecObjProvider is not { InheritSupported: true })
         {
             return false;
         }

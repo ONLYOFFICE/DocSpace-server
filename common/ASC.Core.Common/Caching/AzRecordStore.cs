@@ -44,7 +44,7 @@ class AzRecordStore : IEnumerable<AzRecord>
     {
         _byObjectId.TryGetValue(objectId ?? string.Empty, out var aces);
 
-        return aces ?? new List<AzRecord>();
+        return aces ?? [];
     }
 
     public void Add(AzRecord r)
@@ -57,7 +57,7 @@ class AzRecordStore : IEnumerable<AzRecord>
         var id = r.Object ?? string.Empty;
         if (!_byObjectId.ContainsKey(id))
         {
-            _byObjectId[id] = new List<AzRecord>();
+            _byObjectId[id] = [];
         }
         _byObjectId[id].RemoveAll(a => a.Subject == r.Subject && a.Action == r.Action); // remove escape, see DbAzService
         _byObjectId[id].Add(r);

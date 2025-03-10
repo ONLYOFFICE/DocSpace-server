@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Common.EF.Context;
 
-public class AccountLinkContext(DbContextOptions<AccountLinkContext> options) : DbContext(options)
+public class AccountLinkContext(DbContextOptions<AccountLinkContext> options) : BaseDbContext(options)
 {
     public DbSet<AccountLinks> AccountLinks { get; set; }
     public DbSet<User> Users { get; set; }

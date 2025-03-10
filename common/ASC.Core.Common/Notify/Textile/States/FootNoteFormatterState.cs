@@ -33,11 +33,7 @@ public class FootNoteFormatterState(TextileFormatter f) : SimpleBlockFormatterSt
 
     public override void Enter()
     {
-        Formatter.Output.Write(
-            string.Format("<p id=\"fn{0}\"{1}><sup>{2}</sup> ",
-                _noteID,
-                FormattedStylesAndAlignment("p"),
-                _noteID));
+        Formatter.Output.Write($"<p id=\"fn{_noteID}\"{FormattedStylesAndAlignment("p")}><sup>{_noteID}</sup> ");
     }
 
     public override void Exit()

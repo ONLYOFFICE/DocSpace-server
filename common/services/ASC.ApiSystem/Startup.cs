@@ -50,8 +50,14 @@ public class Startup
         }
     }
 
-    public async Task ConfigureServices(IServiceCollection services)
-    {
+    public async Task ConfigureServices(WebApplicationBuilder builder)
+    {        
+        var services = builder.Services;
+        if (_configuration.GetValue<bool>("openTelemetry:enable"))
+        {
+            builder.ConfigureOpenTelemetry();
+        }
+        
         services.AddCustomHealthCheck(_configuration);
         services.AddHttpContextAccessor();
         services.AddMemoryCache();
@@ -115,7 +121,7 @@ public class Startup
 
         var connectionMultiplexer = await services.GetRedisConnectionMultiplexerAsync(_configuration, GetType().Namespace);
 
-        services.AddDistributedCache(connectionMultiplexer)
+        services.AddHybridCache(connectionMultiplexer)
                 .AddEventBus(_configuration)
                 .AddDistributedTaskQueue()
                 .AddCacheNotify(_configuration)
@@ -125,7 +131,11 @@ public class Startup
         services.RegisterQuotaFeature();
 
         services.AddAutoMapper(BaseStartup.GetAutoMapperProfileAssemblies());
-
+        
+        if (_configuration.GetValue<bool>("openApi:enable"))
+        {
+            services.AddOpenApi(_configuration);
+        }
         if (!_hostEnvironment.IsDevelopment())
         {
             services.AddStartupTask<WarmupServicesStartupTask>()
@@ -159,8 +169,14 @@ public class Startup
             app.UseCors(CustomCorsPolicyName);
         }
 
+        if (_configuration.GetValue<bool>("openApi:enable"))
+        {
+            app.UseOpenApi();
+        }
         app.UseSynchronizationContextMiddleware();
 
+        app.UseTenantMiddleware();
+        
         app.UseAuthentication();
 
         app.UseAuthorization();

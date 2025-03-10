@@ -74,9 +74,10 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
         DateTime? to = null,
         int startIndex = 0,
         int limit = 0,
-        Guid? withoutUserId = null)
+        Guid? withoutUserId = null,
+        string description = null)
     {
-        var tenant = await tenantManager.GetCurrentTenantIdAsync();
+        var tenant = tenantManager.GetCurrentTenantId();
         await using var auditTrailContext = await dbContextFactory.CreateDbContextAsync();
 
         var q1 = auditTrailContext.AuditEvents
@@ -166,6 +167,11 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
                 q1 = q1.Where(q => q.Date <= to.Value);
             }
         }
+
+        if (!string.IsNullOrEmpty(description))
+        {
+            q1 = q1.Where(r => r.DescriptionRaw.Contains(description));
+        }
         
         q1 = q1.OrderByDescending(r => r.Date);
 
@@ -207,6 +213,16 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
             && r.Target.Contains(target));
         
         return q;
+    }
+
+    public async Task<DbAuditEvent> GetLastEventAsync(int tenantId)
+    {
+        await using var auditTrailContext = await dbContextFactory.CreateDbContextAsync();
+
+        return await auditTrailContext.AuditEvents
+            .Where(r => r.TenantId == tenantId)
+            .OrderByDescending(r => r.Id)
+            .FirstOrDefaultAsync();
     }
 
     public async Task<IEnumerable<int>> GetTenantsAsync(DateTime? from = null, DateTime? to = null)

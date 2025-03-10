@@ -26,17 +26,13 @@
 
 global using System.Collections.Concurrent;
 global using System.Net.Sockets;
-
-global using ASC.EventBus.Abstractions;
-global using ASC.EventBus.Events;
-global using ASC.EventBus.ActiveMQ.Log;
 global using Apache.NMS;
-global using Autofac;
-
-global using Microsoft.Extensions.Logging;
-
-global using Polly;
-
+global using ASC.EventBus.Abstractions;
+global using ASC.EventBus.ActiveMQ.Log;
+global using ASC.EventBus.Events;
 global using ASC.EventBus.Exceptions;
 global using ASC.EventBus.Extensions;
 global using ASC.EventBus.Serializers;
+global using Autofac;
+global using Microsoft.Extensions.Logging;
+global using Polly;

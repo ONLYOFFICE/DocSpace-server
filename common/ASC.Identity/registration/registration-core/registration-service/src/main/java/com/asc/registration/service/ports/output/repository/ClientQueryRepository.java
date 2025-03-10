@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,23 +29,28 @@ package com.asc.registration.service.ports.output.repository;
 
 import com.asc.common.core.domain.value.ClientId;
 import com.asc.common.core.domain.value.TenantId;
+import com.asc.common.core.domain.value.UserId;
 import com.asc.common.core.domain.value.enums.ClientVisibility;
 import com.asc.registration.core.domain.entity.Client;
 import com.asc.registration.service.transfer.response.PageableResponse;
+import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Optional;
 
 /**
- * ClientQueryRepository defines the contract for client-related query operations. This repository
- * handles retrieving clients based on various query parameters.
+ * Repository interface for querying client-related data.
+ *
+ * <p>Provides methods for retrieving clients based on various query parameters, including client
+ * ID, tenant ID, visibility status, and pagination details.
  */
 public interface ClientQueryRepository {
 
   /**
    * Finds a client by its unique client ID and visibility status.
    *
-   * @param clientId The unique client ID.
-   * @param visibility The visibility status of the client.
-   * @return An {@link Optional} containing the client if found, or an empty {@link Optional} if not
+   * @param clientId the unique client ID.
+   * @param visibility the visibility status of the client.
+   * @return an {@link Optional} containing the client if found, or an empty {@link Optional} if not
    *     found.
    */
   Optional<Client> findByIdAndVisibility(ClientId clientId, ClientVisibility visibility);
@@ -53,39 +58,69 @@ public interface ClientQueryRepository {
   /**
    * Finds a client by its unique client ID.
    *
-   * @param clientId The unique client ID.
-   * @return An {@link Optional} containing the client if found, or an empty {@link Optional} if not
+   * @param clientId the unique client ID.
+   * @return an {@link Optional} containing the client if found, or an empty {@link Optional} if not
    *     found.
    */
   Optional<Client> findById(ClientId clientId);
 
   /**
-   * Finds all public and private clients belonging to a specific tenant, with pagination support.
+   * Finds all public and private clients belonging to a specific tenant created by a specific user,
+   * with pagination support.
    *
-   * @param tenant The tenant ID to which the clients belong.
-   * @param page The page number to retrieve.
-   * @param limit The number of clients per page.
-   * @return A {@link PageableResponse} containing the clients for the specified tenant.
+   * @param tenantId the tenant ID to which the clients belong.
+   * @param creatorId the user ID of the creator.
+   * @param limit the maximum number of clients to retrieve.
+   * @param lastClientId the client cursor for pagination.
+   * @param lastCreatedOn the creation timestamp cursor for pagination.
+   * @return a {@link PageableResponse} containing the clients for the specified tenant and creator.
    */
-  PageableResponse<Client> findAllPublicAndPrivateByTenantId(TenantId tenant, int page, int limit);
+  PageableResponse<Client> findAllByTenantIdAndCreatorId(
+      TenantId tenantId,
+      UserId creatorId,
+      int limit,
+      String lastClientId,
+      ZonedDateTime lastCreatedOn);
 
   /**
    * Finds all clients belonging to a specific tenant, with pagination support.
    *
-   * @param tenant The tenant ID to which the clients belong.
-   * @param page The page number to retrieve.
-   * @param limit The number of clients per page.
-   * @return A {@link PageableResponse} containing the clients for the specified tenant.
+   * @param tenantId the tenant ID to which the clients belong.
+   * @param limit the maximum number of clients to retrieve.
+   * @param lastClientId the client cursor for pagination.
+   * @param lastCreatedOn the creation timestamp cursor for pagination.
+   * @return a {@link PageableResponse} containing the clients for the specified tenant.
    */
-  PageableResponse<Client> findAllByTenantId(TenantId tenant, int page, int limit);
+  PageableResponse<Client> findAllByTenantId(
+      TenantId tenantId, int limit, String lastClientId, ZonedDateTime lastCreatedOn);
 
   /**
    * Finds a client by its unique client ID and tenant ID.
    *
-   * @param clientId The unique client ID.
-   * @param tenant The tenant ID to which the client belongs.
-   * @return An {@link Optional} containing the client if found, or an empty {@link Optional} if not
+   * @param clientId the unique client ID.
+   * @param tenantId the tenant ID to which the client belongs.
+   * @return an {@link Optional} containing the client if found, or an empty {@link Optional} if not
    *     found.
    */
-  Optional<Client> findByClientIdAndTenantId(ClientId clientId, TenantId tenant);
+  Optional<Client> findByClientIdAndTenantId(ClientId clientId, TenantId tenantId);
+
+  /**
+   * Finds a client by its unique client ID, tenant ID, and creator's user ID.
+   *
+   * @param clientId the unique client ID.
+   * @param tenantId the tenant ID to which the client belongs.
+   * @param creatorId the user ID of the creator.
+   * @return an {@link Optional} containing the client if found, or an empty {@link Optional} if not
+   *     found.
+   */
+  Optional<Client> findByClientIdAndTenantIdAndCreatorId(
+      ClientId clientId, TenantId tenantId, UserId creatorId);
+
+  /**
+   * Finds all clients that match the provided list of client IDs.
+   *
+   * @param clientIds a list of client IDs for which details are to be retrieved.
+   * @return a list of {@link Client} objects matching the specified client IDs.
+   */
+  List<Client> findAllByClientIds(List<ClientId> clientIds);
 }

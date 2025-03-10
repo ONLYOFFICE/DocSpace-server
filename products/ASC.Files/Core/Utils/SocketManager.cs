@@ -46,13 +46,13 @@ public class SocketManager(
 
     public async Task StartEditAsync<T>(T fileId)
     {
-        var room = await FileRoomAsync(fileId);
+        var room = FileRoom(fileId);
         await MakeRequest("start-edit", new { room, fileId });
     }
 
     public async Task StopEditAsync<T>(T fileId)
     {
-        var room = await FileRoomAsync(fileId);
+        var room = FileRoom(fileId);
         await MakeRequest("stop-edit", new { room, fileId });
     }
 
@@ -76,14 +76,14 @@ public class SocketManager(
         await MakeRequest("update-file", file, true);
     }
 
-    public async Task UpdateFolderAsync<T>(Folder<T> folder)
+    public async Task UpdateFolderAsync<T>(Folder<T> folder, IEnumerable<Guid> users = null)
     {
-        await MakeRequest("update-folder", folder, true);
+        await MakeRequest("update-folder", folder, true, users: users);
     }
 
-    public async Task DeleteFileAsync<T>(File<T> file, Func<Task> action = null)
+    public async Task DeleteFileAsync<T>(File<T> file, Func<Task> action = null, IEnumerable<Guid> users = null)
     {
-        await MakeRequest("delete-file", file, action: action);
+        await MakeRequest("delete-file", file, users: users, action: action);
     }
 
     public async Task DeleteFolder<T>(Folder<T> folder, IEnumerable<Guid> users = null, Func<Task> action = null)
@@ -97,7 +97,7 @@ public class SocketManager(
         
         foreach (var g in tags.GroupBy(r => r.EntryId))
         {
-            var room = await FileRoomAsync(g.Key);
+            var room = FileRoom(g.Key);
             result.Add(new { room, fileId = g.Key });
         }
         
@@ -110,7 +110,7 @@ public class SocketManager(
         
         foreach (var g in tags.GroupBy(r => r.EntryId))
         {
-            var room = await FolderRoomAsync(g.Key);
+            var room = FolderRoom(g.Key);
             result.Add(             
                 new {
                     room,
@@ -121,9 +121,32 @@ public class SocketManager(
         
         await MakeRequest("mark-as-new-folder", result);
     }
+
+    public async Task BackupProgressAsync(int percentage)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await MakeRequest("backup-progress", new { tenantId, percentage });
+    }
+
+    public async Task EndBackupAsync<T>(T result)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await MakeRequest("end-backup", new { tenantId, result });
+    }
+
+    public async Task RestoreProgressAsync(int tenantId, int percentage)
+    {
+        await MakeRequest("restore-progress", new { tenantId, percentage });
+    }
+
+    public async Task EndRestoreAsync<T>(int tenantId, T result)
+    {
+        await MakeRequest("end-restore", new { tenantId, result });
+    }
+
     private async Task MakeCreateFormRequest<T>(string method, FileEntry<T> entry, IEnumerable<Guid> userIds, bool isOneMember)
     {
-        var room = await FolderRoomAsync(entry.FolderIdDisplay);
+        var room = FolderRoom(entry.FolderIdDisplay);
         var data = await Serialize(entry);
 
         await base.MakeRequest(method, new
@@ -137,7 +160,7 @@ public class SocketManager(
     }
     private async Task MakeRequest<T>(string method, FileEntry<T> entry, bool withData = false, IEnumerable<Guid> users = null, Func<Task> action = null)
     {
-        var room = await FolderRoomAsync(entry.FolderIdDisplay);
+        var room = FolderRoom(entry.FolderIdDisplay);
         var whoCanRead = users ?? await WhoCanRead(entry);
 
         if (action != null)
@@ -164,16 +187,16 @@ public class SocketManager(
         }
     }
 
-    private async Task<string> FileRoomAsync<T>(T fileId)
+    private string FileRoom<T>(T fileId)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
 
         return $"{tenantId}-FILE-{fileId}";
     }
 
-    private async Task<string> FolderRoomAsync<T>(T folderId)
+    private string FolderRoom<T>(T folderId)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
 
         return $"{tenantId}-DIR-{folderId}";
     }
@@ -197,7 +220,7 @@ public class SocketManager(
         
         var userIds = whoCanRead
             .SelectMany(r => r)
-            .Concat(new []{ entry.CreateBy })
+            .Concat([entry.CreateBy])
             .Distinct()
             .ToList();
 
@@ -207,22 +230,19 @@ public class SocketManager(
     private List<Guid> _admins;
     private Task<IEnumerable<Guid>> Admins()
     {
-        if (_admins != null)
-        {
-            return Task.FromResult<IEnumerable<Guid>>(_admins);
-        }
-
-        return AdminsFromDb();
+        return _admins != null 
+            ? Task.FromResult<IEnumerable<Guid>>(_admins) 
+            : AdminsFromDb();
     }
     
     private async Task<IEnumerable<Guid>> AdminsFromDb()
     {
-        _admins = await userManager.GetUsers(true, EmployeeStatus.Active, null, null, null, null, null, null, null, false, null, true, 0, 0)
-            .Select(r=> r.Id)
-            .ToListAsync();
+        _admins = (await userManager.GetUsersByGroupAsync(Constants.GroupAdmin.ID))
+            .Select(x => x.Id)
+            .ToList();
         
-        _admins.Add((await _tenantManager.GetCurrentTenantAsync()).OwnerId);
+        _admins.Add((_tenantManager.GetCurrentTenant()).OwnerId);
 
         return _admins;
-}
     }
+}

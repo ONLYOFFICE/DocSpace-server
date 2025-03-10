@@ -31,7 +31,7 @@ namespace ASC.Data.Reassigns;
 /// <summary>
 /// </summary>
 [Transient]
-public class RemoveProgressItem(IServiceScopeFactory serviceScopeFactory) : DistributedTaskProgress
+public class RemoveProgressItem : DistributedTaskProgress
 {
     /// <summary>ID of the user whose data is deleted</summary>
     /// <type>System.Guid, System</type>
@@ -40,6 +40,8 @@ public class RemoveProgressItem(IServiceScopeFactory serviceScopeFactory) : Dist
     /// <summary>The user whose data is deleted</summary>
     /// <type>ASC.Core.Users.UserInfo, ASC.Core.Common</type>
     public UserInfo User { get; private set; }
+    
+    public bool IsGuest { get; private set; }
 
     //private readonly IFileStorageService _docService;
     //private readonly MailGarbageEngine _mailEraser;
@@ -49,11 +51,24 @@ public class RemoveProgressItem(IServiceScopeFactory serviceScopeFactory) : Dist
     private Guid _currentUserId;
     private bool _notify;
     private bool _deleteProfile;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
+
+    public RemoveProgressItem()
+    {
+        
+    }
+    
+    /// <summary>
+    /// </summary>
+    public RemoveProgressItem(IServiceScopeFactory serviceScopeFactory)
+    {
+        _serviceScopeFactory = serviceScopeFactory;
+    }
 
     //_docService = Web.Files.Classes.Global.FileStorageService;
     //_mailEraser = new MailGarbageEngine();
 
-    public void Init(IDictionary<string, StringValues> httpHeaders, int tenantId, UserInfo user, Guid currentUserId, bool notify, bool deleteProfile)
+    public void Init(IDictionary<string, StringValues> httpHeaders, int tenantId, UserInfo user, Guid currentUserId, bool notify, bool deleteProfile, bool isGuest)
     {
         _httpHeaders = httpHeaders;
         _tenantId = tenantId;
@@ -67,11 +82,12 @@ public class RemoveProgressItem(IServiceScopeFactory serviceScopeFactory) : Dist
         Exception = null;
         Percentage = 0;
         IsCompleted = false;
+        IsGuest = isGuest;
     }
 
     protected override async Task DoJob()
     {
-        await using var scope = serviceScopeFactory.CreateAsyncScope();
+        await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var scopeClass = scope.ServiceProvider.GetService<RemoveProgressItemScope>();
         var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, webItemManagerSecurity,  userFormatter, options) = scopeClass;
         var logger = options.CreateLogger("ASC.Web");
@@ -99,6 +115,19 @@ public class RemoveProgressItem(IServiceScopeFactory serviceScopeFactory) : Dist
             await PublishChanges();
 
             await fileStorageService.DeletePersonalDataAsync<int>(FromUser);
+
+            if (IsGuest)
+            {
+                Percentage = 50;
+                await PublishChanges();
+
+                await fileStorageService.ReassignRoomsFilesAsync(FromUser);
+                
+                Percentage = 70;
+                await PublishChanges();
+                
+                await fileStorageService.ReassignRoomsFoldersAsync(FromUser);
+            }
 
             Percentage = 95;
             await PublishChanges();
@@ -189,11 +218,11 @@ public class RemoveProgressItem(IServiceScopeFactory serviceScopeFactory) : Dist
 
         if (_httpHeaders != null)
         {
-            await messageService.SendHeadersMessageAsync(MessageAction.UserDeleted, MessageTarget.Create(FromUser), _httpHeaders, userName);
+            messageService.SendHeadersMessage(MessageAction.UserDeleted, MessageTarget.Create(FromUser), _httpHeaders, userName);
         }
         else
         {
-            await messageService.SendAsync(MessageAction.UserDeleted, MessageTarget.Create(FromUser), userName);
+            messageService.Send(MessageAction.UserDeleted, MessageTarget.Create(FromUser), userName);
         }
     }
 
@@ -206,11 +235,11 @@ public class RemoveProgressItem(IServiceScopeFactory serviceScopeFactory) : Dist
 
         if (_httpHeaders != null)
         {
-            await messageService.SendHeadersMessageAsync(MessageAction.UserDataRemoving, MessageTarget.Create(FromUser), _httpHeaders, userName);
+            messageService.SendHeadersMessage(MessageAction.UserDataRemoving, MessageTarget.Create(FromUser), _httpHeaders, userName);
         }
         else
         {
-            await messageService.SendAsync(MessageAction.UserDataRemoving, MessageTarget.Create(FromUser), userName);
+            messageService.Send(MessageAction.UserDataRemoving, MessageTarget.Create(FromUser), userName);
         }
     }
 

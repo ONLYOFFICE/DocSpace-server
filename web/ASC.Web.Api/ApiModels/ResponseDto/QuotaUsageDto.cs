@@ -35,7 +35,7 @@ public class QuotaUsageManager(
 {
     public async Task<QuotaUsageDto> Get()
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         var quota = await tenantManager.GetCurrentTenantQuotaAsync();
         var quotaRows = (await tenantManager.FindTenantQuotaRowsAsync(tenant.Id))
             .Where(r => !string.IsNullOrEmpty(r.Tag) && new Guid(r.Tag) != Guid.Empty)
@@ -61,84 +61,95 @@ public class QuotaUsageManager(
     }
 }
 
-/// <summary>
-/// </summary>
 public class QuotaUsageDto
 {
-    /// <summary>Storage size</summary>
-    /// <type>System.UInt64, System</type>
+    /// <summary>
+    /// Storage size
+    /// </summary>
     public ulong StorageSize { get; init; }
 
-    /// <summary>Maximum file size</summary>
-    /// <type>System.UInt64, System</type>
+    /// <summary>
+    /// Maximum file size
+    /// </summary>
     public ulong MaxFileSize { get; set; }
 
-    /// <summary>Used size</summary>
-    /// <type>System.UInt64, System</type>
+    /// <summary>
+    /// Used size
+    /// </summary>
     public ulong UsedSize { get; init; }
 
-    /// <summary>maximum number of room administrators</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// maximum number of room administrators
+    /// </summary>
     public int MaxRoomAdminsCount { get; init; }
 
-    /// <summary>Number of room administrators</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// Number of room administrators
+    /// </summary>
     public int RoomAdminCount { get; init; }
 
-    /// <summary>Available size</summary>
-    /// <type>System.UInt64, System</type>
+    /// <summary>
+    /// Available size
+    /// </summary>
     public ulong AvailableSize
     {
         get { return Math.Max(0, StorageSize > UsedSize ? StorageSize - UsedSize : 0); }
         set { throw new NotImplementedException(); }
     }
 
-    /// <summary>Available number of users</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// Available number of users
+    /// </summary>
     public int AvailableUsersCount
     {
         get { return Math.Max(0, MaxRoomAdminsCount - RoomAdminCount); }
         set { throw new NotImplementedException(); }
     }
 
-    /// <summary>Storage usage</summary>
-    /// <type>System.Collections.Generic.IList{ASC.Web.Api.ApiModel.ResponseDto.QuotaUsage}, System.Collections.Generic</type>
+    /// <summary>
+    /// Storage usage
+    /// </summary>
     public IList<QuotaUsage> StorageUsage { get; set; }
 
-    /// <summary>User storage size</summary>
-    /// <type>System.Int64, System</type>
+    /// <summary>
+    /// User storage size
+    /// </summary>
     public long UserStorageSize { get; set; }
 
-    /// <summary>User used size</summary>
-    /// <type>System.Int64, System</type>
+    /// <summary>
+    /// User used size
+    /// </summary>
     public long UserUsedSize { get; set; }
 
-    /// <summary>User available size</summary>
-    /// <type>System.Int64, System</type>
+    /// <summary>
+    /// User available size
+    /// </summary>
     public long UserAvailableSize
     {
         get { return Math.Max(0, UserStorageSize - UserUsedSize); }
         set { throw new NotImplementedException(); }
     }
 
-    /// <summary>Maximum number of users</summary>
-    /// <type>System.Int64, System</type>
+    /// <summary>
+    /// Maximum number of users
+    /// </summary>
     public long MaxUsers { get; set; }
 
-    /// <summary>Number of users</summary>
-    /// <type>System.Int64, System</type>
+    /// <summary>
+    /// Number of users
+    /// </summary>
     public long UsersCount { get; set; }
 }
 
-/// <summary>
-/// </summary>
 public class QuotaUsage
 {
-    /// <summary>Path to the storage</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Path to the storage
+    /// </summary>
     public string Path { get; set; }
 
-    /// <summary>Storage size</summary>
-    /// <type>System.Int64, System</type>
+    /// <summary>
+    /// Storage size
+    /// </summary>
     public long Size { get; set; }
 }

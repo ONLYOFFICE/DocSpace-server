@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="BackupNotFound" xml:space="preserve">
-    <value>Файл резервної копії недійсний. Використайте файл, створений в ONLYOFFICE v11.5 або пізнішої версії.</value>
+    <value>Файл резервної копії недійсний. Будь ласка, використовуйте файл, створений на тому ж порталі.</value>
   </data>
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Встановити пароль</value>

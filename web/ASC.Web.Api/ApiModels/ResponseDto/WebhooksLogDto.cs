@@ -26,51 +26,60 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class WebhooksLogDto : IMapFrom<WebhooksLog>
 {
-    /// <summary>ID</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// ID
+    /// </summary>
     public int Id { get; set; }
 
-    /// <summary>Config name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Config name
+    /// </summary>
     public string ConfigName { get; set; }
 
-    /// <summary>Creation time</summary>
-    /// <type>System.DateTime, System</type>
+    /// <summary>
+    /// Creation time
+    /// </summary>
     public DateTime CreationTime { get; set; }
 
-    /// <summary>Method</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Method
+    /// </summary>
     public string Method { get; set; }
 
-    /// <summary>Route</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Route
+    /// </summary>
     public string Route { get; set; }
 
-    /// <summary>Request headers</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Request headers
+    /// </summary>
     public string RequestHeaders { get; set; }
 
-    /// <summary>Request payload</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Request payload
+    /// </summary>
     public string RequestPayload { get; set; }
 
-    /// <summary>Response headers</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Response headers
+    /// </summary>
     public string ResponseHeaders { get; set; }
 
-    /// <summary>Response payload</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Response payload
+    /// </summary>
     public string ResponsePayload { get; set; }
 
-    /// <summary>Status</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// Status
+    /// </summary>
     public int Status { get; set; }
 
-    /// <summary>Delivery time</summary>
-    /// <type>System.Nullable{System.DateTime}, System</type>
+    /// <summary>
+    /// Delivery time
+    /// </summary>
     public DateTime? Delivery { get; set; }
 }

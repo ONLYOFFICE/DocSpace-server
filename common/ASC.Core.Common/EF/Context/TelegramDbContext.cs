@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Common.EF.Context;
 
-public class TelegramDbContext(DbContextOptions<TelegramDbContext> options) : DbContext(options)
+public class TelegramDbContext(DbContextOptions<TelegramDbContext> options) : BaseDbContext(options)
 {
     public DbSet<TelegramUser> Users { get; set; }
 

@@ -29,10 +29,7 @@ namespace ASC.Notify.Messages;
 public class NoticeMessage : INoticeMessage
 {
     [NonSerialized]
-    private readonly List<ITagValue> _arguments = new();
-
-    [NonSerialized]
-    private IPattern _pattern;
+    private readonly List<ITagValue> _arguments = [];
 
     public NoticeMessage() { }
 
@@ -64,11 +61,8 @@ public class NoticeMessage : INoticeMessage
 
     public IDirectRecipient Recipient { get; private set; }
 
-    public IPattern Pattern
-    {
-        get => _pattern;
-        internal set => _pattern = value;
-    }
+    [field: NonSerialized]
+    public IPattern Pattern { get; internal set; }
 
     public INotifyAction Action { get; private set; }
 

@@ -26,16 +26,16 @@
 
 namespace ASC.People.ApiModels.RequestDto;
 
-/// <summary>
-/// 
-/// </summary>
 public abstract class GroupRequestDtoBase
 {
-    /// <summary>Group manager ID</summary>
-    /// <type>System.Guid, System</type>
+    /// <summary>
+    /// Group manager ID
+    /// </summary>
     public Guid GroupManager { get; set; }
 
-    /// <summary>Group name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Group name
+    /// </summary>
+    [StringLength(128)]
     public string GroupName { get; set; }
 }

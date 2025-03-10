@@ -27,9 +27,9 @@
 namespace ASC.Files.Core.Log;
 internal static partial class WordpressHelperLogger
 {
-    [LoggerMessage(Level = LogLevel.Error, Message = "Get Wordpress info about me")]
+    [LoggerMessage(LogLevel.Error, "Get Wordpress info about me")]
     public static partial void ErrorGetWordpressInfo(this ILogger<WordpressHelper> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Create Wordpress post")]
+    [LoggerMessage(LogLevel.Error, "Create Wordpress post")]
     public static partial void ErrorCreateWordpressPost(this ILogger<WordpressHelper> logger, Exception exception);
 }

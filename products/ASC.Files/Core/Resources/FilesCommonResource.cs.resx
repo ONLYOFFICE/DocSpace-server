@@ -290,9 +290,6 @@ Je garantována 100% kompatibilita s MS Office formáty.</value>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Editor</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Administrátor místnosti</value>
-  </data>
   <data name="RoleEnum_User" xml:space="preserve">
     <value>Uživatel</value>
   </data>
@@ -364,9 +361,6 @@ Je garantována 100% kompatibilita s MS Office formáty.</value>
   </data>
   <data name="ErrorrMessage_PinRoom" xml:space="preserve">
     <value>Místnost nelze připnout</value>
-  </data>
-  <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
-    <value>Administrátor místnosti</value>
   </data>
   <data name="AceStatusEnum_CustomFilter" xml:space="preserve">
     <value>Vlastní filtr</value>
@@ -467,26 +461,20 @@ Je garantována 100% kompatibilita s MS Office formáty.</value>
   <data name="Date" xml:space="preserve">
     <value>Datum</value>
   </data>
-  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
-    <value>Mocný uživatel</value>
-  </data>
-  <data name="RoleEnum_PowerUser" xml:space="preserve">
-    <value>Mocný uživatel</value>
-  </data>
   <data name="User" xml:space="preserve">
     <value>Uživatel</value>
   </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Přesun několika souborů do místnosti pro vyplňování formulářů není podporován. Přesouvejte vždy jen jeden formulář ONLYOFFICE PDF.</value>
+    <value>Přesun několika souborů do místnosti pro vyplňování formulářů není podporován. Přesouvejte vždy jen jeden formulář {0} PDF.</value>
   </data>
   <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Přesun složek do místnosti pro vyplňování formulářů není podporován. Přesouvejte vždy jeden PDF formulář aplikace ONLYOFFICE.</value>
+    <value>Přesun složek do místnosti pro vyplňování formulářů není podporován. Přesouvejte vždy jeden PDF formulář aplikace {0}.</value>
   </data>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Soubor nelze do této místnosti přesunout. Zkuste prosím přesunout PDF formulář ONLYOFFICE.</value>
+    <value>Soubor nelze do této místnosti přesunout. Zkuste prosím přesunout PDF formulář {0}.</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Soubor nelze do této místnosti nahrát. Zkuste prosím nahrát PDF formulář ONLYOFFICE.</value>
+    <value>Soubor nelze do této místnosti nahrát. Zkuste prosím nahrát PDF formulář {0}.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Odkaz k vyplnění</value>
@@ -494,7 +482,25 @@ Je garantována 100% kompatibilita s MS Office formáty.</value>
   <data name="LinkToForm" xml:space="preserve">
     <value>Odkaz na formulář</value>
   </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>Číslo formuláře</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Externí uživatel</value>
+  </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Tvůrce obsahu</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Správce místnosti</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Tvůrce obsahu</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Správce místnosti</value>
+  </data>
   <data name="OpenForm" xml:space="preserve">
-    <value>Otevřený formulář</value>
+    <value>Otevřít soubor</value>
   </data>
 </root>

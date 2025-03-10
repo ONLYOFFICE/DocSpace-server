@@ -26,35 +26,39 @@
 
 namespace ASC.Web.Files.Services.WCFService;
 
-/// <summary>
-/// </summary>
 public class ThirdPartyParams
 {
-    /// <summary>Authentication data</summary>
-    /// <type>ASC.Files.Core.AuthData, ASC.Files.Core</type>
+    /// <summary>
+    /// Authentication data
+    /// </summary>
     [JsonPropertyName("auth_data")]
     public AuthData AuthData { get; init; }
 
-    /// <summary>Specifies if this is a corporate account or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if this is a corporate account or not
+    /// </summary>
     public bool Corporate { get; init; }
 
-    /// <summary>Specifies if this is a room storage or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if this is a room storage or not
+    /// </summary>
     public bool RoomsStorage { get; init; }
 
-    /// <summary>Customer title</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Customer title
+    /// </summary>
     [JsonPropertyName("customer_title")]
     public string CustomerTitle { get; set; }
 
-    /// <summary>Provider ID</summary>
-    /// <type>System.Nullable{System.Int32}, System</type>
+    /// <summary>
+    /// Provider ID
+    /// </summary>
     [JsonPropertyName("provider_id")]
     public int? ProviderId { get; init; }
 
-    /// <summary>Provider key</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Provider key
+    /// </summary>
     [JsonPropertyName("provider_key")]
     public string ProviderKey { get; init; }
 }

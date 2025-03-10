@@ -27,18 +27,18 @@
 namespace ASC.ElasticSearch.Log;
 internal static partial class ElasticSearchIndexServiceLogger
 {
-    [LoggerMessage(Level = LogLevel.Critical, Message = "FactoryIndexer")]
+    [LoggerMessage(LogLevel.Critical, "FactoryIndexer")]
     public static partial void CriticalFactoryIndexer(this ILogger logger, Exception exception);  
     
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Product reindex {indexName}")]
+    [LoggerMessage(LogLevel.Debug, "Product reindex {indexName}")]
     public static partial void DebugProductReindex(this ILogger logger, string indexName);  
     
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Product {indexName}")]
+    [LoggerMessage(LogLevel.Debug, "Product {indexName}")]
     public static partial void DebugProduct(this ILogger logger, string indexName);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Subscribe on start")]
+    [LoggerMessage(LogLevel.Error, "Subscribe on start")]
     public static partial void ErrorSubscribeOnStart(this ILogger logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Product reindex {indexName}")]
+    [LoggerMessage(LogLevel.Error, "Product reindex {indexName}")]
     public static partial void ErrorProductReindex(this ILogger logger, string indexName, Exception exception);
 }

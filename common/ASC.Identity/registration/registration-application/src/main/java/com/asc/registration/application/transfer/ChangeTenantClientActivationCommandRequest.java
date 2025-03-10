@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,6 +28,7 @@
 package com.asc.registration.application.transfer;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 import lombok.*;
 
@@ -65,5 +66,6 @@ import lombok.*;
 public class ChangeTenantClientActivationCommandRequest implements Serializable {
   /** Indicates whether the client's activation status is enabled or disabled. */
   @JsonProperty("status")
+  @NotNull
   private boolean enabled;
 }

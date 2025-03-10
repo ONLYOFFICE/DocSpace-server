@@ -335,9 +335,6 @@ Massima compatibilità con docx, xlsx, pptx.</value>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Editore</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Amministratore di stanza</value>
-  </data>
   <data name="RoleEnum_User" xml:space="preserve">
     <value>Utente</value>
   </data>
@@ -361,9 +358,6 @@ Massima compatibilità con docx, xlsx, pptx.</value>
   </data>
   <data name="AceStatusEnum_Editing" xml:space="preserve">
     <value>Editore</value>
-  </data>
-  <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
-    <value>Amministratore di stanza</value>
   </data>
   <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
     <value>La nuova versione non può essere uguale a quella attuale</value>
@@ -464,29 +458,23 @@ Massima compatibilità con docx, xlsx, pptx.</value>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Tipo</value>
   </data>
-  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
-    <value>Utente esperto</value>
-  </data>
   <data name="Date" xml:space="preserve">
     <value>Data</value>
-  </data>
-  <data name="RoleEnum_PowerUser" xml:space="preserve">
-    <value>Utente esperto</value>
   </data>
   <data name="User" xml:space="preserve">
     <value>Utente</value>
   </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Lo spostamento di più file nella sttanza per la Compilazione dei moduli non è supportato. Sposta un modulo PDF di ONLYOFFICE alla volta.</value>
+    <value>Lo spostamento di più file nella sttanza per la Compilazione dei moduli non è supportato. Sposta un modulo PDF di {0} alla volta.</value>
   </data>
   <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Lo spostamento delle cartelle nella sttanza per la Compilazione dei moduli non è supportato. Sposta un modulo PDF di ONLYOFFICE alla volta.</value>
+    <value>Lo spostamento delle cartelle nella sttanza per la Compilazione dei moduli non è supportato. Sposta un modulo PDF di {0} alla volta.</value>
   </data>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Il file non può essere spostato in questa stanza. Prova a spostare il modulo PDF di ONLYOFFICE.</value>
+    <value>Il file non può essere spostato in questa stanza. Prova a spostare il modulo PDF di {0}.</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Impossibile caricare il file in questa stanza. Prova a caricare il modulo PDF di ONLYOFFICE.</value>
+    <value>Impossibile caricare il file in questa stanza. Prova a caricare il modulo PDF di {0}.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Link per la compilazione</value>
@@ -497,7 +485,22 @@ Massima compatibilità con docx, xlsx, pptx.</value>
   <data name="FormNumber" xml:space="preserve">
     <value>Numero del modulo</value>
   </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Content creator</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Content creator</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Manager della stanza</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Manager della stanza</value>
+  </data>
   <data name="OpenForm" xml:space="preserve">
-    <value>Apri il modulo</value>
+    <value>Apri file</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Utente esterno</value>
   </data>
 </root>

@@ -129,9 +129,6 @@ $__AuthorName eliminou a sala: $RoomTitle</value>
   <data name="subject_DocuSignStatus_push" xml:space="preserve">
     <value>Estado da assinatura alterado</value>
   </data>
-  <data name="subject_EditorMentions_push" xml:space="preserve">
-    <value>Mencionado(a) no documento</value>
-  </data>
   <data name="subject_MailMergeEnd_push" xml:space="preserve">
     <value>O envio foi concluído.</value>
   </data>
@@ -151,5 +148,32 @@ Inicie sessão na sua conta DocuSign para obter mais informações.</value>
 Esta é uma notificação por correio eletrónico para o informar de que solicitou o envio de mensagens $MailsCount e que o processo está agora concluído. $Message
 
 As mensagens de e-mail que foram enviadas com êxito podem ser encontradas na pasta "Enviadas":"$__VirtualRootPath/addons/mail/#sent" do Módulo E-mail.</value>
+  </data>
+  <data name="button_CheckReadyForms" xml:space="preserve">
+    <value>Verificar formulários prontos</value>
+  </data>
+  <data name="pattern_FormReceived" xml:space="preserve">
+    <value>h1. O formulário $Message está preenchido
+
+Um novo formulário "$DocumentTitle":"$DocumentURL" está preenchido na sala "$RoomTitle":"$RoomURL"
+
+Remetente do formulário: "$FromUserName":"$FromUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="pattern_FormSubmitted" xml:space="preserve">
+    <value>h1. Você preencheu o formulário $Message
+
+Você preencheu o formulário "$DocumentTitle":"$DocumentURL" na sala "$RoomTitle":"$RoomURL"
+
+Administrador: "$ToUserName":"$ToUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="subject_FormReceived" xml:space="preserve">
+    <value>Notificação do DocSpace. O formulário está preenchido</value>
+  </data>
+  <data name="subject_FormSubmitted" xml:space="preserve">
+    <value>Notificação do DocSpace. O formulário está preenchido</value>
   </data>
 </root>

@@ -67,8 +67,8 @@ public class UserSecurityProvider : SecurityObject
         {
             EmployeeType.DocSpaceAdmin => [AuthConstants.DocSpaceAdmin],
             EmployeeType.RoomAdmin => [AuthConstants.RoomAdmin],
-            EmployeeType.Collaborator => [AuthConstants.Collaborator],
             EmployeeType.User => [AuthConstants.User],
+            EmployeeType.Guest => [AuthConstants.Guest],
             _ => Array.Empty<IRole>()
         };
     }

@@ -27,22 +27,37 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// Request parameters for updating file contents
 /// </summary>
-public class FileStreamRequestDto : IModelWithFile
+public class FileStreamRequestDto<T> : IModelWithFile
 {
-    /// <summary>Request input stream</summary>
-    /// <type>Microsoft.AspNetCore.Http.IFormFile, Microsoft.AspNetCore.Http</type>
+    /// <summary>
+    /// File ID
+    /// </summary>
+    [FromRoute(Name = "fileId")]
+    public T FileId { get; set; }
+
+    /// <summary>
+    /// Request input stream
+    /// </summary>
+    [FromForm(Name = "File")]
     public IFormFile File { get; set; }
 
-    /// <summary>Specifies whether to encrypt a file or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether to encrypt a file or not
+    /// </summary>
+    [FromForm(Name = "Encrypted")]
     public bool Encrypted { get; set; }
 
-    /// <summary>Specifies whether to force save a file or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether to force save a file or not
+    /// </summary>
+    [FromForm(Name = "Forcesave")]
     public bool Forcesave { get; set; }
 
-    /// <summary>File extension</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// File extension
+    /// </summary>
+    [FromForm(Name = "FileExtension")]
     public string FileExtension { get; set; }
 }

@@ -31,10 +31,13 @@ namespace ASC.Core.Common.EF;
 public class DbQuota : BaseEntity, IMapFrom<TenantQuota>
 {
     public int TenantId { get; set; }
+    [MaxLength(128)]
     public string Name { get; set; }
+    [MaxLength(128)]
     public string Description { get; set; }
     public string Features { get; set; }
     public decimal Price { get; set; }
+    [MaxLength(128)]
     public string ProductId { get; set; }
     public bool Visible { get; set; }
 
@@ -63,7 +66,7 @@ public static class DbQuotaExtension
                     TenantId = -1,
                     Name = "trial",
                     Description = null,
-                    Features = "trial,audit,ldap,sso,whitelabel,thirdparty,restore,oauth,total_size:107374182400,file_size:100,manager:1,statistic",
+                    Features = "trial,audit,ldap,sso,customization,thirdparty,restore,oauth,total_size:107374182400,file_size:100,manager:1,statistic",
                     Price = 0,
                     ProductId = null,
                     Visible = false
@@ -73,7 +76,7 @@ public static class DbQuotaExtension
                     TenantId = -2,
                     Name = "admin",
                     Description = "until 01.04.2024",
-                    Features = "audit,ldap,sso,whitelabel,thirdparty,restore,oauth,contentsearch,total_size:107374182400,file_size:1024,manager:1,statistic",
+                    Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:107374182400,file_size:1024,manager:1,statistic",
                     Price = 15,
                     ProductId = "1002",
                     Visible = false
@@ -113,7 +116,7 @@ public static class DbQuotaExtension
                     TenantId = -6,
                     Name = "subscription",
                     Description = null,
-                    Features = "audit,ldap,sso,whitelabel,thirdparty,restore,oauth,contentsearch,file_size:1024,statistic",
+                    Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,file_size:1024,statistic",
                     Price = 0,
                     ProductId = "1001",
                     Visible = false
@@ -125,7 +128,7 @@ public static class DbQuotaExtension
                     Description = null,
                     Features = "non-profit,audit,ldap,sso,thirdparty,restore,oauth,contentsearch,total_size:2147483648,file_size:1024,manager:20,statistic",
                     Price = 0,
-                    ProductId = null,
+                    ProductId = "1007",
                     Visible = false
                 },
                 new DbQuota
@@ -143,9 +146,19 @@ public static class DbQuotaExtension
                     TenantId = -9,
                     Name = "admin",
                     Description = "since 01.04.2024",
-                    Features = "audit,ldap,sso,whitelabel,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic",
+                    Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic",
                     Price = 20,
                     ProductId = "1006",
+                    Visible = true
+                },
+                new DbQuota
+                {
+                    TenantId = -10,
+                    Name = "adminyear",
+                    Description = "since 10.02.2025",
+                    Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,year",
+                    Price = 200,
+                    ProductId = "1009",
                     Visible = true
                 }
                 );
@@ -168,13 +181,13 @@ public static class DbQuotaExtension
 
             entity.Property(e => e.ProductId)
                 .HasColumnName("product_id")
-                .HasColumnType("varchar(128)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Description)
                 .HasColumnName("description")
-                .HasColumnType("varchar(128)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -184,7 +197,7 @@ public static class DbQuotaExtension
 
             entity.Property(e => e.Name)
                 .HasColumnName("name")
-                .HasColumnType("varchar(128)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -203,10 +216,9 @@ public static class DbQuotaExtension
     {
         modelBuilder.Entity<DbQuota>(entity =>
         {
-            entity.HasKey(e => e.TenantId)
-                .HasName("tenants_quota_pkey");
+            entity.HasKey(e => e.TenantId);
 
-            entity.ToTable("tenants_quota", "onlyoffice");
+            entity.ToTable("tenants_quota");
 
             entity.Property(e => e.TenantId)
                 .HasColumnName("tenant")
@@ -214,25 +226,30 @@ public static class DbQuotaExtension
 
             entity.Property(e => e.ProductId)
                 .HasColumnName("product_id")
-                .HasMaxLength(128)
-                .HasDefaultValueSql("NULL");
+                .HasColumnType("varchar(128)");
 
             entity.Property(e => e.Description)
                 .HasColumnName("description")
-                .HasColumnType("character varying");
+                .HasColumnType("varchar(128)");
 
-            entity.Property(e => e.Features).HasColumnName("features");
+            entity.Property(e => e.Features)
+                .HasColumnName("features")
+                .HasColumnType("text");
 
             entity.Property(e => e.Name)
                 .HasColumnName("name")
-                .HasColumnType("character varying");
+                .HasColumnType("varchar(128)");
 
             entity.Property(e => e.Price)
                 .HasColumnName("price")
-                .HasColumnType("numeric(10,2)")
-                .HasDefaultValueSql("0.00");
+                .HasDefaultValue(0.00m)
+                .HasColumnType("decimal(10,2)");
 
-            entity.Property(e => e.Visible).HasColumnName("visible");
+            entity.Property(e => e.Visible)
+                .HasColumnName("visible")
+                .HasColumnType("boolean")
+                .HasDefaultValue(false);
         });
+        
     }
 }

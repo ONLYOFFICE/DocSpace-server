@@ -72,14 +72,9 @@ public class MessageSettings
 
     public static string GetUAHeader(HttpRequest request)
     {
-        var result = request?.Query["request-user-agent"].FirstOrDefault();
+        string result = request?.Query["request-user-agent"];
 
-        if (result != null)
-        {
-            return result;
-        }
-
-        return request?.Headers[UserAgentHeader].FirstOrDefault();
+        return !string.IsNullOrEmpty(result) ? result : request?.Headers.UserAgent.FirstOrDefault();
     }
 
     public static string GetUAHeader(IDictionary<string, StringValues> headers)
@@ -89,24 +84,19 @@ public class MessageSettings
 
     public static string GetReferer(HttpRequest request)
     {
-        return request?.Headers[RefererHeader].FirstOrDefault();
+        return request?.Headers.Referer.FirstOrDefault();
     }
 
     public static string GetReferer(IDictionary<string, StringValues> headers)
     {
-        return headers.TryGetValue(RefererHeader, out var header) ? header.FirstOrDefault() : null;
+        return headers.TryGetValue(RefererHeader, out var header) ? (string)header : null;
     }
 
     public static string GetIP(HttpRequest request)
     {
-        var result = request?.Query["request-x-real-ip"].FirstOrDefault();
+        string result = request?.Query["request-x-real-ip"];
 
-        if (result != null)
-        {
-            return result;
-        }
-
-        return request?.HttpContext.Connection.RemoteIpAddress?.ToString();
+        return !string.IsNullOrEmpty(result) ? result : request?.HttpContext.Connection.RemoteIpAddress?.ToString();
     }
 
     public static string GetIP(IDictionary<string, StringValues> headers)

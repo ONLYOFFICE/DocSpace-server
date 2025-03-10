@@ -802,4 +802,73 @@
   <data name="FormSubmit" xml:space="preserve">
     <value>Пользователи [{0}]. Отправлена форма: {1}</value>
   </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Экспорт индекса комнат, сохраненного в Документах</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Комната: {0} Отключен запрет загрузки</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Комната: {0} Подключен запрет загрузки</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Индексация комнат отключена</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Индексация комнат подключена</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Приглашение отправлено повторно: {0}</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>Отключен срок действия</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>Установлен срок действия. Значение: {0}. Период: {1}. Удалить навсегда: {2}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Комната: {0}. Водяной знак отключен</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Комната: {0}. Водяной знак подключен</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Папка: {0}. Индекс изменен с {1} на {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Папка: {0}. Изменен порядок индексов</value>
+  </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>Файл: {0}. Индекс изменен с {1} на {2}</value>
+  </data>
+  <data name="OAuthModule" xml:space="preserve">
+    <value>OAuth</value>
+  </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Клиент {0} удален</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>Секрет клиента {0} создан повторно</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Отменен доступ клиента {0}</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>Клиент {0} обновлен</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>Сгенерирован код авторизации для клиента {0}</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>Сгенерирован персональный токен доступа для клиента {0}</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Клиент создан</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>Видимость клиента {0} изменилась</value>
+  </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>Активация клиента {0} изменилась</value>
+  </data>
 </root>

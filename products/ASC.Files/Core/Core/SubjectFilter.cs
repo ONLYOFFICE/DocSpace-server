@@ -26,11 +26,11 @@
 
 namespace ASC.Files.Core.Core;
 
-/// <summary>
-/// 
-/// </summary>
 public enum SubjectFilter
 {
+    [SwaggerEnum("Owner")]
     Owner = 0,
+
+    [SwaggerEnum("Member")]
     Member = 1
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,18 +27,24 @@
 
 package com.asc.registration.data.client.adapter;
 
+import com.asc.common.core.domain.event.DomainEventPublisher;
 import com.asc.common.core.domain.value.ClientId;
 import com.asc.common.core.domain.value.TenantId;
-import com.asc.common.data.client.repository.JpaClientRepository;
+import com.asc.common.service.ports.output.message.publisher.AuthorizationMessagePublisher;
+import com.asc.common.service.transfer.message.ClientRemovedEvent;
 import com.asc.registration.core.domain.entity.Client;
+import com.asc.registration.core.domain.event.ClientEvent;
 import com.asc.registration.data.client.mapper.ClientDataAccessMapper;
+import com.asc.registration.data.client.repository.JpaClientRepository;
 import com.asc.registration.service.ports.output.repository.ClientCommandRepository;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Adapter class for handling client command operations and mapping between domain and data layers.
@@ -46,12 +52,15 @@ import org.springframework.stereotype.Repository;
  */
 @Slf4j
 @Repository
+@Profile("!saas")
 @RequiredArgsConstructor
 public class ClientCommandRepositoryDomainAdapter implements ClientCommandRepository {
   private static final String UTC = "UTC";
 
   private final JpaClientRepository jpaClientRepository;
   private final ClientDataAccessMapper clientDataAccessMapper;
+  private final AuthorizationMessagePublisher<ClientRemovedEvent> authorizationMessagePublisher;
+  private final DomainEventPublisher<ClientEvent> messagePublisher;
 
   /**
    * Saves a client entity to the database.
@@ -59,12 +68,42 @@ public class ClientCommandRepositoryDomainAdapter implements ClientCommandReposi
    * @param client the client entity to save
    * @return the saved client entity
    */
-  public Client saveClient(Client client) {
+  @Transactional(
+      timeout = 2,
+      rollbackFor = {Exception.class})
+  public Client saveClient(ClientEvent event, Client client) {
     log.debug("Persisting a new client");
 
     var entity = clientDataAccessMapper.toEntity(client);
     var result = jpaClientRepository.save(entity);
+
+    messagePublisher.publish(event);
+
     return clientDataAccessMapper.toDomain(result);
+  }
+
+  /**
+   * Updates an existing client entity in the database.
+   *
+   * <p>This method retrieves the existing client entity from the database using its ID and then
+   * merges the new values from the provided {@link Client} domain object into the existing entity.
+   * The updated entity is then saved back to the database.
+   *
+   * @param client the {@link Client} domain object containing the updated values
+   * @return the updated {@link Client} domain object after being persisted
+   */
+  @Transactional(
+      timeout = 2,
+      rollbackFor = {Exception.class})
+  public Client updateClient(ClientEvent event, Client client) {
+    log.debug("Updating an existing client");
+
+    var entity = clientDataAccessMapper.toEntity(client);
+    var reference = jpaClientRepository.getReferenceById(entity.getClientId());
+
+    messagePublisher.publish(event);
+
+    return clientDataAccessMapper.toDomain(clientDataAccessMapper.merge(entity, reference));
   }
 
   /**
@@ -74,7 +113,11 @@ public class ClientCommandRepositoryDomainAdapter implements ClientCommandReposi
    * @param clientId the client ID
    * @return the newly generated client secret
    */
-  public String regenerateClientSecretByTenantIdAndClientId(TenantId tenantId, ClientId clientId) {
+  @Transactional(
+      timeout = 2,
+      rollbackFor = {Exception.class})
+  public String regenerateClientSecretByTenantIdAndClientId(
+      ClientEvent event, TenantId tenantId, ClientId clientId) {
     log.debug("Regenerating and persisting a new secret");
 
     var secret = UUID.randomUUID().toString();
@@ -87,6 +130,8 @@ public class ClientCommandRepositoryDomainAdapter implements ClientCommandReposi
         secret,
         ZonedDateTime.now(ZoneId.of(UTC)));
 
+    messagePublisher.publish(event);
+
     return secret;
   }
 
@@ -97,8 +142,11 @@ public class ClientCommandRepositoryDomainAdapter implements ClientCommandReposi
    * @param clientId the client ID
    * @param visible the new visibility status
    */
+  @Transactional(
+      timeout = 2,
+      rollbackFor = {Exception.class})
   public void changeVisibilityByTenantIdAndClientId(
-      TenantId tenantId, ClientId clientId, boolean visible) {
+      ClientEvent event, TenantId tenantId, ClientId clientId, boolean visible) {
     log.debug("Persisting client visibility changes");
 
     jpaClientRepository.changeVisibility(
@@ -106,6 +154,8 @@ public class ClientCommandRepositoryDomainAdapter implements ClientCommandReposi
         clientId.getValue().toString(),
         visible,
         ZonedDateTime.now(ZoneId.of(UTC)));
+
+    messagePublisher.publish(event);
   }
 
   /**
@@ -115,8 +165,11 @@ public class ClientCommandRepositoryDomainAdapter implements ClientCommandReposi
    * @param clientId the client ID
    * @param enabled the new activation status
    */
+  @Transactional(
+      timeout = 2,
+      rollbackFor = {Exception.class})
   public void changeActivationByTenantIdAndClientId(
-      TenantId tenantId, ClientId clientId, boolean enabled) {
+      ClientEvent event, TenantId tenantId, ClientId clientId, boolean enabled) {
     log.debug("Persisting activation changes");
 
     jpaClientRepository.changeActivation(
@@ -124,6 +177,8 @@ public class ClientCommandRepositoryDomainAdapter implements ClientCommandReposi
         clientId.getValue().toString(),
         enabled,
         ZonedDateTime.now(ZoneId.of(UTC)));
+
+    messagePublisher.publish(event);
   }
 
   /**
@@ -133,9 +188,15 @@ public class ClientCommandRepositoryDomainAdapter implements ClientCommandReposi
    * @param clientId the client ID
    * @return the number of clients deleted (typically 0 or 1)
    */
-  public int deleteByTenantIdAndClientId(TenantId tenantId, ClientId clientId) {
+  @Transactional(
+      timeout = 2,
+      rollbackFor = {Exception.class})
+  public int deleteByTenantIdAndClientId(ClientEvent event, TenantId tenantId, ClientId clientId) {
     log.debug("Persisting invalidated marker");
 
+    authorizationMessagePublisher.publish(
+        ClientRemovedEvent.builder().clientId(clientId.getValue().toString()).build());
+    messagePublisher.publish(event);
     return jpaClientRepository.deleteByClientIdAndTenantId(
         clientId.getValue().toString(), tenantId.getValue());
   }

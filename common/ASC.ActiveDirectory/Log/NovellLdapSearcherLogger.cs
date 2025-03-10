@@ -27,60 +27,60 @@
 namespace ASC.ActiveDirectory.Log;
 internal static partial class NovellLdapSearcherLogger
 {
-    [LoggerMessage(Level = LogLevel.Debug, Message = "ldapConnection.Connect(Server='{server}', PortNumber='{portNumber}');")]
+    [LoggerMessage(LogLevel.Debug, "ldapConnection.Connect(Server='{server}', PortNumber='{portNumber}');")]
     public static partial void DebugldapConnection(this ILogger<NovellLdapSearcher> logger, string server, int portNumber);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "ldapConnection.StartTls();")]
+    [LoggerMessage(LogLevel.Debug, "ldapConnection.StartTls();")]
     public static partial void DebugStartTls(this ILogger<NovellLdapSearcher> logger);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "LDAP certificate confirmation requested.")]
+    [LoggerMessage(LogLevel.Debug, "LDAP certificate confirmation requested.")]
     public static partial void DebugLdapCertificateConfirmationRequested(this ILogger<NovellLdapSearcher> logger);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "ldapConnection.Bind(Anonymous)")]
+    [LoggerMessage(LogLevel.Debug, "ldapConnection.Bind(Anonymous)")]
     public static partial void DebugBindAnonymous(this ILogger<NovellLdapSearcher> logger);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "ldapConnection.Bind(Login: '{login}')")]
+    [LoggerMessage(LogLevel.Debug, "ldapConnection.Bind(Login: '{login}')")]
     public static partial void DebugBind(this ILogger<NovellLdapSearcher> logger, string login);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "ServerCertValidationHandler: sslPolicyErrors = {sslPolicyErrors}")]
+    [LoggerMessage(LogLevel.Warning, "ServerCertValidationHandler: sslPolicyErrors = {sslPolicyErrors}")]
     public static partial void WarnSslPolicyErrors(this ILogger<NovellLdapSearcher> logger, SslPolicyErrors sslPolicyErrors);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "The size of the search results is limited. Start TrySearchSimple()")]
+    [LoggerMessage(LogLevel.Warning, "The size of the search results is limited. Start TrySearchSimple()")]
     public static partial void WarnStartTrySearchSimple(this ILogger<NovellLdapSearcher> logger);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Search({searchFilter}) failed")]
+    [LoggerMessage(LogLevel.Error, "Search({searchFilter}) failed")]
     public static partial void ErrorSearch(this ILogger<NovellLdapSearcher> logger, string searchFilter, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "TrySearchSimple() failed")]
+    [LoggerMessage(LogLevel.Error, "TrySearchSimple() failed")]
     public static partial void ErrorTrySearchSimple(this ILogger<NovellLdapSearcher> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "SearchSimple({searchFilter}) failed")]
+    [LoggerMessage(LogLevel.Error, "SearchSimple({searchFilter}) failed")]
     public static partial void ErrorSearchSimple(this ILogger<NovellLdapSearcher> logger, string searchFilter, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "{i}. DN: {distinguishedName}")]
+    [LoggerMessage(LogLevel.Debug, "{i}. DN: {distinguishedName}")]
     public static partial void DebugDnEnumeration(this ILogger<NovellLdapSearcher> logger, int i, string distinguishedName);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "No controls returned")]
+    [LoggerMessage(LogLevel.Debug, "No controls returned")]
     public static partial void DebugNoControlsReturned(this ILogger<NovellLdapSearcher> logger);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "GetCapabilities()->LoopResults failed")]
+    [LoggerMessage(LogLevel.Error, "GetCapabilities()->LoopResults failed")]
     public static partial void ErrorGetCapabilitiesLoopResultsFailed(this ILogger<NovellLdapSearcher> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "GetCapabilities() failed")]
+    [LoggerMessage(LogLevel.Error, "GetCapabilities() failed")]
     public static partial void ErrorGetCapabilitiesFailed(this ILogger<NovellLdapSearcher> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "GetLdapUniqueId()")]
+    [LoggerMessage(LogLevel.Error, "GetLdapUniqueId()")]
     public static partial void ErrorGetLdapUniqueId(this ILogger<NovellLdapSearcher> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "ldapConnection.StopTls();")]
+    [LoggerMessage(LogLevel.Debug, "ldapConnection.StopTls();")]
     public static partial void DebugLdapConnectionStopTls(this ILogger<NovellLdapSearcher> logger);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "ldapConnection.Disconnect();")]
+    [LoggerMessage(LogLevel.Debug, "ldapConnection.Disconnect();")]
     public static partial void DebugLdapConnectionDisconnect(this ILogger<NovellLdapSearcher> logger);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "ldapConnection.Dispose();")]
+    [LoggerMessage(LogLevel.Debug, "ldapConnection.Dispose();")]
     public static partial void DebugLdapConnectionDispose(this ILogger<NovellLdapSearcher> logger);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "LDAP->Dispose() failed")]
+    [LoggerMessage(LogLevel.Error, "LDAP->Dispose() failed")]
     public static partial void ErrorLdapDisposeFailed(this ILogger<NovellLdapSearcher> logger, Exception exception);
 }

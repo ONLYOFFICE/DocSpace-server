@@ -48,9 +48,9 @@ public class LogoUploader
             await tenantLogoManager.DemandWhiteLabelPermissionAsync();
             
             var type = (WhiteLabelLogoType)Convert.ToInt32(context.Request.Form["logotype"]);
-            var width = Convert.ToInt32(context.Request.Form["width"]);
-            var height = Convert.ToInt32(context.Request.Form["height"]);
-            var size = new Size(width, height);
+            var width = Convert.ToUInt32(context.Request.Form["width"]);
+            var height = Convert.ToUInt32(context.Request.Form["height"]);
+            var size = new MagickGeometry(width, height);
 
             if (context.Request.Form.Files.Count != 0)
             {
@@ -90,10 +90,9 @@ public class LogoUploader
                 else
                 {
                     using (var stream = new MemoryStream(data))
-                    using (var image = await Image.LoadAsync(stream))
+                    using (var image = new MagickImage(stream))
                     {
-                        var actualSize = image.Size;
-                        if (actualSize.Height != size.Height && actualSize.Width != size.Width)
+                        if (image.Height != size.Height && image.Width != size.Width)
                         {
                             throw new ImageSizeLimitException();
                         }

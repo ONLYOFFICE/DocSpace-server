@@ -45,8 +45,7 @@ public class MemoryCacheNotify<T> : ICacheNotify<T> where T : new()
     {
         if (onchange != null)
         {
-            _actions.GetOrAdd(GetKey(notifyAction), new List<Action<T>>())
-                    .Add(onchange);
+            _actions.GetOrAdd(GetKey(notifyAction), []).Add(onchange);
         }
     }
 

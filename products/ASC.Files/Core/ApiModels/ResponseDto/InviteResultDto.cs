@@ -28,7 +28,18 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class InviteResultDto
 {
+    /// <summary>
+    /// Email
+    /// </summary>
     public string Email { get; set; }
+
+    /// <summary>
+    /// Success
+    /// </summary>
     public bool Success { get; set; }
+
+    /// <summary>
+    /// Message
+    /// </summary>
     public string Message { get; set; }
 }

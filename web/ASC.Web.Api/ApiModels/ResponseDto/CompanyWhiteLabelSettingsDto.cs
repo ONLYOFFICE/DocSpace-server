@@ -26,36 +26,42 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class CompanyWhiteLabelSettingsDto: IMapFrom<CompanyWhiteLabelSettings>
 {
-    /// <summary>Company name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Company name
+    /// </summary>
     public string CompanyName { get; set; }
 
-    /// <summary>Site</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Site
+    /// </summary>
     public string Site { get; set; }
 
-    /// <summary>Email</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Email
+    /// </summary>
+    [EmailAddress]
     public string Email { get; set; }
 
-    /// <summary>Address</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Address
+    /// </summary>
     public string Address { get; set; }
 
-    /// <summary>Phone number</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Phone number
+    /// </summary>
     public string Phone { get; set; }
 
-    /// <summary>Specifies if a company is a licensor or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if a company is a licensor or not
+    /// </summary>
     public bool IsLicensor { get; set; }
 
-    /// <summary>Specifies if these settings are default or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if these settings are default or not
+    /// </summary>
     public bool IsDefault { get; set; }
 
     public void Mapping(Profile profile)

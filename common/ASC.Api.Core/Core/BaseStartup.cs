@@ -25,18 +25,14 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using System.Diagnostics;
-
-using ASC.Api.Core.Cors.Middlewares;
 using ASC.Api.Core.Cors;
+using ASC.Api.Core.Cors.Enums;
+using ASC.Api.Core.Cors.Middlewares;
 using ASC.Common.Mapping;
 using ASC.Core.Notify.Socket;
 using ASC.MessagingSystem;
-using ASC.MessagingSystem.Data;
-
 using Flurl.Util;
-
 using IPNetwork = Microsoft.AspNetCore.HttpOverrides.IPNetwork;
-using ASC.Api.Core.Cors.Enums;
 
 namespace ASC.Api.Core;
 
@@ -55,6 +51,8 @@ public abstract class BaseStartup
 
     protected bool OpenApiEnabled { get; init; }
 
+    private bool OpenTelemetryEnabled { get; }
+
     protected BaseStartup(IConfiguration configuration)
     {
         _configuration = configuration;
@@ -63,10 +61,17 @@ public abstract class BaseStartup
 
         DIHelper = new DIHelper();
         OpenApiEnabled = _configuration.GetValue<bool>("openApi:enable");
+        OpenTelemetryEnabled = _configuration.GetValue<bool>("openTelemetry:enable");
     }
 
-    public virtual async Task ConfigureServices(IServiceCollection services)
+    public virtual async Task ConfigureServices(WebApplicationBuilder builder)
     {
+        var services = builder.Services;
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            AppContext.SetSwitch("System.Net.Security.UseManagedNtlm", true);
+        }
+        
         services.AddCustomHealthCheck(_configuration);
         services.AddHttpContextAccessor();
         services.AddMemoryCache();
@@ -128,7 +133,10 @@ public abstract class BaseStartup
                 {
                     foreach (var knownIPAddress in knownIPAddresses)
                     {
-                        if (IPAddress.Parse(knownIPAddress).Equals(address)) return true;
+                        if (IPAddress.Parse(knownIPAddress).Equals(address))
+                        {
+                            return true;
+                        }
                     }
                 }
 
@@ -140,7 +148,10 @@ public abstract class BaseStartup
                         var prefixLength = Convert.ToInt32(knownNetwork.Split("/")[1]);
                         var ipNetwork = new IPNetwork(prefix, prefixLength);
 
-                        if (ipNetwork.Contains(address)) return true;
+                        if (ipNetwork.Contains(address))
+                        {
+                            return true;
+                        }
                     }
                 }
 
@@ -193,7 +204,7 @@ public abstract class BaseStartup
                     {
                         permitLimit = _configuration.GetSection("core:hosting:rateLimiterOptions:defaultConcurrencyWriteRequests").Get<int>();
 
-                        if (permitLimit == default(int))
+                        if (permitLimit == 0)
                         {
                             permitLimit = 15;
                         }
@@ -296,11 +307,11 @@ public abstract class BaseStartup
 
                 var partitionKey = $"{RateLimiterPolicy.EmailInvitationApi}_{tenant.Id}";
 
-                RedisFixedWindowRateLimiterOptions optionFactory(string key) => new RedisFixedWindowRateLimiterOptions { PermitLimit = invitationLimitPerDay, Window = TimeSpan.FromDays(1), ConnectionMultiplexerFactory = () => connectionMultiplexer };
+                RedisFixedWindowRateLimiterOptions OptionFactory() => new() { PermitLimit = invitationLimitPerDay, Window = TimeSpan.FromDays(1), ConnectionMultiplexerFactory = () => connectionMultiplexer };
 
-                RateLimiter limitterFactory(string key) => new LooppedRedisFixedWindowRateLimiter<string>(key, optionFactory(key), invitationsCount);
+                RateLimiter LimitterFactory(string key) => new LooppedRedisFixedWindowRateLimiter<string>(key, OptionFactory(), invitationsCount);
 
-                return RateLimitPartition.Get(partitionKey, limitterFactory);
+                return RateLimitPartition.Get(partitionKey, LimitterFactory);
             });
 
             options.OnRejected = (context, ct) => RateLimitMetadata.OnRejected(context.HttpContext, context.Lease, ct);
@@ -334,6 +345,7 @@ public abstract class BaseStartup
         {
             options.JsonSerializerOptions.WriteIndented = false;
             options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+            options.JsonSerializerOptions.NumberHandling = JsonNumberHandling.AllowReadingFromString;
         };
 
         services.AddControllers().AddJsonOptions(jsonOptions);
@@ -372,7 +384,7 @@ public abstract class BaseStartup
         }
 
 
-        services.AddDistributedCache(connectionMultiplexer)
+        services.AddHybridCache(connectionMultiplexer)
             .AddEventBus(_configuration)
             .AddDistributedTaskQueue()
             .AddCacheNotify(_configuration)
@@ -400,9 +412,12 @@ public abstract class BaseStartup
         if (OpenApiEnabled)
         {
             mvcBuilder.AddApiExplorer();
-            services.AddOpenApi();
+            services.AddOpenApi(_configuration);
         }
-
+        if (OpenTelemetryEnabled)
+        {
+            builder.ConfigureOpenTelemetry();
+        }
         services.AddScoped<CookieAuthHandler>();
         services.AddScoped<BasicAuthHandler>();
         services.AddScoped<ConfirmAuthHandler>();
@@ -419,7 +434,7 @@ public abstract class BaseStartup
             {
                 options.ForwardDefaultSelector = context =>
                 {
-                    var authorizationHeader = context.Request.Headers[HeaderNames.Authorization].FirstOrDefault();
+                    string authorizationHeader = context.Request.Headers[HeaderNames.Authorization];
 
                     if (string.IsNullOrEmpty(authorizationHeader))
                     {
@@ -462,10 +477,7 @@ public abstract class BaseStartup
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Writer);
         services.AddHostedService<SocketService>();
         
-        services.Configure<DistributedTaskQueueFactoryOptions>(UserPhotoManager.CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, options =>
-        {
-            options.MaxThreadsCount = 2;
-        });
+        services.RegisterQueue<ResizeWorkerItem>(2);
 
         services
             .AddStartupTask<WarmupServicesStartupTask>()
@@ -473,6 +485,8 @@ public abstract class BaseStartup
             .AddStartupTask<WarmupBaseDbContextStartupTask>()
             .AddStartupTask<WarmupMappingStartupTask>()
             .TryAddSingleton(services);
+        
+        services.AddTransient<DistributedTaskProgress>();
     }
 
     public static IEnumerable<Assembly> GetAutoMapperProfileAssemblies()
@@ -517,6 +531,8 @@ public abstract class BaseStartup
 
         app.UseSynchronizationContextMiddleware();
 
+        app.UseTenantMiddleware();
+        
         app.UseAuthentication();
 
         // TODO: if some client requests very slow, this line will need to remove

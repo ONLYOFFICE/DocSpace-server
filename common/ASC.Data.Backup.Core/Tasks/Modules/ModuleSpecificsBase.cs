@@ -98,20 +98,22 @@ public abstract class ModuleSpecificsBase(Helpers helpers) : IModuleSpecifics
     private string GetSelectCommandConditionText(int tenantId, TableInfo table, Guid id)
     {
         var conditionText = GetSelectCommandConditionText(tenantId, table);
-        if (table.Name == "files_folder_tree")
+        switch (table.Name)
         {
-            conditionText += $" and t1.create_by = '{id}'";
+            case "files_folder_tree":
+                conditionText += $" and t1.create_by = '{id}'";
+                break;
+            case "files_bunch_objects":
+                conditionText = $"inner join files_folder as t1 on t1.id = t.left_node {conditionText} and t1.create_by = '{id}'";
+                break;
         }
-        if (table.Name == "files_bunch_objects")
-        {
-            conditionText = $"inner join files_folder as t1 on t1.id = t.left_node {conditionText} and t1.create_by = '{id}'";
-        }
+
         return conditionText;
     }
 
     private string GetContitionUserText(TableInfo table, Guid id)
     {
-        if (table.UserIDColumns.Any())
+        if (table.UserIDColumns.Length != 0)
         {
             return "and t." + table.UserIDColumns[0] + " = '" + id + "' ";
         }
@@ -239,7 +241,7 @@ public abstract class ModuleSpecificsBase(Helpers helpers) : IModuleSpecifics
             }
 
             var val = row[columnName];
-            if (!parentRelations.ContainsKey(columnName))
+            if (!parentRelations.TryGetValue(columnName, out var relation))
             {
                 if (!TryPrepareValue(connection, columnMapper, table, columnName, ref val))
                 {
@@ -248,7 +250,7 @@ public abstract class ModuleSpecificsBase(Helpers helpers) : IModuleSpecifics
             }
             else
             {
-                if (!TryPrepareValue(dump, connection, columnMapper, table, columnName, parentRelations[columnName], ref val))
+                if (!TryPrepareValue(dump, connection, columnMapper, table, columnName, relation, ref val))
                 {
                     return Task.FromResult((false, (Dictionary<string, object>)null));
                 }

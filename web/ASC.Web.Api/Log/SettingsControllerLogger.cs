@@ -28,6 +28,6 @@ namespace ASC.Web.Api.Log;
 
 internal static partial class SettingsControllerLogger
 {
-    [LoggerMessage(Level = LogLevel.Error, Message = "SaveAuthKeys")]
+    [LoggerMessage(LogLevel.Error, "SaveAuthKeys")]
     public static partial void ErrorSaveAuthKeys(this ILogger logger, Exception exception);
 }

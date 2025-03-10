@@ -34,12 +34,7 @@ public class XmlPatternProvider2 : IPatternProvider
     public Func<INotifyAction, string, NotifyRequest, IPattern> GetPatternMethod { get; set; }
 
 
-    public XmlPatternProvider2(string xml)
-        : this(xml, null)
-    {
-    }
-
-    public XmlPatternProvider2(string xml, Func<INotifyAction, string, NotifyRequest, IPattern> getpattern)
+    public XmlPatternProvider2(string xml, Func<INotifyAction, string, NotifyRequest, IPattern> getpattern = null)
     {
         GetPatternMethod = getpattern;
 

@@ -24,33 +24,47 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Constants = ASC.Core.Users.Constants;
-
 namespace ASC.Migration.Core.Migrators;
 
-public abstract class Migrator : IAsyncDisposable
+public abstract class Migrator(
+    SecurityContext securityContext,
+    UserManager userManager,
+    TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
+    QuotaSocketManager quotaSocketManager,
+    FileStorageService fileStorageService,
+    GlobalFolderHelper globalFolderHelper,
+    IServiceProvider serviceProvider,
+    IDaoFactory daoFactory,
+    EntryManager entryManager,
+    MigrationLogger migrationLogger,
+    AuthContext authContext,
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    UserManagerWrapper userManagerWrapper,
+    UserSocketManager socketManager)
+    : IAsyncDisposable
 {
-    protected SecurityContext SecurityContext { get; }
-    protected UserManager UserManager { get; }
-    protected TenantQuotaFeatureStatHelper TenantQuotaFeatureStatHelper { get; }
-    protected QuotaSocketManager QuotaSocketManager { get; }
-    protected FileStorageService FileStorageService { get; }
-    protected GlobalFolderHelper GlobalFolderHelper { get; }
-    protected IServiceProvider ServiceProvider { get; }
-    protected IDaoFactory DaoFactory { get; }
-    protected EntryManager EntryManager { get; }
-    protected MigrationLogger MigrationLogger { get; }
-    protected AuthContext AuthContext { get; }
-    protected DisplayUserSettingsHelper DisplayUserSettingsHelper { get; }
-    protected UserManagerWrapper UserManagerWrapper { get; }
+    protected SecurityContext SecurityContext { get; } = securityContext;
+    protected UserSocketManager SocketManager { get; } = socketManager;
+    protected UserManager UserManager { get; } = userManager;
+    private TenantQuotaFeatureStatHelper TenantQuotaFeatureStatHelper { get; } = tenantQuotaFeatureStatHelper;
+    private QuotaSocketManager QuotaSocketManager { get; } = quotaSocketManager;
+    private FileStorageService FileStorageService { get; } = fileStorageService;
+    private GlobalFolderHelper GlobalFolderHelper { get; } = globalFolderHelper;
+    private IServiceProvider ServiceProvider { get; } = serviceProvider;
+    private IDaoFactory DaoFactory { get; } = daoFactory;
+    private EntryManager EntryManager { get; } = entryManager;
+    protected MigrationLogger MigrationLogger { get; } = migrationLogger;
+    private AuthContext AuthContext { get; } = authContext;
+    protected DisplayUserSettingsHelper DisplayUserSettingsHelper { get; } = displayUserSettingsHelper;
+    private UserManagerWrapper UserManagerWrapper { get; } = userManagerWrapper;
 
-    public MigrationInfo MigrationInfo { get; set; }
-    protected IAccount _currentUser;
+    public MigrationInfo MigrationInfo { get; protected init; }
+    private IAccount _currentUser;
     private Dictionary<string, MigrationUser> _usersForImport;
-    protected List<string> _importedUsers;
-    protected List<string> _failedUsers;
-    protected readonly string _folderKey = "folder";
-    protected readonly string _fileKey = "file";
+    private List<string> _importedUsers;
+    private List<string> _failedUsers;
+    private const string FolderKey = "folder";
+    private const string FileKey = "file";
 
     protected double _lastProgressUpdate;
     protected string _lastStatusUpdate;
@@ -59,36 +73,7 @@ public abstract class Migrator : IAsyncDisposable
 
     public Func<double, string, Task> OnProgressUpdateAsync { get; set; }
 
-    public Migrator(SecurityContext securityContext,
-        UserManager userManager, 
-        TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
-        QuotaSocketManager quotaSocketManager, 
-        FileStorageService fileStorageService,
-        GlobalFolderHelper globalFolderHelper,
-        IServiceProvider serviceProvider, 
-        IDaoFactory daoFactory,
-        EntryManager entryManager,
-        MigrationLogger migrationLogger, 
-        AuthContext authContext,
-        DisplayUserSettingsHelper displayUserSettingsHelper,
-        UserManagerWrapper userManagerWrapper)
-    {
-        SecurityContext = securityContext;
-        UserManager = userManager;
-        TenantQuotaFeatureStatHelper = tenantQuotaFeatureStatHelper;
-        QuotaSocketManager = quotaSocketManager;
-        FileStorageService = fileStorageService;
-        GlobalFolderHelper = globalFolderHelper;
-        ServiceProvider = serviceProvider;
-        DaoFactory = daoFactory;
-        EntryManager = entryManager;
-        MigrationLogger = migrationLogger;
-        AuthContext = authContext;
-        DisplayUserSettingsHelper = displayUserSettingsHelper;
-        UserManagerWrapper = userManagerWrapper;
-    }
-    
-    public abstract Task InitAsync(string path, CancellationToken cancellationToken, OperationType operation);
+    public abstract Task InitAsync(string path, OperationType operation, CancellationToken cancellationToken);
     public abstract Task<MigrationApiInfo> ParseAsync(bool reportProgress = true);
 
     protected async Task ReportProgressAsync(double value, string status)
@@ -121,10 +106,9 @@ public abstract class Migrator : IAsyncDisposable
     {
         await ReportProgressAsync(0, MigrationResource.PreparingForMigration);
         _currentUser = AuthContext.CurrentAccount;
-        _importedUsers = new();
-        _failedUsers = new();
+        _importedUsers = [];
+        _failedUsers = [];
 
-        var currentUser = SecurityContext.CurrentAccount;
         MigrationInfo.Merge(migrationInfo);
 
         _usersForImport = MigrationInfo.Users.Where(u => u.Value.ShouldImport).ToDictionary();
@@ -190,11 +174,9 @@ public abstract class Migrator : IAsyncDisposable
     private async Task MigrateUsersAsync()
     {
         var i = 1;
-        var progressStep = !_usersForImport.Any() ? 30 : 30 / _usersForImport.Count;
-        foreach (var kv in MigrationInfo.Users)
+        var progressStep = _usersForImport.Count == 0 ? 30 : 30 / _usersForImport.Count;
+        foreach (var (key, user) in MigrationInfo.Users)
         {
-            var key = kv.Key;
-            var user = kv.Value;
             try
             {
                 if (user.ShouldImport)
@@ -209,11 +191,12 @@ public abstract class Migrator : IAsyncDisposable
                     user.Info.UserName = await UserManagerWrapper.MakeUniqueNameAsync(user.Info);
                     user.Info.ActivationStatus = EmployeeActivationStatus.Pending;
                     saved = await UserManager.SaveUserInfo(user.Info, user.UserType);
+                    await SocketManager.AddUserAsync(saved);
                     var groupId = user.UserType switch
                     {
-                        EmployeeType.Collaborator => Constants.GroupCollaborator.ID,
+                        EmployeeType.User => Constants.GroupUser.ID,
                         EmployeeType.DocSpaceAdmin => Constants.GroupAdmin.ID,
-                        EmployeeType.RoomAdmin => Constants.GroupManager.ID,
+                        EmployeeType.RoomAdmin => Constants.GroupRoomAdmin.ID,
                         _ => Guid.Empty
                     };
 
@@ -261,11 +244,11 @@ public abstract class Migrator : IAsyncDisposable
         }
     }
 
-    private void DataСhange(MigrationUser user)
+    private static void DataСhange(MigrationUser user)
     {
         user.Info.UserName ??= user.Info.Email.Split('@').First();
         user.Info.LastName ??= user.Info.FirstName;
-    }
+        }
 
     private async Task MigrateGroupAsync()
     {
@@ -273,7 +256,6 @@ public abstract class Migrator : IAsyncDisposable
         var progressStep = MigrationInfo.Groups.Count == 0 ? 20 : 20 / MigrationInfo.Groups.Count;
         foreach (var kv in MigrationInfo.Groups)
         {
-            var key = kv.Key;
             var group = kv.Value;
 
             await ReportProgressAsync(_lastProgressUpdate + progressStep, string.Format(MigrationResource.GroupMigration, group.Info.Name, i++, MigrationInfo.Groups.Count));
@@ -297,7 +279,7 @@ public abstract class Migrator : IAsyncDisposable
             {
                 try
                 {
-                    var user = _usersForImport.ContainsKey(userGuid) ? _usersForImport[userGuid].Info : Constants.LostUser;
+                    var user = _usersForImport.TryGetValue(userGuid, out var value) ? value.Info : Constants.LostUser;
                     if (user.Equals(Constants.LostUser))
                     {
                         continue;
@@ -322,7 +304,7 @@ public abstract class Migrator : IAsyncDisposable
 
     private async Task MigrateStorageAsync(MigrationStorage storage, MigrationUser user = null)
     {
-        if (!storage.ShouldImport || storage.Files.Count == 0)
+        if (!storage.ShouldImport || storage.Files.Count == 0 && storage.Folders.Count == 0)
         {
             return;
         }
@@ -337,45 +319,44 @@ public abstract class Migrator : IAsyncDisposable
         }
 
         var matchingFilesIds = new Dictionary<string, FileEntry<int>>();
-        Folder<int> newFolder = null;
+        Folder<int> newFolder;
         if (storage.Type != FolderType.BUNCH) 
         {
             newFolder = storage.Type == FolderType.USER
-                ? await FileStorageService.CreateFolderAsync(await GlobalFolderHelper.FolderMyAsync, $"ASC migration files {DateTime.Now:dd.MM.yyyy}")
-                    : await FileStorageService.CreateRoomAsync($"ASC migration common files {DateTime.Now:dd.MM.yyyy}", RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0);
-            Log(MigrationResource.СreateRootFolder);
-
-            matchingFilesIds.Add($"{_folderKey}-{storage.RootKey}", newFolder);
+            ? await FileStorageService.CreateFolderAsync(await GlobalFolderHelper.FolderMyAsync, $"ASC migration files {DateTime.Now:dd.MM.yyyy}")
+                    : await FileStorageService.CreateRoomAsync($"ASC migration common files {DateTime.Now:dd.MM.yyyy}", RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0, null, false, null, null, null, null, null);
+        Log(MigrationResource.СreateRootFolder);
         }
         else
         {
             newFolder = ServiceProvider.GetService<Folder<int>>();
             newFolder.Id = -1;
-            matchingFilesIds.Add($"{_folderKey}-{storage.RootKey}", newFolder);
         }
+
+        matchingFilesIds.Add($"{FolderKey}-{storage.RootKey}", newFolder);
         var orderedFolders = storage.Folders.OrderBy(f => f.Level);
         foreach (var folder in orderedFolders)
         {
             if (!storage.ShouldImportSharedFolders ||
-                !storage.Securities.Any(s => s.EntryId == folder.Id && s.EntryType == 1) && matchingFilesIds[$"{_folderKey}-{folder.ParentId}"].Id != 0)
+                !storage.Securities.Any(s => s.EntryId == folder.Id && s.EntryType == 1) && matchingFilesIds[$"{FolderKey}-{folder.ParentId}"].Id != 0)
             {
                 if (storage.Type == FolderType.BUNCH && !folder.Private)
                 {
-                    newFolder = await FileStorageService.CreateRoomAsync(folder.Title, RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0);
-                    Log(string.Format(MigrationResource.CreateFolder, newFolder.Title));
+                    newFolder = await FileStorageService.CreateRoomAsync(folder.Title, RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0, null, false, null, null, null, null, null);
                 }
                 else
                 {
-                    newFolder = await FileStorageService.CreateFolderAsync(matchingFilesIds[$"{_folderKey}-{folder.ParentId}"].Id, folder.Title);
-                    Log(string.Format(MigrationResource.CreateFolder, newFolder.Title));
+                    newFolder = await FileStorageService.CreateFolderAsync(matchingFilesIds[$"{FolderKey}-{folder.ParentId}"].Id, folder.Title);
                 }
+
+                Log(string.Format(MigrationResource.CreateFolder, newFolder.Title));
             }
             else
             {
                 newFolder = ServiceProvider.GetService<Folder<int>>();
                 newFolder.Title = folder.Title;
             }
-            matchingFilesIds.Add($"{_folderKey}-{folder.Id}", newFolder);
+            matchingFilesIds.Add($"{FolderKey}-{folder.Id}", newFolder);
         }
 
         var fileDao = DaoFactory.GetFileDao<int>();
@@ -387,7 +368,7 @@ public abstract class Migrator : IAsyncDisposable
                 await using var fs = new FileStream(file.Path, FileMode.Open);
 
                 var newFile = ServiceProvider.GetService<File<int>>();
-                newFile.ParentId = matchingFilesIds[$"{_folderKey}-{file.Folder}"].Id;
+                newFile.ParentId = matchingFilesIds[$"{FolderKey}-{file.Folder}"].Id;
                 newFile.Comment = FilesCommonResource.CommentCreate;
                 newFile.Title = Path.GetFileName(file.Title);
                 newFile.ContentLength = fs.Length;
@@ -396,18 +377,18 @@ public abstract class Migrator : IAsyncDisposable
                 newFile.Comment = file.Comment;
                 newFile.CreateOn = file.Created;
                 newFile.ModifiedOn = file.Modified;
-                if (matchingFilesIds.ContainsKey($"{_fileKey}-{file.Id}"))
+                if (matchingFilesIds.ContainsKey($"{FileKey}-{file.Id}"))
                 {
-                    newFile.Id = matchingFilesIds[$"{_fileKey}-{file.Id}"].Id;
+                    newFile.Id = matchingFilesIds[$"{FileKey}-{file.Id}"].Id;
                 }
                 if (!storage.ShouldImportSharedFolders || !storage.Securities.Any(s => s.EntryId == file.Folder && s.EntryType == 1) && newFile.ParentId != 0)
                 {
                     newFile = await fileDao.SaveFileAsync(newFile, fs);
                     Log(string.Format(MigrationResource.CreateFile, file.Title));
                 }
-                if (!matchingFilesIds.ContainsKey($"{_fileKey}-{file.Id}") && newFile.Id != 0)
+                if (!matchingFilesIds.ContainsKey($"{FileKey}-{file.Id}") && newFile.Id != 0)
                 {
-                    matchingFilesIds.Add($"{_fileKey}-{file.Id}", newFile);
+                    matchingFilesIds.Add($"{FileKey}-{file.Id}", newFile);
                 }
             }
             catch (Exception ex)
@@ -436,16 +417,16 @@ public abstract class Migrator : IAsyncDisposable
                 }
                 var access = (Files.Core.Security.FileShare)security.Security;
 
-                var entryIsFile = security.EntryType == 2;
+                    var entryIsFile = security.EntryType == 2;
                 if (entryIsFile && storage.ShouldImportSharedFiles)
                 {
-                    var key = $"{_fileKey}-{security.EntryId}";
+                    var key = $"{FileKey}-{security.EntryId}";
                     if(!matchingFilesIds.ContainsKey(key))
                     {
                         continue;
                     }
                     await SecurityContext.AuthenticateMeAsync(user.Info.Id);
-                    AceWrapper ace = null;
+                    AceWrapper ace;
                     if (!aces.ContainsKey($"{security.Security}{matchingFilesIds[key].Id}"))
                     {
                         try
@@ -466,22 +447,31 @@ public abstract class Migrator : IAsyncDisposable
                     }
                     if (ace != null)
                     {
-                        if (MigrationInfo.Users.ContainsKey(security.Subject))
+                        if (MigrationInfo.Users.TryGetValue(security.Subject, out var infoUser))
                         {
-                            var userForShare = await UserManager.GetUsersAsync(MigrationInfo.Users[security.Subject].Info.Id);
+                            var userForShare = await UserManager.GetUsersAsync(infoUser.Info.Id);
                             await SecurityContext.AuthenticateMeAsync(userForShare.Id);
-                            await EntryManager.MarkAsRecentByLink(matchingFilesIds[key] as File<int>, ace.Id);
+                            await EntryManager.MarkFileAsRecentByLink(matchingFilesIds[key] as File<int>, ace.Id);
                         }
                         else
                         {
-                            var users = UserManager.GetUsers(false, EmployeeStatus.Active,
-                                [[MigrationInfo.Groups[security.Subject].Info.ID]],
-                                [], [], null, null, null, "", false, "firstname",
-                                true, 100000, 0).Where(u => u.Id != user.Info.Id);
+                            var filter = new UserQueryFilter
+                            {
+                                EmployeeStatus = EmployeeStatus.Active,
+                                IncludeGroups = [[MigrationInfo.Groups[security.Subject].Info.ID]],
+                                SortType = UserSortType.FirstName,
+                                SortOrderAsc = true,
+                                IncludeStrangers = true,
+                                Limit = 100000,
+                                Offset = 0,
+                                Area = Area.All
+                            };
+                            
+                            var users = UserManager.GetUsers(filter).Where(u => u.Id != user.Info.Id);
                             await foreach (var u in users)
                             {
                                 await SecurityContext.AuthenticateMeAsync(u.Id);
-                                await EntryManager.MarkAsRecentByLink(matchingFilesIds[key] as File<int>, ace.Id);
+                                await EntryManager.MarkFileAsRecentByLink(matchingFilesIds[key] as File<int>, ace.Id);
                             }
                         }
                     }
@@ -489,7 +479,7 @@ public abstract class Migrator : IAsyncDisposable
                 else if (storage.ShouldImportSharedFolders)
                 {
                     var localMatchingRoomIds = new Dictionary<int, FileEntry<int>>();
-                    var key = $"{_folderKey}-{security.EntryId}";
+                    var key = $"{FolderKey}-{security.EntryId}";
 
                     if (innerFolders.Contains(security.EntryId))
                     {
@@ -503,7 +493,7 @@ public abstract class Migrator : IAsyncDisposable
                             user = MigrationInfo.Users[owner];
                         }
 
-                        if (user.UserType == EmployeeType.Collaborator)
+                        if (user.UserType == EmployeeType.User)
                         {
                             await SecurityContext.AuthenticateMeAsync(_currentUser);
                         }
@@ -511,21 +501,20 @@ public abstract class Migrator : IAsyncDisposable
                         {
                             await SecurityContext.AuthenticateMeAsync(user.Info.Id);
                         }
-                        var room = await FileStorageService.CreateRoomAsync($"{matchingFilesIds[key].Title}",
-                            RoomType.EditingRoom, false, false, new List<FileShareParams>(), 0);
+                        var room = await FileStorageService.CreateRoomAsync($"{matchingFilesIds[key].Title}", RoomType.EditingRoom, false, false, new List<FileShareParams>(), 0, null, false, null, null, null, null, null);
 
                         orderedFolders = storage.Folders.Where(f => f.ParentId == security.EntryId).OrderBy(f => f.Level);
                         matchingRoomIds.Add(security.EntryId, room);
                         localMatchingRoomIds.Add(security.EntryId, room);
                         Log(string.Format(MigrationResource.CreateShareRoom, room.Title));
 
-                        if (user.UserType == EmployeeType.Collaborator)
+                        if (user.UserType == EmployeeType.User)
                         {
                             var aceList = new List<AceWrapper>
                             {
-                                new AceWrapper
+                                new()
                                 {
-                                    Access = Files.Core.Security.FileShare.PowerUser,
+                                    Access = Files.Core.Security.FileShare.ContentCreator,
                                     Id = user.Info.Id
                                 }
                             };
@@ -563,15 +552,15 @@ public abstract class Migrator : IAsyncDisposable
                                 newFile.VersionGroup = file.VersionGroup;
                                 newFile.CreateOn = file.Created;
                                 newFile.ModifiedOn = file.Modified;
-                                if (matchingFilesIds.ContainsKey($"{_fileKey}-{file.Id}"))
+                                if (matchingFilesIds.ContainsKey($"{FileKey}-{file.Id}"))
                                 {
-                                    newFile.Id = matchingFilesIds[$"{_fileKey}-{file.Id}"].Id;
+                                    newFile.Id = matchingFilesIds[$"{FileKey}-{file.Id}"].Id;
                                 }
                                 newFile = await fileDao.SaveFileAsync(newFile, fs);
                                 Log(string.Format(MigrationResource.CreateFile, file.Title));
-                                if (!matchingFilesIds.ContainsKey($"{_fileKey}-{file.Id}"))
+                                if (!matchingFilesIds.ContainsKey($"{FileKey}-{file.Id}"))
                                 {
-                                    matchingFilesIds.Add($"{_fileKey}-{file.Id}", newFile);
+                                    matchingFilesIds.Add($"{FileKey}-{file.Id}", newFile);
                                 }
                             }
                             catch(Exception ex)
@@ -588,11 +577,11 @@ public abstract class Migrator : IAsyncDisposable
 
                     var list = new List<AceWrapper>
                     {
-                        new AceWrapper
+                        new()
                         {
                             Access = access,
-                            Id = MigrationInfo.Users.ContainsKey(security.Subject) 
-                                ? MigrationInfo.Users[security.Subject].Info.Id 
+                            Id = MigrationInfo.Users.TryGetValue(security.Subject, out var infoUser) 
+                                ? infoUser.Info.Id 
                                 : MigrationInfo.Groups[security.Subject].Info.ID
                         }
                     };
@@ -616,14 +605,14 @@ public abstract class Migrator : IAsyncDisposable
         }
     }
 
-    private int OrderSecurity(MigrationStorage storage, MigrationSecurity security)
+    private static int OrderSecurity(MigrationStorage storage, MigrationSecurity security)
     {
         if(security.EntryType != 1)
         {
             return 0;
         }
         var folder = storage.Folders.FirstOrDefault(f => f.Id == security.EntryId);
-        return folder == null ? 0 : folder.Level;
+        return folder?.Level ?? 0;
     }
 
     public async ValueTask DisposeAsync()

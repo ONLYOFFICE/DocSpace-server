@@ -43,7 +43,7 @@ public class FirebaseHelper(AuthContext authContext,
         {
             try
             {
-                var credentials = JsonConvert.SerializeObject(new FirebaseApiKey(configuration)).Replace("\\\\", "\\");
+                var credentials = JsonSerializer.Serialize(new FirebaseApiKey(configuration)).Replace("\\\\", "\\");
                 FirebaseApp.Create(new AppOptions
                 {
                     Credential = GoogleCredential.FromJson(credentials)
@@ -59,19 +59,9 @@ public class FirebaseHelper(AuthContext authContext,
 
         var user = await _userManager.GetUserByUserNameAsync(msg.Reciever);
 
-        Guid productID;
-
-        if (!Guid.TryParse(msg.ProductID, out productID))
-        {
-            return;
-        }
-
         var fireBaseUser = new List<FireBaseUser>();
 
-        if (productID == new Guid("{E67BE73D-F9AE-4ce1-8FEC-1880CB518CB4}")) //documents product
-        {
-            fireBaseUser = await firebaseDao.GetUserDeviceTokensAsync(user.Id, msg.TenantId, PushConstants.PushDocAppName);
-        }
+        fireBaseUser = await firebaseDao.GetUserDeviceTokensAsync(user.Id, msg.TenantId, PushConstants.PushDocAppName);
 
         foreach (var fb in fireBaseUser.Where(fb => fb.IsSubscribed is true))
         {
@@ -93,7 +83,7 @@ public class FirebaseHelper(AuthContext authContext,
     public async Task<FireBaseUser> RegisterUserDeviceAsync(string fbDeviceToken, bool isSubscribed, string application)
     {
         var userId = authContext.CurrentAccount.ID;
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
 
         return await firebaseDao.RegisterUserDeviceAsync(userId, tenantId, fbDeviceToken, isSubscribed, application);
     }
@@ -101,7 +91,7 @@ public class FirebaseHelper(AuthContext authContext,
     public async Task<FireBaseUser> UpdateUserAsync(string fbDeviceToken, bool isSubscribed, string application)
     {
         var userId = authContext.CurrentAccount.ID;
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
 
         return await firebaseDao.UpdateUserAsync(userId, tenantId, fbDeviceToken, isSubscribed, application);
     }

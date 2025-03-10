@@ -37,7 +37,8 @@ public class RestorePortalTask(DbFactory dbFactory,
         TenantManager tenantManager,
         AscCacheNotify ascCacheNotify,
         ModuleProvider moduleProvider,
-        BackupRepository backupRepository)
+        BackupRepository backupRepository,
+        TenantExtra tenantExtra)
     : PortalTaskBase(dbFactory, options, storageFactory, storageFactoryConfig, moduleProvider)
 {
     public bool ReplaceDate { get; set; }
@@ -48,8 +49,9 @@ public class RestorePortalTask(DbFactory dbFactory,
 
     private ColumnMapper _columnMapper;
     private string _region;
+    private bool _expectDump;
 
-    public void Init(string region, string fromFilePath, int tenantId = -1, ColumnMapper columnMapper = null, string upgradesPath = null)
+    public void Init(string region, string fromFilePath, bool expectDump, int tenantId = -1, ColumnMapper columnMapper = null, string upgradesPath = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(fromFilePath);
 
@@ -62,6 +64,7 @@ public class RestorePortalTask(DbFactory dbFactory,
         UpgradesPath = upgradesPath;
         _columnMapper = columnMapper ?? new ColumnMapper();
         _region = region;
+        _expectDump = expectDump; 
         Init(tenantId);
     }
 
@@ -75,11 +78,22 @@ public class RestorePortalTask(DbFactory dbFactory,
         {
             await using (var entry = dataReader.GetEntry(KeyHelper.GetDumpKey()))
             {
-                Dump = entry != null && coreBaseSettings.Standalone;
+                Dump = entry != null;
+            }
+
+            if (Dump && !coreBaseSettings.Standalone)
+            {
+                throw new ArgumentException(BackupResource.BackupNotFound);
+            }
+
+            if (Dump != _expectDump)
+            {
+                throw new ArgumentException(BackupResource.BackupInvalid);
             }
 
             if (Dump)
             {
+                await tenantExtra.DemandAccessSpacePermissionAsync();
                 await RestoreFromDump(dataReader);
             }
             else
@@ -91,7 +105,7 @@ public class RestorePortalTask(DbFactory dbFactory,
                 {
                     var restoreTask = new RestoreDbModuleTask(logger, module, dataReader, _columnMapper, DbFactory, ReplaceDate, Dump, _region, StorageFactory, StorageFactoryConfig, ModuleProvider)
                     {
-                        ProgressChanged = (args) => SetCurrentStepProgress(args.Progress)
+                        ProgressChanged = args => SetCurrentStepProgress(args.Progress)
                     };
 
                     foreach (var tableName in _ignoredTables)
@@ -123,7 +137,7 @@ public class RestorePortalTask(DbFactory dbFactory,
             }
         }
 
-        if (coreBaseSettings.Standalone)
+        if (coreBaseSettings.Standalone && Dump)
         {
             options.DebugRefreshLicense();
             try
@@ -155,14 +169,11 @@ public class RestorePortalTask(DbFactory dbFactory,
         }
 
         var stepscount = keys.Count * 2 + upgrades.Count;
-
-        var databasesFromDirs = new Dictionary<string, List<string>>();
-        var databases = new Dictionary<Tuple<string, string>, List<string>>();
+        
         foreach (var db in dbs)
         {
             var keys1 = dataReader.GetEntries(db + "/" + keyBase).Select(Path.GetFileName).ToList();
             stepscount += keys1.Count * 2;
-            databasesFromDirs.Add(db, keys1);
         }
 
         SetStepsCount(ProcessStorage ? stepscount + 1 : stepscount);
@@ -195,23 +206,6 @@ public class RestorePortalTask(DbFactory dbFactory,
             }
 
             Task.WaitAll(tasks.ToArray());
-        }
-
-        foreach (var database in databases)
-        {
-            for (var i = 0; i < database.Value.Count; i += TasksLimit)
-            {
-                var tasks = new List<Task>(TasksLimit * 2);
-
-                for (var j = 0; j < TasksLimit && i + j < database.Value.Count; j++)
-                {
-                    var key1 = Path.Combine(database.Key.Item1, KeyHelper.GetDatabaseSchema(), database.Value[i + j]);
-                    var key2 = Path.Combine(database.Key.Item1, KeyHelper.GetDatabaseData(), database.Value[i + j]);
-                    tasks.Add(RestoreFromDumpFile(dataReader, key1, key2, database.Key.Item2));
-                }
-
-                Task.WaitAll(tasks.ToArray());
-            }
         }
 
         var comparer = new SqlComparer();
@@ -406,7 +400,7 @@ public class RestorePortalTask(DbFactory dbFactory,
         Logger.DebugEndDeleteStorage();
     }
 
-    private IEnumerable<BackupFileInfo> GetFilesToProcess(IDataReadOperator dataReader)
+    private static List<BackupFileInfo> GetFilesToProcess(IDataReadOperator dataReader)
     {
         using var stream = dataReader.GetEntry(KeyHelper.GetStorageRestoreInfoZipKey());
         if (stream == null)

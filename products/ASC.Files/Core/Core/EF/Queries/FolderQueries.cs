@@ -179,7 +179,7 @@ public partial class FilesDbContext
     }
         
     [PreCompileQuery([PreCompileQuery.DefaultInt])]
-    public Task<DbFolderQuery> FirstParentAsync(int folderId)
+    public Task<DbFolderQuery> ParentIdTypePairAsync(int folderId)
     {
         return FolderQueries.FirstParentAsync(this, folderId);
     }
@@ -298,6 +298,18 @@ public partial class FilesDbContext
         return FolderQueries.ReassignFoldersPartiallyAsync(this, tenantId, oldOwnerId, newOwnerId, exceptFolderIds);
     }
     
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultGuid])]
+    public Task<int> ReassignSpecificFoldersAsync(int tenantId, IEnumerable<int> foldersIds, Guid newOwnerId)
+    {
+        return FolderQueries.ReassignSpecificFoldersAsync(this, tenantId, foldersIds, newOwnerId);
+    }
+    
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, null])]
+    public IAsyncEnumerable<FolderReassignInfo> GetRoomsFoldersReassignInfoAsync(int tenantId, Guid ownerId)
+    {
+        return FolderQueries.GetRoomsFoldersReassignInfoAsync(this, tenantId, ownerId, DocSpaceHelper.RoomTypes);
+    }
+    
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public Task<string> LeftNodeAsync(int tenantId, string key)
     {
@@ -308,6 +320,12 @@ public partial class FilesDbContext
     public Task<int> UpdateTreeFolderCounterAsync(int tenantId, int folderId, long size)
     {
         return FolderQueries.UpdateTreeFolderCounterAsync(this, tenantId, folderId, size);
+    }
+    
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    public Task<DbRoomSettings> RoomSettingsAsync(int tenantId, int roomId)
+    {
+        return FolderQueries.RoomSettingsAsync(this, tenantId, roomId);
     }
 }
 
@@ -372,15 +390,37 @@ static file class FolderQueries
                                     where f.TenantId == r.TenantId
                                     select f
                                 ).FirstOrDefault(),
-                            Shared = (r.FolderType == FolderType.CustomRoom || r.FolderType == FolderType.PublicRoom || r.FolderType == FolderType.FillingFormsRoom) && 
-                                     ctx.Security.Any(s => 
-                                         s.TenantId == tenantId && 
-                                         s.EntryId == r.Id.ToString() && 
-                                         s.EntryType == FileEntryType.Folder && 
-                                         s.SubjectType == SubjectType.PrimaryExternalLink),
-                            Settings = (from f in ctx.RoomSettings 
-                                where f.TenantId == r.TenantId && f.RoomId == r.Id 
-                                select f).FirstOrDefault()
+                            Shared = (r.FolderType == FolderType.CustomRoom || r.FolderType == FolderType.PublicRoom || r.FolderType == FolderType.FillingFormsRoom) 
+                                ? ctx.Security.Any(s => 
+                                    s.TenantId == r.TenantId && 
+                                    s.EntryId == r.Id.ToString() && 
+                                    s.EntryType == FileEntryType.Folder && 
+                                    s.SubjectType == SubjectType.PrimaryExternalLink)
+                                : r.FolderType == FolderType.DEFAULT && ctx.Security.Any(x => 
+                                    x.TenantId == r.TenantId && 
+                                    (x.SubjectType == SubjectType.ExternalLink || x.SubjectType == SubjectType.PrimaryExternalLink) && 
+                                    x.EntryType == FileEntryType.Folder && 
+                                    x.EntryId == ctx.Tree
+                                        .Where(t => t.FolderId == r.ParentId)
+                                        .OrderByDescending(t => t.Level)
+                                        .Select(t => t.ParentId)
+                                        .Skip(1)
+                                        .FirstOrDefault()
+                                        .ToString()),
+                            Settings = ctx.RoomSettings.Where(x => x.TenantId == r.TenantId && x.RoomId == r.Id).Distinct().FirstOrDefault(),
+                            Order = (
+                                from f in ctx.FileOrder
+                                where (
+                                    from rs in ctx.RoomSettings 
+                                    where rs.TenantId == f.TenantId && rs.RoomId ==
+                                        (from t in ctx.Tree
+                                            where t.FolderId == r.ParentId
+                                            orderby t.Level descending
+                                            select t.ParentId
+                                        ).Skip(1).FirstOrDefault()
+                                    select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == r.TenantId && f.EntryType == FileEntryType.Folder
+                                select f.Order
+                            ).FirstOrDefault()
                         }
                     ).SingleOrDefault());
 
@@ -442,9 +482,7 @@ static file class FolderQueries
                                     select rs.Indexing).FirstOrDefault() && f.EntryId == r.folder.Id && f.TenantId == r.folder.TenantId && f.EntryType == FileEntryType.Folder
                                 select f.Order
                             ).FirstOrDefault(),
-                            Settings = (from f in ctx.RoomSettings 
-                                where f.TenantId == r.folder.TenantId && f.RoomId == r.folder.Id 
-                                select f).FirstOrDefault()
+                            Settings = ctx.RoomSettings.Where(x => x.TenantId == r.folder.TenantId && x.RoomId == r.folder.Id).Distinct().FirstOrDefault()
                         }
                     ));
 
@@ -721,6 +759,35 @@ static file class FolderQueries
                     .Where(f => f.CreateBy == oldOwnerId)
                     .Where(f => ctx.Tree.FirstOrDefault(t => t.FolderId == f.Id && exceptFolderIds.Contains(t.ParentId)) == null)
                     .ExecuteUpdate(p => p.SetProperty(f => f.CreateBy, newOwnerId)));
+    
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, Guid, Task<int>> ReassignSpecificFoldersAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<int> foldersIds, Guid newOwnerId) =>
+                ctx.Folders
+                    .Where(r => r.TenantId == tenantId && foldersIds.Contains(r.Id))
+                    .ExecuteUpdate(p => p.SetProperty(f => f.CreateBy, newOwnerId)));
+
+    public static readonly Func<FilesDbContext, int, Guid, IEnumerable<FolderType>, IAsyncEnumerable<FolderReassignInfo>> GetRoomsFoldersReassignInfoAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, Guid ownerId, IEnumerable<FolderType> roomTypes) =>
+                ctx.Folders
+                    .Where(f =>
+                        f.TenantId == tenantId &&
+                        f.CreateBy == ownerId &&
+                        f.FolderType == FolderType.DEFAULT)
+                    .Select(f => new FolderReassignInfo
+                    {
+                        FolderId = f.Id,
+                        RoomOwnerId = ctx.Folders.FirstOrDefault(f1 =>
+                            f1.TenantId == f.TenantId &&
+                            f1.Id == ctx.Tree
+                                .Where(t => t.FolderId == f.ParentId)
+                                .OrderByDescending(t => t.Level)
+                                .Skip(1)
+                                .Select(t => t.ParentId)
+                                .FirstOrDefault() &&
+                            roomTypes.Contains(f1.FolderType)).CreateBy
+                    }));
 
     public static readonly Func<FilesDbContext, int, IEnumerable<int>, IAsyncEnumerable<DbFolderQuery>>
         DbFolderQueriesByIdsAsync = Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
@@ -842,16 +909,16 @@ static file class FolderQueries
                     .OrderByDescending(r => r.Tree.Level)
                     .Select(r => new ParentIdTitlePair { ParentId = r.Tree.ParentId, Title = r.Folders.Title }));
 
-    public static readonly Func<FilesDbContext, int, Task<DbFolderQuery>> FirstParentAsync =
+    public static readonly Func<FilesDbContext, int, Task<DbFolderQuery>> ParentIdTypePairAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int folderId) =>
                 ctx.Tree.Join(ctx.Folders, r => r.ParentId, s => s.Id, (t, f) => new { Tree = t, Folders = f })
                     .Where(r => r.Tree.FolderId == folderId)
                     .OrderByDescending(r => r.Tree.Level)
-                    .Select(r => new DbFolderQuery 
-                    { 
+                    .Select(r => new DbFolderQuery
+                    {
                         Folder = r.Folders,
-                        Settings = ctx.RoomSettings.FirstOrDefault(x => x.TenantId == r.Folders.TenantId && x.RoomId == r.Folders.Id)
+                        Settings = ctx.RoomSettings.Where(x => x.TenantId == r.Folders.TenantId && x.RoomId == r.Folders.Id).Distinct().FirstOrDefault()
                     })
                     .Skip(1)
                     .FirstOrDefault());
@@ -878,4 +945,10 @@ static file class FolderQueries
                     .ExecuteUpdate(toUpdate => toUpdate
                             .SetProperty(p => p.folder.Counter, p => p.folder.Counter + size)
                         ));
+    
+    public static readonly Func<FilesDbContext, int, int, Task<DbRoomSettings>> RoomSettingsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int roomId) =>
+                ctx.RoomSettings
+                    .FirstOrDefault(r => r.TenantId == tenantId && r.RoomId == roomId));
 }

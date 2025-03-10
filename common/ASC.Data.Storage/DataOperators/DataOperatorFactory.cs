@@ -46,10 +46,8 @@ public static class DataOperatorFactory
         {
             return new ZipReadOperator(targetFile, removeTarget);
         }
-        else
-        {
-            return new TarReadOperator(targetFile, removeTarget);
-        }
+
+        return new TarReadOperator(targetFile, removeTarget);
     }
 
     public static IDataReadOperator GetReadOperator(string targetFile, CancellationToken token, bool removeTarget = true)
@@ -58,10 +56,8 @@ public static class DataOperatorFactory
         {
             return new ZipReadOperator(targetFile, token, removeTarget);
         }
-        else
-        {
-            return new TarReadOperator(targetFile, token, removeTarget);
-        }
+
+        return new TarReadOperator(targetFile, token, removeTarget);
     }
 }
  

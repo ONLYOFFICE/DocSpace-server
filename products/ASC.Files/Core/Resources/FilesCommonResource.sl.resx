@@ -202,9 +202,6 @@
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Urednik</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Skrbnik sobe</value>
-  </data>
   <data name="RoleEnum_User" xml:space="preserve">
     <value>Uporabnik</value>
   </data>
@@ -279,9 +276,6 @@
   </data>
   <data name="AceStatusEnum_CustomFilter" xml:space="preserve">
     <value>Filter po meri</value>
-  </data>
-  <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
-    <value>Skrbnik sobe</value>
   </data>
   <data name="AceShareLink" xml:space="preserve">
     <value>Zunanji portal</value>
@@ -467,37 +461,43 @@ Najvišja združljivost z docx, xlsx, pptx.</value>
   <data name="Date" xml:space="preserve">
     <value>Datum</value>
   </data>
-  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
-    <value>Napredni uporabnik</value>
-  </data>
-  <data name="RoleEnum_PowerUser" xml:space="preserve">
-    <value>Napredni uporabnik</value>
-  </data>
   <data name="User" xml:space="preserve">
     <value>Uporabnik</value>
   </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Premikanje več datotek hkrati v prostor za izpolnjevanje obrazcev ni podprto. Premaknite po en obrazec ONLYOFFICE PDF hkrati.</value>
+    <value>Premikanje več datotek hkrati v prostor za izpolnjevanje obrazcev ni podprto. Premaknite po en obrazec {0} PDF hkrati.</value>
   </data>
   <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Premikanje map v sobo za izpolnjevanje obrazcev ni podprto. Premaknite samo en obrazec ONLYOFFICE PDF hkrati.</value>
+    <value>Premikanje map v sobo za izpolnjevanje obrazcev ni podprto. Premaknite samo en obrazec {0} PDF hkrati.</value>
   </data>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Datoteke ni mogoče premakniti v to sobo. Poskusite premakniti obrazec ONLYOFFICE PDF.</value>
+    <value>Datoteke ni mogoče premakniti v to sobo. Poskusite premakniti obrazec {0} PDF.</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Datoteke ni mogoče naložiti v to sobo. Poskusite naložiti obrazec ONLYOFFICE PDF.</value>
+    <value>Datoteke ni mogoče naložiti v to sobo. Poskusite naložiti obrazec {0} PDF.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Povezava za izpolnitev</value>
-  </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Odpri obrazec</value>
   </data>
   <data name="LinkToForm" xml:space="preserve">
     <value>Povezava do obrazca</value>
   </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Številka obrazca</value>
+  </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Ustvarjalec vsebine</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Ustvarjalec vsebine</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Upravljalec sobe</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Upravljalec sobe</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Zunanji uporabnik</value>
   </data>
 </root>

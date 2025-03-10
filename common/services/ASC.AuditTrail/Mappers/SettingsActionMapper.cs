@@ -31,10 +31,11 @@ internal class SettingsActionsMapper : IProductActionMapper
     public List<IModuleActionMapper> Mappers { get; } =
     [
         new GeneralActionMapper(),
-        new ProductsActionMapper()
+        new ProductsActionMapper(),
+        new OAuthActionMapper()
     ];
 
-    public ProductType Product { get; } = ProductType.Settings;
+    public ProductType Product => ProductType.Settings;
 }
 
 internal class GeneralActionMapper : IModuleActionMapper
@@ -49,12 +50,11 @@ internal class GeneralActionMapper : IModuleActionMapper
         Actions = new MessageMapsDictionary(productType, Module)
         {
             {
-                ActionType.Update, new[]
-                {
+                ActionType.Update, [
                     MessageAction.LanguageSettingsUpdated, MessageAction.TimeZoneSettingsUpdated, MessageAction.DnsSettingsUpdated,
                     MessageAction.TrustedMailDomainSettingsUpdated,MessageAction.PasswordStrengthSettingsUpdated,MessageAction.TwoFactorAuthenticationSettingsUpdated,
                     MessageAction.AdministratorMessageSettingsUpdated,MessageAction.DefaultStartPageSettingsUpdated
-                }
+                ]
             }
         };
 
@@ -77,8 +77,7 @@ internal class ProductsActionMapper : IModuleActionMapper
         Actions = new MessageMapsDictionary(ProductType.Settings, Module)
         {
             {
-                ActionType.Update, new[]
-                {
+                ActionType.Update, [
                     MessageAction.ProductsListUpdated,
                     MessageAction.GreetingSettingsUpdated,MessageAction.TeamTemplateChanged,MessageAction.ColorThemeChanged,
                     MessageAction.OwnerSentPortalDeactivationInstructions, MessageAction.PortalDeactivated, MessageAction.PortalRenamed,
@@ -91,42 +90,72 @@ internal class ProductsActionMapper : IModuleActionMapper
                     MessageAction.PrivacyRoomDisable, 
                     MessageAction.QuotaPerRoomChanged, MessageAction.QuotaPerRoomDisabled, MessageAction.QuotaPerUserChanged, MessageAction.QuotaPerUserDisabled, MessageAction.QuotaPerPortalChanged, MessageAction.QuotaPerPortalDisabled,
                     MessageAction.CustomQuotaPerRoomDefault, MessageAction.CustomQuotaPerRoomChanged, MessageAction.CustomQuotaPerRoomDisabled, MessageAction.CustomQuotaPerUserDefault, MessageAction.CustomQuotaPerUserChanged, MessageAction.CustomQuotaPerUserDisabled
-                }
+                ]
             },
             {
-                ActionType.Create, new[]
-                {
+                ActionType.Create, [
                     MessageAction.AdministratorAdded, MessageAction.ProductAddedAdministrator
-                }
+                ]
             },
             {
-                ActionType.UpdateAccess, new[]
-                {
+                ActionType.UpdateAccess, [
                     MessageAction.ProductAccessOpened,MessageAction.ProductAccessRestricted,MessageAction.AdministratorDeleted, MessageAction.AdministratorOpenedFullAccess
-                }
+                ]
             },
             {
-                ActionType.Delete, new[]
-                {
+                ActionType.Delete, [
                     MessageAction.ProductDeletedAdministrator,MessageAction.PortalDeleted
-                }
+                ]
             },
             {
-                ActionType.Send, new[]
-                {
+                ActionType.Send, [
                     MessageAction.OwnerSentPortalDeleteInstructions, MessageAction.OwnerSentChangeOwnerInstructions
-                }
+                ]
             },
             {
-                ActionType.Download, new[]
-                {
+                ActionType.Download, [
                     MessageAction.LoginHistoryReportDownloaded, MessageAction.AuditTrailReportDownloaded
-                }
+                ]
             }
         };
 
         Actions.Add(MessageAction.UsersOpenedProductAccess, new MessageMaps("ProductAccessOpenedForUsers", ActionType.UpdateAccess, productType, Module));
         Actions.Add(MessageAction.GroupsOpenedProductAccess, new MessageMaps("ProductAccessOpenedForGroups", ActionType.UpdateAccess, productType, Module));
         Actions.Add(MessageAction.OwnerUpdated, new MessageMaps("OwnerChanged", ActionType.Update, productType, Module));
+    }
+}
+
+public class OAuthActionMapper : IModuleActionMapper
+{
+    public ModuleType Module { get; }
+    public IDictionary<MessageAction, MessageMaps> Actions { get; }
+
+    public OAuthActionMapper()
+    {
+        Module = ModuleType.OAuth;
+        Actions = new MessageMapsDictionary(ProductType.Settings, Module)
+        {
+            {
+                ActionType.Create, [
+                    MessageAction.CreateClient
+                ]
+            },
+            {
+                ActionType.Update, [
+                    MessageAction.UpdateClient,
+                    MessageAction.RegenerateSecret,
+                    MessageAction.ChangeClientActivation,
+                    MessageAction.ChangeClientVisibility,
+                    MessageAction.RevokeUserClient,
+                    MessageAction.GenerateAuthorizationCodeToken,
+                    MessageAction.GeneratePersonalAccessToken
+                ]
+            },
+            {
+                ActionType.Delete, [
+                    MessageAction.DeleteClient
+                ]
+            }
+        };
     }
 }

@@ -29,13 +29,7 @@ using System.Extensions;
 namespace ASC.Migration.Core;
 
 [Transient]
-public class MigrationOperation(
-    ILogger<MigrationOperation> logger,
-    MigrationCore migrationCore,
-    TenantManager tenantManager,
-    SecurityContext securityContext,
-    IDistributedCache cache)
-    : DistributedTaskProgress
+public class MigrationOperation : DistributedTaskProgress
 {
     private string _migratorName;
     private Guid _userId;
@@ -74,6 +68,30 @@ public class MigrationOperation(
     }
 
     private string _logName;
+    private readonly ILogger<MigrationOperation> _logger;
+    private readonly MigrationCore _migrationCore;
+    private readonly TenantManager _tenantManager;
+    private readonly SecurityContext _securityContext;
+    private readonly IFusionCache _hybridCache;
+
+    public MigrationOperation()
+    {
+        
+    }
+    
+    public MigrationOperation(ILogger<MigrationOperation> logger,
+        MigrationCore migrationCore,
+        TenantManager tenantManager,
+        SecurityContext securityContext,
+        IFusionCache hybridCache)
+    {
+        _logger = logger;
+        _migrationCore = migrationCore;
+        _tenantManager = tenantManager;
+        _securityContext = securityContext;
+        _hybridCache = hybridCache;
+    }
+
     public string LogName
     {
         get => _logName ?? this[nameof(_logName)];
@@ -112,9 +130,9 @@ public class MigrationOperation(
             }
             CustomSynchronizationContext.CreateContext();
 
-            await tenantManager.SetCurrentTenantAsync(TenantId);
-            await securityContext.AuthenticateMeWithoutCookieAsync(_userId);
-            migrator = migrationCore.GetMigrator(_migratorName);
+            await _tenantManager.SetCurrentTenantAsync(TenantId);
+            await _securityContext.AuthenticateMeWithoutCookieAsync(_userId);
+            migrator = _migrationCore.GetMigrator(_migratorName);
             migrator.OnProgressUpdateAsync = Migrator_OnProgressUpdateAsync;
 
             if (migrator == null)
@@ -122,8 +140,8 @@ public class MigrationOperation(
                 throw new ItemNotFoundException(MigrationResource.MigrationNotFoundException);
             }
 
-            var folder = await cache.GetStringAsync($"migration folder - {TenantId}");
-            await migrator.InitAsync(folder, CancellationToken, onlyParse ? OperationType.Parse : OperationType.Migration);
+            var folder = await _hybridCache.GetOrDefaultAsync<string>($"migration folder - {TenantId}");
+            await migrator.InitAsync(folder, onlyParse ? OperationType.Parse : OperationType.Migration, CancellationToken);
 
             await migrator.ParseAsync(onlyParse);
             if (!onlyParse)
@@ -138,8 +156,8 @@ public class MigrationOperation(
         catch (Exception e)
         {
             Exception = e;
-            logger.ErrorWithException(e);
-            if (migrator != null && migrator.MigrationInfo != null)
+            _logger.ErrorWithException(e);
+            if (migrator is { MigrationInfo: not null })
             {
                 MigrationApiInfo = migrator.MigrationInfo.ToApiInfo();
             }
@@ -162,7 +180,7 @@ public class MigrationOperation(
         async Task Migrator_OnProgressUpdateAsync(double arg1, string arg2)
         {
             Percentage = arg1;
-            if (migrator != null && migrator.MigrationInfo != null)
+            if (migrator is { MigrationInfo: not null })
             {
                 MigrationApiInfo = migrator.MigrationInfo.ToApiInfo();
             }

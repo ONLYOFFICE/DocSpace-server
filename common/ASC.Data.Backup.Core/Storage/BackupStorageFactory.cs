@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Text.Json;
+
 namespace ASC.Data.Backup.Storage;
 
 [Scope]
@@ -37,7 +39,7 @@ public class BackupStorageFactory(ConsumerBackupStorage consumerBackupStorage,
     {
         try
         {
-            return await GetBackupStorageAsync(record.StorageType, record.TenantId, JsonConvert.DeserializeObject<Dictionary<string, string>>(record.StorageParams));
+            return await GetBackupStorageAsync(record.StorageType, record.TenantId, JsonSerializer.Deserialize<Dictionary<string, string>>(record.StorageParams));
         }
         catch (Exception error)
         {

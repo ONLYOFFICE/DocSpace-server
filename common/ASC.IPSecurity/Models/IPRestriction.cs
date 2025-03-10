@@ -26,28 +26,28 @@
 
 namespace ASC.IPSecurity;
 
-/// <summary>
-/// </summary>
 public class IPRestriction : IpRestrictionBase, IMapFrom<TenantIpRestrictions>
 {
-    /// <summary>Restiction ID</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// Restiction ID
+    /// </summary>
     public int Id { get; set; }
 
-    /// <summary>Tenant ID</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// Tenant ID
+    /// </summary>
     public int TenantId { get; set; }
 }
 
-/// <summary>
-/// </summary>
 public class IpRestrictionBase
 {
-    /// <summary>IP address</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// IP address
+    /// </summary>
     public string Ip { get; set; }
 
-    /// <summary>Specifies if this address is for administrator users only or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if this address is for administrator users only or not
+    /// </summary>
     public bool ForAdmin { get; set; }
 }

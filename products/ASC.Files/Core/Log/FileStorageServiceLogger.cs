@@ -27,27 +27,27 @@
 namespace ASC.Files.Core.Log;
 internal static partial class FileStorageServiceLogger
 {
-    [LoggerMessage(Level = LogLevel.Error, Message = "DocEditor")]
+    [LoggerMessage(LogLevel.Error, "DocEditor")]
     public static partial void ErrorDocEditor(this ILogger logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "CreateThumbnails")]
+    [LoggerMessage(LogLevel.Error, "CreateThumbnails")]
     public static partial void ErrorCreateThumbnails(this ILogger logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "FileStorageService")]
+    [LoggerMessage(LogLevel.Error, "FileStorageService")]
     public static partial void ErrorFileStorageService(this ILogger logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Reassign provider {providerId} from {fromUser} to {toUser}")]
+    [LoggerMessage(LogLevel.Information, "Reassign provider {providerId} from {fromUser} to {toUser}")]
     public static partial void InformationReassignProvider(this ILogger logger, int providerId, Guid fromUser, Guid toUser);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Delete provider {providerId} for {userId}")]
+    [LoggerMessage(LogLevel.Information, "Delete provider {providerId} for {userId}")]
     public static partial void InformationDeleteProvider(this ILogger logger, int providerId, Guid userId);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Reassign folders from {fromUser} to {toUser}")]
+    [LoggerMessage(LogLevel.Information, "Reassign folders from {fromUser} to {toUser}")]
     public static partial void InformationReassignFolders(this ILogger logger, Guid fromUser, Guid toUser);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Reassign files from {fromUser} to {toUser}")]
+    [LoggerMessage(LogLevel.Information, "Reassign files from {fromUser} to {toUser}")]
     public static partial void InformationReassignFiles(this ILogger logger, Guid fromUser, Guid toUser);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Delete personal data for {userId}")]
+    [LoggerMessage(LogLevel.Information, "Delete personal data for {userId}")]
     public static partial void InformationDeletePersonalData(this ILogger logger, Guid userId);
 }

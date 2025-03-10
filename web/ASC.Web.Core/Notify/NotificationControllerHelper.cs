@@ -75,12 +75,17 @@ public class NotificationControllerHelper(
     }
 }
 
-/// <summary>
-/// </summary>
 public enum NotificationType
 {
+    [SwaggerEnum("Badges")]
     Badges = 0,
+
+    [SwaggerEnum("Rooms activity")]
     RoomsActivity = 1,
+
+    [SwaggerEnum("Daily feed")]
     DailyFeed = 2,
+
+    [SwaggerEnum("Usefull tips")]
     UsefullTips = 3
 }

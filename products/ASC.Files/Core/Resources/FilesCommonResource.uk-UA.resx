@@ -280,9 +280,6 @@
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Редактор</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Адміністратор кімнати</value>
-  </data>
   <data name="RoleEnum_User" xml:space="preserve">
     <value>Користувач</value>
   </data>
@@ -357,9 +354,6 @@
   </data>
   <data name="AceStatusEnum_Editing" xml:space="preserve">
     <value>Редактор</value>
-  </data>
-  <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
-    <value>Адміністратор кімнати</value>
   </data>
   <data name="AceStatusEnum_Comment" xml:space="preserve">
     <value>Коментар</value>
@@ -467,26 +461,20 @@
   <data name="Date" xml:space="preserve">
     <value>Дата</value>
   </data>
-  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
-    <value>Досвідчений користувач</value>
-  </data>
-  <data name="RoleEnum_PowerUser" xml:space="preserve">
-    <value>Досвідчений користувач</value>
-  </data>
   <data name="User" xml:space="preserve">
     <value>Користувач</value>
   </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Переміщення кількох файлів до кімнати заповнення форм не підтримується. Переміщуйте одну PDF-форму ONLYOFFICE за раз.</value>
+    <value>Переміщення кількох файлів до кімнати заповнення форм не підтримується. Переміщуйте одну PDF-форму {0} за раз.</value>
   </data>
   <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Переміщення папок до кімнати заповнення форм не підтримується. Переміщуйте одну PDF-форму ONLYOFFICE за раз.</value>
+    <value>Переміщення папок до кімнати заповнення форм не підтримується. Переміщуйте одну PDF-форму {0} за раз.</value>
   </data>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Не можна перемістити файл до цієї кімнати. Спробуйте перемістити PDF-форму ONLYOFFICE.</value>
+    <value>Не можна перемістити файл до цієї кімнати. Спробуйте перемістити PDF-форму {0}.</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Не можна передати файл до цієї кімнати. Спробуйте передати PDF-форму ONLYOFFICE.</value>
+    <value>Не можна передати файл до цієї кімнати. Спробуйте передати PDF-форму {0}.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Посилання для заповнення</value>
@@ -494,7 +482,25 @@
   <data name="LinkToForm" xml:space="preserve">
     <value>Посилання на форму</value>
   </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>Номер форми</value>
+  </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Автор контенту</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Автор контенту</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Менеджер кімнати</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Менеджер кімнати</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Зовнішній користувач</value>
+  </data>
   <data name="OpenForm" xml:space="preserve">
-    <value>Відкрити форму</value>
+    <value>Відкрити файл</value>
   </data>
 </root>

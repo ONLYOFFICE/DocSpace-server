@@ -26,16 +26,27 @@
 
 namespace ASC.AuditTrail.Types;
 
-/// <summary>
-/// </summary>
 [EnumExtensions]
 public enum EntryType
 {
+    [SwaggerEnum("None")]
     None = 0,
+
+    [SwaggerEnum("File")]
     File = 1,
+
+    [SwaggerEnum("Folder")]
     Folder = 2,
+
+    [SwaggerEnum("User")]
     User = 23,
+
+    [SwaggerEnum("Group")]
     Group = 24,
+
+    [SwaggerEnum("Room")]
     Room = 25,
+
+    [SwaggerEnum("Tag")]
     Tag = 26
 }

@@ -53,7 +53,7 @@ public class AuthHandler(
         {
             Context.Request.Headers.TryGetValue("Authorization", out var headers);
 
-            var header = headers.FirstOrDefault();
+            string header = headers;
 
             if (string.IsNullOrEmpty(header))
             {

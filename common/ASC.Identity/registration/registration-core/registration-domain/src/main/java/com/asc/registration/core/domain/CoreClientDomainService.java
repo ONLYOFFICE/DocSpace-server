@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,6 +28,7 @@
 package com.asc.registration.core.domain;
 
 import com.asc.common.core.domain.entity.Audit;
+import com.asc.common.core.domain.value.UserId;
 import com.asc.common.core.domain.value.enums.AuthenticationMethod;
 import com.asc.common.core.domain.value.enums.ClientVisibility;
 import com.asc.registration.core.domain.entity.Client;
@@ -55,7 +56,7 @@ public class CoreClientDomainService implements ClientDomainService {
    * @return a {@link ClientCreatedEvent} indicating the client was created
    */
   public ClientCreatedEvent createClient(Audit audit, Client client) {
-    client.initialize(audit.getUserEmail());
+    client.initialize(new UserId(audit.getUserId()));
     return new ClientCreatedEvent(audit, client, ZonedDateTime.now(ZoneId.of(UTC)));
   }
 
@@ -67,7 +68,7 @@ public class CoreClientDomainService implements ClientDomainService {
    * @return a {@link ClientUpdatedEvent} indicating the client was made public
    */
   public ClientUpdatedEvent makeClientPublic(Audit audit, Client client) {
-    client.changeVisibility(ClientVisibility.PUBLIC, audit.getUserEmail());
+    client.changeVisibility(ClientVisibility.PUBLIC, new UserId(audit.getUserId()));
     return new ClientUpdatedEvent(audit, client, ZonedDateTime.now(ZoneId.of(UTC)));
   }
 
@@ -79,7 +80,7 @@ public class CoreClientDomainService implements ClientDomainService {
    * @return a {@link ClientUpdatedEvent} indicating the client was made private
    */
   public ClientUpdatedEvent makeClientPrivate(Audit audit, Client client) {
-    client.changeVisibility(ClientVisibility.PRIVATE, audit.getUserEmail());
+    client.changeVisibility(ClientVisibility.PRIVATE, new UserId(audit.getUserId()));
     return new ClientUpdatedEvent(audit, client, ZonedDateTime.now(ZoneId.of(UTC)));
   }
 
@@ -91,7 +92,7 @@ public class CoreClientDomainService implements ClientDomainService {
    * @return a {@link ClientUpdatedEvent} indicating the client was enabled
    */
   public ClientUpdatedEvent enableClient(Audit audit, Client client) {
-    client.enable(audit.getUserEmail());
+    client.enable(new UserId(audit.getUserId()));
     return new ClientUpdatedEvent(audit, client, ZonedDateTime.now(ZoneId.of(UTC)));
   }
 
@@ -103,19 +104,19 @@ public class CoreClientDomainService implements ClientDomainService {
    * @return a {@link ClientUpdatedEvent} indicating the client was disabled
    */
   public ClientUpdatedEvent disableClient(Audit audit, Client client) {
-    client.disable(audit.getUserEmail());
+    client.disable(new UserId(audit.getUserId()));
     return new ClientUpdatedEvent(audit, client, ZonedDateTime.now(ZoneId.of(UTC)));
   }
 
   /**
-   * Invalidates an existing client, marking it for removal.
+   * Deletes an existing client, disabling and removing it.
    *
    * @param audit the audit information related to the update
    * @param client the client to be invalidated
    * @return a {@link ClientDeletedEvent} indicating the client was invalidated
    */
-  public ClientDeletedEvent invalidateClient(Audit audit, Client client) {
-    client.invalidate(audit.getUserEmail());
+  public ClientDeletedEvent deleteClient(Audit audit, Client client) {
+    client.disable(new UserId(audit.getUserId()));
     return new ClientDeletedEvent(audit, client, ZonedDateTime.now(ZoneId.of(UTC)));
   }
 
@@ -127,7 +128,7 @@ public class CoreClientDomainService implements ClientDomainService {
    * @return a {@link ClientUpdatedEvent} indicating the client's secret was regenerated
    */
   public ClientUpdatedEvent regenerateClientSecret(Audit audit, Client client) {
-    client.regenerateSecret(audit.getUserEmail());
+    client.regenerateSecret(new UserId(audit.getUserId()));
     return new ClientUpdatedEvent(audit, client, ZonedDateTime.now(ZoneId.of(UTC)));
   }
 
@@ -140,7 +141,7 @@ public class CoreClientDomainService implements ClientDomainService {
    * @return a {@link ClientUpdatedEvent} indicating the client information was updated
    */
   public ClientUpdatedEvent updateClientInfo(Audit audit, Client client, ClientInfo clientInfo) {
-    client.updateClientInfo(clientInfo, audit.getUserEmail());
+    client.updateClientInfo(clientInfo, new UserId(audit.getUserId()));
     return new ClientUpdatedEvent(audit, client, ZonedDateTime.now(ZoneId.of(UTC)));
   }
 
@@ -154,7 +155,7 @@ public class CoreClientDomainService implements ClientDomainService {
    */
   public ClientUpdatedEvent updateClientWebsiteInfo(
       Audit audit, Client client, ClientWebsiteInfo clientWebsiteInfo) {
-    client.updateClientWebsiteInfo(clientWebsiteInfo, audit.getUserEmail());
+    client.updateClientWebsiteInfo(clientWebsiteInfo, new UserId(audit.getUserId()));
     return new ClientUpdatedEvent(audit, client, ZonedDateTime.now(ZoneId.of(UTC)));
   }
 
@@ -168,7 +169,7 @@ public class CoreClientDomainService implements ClientDomainService {
    */
   public ClientUpdatedEvent updateClientRedirectInfo(
       Audit audit, Client client, ClientRedirectInfo clientRedirectInfo) {
-    client.updateClientRedirectInfo(clientRedirectInfo, audit.getUserEmail());
+    client.updateClientRedirectInfo(clientRedirectInfo, new UserId(audit.getUserId()));
     return new ClientUpdatedEvent(audit, client, ZonedDateTime.now(ZoneId.of(UTC)));
   }
 
@@ -183,7 +184,7 @@ public class CoreClientDomainService implements ClientDomainService {
    */
   public ClientUpdatedEvent addAuthenticationMethod(
       Audit audit, Client client, AuthenticationMethod authenticationMethod) {
-    client.addAuthenticationMethod(authenticationMethod, audit.getUserEmail());
+    client.addAuthenticationMethod(authenticationMethod, new UserId(audit.getUserId()));
     return new ClientUpdatedEvent(audit, client, ZonedDateTime.now(ZoneId.of(UTC)));
   }
 
@@ -198,7 +199,7 @@ public class CoreClientDomainService implements ClientDomainService {
    */
   public ClientUpdatedEvent removeAuthenticationMethod(
       Audit audit, Client client, AuthenticationMethod authenticationMethod) {
-    client.removeAuthenticationMethod(authenticationMethod, audit.getUserEmail());
+    client.removeAuthenticationMethod(authenticationMethod, new UserId(audit.getUserId()));
     return new ClientUpdatedEvent(audit, client, ZonedDateTime.now(ZoneId.of(UTC)));
   }
 
@@ -211,7 +212,7 @@ public class CoreClientDomainService implements ClientDomainService {
    * @return a {@link ClientUpdatedEvent} indicating the scope was added to the client
    */
   public ClientUpdatedEvent addScope(Audit audit, Client client, String scope) {
-    client.addScope(scope, audit.getUserEmail());
+    client.addScope(scope, new UserId(audit.getUserId()));
     return new ClientUpdatedEvent(audit, client, ZonedDateTime.now(ZoneId.of(UTC)));
   }
 
@@ -224,7 +225,7 @@ public class CoreClientDomainService implements ClientDomainService {
    * @return a {@link ClientUpdatedEvent} indicating the scope was removed from the client
    */
   public ClientUpdatedEvent removeScope(Audit audit, Client client, String scope) {
-    client.removeScope(scope, audit.getUserEmail());
+    client.removeScope(scope, new UserId(audit.getUserId()));
     return new ClientUpdatedEvent(audit, client, ZonedDateTime.now(ZoneId.of(UTC)));
   }
 }

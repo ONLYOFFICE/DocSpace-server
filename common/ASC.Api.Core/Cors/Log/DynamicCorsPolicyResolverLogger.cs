@@ -30,9 +30,9 @@ namespace ASC.Api.Core.Log;
 
 internal static partial class DynamicCorsPolicyResolverLogger
 {
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Check cors for origin: {origin}")]
+    [LoggerMessage(LogLevel.Debug, "Check cors for origin: {origin}")]
     public static partial void DebugCheckOrigin(this ILogger<DynamicCorsPolicyResolver> logger, string origin);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Get origins from OAuth 2.0 app with client id: {clienId}, origins: {origins}")]
+    [LoggerMessage(LogLevel.Debug, "Get origins from OAuth 2.0 app with client id: {clienId}, origins: {origins}")]
     public static partial void DebugGetOriginsFromOAuth2App(this ILogger<DynamicCorsPolicyResolver> logger, Guid clienId, IEnumerable<string> origins);
 }

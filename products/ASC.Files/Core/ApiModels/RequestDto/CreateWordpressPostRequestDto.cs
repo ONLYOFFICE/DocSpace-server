@@ -27,18 +27,22 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// Request parameters for creating a WordPress post
 /// </summary>
 public class CreateWordpressPostRequestDto
 {
-    /// <summary>Post title</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Post title
+    /// </summary>
     public string Title { get; set; }
 
-    /// <summary>Post contents</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Post contents
+    /// </summary>
     public string Content { get; set; }
 
-    /// <summary>Operation status</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// Operation status
+    /// </summary>
     public int Status { get; set; }
 }

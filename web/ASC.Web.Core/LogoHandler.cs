@@ -39,7 +39,7 @@ public class LogoHandler
         SettingsManager settingsManager,
         TenantWhiteLabelSettingsHelper tenantWhiteLabelSettingsHelper)
     {
-        var logoTypeStr = context.Request.Query["logotype"].FirstOrDefault();
+        string logoTypeStr = context.Request.Query["logotype"];
         if (!Enum.TryParse(logoTypeStr, out WhiteLabelLogoType logoType))
         {
             throw new ArgumentException("logotype");
@@ -57,16 +57,18 @@ public class LogoHandler
             throw new ArgumentException("dark");
         }
 
+        string culture = context.Request.Query["culture"];
+
         string path;
 
         if (isDefault)
         {
-            path = await tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(logoType, dark);
+            path = await tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(logoType, dark, culture);
         }
         else
         {
             var tenantWhiteLabelSettings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
-            path = await tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, logoType, dark);
+            path = await tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, logoType, dark, culture);
         }
 
         context.Response.Redirect(commonLinkUtility.GetFullAbsolutePath(path));

@@ -58,7 +58,7 @@ public class ConfigurationExtension
     public ConfigurationExtension(IConfiguration configuration)
     {
         _configuration = configuration;
-        _connectionStringSettings = new Lazy<ConnectionStringCollection>(new ConnectionStringCollection(_configuration.GetSection($"ConnectionStrings").Get<IEnumerable<ConnectionStringSettings>>()));
+        _connectionStringSettings = new Lazy<ConnectionStringCollection>(new ConnectionStringCollection(_configuration.GetSection("ConnectionStrings").Get<IEnumerable<ConnectionStringSettings>>()));
     }
     
     public void GetSetting<T>(string section, T instance)

@@ -41,9 +41,9 @@ global using ASC.Common.Threading;
 global using ASC.Common.Web;
 global using ASC.Core;
 global using ASC.Core.Billing;
-global using ASC.Core.Tenants;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.Settings;
+global using ASC.Core.Tenants;
 global using ASC.Core.Users;
 global using ASC.EventBus.Abstractions;
 global using ASC.FederatedLogin.Helpers;
@@ -58,6 +58,8 @@ global using ASC.Files.Core.EF;
 global using ASC.Files.Core.Helpers;
 global using ASC.Files.Core.IntegrationEvents.Events;
 global using ASC.Files.Core.Resources;
+global using ASC.Files.Core.RoomTemplates;
+global using ASC.Files.Core.RoomTemplates.Events;
 global using ASC.Files.Core.Security;
 global using ASC.Files.Core.Services.DocumentBuilderService;
 global using ASC.Files.Core.VirtualRooms;
@@ -94,12 +96,14 @@ global using AutoMapper;
 global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.RateLimiting;
-global using Microsoft.AspNetCore.WebUtilities;
-global using Microsoft.Extensions.Caching.Distributed;
 global using Microsoft.Extensions.DependencyInjection.Extensions;
 global using Microsoft.Extensions.Hosting.WindowsServices;
 
 global using Newtonsoft.Json.Linq;
 
-global using SecurityContext = ASC.Core.SecurityContext;
+global using Swashbuckle.AspNetCore.Annotations;
+
+global using ZiggyCreatures.Caching.Fusion;
+
 global using FileShare = ASC.Files.Core.Security.FileShare;
+global using SecurityContext = ASC.Core.SecurityContext;

@@ -27,6 +27,6 @@
 namespace ASC.Web.Core.Log;
 internal static partial class SmsSenderLogger
 {
-    [LoggerMessage(Level = LogLevel.Information, Message = "Tenant {tenantId} send sms to phoneNumber {number} {message}")]
+    [LoggerMessage(LogLevel.Information, "Tenant {tenantId} send sms to phoneNumber {number} {message}")]
     public static partial void InformationSendSmsToPhoneNumber(this ILogger<SmsSender> logger, int tenantId, string number, string message);
 }

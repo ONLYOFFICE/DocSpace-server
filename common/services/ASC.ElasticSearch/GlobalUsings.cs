@@ -51,7 +51,7 @@ global using Microsoft.Extensions.Logging;
 
 global using NetEscapades.EnumGenerators;
 
-global using Newtonsoft.Json;
+
 
 global using OpenSearch.Client;
 global using OpenSearch.Net;

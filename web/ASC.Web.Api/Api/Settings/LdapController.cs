@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Api.Controllers.Settings;
 
-/// <visible>false</visible>
+[ApiExplorerSettings(IgnoreApi = true)]
 [DefaultRoute("ldap")]
 public class LdapController(
     ApiContext apiContext,
@@ -49,11 +49,10 @@ public class LdapController(
     /// <short>
     /// Get the LDAP settings
     /// </short>
-    /// <category>LDAP</category>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LdapSettingsDto, ASC.Web.Api">LDAP settings</returns>
     /// <path>api/2.0/settings/ldap</path>
-    /// <httpMethod>GET</httpMethod>
-/// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Settings / LDAP")]
+    [SwaggerResponse(200, "LDAP settings", typeof(LdapSettingsDto))]
     [HttpGet("")]
     public async Task<LdapSettingsDto> GetLdapSettingsAsync()
     {
@@ -93,11 +92,10 @@ public class LdapController(
     /// <short>
     /// Get the LDAP cron expression
     /// </short>
-    /// <category>LDAP</category>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LdapCronSettingsDto, ASC.Web.Api">LDAP cron settings</returns>
     /// <path>api/2.0/settings/ldap/cron</path>
-    /// <httpMethod>GET</httpMethod>
-/// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Settings / LDAP")]
+    [SwaggerResponse(200, "LDAP cron settings", typeof(LdapCronSettingsDto))]
     [HttpGet("cron")]
     public async Task<LdapCronSettingsDto> GetLdapCronSettingsAsync()
     {
@@ -119,12 +117,9 @@ public class LdapController(
     /// <short>
     /// Set the LDAP cron expression
     /// </short>
-    /// <category>LDAP</category>
     /// <path>api/2.0/settings/ldap/cron</path>
-    /// <param type="ASC.Web.Api.ApiModels.RequestsDto.LdapCronRequestDto, ASC.Web.Api" name="inDto">LDAP cron request parameters</param>
-    /// <httpMethod>POST</httpMethod>
-    /// <returns></returns>
-/// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Settings / LDAP")]
     [HttpPost("cron")]
     public async Task SetLdapCronSettingsAsync(LdapCronRequestDto inDto)
     {
@@ -147,7 +142,7 @@ public class LdapController(
         settings.Cron = cron;
         await settingsManager.SaveAsync(settings);
 
-        var t = await tenantManager.GetCurrentTenantAsync();
+        var t = tenantManager.GetCurrentTenant();
         if (!string.IsNullOrEmpty(cron))
         {
             ldapNotifyHelper.UnregisterAutoSync(t);
@@ -165,11 +160,10 @@ public class LdapController(
     /// <short>
     /// Synchronize with LDAP server
     /// </short>
-    /// <category>LDAP</category>
     /// <path>api/2.0/settings/ldap/sync</path>
-    /// <httpMethod>GET</httpMethod>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LdapStatusDto, ASC.Web.Api">LDAP operation status</returns>
-/// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Settings / LDAP")]
+    [SwaggerResponse(200, "LDAP operation status", typeof(LdapStatusDto))]
     [HttpGet("sync")]
     public async Task<LdapStatusDto> SyncLdapAsync()
     {
@@ -179,7 +173,7 @@ public class LdapController(
 
         var userId = authContext.CurrentAccount.ID.ToString();
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         
         var result = await ldapSaveSyncOperation.SyncLdapAsync(ldapSettings, tenant, userId);
 
@@ -192,11 +186,10 @@ public class LdapController(
     /// <short>
     /// Test the LDAP synchronization
     /// </short>
-    /// <category>LDAP</category>
     /// <path>api/2.0/settings/ldap/sync/test</path>
-    /// <httpMethod>GET</httpMethod>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LdapStatusDto, ASC.Web.Api">LDAP operation status</returns>
-/// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Settings / LDAP")]
+    [SwaggerResponse(200, "LDAP operation status", typeof(LdapStatusDto))]
     [HttpGet("sync/test")]
     public async Task<LdapStatusDto> TestLdapSync()
     {
@@ -204,7 +197,7 @@ public class LdapController(
 
         var ldapSettings = await settingsManager.LoadAsync<LdapSettings>();
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         
         var result = await ldapSaveSyncOperation.TestLdapSyncAsync(ldapSettings, tenant);
 
@@ -217,12 +210,10 @@ public class LdapController(
     /// <short>
     /// Save the LDAP settings
     /// </short>
-    /// <category>LDAP</category>
-    /// <param type="ASC.Web.Api.ApiModels.RequestsDto.LdapRequestsDto, ASC.Web.Api" name="inDto">LDAP settings</param>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LdapStatusDto, ASC.Web.Api">LDAP operation status</returns>
     /// <path>api/2.0/settings/ldap</path>
-    /// <httpMethod>POST</httpMethod>
-/// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Settings / LDAP")]
+    [SwaggerResponse(200, "LDAP operation status", typeof(LdapStatusDto))]
     [HttpPost("")]
     public async Task<LdapStatusDto> SaveLdapSettingsAsync(LdapRequestsDto inDto)
     {
@@ -237,7 +228,7 @@ public class LdapController(
 
         var userId = authContext.CurrentAccount.ID.ToString();
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         
         var result = await ldapSaveSyncOperation.SaveLdapSettingsAsync(ldapSettings, tenant, userId);
 
@@ -250,12 +241,10 @@ public class LdapController(
     /// <short>
     /// Test the LDAP saving process
     /// </short>
-    /// <category>LDAP</category>
-    /// <param type="ASC.ActiveDirectory.Base.Settings.LdapSettings, ASC.ActiveDirectory.Base.Settings" name="inDto">LDAP settings</param>
     /// <path>api/2.0/settings/ldap/save/test</path>
-    /// <httpMethod>POST</httpMethod>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LdapStatusDto, ASC.Web.Api">LDAP operation status</returns>
-/// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Settings / LDAP")]
+    [SwaggerResponse(200, "LDAP operation status", typeof(LdapStatusDto))]
     [HttpPost("save/test")]
     public async Task<LdapStatusDto> TestLdapSaveAsync(LdapSettings inDto)
     {
@@ -263,7 +252,7 @@ public class LdapController(
 
         var userId = authContext.CurrentAccount.ID.ToString();
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         
         var result = await ldapSaveSyncOperation.TestLdapSaveAsync(inDto, tenant, userId);
 
@@ -276,17 +265,16 @@ public class LdapController(
     /// <short>
     /// Get the LDAP synchronization process status
     /// </short>
-    /// <category>LDAP</category>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LdapStatusDto, ASC.Web.Api">LDAP operation status</returns>
     /// <path>api/2.0/settings/ldap/status</path>
-    /// <httpMethod>GET</httpMethod>
-/// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Settings / LDAP")]
+    [SwaggerResponse(200, "LDAP operation status", typeof(LdapStatusDto))]
     [HttpGet("status")]
     public async Task<LdapStatusDto> GetLdapOperationStatusAsync()
     {
         await CheckLdapPermissionsAsync();
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         
         var result = await ldapSaveSyncOperation.ToLdapOperationStatus(tenant.Id);
 
@@ -299,11 +287,10 @@ public class LdapController(
     /// <short>
     /// Get the LDAP default settings
     /// </short>
-    /// <category>LDAP</category>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LdapSettingsDto, ASC.Web.Api">LDAP default settings: enable LDAP authentication or not, start TLS or not, enable SSL or not, send welcome email or not, server name, user name, port number, user filter, login attribute, LDAP settings mapping, access rights, user is a group member or not, group name, user attribute, group filter, group attribute, group name attribute, authentication is enabled or not, login, password, accept certificate or not</returns>
     /// <path>api/2.0/settings/ldap/default</path>
-    /// <httpMethod>GET</httpMethod>
-/// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Settings / LDAP")]
+    [SwaggerResponse(200, "LDAP default settings: enable LDAP authentication or not, start TLS or not, enable SSL or not, send welcome email or not, server name, user name, port number, user filter, login attribute, LDAP settings mapping, access rights, user is a group member or not, group name, user attribute, group filter, group attribute, group name attribute, authentication is enabled or not, login, password, accept certificate or not", typeof(LdapSettingsDto))]
     [HttpGet("default")]
     public async Task<LdapSettingsDto> GetDefaultLdapSettingsAsync()
     {
@@ -319,7 +306,7 @@ public class LdapController(
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         if (!coreBaseSettings.Standalone
-            && (!SetupInfo.IsVisibleSettings(ManagementType.LdapSettings.ToString())
+            && (!SetupInfo.IsVisibleSettings(ManagementType.LdapSettings.ToStringFast())
                 || !(await tenantManager.GetCurrentTenantQuotaAsync()).Ldap))
         {
             throw new BillingException(Resource.ErrorNotAllowedOption, "Ldap");

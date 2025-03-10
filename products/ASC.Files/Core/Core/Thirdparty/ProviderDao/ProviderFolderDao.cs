@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+
 namespace ASC.Files.Thirdparty.ProviderDao;
 
 [Scope(typeof(IFolderDao<string>))]
@@ -76,13 +77,13 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
     {
         var selector = _selectorFactory.GetSelector(fileId);
         var folderDao = selector.GetFolderDao(fileId);
-        
+
         var folder = await folderDao.GetRootFolderByFileAsync(selector.ConvertId(fileId));
 
         return await ResolveParentAsync(folder);
     }
 
-    public IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> roomsIds, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds = null)
+    public IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> roomsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds = null)
     {
         var result = AsyncEnumerable.Empty<Folder<string>>();
 
@@ -98,7 +99,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
                 {
                     var folderDao = selectorLocal.GetFolderDao(matchedId.FirstOrDefault());
 
-                    return folderDao.GetRoomsAsync(matchedId.Select(selectorLocal.ConvertId).ToList(), filterType, tags, subjectId, searchText, withSubfolders, withoutTags,
+                    return folderDao.GetRoomsAsync(matchedId.Select(selectorLocal.ConvertId).ToList(), filterTypes, tags, subjectId, searchText, withSubfolders, withoutTags,
                         excludeSubject, provider, subjectFilter, subjectEntriesIds);
                 })
                 .Where(r => r != null))
@@ -110,20 +111,21 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         return result.Distinct();
     }
 
-    public override async IAsyncEnumerable<Folder<string>> GetProviderBasedRoomsAsync(SearchArea searchArea, FilterType filterType, IEnumerable<string> tags, Guid subjectId,
+    public override async IAsyncEnumerable<Folder<string>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId,
         string searchText, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds)
     {
         if (provider == ProviderFilter.Storage)
         {
             yield break;
         }
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        
+        var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
 
         var q = filesDbContext.ThirdpartyAccount
             .Where(a => a.TenantId == tenantId && !string.IsNullOrEmpty(a.FolderId));
 
-        var q1 = GetRoomsProvidersQuery(searchArea, filterType, tags, subjectId, searchText, withoutTags, excludeSubject, provider, subjectFilter, 
+        var q1 = GetRoomsProvidersQuery(searchArea, filterTypes, tags, subjectId, searchText, withoutTags, excludeSubject, provider, subjectFilter, 
             subjectEntriesIds, q, filesDbContext, tenantId);
 
         var virtualRoomsFolderId = IdConverter.Convert<string>(await globalFolderHelper.GetFolderVirtualRooms());
@@ -135,17 +137,17 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         }
     }
 
-    public override async IAsyncEnumerable<Folder<string>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<string> roomsIds, FilterType filterType, IEnumerable<string> tags,
+    public override async IAsyncEnumerable<Folder<string>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<string> roomsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags,
         Guid subjectId, string searchText, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
 
         var q = filesDbContext.ThirdpartyAccount
             .Where(a => a.TenantId == tenantId && !string.IsNullOrEmpty(a.FolderId) 
                                                && (a.UserId == authContext.CurrentAccount.ID || roomsIds.Contains(a.FolderId)));
 
-        var q1 = GetRoomsProvidersQuery(searchArea, filterType, tags, subjectId, searchText, withoutTags, excludeSubject, provider, subjectFilter, 
+        var q1 = GetRoomsProvidersQuery(searchArea, filterTypes, tags, subjectId, searchText, withoutTags, excludeSubject, provider, subjectFilter, 
             subjectEntriesIds, q, filesDbContext, tenantId);
 
         var virtualRoomsFolderId = IdConverter.Convert<string>(await globalFolderHelper.GetFolderVirtualRooms());
@@ -156,7 +158,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
             yield return ToProviderRoom(providerDao.ToProviderInfo(providerQuery.Account), virtualRoomsFolderId, archiveFolderId, providerQuery.Shared);
         }
     }
-    
+
     public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, FolderType type)
     {
         return GetFoldersAsync(parentId);
@@ -175,7 +177,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
     }
 
     public async IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
-        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default, bool containingMyFiles = false)
+        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = null, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT)
     {
         var selector = _selectorFactory.GetSelector(parentId);
         var folderDao = selector.GetFolderDao(parentId);
@@ -316,7 +318,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
             string tsId => await ResolveParentAsync(await CopyFolderAsync(folderId, tsId, cancellationToken) as Folder<TTo>),
             _ => throw new NotImplementedException()
         };
-    }
+        }
 
     public async Task<Folder<int>> CopyFolderAsync(string folderId, int toFolderId, CancellationToken? cancellationToken)
     {
@@ -345,7 +347,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
 
     public Task<IDictionary<string, string>> CanMoveOrCopyAsync(IEnumerable<string> folderIds, int to)
     {
-        return Task.FromResult((IDictionary<string, string>)new Dictionary<string, string>());
+        return Task.FromResult<IDictionary<string, string>>(new Dictionary<string, string>());
     }
 
     public Task<IDictionary<string, string>> CanMoveOrCopyAsync(IEnumerable<string> folderIds, string to)
@@ -372,21 +374,30 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
 
         return folderDao.CanMoveOrCopyAsync(matchedIds, to);
     }
-    public async Task<string> UpdateFolderAsync(Folder<string> folder, string newTitle, long newQuota)
+    
+    public async Task<string> UpdateFolderAsync(Folder<string> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark, string color, string cover)
     {
         return await RenameFolderAsync(folder, newTitle);
     }
+    
+    public Task<string> ChangeFolderTypeAsync(Folder<string> folder, FolderType folderType)
+    {
+        return Task.FromResult<string>(null);
+    }
+    
     public async Task<string> RenameFolderAsync(Folder<string> folder, string newTitle)
     {
         var folderId = folder.Id;
+        var parentId = folder.ParentId;
+        
         var selector = _selectorFactory.GetSelector(folderId);
         folder.Id = selector.ConvertId(folderId);
         folder.ParentId = selector.ConvertId(folder.ParentId);
+        
         var folderDao = selector.GetFolderDao(folderId);
-
         var newId = await folderDao.RenameFolderAsync(folder, newTitle);
         folder.Id = folderId;
-        folder.ParentId = folder.ParentId;
+        folder.ParentId = parentId;
         
         return newId;
     }
@@ -507,7 +518,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         return folders.Where(x => providerKey == x.ProviderKey);
     }
 
-    private static IQueryable<RoomProviderQuery> GetRoomsProvidersQuery(SearchArea searchArea, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText,
+    private static IQueryable<RoomProviderQuery> GetRoomsProvidersQuery(SearchArea searchArea, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText,
         bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, IQueryable<DbFilesThirdpartyAccount> q,
         FilesDbContext filesDbContext, int tenantId)
     {
@@ -515,6 +526,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         {
             SearchArea.Active => q.Where(a => a.FolderType == FolderType.VirtualRooms),
             SearchArea.Archive => q.Where(a => a.FolderType == FolderType.Archive),
+            SearchArea.Templates => q.Where(a => a.FolderType == FolderType.RoomTemplates),
             SearchArea.Any => q.Where(a => a.FolderType == FolderType.VirtualRooms || a.FolderType == FolderType.Archive),
             _ => q
         };
@@ -526,11 +538,11 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
             q = q.Where(a => providers == a.Provider);
         }
 
-        if (filterType is not (FilterType.None or FilterType.FoldersOnly))
+        if (filterTypes != null && filterTypes.Any() && !filterTypes.Contains(FilterType.None) && !filterTypes.Contains(FilterType.FoldersOnly))
         {
-            var roomType = GetRoomFolderType(filterType);
+            var types = DocSpaceHelper.MapToFolderTypes(filterTypes);
 
-            q = q.Where(a => a.RoomType == roomType);
+            q = q.Where(a => types.Contains(a.RoomType));
         }
 
         if (subjectId != Guid.Empty)
@@ -615,7 +627,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
 
         return folder;
     }
-    public Task<Folder<string>> GetFirstParentFromFileEntryAsync(FileEntry<string> entry)
+    public Task<Folder<string>> GetFirstParentTypeFromFileEntryAsync(FileEntry<string> entry)
     {
         throw new NotImplementedException();
     }
@@ -627,14 +639,14 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         return folderDao.GetParentRoomInfoFromFileEntryAsync(entry);
     }
 
-    public async Task SetCustomOrder(string folderId, string parentFolderId, int order)
+    public async Task<int> SetCustomOrder(string folderId, string parentFolderId, int order)
     {
         var selector = _selectorFactory.GetSelector(folderId);
         var folderDao = selector.GetFolderDao(folderId);
-        await folderDao.SetCustomOrder(folderId, parentFolderId, order);
+        return await folderDao.SetCustomOrder(folderId, parentFolderId, order);
     }
 
-    public async Task InitCustomOrder(IEnumerable<string> folderIds, string parentFolderId)
+    public async Task InitCustomOrder(Dictionary<string, int> folderIds, string parentFolderId)
     {
         var selector = _selectorFactory.GetSelector(parentFolderId);
         var folderDao = selector.GetFolderDao(parentFolderId);
@@ -657,6 +669,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         {
             FolderType.VirtualRooms => IdConverter.Convert<T>(await globalFolderHelper.FolderVirtualRoomsAsync),
             FolderType.Archive => IdConverter.Convert<T>(await globalFolderHelper.FolderArchiveAsync),
+            FolderType.Templates => IdConverter.Convert<T>(await globalFolderHelper.FolderRoomTemplatesAsync),
             _ => folder.FolderIdDisplay
         };
 
@@ -667,5 +680,39 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
     {
         public DbFilesThirdpartyAccount Account { get; init; }
         public bool Shared { get; init; }
+    }
+
+    public Task<string> SetWatermarkSettings(WatermarkSettings watermarkSettings, Folder<string> folder)
+    {
+        ArgumentNullException.ThrowIfNull(folder);
+        var selector = _selectorFactory.GetSelector(folder.Id);
+        var folderDao = selector.GetFolderDao(folder.Id);
+
+        return folderDao.SetWatermarkSettings(watermarkSettings, folder);
+    }
+
+    public async Task<WatermarkSettings> GetWatermarkSettings(Folder<string> room)
+    {
+        ArgumentNullException.ThrowIfNull(room);
+        var selector = _selectorFactory.GetSelector(room.Id);
+        var folderDao = selector.GetFolderDao(room.Id);
+        
+        return await folderDao.GetWatermarkSettings(room);
+    }
+    public Task<Folder<string>> DeleteWatermarkSettings(Folder<string> room)
+    {
+        ArgumentNullException.ThrowIfNull(room);
+        var selector = _selectorFactory.GetSelector(room.Id);
+        var folderDao = selector.GetFolderDao(room.Id);
+
+        return folderDao.DeleteWatermarkSettings(room);
+    }
+    public Task<Folder<string>> DeleteLifetimeSettings(Folder<string> room)
+    {
+        ArgumentNullException.ThrowIfNull(room);
+        var selector = _selectorFactory.GetSelector(room.Id);
+        var folderDao = selector.GetFolderDao(room.Id);
+
+        return folderDao.DeleteLifetimeSettings(room);
     }
 }

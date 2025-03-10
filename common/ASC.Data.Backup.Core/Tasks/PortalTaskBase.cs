@@ -45,8 +45,8 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
     protected ModuleProvider ModuleProvider { get; set; } = moduleProvider;
     protected DbFactory DbFactory { get; init; } = dbFactory;
 
-    protected readonly List<ModuleName> _ignoredModules = new();
-    protected readonly List<string> _ignoredTables = new(); //todo: add using to backup and transfer tasks
+    protected readonly List<ModuleName> _ignoredModules = [];
+    protected readonly List<string> _ignoredTables = []; //todo: add using to backup and transfer tasks
 
     public void Init(int tenantId)
     {
@@ -88,7 +88,7 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
             {
                 domainFolders.Add(store.GetRootDirectory(domain));
             }
-            var files = store.ListFilesRelativeAsync(string.Empty, "\\", "*.*", true)
+            var files = store.ListFilesRelativeAsync(string.Empty, "\\", "*", true)
                           .Where(path => domainFolders.All(domain => !path.Contains(domain + "/") && !path.Contains(domain + "\\")))
                          .Select(path => new BackupFileInfo(string.Empty, module, path, tenantId));
 
@@ -99,7 +99,7 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
 
             foreach (var domain in StorageFactoryConfig.GetDomainList(module))
             {
-                files = store.ListFilesRelativeAsync(domain, "\\", "*.*", true)
+                files = store.ListFilesRelativeAsync(domain, "\\", "*", true)
                     .Select(path => new BackupFileInfo(domain, module, path, tenantId));
 
                 await foreach (var file in files)
@@ -127,7 +127,6 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
                     "mailaggregator",
                     "whitelabel",
                     "customnavigation",
-                    "userPhotos",
                     "room_logos",
                     "webplugins"
                 };
@@ -151,10 +150,8 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
 
     protected void SetStepsCount(int value)
     {
-        if (value <= 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(value));
-        }
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(value);
+        
         _stepsCount = value;
         Logger.DebugCountSteps(+_stepsCount);
     }
@@ -175,17 +172,16 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
 
     protected async Task SetCurrentStepProgress(int value)
     {
-        if (value is < 0 or > 100)
+        switch (value)
         {
-            throw new ArgumentOutOfRangeException(nameof(value));
-        }
-        if (value == 100)
-        {
-            await SetStepCompleted();
-        }
-        else
-        {
-            await SetProgress((100 * _stepsCompleted + value) / _stepsCount);
+            case < 0 or > 100:
+                throw new ArgumentOutOfRangeException(nameof(value));
+            case 100:
+                await SetStepCompleted();
+                break;
+            default:
+                await SetProgress((100 * _stepsCompleted + value) / _stepsCount);
+                break;
         }
     }
 
@@ -298,34 +294,37 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
                         newline = await reader.ReadLineAsync();
                         if (string.IsNullOrEmpty(newline))
                         {
-                        break;
+                            break;
+                        }
+
+                        sb.Append(newline);
                     }
 
-                    sb.Append(newline);
+                    commandText = sb.ToString();
                 }
 
-                commandText = sb.ToString();
-                }
-
-                try
-                {
-                    command = connection.CreateCommand();
-                    command.CommandText = commandText;
-                    await command.ExecuteNonQueryAsync();
-                }
-                catch (Exception)
+                var attempt = 0;
+                while (true)
                 {
                     try
                     {
-                        Thread.Sleep(2000);//avoiding deadlock
-                            command = connection.CreateCommand();
-                            command.CommandText = commandText;
-                            await command.ExecuteNonQueryAsync();
-                        }
+                        command = connection.CreateCommand();
+                        command.CommandText = commandText;
+                        await command.ExecuteNonQueryAsync();
+                        break;
+                    }
                     catch (Exception ex)
                     {
-                        Logger.ErrorRestore(ex);
+                        if (attempt == 5) 
+                        {
+                            Logger.ErrorRestore(ex);
+                        }
+                        else
+                        {
+                            attempt++;
+                        }
                     }
+                    Thread.Sleep(1000);//avoiding deadlock
                 }
             }
         }

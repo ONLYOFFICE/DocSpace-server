@@ -27,15 +27,15 @@
 namespace ASC.Data.Storage.Log;
 internal static partial class StorageUploaderLogger
 {
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Tenant: {tenantId}")]
+    [LoggerMessage(LogLevel.Debug, "Tenant: {tenantId}")]
     public static partial void DebugTenant(this ILogger<StorageUploader> logger, int tenantId);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Domain: {domain}")]
+    [LoggerMessage(LogLevel.Debug, "Domain: {domain}")]
     public static partial void DebugDomain(this ILogger<StorageUploader> logger, string domain);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "File: {file}")]
+    [LoggerMessage(LogLevel.Debug, "File: {file}")]
     public static partial void DebugFile(this ILogger<StorageUploader> logger, string file);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "MigrateOperation")]
+    [LoggerMessage(LogLevel.Error, "MigrateOperation")]
     public static partial void ErrorMigrateOperation(this ILogger<StorageUploader> logger, Exception exception);
 }

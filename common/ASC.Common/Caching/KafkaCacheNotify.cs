@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Confluent.Kafka.Admin;
+
 namespace ASC.Common.Caching;
 
 [Singleton]
@@ -120,15 +122,14 @@ public class KafkaCacheNotify<T> : IDisposable, ICacheNotify<T> where T : new()
                 {
                     //TODO: must add checking exist
                     await adminClient.CreateTopicsAsync(
-                        new TopicSpecification[]
+                    [
+                        new TopicSpecification
                         {
-                            new()
-                            {
                                 Name = channelName,
                                 NumPartitions = 1,
                                 ReplicationFactor = 1
                             }
-                        });
+                    ]);
                 }
                 catch (AggregateException) { }
             }
@@ -186,7 +187,7 @@ public class KafkaCacheNotify<T> : IDisposable, ICacheNotify<T> where T : new()
         GC.SuppressFinalize(this);
     }
 
-    protected virtual void Dispose(bool disposing)
+    protected void Dispose(bool disposing)
     {
         if (!_disposedValue)
         {

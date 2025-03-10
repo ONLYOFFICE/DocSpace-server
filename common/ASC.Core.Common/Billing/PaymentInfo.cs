@@ -26,21 +26,36 @@
 
 namespace ASC.Core.Billing;
 
+[ProtoContract]
 public class PaymentInfo
 {
-    public int ID { get; set; }
-    public int Status { get; set; }
-    public int PaymentSystemId { get; set; }
-    public string CartId { get; set; }
-    public string FName { get; set; }
-    public string LName { get; set; }
-    public string Email { get; set; }
-    public DateTime PaymentDate { get; set; }
-    public decimal Price { get; set; }
-    public int Qty { get; set; }
-    public string PaymentCurrency { get; set; }
-    public string PaymentMethod { get; set; }
-    public int QuotaId { get; set; }
-    public int ProductRef { get; set; }
-    public string CustomerId { get; set; }
+    [ProtoMember(1)] public int ID { get; set; }
+
+    [ProtoMember(2)] public int Status { get; set; }
+
+    [ProtoMember(3)] public int PaymentSystemId { get; set; }
+
+    [ProtoMember(4)] public string CartId { get; set; }
+
+    [ProtoMember(5)] public string FName { get; set; }
+
+    [ProtoMember(6)] public string LName { get; set; }
+
+    [ProtoMember(7)] public string Email { get; set; }
+
+    [ProtoMember(8)] public DateTime PaymentDate { get; set; }
+
+    [ProtoMember(9)] public decimal Price { get; set; }
+
+    [ProtoMember(10)] public int Qty { get; set; }
+
+    [ProtoMember(11)] public string PaymentCurrency { get; set; }
+
+    [ProtoMember(12)] public string PaymentMethod { get; set; }
+
+    [ProtoMember(13)] public int QuotaId { get; set; }
+
+    [ProtoMember(14)] public int ProductRef { get; set; }
+
+    [ProtoMember(15)] public string CustomerId { get; set; }
 }

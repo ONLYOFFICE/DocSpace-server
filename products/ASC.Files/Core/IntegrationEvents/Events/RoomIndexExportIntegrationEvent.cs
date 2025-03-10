@@ -34,12 +34,13 @@ public record RoomIndexExportIntegrationEvent : IntegrationEvent
 
     }
 
-    public RoomIndexExportIntegrationEvent(Guid createBy, int tenantId, int roomId, string baseUri, bool terminate = false)
+    public RoomIndexExportIntegrationEvent(Guid createBy, int tenantId, int roomId, string baseUri, bool terminate = false, IDictionary<string, string> headers = null)
     : base(createBy, tenantId)
     {
         RoomId = roomId;
         Terminate = terminate;
         BaseUri = baseUri;
+        Headers = headers;
     }
 
     [ProtoMember(1)]
@@ -50,4 +51,7 @@ public record RoomIndexExportIntegrationEvent : IntegrationEvent
 
     [ProtoMember(3)]
     public bool Terminate { get; set; }
+    
+    [ProtoMember(4)]
+    public IDictionary<string, string> Headers { get; set; }
 }

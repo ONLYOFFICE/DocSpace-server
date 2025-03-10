@@ -26,19 +26,22 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class LoginSettingsDto : IMapFrom<LoginSettings>
 {
-    /// <summary>Maximum number of the user attempts to log in</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// Maximum number of the user attempts to log in
+    /// </summary>
     public int AttemptCount { get; set; }
 
-    /// <summary>The time for which the user will be blocked after unsuccessful login attempts</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The time for which the user will be blocked after unsuccessful login attempts
+    /// </summary>
     public int BlockTime { get; set; }
 
-    /// <summary>The time to wait for a response from the server</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The time to wait for a response from the server
+    /// </summary>
     public int CheckPeriod { get; set; }
+    
+    public bool IsDefault { get; set; }
 }

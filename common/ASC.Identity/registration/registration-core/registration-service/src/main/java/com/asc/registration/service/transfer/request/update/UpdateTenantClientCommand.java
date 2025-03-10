@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -52,7 +52,7 @@ public class UpdateTenantClientCommand implements Serializable {
   /** The ID of the tenant. Must be greater than or equal to 1. */
   @Min(value = 1, message = "tenant id must be greater than or equal to 1")
   @JsonProperty("tenant_id")
-  private int tenantId;
+  private long tenantId;
 
   /** The ID of the client. Must not be blank. */
   @NotBlank(message = "client id must not be blank")
@@ -63,8 +63,7 @@ public class UpdateTenantClientCommand implements Serializable {
   @NotBlank(message = "name must not be blank")
   private String name;
 
-  /** The description of the client. Must not be blank. */
-  @NotBlank(message = "description must not be blank")
+  /** The description of the client. */
   private String description;
 
   /** The logo of the client, expected to be passed as a base64 string. Must not be blank. */

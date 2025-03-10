@@ -27,6 +27,6 @@
 namespace ASC.Api.Core.Log;
 internal static partial class IpSecurityFilterLogger
 {
-    [LoggerMessage(Level = LogLevel.Warning, Message = "IPSecurity: user {userId}")]
+    [LoggerMessage(LogLevel.Warning, "IPSecurity: user {userId}")]
     public static partial void WarningIPSecurity(this ILogger<IpSecurityFilter> logger, Guid userId);
 }

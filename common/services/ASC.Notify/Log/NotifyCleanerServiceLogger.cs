@@ -27,6 +27,6 @@
 namespace ASC.Notify.Log;
 internal static partial class NotifyCleanerServiceLogger
 {        
-    [LoggerMessage(Level = LogLevel.Error, Message = "Clear")]
+    [LoggerMessage(LogLevel.Error, "Clear")]
     public static partial void ErrorClear(this ILogger<NotifyCleanerService> logger, Exception exception);
 }

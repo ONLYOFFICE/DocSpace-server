@@ -100,6 +100,8 @@ public class ApiContext : ICloneable
 
     internal long SpecifiedCount { get; private set; }
     internal long SpecifiedStartIndex { get; set; }
+    
+    public string FilterSeparator { get; set; }
 
     private static readonly int _maxCount = 1000;
     private readonly SecurityContext _securityContext;
@@ -143,6 +145,7 @@ public class ApiContext : ICloneable
         FilterValue = query.GetRequestValue("filterValue");
         FilterValues = query.GetRequestArray("filterValue");
         Fields = query.GetRequestArray("fields");
+        FilterSeparator = query.GetRequestValue("filterSeparator");
 
         var updatedSince = query.GetRequestValue("updatedSince");
         if (updatedSince != null)

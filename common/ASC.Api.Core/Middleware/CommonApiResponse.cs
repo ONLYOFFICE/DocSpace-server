@@ -47,6 +47,11 @@ public class ErrorApiResponse : CommonApiResponse
 {
     public CommonApiError Error { get; set; }
 
+    public ErrorApiResponse()
+    {
+        
+    }
+    
     protected internal ErrorApiResponse(HttpStatusCode statusCode, Exception error, string message, bool withStackTrace) : base(statusCode)
     {
         Status = 1;
@@ -113,11 +118,14 @@ public class SuccessApiResponse : CommonApiResponse
     {
         Status = 0;
         _httpContext = httpContext;
-        Response = response;
+        if (response != null)
+        {
+            Response = response;
+        }
 
         Links =
         [
-            new() { Href = httpContext.Request.GetDisplayUrl(), Action = httpContext.Request.Method }
+            new Link { Href = httpContext.Request.GetDisplayUrl(), Action = httpContext.Request.Method }
         ];
     }
 }
@@ -129,6 +137,11 @@ public class CommonApiError
     public string Stack { get; set; }
     public int Hresult { get; set; }
 
+    public CommonApiError()
+    {
+        
+    }
+    
     public static CommonApiError FromException(Exception exception, string message, bool withStackTrace)
     {
         var result = new CommonApiError

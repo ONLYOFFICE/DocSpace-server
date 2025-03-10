@@ -27,21 +27,21 @@
 namespace ASC.Core.Common.Log;
 internal static partial class TariffServiceLogger
 {
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Payment tenant {tenantId} not found: {message}")]
+    [LoggerMessage(LogLevel.Debug, "Payment tenant {tenantId} not found: {message}")]
     public static partial void DebugPaymentTenant(this ILogger<TariffService> logger, string tenantId, string message);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Billing tenant {tenantId} not configured: {message}")]
+    [LoggerMessage(LogLevel.Debug, "Billing tenant {tenantId} not configured: {message}")]
     public static partial void DebugBillingTenant(this ILogger<TariffService> logger, string tenantId, string message);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "GetShoppingUri")]
+    [LoggerMessage(LogLevel.Error, "GetShoppingUri")]
     public static partial void ErrorGetShoppingUri(this ILogger<TariffService> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "LoaderExceptions: {text}")]
+    [LoggerMessage(LogLevel.Error, "LoaderExceptions: {text}")]
     public static partial void ErrorLoaderExceptions(this ILogger<TariffService> logger, string text, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Billing tenant {tenantId}")]
+    [LoggerMessage(LogLevel.Error, "Billing tenant {tenantId}")]
     public static partial void ErrorBillingWithException(this ILogger<TariffService> logger, string tenantId, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Billing tenant {tenantId}: {message}")]
+    [LoggerMessage(LogLevel.Error, "Billing tenant {tenantId}: {message}")]
     public static partial void ErrorBilling(this ILogger<TariffService> logger, string tenantId, string message);
 }

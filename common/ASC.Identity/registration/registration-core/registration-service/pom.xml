@@ -16,6 +16,10 @@
         <!-- Internal Dependencies -->
         <dependency>
             <groupId>com.asc</groupId>
+            <artifactId>common-application</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.asc</groupId>
             <artifactId>common-service</artifactId>
         </dependency>
         <dependency>
@@ -27,10 +31,10 @@
             <artifactId>registration-domain</artifactId>
         </dependency>
 
-        <!-- Spring Transaction Dependency -->
+        <!-- Spring Retry Dependency -->
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-tx</artifactId>
+            <groupId>org.springframework.retry</groupId>
+            <artifactId>spring-retry</artifactId>
         </dependency>
 
         <!-- Testing Dependencies -->

@@ -296,7 +296,7 @@
     <value>Ylläpitäjien määrä ei saisi ylittää {0}</value>
   </data>
   <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Järjestelmänvalvojien/tehokäyttäjien määrä</value>
+    <value>Järjestelmänvalvojien määrä</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Automaattinen varmuuskopiointi &amp; palautus</value>
@@ -337,7 +337,7 @@
   <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
     <value>Huoneessa olevien käyttäjien määrä ei saisi ylittää {0}</value>
   </data>
-  <data name="TariffsFeature_whitelabel" xml:space="preserve">
+  <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Brändäys &amp; räätälöinti</value>
   </data>
   <data name="ConsumersbitlyClientSecret" xml:space="preserve">
@@ -493,6 +493,9 @@
   <data name="Tariffs_admin" xml:space="preserve">
     <value>Yritys</value>
   </data>
+  <data name="Tariffs_adminyear" xml:space="preserve">
+    <value>Yritys</value>
+  </data>
   <data name="Tariffs_startup" xml:space="preserve">
     <value>Aloitus</value>
   </data>
@@ -542,7 +545,7 @@
     <value>Ota sovellus käyttöön kirjautuaksesi sisään portaaliin käyttäen Apple ID-tiliä.</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
-    <value>Ota tämä sovellus käyttöön antaaksesi käyttäjillesi mahdollisuuden kirjautua ONLYOFFICE:en käyttäen Apple ID:tä. {0} Mene Apple-kehittäjät-portaaliin ja luo uusi sovellus ONLYOFFICE-integraatioon. Syötä alle saamasi tiedot:</value>
+    <value>Ota tämä sovellus käyttöön antaaksesi käyttäjillesi mahdollisuuden kirjautua {LogoText}:en käyttäen Apple ID:tä. {0} Mene Apple-kehittäjät-portaaliin ja luo uusi sovellus {LogoText}-integraatioon. Syötä alle saamasi tiedot:</value>
   </data>
   <data name="ConsumersappleIdKeyId" xml:space="preserve">
     <value>10-merkkinen avaimen tunniste, joka on luotu Applen yksityisellä avaimella kirjautumiseen</value>
@@ -563,19 +566,19 @@
     <value>Ota tämä sovellus käyttöön lyhentääksesi kutsua ja asiakirjan linkkejä. {0} Syötä Bitly käyttäjätietosi ja API-avain alle:</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
-    <value>Ota tämä sovellus käyttöön yhdistääksesi Box-tilisi Asiakirjat-moduuliin. Pystyt hallinnoimaan, muokkaamaan ja jakamaan tiedostoja Boxista ONLYOFFICE-käyttäjien kanssa. {0} Kirjaudu sisään tiliisi Boxin kehittäjät-sivulla ja luo uusi sovellus ONLYOFFICE- integraatioon. Syötä saamasi tiedot alle:</value>
+    <value>Ota tämä sovellus käyttöön yhdistääksesi Box-tilisi Asiakirjat-moduuliin. Pystyt hallinnoimaan, muokkaamaan ja jakamaan tiedostoja Boxista {LogoText}-käyttäjien kanssa. {0} Kirjaudu sisään tiliisi Boxin kehittäjät-sivulla ja luo uusi sovellus {LogoText}- integraatioon. Syötä saamasi tiedot alle:</value>
   </data>
   <data name="ConsumersClickatellDescription" xml:space="preserve">
     <value>Ota sovellus käyttöön kaksivaiheista todennusta varten Clickatellin kautta.</value>
   </data>
   <data name="ConsumersClickatellInstruction" xml:space="preserve">
-    <value>Käytä tätä sovellusta ottaaksesi käyttöön kaksivaiheisen todennuksen Clickatell-palvelussa. {0} Kirjaudu sisään tekstiviesti-alustallesi ja luo uusi integraario ONLYOFFICE:lle. Kopioi ApiKey ja syötä se alle:</value>
+    <value>Käytä tätä sovellusta ottaaksesi käyttöön kaksivaiheisen todennuksen Clickatell-palvelussa. {0} Kirjaudu sisään tekstiviesti-alustallesi ja luo uusi integraario {LogoText}:lle. Kopioi ApiKey ja syötä se alle:</value>
   </data>
   <data name="ConsumersDocuSignInstruction" xml:space="preserve">
-    <value>Ota tämä sovellus käyttöön allekirjoittaaksesi asiakirjoja sähköisesti DocuSignin avulla. {0}Mene DocuSign-pääkäyttäjäkonsoliin ja lisää ONLYOFFICE-integraatio. Syötä saamasi tieto alle:</value>
+    <value>Ota tämä sovellus käyttöön allekirjoittaaksesi asiakirjoja sähköisesti DocuSignin avulla. {0}Mene DocuSign-pääkäyttäjäkonsoliin ja lisää {LogoText}-integraatio. Syötä saamasi tieto alle:</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
-    <value>Ota tämä sovellus käyttöön yhdistääksesi DropBox-tilisi Asiakirjat-mobuulissa. Pystyt hallitsemaan, muokkaamaan ja jakamaan tiedostoja DropBoxista ONLYOFFICE-käyttäjien kanssa. {0}Kirjaudu sisään tilillesi Dropboxin Kehittäjät-verkkosivustolla ja luo uusi sovellus ONLYOFFICE-integraatioon. Syötä saamasi tiedot alle:</value>
+    <value>Ota tämä sovellus käyttöön yhdistääksesi DropBox-tilisi Asiakirjat-mobuulissa. Pystyt hallitsemaan, muokkaamaan ja jakamaan tiedostoja DropBoxista {LogoText}-käyttäjien kanssa. {0}Kirjaudu sisään tilillesi Dropboxin Kehittäjät-verkkosivustolla ja luo uusi sovellus {LogoText}-integraatioon. Syötä saamasi tiedot alle:</value>
   </data>
   <data name="ConsumerseasyBibappkey" xml:space="preserve">
     <value>Sovellusavain</value>
@@ -584,13 +587,13 @@
     <value>Ota tämä sovellus käyttöön luodaksesi EasyBibillä bibliografisia listoja asiakirjoissa.</value>
   </data>
   <data name="ConsumersEasyBibInstruction" xml:space="preserve">
-    <value>Ota tämä sovellus käyttöön luodaksesi bibliographeja ONLYOFFICE editoreissa. {0}Mene EasyBib-kirjautumissivulle ja täytä lomake lisätäksesi ONLYOFFICE-integraation. Syötä saamasi sovellusavain alle:</value>
+    <value>Ota tämä sovellus käyttöön luodaksesi bibliographeja {LogoText} editoreissa. {0}Mene EasyBib-kirjautumissivulle ja täytä lomake lisätäksesi {LogoText}-integraation. Syötä saamasi sovellusavain alle:</value>
   </data>
   <data name="ConsumersfacebookAccessToken_Default" xml:space="preserve">
     <value>Sovellustunnus</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
-    <value>Ota tämä sovellus käyttöön antaaksesi käyttäjiesi kirjautua sisään ONLYOFFICE:een käyttäen Facebookia ja linkittää heidän asiakkaidensa Facebook-tilejä CRM-moduuliin. {0}Mene Facebookin Kehittäjät-portaaliit ja luo uusi sovellus ONLYOFFICE-integraatioon. Syötä saamasi tiedot alle:</value>
+    <value>Ota tämä sovellus käyttöön antaaksesi käyttäjiesi kirjautua sisään {LogoText}:een käyttäen Facebookia ja linkittää heidän asiakkaidensa Facebook-tilejä CRM-moduuliin. {0}Mene Facebookin Kehittäjät-portaaliit ja luo uusi sovellus {LogoText}-integraatioon. Syötä saamasi tiedot alle:</value>
   </data>
   <data name="Consumersfirebase_apiKey" xml:space="preserve">
     <value>Web API-avain</value>
@@ -608,7 +611,7 @@
     <value>Ota tämä sovellus käyttöön saadaksesi ilmoituksia sinulle lähetetyistä viesteistä Firebase Cloudissa.</value>
   </data>
   <data name="ConsumersFirebaseInstruction" xml:space="preserve">
-    <value>Ota tämä sovellus käyttöön, jotta käyttäjäsi saavat ilmoituksia viesteistä jopa offlinessa. {0}Mene Firebase-konsoliin ja lisää uusi projekti ONLYOFFICE-integraatiota varten. Syötä saamasi tiedot alle:</value>
+    <value>Ota tämä sovellus käyttöön, jotta käyttäjäsi saavat ilmoituksia viesteistä jopa offlinessa. {0}Mene Firebase-konsoliin ja lisää uusi projekti {LogoText}-integraatiota varten. Syötä saamasi tiedot alle:</value>
   </data>
   <data name="ConsumersGoogleCloud" xml:space="preserve">
     <value>Google Cloud Storage</value>
@@ -623,16 +626,16 @@
     <value>Yhdistä Google Cloud Storage-palvelu varmuuskopioidaksesi ja tallentaaksesi tietoja portaalistasi.</value>
   </data>
   <data name="ConsumersGoogleCloudInstruction" xml:space="preserve">
-    <value>Yhdistä Google Cloud Storage-palvelu varmuuskopioidaksesi ja tallentaaksesi dataa portaalistasi. {0}Mene Google Cloud Platform-konsoliin ja luo uusi palvelutili ONLYOFFICE:lle. Syötä saamasi tiedot alle:</value>
+    <value>Yhdistä Google Cloud Storage-palvelu varmuuskopioidaksesi ja tallentaaksesi dataa portaalistasi. {0}Mene Google Cloud Platform-konsoliin ja luo uusi palvelutili {LogoText}:lle. Syötä saamasi tiedot alle:</value>
   </data>
   <data name="ConsumersGoogleCloudjson" xml:space="preserve">
     <value>GoogleCloud json</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
-    <value>Ota käyttöön tämä sovellus yhdistääksesi Google Drive-tilisi Asiakirjat-moduulissa. Pystyt hallinnoimaan, muokkaamaan ja jakamaan kansioita Google Drivesta ONLYOFFICE-käyttäjille. {0}Mene Google APIs-konsoliin ja luo uusi projekti ONLYOFFICE-integraatiolle. Syötä saamasi tiedot alle:</value>
+    <value>Ota käyttöön tämä sovellus yhdistääksesi Google Drive-tilisi Asiakirjat-moduulissa. Pystyt hallinnoimaan, muokkaamaan ja jakamaan kansioita Google Drivesta {LogoText}-käyttäjille. {0}Mene Google APIs-konsoliin ja luo uusi projekti {LogoText}-integraatiolle. Syötä saamasi tiedot alle:</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
-    <value>Ota käyttöön tämä sovellus saadaksesi ystäväsi kirjautumaan ONLYOFFICE:en käyttäen LinkedIn-tiliä. {0}Mene LinkedIn-kehittäjät verkkosivustolle ja luo uusi sovellus ONLYOFFICE-integraatiolle. Syötä saamasi tiedot alle:</value>
+    <value>Ota käyttöön tämä sovellus saadaksesi ystäväsi kirjautumaan {LogoText}:en käyttäen LinkedIn-tiliä. {0}Mene LinkedIn-kehittäjät verkkosivustolle ja luo uusi sovellus {LogoText}-integraatiolle. Syötä saamasi tiedot alle:</value>
   </data>
   <data name="ConsumersMailruClientSecret" xml:space="preserve">
     <value>Salainen avain</value>
@@ -653,7 +656,7 @@
     <value>Ota käyttöön sovellus kirjautuaksesi sisään portaaliin käyttäen Microsoft-tiliä.</value>
   </data>
   <data name="ConsumersMicrosoftInstruction" xml:space="preserve">
-    <value>Ota tämä sovellus käyttöön antaaksesi käyttäjille mahdollisuuden kirjautua sisään ONLYOFFICE:en Microsoftin kautta. {0} Mene Microsoft Azureen ja luo uusi sovellus ONLYOFFICE-integraatiolle. Syötä saamasi data alle:</value>
+    <value>Ota tämä sovellus käyttöön antaaksesi käyttäjille mahdollisuuden kirjautua sisään {LogoText}:en Microsoftin kautta. {0} Mene Microsoft Azureen ja luo uusi sovellus {LogoText}-integraatiolle. Syötä saamasi data alle:</value>
   </data>
   <data name="ConsumersRackspace" xml:space="preserve">
     <value>Rackspace-pilvipalvelu</value>
@@ -704,7 +707,7 @@
     <value>Yhdistä Amazon AWS S3 portaalisi varmuuskopiointia ja tiedon tallentamista varten.</value>
   </data>
   <data name="ConsumersS3Instruction" xml:space="preserve">
-    <value>Yhdistä Amazon AWS S3 varmuuskopioidaksesi ja tallentaaksesi tietoa portaalistasi. {0}Mene AWS hallintakonsoliin ja luo pääsyavaimet ONLYOFFICE:lle. Syötä saamasi tiedot alle:</value>
+    <value>Yhdistä Amazon AWS S3 varmuuskopioidaksesi ja tallentaaksesi tietoa portaalistasi. {0}Mene AWS hallintakonsoliin ja luo pääsyavaimet {LogoText}:lle. Syötä saamasi tiedot alle:</value>
   </data>
   <data name="ConsumersS3regionDescription" xml:space="preserve">
     <value>Syötä AWS-alue, jossa Amazon-bucket sijaitsee.</value>
@@ -740,7 +743,7 @@
     <value>Client secret</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
-    <value>Ota tämä sovellus käyttöön OneDrive-tilisi Asiakirjat-moduulissa. Pystyt hallitsemaan, ja jakamaan tiedostoja OneDrivestä ONLYOFFICE-käyttäjien kanssa. {0}Kirjaudu sisään Microsoft Azure-tiliisi ja luo uusi sovellus ONLYOFFICE-integraatiolle. Syötä alle saamasi tiedot:</value>
+    <value>Ota tämä sovellus käyttöön OneDrive-tilisi Asiakirjat-moduulissa. Pystyt hallitsemaan, ja jakamaan tiedostoja OneDrivestä {LogoText}-käyttäjien kanssa. {0}Kirjaudu sisään Microsoft Azure-tiliisi ja luo uusi sovellus {LogoText}-integraatiolle. Syötä alle saamasi tiedot:</value>
   </data>
   <data name="ConsumersSmsc" xml:space="preserve">
     <value>Tekstiviestikeskus</value>
@@ -779,7 +782,7 @@
     <value>Client Secret</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Ota tämä sovellus käyttöön, jotta käyttäjäsi voivat kirjautua sisään ONLYOFFICE:en käyttämällä Twitteriä ja linkittää heidän asiakkaidensa Twitter-tilit CRM-moduuliin. {0} Mene Twitter-kehittäjien portaaliin ja luo uusi sovellus ONLYOFFICE-integraatiolle. Syötä alle saamasi tiedot:</value>
+    <value>Ota tämä sovellus käyttöön, jotta käyttäjäsi voivat kirjautua sisään {LogoText}:en käyttämällä Twitteriä ja linkittää heidän asiakkaidensa Twitter-tilit CRM-moduuliin. {0} Mene Twitter-kehittäjien portaaliin ja luo uusi sovellus {LogoText}-integraatiolle. Syötä alle saamasi tiedot:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>API-avain</value>
@@ -806,7 +809,7 @@
     <value>Ota sovellus käyttöön julkaistaksesi asiakirjoja suoraan WordPressissä.</value>
   </data>
   <data name="ConsumersWordpressInstruction" xml:space="preserve">
-    <value>Ota sovellus käyttöön julkaistaksesi helposti asiakirjoja WordPress-sivustollasi. {0}Wordpress-kehittäjien sivulla, luo uusi sovellus ONLYOFFICE-integraatioon. Syötä saamasi tiedot alle:</value>
+    <value>Ota sovellus käyttöön julkaistaksesi helposti asiakirjoja WordPress-sivustollasi. {0}Wordpress-kehittäjien sivulla, luo uusi sovellus {LogoText}-integraatioon. Syötä saamasi tiedot alle:</value>
   </data>
   <data name="ConsumerswpClientId" xml:space="preserve">
     <value>WordPress-avain</value>
@@ -824,7 +827,7 @@
     <value>Ota sovellus käyttöön tuodaksesi käyttäjiä Yahoo-palvelusta.</value>
   </data>
   <data name="ConsumersYahooInstruction" xml:space="preserve">
-    <value>Ota tämä sovellus käyttöön lisätäksesi uusia portaalin käyttäjiä Yahoon kontaktilistalta. {0}Mene luo sovellus-sivulle Yahoon kehittäjäverkostossa ja luo uusi sovellus ONLYOFFICE-integraatiolle. Syötä saamasi tiedot alle:</value>
+    <value>Ota tämä sovellus käyttöön lisätäksesi uusia portaalin käyttäjiä Yahoon kontaktilistalta. {0}Mene luo sovellus-sivulle Yahoon kehittäjäverkostossa ja luo uusi sovellus {LogoText}-integraatiolle. Syötä saamasi tiedot alle:</value>
   </data>
   <data name="ConsumersYandexClientId" xml:space="preserve">
     <value>ID</value>
@@ -992,7 +995,7 @@
     <value>Ota käyttöön kirjautuminen portaaliin Zoom-tilin kautta.</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
-    <value>Ota käyttöön ONLYOFFICE:en kirjautuminen Zoom-tilien kautta. {0}Mene Zoom-kehittäjien verkkosivustolle ja luo uusi sovellus ONLY OFFICE-integraatiolle. Syötä alla olevat tiedot:</value>
+    <value>Ota käyttöön {LogoText}:en kirjautuminen Zoom-tilien kautta. {0}Mene Zoom-kehittäjien verkkosivustolle ja luo uusi sovellus ONLY OFFICE-integraatiolle. Syötä alla olevat tiedot:</value>
   </data>
   <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
     <value>Liian monta kirjautumisyritystä. Ole hyvä ja yritä myöhemmin uudelleen</value>
@@ -1037,7 +1040,7 @@
     <value>Käyttäjätilakiintiö ylitetty</value>
   </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Pääkäyttäjät/Tehokäyttäjät lisätty:</value>
+    <value>Pääkäyttäjät lisätty:</value>
   </data>
   <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
     <value>Kutsujen raja on ylitetty</value>
@@ -1047,5 +1050,32 @@
   </data>
   <data name="MessagePasswordSendedToEmail" xml:space="preserve">
     <value>Salasanan muuttamisen ohje on lähetetty {0} sähköpostiosoitteeseen.</value>
+  </data>
+  <data name="ErrorEmailLinked" xml:space="preserve">
+    <value>Tämä sähköposti on liitetty käyttäjälle {0} kolmannen osapuolen palveluntarjoajana</value>
+  </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>Varastokiintiöt &amp; tilastot</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} per järjestelmänvalvoja ja mahdollisuus lisätä tilaa pyynnöstä</value>
+  </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>Huonekohtaisen kiintiön asettaminen epäonnistui. Syötetty arvo on suurempi kuin koko DocSpacen muisti.</value>
+  </data>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>Käyttäjäkohtaisen kiintiön asettaminen epäonnistui. Syötetty arvo on suurempi kuin koko DocSpacen muisti.</value>
+  </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Lisää ainakin yksi luotettu domain.</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Pääkäyttäjien määrä ylittää rajan: {0}/{1}.</value>
+  </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>Voittoa tavoittelematon</value>
+  </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Lisää ainakin 1 sallittu IP-osoite.</value>
   </data>
 </root>

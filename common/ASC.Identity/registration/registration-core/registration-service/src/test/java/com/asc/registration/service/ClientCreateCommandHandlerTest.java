@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,8 +28,6 @@
 package com.asc.registration.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 import com.asc.common.core.domain.entity.Audit;
@@ -37,6 +35,7 @@ import com.asc.common.core.domain.event.DomainEventPublisher;
 import com.asc.common.core.domain.value.ClientId;
 import com.asc.common.core.domain.value.ClientSecret;
 import com.asc.common.core.domain.value.TenantId;
+import com.asc.common.core.domain.value.UserId;
 import com.asc.common.core.domain.value.enums.AuditCode;
 import com.asc.common.core.domain.value.enums.AuthenticationMethod;
 import com.asc.common.core.domain.value.enums.ClientVisibility;
@@ -108,7 +107,7 @@ public class ClientCreateCommandHandlerTest {
             .authenticationMethods(Set.of(AuthenticationMethod.DEFAULT_AUTHENTICATION))
             .scopes(Set.of("read", "write"))
             .clientInfo(new ClientInfo("Test Client", "Description", "Logo URL"))
-            .clientTenantInfo(new ClientTenantInfo(new TenantId(1)))
+            .clientTenantInfo(new ClientTenantInfo(new TenantId(1L)))
             .clientRedirectInfo(
                 new ClientRedirectInfo(
                     Set.of("http://redirect.url"),
@@ -116,12 +115,12 @@ public class ClientCreateCommandHandlerTest {
                     Set.of("http://logout.url")))
             .clientCreationInfo(
                 ClientCreationInfo.Builder.builder()
-                    .createdBy("creator")
+                    .createdBy(new UserId("creator"))
                     .createdOn(ZonedDateTime.now(ZoneId.of("UTC")))
                     .build())
             .clientVisibility(ClientVisibility.PRIVATE)
             .build();
-    client.initialize("creator");
+    client.initialize(new UserId("creator"));
     client.encryptSecret(s -> "encryptedSecret");
     clientResponse =
         ClientResponse.builder()
@@ -131,7 +130,7 @@ public class ClientCreateCommandHandlerTest {
   }
 
   @Test
-  public void testCreateClient() {
+  public void whenClientIsCreated_thenReturnClientResponse() {
     when(clientDataMapper.toDomain(any(CreateTenantClientCommand.class))).thenReturn(client);
     when(clientDomainService.createClient(any(Audit.class), any(Client.class)))
         .thenReturn(new ClientCreatedEvent(audit, client, ZonedDateTime.now()));
@@ -143,8 +142,7 @@ public class ClientCreateCommandHandlerTest {
     verify(clientDataMapper, times(1)).toDomain(any(CreateTenantClientCommand.class));
     verify(clientDomainService, times(1)).createClient(any(Audit.class), any(Client.class));
     verify(encryptionService, times(1)).encrypt(anyString());
-    verify(clientCommandRepository, times(1)).saveClient(any(Client.class));
-    verify(messagePublisher, times(1)).publish(any(ClientEvent.class));
+    verify(clientCommandRepository, times(1)).saveClient(any(ClientEvent.class), any(Client.class));
     verify(clientDataMapper, times(1)).toClientResponse(any(Client.class));
 
     assertEquals(client.getSecret().value(), response.getClientSecret());

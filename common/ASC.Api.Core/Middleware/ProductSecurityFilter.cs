@@ -97,7 +97,7 @@ public class ProductSecurityFilter(ILogger<ProductSecurityFilter> logger,
     {
         if (method == null || string.IsNullOrEmpty(method.ControllerName))
         {
-            return default;
+            return Guid.Empty;
         }
 
         var name = method.ControllerName.ToLower();
@@ -114,11 +114,6 @@ public class ProductSecurityFilter(ILogger<ProductSecurityFilter> logger,
             }
         }
 
-        if (_products.TryGetValue(name, out var product))
-        {
-            return product;
-        }
-
-        return default;
+        return _products.GetValueOrDefault(name);
     }
 }

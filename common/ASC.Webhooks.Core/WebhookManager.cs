@@ -26,35 +26,37 @@
 
 namespace ASC.Webhooks.Core;
 
-/// <summary>
-/// </summary>
 public class Webhook : IMapFrom<DbWebhook>
 {
-    /// <summary>ID</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// ID
+    /// </summary>
     public int Id { get; set; }
 
-    /// <summary>Route</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Route
+    /// </summary>
     public string Route { get; init; }
 
-    /// <summary>Method</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Method
+    /// </summary>
     public string Method { get; init; }
 
-    /// <summary>Specifies if a webhook is disabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if a webhook is disabled or not
+    /// </summary>
     public bool Disable { get; set; }
 
-    /// <summary>Name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Name
+    /// </summary>
     public string Name { get => WebHookResource.ResourceManager.GetString(Endpoint) ?? ""; }
 
-    /// <summary>Description</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Description
+    /// </summary>
     public string Description { get => WebHookResource.ResourceManager.GetString($"{Endpoint}_Description") ?? ""; }
 
-    /// <summary>Endpoint</summary>
-    /// <type>System.String, System</type>
     private string Endpoint { get => $"{Method}|{Route}"; }
 }

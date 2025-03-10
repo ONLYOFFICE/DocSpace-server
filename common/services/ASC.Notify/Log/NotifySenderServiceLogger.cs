@@ -27,12 +27,12 @@
 namespace ASC.Notify.Log;
 internal static partial class NotifySenderServiceLogger
 {    
-    [LoggerMessage(Level = LogLevel.Error, Message = "ThreadManagerWork")]
+    [LoggerMessage(LogLevel.Error, "ThreadManagerWork")]
     public static partial void ErrorThreadManagerWork(this ILogger<NotifySenderService> logger, Exception exception);  
     
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Notify #{id} has been sent.")]
+    [LoggerMessage(LogLevel.Debug, "Notify #{id} has been sent.")]
     public static partial void DebugNotify(this ILogger<NotifySenderService> logger, int id);  
     
-    [LoggerMessage(Level = LogLevel.Error, Message = "SendMessages")]
+    [LoggerMessage(LogLevel.Error, "SendMessages")]
     public static partial void ErrorSendMessages(this ILogger<NotifySenderService> logger, Exception exception);
 }

@@ -57,7 +57,6 @@ public static class Tags
     public const string Price = "Price";
     public const string PricePeriod = "PricePeriod";
     public const string PortalUrl = "PortalUrl";
-    public const string ControlPanelUrl = "ControlPanelUrl";
     public const string UserDisplayName = "UserDisplayName";
     public const string PricingPage = "PricingPage";
     public const string BlogLink = "TagBlogLink";
@@ -71,6 +70,8 @@ public static class Tags
     public const string ToUserName = "ToUserName";
     public const string ToUserLink = "ToUserLink";
     public const string Message = "Message";
+    public const string RoomRole = "RoomRole";
+    public const string Count = "Count";
 
     public const string Address = "Address";
     public const string Login = "Login";
@@ -83,6 +84,8 @@ public static class Tags
 public static class CommonTags
 {
     public const string VirtualRootPath = "__VirtualRootPath";
+
+    public const string VirtualRootHost = "__VirtualRootHost";
 
     public const string ProductID = "__ProductID";
 

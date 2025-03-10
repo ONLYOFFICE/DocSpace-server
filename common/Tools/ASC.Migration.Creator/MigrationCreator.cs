@@ -41,7 +41,7 @@ public class MigrationCreator
         {
             CreateMigration(options, typeof(MigrationContext), providerInfo);
         }
-        
+
         foreach (var providerInfo in options.TeamlabsiteProviders)
         {
             CreateMigration(options, typeof(TeamlabSiteContext), providerInfo);

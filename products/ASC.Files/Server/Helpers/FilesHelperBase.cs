@@ -33,14 +33,12 @@ public abstract class FilesHelperBase(
     FileDtoHelper fileDtoHelper,
     FileStorageService fileStorageService,
     FileChecker fileChecker,
-    IHttpContextAccessor httpContextAccessor,
-    IDistributedCache distributedCache)
+    IHttpContextAccessor httpContextAccessor)
     {
     protected readonly FilesSettingsHelper _filesSettingsHelper = filesSettingsHelper;
     protected readonly FileUploader _fileUploader = fileUploader;
     protected readonly FileDtoHelper _fileDtoHelper = fileDtoHelper;
     protected readonly FileStorageService _fileStorageService = fileStorageService;
-    protected readonly IDistributedCache _distributedCache = distributedCache;
 
     protected readonly FileChecker _fileChecker = fileChecker;
     protected readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;

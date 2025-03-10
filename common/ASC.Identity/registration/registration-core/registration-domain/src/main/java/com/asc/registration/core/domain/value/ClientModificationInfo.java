@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,6 +27,7 @@
 
 package com.asc.registration.core.domain.value;
 
+import com.asc.common.core.domain.value.UserId;
 import java.time.ZonedDateTime;
 
 /**
@@ -36,7 +37,7 @@ import java.time.ZonedDateTime;
  */
 public class ClientModificationInfo {
   private final ZonedDateTime modifiedOn;
-  private final String modifiedBy;
+  private final UserId modifiedBy;
 
   private ClientModificationInfo(Builder builder) {
     this.modifiedOn = builder.modifiedOn;
@@ -57,14 +58,14 @@ public class ClientModificationInfo {
    *
    * @return the modifier identifier
    */
-  public String getModifiedBy() {
+  public UserId getModifiedBy() {
     return this.modifiedBy;
   }
 
   /** Builder class for constructing instances of {@link ClientModificationInfo}. */
   public static final class Builder {
     private ZonedDateTime modifiedOn;
-    private String modifiedBy;
+    private UserId modifiedBy;
 
     private Builder() {}
 
@@ -94,7 +95,7 @@ public class ClientModificationInfo {
      * @param val the modifier identifier
      * @return the Builder instance
      */
-    public Builder modifiedBy(String val) {
+    public Builder modifiedBy(UserId val) {
       this.modifiedBy = val;
       return this;
     }

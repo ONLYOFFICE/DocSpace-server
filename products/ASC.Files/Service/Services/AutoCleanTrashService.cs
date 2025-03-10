@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Web.Files.Services.WCFService.FileOperations;
-
 using Constants = ASC.Core.Configuration.Constants;
 
 namespace ASC.Files.Service.Services;
@@ -42,27 +40,31 @@ public class AutoCleanTrashService(
 
     protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
-        List<TenantUserSettings> activeTenantsUsers;
-
-        await using (var scope = _scopeFactory.CreateAsyncScope())
+        try
         {
-            await using var userDbContext = await scope.ServiceProvider.GetRequiredService<IDbContextFactory<UserDbContext>>().CreateDbContextAsync(stoppingToken);
+            List<TenantUserSettings> activeTenantsUsers;
 
-            var filesSettingsId = new FilesSettings().ID;
+            await using (var scope = _scopeFactory.CreateAsyncScope())
+            {
+                await using var userDbContext = await scope.ServiceProvider.GetRequiredService<IDbContextFactory<UserDbContext>>().CreateDbContextAsync(stoppingToken);
+                activeTenantsUsers = await Queries.DefaultTenantUserSettingsAsync(userDbContext).ToListAsync(stoppingToken);
+            }
 
-            activeTenantsUsers = await Queries.DefaultTenantUserSettingsAsync(userDbContext).ToListAsync(stoppingToken);
+            if (activeTenantsUsers.Count == 0)
+            {
+                return;
+            }
+
+            logger.InfoFoundUsers(activeTenantsUsers.Count);
+
+            await Parallel.ForEachAsync(activeTenantsUsers,
+                new ParallelOptions { MaxDegreeOfParallelism = 3, CancellationToken = stoppingToken }, //System.Environment.ProcessorCount
+                DeleteFilesAndFoldersAsync);
         }
-
-        if (!activeTenantsUsers.Any())
+        catch (Exception e)
         {
-            return;
+            logger.ErrorWithException(e);
         }
-
-        logger.InfoFoundUsers(activeTenantsUsers.Count);
-
-        await Parallel.ForEachAsync(activeTenantsUsers,
-                                    new ParallelOptions { MaxDegreeOfParallelism = 3, CancellationToken = stoppingToken }, //System.Environment.ProcessorCount
-                                    DeleteFilesAndFoldersAsync);
     }
 
     private async ValueTask DeleteFilesAndFoldersAsync(TenantUserSettings tenantUser, CancellationToken cancellationToken)
@@ -76,7 +78,7 @@ public class AutoCleanTrashService(
             var authManager = scope.ServiceProvider.GetRequiredService<AuthManager>();
             var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
             var daoFactory = scope.ServiceProvider.GetRequiredService<IDaoFactory>();
-            var fileOperationsManager = scope.ServiceProvider.GetRequiredService<FileOperationsManager>();
+            var fileOperationsManager = scope.ServiceProvider.GetRequiredService<FileDeleteOperationsManager>();
             var fileDateTime = scope.ServiceProvider.GetRequiredService<FileDateTime>();
 
             var userAccount = await authManager.GetAccountByIDAsync(tenantUser.TenantId, tenantUser.UserId);
@@ -115,7 +117,7 @@ public class AutoCleanTrashService(
 
             logger.InfoCleanUp(tenantUser.TenantId, trashId);
 
-            await fileOperationsManager.PublishDelete(foldersList, filesList, true, true, true);
+            await fileOperationsManager.Publish(foldersList, filesList, true, true, true);
 
             logger.InfoCleanUpWait(tenantUser.TenantId, trashId);
 

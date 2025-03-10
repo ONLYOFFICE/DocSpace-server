@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 global using System.Collections.Specialized;
+global using System.ComponentModel.DataAnnotations;
 global using System.Globalization;
 global using System.Net;
 global using System.Net.Mail;
@@ -47,6 +48,7 @@ global using ASC.Api.Core.Convention;
 global using ASC.Api.Core.Core;
 global using ASC.Api.Core.Extensions;
 global using ASC.Api.Core.Security;
+global using ASC.Api.Core.Socket;
 global using ASC.Api.Settings;
 global using ASC.Api.Settings.Smtp;
 global using ASC.Api.Utils;
@@ -77,6 +79,7 @@ global using ASC.Core.Common.Quota;
 global using ASC.Core.Common.Quota.Custom;
 global using ASC.Core.Common.Security;
 global using ASC.Core.Common.Settings;
+global using ASC.Core.Common.WhiteLabel;
 global using ASC.Core.Configuration;
 global using ASC.Core.Data;
 global using ASC.Core.Encryption;
@@ -141,7 +144,6 @@ global using ASC.Web.Files.Services.DocumentService;
 global using ASC.Web.Studio.Core;
 global using ASC.Web.Studio.Core.Notify;
 global using ASC.Web.Studio.Core.SMS;
-global using ASC.Web.Studio.Core.Statistic;
 global using ASC.Web.Studio.Core.TFA;
 global using ASC.Web.Studio.UserControls.FirstTime;
 global using ASC.Web.Studio.UserControls.Management;
@@ -161,14 +163,16 @@ global using MailKit.Security;
 global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.WebUtilities;
-global using Microsoft.Extensions.Caching.Distributed;
 global using Microsoft.Extensions.Caching.Memory;
 global using Microsoft.Extensions.Hosting.WindowsServices;
-global using Microsoft.IdentityModel.Tokens;
 
 global using MimeKit;
 
+global using Swashbuckle.AspNetCore.Annotations;
+
+global using ZiggyCreatures.Caching.Fusion;
+
 global using static ASC.ActiveDirectory.Base.Settings.LdapSettings;
-global using static ASC.Security.Cryptography.EmailValidationKeyProvider;
 
 global using SecurityContext = ASC.Core.SecurityContext;
+global using ValidationResult = ASC.Security.Cryptography.EmailValidationKeyProvider.ValidationResult;

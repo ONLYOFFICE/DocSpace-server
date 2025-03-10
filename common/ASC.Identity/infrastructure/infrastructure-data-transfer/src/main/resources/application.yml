@@ -1,0 +1,25 @@
+spring:
+  profiles:
+    active: prod,saas
+  application:
+    name: ${SPRING_APPLICATION_NAME:ASC.Identity.DataTransfer}
+    encryption:
+      type: ${SPRING_APPLICATION_ENCRYPTION_TYPE:aes} # aes/noop
+      secret: ${SPRING_APPLICATION_ENCRYPTION_SECRET:secret}
+      newSecret: ${SPRING_APPLICATION_NEW_ENCRYPTION_SECRET:newsecret}
+  batch:
+    job:
+      enabled: true
+      repository:
+        database-type: h2
+    jdbc:
+      initialize-schema: always
+    processing:
+      pageSize: ${SPRING_BATCH_PROCESSING_PAGE_SIZE:5}
+      batchSize: ${SPRING_BATCH_PROCESSING_BATCH_SIZE:5}
+  config:
+    import:
+      - "classpath:application-datasource.yml"
+  main:
+    banner-mode: off
+    web-application-type: none

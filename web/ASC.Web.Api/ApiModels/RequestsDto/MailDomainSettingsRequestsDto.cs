@@ -27,39 +27,63 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
+/// Request parameters for mail domain settings
 /// </summary>
 public class MailDomainSettingsRequestsDto
 {
-    /// <summary>Trusted domain type</summary>
-    /// <type>ASC.Core.Tenants.TenantTrustedDomainsType, ASC.Core.Common</type>
+    /// <summary>
+    /// Trusted domain type
+    /// </summary>
     public TenantTrustedDomainsType Type { get; set; }
 
-    /// <summary>List of trusted domains</summary>
-    /// <type>System.Collections.Generic.List{System.String}, System.Collections.Generic</type>
+    /// <summary>
+    /// List of trusted domains
+    /// </summary>
     public List<string> Domains { get; set; }
 
-    /// <summary>Invites as a user or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Invites as a user or not
+    /// </summary>
     public bool InviteUsersAsVisitors { get; set; }
 }
 
 /// <summary>
+/// Request parameters for administrator message settings
 /// </summary>
-public class AdminMessageSettingsRequestsDto
+public class AdminMessageBaseSettingsRequestsDto
 {
-    /// <summary>Email</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Email
+    /// </summary>
+    [EmailAddress]
+    [StringLength(255)]
     public string Email { get; set; }
 
-    /// <summary>Message</summary>
-    /// <type>System.String, System</type>
-    public string Message { get; set; }
-
-    /// <summary>Specifies if the administrator messages are enabled or not</summary>
-    /// <type>System.Boolean, System</type>
-    public bool TurnOn { get; set; }
-    
-    /// <summary>Culture</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Culture
+    /// </summary>
     public string Culture { get; set; }
+}
+
+/// <summary>
+/// Request parameters for administrator message settings
+/// </summary>
+public class AdminMessageSettingsRequestsDto : AdminMessageBaseSettingsRequestsDto
+{
+    /// <summary>
+    /// Message
+    /// </summary>
+    [StringLength(255)]
+    public string Message { get; set; }
+}
+
+/// <summary>
+/// Request parameters for administrator message settings
+/// </summary>
+public class TurnOnAdminMessageSettingsRequestDto
+{
+    /// <summary>
+    /// Specifies if the administrator messages are enabled or not
+    /// </summary>
+    public bool TurnOn { get; set; }
 }

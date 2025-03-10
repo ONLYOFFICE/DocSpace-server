@@ -74,7 +74,7 @@ public class TextFileUserImporter(Stream stream) : IUserImporter
         return users;
     }
 
-    private UserInfo GetExportedUser(string line, IDictionary<int, PropertyInfo> mappedProperties, int fieldsCount)
+    private UserInfo GetExportedUser(string line, Dictionary<int, PropertyInfo> mappedProperties, int fieldsCount)
     {
         var exportedUser = new UserInfo
         {
@@ -101,7 +101,7 @@ public class TextFileUserImporter(Stream stream) : IUserImporter
 
     private string[] GetDataFields(string line)
     {
-        var pattern = string.Format("{0}(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))", Separator);
+        var pattern = $"{Separator}(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))";
         var result = Regex.Split(line, pattern);
 
         //remove TextDelmiter
@@ -120,9 +120,9 @@ public class TextFileUserImporter(Stream stream) : IUserImporter
         return result;
     }
 
-    private int GetFieldsMapping(string firstLine, IEnumerable<PropertyInfo> infos, IDictionary<int, PropertyInfo> mappedProperties)
+    private int GetFieldsMapping(string firstLine, IEnumerable<PropertyInfo> infos, Dictionary<int, PropertyInfo> mappedProperties)
     {
-        var fields = firstLine.Split(new[] { Separator }, StringSplitOptions.RemoveEmptyEntries);
+        var fields = firstLine.Split([Separator], StringSplitOptions.RemoveEmptyEntries);
         for (var i = 0; i < fields.Length; i++)
         {
             var field = fields[i];
@@ -137,10 +137,9 @@ public class TextFileUserImporter(Stream stream) : IUserImporter
                     mappedProperties.Add(i, info);
                 }
             }
-            if (!mappedProperties.ContainsKey(i))
+            if (mappedProperties.TryAdd(i, null))
             {
                 //No property was found
-                mappedProperties.Add(i, null);
             }
         }
         return fields.Length;

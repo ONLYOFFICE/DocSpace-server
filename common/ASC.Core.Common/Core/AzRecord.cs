@@ -46,12 +46,7 @@ public class AzRecord : IMapFrom<Acl>
 
     public AzRecord() { }
 
-    public AzRecord(Guid subjectId, Guid actionId, AceType reaction)
-        : this(subjectId, actionId, reaction, default(string))
-    {
-    }
-
-    public AzRecord(Guid subjectId, Guid actionId, AceType reaction, string fullId)
+    public AzRecord(Guid subjectId, Guid actionId, AceType reaction, string fullId = null)
     {
         Subject = subjectId;
         Action = actionId;
@@ -99,7 +94,7 @@ public class AzRecord : IMapFrom<Acl>
             SubjectId = cache.Subject.ToString(),
             ActionId = cache.Action.ToString(),
             ObjectId = cache.Object,
-            Reaction = cache.AceType.ToString(),
+            Reaction = cache.AceType.ToStringFast(),
             Tenant = cache.TenantId
         };
     }

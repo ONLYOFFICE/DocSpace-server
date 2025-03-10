@@ -24,41 +24,70 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+
 namespace ASC.FederatedLogin;
 
 [DebuggerDisplay("{AccessToken} (expired: {IsExpired})")]
 public class OAuth20Token
 {
+    /// <summary>
+    /// Access token
+    /// </summary>
     [JsonPropertyName("access_token")]
     public string AccessToken { get; set; }
 
+    /// <summary>
+    /// Refresh token
+    /// </summary>
     [JsonPropertyName("refresh_token")]
     public string RefreshToken { get; set; }
 
+    /// <summary>
+    /// Expires in
+    /// </summary>
     [JsonPropertyName("expires_in")]
     [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
     public long ExpiresIn { get; set; }
 
+    /// <summary>
+    /// Client id
+    /// </summary>
     [JsonPropertyName("client_id")]
     public string ClientID { get; set; }
 
+    /// <summary>
+    /// Client secret
+    /// </summary>
     [JsonPropertyName("client_secret")]
     public string ClientSecret { get; set; }
 
+    /// <summary>
+    /// Redirect uri
+    /// </summary>
+    [Url]
     [JsonPropertyName("redirect_uri")]
     public string RedirectUri { get; set; }
 
+    /// <summary>
+    /// Timestamp
+    /// </summary>
     [JsonPropertyName("timestamp")]
     public DateTime Timestamp { get; set; }
 
-    [System.Text.Json.Serialization.JsonIgnore]
+    /// <summary>
+    /// Origin json
+    /// </summary>
+    [JsonIgnore]
     public string OriginJson { get; set; }
 
+    /// <summary>
+    /// Is expired
+    /// </summary>
     public bool IsExpired
     {
         get
         {
-            if (!ExpiresIn.Equals(default))
+            if (!ExpiresIn.Equals(0))
             {
                 return DateTime.UtcNow > Timestamp + TimeSpan.FromSeconds(ExpiresIn);
             }

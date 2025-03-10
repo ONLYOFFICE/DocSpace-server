@@ -27,48 +27,48 @@
 namespace ASC.EventBus.ActiveMQ.Log;
 internal static partial class EventBusActiveMQLogger
 {
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Could not publish event: {eventId} after {timeout}s")]
+    [LoggerMessage(LogLevel.Warning, "Could not publish event: {eventId} after {timeout}s")]
     public static partial void WarningCouldNotPublishEvent(this ILogger<EventBusActiveMQ> logger, Guid eventId, double timeout, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Trace, Message = "Creating ActiveMQ session to publish event: {eventId} ({eventName})")]
+    [LoggerMessage(LogLevel.Trace, "Creating ActiveMQ session to publish event: {eventId} ({eventName})")]
     public static partial void TraceCreatingActiveMQSession(this ILogger<EventBusActiveMQ> logger, Guid eventId, string eventName);
 
-    [LoggerMessage(Level = LogLevel.Trace, Message = "Declaring ActiveMQ exchange to publish event: {eventId}")]
+    [LoggerMessage(LogLevel.Trace, "Declaring ActiveMQ exchange to publish event: {eventId}")]
     public static partial void TraceDeclaringActiveMQSession(this ILogger<EventBusActiveMQ> logger, Guid eventId);
 
-    [LoggerMessage(Level = LogLevel.Trace, Message = "Publishing event to ActiveMQ: {eventId}")]
+    [LoggerMessage(LogLevel.Trace, "Publishing event to ActiveMQ: {eventId}")]
     public static partial void TracePublishingEvent(this ILogger<EventBusActiveMQ> logger, Guid eventId);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Subscribing to dynamic event {eventName} with {eventHandler}")]
+    [LoggerMessage(LogLevel.Information, "Subscribing to dynamic event {eventName} with {eventHandler}")]
     public static partial void InformationSubscribingDynamic(this ILogger<EventBusActiveMQ> logger, string eventName, string eventHandler);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Subscribing to event {eventName} with {eventHandler}")]
+    [LoggerMessage(LogLevel.Information, "Subscribing to event {eventName} with {eventHandler}")]
     public static partial void InformationSubscribing(this ILogger<EventBusActiveMQ> logger, string eventName, string eventHandler);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Unsubscribing from event {eventName}")]
+    [LoggerMessage(LogLevel.Information, "Unsubscribing from event {eventName}")]
     public static partial void InformationUnsubscribing(this ILogger<EventBusActiveMQ> logger, string eventName);
 
-    [LoggerMessage(Level = LogLevel.Trace, Message = "Starting ActiveMQ basic consume")]
+    [LoggerMessage(LogLevel.Trace, "Starting ActiveMQ basic consume")]
     public static partial void TraceStartingBasicConsume(this ILogger<EventBusActiveMQ> logger);
 
-    [LoggerMessage(Level = LogLevel.Trace, Message = "Consumer tag {consumerTag} already exist. Cancelled BasicConsume again")]
+    [LoggerMessage(LogLevel.Trace, "Consumer tag {consumerTag} already exist. Cancelled BasicConsume again")]
     public static partial void TraceConsumerTagExist(this ILogger<EventBusActiveMQ> logger, string consumerTag);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "StartBasicConsume can't call on _consumerSession == null")]
+    [LoggerMessage(LogLevel.Error, "StartBasicConsume can't call on _consumerSession == null")]
     public static partial void ErrorStartBasicConsumeCantCall(this ILogger<EventBusActiveMQ> logger);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "----- ERROR Processing message \"{message}\"")]
+    [LoggerMessage(LogLevel.Warning, "----- ERROR Processing message \"{message}\"")]
     public static partial void WarningProcessingMessage(this ILogger<EventBusActiveMQ> logger, string message, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Trace, Message = "Creating ActiveMQ consumer session")]
+    [LoggerMessage(LogLevel.Trace, "Creating ActiveMQ consumer session")]
     public static partial void TraceCreatingConsumerSession(this ILogger<EventBusActiveMQ> logger);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Recreating ActiveMQ consumer session")]
+    [LoggerMessage(LogLevel.Warning, "Recreating ActiveMQ consumer session")]
     public static partial void WarningRecreatingConsumerSession(this ILogger<EventBusActiveMQ> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Trace, Message = "Processing ActiveMQ event: {eventName}")]
+    [LoggerMessage(LogLevel.Trace, "Processing ActiveMQ event: {eventName}")]
     public static partial void TraceProcessingEvent(this ILogger<EventBusActiveMQ> logger, string eventName);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "No subscription for ActiveMQ event: {eventName}")]
+    [LoggerMessage(LogLevel.Warning, "No subscription for ActiveMQ event: {eventName}")]
     public static partial void WarningNoSubscription(this ILogger<EventBusActiveMQ> logger, string eventName);
 }

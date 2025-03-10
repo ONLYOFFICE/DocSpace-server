@@ -27,9 +27,9 @@
 namespace ASC.ClearEvents.Log;
 internal static partial class ClearEventsServiceLogger
 {
-    [LoggerMessage(Level = LogLevel.Information, Message = "Timer Clear Events Service running.")]
+    [LoggerMessage(LogLevel.Information, "Timer Clear Events Service running.")]
     public static partial void InformationTimerRunnig(this ILogger<ClearEventsService> logger);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Timed Clear Events Service is stopping.")]
+    [LoggerMessage(LogLevel.Information, "Timed Clear Events Service is stopping.")]
     public static partial void InformationTimerStopping(this ILogger<ClearEventsService> logger);
 }

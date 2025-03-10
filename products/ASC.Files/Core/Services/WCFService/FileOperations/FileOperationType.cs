@@ -28,12 +28,27 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
 public enum FileOperationType
 {
+    [SwaggerEnum(Description = "Move")]
     Move,
+
+    [SwaggerEnum(Description = "Copy")]
     Copy,
+
+    [SwaggerEnum(Description = "Delete")]
     Delete,
+
+    [SwaggerEnum(Description = "Download")]
     Download,
+
+    [SwaggerEnum(Description = "MarkAsRead")]
     MarkAsRead,
+
+    [SwaggerEnum(Description = "Import")]
     Import,
+
+    [SwaggerEnum(Description = "Convert")]
     Convert,
+
+    [SwaggerEnum(Description = "Duplicate")]
     Duplicate
 }

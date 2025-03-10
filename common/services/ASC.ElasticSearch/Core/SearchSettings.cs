@@ -24,6 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
 namespace ASC.ElasticSearch.Core;
 
 public class SearchSettings : ISettings<SearchSettings>
@@ -41,9 +44,9 @@ public class SearchSettings : ISettings<SearchSettings>
                 return _items;
             }
 
-            var parsed = JsonConvert.DeserializeObject<List<SearchSettingsItem>>(Data ?? "");
+            var parsed = JsonSerializer.Deserialize<List<SearchSettingsItem>>(Data ?? "");
 
-            return _items = parsed ?? new List<SearchSettingsItem>();
+            return _items = parsed ?? [];
         }
         set
         {
@@ -82,7 +85,7 @@ public class SearchSettingsHelper(TenantManager tenantManager,
     {
         if (!coreBaseSettings.Standalone)
         {
-            return new List<SearchSettingsItem>();
+            return [];
         }
 
         var settings = await settingsManager.LoadAsync<SearchSettings>();
@@ -108,10 +111,10 @@ public class SearchSettingsHelper(TenantManager tenantManager,
         var toReIndex = settingsItems.Count == 0 ? items.Where(r => r.Enabled).ToList() : items.Where(item => settingsItems.Any(r => r.ID == item.ID && r.Enabled != item.Enabled)).ToList();
 
         settings.Items = items;
-        settings.Data = JsonConvert.SerializeObject(items);
+        settings.Data = JsonSerializer.Serialize(items);
         await settingsManager.SaveAsync(settings);
 
-        var action = new ReIndexAction { Tenant = await tenantManager.GetCurrentTenantIdAsync() };
+        var action = new ReIndexAction { Tenant = tenantManager.GetCurrentTenantId() };
         action.Names.AddRange(toReIndex.Select(r => r.ID).ToList());
 
         await cacheNotify.PublishAsync(action, CacheNotifyAction.Any);
@@ -153,7 +156,7 @@ public class SearchSettingsHelper(TenantManager tenantManager,
 
     public async Task<bool> CanSearchByContentAsync(Type t)
     {
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         if (!await CanIndexByContentAsync(t))
         {
             return false;

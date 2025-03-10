@@ -27,6 +27,6 @@
 namespace ASC.Files.Core.Log;
 internal static partial class GoogleDriveStorageLogger
 {
-    [LoggerMessage(Level = LogLevel.Error, Message = "Error while trying to insert entity. GoogleDrive insert returned an error.")]
+    [LoggerMessage(LogLevel.Error, "Error while trying to insert entity. GoogleDrive insert returned an error.")]
     public static partial void ErrorWhileTryingToInsertEntity(this ILogger logger, Exception exception);
 }

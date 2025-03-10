@@ -27,43 +27,54 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
+/// Request parameters for linking accounts
 /// </summary>
 public class LinkAccountRequestDto
 {
-    /// <summary>Third-party profile in the serialized format</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Third-party profile in the serialized format
+    /// </summary>
     public string SerializedProfile { get; set; }
 }
 
 /// <summary>
+/// Request parameters for creating a third-party account
 /// </summary>
 public class SignupAccountRequestDto : LinkAccountRequestDto
 {
-    /// <summary>Employee type (All, RoomAdmin, User, DocSpaceAdmin, Collaborator)</summary>
-    /// <type>System.Nullable{ASC.Core.Users.EmployeeType}, System</type>
+    /// <summary>
+    /// Employee type
+    /// </summary>
     public EmployeeType? EmployeeType { get; set; }
 
-    /// <summary>First name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// First name
+    /// </summary>
     public string FirstName { get; set; }
 
-    /// <summary>Last name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Last name
+    /// </summary>
     public string LastName { get; set; }
 
-    /// <summary>Email address</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Email address
+    /// </summary>
+    [EmailAddress]
     public string Email { get; set; }
 
-    /// <summary>Password hash</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Password hash
+    /// </summary>
     public string PasswordHash { get; set; }
-    
-    /// <summary>Link key</summary>
-    /// <type>System.String, System</type>
+
+    /// <summary>
+    /// Link key
+    /// </summary>
     public string Key { get; set; }
-    
-    /// <summary>Culture</summary>
-    /// <type>System.String, System</type>
+
+    /// <summary>
+    /// Culture
+    /// </summary>
     public string Culture { get; set; }
 }

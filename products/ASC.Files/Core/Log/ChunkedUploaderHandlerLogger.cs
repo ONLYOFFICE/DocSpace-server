@@ -27,6 +27,6 @@
 namespace ASC.Files.Core.Log;
 internal static partial class ChunkedUploaderHandlerLogger
 {
-    [LoggerMessage(Level = LogLevel.Error, Message = "ChunkedUploaderHandlerService")]
+    [LoggerMessage(LogLevel.Error, "ChunkedUploaderHandlerService")]
     public static partial void ErrorChunkedUploaderHandlerService(this ILogger<ChunkedUploaderHandlerService> logger, Exception exception);
 }

@@ -27,14 +27,17 @@
 namespace ASC.Web.Api.Models;
 
 /// <summary>
+/// Cookies settings request parameters
 /// </summary>
 public class CookieSettingsRequestsDto
 {
-    /// <summary>Lifetime value in minutes</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// Lifetime value in minutes
+    /// </summary>
     public int LifeTime { get; set; }
 
-    /// <summary>Specifies if the cookie settings are enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the cookie settings are enabled or not
+    /// </summary>
     public bool Enabled { get; set; }
 }

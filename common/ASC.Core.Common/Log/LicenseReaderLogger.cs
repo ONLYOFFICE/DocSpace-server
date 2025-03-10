@@ -27,6 +27,6 @@
 namespace ASC.Core.Common.Log;
 internal static partial class LicenseReaderLogger
 {
-    [LoggerMessage(Level = LogLevel.Debug, Message = "License not found: {message}")]
+    [LoggerMessage(LogLevel.Debug, "License not found: {message}")]
     public static partial void DebugLicenseNotFound(this ILogger<LicenseReader> logger, string message);
 }

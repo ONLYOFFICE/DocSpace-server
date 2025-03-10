@@ -55,29 +55,33 @@ public class CustomColorThemesSettings : ISettings<CustomColorThemesSettings>
     }
 }
 
-/// <summary>
-/// </summary>
 public class CustomColorThemesSettingsItem
 {
-    /// <summary>Theme ID</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// Theme ID
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 1)]
     public int Id { get; set; }
 
-    /// <summary>Theme name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Theme name
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "blue")]
     public string Name { get; set; }
 
-    /// <summary>Main colors</summary>
-    /// <type>ASC.Web.Core.Utility.Settings.CustomColorThemesSettingsColorItem, ASC.Web.Core</type>
+    /// <summary>
+    /// Main colors
+    /// </summary>
     public CustomColorThemesSettingsColorItem Main { get; set; }
 
-    /// <summary>Text colors</summary>
-    /// <type>ASC.Web.Core.Utility.Settings.CustomColorThemesSettingsColorItem, ASC.Web.Core</type>
+    /// <summary>
+    /// Text colors
+    /// </summary>
     public CustomColorThemesSettingsColorItem Text { get; set; }
 
     public static List<CustomColorThemesSettingsItem> Default =>
     [
-        new CustomColorThemesSettingsItem
+        new()
         {
             Id = 1,
             Name = "blue",
@@ -85,7 +89,7 @@ public class CustomColorThemesSettingsItem
             Text = new CustomColorThemesSettingsColorItem { Accent = "#FFFFFF", Buttons = "#FFFFFF" }
         },
 
-        new CustomColorThemesSettingsItem
+        new()
         {
             Id = 2,
             Name = "orange",
@@ -93,7 +97,7 @@ public class CustomColorThemesSettingsItem
             Text = new CustomColorThemesSettingsColorItem { Accent = "#FFFFFF", Buttons = "#FFFFFF" }
         },
 
-        new CustomColorThemesSettingsItem
+        new()
         {
             Id = 3,
             Name = "green",
@@ -101,7 +105,7 @@ public class CustomColorThemesSettingsItem
             Text = new CustomColorThemesSettingsColorItem { Accent = "#FFFFFF", Buttons = "#FFFFFF" }
         },
 
-        new CustomColorThemesSettingsItem
+        new()
         {
             Id = 4,
             Name = "red",
@@ -109,7 +113,7 @@ public class CustomColorThemesSettingsItem
             Text = new CustomColorThemesSettingsColorItem { Accent = "#FFFFFF", Buttons = "#FFFFFF" }
         },
 
-        new CustomColorThemesSettingsItem
+        new()
         {
             Id = 5,
             Name = "purple",
@@ -117,7 +121,7 @@ public class CustomColorThemesSettingsItem
             Text = new CustomColorThemesSettingsColorItem { Accent = "#FFFFFF", Buttons = "#FFFFFF" }
         },
 
-        new CustomColorThemesSettingsItem
+        new()
         {
             Id = 6,
             Name = "light-blue",
@@ -127,15 +131,17 @@ public class CustomColorThemesSettingsItem
     ];
 }
 
-/// <summary>
-/// </summary>
 public class CustomColorThemesSettingsColorItem
 {
-    /// <summary>Accent color</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Accent color
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "#4781D1")]
     public string Accent { get; init; }
-
-    /// <summary>Button color</summary>
-    /// <type>System.String, System</type>
+    
+    /// <summary>
+    /// Button color
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "#5299E0")]
     public string Buttons { get; init; }
 }

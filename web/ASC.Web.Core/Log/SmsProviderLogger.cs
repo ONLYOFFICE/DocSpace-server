@@ -27,24 +27,24 @@
 namespace ASC.Web.Core.Log;
 internal static partial class SmsProviderLogger
 {
-    [LoggerMessage(Level = LogLevel.Information, Message = "SMS was sent to {number}, service returned: {result}")]
+    [LoggerMessage(LogLevel.Information, "SMS was sent to {number}, service returned: {result}")]
     public static partial void InformationSMSWasSend(this ILogger<SmsProvider> logger, string number, string result);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to send sms message")]
+    [LoggerMessage(LogLevel.Error, "Failed to send sms message")]
     public static partial void ErrorSendSms(this ILogger<SmsProvider> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Failed request sms balance")]
+    [LoggerMessage(LogLevel.Error, "Failed request sms balance")]
     public static partial void ErrorRequestSms(this ILogger<SmsProvider> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to send sms message via tiwilio")]
+    [LoggerMessage(LogLevel.Error, "Failed to send sms message via tiwilio")]
     public static partial void ErrorSendSmsViaTiwilio(this ILogger<SmsProvider> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to send sms. code: {code} {message}")]
+    [LoggerMessage(LogLevel.Error, "Failed to send sms. code: {code} {message}")]
     public static partial void ErrorSendSmsWithCode(this ILogger<SmsProvider> logger, int code, string message);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "SMS balance service returned: {result}")]
+    [LoggerMessage(LogLevel.Information, "SMS balance service returned: {result}")]
     public static partial void InformationSmsBalaceReturned(this ILogger<SmsProvider> logger, string result);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "SMS was sent to {number}, status: {status}")]
+    [LoggerMessage(LogLevel.Information, "SMS was sent to {number}, status: {status}")]
     public static partial void InformationSmsWasSendTo(this ILogger<SmsProvider> logger, string number, MessageResource.StatusEnum status);
 }

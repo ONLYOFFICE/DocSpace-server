@@ -28,6 +28,6 @@ namespace ASC.EventBus.Log;
 
 public static partial class IntegrationEventLogger
 {
-    [LoggerMessage(Level = LogLevel.Information, Message = "----- Handling integration event: {integrationEventId} at {appName} - ({integrationEvent})")]
+    [LoggerMessage(LogLevel.Information, "----- Handling integration event: {integrationEventId} at {appName} - ({integrationEvent})")]
     public static partial void InformationHandlingIntegrationEvent(this ILogger logger, Guid integrationEventId, string appName, IntegrationEvent integrationEvent);
 }

@@ -40,23 +40,19 @@ public class Startup : BaseStartup
         }
     }
 
-    public override async Task ConfigureServices(IServiceCollection services)
+    public override async Task ConfigureServices(WebApplicationBuilder builder)
     {
+        var services = builder.Services;
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
         services.AddMemoryCache();
 
-        await base.ConfigureServices(services);
-
-        services.Configure<DistributedTaskQueueFactoryOptions>(FileOperationsManagerHolder.CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, x =>
-        {
-            x.MaxThreadsCount = 10;
-        });
+        await base.ConfigureServices(builder);
         
         services.AddBaseDbContextPool<FilesDbContext>();
         services.RegisterQuotaFeature();
         services.AddScoped<IWebItem, ProductEntryPoint>();
-        services.AddDocumentServiceHttpClient();
+        services.AddDocumentServiceHttpClient(_configuration);
 
         services.AddStartupTask<CheckPdfStartupTask>()
            .TryAddSingleton(services);

@@ -27,22 +27,46 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// Parameters for creating a file
+/// </summary>
+public class CreateFile<T>
+{
+    /// <summary>
+    /// File title
+    /// </summary>
+    [StringLength(165)]
+    public string Title { get; set; }
+
+    /// <summary>
+    /// Template file ID
+    /// </summary>
+    public T TemplateId { get; set; }
+
+    /// <summary>
+    /// Specifies whether to allow the creation of external extension files or not
+    /// </summary>
+    public bool EnableExternalExt { get; set; }
+
+    /// <summary>
+    /// Form ID
+    /// </summary>
+    public int FormId { get; set; }
+}
+
+/// <summary>
+/// Request parameters for creating a file
 /// </summary>
 public class CreateFileRequestDto<T>
 {
-    /// <summary>File title</summary>
-    /// <type>System.String, System</type>
-    public string Title { get; set; }
+    /// <summary>
+    /// Folder ID
+    /// </summary>
+    [FromRoute(Name = "folderId")]
+    public T FolderId { get; set; }
 
-    /// <summary>Template file ID</summary>
-    /// <type>System.Int32, System</type>
-    public T TemplateId { get; set; }
-
-    /// <summary>Specifies whether to allow the creation of external extension files or not</summary>
-    /// <type>System.Boolean, System</type>
-    public bool EnableExternalExt { get; set; }
-
-    /// <summary>Form ID</summary>
-    /// <type>System.Int32, System</type>
-    public int FormId { get; set; }
+    /// <summary>
+    /// File
+    /// </summary>
+    [FromBody]
+    public CreateFile<JsonElement> File { get; set; }
 }

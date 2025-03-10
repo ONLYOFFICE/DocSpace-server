@@ -147,9 +147,6 @@
   <data name="AceStatusEnum_Review" xml:space="preserve">
     <value>مراجعة</value>
   </data>
-  <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
-    <value>مسئول الغرفة</value>
-  </data>
   <data name="Admin" xml:space="preserve">
     <value>المسئول</value>
   </data>
@@ -454,9 +451,6 @@
   <data name="RoleEnum_Review" xml:space="preserve">
     <value>مراجع</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>مسئول الغرفة</value>
-  </data>
   <data name="RoleEnum_User" xml:space="preserve">
     <value>مستخدم</value>
   </data>
@@ -526,26 +520,20 @@
   <data name="Date" xml:space="preserve">
     <value>التاريخ</value>
   </data>
-  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
-    <value>قوة المستخدم</value>
-  </data>
-  <data name="RoleEnum_PowerUser" xml:space="preserve">
-    <value>قوة المستخدم</value>
-  </data>
   <data name="User" xml:space="preserve">
     <value>مستخدم</value>
   </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>نقل عدة ملفات إلى غرفة تعبئة النماذج غير مدعوم. قم بنقل نموذجONLYOFFICE PDF  واحد في كل مرة.</value>
+    <value>نقل عدة ملفات إلى غرفة تعبئة النماذج غير مدعوم. قم بنقل نموذج{0} PDF  واحد في كل مرة.</value>
   </data>
   <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>نقل المجلدات إلى غرفة تعبئة النموذج غير مدعوم. قم بنقل نموذج ONLYOFFICE PDF  واحد في كل مرة.</value>
+    <value>نقل المجلدات إلى غرفة تعبئة النموذج غير مدعوم. قم بنقل نموذج {0} PDF  واحد في كل مرة.</value>
   </data>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>لا يمكن نقل الملف إلى هذه الغرفة. يرجى محاولة نقل نموذج ONLYOFFICE PDF.</value>
+    <value>لا يمكن نقل الملف إلى هذه الغرفة. يرجى محاولة نقل نموذج {0} PDF.</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>لا يمكن تحميل الملف إلى هذه الغرفة. يرجى محاولة تحميل نموذج ONLYOFFICE PDF.</value>
+    <value>لا يمكن تحميل الملف إلى هذه الغرفة. يرجى محاولة تحميل نموذج {0} PDF.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>رابط تعبئة النموذج</value>
@@ -553,7 +541,25 @@
   <data name="LinkToForm" xml:space="preserve">
     <value>رابط النموذج</value>
   </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>رقم النموذج</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>مستخدم خارجي</value>
+  </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>صانع المحتوى</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>مدير الغرفة</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>صانع المحتوى</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>مدير الغرفة</value>
+  </data>
   <data name="OpenForm" xml:space="preserve">
-    <value>فتح النموذج</value>
+    <value>افتح الملف</value>
   </data>
 </root>

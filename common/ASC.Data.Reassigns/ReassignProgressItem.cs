@@ -29,7 +29,7 @@ namespace ASC.Data.Reassigns;
 /// <summary>
 /// </summary>
 [Transient]
-public class ReassignProgressItem(IServiceScopeFactory serviceScopeFactory) : DistributedTaskProgress
+public class ReassignProgressItem : DistributedTaskProgress
 {
     /// <summary>The user whose data is reassigned</summary>
     /// <type>System.Guid, System</type>
@@ -44,6 +44,19 @@ public class ReassignProgressItem(IServiceScopeFactory serviceScopeFactory) : Di
     private Guid _currentUserId;
     private bool _notify;
     private bool _deleteProfile;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
+
+    public ReassignProgressItem()
+    {
+        
+    }
+    
+    /// <summary>
+    /// </summary>
+    public ReassignProgressItem(IServiceScopeFactory serviceScopeFactory)
+    {
+        _serviceScopeFactory = serviceScopeFactory;
+    }
 
     public void Init(IDictionary<string, StringValues> httpHeaders, int tenantId, Guid fromUserId, Guid toUserId, Guid currentUserId, bool notify, bool deleteProfile)
     {
@@ -63,9 +76,9 @@ public class ReassignProgressItem(IServiceScopeFactory serviceScopeFactory) : Di
 
     protected override async Task DoJob()
     {
-        await using var scope = serviceScopeFactory.CreateAsyncScope();
+        await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var scopeClass = scope.ServiceProvider.GetService<ReassignProgressItemScope>();
-        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, displayUserSettingsHelper, options) = scopeClass;
+        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, displayUserSettingsHelper, options, socketManager) = scopeClass;
         var logger = options.CreateLogger("ASC.Web");
         await tenantManager.SetCurrentTenantAsync(_tenantId);
 
@@ -110,7 +123,7 @@ public class ReassignProgressItem(IServiceScopeFactory serviceScopeFactory) : Di
 
             if (_deleteProfile)
             {
-                await DeleteUserProfile(userManager, userPhotoManager, messageService, displayUserSettingsHelper);
+                await DeleteUserProfile(userManager, userPhotoManager, messageService, displayUserSettingsHelper, socketManager);
             }
 
             await SetPercentageAndCheckCancellation(100, false);
@@ -169,11 +182,11 @@ public class ReassignProgressItem(IServiceScopeFactory serviceScopeFactory) : Di
 
         if (_httpHeaders != null)
         {
-            await messageService.SendHeadersMessageAsync(MessageAction.UserDataReassigns, MessageTarget.Create(FromUser), _httpHeaders, new[] { fromUserName, toUserName });
+            messageService.SendHeadersMessage(MessageAction.UserDataReassigns, MessageTarget.Create(FromUser), _httpHeaders, [fromUserName, toUserName]);
         }
         else
         {
-            await messageService.SendAsync(MessageAction.UserDataReassigns, MessageTarget.Create(FromUser), fromUserName, toUserName);
+            messageService.Send(MessageAction.UserDataReassigns, MessageTarget.Create(FromUser), fromUserName, toUserName);
         }
     }
 
@@ -185,21 +198,22 @@ public class ReassignProgressItem(IServiceScopeFactory serviceScopeFactory) : Di
         await studioNotifyService.SendMsgReassignsFailedAsync(_currentUserId, fromUser, toUser, errorMessage);
     }
 
-    private async Task DeleteUserProfile(UserManager userManager, UserPhotoManager userPhotoManager, MessageService messageService, DisplayUserSettingsHelper displayUserSettingsHelper)
+    private async Task DeleteUserProfile(UserManager userManager, UserPhotoManager userPhotoManager, MessageService messageService, DisplayUserSettingsHelper displayUserSettingsHelper, UserSocketManager socketManager)
     {
         var user = await userManager.GetUsersAsync(FromUser);
         var userName = user.DisplayUserName(false, displayUserSettingsHelper);
 
         await userPhotoManager.RemovePhotoAsync(user.Id);
         await userManager.DeleteUserAsync(user.Id);
+        await socketManager.DeleteUserAsync(user.Id);
 
         if (_httpHeaders != null)
         {
-            await messageService.SendHeadersMessageAsync(MessageAction.UserDeleted, MessageTarget.Create(FromUser), _httpHeaders, userName);
+            messageService.SendHeadersMessage(MessageAction.UserDeleted, MessageTarget.Create(FromUser), _httpHeaders, userName);
         }
         else
         {
-            await messageService.SendAsync(MessageAction.UserDeleted, MessageTarget.Create(FromUser), userName);
+            messageService.Send(MessageAction.UserDeleted, MessageTarget.Create(FromUser), userName);
         }
     }
 }
@@ -214,4 +228,5 @@ public record ReassignProgressItemScope(
     UserManager UserManager,
     UserPhotoManager UserPhotoManager,
     DisplayUserSettingsHelper DisplayUserSettingsHelper,
-    ILoggerProvider Options);
+    ILoggerProvider Options,
+    UserSocketManager SocketManager);

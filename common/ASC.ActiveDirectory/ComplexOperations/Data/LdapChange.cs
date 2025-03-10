@@ -27,7 +27,7 @@
 namespace ASC.ActiveDirectory.ComplexOperations.Data;
 public class LdapChange(string sid, string name, string email, LdapChangeType type, LdapChangeAction action, List<LdapItemChange> changes = null)
 {
-    [JsonConverter(typeof(JsonStringEnumConverter))]
+    [JsonConverter(typeof(JsonStringEnumConverter<LdapChangeAction>))]
     public LdapChangeAction Action { get; private set; } = action;
 
     public string Sid { get; private set; } = sid;
@@ -37,10 +37,10 @@ public class LdapChange(string sid, string name, string email, LdapChangeType ty
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string Email { get; private set; } = email;
 
-    [JsonConverter(typeof(JsonStringEnumConverter))]
+    [JsonConverter(typeof(JsonStringEnumConverter<LdapChangeType>))]
     public LdapChangeType Type { get; private set; } = type;
 
-    public List<LdapItemChange> Changes { get; private set; } = changes ?? new List<LdapItemChange>();
+    public List<LdapItemChange> Changes { get; private set; } = changes ?? [];
 
     public LdapChange(string sid, string name, LdapChangeType type, LdapChangeAction action,
         List<LdapItemChange> changes = null) : this(sid, name, null, type, action, changes)

@@ -332,9 +332,6 @@ docx, xlsx, pptx ile en yüksek uyumluluk.</value>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Editör</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Oda Yöneticisi</value>
-  </data>
   <data name="RoleEnum_User" xml:space="preserve">
     <value>Kullanıcı</value>
   </data>
@@ -407,9 +404,6 @@ docx, xlsx, pptx ile en yüksek uyumluluk.</value>
   <data name="AceStatusEnum_Editing" xml:space="preserve">
     <value>Editör</value>
   </data>
-  <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
-    <value>Oda Yöneticisi</value>
-  </data>
   <data name="DefaultExternalLinkTitle" xml:space="preserve">
     <value>Paylaşılan bağlantı</value>
   </data>
@@ -467,26 +461,20 @@ docx, xlsx, pptx ile en yüksek uyumluluk.</value>
   <data name="Date" xml:space="preserve">
     <value>Tarih</value>
   </data>
-  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
-    <value>Uzman kullanıcı</value>
-  </data>
-  <data name="RoleEnum_PowerUser" xml:space="preserve">
-    <value>Uzman kullanıcı</value>
-  </data>
   <data name="User" xml:space="preserve">
     <value>Kullanıcı</value>
   </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Birden fazla dosyanın Form Doldurma odasına taşınması desteklenmemektedir. Bir seferde bir ONLYOFFICE PDF formu taşıyın.</value>
+    <value>Birden fazla dosyanın Form Doldurma odasına taşınması desteklenmemektedir. Bir seferde bir {0} PDF formu taşıyın.</value>
   </data>
   <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Klasörlerin Form Doldurma odasına taşınması desteklenmemektedir. Bir seferde bir ONLYOFFICE PDF formu taşıyın.</value>
+    <value>Klasörlerin Form Doldurma odasına taşınması desteklenmemektedir. Bir seferde bir {0} PDF formu taşıyın.</value>
   </data>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Dosya bu odaya taşınamıyor. Lütfen ONLYOFFICE PDF formunu taşımayı deneyin.</value>
+    <value>Dosya bu odaya taşınamıyor. Lütfen {0} PDF formunu taşımayı deneyin.</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Dosya bu odaya yüklenemiyor. Lütfen ONLYOFFICE PDF formunu yüklemeyi deneyin.</value>
+    <value>Dosya bu odaya yüklenemiyor. Lütfen {0} PDF formunu yüklemeyi deneyin.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Doldurulacak bağlantı</value>
@@ -494,7 +482,22 @@ docx, xlsx, pptx ile en yüksek uyumluluk.</value>
   <data name="LinkToForm" xml:space="preserve">
     <value>Form bağlantısı</value>
   </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Açık form</value>
+  <data name="FormNumber" xml:space="preserve">
+    <value>Form numarası</value>
+  </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>İçerik oluşturucu</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>İçerik oluşturucu</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Oda yöneticisi</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Oda yöneticisi</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Harici kullanıcı</value>
   </data>
 </root>

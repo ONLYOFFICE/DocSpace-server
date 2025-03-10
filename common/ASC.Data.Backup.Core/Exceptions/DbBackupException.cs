@@ -30,9 +30,6 @@ public class DbBackupException : Exception
 {
     public DbBackupException() { }
 
-    public DbBackupException(string message)
-        : this(message, null) { }
-
-    public DbBackupException(string message, Exception innerException)
+    public DbBackupException(string message, Exception innerException = null)
         : base(message, innerException) { }
 }

@@ -27,18 +27,79 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// Security information request parameters
 /// </summary>
 public class SecurityInfoRequestDto : BaseBatchRequestDto
 {
-    /// <summary>Collection of sharing parameters</summary>
-    /// <type>System.Collections.Generic.IAsyncEnumIEnumerableerable{ASC.Files.Core.ApiModels.FileShareParams}, System.Collections.Generic</type>
+    /// <summary>
+    /// Collection of sharing parameters
+    /// </summary>
     public IEnumerable<FileShareParams> Share { get; set; }
 
-    /// <summary>Notifies users about the shared file or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Notifies users about the shared file or not
+    /// </summary>
     public bool Notify { get; set; }
 
-    /// <summary>Message to send when notifying about the shared file</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Message to send when notifying about the shared file
+    /// </summary>
     public string SharingMessage { get; set; }
+}
+
+/// <summary>
+/// Security information request parameters
+/// </summary>
+public class SecurityInfoSimpleRequestDto
+{
+    /// <summary>
+    /// Collection of sharing parameters
+    /// </summary>
+    public IEnumerable<FileShareParams> Share { get; set; }
+
+    /// <summary>
+    /// Notifies users about the shared file or not
+    /// </summary>
+    public bool Notify { get; set; }
+
+    /// <summary>
+    /// Message to send when notifying about the shared file
+    /// </summary>
+    public string SharingMessage { get; set; }
+}
+
+/// <summary>
+/// Security information request parameters
+/// </summary>
+public class FileSecurityInfoSimpleRequestDto<T>
+{
+    /// <summary>
+    /// File ID
+    /// </summary>
+    [FromRoute(Name = "fileId")]
+    public T FileId { get; set; }
+
+    /// <summary>
+    /// Security info simple
+    /// </summary>
+    [FromBody]
+    public SecurityInfoSimpleRequestDto SecurityInfoSimpe { get; set; }
+}
+
+/// <summary>
+/// Security information request parameters
+/// </summary>
+public class FolderSecurityInfoSimpleRequestDto<T>
+{
+    /// <summary>
+    /// Folder ID
+    /// </summary>
+    [FromRoute(Name = "folderId")]
+    public T FolderId { get; set; }
+
+    /// <summary>
+    /// Security info simple
+    /// </summary>
+    [FromBody]
+    public SecurityInfoSimpleRequestDto SecurityInfoSimpe { get; set; }
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.asc.common.core.domain.value.ClientId;
 import com.asc.common.core.domain.value.ClientSecret;
 import com.asc.common.core.domain.value.TenantId;
+import com.asc.common.core.domain.value.UserId;
 import com.asc.common.core.domain.value.enums.AuthenticationMethod;
 import com.asc.common.core.domain.value.enums.ClientStatus;
 import com.asc.common.core.domain.value.enums.ClientVisibility;
@@ -53,7 +54,7 @@ class ClientDataMapperTest {
   }
 
   @Test
-  void testToDomain() {
+  void whenCommandIsMappedToDomain_thenDomainClientIsCreated() {
     var command =
         CreateTenantClientCommand.builder()
             .name("Test Client")
@@ -94,7 +95,7 @@ class ClientDataMapperTest {
   }
 
   @Test
-  void testToClientResponse() {
+  void whenDomainClientIsMappedToResponse_thenResponseIsCreated() {
     var client = createClient();
     var response = clientDataMapper.toClientResponse(client);
 
@@ -116,16 +117,16 @@ class ClientDataMapperTest {
         client.getClientRedirectInfo().logoutRedirectUris(), response.getLogoutRedirectUri());
     assertEquals(client.getScopes(), response.getScopes());
     assertEquals(client.getClientCreationInfo().getCreatedOn(), response.getCreatedOn());
-    assertEquals(client.getClientCreationInfo().getCreatedBy(), response.getCreatedBy());
+    assertEquals(client.getClientCreationInfo().getCreatedBy().getValue(), response.getCreatedBy());
     assertEquals(client.getClientModificationInfo().getModifiedOn(), response.getModifiedOn());
-    assertEquals(client.getClientModificationInfo().getModifiedBy(), response.getModifiedBy());
+    assertEquals(
+        client.getClientModificationInfo().getModifiedBy().getValue(), response.getModifiedBy());
     assertEquals(client.getStatus().equals(ClientStatus.ENABLED), response.isEnabled());
     assertEquals(client.getVisibility().equals(ClientVisibility.PUBLIC), response.isPublic());
-    assertEquals(client.getStatus().equals(ClientStatus.INVALIDATED), response.isInvalidated());
   }
 
   @Test
-  void testToClientSecret() {
+  void whenDomainClientIsMappedToClientSecret_thenSecretResponseIsCreated() {
     var client = createClient();
     var response = clientDataMapper.toClientSecret(client);
 
@@ -134,7 +135,7 @@ class ClientDataMapperTest {
   }
 
   @Test
-  void testToClientInfoResponse() {
+  void whenDomainClientIsMappedToClientInfoResponse_thenInfoResponseIsCreated() {
     var client = createClient();
     var response = clientDataMapper.toClientInfoResponse(client);
 
@@ -150,9 +151,10 @@ class ClientDataMapperTest {
         client.getAuthenticationMethods().size(), response.getAuthenticationMethods().size());
     assertEquals(client.getScopes(), response.getScopes());
     assertEquals(client.getClientCreationInfo().getCreatedOn(), response.getCreatedOn());
-    assertEquals(client.getClientCreationInfo().getCreatedBy(), response.getCreatedBy());
+    assertEquals(client.getClientCreationInfo().getCreatedBy().getValue(), response.getCreatedBy());
     assertEquals(client.getClientModificationInfo().getModifiedOn(), response.getModifiedOn());
-    assertEquals(client.getClientModificationInfo().getModifiedBy(), response.getModifiedBy());
+    assertEquals(
+        client.getClientModificationInfo().getModifiedBy().getValue(), response.getModifiedBy());
   }
 
   private Client createClient() {
@@ -162,7 +164,7 @@ class ClientDataMapperTest {
         .authenticationMethods(Set.of(AuthenticationMethod.DEFAULT_AUTHENTICATION))
         .scopes(Set.of("read", "write"))
         .clientInfo(new ClientInfo("Test Client", "Test Description", "Test Logo"))
-        .clientTenantInfo(new ClientTenantInfo(new TenantId(1)))
+        .clientTenantInfo(new ClientTenantInfo(new TenantId(1L)))
         .clientWebsiteInfo(
             ClientWebsiteInfo.Builder.builder()
                 .websiteUrl("http://test.com")
@@ -177,12 +179,12 @@ class ClientDataMapperTest {
         .clientCreationInfo(
             ClientCreationInfo.Builder.builder()
                 .createdOn(ZonedDateTime.now())
-                .createdBy("creator")
+                .createdBy(new UserId("creator"))
                 .build())
         .clientModificationInfo(
             ClientModificationInfo.Builder.builder()
                 .modifiedOn(ZonedDateTime.now())
-                .modifiedBy("modifier")
+                .modifiedBy(new UserId("modifier"))
                 .build())
         .clientStatus(ClientStatus.ENABLED)
         .clientVisibility(ClientVisibility.PUBLIC)

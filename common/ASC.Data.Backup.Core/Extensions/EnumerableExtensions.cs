@@ -30,7 +30,7 @@ public class TreeNode<TEntry>()
 {
     public TEntry Entry { get; set; }
     public TreeNode<TEntry> Parent { get; set; }
-    public List<TreeNode<TEntry>> Children { get; private set; } = new();
+    public List<TreeNode<TEntry>> Children { get; private set; } = [];
 
     public TreeNode(TEntry entry)
         : this()

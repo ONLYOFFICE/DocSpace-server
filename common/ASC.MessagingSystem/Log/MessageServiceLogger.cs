@@ -27,6 +27,6 @@
 namespace ASC.MessagingSystem.Log;
 internal static partial class MessageServiceLogger
 {
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Empty Http Request for \"{action}\" type of event")]
+    [LoggerMessage(LogLevel.Debug, "Empty Http Request for \"{action}\" type of event")]
     public static partial void DebugEmptyHttpRequest(this ILogger<MessageService> logger, MessageAction action);
 }

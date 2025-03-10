@@ -335,9 +335,6 @@ Sicherheit durch garantierte 100%ige Kompatibilität mit docx, xslx und pptx For
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Redakteur</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Administrator des Raums</value>
-  </data>
   <data name="RoleEnum_User" xml:space="preserve">
     <value>Benutzer</value>
   </data>
@@ -361,9 +358,6 @@ Sicherheit durch garantierte 100%ige Kompatibilität mit docx, xslx und pptx For
   </data>
   <data name="AceStatusEnum_Editing" xml:space="preserve">
     <value>Redakteur</value>
-  </data>
-  <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
-    <value>Administrator des Raums</value>
   </data>
   <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
     <value>Die neue Version kann nicht mit der aktuellen identisch sein</value>
@@ -467,26 +461,20 @@ Sicherheit durch garantierte 100%ige Kompatibilität mit docx, xslx und pptx For
   <data name="Date" xml:space="preserve">
     <value>Datum</value>
   </data>
-  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
-    <value>Power-Benutzer</value>
-  </data>
-  <data name="RoleEnum_PowerUser" xml:space="preserve">
-    <value>Power-Benutzer</value>
-  </data>
   <data name="User" xml:space="preserve">
     <value>Benutzer</value>
   </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Das Verschieben mehrerer Dateien in den Raum zum Ausfüllen von Formularen wird nicht unterstützt. Verschieben Sie immer nur ein ONLYOFFICE PDF-Formular auf einmal.</value>
+    <value>Das Verschieben mehrerer Dateien in den Raum zum Ausfüllen von Formularen wird nicht unterstützt. Verschieben Sie immer nur ein {0} PDF-Formular auf einmal.</value>
   </data>
   <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Das Verschieben von Ordnern in den Raum zum Ausfüllen von Formularen wird nicht unterstützt. Verschieben Sie immer nur ein ONLYOFFICE PDF-Formular auf einmal.</value>
+    <value>Das Verschieben von Ordnern in den Raum zum Ausfüllen von Formularen wird nicht unterstützt. Verschieben Sie immer nur ein {0} PDF-Formular auf einmal.</value>
   </data>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Die Datei kann nicht in diesen Raum verschoben werden. Bitte versuchen Sie, das ONLYOFFICE PDF-Formular zu verschieben.</value>
+    <value>Die Datei kann nicht in diesen Raum verschoben werden. Bitte versuchen Sie, das {0} PDF-Formular zu verschieben.</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Die Datei kann nicht in diesen Raum hochgeladen werden. Bitte versuchen Sie, das ONLYOFFICE PDF-Formular hochzuladen.</value>
+    <value>Die Datei kann nicht in diesen Raum hochgeladen werden. Bitte versuchen Sie, das {0} PDF-Formular hochzuladen.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Link zum Ausfüllen</value>
@@ -494,10 +482,25 @@ Sicherheit durch garantierte 100%ige Kompatibilität mit docx, xslx und pptx For
   <data name="LinkToForm" xml:space="preserve">
     <value>Link zum Formular</value>
   </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Formular öffnen</value>
-  </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Formularnummer</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Externer Benutzer</value>
+  </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Inhaltsersteller</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Raum-Manager</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Raum-Manager</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Inhaltsersteller</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Datei öffnen</value>
   </data>
 </root>

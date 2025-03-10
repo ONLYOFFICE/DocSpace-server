@@ -28,7 +28,7 @@ using User = ASC.Core.Common.EF.User;
 
 namespace ASC.Files.Core.EF;
 
-public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOptions) : DbContext(dbContextOptions)
+public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOptions) : BaseDbContext(dbContextOptions)
 {
     public DbSet<DbFile> Files { get; set; }
     public DbSet<DbFolder> Folders { get; set; }
@@ -50,6 +50,7 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
     public DbSet<DbGroup> Groups { get; set; }
     public DbSet<UserGroup> UserGroup { get; set; }
     public DbSet<DbFilesAuditReference> FilesAuditReference { get; set; }
+    public DbSet<DbUserRelation> UserRelations { get; set; }
     public DbSet<DbAuditEvent> AuditEvents { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -76,6 +77,7 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
             .AddDbGroup()
             .AddUserGroup()
             .AddFilesAuditReference()
+            .AddUserRelation()
             .AddAuditEvent()
             .AddDbFunctions();
     }

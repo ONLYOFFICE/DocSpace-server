@@ -8,8 +8,7 @@ public class DynamicCorsPolicyService : IDynamicCorsPolicyService
     private readonly CorsOptions _options;
     private readonly IDynamicCorsPolicyResolver _dynamicCorsPolicyResolver;
 
-    public DynamicCorsPolicyService(IOptions<CorsOptions> options,
-        IDynamicCorsPolicyResolver dynamicCorsPolicyResolver)
+    public DynamicCorsPolicyService(IOptions<CorsOptions> options, IDynamicCorsPolicyResolver dynamicCorsPolicyResolver)
     {
         ArgumentNullException.ThrowIfNull(options);
 
@@ -41,7 +40,7 @@ public class DynamicCorsPolicyService : IDynamicCorsPolicyService
         var corsResult = new CorsResult
         {
             IsPreflightRequest = isPreflightRequest,
-            IsOriginAllowed = await IsOriginAllowed(policy, origin),
+            IsOriginAllowed = await IsOriginAllowed(policy, origin)
         };
 
         if (isPreflightRequest)
@@ -76,12 +75,12 @@ public class DynamicCorsPolicyService : IDynamicCorsPolicyService
         AddHeaderValues(result.AllowedExposedHeaders, policy.ExposedHeaders);
 
         var allowedMethods = policy.AllowAnyMethod
-            ? new[]
-            {
+            ?
+            [
                 result.IsPreflightRequest
-                    ? (string) context.Request.Headers[CorsConstants.AccessControlRequestMethod]
+                    ? context.Request.Headers[CorsConstants.AccessControlRequestMethod]
                     : context.Request.Method
-            }
+            ]
             : policy.Methods;
         AddHeaderValues(result.AllowedMethods, allowedMethods);
 
@@ -163,9 +162,9 @@ public class DynamicCorsPolicyService : IDynamicCorsPolicyService
             return;
         }
 
-        for (var i = 0; i < headerValues.Count; i++)
+        foreach (var t in headerValues)
         {
-            target.Add(headerValues[i]);
+            target.Add(t);
         }
     }
 

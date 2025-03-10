@@ -25,15 +25,37 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
+
 /// <summary>
+/// Parameters for deleting a folder
 /// </summary>
-public class DeleteFolderDto
+public class DeleteFolder
 {
-    /// <summary>Specifies whether to delete a folder after the editing session is finished or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether to delete a folder after the editing session is finished or not
+    /// </summary>
     public bool DeleteAfter { get; set; }
 
-    /// <summary>Specifies whether to move a folder to the "Trash" folder or delete it immediately</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether to move a folder to the \"Trash\" folder or delete it immediately
+    /// </summary>
     public bool Immediately { get; set; }
+}
+
+/// <summary>
+/// Request parameters for deleting a folder
+/// </summary>
+public class DeleteFolder<T>
+{
+    /// <summary>
+    /// Folder ID
+    /// </summary>
+    [FromRoute(Name = "folderId")]
+    public T FolderId { get; set; }
+
+    /// <summary>
+    /// Parameters for deleting a folder
+    /// </summary>
+    [FromBody]
+    public DeleteFolder Delete { get; set; }
 }

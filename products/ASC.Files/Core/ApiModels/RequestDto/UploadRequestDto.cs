@@ -27,42 +27,51 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// Request parameters for uploading a file
 /// </summary>
 public class UploadRequestDto : IModelWithFile, IDisposable
 {
-    /// <summary>File</summary>
-    /// <type>Microsoft.AspNetCore.Http.IFormFile, Microsoft.AspNetCore.Http</type>
+    /// <summary>
+    /// File
+    /// </summary>
     public IFormFile File { get; set; }
 
-    /// <summary>Content-Type header</summary>
-    /// <type>System.Net.Mime.ContentType, System.Net.Mime</type>
+    /// <summary>
+    /// Content-Type header
+    /// </summary>
     public ContentType ContentType { get; set; }
 
-    /// <summary>Content-Disposition header</summary>
-    /// <type>System.Net.Mime.ContentDisposition, System.Net.Mime</type>
+    /// <summary>
+    /// Content-Disposition header
+    /// </summary>
     public ContentDisposition ContentDisposition { get; set; }
 
-    /// <summary>List of files when specified as multipart/form-data</summary>
-    /// <type>System.Collections.Generic.IEnumerable{Microsoft.AspNetCore.Http.IFormFile}, System.Collections.Generic</type>
+    /// <summary>
+    /// List of files when specified as multipart/form-data
+    /// </summary>
     public IEnumerable<IFormFile> Files { get; set; }
 
-    /// <summary>Specifies whether to create a new file if it already exists or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether to create a new file if it already exists or not
+    /// </summary>
     public bool CreateNewIfExist { get; set; }
 
-    /// <summary>Specifies whether to upload documents in the original formats as well or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    /// <summary>
+    /// Specifies whether to upload documents in the original formats as well or not
+    /// </summary>
     public bool? StoreOriginalFileFlag { get; set; }
 
-    /// <summary>Specifies whether to keep the file converting status or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether to keep the file converting status or not
+    /// </summary>
     public bool KeepConvertStatus { get; set; }
 
     private Stream _stream;
     private bool _disposedValue;
 
-    /// <summary>Request input stream</summary>
-    /// <type>System.IO.Stream, System.IO</type>
+    /// <summary>
+    /// Request input stream
+    /// </summary>
     public Stream Stream
     {
         get => File?.OpenReadStream() ?? _stream;
@@ -94,4 +103,23 @@ public class UploadRequestDto : IModelWithFile, IDisposable
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
+}
+
+/// <summary>
+/// 
+/// </summary>
+public class UploadWithFolderRequestDto<T>
+{
+    /// <summary>
+    /// Folder ID
+    /// </summary>
+    [FromRoute(Name = "folderId")]
+    public T FolderId { get; set; }
+
+    /// <summary>
+    /// Upload data
+    /// </summary>
+    [FromBody]
+    [ModelBinder(BinderType = typeof(UploadModelBinder))]
+    public UploadRequestDto UploadData { get; set; }
 }

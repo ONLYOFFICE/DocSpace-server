@@ -317,9 +317,6 @@
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Редактор</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Администратор на стаята</value>
-  </data>
   <data name="RoleEnum_User" xml:space="preserve">
     <value>Потребител</value>
   </data>
@@ -346,9 +343,6 @@
   </data>
   <data name="AceStatusEnum_Editing" xml:space="preserve">
     <value>Редактор</value>
-  </data>
-  <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
-    <value>Администратор на стаята</value>
   </data>
   <data name="CommentSubmitFillForm" xml:space="preserve">
     <value>Изпратен формуляр</value>
@@ -467,26 +461,20 @@
   <data name="Date" xml:space="preserve">
     <value>Дата</value>
   </data>
-  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
-    <value>Опитен потребител</value>
-  </data>
-  <data name="RoleEnum_PowerUser" xml:space="preserve">
-    <value>Опитен потребител</value>
-  </data>
   <data name="User" xml:space="preserve">
     <value>Потребител</value>
   </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Преместването на няколко файла в стаята за попълване на формуляри не се поддържа. Премествайте по един ONLYOFFICE PDF формуляр.</value>
+    <value>Преместването на няколко файла в стаята за попълване на формуляри не се поддържа. Премествайте по един {0} PDF формуляр.</value>
   </data>
   <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Преместването на папки в стаята за попълване на формуляри не се поддържа. Премествайте по един ONLYOFFICE PDF формуляр.</value>
+    <value>Преместването на папки в стаята за попълване на формуляри не се поддържа. Премествайте по един {0} PDF формуляр.</value>
   </data>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Файлът не може да бъде преместен в тази стая. Моля, опитайте да преместите ONLYOFFICE PDF формуляра.</value>
+    <value>Файлът не може да бъде преместен в тази стая. Моля, опитайте да преместите {0} PDF формуляра.</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Файлът не може да бъде качен в тази стая. Моля, опитайте да качите ONLYOFFICE PDF формуляра.</value>
+    <value>Файлът не може да бъде качен в тази стая. Моля, опитайте да качите {0} PDF формуляра.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Линк за попълване</value>
@@ -494,7 +482,25 @@
   <data name="LinkToForm" xml:space="preserve">
     <value>Линк към формуляра</value>
   </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>Номер на формуляра</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Външен потребител</value>
+  </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Създател на съдържание</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Управител на стая</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Създател на съдържание</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Управител на стая</value>
+  </data>
   <data name="OpenForm" xml:space="preserve">
-    <value>Отворен формуляр</value>
+    <value>Отвори файл</value>
   </data>
 </root>

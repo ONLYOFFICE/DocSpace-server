@@ -27,24 +27,24 @@
 namespace ASC.Data.Backup.Core.Log;
 internal static partial class PortalTaskBaseLogger
 {
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Steps: {stepsCount}")]
+    [LoggerMessage(LogLevel.Debug, "Steps: {stepsCount}")]
     public static partial void DebugCountSteps(this ILogger logger, int stepsCount);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "run mysql file {file} {args}")]
+    [LoggerMessage(LogLevel.Debug, "run mysql file {file} {args}")]
     public static partial void DebugRunMySQlFile(this ILogger logger, string file, string args);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "complete mysql file {file}")]
+    [LoggerMessage(LogLevel.Debug, "complete mysql file {file}")]
     public static partial void DebugCompleteMySQlFile(this ILogger logger, string file);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Restore")]
+    [LoggerMessage(LogLevel.Error, "Restore")]
     public static partial void ErrorRestore(this ILogger logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "begin delete storage")]
+    [LoggerMessage(LogLevel.Debug, "begin delete storage")]
     public static partial void DebugBeginDeleteStorage(this ILogger logger);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "end delete storage")]
+    [LoggerMessage(LogLevel.Debug, "end delete storage")]
     public static partial void DebugEndDeleteStorage(this ILogger logger);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Can't delete files for domain {domain}")]
+    [LoggerMessage(LogLevel.Warning, "Can't delete files for domain {domain}")]
     public static partial void WarningCanNotDeleteFilesForDomain(this ILogger logger, string domain, Exception exception);
 }

@@ -28,6 +28,13 @@ namespace ASC.People.ApiModels.RequestDto;
 
 public class TransferGroupMembersRequestDto
 {
+    /// <summary>
+    /// Group id
+    /// </summary>
     public Guid GroupId { get; set; }
+
+    /// <summary>
+    /// New group id
+    /// </summary>
     public Guid NewGroupId { get; set; }
 }

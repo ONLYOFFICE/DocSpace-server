@@ -32,31 +32,41 @@ public abstract class ActionInterpreter
     {
         { MessageAction.FileMovedWithOverwriting, MessageAction.FileMoved },
         { MessageAction.FileCopiedWithOverwriting, MessageAction.FileCopied },
-        { MessageAction.FileMovedToTrash, MessageAction.FileDeleted },
         { MessageAction.FolderMovedWithOverwriting, MessageAction.FolderMoved },
         { MessageAction.FolderCopiedWithOverwriting, MessageAction.FolderCopied },
-        { MessageAction.FolderMovedToTrash, MessageAction.FolderDeleted },
         { MessageAction.FileRestoreVersion, MessageAction.UserFileUpdated },
         { MessageAction.FileUploadedWithOverwriting, MessageAction.UserFileUpdated }
     }.ToFrozenDictionary();
     
-    public async ValueTask<HistoryEntry> InterpretAsync(DbAuditEvent @event, IServiceProvider serviceProvider)
+    public async ValueTask<HistoryEntry> InterpretAsync(DbAuditEvent @event, FileEntry<int> entry, IServiceProvider serviceProvider)
     {
         var messageAction = @event.Action.HasValue ? (MessageAction)@event.Action.Value : MessageAction.None;
         var processedAction = _aliases.GetValueOrDefault(messageAction, messageAction);
         var key = processedAction != MessageAction.None ? processedAction.ToStringFast() : null;
         
         var description = JsonSerializer.Deserialize<List<string>>(@event.DescriptionRaw);
+        var data = await GetDataAsync(serviceProvider, @event.Target, description, entry);
         
-        var entry = new HistoryEntry
+        var initiatorId = @event.UserId ?? ASC.Core.Configuration.Constants.Guest.ID;
+        string initiatorName = null;
+
+        if (!string.IsNullOrEmpty(data?.InitiatorName) && initiatorId == ASC.Core.Configuration.Constants.Guest.ID)
+        {
+            initiatorName = data.InitiatorName != AuditReportResource.GuestAccount 
+                ? $"{data.InitiatorName} ({FilesCommonResource.ExternalUser})" 
+                : data.InitiatorName;
+        }
+        
+        var historyEntry = new HistoryEntry
         {
             Action = new HistoryAction(processedAction, key),
-            InitiatorId = @event.UserId ?? ASC.Core.Configuration.Constants.Guest.ID,
+            InitiatorId = initiatorId,
+            InitiatorName = initiatorName,
             Date = @event.Date,
-            Data = await GetDataAsync(serviceProvider, @event.Target, description)
+            Data = data
         };
 
-        return entry;
+        return historyEntry;
     }
     
     protected static EventDescription<int> GetAdditionalDescription(List<string> description)
@@ -64,7 +74,7 @@ public abstract class ActionInterpreter
         return JsonSerializer.Deserialize<EventDescription<int>>(description.Last());
     }
 
-    protected abstract ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description);
+    protected abstract ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry);
 }
 
 public record EntryData : HistoryData
@@ -74,14 +84,16 @@ public record EntryData : HistoryData
     public string ParentTitle { get; }
     public int? ParentId { get; }
     public int? ParentType { get; }
-    
-    public EntryData(string id, string title, int? parentId = null, string parentTitle = null, int? parentType = null)
+    public int? Type { get; }
+
+    public EntryData(string id, string title, int? parentId = null, string parentTitle = null, int? parentType = null, int? currentType = null)
     {
         Id = int.Parse(id);
         Title = title;
         ParentId = parentId;
         ParentTitle = parentTitle;
         ParentType = parentType;
+        Type = currentType;
     }
     
     public override int GetId() => ParentId ?? 0;

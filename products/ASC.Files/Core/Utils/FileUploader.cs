@@ -31,6 +31,7 @@ public class FileUploader(
     FileUtility fileUtility,
     UserManager userManager,
     TenantManager tenantManager,
+    TenantLogoManager tenantLogoManager,
     AuthContext authContext,
     SetupInfo setupInfo,
     MaxTotalSizeStatistic maxTotalSizeStatistic,
@@ -132,7 +133,7 @@ public class FileUploader(
     {
         return file != null
                && await fileSecurity.CanEditAsync(file)
-               && !await userManager.IsUserAsync(authContext.CurrentAccount.ID)
+               && !await userManager.IsGuestAsync(authContext.CurrentAccount.ID)
                && !await lockerManager.FileLockedForMeAsync(file.Id)
                && !await fileTracker.IsEditingAsync(file.Id)
                && file.RootFolderType != FolderType.TRASH
@@ -149,7 +150,7 @@ public class FileUploader(
             throw new DirectoryNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
-        if (folder.FolderType == FolderType.VirtualRooms || folder.FolderType == FolderType.Archive || !await fileSecurity.CanCreateAsync(folder))
+        if (folder.FolderType == FolderType.VirtualRooms || folder.FolderType == FolderType.Archive || folder.FolderType == FolderType.RoomTemplates || !await fileSecurity.CanCreateAsync(folder))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
@@ -248,7 +249,7 @@ public class FileUploader(
 
         uploadSession.Expired = uploadSession.Created + ChunkedUploadSessionHolder.SlidingExpiration;
         uploadSession.Location = filesLinkUtility.GetUploadChunkLocationUrl(uploadSession.Id);
-        uploadSession.TenantId = await tenantManager.GetCurrentTenantIdAsync();
+        uploadSession.TenantId = tenantManager.GetCurrentTenantId();
         uploadSession.UserId = authContext.CurrentAccount.ID;
         uploadSession.FolderId = folderId;
         uploadSession.CultureName = CultureInfo.CurrentUICulture.Name;
@@ -304,7 +305,7 @@ public class FileUploader(
                 var memoryStream = new MemoryStream();
                 await stream.CopyToAsync(memoryStream);
 
-                var isForm = false;
+                bool isForm;
                 var cloneStreamForCheck = await tempStream.CloneMemoryStream(memoryStream, 300);
                 try
                 {
@@ -312,7 +313,7 @@ public class FileUploader(
                 }
                 finally
                 {
-                    cloneStreamForCheck.Dispose();
+                    await cloneStreamForCheck.DisposeAsync();
                 }
 
                 uploadSession.File.Category = isForm ? (int)FilterType.PdfForm : (int)FilterType.Pdf;
@@ -322,7 +323,9 @@ public class FileUploader(
                     var currentRoom = await folderDao.GetFolderAsync(roomId);
                     if (currentRoom.FolderType == FolderType.FillingFormsRoom && !isForm)
                     {
-                        throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
+                        var logoText = await tenantLogoManager.GetLogoTextAsync();
+
+                        throw new Exception(string.Format(FilesCommonResource.ErrorMessage_UploadToFormRoom, logoText));
                     }
                 }
 
@@ -333,8 +336,8 @@ public class FileUploader(
                 }
                 finally
                 {
-                    memoryStream.Dispose();
-                    cloneStreamForSave.Dispose();
+                    await memoryStream.DisposeAsync();
+                    await cloneStreamForSave.DisposeAsync();
                 }
 
                 return uploadSession;

@@ -34,19 +34,9 @@ public static class BlockAttributesParser
     /// 
     /// </summary>
     /// <param name="input"></param>
-    /// <returns></returns>
-    public static string ParseBlockAttributes(string input)
-    {
-        return ParseBlockAttributes(input, "");
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="input"></param>
     /// <param name="element"></param>
     /// <returns></returns>
-    public static string ParseBlockAttributes(string input, string element)
+    public static string ParseBlockAttributes(string input, string element = "")
     {
         var style = string.Empty;
         var cssClass = string.Empty;

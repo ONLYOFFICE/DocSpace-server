@@ -28,18 +28,18 @@ namespace ASC.People.Log;
 
 internal static partial class UserControllerLogger
 {
-    [LoggerMessage(Level = LogLevel.Error, Message = "GetAdvanced")]
+    [LoggerMessage(LogLevel.Error, "GetAdvanced")]
     public static partial void ErrorGetAdvanced(this ILogger<UserController> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Account {userId} сould not get user by name {userName}")]
+    [LoggerMessage(LogLevel.Error, "Account {userId} сould not get user by name {userName}")]
     public static partial void ErrorCouldNotGetUserByName(this ILogger<UserController> logger, Guid userId, string userName);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "GetSearch")]
+    [LoggerMessage(LogLevel.Error, "GetSearch")]
     public static partial void ErrorGetSearch(this ILogger<UserController> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "ERROR write to template_unsubscribe, email:{email}")]
+    [LoggerMessage(LogLevel.Debug, "ERROR write to template_unsubscribe, email:{email}")]
     public static partial void DebugWriteToTemplateUnsubscribe(this ILogger<UserController> logger, string email, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Password recovery ({email}): {error}")]
+    [LoggerMessage(LogLevel.Error, "Password recovery ({email}): {error}")]
     public static partial void ErrorPasswordRecovery(this ILogger<UserController> logger, string email, string error);
 }

@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Microsoft.Extensions.DependencyInjection.Extensions;
+
 namespace ASC.Common;
 
 public enum DIAttributeType
@@ -138,7 +140,7 @@ public class DIHelper
     private readonly List<string> _added = [];
     private IServiceCollection _serviceCollection;
 
-    readonly HashSet<string> _visited = new();
+    readonly HashSet<string> _visited = [];
     
     public void Scan()
     {        
@@ -402,8 +404,9 @@ public class DIHelper
 
     private bool Register(DIAttribute c, Type service, Type implementation = null)
     {
-        if (service.IsSubclassOf(typeof(ControllerBase)) || service.GetInterfaces().Contains(typeof(IResourceFilter))
-            || service.GetInterfaces().Contains(typeof(IDictionary<string, string>)))
+        if (service.IsSubclassOf(typeof(ControllerBase)) || 
+            service.GetInterfaces().Contains(typeof(IResourceFilter)) || 
+            service.GetInterfaces().Contains(typeof(IDictionary<string, string>)))
         {
             return true;
         }
@@ -412,6 +415,13 @@ public class DIHelper
 
         if (!_services[c.DiAttributeType].Contains(serviceName))
         {
+            if (service.IsSubclassOf(typeof(DistributedTask)))
+            {
+                var mi = typeof(DIHelper).GetMethod("RegisterDistributedTask");
+                var fooRef = mi.MakeGenericMethod(service);
+                fooRef.Invoke(this, null);
+            }
+            
             c.TryAdd(_serviceCollection, service, implementation);
             _services[c.DiAttributeType].Add(serviceName);
 
@@ -419,5 +429,15 @@ public class DIHelper
         }
 
         return false;
+    }
+
+    public void RegisterDistributedTask<T>() where T : DistributedTask
+    {
+        _serviceCollection.TryAddSingleton(Channel.CreateUnbounded<T>());
+        _serviceCollection.TryAddSingleton(svc => svc.GetRequiredService<Channel<T>>().Reader);
+        _serviceCollection.TryAddSingleton(svc => svc.GetRequiredService<Channel<T>>().Writer);
+        _serviceCollection.TryAddTransient<DistributedTaskQueue<T>>();
+        _serviceCollection.TryAddSingleton<DistributedTaskQueueService<T>>();
+        _serviceCollection.AddHostedService<DistributedTaskQueueService<T>>();
     }
 }

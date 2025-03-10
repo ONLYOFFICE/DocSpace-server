@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Data.Backup.Tasks;
+
 namespace ASC.Data.Backup.IntegrationEvents.EventHandling;
 
 [Scope]
@@ -42,7 +44,7 @@ public class BackupRestoreRequestedIntegrationEventHandler(
         {
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
 
-            if (!@event.Redelivered && await backupWorker.IsInstanceTooBusy())
+            if (!@event.Redelivered && await backupWorker.IsRestoreInstanceTooBusy())
             {
                 throw new IntegrationEventRejectExeption(@event.Id);
             }
@@ -54,7 +56,10 @@ public class BackupRestoreRequestedIntegrationEventHandler(
                                             @event.StorageType,
                                             @event.StorageParams,
                                             @event.Notify,
-                                            @event.ServerBaseUri);
+                                            @event.ServerBaseUri,
+                                            @event.Dump,
+                                            true,
+                                            @event.TaskId);
 
             await Task.CompletedTask;
         }

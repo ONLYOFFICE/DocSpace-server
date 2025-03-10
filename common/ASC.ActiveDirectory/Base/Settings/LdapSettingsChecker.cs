@@ -41,5 +41,5 @@ public abstract class LdapSettingsChecker(ILogger<LdapSettingsChecker> logger)
         LdapImporter = importer;
     }
 
-    public abstract LdapSettingsStatus CheckSettings();
+    public abstract Task<LdapSettingsStatus> CheckSettings();
 }

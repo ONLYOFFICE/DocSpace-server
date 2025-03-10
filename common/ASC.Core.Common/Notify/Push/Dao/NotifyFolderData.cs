@@ -28,10 +28,7 @@ namespace ASC.Core.Common.Notify.Push.Dao;
 
 public class NotifyFolderData
 {
-    [JsonProperty("id")]
     public string Id { get; set; }
-    [JsonProperty("parentId")]
     public string ParentId { get; set; }
-    [JsonProperty("rootFolderType")]
     public int RootFolderType { get; set; }
 }

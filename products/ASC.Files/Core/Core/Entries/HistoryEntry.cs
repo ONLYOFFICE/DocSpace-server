@@ -32,6 +32,7 @@ public record HistoryEntry
 {
     public HistoryAction Action { get; init; }
     public Guid InitiatorId { get; init; }
+    public string InitiatorName { get; init; }
     public DateTime Date { get; init; }
     public HistoryData Data { get; init; }
     
@@ -44,9 +45,18 @@ public record HistoryEntry
         MessageAction.FolderCopied,
         MessageAction.FileDeleted,
         MessageAction.FileConverted,
+        MessageAction.FileIndexChanged,
         MessageAction.FolderDeleted,
+        MessageAction.FolderIndexChanged,
         MessageAction.RoomCreateUser,
-        MessageAction.RoomGroupAdded
+        MessageAction.RoomGroupAdded,
+        MessageAction.RoomInviteResend
+    ];
+
+    private static readonly HashSet<MessageAction> _mergedActions =
+    [
+        MessageAction.FileIndexChanged,
+        MessageAction.FolderIndexChanged
     ];
     
     private int _groupId;
@@ -56,6 +66,11 @@ public record HistoryEntry
         if (_groupId != 0)
         {
             return _groupId;
+        }
+        
+        if (_mergedActions.Contains(Action.Id))
+        {
+            return _groupId = Data?.GetId() ?? 0;
         }
 
         if (_gropedActions.Contains(Action.Id))
@@ -74,9 +89,18 @@ public record HistoryEntry
 [JsonDerivedType(typeof(RenameEntryData))]
 [JsonDerivedType(typeof(TagData))]
 [JsonDerivedType(typeof(UserHistoryData))]
+[JsonDerivedType(typeof(UserFileUpdateData))]
+[JsonDerivedType(typeof(FileData))]
+[JsonDerivedType(typeof(FileOperationData))]
+[JsonDerivedType(typeof(FileRenameData))]
+[JsonDerivedType(typeof(LifeTimeHistoryData))]
+[JsonDerivedType(typeof(FolderIndexChangedData))]
+[JsonDerivedType(typeof(FileIndexChangedData))]
+[JsonDerivedType(typeof(FileVersionRemovedData))]
 public abstract record HistoryData
 {
     public virtual int GetId() => 0;
+    public virtual string InitiatorName => null;
 }
 
 public record HistoryAction(MessageAction Id, string Key);

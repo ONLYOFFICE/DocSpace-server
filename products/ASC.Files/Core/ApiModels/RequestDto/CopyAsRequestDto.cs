@@ -27,26 +27,49 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// Parameters for copying a file
 /// </summary>
-public class CopyAsRequestDto<T>
+public class CopyAs<T>
 {
-    /// <summary>Destination file title</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Destination file title
+    /// </summary>
     public string DestTitle { get; set; }
 
-    /// <summary>Destination folder ID</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// Destination folder ID
+    /// </summary>
     public T DestFolderId { get; set; }
 
-    /// <summary>Specifies whether to allow the creation of external extension files or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether to allow the creation of external extension files or not
+    /// </summary>
     public bool EnableExternalExt { get; set; }
 
-    /// <summary>Password</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Password
+    /// </summary>
     public string Password { get; set; }
 
     /// <summary>Convert to form</summary>
     /// <type>System.Boolean, System</type>
     public bool ToForm { get; set; }
+}
+
+/// <summary>
+/// Request parameters for copying a file
+/// </summary>
+public class CopyAsRequestDto<T>
+{
+    /// <summary>
+    /// File id
+    /// </summary>
+    [FromRoute(Name = "fileId")]
+    public T FileId { get; set; }
+
+    /// <summary>
+    /// File
+    /// </summary>
+    [FromBody]
+    public CopyAs<JsonElement> File { get; set; }
 }

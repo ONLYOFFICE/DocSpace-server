@@ -114,13 +114,13 @@ public class DefaultActiveMQPersistentConnection(IConnectionFactory connectionFa
         _logger.InformationActiveMQTryingConnect();
 
         var policy = Policy.Handle<SocketException>()
-            .WaitAndRetry(retryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
+            .WaitAndRetryAsync(retryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
             {
                 _logger.WarningActiveMQCouldNotConnect(time.TotalSeconds, ex);
             }
         );
 
-        await policy.Execute(async () =>
+        await policy.ExecuteAsync(async () =>
         {
             _connection = await _connectionFactory
                     .CreateConnectionAsync();
@@ -130,7 +130,7 @@ public class DefaultActiveMQPersistentConnection(IConnectionFactory connectionFa
 
         if (IsConnected)
         {
-            _connection.ExceptionListener += async (e) => { await OnExceptionListenerAsync(e); };
+            _connection.ExceptionListener += async e => { await OnExceptionListenerAsync(e); };
             _connection.ConnectionInterruptedListener += async () => { await OnConnectionInterruptedListenerAsync(); };
             _connection.ConnectionResumedListener += async () => { await OnConnectionResumedListenerAsync(); };
 

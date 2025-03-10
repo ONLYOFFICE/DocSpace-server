@@ -7,7 +7,7 @@ internal class DynamicCorsPolicyMiddleware
 {
     // Property key is used by other systems, e.g. MVC, to check if CORS middleware has run
     private const string CorsMiddlewareWithEndpointInvokedKey = "__CorsMiddlewareWithEndpointInvoked";
-    private static readonly object _corsMiddlewareWithEndpointInvokedValue = new object();
+    private static readonly object _corsMiddlewareWithEndpointInvokedValue = new();
 
     private readonly Func<object, Task> _onResponseStartingDelegate = OnResponseStarting;
     private readonly RequestDelegate _next;
@@ -90,12 +90,10 @@ internal class DynamicCorsPolicyMiddleware
             policyName = null;
             corsPolicy = corsPolicyMetadata.Policy;
         }
-        else if (corsMetadata is IEnableCorsAttribute enableCorsAttribute &&
-            enableCorsAttribute.PolicyName != null)
+        else if (corsMetadata is IEnableCorsAttribute { PolicyName: not null } enableCorsAttribute)
         {
             // If a policy name has been provided on the endpoint metadata then prioritizing it above the static middleware policy
             policyName = enableCorsAttribute.PolicyName;
-            corsPolicy = null;
         }
 
         if (corsPolicy == null)
@@ -136,8 +134,6 @@ internal class DynamicCorsPolicyMiddleware
             // Since there is a policy which was identified,
             // always respond to preflight requests.
             context.Response.StatusCode = StatusCodes.Status204NoContent;
-
-            return;
         }
         else
         {

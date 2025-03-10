@@ -27,6 +27,6 @@
 namespace ASC.Data.Backup.Core.Log;
 internal static partial class BackupWorkerLogger
 {
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Configuration file {invalidConfigPath} not found")]
+    [LoggerMessage(LogLevel.Warning, "Configuration file {invalidConfigPath} not found")]
     public static partial void WarningCanNotBackupFile(this ILogger<BackupWorker> logger, string invalidConfigPath);
 }

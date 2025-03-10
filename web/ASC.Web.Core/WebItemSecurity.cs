@@ -93,7 +93,7 @@ public class WebItemSecurity(UserManager userManager,
         IDistributedLockProvider distributedLockProvider)
     {
     
-    private static readonly SecurityAction _read = new(new Guid("77777777-32ae-425f-99b5-83176061d1ae"), "ReadWebItem", false, true);
+    private static readonly SecurityAction _read = new(new Guid("77777777-32ae-425f-99b5-83176061d1ae"), "ReadWebItem", false);
 
     //
     public async Task<bool> IsAvailableForMeAsync(Guid id)
@@ -103,7 +103,7 @@ public class WebItemSecurity(UserManager userManager,
 
     public async Task<bool> IsAvailableForUserAsync(Guid itemId, Guid @for)
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
 
         var id = itemId.ToString();
         bool result;
@@ -128,7 +128,7 @@ public class WebItemSecurity(UserManager userManager,
             if ((
                 webItem.ID == WebItemManager.PeopleProductID ||
                 webItem.ID == WebItemManager.BirthdaysProductID) &&
-                await userManager.IsUserAsync(@for))
+                await userManager.IsGuestAsync(@for))
             {
                 // hack: people and birthday products not visible for collaborators
                 result = false;
@@ -192,7 +192,7 @@ public class WebItemSecurity(UserManager userManager,
             await authorizationManager.AddAceAsync(a);
         }
 
-        await webItemSecurityCache.PublishAsync(await tenantManager.GetCurrentTenantIdAsync());
+        await webItemSecurityCache.PublishAsync(tenantManager.GetCurrentTenantId());
     }
 
     public async Task<WebItemSecurityInfo> GetSecurityInfoAsync(string id)
@@ -243,14 +243,21 @@ public class WebItemSecurity(UserManager userManager,
 
         if (administrator)
         {
-            var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+            var tenantId = tenantManager.GetCurrentTenantId();
 
             await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenantId)))
             {
-                if (await userManager.IsUserInGroupAsync(userid, Constants.GroupUser.ID))
+                var type = await userManager.GetUserTypeAsync(userid);
+                switch (type)
                 {
-                    await countPaidUserChecker.CheckAppend();
-                    await userManager.RemoveUserFromGroupAsync(userid, Constants.GroupUser.ID);
+                    case EmployeeType.Guest:
+                        await countPaidUserChecker.CheckAppend();
+                        await userManager.RemoveUserFromGroupAsync(userid, Constants.GroupGuest.ID);
+                        break;
+                    case EmployeeType.User:
+                        await countPaidUserChecker.CheckAppend();
+                        await userManager.RemoveUserFromGroupAsync(userid, Constants.GroupUser.ID);
+                        break;
                 }
 
                 if (productId == WebItemManager.PeopleProductID)
@@ -288,7 +295,7 @@ public class WebItemSecurity(UserManager userManager,
             await userManager.RemoveUserFromGroupAsync(userid, productId);
         }
 
-        await webItemSecurityCache.PublishAsync(await tenantManager.GetCurrentTenantIdAsync());
+        await webItemSecurityCache.PublishAsync(tenantManager.GetCurrentTenantId());
     }
 
     public async Task<bool> IsProductAdministratorAsync(Guid productId, Guid userid)

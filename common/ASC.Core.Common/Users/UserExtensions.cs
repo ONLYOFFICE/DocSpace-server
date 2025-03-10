@@ -35,7 +35,11 @@ public static class UserExtensions
             return false;
         }
 
-        return tenant != null && tenant.OwnerId.Equals(ui.Id);
+        return IsOwner(ui.Id, tenant);
+    }
+    public static bool IsOwner(this Guid ui, Tenant tenant)
+    {
+        return tenant != null && tenant.OwnerId.Equals(ui);
     }
 
     public static bool IsMe(this UserInfo ui, AuthContext authContext)
@@ -59,15 +63,15 @@ public static class UserExtensions
         return ui != null && await userManager.IsUserInGroupAsync(ui.Id, Constants.GroupAdmin.ID);
     }
 
-    public static async Task<bool> IsUserAsync(this UserManager userManager, Guid id)
+    public static async Task<bool> IsGuestAsync(this UserManager userManager, Guid id)
     {
         var ui = await userManager.GetUsersAsync(id);
-        return await userManager.IsUserAsync(ui);
+        return await userManager.IsGuestAsync(ui);
     }
 
-    public static async Task<bool> IsUserAsync(this UserManager userManager, UserInfo ui)
+    public static async Task<bool> IsGuestAsync(this UserManager userManager, UserInfo ui)
     {
-        return ui != null && await userManager.IsUserInGroupAsync(ui.Id, Constants.GroupUser.ID);
+        return ui != null && await userManager.IsUserInGroupAsync(ui.Id, Constants.GroupGuest.ID);
     }
 
     public static async Task<bool> IsSystemGroup(this UserManager userManager, Guid groupId)
@@ -76,25 +80,25 @@ public static class UserExtensions
         return group.ID == Constants.LostGroupInfo.ID || group.CategoryID == Constants.SysGroupCategoryId;
     }
 
-    public static async Task<bool> IsCollaboratorAsync(this UserManager userManager, UserInfo userInfo)
+    public static async Task<bool> IsUserAsync(this UserManager userManager, UserInfo userInfo)
     {
-        return userInfo != null && await userManager.IsUserInGroupAsync(userInfo.Id, Constants.GroupCollaborator.ID);
+        return userInfo != null && await userManager.IsUserInGroupAsync(userInfo.Id, Constants.GroupUser.ID);
     }
     
-    public static async Task<bool> IsCollaboratorAsync(this UserManager userManager, Guid id)
+    public static async Task<bool> IsUserAsync(this UserManager userManager, Guid id)
     {
         var userInfo = await userManager.GetUsersAsync(id);
-        return await userManager.IsCollaboratorAsync(userInfo);
+        return await userManager.IsUserAsync(userInfo);
     }
 
     public static async Task<bool> IsOutsiderAsync(this UserManager userManager, Guid id)
     {
-        return await userManager.IsUserAsync(id) && id == Constants.OutsideUser.Id;
+        return await userManager.IsGuestAsync(id) && id == Constants.OutsideUser.Id;
     }
 
     public static async Task<bool> IsOutsiderAsync(this UserManager userManager, UserInfo ui)
     {
-        return await userManager.IsUserAsync(ui) && ui.Id == Constants.OutsideUser.Id;
+        return await userManager.IsGuestAsync(ui) && ui.Id == Constants.OutsideUser.Id;
     }
 
     public static bool IsLDAP(this UserInfo ui)
@@ -127,14 +131,50 @@ public static class UserExtensions
     {
         if (user.Equals(Constants.LostUser))
         {
-            return EmployeeType.User;
+            return EmployeeType.Guest;
         }
         
         return 
             await userManager.IsDocSpaceAdminAsync(user) ? EmployeeType.DocSpaceAdmin : 
-            await userManager.IsUserAsync(user) ? EmployeeType.User : 
-            await userManager.IsCollaboratorAsync(user) ? EmployeeType.Collaborator :
+            await userManager.IsGuestAsync(user) ? EmployeeType.Guest : 
+            await userManager.IsUserAsync(user) ? EmployeeType.User :
             EmployeeType.RoomAdmin;
+    }
+
+    public static async Task<bool> CanUserViewAnotherUserAsync(this UserManager userManager, UserInfo sourceUser, UserInfo targetUser)
+    {
+        if (sourceUser.Id == targetUser.Id)
+        {
+            return true;
+        }
+
+        var sourceUserType = await userManager.GetUserTypeAsync(sourceUser);
+
+        if (sourceUserType is EmployeeType.DocSpaceAdmin)
+        {
+            return true;
+        }
+
+        if (sourceUserType is EmployeeType.User or EmployeeType.Guest)
+        {
+            return false;
+        }
+
+        var targetUserType = await userManager.GetUserTypeAsync(targetUser);
+
+        if (targetUserType is EmployeeType.Guest)
+        {
+            if (targetUser.CreatedBy.HasValue && targetUser.CreatedBy.Value == sourceUser.Id)
+            {
+                return true;
+            }
+
+            var userRelations = await userManager.GetUserRelationsAsync(sourceUser.Id);
+
+            return userRelations.ContainsKey(targetUser.Id);
+        }
+
+        return true;
     }
 
     private const string _extMobPhone = "extmobphone";
@@ -167,17 +207,16 @@ public static class UserExtensions
             {
                 case _extMobPhone:
                     newContacts.Add(_mobPhone);
-                    newContacts.Add(value);
                     break;
                 case _extMail:
                     newContacts.Add(_mail);
-                    newContacts.Add(value);
                     break;
                 default:
                     newContacts.Add(type);
-                    newContacts.Add(value);
                     break;
             }
+
+            newContacts.Add(value);
         }
 
         ui.ContactsList = newContacts;

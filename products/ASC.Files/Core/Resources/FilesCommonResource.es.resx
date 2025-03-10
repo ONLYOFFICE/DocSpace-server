@@ -335,9 +335,6 @@
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Editor</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Administrador de la sala</value>
-  </data>
   <data name="RoleEnum_User" xml:space="preserve">
     <value>Usuario</value>
   </data>
@@ -361,9 +358,6 @@
   </data>
   <data name="AceStatusEnum_Editing" xml:space="preserve">
     <value>Editor</value>
-  </data>
-  <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
-    <value>Administrador de la sala</value>
   </data>
   <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
     <value>Este proveedor ya está conectado a la sala</value>
@@ -467,26 +461,20 @@
   <data name="Date" xml:space="preserve">
     <value>Fecha</value>
   </data>
-  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
-    <value>Usuario avanzado</value>
-  </data>
-  <data name="RoleEnum_PowerUser" xml:space="preserve">
-    <value>Usuario avanzado</value>
-  </data>
   <data name="User" xml:space="preserve">
     <value>Usuario</value>
   </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>No se admite mover varios archivos a la sala para rellenar formularios. Mueva un formulario PDF de ONLYOFFICE a la vez.</value>
+    <value>No se admite mover varios archivos a la sala para rellenar formularios. Mueva un formulario PDF de {0} a la vez.</value>
   </data>
   <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>No se admite mover carpetas a la sala para rellenar formularios. Mueva un formulario PDF de ONLYOFFICE a la vez.</value>
+    <value>No se admite mover carpetas a la sala para rellenar formularios. Mueva un formulario PDF de {0} a la vez.</value>
   </data>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>El archivo no se puede mover a esta sala. Intente mover el formulario PDF de ONLYOFFICE.</value>
+    <value>El archivo no se puede mover a esta sala. Intente mover el formulario PDF de {0}.</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>El archivo no se puede cargar en esta sala. Intente cargar el formulario PDF de ONLYOFFICE.</value>
+    <value>El archivo no se puede cargar en esta sala. Intente cargar el formulario PDF de {0}.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Enlace para rellenar</value>
@@ -494,10 +482,25 @@
   <data name="LinkToForm" xml:space="preserve">
     <value>Enlace al formulario</value>
   </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Abrir formulario</value>
-  </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Número de formulario</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Usuario externo</value>
+  </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Creador de contenido</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Gestor de sala</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Creador de contenido</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Gestor de sala</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Abrir archivo</value>
   </data>
 </root>

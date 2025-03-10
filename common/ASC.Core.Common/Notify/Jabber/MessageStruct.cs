@@ -28,16 +28,16 @@ namespace ASC.Core.Common.Notify.Jabber;
 
 public class MessageClass : IComparable<MessageClass>
 {
-    [JsonProperty("i")]
+    [JsonPropertyName("i")]
     public int Id { get; set; }
 
-    [JsonProperty("u")]
+    [JsonPropertyName("u")]
     public string UserName { get; set; }
 
-    [JsonProperty("t")]
+    [JsonPropertyName("t")]
     public string Text { get; set; }
 
-    [JsonProperty("d")]
+    [JsonPropertyName("d")]
     public DateTime DateTime { get; set; }
 
     public int CompareTo(MessageClass other)

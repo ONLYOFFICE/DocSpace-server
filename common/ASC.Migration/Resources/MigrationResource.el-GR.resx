@@ -162,4 +162,52 @@
   <data name="MigrationProjectFiles" xml:space="preserve">
     <value>Αρχεία έργου μετάβασης</value>
   </data>
+  <data name="CanNotAddUserInGroup" xml:space="preserve">
+    <value>Δεν ήταν δυνατή η προσθήκη του χρήστη {0} στην ομάδα {1}</value>
+  </data>
+  <data name="CanNotCreateFile" xml:space="preserve">
+    <value>Δεν ήταν δυνατή η δημιουργία του αρχείου {0}</value>
+  </data>
+  <data name="CanNotImportUser" xml:space="preserve">
+    <value>Δεν ήταν δυνατή η εισαγωγή του χρήστη</value>
+  </data>
+  <data name="CanNotImportUserFiles" xml:space="preserve">
+    <value>Δεν ήταν δυνατή η εισαγωγή αρχείων χρήστη</value>
+  </data>
+  <data name="CanNotParseArchive" xml:space="preserve">
+    <value>Δεν ήταν δυνατή η ανάλυση του αρχείου {0}</value>
+  </data>
+  <data name="CanNotParseArchives" xml:space="preserve">
+    <value>Δεν ήταν δυνατή η ανάλυση αρχείων</value>
+  </data>
+  <data name="CanNotParseUser" xml:space="preserve">
+    <value>Δεν ήταν δυνατή η ανάλυση του χρήστη {0}</value>
+  </data>
+  <data name="CanNotReadInfoFile" xml:space="preserve">
+    <value>Δεν ήταν δυνατή η ανάγνωση αρχείου πληροφοριών από {0}</value>
+  </data>
+  <data name="CanNotShare" xml:space="preserve">
+    <value>Δεν ήταν δυνατή η κοινοποίηση της καταχώρησης {0} με το {1}</value>
+  </data>
+  <data name="CanNotToUnzip" xml:space="preserve">
+    <value>Δεν ήταν δυνατή η αποσυμπίεση του {0}</value>
+  </data>
+  <data name="CreateFile" xml:space="preserve">
+    <value>Δημιουργία αρχείου {0}</value>
+  </data>
+  <data name="CreateFolder" xml:space="preserve">
+    <value>Δημιουργία φακέλου {0}</value>
+  </data>
+  <data name="CreateShareRoom" xml:space="preserve">
+    <value>δημιουργία  κοινοποιημένου δωματίου {0}</value>
+  </data>
+  <data name="СanNotImportCommonFiles" xml:space="preserve">
+    <value>Δεν ήταν δυνατή η εισαγωγή κοινών αρχείων</value>
+  </data>
+  <data name="СanNotImportProjectFiles" xml:space="preserve">
+    <value>Δεν ήταν δυνατή η εισαγωγή αρχείων έργου</value>
+  </data>
+  <data name="СreateRootFolder" xml:space="preserve">
+    <value>Δημιουργία ριζικού φακέλου</value>
+  </data>
 </root>

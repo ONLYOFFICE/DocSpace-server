@@ -27,9 +27,9 @@
 namespace ASC.Data.Storage.Log;
 internal static partial class StaticUploaderLogger
 {
-    [LoggerMessage(Level = LogLevel.Debug, Message = "UploadFile {result}")]
+    [LoggerMessage(LogLevel.Debug, "UploadFile {result}")]
     public static partial void DebugUploadFile(this ILogger<UploadOperation> logger, string result);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "UploadOperation")]
+    [LoggerMessage(LogLevel.Error, "UploadOperation")]
     public static partial void ErrorUploadOperation(this ILogger<UploadOperation> logger, Exception exception);
 }

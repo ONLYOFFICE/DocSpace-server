@@ -28,13 +28,7 @@ namespace ASC.Core.Common.Notify.Push.Dao;
 
 public class NotifyFileData
 {
-    [JsonProperty("id")]
     public string Id { get; set; }
-
-    [JsonProperty("title")]
     public string Title { get; set; }
-
-    [JsonProperty("extension")]
     public string Extension { get; set; }
-
 }

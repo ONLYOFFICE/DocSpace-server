@@ -27,14 +27,35 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// Parameters for changing version history
 /// </summary>
-public class ChangeHistoryRequestDto
+public class ChangeHistory
 {
-    /// <summary>File version</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// File version
+    /// </summary>
     public int Version { get; set; }
 
-    /// <summary>Marks as a version or revision</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Marks as a version or revision
+    /// </summary>
     public bool ContinueVersion { get; set; }
+}
+
+/// <summary>
+/// Request parameters for changing version history
+/// </summary>
+public class ChangeHistoryRequestDto<T>
+{
+    /// <summary>
+    /// File Id
+    /// </summary>
+    [FromRoute(Name = "fileId")]
+    public T FileId { get; set; }
+
+    /// <summary>
+    /// File
+    /// </summary>
+    [FromBody]
+    public ChangeHistory File { get; set; }
 }

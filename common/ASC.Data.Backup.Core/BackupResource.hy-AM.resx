@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="BackupNotFound" xml:space="preserve">
-    <value>Պահուստային ֆայլն անվավեր է. Խնդրում ենք օգտագործել ONLYOFFICE v11.5 կամ ավելի ուշ.</value>
+    <value>Պահուստային ֆայլն անվավեր է. Խնդրում ենք օգտագործել նույն պորտալում ստեղծված ֆայլը:</value>
   </data>
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Սահմանել գաղտնաբառ</value>

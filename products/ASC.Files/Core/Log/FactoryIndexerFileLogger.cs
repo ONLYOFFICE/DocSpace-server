@@ -27,6 +27,6 @@
 namespace ASC.Files.Core.Log;
 internal static partial class FactoryIndexerFileLogger
 {
-    [LoggerMessage(Level = LogLevel.Error, Message = "FactoryIndexerFile")]
+    [LoggerMessage(LogLevel.Error, "FactoryIndexerFile")]
     public static partial void ErrorFactoryIndexerFile(this ILogger logger, Exception exception);
 }

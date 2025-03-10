@@ -32,7 +32,15 @@ namespace ASC.Api.Core;
 [JsonConverter(typeof(ApiDateTimeConverter))]
 public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
 {
+    /// <summary>
+    /// UtcTime
+    /// </summary>
     public DateTime UtcTime { get; private set; }
+
+    /// <summary>
+    /// TimeZoneOffset
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "00:00:00")]
     public TimeSpan TimeZoneOffset { get; private set; }
 
     internal static readonly string[] Formats =
@@ -101,7 +109,7 @@ public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
                 return new ApiDateTime(dateTime, tzOffset);
             }
 
-            if (!data.EndsWith("Z", true, CultureInfo.InvariantCulture))
+            if (!data.EndsWith('Z'))
             {
                 tz ??= GetTimeZoneInfo(tenantManager, timeZoneConverter);
 

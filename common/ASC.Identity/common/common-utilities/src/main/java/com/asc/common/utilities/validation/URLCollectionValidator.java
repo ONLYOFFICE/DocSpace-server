@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -44,7 +44,7 @@ public class URLCollectionValidator
     implements ConstraintValidator<URLCollection, Collection<String>> {
   private Pattern pattern =
       Pattern.compile(
-          "https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)");
+          "https?:\\/\\/(www\\.)?[-a-zA-Z0-9.]{1,256}\\.[a-zA-Z]{2,6}(\\/[a-zA-Z0-9/_-]*(\\.[a-zA-Z]{2,6})?)?");
 
   /**
    * Validates the collection of URLs against the specified pattern.

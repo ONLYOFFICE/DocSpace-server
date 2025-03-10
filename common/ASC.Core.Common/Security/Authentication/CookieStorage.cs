@@ -134,12 +134,12 @@ public class CookieStorage(InstanceCrypto instanceCrypto,
 
     public async Task<string> EncryptCookieAsync(int tenant, Guid userid, int indexTenant, DateTime expires, int indexUser, int loginEventId)
     {
-        var s = string.Format("{0}${1}${2}${3}${4}${5}${6}${7}${8}",
+        var s = string.Format("{0}${1}${2}${3}${4:N}${5}${6}${7}${8}",
             string.Empty, //login
             tenant,
             string.Empty, //password
-            GetUserDependencySalt(),
-            userid.ToString("N"),
+            GetUserDependencySalt(), 
+            userid,
             indexTenant,
             expires.ToString(DateTimeFormat, CultureInfo.InvariantCulture),
             indexUser,
@@ -153,7 +153,7 @@ public class CookieStorage(InstanceCrypto instanceCrypto,
         var data = string.Empty;
         try
         {
-            if (_httpContext is { Request: not null, Connection.RemoteIpAddress: not null })
+            if (_httpContext is { Connection.RemoteIpAddress: not null })
             {
                 data = _httpContext.Connection.RemoteIpAddress.ToString();
             }

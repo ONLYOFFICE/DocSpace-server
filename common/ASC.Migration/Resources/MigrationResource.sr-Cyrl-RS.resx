@@ -162,4 +162,52 @@
   <data name="UserMigration" xml:space="preserve">
     <value>Миграција корисника {0} ({1}/{2})</value>
   </data>
+  <data name="CanNotAddUserInGroup" xml:space="preserve">
+    <value>Није могуће додати корисника {0} у групу {1}</value>
+  </data>
+  <data name="CanNotCreateFile" xml:space="preserve">
+    <value>Није могуће креирати датотеку {0}</value>
+  </data>
+  <data name="CanNotImportUser" xml:space="preserve">
+    <value>Није могуће увести корисника</value>
+  </data>
+  <data name="CanNotImportUserFiles" xml:space="preserve">
+    <value>Није могуће увести корисничке датотеке</value>
+  </data>
+  <data name="CanNotParseArchive" xml:space="preserve">
+    <value>Није могуће обрадити {0} архиву</value>
+  </data>
+  <data name="CanNotParseArchives" xml:space="preserve">
+    <value>Није могуће обрадити архиве</value>
+  </data>
+  <data name="CanNotParseUser" xml:space="preserve">
+    <value>Није могуће обрадити корисника {0}</value>
+  </data>
+  <data name="CanNotReadInfoFile" xml:space="preserve">
+    <value>Није могуће читати информативну датотеку са {0}</value>
+  </data>
+  <data name="CanNotShare" xml:space="preserve">
+    <value>Није могуће поделити унос {0} на {1}</value>
+  </data>
+  <data name="CanNotToUnzip" xml:space="preserve">
+    <value>Није могуће распаковати {0}</value>
+  </data>
+  <data name="CreateFile" xml:space="preserve">
+    <value>Креирај датотеку {0}</value>
+  </data>
+  <data name="CreateFolder" xml:space="preserve">
+    <value>Креирај фолдер {0}</value>
+  </data>
+  <data name="CreateShareRoom" xml:space="preserve">
+    <value>креирај заједничку просторију {0}</value>
+  </data>
+  <data name="СanNotImportCommonFiles" xml:space="preserve">
+    <value>Није могуће увести заједничке датотеке</value>
+  </data>
+  <data name="СanNotImportProjectFiles" xml:space="preserve">
+    <value>Није могуће увести датотеке пројекта</value>
+  </data>
+  <data name="СreateRootFolder" xml:space="preserve">
+    <value>Креирај роот фолдер</value>
+  </data>
 </root>

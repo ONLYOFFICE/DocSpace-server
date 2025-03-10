@@ -34,14 +34,13 @@ public class TenantLogoManager(
     TenantManager tenantManager,
     AuthContext authContext,
     IConfiguration configuration,
-    IDistributedCache distributedCache,
-    CoreBaseSettings coreBaseSettings)
+    IFusionCache hybridCache)
 {
     public bool WhiteLabelEnabled
     {
         get
         {
-            var hideSettings = (configuration["web:hide-settings"] ?? "").Split(',', ';', ' ');
+            var hideSettings = configuration.GetSection("web:hide-settings").Get<string[]>() ?? [];
             return !hideSettings.Contains("WhiteLabel", StringComparer.CurrentCultureIgnoreCase);
         }
     }
@@ -56,7 +55,7 @@ public class TenantLogoManager(
             if (timeParam)
             {
                 var now = DateTime.Now;
-                faviconPath = string.Format("{0}?t={1}", faviconPath, now.Ticks);
+                faviconPath = $"{faviconPath}?t={now.Ticks}";
             }
         }
         else
@@ -120,9 +119,20 @@ public class TenantLogoManager(
         {
             var tenantWhiteLabelSettings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
 
-            return await tenantWhiteLabelSettings.GetLogoTextAsync(settingsManager) ?? TenantWhiteLabelSettings.DefaultLogoText;
+            return await tenantWhiteLabelSettings.GetLogoTextAsync(settingsManager);
         }
         return TenantWhiteLabelSettings.DefaultLogoText;
+    }
+
+    public async Task<bool> IsDefaultLogoSettingsAsync()
+    {
+        if (WhiteLabelEnabled)
+        {
+            var tenantWhiteLabelSettings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
+
+            return await tenantWhiteLabelSettings.GetIsDefault(settingsManager);
+        }
+        return true;
     }
 
     public bool IsRetina(HttpRequest request)
@@ -137,19 +147,19 @@ public class TenantLogoManager(
 
     private async Task<bool> GetWhiteLabelPaidAsync()
     {
-        return (await tenantManager.GetTenantQuotaAsync(await tenantManager.GetCurrentTenantIdAsync())).WhiteLabel;
+        return (await tenantManager.GetCurrentTenantQuotaAsync()).Customization;
     }
     
     public async Task<bool> GetEnableWhitelabelAsync()
     {
-        return coreBaseSettings.Standalone || WhiteLabelEnabled && await GetWhiteLabelPaidAsync();
+        return WhiteLabelEnabled && await GetWhiteLabelPaidAsync();
     }
     
     public async Task DemandWhiteLabelPermissionAsync()
     {
         if (!await GetEnableWhitelabelAsync())
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption, "WhiteLabel");
+            throw new BillingException(Resource.ErrorNotAllowedOption, "Customization");
         }
     }
     
@@ -207,29 +217,26 @@ public class TenantLogoManager(
 
         foreach (var customCulture in customCultures)
         {
-            await distributedCache.RemoveAsync(await GetCacheKey(customCulture));
+            await hybridCache.RemoveAsync(GetCacheKey(customCulture));
         }
 
-        await distributedCache.RemoveAsync(await GetCacheKey(string.Empty));
+        await hybridCache.RemoveAsync(GetCacheKey(string.Empty));
     }
 
 
     private async Task<byte[]> GetMailLogoDataFromCacheAsync(string culture)
     {
-        return await distributedCache.GetAsync(await GetCacheKey(culture));
+        return await hybridCache.GetOrDefaultAsync<byte[]>(GetCacheKey(culture));
     }
 
     private async Task InsertMailLogoDataToCacheAsync(byte[] data, string culture)
     {
-        await distributedCache.SetAsync(await GetCacheKey(culture), data, new DistributedCacheEntryOptions
-        {
-            AbsoluteExpiration = DateTime.UtcNow.Add(TimeSpan.FromDays(1))
-        });
+        await hybridCache.SetAsync(GetCacheKey(culture), data, TimeSpan.FromDays(1));
     }
 
-    private async Task<string> GetCacheKey(string culture)
+    private string GetCacheKey(string culture)
     {
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         var regionalPath = GetLogoRegionalPath(culture);
         return $"letterlogodata{tenantId}{regionalPath}";
     }

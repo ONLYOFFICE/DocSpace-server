@@ -35,12 +35,7 @@ public abstract class PatternFormatter : IPatternFormatter
 
     protected PatternFormatter() { }
 
-    protected PatternFormatter(string tagSearchRegExp)
-        : this(tagSearchRegExp, false)
-    {
-    }
-
-    protected PatternFormatter(string tagSearchRegExp, bool formatMessage)
+    protected PatternFormatter(string tagSearchRegExp, bool formatMessage = false)
     {
         if (string.IsNullOrEmpty(tagSearchRegExp))
         {

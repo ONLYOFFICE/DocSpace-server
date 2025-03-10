@@ -28,24 +28,24 @@ namespace ASC.Web.Api.Log;
 
 internal static partial class FirstTimeTenantSettingsLogger
 {
-    [LoggerMessage(Level = LogLevel.Error, Message = "{tenantId}: owner id is empty.")]
+    [LoggerMessage(LogLevel.Error, "{tenantId}: owner id is empty.")]
     public static partial void ErrorOwnerEmpty(this ILogger<FirstTimeTenantSettings> logger, int tenantId);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "FirstTimeTenantSettings")]
+    [LoggerMessage(LogLevel.Error, "FirstTimeTenantSettings")]
     public static partial void ErrorFirstTimeTenantSettings(this ILogger<FirstTimeTenantSettings> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "TrySetLanguage")]
+    [LoggerMessage(LogLevel.Error, "TrySetLanguage")]
     public static partial void ErrorTrySetLanguage(this ILogger<FirstTimeTenantSettings> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Instance id: {amiId}")]
-    public static partial void DebugInstanceId(this ILogger<FirstTimeTenantSettings> logger, string amiId);
+    [LoggerMessage(LogLevel.Debug, "Request AMI {requestUrl} {responseString}")]
+    public static partial void DebugRequestAMI(this ILogger<FirstTimeTenantSettings> logger, string requestUrl, string responseString);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Request AMI id")]
-    public static partial void ErrorRequestAMIId(this ILogger<FirstTimeTenantSettings> logger, Exception exception);
+    [LoggerMessage(LogLevel.Error, "Request AMI")]
+    public static partial void ErrorRequestAMI(this ILogger<FirstTimeTenantSettings> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Subscribe response: {response}")]
+    [LoggerMessage(LogLevel.Debug, "Subscribe response: {response}")]
     public static partial void DebugSubscribeResponse(this ILogger<FirstTimeTenantSettings> logger, HttpResponseMessage response);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Subscribe request")]
+    [LoggerMessage(LogLevel.Error, "Subscribe request")]
     public static partial void ErrorSubscribeRequest(this ILogger<FirstTimeTenantSettings> logger, Exception exception);
 }

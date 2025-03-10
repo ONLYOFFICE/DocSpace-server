@@ -27,81 +27,81 @@
 namespace ASC.ActiveDirectory.Log;
 internal static partial class LdapUserImporterLogger
 {
-    [LoggerMessage(Level = LogLevel.Debug, Message = "LdapUserImporter.GetGroupUsers(Group name: {groupName})")]
+    [LoggerMessage(LogLevel.Debug, "LdapUserImporter.GetGroupUsers(Group name: {groupName})")]
     public static partial void DebugGetGroupUsers(this ILogger<LdapUserImporter> logger, string groupName);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Found nested LDAP Group: {groupName}")]
+    [LoggerMessage(LogLevel.Debug, "Found nested LDAP Group: {groupName}")]
     public static partial void DebugFoundNestedLdapGroup(this ILogger<LdapUserImporter> logger, string groupName);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Skip already watched nested LDAP Group: {groupName}")]
+    [LoggerMessage(LogLevel.Debug, "Skip already watched nested LDAP Group: {groupName}")]
     public static partial void DebugSkipAlreadyWatched(this ILogger<LdapUserImporter> logger, string groupName);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "IsUserExistInGroups(login: '{login}' sid: '{sid}')")]
+    [LoggerMessage(LogLevel.Error, "IsUserExistInGroups(login: '{login}' sid: '{sid}')")]
     public static partial void ErrorIsUserExistInGroups(this ILogger<LdapUserImporter> logger, string login, string sid, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "GetAndCheckCurrentGroups(login: '{login}' sid: '{sid}')")]
+    [LoggerMessage(LogLevel.Error, "GetAndCheckCurrentGroups(login: '{login}' sid: '{sid}')")]
     public static partial void ErrorGetAndCheckCurrentGroups(this ILogger<LdapUserImporter> logger, string login, string sid, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "TrySyncUserGroupMembership(groupname: '{groupName}' sid: '{sid}') no portal group found, creating")]
+    [LoggerMessage(LogLevel.Debug, "TrySyncUserGroupMembership(groupname: '{groupName}' sid: '{sid}') no portal group found, creating")]
     public static partial void DebugTrySyncUserGroupMembershipCreatingPortalGroup(this ILogger<LdapUserImporter> logger, string groupName, string sid);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "TrySyncUserGroupMembership(username: '{userName}' sid: '{userSid}') adding user to group (groupname: '{groupName}' sid: '{groupSid}')")]
+    [LoggerMessage(LogLevel.Debug, "TrySyncUserGroupMembership(username: '{userName}' sid: '{userSid}') adding user to group (groupname: '{groupName}' sid: '{groupSid}')")]
     public static partial void DebugTrySyncUserGroupMembershipAddingUserToGroup(this ILogger<LdapUserImporter> logger, string userName, string userSid, string groupName, string groupSid);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "TrySyncUserGroupMembership(username: '{userName}' sid: '{userSid}') removing user from group (groupname: '{groupName}' sid: '{groupSid}')")]
+    [LoggerMessage(LogLevel.Debug, "TrySyncUserGroupMembership(username: '{userName}' sid: '{userSid}') removing user from group (groupname: '{groupName}' sid: '{groupSid}')")]
     public static partial void DebugTrySyncUserGroupMembershipRemovingUserFromGroup(this ILogger<LdapUserImporter> logger, string userName, string userSid, string groupName, string groupSid);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "TryLoadLDAPUsers(): Incorrect filter. userFilter = {userFilter}")]
+    [LoggerMessage(LogLevel.Error, "TryLoadLDAPUsers(): Incorrect filter. userFilter = {userFilter}")]
     public static partial void ErrorTryLoadLDAPUsersIncorrectUserFilter(this ILogger<LdapUserImporter> logger, string userFilter);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "TryLoadLDAPGroups(): Incorrect group filter. groupFilter = {groupFilter}")]
+    [LoggerMessage(LogLevel.Error, "TryLoadLDAPGroups(): Incorrect group filter. groupFilter = {groupFilter}")]
     public static partial void ErrorTryLoadLDAPUsersIncorrectGroupFilter(this ILogger<LdapUserImporter> logger, string groupFilter);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "LoadLDAPDomain(): Error")]
+    [LoggerMessage(LogLevel.Error, "LoadLDAPDomain(): Error")]
     public static partial void ErrorLoadLDAPDomain(this ILogger<LdapUserImporter> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Login Attribute parameter ({loginAttributeParametr}) not found: DN = {distinguishedName}")]
+    [LoggerMessage(LogLevel.Debug, "Login Attribute parameter ({loginAttributeParametr}) not found: DN = {distinguishedName}")]
     public static partial void DebugLoginAttributeParameterNotFound(this ILogger<LdapUserImporter> logger, string loginAttributeParametr, string distinguishedName);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Login Attribute parameter ({loginAttributeParametr}) not found: loginAttribute = {loginAttribute}")]
+    [LoggerMessage(LogLevel.Error, "Login Attribute parameter ({loginAttributeParametr}) not found: loginAttribute = {loginAttribute}")]
     public static partial void ErrorLoginAttributeParameterNotFound(this ILogger<LdapUserImporter> logger, string loginAttributeParametr, string loginAttribute, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "User Attribute parameter ({userAttributeParametr}) not found: DN = {distinguishedName}")]
+    [LoggerMessage(LogLevel.Debug, "User Attribute parameter ({userAttributeParametr}) not found: DN = {distinguishedName}")]
     public static partial void DebugUserAttributeParameterNotFound(this ILogger<LdapUserImporter> logger, string userAttributeParametr, string distinguishedName);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "User Attribute parameter ({userAttributeParametr}) not found: userAttr = {userAttribute}")]
+    [LoggerMessage(LogLevel.Error, "User Attribute parameter ({userAttributeParametr}) not found: userAttr = {userAttribute}")]
     public static partial void ErrorUserAttributeParameterNotFound(this ILogger<LdapUserImporter> logger, string userAttributeParametr, string userAttribute, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Group Attribute parameter ({groupAttributeParametr}) not found: {groupAttribute}")]
+    [LoggerMessage(LogLevel.Error, "Group Attribute parameter ({groupAttributeParametr}) not found: {groupAttribute}")]
     public static partial void ErrorGroupAttributeParameterNotFound(this ILogger<LdapUserImporter> logger, string groupAttributeParametr, string groupAttribute, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Group Name Attribute parameter ({groupNameAttributeParametr}) not found: {groupAttribute}")]
+    [LoggerMessage(LogLevel.Debug, "Group Name Attribute parameter ({groupNameAttributeParametr}) not found: {groupAttribute}")]
     public static partial void DebugGroupNameAttributeParameterNotFound(this ILogger<LdapUserImporter> logger, string groupNameAttributeParametr, string groupAttribute);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "LdapUserImporter.FindUsersByPrimaryGroup()")]
+    [LoggerMessage(LogLevel.Debug, "LdapUserImporter.FindUsersByPrimaryGroup()")]
     public static partial void DebugFindUsersByPrimaryGroup(this ILogger<LdapUserImporter> logger);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "LdapUserImporter.FindUserByMember(user attr: {userAttribute})")]
+    [LoggerMessage(LogLevel.Debug, "LdapUserImporter.FindUserByMember(user attr: {userAttribute})")]
     public static partial void DebugFindUserByMember(this ILogger<LdapUserImporter> logger, string userAttribute);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "LdapUserImporter.FindGroupByMember(member: {member})")]
+    [LoggerMessage(LogLevel.Debug, "LdapUserImporter.FindGroupByMember(member: {member})")]
     public static partial void DebugFindGroupByMember(this ILogger<LdapUserImporter> logger, string member);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "FindLdapUser->ToUserInfo() failed")]
+    [LoggerMessage(LogLevel.Error, "FindLdapUser->ToUserInfo() failed")]
     public static partial void ErrorToUserInfo(this ILogger<LdapUserImporter> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "LDAP: DN: '{distinguishedName}' Login Attribute '{loginAttribute}' is empty")]
+    [LoggerMessage(LogLevel.Warning, "LDAP: DN: '{distinguishedName}' Login Attribute '{loginAttribute}' is empty")]
     public static partial void WarnLoginAttributeIsEmpty(this ILogger<LdapUserImporter> logger, string distinguishedName, string loginAttribute);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "FindLdapUsers(login '{login}') found: {usersCount} users")]
+    [LoggerMessage(LogLevel.Debug, "FindLdapUsers(login '{login}') found: {usersCount} users")]
     public static partial void DebugFindLdapUsers(this ILogger<LdapUserImporter> logger, string login, int usersCount);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "LdapUserImporter->Login(login: '{login}', dn: '{sid}') failed. Error: missing DN or SID")]
+    [LoggerMessage(LogLevel.Debug, "LdapUserImporter->Login(login: '{login}', dn: '{sid}') failed. Error: missing DN or SID")]
     public static partial void DebugLdapUserImporterFailed(this ILogger<LdapUserImporter> logger, string login, string sid);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "LdapUserImporter.Login('{login}')")]
+    [LoggerMessage(LogLevel.Debug, "LdapUserImporter.Login('{login}')")]
     public static partial void DebugLdapUserImporterLogin(this ILogger<LdapUserImporter> logger, string login);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "LdapUserImporter->Login(login: '{login}') failed")]
+    [LoggerMessage(LogLevel.Error, "LdapUserImporter->Login(login: '{login}') failed")]
     public static partial void ErrorLdapUserImporterLoginFailed(this ILogger<LdapUserImporter> logger, string login, Exception exception);
 }

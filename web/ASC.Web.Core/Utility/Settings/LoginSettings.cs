@@ -45,6 +45,15 @@ public class LoginSettings : ISettings<LoginSettings>
             CheckPeriod = 60
         };
     }
+
+    public bool IsDefault
+    {
+        get
+        {
+            var def = GetDefault();
+            return def.AttemptCount == AttemptCount && def.BlockTime == BlockTime && def.CheckPeriod == CheckPeriod;
+        }
+    }
 }
 
 public class LoginSettingsWrapper(LoginSettings loginSettings)

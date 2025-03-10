@@ -108,7 +108,7 @@ public class ClearEventsService(ILogger<ClearEventsService> logger, IServiceScop
 
             ids = await ae.Select(r => r.ef).ToListAsync();
 
-            if (!ids.Any())
+            if (ids.Count == 0)
             {
                 return;
             }
@@ -116,6 +116,6 @@ public class ClearEventsService(ILogger<ClearEventsService> logger, IServiceScop
             table.RemoveRange(ids);
             await ef.SaveChangesAsync();
 
-        } while (ids.Any());
+        } while (ids.Count != 0);
     }
 }

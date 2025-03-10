@@ -26,48 +26,46 @@
 
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class AuthenticationTokenDto
 {
-    /// <summary>Authentication token</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Authentication token
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "abcde12345")]
     public string Token { get; set; }
 
-    /// <summary>Token expiration time</summary>
-    /// <type>System.DateTime, System</type>
+    /// <summary>
+    /// Token expiration time
+    /// </summary>
     public DateTime Expires { get; set; }
 
-    /// <summary>Specifies if the authentication code is sent by SMS or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the authentication code is sent by SMS or not
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
     public bool Sms { get; set; }
 
-    /// <summary>Phone number</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Phone number
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "")]
     public string PhoneNoise { get; set; }
 
-    /// <summary>Specifies if the two-factor application is used or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the two-factor application is used or not
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
     public bool Tfa { get; set; }
 
-    /// <summary>Two-factor authentication key</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Two-factor authentication key
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "")]
     public string TfaKey { get; set; }
 
-    /// <summary>Confirmation email URL</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Confirmation email URL
+    /// </summary>
+    [Url]
     public string ConfirmUrl { get; set; }
-
-    public static AuthenticationTokenDto GetSample()
-    {
-        return new AuthenticationTokenDto
-        {
-            Expires = DateTime.UtcNow,
-            Token = "abcde12345",
-            Sms = false,
-            PhoneNoise = null,
-            Tfa = false,
-            TfaKey = null
-        };
-    }
 }

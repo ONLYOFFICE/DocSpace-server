@@ -92,14 +92,12 @@ internal class ProviderFileDao(
 
     public async IAsyncEnumerable<File<string>> GetFilesAsync(IEnumerable<string> fileIds)
     {
-        foreach (var group in _selectorFactory.GetSelectors(fileIds))
+        foreach (var (selectorLocal, matchedIds) in _selectorFactory.GetSelectors(fileIds))
         {
-            var selectorLocal = group.Key;
             if (selectorLocal == null)
             {
                 continue;
             }
-            var matchedIds = group.Value;
 
             foreach (var matchedId in matchedIds.GroupBy(selectorLocal.GetIdCode))
             {
@@ -116,17 +114,14 @@ internal class ProviderFileDao(
         }
     }
 
-    public async IAsyncEnumerable<File<string>> GetFilesFilteredAsync(IEnumerable<string> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, 
-        bool searchInContent, bool checkShared = false)
+    public async IAsyncEnumerable<File<string>> GetFilesFilteredAsync(IEnumerable<string> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, bool searchInContent, bool checkShared = false)
     {
-        foreach (var group in _selectorFactory.GetSelectors(fileIds))
+        foreach (var (selectorLocal, matchedIds) in _selectorFactory.GetSelectors(fileIds))
         {
-            var selectorLocal = group.Key;
             if (selectorLocal == null)
             {
                 continue;
             }
-            var matchedIds = group.Value;
 
             foreach (var matchedId in matchedIds.GroupBy(selectorLocal.GetIdCode))
             {
@@ -157,12 +152,12 @@ internal class ProviderFileDao(
     }
 
     public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
-        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default, bool withShared = false)
+        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = null, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null)
     {
         var selector = _selectorFactory.GetSelector(parentId);
 
         var fileDao = selector.GetFileDao(parentId);
-        var files = fileDao.GetFilesAsync(selector.ConvertId(parentId), orderBy, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, withSubfolders, excludeSubject);
+        var files = fileDao.GetFilesAsync(selector.ConvertId(parentId), orderBy, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, withSubfolders, excludeSubject, formsItemDto: formsItemDto);
         var result = await files.Where(r => r != null).ToListAsync();
 
         foreach (var r in result)
@@ -321,6 +316,33 @@ internal class ProviderFileDao(
     {
         await DeleteFileAsync(fileId, Guid.Empty);
     }
+
+    public async Task DeleteFileVersionAsync(File<string> file, int version)
+    {
+        ArgumentNullException.ThrowIfNull(file);
+
+        if (file.Id == null)
+        {
+            throw new ArgumentException("No file id or folder id toFolderId determine provider");
+        }
+
+        var fileId = file.Id;
+        var folderId = file.ParentId;
+
+        //Convert
+        var selector = _selectorFactory.GetSelector(fileId);
+
+        file.Id = selector.ConvertId(fileId);
+        if (folderId != null)
+        {
+            file.ParentId = selector.ConvertId(folderId);
+        }
+
+        var fileDao = selector.GetFileDao(fileId);
+
+        await fileDao.DeleteFileVersionAsync(file, version);
+    }
+
     public async Task DeleteFileAsync(string fileId, Guid ownerId)
     {
         var selector = _selectorFactory.GetSelector(fileId);
@@ -525,27 +547,27 @@ internal class ProviderFileDao(
         return file;
     }
 
-    public override Task<Stream> GetThumbnailAsync(string fileId, int width, int height)
+    public override Task<Stream> GetThumbnailAsync(string fileId, uint width, uint height)
     {
         var selector = _selectorFactory.GetSelector(fileId);
         var fileDao = selector.GetFileDao(fileId);
         return fileDao.GetThumbnailAsync(selector.ConvertId(fileId), width, height);
     }
 
-    public override Task<Stream> GetThumbnailAsync(File<string> file, int width, int height)
+    public override Task<Stream> GetThumbnailAsync(File<string> file, uint width, uint height)
     {
         var fileDao = GetFileDao(file);
         return fileDao.GetThumbnailAsync(file, width, height);
     }
 
-    public async Task SetCustomOrder(string fileId, string parentFolderId, int order)
+    public async Task<int> SetCustomOrder(string fileId, string parentFolderId, int order)
     {
         var selector = _selectorFactory.GetSelector(fileId);
         var fileDao = selector.GetFileDao(fileId);
-        await fileDao.SetCustomOrder(fileId, parentFolderId, order);
+        return await fileDao.SetCustomOrder(fileId, parentFolderId, order);
     }
 
-    public async Task InitCustomOrder(IEnumerable<string> fileIds, string parentFolderId)
+    public async Task InitCustomOrder(Dictionary<string, int> fileIds, string parentFolderId)
     {
         var selector = _selectorFactory.GetSelector(parentFolderId);
         var fileDao = selector.GetFileDao(parentFolderId);

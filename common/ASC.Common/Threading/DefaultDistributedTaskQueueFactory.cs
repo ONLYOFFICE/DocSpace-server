@@ -26,29 +26,28 @@
 
 namespace ASC.Common.Threading;
 
-public class DefaultDistributedTaskQueueFactory(IServiceProvider serviceProvider,
-                                              IOptionsMonitor<DistributedTaskQueueFactoryOptions> options)
-    : IDistributedTaskQueueFactory
+public class DefaultDistributedTaskQueueFactory(IServiceProvider serviceProvider, IOptionsMonitor<DistributedTaskQueueFactoryOptions> options) : IDistributedTaskQueueFactory 
+{
+    public DistributedTaskQueue<T> CreateQueue<T>(int timeUntilUnregisterInSeconds = 60) where T : DistributedTask
     {
-    public DistributedTaskQueue CreateQueue<T>(int timeUntilUnregisterInSeconds = 60) where T : DistributedTask
-    {
-        return CreateQueue(typeof(T).FullName, timeUntilUnregisterInSeconds);
-    }
-
-    public DistributedTaskQueue CreateQueue(Type type, int timeUntilUnregisterInSeconds = 60)
-    {
-        return CreateQueue(type.FullName, timeUntilUnregisterInSeconds);
-    }
-
-    public DistributedTaskQueue CreateQueue(string name = default, int timeUntilUnregisterInSeconds = 60)
-    {
-        var option = options.Get(name);
-        var queue = serviceProvider.GetRequiredService<DistributedTaskQueue>();
+        var option = options.Get(typeof(T).FullName ?? typeof(T).Name);
+        var queue = serviceProvider.GetRequiredService<DistributedTaskQueue<T>>();
 
         queue.MaxThreadsCount = option.MaxThreadsCount;
-        queue.Name = name;
+        queue.Name = typeof(T).FullName ?? typeof(T).Name;
         queue.TimeUntilUnregisterInSeconds = timeUntilUnregisterInSeconds;
 
         return queue;
+    }
+}
+
+public static class DefaultDistributedTaskQueueFactoryExtension
+{
+    public static void RegisterQueue<T>(this IServiceCollection services, int maxThreadsCount) where T : DistributedTask
+    { 
+        services.Configure<DistributedTaskQueueFactoryOptions>(typeof(T).FullName ?? typeof(T).Name, options =>
+        {
+            options.MaxThreadsCount = maxThreadsCount;
+        });
     }
 }

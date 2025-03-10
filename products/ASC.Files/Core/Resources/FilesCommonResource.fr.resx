@@ -335,9 +335,6 @@ Compatibilité maximale avec docx, xlsx, pptx.</value>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Éditeur</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Administrateur de la salle</value>
-  </data>
   <data name="RoleEnum_User" xml:space="preserve">
     <value>Utilisateur</value>
   </data>
@@ -361,9 +358,6 @@ Compatibilité maximale avec docx, xlsx, pptx.</value>
   </data>
   <data name="AceStatusEnum_Editing" xml:space="preserve">
     <value>Éditeur</value>
-  </data>
-  <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
-    <value>Administrateur de la salle</value>
   </data>
   <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
     <value>La nouvelle version ne peut pas être identique à la version actuelle</value>
@@ -467,26 +461,20 @@ Compatibilité maximale avec docx, xlsx, pptx.</value>
   <data name="Date" xml:space="preserve">
     <value>Date</value>
   </data>
-  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
-    <value>Utilisateur avancé</value>
-  </data>
-  <data name="RoleEnum_PowerUser" xml:space="preserve">
-    <value>Utilisateur avancé</value>
-  </data>
   <data name="User" xml:space="preserve">
     <value>Utilisateur</value>
   </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Il n'est pas possible de déplacer plusieurs fichiers vers la salle de remplissage des formulaires. Déplacez un seul formulaire PDF ONLYOFFICE à la fois.</value>
+    <value>Il n'est pas possible de déplacer plusieurs fichiers vers la salle de remplissage des formulaires. Déplacez un seul formulaire PDF {0} à la fois.</value>
   </data>
   <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Le déplacement de dossiers vers la salle de remplissage des formulaires n'est pas possible. Déplacez un seul formulaire PDF ONLYOFFICE à la fois.</value>
+    <value>Le déplacement de dossiers vers la salle de remplissage des formulaires n'est pas possible. Déplacez un seul formulaire PDF {0} à la fois.</value>
   </data>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Le fichier ne peut pas être déplacé dans cette salle. Veuillez essayer de déplacer le formulaire PDF ONLYOFFICE.</value>
+    <value>Le fichier ne peut pas être déplacé dans cette salle. Veuillez essayer de déplacer le formulaire PDF {0}.</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Le fichier ne peut pas être téléchargé dans cette salle. Veuillez essayer de télécharger le formulaire PDF ONLYOFFICE.</value>
+    <value>Le fichier ne peut pas être téléchargé dans cette salle. Veuillez essayer de télécharger le formulaire PDF {0}.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Lien pour remplir</value>
@@ -497,7 +485,22 @@ Compatibilité maximale avec docx, xlsx, pptx.</value>
   <data name="FormNumber" xml:space="preserve">
     <value>Numéro de formulaire</value>
   </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Utilisateur externe</value>
+  </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Créateur de contenu</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Responsable de salle</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Créateur de contenu</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Responsable de salle</value>
+  </data>
   <data name="OpenForm" xml:space="preserve">
-    <value>Ouvrir le formulaire</value>
+    <value>Ouvrir le fichier</value>
   </data>
 </root>

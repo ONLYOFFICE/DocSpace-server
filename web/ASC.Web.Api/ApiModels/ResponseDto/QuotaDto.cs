@@ -26,81 +26,94 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class QuotaDto
 {
-    /// <summary>ID</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// ID
+    /// </summary>
     public int Id { get; set; }
 
-    /// <summary>Title</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Title
+    /// </summary>
     public string Title { get; set; }
 
-    /// <summary>Price</summary>
-    /// <type>ASC.Web.Api.ApiModels.ResponseDto.PriceDto, ASC.Web.Api</type>
+    /// <summary>
+    /// Price
+    /// </summary>
     public PriceDto Price { get; set; }
 
-    /// <summary>Specifies if the quota is nonprofit or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the quota is nonprofit or not
+    /// </summary>
     public bool NonProfit { get; set; }
 
-    /// <summary>Specifies if the quota is free or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the quota is free or not
+    /// </summary>
     public bool Free { get; set; }
 
-    /// <summary>Specifies if the quota is trial or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the quota is trial or not
+    /// </summary>
     public bool Trial { get; set; }
 
-    /// <summary>List of quota features</summary>
-    /// <type>System.Collections.Generic.IEnumerable{ASC.Web.Api.ApiModels.ResponseDto.TenantQuotaFeatureDto}, ASC.Web.Api</type>
+    /// <summary>
+    /// List of quota features
+    /// </summary>
     public IEnumerable<TenantQuotaFeatureDto> Features { get; set; }
 
-    /// <summary>User quota</summary>
-    /// <type>ASC.Core.Tenants.TenantEntityQuotaSettings, ASC.Core.Common</type>
+    /// <summary>
+    /// User quota
+    /// </summary>
     public TenantEntityQuotaSettings UsersQuota {  get; set; }
 
-    /// <summary>Room quota</summary>
-    /// <type>ASC.Core.Tenants.TenantEntityQuotaSettings, ASC.Core.Common</type>
+    /// <summary>
+    /// Room quota
+    /// </summary>
     public TenantEntityQuotaSettings RoomsQuota {  get; set; }
 
-    /// <summary>Tenant custom quota</summary>
-    /// <type>ASC.Core.Tenants.TenantQuotaSettings, ASC.Core.Common</type>
+    /// <summary>
+    /// Tenant custom quota
+    /// </summary>
     public TenantQuotaSettings TenantCustomQuota { get; set; }
 }
 
-/// <summary>
-/// </summary>
 public class TenantQuotaFeatureDto : IEquatable<TenantQuotaFeatureDto>
 {
-    /// <summary>ID</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// ID
+    /// </summary>
     public string Id { get; set; }
 
-    /// <summary>Title</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Title
+    /// </summary>
     public string Title { get; set; }
 
-    /// <summary>Image URL</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Image URL
+    /// </summary>
     public string Image { get; set; }
 
-    /// <summary>Value</summary>
-    /// <type>System.Object, System</type>
+    /// <summary>
+    /// Value
+    /// </summary>
     public object Value { get; set; }
 
-    /// <summary>Type</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Type
+    /// </summary>
     public string Type { get; set; }
 
-    /// <summary>Used feature parameters</summary>
-    /// <type>ASC.Web.Api.ApiModels.ResponseDto.FeatureUsedDto, ASC.Web.Api</type>
+    /// <summary>
+    /// Used feature parameters
+    /// </summary>
     public FeatureUsedDto Used { get; set; }
 
-    /// <summary>Price title</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Price title
+    /// </summary>
     public string PriceTitle { get; set; }
 
     public bool Equals(TenantQuotaFeatureDto other)
@@ -117,28 +130,29 @@ public class TenantQuotaFeatureDto : IEquatable<TenantQuotaFeatureDto>
     public override int GetHashCode() => Id.GetHashCode();
 }
 
-/// <summary>
-/// </summary>
 public class PriceDto
 {
-    /// <summary>Value</summary>
-    /// <type>System.Nullable{System.Decimal}, System</type>
+    /// <summary>
+    /// Value
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 10.0)]
     public decimal? Value { get; set; }
 
-    /// <summary>Currency symbol</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Currency symbol
+    /// </summary>
     public string CurrencySymbol { get; set; }
 }
 
-/// <summary>
-/// </summary>
 public class FeatureUsedDto
 {
-    /// <summary>Value</summary>
-    /// <type>System.Object, System</type>
+    /// <summary>
+    /// Value
+    /// </summary>
     public object Value { get; set; }
 
-    /// <summary>Title</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Title
+    /// </summary>
     public string Title { get; set; }
 }

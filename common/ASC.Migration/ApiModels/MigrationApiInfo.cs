@@ -29,50 +29,105 @@ namespace ASC.Migration.Core.Models.Api;
 [ProtoContract]
 public class MigrationApiInfo
 {
+    /// <summary>
+    /// Migrator name
+    /// </summary>
     [ProtoMember(1)]
     public string MigratorName { get; set; }
 
+    /// <summary>
+    /// Operation
+    /// </summary>
     [ProtoMember(2)]
     public string Operation { get; set; }
 
+    /// <summary>
+    /// Failed archives
+    /// </summary>
     [ProtoMember(3)]
-    public List<string> FailedArchives { get; set; } = new List<string>();
+    public List<string> FailedArchives { get; set; } = [];
 
+    /// <summary>
+    /// Users
+    /// </summary>
     [ProtoMember(4)]
-    public List<MigratingApiUser> Users { get; set; } = new List<MigratingApiUser>();
+    public List<MigratingApiUser> Users { get; set; } = [];
 
+    /// <summary>
+    /// Without email users
+    /// </summary>
     [ProtoMember(5)]
-    public List<MigratingApiUser> WithoutEmailUsers { get; set; } = new List<MigratingApiUser>();
+    public List<MigratingApiUser> WithoutEmailUsers { get; set; } = [];
 
+    /// <summary>
+    /// Exist users
+    /// </summary>
     [ProtoMember(6)]
-    public List<MigratingApiUser> ExistUsers { get; set; } = new List<MigratingApiUser>();
-    
-    [ProtoMember(7)]
-    public List<MigratingApiGroup> Groups { get; set; } = new List<MigratingApiGroup>();
+    public List<MigratingApiUser> ExistUsers { get; set; } = [];
 
+    /// <summary>
+    /// Groups
+    /// </summary>
+    [ProtoMember(7)]
+    public List<MigratingApiGroup> Groups { get; set; } = [];
+
+    /// <summary>
+    /// Import personal files
+    /// </summary>
     [ProtoMember(8)]
-    public bool ImportPersonalFiles { get; set; } 
+    public bool ImportPersonalFiles { get; set; }
+
+    /// <summary>
+    /// Import shared files
+    /// </summary>
     [ProtoMember(9)]
     public bool ImportSharedFiles { get; set; }
-    
+
+    /// <summary>
+    /// Import shared folders
+    /// </summary>
     [ProtoMember(10)]
-    public bool ImportSharedFolders { get; set; } 
-    
+    public bool ImportSharedFolders { get; set; }
+
+    /// <summary>
+    /// Import common files
+    /// </summary>
     [ProtoMember(11)]
     public bool ImportCommonFiles { get; set; }
-    
+
+    /// <summary>
+    /// Import project files
+    /// </summary>
     [ProtoMember(12)]
-    public bool ImportProjectFiles { get; set; } 
-    
+    public bool ImportProjectFiles { get; set; }
+
+    /// <summary>
+    /// Import groups
+    /// </summary>
     [ProtoMember(13)]
     public bool ImportGroups { get; set; }
-    
+
+    /// <summary>
+    /// Successed users
+    /// </summary>
     [ProtoMember(14)]
     public int SuccessedUsers { get; set; }
+
+    /// <summary>
+    /// Failed users
+    /// </summary>
     [ProtoMember(15)]
     public int FailedUsers { get; set; }
+
+    /// <summary>
+    /// Files
+    /// </summary>
     [ProtoMember(16)]
     public List<string> Files { get; set; }
+
+    /// <summary>
+    /// Errors
+    /// </summary>
     [ProtoMember(17)]
     public List<string> Errors { get; set; }
 }

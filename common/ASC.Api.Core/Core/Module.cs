@@ -26,43 +26,50 @@
 
 namespace ASC.Api.Core;
 
-/// <summary>
-/// </summary>
 public class Module(Product product)
 {
-    /// <summary>ID</summary>
-    /// <type>System.Guid, System</type>
+    /// <summary>
+    /// ID
+    /// </summary>
     public Guid Id { get; set; } = product.ProductID;
 
-    /// <summary>Product class name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Product class name
+    /// </summary>
     public string AppName { get; set; } = product.ProductClassName;
 
-    /// <summary>Title</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Title
+    /// </summary>
     public string Title { get; set; } = product.Name;
 
-    /// <summary>Start link</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Start link
+    /// </summary>
     public string Link { get; set; } = product.StartURL;
 
-    /// <summary>Icon URL</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Icon URL
+    /// </summary>
     public string IconUrl { get; set; } = product.Context.IconFileName;
 
-    /// <summary>Large image URL</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Large image URL
+    /// </summary>
     public string ImageUrl { get; set; } = product.Context.LargeIconFileName;
 
-    /// <summary>Help URL</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Help URL
+    /// </summary>
     public string HelpUrl { get; set; } = product.HelpURL;
 
-    /// <summary>Description</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Description
+    /// </summary>
     public string Description { get; set; } = product.Description;
 
-    /// <summary>Specifies if the module is primary or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the module is primary or not
+    /// </summary>
     public bool IsPrimary { get; set; } = product.IsPrimary;
 }

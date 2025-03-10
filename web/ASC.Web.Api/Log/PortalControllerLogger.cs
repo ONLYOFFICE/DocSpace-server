@@ -30,9 +30,9 @@ namespace ASC.Web.Api.Log;
 
 internal static partial class PortalControllerLogger
 {
-    [LoggerMessage(Level = LogLevel.Error, Message = "getshortenlink")]
+    [LoggerMessage(LogLevel.Error, "getshortenlink")]
     public static partial void ErrorGetShortenLink(this ILogger<PortalController> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "MarkPresentAsReaded")]
+    [LoggerMessage(LogLevel.Error, "MarkPresentAsReaded")]
     public static partial void ErrorMarkPresentAsReaded(this ILogger<PortalController> logger, Exception exception);
 }

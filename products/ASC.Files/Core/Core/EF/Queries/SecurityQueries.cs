@@ -93,6 +93,12 @@ public partial class FilesDbContext
     {
         return SecurityQueries.EntrySharesBySubjectsAsync(this, tenantId, entryId, entryType, subjects);
     }
+    
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid, SubjectType.User])]
+    public Task<int> RemoveSecuritiesAsync(int tenantId, Guid subject, Guid owner, SubjectType subjectType)
+    {
+        return SecurityQueries.RemoveSecuritiesAsync(this, tenantId, subject, owner, subjectType);
+    }
 } 
 
 static file class SecurityQueries
@@ -175,4 +181,15 @@ static file class SecurityQueries
             (FilesDbContext ctx, int tenantId, string entryId, FileEntryType entryType, IEnumerable<Guid> subjects) => 
                 ctx.Security
                     .Where(r => r.TenantId == tenantId && r.EntryId == entryId && r.EntryType == entryType && subjects.Contains(r.Subject)));
+    
+    public static readonly Func<FilesDbContext, int, Guid, Guid, SubjectType, Task<int>> RemoveSecuritiesAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, Guid subject, Guid owner, SubjectType subjectType) =>
+                ctx.Security
+                    .Where(r => 
+                        r.TenantId == tenantId && 
+                        r.Subject == subject && 
+                        r.Owner == owner && 
+                        r.SubjectType == subjectType)
+                    .ExecuteDelete());
 }

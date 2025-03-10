@@ -28,21 +28,71 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class ActiveConnectionsDto
 {
+    /// <summary>
+    /// Login event
+    /// </summary>
     public int LoginEvent { get; set; }
+
+    /// <summary>
+    /// Items
+    /// </summary>
     public List<ActiveConnectionsItemDto> Items { get; set; }
 }
 
 public class ActiveConnectionsItemDto
 {
+    /// <summary>
+    /// Id
+    /// </summary>
     public int Id { get; set; }
+
+    /// <summary>
+    /// Tenant id
+    /// </summary>
     public int TenantId { get; set; }
+
+    /// <summary>
+    /// User id
+    /// </summary>
     public Guid UserId { get; set; }
+
+    /// <summary>
+    /// Mobile
+    /// </summary>
     public bool Mobile {  get; set; }
+
+    /// <summary>
+    /// Ip
+    /// </summary>
     public string Ip { get; set; }
+
+    /// <summary>
+    /// Country
+    /// </summary>
     public string Country { get; set; }
+
+    /// <summary>
+    /// City
+    /// </summary>
     public string City { get; set; }
+
+    /// <summary>
+    /// Browser
+    /// </summary>
     public string Browser { get; set; }
+
+    /// <summary>
+    /// Platform
+    /// </summary>
     public string Platform { get; set; }
+
+    /// <summary>
+    /// Date
+    /// </summary>
     public ApiDateTime Date { get; set; }
+
+    /// <summary>
+    /// Page
+    /// </summary>
     public string Page { get; set; }
 }

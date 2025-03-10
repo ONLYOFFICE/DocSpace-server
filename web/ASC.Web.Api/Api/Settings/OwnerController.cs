@@ -42,7 +42,8 @@ public class OwnerController(
     DisplayUserSettingsHelper displayUserSettingsHelper,
     IMemoryCache memoryCache,
     IHttpContextAccessor httpContextAccessor,
-    IUrlShortener urlShortener)
+    IUrlShortener urlShortener,
+    UserManagerWrapper userManagerWrapper)
     : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
@@ -51,21 +52,20 @@ public class OwnerController(
     /// <short>
     /// Send the owner change instructions
     /// </short>
-    /// <category>Owner</category>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.SettingsRequestsDto, ASC.Web.Api" name="inDto">Settings request parameters</param>
-    /// <returns type="System.Object, System">Message about changing the portal owner</returns>
     /// <path>api/2.0/settings/owner</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("Settings / Owner")]
+    [SwaggerResponse(200, "Message about changing the portal owner", typeof(OwnerChangeInstructionsDto))]
+    [SwaggerResponse(403, "Collaborator can not be an owner")]
     [HttpPost("")]
-    public async Task<object> SendOwnerChangeInstructionsAsync(SettingsRequestsDto inDto)
+    public async Task<OwnerChangeInstructionsDto> SendOwnerChangeInstructionsAsync(OwnerIdSettingsRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var curTenant = await tenantManager.GetCurrentTenantAsync();
+        var curTenant = tenantManager.GetCurrentTenant();
         var owner = await userManager.GetUsersAsync(curTenant.OwnerId);
         var newOwner = await userManager.GetUsersAsync(inDto.OwnerId);
 
-        if (await userManager.IsUserAsync(newOwner))
+        if (await userManager.IsGuestAsync(newOwner))
         {
             throw new SecurityException("Collaborator can not be an owner");
         }
@@ -74,16 +74,16 @@ public class OwnerController(
             Guid.Empty.Equals(newOwner.Id) || 
             newOwner.Status != EmployeeStatus.Active)
         {
-            return new { Status = 0, Message = Resource.ErrorAccessDenied };
+            return new OwnerChangeInstructionsDto { Status = 0, Message = Resource.ErrorAccessDenied };
         }
 
-        var confirmLink = await commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalOwnerChange, newOwner.Id, newOwner.Id);
+        var confirmLink = commonLinkUtility.GetConfirmationEmailUrl(owner.Email, ConfirmType.PortalOwnerChange, newOwner.Id, newOwner.Id);
         await studioNotifyService.SendMsgConfirmChangeOwnerAsync(owner, newOwner, await urlShortener.GetShortenLinkAsync(confirmLink));
 
-        await messageService.SendAsync(MessageAction.OwnerSentChangeOwnerInstructions, MessageTarget.Create(owner.Id), owner.DisplayUserName(false, displayUserSettingsHelper));
+        messageService.Send(MessageAction.OwnerSentChangeOwnerInstructions, MessageTarget.Create(owner.Id), owner.DisplayUserName(false, displayUserSettingsHelper));
 
         var emailLink = $"<a href=\"mailto:{owner.Email}\">{owner.Email}</a>";
-        return new { Status = 1, Message = Resource.ChangePortalOwnerMsg.Replace(":email", emailLink) };
+        return new OwnerChangeInstructionsDto { Status = 1, Message = Resource.ChangePortalOwnerMsg.Replace(":email", emailLink) };
     }
 
     /// <summary>
@@ -92,14 +92,14 @@ public class OwnerController(
     /// <short>
     /// Update the portal owner
     /// </short>
-    /// <category>Owner</category>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.SettingsRequestsDto, ASC.Web.Api" name="inDto">Settings request parameters</param>
-    /// <returns></returns>
     /// <path>api/2.0/settings/owner</path>
-    /// <httpMethod>PUT</httpMethod>
+    [Tags("Settings / Owner")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(400, "The user could not be found")]
+    [SwaggerResponse(409, "")]
     [HttpPut("")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalOwnerChange")]
-    public async Task OwnerAsync(SettingsRequestsDto inDto)
+    public async Task OwnerAsync(OwnerIdSettingsRequestDto inDto)
     {
         var newOwner = Constants.LostUser;
         try
@@ -108,13 +108,15 @@ public class OwnerController(
         }
         catch
         {
+            // ignored
         }
+
         if (Constants.LostUser.Equals(newOwner))
         {
             throw new Exception(Resource.ErrorUserNotFound);
         }
 
-        if (await userManager.IsUserInGroupAsync(newOwner.Id, Constants.GroupUser.ID))
+        if (await userManager.IsUserInGroupAsync(newOwner.Id, Constants.GroupGuest.ID))
         {
             throw new Exception(Resource.ErrorUserNotFound);
         }
@@ -123,11 +125,20 @@ public class OwnerController(
         {
             throw new Exception(Resource.ErrorAccessDenied);
         }
+        
+        var newOwnerType = await userManager.GetUserTypeAsync(newOwner);
+        if (newOwnerType != EmployeeType.DocSpaceAdmin)
+        {
+            if (!await userManagerWrapper.UpdateUserTypeAsync(newOwner, EmployeeType.DocSpaceAdmin))
+            {
+                throw new InvalidOperationException();
+            }
+        }
 
-        var curTenant = await tenantManager.GetCurrentTenantAsync();
+        var curTenant = tenantManager.GetCurrentTenant();
         curTenant.OwnerId = newOwner.Id;
         await tenantManager.SaveTenantAsync(curTenant);
 
-        await messageService.SendAsync(MessageAction.OwnerUpdated, newOwner.DisplayUserName(false, displayUserSettingsHelper));
+        messageService.Send(MessageAction.OwnerUpdated, newOwner.DisplayUserName(false, displayUserSettingsHelper));
     }
 }

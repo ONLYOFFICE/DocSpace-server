@@ -27,6 +27,6 @@
 namespace ASC.Files.Core.Log;
 internal static partial class ProductEntryPointLogger
 {
-    [LoggerMessage(Level = LogLevel.Error, Message = "Error while deserializing audit event: {eventId}")]
+    [LoggerMessage(LogLevel.Error, "Error while deserializing audit event: {eventId}")]
     public static partial void ErrorDeserializingAuditEvent(this ILogger<ProductEntryPoint> logger, int eventId, Exception exception);
 }

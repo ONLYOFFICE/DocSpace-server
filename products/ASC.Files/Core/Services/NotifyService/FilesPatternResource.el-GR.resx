@@ -114,9 +114,6 @@ $Message</value>
   <data name="subject_DocuSignStatus_push" xml:space="preserve">
     <value>Η κατάσταση υπογραφής άλλαξε</value>
   </data>
-  <data name="subject_EditorMentions_push" xml:space="preserve">
-    <value>Αναφέρεται στο έγγραφο</value>
-  </data>
   <data name="subject_MailMergeEnd_push" xml:space="preserve">
     <value>Η αποστολή έχει ολοκληρωθεί.</value>
   </data>
@@ -151,5 +148,32 @@ $Message</value>
     <value>h1. $Message: $DocumentTitle
 
 Συνδεθείτε στον λογαριασμό σας στο DocuSign για περισσότερες πληροφορίες.</value>
+  </data>
+  <data name="button_CheckReadyForms" xml:space="preserve">
+    <value>Δείτε τις έτοιμες φόρμες</value>
+  </data>
+  <data name="pattern_FormReceived" xml:space="preserve">
+    <value>h1. Η φόρμα $Message συμπληρώθηκε
+
+Μια νέα φόρμα "$DocumentTitle":"$DocumentURL" συμπληρώθηκε στο δωμάτιο "$RoomTitle":"$RoomURL"
+
+Άτομο που υπέβαλε τη φόρμα: "$FromUserName":"$FromUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="pattern_FormSubmitted" xml:space="preserve">
+    <value>h1. Συμπληρώσατε τη φόρμα $Message
+
+Συμπληρώσατε τη φόρμα "$DocumentTitle":"$DocumentURL" στο δωμάτιο "$RoomTitle":"$RoomURL"
+
+Διαχειριστής: "$ToUserName":"$ToUserLink"
+
+$OrangeButton</value>
+  </data>
+  <data name="subject_FormReceived" xml:space="preserve">
+    <value>Ειδοποίηση DocSpace. Η φόρμα έχει συμπληρωθεί</value>
+  </data>
+  <data name="subject_FormSubmitted" xml:space="preserve">
+    <value>Ειδοποίηση DocSpace. Η φόρμα έχει συμπληρωθεί</value>
   </data>
 </root>

@@ -27,6 +27,6 @@
 namespace ASC.Core.Common.Log;
 internal static partial class JabberSenderLogger
 {
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Unexpected error")]
+    [LoggerMessage(LogLevel.Debug, "Unexpected error")]
     public static partial void ErrorUnexpected(this ILogger logger, Exception exception);
 }

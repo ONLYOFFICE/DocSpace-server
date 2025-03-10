@@ -39,7 +39,7 @@ public class BackupFileUploadHandler
     public async Task Invoke(HttpContext context,
         PermissionContext permissionContext,
         BackupAjaxHandler backupAjaxHandler,
-        ICache cache,
+        IFusionCache cache,
         TenantManager tenantManager,
         SetupInfo setupInfo)
     {
@@ -51,7 +51,7 @@ public class BackupFileUploadHandler
             {
                 throw new ArgumentException("Access denied.");
             }
-            var tenantId = (await tenantManager.GetCurrentTenantAsync()).Id;
+            var tenantId = (tenantManager.GetCurrentTenant()).Id;
             string path;
             try
             {
@@ -91,7 +91,7 @@ public class BackupFileUploadHandler
                         Ext = context.Request.Query["extension"].ToString() == "tar" ? ".tar" : ".tar.gz",
                         Size = size
                     };
-                    cache.Insert($"{tenantId} backupTotalSize", info, TimeSpan.FromMinutes(20));
+                    await cache.SetAsync($"{tenantId} backupTotalSize", info, TimeSpan.FromMinutes(20));
 
                     result = Success(setupInfo.ChunkUploadSize);
                 }
@@ -102,7 +102,7 @@ public class BackupFileUploadHandler
             }
             else
             {
-                var info = cache.Get<UploadInfo>($"{tenantId} backupTotalSize");
+                var info = await cache.GetOrDefaultAsync<UploadInfo>($"{tenantId} backupTotalSize");
                 if (info == null)
                 {
                     throw new ArgumentException("Need init upload.");
@@ -121,7 +121,7 @@ public class BackupFileUploadHandler
 
                 if (fs.Length >= info.Size)
                 {
-                    cache.Remove($"{tenantId} backupTotalSize");
+                    await cache.RemoveAsync($"{tenantId} backupTotalSize");
                     result = Success(setupInfo.ChunkUploadSize, endUpload: true);
                 }
                 else

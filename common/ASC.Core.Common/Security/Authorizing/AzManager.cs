@@ -87,7 +87,7 @@ public class AzManager(IRoleProvider roleProvider, IPermissionProvider permissio
             {
                 subject
             };
-        subjects.AddRange((await _roleProvider.GetRolesAsync(subject)).ConvertAll(r => (ISubject)r));
+        subjects.AddRange((await _roleProvider.GetRolesAsync(subject)).ConvertAll(ISubject (r) => r));
         if (objectId != null)
         {
             var secObjProviderHelper = new AzObjectSecurityProviderHelper(objectId, securityObjProvider);

@@ -31,7 +31,7 @@ public class MessagePolicy(IConfiguration configuration)
 {
     private readonly IEnumerable<string> _secretIps = configuration["messaging:secret-ips"] == null
         ? []
-        : configuration["messaging:secret-ips"].Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+        : configuration["messaging:secret-ips"].Split([','], StringSplitOptions.RemoveEmptyEntries);
 
     public bool Check(EventMessage message)
     {

@@ -29,16 +29,21 @@ namespace ASC.Web.Files.Services.DocumentService;
 [EnumExtensions]
 public enum EditorType
 {
+    [SwaggerEnum(Description = "Desktop")]
     Desktop,
+
+    [SwaggerEnum(Description = "Mobile")]
     Mobile,
+
+    [SwaggerEnum(Description = "Embedded")]
     Embedded
 }
 
-/// <summary>
-/// </summary>
 public class ActionLinkConfig
 {
-    /// <summary>The information about the comment in the document that will be scrolled to</summary>
+    /// <summary>
+    /// The information about the comment in the document that will be scrolled to
+    /// </summary>
     [JsonPropertyName("action")]
     public ActionConfig Action { get; set; }
 
@@ -47,15 +52,17 @@ public class ActionLinkConfig
         return JsonSerializer.Serialize(actionLinkConfig);
     }
 
-    /// <summary>
-    /// </summary>
     public class ActionConfig
     {
-        /// <summary>Comment data</summary>
+        /// <summary>
+    /// Comment data
+    /// </summary>
         [JsonPropertyName("data")]
         public string Data { get; set; }
 
-        /// <summary>Action type</summary>
+        /// <summary>
+    /// Action type
+    /// </summary>
         [JsonPropertyName("type")]
         public string Type { get; set; }
     }
@@ -63,14 +70,35 @@ public class ActionLinkConfig
 
 public class CoEditingConfig
 {
+    /// <summary>
+    /// Change
+    /// </summary>
     public bool Change { get; set; }
+
+    /// <summary>
+    /// Fast
+    /// </summary>
     public bool Fast { get; init; }
 
-    public string Mode
+    /// <summary>
+    /// Mode
+    /// </summary>
+    public CoEditingConfigMode Mode
     {
-        get { return Fast ? "fast" : "strict"; }
+        get { return Fast ? CoEditingConfigMode.Fast : CoEditingConfigMode.Strict; }
     }
 }
+
+[EnumExtensions]
+public enum CoEditingConfigMode
+{
+    [SwaggerEnum("Fast")]
+    Fast,
+
+    [SwaggerEnum("Strict")]
+    Strict
+}
+
 
 [Scope(GenericArguments = [typeof(int)])]
 [Scope(GenericArguments = [typeof(string)])]
@@ -119,7 +147,7 @@ public class Configuration<T>(
     /// <type>System.String, System</type>
     public string Type
     {
-        set => EditorType = (EditorType)Enum.Parse(typeof(EditorType), value, true);
+        set => EditorType = Enum.Parse<EditorType>(value, true);
         get => EditorType.ToString().ToLower();
     }
 
@@ -148,7 +176,7 @@ public class DocumentConfig<T>(
     private string _key = string.Empty;
     private FileReferenceData _referenceData;
     public string GetFileType(File<T> file) => file.ConvertedExtension.Trim('.');
-    public InfoConfig<T> Info { get; set; } = infoConfig;
+    public InfoConfig<T> Info { get; } = infoConfig;
     public bool IsLinkedForMe { get; set; }
 
     public string Key
@@ -158,25 +186,27 @@ public class DocumentConfig<T>(
     }
 
     public PermissionsConfig Permissions { get; set; } = new();
+    
+	public Options Options { get; set; }
     public string SharedLinkParam { get; set; }
     public string SharedLinkKey { get; set; }
-    public async Task<FileReferenceData> GetReferenceData(File<T> file)
+    public FileReferenceData GetReferenceData(File<T> file)
     {
         return _referenceData ??= new FileReferenceData
         {
             FileKey = file.Id.ToString(), 
-            InstanceId = (await tenantManager.GetCurrentTenantIdAsync()).ToString()
+            InstanceId = (tenantManager.GetCurrentTenantId()).ToString()
         };
     }
 
     public string Title { get; set; }
 
-    public async Task SetUrl(string val)
+    public void SetUrl(string val)
     {
-        _fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(val);
+        _fileUri = documentServiceConnector.ReplaceCommunityAddress(val);
     }
     
-    public async Task<string> GetUrl(File<T> file)
+    public string GetUrl(File<T> file)
     {
         if (!string.IsNullOrEmpty(_fileUri))
         {
@@ -184,7 +214,7 @@ public class DocumentConfig<T>(
         }
 
         var last = Permissions.Edit || Permissions.Review || Permissions.Comment;
-        _fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(await pathProvider.GetFileStreamUrlAsync(file, last));
+        _fileUri = documentServiceConnector.ReplaceCommunityAddress(pathProvider.GetFileStreamUrl(file, last));
 
         return _fileUri;
     }
@@ -244,18 +274,22 @@ public class EditorConfiguration<T>(
         return _user;
     }
 
-    public async Task<string> GetCallbackUrl(string fileId, string fillingSessionId)
+    public async Task<string> GetCallbackUrl(File<T> file)
     {
         if (!ModeWrite)
         {
             return null;
         }
 
-        var callbackUrl = await documentServiceTrackerHelper.GetCallbackUrlAsync(fileId);
+        var callbackUrl = documentServiceTrackerHelper.GetCallbackUrl(file.Id.ToString());
 
-        callbackUrl = !string.IsNullOrEmpty(fillingSessionId) ? QueryHelpers.AddQueryString(callbackUrl, FilesLinkUtility.FillingSessionId, fillingSessionId) : callbackUrl;
+        if (file.ShareRecord is not { IsLink: true } || string.IsNullOrEmpty(file.ShareRecord.Options?.Password))
+        {
+            return externalShare.GetUrlWithShare(callbackUrl);
+        }
 
-        return externalShare.GetUrlWithShare(callbackUrl);
+        var key = await externalShare.CreateShareKeyAsync(file.ShareRecord.Subject, file.ShareRecord.Options?.Password);
+        return externalShare.GetUrlWithShare(callbackUrl, key);
     }
 
     public async Task<CoEditingConfig> GetCoEditingAsync()
@@ -276,7 +310,7 @@ public class EditorConfiguration<T>(
             return null;
         }
 
-        if (!authContext.IsAuthenticated || await userManager.IsUserAsync(authContext.CurrentAccount.ID))
+        if (!authContext.IsAuthenticated || await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
             return null;
         }
@@ -314,7 +348,7 @@ public class EditorConfiguration<T>(
     
     public async IAsyncEnumerable<RecentConfig> GetRecent(FileType fileType, T fileId)
     {
-        if (!authContext.IsAuthenticated || await userManager.IsUserAsync(authContext.CurrentAccount.ID))
+        if (!authContext.IsAuthenticated || await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
             yield break;
         }
@@ -355,7 +389,7 @@ public class EditorConfiguration<T>(
 
     public async Task<List<TemplatesConfig>> GetTemplates(FileType fileType, string title)
     {
-            if (!authContext.IsAuthenticated || await userManager.IsUserAsync(authContext.CurrentAccount.ID))
+            if (!authContext.IsAuthenticated || await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
             {
                 return null;
             }
@@ -409,7 +443,7 @@ public class InfoConfig<T>(
             return _favorite;
         }
 
-        if (!securityContext.IsAuthenticated || await userManager.IsUserAsync(securityContext.CurrentAccount.ID))
+        if (!securityContext.IsAuthenticated || await userManager.IsGuestAsync(securityContext.CurrentAccount.ID))
         {
             return null;
         }
@@ -471,67 +505,225 @@ public class InfoConfig<T>(
 
 public class PermissionsConfig
 {
+    /// <summary>
+    /// Change history
+    /// </summary>
     public bool ChangeHistory { get; set; }
+
+    /// <summary>
+    /// Comment
+    /// </summary>
     public bool Comment { get; set; } = true;
+
+    /// <summary>
+    /// Chat
+    /// </summary>
     public bool Chat { get; set; } = true;
+
+    /// <summary>
+    /// Download
+    /// </summary>
     public bool Download { get; set; } = true;
+
+    /// <summary>
+    /// Edit
+    /// </summary>
     public bool Edit { get; set; } = true;
+
+    /// <summary>
+    /// FillForms
+    /// </summary>
     public bool FillForms { get; set; } = true;
+
+    /// <summary>
+    /// ModifyFilter
+    /// </summary>
     public bool ModifyFilter { get; set; } = true;
+
+    /// <summary>
+    /// Protect
+    /// </summary>
     public bool Protect { get; set; } = true;
+
+    /// <summary>
+    /// Print
+    /// </summary>
     public bool Print { get; set; } = true;
+
+    /// <summary>
+    /// Rename
+    /// </summary>
     public bool Rename { get; set; }
+
+    /// <summary>
+    /// Review
+    /// </summary>
     public bool Review { get; set; } = true;
+
+    /// <summary>
+    /// Copy
+    /// </summary>
     public bool Copy { get; set; } = true;
 }
 
-/// <summary>
-/// </summary>
+public class Options
+{
+    [JsonPropertyName("watermark_on_draw")]
+    public WatermarkOnDraw WatermarkOnDraw { get; set; }
+
+    public string GetMD5Hash()
+    {
+        if (WatermarkOnDraw == null)
+        {
+            return null;
+        }
+
+        var stringBuilder = new StringBuilder();
+
+        _ = stringBuilder.Append(WatermarkOnDraw.Width.ToString(CultureInfo.InvariantCulture));
+        _ = stringBuilder.Append(WatermarkOnDraw.Height.ToString(CultureInfo.InvariantCulture));
+        _ = stringBuilder.Append(string.Join(',',WatermarkOnDraw.Margins));
+        _ = stringBuilder.Append(WatermarkOnDraw.Fill);
+        _ = stringBuilder.Append(WatermarkOnDraw.Rotate);
+        _ = stringBuilder.Append(WatermarkOnDraw.Transparent.ToString(CultureInfo.InvariantCulture));
+
+        if (WatermarkOnDraw.Paragraphs != null)
+        {
+            foreach (var paragraph in WatermarkOnDraw.Paragraphs)
+            {
+                if (paragraph.Runs != null)
+                {
+                    foreach (var run in paragraph.Runs)
+                    {
+                        if (run.UsedInHash)
+                        {
+                            _ = stringBuilder.Append(run.Text);
+                        }
+                    }
+                }
+            }
+        }
+
+        var bytes = MD5.HashData(Encoding.UTF8.GetBytes(stringBuilder.ToString()));
+
+        return BitConverter.ToString(bytes).Replace("-", "").ToLower();
+    }
+}
+
+public class WatermarkOnDraw(double widthInPixels, double heightInPixels, string fill, int rotate, List<Paragraph> paragraphs)
+{
+    private const double DotsPerInch = 96;
+    private const double DotsPerMm = DotsPerInch / 25.4;
+
+    /// <summary>
+    /// Defines the watermark width measured in millimeters.
+    /// </summary>
+    [JsonPropertyName("width")]
+    public double Width { get; init; } = widthInPixels == 0 ? 100 : widthInPixels / DotsPerMm;
+
+    /// <summary>
+    /// Defines the watermark height measured in millimeters.
+    /// </summary>
+    [JsonPropertyName("height")]
+    public double Height { get; init; } = heightInPixels == 0 ? 100 : heightInPixels / DotsPerMm;
+
+    [JsonPropertyName("margins")]
+    public int[] Margins { get; init; } = [0, 0, 0, 0];
+
+    [JsonPropertyName("fill")]
+    public string Fill { get; init; } = fill;
+
+    [JsonPropertyName("rotate")]
+    public int Rotate { get; init; } = rotate;
+
+    [JsonPropertyName("transparent")]
+    public double Transparent { get; init; } = 0.4;
+
+    [JsonPropertyName("paragraphs")]
+    public List<Paragraph> Paragraphs { get; init; } = paragraphs;
+}
+
+public class Paragraph
+{
+    public Paragraph(List<Run> runs)
+    {
+        Runs = runs;
+        Align = 2;
+    }
+    [JsonPropertyName("align")]
+    public int Align { get; set; }
+
+    [JsonPropertyName("runs")]
+    public List<Run> Runs { get; set; }
+}
+public class Run(string text, bool usedInHash = true)
+{
+    internal bool UsedInHash => usedInHash;
+
+    [JsonPropertyName("fill")]
+    public int[] Fill { get; set; } = [124, 124, 124];
+
+    [JsonPropertyName("text")]
+    public string Text { get; set; } = text;
+
+    [JsonPropertyName("font-size")]
+    public string FontSize { get; set; } = "26";
+}
+
 public class FileReference
 {
-    /// <summary>File reference data</summary>
-    /// <type>ASC.Web.Files.Services.DocumentService.FileReferenceData, ASC.Files.Core</type>
+    /// <summary>
+    /// File reference data
+    /// </summary>
     public FileReferenceData ReferenceData { get; set; }
 
-    /// <summary>Error</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Error
+    /// </summary>
     public string Error { get; set; }
 
-    /// <summary>Path</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Path
+    /// </summary>
     public string Path { get; set; }
 
-    /// <summary>URL</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// URL
+    /// </summary>
+    [Url]
     public string Url { get; set; }
 
-    /// <summary>File type</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// File type
+    /// </summary>
     public string FileType { get; set; }
 
-    /// <summary>Key</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Key
+    /// </summary>
     public string Key { get; set; }
 
-    /// <summary>Link</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Link
+    /// </summary>
     public string Link { get; set; }
 
-    /// <summary>Token</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Token
+    /// </summary>
     public string Token { get; set; }
 }
 
-/// <summary>
-/// </summary>
 public class FileReferenceData
 {
-    /// <summary>File key</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// File key
+    /// </summary>
     public string FileKey { get; set; }
 
-    /// <summary>Instance ID</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Instance ID
+    /// </summary>
     public string InstanceId { get; set; }
 }
 
@@ -545,7 +737,9 @@ public class CustomerConfig(
 {
     public async Task<string> GetAddress() => (await settingsManager.LoadForDefaultTenantAsync<CompanyWhiteLabelSettings>()).Address;
 
-    public async Task<string> GetLogo() => baseCommonLinkUtility.GetFullAbsolutePath(await tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(WhiteLabelLogoType.LoginPage, false));
+    public async Task<string> GetLogo() => baseCommonLinkUtility.GetFullAbsolutePath(await tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(WhiteLabelLogoType.AboutPage, false));
+
+    public async Task<string> GetLogoDark() => baseCommonLinkUtility.GetFullAbsolutePath(await tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(WhiteLabelLogoType.AboutPage, true));
 
     public async Task<string> GetMail() => (await settingsManager.LoadForDefaultTenantAsync<CompanyWhiteLabelSettings>()).Email;
 
@@ -585,7 +779,7 @@ public class CustomizationConfig<T>(
             return null;
         }
 
-        var link = await commonLinkUtility.GetFeedbackAndSupportLink(settingsManager);
+        var link = await commonLinkUtility.GetSupportLinkAsync(settingsManager);
 
         if (string.IsNullOrEmpty(link))
         {
@@ -676,12 +870,11 @@ public class CustomizationConfig<T>(
         return modeWrite ? null : "markup";
     }
 
-    public async Task<bool> GetSubmitForm(File<T> file, bool modeWrite)
+    public async Task<bool> GetSubmitForm(File<T> file)
     {
 
         var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
-
-        return properties is { FormFilling.CollectFillForm: true } && file.RootFolderType != FolderType.Archive;
+        return file.RootFolderType != FolderType.Archive && await fileSecurity.CanFillFormsAsync(file) && properties is { FormFilling.CollectFillForm: true };
     }
 
     private FileSharing FileSharing { get; } = fileSharing;
@@ -690,32 +883,68 @@ public class CustomizationConfig<T>(
 [Transient]
 public class EmbeddedConfig(BaseCommonLinkUtility baseCommonLinkUtility, FilesLinkUtility filesLinkUtility)
 {
-    public string EmbedUrl => baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=embedded" + ShareLinkParam);
+    /// <summary>
+    /// Embed url
+    /// </summary>
+    public string EmbedUrl => ShareLinkParam != null && ShareLinkParam.Contains(FilesLinkUtility.ShareKey, StringComparison.Ordinal) ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=embedded" + ShareLinkParam) : null;
 
+    /// <summary>
+    /// Save url
+    /// </summary>
     public string SaveUrl => baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FileHandlerPath + "?" + FilesLinkUtility.Action + "=download" + ShareLinkParam);
 
+    /// <summary>
+    /// Share link param
+    /// </summary>
     public string ShareLinkParam { get; set; }
 
-    public string ShareUrl => baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=view" + ShareLinkParam);
+    /// <summary>
+    /// Share url
+    /// </summary>
+    public string ShareUrl => ShareLinkParam != null && ShareLinkParam.Contains(FilesLinkUtility.ShareKey) ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=view" + ShareLinkParam) : null;
 
+    /// <summary>
+    /// Toolbar docked
+    /// </summary>
     public string ToolbarDocked => "top";
 }
 
 public class EncryptionKeysConfig
 {
+    /// <summary>
+    /// Crypto engine id
+    /// </summary>
     public string CryptoEngineId => "{FFF0E1EB-13DB-4678-B67D-FF0A41DBBCEF}";
+
+    /// <summary>
+    /// Private key enc
+    /// </summary>
     public string PrivateKeyEnc { get; set; }
+
+    /// <summary>
+    /// Public key
+    /// </summary>
     public string PublicKey { get; set; }
 }
 
 public class FeedbackConfig
 {
+    /// <summary>
+    /// Url
+    /// </summary>
     public string Url { get; set; }
+
+    /// <summary>
+    /// Visible
+    /// </summary>
     public bool Visible { get => true; }
 }
 
 public class GobackConfig
 {
+    /// <summary>
+    /// Url
+    /// </summary>
     public string Url { get; set; }
 }
 
@@ -801,21 +1030,56 @@ public class PluginsConfig
 
 public class RecentConfig
 {
+    /// <summary>
+    /// Folder
+    /// </summary>
     public string Folder { get; set; }
+
+    /// <summary>
+    /// Title
+    /// </summary>
     public string Title { get; set; }
+
+    /// <summary>
+    /// Url
+    /// </summary>
+    [Url]
     public string Url { get; set; }
 }
 
 public class TemplatesConfig
 {
+    /// <summary>
+    /// Image
+    /// </summary>
     public string Image { get; set; }
+
+    /// <summary>
+    /// Title
+    /// </summary>
     public string Title { get; set; }
+
+    /// <summary>
+    /// Url
+    /// </summary>
+    [Url]
     public string Url { get; set; }
 }
 
 public class UserConfig
 {
+    /// <summary>
+    /// Id
+    /// </summary>
     public string Id { get; set; }
+
+    /// <summary>
+    /// Name
+    /// </summary>
     public string Name { get; set; }
+
+    /// <summary>
+    /// Image
+    /// </summary>
     public string Image { get; set; }
 }

@@ -43,7 +43,8 @@ public class CoreModuleSpecifics : ModuleSpecificsBase
         new("core_usersecurity", "tenant") {UserIDColumns = ["userid"] }, 
         new("core_usergroup", "tenant") {UserIDColumns = ["userid"] }, 
         new("backup_schedule", "tenant_id"), 
-        new("core_settings", "tenant")
+        new("core_settings", "tenant"),
+        new("core_user_relations", "tenant") { UserIDColumns = ["source_user_id", "target_user_id"] }
     ];
 
     public CoreModuleSpecifics(Helpers helpers) : base(helpers)

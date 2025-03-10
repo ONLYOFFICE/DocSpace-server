@@ -290,9 +290,6 @@
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Redaktor</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Administrátor miestnosti</value>
-  </data>
   <data name="RoleEnum_User" xml:space="preserve">
     <value>Používateľ</value>
   </data>
@@ -367,9 +364,6 @@
   </data>
   <data name="AceStatusEnum_CustomFilter" xml:space="preserve">
     <value>Vlastný filter</value>
-  </data>
-  <data name="AceStatusEnum_RoomAdmin" xml:space="preserve">
-    <value>Administrátor miestnosti</value>
   </data>
   <data name="IndexTitle" xml:space="preserve">
     <value>Hľadať v obsahu dokumentov</value>
@@ -467,26 +461,20 @@
   <data name="Date" xml:space="preserve">
     <value>Dátum</value>
   </data>
-  <data name="AceStatusEnum_PowerUser" xml:space="preserve">
-    <value>Pokročilý používateľ</value>
-  </data>
-  <data name="RoleEnum_PowerUser" xml:space="preserve">
-    <value>Pokročilý používateľ</value>
-  </data>
   <data name="User" xml:space="preserve">
     <value>Používateľ</value>
   </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Presun viacerých súborov do miestnosti na vyplnenie formulárov nie je podporovaný. Presúvajte vždy len jeden ONLYOFFICE PDF formulár.</value>
+    <value>Presun viacerých súborov do miestnosti na vyplnenie formulárov nie je podporovaný. Presúvajte vždy len jeden {0} PDF formulár.</value>
   </data>
   <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Presun priečinkov do miestnosti na vyplnenie formulárov nie je podporovaný. Presúvajte vždy jeden ONLYOFFICE PDF formulár.</value>
+    <value>Presun priečinkov do miestnosti na vyplnenie formulárov nie je podporovaný. Presúvajte vždy jeden {0} PDF formulár.</value>
   </data>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Súbor nie je možné presunúť do tejto miestnosti. Pokúste sa presunúť ONLYOFFICE PDF formulár.</value>
+    <value>Súbor nie je možné presunúť do tejto miestnosti. Pokúste sa presunúť {0} PDF formulár.</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Súbor nie je možné nahrať do tejto miestnosti. Pokúste sa nahrať ONLYOFFICE PDF formulár.</value>
+    <value>Súbor nie je možné nahrať do tejto miestnosti. Pokúste sa nahrať {0} PDF formulár.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Odkaz na vyplnenie</value>
@@ -494,10 +482,22 @@
   <data name="LinkToForm" xml:space="preserve">
     <value>Odkaz na formulár</value>
   </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Otvoriť formulár</value>
-  </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Číslo formulára</value>
+  </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Tvorca obsahu</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Tvorca obsahu</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Manažér miestnosti</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Manažér miestnosti</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Externý používateľ</value>
   </data>
 </root>

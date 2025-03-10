@@ -30,7 +30,7 @@ namespace ASC.Api.Core.Auth;
 
 public static class AuthorizationExtension
 {
-    private static readonly NameValueCollection _scopesMap = new NameValueCollection()
+    private static readonly NameValueCollection _scopesMap = new()
     {
         { "GET api/[0-9].[0-9]/files/rooms", "rooms:read" },
         { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/files/rooms", "rooms:write" },
@@ -39,18 +39,20 @@ public static class AuthorizationExtension
         { "GET api/[0-9].[0-9]/people/@self", "accounts.self:read" },
         { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/people/@self", "account.self:write" },
         { "GET api/[0-9].[0-9]/people", "accounts:read" },
-        { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/people", "accounts:write" },
+        { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/people", "accounts:write" }
     };
 
-    private static readonly string[] _allScopes = new[] {
-    "files:read",
+    private static readonly string[] _allScopes =
+    [
+        "files:read",
     "files:write",
     "rooms:read",
     "rooms:write",
     "account.self:read",
     "account.self:write",
     "accounts:read",
-    "accounts:write" };
+    "accounts:write"
+    ];
 
     private static string GetAuthorizePolicy(string routePattern, string httpMethod)
     {
@@ -58,7 +60,10 @@ public static class AuthorizationExtension
         {
             var regex = new Regex(regexPattern);
 
-            if (!regex.IsMatch($"{httpMethod} {routePattern}")) continue;
+            if (!regex.IsMatch($"{httpMethod} {routePattern}"))
+            {
+                continue;
+            }
 
             var scopes = _scopesMap[regexPattern];
 

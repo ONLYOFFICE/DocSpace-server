@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,6 +31,7 @@ import com.asc.common.utilities.validation.URLCollection;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Set;
 import lombok.*;
@@ -82,8 +83,9 @@ public class UpdateTenantClientCommandRequest implements Serializable {
   /** The name of the client. This field must not be blank. */
   @NotBlank private String name;
 
-  /** The description of the client. This field must not be blank. */
-  @NotBlank private String description;
+  /** The description of the client. */
+  @Size(max = 255, message = "client description length is expected to be less than 256 characters")
+  private String description;
 
   /**
    * The logo of the client in base64 format. The client logo is expected to be passed as base64.

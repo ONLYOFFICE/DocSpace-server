@@ -38,7 +38,8 @@ internal class LinkDao<T>(
     MaxTotalSizeStatistic maxTotalSizeStatistic,
     SettingsManager settingsManager,
     AuthContext authContext,
-    IServiceProvider serviceProvider)
+    IServiceProvider serviceProvider,
+    IDistributedLockProvider distributedLockProvider)
     : AbstractDao(dbContextManager,
         userManager,
         tenantManager,
@@ -47,11 +48,12 @@ internal class LinkDao<T>(
         maxTotalSizeStatistic,
         settingsManager,
         authContext,
-        serviceProvider), ILinkDao<T>
+        serviceProvider,
+        distributedLockProvider), ILinkDao<T>
 {
     public async Task AddLinkAsync(T sourceId, T linkedId)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         var mapping = daoFactory.GetMapping<T>();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
@@ -68,26 +70,26 @@ internal class LinkDao<T>(
 
     public async Task<T> GetSourceAsync(T linkedId)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         var mapping = daoFactory.GetMapping<T>();
         
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var mappedLinkedId = (await mapping.MappingIdAsync(linkedId));
-        
+
         var fromDb = await filesDbContext.SourceIdAsync(tenantId, mappedLinkedId, _authContext.CurrentAccount.ID);
-        
-        if (Equals(fromDb, default))
+
+        if (Equals(fromDb, null))
         {
             return default;
         }
-        
+
         return (T)Convert.ChangeType(fromDb, typeof(T));
     }
 
     public async Task<T> GetLinkedAsync(T sourceId)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         var mapping = daoFactory.GetMapping<T>();
         
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
@@ -95,18 +97,34 @@ internal class LinkDao<T>(
         var mappedSourceId = await mapping.MappingIdAsync(sourceId);
 
         var fromDb = await filesDbContext.LinkedIdAsync(tenantId, mappedSourceId, _authContext.CurrentAccount.ID);
-        
-        if (Equals(fromDb, default))
+
+        if (Equals(fromDb, null))
         {
             return default;
         }
-        
+
         return (T)Convert.ChangeType(fromDb, typeof(T));
+    }
+
+    public async Task<Dictionary<T, T>> GetLinkedIdsAsync(IEnumerable<T> sourceIds)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        var mapping = daoFactory.GetMapping<T>();
+
+        var mappedIds = await sourceIds.ToAsyncEnumerable().SelectAwait(async x => await mapping.MappingIdAsync(x)).ToListAsync();
+        var source = mappedIds.Select(x => x.ToString());
+        
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        
+        return await filesDbContext.FilesLinksAsync(tenantId, source, _authContext.CurrentAccount.ID)
+            .ToDictionaryAsync(
+                x => (T)Convert.ChangeType(x.SourceId, typeof(T)), 
+                x => (T)Convert.ChangeType(x.LinkedId, typeof(T)));
     }
 
     public async Task DeleteLinkAsync(T sourceId)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         var mapping = daoFactory.GetMapping<T>();
         
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
@@ -122,7 +140,7 @@ internal class LinkDao<T>(
 
     public async Task DeleteAllLinkAsync(T fileId)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         var mapping = daoFactory.GetMapping<T>();
         
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();

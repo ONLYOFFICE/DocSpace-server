@@ -148,7 +148,7 @@ public class UserFormatter : IComparer<UserInfo>
         return formats[format];
     }
 
-    private static DisplayUserNameFormat GetUserDisplayDefaultOrder()
+    public static DisplayUserNameFormat GetUserDisplayDefaultOrder()
     {
         var culture = CultureInfo.CurrentCulture.Name;
         if (!_displayFormats.TryGetValue(culture, out var formats))

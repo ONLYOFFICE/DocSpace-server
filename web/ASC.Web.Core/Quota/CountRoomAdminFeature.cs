@@ -40,6 +40,7 @@ public class CountPaidUserChecker(
     {
         return string.Format(Resource.TariffsFeature_manager_exception, count);
     }
+    
     public override async Task CheckAddAsync(int tenantId, int newValue)
     {
         if ((await tariffService.GetTariffAsync(tenantId)).State > TariffState.Paid)
@@ -57,9 +58,8 @@ public class CountPaidUserStatistic(IServiceProvider serviceProvider) : ITenantQ
     public async Task<int> GetValueAsync()
     {
         var userManager = serviceProvider.GetService<UserManager>();
-        var adminsCount = (await userManager.GetUsersByGroupAsync(Constants.GroupManager.ID)).Length;
-        var collaboratorsCount = (await userManager.GetUsersByGroupAsync(Constants.GroupCollaborator.ID)).Length;
+        var adminsCount = (await userManager.GetUsersByGroupAsync(Constants.GroupRoomAdmin.ID)).Length;
 
-        return adminsCount + collaboratorsCount;
+        return adminsCount;
     }
 }

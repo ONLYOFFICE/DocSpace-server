@@ -56,16 +56,16 @@ public interface IFolderDao<T>
     /// <returns>root folder</returns>
     Task<Folder<T>> GetRootFolderByFileAsync(T fileId);
 
-    IAsyncEnumerable<Folder<T>> GetRoomsAsync(IEnumerable<T> parentsIds, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders,
+    IAsyncEnumerable<Folder<T>> GetRoomsAsync(IEnumerable<T> parentsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders,
         bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, QuotaFilter quotaFilter);
 
-    IAsyncEnumerable<Folder<T>> GetRoomsAsync(IEnumerable<T> roomsIds, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders,
+    IAsyncEnumerable<Folder<T>> GetRoomsAsync(IEnumerable<T> roomsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders,
         bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds = null);
 
-    IAsyncEnumerable<Folder<T>> GetProviderBasedRoomsAsync(SearchArea searchArea, FilterType filterType, IEnumerable<string> tags, Guid subjectId, string searchText, bool withoutTags, 
+    IAsyncEnumerable<Folder<T>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, bool withoutTags, 
         bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds);
 
-    IAsyncEnumerable<Folder<T>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<T> roomsIds, FilterType filterType, IEnumerable<string> tags,
+    IAsyncEnumerable<Folder<T>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<T> roomsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags,
         Guid subjectId, string searchText, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds);
 
     /// <summary>
@@ -96,9 +96,10 @@ public interface IFolderDao<T>
     /// <param name="count"></param>
     /// <param name="roomId"></param>
     /// <param name="containingMyFiles"></param>
+    /// <param name="parentType"></param>
     /// <returns></returns>
     IAsyncEnumerable<Folder<T>> GetFoldersAsync(T parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
-        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, T roomId = default, bool containingMyFiles = false);
+        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, T roomId = default, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT);
 
     /// <summary>
     /// Gets the folder (s) by ID (s)
@@ -180,8 +181,21 @@ public interface IFolderDao<T>
     /// </summary>
     /// <param name="folder"></param>
     /// <param name="newTitle">new name</param>
-    /// <param name="newQuota">new name</param>
-    Task<T> UpdateFolderAsync(Folder<T> folder, string newTitle, long newQuota);
+    /// <param name="newQuota">new quota</param>
+    /// <param name="indexing">indexing</param>
+    /// <param name="denyDownload">denyDownload</param>
+    /// <param name="lifetime">lifetime</param>
+    /// <param name="watermark">watermark</param>
+    /// <param name="color">color</param>
+    /// <param name="cover">cover</param>
+    Task<T> UpdateFolderAsync(Folder<T> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifetime, WatermarkSettings watermark, string color, string cover);
+
+    /// <summary>
+    ///    Change folder type
+    /// </summary>
+    /// <param name="folder"></param>
+    /// <param name="folderType">new name</param>
+    Task<T> ChangeFolderTypeAsync(Folder<T> folder, FolderType folderType);
 
     /// <summary>
     ///    Gets the number of files and folders to the container in your
@@ -369,6 +383,8 @@ public interface IFolderDao<T>
     /// <returns></returns>
     Task<T> GetFolderIDVirtualRooms(bool createIfNotExists);
 
+    Task<T> GetFolderIDRoomTemplatesAsync(bool createIfNotExists);
+
     /// <summary>
     /// Returns id folder "Archive"
     /// Only in TMFolderDao
@@ -394,13 +410,18 @@ public interface IFolderDao<T>
     /// <param name="entry"></param>
     /// <returns></returns>
     Task<(T RoomId, string RoomTitle)> GetParentRoomInfoFromFileEntryAsync(FileEntry<T> entry);
-    Task<Folder<T>> GetFirstParentFromFileEntryAsync(FileEntry<T> entry);
+    Task<Folder<T>> GetFirstParentTypeFromFileEntryAsync(FileEntry<T> entry);
     Task<int> GetFoldersCountAsync(T parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool withSubfolders = false, bool excludeSubject = false,
         T roomId = default);
     Task<FilesStatisticsResultDto> GetFilesUsedSpace();
-    Task SetCustomOrder(T folderId, T parentFolderId, int order);
+    Task<int> SetCustomOrder(T folderId, T parentFolderId, int order);
 
-    Task InitCustomOrder(IEnumerable<T> folderIds, T parentFolderId);
-    
+    Task InitCustomOrder(Dictionary<T, int> folderIds, T parentFolderId);
+    Task<T> SetWatermarkSettings(WatermarkSettings waterMarks, Folder<T> folder);
+    Task<WatermarkSettings> GetWatermarkSettings(Folder<T> room);
+    Task<Folder<T>> DeleteWatermarkSettings(Folder<T> room);
+    Task<Folder<T>> DeleteLifetimeSettings(Folder<T> room);
     #endregion
 }
+
+public interface ICacheFolderDao<T> : IFolderDao<T>;

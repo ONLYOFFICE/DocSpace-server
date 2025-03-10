@@ -46,6 +46,8 @@ public class SubscriptionMethod : IMapFrom<DbSubscriptionMethod>
     [ProtoMember(5)]
     public string[] Methods { get; set; }
 
+    private static readonly char[] _separator = ['|'];
+
     public static implicit operator SubscriptionMethod(SubscriptionMethodCache cache)
     {
         return new SubscriptionMethod
@@ -71,7 +73,6 @@ public class SubscriptionMethod : IMapFrom<DbSubscriptionMethod>
     public void Mapping(Profile profile)
     {
         profile.CreateMap<DbSubscriptionMethod, SubscriptionMethod>()
-            .ForMember(dest => dest.Methods, opt => opt
-                .MapFrom(src => src.Sender.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries)));
+            .ForMember(dest => dest.Methods, opt => opt.MapFrom(src => src.Sender.Split(_separator, StringSplitOptions.RemoveEmptyEntries)));
     }
 }

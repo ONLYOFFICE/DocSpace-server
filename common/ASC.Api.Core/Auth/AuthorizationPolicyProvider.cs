@@ -25,14 +25,9 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Api.Core.Auth;
-public class AuthorizationPolicyProvider : IAuthorizationPolicyProvider
+public class AuthorizationPolicyProvider(IOptions<AuthorizationOptions> options) : IAuthorizationPolicyProvider
 {
-    public AuthorizationPolicyProvider(IOptions<AuthorizationOptions> options)
-    {
-        FallbackPolicyProvider = new DefaultAuthorizationPolicyProvider(options);
-    }
-
-    public DefaultAuthorizationPolicyProvider FallbackPolicyProvider { get; }
+    public DefaultAuthorizationPolicyProvider FallbackPolicyProvider { get; } = new(options);
 
     public Task<AuthorizationPolicy> GetDefaultPolicyAsync()
     {

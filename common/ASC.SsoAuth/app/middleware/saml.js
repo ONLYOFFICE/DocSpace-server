@@ -51,6 +51,11 @@ module.exports = (app, config) => {
       return;
     }
 
+    if (req.originalUrl == "/health") {
+      res.status(200).json({status: "Healthy"});
+      return;
+    }
+
     if (!foundRoutes.length) {
       logger.error(`invalid route ${req.originalUrl}`);
       return res.redirect(urlResolver.getPortal404Url(req));

@@ -31,6 +31,6 @@ namespace ASC.Files.Thirdparty.Box;
 internal class BoxProviderInfo(DisposableWrapper wrapper, ProviderInfoHelper providerInfoHelper)
     : AbstractProviderInfo<BoxFile, BoxFolder, BoxItem, BoxLoginProvider>(wrapper, providerInfoHelper)
 {
-    public override Selector Selector { get; } = Selectors.Box;
-    public override ProviderFilter ProviderFilter { get; } = ProviderFilter.Box;
+    public override Selector Selector => Selectors.Box;
+    public override ProviderFilter ProviderFilter => ProviderFilter.Box;
 }

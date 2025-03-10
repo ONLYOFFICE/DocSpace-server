@@ -126,7 +126,7 @@ public class NovellLdapObject : LdapObject
         var propertyValueArray = _novellLdapEntryExtension.GetAttributeArrayValue(_ldapEntry, propertyName);
         if (propertyValueArray == null)
         {
-            return new List<string>();
+            return [];
         }
 
         var properties = propertyValueArray.ToList();

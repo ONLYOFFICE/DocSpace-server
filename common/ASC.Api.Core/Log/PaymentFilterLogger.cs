@@ -27,6 +27,6 @@
 namespace ASC.Api.Core.Log;
 internal static partial class PaymentFilterLogger
 {
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Payment Required {url}.")]
+    [LoggerMessage(LogLevel.Warning, "Payment Required {url}.")]
     public static partial void WarningPaymentRequired(this ILogger<PaymentFilter> logger, Uri url);
 }

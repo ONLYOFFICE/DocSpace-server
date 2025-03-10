@@ -94,7 +94,7 @@ module.exports = function (app, config) {
         res.status(200).send(validateCertificate(req.body.certs));
     }
     catch (error) {
-        res.status(500).send("Invalid certificate");
+        res.status(500).send(error);
     }
   }
   function onUploadMetadata(req, res) {
@@ -247,22 +247,16 @@ module.exports = function (app, config) {
             if (!isPrivateKeyValid(data.key)) {
                 throw "Invalid private key";
             }
-            const privateKey = data.key;
+
+            const certificate = crypto.createPublicKey(data.crt);
+            const privateKey = crypto.createPrivateKey(data.key);
 
             const signData = 'sign this';
-            const sign = crypto.createSign('SHA256');
-            sign.update(signData);
-            sign.end();
-            const signature = sign.sign(privateKey, 'hex');
 
-            const verify = crypto.createVerify('SHA256');
-            verify.update(signData);
-            verify.end();
-            try {
-                verify.verify(data.crt, signature, 'hex');
-            }
-            catch (error) {
-                logger.error(error.message);
+            const signature = crypto.sign(null, Buffer.from(signData), privateKey);
+            const isVerified = crypto.verify(null, Buffer.from(signData), certificate, signature);
+
+            if (!isVerified) {
                 throw "Invalid key-pair (unverified signed data test)";
             }
         }
@@ -294,6 +288,10 @@ module.exports = function (app, config) {
     } else {
       return res.redirect(request.context);
     }
+  }
+  function getValueByKeyIgnoreCase(obj, key) {
+      const entry = Object.entries(obj).find(([k]) => k.toLowerCase() === key.toLowerCase());
+      return entry ? entry[1] : undefined;
   }
 
   const createAuthnTemplateCallback = (_idp, _sp, method) => (template) => {
@@ -573,8 +571,8 @@ module.exports = function (app, config) {
 
       //const logoutUser = new LogoutModel(userData.NameId, userData.SessionId);
       const user = {
-        logoutNameID: userData.NameId,
-        sessionIndex: userData.SessionId,
+          logoutNameID: getValueByKeyIgnoreCase(userData, "NameId"),
+          sessionIndex: getValueByKeyIgnoreCase(userData, "SessionId")
       };
 
       const data = sp.createLogoutRequest(
@@ -695,20 +693,24 @@ module.exports = function (app, config) {
       const isResponse = req.query.SAMLResponse || req.body.SAMLResponse;
 
       if (isResponse) {
-        const responseInfo = await sp.parseLogoutResponse(idp, method, req);
+        try {
+            const responseInfo = await sp.parseLogoutResponse(idp, method, req);
 
-        if (config.app.logSamlData) {
-          logger.debug(`onLogout->response ${JSON.stringify(responseInfo)}`);
+            if (config.app.logSamlData) {
+                logger.debug(`onLogout->response ${JSON.stringify(responseInfo)}`);
+            }
+        } catch (e) {
+            logger.debug(`ERROR: ${getError(e)}`);
         }
 
         return res.redirect(urlResolver.getPortalAuthUrl(req));
       } else {
-        const requestInfo = await sp.parseLogoutRequest(idp, method, req);
+            const requestInfo = await sp.parseLogoutRequest(idp, method, req);
 
-        if (config.app.logSamlData) {
-          logger.debug(`onLogout->request ${JSON.stringify(requestInfo)}`);
-        }
-
+            if (config.app.logSamlData) {
+                logger.debug(`onLogout->request ${JSON.stringify(requestInfo)}`);
+            }
+        
         const nameID = getNameId(requestInfo);
         const sessionIndex = getSessionIndex(requestInfo);
 

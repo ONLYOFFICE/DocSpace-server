@@ -27,24 +27,24 @@
 namespace ASC.ActiveDirectory.Log;
 internal static partial class LdapHelperLogger
 {
-    [LoggerMessage(Level = LogLevel.Error, Message = "UserExistsInGroup() failed")]
+    [LoggerMessage(LogLevel.Error, "UserExistsInGroup() failed")]
     public static partial void ErrorUserExistsInGroupFailed(this ILogger<LdapHelper> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "NovellLdapHelper->SearchDomain() failed")]
+    [LoggerMessage(LogLevel.Warning, "NovellLdapHelper->SearchDomain() failed")]
     public static partial void WarnSearchDomainFailed(this ILogger<LdapHelper> logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "NovellLdapHelper->CheckUserDn(userDn: {userDn}) Wrong User DN parameter")]
+    [LoggerMessage(LogLevel.Error, "NovellLdapHelper->CheckUserDn(userDn: {userDn}) Wrong User DN parameter")]
     public static partial void ErrorWrongUserDnParameter(this ILogger<LdapHelper> logger, string userDn);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "NovellLdapHelper->CheckGroupDn(groupDn: {groupDn}): Wrong Group DN parameter")]
+    [LoggerMessage(LogLevel.Error, "NovellLdapHelper->CheckGroupDn(groupDn: {groupDn}): Wrong Group DN parameter")]
     public static partial void ErrorWrongGroupDnParameter(this ILogger<LdapHelper> logger, string groupDn);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "NovellLdapHelper->GetUsers(filter: '{filter}' limit: {limit}) failed")]
+    [LoggerMessage(LogLevel.Error, "NovellLdapHelper->GetUsers(filter: '{filter}' limit: {limit}) failed")]
     public static partial void ErrorGetUsersFailed(this ILogger<LdapHelper> logger, string filter, int limit, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "NovellLdapHelper->GetUserBySid(sid: '{sid}') failed")]
+    [LoggerMessage(LogLevel.Error, "NovellLdapHelper->GetUserBySid(sid: '{sid}') failed")]
     public static partial void ErrorGetUserBySidFailed(this ILogger<LdapHelper> logger, string sid, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "NovellLdapHelper->GetGroups(criteria: '{criteria}') failed")]
+    [LoggerMessage(LogLevel.Error, "NovellLdapHelper->GetGroups(criteria: '{criteria}') failed")]
     public static partial void ErrorGetGroupsFailed(this ILogger<LdapHelper> logger, Criteria criteria, Exception exception);
 }

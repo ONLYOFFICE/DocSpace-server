@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Folder = Microsoft.SharePoint.Client.Folder;
-
 namespace ASC.Files.Thirdparty.SharePoint;
 
 [Scope]
@@ -150,7 +148,7 @@ internal class SharePointFileDao(
 
         if (!string.IsNullOrEmpty(searchText))
         {
-            files = files.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
+            files = files.Where(x => x.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase));
         }
 
         if (!extension.IsNullOrEmpty())
@@ -173,7 +171,7 @@ internal class SharePointFileDao(
     }
 
     public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
-        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default, bool withShared = false)
+        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = null, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null)
     {
         if (filterType == FilterType.FoldersOnly)
         {
@@ -232,7 +230,7 @@ internal class SharePointFileDao(
 
         if (!string.IsNullOrEmpty(searchText))
         {
-            files = files.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
+            files = files.Where(x => x.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase));
         }
 
         if (!extension.IsNullOrEmpty())
@@ -346,10 +344,17 @@ internal class SharePointFileDao(
     {
         return await SaveFileAsync(file, fileStream);
     }
-    public async Task DeleteFileAsync(string fileId,Guid ownerId)
+
+    public async Task DeleteFileVersionAsync(File<string> file, int version)
+    {
+        await DeleteFileAsync(file.Id);
+    }
+
+    public async Task DeleteFileAsync(string fileId, Guid ownerId)
     {
         await DeleteFileAsync(fileId);
     }
+    
     public async Task DeleteFileAsync(string fileId)
     {
         await SharePointProviderInfo.DeleteFileAsync(fileId);
@@ -507,12 +512,12 @@ internal class SharePointFileDao(
         return file;
     }
 
-    public Task SetCustomOrder(string fileId, string parentFolderId, int order)
+    public Task<int> SetCustomOrder(string fileId, string parentFolderId, int order)
     {
-        return Task.CompletedTask;
+        return Task.FromResult(0);
     }
 
-    public Task InitCustomOrder(IEnumerable<string> fileIds, string parentFolderId)
+    public Task InitCustomOrder(Dictionary<string, int> fileIds, string parentFolderId)
     {
         return Task.CompletedTask;
     }

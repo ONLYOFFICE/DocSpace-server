@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+global using System.Text.Json.Serialization;
+
 global using ASC.Api.Collections;
 global using ASC.Api.Core;
 global using ASC.Api.Core.Extensions;

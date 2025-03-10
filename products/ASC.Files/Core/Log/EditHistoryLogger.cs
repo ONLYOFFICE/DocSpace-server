@@ -27,6 +27,6 @@
 namespace ASC.Files.Core.Log;
 internal static partial class EditHistoryLogger
 {
-    [LoggerMessage(Level = LogLevel.Error, Message = "DeSerialize old scheme exception")]
+    [LoggerMessage(LogLevel.Error, "DeSerialize old scheme exception")]
     public static partial void ErrorDeSerializeOldScheme(this ILogger<EditHistory> logger, Exception exception);
 }

@@ -75,10 +75,7 @@ public class AscRandom : Random
 
     public override int Next(int maxValue)
     {
-        if (maxValue < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(maxValue));
-        }
+        ArgumentOutOfRangeException.ThrowIfNegative(maxValue);
 
         return (int)(InternalSample() * 4.6566128752457969E-10 * maxValue);
     }

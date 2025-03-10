@@ -50,6 +50,20 @@ internal sealed class BackupCleanerService(
 
         foreach (var scheduledBackups in (await backupRepository.GetScheduledBackupRecordsAsync()).GroupBy(r => r.TenantId))
         {
+            foreach (var record in await backupRepository.GetBackupRecordsByTenantIdAsync(scheduledBackups.Key))
+            {
+                var storage = await backupStorageFactory.GetBackupStorageAsync(record);
+                if (storage == null)
+                {
+                    continue;
+                }
+
+                if (!await storage.IsExistsAsync(record.StoragePath))
+                {
+                    await backupRepository.DeleteBackupRecordAsync(record.Id);
+                }
+            }
+
             if (stoppingToken.IsCancellationRequested)
             {
                 return;
@@ -60,15 +74,11 @@ internal sealed class BackupCleanerService(
             if (schedule != null)
             {
                 var scheduledBackupsToRemove = scheduledBackups.OrderByDescending(r => r.CreatedOn).Skip(schedule.BackupsStored).ToList();
-                if (scheduledBackupsToRemove.Any())
+                if (scheduledBackupsToRemove.Count != 0)
                 {
                     logger.DebugOnlyLast(schedule.BackupsStored, schedule.TenantId, scheduledBackupsToRemove.Count);
                     backupsToRemove.AddRange(scheduledBackupsToRemove);
                 }
-            }
-            else
-            {
-                backupsToRemove.AddRange(scheduledBackups);
             }
         }
 

@@ -36,11 +36,12 @@ public static class ServiceCollectionExtension
         services.AddSingleton<EFLoggerFactory>();
         services.AddHostedService<ClearEventsService>();
         services.AddBaseDbContextPool<MessagesContext>();
+        services.AddEventBus(configuration); // only for healthcheck. need refactoring
         services.AddCustomHealthCheck(configuration);
         
         var connectionMultiplexer = await services.GetRedisConnectionMultiplexerAsync(configuration, @namespace);
 
-        services.AddDistributedCache(connectionMultiplexer);
+        services.AddHybridCache(connectionMultiplexer);
             
         return services;
 

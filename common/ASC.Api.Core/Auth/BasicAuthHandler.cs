@@ -28,7 +28,7 @@ using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.Api.Core.Auth;
 
-public class BasicAuthHandler(
+public partial class BasicAuthHandler(
     IOptionsMonitor<AuthenticationSchemeOptions> options,
     ILoggerFactory logger,
     UrlEncoder encoder,
@@ -47,8 +47,8 @@ public class BasicAuthHandler(
         }
 
         // Get authorization key
-        var authorizationHeader = Request.Headers["Authorization"].ToString();
-        var authHeaderRegex = new Regex(@"Basic (.*)");
+        var authorizationHeader = Request.Headers.Authorization.ToString();
+        var authHeaderRegex = BasicRegex();
 
         if (!authHeaderRegex.IsMatch(authorizationHeader))
         {
@@ -65,7 +65,7 @@ public class BasicAuthHandler(
             var userInfo = await userManager.GetUserByEmailAsync(authUsername);
             var passwordHash = passwordHasher.GetClientPassword(authPassword);
 
-            var claims = new List<Claim>()
+            var claims = new List<Claim>
             {
                 AuthConstants.Claim_ScopeRootWrite
             };
@@ -79,4 +79,7 @@ public class BasicAuthHandler(
 
         return AuthenticateResult.Success(new AuthenticationTicket(Context.User, Scheme.Name));
     }
+
+    [GeneratedRegex(@"Basic (.*)")]
+    private static partial Regex BasicRegex();
 }

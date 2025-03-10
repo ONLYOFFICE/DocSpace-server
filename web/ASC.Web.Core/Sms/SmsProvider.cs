@@ -275,7 +275,7 @@ public class SmscProvider : SmsProvider, IValidateKeysProvider
 
     public async Task<bool> ValidateKeysAsync()
     {
-        return double.TryParse(await GetBalanceAsync(await TenantManager.GetCurrentTenantAsync(false), true), NumberStyles.Number, CultureInfo.InvariantCulture, out var balance) && balance > 0;
+        return double.TryParse(await GetBalanceAsync(TenantManager.GetCurrentTenant(false), true), NumberStyles.Number, CultureInfo.InvariantCulture, out var balance) && balance > 0;
     }
 }
 
@@ -361,13 +361,11 @@ public class TwilioProvider : SmsProvider, IValidateKeysProvider
     protected string AccountSid
     {
         get { return this["twilioAccountSid"]; }
-        set { }
     }
 
     protected string AuthToken
     {
         get { return this["twilioAuthToken"]; }
-        set { }
     }
 
     protected override string Sender

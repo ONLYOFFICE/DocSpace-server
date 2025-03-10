@@ -27,12 +27,12 @@
 namespace ASC.Data.Backup.BackgroundTasks.Log;
 internal static partial class BackupCleanerTempFileServiceLogger
 {
-    [LoggerMessage(Level = LogLevel.Information, Message = "starting backup cleaner temp file service...")]
+    [LoggerMessage(LogLevel.Information, "starting backup cleaner temp file service...")]
     public static partial void InfoBeginBackupCleaner(this ILogger<BackupCleanerTempFileService> logger);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "backup cleaner temp file service stoped")]
+    [LoggerMessage(LogLevel.Information, "backup cleaner temp file service stoped")]
     public static partial void InfoStopBackupCleaner(this ILogger<BackupCleanerTempFileService> logger);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "delete file {path}")]
+    [LoggerMessage(LogLevel.Information, "delete file {path}")]
     public static partial void InfoBackupCleanerDeleteFile(this ILogger<BackupCleanerTempFileService> logger, string path);
 }

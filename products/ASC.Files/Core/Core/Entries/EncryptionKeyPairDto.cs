@@ -56,7 +56,7 @@ public class EncryptionKeyPairDtoHelper(UserManager userManager,
         ArgumentException.ThrowIfNullOrEmpty(privateKeyEnc);
 
         var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
-        if (!authContext.IsAuthenticated || await userManager.IsUserAsync(user))
+        if (!authContext.IsAuthenticated || await userManager.IsGuestAsync(user))
         {
             throw new SecurityException();
         }

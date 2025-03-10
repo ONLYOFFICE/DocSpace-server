@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="BackupNotFound" xml:space="preserve">
-    <value>备份文件无效。请使用通过 ONLYOFFICE v11.5 或更高版本创建的文件。</value>
+    <value>备份文件无效。请使用在同一个门户中创建的文件。</value>
   </data>
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>设置密码</value>

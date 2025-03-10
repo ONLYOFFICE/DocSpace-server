@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Constants = ASC.Core.Users.Constants;
+
 namespace ASC.Core.Common.EF;
 
 public class Acl : BaseEntity, IMapFrom<AzRecord>
@@ -31,6 +33,7 @@ public class Acl : BaseEntity, IMapFrom<AzRecord>
     public int TenantId { get; set; }
     public Guid Subject { get; set; }
     public Guid Action { get; set; }
+    [MaxLength(255)]
     public string Object { get; set; }
     public AceType AceType { get; set; }
 
@@ -119,7 +122,8 @@ public static class AclExtension
                 new Acl { TenantId = -1, Subject = Guid.Parse("c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e"), Action = Guid.Parse("77777777-32ae-425f-99b5-83176061d1ae"), Object = "ASC.Web.Core.WebItemSecurity+WebItemSecurityObject|853b6eb973ee438d9b098ffeedf36234", AceType = (AceType)1 },
                 new Acl { TenantId = -1, Subject = Guid.Parse("c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e"), Action = Guid.Parse("77777777-32ae-425f-99b5-83176061d1ae"), Object = "ASC.Web.Core.WebItemSecurity+WebItemSecurityObject|46cfa73af32046cf8d5bcd82e1d67f26", AceType = 0 },
                 new Acl { TenantId = -1, Subject = Guid.Parse("c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e"), Action = Guid.Parse("77777777-32ae-425f-99b5-83176061d1ae"), Object = "ASC.Web.Core.WebItemSecurity+WebItemSecurityObject|37620ae5c40b45ce855a39dd7d76a1fa", AceType = 0 },
-                new Acl { TenantId = -1, Subject = Guid.Parse("abef62db-11a8-4673-9d32-ef1d8af19dc0"), Action = Guid.Parse("3e74aff2-7c0c-4089-b209-6495b8643471"), Object = "", AceType = 0 });
+                new Acl { TenantId = -1, Subject = Guid.Parse("abef62db-11a8-4673-9d32-ef1d8af19dc0"), Action = Guid.Parse("3e74aff2-7c0c-4089-b209-6495b8643471"), Object = "", AceType = 0 },
+                new Acl { TenantId = -1, Subject = Constants.GroupUser.ID, Action = Constants.Action_ReadGroups.ID, Object = "", AceType = (AceType)1 });
 
         return modelBuilder;
     }
@@ -150,7 +154,7 @@ public static class AclExtension
 
             entity.Property(e => e.Object)
                 .HasColumnName("object")
-                .HasColumnType("varchar(255)")
+                .HasColumnType("varchar")
                 .HasDefaultValueSql("''")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
@@ -162,27 +166,26 @@ public static class AclExtension
     {
         modelBuilder.Entity<Acl>(entity =>
         {
-            entity.HasKey(e => new { e.TenantId, e.Subject, e.Action, e.Object })
-                .HasName("core_acl_pkey");
+            entity.HasKey(e => new { e.TenantId, e.Subject, e.Action, e.Object });
 
-            entity.ToTable("core_acl", "onlyoffice");
+            entity.ToTable("core_acl");
 
             entity.Property(e => e.TenantId).HasColumnName("tenant");
 
             entity.Property(e => e.Subject)
                 .HasColumnName("subject")
-                .HasMaxLength(38);
+                .HasColumnType("uuid");
 
             entity.Property(e => e.Action)
                 .HasColumnName("action")
-                .HasMaxLength(38);
+                .HasColumnType("uuid");
 
             entity.Property(e => e.Object)
                 .HasColumnName("object")
-                .HasMaxLength(255)
-                .HasDefaultValueSql("''");
+                .HasColumnType("text");
 
             entity.Property(e => e.AceType).HasColumnName("acetype");
         });
+        
     }
 }

@@ -27,84 +27,102 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
+/// Authentication request parameters
 /// </summary>
 public class AuthRequestsDto
 {
-    /// <summary>Username / email</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Username / email
+    /// </summary>
     public string UserName { get; set; }
 
-    /// <summary>Password</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Password
+    /// </summary>
     public string Password { get; set; }
 
-    /// <summary>Password hash</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Password hash
+    /// </summary>
     public string PasswordHash { get; set; }
 
-    /// <summary>Provider type</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Provider type
+    /// </summary>
     public string Provider { get; set; }
 
-    /// <summary>Provider access token</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Provider access token
+    /// </summary>
     public string AccessToken { get; set; }
 
-    /// <summary>Serialized user profile</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Serialized user profile
+    /// </summary>
     public string SerializedProfile { get; set; }
 
-    /// <summary>Two-factor authentication code</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Two-factor authentication code
+    /// </summary>
     public string Code { get; set; }
 
-    /// <summary>Code for getting a token</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Code for getting a token
+    /// </summary>
     public string CodeOAuth { get; set; }
 
-    /// <summary>Session based authentication or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Session based authentication or not
+    /// </summary>
     public bool Session { get; set; }
 
-    /// <summary>Confirmation data</summary>
-    /// <type>ASC.Web.Api.ApiModel.RequestsDto.ConfirmData, ASC.Web.Api</type>
+    /// <summary>
+    /// Confirmation data
+    /// </summary>
     public ConfirmData ConfirmData { get; set; }
 
-    /// <summary>Type of captcha</summary>
-    /// <type>ASC.Web.Core.RecaptchaType, ASC.Web.Core</type>
+    /// <summary>
+    /// Type of captcha
+    /// </summary>
     public RecaptchaType RecaptchaType { get; set; }
 
-    /// <summary>reCAPTCHA response</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// reCAPTCHA response
+    /// </summary>
     public string RecaptchaResponse { get; set; }
-    
-    /// <summary>Culture</summary>
-    /// <type>System.String, System</type>
+
+    /// <summary>
+    /// Culture
+    /// </summary>
     public string Culture { get; set; }
 }
 
 /// <summary>
+/// Mobile phone request parameters
 /// </summary>
 public class MobileRequestsDto
 {
-    /// <summary>Mobile phone</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Mobile phone
+    /// </summary>
     public string MobilePhone { get; set; }
 }
 
-/// <summary>
-/// </summary>
 public class ConfirmData
 {
-    /// <summary>Email address</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Email address
+    /// </summary>
+    [EmailAddress]
     public string Email { get; set; }
 
-    /// <summary>Access an account for the first time or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    /// <summary>
+    /// Access an account for the first time or not
+    /// </summary>
     public bool? First { get; set; }
 
-    /// <summary>Key</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Key
+    /// </summary>
     public string Key { get; set; }
 }

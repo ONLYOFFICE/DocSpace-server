@@ -38,12 +38,7 @@ public class DbFactory(IConfiguration configuration, ConfigurationExtension conf
             return connectionString;
         }
 
-        if (key != null)
-        {
-            return configurationExtension.GetConnectionStrings(key, region).ConnectionString;
-        }
-
-        return configurationExtension.GetConnectionStrings(DefaultConnectionStringName, region).ConnectionString;
+        return key != null ? configurationExtension.GetConnectionStrings(key, region).ConnectionString : configurationExtension.GetConnectionStrings(DefaultConnectionStringName, region).ConnectionString;
     }
 
     private DbProviderFactory DbProviderFactory
@@ -91,7 +86,7 @@ public class DbFactory(IConfiguration configuration, ConfigurationExtension conf
         if (command != null)
         {
             command.CommandText =
-                configurationExtension.GetConnectionStrings(DefaultConnectionStringName).ProviderName.IndexOf("MySql", StringComparison.OrdinalIgnoreCase) != -1
+                configurationExtension.GetConnectionStrings(DefaultConnectionStringName).ProviderName.Contains("MySql", StringComparison.OrdinalIgnoreCase)
                     ? "select Last_Insert_Id();"
                     : "select last_insert_rowid();";
         }

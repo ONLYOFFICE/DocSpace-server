@@ -25,7 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 global using System.Reflection;
-
 global using ASC.Api.Core;
 global using ASC.Api.Core.Extensions;
 global using ASC.Common;
@@ -42,24 +41,18 @@ global using ASC.Core.Common.Settings;
 global using ASC.Core.Notify.Senders;
 global using ASC.EventBus.Abstractions;
 global using ASC.EventBus.Log;
+global using ASC.Notify;
 global using ASC.Notify.Config;
+global using ASC.Notify.Extension;
 global using ASC.Notify.IntegrationEvents.EventHandling;
 global using ASC.Notify.Log;
 global using ASC.Notify.Messages;
 global using ASC.Notify.Services;
 global using ASC.Web.Core.WhiteLabel;
 global using ASC.Web.Studio.Core.Notify;
-
 global using Autofac;
-
 global using AutoMapper;
-
 global using Microsoft.AspNetCore.Builder;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Hosting.WindowsServices;
 global using Microsoft.Extensions.Logging;
-global using Microsoft.Extensions.Options;
-
-global using Newtonsoft.Json;
-global using ASC.Notify;
-global using ASC.Notify.Extension;

@@ -76,7 +76,7 @@ public class AWSSender : SmtpSender, IDisposable
                     result = await SendMessage(m);
                 }
 
-                _logger.Debug(result.ToString());
+                _logger.Debug(result.ToStringFast());
             }
             catch (Exception e)
             {

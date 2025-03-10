@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -51,7 +51,13 @@ public enum AuditCode {
   CHANGE_CLIENT_VISIBILITY(9906),
 
   /** Audit code for revoking a user's client access. */
-  REVOKE_USER_CLIENT(9907);
+  REVOKE_USER_CLIENT(9907),
+
+  /** Audit code for generating a user's authorization_code authorization. */
+  GENERATE_AUTHORIZATION_CODE_TOKEN(9908),
+
+  /** Audit code for generating a user's personal_access_token authorization. */
+  GENERATE_PERSONAL_ACCESS_TOKEN(9909);
 
   private final int code;
 

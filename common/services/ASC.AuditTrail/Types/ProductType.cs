@@ -26,15 +26,24 @@
 
 namespace ASC.AuditTrail.Types;
 
-/// <summary>
-/// </summary>
 [EnumExtensions]
 public enum ProductType
 {
+    [SwaggerEnum("None")]
     None = 0,
+
+    [SwaggerEnum("Documents")]
     Documents = 2,
+
+    [SwaggerEnum("Login")]
     Login = 3,
+
+    [SwaggerEnum("Others")]
     Others = 4,
+
+    [SwaggerEnum("People")]
     People = 5,
+
+    [SwaggerEnum("Settings")]
     Settings = 7
 }

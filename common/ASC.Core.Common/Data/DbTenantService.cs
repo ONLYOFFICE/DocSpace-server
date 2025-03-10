@@ -191,6 +191,7 @@ public class DbTenantService(
         using var tenantDbContext = dbContextFactory.CreateDbContext();
 
         return tenantDbContext.Tenants
+             .Where(t => t.Id != -1)
             .OrderBy(a => a.Status)
             .ThenBy(a => a.Id)
             .ProjectTo<Tenant>(mapper.ConfigurationProvider)
@@ -202,6 +203,8 @@ public class DbTenantService(
         await using var tenantDbContext = await dbContextFactory.CreateDbContextAsync();
 
         return await tenantDbContext.Tenants
+            .Where(t => t.Id != -1)
+            .Where(t => t.Status != TenantStatus.Suspended && t.Status != TenantStatus.RemovePending)
             .OrderBy(a => a.Status)
             .ThenBy(a => a.Id)
             .ProjectTo<Tenant>(mapper.ConfigurationProvider)
@@ -396,7 +399,6 @@ public class DbTenantService(
                 dbTenant.PaymentId = tenant.PaymentId;
                 dbTenant.LastModified = tenant.LastModified = DateTime.UtcNow;
                 dbTenant.Industry = tenant.Industry;
-                dbTenant.Spam = tenant.Spam;
                 dbTenant.Calls = tenant.Calls;
                 dbTenant.OwnerId = tenant.OwnerId;
 

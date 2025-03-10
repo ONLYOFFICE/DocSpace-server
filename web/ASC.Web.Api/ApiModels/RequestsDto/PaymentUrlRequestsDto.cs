@@ -27,14 +27,23 @@
 namespace ASC.Web.Api.Models;
 
 /// <summary>
+/// Payment URL request parameters
 /// </summary>
-public class PaymentUrlRequestsDto
+public class PaymentUrlRequestsDto : QuantityRequestDto
 {
-    /// <summary>The quantity of payment</summary>
-    /// <type>System.Collections.Generic.Dictionary{System.String, System.Int32}, System.Collections.Generic</type>
-    public Dictionary<string, int> Quantity { get; set; }
-
-    /// <summary>Back URL</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Back URL
+    /// </summary>
     public string BackUrl { get; set; }
+}
+
+/// <summary>
+/// Payment URL request parameters
+/// </summary>
+public class QuantityRequestDto
+{
+    /// <summary>
+    /// The quantity of payment
+    /// </summary>
+    public Dictionary<string, int> Quantity { get; set; }
 }

@@ -25,25 +25,19 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using Polly;
+using Polly.Contrib.WaitAndRetry;
 using Polly.Extensions.Http;
+using Polly.Timeout;
 
 namespace ASC.Files.Core.Helpers;
 
-/// <summary>
-/// Class service connector
-/// </summary>
 public static class DocumentService
 {
-    /// <summary>
-    /// Timeout to request conversion
-    /// </summary>
-    public static readonly int Timeout = 120000;
-    //public static int Timeout = Convert.ToInt32(ConfigurationManagerExtension.AppSettings["files.docservice.timeout"] ?? "120000");
+    private const int Timeout = 120000;
 
-    /// <summary>
-    /// Number of tries request conversion
-    /// </summary>
-    public static readonly int MaxTry = 3;
+    public const string CustomSslVerificationClient = "CustomSSLVerificationClient";
+
+    public static string GetHttpClientName(bool sslVerification) => nameof(DocumentService) + (sslVerification ? string.Empty : CustomSslVerificationClient);
 
     private static readonly JsonSerializerOptions _bodySettings = new()
     {
@@ -77,7 +71,6 @@ public static class DocumentService
     /// <summary>
     /// The method is to convert the file to the required format
     /// </summary>
-    /// <param name="fileUtility"></param>
     /// <param name="documentConverterUrl">Url to the service of conversion</param>
     /// <param name="documentUri">Uri for the document to convert</param>
     /// <param name="fromExtension">Document extension</param>
@@ -87,8 +80,11 @@ public static class DocumentService
     /// <param name="region"></param>
     /// <param name="thumbnail">Thumbnail settings</param>
     /// <param name="spreadsheetLayout"></param>
+    /// <param name="options"></param>
     /// <param name="isAsync">Perform conversions asynchronously</param>
     /// <param name="signatureSecret">Secret key to generate the token</param>
+    /// <param name="signatureHeader">Header to transfer the token</param>
+    /// <param name="sslVerification">Enable SSL verification</param>
     /// <param name="clientFactory"></param>
     /// <param name="toForm"></param>
     /// <returns>The percentage of completion of conversion</returns>
@@ -100,7 +96,6 @@ public static class DocumentService
     /// </exception>
 
     public static Task<(int ResultPercent, string ConvertedDocumentUri, string convertedFileType)> GetConvertedUriAsync(
-        FileUtility fileUtility,
         string documentConverterUrl,
         string documentUri,
         string fromExtension,
@@ -110,8 +105,11 @@ public static class DocumentService
         string region,
         ThumbnailData thumbnail,
         SpreadsheetLayout spreadsheetLayout,
+        Options options,
         bool isAsync,
         string signatureSecret,
+        string signatureHeader,
+        bool sslVerification,
        IHttpClientFactory clientFactory,
        bool toForm)
     {
@@ -126,11 +124,10 @@ public static class DocumentService
             throw new ArgumentNullException(nameof(toExtension), "Extension for conversion is not known");
         }
 
-        return InternalGetConvertedUriAsync(fileUtility, documentConverterUrl, documentUri, fromExtension, toExtension, documentRevisionId, password, region, thumbnail, spreadsheetLayout, isAsync, signatureSecret, clientFactory, toForm);
+        return InternalGetConvertedUriAsync(documentConverterUrl, documentUri, fromExtension, toExtension, documentRevisionId, password, region, thumbnail, spreadsheetLayout, options, isAsync, signatureSecret, signatureHeader, sslVerification, clientFactory, toForm);
     }
 
     private static async Task<(int ResultPercent, string ConvertedDocumentUri, string convertedFileType)> InternalGetConvertedUriAsync(
-       FileUtility fileUtility,
        string documentConverterUrl,
        string documentUri,
        string fromExtension,
@@ -140,8 +137,11 @@ public static class DocumentService
        string region,
        ThumbnailData thumbnail,
        SpreadsheetLayout spreadsheetLayout,
+       Options options,
        bool isAsync,
        string signatureSecret,
+       string signatureHeader,
+       bool sslVerification,
        IHttpClientFactory clientFactory,
        bool toForm)
     {
@@ -151,7 +151,12 @@ public static class DocumentService
         documentRevisionId = string.IsNullOrEmpty(documentRevisionId)
                                  ? documentUri
                                  : documentRevisionId;
+
         documentRevisionId = GenerateRevisionId(documentRevisionId);
+
+        documentConverterUrl = FilesLinkUtility.AddQueryString(documentConverterUrl, new Dictionary<string, string> {
+            { FilesLinkUtility.ShardKey, documentRevisionId }
+        });
 
         var request = new HttpRequestMessage
         {
@@ -160,7 +165,7 @@ public static class DocumentService
         };
         request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
-        var httpClient = clientFactory.CreateClient(nameof(DocumentService));
+        var httpClient = clientFactory.CreateClient(GetHttpClientName(sslVerification));
 
         var body = new ConvertionBody
         {
@@ -171,6 +176,7 @@ public static class DocumentService
             Title = title,
             Thumbnail = thumbnail,
             SpreadsheetLayout = spreadsheetLayout,
+            Watermark = options?.WatermarkOnDraw,
             Url = documentUri,
             Region = region
         };
@@ -188,7 +194,7 @@ public static class DocumentService
         {
             var token = JsonWebToken.Encode(new { payload = body }, signatureSecret);
             //todo: remove old scheme
-            request.Headers.Add(fileUtility.SignatureHeader, "Bearer " + token);
+            request.Headers.Add(signatureHeader, "Bearer " + token);
 
             token = JsonWebToken.Encode(body, signatureSecret);
             body.Token = token;
@@ -210,7 +216,6 @@ public static class DocumentService
     /// <summary>
     /// Request to Document Server with command
     /// </summary>
-    /// <param name="fileUtility"></param>
     /// <param name="documentTrackerUrl">Url to the command service</param>
     /// <param name="method">Name of method</param>
     /// <param name="documentRevisionId">Key for caching on service, whose used in editor</param>
@@ -218,10 +223,12 @@ public static class DocumentService
     /// <param name="users">users id for drop</param>
     /// <param name="meta">file meta data for update</param>
     /// <param name="signatureSecret">Secret key to generate the token</param>
+    /// <param name="signatureHeader">Header to transfer the token</param>
+    /// <param name="sslVerification">Enable SSL verification</param>
     /// <param name="clientFactory"></param>
     /// <returns>Response</returns>
 
-    public static async Task<CommandResponse> CommandRequestAsync(FileUtility fileUtility,
+    public static async Task<CommandResponse> CommandRequestAsync(
         string documentTrackerUrl,
         CommandMethod method,
         string documentRevisionId,
@@ -229,25 +236,29 @@ public static class DocumentService
         string[] users,
         MetaData meta,
         string signatureSecret,
+        string signatureHeader,
+        bool sslVerification,
         IHttpClientFactory clientFactory)
     {
-        var defaultTimeout = Timeout;
-        var commandTimeout = defaultTimeout;
+        documentTrackerUrl = FilesLinkUtility.AddQueryString(documentTrackerUrl, new Dictionary<string, string> {
+            { FilesLinkUtility.ShardKey, documentRevisionId }
+        });
+
+        var commandTimeout = Timeout;
 
         if (method == CommandMethod.Version)
         {
             commandTimeout = 5000;
         }
 
-        var cancellationTokenSource = new CancellationTokenSource(commandTimeout);
+        using var cancellationTokenSource = new CancellationTokenSource(commandTimeout);
         var request = new HttpRequestMessage
         {
             RequestUri = new Uri(documentTrackerUrl),
             Method = HttpMethod.Post
         };
 
-        var httpClient = clientFactory.CreateClient();
-        httpClient.Timeout = TimeSpan.FromMilliseconds(commandTimeout);
+        var httpClient = clientFactory.CreateClient(GetHttpClientName(sslVerification));
 
         var body = new CommandBody
         {
@@ -273,9 +284,9 @@ public static class DocumentService
         if (!string.IsNullOrEmpty(signatureSecret))
         {
             var token = JsonWebToken.Encode(new { payload = body }, signatureSecret);
-            
+
             //todo: remove old scheme
-            request.Headers.Add(fileUtility.SignatureHeader, "Bearer " + token);
+            request.Headers.Add(signatureHeader, "Bearer " + token);
 
             token = JsonWebToken.Encode(body, signatureSecret);
             body.Token = token;
@@ -284,13 +295,21 @@ public static class DocumentService
         var bodyString = JsonSerializer.Serialize(body, _bodySettings);
 
         request.Content = new StringContent(bodyString, Encoding.UTF8, "application/json");
-
         string dataResponse;
-        using (var response = await httpClient.SendAsync(request, cancellationTokenSource.Token))
+        try
         {
+            using var response = await httpClient.SendAsync(request, cancellationTokenSource.Token);
             dataResponse = await response.Content.ReadAsStringAsync(cancellationTokenSource.Token);
         }
-        
+        catch (HttpRequestException e) when (e.HttpRequestError == HttpRequestError.NameResolutionError)
+        {
+            return new CommandResponse
+            {
+                Error = ErrorTypes.UnknownError,
+                ErrorString = e.Message
+            };
+        }
+
         try
         {
             var commandResponse = JsonSerializer.Deserialize<CommandResponse>(dataResponse, _commonSettings);
@@ -301,18 +320,19 @@ public static class DocumentService
             return new CommandResponse
             {
                 Error = ErrorTypes.ParseError,
-                ErrorString = ex.Message
+                ErrorString = $"{ex.Message} Content: {dataResponse}"
             };
         }
     }
 
     public static Task<(string DocBuilderKey, Dictionary<string, string> Urls)> DocbuilderRequestAsync(
-        FileUtility fileUtility,
         string docbuilderUrl,
         string requestKey,
         string scriptUrl,
         bool isAsync,
         string signatureSecret,
+        string signatureHeader,
+        bool sslVerification,
        IHttpClientFactory clientFactory)
     {
         ArgumentException.ThrowIfNullOrEmpty(docbuilderUrl);
@@ -322,26 +342,30 @@ public static class DocumentService
             throw new ArgumentException("requestKey or inputScript is empty");
         }
 
-        return InternalDocbuilderRequestAsync(fileUtility, docbuilderUrl, requestKey, scriptUrl, isAsync, signatureSecret, clientFactory);
+        return InternalDocbuilderRequestAsync(docbuilderUrl, requestKey, scriptUrl, isAsync, signatureSecret, signatureHeader, sslVerification, clientFactory);
     }
 
     private static async Task<(string DocBuilderKey, Dictionary<string, string> Urls)> InternalDocbuilderRequestAsync(
-       FileUtility fileUtility,
        string docbuilderUrl,
        string requestKey,
        string scriptUrl,
        bool isAsync,
        string signatureSecret,
+       string signatureHeader,
+       bool sslVerification,
        IHttpClientFactory clientFactory)
     {
+        docbuilderUrl = FilesLinkUtility.AddQueryString(docbuilderUrl, new Dictionary<string, string> {
+            { FilesLinkUtility.ShardKey, requestKey }
+        });
+
         var request = new HttpRequestMessage
         {
             RequestUri = new Uri(docbuilderUrl),
             Method = HttpMethod.Post
         };
 
-        var httpClient = clientFactory.CreateClient();
-        httpClient.Timeout = TimeSpan.FromMilliseconds(Timeout);
+        var httpClient = clientFactory.CreateClient(GetHttpClientName(sslVerification));
 
         var body = new BuilderBody
         {
@@ -354,7 +378,7 @@ public static class DocumentService
         {
             var token = JsonWebToken.Encode(new { payload = body }, signatureSecret);
             //todo: remove old scheme
-            request.Headers.Add(fileUtility.SignatureHeader, "Bearer " + token);
+            request.Headers.Add(signatureHeader, "Bearer " + token);
 
             token = JsonWebToken.Encode(body, signatureSecret);
             body.Token = token;
@@ -439,17 +463,17 @@ public static class DocumentService
     public class CommandResponse
     {
         public ErrorTypes Error { get; set; }
-        
+
         public string ErrorString { get; set; }
-        
+
         public string Key { get; set; }
-        
+
         public License License { get; set; }
-        
+
         public ServerInfo Server { get; set; }
-        
+
         public QuotaInfo Quota { get; set; }
-        
+
         public string Version { get; set; }
 
         public enum ErrorTypes
@@ -468,14 +492,14 @@ public static class DocumentService
         public class ServerInfo
         {
             public DateTime BuildDate { get; set; }
-            
+
             public int BuildNumber { get; set; }
             public string BuildVersion { get; set; }
-            
+
             public PackageTypes PackageType { get; set; }
-            
+
             public ResultTypes ResultType { get; set; }
-            
+
             public int WorkersCount { get; set; }
 
             public enum PackageTypes
@@ -510,7 +534,7 @@ public static class DocumentService
             {
                 [JsonPropertyName("userid")]
                 public string UserId { get; set; }
-                
+
                 public DateTime Expire { get; set; }
             }
         }
@@ -528,12 +552,12 @@ public static class DocumentService
         }
 
         public string Callback { get; set; }
-        
+
         public string Key { get; init; }
         public MetaData Meta { get; set; }
-        
+
         public string[] Users { get; set; }
-        
+
         public string Token { get; set; }
 
         //not used
@@ -608,6 +632,7 @@ public static class DocumentService
         public SpreadsheetLayout SpreadsheetLayout { get; set; }
         public required string Url { get; set; }
         public required string Region { get; set; }
+        public WatermarkOnDraw Watermark { get; set; }        
         public string Token { get; set; }
         public PdfData Pdf { get; set; }
 
@@ -624,9 +649,21 @@ public static class DocumentService
 
     public class FileLink
     {
+        /// <summary>
+        /// File type
+        /// </summary>
         [JsonPropertyName("filetype")]
         public string FileType { get; set; }
+
+        /// <summary>
+        /// Token
+        /// </summary>
         public string Token { get; set; }
+
+        /// <summary>
+        /// Url
+        /// </summary>
+        [Url]
         public string Url { get; set; }
     }
 
@@ -722,19 +759,41 @@ public static class DocumentService
 
 public static class DocumentServiceHttpClientExtension
 {
-    public static void AddDocumentServiceHttpClient(this IServiceCollection services)
+    public static void AddDocumentServiceHttpClient(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddHttpClient(nameof(DocumentService))
-            .SetHandlerLifetime(TimeSpan.FromMilliseconds(DocumentService.Timeout))
-            .AddPolicyHandler((_, _) => 
-                HttpPolicyExtensions
-                .HandleTransientHttpError()
-                .OrResult(response =>
+        var httpClientTimeout = Convert.ToInt32(configuration["files:docservice:timeout"] ?? "100000");
+        var policyTimeout = httpClientTimeout / 1000;
+        var retryCount = Convert.ToInt32(configuration["files:docservice:try"] ?? "6");
+        var delay = Backoff.DecorrelatedJitterBackoffV2(medianFirstRetryDelay: TimeSpan.FromSeconds(1), retryCount: retryCount);
+
+        services.AddHttpClient(GetHttpClientName(sslVerification: true))
+                .SetHandlerLifetime(TimeSpan.FromMinutes(5))
+                .AddPolicyHandler(Policy.TimeoutAsync<HttpResponseMessage>(policyTimeout))
+                .AddPolicyHandler((_, _) => HttpPolicyExtensions.HandleTransientHttpError()
+                                                                .Or<TimeoutRejectedException>()
+                                                                .WaitAndRetryAsync(delay));
+
+        services.AddHttpClient(GetHttpClientName(sslVerification: false))
+                .SetHandlerLifetime(TimeSpan.FromMinutes(5))
+                .ConfigurePrimaryHttpMessageHandler(_ =>
                 {
-                    return response.IsSuccessStatusCode
-                        ? false
-                        : throw new HttpRequestException($"Response status code: {response.StatusCode}", null, response.StatusCode);
+                    return new HttpClientHandler
+                    {
+                        ServerCertificateCustomValidationCallback = (_, _, _, _) => true
+                    };
                 })
-                .WaitAndRetryAsync(MaxTry, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));
+                .AddPolicyHandler(Policy.TimeoutAsync<HttpResponseMessage>(policyTimeout))
+                .AddPolicyHandler((_, _) => HttpPolicyExtensions.HandleTransientHttpError()
+                                                                .Or<TimeoutRejectedException>()
+                                                                .WaitAndRetryAsync(delay));
+
+        services.AddHttpClient(CustomSslVerificationClient)
+                .ConfigurePrimaryHttpMessageHandler(_ =>
+                {
+                    return new HttpClientHandler
+                    {
+                        ServerCertificateCustomValidationCallback = (_, _, _, _) => true
+                    };
+                });
     }
 }

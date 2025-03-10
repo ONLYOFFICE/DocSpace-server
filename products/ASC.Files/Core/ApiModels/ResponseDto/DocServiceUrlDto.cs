@@ -27,22 +27,44 @@
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class DocServiceUrlDto
-{   
-    /// <type>System.String, System</type>
+{
+    /// <summary>
+    /// Version
+    /// </summary>
     public required string Version { get; set; }
-    
-    /// <type>System.String, System</type>
+
+    /// <summary>
+    /// Doc service url api
+    /// </summary>
     public required string DocServiceUrlApi { get; set; }
-    
-    /// <type>System.String, System</type>
+
+    /// <summary>
+    /// Doc service url
+    /// </summary>
     public required string DocServiceUrl { get; set; }
-    
-    /// <type>System.String, System</type>
+
+    /// <summary>
+    /// Doc service url internal
+    /// </summary>
     public required string DocServiceUrlInternal { get; set; }
-    
-    /// <type>System.String, System</type>
+
+    /// <summary>
+    /// Doc service portal url
+    /// </summary>
     public required string DocServicePortalUrl { get; set; }
-    
-    /// <type>System.Boolean, System</type>
+
+    /// <summary>
+    /// Doc service signature header
+    /// </summary>
+    public string DocServiceSignatureHeader { get; set; }
+
+    /// <summary>
+    /// Enable SSL verification
+    /// </summary>
+    public bool DocServiceSslVerification { get; set; }
+
+    /// <summary>
+    /// Is default
+    /// </summary>
     public required bool IsDefault { get; set; }
 }

@@ -28,7 +28,18 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 public class DeepLinkDto
 {
+    /// <summary>
+    /// Android package name
+    /// </summary>
     public string AndroidPackageName { get; set; }
+
+    /// <summary>
+    /// Url
+    /// </summary>
     public string Url { get; set; }
+
+    /// <summary>
+    /// Ios package id
+    /// </summary>
     public string IosPackageId { get; set; }
 }

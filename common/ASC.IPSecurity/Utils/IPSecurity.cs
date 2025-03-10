@@ -67,7 +67,7 @@ public class IPSecurity(
                 return _ipSecurityEnabled.Value;
             }
             
-            var hideSettings = (configuration["web:hide-settings"] ?? "").Split(',', ';', ' ');
+            var hideSettings = configuration.GetSection("web:hide-settings").Get<string[]>() ?? [];
             _ipSecurityEnabled = !hideSettings.Contains("IpSecurity", StringComparer.CurrentCultureIgnoreCase);
             return _ipSecurityEnabled.Value;
         }
@@ -76,7 +76,7 @@ public class IPSecurity(
     
     public async Task<bool> VerifyAsync()
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
 
         if (!IpSecurityEnabled)
         {

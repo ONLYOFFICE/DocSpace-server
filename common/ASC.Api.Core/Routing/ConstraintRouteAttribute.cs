@@ -26,6 +26,7 @@
 
 namespace ASC.Api.Core.Routing;
 
+[AttributeUsage(AttributeTargets.Class)]
 public class ConstraintRouteAttribute(string constraint) : Attribute
 {
     public IRouteConstraint GetRouteConstraint()

@@ -107,7 +107,7 @@ public static class HttpRequestExtensions
 
     public static Uri PopRewritenUri(this HttpContext context)
     {
-        if (context != null && context.Items["oldUri"] != null)
+        if (context?.Items["oldUri"] != null)
         {
             var rewriteTo = context.Items["oldUri"] as Uri;
 
@@ -129,6 +129,6 @@ public static class HttpRequestExtensions
 
     public static bool MobileApp(this HttpRequest request)
     {
-        return !string.IsNullOrEmpty(request.Headers[HeaderNames.UserAgent]) && (request.Headers[HeaderNames.UserAgent].Contains("iOS") || request.Headers[HeaderNames.UserAgent].Contains("Android"));
+        return !string.IsNullOrEmpty(request.Headers[HeaderNames.UserAgent]) && (request.Headers[HeaderNames.UserAgent].ToString().Contains("iPhone") || request.Headers[HeaderNames.UserAgent].ToString().Contains("iOS") || request.Headers[HeaderNames.UserAgent].ToString().Contains("Android"));
     }
 }

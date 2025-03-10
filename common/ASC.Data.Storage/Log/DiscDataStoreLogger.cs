@@ -27,6 +27,6 @@
 namespace ASC.Data.Storage.Log;
 internal static partial class DiscDataStoreLogger
 {
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Save {path}")]
+    [LoggerMessage(LogLevel.Debug, "Save {path}")]
     public static partial void DebugSavePath(this ILogger logger, string path);
 }

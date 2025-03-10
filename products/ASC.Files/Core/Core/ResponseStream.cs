@@ -65,7 +65,7 @@ public class ResponseStream(Stream stream, long length) : Stream
         return stream.Read(buffer, offset, count);
     }
 
-    public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = new CancellationToken())
+    public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = new())
     {
         return stream.ReadAsync(buffer, cancellationToken);
     }
@@ -95,7 +95,7 @@ public class ResponseStream(Stream stream, long length) : Stream
         return stream.WriteAsync(buffer, offset, count, cancellationToken);
     }
 
-    public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = new CancellationToken())
+    public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = new())
     {
         return stream.WriteAsync(buffer, cancellationToken);
     }

@@ -77,8 +77,9 @@ public class FilesLinkUtility
     public const string AuthKey = "stream_auth";
     public const string Anchor = "anchor";
     public const string ShareKey = "share";
-    public const string FillingSessionId = "filling_session_id";
     public const string IsFile = "is_file";
+    public const string View = "view";
+    public const string ShardKey = "shardkey";
 
     public string FileHandlerPath
     {
@@ -241,6 +242,44 @@ public class FilesLinkUtility
         }
     }
 
+    public string DocServiceSignatureSecret
+    {
+        get
+        {
+            var result = GetSignatureSetting(SignatureSecretKey, out _);
+
+            if (string.IsNullOrWhiteSpace(result))
+            {
+                result = "";
+            }
+
+            return result;
+        }
+    }
+
+    public string DocServiceSignatureHeader
+    {
+        get
+        {
+            var result = GetSignatureSetting(SignatureHeaderKey, out _);
+
+            if (string.IsNullOrWhiteSpace(result))
+            {
+                result = "Authorization";
+            }
+
+            return result;
+        }
+    }
+
+    public bool DocServiceSslVerification
+    {
+        get
+        {
+            return GetSslVerificationSetting( out _);
+        }
+    }
+
     private const string PortalUrlKey = "portal";
 
     public string GetDocServicePortalUrl()
@@ -263,6 +302,42 @@ public class FilesLinkUtility
         await SetUrlSettingAsync(PortalUrlKey, value);
     }
 
+    private const string SignatureSecretKey = "secret:value";
+
+    public string GetDocServiceSignatureSecret()
+    {
+        return GetSignatureSetting(SignatureSecretKey, out _);
+    }
+
+    public async Task SetDocServiceSignatureSecretAsync(string value)
+    {
+        await SetSignatureSettingAsync(SignatureSecretKey, value);
+    }
+
+    private const string SignatureHeaderKey = "secret:header";
+
+    public string GetDocServiceSignatureHeader()
+    {
+        return GetSignatureSetting(SignatureHeaderKey, out _);
+    }
+
+    public async Task SetDocServiceSignatureHeaderAsync(string value)
+    {
+        await SetSignatureSettingAsync(SignatureHeaderKey, value);
+    }
+
+    private const string SslVerificationKey = "sslverification";
+
+    public bool GetDocServiceSslVerification()
+    {
+        return GetSslVerificationSetting(out _);
+    }
+
+    public async Task SetDocServiceSslVerificationAsync(bool value)
+    {
+        await SetSslVerificationSettingAsync(value);
+    }
+
     public bool IsDefault
     {
         get
@@ -280,6 +355,24 @@ public class FilesLinkUtility
             }
 
             GetUrlSetting(PortalUrlKey, out isDefault);
+            if (!isDefault)
+            {
+                return false;
+            }
+
+            GetSignatureSetting(SignatureSecretKey, out isDefault);
+            if (!isDefault)
+            {
+                return false;
+            }
+
+            GetSignatureSetting(SignatureHeaderKey, out isDefault);
+            if (!isDefault)
+            {
+                return false;
+            }
+
+            GetSslVerificationSetting(out isDefault);
             if (!isDefault)
             {
                 return false;
@@ -465,11 +558,99 @@ public class FilesLinkUtility
         }
     }
 
+    private string GetSignatureSetting(string key, out bool isDefault)
+    {
+        var value = string.Empty;
+        isDefault = false;
+
+        if (_coreBaseSettings.Standalone)
+        {
+            value = _coreSettings.GetSetting(GetSettingsKey(key));
+        }
+
+        if (string.IsNullOrEmpty(value))
+        {
+            value = GetDefaultSignatureSetting(key);
+            isDefault = true;
+        }
+
+        return value;
+    }
+
+    private string GetDefaultSignatureSetting(string key)
+    {
+        return _configuration[$"files:docservice:{key}"];
+    }
+
+    private async Task SetSignatureSettingAsync(string key, string value)
+    {
+        if (!_coreBaseSettings.Standalone)
+        {
+            throw new NotSupportedException("Method for server edition only.");
+        }
+        value = (value ?? "").Trim();
+        if (string.IsNullOrEmpty(value))
+        {
+            value = null;
+        }
+
+        if (value != null)
+        {
+            var def = GetDefaultSignatureSetting(key);
+            if (def == value)
+            {
+                value = null;
+            }
+        }
+
+        if (GetSignatureSetting(key, out _) != value)
+        {
+            await _coreSettings.SaveSettingAsync(GetSettingsKey(key), value);
+        }
+    }
+
+    private bool GetSslVerificationSetting(out bool isDefault)
+    {
+        isDefault = false;
+
+        if (_coreBaseSettings.Standalone)
+        {
+            var value = _coreSettings.GetSetting(GetSettingsKey(SslVerificationKey));
+
+            if (bool.TryParse(value, out var result))
+            {
+                return result;
+            }
+        }
+
+        isDefault = true;
+        return GetDefaultSslVerificationSetting();
+    }
+
+    private bool GetDefaultSslVerificationSetting()
+    {
+        var value = _configuration[$"files:docservice:{SslVerificationKey}"];
+
+        return bool.TryParse(value, out var result) ? result : true;
+    }
+
+    private async Task SetSslVerificationSettingAsync(bool value)
+    {
+        if (!_coreBaseSettings.Standalone)
+        {
+            throw new NotSupportedException("Method for server edition only.");
+        }
+
+        var def = GetDefaultSslVerificationSetting();
+
+        await _coreSettings.SaveSettingAsync(GetSettingsKey(SslVerificationKey), def == value ? null : value.ToString());
+    }
+
     private string GetSettingsKey(string key)
     {
         return "DocKey_" + key;
     }
-    
+
     private string GetFileWebMediaViewUrl(object fileId, bool external = false)
     {
         var id = HttpUtility.UrlEncode(fileId.ToString());
@@ -479,6 +660,40 @@ public class FilesLinkUtility
             return FilesBaseAbsolutePath + $"share/preview/{id}";
         }
         
-        return FilesBaseAbsolutePath + $"#preview/{id}";
+        return FilesBaseAbsolutePath + $"media/view/{id}";
+    }
+
+    public static string AddQueryString(string uri, Dictionary<string, string> queryString)
+    {
+        var uriToBeAppended = uri;
+        var anchorText = string.Empty;
+
+        var anchorIndex = uri.IndexOf('#');
+        if (anchorIndex != -1)
+        {
+            anchorText = uriToBeAppended.Substring(anchorIndex);
+            uriToBeAppended = uriToBeAppended.Substring(0, anchorIndex);
+        }
+        
+        var hasQuery =  uriToBeAppended.Contains('?');
+
+        var sb = new StringBuilder();
+        sb.Append(uriToBeAppended);
+        foreach (var parameter in queryString)
+        {
+            if (parameter.Value == null)
+            {
+                continue;
+            }
+
+            sb.Append(hasQuery ? '&' : '?');
+            sb.Append(HttpUtility.UrlEncode(parameter.Key));
+            sb.Append('=');
+            sb.Append(HttpUtility.UrlEncode(parameter.Value));
+            hasQuery = true;
+        }
+
+        sb.Append(anchorText);
+        return sb.ToString();
     }
 }

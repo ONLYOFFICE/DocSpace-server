@@ -208,7 +208,7 @@ public class SmtpSender(IConfiguration configuration,
 
         mimeMessage.From.Add(fromAddress);
 
-        foreach (var to in m.Reciever.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries))
+        foreach (var to in m.Reciever.Split(['|'], StringSplitOptions.RemoveEmptyEntries))
         {
             mimeMessage.To.Add(MailboxAddress.Parse(ParserOptions.Default, to));
         }

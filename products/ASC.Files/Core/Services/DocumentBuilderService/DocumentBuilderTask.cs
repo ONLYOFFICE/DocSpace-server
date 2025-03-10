@@ -25,30 +25,35 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Files.Core.Services.DocumentBuilderService;
-
-[Transient(GenericArguments = [typeof(int)])]
-public class DocumentBuilderTask<T>(IServiceScopeFactory serviceProvider) : DistributedTaskProgress
+public abstract class DocumentBuilderTask<TId, TData> : DistributedTaskProgress
 {
     private string _baseUri;
     private int _tenantId;
-    private Guid _userId;
-    private string _script;
-    private string _tempFileName;
-    private string _outputFileName;
+    protected Guid _userId;
+    protected TData _data;
+    private readonly IServiceScopeFactory _serviceProvider;
 
-    public void Init(string baseUri, int tenantId, Guid userId, string script, string tempFileName, string outputFileName)
+    public DocumentBuilderTask()
+    {
+        
+    }
+    
+    protected DocumentBuilderTask(IServiceScopeFactory serviceProvider)
+    {
+        _serviceProvider = serviceProvider;
+    }
+
+    public void Init(string baseUri, int tenantId, Guid userId, TData data)
     {
         _baseUri = baseUri;
         _tenantId = tenantId;
         _userId = userId;
-        _script = script;
-        _tempFileName = tempFileName;
-        _outputFileName = outputFileName;
-
+        _data = data;
+        
         Id = DocumentBuilderTaskManager.GetTaskId(tenantId, userId);
         Status = DistributedTaskStatus.Created;
 
-        this["ResultFileId"] = default(T);
+        this["ResultFileId"] = default(TId);
         this["ResultFileName"] = string.Empty;
         this["ResultFileUrl"] = string.Empty;
     }
@@ -61,7 +66,7 @@ public class DocumentBuilderTask<T>(IServiceScopeFactory serviceProvider) : Dist
         {
             CancellationToken.ThrowIfCancellationRequested();
 
-            await using var scope = serviceProvider.CreateAsyncScope();
+            await using var scope = _serviceProvider.CreateAsyncScope();
 
             if (!string.IsNullOrEmpty(_baseUri))
             {
@@ -73,17 +78,21 @@ public class DocumentBuilderTask<T>(IServiceScopeFactory serviceProvider) : Dist
             await tenantManager.SetCurrentTenantAsync(_tenantId);
 
             var filesLinkUtility = scope.ServiceProvider.GetService<FilesLinkUtility>();
-            logger = scope.ServiceProvider.GetService<ILogger<DocumentBuilderTask<T>>>();
+            logger = scope.ServiceProvider.GetService<ILogger<DocumentBuilderTask<TId, TData>>>();
 
             var documentBuilderTask = scope.ServiceProvider.GetService<DocumentBuilderTask>();
 
             CancellationToken.ThrowIfCancellationRequested();
 
+            var inputData = await GetDocumentBuilderInputDataAsync(scope.ServiceProvider);
+
             Percentage = 30;
 
             await PublishChanges();
 
-            var fileUri = await documentBuilderTask.BuildFileAsync(CancellationToken, _script, _tempFileName);
+            CancellationToken.ThrowIfCancellationRequested();
+
+            var fileUri = await documentBuilderTask.BuildFileAsync(inputData, CancellationToken);
 
             Percentage = 60;
 
@@ -91,9 +100,8 @@ public class DocumentBuilderTask<T>(IServiceScopeFactory serviceProvider) : Dist
 
             CancellationToken.ThrowIfCancellationRequested();
 
-            var file = scope.ServiceProvider.GetService<File<T>>();
-            file = await documentBuilderTask.SaveFileFromUriAsync(file, new Uri(fileUri), _userId, _outputFileName);
-            
+            var file = await ProcessSourceFileAsync(scope.ServiceProvider, new Uri(fileUri), inputData);
+
             this["ResultFileId"] = file.Id;
             this["ResultFileName"] = file.Title;
             this["ResultFileUrl"] = filesLinkUtility.GetFileWebEditorUrl(file.Id);
@@ -119,18 +127,45 @@ public class DocumentBuilderTask<T>(IServiceScopeFactory serviceProvider) : Dist
             await PublishChanges();
         }
     }
+    
+    protected abstract Task<DocumentBuilderInputData> GetDocumentBuilderInputDataAsync(IServiceProvider serviceProvider);
+    protected abstract Task<File<TId>> ProcessSourceFileAsync(IServiceProvider serviceProvider, Uri fileUri, DocumentBuilderInputData inputData);
+}
+
+public record DocumentBuilderInputData
+{
+    public DocumentBuilderInputData(string Script, string TempFileName, string OutputFileName)
+    {
+        this.Script = Script;
+        this.TempFileName = TempFileName;
+        this.OutputFileName = OutputFileName;
+    }
+
+    public string Script { get; init; }
+    public string TempFileName { get; init; }
+    public string OutputFileName { get; init; }
+
+    public void Deconstruct(out string Script, out string TempFileName, out string OutputFileName)
+    {
+        Script = this.Script;
+        TempFileName = this.TempFileName;
+        OutputFileName = this.OutputFileName;
+    }
 }
 
 [Scope]
-public class DocumentBuilderTask(
-    DocumentServiceConnector documentServiceConnector,
-    IHttpClientFactory clientFactory,
-    IDaoFactory daoFactory,
-    SocketManager socketManager)
+public class DocumentBuilderTask
 {
-    internal async Task<string> BuildFileAsync(CancellationToken cancellationToken, string script, string fileName)
+    private readonly DocumentServiceConnector _documentServiceConnector;
+
+    public DocumentBuilderTask(DocumentServiceConnector documentServiceConnector)
     {
-        var resultTuple = await documentServiceConnector.DocbuilderRequestAsync(null, script, true);
+        _documentServiceConnector = documentServiceConnector;
+    }
+
+    internal async Task<string> BuildFileAsync(DocumentBuilderInputData inputData, CancellationToken cancellationToken)
+    {
+        var resultTuple = await _documentServiceConnector.DocbuilderRequestAsync(null, inputData.Script, true);
 
         if (string.IsNullOrEmpty(resultTuple.BuilderKey))
         {
@@ -143,46 +178,29 @@ public class DocumentBuilderTask(
 
             await Task.Delay(1000, cancellationToken);
 
-            resultTuple = await documentServiceConnector.DocbuilderRequestAsync(resultTuple.BuilderKey, null, true);
+            resultTuple = await _documentServiceConnector.DocbuilderRequestAsync(resultTuple.BuilderKey, null, true);
 
             if (string.IsNullOrEmpty(resultTuple.BuilderKey))
             {
                 throw new Exception("DocbuilderRequest: empty Key");
             }
 
-            if (resultTuple.Urls != null)
+            if (resultTuple.Urls == null)
             {
-                if (!resultTuple.Urls.Any())
-                {
-                    throw new Exception("DocbuilderRequest: empty Urls");
-                }
+                continue;
+            }
 
-                if (resultTuple.Urls.ContainsKey(fileName))
-                {
-                    break;
-                }
+            if (resultTuple.Urls.Count == 0)
+            {
+                throw new Exception("DocbuilderRequest: empty Urls");
+            }
+
+            if (resultTuple.Urls.ContainsKey(inputData.TempFileName))
+            {
+                break;
             }
         }
 
-        return resultTuple.Urls[fileName];
-    }
-
-    internal async Task<File<T>> SaveFileFromUriAsync<T>(File<T> file, Uri sourceUri, Guid userId, string title)
-    {            
-        file.ParentId = await daoFactory.GetFolderDao<T>().GetFolderIDUserAsync(false, userId);
-        file.Title = title;
-        
-        using var request = new HttpRequestMessage();
-        request.RequestUri = sourceUri;
-
-        using var httpClient = clientFactory.CreateClient();
-        using var response = await httpClient.SendAsync(request);
-        await using var stream = await response.Content.ReadAsStreamAsync();
-        
-        var fileDao = daoFactory.GetFileDao<T>();
-
-        file = await fileDao.SaveFileAsync(file, stream);
-        await socketManager.CreateFileAsync(file);
-        return file;
+        return resultTuple.Urls[inputData.TempFileName];
     }
 }

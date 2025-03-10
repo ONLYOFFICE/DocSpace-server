@@ -84,7 +84,7 @@ public class ExternalShare(Global global,
     
     public async Task<Status> ValidateAsync(Guid linkId, bool isAuthenticated)
     {
-        var record = await daoFactory.GetSecurityDao<string>().GetSharesAsync(new [] { linkId }).FirstOrDefaultAsync();
+        var record = await daoFactory.GetSecurityDao<string>().GetSharesAsync([linkId]).FirstOrDefaultAsync();
 
         return record == null ? Status.Invalid : await ValidateRecordAsync(record, null, isAuthenticated);
     }
@@ -121,6 +121,15 @@ public class ExternalShare(Global global,
         if (string.IsNullOrEmpty(passwordKey))
         {
             passwordKey = cookiesManager.GetCookies(CookiesType.ShareLink, record.Subject.ToString(), true);
+            if (string.IsNullOrEmpty(passwordKey))
+            {
+                var key = GetKey();
+                if (!string.IsNullOrEmpty(key))
+                {
+                    var data = await ParseShareKeyAsync(key);
+                    passwordKey = data.Password;
+                }
+            }
         }
         
         if (passwordKey == record.Options.Password)
@@ -167,11 +176,36 @@ public class ExternalShare(Global global,
         return string.IsNullOrEmpty(key) ? null : key;
     }
     
-    public async Task<Guid> ParseShareKeyAsync(string key)
+    public async Task<TokenData> ParseShareKeyAsync(string key)
     {
-        ArgumentException.ThrowIfNullOrEmpty(key);
-        
-        return Signature.Read<Guid>(key, await GetDbKeyAsync());
+        if (string.IsNullOrEmpty(key))
+        {
+            return new TokenData
+            {
+                Id = Guid.Empty
+            };
+        }
+
+        var stringKey = Signature.Read<string>(key, await GetDbKeyAsync());
+
+        if (string.IsNullOrEmpty(stringKey))
+        {
+            return new TokenData
+            {
+                Id = Guid.Empty
+            };
+        }
+
+        if (!stringKey.StartsWith('{') || !stringKey.EndsWith('}'))
+        {
+            return new TokenData
+            {
+                Id = Guid.TryParse(stringKey, out var id) ? id : Guid.Empty
+            };
+        }
+
+        var token = JsonSerializer.Deserialize<TokenData>(stringKey);
+        return token;
     }
 
     public async Task<Guid> GetLinkIdAsync()
@@ -187,8 +221,8 @@ public class ExternalShare(Global global,
             return Guid.Empty;
         }
         
-        var linkId = await ParseShareKeyAsync(key);
-        return linkId == Guid.Empty ? Guid.Empty : linkId;
+        var data = await ParseShareKeyAsync(key);
+        return data?.Id ?? Guid.Empty;
     }
 
     public Guid GetSessionId()
@@ -275,9 +309,20 @@ public class ExternalShare(Global global,
         _snapshot = snapshot;
     }
     
-    public async Task<string> CreateShareKeyAsync(Guid linkId)
+    public async Task<string> CreateShareKeyAsync(Guid linkId, string password = null)
     {
-        return Signature.Create(linkId, await GetDbKeyAsync());
+        if (string.IsNullOrEmpty(password))
+        {
+            return Signature.Create(linkId, await GetDbKeyAsync());
+        }
+
+        var data = new TokenData
+        {
+            Id = linkId, 
+            Password = password
+        };
+        
+        return Signature.Create(JsonSerializer.Serialize(data), await GetDbKeyAsync());
     }
 
     private async Task<string> GetDbKeyAsync()
@@ -308,6 +353,14 @@ public class ValidationInfo
     /// <type>System.String, System</type>
     public string Title { get; set; }
 
+    /// <summary>Entity ID</summary>
+    /// <type>System.String, System</type>
+    public string EntityId { get; set; }
+   
+    /// <summary>Entity title</summary>
+    /// <type>System.String, System</type>
+    public string EntryTitle { get; set; }
+    
     /// <summary>Sharing rights</summary>
     /// <type>ASC.Files.Core.Security.FileShare, ASC.Files.Core</type>
     public FileShare Access { get; set; }
@@ -323,6 +376,10 @@ public class ValidationInfo
     /// <summary>Link ID</summary>
     /// <type>System.Guid, System</type>
     public Guid LinkId { get; set; }
+    
+    /// <summary>Specifies whether the user is authenticated or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool IsAuthenticated { get; set; }
 }
 
 public record DownloadSession
@@ -358,10 +415,27 @@ public class ExternalSessionSnapshot
 
 public enum Status
 {
+    [SwaggerEnum(Description = "Ok")]
     Ok,
+
+    [SwaggerEnum(Description = "Invalid")]
     Invalid,
+
+    [SwaggerEnum(Description = "Expired")]
     Expired,
+
+    [SwaggerEnum(Description = "Required password")]
     RequiredPassword,
+
+    [SwaggerEnum(Description = "Invalid password")]
     InvalidPassword,
+
+    [SwaggerEnum(Description = "External access denied")]
     ExternalAccessDenied
+}
+
+public record TokenData
+{
+    public Guid Id { get; set; }
+    public string Password { get; set; }
 }

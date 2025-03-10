@@ -113,7 +113,6 @@ public class HostedSolution(ITenantService tenantService,
             AffiliateId = registrationInfo.AffiliateId,
             Campaign = registrationInfo.Campaign,
             Industry = registrationInfo.Industry,
-            Spam = registrationInfo.Spam,
             Calls = registrationInfo.Calls
         };
 
@@ -128,7 +127,8 @@ public class HostedSolution(ITenantService tenantService,
             Email = registrationInfo.Email,
             MobilePhone = registrationInfo.MobilePhone,
             WorkFromDate = tenantUtil.DateTimeNow(tenant.TimeZone),
-            ActivationStatus = registrationInfo.ActivationStatus
+            ActivationStatus = registrationInfo.ActivationStatus,
+            Spam = registrationInfo.Spam
         };
 
         user = await userService.SaveUserAsync(tenant.Id, user);
@@ -211,7 +211,7 @@ public class HostedSolution(ITenantService tenantService,
         var quota = (await quotaService.GetTenantQuotasAsync()).FirstOrDefault(q => paid ? q.NonProfit : q.Trial);
         if (quota != null)
         {
-            await tariffService.SetTariffAsync(tenant, new Tariff { Quotas = [new(quota.TenantId, 1)], DueDate = DateTime.MaxValue });
+            await tariffService.SetTariffAsync(tenant, new Tariff { Quotas = [new Quota(quota.TenantId, 1)], DueDate = DateTime.MaxValue });
         }
     }
 

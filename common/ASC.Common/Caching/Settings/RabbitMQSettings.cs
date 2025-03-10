@@ -45,7 +45,6 @@ public class RabbitMQSettings
     {
         var factory = new ConnectionFactory
         {
-            DispatchConsumersAsync = true,
             ClientProvidedName = ClientProvidedName,
             RequestedChannelMax = RequestedChannelMax
         };

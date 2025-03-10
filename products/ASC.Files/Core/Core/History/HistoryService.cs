@@ -28,82 +28,129 @@ namespace ASC.Files.Core.Core.History;
 
 [Scope]
 public class HistoryService(
-    HistoryStore historyStore,
-    HistoryDtoHelper historyDtoHelper,
-    ApiContext apiContext,
-    IDaoFactory daoFactory,
-    FileSecurity fileSecurity,
-    UserManager userManager,
-    AuthContext authContext)
+    IDbContextFactory<MessagesContext> dbContextFactory, 
+    TenantManager tenantManager,
+    AuditInterpreter interpreter)
 {
-    public IAsyncEnumerable<HistoryDto> GetFileHistoryAsync(int fileId)
-    { 
-        return GetEntryHistoryAsync(fileId, FileEntryType.File);
-    }
+    public static HashSet<MessageAction> TrackedActions => [
+        MessageAction.FileCreated, 
+        MessageAction.FileUploaded,
+        MessageAction.FileUploadedWithOverwriting,
+        MessageAction.UserFileUpdated, 
+        MessageAction.FileRenamed, 
+        MessageAction.FileMoved, 
+        MessageAction.FileMovedWithOverwriting, 
+        MessageAction.FileMovedToTrash, 
+        MessageAction.FileCopied, 
+        MessageAction.FileCopiedWithOverwriting, 
+        MessageAction.FileVersionRemoved, 
+        MessageAction.FileDeleted, 
+        MessageAction.FileConverted, 
+        MessageAction.FileRestoreVersion,
+        MessageAction.FileIndexChanged,
+        MessageAction.FileLocked,
+        MessageAction.FileUnlocked,
+        MessageAction.FolderCreated,
+        MessageAction.FolderRenamed,
+        MessageAction.FolderMoved,
+        MessageAction.FolderMovedWithOverwriting,
+        MessageAction.FolderCopied,
+        MessageAction.FolderCopiedWithOverwriting,
+        MessageAction.FolderMovedToTrash,
+        MessageAction.FolderDeleted,
+        MessageAction.FolderIndexChanged,
+        MessageAction.FolderIndexReordered,
+        MessageAction.RoomCreateUser,
+        MessageAction.RoomUpdateAccessForUser,
+        MessageAction.RoomRemoveUser,
+        MessageAction.RoomGroupAdded,
+        MessageAction.RoomUpdateAccessForGroup,
+        MessageAction.RoomGroupRemove,
+        MessageAction.RoomCreated,
+        MessageAction.RoomCopied,
+        MessageAction.RoomRenamed,
+        MessageAction.AddedRoomTags,
+        MessageAction.DeletedRoomTags,
+        MessageAction.RoomLogoCreated,
+        MessageAction.RoomLogoDeleted,
+        MessageAction.RoomExternalLinkCreated,
+        MessageAction.RoomExternalLinkRenamed,
+        MessageAction.RoomExternalLinkDeleted,
+        MessageAction.RoomExternalLinkRevoked,
+        MessageAction.FormSubmit,
+        MessageAction.FormOpenedForFilling,
+        MessageAction.RoomIndexingEnabled,
+        MessageAction.RoomIndexingDisabled,
+        MessageAction.RoomLifeTimeSet,
+        MessageAction.RoomLifeTimeDisabled,
+        MessageAction.RoomArchived,
+        MessageAction.RoomUnarchived,
+        MessageAction.RoomDenyDownloadEnabled,
+        MessageAction.RoomDenyDownloadDisabled,
+        MessageAction.RoomWatermarkSet,
+        MessageAction.RoomWatermarkDisabled,
+        MessageAction.RoomColorChanged,
+        MessageAction.RoomCoverChanged,
+        MessageAction.RoomIndexExportSaved,
+        MessageAction.RoomInviteResend
+    ];
 
-    public IAsyncEnumerable<HistoryDto> GetFolderHistoryAsync(int folderId)
-    {
-        return GetEntryHistoryAsync(folderId, FileEntryType.Folder);
-    }
+    private static HashSet<int> FilterFolderActions => [
+        (int)MessageAction.FolderCreated,
+        (int)MessageAction.FolderMovedWithOverwriting,
+        (int)MessageAction.FolderMovedToTrash,
+        (int)MessageAction.FolderRenamed
+    ];
+
+    private static HashSet<int> FilterFileActions => [
+        (int)MessageAction.FileCopied,
+        (int)MessageAction.FileUploaded,
+        (int)MessageAction.FileMoved,
+        (int)MessageAction.FileRenamed,
+        (int)MessageAction.FormSubmit,
+        (int)MessageAction.FormOpenedForFilling
+    ];
     
-    private async IAsyncEnumerable<HistoryDto> GetEntryHistoryAsync(int entryId, FileEntryType entryType)
+    public async IAsyncEnumerable<HistoryEntry> GetHistoryAsync(
+        FileEntry<int> entry,
+        int offset,
+        int count,
+        bool needFiltering,
+        List<int> filterFolderIds,
+        List<int> filterFilesIds,
+        DateTime? fromDate,
+        DateTime? toDate)
     {
-        var offset = Convert.ToInt32(apiContext.StartIndex);
-        var count = Convert.ToInt32(apiContext.Count);
-        
-        FileEntry<int> entry = entryType switch
+        var messageDbContext = await dbContextFactory.CreateDbContextAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        var events = needFiltering 
+            ? messageDbContext.GetFilteredAuditEventsByReferences(tenantId, entry.Id, (byte)entry.FileEntryType, offset, count, filterFolderIds, filterFilesIds, FilterFolderActions, FilterFileActions, fromDate, toDate) 
+            : messageDbContext.GetAuditEventsByReferences(tenantId, entry.Id, (byte)entry.FileEntryType, offset, count, fromDate, toDate);
+
+        await foreach (var hEntry in events.SelectAwait(e => interpreter.ToHistoryAsync(e, entry)).Where(x => x != null))
         {
-            FileEntryType.File => await daoFactory.GetFileDao<int>().GetFileAsync(entryId),
-            FileEntryType.Folder => await daoFactory.GetFolderDao<int>().GetFolderAsync(entryId),
-            _ => throw new ArgumentOutOfRangeException(nameof(entryType), entryType, null)
-        };
-        
-        if (entry == null)
+            yield return hEntry;
+        }
+    }
+
+    public async Task<int> GetHistoryCountAsync(
+        int entryId,
+        FileEntryType entryType,
+        bool needFiltering,
+        List<int> filterFolderIds,
+        List<int> filterFilesIds,
+        DateTime? fromDate,
+        DateTime? toDate)
+    {
+        var messageDbContext = await dbContextFactory.CreateDbContextAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        if (needFiltering)
         {
-            throw new ItemNotFoundException(entryType == FileEntryType.File 
-                ? FilesCommonResource.ErrorMessage_FileNotFound 
-                : FilesCommonResource.ErrorMessage_FolderNotFound
-            );
+            return await messageDbContext.GetFilteredAuditEventsByReferencesTotalCount(tenantId, entryId, (byte)entryType, filterFolderIds, filterFilesIds, FilterFolderActions, FilterFileActions, fromDate, toDate);
         }
         
-        var roomTask = daoFactory.GetFolderDao<int>().GetFirstParentFromFileEntryAsync(entry);
-        
-        if (!await fileSecurity.CanReadAsync(entry))
-        {
-            throw new SecurityException(entryType == FileEntryType.File 
-                ? FilesCommonResource.ErrorMessage_SecurityException_ReadFile 
-                : FilesCommonResource.ErrorMessage_SecurityException_ReadFolder
-            );
-        }
-        
-        var room = await roomTask;
-        var userId = authContext.CurrentAccount.ID;
-        
-        var excludeOtherUsersFilesEvents = 
-            room is { SettingsStealth: true } && 
-            entry.FileEntryType == FileEntryType.Folder && 
-            room.CreateBy != userId && 
-            !await userManager.IsDocSpaceAdminAsync(userId);
-
-        var totalCountTask = historyStore.GetHistoryTotalCountAsync(entry, excludeOtherUsersFilesEvents, userId); 
-
-        var histories = historyStore.GetHistoryAsync(entry,excludeOtherUsersFilesEvents, userId, offset, count)
-            .GroupByAwait(x => ValueTask.FromResult(x.GetGroupId()),
-                async (_, group) =>
-                {
-                    var first = await historyDtoHelper.GetAsync(await group.FirstAsync());
-                    first.Related = await group.Skip(1).SelectAwait(async x => await historyDtoHelper.GetAsync(x)).ToListAsync();
-                    return first;
-                })
-            .OrderByDescending(x => x.Date);
-
-        var totalCount = await totalCountTask;
-        
-        apiContext.SetCount(Math.Min(Math.Max(totalCount - offset, 0), count)).SetTotalCount(totalCount);
-        
-        await foreach (var history in histories)
-        {
-            yield return history;
-        }
+        return await messageDbContext.GetAuditEventsByReferencesTotalCount(tenantId, entryId, (byte)entryType, fromDate, toDate);
     }
 }

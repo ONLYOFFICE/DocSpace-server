@@ -26,7 +26,77 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
-public class CreateThirdPartyRoomRequestDto : CreateRoomRequestDto
+/// <summary>
+/// Parameters for creating a room
+/// </summary>
+public class CreateThirdPartyRoom
 {
+    /// <summary>
+    /// Create as new folder
+    /// </summary>
     public bool CreateAsNewFolder { get; set; }
+
+    /// <summary>
+    /// Room name
+    /// </summary>
+    public string Title { get; set; }
+
+    /// <summary>
+    /// Room type
+    /// </summary>
+    public RoomType RoomType { get; set; }
+
+    /// <summary>
+    /// Private
+    /// </summary>
+    public bool Private { get; set; }
+
+    /// <summary>
+    /// Indexing
+    /// </summary>
+    public bool Indexing { get; set; }
+    
+    /// <summary>
+    /// Deny download
+    /// </summary>
+    public bool DenyDownload { get; set; }
+    
+    /// <summary>
+    /// Color
+    /// </summary>
+    public string Color { get; set; }
+
+    /// <summary>
+    /// Cover
+    /// </summary>
+    public string Cover { get; set; }
+
+    /// <summary>
+    /// Tags
+    /// </summary>
+    public IEnumerable<string> Tags { get; set; }
+
+    /// <summary>
+    /// Logo
+    /// </summary>
+    public LogoRequest Logo { get; set; }
+}
+
+
+/// <summary>
+/// Request parameters for creating a room
+/// </summary>
+public class CreateThirdPartyRoomRequestDto
+{
+    /// <summary>
+    /// ID of the folder in the third-party storage in which the contents of the room will be stored
+    /// </summary>
+    [FromRoute(Name = "id")]
+    public string Id { get; set; }
+
+    /// <summary>
+    /// ThirdParty room
+    /// </summary>
+    [FromBody]
+    public CreateThirdPartyRoom Room { get; set; }
 }

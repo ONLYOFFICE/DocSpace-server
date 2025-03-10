@@ -89,7 +89,7 @@ public class FactoryIndexerFile(
                     if (j >= settings.Threads)
                     {
                         Task.WaitAll(tasks.ToArray());
-                        tasks = new List<Task>();
+                        tasks = [];
                         j = 0;
                     }
                 }
@@ -158,7 +158,7 @@ public class FactoryIndexerFile(
 
             var count = Queries.FilesCount(filesDbContext, lastIndexed);
 
-            return new(count, maxId, minId);
+            return new ValueTuple<int, int, int>(count, maxId, minId);
         }
     }
 

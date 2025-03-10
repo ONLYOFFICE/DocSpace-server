@@ -37,7 +37,7 @@ public class WebItemSettings() : ISettings<WebItemSettings>
     }
 
     [JsonPropertyName("Settings")]
-    public List<WebItemOption> SettingsCollection { get; set; } = new();
+    public List<WebItemOption> SettingsCollection { get; set; } = [];
 
     public WebItemSettings(WebItemManager webItemManager) : this()
     {
