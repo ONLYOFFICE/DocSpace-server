@@ -44,7 +44,7 @@ public class UserSocketManager(ITariffService tariffService,
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
         var dto = await employeeFullDtoHelper.GetFullAsync(userInfo);
-        await MakeRequest("change-my-type", new { tenantId, user = dto });
+        await MakeRequest("change-my-type", new { tenantId, user = dto, admin = securityContext.CurrentAccount.ID });
     }
 
     public async Task AddUserAsync(UserInfo userInfo)
