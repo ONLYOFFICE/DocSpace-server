@@ -136,6 +136,12 @@ public class FileDto<T> : FileEntryDto<T>
     public bool? IsForm { get; set; }
 
     /// <summary>
+    /// Is the custom filter edit rights enabled for the spreadsheet or not
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
+    public bool? IsCustomFilterEditEnabled { get; set; }
+
+    /// <summary>
     /// Specifies if the filling has started or not
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
@@ -311,6 +317,15 @@ public class FileDtoHelper(
                     result.DraftLocation = draftLocation;
                 }
             }
+        }
+
+        if (fileType == FileType.Spreadsheet &&
+            fileUtility.CanWebCustomFilterEditing(file.Title) &&
+            file.RootFolderType == FolderType.VirtualRooms)
+        {
+            var shareRecord = await _fileSecurity.GetPureSharesAsync(file, [Constants.GroupEveryone.ID]).FirstOrDefaultAsync();
+
+            result.IsCustomFilterEditEnabled = shareRecord?.Share == FileShare.CustomFilter;
         }
 
         result.FileExst = extension;

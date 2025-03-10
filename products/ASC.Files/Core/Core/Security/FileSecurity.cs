@@ -1256,10 +1256,17 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         if (ace == null)
         {
+            string cachePostfix = null;
+
+            if (file != null && e.RootFolderType is FolderType.VirtualRooms && fileUtility.CanWebCustomFilterEditing(file.Title))
+            {
+                cachePostfix = $"-{file.UniqID}";
+            }
+
             var cachedRecords = GetCachedRecords<T>();
             if ((!isRoom && e.RootFolderType is FolderType.VirtualRooms or FolderType.RoomTemplates or FolderType.Archive &&
-                 cachedRecords.TryGetValue(GetCacheKey(e.ParentId, userId), out var value)) ||
-                cachedRecords.TryGetValue(GetCacheKey(e.ParentId, await externalShare.GetLinkIdAsync()), out value))
+                 cachedRecords.TryGetValue(GetCacheKey(e.ParentId, userId, cachePostfix), out var value)) ||
+                cachedRecords.TryGetValue(GetCacheKey(e.ParentId, await externalShare.GetLinkIdAsync(), cachePostfix), out value))
             {
                 ace = value.Clone();
                 ace.EntryId = e.Id;
@@ -1267,7 +1274,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             else
             {
                 var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
-                if (e.RootFolderType != FolderType.RoomTemplates || userType == EmployeeType.RoomAdmin || userType == EmployeeType.DocSpaceAdmin) 
+                if (e.RootFolderType != FolderType.RoomTemplates || userType == EmployeeType.RoomAdmin || userType == EmployeeType.DocSpaceAdmin)
                 {
                     ace = await GetCurrentShareAsync(e, userId, isDocSpaceAdmin, shares);
 
@@ -1276,7 +1283,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                     {
                         var id = ace.SubjectType is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink ? ace.Subject : userId;
 
-                        cachedRecords.TryAdd(GetCacheKey(e.ParentId, id), ace);
+                        cachedRecords.TryAdd(GetCacheKey(e.ParentId, id, cachePostfix), ace);
                     }
                 }
             }
@@ -1461,6 +1468,11 @@ public class FileSecurity(IDaoFactory daoFactory,
 
                 break;
             case FilesSecurityActions.CustomFilter:
+                if (e.Access is FileShare.CustomFilter)
+                {
+                    return true;
+                }
+
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
@@ -2664,10 +2676,10 @@ public class FileSecurity(IDaoFactory daoFactory,
         return false;
     }
 
-    private string GetCacheKey<T>(T parentId, Guid userId)
+    private string GetCacheKey<T>(T parentId, Guid userId, string filePostfix = null)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
-        return $"{tenantId}-{userId}-{parentId}";
+        return $"{tenantId}-{userId}-{parentId}{filePostfix}";
     }
 
     private string GetCacheKey<T>(T parentId)

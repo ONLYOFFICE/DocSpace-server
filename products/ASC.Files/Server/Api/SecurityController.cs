@@ -191,6 +191,35 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
             };
         }
     }
+
+
+    /// <summary>
+    /// Sets the custom filter edit rights to a file with the ID specified in the request.
+    /// </summary>
+    /// <short>Sets the custom filter edit rights</short>
+    /// <path>api/2.0/files/file/{fileId}/customfilter</path>
+    /// <collection>list</collection>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Files / Sharing")]
+    [HttpPost("file/{fileId}/customfilter")]
+    public async Task SetCustomFilterEditAsync(FileIdRequestDto<T> inDto)
+    {
+        await securityControllerHelper.SetCustomFilterEditAsync(inDto.FileId, true);
+    }
+
+    /// <summary>
+    /// Removes the custom filter edit rights to a file with the ID specified in the request.
+    /// </summary>
+    /// <short>Removes the custom filter edit rights</short>
+    /// <path>api/2.0/files/file/{fileId}/customfilter</path>
+    /// <collection>list</collection>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Files / Sharing")]
+    [HttpDelete("file/{fileId}/customfilter")]
+    public async Task DeleteCustomFilterEditAsync(FileIdRequestDto<T> inDto)
+    {
+        await securityControllerHelper.SetCustomFilterEditAsync(inDto.FileId, false);
+    }
 }
 
 public class SecurityControllerCommon(FileStorageService fileStorageService,

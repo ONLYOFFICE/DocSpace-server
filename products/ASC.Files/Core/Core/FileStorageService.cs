@@ -1251,6 +1251,48 @@ public class FileStorageService //: IFileStorageService
         return renamedFolder;
     }
 
+    public async Task SetCustomFilterEditAsync<T>(T fileId, bool enabled)
+    {
+        var fileDao = daoFactory.GetFileDao<T>();
+        var file = await fileDao.GetFileAsync(fileId);
+
+        file.NotFoundIfNull();
+
+        if (!fileUtility.CanWebCustomFilterEditing(file.Title) || file.RootFolderType != FolderType.VirtualRooms)
+        {
+            throw new ArgumentException();
+        }
+
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var room = await DocSpaceHelper.GetParentRoom(file, folderDao);
+
+        if (room == null || !await fileSecurity.CanEditAsync(room))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        var shareRecord = await fileSecurity.GetPureSharesAsync(file, [Constants.GroupEveryone.ID]).FirstOrDefaultAsync();
+
+        if (enabled)
+        {
+            if (shareRecord?.Share == FileShare.CustomFilter)
+            {
+                return;
+            }
+
+            await fileSecurity.ShareAsync(fileId, FileEntryType.File, Constants.GroupEveryone.ID, FileShare.CustomFilter);
+        }
+        else
+        {
+            if (shareRecord?.Share != FileShare.CustomFilter)
+            {
+                return;
+            }
+
+            await fileSecurity.ShareAsync(fileId, FileEntryType.File, Constants.GroupEveryone.ID, FileShare.None);
+        }
+    }
+
     public async Task<File<T>> GetFileAsync<T>(T fileId, int version)
     {
         var fileDao = daoFactory.GetFileDao<T>();
