@@ -147,6 +147,9 @@ public class File<T> : FileEntry<T>
         }
     }
 
+    public bool? CustomFilterEnabled { get; set; }
+
+
     public int Category { get; set; }
     public string LockedBy { get; set; }
 

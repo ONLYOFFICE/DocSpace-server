@@ -136,10 +136,10 @@ public class FileDto<T> : FileEntryDto<T>
     public bool? IsForm { get; set; }
 
     /// <summary>
-    /// Is the custom filter edit rights enabled for the spreadsheet or not
+    /// Is the custom filter edit rights enabled or not
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
-    public bool? IsCustomFilterEditEnabled { get; set; }
+    public bool? CustomFilterEnabled { get; set; }
 
     /// <summary>
     /// Specifies if the filling has started or not
@@ -319,15 +319,6 @@ public class FileDtoHelper(
             }
         }
 
-        if (fileType == FileType.Spreadsheet &&
-            file.RootFolderType == FolderType.VirtualRooms &&
-            fileUtility.CanWebCustomFilterEditing(file.Title))
-        {
-            var shareRecord = await _fileSecurity.GetPureSharesAsync(file, [Constants.GroupEveryone.ID]).FirstOrDefaultAsync();
-
-            result.IsCustomFilterEditEnabled = shareRecord?.Share == FileShare.CustomFilter;
-        }
-
         result.FileExst = extension;
         result.FileType = fileType;
         result.Version = file.Version;
@@ -342,6 +333,7 @@ public class FileDtoHelper(
         result.LockedBy = file.LockedBy;
         result.Access = file.Access;
         result.LastOpened = _apiDateTimeHelper.Get(file.LastOpened);
+        result.CustomFilterEnabled = file.CustomFilterEnabled;
 
         if (!file.ProviderEntry && file.RootFolderType == FolderType.VirtualRooms && !expiration.HasValue)
         {

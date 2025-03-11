@@ -339,6 +339,20 @@ public abstract class FilesController<T>(
     }
 
     /// <summary>
+    /// Sets the custom filter edit rights to a file with the ID specified in the request.
+    /// </summary>
+    /// <short>Sets the custom filter edit rights</short>
+    /// <path>api/2.0/files/file/{fileId}/customfilter</path>
+    /// <collection>list</collection>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "File information", typeof(FileDto<int>))]
+    [HttpPut("file/{fileId}/customfilter")]
+    public async Task<FileDto<T>> SetCustomFilterTagAsync(FileCustomFilterRequestDto<T> inDto)
+    {
+        return await filesControllerHelper.SetCustomFilterTagAsync(inDto.FileId, inDto.Parameters.Enabled);
+    }
+
+    /// <summary>
     /// Restores a file version specified in the request.
     /// </summary>
     /// <short>Restore a file version</short>

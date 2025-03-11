@@ -95,9 +95,4 @@ public class SecurityControllerHelper(
             yield return s;
         }
     }
-
-    public async Task SetCustomFilterEditAsync<T>(T fileId, bool enabled)
-    {
-        await _fileStorageService.SetCustomFilterEditAsync(fileId, enabled);
-    }
 }

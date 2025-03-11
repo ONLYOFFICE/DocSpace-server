@@ -131,7 +131,7 @@ public class BreadCrumbsManager(
 }
 
 [Scope]
-public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext, Global global)
+public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext, Global global, FileUtility fileUtility)
 {
     public async Task SetFileStatusAsync<T>(File<T> file)
     {
@@ -158,6 +158,14 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
         var tags = await tagsTask;
         var tagsNew = await tagsNewTask;
 
+        var spreadsheets = files.Where(file =>
+            file.RootFolderType == FolderType.VirtualRooms &&
+            fileUtility.CanWebCustomFilterEditing(file.Title));
+
+        var tagsCustomFilter = spreadsheets.Any()
+            ? await tagDao.GetTagsAsync(TagType.CustomFilter, spreadsheets).ToListAsync()
+            : [];
+
         foreach (var file in files)
         {
             if (tags.TryGetValue(file.Id, out var lockedTag))
@@ -172,6 +180,11 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
             if (tagsNew.Exists(r => r.EntryId.Equals(file.Id)))
             {
                 file.IsNew = true;
+            }
+
+            if (tagsCustomFilter.Exists(r => r.EntryId.Equals(file.Id)))
+            {
+                file.CustomFilterEnabled = true;
             }
         }
     }

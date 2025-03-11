@@ -41,7 +41,8 @@ public enum TagType
     Pin = 128,
     Origin = 256,
     RecentByLink = 512,
-    FromRoom = 1024
+    FromRoom = 1024,
+    CustomFilter = 2048
 }
 
 [DebuggerDisplay("{Name} ({Id}) entry {EntryType} ({EntryId})")]

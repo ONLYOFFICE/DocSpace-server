@@ -1256,17 +1256,10 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         if (ace == null)
         {
-            string cachePostfix = null;
-
-            if (file != null && e.RootFolderType is FolderType.VirtualRooms && fileUtility.CanWebCustomFilterEditing(file.Title))
-            {
-                cachePostfix = $"-{file.UniqID}";
-            }
-
             var cachedRecords = GetCachedRecords<T>();
             if ((!isRoom && e.RootFolderType is FolderType.VirtualRooms or FolderType.RoomTemplates or FolderType.Archive &&
-                 cachedRecords.TryGetValue(GetCacheKey(e.ParentId, userId, cachePostfix), out var value)) ||
-                cachedRecords.TryGetValue(GetCacheKey(e.ParentId, await externalShare.GetLinkIdAsync(), cachePostfix), out value))
+                 cachedRecords.TryGetValue(GetCacheKey(e.ParentId, userId), out var value)) ||
+                cachedRecords.TryGetValue(GetCacheKey(e.ParentId, await externalShare.GetLinkIdAsync()), out value))
             {
                 ace = value.Clone();
                 ace.EntryId = e.Id;
@@ -1283,7 +1276,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                     {
                         var id = ace.SubjectType is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink ? ace.Subject : userId;
 
-                        cachedRecords.TryAdd(GetCacheKey(e.ParentId, id, cachePostfix), ace);
+                        cachedRecords.TryAdd(GetCacheKey(e.ParentId, id), ace);
                     }
                 }
             }
@@ -1468,9 +1461,9 @@ public class FileSecurity(IDaoFactory daoFactory,
 
                 break;
             case FilesSecurityActions.CustomFilter:
-                if (e.Access is FileShare.CustomFilter)
+                if (e.Access is FileShare.Restrict || file is null || !fileUtility.CanWebCustomFilterEditing(file.Title))
                 {
-                    return true;
+                    return false;
                 }
 
                 switch (e.RootFolderType)
@@ -1488,7 +1481,15 @@ public class FileSecurity(IDaoFactory daoFactory,
                             return true;
                         }
 
-                        break;
+                        if (!file.CustomFilterEnabled.HasValue)
+                        {
+                            var tagDao = daoFactory.GetTagDao<T>();
+                            var tagCustomFilter = await tagDao.GetTagsAsync(file.Id, FileEntryType.File, TagType.CustomFilter).FirstOrDefaultAsync();
+
+                            file.CustomFilterEnabled = tagCustomFilter != null;
+                        }
+
+                        return file.CustomFilterEnabled.Value;
                 }
 
                 break;
@@ -2676,10 +2677,10 @@ public class FileSecurity(IDaoFactory daoFactory,
         return false;
     }
 
-    private string GetCacheKey<T>(T parentId, Guid userId, string filePostfix = null)
+    private string GetCacheKey<T>(T parentId, Guid userId)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
-        return $"{tenantId}-{userId}-{parentId}{filePostfix}";
+        return $"{tenantId}-{userId}-{parentId}";
     }
 
     private string GetCacheKey<T>(T parentId)
