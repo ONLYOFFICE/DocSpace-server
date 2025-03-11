@@ -107,39 +107,39 @@ public partial class FilesDbContext
     }
     
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, (byte)0, 0, 0, null, null])]
-    public IAsyncEnumerable<DbAuditEvent> GetAuditEventsByReferences(int tenantId, int entryId, byte entryType, int offset, int count, DateTime? fromDate, DateTime? toDate)
+    public IAsyncEnumerable<DbAuditEvent> GetReferenceEventsAsync(int tenantId, int entryId, byte entryType, int offset, int count, DateTime? fromDate, DateTime? toDate)
     {
-        return AbstractQueries.GetAuditEventsByReferences(this, tenantId, entryId, entryType, offset, count, fromDate, toDate);
+        return AbstractQueries.GetReferenceEventsAsync(this, tenantId, entryId, entryType, offset, count, fromDate, toDate);
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, (byte)0, 0, 0, null, null, null, null, null, null])]
-    public IAsyncEnumerable<DbAuditEvent> GetFilteredAuditEventsByReferences(int tenantId, int entryId, byte entryType, int offset, int count, IEnumerable<int> filterFolderIds, IEnumerable<int> filterFilesIds, IEnumerable<int> filterFolderActions, IEnumerable<int> filterFileActions, DateTime? fromDate, DateTime? toDate)
+    public IAsyncEnumerable<DbAuditEvent> GetReferenceEventsByEntriesAsync(int tenantId, int entryId, byte entryType, int offset, int count, IEnumerable<int> filterFolderIds, IEnumerable<int> filterFilesIds, IEnumerable<int> filterFolderActions, IEnumerable<int> filterFileActions, DateTime? fromDate, DateTime? toDate)
     {
-        return AbstractQueries.GetFilteredAuditEventsByReferences(this, tenantId, entryId, entryType, offset, count, filterFolderIds, filterFilesIds, filterFolderActions, filterFileActions, fromDate, toDate);
+        return AbstractQueries.GetReferenceEventsByEntriesAsync(this, tenantId, entryId, entryType, offset, count, filterFolderIds, filterFilesIds, filterFolderActions, filterFileActions, fromDate, toDate);
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, (byte)0, null, null])]
-    public Task<int> GetAuditEventsByReferencesTotalCount(int tenantId, int entryId, byte entryType, DateTime? fromDate, DateTime? toDate)
+    public Task<int> GetReferenceEventsCountAsync(int tenantId, int entryId, byte entryType, DateTime? fromDate, DateTime? toDate)
     {
-        return AbstractQueries.GetAuditEventsByReferencesTotalCount(this, tenantId, entryId, entryType, fromDate, toDate);
+        return AbstractQueries.GetReferenceEventsCountAsync(this, tenantId, entryId, entryType, fromDate, toDate);
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, (byte)0, null, null, null, null, null, null])]
-    public Task<int> GetFilteredAuditEventsByReferencesTotalCount(int tenantId, int entryId, byte entryType, IEnumerable<int> filterFolderIds, IEnumerable<int> filterFilesIds, IEnumerable<int> filterFolderActions, IEnumerable<int> filterFileActions, DateTime? fromDate, DateTime? toDate)
+    public Task<int> GetReferenceEventsCountByEntriesAsync(int tenantId, int entryId, byte entryType, IEnumerable<int> filterFolderIds, IEnumerable<int> filterFilesIds, IEnumerable<int> filterFolderActions, IEnumerable<int> filterFileActions, DateTime? fromDate, DateTime? toDate)
     {
-        return AbstractQueries.GetFilteredAuditEventsByReferencesTotalCount(this, tenantId, entryId, entryType, filterFolderIds, filterFilesIds, filterFolderActions, filterFileActions, fromDate, toDate);
+        return AbstractQueries.GetReferenceEventsCountByEntriesAsync(this, tenantId, entryId, entryType, filterFolderIds, filterFilesIds, filterFolderActions, filterFileActions, fromDate, toDate);
     }
     
     [PreCompileQuery(([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt]))]
-    public IAsyncEnumerable<DbAuditEvent> GetUserHistoryEventsAsync(int tenantId, int folderId, int parentId, IEnumerable<int?> sensitiveActions, Guid userId, int offset, int count, DateTime? fromDate, DateTime? toDate)
+    public IAsyncEnumerable<DbAuditEvent> GetReferenceEventsByUserIdAsync(int tenantId, int folderId, int parentId, IEnumerable<int?> sensitiveActions, Guid userId, int offset, int count, DateTime? fromDate, DateTime? toDate)
     {
-        return AbstractQueries.GetUserHistoryEventsAsync(this, tenantId, folderId, parentId, sensitiveActions, userId, offset, count, fromDate, toDate);
+        return AbstractQueries.GetReferenceEventsByUserIdAsync(this, tenantId, folderId, parentId, sensitiveActions, userId, offset, count, fromDate, toDate);
     }
     
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultGuid])]
-    public Task<int> GetUserHistoryEventsTotalCountAsync(int tenantId, int folderId, int parentId, IEnumerable<int?> sensitiveActions, Guid userId, DateTime? fromDate, DateTime? toDate)
+    public Task<int> GetReferenceEventsCountByUserIdAsync(int tenantId, int folderId, int parentId, IEnumerable<int?> sensitiveActions, Guid userId, DateTime? fromDate, DateTime? toDate)
     {
-        return AbstractQueries.GetUserHistoryEventsTotalCountAsync(this, tenantId, folderId, parentId, sensitiveActions, userId, fromDate, toDate);
+        return AbstractQueries.GetReferenceEventsCountByUserIdAsync(this, tenantId, folderId, parentId, sensitiveActions, userId, fromDate, toDate);
     }
 }
 
@@ -261,7 +261,7 @@ static file class AbstractQueries
                     .Where(x => x.SubjectType == SubjectType.PrimaryExternalLink || x.SubjectType == SubjectType.ExternalLink)
                     .ExecuteDelete());
     
-    public static readonly Func<FilesDbContext, int, int, byte, int, int, DateTime?, DateTime?, IAsyncEnumerable<DbAuditEvent>> GetAuditEventsByReferences =
+    public static readonly Func<FilesDbContext, int, int, byte, int, int, DateTime?, DateTime?, IAsyncEnumerable<DbAuditEvent>> GetReferenceEventsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int entryId, byte entryType, int offset, int count, DateTime? fromDate, DateTime? toDate) =>
                 ctx.AuditEvents.Join(
@@ -279,7 +279,7 @@ static file class AbstractQueries
                     .Take(count)
                     .Select(x => x.@event));
 
-    public static readonly Func<FilesDbContext, int, int, byte, int, int, IEnumerable<int>, IEnumerable<int>, IEnumerable<int>, IEnumerable<int>, DateTime?, DateTime?, IAsyncEnumerable<DbAuditEvent>> GetFilteredAuditEventsByReferences =
+    public static readonly Func<FilesDbContext, int, int, byte, int, int, IEnumerable<int>, IEnumerable<int>, IEnumerable<int>, IEnumerable<int>, DateTime?, DateTime?, IAsyncEnumerable<DbAuditEvent>> GetReferenceEventsByEntriesAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int entryId, byte entryType, int offset, int count, IEnumerable<int> folders, IEnumerable<int> files, IEnumerable<int> filterFolderActions, IEnumerable<int> filterFileActions, DateTime? fromDate, DateTime? toDate) =>
                  ctx.AuditEvents
@@ -299,7 +299,7 @@ static file class AbstractQueries
                     .Take(count)
                     .Select(g => g.FirstOrDefault().@event));
 
-    public static readonly Func<FilesDbContext, int, int, byte, DateTime?, DateTime?, Task<int>> GetAuditEventsByReferencesTotalCount =
+    public static readonly Func<FilesDbContext, int, int, byte, DateTime?, DateTime?, Task<int>> GetReferenceEventsCountAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int entryId, byte entryType, DateTime? fromDate, DateTime? toDate) =>
                 ctx.AuditEvents
@@ -312,7 +312,7 @@ static file class AbstractQueries
                                 (fromDate == null || x.@event.Date >= fromDate) &&
                                 (toDate == null || x.@event.Date <= toDate)));
 
-    public static readonly Func<FilesDbContext, int, int, byte, IEnumerable<int>, IEnumerable<int>, IEnumerable<int>, IEnumerable<int>, DateTime?, DateTime?, Task<int>> GetFilteredAuditEventsByReferencesTotalCount =
+    public static readonly Func<FilesDbContext, int, int, byte, IEnumerable<int>, IEnumerable<int>, IEnumerable<int>, IEnumerable<int>, DateTime?, DateTime?, Task<int>> GetReferenceEventsCountByEntriesAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int entryId, byte entryType, IEnumerable<int> folders, IEnumerable<int> files, IEnumerable<int> filterFolderActions, IEnumerable<int> filterFileActions, DateTime? fromDate, DateTime? toDate) =>
                 ctx.AuditEvents
@@ -334,7 +334,7 @@ static file class AbstractQueries
                     })
                     .Count(g => g.UniqueEntryCount > 1));
 
-    public static readonly Func<FilesDbContext, int, int, int, IEnumerable<int?>, Guid, int, int, DateTime?, DateTime?, IAsyncEnumerable<DbAuditEvent>> GetUserHistoryEventsAsync =
+    public static readonly Func<FilesDbContext, int, int, int, IEnumerable<int?>, Guid, int, int, DateTime?, DateTime?, IAsyncEnumerable<DbAuditEvent>> GetReferenceEventsByUserIdAsync =
             Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
                 (FilesDbContext ctx, int tenantId, int folderId, int parentId, IEnumerable<int?> sensitiveActions, Guid userId, int offset, int count, DateTime? fromDate, DateTime? toDate) =>
                     ctx.FilesAuditReference
@@ -358,7 +358,7 @@ static file class AbstractQueries
                         .Skip(offset)
                         .Take(count));
 
-    public static readonly Func<FilesDbContext, int, int, int, IEnumerable<int?>, Guid, DateTime?, DateTime?, Task<int>> GetUserHistoryEventsTotalCountAsync =
+    public static readonly Func<FilesDbContext, int, int, int, IEnumerable<int?>, Guid, DateTime?, DateTime?, Task<int>> GetReferenceEventsCountByUserIdAsync =
             Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
                 (FilesDbContext ctx, int tenantId, int folderId, int parentId, IEnumerable<int?> sensitiveActions, Guid userId, DateTime? fromDate, DateTime? toDate) =>
                     ctx.FilesAuditReference

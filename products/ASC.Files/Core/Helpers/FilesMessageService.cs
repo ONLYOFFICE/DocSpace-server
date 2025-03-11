@@ -370,7 +370,7 @@ public class FilesMessageService(
 
         var desc = GetEventDescription(action, oldTitle, userid, userRole, room?.Id ?? -1, room?.Title, entry.CreateBy);
 
-        if (!HistoryService.TrackedActions.Contains(action))
+        if (!HistoryStore.TrackedActions.Contains(action))
         {
             return new FileEntryData(JsonSerializer.Serialize(desc, _serializerOptions), null);
         }

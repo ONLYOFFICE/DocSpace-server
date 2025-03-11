@@ -37,7 +37,7 @@ public class FoldersControllerInternal(
     FileDtoHelper fileDtoHelper,
     PermissionContext permissionContext,
     FileShareDtoHelper fileShareDtoHelper,
-    HistoryApiHelper historyApiHelper,
+    HistoryService historyService,
     FormFillingReportCreator formFillingReportCreator)
     : FoldersController<int>(breadCrumbsManager,
         folderContentDtoHelper,
@@ -64,7 +64,7 @@ public class FoldersControllerInternal(
     [HttpGet("folder/{folderId:int}/log")]
     public IAsyncEnumerable<HistoryDto> GetFolderHistoryAsync(HistoryFolderRequestDto inDto)
     {
-        return historyApiHelper.GetFolderHistoryAsync(inDto.FolderId, inDto.FromDate, inDto.ToDate);
+        return historyService.GetFolderHistoryAsync(inDto.FolderId, inDto.FromDate, inDto.ToDate);
     }
 
     /// <summary>
