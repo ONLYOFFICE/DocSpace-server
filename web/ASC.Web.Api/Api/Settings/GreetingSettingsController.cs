@@ -33,10 +33,10 @@ public class GreetingSettingsController(TenantInfoSettingsHelper tenantInfoSetti
         TenantManager tenantManager,
         PermissionContext permissionContext,
         WebItemManager webItemManager,
-        IMemoryCache memoryCache,
+        IFusionCache fusionCache,
         CoreBaseSettings coreBaseSettings,
         IHttpContextAccessor httpContextAccessor)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
     /// Returns the greeting settings for the current portal.
