@@ -449,7 +449,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                         var fromRoomTag = await fromRoomTags.FirstOrDefaultAsync();
                         var hasHeaders = _headers is { Count: > 0 };
 
-                        if (isNeedSendActions || !hasHeaders)
+                        if ((hasHeaders && isNeedSendActions) || !hasHeaders)
                         {
                             webhookTrigger = WebhookTrigger.FileDeleted;
                             webhookConfigs = await webhookManager.GetWebhookConfigsAsync(webhookTrigger, file);
@@ -469,10 +469,13 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                             await folderDao.ChangeTreeFolderSizeAsync(_trashId, (-1) * file.ContentLength);
                         }
 
-                        if (hasHeaders && isNeedSendActions)
+                        if (hasHeaders)
                         {
-                            await filesMessageService.SendAsync(MessageAction.FileDeleted, file, _headers, file.Title);
-                            await webhookManager.PublishAsync(webhookTrigger, webhookConfigs, file);
+                            if (isNeedSendActions)
+                            {
+                                await filesMessageService.SendAsync(MessageAction.FileDeleted, file, _headers, file.Title);
+                                await webhookManager.PublishAsync(webhookTrigger, webhookConfigs, file);
+                            }
                         }
                         else
                         {
