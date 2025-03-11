@@ -27,6 +27,7 @@
 namespace ASC.Web.Api.Controllers.Settings;
 
 [DefaultRoute("customschemas")]
+[ApiExplorerSettings(IgnoreApi = true)]
 public class CustomSchemasController(MessageService messageService,
         ApiContext apiContext,
         TenantManager tenantManager,

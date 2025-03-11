@@ -27,6 +27,7 @@
 namespace ASC.Web.Api.Controllers.Settings;
 
 [DefaultRoute("tips")]
+[ApiExplorerSettings(IgnoreApi = true)]
 public class TipsController(ILoggerProvider option,
         ApiContext apiContext,
         AuthContext authContext,
