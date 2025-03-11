@@ -339,9 +339,9 @@ public abstract class FilesController<T>(
     }
 
     /// <summary>
-    /// Sets the custom filter edit rights to a file with the ID specified in the request.
+    /// Sets the Custom Filter editing mode to a file with the ID specified in the request.
     /// </summary>
-    /// <short>Sets the custom filter edit rights</short>
+    /// <short>Sets the Custom Filter editing mode</short>
     /// <path>api/2.0/files/file/{fileId}/customfilter</path>
     /// <collection>list</collection>
     [Tags("Files / Files")]

@@ -136,7 +136,7 @@ public class FileDto<T> : FileEntryDto<T>
     public bool? IsForm { get; set; }
 
     /// <summary>
-    /// Is the custom filter edit rights enabled or not
+    /// Is Custom filter editing mode enabled or not
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool? CustomFilterEnabled { get; set; }

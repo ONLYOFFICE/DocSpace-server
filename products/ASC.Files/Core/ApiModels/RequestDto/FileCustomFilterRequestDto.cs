@@ -27,18 +27,18 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Parameters for setting CustomFilter edit rights
+/// Parameters for setting Custom Filter editing mode
 /// </summary>
 public class CustomFilterParameters
 {
     /// <summary>
-    /// Specifies CustomFilter edit rights enabled or not
+    /// Specifies Custom Filter editing mode enabled or not
     /// </summary>
     public bool Enabled { get; set; }
 }
 
 /// <summary>
-/// Request parameters for setting CustomFilter edit rights on a file
+/// Request parameters for setting Custom Filter editing mode for a file
 /// </summary>
 public class FileCustomFilterRequestDto<T>
 {
@@ -49,7 +49,7 @@ public class FileCustomFilterRequestDto<T>
     public T FileId { get; set; }
 
     /// <summary>
-    /// Parameters for setting CustomFilter edit rights
+    /// Parameters for setting Custom Filter editing mode
     /// </summary>
     [FromBody]
     public CustomFilterParameters Parameters { get; set; }
