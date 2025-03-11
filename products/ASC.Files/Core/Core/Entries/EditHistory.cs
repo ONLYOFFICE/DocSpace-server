@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core;
 
+/// <summary>
+/// The file edit history parameters.
+/// </summary>
 [Transient]
 [DebuggerDisplay("{ID} v{Version}")]
 public class EditHistory(ILogger<EditHistory> logger,
@@ -33,15 +36,50 @@ public class EditHistory(ILogger<EditHistory> logger,
     UserManager userManager,
     DisplayUserSettingsHelper displayUserSettingsHelper)
 {
+
+    /// <summary>
+    /// The file edit history ID.
+    /// </summary>
     public int ID { get; set; }
+
+    /// <summary>
+    /// The file edit history key.
+    /// </summary>
     public string Key { get; set; }
+
+    /// <summary>
+    /// The file edit history version.
+    /// </summary>
     public int Version { get; set; }
+
+    /// <summary>
+    /// The file edit history version group.
+    /// </summary>
     public int VersionGroup { get; set; }
+
+    /// <summary>
+    /// The file edit history modification date and time.
+    /// </summary>
     public DateTime ModifiedOn { get; set; }
+
+    /// <summary>
+    /// The file edit history modification author ID.
+    /// </summary>
     public Guid ModifiedBy { get; set; }
+
+    /// <summary>
+    /// The file edit changes.
+    /// </summary>
     public string ChangesString { get; set; }
+
+    /// <summary>
+    /// The file edit history server version.
+    /// </summary>
     public string ServerVersion { get; set; }
 
+    /// <summary>
+    /// The list of changes of the file edit history.
+    /// </summary>
     public List<EditHistoryChanges> Changes
     {
         get
@@ -104,38 +142,75 @@ public class EditHistory(ILogger<EditHistory> logger,
     }
 }
 
+/// <summary>
+/// The data list of the file changes.
+/// </summary>
 class ChangesDataList
 {
+    /// <summary>
+    /// The file changes server version.
+    /// </summary>
     public string ServerVersion { get; set; }
+
+    /// <summary>
+    /// The array of the file changes.
+    /// </summary>
     public ChangesData[] Changes { get; set; }
 }
 
+/// <summary>
+/// The data item of the file changes.
+/// </summary>
 class ChangesData
 {
+    /// <summary>
+    /// The date when the file change created.
+    /// </summary>
     public string Created { get; set; }
+
+    /// <summary>
+    /// The user who changed the file.
+    /// </summary>
     public ChangesUserData User { get; set; }
+
+    /// <summary>
+    /// The document of the file change.
+    /// </summary>
     public string DocumentSha256 { get; set; }
 }
 
+/// <summary>
+/// The user data who changed the file.
+/// </summary>
 class ChangesUserData
 {
+    /// <summary>
+    /// The user ID.
+    /// </summary>
     public string Id { get; set; }
+
+    /// <summary>
+    /// The user name.
+    /// </summary>
     public string Name { get; set; }
 }
 
+/// <summary>
+/// The information about file edit history author.
+/// </summary>
 [Transient]
 [DebuggerDisplay("{Id} {Name}")]
 public class EditHistoryAuthor(UserManager userManager, DisplayUserSettingsHelper displayUserSettingsHelper)
 {
     /// <summary>
-    /// Id
+    /// The author Id.
     /// </summary>
     public string Id { get; init; }
 
     private readonly string _name;
 
     /// <summary>
-    /// Name
+    /// The author name.
     /// </summary>
     public string Name
     {
@@ -160,71 +235,91 @@ public class EditHistoryAuthor(UserManager userManager, DisplayUserSettingsHelpe
     }
 }
 
+/// <summary>
+/// The information about file edit history changes.
+/// </summary>
 [DebuggerDisplay("{Author.Name}")]
 public class EditHistoryChanges
 {
+    /// <summary>
+    /// The author the file changes.
+    /// </summary>
     public EditHistoryAuthor Author { get; init; }
+
+    /// <summary>
+    /// The date and time of the file changes.
+    /// </summary>
     public DateTime Date { get; set; }
+
+    /// <summary>
+    /// The document of the file changes.
+    /// </summary>
     public string DocumentSha256 { get; set; }
 }
 
+/// <summary>
+/// The file edit history data.
+/// </summary>
 [DebuggerDisplay("{Version}")]
 public class EditHistoryDataDto
 {
     /// <summary>
-    /// URL to the file changes
+    /// The URL address to the file changes.
     /// </summary>
     [Url]
     public string ChangesUrl { get; set; }
 
     /// <summary>
-    /// Key
+    /// The key of the file changes.
     /// </summary>
     public string Key { get; set; }
 
     /// <summary>
-    /// Previous version
+    /// The previous version of the file history.
     /// </summary>
     public EditHistoryUrl Previous { get; set; }
 
     /// <summary>
-    /// Token
+    /// The token of the file changes.
     /// </summary>
     public string Token { get; set; }
 
     /// <summary>
-    /// File URL
+    /// The file URL address.
     /// </summary>
     [Url]
     public string Url { get; set; }
 
     /// <summary>
-    /// File version
+    /// The file version.
     /// </summary>
     public int Version { get; init; }
 
     /// <summary>
-    /// File type
+    /// The file type.
     /// </summary>
     public string FileType { get; set; }
 }
 
+/// <summary>
+/// The file edit history URL parameters.
+/// </summary>
 [DebuggerDisplay("{Key} - {Url}")]
 public class EditHistoryUrl
 {
     /// <summary>
-    /// Key
+    /// The key of the file history URL.
     /// </summary>
     public string Key { get; init; }
 
     /// <summary>
-    /// Url
+    /// The file history URL.
     /// </summary>
     [Url]
     public string Url { get; init; }
 
     /// <summary>
-    /// File type
+    /// The file type.
     /// </summary>
     public string FileType { get; set; }
 }

@@ -26,10 +26,13 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// The default access rights request parameters.
+/// </summary>
 public class DefaultAccessRightsrequestDto
 {
     /// <summary>
-    /// Sharing rights (None, ReadWrite, Read, Restrict, Varies, Review, Comment, FillForms, CustomFilter, RoomAdmin, Editing, Collaborator)
+    /// Sharing rights (None, ReadWrite, Read, Restrict, Varies, Review, Comment, FillForms, CustomFilter, RoomAdmin, Editing, Collaborator).
     /// </summary>
     [FromBody]
     public List<FileShare> Value { get; set; }

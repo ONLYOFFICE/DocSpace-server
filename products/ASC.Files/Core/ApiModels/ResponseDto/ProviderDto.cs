@@ -26,39 +26,44 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// The provider information.
+/// </summary>
 public record ProviderDto(string Name, string Key, bool Connected, bool Oauth = false, string RedirectUrl = null, bool RequiredConnectionUrl = false, string ClientId = null)
 {
     /// <summary>
-    /// Provider name
+    /// The provider name.
     /// </summary>
     public string Name { get; init; } = Name;
 
     /// <summary>
-    /// Provider key
+    /// The provider key.
     /// </summary>
     public string Key { get; init; } = Key;
 
     /// <summary>
-    /// Connected flag
+    /// Specifies whether the provider is connected.
     /// </summary>
     public bool Connected { get; init; } = Connected;
 
     /// <summary>
-    /// Oauth flag
+    /// Specifies whether the provider is the Oauth.
     /// </summary>
     public bool Oauth { get; init; } = Oauth;
 
     /// <summary>
-    /// Redirect url
+    /// The provider redirect url.
     /// </summary>
     public string RedirectUrl { get; init; } = RedirectUrl;
 
     /// <summary>
-    /// Required connection url flag
+    /// The required connection url flag.
     /// </summary>
     public bool RequiredConnectionUrl { get; init; } = RequiredConnectionUrl;
     
-    /// <summary>Oauth client id</summary>
+    /// <summary>
+    /// The provider Oauth client ID.
+    /// </summary>
     /// <type>System.String, System</type>
     public string ClientId { get; init; } = ClientId;
 }

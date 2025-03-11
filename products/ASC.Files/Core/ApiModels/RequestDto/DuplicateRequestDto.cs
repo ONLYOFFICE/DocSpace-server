@@ -26,13 +26,16 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// The duplicate request parameters.
+/// </summary>
 public class DuplicateRequestDto
 {
-    /// <summary>List of folder IDs</summary>
+    /// <summary>The list of folder IDs.</summary>
     /// <type>System.Collections.Generic.IEnumerable{System.Text.Json.JsonElement}, System.Collections.Generic</type>
     public IEnumerable<JsonElement> FolderIds { get; set; } = new List<JsonElement>();
 
-    /// <summary>List of file IDs</summary>
+    /// <summary>The list of file IDs.</summary>
     /// <type>System.Collections.Generic.IEnumerable{System.Text.Json.JsonElement}, System.Collections.Generic</type>
     public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
 }

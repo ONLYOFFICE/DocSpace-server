@@ -27,126 +27,143 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Base batch request parameters
+/// The base batch request parameters.
 /// </summary>
 public class BaseBatchRequestDto
 {
     /// <summary>
-    /// List of folder IDs
+    /// The list of folder IDs of the base batch request.
     /// </summary>
     public IEnumerable<JsonElement> FolderIds { get; set; } = new List<JsonElement>();
 
     /// <summary>
-    /// List of file IDs
+    /// The list of file IDs of the base batch request.
     /// </summary>
     public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
 }
 
 /// <summary>
-/// Request parameters for downloading files
+/// The request parameters for downloading files.
 /// </summary>
 public class DownloadRequestDto : BaseBatchRequestDto
 {
     /// <summary>
-    /// List of file IDs which will be converted
+    /// The list of file IDs which will be converted while download.
     /// </summary>
     public IEnumerable<DownloadRequestItemDto> FileConvertIds { get; set; } = new List<DownloadRequestItemDto>();
 }
 
+/// <summary>
+/// The request parameter for downloading files.
+/// </summary>
 public class DownloadRequestItemDto
 {
+    /// <summary>
+    /// The key of the download item.
+    /// </summary>
     public JsonElement Key { get; init; }
+
+    /// <summary>
+    /// The value of the download item.
+    /// </summary>
     public string Value { get; init; }
+
+    /// <summary>
+    /// The password of the download item.
+    /// </summary>
     public string Password { get; init; }
 }
 
 /// <summary>
-/// Request parameters for deleting files
+/// The request parameters for deleting files.
 /// </summary>
 public class DeleteBatchRequestDto : BaseBatchRequestDto
 {
     /// <summary>
-    /// Specifies whether to delete a file after the editing session is finished or not
+    /// Specifies whether to delete a file after the editing session is finished or not.
     /// </summary>
     public bool DeleteAfter { get; set; }
 
     /// <summary>
-    /// Specifies whether to move a file to the \"Trash\" folder or delete it immediately
+    /// Specifies whether to move a file to the \"Trash\" folder or delete it immediately.
     /// </summary>
     public bool Immediately { get; set; }
 }
 
 /// <summary>
-/// Request parameters for deleting file's version
+/// The request parameters for deleting file's version.
 /// </summary>
 public class DeleteVersionBatchRequestDto
 {
     /// <summary>
-    /// Specifies whether to delete a file after the editing session is finished or not
+    /// Specifies whether to delete a file after the editing session is finished or not.
     /// </summary>
     public bool DeleteAfter { get; set; }
-    
+
+    /// <summary>
+    /// Specifies whether to delete a file after the editing session is finished or not.
+    /// </summary>
     public int FileId { get; set; }
     
     public IEnumerable<int> Versions { get; set; } = new List<int>();
 }
 
 /// <summary>
-/// Parameters for deleting a file
+/// The parameters for deleting a file.
 /// </summary>
 public class Delete
 {
     /// <summary>
-    /// Specifies whether to delete a file after the editing session is finished or not
+    /// Specifies whether to delete a file after the editing session is finished or not.
     /// </summary>
     public bool DeleteAfter { get; set; }
 
     /// <summary>
-    /// Specifies whether to move a file to the \"Trash\" folder or delete it immediately
+    /// Specifies whether to move a file to the \"Trash\" folder or delete it immediately.
     /// </summary>
     public bool Immediately { get; set; }
 }
 
 /// <summary>
-/// Request parameters for deleting a file
+/// The request parameters for deleting a file.
 /// </summary>
 public class DeleteRequestDto<T>
 {
     /// <summary>
-    /// File ID
+    /// The file ID to delete.
     /// </summary>
     [FromRoute(Name = "fileId")]
     public T FileId { get; set; }
 
     /// <summary>
-    /// File
+    /// The file to delete.
     /// </summary>
     [FromBody]
     public Delete File {  get; set; }
 }
 
 /// <summary>
-/// Request parameters for copying/moving files
+/// The request parameters for copying/moving files.
 /// </summary>
 public class BatchRequestDto : BaseBatchRequestDto
 {
     /// <summary>
-    /// Destination folder ID
+    /// The destination folder ID to copy or move the file.
     /// </summary>
     public JsonElement DestFolderId { get; set; }
 
     /// <summary>
-    /// Overwriting behavior
+    /// The overwriting behavior of the file copying or moving.
     /// </summary>
     public FileConflictResolveType ConflictResolveType { get; set; }
 
     /// <summary>
-    /// Specifies whether to delete a folder after the editing session is finished or not
+    /// Specifies whether to delete the folder after the editing session is finished or not.
     /// </summary>
     public bool DeleteAfter { get; set; }
 
     /// <summary>
-    /// Content
+    ///  Specifies whether to copy or move the file content or not.
     /// </summary>
     public bool Content { get; set; }
 }

@@ -27,35 +27,35 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// External link parameters
+/// The external link request parameters.
 /// </summary>
 public class FileLinkRequest : LinkRequestDtoBase
 {
     /// <summary>
-    /// Link scope
+    /// Specifies the link scope, whether it is internal or not.
     /// </summary>
     public bool Internal { get; set; }
 
     /// <summary>
-    /// Primary link flag
+    /// Specifies whether the file link is primary or not.
     /// </summary>
     public bool Primary { get; set; }
 }
 
 
 /// <summary>
-/// External link request parameters
+/// The external link generic request parameters.
 /// </summary>
 public class FileLinkRequestDto<T>
 {
     /// <summary>
-    /// File ID
+    /// The file ID.
     /// </summary>
     [FromRoute(Name = "id")]
     public T Id { get; set; }
 
     /// <summary>
-    /// External link parameters
+    /// The file external link parameters.
     /// </summary>
     [FromBody]
     public FileLinkRequest File { get; set; }

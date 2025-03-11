@@ -26,10 +26,13 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// The external share data request parameters.
+/// </summary>
 public class ExternalShareDataRequestDto
 {
     /// <summary>
-    /// The unique key
+    /// The unique key of the external share data.
     /// </summary>
     [FromRoute(Name = "key")]
     public string Key { get; set; }

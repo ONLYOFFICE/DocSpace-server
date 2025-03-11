@@ -26,74 +26,107 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// The file sharing rights information.
+/// </summary>
 public class FileShareDto
 {
     /// <summary>
-    /// Sharing rights
+    /// The file sharing rights.
     /// </summary>
     public FileShare Access { get; set; }
 
     /// <summary>
-    /// A user who has the access to the specified file
+    /// The user who has the access to the specified file.
     /// </summary>
     public object SharedTo { get; set; }
 
     /// <summary>
-    /// Specifies if the file is locked by this user or not
+    /// Specifies if the file is locked by this user or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool IsLocked { get; set; }
 
     /// <summary>
-    /// Specifies if this user is an owner of the specified file or not
+    /// Specifies if this user is an owner of the specified file or not.
     /// </summary>
     public bool IsOwner { get; set; }
 
     /// <summary>
-    /// Spceifies if this user can edit the access to the specified file or not
+    /// Spceifies if this user can edit the access to the specified file or not.
     /// </summary>
     public bool CanEditAccess { get; set; }
 
     /// <summary>
-    /// Subject type
+    /// The subject type.
     /// </summary>
     public SubjectType SubjectType { get; set; }
 }
 
+/// <summary>
+/// The file sharing link information.
+/// </summary>
 public class FileShareLink
 {
     /// <summary>
-    /// Id
+    /// The file ID.
     /// </summary>
     public Guid Id { get; set; }
 
     /// <summary>
-    /// Title
+    /// The file title.
     /// </summary>
     public string Title { get; set; }
 
     /// <summary>
-    /// Share link
+    /// The file share link.
     /// </summary>
     public string ShareLink { get; set; }
 
     /// <summary>
-    /// Expiration date
+    /// The file expiration date.
     /// </summary>
     public ApiDateTime ExpirationDate { get; set; }
 
     /// <summary>
-    /// link type
+    /// The file link type.
     /// </summary>
     public LinkType LinkType { get; set; }
+
+    /// <summary>
+    /// The file password.
+    /// </summary>
     public string Password { get; set; }
+
+    /// <summary>
+    /// Specifies whether to deny the file download or not.
+    /// </summary>
     public bool? DenyDownload { get; set; }
+
+    /// <summary>
+    /// Specifies whether the file share link is expired or not.
+    /// </summary>
     public bool? IsExpired { get; set; }
+
+    /// <summary>
+    /// Specifies whether the file share link is primary or not.
+    /// </summary>
     public bool Primary { get; set; }
+
+    /// <summary>
+    /// Specifies whether the file share link is internal or not.
+    /// </summary>
     public bool? Internal { get; set; }
+
+    /// <summary>
+    /// The file share link's request token.
+    /// </summary>
     public string RequestToken { get; set; }
 }
 
+/// <summary>
+/// The file sharing link type information.
+/// </summary>
 public enum LinkType
 {
     [SwaggerEnum(Description = "Invitation")]

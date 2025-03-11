@@ -68,7 +68,7 @@ public class OperationController(
     /// <summary>
     /// Copies all the selected files and folders to the folder with the ID specified in the request.
     /// </summary>
-    /// <short>Copy to a folder</short>
+    /// <short>Copy to the folder</short>
     /// <path>api/2.0/files/fileops/copy</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
@@ -104,7 +104,13 @@ public class OperationController(
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
     }
-    
+
+    /// <summary>
+    /// Deletes the file versions with the IDs specified in the request.
+    /// </summary>
+    /// <short>Delete file versions</short>
+    /// <path>api/2.0/files/fileops/deleteversion</path>
+    /// <collection>list</collection>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "List of file operations", typeof(FileOperationDto))]
     [HttpPut("deleteversion")]
@@ -140,9 +146,9 @@ public class OperationController(
     }
 
     /// <summary>
-    ///  Returns a list of all the active operations.
+    ///  Returns a list of all the active file operations.
     /// </summary>
-    /// <short>Get active operations</short>
+    /// <short>Get active file operations</short>
     /// <path>api/2.0/files/fileops</path>
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>
@@ -232,9 +238,11 @@ public class OperationController(
     }
 
     /// <summary>
-    /// Duplicates all the selected files and folders
+    /// Duplicates all the selected files and folders.
     /// </summary>
+    /// <short>Duplicate files and folders</short>
     /// <path>api/2.0/files/fileops/duplicate</path>
+    /// <collection>list</collection>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "List of file operations", typeof(IAsyncEnumerable<FileOperationDto>))]
     [SwaggerResponse(403, "You don't have enough permission to duplicate")]
@@ -250,8 +258,9 @@ public class OperationController(
     }
     
     /// <summary>
-    /// Moves or copies 
+    /// Moves or copies all the destination folder.
     /// </summary>
+    /// <short>Move or copy the folder</short>
     /// <path>api/2.0/files/fileops/checkdestfolder</path>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Result", typeof(CheckDestFolderDto))]

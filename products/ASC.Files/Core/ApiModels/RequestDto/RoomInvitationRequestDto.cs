@@ -27,42 +27,45 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for inviting users to a room
+/// The request parameters for inviting users to the room.
 /// </summary>
 public class RoomInvitationRequest
 {
     /// <summary>
-    /// Collection of invitation parameters
+    /// The collection of invitation parameters.
     /// </summary>
     [MaxEmailInvitations]
     public IEnumerable<RoomInvitation> Invitations { get; set; }
 
     /// <summary>
-    /// Notifies users about the shared room or not
+    /// Specifies whether to notify users about the shared room or not.
     /// </summary>
     public bool Notify { get; set; }
 
     /// <summary>
-    /// Message to send when notifying about the shared room
+    /// The message to send when notifying about the shared room.
     /// </summary>
     public string Message { get; set; }
 
     /// <summary>
-    /// Culture
+    /// The culture of the room invitation.
     /// </summary>
     public string Culture { get; set; }
 }
 
+/// <summary>
+/// The generic request parameters for inviting users to the room.
+/// </summary>
 public class RoomInvitationRequestDto<T>
 {
     /// <summary>
-    /// Room ID
+    /// The room ID.
     /// </summary>
     [FromRoute(Name = "id")]
     public T Id { get; set; }
 
     /// <summary>
-    /// Room invitation
+    /// The room invitation request.
     /// </summary>
     [FromBody]
     public RoomInvitationRequest RoomInvitation { get; set; }

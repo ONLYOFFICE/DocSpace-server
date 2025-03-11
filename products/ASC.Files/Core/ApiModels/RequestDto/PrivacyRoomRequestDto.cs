@@ -27,33 +27,33 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for setting encryption keys
+/// Request parameters for setting encryption keys for the privacy room.
 /// </summary>
 public class PrivacyRoomRequestDto
 {
     /// <summary>
-    /// Public key
+    /// The public key of the privacy room.
     /// </summary>
     public string PublicKey { get; set; }
 
     /// <summary>
-    /// Private key
+    /// The private key of the privacy room.
     /// </summary>
     public string PrivateKeyEnc { get; set; }
 
     /// <summary>
-    /// Encryption keys need to be updated or not
+    /// Specifies if the encryption keys need to be updated or not.
     /// </summary>
     public bool Update { get; set; }
 }
 
 /// <summary>
-/// Request parameters for setting encryption keys
+/// Request parameters for setting encryption keys.
 /// </summary>
 public class PrivacyRoomEnableRequestDto
 {
     /// <summary>
-    /// Specifies whether to enable the Private Room settings or not
+    /// Specifies whether to enable the Private Room settings or not.
     /// </summary>
     public bool Enable { get; set; }
 }

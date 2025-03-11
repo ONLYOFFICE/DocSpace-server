@@ -27,34 +27,34 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Parameters for updating a comment
+/// Parameters for updating a comment.
 /// </summary>
 public class UpdateComment
 {
     /// <summary>
-    /// File version
+    /// The version of the comment.
     /// </summary>
     public int Version { get; set; }
 
     /// <summary>
-    /// Comment text
+    /// The comment text.
     /// </summary>
     public string Comment { get; set; }
 }
 
 /// <summary>
-/// Request parameters for updating a comment
+/// Request parameters for updating a comment.
 /// </summary>
 public class UpdateCommentRequestDto<T>
 {
     /// <summary>
-    /// File ID
+    /// The file ID of the comment.
     /// </summary>
     [FromRoute(Name = "fileId")]
     public T FileId { get; set; }
 
     /// <summary>
-    /// Parameters for updating a comment
+    /// The parameters for updating a comment.
     /// </summary>
     [FromBody]
     public UpdateComment File { get; set; }

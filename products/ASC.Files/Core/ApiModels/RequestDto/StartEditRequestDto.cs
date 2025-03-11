@@ -27,29 +27,29 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Parameters for starting file editing
+/// Parameters for starting file editing.
 /// </summary>
 public class StartEdit
 {
     /// <summary>
-    /// Specifies whether to share a file with other users for editing or not
+    /// Specifies whether to share the file with other users for editing or not.
     /// </summary>
     public bool EditingAlone { get; set; }
 }
 
 /// <summary>
-/// Request parameters for starting file editing
+/// Request parameters for starting file editing.
 /// </summary>
 public class StartEditRequestDto<T>
 {
     /// <summary>
-    /// File ID
+    /// The file ID to start editing.
     /// </summary>
     [FromRoute(Name = "fileId")]
     public T FileId { get; set; }
 
     /// <summary>
-    /// Parameters for starting file editing
+    /// The file parameters to start editing.
     /// </summary>
     [FromBody]
     public StartEdit File { get; set; }

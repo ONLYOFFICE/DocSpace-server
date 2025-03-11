@@ -26,11 +26,23 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// The delete the WordPress plugin information response parameters.
+/// </summary>
 public class DeleteWordpressInfoResponse(bool success)
 {
+    /// <summary>
+    /// Specifies whether the deletion of WordPress plugin is successful or not.
+    /// </summary>
     public bool Success { get; set; } = success;
 
-    // Convenience factory methods
+    /// <summary>
+    /// The factory method that specifies whether the deletion of WordPress plugin is successful or not.
+    /// </summary>
     public static DeleteWordpressInfoResponse Succeeded() => new(true);
+
+    /// <summary>
+    /// The factory method that specifies whether the deletion of WordPress plugin is failed or not.
+    /// </summary>
     public static DeleteWordpressInfoResponse Failed() => new(false);
 }

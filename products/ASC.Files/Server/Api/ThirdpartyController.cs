@@ -42,9 +42,9 @@ public class ThirdpartyController(
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
-    /// Returns a list of the available providers.
+    /// Returns the list of the available providers.
     /// </summary>
-    /// <short>Get providers</short>
+    /// <short>Get providers list</short>
     /// <remarks>Available provider keys: DropboxV2, Box, WebDav, Yandex, OneDrive, SharePoint, GoogleDrive, kDrive.</remarks>
     /// <path>api/2.0/files/thirdparty/capabilities</path>
     /// <collection>list</collection>
@@ -62,9 +62,9 @@ public class ThirdpartyController(
     }
 
     /// <summary>
-    /// Creates a WordPress post with the parameters specified in the request.
+    /// Creates the WordPress post with the parameters specified in the request.
     /// </summary>
-    /// <short>Create a WordPress post</short>
+    /// <short>Create the WordPress post</short>
     /// <path>api/2.0/files/wordpress</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / WordPress")]
@@ -305,7 +305,7 @@ public class ThirdpartyController(
     }
 
     /// <summary>
-    /// Returns a list of the all providers.
+    /// Returns the list of the all providers.
     /// </summary>
     /// <short>Get all providers</short>
     /// <remarks>Available provider keys: Dropbox, Box, WebDav, OneDrive, GoogleDrive, kDrive, ownCloud, Nextcloud</remarks>

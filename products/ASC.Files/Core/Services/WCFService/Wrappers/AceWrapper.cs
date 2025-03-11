@@ -67,20 +67,23 @@ public class AceWrapper : IMapFrom<RoomInvitation>
     public bool IsLink => (SubjectType is SubjectType.InvitationLink or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink) || !string.IsNullOrEmpty(Link);
 }
 
+/// <summary>
+/// The ace short wrapper parameters.
+/// </summary>
 public class AceShortWrapper(string subjectName, string permission, bool isLink)
 {
     /// <summary>
-    /// User
+    /// The user of the wrapper.
     /// </summary>
     public string User { get; init; } = subjectName;
 
     /// <summary>
-    /// User access rights to the file
+    /// The user access rights to the file.
     /// </summary>
     public string Permissions { get; init; } = permission;
 
     /// <summary>
-    /// Is link
+    /// Specifies whether the message is link.
     /// </summary>
     public bool isLink { get; init; } = isLink;
 }

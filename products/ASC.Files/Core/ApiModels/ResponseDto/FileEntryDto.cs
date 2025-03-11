@@ -35,7 +35,9 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 [JsonSerializable(typeof(FolderDto<string>[]))]
 public partial class FileEntryDtoContext : JsonSerializerContext;
 
-
+/// <summary>
+/// The file entry information.
+/// </summary>
 [JsonDerivedType(typeof(FileDto<int>))]
 [JsonDerivedType(typeof(FileDto<string>))]
 [JsonDerivedType(typeof(FolderDto<int>))]
@@ -43,36 +45,36 @@ public partial class FileEntryDtoContext : JsonSerializerContext;
 public abstract class FileEntryDto
 {
     /// <summary>
-    /// Title
+    /// The file entry title.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Some titile.txt/ Some title")]
     public string Title { get; set; }
 
     /// <summary>
-    /// Access rights
+    /// The access rights of the file entry.
     /// </summary>
     public FileShare Access { get; set; }
 
     /// <summary>
-    /// Specifies if the file is shared or not
+    /// Specifies if the file entry is shared or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool Shared { get; set; }
 
     /// <summary>
-    /// Creation time
+    /// The creation date and time of the file entry.
     /// </summary>
     public ApiDateTime Created { get; set; }
 
     /// <summary>
-    /// Author
+    /// The file entry author.
     /// </summary>
     public EmployeeDto CreatedBy { get; set; }
 
     private ApiDateTime _updated;
 
     /// <summary>
-    /// Time of the last file update
+    /// The last date and time when the file entry was updated.
     /// </summary>
     public ApiDateTime Updated
     {
@@ -81,45 +83,48 @@ public abstract class FileEntryDto
     }
 
     /// <summary>
-    /// Time when the file will be automatically deleted
+    /// The date and time when the file entry will be automatically deleted.
     /// </summary>
     public ApiDateTime AutoDelete { get; set; }
 
     /// <summary>
-    /// Root folder type
+    /// The root folder type of the file entry.
     /// </summary>
     public FolderType RootFolderType { get; set; }
 
     /// <summary>
-    /// First parent folder type
+    /// The first parent folder type of the file entry.
     /// </summary>
     public FolderType? ParentRoomType { get; set; }
 
     /// <summary>
-    /// A user who updated a file
+    /// The employer user who updated the file entry.
     /// </summary>
     public EmployeeDto UpdatedBy { get; set; }
 
     /// <summary>
-    /// Provider is specified or not
+    /// Is file entry provider is specified or not.
     /// </summary>
     public bool? ProviderItem { get; set; }
 
     /// <summary>
-    /// Provider key
+    /// The provider key of the file entry.
     /// </summary>
     public string ProviderKey { get; set; }
 
     /// <summary>
-    /// Provider ID
+    /// The provider ID of the file entry.
     /// </summary>
     public int? ProviderId { get; set; }
 
     /// <summary>
-    /// Order
+    /// The order of the file entry.
     /// </summary>
     public string Order { get; set; }
-    
+
+    /// <summary>
+    /// The file entry type.
+    /// </summary>
     public abstract FileEntryType FileEntryType { get; }
 
     protected FileEntryDto(FileEntry entry)
@@ -137,50 +142,57 @@ public abstract class FileEntryDto
     protected FileEntryDto() { }
 }
 
+/// <summary>
+/// The generic file entry information.
+/// </summary>
 public abstract class FileEntryDto<T> : FileEntryDto
 {
     /// <summary>
-    /// Id
+    /// The file entry Id.
     /// </summary>
     [SwaggerSchemaCustom(Example = 10)]
     public T Id { get; set; }
 
     /// <summary>
-    /// Root folder id
+    /// The root folder id of the file entry.
     /// </summary>
     public T RootFolderId { get; set; }
 
     /// <summary>
-    /// Origin id
+    /// The origin id of the file entry.
     /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public T OriginId { get; set; }
 
     /// <summary>
-    /// Origin room id
+    /// The origin room id of the file entry.
     /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public T OriginRoomId { get; set; }
 
     /// <summary>
-    /// Origin title
+    /// The origin title of the file entry.
     /// </summary>
     public string OriginTitle { get; set; }
 
     /// <summary>
-    /// Origin room title
+    /// The origin room title of the file entry.
     /// </summary>
     public string OriginRoomTitle { get; set; }
 
     /// <summary>
-    /// Can share
+    /// Can the file entry share or not.
     /// </summary>
     public bool CanShare { get; set; }
 
     /// <summary>
-    /// Security
+    /// The security of the file entry.
     /// </summary>
     public IDictionary<FilesSecurityActions, bool> Security { get; set; }
+
+    /// <summary>
+    /// The request token of the file entry.
+    /// </summary>
     public string RequestToken { get; set; }
 
     protected FileEntryDto(FileEntry<T> entry)

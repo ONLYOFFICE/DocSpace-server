@@ -26,16 +26,19 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// The created edit session request.
+/// </summary>
 public class CreateEditSessionRequestDto<T>
 {
     /// <summary>
-    /// File ID
+    /// The file ID of the edit session request.
     /// </summary>
     [FromRoute(Name = "fileId")]
     public T FileId { get; set; }
 
     /// <summary>
-    /// File size in bytes
+    /// The file size in bytes.
     /// </summary>
     [FromQuery(Name = "fileSize")]
     public long FileSize { get; set; }

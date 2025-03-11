@@ -27,29 +27,29 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Parameters for deleting a room
+/// The parameters for deleting the room.
 /// </summary>
 public class DeleteRoomRequest
 {
     /// <summary>
-    /// Specifies whether to delete a room after the editing session is finished or not
+    /// Specifies whether to delete the room after the editing session is finished or not.
     /// </summary>
     public bool DeleteAfter { get; set; }
 }
 
 /// <summary>
-/// Request parameters for deleting a room
+/// The request parameters for deleting the room.
 /// </summary>
 public class DeleteRoomRequestDto<T>
 {
     /// <summary>
-    /// Room ID
+    /// The room ID.
     /// </summary>
     [FromRoute(Name = "id")]
     public T Id { get; set; }
 
     /// <summary>
-    /// Parameters for deleting a room
+    /// The parameters for deleting the room.
     /// </summary>
     [FromBody]
     public DeleteRoomRequest DeleteRoom { get; set; }

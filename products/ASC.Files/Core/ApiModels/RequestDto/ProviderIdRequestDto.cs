@@ -26,10 +26,13 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// The provider request parameters.
+/// </summary>
 public class ProviderIdRequestDto
 {
     /// <summary>
-    /// Provider ID
+    /// The provider ID.
     /// </summary>
     [FromRoute(Name = "providerId")]
     public int ProviderId { get; set; }

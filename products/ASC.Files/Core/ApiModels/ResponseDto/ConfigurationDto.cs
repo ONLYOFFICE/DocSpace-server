@@ -29,58 +29,58 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 public class ConfigurationDto<T>
 {
     /// <summary>
-    /// Document config
+    /// The document configuration.
     /// </summary>
     public DocumentConfigDto Document { get; set; }
 
     /// <summary>
-    /// Document type
+    /// The document type.
     /// </summary>
     public string DocumentType { get; set; }
 
     /// <summary>
-    /// Editor config
+    /// The editor configuration.
     /// </summary>
     public EditorConfigurationDto EditorConfig { get; set; }
 
     /// <summary>
-    /// Editor type
+    /// The editor type.
     /// </summary>
     public EditorType EditorType { get; set; }
 
     /// <summary>
-    /// Editor URL
+    /// The editor URL.
     /// </summary>
     [Url]
     public string EditorUrl { get; set; }
 
     /// <summary>
-    /// Token
+    /// The token of the file configuration.
     /// </summary>
     public string Token { get; set; }
 
     /// <summary>
-    /// Platform type
+    /// The platform type.
     /// </summary>
     public string Type { get; set; }
 
     /// <summary>
-    /// File parameters
+    /// The file parameters.
     /// </summary>
     public FileDto<T> File { get; set; }
 
     /// <summary>
-    /// Error message
+    /// The error message.
     /// </summary>
     public string ErrorMessage { get; set; }
 
     /// <summary>
-    /// Specifies if the filling has started or not
+    /// Specifies if the file filling has started or not.
     /// </summary>
     public bool? StartFilling { get; set; }
 
     /// <summary>
-    /// Filling session Id
+    /// The file filling session Id.
     /// </summary>
     public string FillingSessionId { get; set; }
 }
@@ -88,120 +88,120 @@ public class ConfigurationDto<T>
 public class EditorConfigurationDto
 {
     /// <summary>
-    /// Callback url
+    /// The callback url of the editor.
     /// </summary>
     [Url]
     public string CallbackUrl { get; set; }
 
     /// <summary>
-    /// Co editing
+    /// The co editing configuration.
     /// </summary>
     public CoEditingConfig CoEditing { get; set; }
 
     /// <summary>
-    /// Create url
+    /// The create url of the editor.
     /// </summary>
     public string CreateUrl { get; set; }
 
     /// <summary>
-    /// Customization
+    /// The customization configuration.
     /// </summary>
     public CustomizationConfigDto Customization { get; set; }
 
     /// <summary>
-    /// Embedded
+    /// The embedded configuration.
     /// </summary>
     public EmbeddedConfig Embedded { get; set; }
 
     /// <summary>
-    /// Encryption keys
+    /// The encryption keys of the editor configuration.
     /// </summary>
     public EncryptionKeysConfig EncryptionKeys { get; set; }
 
     /// <summary>
-    /// Lang
+    /// The language of the editor configuration.
     /// </summary>
     public string Lang { get; set; }
 
     /// <summary>
-    /// Mode
+    /// The mode of the editor configuration.
     /// </summary>
     public string Mode { get; set; }
 
     /// <summary>
-    /// Mode write
+    /// Specifies if the mode is write of the editor configuration.
     /// </summary>
     public bool ModeWrite { get; set; }
 
     /// <summary>
-    /// Plugins
+    /// The plugins configuration.
     /// </summary>
     public PluginsConfig Plugins { get; set; }
 
     /// <summary>
-    /// Recent
+    /// The recent configuration of the editor.
     /// </summary>
     public List<RecentConfig> Recent { get; set; }
 
     /// <summary>
-    /// Templates
+    /// The templates of the editor configuration.
     /// </summary>
     public List<TemplatesConfig> Templates { get; set; }
 
     /// <summary>
-    /// User
+    /// The user configuration of the editor.
     /// </summary>
     public UserConfig User { get; set; }
 }
 public class CustomizationConfigDto
 {
     /// <summary>
-    /// About
+    /// Specifies if the customization is about.
     /// </summary>
     public bool About { get; set; }
 
     /// <summary>
-    /// Customer
+    /// The customization customer configuration.
     /// </summary>
     public CustomerConfigDto Customer { get; set; }
 
     /// <summary>
-    /// Anonymous
+    /// The anonymous configuration of the customization.
     /// </summary>
     public AnonymousConfigDto Anonymous { get; set; }
 
     /// <summary>
-    /// Feedback
+    /// The feedback configuration of the customization.
     /// </summary>
     public FeedbackConfig Feedback  { get; set; }
 
     /// <summary>
-    /// Forcesave
+    /// Specifies if the customization should be force saved.
     /// </summary>
     public bool? Forcesave { get; set; }
 
     /// <summary>
-    /// Go back
+    /// The go back configuration of the customization.
     /// </summary>
     public GobackConfig Goback { get; set; }
 
     /// <summary>
-    /// Logo
+    /// The logo of the customization.
     /// </summary>
     public LogoConfigDto Logo { get; set; }
 
     /// <summary>
-    /// MentionShare
+    /// Specifies if the share should be mentioned.
     /// </summary>
     public bool MentionShare { get; set; }
 
     /// <summary>
-    /// Review display
+    /// The review display of the customization.
     /// </summary>
     public string ReviewDisplay { get; set; }
 
     /// <summary>
-    /// Submit form
+    /// Specifies if the form should be submitted.
     /// </summary>
     public bool SubmitForm { get; set; }
 }
@@ -209,27 +209,27 @@ public class CustomizationConfigDto
 public class LogoConfigDto
 {
     /// <summary>
-    /// Image
+    /// The image of the logo.
     /// </summary>
     public string Image { get; set; }
 
     /// <summary>
-    /// Image dark
+    /// The dark image of the logo.
     /// </summary>
     public string ImageDark { get; set; }
 
     /// <summary>
-    /// Image embedded
+    /// The embedded image of the logo.
     /// </summary>
     public string ImageEmbedded { get; set; }
 
     /// <summary>
-    /// Url
+    /// The url link of the logo.
     /// </summary>
     public string Url { get; set; }
 
     /// <summary>
-    /// Visible
+    /// Specifies if the logo is visible.
     /// </summary>
     public bool Visible { get; set; }
 }
@@ -237,7 +237,7 @@ public class LogoConfigDto
 public class AnonymousConfigDto
 {
     /// <summary>
-    /// Request
+    /// Specifies if the anonymous is a request.
     /// </summary>
     public bool Request { get; set; }
 }
@@ -245,32 +245,32 @@ public class AnonymousConfigDto
 public class CustomerConfigDto
 {
     /// <summary>
-    /// Address
+    /// The address of the customer configuration.
     /// </summary>
     public string Address { get; set; }
 
     /// <summary>
-    /// Logo
+    /// The logo of the customer configuration.
     /// </summary>
     public string Logo { get; set; }
 
     /// <summary>
-    /// Dark logo
+    /// The dark logo of the customer configuration.
     /// </summary>
     public string LogoDark { get; set; }
 
     /// <summary>
-    /// Mail
+    /// The mail address of the customer configuration.
     /// </summary>
     public string Mail { get; set; }
 
     /// <summary>
-    /// Name
+    /// The name of the customer configuration.
     /// </summary>
     public string Name  { get; set; }
 
     /// <summary>
-    /// Site
+    /// The site web address of the customer configuration.
     /// </summary>
     public string Www  { get; set; }
 }
@@ -278,58 +278,58 @@ public class CustomerConfigDto
 public class DocumentConfigDto
 {
     /// <summary>
-    /// File type
+    /// The file type of the document.
     /// </summary>
     public string FileType  { get; set; }
 
     /// <summary>
-    /// Info
+    /// The configuration information of the document.
     /// </summary>
     public InfoConfigDto Info { get; set; }
 
     /// <summary>
-    /// Is linked for me
+    /// Specifies if the documnet is linked for current user.
     /// </summary>
     public bool IsLinkedForMe { get; set; }
 
     /// <summary>
-    /// Key
+    /// The document key.
     /// </summary>
     public string Key { get; set; }
 
     /// <summary>
-    /// Permissions
+    /// The document permissions.
     /// </summary>
     public PermissionsConfig Permissions { get; set; }
 
     /// <summary>
-    /// Shared link param
+    /// The shared link parameter of the document.
     /// </summary>
     public string SharedLinkParam { get; set; }
 
     /// <summary>
-    /// Shared link key
+    /// The shared link key of the document.
     /// </summary>
     public string SharedLinkKey { get; set; }
 
     /// <summary>
-    /// Reference data
+    /// The reference data of the document.
     /// </summary>
     public FileReferenceData ReferenceData { get; set; }
 
     /// <summary>
-    /// Title
+    /// The document title.
     /// </summary>
     public string Title { get; set; }
 
     /// <summary>
-    /// Url
+    /// The document url.
     /// </summary>
     [Url]
     public string Url { get; set; }
 
     /// <summary>
-    /// Options
+    /// The options of the document.
     /// </summary>
     public Options Options { get; set; }
 }
@@ -337,32 +337,32 @@ public class DocumentConfigDto
 public class InfoConfigDto
 {
     /// <summary>
-    /// Favorite
+    /// Specifies if the file is favorite or not.
     /// </summary>
     public bool? Favorite { get; set; }
 
     /// <summary>
-    /// Folder
+    /// The folder of the file.
     /// </summary>
     public string Folder { get; set; }
 
     /// <summary>
-    /// Owner
+    /// The file owner.
     /// </summary>
     public string Owner { get; set; }
 
     /// <summary>
-    /// Sharing settings
+    /// The sharing settings of the file.
     /// </summary>
     public List<AceShortWrapper> SharingSettings{ get; set; }
 
     /// <summary>
-    /// Type
+    /// The editor type of the file.
     /// </summary>
     public EditorType Type { get; set; }
 
     /// <summary>
-    /// Uploaded
+    /// The uploaded file.
     /// </summary>
     public string Uploaded { get; set; }
 }

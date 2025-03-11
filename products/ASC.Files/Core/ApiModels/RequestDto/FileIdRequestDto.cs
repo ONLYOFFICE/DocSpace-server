@@ -26,29 +26,37 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// The file ID request parameters.
+/// </summary>
 public class FileIdRequestDto<T>
 {
     /// <summary>
-    /// File ID
+    /// The file ID of the request.
     /// </summary>
     [FromRoute(Name = "fileId")]
     public T FileId { get; set; }
 }
 
-
+/// <summary>
+/// The file primary ID request parameters.
+/// </summary>
 public class FilePrimaryIdRequestDto<T>
 {
     /// <summary>
-    /// File ID
+    /// The file primary ID of the request.
     /// </summary>
     [FromRoute(Name = "id")]
     public T Id { get; set; }
 }
 
+/// <summary>
+/// The operation ID request parameters.
+/// </summary>
 public class OperationIdRequestDto
 {
     /// <summary>
-    /// Operation ID
+    /// The operation ID of the request.
     /// </summary>
     [FromRoute(Name = "id")]
     public string Id { get; set; } = null;

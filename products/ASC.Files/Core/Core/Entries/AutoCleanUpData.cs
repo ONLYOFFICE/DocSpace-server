@@ -47,15 +47,18 @@ public enum DateToAutoCleanUp
     ThreeMonths
 }
 
+/// <summary>
+/// The auto clean up data parameters.
+/// </summary>
 public class AutoCleanUpData
 {
     /// <summary>
-    /// Specifies if the auto-clearing setting is enabled or not
+    /// Specifies if the auto-clearing setting is enabled or not.
     /// </summary>
     public bool IsAutoCleanUp { get; init; }
 
     /// <summary>
-    /// The period when the trash bin will be cleared
+    /// The period when the trash bin will be cleared.
     /// </summary>
     public DateToAutoCleanUp Gap { get; init; }
 

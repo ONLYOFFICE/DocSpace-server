@@ -27,77 +27,77 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for starting file conversion
+/// Request parameters for checking file conversion.
 /// </summary>
 public class CheckConversionRequestDto<T>
 {
     /// <summary>
-    /// File ID
+    /// The file ID to check conversion proccess.
     /// </summary>
     public T FileId { get; set; }
 
     /// <summary>
-    /// Specifies if the conversion process is synchronous or not
+    /// Specifies if the conversion process is synchronous or not.
     /// </summary>
     public bool Sync { get; set; }
 
     /// <summary>
-    /// Specifies whether to start a conversion process or not
+    /// Specifies whether to start a conversion process or not.
     /// </summary>
     public bool StartConvert { get; set; }
 
     /// <summary>
-    /// File version
+    /// The file version of the conversion.
     /// </summary>
     public int Version { get; set; }
 
     /// <summary>
-    /// Password
+    /// The password of the file conversion.
     /// </summary>
     public string Password { get; set; }
     
     /// <summary>
-    /// Output type
+    /// The output type of the conversion.
     /// </summary>
     public string OutputType { get; set; }
 
     /// <summary>
-    /// Create new if exists
+    /// Specifies whether to create a new file if it exists or not.
     /// </summary>
     public bool CreateNewIfExist { get; set; }
 }
 
 /// <summary>
-/// 
+/// Request parameters for starting file conversion.
 /// </summary>
 public class StartConversionRequestDto<T>
 {
     /// <summary>
-    /// File ID
+    /// The file ID to start conversion proccess.
     /// </summary>
     [FromRoute(Name = "fileId")]
     public T FileId { get; set; }
 
     /// <summary>
-    /// Check conversion  
+    /// Check conversion of the file.
     /// </summary>
     [FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)]
     public CheckConversionRequestDto<T> CheckConversion { get; set; }
 }
 
 /// <summary>
-/// 
+/// Request parameters for checking file conversion status.
 /// </summary>
 public class CheckConversionStatusRequestDto<T>
 {
     /// <summary>
-    /// File ID
+    /// The file ID to check conversion status.
     /// </summary>
     [FromRoute(Name = "fileId")]
     public T FileId { get; set; }
 
     /// <summary>
-    /// Specifies if a conversion operation is started or not
+    /// Specifies whether a conversion operation is started or not.
     /// </summary>
     [FromQuery(Name = "start")]
     public bool Start { get; set; }

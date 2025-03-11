@@ -27,29 +27,29 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Parameters for locking a file
+/// Parameters for locking a file.
 /// </summary>
 public class LockFileParameters
 {
     /// <summary>
-    /// Specifies whether to lock a file or not
+    /// Specifies whether to lock a file or not.
     /// </summary>
     public bool LockFile { get; set; }
 }
 
 /// <summary>
-/// Request parameters for locking a file
+/// Request parameters for locking a file.
 /// </summary>
 public class LockFileRequestDto<T>
 {
     /// <summary>
-    /// File ID
+    /// The file ID for locking.
     /// </summary>
     [FromRoute(Name = "fileId")]
     public T FileId { get; set; }
 
     /// <summary>
-    /// Parameters for locking a file
+    /// Parameters for locking a file.
     /// </summary>
     [FromBody]
     public LockFileParameters File { get; set; }

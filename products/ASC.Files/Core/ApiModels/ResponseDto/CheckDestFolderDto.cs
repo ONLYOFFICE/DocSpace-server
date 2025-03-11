@@ -26,19 +26,25 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// The destination folder checking information.
+/// </summary>
 public class CheckDestFolderDto
 {
     /// <summary>
-    /// Result
+    /// The result of the opertaion.
     /// </summary>
     public CheckDestFolderResult Result { get; set; }
 
     /// <summary>
-    /// Files
+    /// The list of files of the destination folder.
     /// </summary>
     public List<FileEntryDto> Files { get; set; }
 }
 
+/// <summary>
+/// The destination folder checking result.
+/// </summary>
 public enum CheckDestFolderResult
 {
     [SwaggerEnum(Description = "All allowed")]

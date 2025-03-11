@@ -27,29 +27,29 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for track file changes when editing
+/// Request parameters for track file changes when editing.
 /// </summary>
 public class TrackEditFileRequestDto<T>
 {
     /// <summary>
-    /// File ID
+    /// The file ID to track editing changes.
     /// </summary>
     [FromRoute(Name = "fileId")]
     public T FileId { get; set; }
     /// <summary>
-    /// Tab ID
+    /// The tab ID to track editing changes.
     /// </summary>
     [FromQuery(Name = "tabId")]
     public Guid TabId { get; set; }
 
     /// <summary>
-    /// Document key for tracking
+    /// The document key for tracking changes.
     /// </summary>
     [FromQuery(Name = "docKeyForTrack")]
     public string DocKeyForTrack { get; set; }
 
     /// <summary>
-    /// Specifies whether to finish file tracking or not
+    /// Specifies whether to finish file tracking or not.
     /// </summary>
     [FromQuery(Name = "isFinish")]
     public bool IsFinish { get; set; }

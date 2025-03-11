@@ -27,37 +27,37 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for checking the document service location
+/// Request parameters for checking the document service location.
 /// </summary>
 public class CheckDocServiceUrlRequestDto
 {
     /// <summary>
-    /// The Document Server address
+    /// The document server url address.
     /// </summary>
     public string DocServiceUrl { get; set; }
 
     /// <summary>
-    /// The Document Server address in the local private network
+    /// The document server url address in the local private network.
     /// </summary>
     public string DocServiceUrlInternal { get; set; }
 
     /// <summary>
-    /// The Community Server address
+    /// The community server url address.
     /// </summary>
     public string DocServiceUrlPortal { get; set; }
 
     /// <summary>
-    /// Signature secret
+    /// The signature secret of the document server.
     /// </summary>
     public string DocServiceSignatureSecret { get; set; }
 
     /// <summary>
-    /// Signature header
+    /// The signature header of the document server.
     /// </summary>
     public string DocServiceSignatureHeader { get; set; }
 
     /// <summary>
-    /// Enable SSL verification
+    /// Specifies if the SSL verification of the document server is enabled or not.
     /// </summary>
     public bool? DocServiceSslVerification { get; set; }
 }

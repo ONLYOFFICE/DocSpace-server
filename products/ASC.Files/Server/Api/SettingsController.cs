@@ -202,7 +202,7 @@ public class SettingsController(
     }
 
     /// <summary>
-    /// Returns the information about the Documents module.
+    /// Returns the information about the "Documents" module.
     /// </summary>
     /// <short>Get the Documents information</short>
     /// <path>api/2.0/files/info</path>
@@ -216,7 +216,7 @@ public class SettingsController(
     }
 
     /// <summary>
-    /// Hide confirmation dialog when canceling operation.
+    /// Hides confirmation dialog when canceling operation.
     /// </summary>
     /// <short>Hide confirmation dialog when canceling operation</short>
     /// <path>api/2.0/files/hideconfirmroomlifetime</path>
@@ -242,7 +242,7 @@ public class SettingsController(
     }
 
     /// <summary>
-    /// Hide confirmation dialog when changing room lifetime settings.
+    /// Hides confirmation dialog when changing room lifetime settings.
     /// </summary>
     /// <short>Hide confirmation dialog when changing room lifetime settings</short>
     /// <path>api/2.0/files/hideconfirmroomlifetime</path>
@@ -255,7 +255,7 @@ public class SettingsController(
     }
 
     /// <summary>
-    /// Checks if the Private Room settings are available or not.
+    /// Checks if the "Private Room" settings are available or not.
     /// </summary>
     /// <short>Check the Private Room availability</short>
     /// <path>api/2.0/files/@privacy/available</path>
@@ -377,9 +377,9 @@ public class SettingsController(
     }
 
     /// <summary>
-    /// Change the ability to open in a document in the same browser tab
+    /// Changes the ability to open the document in the same browser tab.
     /// </summary>
-    /// <short>Open document in same browser tab</short>
+    /// <short>Open document in the same browser tab</short>
     /// <path>api/2.0/files/settings/openeditorinsametab</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]

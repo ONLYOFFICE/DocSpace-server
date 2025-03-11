@@ -27,34 +27,34 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Parameters to change the room cover
+/// The parameters to change the room cover.
 /// </summary>
 public class CoverRequestDto
 {
     /// <summary>
-    /// Color
+    /// The color of the cover.
     /// </summary>
     public string Color { get; set; }
 
     /// <summary>
-    /// Cover
+    /// The cover name.
     /// </summary>
     public string Cover { get; set; }
 }
 
 /// <summary>
-/// Request parameters to change the room cover
+/// The request parameters to change the room cover.
 /// </summary>
 public class CoverRequestDto<T>
 {
     /// <summary>
-    /// Room ID
+    /// The room ID of the cover.
     /// </summary>
     [FromRoute(Name = "id")]
     public T Id { get; set; }
 
     /// <summary>
-    /// Parameters to change the room cover
+    /// The parameters to change the room cover.
     /// </summary>
     [FromBody]
     public CoverRequestDto Cover { get; set; } = null;

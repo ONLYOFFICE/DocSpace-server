@@ -27,26 +27,42 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Order request parameters
+/// The order request parameters.
 /// </summary>
 public class OrderRequestDto
 {
     /// <summary>
-    /// Order
+    /// The order number.
     /// </summary>
     [Range(1, int.MaxValue)]
     [JsonConverter(typeof(OrderRequestDtoConverter))]
     public int Order { get; set; }
 }
 
+/// <summary>
+/// The order item generic request parameters.
+/// </summary>
 public class OrdersItemRequestDto<T> : OrderRequestDto
 {
+    /// <summary>
+    /// The order entry ID.
+    /// </summary>
     public T EntryId { get; set; }
+
+    /// <summary>
+    /// The order file entry type.
+    /// </summary>
     public FileEntryType EntryType { get; set; }
 }
 
+/// <summary>
+/// The order generic request parameters.
+/// </summary>
 public class OrdersRequestDto<T>
 {
+    /// <summary>
+    /// The list of order items.
+    /// </summary>
     public IEnumerable<OrdersItemRequestDto<T>> Items { get; set; }
 }
 
@@ -74,36 +90,36 @@ public class OrderRequestDtoConverter : System.Text.Json.Serialization.JsonConve
 }
 
 /// <summary>
-/// 
+/// The order file request parameters.
 /// </summary>
 public class OrderFileRequestDto<T>
 {
     /// <summary>
-    /// File ID
+    /// The file ID of the order.
     /// </summary>
     [FromRoute(Name = "fileId")]
     public T FileId { get; set; }
 
     /// <summary>
-    /// Order
+    /// The order request.
     /// </summary>
     [FromBody]
     public OrderRequestDto Order { get; set; }
 }
 
 /// <summary>
-/// 
+/// The order folder request parameters.
 /// </summary>
 public class OrderFolderRequestDto<T>
 {
     /// <summary>
-    /// Folder ID
+    /// The folder ID of the order.
     /// </summary>
     [FromRoute(Name = "folderId")]
     public T FolderId { get; set; }
 
     /// <summary>
-    /// Order
+    /// The order request.
     /// </summary>
     [FromBody]
     public OrderRequestDto Order { get; set; }

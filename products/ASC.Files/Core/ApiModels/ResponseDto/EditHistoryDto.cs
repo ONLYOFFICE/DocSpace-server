@@ -26,50 +26,53 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// The file edit history parameters.
+/// </summary>
 public class EditHistoryDto
 {
     /// <summary>
-    /// File ID
+    /// The file ID which was edited.
     /// </summary>
     public int ID { get; set; }
 
     /// <summary>
-    /// Key
+    /// The edit history key.
     /// </summary>
     public string Key { get; set; }
 
     /// <summary>
-    /// File version
+    /// The file version.
     /// </summary>
     public int Version { get; set; }
 
     /// <summary>
-    /// Version group
+    /// The file version group.
     /// </summary>
     public int VersionGroup { get; set; }
 
     /// <summary>
-    /// A user who updated a file
+    /// The user who updated a file.
     /// </summary>
     public EditHistoryAuthor User { get; set; }
 
     /// <summary>
-    /// Creation time
+    /// The creation time of the file change.
     /// </summary>
     public ApiDateTime Created { get; set; }
 
     /// <summary>
-    /// History changes in the string format
+    /// The file history changes in the string format.
     /// </summary>
     public string ChangesHistory { get; set; }
 
     /// <summary>
-    /// List of history changes
+    /// The list of file history changes.
     /// </summary>
     public List<EditHistoryChangesWrapper> Changes { get; set; }
 
     /// <summary>
-    /// Server version
+    /// The file history server version.
     /// </summary>
     public string ServerVersion { get; set; }
 
@@ -87,17 +90,23 @@ public class EditHistoryDto
     }
 }
 
+/// <summary>
+/// The file edit history wrapper parameters.
+/// </summary>
 public class EditHistoryChangesWrapper(EditHistoryChanges historyChanges, ApiDateTimeHelper apiDateTimeHelper)
 {
     /// <summary>
-    /// User
+    /// The user who edited the file.
     /// </summary>
     public EditHistoryAuthor User { get; set; } = historyChanges.Author;
 
     /// <summary>
-    /// Created
+    /// The creation date and time of the file history.
     /// </summary>
     public ApiDateTime Created { get; set; } = apiDateTimeHelper.Get(historyChanges.Date);
 
+    /// <summary>
+    /// The document of the file changes history.
+    /// </summary>
     public string DocumentSha256 { get; set; } = historyChanges.DocumentSha256;
 }

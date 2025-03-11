@@ -26,296 +26,298 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// The file settings parameters.
+/// </summary>
 public class FilesSettingsDto
 {
     /// <summary>
-    /// Exts image previewed
+    /// The list of exts of image previewed.
     /// </summary>
     public List<string> ExtsImagePreviewed { get; set; }
 
     /// <summary>
-    /// Exts media previewed
+    /// The list of exts of media previewed.
     /// </summary>
     public List<string> ExtsMediaPreviewed { get; set; }
 
     /// <summary>
-    /// Exts web previewed
+    /// The list of exts of web previewed.
     /// </summary>
     public List<string> ExtsWebPreviewed { get; set; }
 
     /// <summary>
-    /// Exts web edited
+    /// The list of exts of web edited.
     /// </summary>
     public List<string> ExtsWebEdited { get; set; }
 
     /// <summary>
-    /// Exts web encrypt
+    /// The list of exts of web encrypt.
     /// </summary>
     public List<string> ExtsWebEncrypt { get; set; }
 
     /// <summary>
-    /// Exts web reviewed
+    /// The list of exts of web reviewed.
     /// </summary>
     public List<string> ExtsWebReviewed { get; set; }
 
     /// <summary>
-    /// Exts web custom filter editing
+    /// The list of exts of web custom filter editing.
     /// </summary>
     public List<string> ExtsWebCustomFilterEditing { get; set; }
 
     /// <summary>
-    /// Exts web restricted editing
+    /// The list of exts of web restricted editing.
     /// </summary>
     public List<string> ExtsWebRestrictedEditing { get; set; }
 
     /// <summary>
-    /// Exts web commented
+    /// The list of exts of web commented.
     /// </summary>
     public List<string> ExtsWebCommented { get; set; }
 
     /// <summary>
-    /// Exts web template
+    /// The list of exts of web template.
     /// </summary>
     public List<string> ExtsWebTemplate { get; set; }
 
     /// <summary>
-    /// Exts co authoring
+    /// The list of exts of co authoring.
     /// </summary>
     public List<string> ExtsCoAuthoring { get; set; }
 
     /// <summary>
-    /// Exts must convert
+    /// The list of exts that must be converted.
     /// </summary>
     public List<string> ExtsMustConvert { get; set; }
 
     /// <summary>
-    /// Exts convertible
+    /// The list of convertible exts.
     /// </summary>
     public IDictionary<string, List<string>> ExtsConvertible { get; set; }
 
     /// <summary>
-    /// Exts uploadable
+    /// The list of uploadable exts.
     /// </summary>
     public List<string> ExtsUploadable { get; set; }
 
     /// <summary>
-    /// Exts archive
+    /// The list of exts that must be archived.
     /// </summary>
     public ImmutableList<string> ExtsArchive { get; set; }
 
     /// <summary>
-    /// Exts video
+    /// The list of video exts.
     /// </summary>
     public ImmutableList<string> ExtsVideo { get; set; }
 
     /// <summary>
-    /// Exts audio
+    /// The list of audio exts.
     /// </summary>
     public ImmutableList<string> ExtsAudio { get; set; }
 
     /// <summary>
-    /// Exts image
+    /// The list of image exts.
     /// </summary>
     public ImmutableList<string> ExtsImage { get; set; }
 
     /// <summary>
-    /// Exts spreadsheet
+    /// The list of spreadsheet exts.
     /// </summary>
     public ImmutableList<string> ExtsSpreadsheet { get; set; }
 
     /// <summary>
-    /// Exts presentation
+    /// The list of presentation exts.
     /// </summary>
     public ImmutableList<string> ExtsPresentation { get; set; }
 
     /// <summary>
-    /// Exts document
+    /// The list of document exts. 
     /// </summary>
     public ImmutableList<string> ExtsDocument { get; set; }
 
     /// <summary>
-    /// Internal formats
+    /// The internal file formats.
     /// </summary>
     public Dictionary<FileType, string> InternalFormats { get; set; }
 
     /// <summary>
-    /// Master form extension
+    /// The master form extension.
     /// </summary>
     public string MasterFormExtension { get; set; }
 
     /// <summary>
-    /// Param version
+    /// The param version of the file.
     /// </summary>
     public string ParamVersion { get; set; }
 
     /// <summary>
-    /// Param out type
+    /// The param out type of the file.
     /// </summary>
     public string ParamOutType { get; set; }
 
     /// <summary>
-    /// File download url string
+    /// The file download url string.
     /// </summary>
     [Url]
     public string FileDownloadUrlString { get; set; }
 
     /// <summary>
-    /// File web viewer url string
+    /// The file web viewer url string.
     /// </summary>
     public string FileWebViewerUrlString { get; set; }
 
     /// <summary>
-    /// File web viewer external url string
+    /// The file web viewer external url string.
     /// </summary>
     [Url]
     public string FileWebViewerExternalUrlString { get; set; }
 
     /// <summary>
-    /// File web editor url string
+    /// The file web editor url string.
     /// </summary>
     public string FileWebEditorUrlString { get; set; }
 
     /// <summary>
-    /// File web editor external url string
+    /// The file web editor external url string.
     /// </summary>
     [Url]
     public string FileWebEditorExternalUrlString { get; set; }
 
     /// <summary>
-    /// File redirect preview url string
+    /// The file redirect preview url string.
     /// </summary>
     [Url]
     public string FileRedirectPreviewUrlString { get; set; }
 
     /// <summary>
-    /// File thumbnail url string
+    /// The file thumbnail url string.
     /// </summary>
     [Url]
     public string FileThumbnailUrlString { get; set; }
 
     /// <summary>
-    /// Confirm delete
+    /// Specifies whether to confirm delete or not.
     /// </summary>
     public bool ConfirmDelete { get; set; }
 
     /// <summary>
-    /// EnableT third party
+    /// Specifies whether to enable the third party.
     /// </summary>
     public bool EnableThirdParty { get; set; }
 
     /// <summary>
-    /// External share
+    /// Specifies whether to enable the external share.
     /// </summary>
     public bool ExternalShare { get; set; }
 
     /// <summary>
-    /// External share social media
+    /// Specifies whether to enable external share on social media.
     /// </summary>
     public bool ExternalShareSocialMedia { get; set; }
 
     /// <summary>
-    /// Store original files
+    /// Specifies whether to enable storing original files.
     /// </summary>
     public bool StoreOriginalFiles { get; set; }
 
     /// <summary>
-    /// Keep new file name
+    /// Specifies whether to keep the new file name.
     /// </summary>
     public bool KeepNewFileName { get; set; }
 
     /// <summary>
-    /// Display file extension
+    /// Specifies whether to display the file extension.
     /// </summary>
     public bool DisplayFileExtension { get; set; }
 
     /// <summary>
-    /// Convert notify
+    /// Specifies whether to convert notify or not.
     /// </summary>    
     public bool ConvertNotify { get; set; }
 
     /// <summary>
-    /// Hide confirm cancel operation
+    /// Specifies whether to hide confirm cancel operation.
     /// </summary>
     public bool HideConfirmCancelOperation { get; set; }
     
     /// <summary>
-    /// HideC confirm convert save
+    /// Specifies whether to hide confirm convert save.
     /// </summary>
     public bool HideConfirmConvertSave { get; set; }
 
     /// <summary>
-    /// Hide confirm convert open
+    /// Specifies whether to hide confirm convert open.
     /// </summary>
     public bool HideConfirmConvertOpen { get; set; }
 
     /// <summary>
-    /// Hide confirm room lifetime
+    /// Specifies whether to hide confirm room lifetime.
     /// </summary>
     public bool HideConfirmRoomLifetime { get; set; }
 
     /// <summary>
-    /// Default order
+    /// The default order of files.
     /// </summary>
     public OrderBy DefaultOrder { get; set; }
 
     /// <summary>
-    /// Forcesave
+    /// Specifies whether to forcesave or not.
     /// </summary>
     public bool Forcesave { get; set; }
 
     /// <summary>
-    /// Store forcesave
+    /// Specifies whether to store forcesave or not.
     /// </summary>
     public bool StoreForcesave { get; set; }
 
     /// <summary>
-    /// Recent section
+    /// Specifies whether it is a recent section or not.
     /// </summary>
     public bool RecentSection { get; set; }
 
     /// <summary>
-    /// Favorites section
+    /// Specifies whether it is a favorites section or not.
     /// </summary>
     public bool FavoritesSection { get; set; }
 
     /// <summary>
-    /// Templates section
+    /// Specifies whether it is a templates section or not.
     /// </summary>
     public bool TemplatesSection { get; set; }
 
     /// <summary>
-    /// Download tar gz
+    /// Specifies whether to download in .tar.gz format.
     /// </summary>
     public bool DownloadTarGz { get; set; }
 
     /// <summary>
-    /// Automatically clean up
+    /// The automatically clean up data.
     /// </summary>
     public AutoCleanUpData AutomaticallyCleanUp { get; set; }
 
     /// <summary>
-    /// Can search by content
+    /// Specifies whether the file can searched by content or not.
     /// </summary>
     public bool CanSearchByContent { get; set; }
 
     /// <summary>
-    /// Default sharing access rights
+    /// The default sharing access rights.
     /// </summary>
     public List<FileShare> DefaultSharingAccessRights { get; set; }
 
-
     /// <summary>
-    /// Max upload thread count
+    /// The max upload thread count.
     /// </summary>    
     public int MaxUploadThreadCount { get; set; }
 
     /// <summary>
-    /// Chunk upload size
+    /// The chunk upload file size.
     /// </summary>    
     public long ChunkUploadSize { get; set; }
 
     /// <summary>
-    /// Open editor in same tab
+    /// Specifies whether to open editor in the same tab or not.
     /// </summary>
     public bool OpenEditorInSameTab { get; set; }
 }

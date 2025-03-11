@@ -26,45 +26,48 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// The document service URL parameters.
+/// </summary>
 public class DocServiceUrlDto
 {
     /// <summary>
-    /// Version
+    /// The version of the document service.
     /// </summary>
     public required string Version { get; set; }
 
     /// <summary>
-    /// Doc service url api
+    /// The document service url api.
     /// </summary>
     public required string DocServiceUrlApi { get; set; }
 
     /// <summary>
-    /// Doc service url
+    /// The document service url.
     /// </summary>
     public required string DocServiceUrl { get; set; }
 
     /// <summary>
-    /// Doc service url internal
+    /// The document service url internal.
     /// </summary>
     public required string DocServiceUrlInternal { get; set; }
 
     /// <summary>
-    /// Doc service portal url
+    /// The document service portal url.
     /// </summary>
     public required string DocServicePortalUrl { get; set; }
 
     /// <summary>
-    /// Doc service signature header
+    /// The document service signature header.
     /// </summary>
     public string DocServiceSignatureHeader { get; set; }
 
     /// <summary>
-    /// Enable SSL verification
+    /// Specifies if the document service SSL verification is enabled.
     /// </summary>
     public bool DocServiceSslVerification { get; set; }
 
     /// <summary>
-    /// Is default
+    /// Specifies if the document service is default.
     /// </summary>
     public required bool IsDefault { get; set; }
 }

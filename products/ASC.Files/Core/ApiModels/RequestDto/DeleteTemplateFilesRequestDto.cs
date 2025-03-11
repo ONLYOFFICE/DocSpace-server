@@ -26,10 +26,13 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// The delete template files request parameters.
+/// </summary>
 public class DeleteTemplateFilesRequestDto
 {
     /// <summary>
-    /// File IDs
+    /// The file IDs of the delete template.
     /// </summary>
     [FromBody]
     public IEnumerable<int> FileIds { get; set; }

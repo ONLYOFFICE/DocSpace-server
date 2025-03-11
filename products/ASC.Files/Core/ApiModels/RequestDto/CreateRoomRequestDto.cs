@@ -67,22 +67,22 @@ public static class RoomTypeExtensions
 }
 
 /// <summary>
-/// Request parameters for creating a room
+/// The request parameters for creating the room.
 /// </summary>
 public class CreateRoomRequestDto : UpdateRoomRequest
 {
     /// <summary>
-    /// Room type
+    /// The room type to be created.
     /// </summary>
     public RoomType RoomType { get; set; }
 
     /// <summary>
-    /// Private
+    /// Specifies whether the room to be created is private or not.
     /// </summary>
     public bool Private { get; set; }
 
     /// <summary>
-    /// Collection of sharing parameters
+    /// The collection of sharing parameters.
     /// </summary>
     public IEnumerable<FileShareParams> Share { get; set; }
 }

@@ -27,45 +27,45 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Parameters for creating a file
+/// Parameters for creating a file.
 /// </summary>
 public class CreateFile<T>
 {
     /// <summary>
-    /// File title
+    /// The file title for creation.
     /// </summary>
     [StringLength(165)]
     public string Title { get; set; }
 
     /// <summary>
-    /// Template file ID
+    /// The template file ID for creation.
     /// </summary>
     public T TemplateId { get; set; }
 
     /// <summary>
-    /// Specifies whether to allow the creation of external extension files or not
+    /// Specifies whether to allow the creation of external extension files or not while creation.
     /// </summary>
     public bool EnableExternalExt { get; set; }
 
     /// <summary>
-    /// Form ID
+    /// The form ID for creation.
     /// </summary>
     public int FormId { get; set; }
 }
 
 /// <summary>
-/// Request parameters for creating a file
+/// Request parameters for creating a file.
 /// </summary>
 public class CreateFileRequestDto<T>
 {
     /// <summary>
-    /// Folder ID
+    /// The folder ID for the file creation.
     /// </summary>
     [FromRoute(Name = "folderId")]
     public T FolderId { get; set; }
 
     /// <summary>
-    /// File
+    /// The file to create.
     /// </summary>
     [FromBody]
     public CreateFile<JsonElement> File { get; set; }

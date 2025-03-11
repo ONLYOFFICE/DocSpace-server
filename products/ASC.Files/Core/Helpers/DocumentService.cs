@@ -650,18 +650,18 @@ public static class DocumentService
     public class FileLink
     {
         /// <summary>
-        /// File type
+        /// The file type.
         /// </summary>
         [JsonPropertyName("filetype")]
         public string FileType { get; set; }
 
         /// <summary>
-        /// Token
+        /// The file token.
         /// </summary>
         public string Token { get; set; }
 
         /// <summary>
-        /// Url
+        /// The file url.
         /// </summary>
         [Url]
         public string Url { get; set; }

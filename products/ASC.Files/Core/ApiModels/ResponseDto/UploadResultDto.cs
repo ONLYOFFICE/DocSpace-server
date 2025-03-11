@@ -26,20 +26,23 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// The upload result parameters.
+/// </summary>
 public class UploadResultDto
 {
     /// <summary>
-    /// Specifies if the operation is successful or not
+    /// Specifies if the operation is successful or not.
     /// </summary>
     public bool Success { get; set; }
 
     /// <summary>
-    /// Data
+    /// The data of the upload result.
     /// </summary>
     public object Data { get; set; }
 
     /// <summary>
-    /// Message
+    /// The message of the upload result.
     /// </summary>
     public string Message { get; set; }
 }

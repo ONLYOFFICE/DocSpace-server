@@ -49,7 +49,7 @@ public class FilesControllerInternal(
         hybridCache)
 {
     /// <summary>
-    /// Get the list of actions performed on the file with the specified identifier
+    /// Get the list of actions performed on the file with the specified identifier.
     /// </summary>
     /// <short>
     /// Get file history
@@ -136,7 +136,8 @@ public abstract class FilesController<T>(
     }
 
     /// <summary>
-    /// Returns a link to download a file with the ID specified in the request.
+    /// Returns a pre-signed URL to download a file with the specified ID.
+    /// This temporary link allows secure access to the file.
     /// </summary>
     /// <short>Get file download link</short>
     /// <path>api/2.0/files/file/{fileId}/presigneduri</path>
@@ -149,7 +150,7 @@ public abstract class FilesController<T>(
     }
 
     /// <summary>
-    /// Checks if the PDF file is form or not.
+    /// Checks if the PDF file is a form or not.
     /// </summary>
     /// <short>Check the PDF file</short>
     /// <path>api/2.0/files/file/{fileId}/isformpdf</path>
@@ -218,7 +219,7 @@ public abstract class FilesController<T>(
     /// <summary>
     /// Creates a text (.txt) file in the selected folder with the title and contents specified in the request.
     /// </summary>
-    /// <short>Create a txt file</short>
+    /// <short>Create a text file</short>
     /// <path>api/2.0/files/{folderId}/text</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
@@ -248,9 +249,13 @@ public abstract class FilesController<T>(
     }
 
     /// <summary>
-    /// Gets fill result
+    /// Retrieve the result of a form-filling session.
     /// </summary>
+    /// <short>
+    /// Get form-filling result.
+    /// </short>
     /// <path>api/2.0/files/file/fillresult</path>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Ok", typeof(FillingFormResultDto<int>))]
     [AllowAnonymous]
@@ -438,6 +443,7 @@ public abstract class FilesController<T>(
     /// </summary>
     /// <short>Get primary external link</short>
     /// <path>api/2.0/files/file/{id}/link</path>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File security information", typeof(FileShareDto))]
     [SwaggerResponse(404, "Not Found")]
@@ -451,7 +457,7 @@ public abstract class FilesController<T>(
     }
 
     /// <summary>
-    /// Sets order of a file with ID specified in the request
+    /// Sets order of the file with ID specified in the request.
     /// </summary>
     /// <path>api/2.0/files/{fileId}/order</path>
     [Tags("Files / Files")]
@@ -465,8 +471,11 @@ public abstract class FilesController<T>(
     }
 
     /// <summary>
-    /// Sets order
+    /// Sets order of the files.
     /// </summary>
+    /// <short>
+    /// Set files order
+    /// </short>
     /// <path>api/2.0/files/order</path>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
     [Tags("Files / Files")]
@@ -518,7 +527,7 @@ public abstract class FilesController<T>(
     }
 
     /// <summary>
-    /// Saves a file with the identifier specified in the request as a PDF document
+    /// Saves a file with the identifier specified in the request as a PDF document.
     /// </summary>
     /// <short>Save as pdf</short>
     /// <path>api/2.0/files/file/{id}/saveaspdf</path>

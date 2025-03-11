@@ -27,49 +27,49 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Logo request parameters
+/// The logo request parameters.
 /// </summary>
 public class LogoRequest
 {
     /// <summary>
-    /// The path to the temporary image file
+    /// The path to the temporary image file.
     /// </summary>
     public string TmpFile { get; set; }
 
     /// <summary>
-    /// The X coordinate of the rectangle starting point
+    /// The X coordinate of the rectangle starting point.
     /// </summary>
     public int X { get; set; }
 
     /// <summary>
-    /// The Y coordinate of the rectangle starting point
+    /// The Y coordinate of the rectangle starting point.
     /// </summary>
     public int Y { get; set; }
 
     /// <summary>
-    /// The rectangle width
+    /// The rectangle width.
     /// </summary>
     public uint Width { get; set; }
 
     /// <summary>
-    /// The rectangle height
+    /// The rectangle height.
     /// </summary>
     public uint Height { get; set; }
 }
 
 /// <summary>
-/// Logo request parameters
+/// The logo request parameters.
 /// </summary>
 public class LogoRequest<T>
 {
     /// <summary>
-    /// Room Id
+    /// The room Id.
     /// </summary>
     [FromRoute(Name = "id")]
     public T Id { get; set; }
 
     /// <summary>
-    /// Logo
+    /// The logo request.
     /// </summary>
     [FromBody]
     public LogoRequest Logo { get; set; }

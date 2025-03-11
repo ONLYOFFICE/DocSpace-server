@@ -45,7 +45,7 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
-    /// Creates a session to upload large files in multiple chunks to the folder with the ID specified in the request.
+    /// Creates the session to upload large files in multiple chunks to the folder with the ID specified in the request.
     /// </summary>
     /// <short>Chunked upload</short>
     /// <remarks>
@@ -79,7 +79,7 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     }
 
     /// <summary>
-    /// Creates a session to edit the existing file with multiple chunks (needed for WebDAV).
+    /// Creates the session to edit the existing file with multiple chunks (needed for WebDAV).
     /// </summary>
     /// <short>Create the editing session</short>
     /// <![CDATA[
@@ -107,6 +107,7 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// Checks upload
     /// </summary>
     /// <path>api/2.0/files/{folderId}/upload/check</path>
+    /// <collection>list</collection>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Inserted file", typeof(List<string>))]
     [HttpPost("{folderId}/upload/check")]
@@ -116,9 +117,9 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     }
 
     /// <summary>
-    /// Inserts a file specified in the request to the selected folder by single file uploading.
+    /// Inserts the file specified in the request to the selected folder by single file uploading.
     /// </summary>
-    /// <short>Insert a file</short>
+    /// <short>Insert the file</short>
     /// <path>api/2.0/files/{folderId}/insert</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Inserted file", typeof(FileDto<int>))]
@@ -132,7 +133,7 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
 
 
     /// <summary>
-    /// Uploads a file specified in the request to the selected folder by single file uploading or standart multipart/form-data method.
+    /// Uploads the file specified in the request to the selected folder by single file uploading or standart multipart/form-data method.
     /// </summary>
     /// <short>Upload a file</short>
     /// <remarks>
@@ -162,9 +163,9 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
-    /// Inserts a file specified in the request to the "Common" section by single file uploading.
+    /// Inserts the file specified in the request to the "Common" section by single file uploading.
     /// </summary>
-    /// <short>Insert a file to the "Common" section</short>
+    /// <short>Insert the file to the "Common" section</short>
     /// <path>api/2.0/files/@common/insert</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
@@ -178,9 +179,9 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     }
 
     /// <summary>
-    /// Inserts a file specified in the request to the "My documents" section by single file uploading.
+    /// Inserts the file specified in the request to the "My documents" section by single file uploading.
     /// </summary>
-    /// <short>Insert a file to the "My documents" section</short>
+    /// <short>Insert the file to the "My documents" section</short>
     /// <path>api/2.0/files/@my/insert</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Inserted file", typeof(FileDto<int>))]
@@ -193,9 +194,9 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     }
 
     /// <summary>
-    /// Uploads a file specified in the request to the "Common" section by single file uploading or standart multipart/form-data method.
+    /// Uploads the file specified in the request to the "Common" section by single file uploading or standart multipart/form-data method.
     /// </summary>
-    /// <short>Upload a file to the "Common" section</short>
+    /// <short>Upload the file to the "Common" section</short>
     /// <remarks>
     /// <![CDATA[
     ///  You can upload files in two different ways:
@@ -219,9 +220,9 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     }
 
     /// <summary>
-    /// Uploads a file specified in the request to the "My documents" section by single file uploading or standart multipart/form-data method.
+    /// Uploads the file specified in the request to the "My documents" section by single file uploading or standart multipart/form-data method.
     /// </summary>
-    /// <short>Upload a file to the "My documents" section</short>
+    /// <short>Upload the file to the "My documents" section</short>
     /// <remarks>
     /// <![CDATA[
     ///  You can upload files in two different ways:

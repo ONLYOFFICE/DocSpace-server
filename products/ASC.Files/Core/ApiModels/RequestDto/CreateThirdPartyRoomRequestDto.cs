@@ -27,75 +27,75 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Parameters for creating a room
+/// The parameters for creating the third-party room.
 /// </summary>
 public class CreateThirdPartyRoom
 {
     /// <summary>
-    /// Create as new folder
+    /// Specifies whether to create a third-party room as the new folder or not.
     /// </summary>
     public bool CreateAsNewFolder { get; set; }
 
     /// <summary>
-    /// Room name
+    /// The third-party room name to be created.
     /// </summary>
     public string Title { get; set; }
 
     /// <summary>
-    /// Room type
+    /// The third-party room type to be created.
     /// </summary>
     public RoomType RoomType { get; set; }
 
     /// <summary>
-    /// Private
+    /// Specifies whether to create the private third-party room or not.
     /// </summary>
     public bool Private { get; set; }
 
     /// <summary>
-    /// Indexing
+    /// Specifies whether to create the third-party room with indexing.
     /// </summary>
     public bool Indexing { get; set; }
     
     /// <summary>
-    /// Deny download
+    /// Specifies whether to deny download or not for the third-party room.
     /// </summary>
     public bool DenyDownload { get; set; }
     
     /// <summary>
-    /// Color
+    /// The color of the third-party room.
     /// </summary>
     public string Color { get; set; }
 
     /// <summary>
-    /// Cover
+    /// The cover of the third-party room.
     /// </summary>
     public string Cover { get; set; }
 
     /// <summary>
-    /// Tags
+    /// The list of tags of the third-party room.
     /// </summary>
     public IEnumerable<string> Tags { get; set; }
 
     /// <summary>
-    /// Logo
+    /// The logo request of the third-party room.
     /// </summary>
     public LogoRequest Logo { get; set; }
 }
 
 
 /// <summary>
-/// Request parameters for creating a room
+/// The request parameters for creating the third-party room.
 /// </summary>
 public class CreateThirdPartyRoomRequestDto
 {
     /// <summary>
-    /// ID of the folder in the third-party storage in which the contents of the room will be stored
+    /// The ID of the folder in the third-party storage in which the contents of the room will be stored.
     /// </summary>
     [FromRoute(Name = "id")]
     public string Id { get; set; }
 
     /// <summary>
-    /// ThirdParty room
+    /// The third-party room information.
     /// </summary>
     [FromBody]
     public CreateThirdPartyRoom Room { get; set; }

@@ -27,77 +27,77 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Parameters for updating a room
+/// The parameters for updating the room.
 /// </summary>
 public class UpdateRoomRequest
 {
     /// <summary>
-    /// Room name
+    /// The room title to update.
     /// </summary>
     [StringLength(170)]
     public string Title { get; set; }
 
     /// <summary>
-    /// Room quota
+    /// The room quota to update.
     /// </summary>
     public long? Quota { get; set; }
     
     /// <summary>
-    /// Indexing
+    /// Specifies the indexing of the room to update.
     /// </summary>
     public bool? Indexing { get; set; }
     
     /// <summary>
-    /// Room quota
+    /// Specifies whether to deny the download of the room or not.
     /// </summary>
     public bool? DenyDownload { get; set; }
 
     /// <summary>
-    /// Lifetime
+    /// The room data lifetime information.
     /// </summary>
     public RoomDataLifetimeDto Lifetime { get; set; }
 
     /// <summary>
-    /// Watermark settings
+    /// The watermark settings.
     /// </summary>
     public WatermarkRequestDto Watermark { get; set; }
 
     /// <summary>
-    /// Logo
+    /// The request logo.
     /// </summary>
     public LogoRequest Logo { get; set; }
 
     /// <summary>
-    /// List of tags
+    /// The list of tags.
     /// </summary>
     public IEnumerable<string> Tags { get; set; }
     
     /// <summary>
-    /// Color
+    /// The color of the room to update.
     /// </summary>
     [StringLength(6)]
     public string Color { get; set; }
 
     /// <summary>
-    /// Cover
+    /// The cover of the room to update.
     /// </summary>
     [StringLength(50)]
     public string Cover { get; set; }
 }
 
 /// <summary>
-/// Request parameters for updating a room
+/// The request parameters for updating the room.
 /// </summary>
 public class UpdateRoomRequestDto<T>
 {
     /// <summary>
-    /// Room ID
+    /// The room ID.
     /// </summary>
     [FromRoute(Name = "id")]
     public T Id { get; set; }
 
     /// <summary>
-    /// Update room
+    /// The update room request parameters.
     /// </summary>
     [FromBody]
     public UpdateRoomRequest UpdateRoom { get; set; }

@@ -27,18 +27,18 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// 
+/// The toggle file favorite request parameters.
 /// </summary>
 public class ToggleFileFavoriteRequestDto<T>
 {
     /// <summary>
-    /// File ID
+    /// The file ID of the toggle file favorite.
     /// </summary>
     [FromRoute(Name = "fileId")]
     public T FileId { get; set; }
 
     /// <summary>
-    /// Specifies if this file is marked as favorite or not
+    /// Specifies if this file is marked as favorite or not.
     /// </summary>
     [FromQuery(Name = "favorite")]
     public bool Favorite { get; set; }

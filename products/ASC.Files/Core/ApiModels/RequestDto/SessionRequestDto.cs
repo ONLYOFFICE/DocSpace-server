@@ -27,52 +27,54 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Session parameters
+/// The session request parameters.
 /// </summary>
 public class SessionRequest
 {
     /// <summary>
-    /// File name
+    /// The file name of the session.
     /// </summary>
     public string FileName { get; set; }
 
     /// <summary>
-    /// File length in bytes
+    /// The file length in bytes of the session.
     /// </summary>
     public long FileSize { get; set; }
 
     /// <summary>
-    /// Relative path to the folder
+    /// The relative path to the folder of the session.
     /// </summary>
     public string RelativePath { get; set; }
 
     /// <summary>
-    /// Creation time
+    /// The creation time of the session.
     /// </summary>
     public ApiDateTime CreateOn { get; set; }
 
     /// <summary>
-    /// Specifies whether to encrypt a file or not
+    /// Specifies whether to encrypt a file or not.
     /// </summary>
     public bool Encrypted { get; set; }
 
     /// <summary>
-    /// Create new if exists
+    /// Create new if exists.
     /// </summary>
     public bool CreateNewIfExist { get; set; }
 }
 
-
+/// <summary>
+/// The generic session request parameters.
+/// </summary>
 public class SessionRequestDto<T>
 {
     /// <summary>
-    /// Folder ID
+    /// The folder ID of the session.
     /// </summary>
     [FromRoute(Name = "folderId")]
     public T FolderId { get; set; }
 
     /// <summary>
-    /// Session
+    /// The session request.
     /// </summary>
     [FromBody]
     public SessionRequest Session {  get; set; }

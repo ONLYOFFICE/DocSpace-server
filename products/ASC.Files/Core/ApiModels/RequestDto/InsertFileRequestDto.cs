@@ -27,27 +27,27 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for inserting a file
+/// The request parameters for inserting the file.
 /// </summary>
 public class InsertFileRequestDto : IModelWithFile, IDisposable
 {
     /// <summary>
-    /// File
+    /// The file to be inserted.
     /// </summary>
     public IFormFile File { get; set; }
 
     /// <summary>
-    /// File name
+    /// The file title to be inserted.
     /// </summary>
     public string Title { get; set; }
 
     /// <summary>
-    /// Specifies whether to create a new file if it already exists or not
+    /// Specifies whether to create a new file if it already exists or not.
     /// </summary>
     public bool CreateNewIfExist { get; set; }
 
     /// <summary>
-    /// Specifies whether to keep the file converting status or not
+    /// Specifies whether to keep the file converting status or not.
     /// </summary>
     public bool KeepConvertStatus { get; set; }
 
@@ -56,7 +56,7 @@ public class InsertFileRequestDto : IModelWithFile, IDisposable
     private bool _disposedValue;
 
     /// <summary>
-    /// Request input stream
+    /// The request input stream.
     /// </summary>
     public Stream Stream
     {
@@ -92,18 +92,18 @@ public class InsertFileRequestDto : IModelWithFile, IDisposable
 }
 
 /// <summary>
-/// 
+/// The generic request parameters for inserting the file.
 /// </summary>
 public class InsertWithFileRequestDto<T>
 {
     /// <summary>
-    /// Folder ID
+    /// The folder ID of the file to be inserted.
     /// </summary>
     [FromRoute(Name = "folderId")]
     public T FolderId { get; set; }
 
     /// <summary>
-    /// Insert file
+    /// The file information to be inserted.
     /// </summary>
     [FromForm]
     [ModelBinder(BinderType = typeof(InsertFileModelBinder))]

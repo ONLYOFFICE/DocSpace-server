@@ -42,7 +42,7 @@ public enum EditorType
 public class ActionLinkConfig
 {
     /// <summary>
-    /// The information about the comment in the document that will be scrolled to
+    /// The information about the comment in the document that will be scrolled to.
     /// </summary>
     [JsonPropertyName("action")]
     public ActionConfig Action { get; set; }
@@ -55,14 +55,14 @@ public class ActionLinkConfig
     public class ActionConfig
     {
         /// <summary>
-    /// Comment data
-    /// </summary>
+        /// The comment data that will be scrolled to.
+        /// </summary>
         [JsonPropertyName("data")]
         public string Data { get; set; }
 
         /// <summary>
-    /// Action type
-    /// </summary>
+        /// The action type of the action link.
+        /// </summary>
         [JsonPropertyName("type")]
         public string Type { get; set; }
     }
@@ -71,17 +71,17 @@ public class ActionLinkConfig
 public class CoEditingConfig
 {
     /// <summary>
-    /// Change
+    /// Specifies if the co editing configuration can be changed.
     /// </summary>
     public bool Change { get; set; }
 
     /// <summary>
-    /// Fast
+    /// Specifies if the co editing configuration is fast.
     /// </summary>
     public bool Fast { get; init; }
 
     /// <summary>
-    /// Mode
+    /// The co editing configuration mode.
     /// </summary>
     public CoEditingConfigMode Mode
     {
@@ -506,62 +506,62 @@ public class InfoConfig<T>(
 public class PermissionsConfig
 {
     /// <summary>
-    /// Change history
+    /// The change history of the permissions configuration.
     /// </summary>
     public bool ChangeHistory { get; set; }
 
     /// <summary>
-    /// Comment
+    /// Specifies the permissions to comment.
     /// </summary>
     public bool Comment { get; set; } = true;
 
     /// <summary>
-    /// Chat
+    /// Specifies the permissions to chat.
     /// </summary>
     public bool Chat { get; set; } = true;
 
     /// <summary>
-    /// Download
+    /// Specifies the permissions to download.
     /// </summary>
     public bool Download { get; set; } = true;
 
     /// <summary>
-    /// Edit
+    /// Specifies the permissions to edit.
     /// </summary>
     public bool Edit { get; set; } = true;
 
     /// <summary>
-    /// FillForms
+    /// Specifies the permissions to fill forms.
     /// </summary>
     public bool FillForms { get; set; } = true;
 
     /// <summary>
-    /// ModifyFilter
+    /// Specifies the permissions to modify filter.
     /// </summary>
     public bool ModifyFilter { get; set; } = true;
 
     /// <summary>
-    /// Protect
+    /// Specifies the permissions to protect.
     /// </summary>
     public bool Protect { get; set; } = true;
 
     /// <summary>
-    /// Print
+    /// Specifies the permissions to print.
     /// </summary>
     public bool Print { get; set; } = true;
 
     /// <summary>
-    /// Rename
+    /// Specifies the permissions to rename.
     /// </summary>
     public bool Rename { get; set; }
 
     /// <summary>
-    /// Review
+    /// Specifies the permissions to review.
     /// </summary>
     public bool Review { get; set; } = true;
 
     /// <summary>
-    /// Copy
+    /// Specifies the permissions to copy.
     /// </summary>
     public bool Copy { get; set; } = true;
 }
@@ -627,18 +627,33 @@ public class WatermarkOnDraw(double widthInPixels, double heightInPixels, string
     [JsonPropertyName("height")]
     public double Height { get; init; } = heightInPixels == 0 ? 100 : heightInPixels / DotsPerMm;
 
+    /// <summary>
+    /// Defines the watermark margins measured in millimeters.
+    /// </summary>
     [JsonPropertyName("margins")]
     public int[] Margins { get; init; } = [0, 0, 0, 0];
 
+    /// <summary>
+    /// Defines the watermark fill color.
+    /// </summary>
     [JsonPropertyName("fill")]
     public string Fill { get; init; } = fill;
 
+    /// <summary>
+    /// Defines the watermark rotation number.
+    /// </summary>
     [JsonPropertyName("rotate")]
     public int Rotate { get; init; } = rotate;
 
+    /// <summary>
+    /// Defines the watermark transparency percentage.
+    /// </summary>
     [JsonPropertyName("transparent")]
     public double Transparent { get; init; } = 0.4;
 
+    /// <summary>
+    /// The list of paragraphs of the watermark.
+    /// </summary>
     [JsonPropertyName("paragraphs")]
     public List<Paragraph> Paragraphs { get; init; } = paragraphs;
 }
@@ -650,9 +665,16 @@ public class Paragraph
         Runs = runs;
         Align = 2;
     }
+
+    /// <summary>
+    /// The align of the paragraph.
+    /// </summary>
     [JsonPropertyName("align")]
     public int Align { get; set; }
 
+    /// <summary>
+    /// The list of text runs of the paragraph.
+    /// </summary>
     [JsonPropertyName("runs")]
     public List<Run> Runs { get; set; }
 }
@@ -660,12 +682,21 @@ public class Run(string text, bool usedInHash = true)
 {
     internal bool UsedInHash => usedInHash;
 
+    /// <summary>
+    /// The fill color of the text run in RGB format.
+    /// </summary>
     [JsonPropertyName("fill")]
     public int[] Fill { get; set; } = [124, 124, 124];
 
+    /// <summary>
+    /// The fill color of the text run in RGB format.
+    /// </summary>
     [JsonPropertyName("text")]
     public string Text { get; set; } = text;
 
+    /// <summary>
+    /// The font size of the text run in points.
+    /// </summary>
     [JsonPropertyName("font-size")]
     public string FontSize { get; set; } = "26";
 }
@@ -673,43 +704,43 @@ public class Run(string text, bool usedInHash = true)
 public class FileReference
 {
     /// <summary>
-    /// File reference data
+    /// The file reference data.
     /// </summary>
     public FileReferenceData ReferenceData { get; set; }
 
     /// <summary>
-    /// Error
+    /// The error message of the file reference.
     /// </summary>
     public string Error { get; set; }
 
     /// <summary>
-    /// Path
+    /// The path of the file reference.
     /// </summary>
     public string Path { get; set; }
 
     /// <summary>
-    /// URL
+    /// The URL of the file reference.
     /// </summary>
     [Url]
     public string Url { get; set; }
 
     /// <summary>
-    /// File type
+    /// The file type of the reference.
     /// </summary>
     public string FileType { get; set; }
 
     /// <summary>
-    /// Key
+    /// The file reference key.
     /// </summary>
     public string Key { get; set; }
 
     /// <summary>
-    /// Link
+    /// The file reference link.
     /// </summary>
     public string Link { get; set; }
 
     /// <summary>
-    /// Token
+    /// The file reference token.
     /// </summary>
     public string Token { get; set; }
 }
@@ -717,12 +748,12 @@ public class FileReference
 public class FileReferenceData
 {
     /// <summary>
-    /// File key
+    /// The file key of the reference.
     /// </summary>
     public string FileKey { get; set; }
 
     /// <summary>
-    /// Instance ID
+    /// The file reference instance ID.
     /// </summary>
     public string InstanceId { get; set; }
 }
@@ -884,27 +915,27 @@ public class CustomizationConfig<T>(
 public class EmbeddedConfig(BaseCommonLinkUtility baseCommonLinkUtility, FilesLinkUtility filesLinkUtility)
 {
     /// <summary>
-    /// Embed url
+    /// The embed url.
     /// </summary>
     public string EmbedUrl => ShareLinkParam != null && ShareLinkParam.Contains(FilesLinkUtility.ShareKey, StringComparison.Ordinal) ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=embedded" + ShareLinkParam) : null;
 
     /// <summary>
-    /// Save url
+    /// The save url of the embed.
     /// </summary>
     public string SaveUrl => baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FileHandlerPath + "?" + FilesLinkUtility.Action + "=download" + ShareLinkParam);
 
     /// <summary>
-    /// Share link param
+    /// The share link parameter of the embed.
     /// </summary>
     public string ShareLinkParam { get; set; }
 
     /// <summary>
-    /// Share url
+    /// The share url of the embed.
     /// </summary>
     public string ShareUrl => ShareLinkParam != null && ShareLinkParam.Contains(FilesLinkUtility.ShareKey) ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=view" + ShareLinkParam) : null;
 
     /// <summary>
-    /// Toolbar docked
+    /// The toolbar dock type of the embed.
     /// </summary>
     public string ToolbarDocked => "top";
 }
@@ -912,17 +943,17 @@ public class EmbeddedConfig(BaseCommonLinkUtility baseCommonLinkUtility, FilesLi
 public class EncryptionKeysConfig
 {
     /// <summary>
-    /// Crypto engine id
+    /// The crypto engine id of the encryption key.
     /// </summary>
     public string CryptoEngineId => "{FFF0E1EB-13DB-4678-B67D-FF0A41DBBCEF}";
 
     /// <summary>
-    /// Private key enc
+    /// The private key enc of the encryption key.
     /// </summary>
     public string PrivateKeyEnc { get; set; }
 
     /// <summary>
-    /// Public key
+    /// The public key of the encryption key.
     /// </summary>
     public string PublicKey { get; set; }
 }
@@ -930,12 +961,12 @@ public class EncryptionKeysConfig
 public class FeedbackConfig
 {
     /// <summary>
-    /// Url
+    /// The feedback url.
     /// </summary>
     public string Url { get; set; }
 
     /// <summary>
-    /// Visible
+    /// Specifies if feedback is visible or not.
     /// </summary>
     public bool Visible { get => true; }
 }
@@ -943,7 +974,7 @@ public class FeedbackConfig
 public class GobackConfig
 {
     /// <summary>
-    /// Url
+    /// The go back url.
     /// </summary>
     public string Url { get; set; }
 }
@@ -1031,17 +1062,17 @@ public class PluginsConfig
 public class RecentConfig
 {
     /// <summary>
-    /// Folder
+    /// The recent folder.
     /// </summary>
     public string Folder { get; set; }
 
     /// <summary>
-    /// Title
+    /// The recent title.
     /// </summary>
     public string Title { get; set; }
 
     /// <summary>
-    /// Url
+    /// The recent url.
     /// </summary>
     [Url]
     public string Url { get; set; }
@@ -1050,17 +1081,17 @@ public class RecentConfig
 public class TemplatesConfig
 {
     /// <summary>
-    /// Image
+    /// The image of the template.
     /// </summary>
     public string Image { get; set; }
 
     /// <summary>
-    /// Title
+    /// The title of the template.
     /// </summary>
     public string Title { get; set; }
 
     /// <summary>
-    /// Url
+    /// The url of the template.
     /// </summary>
     [Url]
     public string Url { get; set; }
@@ -1069,17 +1100,17 @@ public class TemplatesConfig
 public class UserConfig
 {
     /// <summary>
-    /// Id
+    /// The user Id.
     /// </summary>
     public string Id { get; set; }
 
     /// <summary>
-    /// Name
+    /// The user name.
     /// </summary>
     public string Name { get; set; }
 
     /// <summary>
-    /// Image
+    /// The user profile image.
     /// </summary>
     public string Image { get; set; }
 }
