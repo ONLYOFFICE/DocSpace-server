@@ -445,4 +445,23 @@ public class FileIndexChangedInterpreter : FileActionInterpreterBase
     }
 }
 
+public class FileCustomFilterInterpreter : FileActionInterpreterBase
+{
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
+    {
+        var desc = GetAdditionalDescription(description);
+        var accessibility = GetAccessibility(serviceProvider, description[0]);
+        var viewUrl = GetViewUrl(serviceProvider, target);
+
+        return new ValueTask<HistoryData>(new FileData(
+            target,
+            description[0],
+            desc.ParentId,
+            desc.ParentTitle,
+            desc.ParentType,
+            accessibility: accessibility,
+            viewUrl: viewUrl));
+    }
+}
+
 #endregion
