@@ -193,8 +193,10 @@ public class FileDtoHelper(
         ExternalShare externalShare,
         BreadCrumbsManager breadCrumbsManager,
         FileSharing fileSharing,
-        FileChecker fileChecker)
-    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime) 
+        FileChecker fileChecker,
+        SecurityContext securityContext,
+        UserManager userManager)
+    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory) 
 {
     private readonly ApiDateTimeHelper _apiDateTimeHelper = apiDateTimeHelper;
 

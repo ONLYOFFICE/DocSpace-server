@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.Data;
+
 using static ASC.Files.Core.Security.FileSecurity;
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
@@ -200,7 +202,10 @@ public class FileEntryDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
     FileSecurity fileSecurity,
     GlobalFolderHelper globalFolderHelper,
     FilesSettingsHelper filesSettingsHelper,
-    FileDateTime fileDateTime)
+    FileDateTime fileDateTime,
+    SecurityContext securityContext,
+    UserManager userManager,
+    IDaoFactory daoFactory)
 {
     protected readonly FileSecurity _fileSecurity = fileSecurity;
     protected readonly GlobalFolderHelper _globalFolderHelper = globalFolderHelper;
@@ -255,6 +260,18 @@ public class FileEntryDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
     private async ValueTask<DateTime> GetDeletedPermanentlyOn<T>(FileEntry<T> entry)
     {
+        var isGuest = await userManager.IsGuestAsync(securityContext.CurrentAccount.ID);
+        if (isGuest) 
+        {
+            var folderDao = daoFactory.GetFolderDao<T>();
+            var my = await folderDao.GetFolderIDUserAsync(false, securityContext.CurrentAccount.ID);
+
+            if (Equals(entry.FolderIdDisplay, my))
+            {
+                return fileDateTime.GetModifiedOnWithAutoCleanUp(entry.ModifiedOn, DateToAutoCleanUp.OneMonth);
+            }
+        }
+
         if (entry.ModifiedOn.Equals(default) || !Equals(entry.FolderIdDisplay, await _globalFolderHelper.FolderTrashAsync))
         {
             return default;
