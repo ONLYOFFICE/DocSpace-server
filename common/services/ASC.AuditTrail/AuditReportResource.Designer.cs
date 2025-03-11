@@ -538,6 +538,24 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to File: {0}. Custom filter disabled.
+        /// </summary>
+        public static string FileCustomFilterDisabled {
+            get {
+                return ResourceManager.GetString("FileCustomFilterDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to File: {0}. Custom filter enabled.
+        /// </summary>
+        public static string FileCustomFilterEnabled {
+            get {
+                return ResourceManager.GetString("FileCustomFilterEnabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to File Deleted: {0}.
         /// </summary>
         public static string FileDeleted {

@@ -1973,6 +1973,8 @@ public class FileStorageService //: IFileStorageService
 
                 await tagDao.SaveTagsAsync(tagCustomFilter);
             }
+
+            await filesMessageService.SendAsync(MessageAction.FileCustomFilterEnabled, file, file.Title);
         }
         else
         {
@@ -1988,6 +1990,8 @@ public class FileStorageService //: IFileStorageService
                     await documentServiceHelper.DropUserAsync(docKey, usersDrop, file.Id);
                 }
             }
+
+            await filesMessageService.SendAsync(MessageAction.FileCustomFilterDisabled, file, file.Title);
         }
 
         await entryStatusManager.SetFileStatusAsync(file);
