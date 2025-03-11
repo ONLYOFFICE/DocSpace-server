@@ -74,7 +74,8 @@ public class UserController(
     AuditEventsRepository auditEventsRepository,
     EmailValidationKeyModelHelper emailValidationKeyModelHelper,
     CountPaidUserStatistic countPaidUserStatistic,
-    UserSocketManager socketManager)
+    UserSocketManager socketManager,
+    IDaoFactory daoFactory)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
 {
     /// <summary>
@@ -1250,6 +1251,13 @@ public class UserController(
         result.Theme = (await settingsManager.LoadForCurrentUserAsync<DarkThemeSettings>()).Theme;
 
         result.LoginEventId = cookieStorage.GetLoginEventIdFromCookie(cookiesManager.GetCookies(CookiesType.AuthKey));
+
+        if (result.IsVisitor) 
+        {
+            var folderDao = daoFactory.GetFolderDao<int>();
+            var myId = await folderDao.GetFolderIDUserAsync(false, securityContext.CurrentAccount.ID);
+            result.HasPersonalFolder = myId != 0;
+        }
 
         return result;
     }

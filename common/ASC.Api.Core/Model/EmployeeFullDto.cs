@@ -213,6 +213,10 @@ public class EmployeeFullDto : EmployeeDto
     /// </summary>
     public ApiDateTime RegistrationDate { get; set; }
 
+    /// <summary>
+    /// Specifies if the guest has an personal folder or not
+    /// </summary>
+    public bool HasPersonalFolder { get; set; }
 }
 [Scope]
 public class EmployeeFullDtoHelper(
