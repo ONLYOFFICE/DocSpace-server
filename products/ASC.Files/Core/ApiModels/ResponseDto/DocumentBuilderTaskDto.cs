@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.Services.DocumentBuilderService;
+
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 public class DocumentBuilderTaskDto
@@ -68,7 +70,7 @@ public class DocumentBuilderTaskDto
     /// </summary>
     public string ResultFileUrl { get; set; }
 
-    public static DocumentBuilderTaskDto Get(DistributedTaskProgress task)
+    public static DocumentBuilderTaskDto Get<TId, TData>(DocumentBuilderTask<TId, TData> task)
     {
         return task == null
             ? null
@@ -79,9 +81,9 @@ public class DocumentBuilderTaskDto
                 Percentage = (int)task.Percentage,
                 IsCompleted = task.IsCompleted,
                 Status = task.Status,
-                ResultFileId = task["ResultFileId"],
-                ResultFileName = task["ResultFileName"],
-                ResultFileUrl = task["ResultFileUrl"]
+                ResultFileId = task.ResultFileId,
+                ResultFileName = task.ResultFileName,
+                ResultFileUrl = task.ResultFileUrl
             };
     }
 }

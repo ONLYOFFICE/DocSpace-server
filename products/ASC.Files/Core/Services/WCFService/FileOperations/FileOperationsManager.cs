@@ -46,28 +46,28 @@ public class FileOperationsManagerHolder<T> where T : FileOperation
     public async Task<List<FileOperationResult>> GetOperationResults(Guid userId)
     {
         var operations = (await _tasks.GetAllTasks())
-            .Where(t => new Guid(t[FileOperation.Owner]) == userId)
+            .Where(t => t.Owner == userId)
             .ToList();
         
         foreach (var o in operations.Where(o => o.Status > DistributedTaskStatus.Running))
         {
-            o[FileOperation.Progress] = 100;
+            o.Progress = 100;
 
             await _tasks.DequeueTask(o.Id);
         }
 
         var results = operations
-            .Where(o => o[FileOperation.Hold] || o[FileOperation.Progress] != 100)
+            .Where(o => o.Hold || o.Progress != 100)
             .Select(o => new FileOperationResult
             {
                 Id = o.Id,
-                OperationType = (FileOperationType)o[FileOperation.OpType],
-                Source = o[FileOperation.Src],
-                Progress = o[FileOperation.Progress],
-                Processed = Convert.ToString(o[FileOperation.Process]),
-                Result = o[FileOperation.Res],
-                Error = o[FileOperation.Err],
-                Finished = o[FileOperation.Finish]
+                OperationType = o.FileOperationType,
+                Source = o.Src,
+                Progress = o.Progress,
+                Processed = Convert.ToString(o.Process),
+                Result = o.Result,
+                Error = o.Err,
+                Finished = o.Finish
             })
             .ToList();
 
@@ -77,7 +77,7 @@ public class FileOperationsManagerHolder<T> where T : FileOperation
     public async Task<List<FileOperationResult>> CancelOperations(Guid userId, string id = null)
     {
         var operations = (await _tasks.GetAllTasks())
-            .Where(t => (string.IsNullOrEmpty(id) || t.Id == id) && new Guid(t[FileOperation.Owner]) == userId);
+            .Where(t => (string.IsNullOrEmpty(id) || t.Id == id) && t.Owner == userId);
 
         foreach (var o in operations)
         {
@@ -100,8 +100,8 @@ public class FileOperationsManagerHolder<T> where T : FileOperation
     public async Task CheckRunning(Guid userId, FileOperationType fileOperationType)
     {
         var operations = (await _tasks.GetAllTasks())
-            .Where(t => new Guid(t[FileOperation.Owner]) == userId)
-            .Where(t => (FileOperationType)t[FileOperation.OpType] == fileOperationType);
+            .Where(t => t.Owner == userId)
+            .Where(t => t.FileOperationType == fileOperationType);
         
         if (operations.Any(o => o.Status <= DistributedTaskStatus.Running))
         {
