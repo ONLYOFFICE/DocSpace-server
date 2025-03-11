@@ -417,7 +417,9 @@ public class DIHelper
         {
             if (service.IsSubclassOf(typeof(DistributedTask)))
             {
-                _serviceCollection.TryAddTransient(typeof(DistributedTaskQueue<>).MakeGenericType(service));
+                var mi = typeof(DIHelper).GetMethod("RegisterDistributedTask");
+                var fooRef = mi.MakeGenericMethod(service);
+                fooRef.Invoke(this, null);
             }
             
             c.TryAdd(_serviceCollection, service, implementation);
@@ -427,5 +429,15 @@ public class DIHelper
         }
 
         return false;
+    }
+
+    public void RegisterDistributedTask<T>() where T : DistributedTask
+    {
+        _serviceCollection.TryAddSingleton(Channel.CreateUnbounded<T>());
+        _serviceCollection.TryAddSingleton(svc => svc.GetRequiredService<Channel<T>>().Reader);
+        _serviceCollection.TryAddSingleton(svc => svc.GetRequiredService<Channel<T>>().Writer);
+        _serviceCollection.TryAddTransient<DistributedTaskQueue<T>>();
+        _serviceCollection.TryAddSingleton<DistributedTaskQueueService<T>>();
+        _serviceCollection.AddHostedService<DistributedTaskQueueService<T>>();
     }
 }

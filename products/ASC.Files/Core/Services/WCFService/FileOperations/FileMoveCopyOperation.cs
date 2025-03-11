@@ -37,12 +37,13 @@ public record FileMoveCopyOperationData<T> : FileOperationData<T>
     public FileMoveCopyOperationData(IEnumerable<T> Folders,
         IEnumerable<T> Files,
         int TenantId,
+        Guid UserId,
         JsonElement DestFolderId,
         bool Copy,
         FileConflictResolveType ResolveType,
         bool HoldResult = true,
         IDictionary<string, string> Headers = null,
-        ExternalSessionSnapshot SessionSnapshot = null) : base(Folders, Files, TenantId, Headers, SessionSnapshot, HoldResult)
+        ExternalSessionSnapshot SessionSnapshot = null) : base(Folders, Files, TenantId, UserId, Headers, SessionSnapshot, HoldResult)
     {
         this.DestFolderId = DestFolderId.ToString();
         this.Copy = Copy;

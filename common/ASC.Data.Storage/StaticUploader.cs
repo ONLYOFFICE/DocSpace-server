@@ -37,8 +37,8 @@ public class StaticUploader(
     IDistributedTaskQueueFactory queueFactory,
     IDistributedLockProvider distributedLockProvider)
 {
-    protected readonly DistributedTaskQueue<UploadOperationProgress> _queue = queueFactory.CreateQueue<UploadOperationProgress>(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
-    public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "static_upload"; 
+    private const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "static_upload";
+    private readonly DistributedTaskQueue<UploadOperationProgress> _queue = queueFactory.CreateQueue<UploadOperationProgress>();
     private static readonly CancellationTokenSource _tokenSource;
     private static readonly object _locker;
 
@@ -152,12 +152,13 @@ public class StaticUploader(
 }
 
 [Scope]
-public class UploadOperation(ILogger<UploadOperation> logger,
-        TenantManager tenantManager,
-        SecurityContext securityContext,
-        SettingsManager settingsManager,
-        StorageSettingsHelper storageSettingsHelper)
-    {
+public class UploadOperation(
+    ILogger<UploadOperation> logger,
+    TenantManager tenantManager,
+    SecurityContext securityContext,
+    SettingsManager settingsManager,
+    StorageSettingsHelper storageSettingsHelper)
+{
     public string Result { get; private set; } = string.Empty;
 
     public async Task<string> DoJobAsync(int tenantId, string path, string mappedPath)
@@ -178,6 +179,7 @@ public class UploadOperation(ILogger<UploadOperation> logger,
                     await using var stream = File.OpenRead(mappedPath);
                     await dataStore.SaveAsync(path, stream);
                 }
+
                 var uri = await dataStore.GetInternalUriAsync("", path, TimeSpan.Zero, null);
                 Result = uri.AbsoluteUri.ToLower();
                 logger.DebugUploadFile(Result);
@@ -205,9 +207,8 @@ public class UploadOperationProgress : DistributedTaskProgress
 
     public UploadOperationProgress()
     {
-        
     }
-    
+
     public UploadOperationProgress(IServiceProvider serviceProvider, string key, int tenantId, string relativePath, string mappedPath)
     {
         _serviceProvider = serviceProvider;

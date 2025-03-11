@@ -33,10 +33,8 @@ public class MigrationWorker(
     ILogger<MigrationWorker> logger)
 {
     private static readonly SemaphoreSlim _semaphoreSlim = new(1);
-    private readonly DistributedTaskQueue<MigrationOperation> _queue = queueFactory.CreateQueue<MigrationOperation>(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, 60 * 60 * 24); // 1 day
-
-    public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "migration";
-
+    private readonly DistributedTaskQueue<MigrationOperation> _queue = queueFactory.CreateQueue<MigrationOperation>(60 * 60 * 24); // 1 day
+    
     public async Task StartParse(int tenantId, Guid userId, string migratorName)
     {
         await Start(tenantId, item => item.InitParse(tenantId, userId, migratorName));

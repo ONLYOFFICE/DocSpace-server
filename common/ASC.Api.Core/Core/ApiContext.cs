@@ -106,6 +106,11 @@ public class ApiContext : ICloneable
     private static readonly int _maxCount = 1000;
     private readonly SecurityContext _securityContext;
 
+    public ApiContext()
+    {
+        
+    }
+    
     public ApiContext(IHttpContextAccessor httpContextAccessor, SecurityContext securityContext)
     {
         _securityContext = securityContext;
