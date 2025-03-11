@@ -85,6 +85,7 @@ public class LdapSaveSyncOperation(IServiceProvider serviceProvider, IDistribute
         if (!ldapSettings.LdapMapping.ContainsKey(LdapSettings.MappingFields.MailAttribute) || string.IsNullOrEmpty(ldapSettings.LdapMapping[LdapSettings.MappingFields.MailAttribute]))
         {
             ldapSettings.SendWelcomeEmail = false;
+            ldapSettings.DisableEmailVerification = false;
         }
 
         var ldapLocalization = new LdapLocalization();
