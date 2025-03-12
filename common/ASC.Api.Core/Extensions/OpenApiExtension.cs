@@ -63,31 +63,37 @@ public static class OpenApiExtension
 
             var serverTemplate = configuration.GetValue<string>("openApi:server") ?? "";
 
-            var hosts = configuration.GetSection("openApi:hosts:enum").Get<List<string>>() ?? [];
+            var protocolEnum = configuration.GetSection("openApi:protocols:enum").Get<List<string>>() ?? [];
+            var defaultProtocol = configuration.GetValue<string>("openApi:protocols:default") ?? "";
+            var protocolDescription = configuration.GetValue<string>("openApi:protocols:description") ?? "";
+
             var defaultHost = configuration.GetValue<string>("openApi:hosts:default") ?? "";
             var hostDescription = configuration.GetValue<string>("openApi:hosts:description") ?? "";
-
-            var ports = configuration.GetSection("openApi:ports:enum").Get<List<string>>() ?? [];
+            
             var defaultPort = configuration.GetValue<string>("openApi:ports:default") ?? "";
             var portDescription = configuration.GetValue<string>("openApi:ports:description") ?? "";
 
             c.AddServer(new OpenApiServer
             {
                 Url = serverTemplate,
-                Description = "Configurable server",
+                Description = "Server configuration",
                 Variables = new Dictionary<string, OpenApiServerVariable>
                 {
+                    ["protocol"] = new OpenApiServerVariable
+                    {
+                        Default = defaultProtocol,
+                        Description = protocolDescription,
+                        Enum = protocolEnum
+                    },
                     ["host"] = new OpenApiServerVariable
                     {
                         Default = defaultHost,
-                        Description = hostDescription,
-                        Enum = hosts
+                        Description = hostDescription
                     },
                     ["port"] = new OpenApiServerVariable
                     {
                         Default = defaultPort,
-                        Description = portDescription,
-                        Enum = ports
+                        Description = portDescription
                     }
                 }
             });
