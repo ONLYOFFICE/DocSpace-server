@@ -1205,7 +1205,19 @@ public class FileSecurity(IDaoFactory daoFactory,
                             _ => false
                         };
                     }
-                } else if ((file == null || !file.IsForm) && action is FilesSecurityActions.OpenForm)
+                    else if (fileFolder != null && fileFolder.FolderType == FolderType.FillingFormsRoom)
+                    {
+                        switch (action)
+                        {
+                            case FilesSecurityActions.ResetFilling:
+                            case FilesSecurityActions.StopFilling:
+                            case FilesSecurityActions.StartFilling:
+                            case FilesSecurityActions.FillingStatus:
+                                return false;
+                        }
+                    }
+                } 
+                else if ((file == null || !file.IsForm) && action is FilesSecurityActions.OpenForm)
                 {
                     return false;
                 }
