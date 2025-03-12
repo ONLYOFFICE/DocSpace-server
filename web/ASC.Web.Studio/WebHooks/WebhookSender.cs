@@ -52,6 +52,7 @@ public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory s
         await using var scope = scopeFactory.CreateAsyncScope();
         var dbWorker = scope.ServiceProvider.GetRequiredService<DbWorker>();
         var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
+        var messageService = scope.ServiceProvider.GetRequiredService<MessageService>();
 
         await tenantManager.SetCurrentTenantAsync(webhookRequest.TenantId);
 
@@ -124,18 +125,17 @@ public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory s
             if (e.StatusCode == HttpStatusCode.Gone)
             {
                 await dbWorker.RemoveWebhookConfigAsync(entry.ConfigId);
-
-                var messageService = scope.ServiceProvider.GetRequiredService<MessageService>();
                 messageService.SendHeadersMessage(MessageAction.WebhookDeleted, MessageTarget.Create(entry.ConfigId), null, $"{entry.Config.Name} (HTTP status 410)");
-
                 return;
             }
+
+            responsePayload = e.Message;
 
             entry.Config.LastFailureContent = e.Message;
             entry.Config.LastFailureOn = DateTime.UtcNow;
 
             if (entry.Config.LastSuccessOn.HasValue &&
-                (entry.Config.LastFailureOn - entry.Config.LastSuccessOn.Value > TimeSpan.FromDays(3)))
+                (entry.Config.LastFailureOn - entry.Config.LastSuccessOn.Value > TimeSpan.FromDays(settings.TrustedDaysCount ?? 3)))
             {
                 entry.Config.Enabled = false;
             }
@@ -144,6 +144,8 @@ public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory s
         }
         catch (Exception e)
         {
+            responsePayload = e.Message;
+
             entry.Config.LastFailureContent = e.Message;
             entry.Config.LastFailureOn = DateTime.UtcNow;
 
@@ -153,6 +155,11 @@ public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory s
 
         await dbWorker.UpdateWebhookJournal(entry.Id, status, delivery: DateTime.UtcNow, requestPayload, requestHeaders, responsePayload, responseHeaders);
         await dbWorker.UpdateWebhookConfig(entry.Config);
+
+        if (!entry.Config.Enabled)
+        {
+            messageService.SendHeadersMessage(MessageAction.WebhookUpdated, MessageTarget.Create(entry.ConfigId), null, $"{entry.Config.Name} (more than {settings.TrustedDaysCount} days without success)");
+        }
     }
 
     private string GetSecretHash(string secretKey, string body)
