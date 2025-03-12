@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    [Migration("20250303103641_MigrationContext_Upgrade47")]
+    [Migration("20250312084344_MigrationContext_Upgrade47")]
     partial class MigrationContext_Upgrade47
     {
         /// <inheritdoc />
@@ -21,7 +21,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn)
-                .HasAnnotation("ProductVersion", "8.0.8")
+                .HasAnnotation("ProductVersion", "8.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("ASC.Core.Common.EF.Acl", b =>
@@ -613,7 +613,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Subject = "88f11e7c-7407-4bea-b4cb-070010cdbb6b",
                             Action = "3e74aff2-7c0c-4089-b209-6495b8643471",
                             Object = "",
-                            AceType = 0
+                            AceType = 1
                         });
                 });
 
@@ -6862,8 +6862,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("client_secret");
 
                     b.Property<string>("CreatedBy")
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
+                        .HasMaxLength(36)
+                        .HasColumnType("varchar(36)")
                         .HasColumnName("created_by");
 
                     b.Property<DateTime?>("CreatedOn")
@@ -6902,8 +6902,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("logout_redirect_uri");
 
                     b.Property<string>("ModifiedBy")
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
+                        .HasMaxLength(36)
+                        .HasColumnType("varchar(36)")
                         .HasColumnName("modified_by");
 
                     b.Property<DateTime?>("ModifiedOn")
@@ -6944,8 +6944,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasIndex(new[] { "ClientId" }, "UK_client_id")
                         .IsUnique();
 
-                    b.HasIndex(new[] { "ClientSecret" }, "UK_client_secret")
-                        .IsUnique();
+                    b.HasIndex(new[] { "ClientSecret" }, "idx_client_secret");
 
                     b.HasIndex(new[] { "TenantId" }, "idx_identity_clients_tenant_id");
 
@@ -7190,6 +7189,36 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.ToTable("identity_shedlock", (string)null);
                 });
 
+            modelBuilder.Entity("ASC.Webhooks.Core.EF.Model.DbWebhook", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id")
+                        .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Method")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(10)
+                        .HasColumnType("varchar(10)")
+                        .HasColumnName("method")
+                        .HasDefaultValueSql("''");
+
+                    b.Property<string>("Route")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)")
+                        .HasColumnName("route")
+                        .HasDefaultValueSql("''");
+
+                    b.HasKey("Id")
+                        .HasName("PRIMARY");
+
+                    b.ToTable("webhooks", (string)null);
+
+                    b.HasAnnotation("MySql:CharSet", "utf8");
+                });
+
             modelBuilder.Entity("ASC.Webhooks.Core.EF.Model.DbWebhooksConfig", b =>
                 {
                     b.Property<int>("Id")
@@ -7343,6 +7372,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("uid")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<int>("WebhookId")
+                        .HasColumnType("int")
+                        .HasColumnName("webhook_id");
 
                     b.HasKey("Id")
                         .HasName("PRIMARY");

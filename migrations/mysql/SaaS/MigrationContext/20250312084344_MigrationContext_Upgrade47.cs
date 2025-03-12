@@ -1,5 +1,4 @@
 using System;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -12,13 +11,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "webhooks");
-
-            migrationBuilder.DropColumn(
-                name: "webhook_id",
-                table: "webhooks_logs");
-
             migrationBuilder.AddColumn<int>(
                 name: "trigger",
                 table: "webhooks_logs",
@@ -86,6 +78,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
+                name: "trigger",
+                table: "webhooks_logs");
+
+            migrationBuilder.DropColumn(
                 name: "created_by",
                 table: "webhooks_config");
 
@@ -116,34 +112,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             migrationBuilder.DropColumn(
                 name: "triggers",
                 table: "webhooks_config");
-
-            migrationBuilder.DropColumn(
-                name: "trigger",
-                table: "webhooks_logs");
-
-            migrationBuilder.AddColumn<int>(
-                name: "webhook_id",
-                table: "webhooks_logs",
-                type: "int",
-                nullable: false,
-                defaultValue: 0);
-
-            migrationBuilder.CreateTable(
-                name: "webhooks",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    method = table.Column<string>(type: "varchar(10)", maxLength: 10, nullable: true, defaultValueSql: "''")
-                        .Annotation("MySql:CharSet", "utf8"),
-                    route = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: true, defaultValueSql: "''")
-                        .Annotation("MySql:CharSet", "utf8")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PRIMARY", x => x.id);
-                })
-                .Annotation("MySql:CharSet", "utf8");
         }
     }
 }

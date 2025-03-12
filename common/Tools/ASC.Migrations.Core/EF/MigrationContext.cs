@@ -78,6 +78,7 @@ public class MigrationContext : DbContext
 
     public DbSet<DbWebhooksConfig> WebhooksConfigs { get; set; }
     public DbSet<DbWebhooksLog> WebhooksLogs { get; set; }
+    public DbSet<DbWebhook> Webhooks { get; set; }
 
     public DbSet<DbFile> Files { get; set; }
     public DbSet<DbFolder> Folders { get; set; }
@@ -174,6 +175,7 @@ public class MigrationContext : DbContext
             .AddBackupSchedule()
             .AddBackupRecord()
             .AddIntegrationEventLog()
+            .AddDbWebhooks()
             .AddWebhooksConfig()
             .AddWebhooksLog()
             .AddShortLinks()
