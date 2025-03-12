@@ -63,15 +63,8 @@ public static class OpenApiExtension
 
             var serverTemplate = configuration.GetValue<string>("openApi:server") ?? "";
 
-            var protocolEnum = configuration.GetSection("openApi:protocols:enum").Get<List<string>>() ?? [];
-            var defaultProtocol = configuration.GetValue<string>("openApi:protocols:default") ?? "";
-            var protocolDescription = configuration.GetValue<string>("openApi:protocols:description") ?? "";
-
-            var defaultHost = configuration.GetValue<string>("openApi:hosts:default") ?? "";
-            var hostDescription = configuration.GetValue<string>("openApi:hosts:description") ?? "";
-            
-            var defaultPort = configuration.GetValue<string>("openApi:ports:default") ?? "";
-            var portDescription = configuration.GetValue<string>("openApi:ports:description") ?? "";
+            var defaultUrl = configuration.GetValue<string>("openApi:url:default") ?? "";
+            var urlDescription = configuration.GetValue<string>("openApi:url:description") ?? "";
 
             c.AddServer(new OpenApiServer
             {
@@ -79,21 +72,10 @@ public static class OpenApiExtension
                 Description = "Server configuration",
                 Variables = new Dictionary<string, OpenApiServerVariable>
                 {
-                    ["protocol"] = new OpenApiServerVariable
+                    ["baseUrl"] = new OpenApiServerVariable
                     {
-                        Default = defaultProtocol,
-                        Description = protocolDescription,
-                        Enum = protocolEnum
-                    },
-                    ["host"] = new OpenApiServerVariable
-                    {
-                        Default = defaultHost,
-                        Description = hostDescription
-                    },
-                    ["port"] = new OpenApiServerVariable
-                    {
-                        Default = defaultPort,
-                        Description = portDescription
+                        Default = defaultUrl,
+                        Description = urlDescription
                     }
                 }
             });
