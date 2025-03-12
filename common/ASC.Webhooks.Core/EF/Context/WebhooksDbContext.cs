@@ -28,7 +28,7 @@ namespace ASC.Webhooks.Core.EF.Context;
 
 public class WebhooksDbContext(DbContextOptions<WebhooksDbContext> options) : BaseDbContext(options)
 {
-    public DbSet<DbWebhook> Webhooks { get; set; }
+    public DbSet<DbWebhook> Webhooks { get; set; } // TODO: Deprecated
     public DbSet<DbWebhooksConfig> WebhooksConfigs { get; set; }
     public DbSet<DbWebhooksLog> WebhooksLogs { get; set; }
 
