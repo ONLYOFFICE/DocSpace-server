@@ -28,10 +28,12 @@ using ASC.Files.Core;
 
 namespace ASC.Data.Reassigns;
 
+[Transient]
 public class DeletePersonalFolderProgressItem : DistributedTaskProgress
 {
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private Guid _userId;
+    private int _tenantId;
 
     public DeletePersonalFolderProgressItem()
     {
@@ -42,9 +44,10 @@ public class DeletePersonalFolderProgressItem : DistributedTaskProgress
         _serviceScopeFactory = serviceScopeFactory;
     }
 
-    public void Init(Guid userId)
+    public void Init(Guid userId, int tenantId)
     {
         _userId = userId;
+        _tenantId = tenantId;
     }
 
     protected override async Task DoJob()
@@ -53,6 +56,9 @@ public class DeletePersonalFolderProgressItem : DistributedTaskProgress
         var fileStorageService = scope.ServiceProvider.GetService<FileStorageService>();
         var options = scope.ServiceProvider.GetService<ILoggerProvider>();
         var daoFactory = scope.ServiceProvider.GetService<IDaoFactory>();
+        var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
+
+        await tenantManager.SetCurrentTenantAsync(_tenantId);
 
         var folderDao = daoFactory.GetFolderDao<int>();
         var logger = options.CreateLogger("ASC.Web");

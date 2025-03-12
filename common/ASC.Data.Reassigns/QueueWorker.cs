@@ -140,7 +140,7 @@ public class QueueDeletePersonalFolderType(IHttpContextAccessor httpContextAcces
 
         var result = _serviceProvider.GetService<DeletePersonalFolderProgressItem>();
 
-        result.Init(userId);
+        result.Init(userId, tenantId);
 
         return await StartAsync(tenantId, userId, result);
     }
