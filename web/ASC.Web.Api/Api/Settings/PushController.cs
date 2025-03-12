@@ -31,10 +31,10 @@ namespace ASC.Web.Api.Api.Settings;
 [DefaultRoute("push")]
 public class PushController(ApiContext apiContext,
         WebItemManager webItemManager,
-        IMemoryCache memoryCache,
+        IFusionCache fusionCache,
         FirebaseHelper firebaseHelper,
         IHttpContextAccessor httpContextAccessor)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
     /// Saves the Firebase device token specified in the request for the Documents application.

@@ -85,6 +85,7 @@ public class LdapSaveSyncOperation(IServiceProvider serviceProvider, IDistribute
         if (!ldapSettings.LdapMapping.ContainsKey(LdapSettings.MappingFields.MailAttribute) || string.IsNullOrEmpty(ldapSettings.LdapMapping[LdapSettings.MappingFields.MailAttribute]))
         {
             ldapSettings.SendWelcomeEmail = false;
+            ldapSettings.DisableEmailVerification = false;
         }
 
         var ldapLocalization = new LdapLocalization();
@@ -147,13 +148,11 @@ public class LdapSaveSyncOperation(IServiceProvider serviceProvider, IDistribute
                 continue;
             }
 
-            o[LdapTaskProperty.PROGRESS] = 100;
+            o.Percentage = 100;
             await _progressQueue.DequeueTask(o.Id);
         }
 
-        var operation =
-            operations
-                .FirstOrDefault(t => t[LdapTaskProperty.OWNER] == tenantId);
+        var operation = operations.FirstOrDefault(t => t.TenantId == tenantId);
 
         if (operation == null)
         {
@@ -162,26 +161,26 @@ public class LdapSaveSyncOperation(IServiceProvider serviceProvider, IDistribute
 
         if (DistributedTaskStatus.Running < operation.Status)
         {
-            operation[LdapTaskProperty.PROGRESS] = 100;
+            operation.Percentage = 100;
             await _progressQueue.DequeueTask(operation.Id);
         }
 
         var result = new LdapOperationStatus
         {
             Id = operation.Id,
-            Completed = operation[LdapTaskProperty.FINISHED],
-            Percents = operation[LdapTaskProperty.PROGRESS],
-            Status = operation[LdapTaskProperty.RESULT],
-            Error = operation[LdapTaskProperty.ERROR],
-            CertificateConfirmRequest = operation[LdapTaskProperty.CERT_REQUEST] != "" ? operation[LdapTaskProperty.CERT_REQUEST] : null,
-            Source = operation[LdapTaskProperty.SOURCE],
-            OperationType = operation[LdapTaskProperty.OPERATION_TYPE],
-            Warning = operation[LdapTaskProperty.WARNING]
+            Completed = operation.Finished,
+            Percents = (int)operation.Percentage,
+            Status = operation.Result,
+            Error = operation.Error,
+            CertificateConfirmRequest = operation.CertRequest != "" ? operation.CertRequest : null,
+            Source = operation.Source,
+            OperationType = operation.OperationType.ToString(),
+            Warning = operation.Warning
         };
 
         if (!(string.IsNullOrEmpty(result.Warning)))
         {
-            operation[LdapTaskProperty.WARNING] = ""; // "mark" as read
+            operation.Warning = ""; // "mark" as read
         }
 
         return result;
@@ -209,10 +208,9 @@ public class LdapSaveSyncOperation(IServiceProvider serviceProvider, IDistribute
 
         var hasStarted = operations.Any(o =>
         {
-            var opType = o[LdapTaskProperty.OPERATION_TYPE];
+            var opType = o.OperationType;
 
-            return o.Status <= DistributedTaskStatus.Running &&
-                   (opType == arg1.ToString() || opType == arg2.ToString());
+            return o.Status <= DistributedTaskStatus.Running && (opType == arg1 || opType == arg2);
         });
 
         return (hasStarted, operations);
@@ -221,7 +219,7 @@ public class LdapSaveSyncOperation(IServiceProvider serviceProvider, IDistribute
     private async Task<List<LdapOperationJob>> GetOperationsForTenant(int tenantId)
     {
         return (await _progressQueue.GetAllTasks())
-            .Where(t => t[LdapTaskProperty.OWNER] == tenantId)
+            .Where(t => t.TenantId == tenantId)
             .ToList();
     }
 }

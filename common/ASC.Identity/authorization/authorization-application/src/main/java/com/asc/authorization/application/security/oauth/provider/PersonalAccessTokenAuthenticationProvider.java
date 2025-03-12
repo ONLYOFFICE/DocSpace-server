@@ -103,7 +103,7 @@ public class PersonalAccessTokenAuthenticationProvider implements Authentication
         throw new BadCredentialsException("Authentication failed due to missing request context");
       var request = ctx.getRequest();
 
-      var sig = request.getAttribute(configurationProperties.getSignatureHeader());
+      var sig = request.getAttribute(configurationProperties.getSignatureCookie());
       if (sig instanceof BasicSignature signature && signature.isGuest())
         throw new OAuth2AuthenticationException(
             new OAuth2Error(

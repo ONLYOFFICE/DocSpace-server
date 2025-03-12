@@ -38,12 +38,12 @@ public class LicenseController(ILoggerProvider option,
         SettingsManager settingsManager,
         WebItemManager webItemManager,
         CoreBaseSettings coreBaseSettings,
-        IMemoryCache memoryCache,
+        IFusionCache fusionCache,
         FirstTimeTenantSettings firstTimeTenantSettings,
         ITariffService tariffService,
         IHttpContextAccessor httpContextAccessor,
         DocumentServiceLicense documentServiceLicense)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     private readonly ILogger _log = option.CreateLogger("ASC.Api");
 
