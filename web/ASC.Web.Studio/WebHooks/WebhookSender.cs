@@ -27,6 +27,8 @@
 using System.Text.Json.Nodes;
 
 using ASC.Core;
+using ASC.MessagingSystem.Core;
+using ASC.MessagingSystem.EF.Model;
 
 namespace ASC.Webhooks;
 
@@ -122,6 +124,10 @@ public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory s
             if (e.StatusCode == HttpStatusCode.Gone)
             {
                 await dbWorker.RemoveWebhookConfigAsync(entry.ConfigId);
+
+                var messageService = scope.ServiceProvider.GetRequiredService<MessageService>();
+                messageService.SendHeadersMessage(MessageAction.WebhookDeleted, MessageTarget.Create(entry.ConfigId), null, $"{entry.Config.Name} (HTTP status 410)");
+
                 return;
             }
 
