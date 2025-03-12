@@ -69,7 +69,7 @@ public class GrpcRegisteredClientService {
       noRetryFor = {RegisteredClientPermissionException.class},
       maxAttempts = 5,
       backoff = @Backoff(delay = 100, multiplier = 1.625))
-  protected ClientResponse getClient(String id) {
+  public ClientResponse getClient(String id) {
     log.info("GRPC call to get client: {}", id);
     return registrationService
         .withDeadline(Deadline.after(1750, TimeUnit.MILLISECONDS))
