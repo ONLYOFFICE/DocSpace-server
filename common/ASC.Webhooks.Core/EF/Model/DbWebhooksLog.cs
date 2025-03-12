@@ -32,7 +32,7 @@ public class DbWebhooksLog
     public int ConfigId { get; set; }
     public WebhookTrigger Trigger { get; set; }
     public DateTime CreationTime { get; set; }
-    public int WebhookId { get; set; }
+    public int WebhookId { get; set; } // TODO: Deprecated
     public string RequestHeaders { get; set; }
     public string RequestPayload { get; set; }
     public string ResponseHeaders { get; set; }
