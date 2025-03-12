@@ -60,18 +60,38 @@ public static class OpenApiExtension
             c.OperationFilter<SwaggerCustomOperationFilter>();
             c.OperationFilter<ContentTypeOperationFilter>();
             c.EnableAnnotations();
-            var serverUrls = configuration.GetSection("openApi:servers").Get<List<string>>() ?? [];
-            var serverDescription = configuration.GetSection("openApi:serversDescription").Get<List<string>>() ?? [];
 
-            for (var i = 0; i < serverUrls.Count; i++)
+            var serverTemplate = configuration.GetValue<string>("openApi:server") ?? "";
+
+            var hosts = configuration.GetSection("openApi:hosts:enum").Get<List<string>>() ?? [];
+            var defaultHost = configuration.GetValue<string>("openApi:hosts:default") ?? "";
+            var hostDescription = configuration.GetValue<string>("openApi:hosts:description") ?? "";
+
+            var ports = configuration.GetSection("openApi:ports:enum").Get<List<string>>() ?? [];
+            var defaultPort = configuration.GetValue<string>("openApi:ports:default") ?? "";
+            var portDescription = configuration.GetValue<string>("openApi:ports:description") ?? "";
+
+            c.AddServer(new OpenApiServer
             {
-                c.AddServer(new OpenApiServer
+                Url = serverTemplate,
+                Description = "Configurable server",
+                Variables = new Dictionary<string, OpenApiServerVariable>
                 {
-                    Url = serverUrls[i], 
-                    Description = serverDescription.Count > i ? serverDescription[i] : null
-                });
-            }
-            
+                    ["host"] = new OpenApiServerVariable
+                    {
+                        Default = defaultHost,
+                        Description = hostDescription,
+                        Enum = hosts
+                    },
+                    ["port"] = new OpenApiServerVariable
+                    {
+                        Default = defaultPort,
+                        Description = portDescription,
+                        Enum = ports
+                    }
+                }
+            });
+
             // ToDo: add security definitions
             c.AddSecurityDefinition(CookiesManager.AuthCookiesName, new OpenApiSecurityScheme
             {
