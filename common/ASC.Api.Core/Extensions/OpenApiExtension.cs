@@ -60,18 +60,26 @@ public static class OpenApiExtension
             c.OperationFilter<SwaggerCustomOperationFilter>();
             c.OperationFilter<ContentTypeOperationFilter>();
             c.EnableAnnotations();
-            var serverUrls = configuration.GetSection("openApi:servers").Get<List<string>>() ?? [];
-            var serverDescription = configuration.GetSection("openApi:serversDescription").Get<List<string>>() ?? [];
 
-            for (var i = 0; i < serverUrls.Count; i++)
+            var serverTemplate = configuration.GetValue<string>("openApi:server") ?? "";
+
+            var defaultUrl = configuration.GetValue<string>("openApi:url:default") ?? "";
+            var urlDescription = configuration.GetValue<string>("openApi:url:description") ?? "";
+
+            c.AddServer(new OpenApiServer
             {
-                c.AddServer(new OpenApiServer
+                Url = serverTemplate,
+                Description = "Server configuration",
+                Variables = new Dictionary<string, OpenApiServerVariable>
                 {
-                    Url = serverUrls[i], 
-                    Description = serverDescription.Count > i ? serverDescription[i] : null
-                });
-            }
-            
+                    ["baseUrl"] = new OpenApiServerVariable
+                    {
+                        Default = defaultUrl,
+                        Description = urlDescription
+                    }
+                }
+            });
+
             // ToDo: add security definitions
             c.AddSecurityDefinition(CookiesManager.AuthCookiesName, new OpenApiSecurityScheme
             {
