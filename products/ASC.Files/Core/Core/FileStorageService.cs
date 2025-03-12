@@ -3696,7 +3696,7 @@ public class FileStorageService //: IFileStorageService
                 await filesMessageService.SendAsync(MessageAction.FileCreated, result, result.Title);
                 await fileMarker.MarkAsNewAsync(result);
                 await socketManager.CreateFileAsync(result);
-                await webhookManager.PublishAsync(WebhookTrigger.FileCreated, file);
+                await webhookManager.PublishAsync(WebhookTrigger.FileCreated, result);
             }
 
             return result;

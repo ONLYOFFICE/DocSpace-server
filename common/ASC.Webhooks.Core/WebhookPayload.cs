@@ -28,41 +28,53 @@ namespace ASC.Webhooks.Core;
 
 public class WebhookPayload<T>
 {
-    public WebhookPayloadTriggerInfo Trigger { get; init; }
+    public WebhookPayloadActionInfo Action { get; init; }
     public T Payload { get; init; }
     public WebhookPayloadConfigInfo Webhook { get; init; }
 
     public WebhookPayload(WebhookTrigger trigger, DbWebhooksConfig config, T data, Guid userId)
     {
+        var now = DateTime.UtcNow;
+        now = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second, DateTimeKind.Utc);
 
-        Trigger = new WebhookPayloadTriggerInfo
+        Action = new WebhookPayloadActionInfo
         {
             CreateBy = userId,
-            CreateOn = DateTime.UtcNow,
-            Trigger = trigger
+            CreateOn = now,
+            Id = (int)trigger,
+            Trigger = trigger.ToStringFast()
         };
 
         Payload = data;
+
+        var triggers = config.Triggers == WebhookTrigger.All
+            ? [config.Triggers.ToStringFast()]
+            : Enum.GetValues<WebhookTrigger>()
+                .Where(flag => config.Triggers.HasFlag(flag) && flag != 0)
+                .Select(flag => flag.ToStringFast())
+                .ToArray();
 
         Webhook = new WebhookPayloadConfigInfo
         {
             Id = config.Id,
             Name = config.Name,
             Url = config.Uri,
-            Triggers = config.Triggers,
+            Triggers = triggers,
             LastFailureOn = config.LastFailureOn,
             LastFailureContent = config.LastFailureContent,
             LastSuccessOn = config.LastSuccessOn,
-            RetryCount = 0
+            RetryCount = 0,
+            RetryOn = now
         };
     }
 }
 
-public class WebhookPayloadTriggerInfo
+public class WebhookPayloadActionInfo
 {
     public DateTime CreateOn { get; set; }
     public Guid CreateBy { get; set; }
-    public WebhookTrigger Trigger { get; set; }
+    public int Id { get; set; }
+    public string Trigger { get; set; }
 }
 
 public class WebhookPayloadConfigInfo
@@ -70,13 +82,12 @@ public class WebhookPayloadConfigInfo
     public int Id { get; set; }
     public string Name { get; set; }
     public string Url { get; set; }
-    public WebhookTrigger Triggers { get; set; }
+    public string[] Triggers { get; set; }
 
     public DateTime? LastFailureOn { get; set; }
     public string LastFailureContent { get; set; }
     public DateTime? LastSuccessOn { get; set; }
 
     public int RetryCount { get; set; }
-
-    //public DateTime RetryOn { get; set; }
+    public DateTime RetryOn { get; set; }
 }

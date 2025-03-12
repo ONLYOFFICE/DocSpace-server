@@ -48,11 +48,11 @@ public record FileMarkAsReadOperationData<T> : FileOperationData<T>
 [Transient]
 public class FileMarkAsReadOperation : ComposeFileOperation<FileMarkAsReadOperationData<string>, FileMarkAsReadOperationData<int>>
 {
+    public override FileOperationType FileOperationType { get; set; } = FileOperationType.MarkAsRead;
+    
     public FileMarkAsReadOperation() { }
     
     public FileMarkAsReadOperation(IServiceProvider serviceProvider) : base(serviceProvider) { }
-
-    protected override FileOperationType FileOperationType { get => FileOperationType.MarkAsRead; }
     
     public override Task RunJob(CancellationToken cancellationToken)
     {
@@ -67,12 +67,12 @@ public class FileMarkAsReadOperation : ComposeFileOperation<FileMarkAsReadOperat
 class FileMarkAsReadOperation<T> : FileOperation<FileMarkAsReadOperationData<T>, T>
 {
     private readonly IDictionary<string, StringValues> _headers;
-
+    public override FileOperationType FileOperationType { get; set; } = FileOperationType.MarkAsRead;
+    
     public FileMarkAsReadOperation(IServiceProvider serviceProvider, FileMarkAsReadOperationData<T> fileOperationData)
         : base(serviceProvider, fileOperationData)
     {
         _headers = fileOperationData.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value));
-        this[OpType] = (int)FileOperationType.MarkAsRead;
     }
 
     protected override int InitTotalProgressSteps()
@@ -139,7 +139,7 @@ class FileMarkAsReadOperation<T> : FileOperation<FileMarkAsReadOperationData<T>,
             newrootfolder.Add($"new_{{\"key\"? \"{item.Key}\", \"value\"? \"{item.Value}\"}}");
         }
 
-        this[Res] += string.Join(SplitChar, newrootfolder.ToArray());
+        Result += string.Join(SplitChar, newrootfolder.ToArray());
     }
 }
 

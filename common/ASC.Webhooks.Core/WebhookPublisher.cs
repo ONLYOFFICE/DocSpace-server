@@ -42,7 +42,8 @@ public class WebhookPublisher(
     private readonly JsonSerializerOptions _serializerOptions = new()
     {
         Converters = { new TenantToUtcDateTimeJsonConverter(tenantUtil) },
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
 
     private class TenantToUtcDateTimeJsonConverter(TenantUtil tenantUtil) : JsonConverter<DateTime>
@@ -59,7 +60,7 @@ public class WebhookPublisher(
     }
 
 
-    public async Task<IEnumerable<DbWebhooksConfig>> GetWebhookConfigsAsync(WebhookTrigger trigger, Func<Guid, Task<bool>> checher)
+    public async Task<IEnumerable<DbWebhooksConfig>> GetWebhookConfigsAsync<T>(WebhookTrigger trigger, IWebhookAccessChecker<T> checker, T data)
     {
         var result = new List<DbWebhooksConfig>();
 
@@ -72,9 +73,9 @@ public class WebhookPublisher(
                 continue;
             }
 
-            if (checher != null && config.CreatedBy.HasValue && authContext.CurrentAccount.ID != config.CreatedBy.Value)
+            if (checker != null && config.CreatedBy.HasValue && authContext.CurrentAccount.ID != config.CreatedBy.Value)
             {
-                if (!await checher(config.CreatedBy.Value))
+                if (!await checker.CheckAccessAsync(data, config.CreatedBy.Value))
                 {
                     continue;
                 }
@@ -94,9 +95,9 @@ public class WebhookPublisher(
         }
     }
 
-    public async Task PublishAsync<T>(WebhookTrigger trigger, Func<Guid, Task<bool>> checher, T data)
+    public async Task PublishAsync<T>(WebhookTrigger trigger, IWebhookAccessChecker<T> checker, T data)
     {
-        var webhookConfigs = await GetWebhookConfigsAsync(trigger, checher);
+        var webhookConfigs = await GetWebhookConfigsAsync(trigger, checker, data);
 
         foreach (var config in webhookConfigs)
         {

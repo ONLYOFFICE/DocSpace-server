@@ -26,91 +26,49 @@
 
 using ASC.Webhooks.Core.EF.Model;
 
-using net.openstack.Core;
-
 namespace ASC.Web.Files.Utils;
 
 [Scope]
 public class WebhookManager(
-    TenantManager tenantManager,
-    UserManager userManager,
-    FileSecurity fileSecurity,
-    IServiceProvider serviceProvider,
-    IWebhookPublisher webhookPublisher)
+    IDaoFactory daoFactory,
+    IWebhookPublisher webhookPublisher,
+    IServiceProvider serviceProvider)
 {
-
-    public async Task<IEnumerable<DbWebhooksConfig>> GetWebhookConfigsAsync<T>(WebhookTrigger trigger, FileEntry<T> entry)
+    public async Task<IEnumerable<DbWebhooksConfig>> GetWebhookConfigsAsync<T>(WebhookTrigger trigger, FileEntry<T> fileEntry)
     {
-        var whoCanRead = await GetWhoCanRead(entry);
+        var checker = serviceProvider.GetService<WebhookFileEntryAccessChecker<T>>();
+        var cleanFileEntry = await GetCleanFileEntry(fileEntry);
 
-        var result = await webhookPublisher.GetWebhookConfigsAsync(trigger, CanRead);
-
-        //async Task<bool> CanRead(Guid userId)
-        //{
-        //    return await fileSecurity.CanReadAsync(entry, userId);
-        //}
-
-        Task<bool> CanRead(Guid userId)
-        {
-            return Task.FromResult(whoCanRead.Contains(userId));
-        }
-
-        return result;
+        return await webhookPublisher.GetWebhookConfigsAsync(trigger, checker, cleanFileEntry);
     }
 
-    public async Task PublishAsync<T>(WebhookTrigger trigger, IEnumerable<DbWebhooksConfig> webhookConfigs, FileEntry<T> entry)
+    public async Task PublishAsync<T>(WebhookTrigger trigger, IEnumerable<DbWebhooksConfig> webhookConfigs, FileEntry<T> fileEntry)
     {
-        var data = await Convert(entry);
-
-        await webhookPublisher.PublishAsync(trigger, webhookConfigs, data);
+        await webhookPublisher.PublishAsync(trigger, webhookConfigs, fileEntry);
     }
 
-    public async Task PublishAsync<T>(WebhookTrigger trigger, FileEntry<T> entry)
+    public async Task PublishAsync<T>(WebhookTrigger trigger, FileEntry<T> fileEntry)
     {
-        var whoCanRead = await GetWhoCanRead(entry);
+        var checker = serviceProvider.GetService<WebhookFileEntryAccessChecker<T>>();
+        var cleanFileEntry = await GetCleanFileEntry(fileEntry);
 
-        var data = await Convert(entry);
-
-        await webhookPublisher.PublishAsync(trigger, CanRead, data);
-
-        //async Task<bool> CanRead(Guid userId)
-        //{
-        //    return await fileSecurity.CanReadAsync(entry, userId);
-        //}
-
-        Task<bool> CanRead(Guid userId)
-        {
-            return Task.FromResult(whoCanRead.Contains(userId));
-        }
+        await webhookPublisher.PublishAsync(trigger, checker, cleanFileEntry);
     }
 
-    private async Task<FileEntryDto<T>> Convert<T>(FileEntry<T> entry)
+    private async Task<FileEntry<T>> GetCleanFileEntry<T>(FileEntry<T> fileEntry)
     {
-        return entry switch
-        {
-            File<T> file => await serviceProvider.GetRequiredService<FileDtoHelper>().GetAsync(file),
-            Folder<T> folder => await serviceProvider.GetRequiredService<FolderDtoHelper>().GetAsync(folder),
-            _ => null
-        };
+        return fileEntry.FileEntryType == FileEntryType.File
+            ? await daoFactory.GetFileDao<T>().GetFileAsync(fileEntry.Id)
+            : await daoFactory.GetFolderDao<T>().GetFolderAsync(fileEntry.Id);
     }
+}
 
-    private async Task<IEnumerable<Guid>> GetWhoCanRead<T>(FileEntry<T> entry)
+[Scope(GenericArguments = [typeof(int)])]
+[Scope(GenericArguments = [typeof(string)])]
+public class WebhookFileEntryAccessChecker<T>(FileSecurity fileSecurity) : IWebhookAccessChecker<FileEntry<T>>
+{
+    public async Task<bool> CheckAccessAsync(FileEntry<T> fileEntry, Guid userId)
     {
-        var result = new List<Guid> { entry.CreateBy };
-
-        if (entry.RootFolderType != FolderType.USER && entry.RootFolderType != FolderType.TRASH)
-        {
-            result.Add(tenantManager.GetCurrentTenant().OwnerId);
-
-            var admins = (await userManager.GetUsersByGroupAsync(Constants.GroupAdmin.ID)).Select(x => x.Id);
-
-            result.AddRange(admins);
-
-            var whoCanRead = await fileSecurity.WhoCanReadAsync(entry);
-
-            result.AddRange(whoCanRead);
-        }
-
-        return result.Distinct();
+        return await fileSecurity.CanReadAsync(fileEntry, userId);
     }
 }
