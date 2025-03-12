@@ -33,10 +33,9 @@ public class SettingsManager(
     AuthContext authContext,
     TenantManager tenantManager,
     IDbContextFactory<WebstudioDbContext> dbContextFactory,
-    IFusionCache fusionCache,
-    TenantUtil tenantUtil)
+    IFusionCache fusionCache)
 {
-    private static readonly TimeSpan _expirationTimeout = TimeSpan.FromSeconds(20);
+    private static readonly TimeSpan _expirationTimeout = TimeSpan.FromMinutes(5);
     private static readonly JsonSerializerOptions  _options = new()
     {
         PropertyNameCaseInsensitive = true,
@@ -138,7 +137,7 @@ public class SettingsManager(
 
         return await fusionCache.GetOrSetAsync<T>(key, async (ctx, token) =>
         {
-            if (lastModified.HasValue && ctx is { HasStaleValue: true, HasLastModified: true } && ctx.LastModified <= lastModified)
+            if (lastModified.HasValue && ctx is { HasStaleValue: true, HasLastModified: true } && ctx.LastModified >= lastModified.Value)
             {
                 return ctx.NotModified();
             }
@@ -146,12 +145,12 @@ public class SettingsManager(
             await using var context = await dbContextFactory.CreateDbContextAsync(token);
             var result = await context.WebStudioSettingsAsync(tenantId, def.ID, userId);
             var settings = def;
-            def.LastModified = tenantUtil.DateTimeNow();
+            def.LastModified = DateTime.UtcNow;
             
             if (result != null)
             {
                 settings = Deserialize<T>(result.Data);
-                settings.LastModified = tenantUtil.DateTimeFromUtc(result.LastModified);
+                settings.LastModified = result.LastModified;
             }
             
             return ctx.Modified(settings, lastModified: settings.LastModified);
@@ -191,15 +190,15 @@ public class SettingsManager(
                     UserId = userId,
                     TenantId = tenantId,
                     Data = data,
-                    LastModified = tenantUtil.DateTimeNow()
+                    LastModified = DateTime.UtcNow
                 };
 
                 await context.AddOrUpdateAsync(q => q.WebstudioSettings, s);
             }
 
             await context.SaveChangesAsync();
-
-            await fusionCache.SetAsync(key, settings, _expirationTimeout);
+            
+            await fusionCache.RemoveAsync(key);
 
             return true;
         }

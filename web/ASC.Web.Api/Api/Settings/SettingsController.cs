@@ -706,6 +706,7 @@ public partial class SettingsController(MessageService messageService,
             if (lastModifiedStr == Request.Headers.IfModifiedSince)
             {
                 Response.StatusCode = 304;
+                Response.Headers.CacheControl = "no-cache";
                 return null;
             }
             
