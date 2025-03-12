@@ -32,6 +32,7 @@ public class DbWebstudioSettings : BaseEntity
     public Guid Id { get; set; }
     public Guid UserId { get; set; }
     public string Data { get; set; }
+    public DateTime LastModified { get; set; }
 
     public DbTenant Tenant { get; set; }
 
@@ -94,6 +95,10 @@ public static class WebstudioSettingsExtension
                 .HasColumnType("mediumtext")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
+            
+            entity.Property(e => e.LastModified)
+                .HasColumnName("last_modified")
+                .HasColumnType("datetime");
         });
     }
     
@@ -123,6 +128,10 @@ public static class WebstudioSettingsExtension
                 .IsRequired()
                 .HasColumnName("data")
                 .HasColumnType("jsonb");
+            
+            entity.Property(e => e.LastModified)
+                .HasColumnName("last_modified")
+                .HasColumnType("timestamptz");
         });
     }
 }

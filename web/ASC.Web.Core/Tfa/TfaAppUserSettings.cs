@@ -48,6 +48,8 @@ public class TfaAppUserSettings : ISettings<TfaAppUserSettings>
             SaltSetting = 0
         };
     }
+    
+    public DateTime LastModified { get; set; }
 
     public static async Task<long> GetSaltAsync(SettingsManager settingsManager, Guid userId)
     {

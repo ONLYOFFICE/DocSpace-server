@@ -97,6 +97,8 @@ public abstract class BaseStorageSettings<T> : ISettings<BaseStorageSettings<T>>
     {
         throw new NotImplementedException();
     }
+    
+    public DateTime LastModified { get; set; }
 }
 
 /// <summary>

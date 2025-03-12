@@ -692,7 +692,27 @@ public partial class SettingsController(MessageService messageService,
     [HttpGet("colortheme")]
     public async Task<CustomColorThemesSettingsDto> GetColorThemeAsync()
     {
-        return new CustomColorThemesSettingsDto(await settingsManager.LoadAsync<CustomColorThemesSettings>(), customColorThemesSettingsHelper.Limit);
+        DateTime? lastModified = null;
+        if (DateTime.TryParse(Request.Headers.IfModifiedSince, CultureInfo.InvariantCulture, out var parsedLastModified))
+        {
+            lastModified = parsedLastModified;
+            lastModified = DateTime.SpecifyKind(lastModified.Value, DateTimeKind.Local);
+        }
+        
+        var settings = await settingsManager.LoadAsync<CustomColorThemesSettings>(lastModified);
+        if (settings.LastModified != DateTime.MinValue)
+        {
+            var lastModifiedStr = settings.LastModified.ToString(CultureInfo.InvariantCulture);
+            if (lastModifiedStr == Request.Headers.IfModifiedSince)
+            {
+                Response.StatusCode = 304;
+                return null;
+            }
+            
+            Response.Headers.LastModified = lastModifiedStr;
+        }
+
+        return new CustomColorThemesSettingsDto(settings, customColorThemesSettingsHelper.Limit);
     }
 
     /// <summary>

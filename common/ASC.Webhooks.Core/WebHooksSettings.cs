@@ -37,6 +37,8 @@ public class WebHooksSettings : ISettings<WebHooksSettings>
     {
         Ids = []
     };
+    
+    public DateTime LastModified { get; set; }
 }
 
 
