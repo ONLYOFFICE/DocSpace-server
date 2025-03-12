@@ -32,6 +32,7 @@ public class DbWebhooksLog
     public int ConfigId { get; set; }
     public WebhookTrigger Trigger { get; set; }
     public DateTime CreationTime { get; set; }
+    public int WebhookId { get; set; }
     public string RequestHeaders { get; set; }
     public string RequestPayload { get; set; }
     public string ResponseHeaders { get; set; }
@@ -113,6 +114,11 @@ public static class WebhooksPayloadExtension
                 .HasColumnName("response_headers")
                 .HasColumnType("json");
 
+            entity.Property(e => e.WebhookId)
+                .HasColumnType("int")
+                .HasColumnName("webhook_id")
+                .IsRequired();
+
             entity.Property(e => e.CreationTime)
                 .HasColumnType("datetime")
                 .HasColumnName("creation_time");
@@ -169,6 +175,10 @@ public static class WebhooksPayloadExtension
             entity.Property(e => e.ResponseHeaders)
                 .HasColumnName("response_headers")
                 .HasColumnType("json");
+
+            entity.Property(e => e.WebhookId)
+                .IsRequired()
+                .HasColumnName("webhook_id");
 
             entity.Property(e => e.CreationTime)
                 .HasColumnName("creation_time");

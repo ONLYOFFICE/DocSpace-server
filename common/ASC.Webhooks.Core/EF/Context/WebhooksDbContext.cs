@@ -28,6 +28,7 @@ namespace ASC.Webhooks.Core.EF.Context;
 
 public class WebhooksDbContext(DbContextOptions<WebhooksDbContext> options) : BaseDbContext(options)
 {
+    public DbSet<DbWebhook> Webhooks { get; set; }
     public DbSet<DbWebhooksConfig> WebhooksConfigs { get; set; }
     public DbSet<DbWebhooksLog> WebhooksLogs { get; set; }
 
@@ -35,6 +36,7 @@ public class WebhooksDbContext(DbContextOptions<WebhooksDbContext> options) : Ba
     {
         ModelBuilderWrapper
             .From(modelBuilder, Database)
+            .AddDbWebhooks()
             .AddWebhooksConfig()
             .AddWebhooksLog()
             .AddDbTenant();
