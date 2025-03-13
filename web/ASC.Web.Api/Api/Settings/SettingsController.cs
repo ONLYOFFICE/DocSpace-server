@@ -48,7 +48,7 @@ public partial class SettingsController(MessageService messageService,
         ConsumerFactory consumerFactory,
         TimeZoneConverter timeZoneConverter,
         CustomNamingPeople customNamingPeople,
-        IMemoryCache memoryCache,
+        IFusionCache fusionCache,
         ProviderManager providerManager,
         FirstTimeTenantSettings firstTimeTenantSettings,
         TelegramHelper telegramHelper,
@@ -67,7 +67,7 @@ public partial class SettingsController(MessageService messageService,
         UsersQuotaSyncOperation usersQuotaSyncOperation,
         CustomQuota customQuota,
         QuotaSocketManager quotaSocketManager)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     [GeneratedRegex("^[a-z0-9]([a-z0-9-.]){1,253}[a-z0-9]$")]
     private static partial Regex EmailDomainRegex();
@@ -405,6 +405,47 @@ public partial class SettingsController(MessageService messageService,
         }
 
         return quotaSettings;
+    }
+
+    /// <summary>
+    /// Saves the deep link configuration settings for the portal.
+    /// </summary>
+    /// <short>
+    /// Configure deep link settings
+    /// </short>
+    /// <path>api/2.0/settings/deeplink</path>
+    [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "Deep link configuration updated", typeof(TenantDeepLinkSettings))]
+    [SwaggerResponse(400, "Invalid deep link configuration")]
+    [HttpPost("deeplink")]
+    public async Task<TenantDeepLinkSettings> SaveConfigureDeepLinkAsync(DeepLinkConfigurationRequestsDto inDto)
+    {
+        await DemandStatisticPermissionAsync();
+        if (!Enum.IsDefined(typeof(DeepLinkHandlingMode), inDto.DeepLinkSettings.HandlingMode))
+        {
+            throw new ArgumentException(nameof(inDto.DeepLinkSettings.HandlingMode));
+        }
+        var tenant = tenantManager.GetCurrentTenant();
+        var tenantDeepLinkSettings = await settingsManager.LoadAsync<TenantDeepLinkSettings>();
+
+        tenantDeepLinkSettings.HandlingMode = inDto.DeepLinkSettings.HandlingMode;
+        await settingsManager.SaveAsync(tenantDeepLinkSettings, tenant.Id);
+
+        return tenantDeepLinkSettings;
+    }
+
+    /// <summary>
+    /// Gets deeplink settings
+    /// </summary>
+    /// <path>api/2.0/settings/deeplink</path>
+    [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "Ok", typeof(TenantDeepLinkSettings))]
+    [HttpGet("deeplink")]
+    public async Task<TenantDeepLinkSettings> GettDeepLinkSettings()
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        return await settingsManager.LoadAsync<TenantDeepLinkSettings>();
     }
 
     /// <summary>
@@ -946,11 +987,13 @@ public partial class SettingsController(MessageService messageService,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
+        var logoText = await tenantLogoManager.GetLogoTextAsync();
+
         return await consumerFactory.GetAll<Consumer>()
             .Where(consumer => consumer.ManagedKeys.Any())
             .OrderBy(services => services.Order)
             .ToAsyncEnumerable()
-            .SelectAwait(async r => await AuthServiceRequestsDto.From(r))
+            .SelectAwait(async r => await AuthServiceRequestsDto.From(r, logoText))
             .ToListAsync();
     }
 

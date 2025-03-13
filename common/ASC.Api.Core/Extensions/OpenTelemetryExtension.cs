@@ -61,10 +61,11 @@ public static class OpenTelemetryExtension
             .ConfigureResource(resource => resource.AddService(telemetrySettings.ServiceName))
             .WithMetrics(metrics =>
             {
-                metrics.AddAspNetCoreInstrumentation();
-                metrics.AddHttpClientInstrumentation();
-                metrics.AddRuntimeInstrumentation();
-                metrics.AddProcessInstrumentation();
+                metrics.AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    .AddRuntimeInstrumentation()
+                    .AddProcessInstrumentation()
+                    .AddFusionCacheInstrumentation();
 
                 if (telemetrySettings.InfluxDB != null)
                 {
@@ -80,7 +81,8 @@ public static class OpenTelemetryExtension
             .WithTracing(tracing =>
             {
                 tracing.AddSource(builder.Environment.ApplicationName)
-                    .AddHttpClientInstrumentation();
+                    .AddHttpClientInstrumentation()
+                    .AddFusionCacheInstrumentation();
             });
         
         builder.AddOpenTelemetryExporters();

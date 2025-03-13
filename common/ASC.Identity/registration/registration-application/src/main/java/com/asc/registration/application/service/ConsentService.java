@@ -27,8 +27,6 @@
 
 package com.asc.registration.application.service;
 
-import com.asc.common.application.proto.AuthorizationServiceGrpc;
-import com.asc.common.application.proto.GetConsentsRequest;
 import com.asc.common.core.domain.value.ClientId;
 import com.asc.registration.service.ports.input.service.ClientApplicationService;
 import com.asc.registration.service.transfer.response.ClientInfoResponse;
@@ -41,44 +39,51 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 /**
- * Service class for managing consents and retrieving client-related information.
+ * Service for retrieving and aggregating consent records for a given principal.
  *
- * <p>This service interacts with the authorization service and client application service to fetch
- * and aggregate consent details, including associated client information.
+ * <p>This service interacts with both the remote authorization service and the client application
+ * service to:
+ *
+ * <ul>
+ *   <li>Fetch raw consent data via gRPC.
+ *   <li>Retrieve additional client details corresponding to each consent.
+ *   <li>Combine the data into a paginated response containing enriched consent information.
+ * </ul>
  */
 @Service
 @RequiredArgsConstructor
 public class ConsentService {
-
-  private final AuthorizationServiceGrpc.AuthorizationServiceBlockingStub authorizationService;
+  private final GrpcAuthorizationService grpcAuthorizationService;
   private final ClientApplicationService clientApplicationService;
 
   /**
-   * Retrieves a paginated list of consents for a given principal ID.
+   * Retrieves a paginated list of consent records for a specific principal.
    *
-   * <p>The method fetches consent data from the authorization service, retrieves associated client
-   * information using the {@link ClientApplicationService}, and combines the data into {@link
-   * ConsentResponse} objects. If a `lastModifiedOn` timestamp is provided, only consents modified
-   * after that timestamp are retrieved.
+   * <p>This method performs the following steps:
    *
-   * @param principalId the ID of the principal for whom to retrieve consents.
-   * @param limit the maximum number of consents to retrieve in a single request.
-   * @param lastModifiedOn the timestamp for filtering consents based on their modification date;
-   *     can be {@code null}.
-   * @return a {@link PageableModificationResponse} containing a list of {@link ConsentResponse}
-   *     objects, along with metadata such as the last modification timestamp and limit.
+   * <ol>
+   *   <li>Calls the authorization service to obtain consent records using a gRPC request.
+   *   <li>Extracts the client identifiers from the retrieved consents.
+   *   <li>Fetches client information from the client application service based on those
+   *       identifiers.
+   *   <li>Maps each consent into a {@link ConsentResponse}, enriching it with the corresponding
+   *       client details. The consent's modified timestamp is parsed and assigned if present.
+   *   <li>Wraps the resulting list and metadata into a {@link PageableModificationResponse}.
+   * </ol>
+   *
+   * @param principalId the unique identifier of the principal whose consents are being retrieved.
+   * @param limit the maximum number of consent records to return in one call.
+   * @param lastModifiedOn an optional timestamp used to filter consents; only those modified after
+   *     this time are returned. May be {@code null} to indicate no filtering by modification date.
+   * @return a {@link PageableModificationResponse} containing:
+   *     <ul>
+   *       <li>A list of {@link ConsentResponse} objects with enriched client details.
+   *       <li>Metadata including the last modification timestamp and the request limit.
+   *     </ul>
    */
   public PageableModificationResponse<ConsentResponse> getConsents(
       String principalId, int limit, ZonedDateTime lastModifiedOn) {
-    var response =
-        authorizationService.getConsents(
-            GetConsentsRequest.newBuilder()
-                .setPrincipalId(principalId)
-                .setLimit(limit)
-                .setLastModifiedAt(
-                    Optional.ofNullable(lastModifiedOn).map(ZonedDateTime::toString).orElse(""))
-                .build());
-
+    var response = grpcAuthorizationService.getConsents(principalId, limit, lastModifiedOn);
     var clientIds =
         response.getConsentsList().stream()
             .map(c -> new ClientId(UUID.fromString(c.getClientId())))

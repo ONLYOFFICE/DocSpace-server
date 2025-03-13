@@ -43,12 +43,12 @@ public class SecurityController(
     WebItemManagerSecurity webItemManagerSecurity,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     EmployeeDtoHelper employeeWrapperHelper,
-    IMemoryCache memoryCache,
+    IFusionCache fusionCache,
     IMapper mapper,
     IHttpContextAccessor httpContextAccessor,
     PasswordSettingsConverter passwordSettingsConverter,
     PasswordSettingsManager passwordSettingsManager)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
     /// Returns the security settings for the modules specified in the request.

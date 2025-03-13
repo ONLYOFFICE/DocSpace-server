@@ -39,7 +39,7 @@ public class MigrationFileUploadHandler
         UserManager userManager,
         AuthContext authContext,
         ILogger<MigrationFileUploadHandler> logger,
-        IDistributedCache cache)
+        IFusionCache hybridCache)
     {
         MigrationFileUploadResult result;
         try
@@ -59,7 +59,7 @@ public class MigrationFileUploadHandler
                     logger.Information("start migration upload file");
                     var discStore = await storageFactory.GetStorageAsync(tenantId, "migration", (IQuotaController)null) as DiscDataStore;
 
-                    var path = await cache.GetStringAsync(key);
+                    var path = await hybridCache.GetOrDefaultAsync<string>(key);
                     if (!string.IsNullOrEmpty(path))
                     {
                         _ = Task.Factory.StartNew(() =>
@@ -74,10 +74,7 @@ public class MigrationFileUploadHandler
                     var newPath = Path.GetRandomFileName();
                     var newFolder = discStore.GetPhysicalPath("", newPath);
                     Directory.CreateDirectory(newFolder);
-                    await cache.SetStringAsync(key, newFolder, new DistributedCacheEntryOptions
-                    {
-                        SlidingExpiration = TimeSpan.FromDays(1)
-                    });
+                    await hybridCache.SetAsync(key, newFolder, TimeSpan.FromDays(1));
 
                     int.TryParse(configuration["files:uploader:chunk-size"], out var chunkSize);
                     chunkSize = chunkSize == 0 ? 10 * 1024 * 1024 : chunkSize;
@@ -91,7 +88,7 @@ public class MigrationFileUploadHandler
             }
             else
             {
-                var path = await cache.GetStringAsync(key);
+                var path = await hybridCache.GetOrDefaultAsync<string>(key);
                 var file = context.Request.Form.Files[0];
                 await using var stream = file.OpenReadStream();
                 var folder = Path.Combine(path, Path.GetFileName(context.Request.Query["Name"].ToString()));

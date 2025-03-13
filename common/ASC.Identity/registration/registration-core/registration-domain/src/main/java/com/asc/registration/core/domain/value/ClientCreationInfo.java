@@ -27,6 +27,7 @@
 
 package com.asc.registration.core.domain.value;
 
+import com.asc.common.core.domain.value.UserId;
 import java.time.ZonedDateTime;
 
 /**
@@ -35,7 +36,7 @@ import java.time.ZonedDateTime;
  */
 public class ClientCreationInfo {
   private final ZonedDateTime createdOn;
-  private final String createdBy;
+  private final UserId createdBy;
 
   private ClientCreationInfo(Builder builder) {
     this.createdOn = builder.createdOn;
@@ -56,14 +57,14 @@ public class ClientCreationInfo {
    *
    * @return the creator identifier
    */
-  public String getCreatedBy() {
+  public UserId getCreatedBy() {
     return this.createdBy;
   }
 
   /** Builder class for constructing instances of {@link ClientCreationInfo}. */
   public static final class Builder {
     private ZonedDateTime createdOn;
-    private String createdBy;
+    private UserId createdBy;
 
     private Builder() {}
 
@@ -93,7 +94,7 @@ public class ClientCreationInfo {
      * @param val the creator identifier
      * @return the Builder instance
      */
-    public Builder createdBy(String val) {
+    public Builder createdBy(UserId val) {
       this.createdBy = val;
       return this;
     }

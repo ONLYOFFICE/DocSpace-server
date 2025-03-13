@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
@@ -88,7 +89,7 @@ public class SignatureService {
       var claimsJson = objectMapper.writeValueAsString(jwt.getClaims());
       return objectMapper.readValue(claimsJson, clazz);
     } catch (JwtException | JsonProcessingException e) {
-      throw new RuntimeException("Failed to validate token", e);
+      throw new BadCredentialsException("Failed to validate token", e);
     }
   }
 }

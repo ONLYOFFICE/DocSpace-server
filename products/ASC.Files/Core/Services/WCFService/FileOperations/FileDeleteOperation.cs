@@ -51,12 +51,13 @@ public record FileDeleteOperationData<T> : FileOperationData<T>
         IEnumerable<T> files,
         IEnumerable<int> versions,
         int tenantId,
+        Guid userId,
         IDictionary<string, string> headers,
         ExternalSessionSnapshot sessionSnapshot,
         bool holdResult = true,
         bool ignoreException = false,
         bool immediately = false,
-        bool isEmptyTrash = false) : base(folders, files, tenantId, headers, sessionSnapshot, holdResult)
+        bool isEmptyTrash = false) : base(folders, files, tenantId, userId, headers, sessionSnapshot, holdResult)
     {
         IgnoreException = ignoreException;
         Immediately = immediately;
@@ -66,16 +67,20 @@ public record FileDeleteOperationData<T> : FileOperationData<T>
 }
 
 [Transient]
-public class FileDeleteOperation(IServiceProvider serviceProvider) : ComposeFileOperation<FileDeleteOperationData<string>, FileDeleteOperationData<int>>(serviceProvider)
+public class FileDeleteOperation : ComposeFileOperation<FileDeleteOperationData<string>, FileDeleteOperationData<int>>
 {
-    protected override FileOperationType FileOperationType { get => FileOperationType.Delete; }
+    public FileDeleteOperation() { }
+    
+    public FileDeleteOperation(IServiceProvider serviceProvider) : base(serviceProvider) { }
 
-    public override Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
+    public override FileOperationType FileOperationType { get; set; } = FileOperationType.Delete;
+
+    public override Task RunJob(CancellationToken cancellationToken)
     {
         DaoOperation = new FileDeleteOperation<int>(_serviceProvider, Data);
         ThirdPartyOperation = new FileDeleteOperation<string>(_serviceProvider, ThirdPartyData);
 
-        return base.RunJob(distributedTask, cancellationToken);
+        return base.RunJob(cancellationToken);
     }
 }
 
@@ -87,7 +92,9 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
     private readonly bool _isEmptyTrash;
     private readonly Dictionary<string, StringValues> _headers;
     private readonly IEnumerable<int> _filesVersions;
-
+    
+    public override FileOperationType FileOperationType { get; set; } = FileOperationType.Delete;
+    
     public FileDeleteOperation(IServiceProvider serviceProvider, FileDeleteOperationData<T> fileOperationData)
     : base(serviceProvider, fileOperationData)
     {
@@ -96,7 +103,6 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         _headers = fileOperationData.Headers?.ToDictionary(x => x.Key, x => new StringValues(x.Value));
         _isEmptyTrash = fileOperationData.IsEmptyTrash;
         _filesVersions = fileOperationData.FilesVersions;
-        this[OpType] = (int)FileOperationType.Delete;
     }
     
     protected override int InitTotalProgressSteps()
@@ -132,7 +138,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         }
         if (root != null)
         {
-            this[Res] += $"folder_{root.Id}{SplitChar}";
+            Result += $"folder_{root.Id}{SplitChar}";
         }
 
         if (_filesVersions != null && _filesVersions.Any() && Files.Count > 0)
@@ -143,8 +149,8 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         {
             if (_isEmptyTrash)
             {
-            await DeleteFilesAsync(Files, serviceScope, true);
-            await DeleteFoldersAsync(Folders, serviceScope, true);
+                await DeleteFilesAsync(Files, serviceScope, true);
+                await DeleteFoldersAsync(Folders, serviceScope, true);
 
                 var trash = await folderDao.GetFolderAsync(_trashId);
                 await filesMessageService.SendAsync(MessageAction.TrashEmptied, trash, _headers);
@@ -181,19 +187,19 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
             T canCalculate = default;
             if (folder == null)
             {
-                this[Err] = FilesCommonResource.ErrorMessage_FolderNotFound;
+                Err = FilesCommonResource.ErrorMessage_FolderNotFound;
             }
             else if (folder.FolderType != FolderType.DEFAULT && folder.FolderType != FolderType.BUNCH
                 && !DocSpaceHelper.IsRoom(folder.FolderType)
                 && (folder.FolderType is FolderType.InProcessFormFolder or FolderType.ReadyFormFolder && (folder.RootFolderType != FolderType.Archive && folder.RootFolderType != FolderType.RoomTemplates)))
             {
-                this[Err] = FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder;
+                Err = FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder;
             }
             else if (!_ignoreException && checkPermissions && !canDelete)
             {
                 canCalculate = FolderDao.CanCalculateSubitems(folderId) ? default : folderId;
 
-                this[Err] = FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder;
+                Err = FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder;
             }
             else
             {
@@ -302,7 +308,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
 
                         if (!_ignoreException && isError)
                         {
-                            this[Err] = message;
+                            Err = message;
                         }
                         else
                         {
@@ -365,11 +371,11 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
             var (isError, message) = await WithErrorAsync(scope, [file], false, checkPermissions);
             if (file == null)
             {
-                this[Err] = FilesCommonResource.ErrorMessage_FileNotFound;
+                Err = FilesCommonResource.ErrorMessage_FileNotFound;
             }
             else if (!_ignoreException && isError)
             {
-                this[Err] = message;
+                Err = message;
             }
             else
             {
@@ -399,7 +405,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                     }
                     catch (Exception ex)
                     {
-                        this[Err] = ex.Message;
+                        Err = ex.Message;
                         Logger.ErrorWithException(ex);
                     }
                     
@@ -442,7 +448,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                     }
                     catch (Exception ex)
                     {
-                        this[Err] = ex.Message;
+                        Err = ex.Message;
                         Logger.ErrorWithException(ex);
                     }
                 }
@@ -463,10 +469,10 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         
         if (file == null)
         {
-            this[Err] = FilesCommonResource.ErrorMessage_FileNotFound;
+            Err = FilesCommonResource.ErrorMessage_FileNotFound;
         } else if (file.RootFolderType is FolderType.Archive or FolderType.TRASH)
         {
-            this[Err] = FilesCommonResource.ErrorMessage_SecurityException;
+            Err = FilesCommonResource.ErrorMessage_SecurityException;
         }
         else
         {
@@ -478,11 +484,11 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
 
                 if (file.Version == v)
                 {
-                    this[Err] = FilesCommonResource.ErrorMessage_SecurityException_FileVersion;
+                    Err = FilesCommonResource.ErrorMessage_SecurityException_FileVersion;
                 }
                 else if (!_ignoreException && isError)
                 {
-                    this[Err] = message;
+                    Err = message;
                 }
                 else
                 {
@@ -498,12 +504,12 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                     }
                     catch (Exception ex)
                     {
-                        this[Err] = ex.Message;
+                        Err = ex.Message;
                         Logger.ErrorWithException(ex);
                     }
 
-                    this[Process]++;
-                    this[Res] += $"file_{fileId}{SplitChar}";
+                    Process++;
+                    Result += $"file_{fileId}{SplitChar}";
                 }
 
                 await ProgressStep();

@@ -121,7 +121,7 @@
     <value>Nastaviť heslo</value>
   </data>
   <data name="BackupNotFound" xml:space="preserve">
-    <value>Záložný súbor je neplatný. Použite prosím súbor vytvorený vo verzii ONLYOFFICE v11.5 alebo novšej verzii.</value>
+    <value>Záložný súbor je neplatný. Použite súbor vytvorený na rovnakom portáli.</value>
   </data>
   <data name="LargeBackup" xml:space="preserve">
     <value>Záloha je väčšia ako celková veľkosť portálu</value>

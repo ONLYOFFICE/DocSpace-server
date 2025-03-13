@@ -32,6 +32,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         FileSecurity fileSecurity,
         FileUtility fileUtility,
+        FilesLinkUtility filesLinkUtility,
         MachinePseudoKeys machinePseudoKeys,
         Global global,
         TenantUtil tenantUtil,
@@ -302,12 +303,14 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
     public string GetSignature(object payload)
     {
-        if (string.IsNullOrEmpty(fileUtility.SignatureSecret))
+        var signatureSecret = filesLinkUtility.DocServiceSignatureSecret;
+
+        if (string.IsNullOrEmpty(signatureSecret))
         {
             return null;
         }
 
-        return JsonWebToken.Encode(payload, fileUtility.SignatureSecret);
+        return JsonWebToken.Encode(payload, signatureSecret);
     }
 
     public async Task<File<T>> CheckNeedDeletion<T>(IFileDao<T> fileDao, T fileId, FormFillingProperties<T> formFillingProperties)

@@ -32,6 +32,7 @@ namespace ASC.Web.Studio.Core.Notify;
 public class StudioPeriodicNotify(ILoggerProvider log,
         WorkContext workContext,
         TenantManager tenantManager,
+        TenantLogoManager tenantLogoManager,
         UserManager userManager,
         StudioNotifyHelper studioNotifyHelper,
         ITariffService tariffService,
@@ -39,14 +40,13 @@ public class StudioPeriodicNotify(ILoggerProvider log,
         CommonLinkUtility commonLinkUtility,
         ApiSystemHelper apiSystemHelper,
         ExternalResourceSettingsHelper externalResourceSettingsHelper,
-        SettingsManager settingsManager,
         CoreBaseSettings coreBaseSettings,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         CoreSettings coreSettings,
         IServiceProvider serviceProvider,
         AuditEventsRepository auditEventsRepository,
         LoginEventsRepository loginEventsRepository,
-        IDistributedCache distributedCache,
+        IFusionCache hybridCache,
         IEventBus eventBus)
 {
     private readonly ILogger _log = log.CreateLogger("ASC.Notify");
@@ -67,10 +67,10 @@ public class StudioPeriodicNotify(ILoggerProvider log,
         var nowDate = scheduleDate.Date;
         var startDateToNotifyUnusedPortals = nowDate;
 
-        var cacheValue = await distributedCache.GetStringAsync(CacheKey);
+        var cacheValue = await hybridCache.GetOrDefaultAsync<string>(CacheKey);
         if (string.IsNullOrEmpty(cacheValue))
         {
-            await distributedCache.SetStringAsync(CacheKey, JsonSerializer.Serialize(startDateToNotifyUnusedPortals));
+            await hybridCache.SetAsync(CacheKey, JsonSerializer.Serialize(startDateToNotifyUnusedPortals));
         }
         else
         {
@@ -532,7 +532,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
         {
             try
             {
-                var defaultRebranding = await MailWhiteLabelSettings.IsDefaultAsync(settingsManager);
+                var defaultRebranding = await tenantLogoManager.IsDefaultLogoSettingsAsync();
                 await tenantManager.SetCurrentTenantAsync(tenant.Id);
                 var client = workContext.RegisterClient(serviceProvider, studioNotifyHelper.NotifySource);
 

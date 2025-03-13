@@ -34,7 +34,7 @@ public class TenantLogoManager(
     TenantManager tenantManager,
     AuthContext authContext,
     IConfiguration configuration,
-    IDistributedCache distributedCache)
+    IFusionCache hybridCache)
 {
     public bool WhiteLabelEnabled
     {
@@ -119,9 +119,20 @@ public class TenantLogoManager(
         {
             var tenantWhiteLabelSettings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
 
-            return await tenantWhiteLabelSettings.GetLogoTextAsync(settingsManager) ?? TenantWhiteLabelSettings.DefaultLogoText;
+            return await tenantWhiteLabelSettings.GetLogoTextAsync(settingsManager);
         }
         return TenantWhiteLabelSettings.DefaultLogoText;
+    }
+
+    public async Task<bool> IsDefaultLogoSettingsAsync()
+    {
+        if (WhiteLabelEnabled)
+        {
+            var tenantWhiteLabelSettings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
+
+            return await tenantWhiteLabelSettings.GetIsDefault(settingsManager);
+        }
+        return true;
     }
 
     public bool IsRetina(HttpRequest request)
@@ -206,24 +217,21 @@ public class TenantLogoManager(
 
         foreach (var customCulture in customCultures)
         {
-            await distributedCache.RemoveAsync(GetCacheKey(customCulture));
+            await hybridCache.RemoveAsync(GetCacheKey(customCulture));
         }
 
-        await distributedCache.RemoveAsync(GetCacheKey(string.Empty));
+        await hybridCache.RemoveAsync(GetCacheKey(string.Empty));
     }
 
 
     private async Task<byte[]> GetMailLogoDataFromCacheAsync(string culture)
     {
-        return await distributedCache.GetAsync(GetCacheKey(culture));
+        return await hybridCache.GetOrDefaultAsync<byte[]>(GetCacheKey(culture));
     }
 
     private async Task InsertMailLogoDataToCacheAsync(byte[] data, string culture)
     {
-        await distributedCache.SetAsync(GetCacheKey(culture), data, new DistributedCacheEntryOptions
-        {
-            AbsoluteExpiration = DateTime.UtcNow.Add(TimeSpan.FromDays(1))
-        });
+        await hybridCache.SetAsync(GetCacheKey(culture), data, TimeSpan.FromDays(1));
     }
 
     private string GetCacheKey(string culture)

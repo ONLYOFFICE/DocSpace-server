@@ -34,7 +34,9 @@ import static org.mockito.Mockito.*;
 import com.asc.common.core.domain.entity.Audit;
 import com.asc.common.core.domain.value.ClientId;
 import com.asc.common.core.domain.value.ClientSecret;
+import com.asc.common.core.domain.value.Role;
 import com.asc.common.core.domain.value.TenantId;
+import com.asc.common.core.domain.value.UserId;
 import com.asc.common.core.domain.value.enums.AuditCode;
 import com.asc.common.core.domain.value.enums.AuthenticationMethod;
 import com.asc.common.service.transfer.response.ClientResponse;
@@ -66,6 +68,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 public class ClientUpdateCommandHandlerTest {
+  private final UserId CREATOR_ID = new UserId("creator");
+
   @InjectMocks private ClientUpdateCommandHandler clientUpdateCommandHandler;
   @Mock private ClientDomainService clientDomainService;
   @Mock private EncryptionService encryptionService;
@@ -112,11 +116,11 @@ public class ClientUpdateCommandHandlerTest {
                     Set.of("http://logout.url")))
             .clientCreationInfo(
                 ClientCreationInfo.Builder.builder()
-                    .createdBy("creator")
+                    .createdBy(CREATOR_ID)
                     .createdOn(ZonedDateTime.now(ZoneId.of("UTC")))
                     .build())
             .build();
-    client.initialize("creator");
+    client.initialize(CREATOR_ID);
     clientResponse =
         ClientResponse.builder()
             .clientId(client.getId().getValue().toString())
@@ -144,7 +148,7 @@ public class ClientUpdateCommandHandlerTest {
     when(encryptionService.encrypt(anyString())).thenReturn("encryptedSecret");
     when(clientDataMapper.toClientSecret(any(Client.class))).thenReturn(clientSecretResponse);
 
-    var response = clientUpdateCommandHandler.regenerateSecret(audit, command);
+    var response = clientUpdateCommandHandler.regenerateSecret(audit, Role.ROLE_ADMIN, command);
 
     verify(clientQueryRepository, times(1))
         .findByClientIdAndTenantId(any(ClientId.class), any(TenantId.class));
@@ -171,7 +175,7 @@ public class ClientUpdateCommandHandlerTest {
 
     assertThrows(
         ClientNotFoundException.class,
-        () -> clientUpdateCommandHandler.regenerateSecret(audit, command));
+        () -> clientUpdateCommandHandler.regenerateSecret(audit, Role.ROLE_ADMIN, command));
   }
 
   @Test
@@ -189,7 +193,7 @@ public class ClientUpdateCommandHandlerTest {
     when(clientDomainService.makeClientPublic(any(Audit.class), any(Client.class)))
         .thenReturn(clientUpdatedEvent);
 
-    clientUpdateCommandHandler.changeVisibility(audit, command);
+    clientUpdateCommandHandler.changeVisibility(audit, Role.ROLE_ADMIN, command);
 
     verify(clientQueryRepository, times(1))
         .findByClientIdAndTenantId(any(ClientId.class), any(TenantId.class));
@@ -214,7 +218,7 @@ public class ClientUpdateCommandHandlerTest {
     when(clientDomainService.makeClientPrivate(any(Audit.class), any(Client.class)))
         .thenReturn(clientUpdatedEvent);
 
-    clientUpdateCommandHandler.changeVisibility(audit, command);
+    clientUpdateCommandHandler.changeVisibility(audit, Role.ROLE_ADMIN, command);
 
     verify(clientQueryRepository, times(1))
         .findByClientIdAndTenantId(any(ClientId.class), any(TenantId.class));
@@ -238,7 +242,7 @@ public class ClientUpdateCommandHandlerTest {
 
     assertThrows(
         ClientNotFoundException.class,
-        () -> clientUpdateCommandHandler.changeVisibility(audit, command));
+        () -> clientUpdateCommandHandler.changeVisibility(audit, Role.ROLE_ADMIN, command));
   }
 
   @Test
@@ -255,7 +259,7 @@ public class ClientUpdateCommandHandlerTest {
     when(clientDomainService.deleteClient(any(Audit.class), any(Client.class)))
         .thenReturn(clientDeletedEvent);
 
-    clientUpdateCommandHandler.deleteClient(audit, command);
+    clientUpdateCommandHandler.deleteClient(audit, Role.ROLE_ADMIN, command);
 
     verify(clientQueryRepository, times(1))
         .findByClientIdAndTenantId(any(ClientId.class), any(TenantId.class));
@@ -278,6 +282,6 @@ public class ClientUpdateCommandHandlerTest {
 
     assertThrows(
         ClientNotFoundException.class,
-        () -> clientUpdateCommandHandler.deleteClient(audit, command));
+        () -> clientUpdateCommandHandler.deleteClient(audit, Role.ROLE_ADMIN, command));
   }
 }

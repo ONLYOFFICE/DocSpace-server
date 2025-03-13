@@ -36,11 +36,12 @@ public record FileDownloadOperationData<T> : FileOperationData<T>
     
     public FileDownloadOperationData(IEnumerable<T> folders,
         IEnumerable<FilesDownloadOperationItem<T>> filesDownload,
-        int tenantId,
+        int tenantId,        
+        Guid userId,
         IDictionary<string, string> headers,
         ExternalSessionSnapshot sessionSnapshot,
         string baseUri =  null,
-        bool holdResult = true) : base(folders, filesDownload.Select(f => f.Id).ToList(), tenantId, headers, sessionSnapshot, holdResult)
+        bool holdResult = true) : base(folders, filesDownload.Select(f => f.Id).ToList(), tenantId, userId, headers, sessionSnapshot, holdResult)
     {
         FilesDownload = filesDownload;
         BaseUri = baseUri;
@@ -56,16 +57,19 @@ public record FileDownloadOperationData<T> : FileOperationData<T>
 public record FilesDownloadOperationItem<T>(T Id, string Ext, string Password);
 
 [Transient]
-public class FileDownloadOperation(IServiceProvider serviceProvider) : ComposeFileOperation<FileDownloadOperationData<string>, FileDownloadOperationData<int>>(serviceProvider)
-{    
-    protected override FileOperationType FileOperationType { get => FileOperationType.Download; }
+public class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationData<string>, FileDownloadOperationData<int>>
+{
+    public override FileOperationType FileOperationType { get; set; } = FileOperationType.Download;
+    public FileDownloadOperation() { }
     
-    public override async Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
+    public FileDownloadOperation(IServiceProvider serviceProvider) : base(serviceProvider) { }
+    
+    public override async Task RunJob(CancellationToken cancellationToken)
     {
         DaoOperation = new FileDownloadOperation<int>(_serviceProvider, Data);
         ThirdPartyOperation = new FileDownloadOperation<string>(_serviceProvider, ThirdPartyData);
 
-        await base.RunJob(distributedTask, cancellationToken);
+        await base.RunJob(cancellationToken);
 
         await using var scope = await ThirdPartyOperation.CreateScopeAsync();
         var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
@@ -173,15 +177,15 @@ public class FileDownloadOperation(IServiceProvider serviceProvider) : ComposeFi
                 MimeMapping.GetMimeMapping(path),
                 "attachment; filename=\"" + Uri.EscapeDataString(fileName) + "\"");
 
-            this[Res] = $"{filesLinkUtility.FileHandlerPath}?{FilesLinkUtility.Action}=bulk&filename={Uri.EscapeDataString(await instanceCrypto.EncryptAsync(fileName))}";
+            Result = $"{filesLinkUtility.FileHandlerPath}?{FilesLinkUtility.Action}=bulk&filename={Uri.EscapeDataString(await instanceCrypto.EncryptAsync(fileName))}";
 
             if (!isAuthenticated)
             {
-                this[Res] += $"&session={HttpUtility.UrlEncode(sessionKey)}";
+                Result += $"&session={HttpUtility.UrlEncode(sessionKey)}";
             }
         }
 
-        this[Finish] = true;
+        Finish = true;
         await PublishChanges();
     }
 
@@ -190,25 +194,25 @@ public class FileDownloadOperation(IServiceProvider serviceProvider) : ComposeFi
         var thirdpartyTask = ThirdPartyOperation;
         var daoTask = DaoOperation;
 
-        var error1 = thirdpartyTask[Err];
-        var error2 = daoTask[Err];
+        var error1 = thirdpartyTask.Err;
+        var error2 = daoTask.Err;
 
         if (!string.IsNullOrEmpty(error1))
         {
-            this[Err] = error1;
+            Err = error1;
         }
         else if (!string.IsNullOrEmpty(error2))
         {
-            this[Err] = error2;
+            Err = error2;
         }
 
-        this[Process] = thirdpartyTask[Process] + daoTask[Process];
+        Process = thirdpartyTask.Process + daoTask.Process;
 
         var progressSteps = ThirdPartyOperation.Total + DaoOperation.Total + 1;
 
-        var progress = (int)(this[Process] / (double)progressSteps * 100);
+        var progress = (int)(Process / (double)progressSteps * 100);
 
-        this[Progress] = progress < 100 ? progress : 100;
+        Progress = progress < 100 ? progress : 100;
         await PublishChanges();
     }
 }
@@ -218,13 +222,13 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
     private readonly Dictionary<T, (string, string)> _files;
     private readonly IDictionary<string, StringValues> _headers;
     private ItemNameValueCollection<T> _entriesPathId;
-
+    public override FileOperationType FileOperationType { get; set; } = FileOperationType.Download;
+    
     public FileDownloadOperation(IServiceProvider serviceProvider, FileDownloadOperationData<T> fileDownloadOperationData)
         : base(serviceProvider, fileDownloadOperationData)
     {
         _files = fileDownloadOperationData.FilesDownload?.ToDictionary(r => r.Id, r => (r.Ext, r.Password)) ?? new Dictionary<T, (string, string)>();
         _headers = fileDownloadOperationData.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value));
-        this[OpType] = (int)FileOperationType.Download;
     }
 
     protected override async Task DoJob(AsyncServiceScope serviceScope)
@@ -429,7 +433,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 
                     if (file == null)
                     {
-                        this[Err] = FilesCommonResource.ErrorMessage_FileNotFound;
+                        Err = FilesCommonResource.ErrorMessage_FileNotFound;
                         continue;
                     }
 
@@ -512,7 +516,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 
         if (!string.IsNullOrEmpty(error))
         {
-            this[Err] = error;
+            Err = error;
             await PublishChanges();
         }
         
@@ -554,7 +558,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 
             if (file == null)
             {
-                this[Err] = FilesCommonResource.ErrorMessage_FileNotFound;
+                Err = FilesCommonResource.ErrorMessage_FileNotFound;
                 return null;
             }
 
@@ -579,7 +583,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
             }
             catch (Exception ex)
             {
-                this[Err] = ex.Message;
+                Err = ex.Message;
 
                 Logger.ErrorWithException(ex);
             }

@@ -154,7 +154,7 @@
     <value>قم بتفعيل التطبيق لتسجيل الدخول للبوابة باستخدام حساب معرف Apple.</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
-    <value>قم بتفعيل هذا التطبيق للسماح للمستخدمين بتسجيل الدخول إلى ONLYOFFICE بواسطة معرف Apple. {0} إذهب لبوابة مطورين Apple وقم بانشاء تطبيق ONLYOFFICE جديد. وقم بادراج البيانات المستلمة بالأسفل:</value>
+    <value>قم بتفعيل هذا التطبيق للسماح للمستخدمين بتسجيل الدخول إلى {LogoText} بواسطة معرف Apple. {0} إذهب لبوابة مطورين Apple وقم بانشاء تطبيق {LogoText} جديد. وقم بادراج البيانات المستلمة بالأسفل:</value>
   </data>
   <data name="ConsumersappleIdKeyId" xml:space="preserve">
     <value>تم انشاء معرف رئيسي مكون من 10 أحرف لتسجيل الدخول بواسطة مفتاح Apple الخاص</value>
@@ -199,7 +199,7 @@
     <value>قم بالسماح للتطبيق بالتحكم بملفات ومجلدات Box.</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
-    <value>قم بالسماح لهذا التطبيق بتوصيل حساب BOX الخاص بك بوحدة المستندات. ستتمكن من إدارة الملفات وتعديلها ومشاركتها من Box مع مستخدمين ONLYOFFICE. {0} سجل الدخول إلى حسابك في صفحة مطوري Box وأنشئ تطبيقاً جديداً لتكامل ONLYOFFICE. أدخل البيانات المستلمة في الأسفل:</value>
+    <value>قم بالسماح لهذا التطبيق بتوصيل حساب BOX الخاص بك بوحدة المستندات. ستتمكن من إدارة الملفات وتعديلها ومشاركتها من Box مع مستخدمين {LogoText}. {0} سجل الدخول إلى حسابك في صفحة مطوري Box وأنشئ تطبيقاً جديداً لتكامل {LogoText}. أدخل البيانات المستلمة في الأسفل:</value>
   </data>
   <data name="ConsumersClickatell" xml:space="preserve">
     <value>Clickatell</value>
@@ -211,7 +211,7 @@
     <value>قم بالسماح للتطبيق بالمصادقة الثنائية عبر Clickatell.</value>
   </data>
   <data name="ConsumersClickatellInstruction" xml:space="preserve">
-    <value>استخدم هذا التطبيق لتمكين المصادقة الثنائية مع خدمة Clickatell. {0} سجل الدخول إلى حساس الرسائل القصيري في المنصة وأنشئ تكاملاً جديداً لـ ONLYOFFICE. انسخ مفتاح api وأدخله أدناه:</value>
+    <value>استخدم هذا التطبيق لتمكين المصادقة الثنائية مع خدمة Clickatell. {0} سجل الدخول إلى حساس الرسائل القصيري في المنصة وأنشئ تكاملاً جديداً لـ {LogoText}. انسخ مفتاح api وأدخله أدناه:</value>
   </data>
   <data name="ConsumersDocuSign" xml:space="preserve">
     <value>DocuSign</value>
@@ -229,7 +229,7 @@
     <value>نقطة نهاية مصادقة DocuSign</value>
   </data>
   <data name="ConsumersDocuSignInstruction" xml:space="preserve">
-    <value>قم بالسماح لهذا التطبيق بتوقيع المستندات رقمياً باستخدام DocuSign. {0} انتقل إلى وحدة  تحكم المسئول في DocuSign وأضف تكاملاً لـ ONLYOFFICE. أدخل البيانات التي تلقيتها أدناه:</value>
+    <value>قم بالسماح لهذا التطبيق بتوقيع المستندات رقمياً باستخدام DocuSign. {0} انتقل إلى وحدة  تحكم المسئول في DocuSign وأضف تكاملاً لـ {LogoText}. أدخل البيانات التي تلقيتها أدناه:</value>
   </data>
   <data name="ConsumersDropBox" xml:space="preserve">
     <value>DropBox</value>
@@ -238,7 +238,7 @@
     <value>قم بالسماح للتطبيق بإدارة ملفات ومجلدات DropBox.</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
-    <value>قم بالسماح لهذا التطبيق بربط حساب DropBox الخاص بك بوحدة المستندات. ستتمكن نم إدارة الملفات وتحريرها ومشاركتها من DropBox مع مستخدمين ONLYOFFICE. {0} سجل الدخول إلى حسابك على موقع Dropbox Developers وأنشئ تطبيقاً جديداً لتكامل ONLYOFFICE. أدخل البيانات التي تلقيتها أدناه:</value>
+    <value>قم بالسماح لهذا التطبيق بربط حساب DropBox الخاص بك بوحدة المستندات. ستتمكن نم إدارة الملفات وتحريرها ومشاركتها من DropBox مع مستخدمين {LogoText}. {0} سجل الدخول إلى حسابك على موقع Dropbox Developers وأنشئ تطبيقاً جديداً لتكامل {LogoText}. أدخل البيانات التي تلقيتها أدناه:</value>
   </data>
   <data name="ConsumersDropBoxKey" xml:space="preserve">
     <value>عرف DropBox</value>
@@ -256,7 +256,7 @@
     <value>قم بتمكين هذا التطبيق لإنشاء قوائم ببليوغرافية في المستندات باستخدام EasyBib.</value>
   </data>
   <data name="ConsumersEasyBibInstruction" xml:space="preserve">
-    <value>قم بتمكين هذا التطبيق لإنشاء قوائم المراجع في محرري ONLYOFFICE.  {0} انتقل إلى صفحة الاشتراك في EasyBib واملأ النموذج لإضافة تكامل ONLYOFFICE بعد الحصول على مفتاح التطبيق قم بلصقه أدناه:</value>
+    <value>قم بتمكين هذا التطبيق لإنشاء قوائم المراجع في محرري {LogoText}.  {0} انتقل إلى صفحة الاشتراك في EasyBib واملأ النموذج لإضافة تكامل {LogoText} بعد الحصول على مفتاح التطبيق قم بلصقه أدناه:</value>
   </data>
   <data name="ConsumersFacebook" xml:space="preserve">
     <value>فيسبوك</value>
@@ -274,7 +274,7 @@
     <value>قم بتفعيل التطبيق لتسجيل الدخول للبوابة من خلال حساب فيسبوك.</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
-    <value>قم بتمكين هذا التطبيق للسماح للمستخدمين بتسجيل الدخول إلى ONLYOFFICE باستخدام فيسبوك وربط حسابات زبائن الفيسبوك بوحدة الـ CRM. {0} انتقل إلى بوابة مطورين فيسبوك وأنشئ تكامل تطبيقاً جديداً ONLYOFFICE. أدخل البيانات التي تلقيتها أدناه:</value>
+    <value>قم بتمكين هذا التطبيق للسماح للمستخدمين بتسجيل الدخول إلى {LogoText} باستخدام فيسبوك وربط حسابات زبائن الفيسبوك بوحدة الـ CRM. {0} انتقل إلى بوابة مطورين فيسبوك وأنشئ تكامل تطبيقاً جديداً {LogoText}. أدخل البيانات التي تلقيتها أدناه:</value>
   </data>
   <data name="ConsumersFirebase" xml:space="preserve">
     <value>Firebase</value>
@@ -295,7 +295,7 @@
     <value>قم بتمكين هذا التطبيق لاستلام اشعارات عن المستلمة من المراسلة السحابية من Firebase.</value>
   </data>
   <data name="ConsumersFirebaseInstruction" xml:space="preserve">
-    <value>قم بتمكين هذا التطبيق للسماح للمستخدمين بتلقي إشعارات حول الرسائل حتى في وضع عدم الاتصال. {0} انتقل إلى وحدة تحكم Firebase وأضف مشروعاً جديداً لتكامل ONLYOFFICE. أدخل البيانات التي تلقيتها أدناه:</value>
+    <value>قم بتمكين هذا التطبيق للسماح للمستخدمين بتلقي إشعارات حول الرسائل حتى في وضع عدم الاتصال. {0} انتقل إلى وحدة تحكم Firebase وأضف مشروعاً جديداً لتكامل {LogoText}. أدخل البيانات التي تلقيتها أدناه:</value>
   </data>
   <data name="ConsumersGoogle" xml:space="preserve">
     <value>جوجل</value>
@@ -331,7 +331,7 @@
     <value>قم بتوصيل المشروع لتسجيل الدخول إلى البوابة باستخدام حساب جوجل و قم بإدارة ملفات و مجلدات جوجل درايف.</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
-    <value>قم بتمكين هذا التطبيق لتوصيل حساب جوجل درايف الخاص بك بوحدة المستندات. ستتمكن من إدارة الملفات وتعديلها ومشاركتها من جوجل درايف مع مستخدمين ONLYOFFICE. {0} انتقل إلى وحدة تحكم Google APIs وأنشئ مشروعاً جديداً لتكامل ONLYOFFICE. أدخل البيانات التي تلقيتها أدناه:</value>
+    <value>قم بتمكين هذا التطبيق لتوصيل حساب جوجل درايف الخاص بك بوحدة المستندات. ستتمكن من إدارة الملفات وتعديلها ومشاركتها من جوجل درايف مع مستخدمين {LogoText}. {0} انتقل إلى وحدة تحكم Google APIs وأنشئ مشروعاً جديداً لتكامل {LogoText}. أدخل البيانات التي تلقيتها أدناه:</value>
   </data>
   <data name="ConsumersLinkedIn" xml:space="preserve">
     <value>لينكدان</value>
@@ -340,7 +340,7 @@
     <value>قم بتفعيل التطبيق لتسجيل الدخول للبوابة من خلال حساب لينكدان.</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
-    <value>قم بتمكين هذا التطبيق للسماح للمستخدمين بتسجيل الدخول إلى ONLYOFFICE باستخدام حسابات لينكدان. {0} انتقل إلى موقع مطورين لينكدان وأنشئ تطبيق جديد لتكامل ONLYOFFICE. أدخل البيانات التي تلقيتها أدناه:</value>
+    <value>قم بتمكين هذا التطبيق للسماح للمستخدمين بتسجيل الدخول إلى {LogoText} باستخدام حسابات لينكدان. {0} انتقل إلى موقع مطورين لينكدان وأنشئ تطبيق جديد لتكامل {LogoText}. أدخل البيانات التي تلقيتها أدناه:</value>
   </data>
   <data name="ConsumersLinkedInKey" xml:space="preserve">
     <value>معرف لينكدان</value>
@@ -376,7 +376,7 @@
     <value>قم بتفعيل التطبيق لتسجيل الدخول للبوابة من خلال حساب مايكروسوفت.</value>
   </data>
   <data name="ConsumersMicrosoftInstruction" xml:space="preserve">
-    <value>قم بتمكين هذا التطبيق للسماح للمستخدمين بتسجيل الدخول إلى ONLYOFFICE باستخدام مايكروسوفت. {0} انتقل إلى Microsoft Azure وأنشئ تطبيق كامل لتكامل ONLYOFFICE. أدخل البيانات التي تلقيتها أدناه:</value>
+    <value>قم بتمكين هذا التطبيق للسماح للمستخدمين بتسجيل الدخول إلى {LogoText} باستخدام مايكروسوفت. {0} انتقل إلى Microsoft Azure وأنشئ تطبيق كامل لتكامل {LogoText}. أدخل البيانات التي تلقيتها أدناه:</value>
   </data>
   <data name="ConsumersRackspace" xml:space="preserve">
     <value>ذاكرة السحابة في Rackspace</value>
@@ -421,7 +421,7 @@
     <value>قم بتوصيل أمازون  AWS S3 بالنسخ الاحتياطي وتخزين البيانات من بوابتك الإلكترونية.</value>
   </data>
   <data name="ConsumersS3Instruction" xml:space="preserve">
-    <value>قم بتوصيل Amazon AWS S3 بالنسخ الاحتياطي وتخزين البيانات من بوابتك الإلكترونية. {0} انتقل إلى وحدة إدارة AWS وأنشئ مفاتيح وصول لـ ONLYOFFICE. الصق البيانات التي تلقيتها أدناه:</value>
+    <value>قم بتوصيل Amazon AWS S3 بالنسخ الاحتياطي وتخزين البيانات من بوابتك الإلكترونية. {0} انتقل إلى وحدة إدارة AWS وأنشئ مفاتيح وصول لـ {LogoText}. الصق البيانات التي تلقيتها أدناه:</value>
   </data>
   <data name="ConsumersS3region" xml:space="preserve">
     <value>المنطقة</value>
@@ -466,7 +466,7 @@
     <value>تمكين التطبيق لإدارة ملفات ومجلدات OneDrive.</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
-    <value>قم بتمكين هذا التطبيق لتوصيل حساب OneDrive الخاص بك بوحدة المستندات. ستتمكن من إدارة الملفات وتحريرها ومشاركتها من OneDrive مع مستخدمين ONLYOFFICE. {0}قم بتسجيل الدخول إلى حساب Microsoft Azure الخاص بك وإنشاء تطبيق جديد لتكامل ONLYOFFICE. ثم قم بإدراج البيانات التي تلقيتها أدناه:</value>
+    <value>قم بتمكين هذا التطبيق لتوصيل حساب OneDrive الخاص بك بوحدة المستندات. ستتمكن من إدارة الملفات وتحريرها ومشاركتها من OneDrive مع مستخدمين {LogoText}. {0}قم بتسجيل الدخول إلى حساب Microsoft Azure الخاص بك وإنشاء تطبيق جديد لتكامل {LogoText}. ثم قم بإدراج البيانات التي تلقيتها أدناه:</value>
   </data>
   <data name="ConsumersSmsc" xml:space="preserve">
     <value>مركز الرسائل القصيرة</value>
@@ -562,7 +562,7 @@
     <value>قم بالسماح للتطبيق بنشر المستندات مباشرة في WordPress.</value>
   </data>
   <data name="ConsumersWordpressInstruction" xml:space="preserve">
-    <value>قم بتمكين التطبيق لنشر المستندات بسهولة على موقع WordPress الخاص بك. {0}أنشئ تطبيقًا جديدًا لتكامل ONLYOFFICE في صفحة مطوري ONLYOFFICE. ثم الصق البيانات التي تلقيتها أدناه:</value>
+    <value>قم بتمكين التطبيق لنشر المستندات بسهولة على موقع WordPress الخاص بك. {0}أنشئ تطبيقًا جديدًا لتكامل {LogoText} في صفحة مطوري {LogoText}. ثم الصق البيانات التي تلقيتها أدناه:</value>
   </data>
   <data name="ConsumerswpClientId" xml:space="preserve">
     <value>مفتاح WordPress</value>
@@ -583,7 +583,7 @@
     <value>قم بتمكين التطبيق لاستيراد المستخدمين من خدمة Yahoo.</value>
   </data>
   <data name="ConsumersYahooInstruction" xml:space="preserve">
-    <value>قم بتمكين هذا التطبيق لإضافة مستخدمي البوابة الجديدة من قائمة جهات اتصال في .Yahoo {0}انتقل إلى صفحة إنشاء تطبيق في شبكة مطوري Yahoo وأنشئ تطبيقًا جديدًا لتكامل ONLYOFFICE. ثم قم بإدراج البيانات المتلقاة:</value>
+    <value>قم بتمكين هذا التطبيق لإضافة مستخدمي البوابة الجديدة من قائمة جهات اتصال في .Yahoo {0}انتقل إلى صفحة إنشاء تطبيق في شبكة مطوري Yahoo وأنشئ تطبيقًا جديدًا لتكامل {LogoText}. ثم قم بإدراج البيانات المتلقاة:</value>
   </data>
   <data name="ConsumersYandex" xml:space="preserve">
     <value>Yandex</value>
@@ -1054,7 +1054,7 @@
     <value>تفعيل التطبيق لتسجيل الدخول للبوابة باستخدام حساب الزووم.</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
-    <value>قم بتمكين هذا التطبيق للسماح للمستخدمين بتسجيل الدخول إلى ONLYOFFICE باستخدام حسابات الزووم الخاصة بهم.  {0}انتقل إلى موقع ويب Zoom Developers وأنشئ تطبيقًا جديدًا متكاملاً مع ONLYOFFICE. أدخل البيانات التي تلقيتها أدناه:</value>
+    <value>قم بتمكين هذا التطبيق للسماح للمستخدمين بتسجيل الدخول إلى {LogoText} باستخدام حسابات الزووم الخاصة بهم.  {0}انتقل إلى موقع ويب Zoom Developers وأنشئ تطبيقًا جديدًا متكاملاً مع {LogoText}. أدخل البيانات التي تلقيتها أدناه:</value>
   </data>
   <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
     <value>فشلت محاولات تسجيل الدخول. يرحى المحاولة لاحقاً</value>

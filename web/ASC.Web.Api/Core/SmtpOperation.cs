@@ -29,12 +29,11 @@ namespace ASC.Web.Api.Core;
 [Singleton]
 public class SmtpOperation(IServiceProvider serviceProvider, IDistributedTaskQueueFactory queueFactory)
 {
-    public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "smtp";
-    private readonly DistributedTaskQueue _progressQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
+    private readonly DistributedTaskQueue<SmtpJob> _progressQueue = queueFactory.CreateQueue<SmtpJob>();
 
     public async Task StartSmtpJob(SmtpSettingsDto smtpSettings, Tenant tenant, Guid user)
     {
-        var item = (await _progressQueue.GetAllTasks<SmtpJob>()).FirstOrDefault(t => t.TenantId == tenant.Id);
+        var item = (await _progressQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenant.Id);
 
         if (item is { IsCompleted: true })
         {
@@ -54,7 +53,7 @@ public class SmtpOperation(IServiceProvider serviceProvider, IDistributedTaskQue
 
     public async Task<SmtpOperationStatusRequestsDto> GetStatus(Tenant tenant)
     {
-        var item = (await _progressQueue.GetAllTasks<SmtpJob>()).FirstOrDefault(t => t.TenantId == tenant.Id);
+        var item = (await _progressQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenant.Id);
 
         if (item == null)
         {

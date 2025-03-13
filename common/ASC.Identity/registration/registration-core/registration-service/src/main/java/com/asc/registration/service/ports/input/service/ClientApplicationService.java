@@ -29,6 +29,7 @@ package com.asc.registration.service.ports.input.service;
 
 import com.asc.common.core.domain.entity.Audit;
 import com.asc.common.core.domain.value.ClientId;
+import com.asc.common.core.domain.value.Role;
 import com.asc.common.service.transfer.response.ClientResponse;
 import com.asc.registration.service.transfer.request.create.CreateTenantClientCommand;
 import com.asc.registration.service.transfer.request.fetch.ClientInfoPaginationQuery;
@@ -45,120 +46,219 @@ import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
 /**
- * Interface defining the contract for managing clients within the application layer.
+ * Defines the contract for managing client entities within the application layer.
  *
- * <p>Provides methods for creating, updating, retrieving, and deleting clients. It also supports
- * managing client-related attributes, such as consents, activation state, and visibility settings.
+ * <p>This interface provides methods for creating, updating, retrieving, and deleting clients, as
+ * well as managing client-specific attributes such as activation status, visibility, and security
+ * (e.g., secret regeneration). The behavior of several methods is determined by the role of the
+ * user, ensuring that authorization is enforced appropriately.
  */
 public interface ClientApplicationService {
 
   /**
-   * Retrieves detailed information about a specific tenant client. Accessible only by admin users.
+   * Retrieves detailed information for a tenant client based on the provided query.
    *
-   * @param query the query containing the tenant ID and client ID.
-   * @return a {@link ClientResponse} containing the client's details.
+   * <p>Access control:
+   *
+   * <ul>
+   *   <li>Administrators can retrieve details for any client within the tenant.
+   *   <li>Regular users can only retrieve details for clients they own.
+   * </ul>
+   *
+   * @param role the role of the user performing the operation.
+   * @param query a {@link TenantClientQuery} containing the tenant and client identifiers.
+   * @return a {@link ClientResponse} containing the detailed information of the specified client.
    */
-  ClientResponse getClient(@Valid TenantClientQuery query);
+  ClientResponse getClient(@NotNull Role role, @Valid TenantClientQuery query);
 
   /**
-   * Retrieves detailed information about a specific client using its client ID.
+   * Retrieves detailed information for a client identified by its client ID.
    *
    * @param clientId the unique identifier of the client.
-   * @return a {@link ClientResponse} containing the client's details.
+   * @return a {@link ClientResponse} containing the detailed information of the specified client.
    */
   ClientResponse getClient(@Valid String clientId);
 
   /**
-   * Retrieves basic information about a specific client. Allows fetching either public clients
-   * using only the client ID, or any client using both the client ID and tenant ID.
+   * Retrieves basic client information based on the provided query.
    *
-   * @param query the query containing the client ID and optionally the tenant ID.
-   * @return a {@link ClientInfoResponse} containing the client's basic information.
+   * <p>Access control:
+   *
+   * <ul>
+   *   <li>Administrators can access basic information for any client across tenants.
+   *   <li>Regular users can access basic information only for clients they own.
+   * </ul>
+   *
+   * @param role the role of the user performing the request.
+   * @param query a {@link ClientInfoQuery} containing the client identifier and, optionally, the
+   *     tenant identifier.
+   * @return a {@link ClientInfoResponse} containing the basic information of the specified client.
    */
-  ClientInfoResponse getClientInfo(@Valid ClientInfoQuery query);
+  ClientInfoResponse getClientInfo(@NotNull Role role, @Valid ClientInfoQuery query);
 
   /**
-   * Retrieves basic information about a specific client using only its client ID.
+   * Retrieves basic client information for the specified client ID.
+   *
+   * <p>This is a public method that does not require tenant verification.
    *
    * @param clientId the unique identifier of the client.
-   * @return a {@link ClientInfoResponse} containing the client's basic information.
+   * @return a {@link ClientInfoResponse} containing the basic information of the client.
    */
   ClientInfoResponse getClientInfo(@NotBlank String clientId);
 
   /**
-   * Retrieves a paginated list of basic information about clients for a specific tenant. Fetches
-   * either public clients or all clients associated with the specified tenant ID.
+   * Retrieves a paginated list of basic client information for a specific tenant.
    *
-   * @param query the query containing pagination parameters, tenant ID, and other filters.
-   * @return a {@link PageableResponse} containing a list of {@link ClientInfoResponse}.
+   * <p>Access control:
+   *
+   * <ul>
+   *   <li>Administrators can retrieve all clients associated with the tenant.
+   *   <li>Regular users can retrieve only the clients accessible to them.
+   * </ul>
+   *
+   * @param role the role of the user making the request.
+   * @param query a {@link ClientInfoPaginationQuery} containing pagination parameters, tenant
+   *     identifier, and optional filters.
+   * @return a {@link PageableResponse} containing a paginated list of {@link ClientInfoResponse}
+   *     objects.
    */
-  PageableResponse<ClientInfoResponse> getClientsInfo(@Valid ClientInfoPaginationQuery query);
+  PageableResponse<ClientInfoResponse> getClientsInfo(
+      @NotNull Role role, @Valid ClientInfoPaginationQuery query);
 
   /**
-   * Retrieves a paginated list of clients for a specific tenant. Accessible only by admin users.
+   * Retrieves a paginated list of clients for a specific tenant.
    *
-   * @param query the query containing pagination parameters and tenant ID.
-   * @return a {@link PageableResponse} containing a list of {@link ClientResponse}.
+   * <p>Access control:
+   *
+   * <ul>
+   *   <li>Administrators can retrieve all clients for the tenant.
+   *   <li>Regular users can retrieve only the clients accessible to them.
+   * </ul>
+   *
+   * @param role the role of the user performing the operation.
+   * @param query a {@link TenantClientsPaginationQuery} containing pagination parameters and the
+   *     tenant identifier.
+   * @return a {@link PageableResponse} containing a paginated list of {@link ClientResponse}
+   *     objects.
    */
-  PageableResponse<ClientResponse> getClients(@Valid TenantClientsPaginationQuery query);
+  PageableResponse<ClientResponse> getClients(
+      @NotNull Role role, @Valid TenantClientsPaginationQuery query);
 
   /**
-   * Retrieves a list of clients for the given set of client IDs.
+   * Retrieves detailed information for a list of clients identified by their client IDs.
    *
-   * @param clientIds a list of client IDs for which details are to be retrieved.
-   * @return a list of {@link ClientResponse} containing details of the specified clients.
+   * @param clientIds a list of {@link ClientId} objects representing the unique identifiers of the
+   *     clients.
+   * @return a list of {@link ClientResponse} objects containing detailed information for the
+   *     specified clients.
    */
   List<ClientResponse> getClients(@Valid @NotNull List<ClientId> clientIds);
 
   /**
-   * Creates a new client for a specific tenant.
+   * Creates a new client for a specified tenant.
    *
-   * @param audit the audit details of the user performing the operation.
-   * @param command the command containing the details required to create a new client.
-   * @return a {@link ClientResponse} containing the created client's details.
+   * @param audit an {@link Audit} object capturing the audit details of the user performing the
+   *     operation.
+   * @param command a {@link CreateTenantClientCommand} containing the details required to create
+   *     the client.
+   * @return a {@link ClientResponse} containing the details of the newly created client.
    */
   ClientResponse createClient(@Valid Audit audit, @Valid CreateTenantClientCommand command);
 
   /**
-   * Regenerates the secret key for a specific client.
+   * Regenerates the secret key for a specified client.
    *
-   * @param audit the audit details of the user performing the operation.
-   * @param command the command containing the tenant ID and client ID.
-   * @return a {@link ClientSecretResponse} containing the new client secret.
+   * <p>Access control:
+   *
+   * <ul>
+   *   <li>Administrators can regenerate the secret for any client within the tenant.
+   *   <li>Regular users can only regenerate the secret for clients they own.
+   * </ul>
+   *
+   * @param audit an {@link Audit} object capturing the audit details of the user performing the
+   *     operation.
+   * @param role the role of the user requesting the secret regeneration.
+   * @param command a {@link RegenerateTenantClientSecretCommand} containing the tenant and client
+   *     identifiers.
+   * @return a {@link ClientSecretResponse} containing the newly generated client secret.
    */
   ClientSecretResponse regenerateSecret(
-      @Valid Audit audit, @Valid RegenerateTenantClientSecretCommand command);
+      @Valid Audit audit, @NotNull Role role, @Valid RegenerateTenantClientSecretCommand command);
 
   /**
-   * Updates the activation state of a specific client.
+   * Updates the activation state of a specified client.
    *
-   * @param audit the audit details of the user performing the operation.
-   * @param command the command containing the tenant ID, client ID, and the new activation state.
+   * <p>Access control:
+   *
+   * <ul>
+   *   <li>Administrators can change the activation state for any client within the tenant.
+   *   <li>Regular users can change the activation state only for the clients they own.
+   * </ul>
+   *
+   * @param audit an {@link Audit} object capturing the audit details of the user performing the
+   *     operation.
+   * @param role the role of the user performing the update.
+   * @param command a {@link ChangeTenantClientActivationCommand} containing the tenant and client
+   *     identifiers, along with the new activation state.
    */
-  void changeActivation(@Valid Audit audit, @Valid ChangeTenantClientActivationCommand command);
+  void changeActivation(
+      @Valid Audit audit, @NotNull Role role, @Valid ChangeTenantClientActivationCommand command);
 
   /**
-   * Updates the visibility state of a specific client.
+   * Updates the visibility state of a specified client.
    *
-   * @param audit the audit details of the user performing the operation.
-   * @param command the command containing the tenant ID, client ID, and the new visibility state.
+   * <p>Access control:
+   *
+   * <ul>
+   *   <li>Administrators can change the visibility state for any client within the tenant.
+   *   <li>Regular users can change the visibility state only for the clients they own.
+   * </ul>
+   *
+   * @param audit an {@link Audit} object capturing the audit details of the user performing the
+   *     operation.
+   * @param role the role of the user performing the update.
+   * @param command a {@link ChangeTenantClientVisibilityCommand} containing the tenant and client
+   *     identifiers, along with the new visibility state.
    */
-  void changeVisibility(@Valid Audit audit, @Valid ChangeTenantClientVisibilityCommand command);
+  void changeVisibility(
+      @Valid Audit audit, @NotNull Role role, @Valid ChangeTenantClientVisibilityCommand command);
 
   /**
-   * Updates the details of a specific client.
+   * Updates the details of an existing client.
    *
-   * @param audit the audit details of the user performing the operation.
-   * @param command the command containing the updated client details.
-   * @return a {@link ClientResponse} containing the updated client's details.
+   * <p>Access control:
+   *
+   * <ul>
+   *   <li>Administrators can update any client within the tenant.
+   *   <li>Regular users can update only the clients they own.
+   * </ul>
+   *
+   * @param audit an {@link Audit} object capturing the audit details of the user performing the
+   *     update.
+   * @param role the role of the user performing the update.
+   * @param command a {@link UpdateTenantClientCommand} containing the updated client details.
+   * @return a {@link ClientResponse} containing the updated details of the client.
    */
-  ClientResponse updateClient(@Valid Audit audit, @Valid UpdateTenantClientCommand command);
+  ClientResponse updateClient(
+      @Valid Audit audit, @NotNull Role role, @Valid UpdateTenantClientCommand command);
 
   /**
-   * Deletes a specific client.
+   * Deletes a specified client.
    *
-   * @param audit the audit details of the user performing the operation.
-   * @param command the command containing the tenant ID and client ID.
+   * <p>Access control:
+   *
+   * <ul>
+   *   <li>Administrators can delete any client within the tenant.
+   *   <li>Regular users can delete only the clients they own.
+   * </ul>
+   *
+   * @param audit an {@link Audit} object capturing the audit details of the user performing the
+   *     deletion.
+   * @param role the role of the user performing the deletion.
+   * @param command a {@link DeleteTenantClientCommand} containing the tenant and client identifiers
+   *     for deletion.
+   * @return the result of the delete operation, the number of rows affected.
    */
-  void deleteClient(@Valid Audit audit, @Valid DeleteTenantClientCommand command);
+  int deleteClient(
+      @Valid Audit audit, @NotNull Role role, @Valid DeleteTenantClientCommand command);
 }

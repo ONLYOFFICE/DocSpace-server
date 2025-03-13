@@ -96,13 +96,14 @@ global using AutoMapper;
 global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.RateLimiting;
-global using Microsoft.Extensions.Caching.Distributed;
 global using Microsoft.Extensions.DependencyInjection.Extensions;
 global using Microsoft.Extensions.Hosting.WindowsServices;
 
 global using Newtonsoft.Json.Linq;
 
 global using Swashbuckle.AspNetCore.Annotations;
+
+global using ZiggyCreatures.Caching.Fusion;
 
 global using FileShare = ASC.Files.Core.Security.FileShare;
 global using SecurityContext = ASC.Core.SecurityContext;

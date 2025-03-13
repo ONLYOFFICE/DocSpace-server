@@ -292,7 +292,7 @@ public class EntryManager(IDaoFactory daoFactory,
     IQuotaService quotaService,
     TenantManager tenantManager,
     FileChecker fileChecker,
-    IDistributedCache distributedCache,
+    IFusionCache hybridCache,
     NotifyClient notifyClient,
     ExternalShare externalShare)
 {
@@ -2127,7 +2127,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
             if (fillingSessionId != null)
             {
-                await distributedCache.SetStringAsync(fillingSessionId, result.Id.ToString());
+                await hybridCache.SetAsync(fillingSessionId, result.Id.ToString());
             }
 
             try
