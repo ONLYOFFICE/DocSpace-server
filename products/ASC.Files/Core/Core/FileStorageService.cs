@@ -4468,8 +4468,15 @@ public class FileStorageService //: IFileStorageService
         await fileDao.SaveFormRoleMapping(formId, roles);
 
         var properties = await fileDao.GetProperties(formId) ?? new EntryProperties<T> { FormFilling = new FormFillingProperties<T>() };
-        properties.FormFilling.StartFilling = true;
-        await fileDao.SaveProperties(formId, properties);
+        if (roles == null || !roles.Any())
+        {
+            await fileDao.SaveProperties(formId, null);
+        }
+        else
+        {
+            properties.FormFilling.StartFilling = true;
+            await fileDao.SaveProperties(formId, properties);
+        }
 
         var roleUserIds = roles.Where(role => !role.UserId.Equals(authContext.CurrentAccount.ID)).Select(role => role.UserId).Distinct();
         var aces = await fileSharing.GetPureSharesAsync(currentRoom, roleUserIds).Where(ace => ace is not { Access: FileShare.FillForms }).Select(role => role.Id).ToListAsync();
