@@ -179,7 +179,7 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
             file.RootFolderType == FolderType.VirtualRooms &&
             fileUtility.CanWebCustomFilterEditing(file.Title));
 
-        var ñustomFilterTags = spreadsheets.Any()
+        var customFilterTags = spreadsheets.Any()
             ? await tagDao.GetTagsAsync(TagType.CustomFilter, spreadsheets).ToDictionaryAsync(k => k.EntryId, v => v)
             : [];
 
@@ -199,11 +199,11 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
                 file.IsNew = true;
             }
 
-            if (ñustomFilterTags.TryGetValue(file.Id, out var ñustomFilterTag))
+            if (customFilterTags.TryGetValue(file.Id, out var customFilterTag))
             {
                 file.CustomFilterEnabled = true;
-                file.CustomFilterEnabledBy = ñustomFilterTag.Owner != authContext.CurrentAccount.ID
-                    ? await global.GetUserNameAsync(ñustomFilterTag.Owner)
+                file.CustomFilterEnabledBy = customFilterTag.Owner != authContext.CurrentAccount.ID
+                    ? await global.GetUserNameAsync(customFilterTag.Owner)
                     : null;
             }
         }

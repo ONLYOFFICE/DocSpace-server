@@ -119,7 +119,7 @@ public class FileDto<T> : FileEntryDto<T>
     public bool? Locked { get; set; }
 
     /// <summary>
-    /// User who locked a file
+    /// User name who locked a file
     /// </summary>
     public string LockedBy { get; set; }
 
@@ -141,7 +141,7 @@ public class FileDto<T> : FileEntryDto<T>
     public bool? CustomFilterEnabled { get; set; }
 
     /// <summary>
-    /// User who enabled a Custom Filter editing mode for a file
+    /// User name who enabled a Custom Filter editing mode for a file
     /// </summary>
     public string CustomFilterEnabledBy { get; set; }
 
