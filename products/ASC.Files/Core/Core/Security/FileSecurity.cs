@@ -1413,11 +1413,20 @@ public class FileSecurity(IDaoFactory daoFactory,
 
                         break;
                     default:
-                        if (e.Access is FileShare.RoomManager or FileShare.ContentCreator || (e.Access is FileShare.Editing && !MustConvert(e)))
+                        if (isRoom)
                         {
-                            return true;
+                            if (e.Access is FileShare.RoomManager)
+                            {
+                                return true;
+                            }
                         }
-
+                        else
+                        {
+                            if (e.Access is FileShare.RoomManager or FileShare.ContentCreator || (e.Access is FileShare.Editing && !MustConvert(e)))
+                            {
+                                return true;
+                            }
+                        }
                         break;
                 }
 
