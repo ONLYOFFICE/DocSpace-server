@@ -667,6 +667,94 @@ public class UserController(
     }
 
     /// <summary>
+    /// Returns an link for share guest with another user
+    /// </summary>
+    /// <short>
+    /// Get a guest share link
+    /// </short>
+    /// <path>api/2.0/people/guests/{userid}/share</path>
+    [Tags("Portal / Guests")]
+    [SwaggerResponse(200, "User share link", typeof(string))]
+    [HttpGet("guests/{userid:guid}/share")]
+    public async Task<string> GetGuestShareLinkAsync(GuestShareRequestDto inDto)
+    {
+        var targetUser = await _userManager.GetUsersAsync(inDto.UserId);
+
+        if (Equals(targetUser, Constants.LostUser))
+        {
+            throw new ItemNotFoundException("User not found");
+        }
+
+        var targetUserType = await _userManager.GetUserTypeAsync(targetUser);
+
+        if (targetUserType is not EmployeeType.Guest)
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
+        var currentUserId = authContext.CurrentAccount.ID;
+        var currentUser = await _userManager.GetUsersAsync(currentUserId);
+
+        if (!await _userManager.CanUserViewAnotherUserAsync(currentUser, targetUser))
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
+        var link = commonLinkUtility.GetConfirmationEmailUrl(targetUser.Email, ConfirmType.GuestShareLink,
+                $"{currentUserId}{inDto.UserId}", currentUserId);
+
+        return await urlShortener.GetShortenLinkAsync(link);
+    }
+
+    /// <summary>
+    /// Approve a guest share link and returns the detailed information about a guest.
+    /// </summary>
+    /// <short>
+    /// Approve a guest share link
+    /// </short>
+    /// <path>api/2.0/people/guests/{userid:guid}/share</path>
+    [Tags("People / Guests")]
+    [SwaggerResponse(200, "Detailed profile information", typeof(EmployeeFullDto))]
+    [SwaggerResponse(400, "Incorect UserId")]
+    [SwaggerResponse(404, "User not found")]
+    [AllowNotPayment]
+    [Authorize(AuthenticationSchemes = "confirm", Roles = "GuestShareLink")]
+    [HttpPost("guests/{userid:guid}/share")]
+    public async Task<EmployeeFullDto> ApproveGuestShareLinkAsync(GuestShareRequestDto inDto)
+    {
+        await _apiContext.AuthByClaimAsync();
+
+        var targetUser = await _userManager.GetUsersAsync(inDto.UserId);
+
+        if (Equals(targetUser, Constants.LostUser))
+        {
+            throw new ItemNotFoundException("User not found");
+        }
+
+        var targetUserType = await _userManager.GetUserTypeAsync(targetUser);
+
+        if (targetUserType is not EmployeeType.Guest)
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
+        var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+        var currentUserType = await _userManager.GetUserTypeAsync(currentUser);
+
+        if (currentUserType is EmployeeType.Guest or EmployeeType.User)
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
+        if (!await _userManager.CanUserViewAnotherUserAsync(currentUser, targetUser))
+        {
+            await _userManager.AddUserRelationAsync(currentUser.Id, targetUser.Id);
+        }
+
+        return await employeeFullDtoHelper.GetFullAsync(targetUser);
+    }
+
+    /// <summary>
     /// Returns a list of users matching the status filter and search query.
     /// </summary>
     /// <short>
