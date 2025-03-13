@@ -174,6 +174,11 @@ public class SsoHandlerService
                     throw new SSOException("Current user is terminated", MessageKey.SsoSettingsUserTerminated);
                 }
 
+                if (settings.DisableEmailVerification)
+                {
+                    userInfo.ActivationStatus = EmployeeActivationStatus.Activated;
+                }
+
                 if (context.User.Identity is { IsAuthenticated: true })
                 {
                     var authenticatedUserInfo = await _userManager.GetUsersAsync(((IUserAccount)context.User.Identity).ID);

@@ -34,11 +34,11 @@ public class TipsController(ILoggerProvider option,
         SettingsManager settingsManager,
         WebItemManager webItemManager,
         SetupInfo setupInfo,
-        IMemoryCache memoryCache,
+        IFusionCache fusionCache,
         IHttpClientFactory clientFactory,
         TenantManager tenantManager,
         IHttpContextAccessor httpContextAccessor)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     private readonly ILogger _log = option.CreateLogger("ASC.Api");
 

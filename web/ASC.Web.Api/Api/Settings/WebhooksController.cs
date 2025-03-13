@@ -30,14 +30,14 @@ public class WebhooksController(ApiContext context,
         PermissionContext permissionContext,
         ApiContext apiContext,
         WebItemManager webItemManager,
-        IMemoryCache memoryCache,
+        IFusionCache fusionCache,
         DbWorker dbWorker,
         IHttpContextAccessor httpContextAccessor,
         IMapper mapper,
         WebhookPublisher webhookPublisher,
         SettingsManager settingsManager,
         PasswordSettingsManager passwordSettingsManager)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
     /// Returns a list of the tenant webhooks.

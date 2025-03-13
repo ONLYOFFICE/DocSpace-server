@@ -39,9 +39,6 @@ public class CreateRoomFromTemplateOperation : DistributedTaskProgress
     private int _templateId;
     private int _totalCount;
     private int _count;
-    private int? _roomId;
-
-    private int? _tenantId;
     private readonly IServiceProvider _serviceProvider;
 
     public CreateRoomFromTemplateOperation()
@@ -54,25 +51,8 @@ public class CreateRoomFromTemplateOperation : DistributedTaskProgress
         _serviceProvider = serviceProvider;
     }
 
-    public int TenantId
-    {
-        get => _tenantId ?? this[nameof(_tenantId)];
-        set
-        {
-            _tenantId = value;
-            this[nameof(_tenantId)] = value;
-        }
-    }
-
-    public int RoomId
-    {
-        get => _roomId ?? this[nameof(_roomId)];
-        set
-        {
-            _roomId = value;
-            this[nameof(_roomId)] = value;
-        }
-    }
+    public int TenantId { get; set; }
+    public int RoomId { get; set; }
 
     public void Init(int tenantId,
         Guid userId,
@@ -100,9 +80,7 @@ public class CreateRoomFromTemplateOperation : DistributedTaskProgress
     {
         var tenantManager = _serviceProvider.GetService<TenantManager>();
         var securityContext = _serviceProvider.GetService<SecurityContext>();
-        var globalHelper = _serviceProvider.GetService<GlobalFolderHelper>();
         var fileStorageService = _serviceProvider.GetService<FileStorageService>();
-        var dbFactory = _serviceProvider.GetService<IDbContextFactory<FilesDbContext>>();
         var roomLogoManager = _serviceProvider.GetService<RoomLogoManager>();
         var daoFactory = _serviceProvider.GetService<IDaoFactory>();
         var folderDao = daoFactory.GetFolderDao<int>();
