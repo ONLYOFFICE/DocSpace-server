@@ -36,15 +36,19 @@ public class UserSocketManager(ITariffService tariffService,
     EmployeeFullDtoHelper employeeFullDtoHelper,
     SecurityContext securityContext,
     UserManager userManager,
-    GroupFullDtoHelper groupFullDtoHelper) : SocketServiceClient(tariffService, tenantManager, channelWriter, machinePseudoKeys, configuration)
+    GroupFullDtoHelper groupFullDtoHelper,
+    DisplayUserSettingsHelper displayUserSettingsHelper) : SocketServiceClient(tariffService, tenantManager, channelWriter, machinePseudoKeys, configuration)
 {
     protected override string Hub => "files";
 
-    public async Task ChangeUserTypeAsync(UserInfo userInfo)
+    public async Task ChangeUserTypeAsync(UserInfo userInfo, bool hasPersonalFolder)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
         var dto = await employeeFullDtoHelper.GetFullAsync(userInfo);
-        await MakeRequest("change-my-type", new { tenantId, user = dto, admin = securityContext.CurrentAccount.ID });
+        var currentUser = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
+        var name = currentUser.DisplayUserName(displayUserSettingsHelper);
+
+        await MakeRequest("change-my-type", new { tenantId, user = dto, admin = name, hasPersonalFolder });
     }
 
     public async Task AddUserAsync(UserInfo userInfo)

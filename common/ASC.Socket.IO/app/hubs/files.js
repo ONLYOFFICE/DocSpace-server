@@ -365,9 +365,9 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:logout-session", loginEventId);
   }
 
-  function changeMyType({ tenantId, user, admin } = {}) {
+  function changeMyType({ tenantId, user, admin, hasPersonalFolder } = {}) {
     var room = `${tenantId}-change-my-type-${user.id}`;
-    filesIO.to(room).emit("s:change-my-type",  {id: user.id, data: user, admin: admin});
+    filesIO.to(room).emit("s:change-my-type",  {id: user.id, data: user, admin: admin, hasPersonalFolder: hasPersonalFolder});
   }
 
   function addUser({ tenantId, user } = {}) {

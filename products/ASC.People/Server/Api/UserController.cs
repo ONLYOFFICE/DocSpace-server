@@ -1797,7 +1797,7 @@ public class UserController(
             {
                 await socketManager.UpdateUserAsync(user);
             }
-            await socketManager.ChangeUserTypeAsync(user);
+            await socketManager.ChangeUserTypeAsync(user, true);
         }
 
         messageService.Send(MessageAction.UsersUpdatedType, MessageTarget.Create(users.Select(x => x.Id)),

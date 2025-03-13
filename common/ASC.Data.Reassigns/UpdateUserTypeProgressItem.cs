@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Core.Common;
+using ASC.Files.Core;
 
 namespace ASC.Data.Reassigns;
 
@@ -68,7 +69,7 @@ public class UpdateUserTypeProgressItem: DistributedTaskProgress
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var scopeClass = scope.ServiceProvider.GetService<ChangeUserTypeProgressItemScope>();
-        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, displayUserSettingsHelper, options, webItemSecurityCache, distributedLockProvider, socketManager, userFormatter) = scopeClass;
+        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, displayUserSettingsHelper, options, webItemSecurityCache, distributedLockProvider, socketManager, userFormatter, daoFactory) = scopeClass;
         var logger = options.CreateLogger("ASC.Web");
         await tenantManager.SetCurrentTenantAsync(_tenantId);
         _userInfo = await userManager.GetUsersAsync(User);
@@ -94,7 +95,7 @@ public class UpdateUserTypeProgressItem: DistributedTaskProgress
                 await SetPercentageAndCheckCancellationAsync(60, true);
             }
 
-            await UpdateUserTypeAsync(userManager, webItemSecurityCache, distributedLockProvider, socketManager);
+            await UpdateUserTypeAsync(userManager, webItemSecurityCache, distributedLockProvider, socketManager, daoFactory);
 
             await SetPercentageAndCheckCancellationAsync(100, false);
 
@@ -121,7 +122,7 @@ public class UpdateUserTypeProgressItem: DistributedTaskProgress
         }
     }
 
-    private async Task UpdateUserTypeAsync(UserManager userManager, WebItemSecurityCache webItemSecurityCache, IDistributedLockProvider distributedLockProvider, UserSocketManager socketManager)
+    private async Task UpdateUserTypeAsync(UserManager userManager, WebItemSecurityCache webItemSecurityCache, IDistributedLockProvider distributedLockProvider, UserSocketManager socketManager, IDaoFactory daoFactory)
     {
         var currentType = await userManager.GetUserTypeAsync(_userInfo);
         var lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(_tenantId));
@@ -151,7 +152,7 @@ public class UpdateUserTypeProgressItem: DistributedTaskProgress
                 if (currentType != _employeeType)
                 {
                     webItemSecurityCache.ClearCache(_tenantId);
-                    await socketManager.ChangeUserTypeAsync(_userInfo);
+                    await socketManager.ChangeUserTypeAsync(_userInfo, true);
                 }
             }
             else if (_employeeType is EmployeeType.Guest)
@@ -181,7 +182,11 @@ public class UpdateUserTypeProgressItem: DistributedTaskProgress
                 if (currentType != _employeeType)
                 {
                     webItemSecurityCache.ClearCache(_tenantId);
-                    await socketManager.ChangeUserTypeAsync(_userInfo);
+
+                    var folderDao = daoFactory.GetFolderDao<int>();
+                    var myId = await folderDao.GetFolderIDUserAsync(false, User);
+                    var hasPersonalFolder = myId != 0;
+                    await socketManager.ChangeUserTypeAsync(_userInfo, hasPersonalFolder);
                 }
             }
         }
@@ -240,4 +245,5 @@ public record ChangeUserTypeProgressItemScope(
     WebItemSecurityCache WebItemSecurityCache,
     IDistributedLockProvider DistributedLockProvider,
     UserSocketManager SocketManager,
-    UserFormatter UserFormatter);
+    UserFormatter UserFormatter,
+    IDaoFactory DaoFactory);
