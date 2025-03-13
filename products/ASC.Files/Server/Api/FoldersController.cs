@@ -319,8 +319,7 @@ public class FoldersControllerCommon(
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     UserManager userManager,
-    SecurityContext securityContext,
-    IDaoFactory daoFactory)
+    SecurityContext securityContext)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
