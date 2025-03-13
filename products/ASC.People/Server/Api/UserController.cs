@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Web.Files.Classes;
+
 namespace ASC.People.Api;
 
 public class UserController(
@@ -75,7 +77,7 @@ public class UserController(
     EmailValidationKeyModelHelper emailValidationKeyModelHelper,
     CountPaidUserStatistic countPaidUserStatistic,
     UserSocketManager socketManager,
-    IDaoFactory daoFactory)
+    GlobalFolderHelper globalFolderHelper)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
 {
     /// <summary>
@@ -1254,9 +1256,8 @@ public class UserController(
 
         if (result.IsVisitor) 
         {
-            var folderDao = daoFactory.GetFolderDao<int>();
-            var myId = await folderDao.GetFolderIDUserAsync(false, securityContext.CurrentAccount.ID);
-            result.HasPersonalFolder = myId != 0;
+            var my = await globalFolderHelper.FolderMyAsync;
+            result.HasPersonalFolder = my != 0;
         }
 
         return result;
