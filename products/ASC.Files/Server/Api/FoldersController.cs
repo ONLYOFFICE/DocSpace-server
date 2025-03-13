@@ -507,12 +507,10 @@ public class FoldersControllerCommon(
         }
         else
         {
-
-            var folderDao = daoFactory.GetFolderDao<int>();
-            var my = await folderDao.GetFolderIDUserAsync(false, securityContext.CurrentAccount.ID);
+            var my = await globalFolderHelper.FolderMyAsync;
             if (my != 0)
             {
-                yield return await folderDao.GetFolderIDUserAsync(false, securityContext.CurrentAccount.ID);
+                yield return my;
             }
         }
 
