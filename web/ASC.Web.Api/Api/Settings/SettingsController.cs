@@ -346,7 +346,8 @@ public partial class SettingsController(MessageService messageService,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        return await settingsManager.LoadAsync<TenantUserQuotaSettings>();
+        var result = await settingsManager.LoadAsync<TenantUserQuotaSettings>(HttpContext);
+        return result == null ? null : await settingsManager.LoadAsync<TenantUserQuotaSettings>(HttpContext);
     }
 
     /// <summary>
@@ -445,7 +446,8 @@ public partial class SettingsController(MessageService messageService,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        return await settingsManager.LoadAsync<TenantDeepLinkSettings>();
+        var result = await settingsManager.LoadAsync<TenantDeepLinkSettings>(HttpContext);
+        return result == null ? null : await settingsManager.LoadAsync<TenantDeepLinkSettings>();
     }
 
     /// <summary>
@@ -632,7 +634,8 @@ public partial class SettingsController(MessageService messageService,
     [HttpGet("logo")]
     public async Task<string> GetLogoAsync()
     {
-        return await tenantInfoSettingsHelper.GetAbsoluteCompanyLogoPathAsync(await settingsManager.LoadAsync<TenantInfoSettings>());
+        var result = await settingsManager.LoadAsync<TenantInfoSettings>(HttpContext);
+        return result == null ? null : await tenantInfoSettingsHelper.GetAbsoluteCompanyLogoPathAsync(result);
     }
 
     /// <summary>
@@ -692,28 +695,9 @@ public partial class SettingsController(MessageService messageService,
     [HttpGet("colortheme")]
     public async Task<CustomColorThemesSettingsDto> GetColorThemeAsync()
     {
-        DateTime? lastModified = null;
-        if (DateTime.TryParse(Request.Headers.IfModifiedSince, CultureInfo.InvariantCulture, out var parsedLastModified))
-        {
-            lastModified = parsedLastModified;
-            lastModified = DateTime.SpecifyKind(lastModified.Value, DateTimeKind.Local);
-        }
-        
-        var settings = await settingsManager.LoadAsync<CustomColorThemesSettings>(lastModified);
-        if (settings.LastModified != DateTime.MinValue)
-        {
-            var lastModifiedStr = settings.LastModified.ToString(CultureInfo.InvariantCulture);
-            if (lastModifiedStr == Request.Headers.IfModifiedSince)
-            {
-                Response.StatusCode = 304;
-                Response.Headers.CacheControl = "no-cache";
-                return null;
-            }
-            
-            Response.Headers.LastModified = lastModifiedStr;
-        }
+        var settings = await settingsManager.LoadAsync<CustomColorThemesSettings>(HttpContext);
 
-        return new CustomColorThemesSettingsDto(settings, customColorThemesSettingsHelper.Limit);
+        return settings == null ? null : new CustomColorThemesSettingsDto(settings, customColorThemesSettingsHelper.Limit);
     }
 
     /// <summary>

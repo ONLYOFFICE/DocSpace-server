@@ -57,10 +57,35 @@ public class SettingsManager(
         return settingsInstance.GetDefault();
     }
 
-    public async Task<T> LoadAsync<T>(DateTime? lastModified = null) where T : class, ISettings<T>
+    public async Task<T> LoadAsync<T>(HttpContext context = null) where T : class, ISettings<T>
     {
         var tenantId = tenantManager.GetCurrentTenantId();
-        return await LoadAsync<T>(tenantId, Guid.Empty, lastModified);
+
+        if (context != null)
+        {
+            DateTime? lastModified = null;
+            if (DateTime.TryParse(context.Request.Headers.IfModifiedSince, CultureInfo.InvariantCulture, out var parsedLastModified))
+            {
+                lastModified = parsedLastModified;
+                lastModified = DateTime.SpecifyKind(lastModified.Value, DateTimeKind.Local);
+            }
+
+            var settings = await LoadAsync<T>(tenantId, Guid.Empty, lastModified);
+            if (settings.LastModified != DateTime.MinValue)
+            {
+                var lastModifiedStr = settings.LastModified.ToString(CultureInfo.InvariantCulture);
+                if (lastModifiedStr == context.Request.Headers.IfModifiedSince)
+                {
+                    context.Response.StatusCode = 304;
+                    context.Response.Headers.CacheControl = "no-cache";
+                    return null;
+                }
+
+                context.Response.Headers.LastModified = lastModifiedStr;
+            }
+        }
+
+        return await LoadAsync<T>(tenantId, Guid.Empty);
     }
     
     public async Task<T> LoadAsync<T>(Guid userId) where T : class, ISettings<T>

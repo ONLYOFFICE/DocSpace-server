@@ -147,8 +147,8 @@ public class SecurityController(
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Everyone")]
     public async Task<PasswordSettingsDto> GetPasswordSettingsAsync()
     {
-        var settings = await settingsManager.LoadAsync<PasswordSettings>();
-        return passwordSettingsConverter.Convert(settings);
+        var settings = await settingsManager.LoadAsync<PasswordSettings>(HttpContext);
+        return settings == null ? null : passwordSettingsConverter.Convert(settings);
     }
 
     /// <summary>
@@ -416,9 +416,9 @@ public class SecurityController(
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var settings = await settingsManager.LoadAsync<LoginSettings>();
+        var settings = await settingsManager.LoadAsync<LoginSettings>(HttpContext);
 
-        return mapper.Map<LoginSettings, LoginSettingsDto>(settings);
+        return settings == null ? null : mapper.Map<LoginSettings, LoginSettingsDto>(settings);
     }
 
     /// <summary>
