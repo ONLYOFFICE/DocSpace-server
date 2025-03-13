@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Core.Data;
-
 using static ASC.Files.Core.Security.FileSecurity;
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
@@ -264,11 +262,12 @@ public class FileEntryDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         if (isGuest) 
         {
             var folderDao = daoFactory.GetFolderDao<T>();
-            var my = await folderDao.GetFolderIDUserAsync(false, securityContext.CurrentAccount.ID);
+            var myId = await folderDao.GetFolderIDUserAsync(false, securityContext.CurrentAccount.ID);
 
-            if (Equals(entry.FolderIdDisplay, my))
+            if (Equals(entry.FolderIdDisplay, myId))
             {
-                return fileDateTime.GetModifiedOnWithAutoCleanUp(entry.ModifiedOn, DateToAutoCleanUp.OneMonth);
+                var my = await folderDao.GetFolderAsync(myId);
+                return fileDateTime.GetModifiedOnWithAutoCleanUp(my.ModifiedOn, DateToAutoCleanUp.ThirtyDays);
             }
         }
 

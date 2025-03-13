@@ -110,7 +110,7 @@ public class AutoDeletePersonalFolderService(
             }
             var my = await folderDao.GetFolderAsync(myId);
 
-            if (fileDateTime.GetModifiedOnWithAutoCleanUp(my.ModifiedOn, DateToAutoCleanUp.OneMonth, true) > now)
+            if (fileDateTime.GetModifiedOnWithAutoCleanUp(my.ModifiedOn, DateToAutoCleanUp.ThirtyDays, true) > now)
             {
                 return;
             }
