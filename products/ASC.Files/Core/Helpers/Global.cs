@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.Data;
+
 namespace ASC.Web.Files.Classes;
 
 [Singleton]
@@ -468,17 +470,21 @@ public class GlobalFolder(
             return 0;
         }
 
-        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
-        {
-            return 0;
-        }
-
         var cacheKey = $"my/{tenantManager.GetCurrentTenantId()}/{authContext.CurrentAccount.ID}";
 
-        var myFolderId = await cache.GetOrDefaultAsync<int>(cacheKey);
-        if (myFolderId == 0)
+        var myFolderId = await cache.GetOrDefaultAsync(cacheKey, -1);
+        if (myFolderId == -1)
         {
-            myFolderId = await GetFolderIdAndProcessFirstVisitAsync(daoFactory, true);
+            if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
+            {
+                var folderDao = daoFactory.GetFolderDao<int>();
+                myFolderId = await folderDao.GetFolderIDUserAsync(false);
+            }
+            else
+            {
+                myFolderId = await GetFolderIdAndProcessFirstVisitAsync(daoFactory, true);
+            }
+            await cache.SetAsync(cacheKey, myFolderId);
         }
 
         return myFolderId;
