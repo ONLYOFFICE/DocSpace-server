@@ -3018,7 +3018,7 @@ public class FileStorageService //: IFileStorageService
             return;
         }
 
-        var shared = await fileDao.GetFilesAsync(my, null, default, false, Guid.Empty, string.Empty, null, false, true, withShared: true).Where(q => q.Shared).Select(q => q.Id).ToListAsync();
+        var shared = await fileDao.GetFilesAsync(my, null, default, false, Guid.Empty, string.Empty, null, false, true, withShared: true).Where(q => q.Shared).ToListAsync();
 
         await securityContext.AuthenticateMeWithoutCookieAsync(toUser);
         if (shared.Count > 0)
@@ -3028,10 +3028,12 @@ public class FileStorageService //: IFileStorageService
             var folder = await CreateFolderAsync(await globalFolderHelper.FolderMyAsync, $"Documents of user {userInfo.FirstName} {userInfo.LastName}");
             foreach (var file in shared)
             {
-                await fileDao.MoveFileAsync(file, folder.Id);
+                await socketManager.DeleteFileAsync(file, action: async () => await fileDao.MoveFileAsync(file.Id, folder.Id));
+                await socketManager.CreateFileAsync(file);
             }
-            await DeleteFromRecentAsync([], shared, true);
-            await fileDao.ReassignFilesAsync(toUser, shared);
+            var ids = shared.Select(s => s.Id).ToList();
+            await DeleteFromRecentAsync([], ids, true);
+            await fileDao.ReassignFilesAsync(toUser, ids);
         }
 
         await securityContext.AuthenticateMeWithoutCookieAsync(initUser);
@@ -3119,6 +3121,7 @@ public class FileStorageService //: IFileStorageService
         _logger.InformationDeletePersonalData(userId);
 
         var folderIdMy = await folderDao.GetFolderIDUserAsync(false, userId);
+        var my = await folderDao.GetFolderAsync(folderIdMy);
         var folderIdTrash = await folderDao.GetFolderIDTrashAsync(false, userId);
 
         if (!Equals(folderIdMy, 0))
@@ -3129,7 +3132,7 @@ public class FileStorageService //: IFileStorageService
             await DeleteFilesAsync(fileIdsFromMy, folderIdTrash);
             await DeleteFoldersAsync(folderIdsFromMy, folderIdTrash);
 
-            await folderDao.DeleteFolderAsync(folderIdMy);
+            await socketManager.DeleteFolder(my, action: async () => await folderDao.DeleteFolderAsync(folderIdMy));
             await globalFolderHelper.ClearCacheFolderMyAsync(userId);
         }
         return;
@@ -3147,7 +3150,7 @@ public class FileStorageService //: IFileStorageService
 
             await fileMarker.RemoveMarkAsNewForAllAsync(file);
 
-            await fileDao.DeleteFileAsync(file.Id, file.GetFileQuotaOwner());
+            await socketManager.DeleteFileAsync(file, action: async () => await fileDao.DeleteFileAsync(file.Id, file.GetFileQuotaOwner()));
 
             if (file.RootFolderType == FolderType.TRASH && !Equals(folderIdTrash, 0))
             {
@@ -3177,7 +3180,7 @@ public class FileStorageService //: IFileStorageService
 
             if (await folderDao.IsEmptyAsync(folder.Id))
             {
-                await folderDao.DeleteFolderAsync(folder.Id);
+                await socketManager.DeleteFolder(folder, action: async () => await folderDao.DeleteFolderAsync(folder.Id));
             }
         }
     }
