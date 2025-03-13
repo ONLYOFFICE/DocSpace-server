@@ -261,11 +261,11 @@ public class FileEntryDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
         var isGuest = await userManager.IsGuestAsync(securityContext.CurrentAccount.ID);
         if (isGuest) 
         {
-            var myId = await _globalFolderHelper.GetFolderMyAsync<T>();
+            var myId = await _globalFolderHelper.GetFolderMyAsync<int>();
 
-            if (Equals(entry.FolderIdDisplay, myId))
+            if (Equals(entry.FolderIdDisplay, myId) && myId != 0)
             {
-                var folderDao = daoFactory.GetFolderDao<T>();
+                var folderDao = daoFactory.GetFolderDao<int>();
                 var my = await folderDao.GetFolderAsync(myId);
 
                 return fileDateTime.GetModifiedOnWithAutoCleanUp(my.ModifiedOn, DateToAutoCleanUp.OneMonth);

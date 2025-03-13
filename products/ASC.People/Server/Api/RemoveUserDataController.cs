@@ -29,7 +29,7 @@ namespace ASC.People.Api;
 public class RemoveUserDataController(PermissionContext permissionContext,
         UserManager userManager,
         QueueWorkerRemove queueWorkerRemove,
-        QueueDeletePersonalFolderType queueDeletePersonalFolder,
+        QueueDeletePersonalFolder queueDeletePersonalFolder,
         SecurityContext securityContext,
         StudioNotifyService studioNotifyService,
         MessageService messageService,
@@ -182,7 +182,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     public async Task<TaskProgressResponseDto> GetDeletePersonalFolderProgressAsync()
     {
         var tenant = tenantManager.GetCurrentTenant();
-        var progressItem = await queueWorkerRemove.GetProgressItemStatus(tenant.Id, securityContext.CurrentAccount.ID);
+        var progressItem = await queueDeletePersonalFolder.GetProgressItemStatus(tenant.Id, securityContext.CurrentAccount.ID);
 
         return TaskProgressResponseDto.Get(progressItem);
     }

@@ -122,7 +122,7 @@ public class QueueWorkerUpdateUserType(IHttpContextAccessor httpContextAccessor,
 }
 
 [Scope]
-public class QueueDeletePersonalFolderType(IHttpContextAccessor httpContextAccessor,
+public class QueueDeletePersonalFolder(IHttpContextAccessor httpContextAccessor,
         IServiceProvider serviceProvider,
         IDistributedTaskQueueFactory queueFactory,
         IDistributedLockProvider distributedLockProvider,

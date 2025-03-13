@@ -46,6 +46,7 @@ public class DeletePersonalFolderProgressItem : DistributedTaskProgress
 
     public void Init(Guid userId, int tenantId)
     {
+        Id = QueueDeletePersonalFolder.GetProgressItemId(tenantId, userId);
         _userId = userId;
         _tenantId = tenantId;
     }

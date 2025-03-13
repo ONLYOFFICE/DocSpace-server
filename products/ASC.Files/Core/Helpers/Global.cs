@@ -473,18 +473,23 @@ public class GlobalFolder(
         var cacheKey = $"my/{tenantManager.GetCurrentTenantId()}/{authContext.CurrentAccount.ID}";
 
         var myFolderId = await cache.GetOrDefaultAsync(cacheKey, -1);
-        if (myFolderId == -1)
+
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
-            if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
+            if (myFolderId == -1)
             {
                 var folderDao = daoFactory.GetFolderDao<int>();
                 myFolderId = await folderDao.GetFolderIDUserAsync(false);
+                await cache.SetAsync(cacheKey, myFolderId);
             }
-            else
+        }
+        else
+        {
+            if (myFolderId <= 0)
             {
                 myFolderId = await GetFolderIdAndProcessFirstVisitAsync(daoFactory, true);
+                await cache.SetAsync(cacheKey, myFolderId);
             }
-            await cache.SetAsync(cacheKey, myFolderId);
         }
 
         return myFolderId;
