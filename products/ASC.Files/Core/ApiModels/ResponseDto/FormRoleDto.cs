@@ -35,7 +35,7 @@ public class FormRoleDto
     public EmployeeFullDto User { get; set; }
     public int Sequence { get; set; }
     public bool Submitted { get; set; }
-    public Guid? StopedBy { get; set; }
+    public EmployeeFullDto? StopedBy { get; set; }
     public Dictionary<int, DateTime> History { get; set; }
     public FormFillingStatus RoleStatus { get; set; }
 }
@@ -71,7 +71,9 @@ public class FormRoleDtoHelper(TenantUtil tenantUtil, EmployeeFullDtoHelper empl
         }
         if (properties != null && !DateTime.MinValue.Equals(properties.FormFilling.FillingStopedDate) && role.RoleName.Equals(properties.FormFilling.FormFillingInterruption?.RoleName))
         {
-            result.StopedBy = Guid.Empty.Equals(properties.FormFilling.FormFillingInterruption?.UserId) ? null : properties.FormFilling.FormFillingInterruption?.UserId;
+            var stopedById = properties.FormFilling.FormFillingInterruption?.UserId ?? Guid.Empty;
+            var stopedBy = await employeeFullDtoHelper.GetFullAsync(await userManager.GetUsersAsync(stopedById));
+            result.StopedBy = Guid.Empty.Equals(stopedById) ? null : stopedBy;
             result.History.Add((int)FormRoleHistory.StopDate, tenantUtil.DateTimeFromUtc(properties.FormFilling.FillingStopedDate));
         }
         return result;
