@@ -1903,8 +1903,7 @@ public class FileStorageService //: IFileStorageService
             var usersDrop = (await fileTracker.GetEditingByAsync(file.Id)).Where(uid => uid != authContext.CurrentAccount.ID).Select(u => u.ToString()).ToArray();
             if (usersDrop.Length > 0)
             {
-                var fileStable = file.Forcesave == ForcesaveType.None ? file : await fileDao.GetFileStableAsync(file.Id, file.Version);
-                var docKey = await documentServiceHelper.GetDocKeyAsync(fileStable);
+                var docKey = fileTracker.GetTrackerDocKey(file.Id);
                 await documentServiceHelper.DropUserAsync(docKey, usersDrop, file.Id);
             }
 
@@ -1972,6 +1971,13 @@ public class FileStorageService //: IFileStorageService
                 tagCustomFilter = new Tag("customfilter", TagType.CustomFilter, authContext.CurrentAccount.ID).AddEntry(file);
 
                 await tagDao.SaveTagsAsync(tagCustomFilter);
+
+                var usersDrop = (await fileTracker.GetEditingByAsync(file.Id)).Where(uid => uid != authContext.CurrentAccount.ID).Select(u => u.ToString()).ToArray();
+                if (usersDrop.Length > 0)
+                {
+                    var docKey = fileTracker.GetTrackerDocKey(file.Id);
+                    await documentServiceHelper.DropUserAsync(docKey, usersDrop, file.Id);
+                }
             }
 
             await filesMessageService.SendAsync(MessageAction.FileCustomFilterEnabled, file, file.Title);
@@ -1981,14 +1987,6 @@ public class FileStorageService //: IFileStorageService
             if (tagCustomFilter != null)
             {
                 await tagDao.RemoveTagsAsync(tagCustomFilter);
-
-                var usersDrop = (await fileTracker.GetEditingByAsync(file.Id)).Where(uid => uid != authContext.CurrentAccount.ID).Select(u => u.ToString()).ToArray();
-                if (usersDrop.Length > 0)
-                {
-                    var fileStable = file.Forcesave == ForcesaveType.None ? file : await fileDao.GetFileStableAsync(file.Id, file.Version);
-                    var docKey = await documentServiceHelper.GetDocKeyAsync(fileStable);
-                    await documentServiceHelper.DropUserAsync(docKey, usersDrop, file.Id);
-                }
             }
 
             await filesMessageService.SendAsync(MessageAction.FileCustomFilterDisabled, file, file.Title);
