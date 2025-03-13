@@ -38,7 +38,24 @@ public class LockerManager(AuthContext authContext, IDaoFactory daoFactory)
 
         return lockedBy != Guid.Empty && lockedBy != userId;
     }
+}
+
+[Scope]
+public class CustomFilterManager(AuthContext authContext, IDaoFactory daoFactory, FileUtility fileUtility)
+{
+    public async Task<bool> CustomFilterEnabledForMeAsync<T>(File<T> file)
+    {
+        if (file.RootFolderType != FolderType.VirtualRooms || !fileUtility.CanWebCustomFilterEditing(file.Title))
+        {
+            return false;
+        }
+
+        var tagDao = daoFactory.GetTagDao<T>();
+        var customFilterTag = await tagDao.GetTagsAsync(file.Id, FileEntryType.File, TagType.CustomFilter).FirstOrDefaultAsync();
+
+        return customFilterTag != null && customFilterTag.Owner != authContext.CurrentAccount.ID;
     }
+}
 
 [Scope]
 public class BreadCrumbsManager(
@@ -162,8 +179,8 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
             file.RootFolderType == FolderType.VirtualRooms &&
             fileUtility.CanWebCustomFilterEditing(file.Title));
 
-        var tagsCustomFilter = spreadsheets.Any()
-            ? await tagDao.GetTagsAsync(TagType.CustomFilter, spreadsheets).ToListAsync()
+        var ñustomFilterTags = spreadsheets.Any()
+            ? await tagDao.GetTagsAsync(TagType.CustomFilter, spreadsheets).ToDictionaryAsync(k => k.EntryId, v => v)
             : [];
 
         foreach (var file in files)
@@ -182,9 +199,12 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
                 file.IsNew = true;
             }
 
-            if (tagsCustomFilter.Exists(r => r.EntryId.Equals(file.Id)))
+            if (ñustomFilterTags.TryGetValue(file.Id, out var ñustomFilterTag))
             {
                 file.CustomFilterEnabled = true;
+                file.CustomFilterEnabledBy = ñustomFilterTag.Owner != authContext.CurrentAccount.ID
+                    ? await global.GetUserNameAsync(ñustomFilterTag.Owner)
+                    : null;
             }
         }
     }

@@ -38,6 +38,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         TenantUtil tenantUtil,
         DocumentServiceConnector documentServiceConnector,
         LockerManager lockerManager,
+        CustomFilterManager customFilterManager,
         FileTrackerHelper fileTracker,
         EntryStatusManager entryStatusManager,
         IServiceProvider serviceProvider,
@@ -120,7 +121,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             editPossible = false;
         }
 
-        rightModifyFilter = rightModifyFilter && await fileSecurity.CanEditAsync(file);
+        rightModifyFilter = rightModifyFilter && await fileSecurity.CanEditAsync(file) && !await customFilterManager.CustomFilterEnabledForMeAsync(file);
         rightToRename = rightToRename && rightToEdit && await fileSecurity.CanRenameAsync(file);
 
         rightToReview = rightToReview && await fileSecurity.CanReviewAsync(file);
