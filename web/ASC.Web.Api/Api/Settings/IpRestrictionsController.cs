@@ -50,7 +50,20 @@ public class IpRestrictionsController(ApiContext apiContext,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var tenant = tenantManager.GetCurrentTenant();
-        return await iPRestrictionsService.GetAsync(tenant.Id);
+        var etagFromRequest = HttpContext.Request.Headers.IfNoneMatch;
+        var result = await iPRestrictionsService.GetAsync(tenant.Id, etagFromRequest);
+        var etag = await iPRestrictionsService.CalculateEtagAsync(result);
+        
+        if (etag == etagFromRequest)
+        {
+            HttpContext.Response.StatusCode = 304;
+            HttpContext.Response.Headers.CacheControl = "no-cache";
+            return null;
+        }
+        
+        HttpContext.Response.Headers.ETag = etag;
+        
+        return result;
     }
 
     /// <summary>
