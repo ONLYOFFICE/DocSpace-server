@@ -278,13 +278,6 @@ public class FileDtoHelper(
                 _ = await _fileSecurity.SetSecurity(new[] { currentRoom }.ToAsyncEnumerable()).ToListAsync();
             }
 
-            var currentRoomId = currentRoom.Id?.ToString();
-            if (currentRoomId != null && !shareCache.TryGetValue(currentRoomId, out var ace))
-            {
-                ace = await fileSharing.GetPureSharesAsync(currentRoom, [authContext.CurrentAccount.ID]).FirstOrDefaultAsync();
-                shareCache.TryAdd(currentRoomId, ace);
-            }
-
             if (!file.IsForm && (FilterType)file.Category == FilterType.None)
             {
                 result.IsForm = await fileChecker.CheckExtendedPDF(file);
