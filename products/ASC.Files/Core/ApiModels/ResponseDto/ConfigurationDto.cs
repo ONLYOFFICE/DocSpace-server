@@ -217,10 +217,21 @@ public class CustomizationConfigDto
     /// <summary>
     /// Submit form
     /// </summary>
-    public bool SubmitForm { get; set; }
+    public SubmitForm SubmitForm { get; set; }
     public StartFillingForm StartFillingForm { get; set; }
 }
 
+public class SubmitForm
+{
+    /// <summary>
+    /// Visible
+    /// </summary>
+    public bool Visible { get; set; }
+    /// <summary>
+    /// ResultMessage
+    /// </summary>
+    public string ResultMessage { get; set; }
+}
 public class StartFillingForm
 {
     /// <summary>
@@ -349,6 +360,11 @@ public class DocumentConfigDto
     /// </summary>
     [Url]
     public string Url { get; set; }
+
+    /// <summary>
+    /// Indicates whether this is a form
+    /// </summary>
+    public bool IsForm { get; set; }
 
     /// <summary>
     /// Options
@@ -592,6 +608,7 @@ public class DocumentConfigConverter<T>(InfoConfigConverter<T> configConverter)
         var result = new DocumentConfigDto
         {
             FileType = source.GetFileType(file),
+            IsForm = file.IsForm,
             Info = await configConverter.Convert(source.Info, file),
             IsLinkedForMe = source.IsLinkedForMe,
             Key = source.Key,
