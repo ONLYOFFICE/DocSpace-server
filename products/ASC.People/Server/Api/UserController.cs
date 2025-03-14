@@ -675,6 +675,8 @@ public class UserController(
     /// <path>api/2.0/people/guests/{userid}/share</path>
     [Tags("Portal / Guests")]
     [SwaggerResponse(200, "User share link", typeof(string))]
+    [SwaggerResponse(404, "User not found")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("guests/{userid:guid}/share")]
     public async Task<string> GetGuestShareLinkAsync(GuestShareRequestDto inDto)
     {
@@ -715,8 +717,8 @@ public class UserController(
     /// <path>api/2.0/people/guests/{userid:guid}/share</path>
     [Tags("People / Guests")]
     [SwaggerResponse(200, "Detailed profile information", typeof(EmployeeFullDto))]
-    [SwaggerResponse(400, "Incorect UserId")]
     [SwaggerResponse(404, "User not found")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "GuestShareLink")]
     [HttpPost("guests/{userid:guid}/share")]
