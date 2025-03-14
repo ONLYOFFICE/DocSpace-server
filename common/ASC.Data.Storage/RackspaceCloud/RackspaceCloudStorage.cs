@@ -47,7 +47,6 @@ public class RackspaceCloudStorage(TempPath tempPath,
     : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, options, logger, httpClient, tenantQuotaFeatureStatHelper, quotaSocketManager, settingsManager, quotaService, userManager, customQuota)
 {
     public override bool IsSupportChunking => true;
-    public override bool ContentAsAttachment => _contentAsAttachment;
     public TempPath TempPath { get; } = tempPath;
 
     private string _region;
@@ -62,7 +61,6 @@ public class RackspaceCloudStorage(TempPath tempPath,
     private Uri _cname;
     private Uri _cnameSSL;
     private readonly List<string> _domains = [];
-    private bool _contentAsAttachment;
 
     public override IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator dataStoreValidator)
     {
@@ -73,11 +71,14 @@ public class RackspaceCloudStorage(TempPath tempPath,
             Modulename = moduleConfig.Name;
             DataList = new DataList(moduleConfig);
 
-            _contentAsAttachment = moduleConfig.ContentAsAttachment;
-
             _domains.AddRange(moduleConfig.Domain.Select(x => $"{x.Name}/"));
+
             DomainsExpires = moduleConfig.Domain.Where(x => x.Expires != TimeSpan.Zero).ToDictionary(x => x.Name, y => y.Expires);
             DomainsExpires.Add(string.Empty, moduleConfig.Expires);
+
+            DomainsContentAsAttachment = moduleConfig.Domain.Where(x => x.ContentAsAttachment.HasValue).ToDictionary(x => x.Name, y => y.ContentAsAttachment.Value);
+            DomainsContentAsAttachment.Add(string.Empty, moduleConfig.ContentAsAttachment.HasValue ? moduleConfig.ContentAsAttachment.Value : false);
+
             _domainsAcl = moduleConfig.Domain.ToDictionary(x => x.Name, y => y.Acl);
             _moduleAcl = moduleConfig.Acl;
         }
@@ -85,7 +86,10 @@ public class RackspaceCloudStorage(TempPath tempPath,
         {
             Modulename = string.Empty;
             DataList = null;
+
             DomainsExpires = new Dictionary<string, TimeSpan> { { string.Empty, TimeSpan.Zero } };
+            DomainsContentAsAttachment = new Dictionary<string, bool> { { string.Empty, false } };
+
             _domainsAcl = new Dictionary<string, ACL>();
             _moduleAcl = ACL.Auto;
         }

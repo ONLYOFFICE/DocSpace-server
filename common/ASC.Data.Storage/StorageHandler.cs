@@ -78,7 +78,7 @@ public class StorageHandler(string storagePath, string module, string domain, bo
 
         var headers = header is { Length: > 0 } ? header.Split('&').Select(HttpUtility.UrlDecode).ToList() : [];
 
-        if (storage.ContentAsAttachment)
+        if (storage.IsContentAsAttachment(domain))
         {
             headers.Add("Content-Disposition:attachment");
         }
