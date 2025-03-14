@@ -826,20 +826,22 @@ public class UserController(
     [SwaggerResponse(404, "User not found")]
     [AllowNotPayment]
     [HttpGet("email")]
-    [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,Everyone")]
+    [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,GuestShareLink,Everyone")]
     public async Task<EmployeeFullDto> GetByEmailAsync(GetMemberByEmailRequestDto inDto)
     {
         var user = await _userManager.GetUserByEmailAsync(inDto.Email);
 
-        var isInvite = _httpContextAccessor.HttpContext!.User.Claims
-            .Any(role => role.Type == ClaimTypes.Role && ConfirmTypeExtensions.TryParse(role.Value, out var confirmType) && confirmType == ConfirmType.LinkInvite);
+        var isConfirmLink = _httpContextAccessor.HttpContext!.User.Claims
+            .Any(role => role.Type == ClaimTypes.Role &&
+                ConfirmTypeExtensions.TryParse(role.Value, out var confirmType) &&
+                (confirmType == ConfirmType.LinkInvite || confirmType == ConfirmType.GuestShareLink));
 
         if (user.Id == Constants.LostUser.Id)
         {
             throw new ItemNotFoundException("User not found");
         }
 
-        if (isInvite)
+        if (isConfirmLink)
         {
             return await employeeFullDtoHelper.GetSimple(user, false);
         }
