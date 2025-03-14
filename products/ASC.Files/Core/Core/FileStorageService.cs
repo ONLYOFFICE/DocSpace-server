@@ -4463,7 +4463,7 @@ public class FileStorageService //: IFileStorageService
         var form = await fileDao.GetFileAsync(formId);
         var currentRoom = await DocSpaceHelper.GetParentRoom(form, folderDao);
 
-        await ValidateChangeRolesPermission(formId, fileDao);
+        await ValidateChangeRolesPermission(form);
 
         await fileDao.SaveFormRoleMapping(formId, roles);
 
@@ -4476,18 +4476,20 @@ public class FileStorageService //: IFileStorageService
         {
             properties.FormFilling.StartFilling = true;
             await fileDao.SaveProperties(formId, properties);
+            var roleUserIds = roles.Where(role => !role.UserId.Equals(authContext.CurrentAccount.ID)).Select(role => role.UserId).Distinct();
+            var aces = await fileSharing.GetPureSharesAsync(currentRoom, roleUserIds).Where(ace => ace is not { Access: FileShare.FillForms }).Select(role => role.Id).ToListAsync();
+
+            await notifyClient.SendFormStartedFilling(currentRoom, form, aces, authContext.CurrentAccount.ID);
         }
 
-        var roleUserIds = roles.Where(role => !role.UserId.Equals(authContext.CurrentAccount.ID)).Select(role => role.UserId).Distinct();
-        var aces = await fileSharing.GetPureSharesAsync(currentRoom, roleUserIds).Where(ace => ace is not { Access: FileShare.FillForms }).Select(role => role.Id).ToListAsync();
-
-        await notifyClient.SendFormStartedFilling(currentRoom, form, aces, authContext.CurrentAccount.ID);
+        await socketManager.UpdateFileAsync(form);
     }
 
     public async Task<FormRole> ReassignFormRoleToUser<T>(T formId, string roleName, Guid userId, Guid toUserId)
     {
         var fileDao = daoFactory.GetFileDao<T>();
-        await ValidateChangeRolesPermission(formId, fileDao);
+        var form = await fileDao.GetFileAsync(formId);
+        await ValidateChangeRolesPermission(form);
 
         if (userId == Guid.Empty)
         {
@@ -4499,7 +4501,8 @@ public class FileStorageService //: IFileStorageService
     public async Task ReopenFormForUser<T>(T formId, string roleName, Guid userId, bool resetSubsequentRoles)
     {
         var fileDao = daoFactory.GetFileDao<T>();
-        await ValidateChangeRolesPermission(formId, fileDao);
+        var form = await fileDao.GetFileAsync(formId);
+        await ValidateChangeRolesPermission(form);
 
         if (userId == Guid.Empty)
         {
@@ -4552,7 +4555,8 @@ public class FileStorageService //: IFileStorageService
     public async Task ManageFormFilling<T>(T formId, FormFillingManageAction action)
     {
         var fileDao = daoFactory.GetFileDao<T>();
-        await ValidateChangeRolesPermission(formId, fileDao);
+        var form = await fileDao.GetFileAsync(formId);
+        await ValidateChangeRolesPermission(form);
 
         var properties = await daoFactory.GetFileDao<T>().GetProperties(formId);
         switch (action)
@@ -4578,13 +4582,12 @@ public class FileStorageService //: IFileStorageService
         }
 
         await fileDao.SaveProperties(formId, properties);
+        await socketManager.UpdateFileAsync(form);
     }
 
 
-    private async Task ValidateChangeRolesPermission<T>(T formId, IFileDao<T> fileDao)
+    private async Task ValidateChangeRolesPermission<T>(File<T> form)
     {
-        var form = await fileDao.GetFileAsync(formId);
-
         if (form == null)
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
