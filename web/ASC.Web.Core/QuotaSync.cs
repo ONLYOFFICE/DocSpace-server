@@ -29,14 +29,11 @@ namespace ASC.Web.Studio.Core.Quota;
 [Singleton]
 public class QuotaSyncOperation(IServiceProvider serviceProvider, IDistributedTaskQueueFactory queueFactory)
 {
-
-    public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "quotaOperation";
-
-    private readonly DistributedTaskQueue _progressQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
+    private readonly DistributedTaskQueue<QuotaSyncJob> _progressQueue = queueFactory.CreateQueue<QuotaSyncJob>();
 
     public async Task RecalculateQuota(Tenant tenant)
     {
-        var item = (await _progressQueue.GetAllTasks<QuotaSyncJob>()).FirstOrDefault(t => t.TenantId == tenant.Id);
+        var item = (await _progressQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenant.Id);
         if (item is { IsCompleted: true })
         {
             await _progressQueue.DequeueTask(item.Id);
@@ -55,7 +52,7 @@ public class QuotaSyncOperation(IServiceProvider serviceProvider, IDistributedTa
 
     public async Task<bool> CheckRecalculateQuota(Tenant tenant)
     {
-        var item = (await _progressQueue.GetAllTasks<QuotaSyncJob>()).FirstOrDefault(t => t.TenantId == tenant.Id);
+        var item = (await _progressQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenant.Id);
         if (item is { IsCompleted: true })
         {
             await _progressQueue.DequeueTask(item.Id);
@@ -67,31 +64,32 @@ public class QuotaSyncOperation(IServiceProvider serviceProvider, IDistributedTa
 }
 
 [Transient]
-public class QuotaSyncJob(IServiceScopeFactory serviceScopeFactory) : DistributedTaskProgress
+public class QuotaSyncJob : DistributedTaskProgress
 {
-    private int? _tenantId;
-    public int TenantId
+    private readonly IServiceScopeFactory _serviceScopeFactory;
+
+    public QuotaSyncJob()
     {
-        get
-        {
-            return _tenantId ?? this[nameof(_tenantId)];
-        }
-        private set
-        {
-            _tenantId = value;
-            this[nameof(_tenantId)] = value;
-        }
+        
     }
+    
+    public QuotaSyncJob(IServiceScopeFactory serviceScopeFactory)
+    {
+        _serviceScopeFactory = serviceScopeFactory;
+    }
+
+    public int TenantId { get; set; }
 
     public void InitJob(Tenant tenant)
     {
         TenantId = tenant.Id;
     }
+    
     protected override async Task DoJob()
     {
         try
         {
-            await using var scope = serviceScopeFactory.CreateAsyncScope();
+            await using var scope = _serviceScopeFactory.CreateAsyncScope();
 
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
             var storageFactoryConfig = scope.ServiceProvider.GetRequiredService<StorageFactoryConfig>();

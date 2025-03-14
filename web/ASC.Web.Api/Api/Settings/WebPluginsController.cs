@@ -27,16 +27,17 @@
 namespace ASC.Web.Api.Controllers.Settings;
 
 [DefaultRoute("webplugins")]
-public class WebPluginsController(ApiContext apiContext,
-        IMemoryCache memoryCache,
-        WebItemManager webItemManager,
-        IHttpContextAccessor httpContextAccessor,
-        PermissionContext permissionContext,
-        WebPluginManager webPluginManager,
-        TenantManager tenantManager,
-        CspSettingsHelper cspSettingsHelper,
-        IMapper mapper)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+public class WebPluginsController(
+    ApiContext apiContext,
+    IFusionCache fusionCache,
+    WebItemManager webItemManager,
+    IHttpContextAccessor httpContextAccessor,
+    PermissionContext permissionContext,
+    WebPluginManager webPluginManager,
+    TenantManager tenantManager,
+    CspSettingsHelper cspSettingsHelper,
+    IMapper mapper)
+    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
     /// Adds web plugins from file

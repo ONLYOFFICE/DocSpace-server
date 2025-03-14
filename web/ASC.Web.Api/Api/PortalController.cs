@@ -66,6 +66,7 @@ public class PortalController(
     EmailValidationKeyProvider emailValidationKeyProvider,
     StudioSmsNotificationSettingsHelper studioSmsNotificationSettingsHelper,
     TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
+    ExternalResourceSettingsHelper externalResourceSettingsHelper,
     IMapper mapper,
     IHttpContextAccessor httpContextAccessor,
     QuotaHelper quotaHelper,
@@ -93,7 +94,13 @@ public class PortalController(
             return new TenantDto { TenantId = tenant.Id };
         }
 
-        return mapper.Map<TenantDto>(tenant);
+        var dto =  mapper.Map<TenantDto>(tenant);
+
+        if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
+        {
+            dto.Region = await apiSystemHelper.GetTenantRegionAsync(dto.Name);
+        }
+        return dto;
     }
 
     /// <summary>
@@ -663,13 +670,8 @@ public class PortalController(
         }
 
         var owner = await userManager.GetUsersAsync(tenant.OwnerId);
-        var redirectLink = setupInfo.TeamlabSiteRedirect + "/remove-portal-feedback-form.aspx#";
-        var parameters = Convert.ToBase64String(Encoding.UTF8.GetBytes("{\"firstname\":\"" + owner.FirstName +
-                                                                                "\",\"lastname\":\"" + owner.LastName +
-                                                                                "\",\"alias\":\"" + tenant.Alias +
-                                                                                "\",\"email\":\"" + owner.Email + "\"}"));
 
-        redirectLink += HttpUtility.UrlEncode(parameters);
+        var redirectLink = externalResourceSettingsHelper.Site.GetRegionalFullEntry("registrationcanceled");
 
         await studioNotifyService.SendMsgPortalDeletionSuccessAsync(owner, redirectLink);
 

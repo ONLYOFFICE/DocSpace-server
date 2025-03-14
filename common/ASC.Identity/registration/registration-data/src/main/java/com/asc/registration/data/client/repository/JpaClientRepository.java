@@ -37,25 +37,33 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-/** JPA repository interface for performing CRUD operations on {@link ClientEntity} objects. */
+/**
+ * JPA repository interface for managing {@link ClientEntity} objects. Provides CRUD operations as
+ * well as custom queries to retrieve, update, and delete clients based on tenant, visibility, and
+ * pagination criteria.
+ */
 public interface JpaClientRepository extends JpaRepository<ClientEntity, String> {
 
   /**
-   * Finds a client entity by its ID, provided it is not invalidated.
+   * Retrieves a client entity by its unique identifier, provided that the entity has not been
+   * invalidated.
    *
-   * @param id the ID of the client entity
-   * @return an optional containing the found client entity, or empty if not found
+   * @param id the unique identifier of the client entity
+   * @return an {@link Optional} containing the found {@link ClientEntity} if it exists and is
+   *     valid, otherwise an empty {@link Optional}
    */
   @Nonnull
   @Query("SELECT c FROM ClientEntity c WHERE c.clientId = :id AND c.invalidated = false")
   Optional<ClientEntity> findById(@Param("id") @Nonnull String id);
 
   /**
-   * Finds a client entity by its ID and visibility status, provided it is not invalidated.
+   * Retrieves a client entity by its unique identifier and accessibility status, ensuring that the
+   * entity has not been invalidated.
    *
-   * @param id the ID of the client entity
-   * @param accessible the visibility status of the client entity
-   * @return an optional containing the found client entity, or empty if not found
+   * @param id the unique identifier of the client entity
+   * @param accessible the desired accessibility status (true for accessible, false otherwise)
+   * @return an {@link Optional} containing the matching {@link ClientEntity} if found, otherwise an
+   *     empty {@link Optional}
    */
   @Nonnull
   @Query(
@@ -64,132 +72,174 @@ public interface JpaClientRepository extends JpaRepository<ClientEntity, String>
       @Param("id") @Nonnull String id, @Param("accessible") boolean accessible);
 
   /**
-   * Finds a client entity by its client_id, provided it is not invalidated.
+   * Retrieves a client entity by its client identifier and tenant identifier.
    *
-   * @param clientId the client_id of the client entity
-   * @return an optional containing the found client entity, or empty if not found
-   */
-  Optional<ClientEntity> findByClientId(String clientId);
-
-  /**
-   * Finds a client entity by its client ID and tenant ID.
-   *
-   * @param clientId the client ID
-   * @param tenantId the tenant ID
-   * @return an optional containing the found client entity, or empty if not found
+   * @param clientId the client identifier
+   * @param tenantId the tenant identifier
+   * @return an {@link Optional} containing the matching {@link ClientEntity} if present, otherwise
+   *     an empty {@link Optional}
    */
   Optional<ClientEntity> findByClientIdAndTenantId(String clientId, long tenantId);
 
-  /** Finds all client entities for a specific tenant using cursor-based pagination. */
+  /**
+   * Retrieves a client entity by its client identifier, tenant identifier, and creator identifier.
+   *
+   * @param clientId the client identifier
+   * @param tenantId the tenant identifier
+   * @param createdBy the identifier of the creator of the client entity
+   * @return an {@link Optional} containing the matching {@link ClientEntity} if found, otherwise an
+   *     empty {@link Optional}
+   */
+  Optional<ClientEntity> findByClientIdAndTenantIdAndCreatedBy(
+      String clientId, long tenantId, String createdBy);
+
+  /**
+   * Retrieves a paginated list of both public and private client entities for a specified tenant.
+   *
+   * <p>This query employs cursor-based pagination using the creation timestamp. When {@code
+   * lastCreatedOn} is provided, only client entities created before this timestamp are returned.
+   *
+   * @param tenantId the tenant identifier
+   * @param lastCreatedOn the cursor timestamp for pagination (may be {@code null} to fetch the most
+   *     recent records)
+   * @param limit the maximum number of client entities to return
+   * @return a list of matching {@link ClientEntity} objects
+   */
   @Query(
       value =
           """
-                  SELECT * FROM identity_clients
-                  WHERE tenant_id = :tenant
-                    AND is_public = true
-                    AND is_invalidated = false
-                    AND (:lastCreatedOn IS NULL OR created_on < :lastCreatedOn)
-                  ORDER BY created_on DESC
-                  LIMIT :limit
-              """,
+                          SELECT * FROM identity_clients
+                          WHERE tenant_id = :tenantId
+                            AND is_invalidated = false
+                            AND (:lastCreatedOn IS NULL OR created_on < :lastCreatedOn)
+                          ORDER BY created_on DESC
+                          LIMIT :limit
+                      """,
       nativeQuery = true)
   List<ClientEntity> findAllByTenantIdWithCursor(
-      @Param("tenant") long tenant,
+      @Param("tenantId") long tenantId,
       @Param("lastCreatedOn") ZonedDateTime lastCreatedOn,
       @Param("limit") int limit);
 
   /**
-   * Finds all public clients and private clients belonging to a specific tenant using cursor-based
-   * pagination.
+   * Retrieves a paginated list of both public and private client entities for a specified tenant,
+   * filtered by the creator's identifier.
+   *
+   * <p>This query employs cursor-based pagination using the creation timestamp. When {@code
+   * lastCreatedOn} is provided, only client entities created before this timestamp are returned.
+   *
+   * @param tenantId the tenant identifier
+   * @param createdBy the identifier of the creator of the client entities
+   * @param lastCreatedOn the cursor timestamp for pagination (may be {@code null} to fetch the most
+   *     recent records)
+   * @param limit the maximum number of client entities to return
+   * @return a list of matching {@link ClientEntity} objects
    */
   @Query(
       value =
           """
-                  SELECT * FROM identity_clients
-                  WHERE tenant_id = :tenant
-                    AND is_invalidated = false
-                    AND (:lastCreatedOn IS NULL OR created_on < :lastCreatedOn)
-                  ORDER BY created_on DESC
-                  LIMIT :limit
-              """,
+                                  SELECT * FROM identity_clients
+                                  WHERE tenant_id = :tenantId
+                                    AND is_invalidated = false
+                                    AND (:lastCreatedOn IS NULL OR created_on < :lastCreatedOn)
+                                    AND created_by = :createdBy
+                                  ORDER BY created_on DESC
+                                  LIMIT :limit
+                              """,
       nativeQuery = true)
-  List<ClientEntity> findAllPublicAndPrivateByTenantWithCursor(
-      @Param("tenant") long tenant,
+  List<ClientEntity> findAllByTenantIdAndCreatedByWithCursor(
+      @Param("tenantId") long tenantId,
+      @Param("createdBy") String createdBy,
       @Param("lastCreatedOn") ZonedDateTime lastCreatedOn,
       @Param("limit") int limit);
 
   /**
-   * Deletes a client entity by its ID and tenant ID.
+   * Deletes a client entity matching the specified client identifier and tenant identifier.
    *
-   * @param id the ID of the client entity
-   * @param tenant the tenant ID
-   * @return the number of entities deleted
+   * @param id the client identifier
+   * @param tenantId the tenant identifier
+   * @return the number of client entities deleted (typically 0 or 1)
    */
-  int deleteByClientIdAndTenantId(String id, long tenant);
+  int deleteByClientIdAndTenantId(String id, long tenantId);
 
   /**
-   * Regenerates the client secret for a specific client entity by its ID and tenant ID.
+   * Updates the client secret for a specified client entity.
    *
-   * @param tenant the tenant ID
-   * @param clientId the ID of the client entity
-   * @param secret the new client secret
-   * @param modifiedOn the date and time when the modification was made
+   * <p>This operation sets a new client secret and updates the modification timestamp.
+   *
+   * @param tenantId the tenant identifier associated with the client entity
+   * @param clientId the client identifier
+   * @param secret the new client secret to set
+   * @param modifiedOn the timestamp indicating when the update occurred
    */
   @Modifying
   @Query(
       """
-        UPDATE ClientEntity c
-        SET c.clientSecret = :secret, c.modifiedOn = :modifiedOn
-        WHERE c.clientId = :clientId AND c.tenantId = :tenant
-    """)
+            UPDATE ClientEntity c
+            SET c.clientSecret = :secret, c.modifiedOn = :modifiedOn
+            WHERE c.clientId = :clientId AND c.tenantId = :tenantId
+        """)
   void regenerateClientSecretByClientId(
-      @Param("tenant") long tenant,
+      @Param("tenantId") long tenantId,
       @Param("clientId") String clientId,
       @Param("secret") String secret,
       @Param("modifiedOn") ZonedDateTime modifiedOn);
 
   /**
-   * Changes the visibility status of a specific client entity by its ID and tenant ID.
+   * Updates the accessibility status of a specified client entity.
    *
-   * @param tenant the tenant ID
-   * @param clientId the ID of the client entity
-   * @param accessible the new visibility status
-   * @param modifiedOn the date and time when the modification was made
+   * <p>This method changes the visibility of the client entity and updates the modification
+   * timestamp.
+   *
+   * @param tenantId the tenant identifier associated with the client entity
+   * @param clientId the client identifier
+   * @param accessible the new accessibility status (true for accessible, false otherwise)
+   * @param modifiedOn the timestamp indicating when the update occurred
    */
   @Modifying
   @Query(
       """
-        UPDATE ClientEntity c
-        SET c.accessible = :accessible, c.modifiedOn = :modifiedOn
-        WHERE c.clientId = :clientId AND c.tenantId = :tenant
-    """)
+            UPDATE ClientEntity c
+            SET c.accessible = :accessible, c.modifiedOn = :modifiedOn
+            WHERE c.clientId = :clientId AND c.tenantId = :tenantId
+        """)
   void changeVisibility(
-      @Param("tenant") long tenant,
+      @Param("tenantId") long tenantId,
       @Param("clientId") String clientId,
       @Param("accessible") boolean accessible,
       @Param("modifiedOn") ZonedDateTime modifiedOn);
 
   /**
-   * Changes the activation status of a specific client entity by its ID and tenant ID.
+   * Updates the activation status of a specified client entity.
    *
-   * @param tenant the tenant ID
-   * @param clientId the ID of the client entity
-   * @param enabled the new activation status
-   * @param modifiedOn the date and time when the modification was made
+   * <p>This method toggles the enabled state of the client entity and updates the modification
+   * timestamp.
+   *
+   * @param tenantId the tenant identifier associated with the client entity
+   * @param clientId the client identifier
+   * @param enabled the new activation status (true if enabled, false otherwise)
+   * @param modifiedOn the timestamp indicating when the update occurred
    */
   @Modifying
   @Query(
       """
-        UPDATE ClientEntity c
-        SET c.enabled = :enabled, c.modifiedOn = :modifiedOn
-        WHERE c.clientId = :clientId AND c.tenantId = :tenant
-    """)
+            UPDATE ClientEntity c
+            SET c.enabled = :enabled, c.modifiedOn = :modifiedOn
+            WHERE c.clientId = :clientId AND c.tenantId = :tenantId
+        """)
   void changeActivation(
-      @Param("tenant") long tenant,
+      @Param("tenantId") long tenantId,
       @Param("clientId") String clientId,
       @Param("enabled") boolean enabled,
       @Param("modifiedOn") ZonedDateTime modifiedOn);
 
+  /**
+   * Retrieves a list of client entities whose identifiers are included in the provided list,
+   * filtering out any entities that have been invalidated.
+   *
+   * @param clientIds a list of client identifiers to search for
+   * @return a list of matching {@link ClientEntity} objects
+   */
   @Query("SELECT c FROM ClientEntity c WHERE c.clientId IN :clientIds AND c.invalidated = false")
   List<ClientEntity> findAllByClientIds(@Param("clientIds") List<String> clientIds);
 }

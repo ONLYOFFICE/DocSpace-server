@@ -44,9 +44,6 @@ public enum AuthenticationError {
   /** Error indicating that the client does not have permission. */
   CLIENT_PERMISSION_DENIED_ERROR("client_permission_denied_error"),
 
-  /** Error indicating that the redirect URI is invalid. */
-  INVALID_REDIRECT_URI_ERROR("invalid_redirect_uri_error"),
-
   MISSING_ASC_SIGNATURE("missing_asc_signature_error"),
 
   /** Error indicating that the client ID is missing. */

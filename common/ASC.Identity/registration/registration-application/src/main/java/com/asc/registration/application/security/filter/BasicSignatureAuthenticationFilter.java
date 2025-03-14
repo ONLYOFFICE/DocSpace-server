@@ -30,9 +30,12 @@ package com.asc.registration.application.security.filter;
 import com.asc.registration.application.security.authentication.BasicSignatureToken;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -46,7 +49,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
  * Filter for authenticating requests using a basic signature token. This filter checks the presence
- * of a signature header in the HTTP request and attempts to authenticate the token using the
+ * of a signature cookie in the HTTP request and attempts to authenticate the token using the
  * provided {@link AuthenticationManager}. If authentication succeeds, the security context is
  * updated; otherwise, the request is rejected.
  */
@@ -54,14 +57,14 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Component
 @RequiredArgsConstructor
 public class BasicSignatureAuthenticationFilter extends OncePerRequestFilter {
-  private static final String SIGNATURE_HEADER = "X-Signature";
+  private static final String SIGNATURE_COOKIE = "x-signature";
   private final AuthenticationManager authenticationManager;
 
   /**
    * Performs filtering of incoming HTTP requests to authenticate requests containing the signature
    * header.
    *
-   * <p>If the {@code X-Signature} header is present in the request, the token is validated and
+   * <p>If the {@code x-signature} cookie is present in the request, the token is validated and
    * authenticated using the {@link AuthenticationManager}. On successful authentication, the
    * security context is updated with the authenticated token. If authentication fails, the response
    * is set to {@code 403 Forbidden}.
@@ -75,8 +78,15 @@ public class BasicSignatureAuthenticationFilter extends OncePerRequestFilter {
   protected void doFilterInternal(
       HttpServletRequest request, HttpServletResponse response, FilterChain chain)
       throws ServletException, IOException {
-    var token = request.getHeader(SIGNATURE_HEADER);
-    if (token == null || token.isBlank()) {
+    var token =
+        Arrays.stream(Optional.ofNullable(request.getCookies()).orElse(new Cookie[0]))
+            .filter(c -> c.getName().equalsIgnoreCase(SIGNATURE_COOKIE))
+            .findFirst()
+            .orElse(null);
+    if (token == null || token.getValue().isBlank()) {
+      log.debug(
+          "Authentication signature {} is missing, passing the request down the filter chain",
+          SIGNATURE_COOKIE);
       chain.doFilter(request, response);
       return;
     }
@@ -85,7 +95,7 @@ public class BasicSignatureAuthenticationFilter extends OncePerRequestFilter {
       MDC.put("request_uri", request.getRequestURI());
       log.debug("Validating user");
 
-      var authentication = new BasicSignatureToken(token);
+      var authentication = new BasicSignatureToken(token.getValue());
       authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
       var authenticated = authenticationManager.authenticate(authentication);

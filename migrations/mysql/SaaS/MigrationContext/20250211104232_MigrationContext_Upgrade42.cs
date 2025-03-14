@@ -71,10 +71,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 .OldAnnotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateIndex(
-                name: "UK_client_secret",
+                name: "idx_client_secret",
                 table: "identity_clients",
-                column: "client_secret",
-                unique: true);
+                column: "client_secret");
 
             migrationBuilder.CreateIndex(
                 name: "idx_identity_authorizations_id",
@@ -89,7 +88,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropIndex(
-                name: "UK_client_secret",
+                name: "idx_client_secret",
                 table: "identity_clients");
 
             migrationBuilder.DropIndex(

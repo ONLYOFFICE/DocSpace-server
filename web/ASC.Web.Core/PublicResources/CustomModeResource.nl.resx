@@ -120,7 +120,7 @@
   <data name="pattern_enterprise_whitelabel_user_welcome_custom_mode_v1" xml:space="preserve">
     <value>Hallo, $UserName!
 
-Welkom bij ONLYOFFICE DocSpace! Uw gebruikersprofiel is toegevoegd aan "${__VirtualRootPath}":"${__VirtualRootPath}". Nu kunt u:
+Welkom bij ${LetterLogoText} DocSpace! Uw gebruikersprofiel is toegevoegd aan "${__VirtualRootPath}":"${__VirtualRootPath}". Nu kunt u:
 
 * Samenwerken met andere gebruikers in de ruimte waarvoor u bent uitgenodigd*: samen werken in kamers voor real-time co-auteurschap of aangepaste kamers met flexibele instellingen voor elk doel*.
 

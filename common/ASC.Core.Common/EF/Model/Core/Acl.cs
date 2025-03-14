@@ -123,7 +123,7 @@ public static class AclExtension
                 new Acl { TenantId = -1, Subject = Guid.Parse("c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e"), Action = Guid.Parse("77777777-32ae-425f-99b5-83176061d1ae"), Object = "ASC.Web.Core.WebItemSecurity+WebItemSecurityObject|46cfa73af32046cf8d5bcd82e1d67f26", AceType = 0 },
                 new Acl { TenantId = -1, Subject = Guid.Parse("c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e"), Action = Guid.Parse("77777777-32ae-425f-99b5-83176061d1ae"), Object = "ASC.Web.Core.WebItemSecurity+WebItemSecurityObject|37620ae5c40b45ce855a39dd7d76a1fa", AceType = 0 },
                 new Acl { TenantId = -1, Subject = Guid.Parse("abef62db-11a8-4673-9d32-ef1d8af19dc0"), Action = Guid.Parse("3e74aff2-7c0c-4089-b209-6495b8643471"), Object = "", AceType = 0 },
-                new Acl { TenantId = -1, Subject = Constants.GroupUser.ID, Action = Constants.Action_ReadGroups.ID, Object = "", AceType = 0 });
+                new Acl { TenantId = -1, Subject = Constants.GroupUser.ID, Action = Constants.Action_ReadGroups.ID, Object = "", AceType = (AceType)1 });
 
         return modelBuilder;
     }

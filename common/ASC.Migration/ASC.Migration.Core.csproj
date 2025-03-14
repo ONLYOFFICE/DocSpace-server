@@ -18,8 +18,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FolkerKinzel.VCards" Version="8.0.0" />
-    <PackageReference Include="HtmlAgilityPack" Version="1.11.72" />
+    <PackageReference Include="FolkerKinzel.VCards" Version="8.0.1" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.74" />
     <PackageReference Include="Ical.Net" Version="4.3.1" />
   </ItemGroup>
 

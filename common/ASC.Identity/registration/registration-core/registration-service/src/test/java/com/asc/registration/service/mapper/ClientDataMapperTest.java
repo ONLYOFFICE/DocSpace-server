@@ -32,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.asc.common.core.domain.value.ClientId;
 import com.asc.common.core.domain.value.ClientSecret;
 import com.asc.common.core.domain.value.TenantId;
+import com.asc.common.core.domain.value.UserId;
 import com.asc.common.core.domain.value.enums.AuthenticationMethod;
 import com.asc.common.core.domain.value.enums.ClientStatus;
 import com.asc.common.core.domain.value.enums.ClientVisibility;
@@ -116,9 +117,10 @@ class ClientDataMapperTest {
         client.getClientRedirectInfo().logoutRedirectUris(), response.getLogoutRedirectUri());
     assertEquals(client.getScopes(), response.getScopes());
     assertEquals(client.getClientCreationInfo().getCreatedOn(), response.getCreatedOn());
-    assertEquals(client.getClientCreationInfo().getCreatedBy(), response.getCreatedBy());
+    assertEquals(client.getClientCreationInfo().getCreatedBy().getValue(), response.getCreatedBy());
     assertEquals(client.getClientModificationInfo().getModifiedOn(), response.getModifiedOn());
-    assertEquals(client.getClientModificationInfo().getModifiedBy(), response.getModifiedBy());
+    assertEquals(
+        client.getClientModificationInfo().getModifiedBy().getValue(), response.getModifiedBy());
     assertEquals(client.getStatus().equals(ClientStatus.ENABLED), response.isEnabled());
     assertEquals(client.getVisibility().equals(ClientVisibility.PUBLIC), response.isPublic());
   }
@@ -149,9 +151,10 @@ class ClientDataMapperTest {
         client.getAuthenticationMethods().size(), response.getAuthenticationMethods().size());
     assertEquals(client.getScopes(), response.getScopes());
     assertEquals(client.getClientCreationInfo().getCreatedOn(), response.getCreatedOn());
-    assertEquals(client.getClientCreationInfo().getCreatedBy(), response.getCreatedBy());
+    assertEquals(client.getClientCreationInfo().getCreatedBy().getValue(), response.getCreatedBy());
     assertEquals(client.getClientModificationInfo().getModifiedOn(), response.getModifiedOn());
-    assertEquals(client.getClientModificationInfo().getModifiedBy(), response.getModifiedBy());
+    assertEquals(
+        client.getClientModificationInfo().getModifiedBy().getValue(), response.getModifiedBy());
   }
 
   private Client createClient() {
@@ -176,12 +179,12 @@ class ClientDataMapperTest {
         .clientCreationInfo(
             ClientCreationInfo.Builder.builder()
                 .createdOn(ZonedDateTime.now())
-                .createdBy("creator")
+                .createdBy(new UserId("creator"))
                 .build())
         .clientModificationInfo(
             ClientModificationInfo.Builder.builder()
                 .modifiedOn(ZonedDateTime.now())
-                .modifiedBy("modifier")
+                .modifiedBy(new UserId("modifier"))
                 .build())
         .clientStatus(ClientStatus.ENABLED)
         .clientVisibility(ClientVisibility.PUBLIC)

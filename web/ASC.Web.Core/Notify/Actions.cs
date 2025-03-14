@@ -106,10 +106,7 @@ public static class Actions
     public static readonly INotifyAction EnterpriseWhitelabelAdminWelcomeV1 = new NotifyAction("enterprise_whitelabel_admin_welcome_v1");
     public static readonly INotifyAction OpensourceAdminWelcomeV1 = new NotifyAction("opensource_admin_welcome_v1");
 
-    public static readonly INotifyAction SaasAdminUserDocsTipsV1 = new NotifyAction("saas_admin_user_docs_tips_v1");
-    public static readonly INotifyAction OpensourceAdminDocsTipsV1 = new NotifyAction("opensource_admin_docs_tips_v1");
-    public static readonly INotifyAction OpensourceUserDocsTipsV1 = new NotifyAction("opensource_user_docs_tips_v1");
-    public static readonly INotifyAction EnterpriseAdminUserDocsTipsV1 = new NotifyAction("enterprise_admin_user_docs_tips_v1");
+    public static readonly INotifyAction DocsTips = new NotifyAction("docs_tips");
 
     public static readonly INotifyAction SaasAdminTrialWarningAfterHalfYearV1 = new NotifyAction("saas_admin_trial_warning_after_half_year_v1");
     public static readonly INotifyAction SaasAdminStartupWarningAfterYearV1 = new NotifyAction("saas_admin_startup_warning_after_year_v1");

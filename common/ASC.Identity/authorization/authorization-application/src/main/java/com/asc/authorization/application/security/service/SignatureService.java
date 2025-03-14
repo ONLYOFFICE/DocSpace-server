@@ -27,11 +27,11 @@
 
 package com.asc.authorization.application.security.service;
 
+import com.asc.common.utilities.crypto.MachinePseudoKeys;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import java.nio.charset.StandardCharsets;
 import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
@@ -59,8 +59,10 @@ public class SignatureService {
    *     `application.signingSecret` configuration property.
    */
   public SignatureService(@Value("${spring.application.signature.secret}") String secret) {
+    var machineKeyGenerator = new MachinePseudoKeys(secret);
     var secretKey =
-        new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), MacAlgorithm.HS256.getName());
+        new SecretKeySpec(
+            machineKeyGenerator.getMachineConstant(256), MacAlgorithm.HS256.getName());
     jwtDecoder = NimbusJwtDecoder.withSecretKey(secretKey).build();
     objectMapper =
         new ObjectMapper()

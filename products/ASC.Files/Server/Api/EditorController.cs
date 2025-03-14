@@ -35,7 +35,6 @@ public class EditorControllerInternal(FileStorageService fileStorageService,
         EncryptionKeyPairDtoHelper encryptionKeyPairDtoHelper,
         SettingsManager settingsManager,
         EntryManager entryManager,
-        IHttpContextAccessor httpContextAccessor,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
         ExternalShare externalShare,
@@ -44,7 +43,7 @@ public class EditorControllerInternal(FileStorageService fileStorageService,
         IDaoFactory daoFactory,
         SecurityContext securityContext,
         FileSecurity fileSecurity)
-        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, daoFactory, securityContext, fileSecurity);
+        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, daoFactory, securityContext, fileSecurity);
 
 [DefaultRoute("file")]
 public class EditorControllerThirdparty(FileStorageService fileStorageService,
@@ -52,7 +51,6 @@ public class EditorControllerThirdparty(FileStorageService fileStorageService,
         EncryptionKeyPairDtoHelper encryptionKeyPairDtoHelper,
         SettingsManager settingsManager,
         EntryManager entryManager,
-        IHttpContextAccessor httpContextAccessor,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
         ExternalShare externalShare,
@@ -61,14 +59,13 @@ public class EditorControllerThirdparty(FileStorageService fileStorageService,
         IDaoFactory daoFactory,
         SecurityContext securityContext,
         FileSecurity fileSecurity)
-        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, daoFactory, securityContext, fileSecurity);
+        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, daoFactory, securityContext, fileSecurity);
 
 public abstract class EditorController<T>(FileStorageService fileStorageService,
         DocumentServiceHelper documentServiceHelper,
         EncryptionKeyPairDtoHelper encryptionKeyPairDtoHelper,
         SettingsManager settingsManager,
         EntryManager entryManager,
-        IHttpContextAccessor httpContextAccessor,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
         ExternalShare externalShare,
@@ -92,9 +89,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     [HttpPut("{fileId}/saveediting")]
     public async Task<FileDto<T>> SaveEditingFromFormAsync(SaveEditingRequestDto<T> inDto)
     {
-        await using var stream = httpContextAccessor.HttpContext.Request.Body;
-
-        return await _fileDtoHelper.GetAsync(await fileStorageService.SaveEditingAsync(inDto.FileId, inDto.FileExtension, inDto.DownloadUri, stream, inDto.Forcesave));
+        return await _fileDtoHelper.GetAsync(await fileStorageService.SaveEditingAsync(inDto.FileId, inDto.FileExtension, inDto.DownloadUri, inDto.File?.OpenReadStream(), inDto.Forcesave));
     }
 
     /// <summary>
@@ -413,10 +408,13 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     public async Task<DocServiceUrlDto> CheckDocServiceUrl(CheckDocServiceUrlRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        
+
         var currentDocServiceUrl = filesLinkUtility.GetDocServiceUrl();
         var currentDocServiceUrlInternal = filesLinkUtility.GetDocServiceUrlInternal();
         var currentDocServicePortalUrl = filesLinkUtility.GetDocServicePortalUrl();
+        var currentDocServiceSecretValue = filesLinkUtility.GetDocServiceSignatureSecret();
+        var currentDocServiceSecretHeader = filesLinkUtility.GetDocServiceSignatureHeader();
+        var currentDocServiceSslVerification = filesLinkUtility.GetDocServiceSslVerification();
 
         if (!ValidateUrl(inDto.DocServiceUrl) ||
             !ValidateUrl(inDto.DocServiceUrlInternal) ||
@@ -425,9 +423,18 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
             throw new Exception("Invalid input urls");
         }
 
+        if (!string.IsNullOrEmpty(inDto.DocServiceSignatureSecret) &&
+            string.IsNullOrEmpty(inDto.DocServiceSignatureHeader))
+        {
+            throw new Exception("Invalid signature header");
+        }
+
         await filesLinkUtility.SetDocServiceUrlAsync(inDto.DocServiceUrl);
         await filesLinkUtility.SetDocServiceUrlInternalAsync(inDto.DocServiceUrlInternal);
         await filesLinkUtility.SetDocServicePortalUrlAsync(inDto.DocServiceUrlPortal);
+        await filesLinkUtility.SetDocServiceSignatureSecretAsync(inDto.DocServiceSignatureSecret);
+        await filesLinkUtility.SetDocServiceSignatureHeaderAsync(inDto.DocServiceSignatureHeader);
+        await filesLinkUtility.SetDocServiceSslVerificationAsync(inDto.DocServiceSslVerification.HasValue ? inDto.DocServiceSslVerification.Value : true);
 
         var https = new Regex(@"^https://", RegexOptions.IgnoreCase);
         var http = new Regex(@"^http://", RegexOptions.IgnoreCase);
@@ -451,6 +458,9 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
             await filesLinkUtility.SetDocServiceUrlAsync(currentDocServiceUrl);
             await filesLinkUtility.SetDocServiceUrlInternalAsync(currentDocServiceUrlInternal);
             await filesLinkUtility.SetDocServicePortalUrlAsync(currentDocServicePortalUrl);
+            await filesLinkUtility.SetDocServiceSignatureSecretAsync(currentDocServiceSecretValue);
+            await filesLinkUtility.SetDocServiceSignatureHeaderAsync(currentDocServiceSecretHeader);
+            await filesLinkUtility.SetDocServiceSslVerificationAsync(currentDocServiceSslVerification);
 
             throw new Exception("Unable to establish a connection with the Document Server.");
         }
@@ -504,6 +514,8 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
             DocServiceUrl = filesLinkUtility.GetDocServiceUrl(),
             DocServiceUrlInternal =filesLinkUtility.GetDocServiceUrlInternal(),
             DocServicePortalUrl = filesLinkUtility.GetDocServicePortalUrl(),
+            DocServiceSignatureHeader = filesLinkUtility.GetDocServiceSignatureHeader(),
+            DocServiceSslVerification = filesLinkUtility.GetDocServiceSslVerification(),
             IsDefault = filesLinkUtility.IsDefault
         };
     }

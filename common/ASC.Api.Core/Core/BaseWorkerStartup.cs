@@ -79,7 +79,7 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
         
         var connectionMultiplexer = await services.GetRedisConnectionMultiplexerAsync(Configuration, GetType().Namespace);
 
-        services.AddDistributedCache(connectionMultiplexer)
+        services.AddHybridCache(connectionMultiplexer)
                 .AddEventBus(Configuration)
                 .AddDistributedTaskQueue()
                 .AddCacheNotify(Configuration)
