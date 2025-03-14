@@ -960,20 +960,6 @@ public partial class SettingsController(MessageService messageService,
         return new { Url = hubUrl };
     }
 
-    /*/// <summary>
-    /// Returns the tenant Control Panel settings.
-    /// </summary>
-    /// <short>Get the tenant Control Panel settings</short>
-
-    /// <path>api/2.0/settings/controlpanel</path>
-
-    [ApiExplorerSettings(IgnoreApi = true)]
-    [HttpGet("controlpanel")]
-    public TenantControlPanelSettings GetTenantControlPanelSettings()
-    {
-        return _settingsManager.Load<TenantControlPanelSettings>();
-    }*/
-
     /// <summary>
     /// Returns the authorization services.
     /// </summary>
@@ -1150,5 +1136,51 @@ public partial class SettingsController(MessageService messageService,
         {
             throw new BillingException(Resource.ErrorNotAllowedOption, "Statistic");
         }
+    }
+
+
+    /// <summary>
+    /// Returns the portal user invitation settings.
+    /// </summary>
+    /// <short>Get the user invitation settings</short>
+    /// <path>api/2.0/settings/invitationsettings</path>
+    [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "portal user invitation settings", typeof(TenantUserInvitationSettingsDto))]
+    [HttpGet("invitationsettings")]
+    public async Task<TenantUserInvitationSettingsDto> GetTenantUserInvitationSettingsAsync()
+    {
+        var currentUserType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+        if (currentUserType is EmployeeType.User or EmployeeType.Guest)
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
+        var settings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
+
+        return mapper.Map<TenantUserInvitationSettings, TenantUserInvitationSettingsDto>(settings);
+    }
+
+
+    /// <summary>
+    /// Updates the portal user invitation settings.
+    /// </summary>
+    /// <short>Update user invitation settings</short>
+    /// <path>api/2.0/settings/invitationsettings</path>
+    [Tags("Settings / Common settings")]
+    [SwaggerResponse(200, "Updated user invitation settings", typeof(TenantUserInvitationSettingsDto))]
+    [HttpPut("invitationsettings")]
+    public async Task<TenantUserInvitationSettingsDto> UpdateLoginSettingsAsync(TenantUserInvitationSettingsRequestDto inDto)
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        var settings = new TenantUserInvitationSettings
+        {
+            AllowInvitingMembers = inDto.AllowInvitingMembers,
+            AllowInvitingGuests = inDto.AllowInvitingGuests
+        };
+
+        _ = await settingsManager.SaveAsync(settings);
+
+        return mapper.Map<TenantUserInvitationSettings, TenantUserInvitationSettingsDto>(settings);
     }
 }
