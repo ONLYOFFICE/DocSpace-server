@@ -104,7 +104,10 @@ public class SocketService(
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var maxDegreeOfParallelism = 1000;
+        if (!int.TryParse(configuration["web:hub:maxDegreeOfParallelism"], out var maxDegreeOfParallelism))
+        {
+            maxDegreeOfParallelism = 10;
+        }
 
         List<ChannelReader<SocketData>> readers = [channelReader];
 
