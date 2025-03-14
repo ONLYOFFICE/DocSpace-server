@@ -332,7 +332,8 @@ public abstract class BaseStartup
             .AddBaseDbContextPool<InstanceRegistrationContext>()
             .AddBaseDbContextPool<IntegrationEventLogContext>()
             .AddBaseDbContextPool<MessagesContext>()
-            .AddBaseDbContextPool<WebhooksDbContext>();
+            .AddBaseDbContextPool<WebhooksDbContext>()
+            .AddBaseDbContextPool<ApiKeysDbContext>();
 
         if (AddAndUseSession)
         {
@@ -427,10 +428,11 @@ public abstract class BaseStartup
                 options.DefaultScheme = MultiAuthSchemes;
                 options.DefaultChallengeScheme = MultiAuthSchemes;
             })
+            .AddScheme<AuthenticationSchemeOptions, ApiKeyBearerAuthHandler>(ApiKeyBearerDefaults.AuthenticationScheme, _ => { })
             .AddScheme<AuthenticationSchemeOptions, CookieAuthHandler>(CookieAuthenticationDefaults.AuthenticationScheme, _ => { })
             .AddScheme<AuthenticationSchemeOptions, BasicAuthHandler>(BasicAuthScheme, _ => { })
             .AddScheme<AuthenticationSchemeOptions, ConfirmAuthHandler>("confirm", _ => { })
-            .AddPolicyScheme(MultiAuthSchemes, JwtBearerDefaults.AuthenticationScheme, options =>
+            .AddPolicyScheme(MultiAuthSchemes, MultiAuthSchemes, options =>
             {
                 options.ForwardDefaultSelector = context =>
                 {
@@ -454,6 +456,10 @@ public abstract class BaseStartup
                         if (jwtHandler.CanReadToken(token))
                         {
                             return JwtBearerDefaults.AuthenticationScheme;
+                        }
+                        else if (token.StartsWith("sk-"))
+                        {
+                            return ApiKeyBearerDefaults.AuthenticationScheme;
                         }
                     }
 
