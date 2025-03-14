@@ -58,6 +58,7 @@ public class DeletePersonalFolderProgressItem : DistributedTaskProgress
         var options = scope.ServiceProvider.GetService<ILoggerProvider>();
         var daoFactory = scope.ServiceProvider.GetService<IDaoFactory>();
         var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
+        var userManager = scope.ServiceProvider.GetService<UserManager>();
 
         await tenantManager.SetCurrentTenantAsync(_tenantId);
 
@@ -80,7 +81,14 @@ public class DeletePersonalFolderProgressItem : DistributedTaskProgress
             Percentage = 20;
             await PublishChanges();
 
-            await fileStorageService.MoveSharedFilesAsync(_userId, my.ModifiedBy);
+            var userTo = my.ModifiedBy;
+
+            if (await userManager.IsGuestAsync(userTo))
+            {
+                userTo = tenantManager.GetCurrentTenant().OwnerId;
+            }
+
+            await fileStorageService.MoveSharedFilesAsync(_userId, userTo);
 
             Percentage = 50;
             await PublishChanges();

@@ -30,14 +30,15 @@ global using System.Security;
 global using System.Security.Claims;
 global using System.Text.Json;
 global using System.Web;
+
 global using ASC.Api.Core;
 global using ASC.Api.Core.Convention;
-global using ASC.Api.Core.Socket;
 global using ASC.Api.Core.Core;
 global using ASC.Api.Core.Extensions;
 global using ASC.Api.Core.Model;
 global using ASC.Api.Core.Routing;
 global using ASC.Api.Core.Security;
+global using ASC.Api.Core.Socket;
 global using ASC.Api.Utils;
 global using ASC.AuditTrail.Repositories;
 global using ASC.AuditTrail.Types;
@@ -89,10 +90,14 @@ global using ASC.Web.Core.Quota;
 global using ASC.Web.Core.Users;
 global using ASC.Web.Core.Utility;
 global using ASC.Web.Files;
+global using ASC.Web.Files.Classes;
+global using ASC.Web.Files.Services.WCFService;
 global using ASC.Web.Studio.Core;
 global using ASC.Web.Studio.Core.Notify;
 global using ASC.Web.Studio.Utility;
+
 global using Autofac;
+
 global using Microsoft.AspNetCore.Http.Extensions;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.RateLimiting;

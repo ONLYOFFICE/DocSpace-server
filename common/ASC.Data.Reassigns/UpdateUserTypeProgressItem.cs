@@ -27,6 +27,8 @@
 using ASC.Core.Common;
 using ASC.Files.Core;
 
+using SecurityContext = ASC.Core.SecurityContext;
+
 namespace ASC.Data.Reassigns;
 
 [Transient]
