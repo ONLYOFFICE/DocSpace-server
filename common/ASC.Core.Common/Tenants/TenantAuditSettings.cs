@@ -61,7 +61,7 @@ public class TenantAuditSettings : ISettings<TenantAuditSettings>
 public class TenantAuditSettingsWrapper
 {
     /// <summary>
-    /// Audit trail settingse
+    /// Audit trail settings
     /// </summary>
     public TenantAuditSettings Settings { get; set; }
 }
