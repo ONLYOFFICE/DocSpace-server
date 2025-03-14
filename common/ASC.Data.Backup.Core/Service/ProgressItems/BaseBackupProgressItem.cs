@@ -31,10 +31,6 @@ namespace ASC.Data.Backup.Services;
 public abstract class BaseBackupProgressItem : DistributedTaskProgress
 {
     protected readonly IServiceScopeFactory _serviceScopeProvider;
-    private int? _tenantId;
-    private BackupProgressItemType? _backupProgressItemEnum;
-    private string _link;
-    private int? _newTenantId;
 
     public BaseBackupProgressItem()
     {
@@ -46,58 +42,16 @@ public abstract class BaseBackupProgressItem : DistributedTaskProgress
         _serviceScopeProvider = serviceScopeFactory;
     }
 
-    public int NewTenantId
-    {
-        get => _newTenantId ?? this[nameof(_newTenantId)];
-        set
-        {
-            _newTenantId = value;
-            this[nameof(_newTenantId)] = value;
-        }
-    }
-
-
-    public int TenantId
-    {
-        get => _tenantId ?? this[nameof(_tenantId)];
-        set
-        {
-            _tenantId = value;
-            this[nameof(_tenantId)] = value;
-        }
-    }
-
-    public string Link
-    {
-        get
-        {
-            return _link ?? this[nameof(_link)];
-        }
-        set
-        {
-            _link = value;
-            this[nameof(_link)] = value;
-        }
-    }
-
-    public BackupProgressItemType BackupProgressItemType
-    {
-        get
-        {
-            return _backupProgressItemEnum ?? (BackupProgressItemType)this[nameof(_backupProgressItemEnum)];
-        }
-        protected set
-        {
-            _backupProgressItemEnum = value;
-            this[nameof(_backupProgressItemEnum)] = (int)value;
-        }
-    }
+    public int NewTenantId { get; set; }
+    public int TenantId { get; set; }
+    public string Link { get; set; }
+    public BackupProgressItemType BackupProgressItemType { get; set; }
 
     protected void Init()
     {
-        this[nameof(_tenantId)] = 0;
-        this[nameof(_newTenantId)] = 0;
-        this[nameof(_link)] = "";
+        TenantId = 0;
+        NewTenantId = 0;
+        Link = "";
     }
 
     public BackupProgress ToBackupProgress()

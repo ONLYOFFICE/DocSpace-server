@@ -29,13 +29,13 @@ namespace ASC.Web.Api.Controllers.Settings;
 [DefaultRoute("notification")]
 public class NotificationController(
     ApiContext apiContext,
-    IMemoryCache memoryCache,
+    IFusionCache fusionCache,
     WebItemManager webItemManager,
     NotificationControllerHelper notificationControllerHelper,
     RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
     IMapper mapper,
     IHttpContextAccessor httpContextAccessor)
-: BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+: BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
     /// Checks if the notification type specified in the request is enabled or not.

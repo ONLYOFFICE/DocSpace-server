@@ -35,7 +35,6 @@ public class EditorControllerInternal(FileStorageService fileStorageService,
         EncryptionKeyPairDtoHelper encryptionKeyPairDtoHelper,
         SettingsManager settingsManager,
         EntryManager entryManager,
-        IHttpContextAccessor httpContextAccessor,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
         ExternalShare externalShare,
@@ -44,7 +43,7 @@ public class EditorControllerInternal(FileStorageService fileStorageService,
         IDaoFactory daoFactory,
         SecurityContext securityContext,
         FileSecurity fileSecurity)
-        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, daoFactory, securityContext, fileSecurity);
+        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, daoFactory, securityContext, fileSecurity);
 
 [DefaultRoute("file")]
 public class EditorControllerThirdparty(FileStorageService fileStorageService,
@@ -52,7 +51,6 @@ public class EditorControllerThirdparty(FileStorageService fileStorageService,
         EncryptionKeyPairDtoHelper encryptionKeyPairDtoHelper,
         SettingsManager settingsManager,
         EntryManager entryManager,
-        IHttpContextAccessor httpContextAccessor,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
         ExternalShare externalShare,
@@ -61,14 +59,13 @@ public class EditorControllerThirdparty(FileStorageService fileStorageService,
         IDaoFactory daoFactory,
         SecurityContext securityContext,
         FileSecurity fileSecurity)
-        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, httpContextAccessor, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, daoFactory, securityContext, fileSecurity);
+        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, daoFactory, securityContext, fileSecurity);
 
 public abstract class EditorController<T>(FileStorageService fileStorageService,
         DocumentServiceHelper documentServiceHelper,
         EncryptionKeyPairDtoHelper encryptionKeyPairDtoHelper,
         SettingsManager settingsManager,
         EntryManager entryManager,
-        IHttpContextAccessor httpContextAccessor,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
         ExternalShare externalShare,
@@ -92,9 +89,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     [HttpPut("{fileId}/saveediting")]
     public async Task<FileDto<T>> SaveEditingFromFormAsync(SaveEditingRequestDto<T> inDto)
     {
-        await using var stream = httpContextAccessor.HttpContext.Request.Body;
-
-        return await _fileDtoHelper.GetAsync(await fileStorageService.SaveEditingAsync(inDto.FileId, inDto.FileExtension, inDto.DownloadUri, stream, inDto.Forcesave));
+        return await _fileDtoHelper.GetAsync(await fileStorageService.SaveEditingAsync(inDto.FileId, inDto.FileExtension, inDto.DownloadUri, inDto.File?.OpenReadStream(), inDto.Forcesave));
     }
 
     /// <summary>

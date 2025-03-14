@@ -48,7 +48,7 @@ public partial class SettingsController(MessageService messageService,
         ConsumerFactory consumerFactory,
         TimeZoneConverter timeZoneConverter,
         CustomNamingPeople customNamingPeople,
-        IMemoryCache memoryCache,
+        IFusionCache fusionCache,
         ProviderManager providerManager,
         FirstTimeTenantSettings firstTimeTenantSettings,
         TelegramHelper telegramHelper,
@@ -67,7 +67,7 @@ public partial class SettingsController(MessageService messageService,
         UsersQuotaSyncOperation usersQuotaSyncOperation,
         CustomQuota customQuota,
         QuotaSocketManager quotaSocketManager)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     [GeneratedRegex("^[a-z0-9]([a-z0-9-.]){1,253}[a-z0-9]$")]
     private static partial Regex EmailDomainRegex();

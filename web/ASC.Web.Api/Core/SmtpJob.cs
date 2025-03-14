@@ -32,27 +32,8 @@ namespace ASC.Api.Settings.Smtp;
 [Transient]
 public class SmtpJob : DistributedTaskProgress
 {
-    private int? _tenantId;
-    public int TenantId
-    {
-        get => _tenantId ?? this[nameof(_tenantId)];
-        set
-        {
-            _tenantId = value;
-            this[nameof(_tenantId)] = value;
-        }
-    }
-
-    private string _currentOperation;
-    public string CurrentOperation
-    {
-        get => _currentOperation ?? this[nameof(_currentOperation)];
-        set
-        {
-            _currentOperation = value;
-            this[nameof(_currentOperation)] = value;
-        }
-    }
+    public int TenantId { get; set; }
+    public string CurrentOperation { get; set; }
 
     private Guid _currentUser;
     private SmtpSettingsDto _smtpSettings = new();

@@ -63,10 +63,9 @@ public record FileMoveCopyOperationData<T> : FileOperationData<T>
 [Transient]
 public class FileMoveCopyOperation : ComposeFileOperation<FileMoveCopyOperationData<string>, FileMoveCopyOperationData<int>>
 {
+    public override FileOperationType FileOperationType { get; set; } = FileOperationType.Copy;
     public FileMoveCopyOperation() { }
     public FileMoveCopyOperation(IServiceProvider serviceProvider) : base(serviceProvider) { }
-
-    protected override FileOperationType FileOperationType => FileOperationType.Copy;
 
     public void Init(bool holdResult, bool copy)
     {
@@ -74,7 +73,7 @@ public class FileMoveCopyOperation : ComposeFileOperation<FileMoveCopyOperationD
         
         if (!copy)
         {
-            this[OpType] = (int)FileOperationType.Move;
+            FileOperationType = (int)FileOperationType.Move;
         }
     }
 
@@ -85,7 +84,7 @@ public class FileMoveCopyOperation : ComposeFileOperation<FileMoveCopyOperationD
         
         if (!copy)
         {
-            this[OpType] = (int)FileOperationType.Move;
+            FileOperationType = (int)FileOperationType.Move;
         }
     }
 
@@ -107,7 +106,9 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
     private readonly FileConflictResolveType _resolveType;
     private readonly IDictionary<string, StringValues> _headers;
     private readonly Dictionary<T, Folder<T>> _parentRooms = new();
-
+    
+    public override FileOperationType FileOperationType { get; set; } = FileOperationType.Copy;
+    
     public FileMoveCopyOperation(IServiceProvider serviceProvider, FileMoveCopyOperationData<T> data)
         : base(serviceProvider, data)
     {
@@ -126,7 +127,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         _resolveType = data.ResolveType;
 
         _headers = data.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value));
-        this[OpType] = (int)(_copy ? FileOperationType.Copy : FileOperationType.Move);
+        FileOperationType = (_copy ? FileOperationType.Copy : FileOperationType.Move);
     }
 
     protected override async Task DoJob(AsyncServiceScope serviceScope)
@@ -164,7 +165,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var parentFolders = await folderDao.GetParentFoldersAsync(toFolder.Id).ToListAsync();
         if (parentFolders.Exists(parent => Folders.Exists(r => r.ToString() == parent.Id.ToString())))
         {
-            this[Err] = FilesCommonResource.ErrorMessage_FolderCopyError;
+            Err = FilesCommonResource.ErrorMessage_FolderCopyError;
 
             return;
         }
@@ -191,7 +192,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                     var tenantLogoManager = scope.ServiceProvider.GetService<TenantLogoManager>();
                     var logoText = await tenantLogoManager.GetLogoTextAsync();
 
-                    this[Err] = string.Format(FilesCommonResource.ErrorMessage_FolderMoveFormFillingError, logoText);
+                    Err = string.Format(FilesCommonResource.ErrorMessage_FolderMoveFormFillingError, logoText);
 
                     return;
                 }
@@ -200,7 +201,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                     var tenantLogoManager = scope.ServiceProvider.GetService<TenantLogoManager>();
                     var logoText = await tenantLogoManager.GetLogoTextAsync();
 
-                    this[Err] = string.Format(FilesCommonResource.ErrorMessage_FilesMoveFormFillingError, logoText);
+                    Err = string.Format(FilesCommonResource.ErrorMessage_FilesMoveFormFillingError, logoText);
 
                     return;
                 }
@@ -216,7 +217,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
             if (_copy && !await FilesSecurity.CanCopyAsync(firstFolder))
             {
-               this[Err] = FilesCommonResource.ErrorMessage_SecurityException_CopyFolder;
+               Err = FilesCommonResource.ErrorMessage_SecurityException_CopyFolder;
 
                return;
             }
@@ -225,14 +226,14 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             {
                 if (isRoom)
                 {
-                    this[Err] = toFolder.FolderType == FolderType.Archive
+                    Err = toFolder.FolderType == FolderType.Archive
                         ? FilesCommonResource.ErrorMessage_SecurityException_ArchiveRoom
                         : FilesCommonResource.ErrorMessage_SecurityException_UnarchiveRoom;
 
                 }
                 else
                 {
-                    this[Err] = FilesCommonResource.ErrorMessage_SecurityException_MoveFolder;
+                    Err = FilesCommonResource.ErrorMessage_SecurityException_MoveFolder;
                 }
 
                 return;
@@ -245,13 +246,13 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
             if (_copy && !await FilesSecurity.CanCopyAsync(firstFile))
             {
-                this[Err] = FilesCommonResource.ErrorMessage_SecurityException_CopyFile;
+                Err = FilesCommonResource.ErrorMessage_SecurityException_CopyFile;
 
                 return;
             }
             if (!_copy && !await FilesSecurity.CanMoveAsync(firstFile))
             {
-                this[Err] = FilesCommonResource.ErrorMessage_SecurityException_MoveFile;
+                Err = FilesCommonResource.ErrorMessage_SecurityException_MoveFile;
 
                 return;
             }
@@ -259,14 +260,14 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
         if (_copy && !(isRoom && toFolder.FolderType == FolderType.VirtualRooms) && !await fileSecurity.CanCopyToAsync(toFolder))
         {
-            this[Err] = FilesCommonResource.ErrorMessage_SecurityException_CopyToFolder;
+            Err = FilesCommonResource.ErrorMessage_SecurityException_CopyToFolder;
 
             return;
         }
         
         if (!_copy && !await fileSecurity.CanMoveToAsync(toFolder))
         {
-            this[Err] = toFolder.FolderType switch
+            Err = toFolder.FolderType switch
             {
                 FolderType.VirtualRooms => FilesCommonResource.ErrorMessage_SecurityException_UnarchiveRoom,
                 FolderType.Archive => FilesCommonResource.ErrorMessage_SecurityException_UnarchiveRoom,
@@ -276,7 +277,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             return;
         }
 
-        this[Res] += $"folder_{tto}{SplitChar}";
+        Result += $"folder_{tto}{SplitChar}";
         
         var needToMark = new List<FileEntry>();
 
@@ -350,7 +351,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var isToFolder = Equals(toFolderId, _daoFolderId);
 
         var sb = new StringBuilder();
-        sb.Append(this[Res]);
+        sb.Append(Result);
         foreach (var folderId in folderIds)
         {
             CancellationToken.ThrowIfCancellationRequested();
@@ -424,53 +425,53 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
             if (folder == null)
             {
-                this[Err] = FilesCommonResource.ErrorMessage_FolderNotFound;
+                Err = FilesCommonResource.ErrorMessage_FolderNotFound;
             }
             else if (copy && checkPermissions && !canMoveOrCopy)
             {
-                this[Err] = FilesCommonResource.ErrorMessage_SecurityException_CopyFolder;
+                Err = FilesCommonResource.ErrorMessage_SecurityException_CopyFolder;
             }
             else if (!copy && checkPermissions && !canMoveOrCopy)
             {
                 if (isRoom)
                 {
-                    this[Err] = toFolder.FolderType == FolderType.Archive
+                    Err = toFolder.FolderType == FolderType.Archive
                         ? FilesCommonResource.ErrorMessage_SecurityException_ArchiveRoom
                         : FilesCommonResource.ErrorMessage_SecurityException_UnarchiveRoom;
                 }
                 else
                 {
-                    this[Err] = FilesCommonResource.ErrorMessage_SecurityException_MoveFolder;
+                    Err = FilesCommonResource.ErrorMessage_SecurityException_MoveFolder;
                 }
             }
             else if (!isRoom && (toFolder.FolderType == FolderType.VirtualRooms || toFolder.RootFolderType == FolderType.Archive))
             {
-                this[Err] = FilesCommonResource.ErrorMessage_SecurityException_MoveFolder;
+                Err = FilesCommonResource.ErrorMessage_SecurityException_MoveFolder;
             }
             else if (isRoom && toFolder.FolderType != FolderType.VirtualRooms && toFolder.FolderType != FolderType.Archive)
             {
-                this[Err] = FilesCommonResource.ErrorMessage_SecurityException_UnarchiveRoom;
+                Err = FilesCommonResource.ErrorMessage_SecurityException_UnarchiveRoom;
             }
             else if (!isRoom && folder.SettingsPrivate && !await CompliesPrivateRoomRulesAsync(folder, toFolderParents))
             {
-                this[Err] = FilesCommonResource.ErrorMessage_SecurityException_MoveFolder;
+                Err = FilesCommonResource.ErrorMessage_SecurityException_MoveFolder;
             }
             else if (checkPermissions && folder.RootFolderType != FolderType.TRASH && !await FilesSecurity.CanDownloadAsync(folder))
             {
-                this[Err] = FilesCommonResource.ErrorMessage_SecurityException;
+                Err = FilesCommonResource.ErrorMessage_SecurityException;
             }
             else if (folder.RootFolderType == FolderType.Privacy
                 && (copy || toFolder.RootFolderType != FolderType.Privacy))
             {
-                this[Err] = FilesCommonResource.ErrorMessage_SecurityException_MoveFolder;
+                Err = FilesCommonResource.ErrorMessage_SecurityException_MoveFolder;
             }
             else if (!canUseRoomQuota)
             {
-                this[Err] = FileSizeComment.GetRoomFreeSpaceException(roomQuotaLimit);
+                Err = FileSizeComment.GetRoomFreeSpaceException(roomQuotaLimit).Message;
             }
             else if (!canUseUserQuota)
             {
-                this[Err] = FileSizeComment.GetUserFreeSpaceException(userQuotaLimit);
+                Err = FileSizeComment.GetUserFreeSpaceException(userQuotaLimit).Message;
             }
             else if (!Equals(folder.ParentId ?? default, toFolderId) || _resolveType == FileConflictResolveType.Duplicate)
             {
@@ -605,7 +606,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                             {
                                 if (checkPermissions && !await FilesSecurity.CanMoveAsync(folder))
                                 {
-                                    this[Err] = FilesCommonResource.ErrorMessage_SecurityException_MoveFolder;
+                                    Err = FilesCommonResource.ErrorMessage_SecurityException_MoveFolder;
                                 }
                                 else if (await FolderDao.IsEmptyAsync(folder.Id))
                                 {
@@ -658,11 +659,11 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 }
                                 else if (checkPermissions && !await FilesSecurity.CanMoveAsync(folder))
                                 {
-                                    this[Err] = FilesCommonResource.ErrorMessage_SecurityException_MoveFolder;
+                                    Err = FilesCommonResource.ErrorMessage_SecurityException_MoveFolder;
                                 }
                                 else if (isError)
                                 {
-                                    this[Err] = message;
+                                    Err = message;
                                 }
                                 else
                                 {
@@ -689,11 +690,11 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                     {
                         if (checkPermissions && !await FilesSecurity.CanMoveAsync(folder))
                         {
-                            this[Err] = FilesCommonResource.ErrorMessage_SecurityException_MoveFolder;
+                            Err = FilesCommonResource.ErrorMessage_SecurityException_MoveFolder;
                         }
                         else if (isError)
                         {
-                            this[Err] = message;
+                            Err = message;
                         }
                         else
                         {
@@ -818,11 +819,12 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                             }
                         }
                     }
-                    this[Res] = sb.ToString();
+                    
+                    Result = sb.ToString();
                 }
                 catch (Exception ex)
                 {
-                    this[Err] = ex.Message;
+                    Err = ex.Message;
 
                     Logger.ErrorWithException(ex);
                 }
@@ -869,37 +871,37 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
             if (file == null)
             {
-                this[Err] = FilesCommonResource.ErrorMessage_FileNotFound;
+                Err = FilesCommonResource.ErrorMessage_FileNotFound;
             }
             else if (toFolder.FolderType == FolderType.VirtualRooms || toFolder.RootFolderType == FolderType.Archive)
             {
-                this[Err] = FilesCommonResource.ErrorMessage_SecurityException_MoveFile;
+                Err = FilesCommonResource.ErrorMessage_SecurityException_MoveFile;
             }
             else if (copy && !await FilesSecurity.CanCopyAsync(file))
             {
-                this[Err] = FilesCommonResource.ErrorMessage_SecurityException_CopyFile;
+                Err = FilesCommonResource.ErrorMessage_SecurityException_CopyFile;
             }
             else if (!copy && checkPermissions && !await FilesSecurity.CanMoveAsync(file))
             {
-                this[Err] = FilesCommonResource.ErrorMessage_SecurityException_MoveFile;
+                Err = FilesCommonResource.ErrorMessage_SecurityException_MoveFile;
             }
             else if (checkPermissions && file.RootFolderType != FolderType.TRASH && !await FilesSecurity.CanDownloadAsync(file))
             {
-                this[Err] = FilesCommonResource.ErrorMessage_SecurityException;
+                Err = FilesCommonResource.ErrorMessage_SecurityException;
             }
             else if (!await CompliesPrivateRoomRulesAsync(file, toParentFolders))
             {
-                this[Err] = FilesCommonResource.ErrorMessage_SecurityException_MoveFile;
+                Err = FilesCommonResource.ErrorMessage_SecurityException_MoveFile;
             }
             else if (file.RootFolderType == FolderType.Privacy
                 && (copy || toFolder.RootFolderType != FolderType.Privacy))
             {
-                this[Err] = FilesCommonResource.ErrorMessage_SecurityException_MoveFile;
+                Err = FilesCommonResource.ErrorMessage_SecurityException_MoveFile;
             }
             else if (global.EnableUploadFilter
                      && !fileUtility.ExtsUploadable.Contains(FileUtility.GetFileExtension(file.Title)))
             {
-                this[Err] = FilesCommonResource.ErrorMessage_NotSupportedFormat;
+                Err = FilesCommonResource.ErrorMessage_NotSupportedFormat;
             }
             else
             {
@@ -921,13 +923,13 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     var tenantLogoManager = scope.ServiceProvider.GetService<TenantLogoManager>();
                                     var logoText = await tenantLogoManager.GetLogoTextAsync();
 
-                                    this[Err] = string.Format(_copy ? FilesCommonResource.ErrorMessage_UploadToFormRoom : FilesCommonResource.ErrorMessage_MoveToFormRoom, logoText);
+                                    Err = string.Format(_copy ? FilesCommonResource.ErrorMessage_UploadToFormRoom : FilesCommonResource.ErrorMessage_MoveToFormRoom, logoText);
                                     continue;
                                 }
                             }
                             catch
                             {
-                                this[Err] = FilesCommonResource.ErrorMessage_FileNotFound;
+                                Err = FilesCommonResource.ErrorMessage_FileNotFound;
                                 continue;
                             }
 
@@ -994,7 +996,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                         {
                             if (isError)
                             {
-                                this[Err] = message;
+                                Err = message;
                             }
                             else
                             {
@@ -1070,15 +1072,15 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                         {
                             if (checkPermissions && !await FilesSecurity.CanEditAsync(conflict) && !await FilesSecurity.CanFillFormsAsync(conflict))
                             {
-                                this[Err] = FilesCommonResource.ErrorMessage_SecurityException;
+                                Err = FilesCommonResource.ErrorMessage_SecurityException;
                             }
                             else if (await lockerManager.FileLockedForMeAsync(conflict.Id))
                             {
-                                this[Err] = FilesCommonResource.ErrorMessage_LockedFile;
+                                Err = FilesCommonResource.ErrorMessage_LockedFile;
                             }
                             else if (await fileTracker.IsEditingAsync(conflict.Id))
                             {
-                                this[Err] = FilesCommonResource.ErrorMessage_SecurityException_UpdateEditingFile;
+                                Err = FilesCommonResource.ErrorMessage_SecurityException_UpdateEditingFile;
                             }
                             else
                             {
@@ -1156,7 +1158,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     {
                                         if (isError)
                                         {
-                                            this[Err] = message;
+                                            Err = message;
                                         }
                                         else
                                         {
@@ -1186,7 +1188,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                 }
                 catch (Exception ex)
                 {
-                    this[Err] = ex.Message;
+                    Err = ex.Message;
 
                     Logger.ErrorWithException(ex);
                 }
@@ -1195,7 +1197,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             await ProgressStep(fileId: FolderDao.CanCalculateSubitems(fileId) ? default : fileId);
         }
 
-        this[Res] = sb.ToString();
+        Result = sb.ToString();
 
         return needToMark;
     }

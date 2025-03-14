@@ -66,7 +66,6 @@ public class QuotaSyncOperation(IServiceProvider serviceProvider, IDistributedTa
 [Transient]
 public class QuotaSyncJob : DistributedTaskProgress
 {
-    private int? _tenantId;
     private readonly IServiceScopeFactory _serviceScopeFactory;
 
     public QuotaSyncJob()
@@ -79,23 +78,13 @@ public class QuotaSyncJob : DistributedTaskProgress
         _serviceScopeFactory = serviceScopeFactory;
     }
 
-    public int TenantId
-    {
-        get
-        {
-            return _tenantId ?? this[nameof(_tenantId)];
-        }
-        private set
-        {
-            _tenantId = value;
-            this[nameof(_tenantId)] = value;
-        }
-    }
+    public int TenantId { get; set; }
 
     public void InitJob(Tenant tenant)
     {
         TenantId = tenant.Id;
     }
+    
     protected override async Task DoJob()
     {
         try
