@@ -1951,8 +1951,7 @@ public class UserController(
     [HttpPut("userquota")]
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserQuotaAsync(UpdateMembersQuotaRequestDto inDto)
     {
-        var quotaStr = inDto.Quota.GetString();
-        if (!long.TryParse(quotaStr, out var quota))
+        if (!inDto.Quota.TryGetInt64(out var quota))
         {
             throw new Exception(Resource.UserQuotaGreaterPortalError);
         }
