@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Common.Quota.Custom;
+
 using Document = ASC.ElasticSearch.Document;
 
 namespace ASC.Files.Core.Data;
@@ -66,7 +68,9 @@ internal class FileDao(
     FileChecker fileChecker,
     EntryManager entryManager,
     FileSharing fileSharing,
-    FilesMessageService filesMessageService)
+    FilesMessageService filesMessageService,
+    QuotaSocketManager quotaSocketManager,
+    CustomQuota customQuota)
     : AbstractDao(dbContextManager,
               userManager,
               tenantManager,
@@ -1001,6 +1005,10 @@ internal class FileDao(
 
         var trashId = await globalFolder.GetFolderTrashAsync(daoFactory);
 
+        var toUser = await _userManager.GetUsersAsync(toFolder.RootCreateBy);
+        var fromUser = await _userManager.GetUsersAsync(fromFolder.RootCreateBy);
+
+
         if (toRoomId != -1 && fromRoomId != toRoomId)
         {
             var toRoom = DocSpaceHelper.IsRoom(toFolder.FolderType) ? toFolder : await folderDao.GetFolderAsync(toRoomId);
@@ -1034,6 +1042,28 @@ internal class FileDao(
                     if (userQuotaLimit - userUsedSpace < fileContentLength)
                     {
                         throw FileSizeComment.GetUserFreeSpaceException(userQuotaLimit);
+                    }
+                }
+            }
+        }
+        else
+        {
+            if (toUser != fromUser && toFolder.RootFolderType is FolderType.USER && fromFolder.RootFolderType is FolderType.USER) 
+            {
+                var quotaUserSettings = await _settingsManager.LoadAsync<TenantUserQuotaSettings>();
+                if (quotaUserSettings.EnableQuota)
+                {
+                    var toUserQuotaData = await _settingsManager.LoadAsync<UserQuotaSettings>(toUser);
+                    var toUserQuotaLimit = toUserQuotaData.UserQuota == toUserQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : toUserQuotaData.UserQuota;
+                    var toUserUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenantId, toUser.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
+                    if (toUserQuotaLimit != TenantEntityQuotaSettings.NoQuota)
+                    {
+                        if (toUserQuotaLimit - toUserUsedSpace < fileContentLength)
+                        {
+                            await settingsManager.SaveAsync(new UserQuotaSettings { UserQuota = toUserQuotaLimit + fileContentLength }, toUser);
+
+                            _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(tenantId, customQuota.GetFeature<UserCustomQuotaFeature>().Name, quotaUserSettings.EnableQuota, toUserUsedSpace, toUserQuotaLimit + fileContentLength, [toUser.Id]);
+                        }
                     }
                 }
             }
@@ -1115,6 +1145,21 @@ internal class FileDao(
                         await tagDao.RemoveTagLinksAsync(fileId, FileEntryType.File, TagType.FromRoom);
                         await tagDao.RemoveTagLinksAsync(fileId, FileEntryType.File, TagType.Origin);
                     }
+                }
+
+                if (toUser != fromUser && toFolder.RootFolderType is FolderType.USER && fromFolder.RootFolderType is FolderType.USER)
+                {
+                    await storageFactory.QuotaUsedAddAsync(
+                        _tenantManager.GetCurrentTenantId(),
+                        FileConstant.ModuleId, "",
+                        WebItemManager.DocumentsProductID.ToString(),
+                        file.ContentLength, toUser.Id);
+
+                    await storageFactory.QuotaUsedDeleteAsync(
+                        _tenantManager.GetCurrentTenantId(),
+                        FileConstant.ModuleId, "",
+                        WebItemManager.DocumentsProductID.ToString(),
+                        file.ContentLength, fromUser.Id);
                 }
 
                 if (deleteLinks)
