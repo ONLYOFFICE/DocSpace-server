@@ -114,7 +114,7 @@ public class RemoveProgressItem : DistributedTaskProgress
             Percentage = 30;
             await PublishChanges();
 
-            await fileStorageService.DeletePersonalDataAsync<int>(UserId);
+            await fileStorageService.DeletePersonalDataAsync(UserId);
 
             if (IsGuest)
             {

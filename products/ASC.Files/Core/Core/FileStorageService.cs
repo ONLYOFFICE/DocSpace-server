@@ -24,7 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Core.Data;
+using ASC.Common.protos;
 
 namespace ASC.Web.Files.Services.WCFService;
 
@@ -97,7 +97,8 @@ public class FileStorageService //: IFileStorageService
     IDbContextFactory<UrlShortenerDbContext> dbContextFactory,
     WatermarkManager watermarkManager,
     CustomTagsService customTagsService,
-    IMapper mapper)
+    IMapper mapper,
+    ICacheNotify<ClearMyFolderItem> NotifyMyFolder)
 {
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
 
@@ -3039,16 +3040,16 @@ public class FileStorageService //: IFileStorageService
         await securityContext.AuthenticateMeWithoutCookieAsync(initUser);
     }
 
-    public async Task DeletePersonalDataAsync<T>(Guid userFromId, bool checkPermission = false)
+    public async Task DeletePersonalDataAsync(Guid userFromId, bool checkPermission = false)
     {
         if (checkPermission)
         {
             await DemandPermissionToDeletePersonalDataAsync(userFromId);
         }
 
-        var folderDao = daoFactory.GetFolderDao<T>();
-        var fileDao = daoFactory.GetFileDao<T>();
-        var linkDao = daoFactory.GetLinkDao<T>();
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var fileDao = daoFactory.GetFileDao<int>();
+        var linkDao = daoFactory.GetLinkDao<int>();
 
         if (folderDao == null || fileDao == null || linkDao == null)
         {
@@ -3102,16 +3103,16 @@ public class FileStorageService //: IFileStorageService
         await folderDao.SaveFolderAsync(my);
     }
 
-    public async Task DeletePersonalFolderAsync<T>(Guid userId, bool checkPermission = false)
+    public async Task DeletePersonalFolderAsync(Guid userId, bool checkPermission = false)
     {
         if (checkPermission)
         {
             await DemandPermissionToDeletePersonalDataAsync(userId);
         }
 
-        var folderDao = daoFactory.GetFolderDao<T>();
-        var fileDao = daoFactory.GetFileDao<T>();
-        var linkDao = daoFactory.GetLinkDao<T>();
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var fileDao = daoFactory.GetFileDao<int>();
+        var linkDao = daoFactory.GetLinkDao<int>();
 
         if (folderDao == null || fileDao == null || linkDao == null)
         {
@@ -3133,7 +3134,9 @@ public class FileStorageService //: IFileStorageService
             await DeleteFoldersAsync(folderIdsFromMy, folderIdTrash);
 
             await socketManager.DeleteFolder(my, action: async () => await folderDao.DeleteFolderAsync(folderIdMy));
-            await globalFolderHelper.ClearCacheFolderMyAsync(userId);
+
+            var cacheKey = $"my/{tenantManager.GetCurrentTenantId()}/{userId}";
+            await NotifyMyFolder.PublishAsync(new ClearMyFolderItem { Key = cacheKey }, CacheNotifyAction.Remove);
         }
         return;
     }

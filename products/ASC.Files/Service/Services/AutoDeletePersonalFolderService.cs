@@ -125,7 +125,7 @@ public class AutoDeletePersonalFolderService(
             }
 
             await fileStorageService.MoveSharedFilesAsync(tenantUser.UserId, my.ModifiedBy);
-            await fileStorageService.DeletePersonalFolderAsync<int>(tenantUser.UserId);
+            await fileStorageService.DeletePersonalFolderAsync(tenantUser.UserId);
 
             logger.InfoCleanUpFinish(myId);
         }

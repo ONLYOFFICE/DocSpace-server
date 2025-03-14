@@ -85,7 +85,7 @@ public class DeletePersonalFolderProgressItem : DistributedTaskProgress
             Percentage = 50;
             await PublishChanges();
 
-            await fileStorageService.DeletePersonalFolderAsync<int>(_userId);
+            await fileStorageService.DeletePersonalFolderAsync(_userId);
 
             Percentage = 100;
         }

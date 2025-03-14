@@ -24,7 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Core.Data;
+using System.Collections.Generic;
+
+using ASC.Common.protos;
 
 namespace ASC.Web.Files.Classes;
 
@@ -33,14 +35,39 @@ public class GlobalNotify
 {
     private ILogger Logger { get; set; }
     private readonly ICacheNotify<AscCacheItem> _notify;
+    private readonly ICacheNotify<ClearMyFolderItem> _notifyMyFolder;
 
-    public GlobalNotify(ICacheNotify<AscCacheItem> notify, ILoggerProvider options, CoreBaseSettings coreBaseSettings)
+    public GlobalNotify(ICacheNotify<AscCacheItem> notify, ICacheNotify<ClearMyFolderItem> notifyMyFolder, ILoggerProvider options, CoreBaseSettings coreBaseSettings)
     {
         _notify = notify;
+        _notifyMyFolder = notifyMyFolder;
         Logger = options.CreateLogger("ASC.Files");
         if (coreBaseSettings.Standalone)
         {
             ClearCache();
+        }
+        ClearMyFolderCache();
+    }
+
+    private void ClearMyFolderCache()
+    {
+        try
+        {
+            _notifyMyFolder.Subscribe(r =>
+            {
+                try
+                {
+                    GlobalFolder.UserRootFolderCache.Remove(r.Key, out _);
+                }
+                catch (Exception e)
+                {
+                    Logger.CriticalClearCacheAction(e);
+                }
+            }, CacheNotifyAction.Remove);
+        }
+        catch (Exception e)
+        {
+            Logger.CriticalClearCacheSubscribe(e);
         }
     }
 
@@ -373,8 +400,7 @@ public class GlobalFolder(
     UserManager userManager,
     SettingsManager settingsManager,
     ILogger<GlobalFolder> logger,
-    IServiceProvider serviceProvider,
-    IFusionCache cache)
+    IServiceProvider serviceProvider)
 {
     internal static readonly IDictionary<int, int> ProjectsRootFolderCache = new ConcurrentDictionary<int, int>(); /*Use SYNCHRONIZED for cross thread blocks*/
 
@@ -456,12 +482,7 @@ public class GlobalFolder(
         return result;
     }
 
-    public async Task ClearCacheFolderMyAsync(Guid userId)
-    {
-        var cacheKey = $"my/{tenantManager.GetCurrentTenantId()}/{userId}";
-        await cache.RemoveAsync(cacheKey);
-    }
-
+    internal static readonly ConcurrentDictionary<string, Lazy<int>> UserRootFolderCache = new(); /*Use SYNCHRONIZED for cross thread blocks*/
 
     public async ValueTask<int> GetFolderMyAsync(IDaoFactory daoFactory)
     {
@@ -472,27 +493,27 @@ public class GlobalFolder(
 
         var cacheKey = $"my/{tenantManager.GetCurrentTenantId()}/{authContext.CurrentAccount.ID}";
 
-        var myFolderId = await cache.GetOrDefaultAsync(cacheKey, -1);
-
         if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
-            if (myFolderId == -1)
-            {
-                var folderDao = daoFactory.GetFolderDao<int>();
-                myFolderId = await folderDao.GetFolderIDUserAsync(false);
-                await cache.SetAsync(cacheKey, myFolderId);
-            }
+            var myFolderId = UserRootFolderCache.GetOrAdd(cacheKey, _ => new Lazy<int>(() => GetFolderIDUserAsync(daoFactory).Result));
+            return myFolderId.Value;
         }
         else
         {
-            if (myFolderId <= 0)
+            var myFolderId = UserRootFolderCache.GetOrAdd(cacheKey, _ => new Lazy<int>(() => GetFolderIdAndProcessFirstVisitAsync(daoFactory, true).Result));
+            if (myFolderId.Value == 0)
             {
-                myFolderId = await GetFolderIdAndProcessFirstVisitAsync(daoFactory, true);
-                await cache.SetAsync(cacheKey, myFolderId);
+                UserRootFolderCache.Remove(cacheKey, out _);
+                myFolderId = UserRootFolderCache.GetOrAdd(cacheKey, _ => new Lazy<int>(() => GetFolderIdAndProcessFirstVisitAsync(daoFactory, true).Result));
             }
+            return myFolderId.Value;
         }
+    }
 
-        return myFolderId;
+    private async Task<int> GetFolderIDUserAsync(IDaoFactory daoFactory)
+    {
+        var folderDao = daoFactory.GetFolderDao<int>();
+        return await folderDao.GetFolderIDUserAsync(false);
     }
 
     internal static readonly IDictionary<int, int> CommonFolderCache =
@@ -862,11 +883,6 @@ public class GlobalFolderHelper(IDaoFactory daoFactory, GlobalFolder globalFolde
         return IdConverter.Convert<T>(await FolderMyAsync);
     }
 
-    public async Task ClearCacheFolderMyAsync(Guid userId)
-    {
-        await globalFolder.ClearCacheFolderMyAsync(userId);
-    }
-    
     public async ValueTask<T> GetFolderProjectsAsync<T>()
     {
         return IdConverter.Convert<T>(await FolderProjectsAsync);
