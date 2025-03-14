@@ -1156,8 +1156,7 @@ internal class FileDao(
                         folderDao,
                         oldFolder,
                         toFolder,
-                        file,
-                        fileContentLength);
+                        file);
                 }
                 
                 await IncrementCountAsync(context, toFolderId, tenantId, FileEntryType.File);
@@ -1361,30 +1360,10 @@ internal class FileDao(
                    : null;
     }
 
-    private async Task UpdateUsedFileSpace(IFolderDao<int> folderDao, Folder<int> fromFolder, Folder<int> toFolder, File<int> file, long size)
+    private async Task UpdateUsedFileSpace(IFolderDao<int> folderDao, Folder<int> fromFolder, Folder<int> toFolder, File<int> file)
     {
-        var (toFolderRoomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(toFolder);
-        var (oldFolderRoomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(fromFolder);
-       
         await folderDao.ChangeTreeFolderSizeAsync(toFolder.Id, file.ContentLength);
         await folderDao.ChangeTreeFolderSizeAsync(fromFolder.Id, (-1) * file.ContentLength);
-
-        if (toFolderRoomId != -1 || oldFolderRoomId != -1)
-        {
-            var tenantId = _tenantManager.GetCurrentTenantId();
-
-            if (toFolder.FolderType is FolderType.USER or FolderType.DEFAULT)
-            {
-                file.RootCreateBy = toFolder.RootCreateBy;
-                file.RootFolderType = toFolder.FolderType;
-                await storageFactory.QuotaUsedAddAsync(tenantId, FileConstant.ModuleId, "", WebItemManager.DocumentsProductID.ToString(), size, file.GetFileQuotaOwner());
-            }
-            if (fromFolder.FolderType is FolderType.USER or FolderType.DEFAULT)
-            {
-                await storageFactory.QuotaUsedDeleteAsync(tenantId, FileConstant.ModuleId, "", WebItemManager.DocumentsProductID.ToString(), size, file.GetFileQuotaOwner());
-            }
-        }
-
     }
     public static bool TryGetFileId(string path, out int fileId)
     {
