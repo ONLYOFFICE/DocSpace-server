@@ -728,6 +728,15 @@ public enum MessageAction
 
     [SwaggerEnum("Custom quota per user disabled")]
     CustomQuotaPerUserDisabled = 6053,
+    
+    [SwaggerEnum("Created api key")]
+    ApiKeyCreated = 6054,
+
+    [SwaggerEnum("Revoked api key")]
+    ApiKeyChangedStatus = 6055,
+
+    [SwaggerEnum("Deleted User api key")]
+    ApiKeyDeleted = 6056,
 
     [SwaggerEnum("Document service location setting")]
     DocumentServiceLocationSetting = 5037,
@@ -758,6 +767,8 @@ public enum MessageAction
 
     [SwaggerEnum("Start storage decryption")]
     StartStorageDecryption = 5053,
+    
+ 
 
     #endregion
 
