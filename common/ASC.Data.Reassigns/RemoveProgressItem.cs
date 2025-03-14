@@ -26,6 +26,8 @@
 
 using ASC.Web.Core.WebZones;
 
+using SecurityContext = ASC.Core.SecurityContext;
+
 namespace ASC.Data.Reassigns;
 
 /// <summary>
@@ -111,24 +113,24 @@ public class RemoveProgressItem : DistributedTaskProgress
 
             var wrapper = await GetUsageSpace(webItemManagerSecurity);
 
-            Percentage = 30;
-            await PublishChanges();
+            if (!IsGuest)
+            {
+                await fileStorageService.MoveSharedFilesAsync(UserId, _currentUserId);
+                Percentage = 30;
+                await PublishChanges();
+            }
 
             await fileStorageService.DeletePersonalDataAsync(UserId);
 
-            if (IsGuest)
-            {
-                await fileStorageService.MoveSharedFilesAsync(UserId, _currentUserId);
-                Percentage = 50;
-                await PublishChanges();
+            Percentage = 50;
+            await PublishChanges();
 
-                await fileStorageService.ReassignRoomsFilesAsync(UserId);
+            await fileStorageService.ReassignRoomsFilesAsync(UserId);
                 
-                Percentage = 70;
-                await PublishChanges();
+            Percentage = 70;
+            await PublishChanges();
                 
-                await fileStorageService.ReassignRoomsFoldersAsync(UserId);
-            }
+            await fileStorageService.ReassignRoomsFoldersAsync(UserId);
 
             Percentage = 95;
             await PublishChanges();

@@ -24,11 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Security;
-
-using ASC.Files.Core;
-using ASC.Web.Core.PublicResources;
-
 namespace ASC.Data.Reassigns;
 
 public class QueueWorker<T>(
