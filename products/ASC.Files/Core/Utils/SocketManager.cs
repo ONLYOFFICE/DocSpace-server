@@ -204,8 +204,25 @@ public class SocketManager(
     {
         return entry switch
         {
-            File<T> file => JsonSerializer.Serialize(new FileDto<T> { Id = file.Id, FolderId = file.ParentId }, typeof(FileDto<T>), FileEntryDtoContext.Default),
-            Folder<T> folder => JsonSerializer.Serialize(new FolderDto<T> { Id = folder.Id, ParentId = folder.ParentId }, typeof(FolderDto<T>), FileEntryDtoContext.Default),
+            File<T> file => JsonSerializer.Serialize(new FileDto<T>
+            {
+                Id = file.Id, 
+                FolderId = file.ParentId, 
+                Title = file.Title, 
+                Version = file.Version, 
+                VersionGroup = file.VersionGroup
+            }, _jsonSerializerOptions),
+            Folder<T> folder => JsonSerializer.Serialize(new FolderDto<T>
+            {
+                Id = folder.Id, 
+                ParentId = folder.ParentId, 
+                Title = folder.Title, 
+                RoomType = DocSpaceHelper.MapToRoomType(folder.FolderType), 
+                CreatedBy = new EmployeeDto
+                {
+                    Id = folder.CreateBy
+                }
+            }, _jsonSerializerOptions),
             _ => string.Empty
         };
     }
@@ -227,6 +244,12 @@ public class SocketManager(
     }
     
     private List<Guid> _admins;
+    private readonly JsonSerializerOptions _jsonSerializerOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
+    };
+
     private Task<IEnumerable<Guid>> Admins()
     {
         return _admins != null 
