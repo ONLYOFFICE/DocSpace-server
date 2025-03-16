@@ -26,7 +26,7 @@
 
 namespace ASC.Api.Core.Core;
 
-public class CspStartupTask(IServiceProvider provider, IFusionCache hybridCache) : IStartupTask
+public class CspStartupTask(IServiceProvider provider, IFusionCache hybridCache,  ILogger<CspStartupTask> logger) : IStartupTask
 {
     private const string HeaderKey = "csp";
 
@@ -36,7 +36,16 @@ public class CspStartupTask(IServiceProvider provider, IFusionCache hybridCache)
         var serviceProvider = scope.ServiceProvider;
         var helper = serviceProvider.GetService<CspSettingsHelper>();
 
-        var oldHeaderValue = await hybridCache.GetOrDefaultAsync<string>(HeaderKey, token: cancellationToken);
+        var oldHeaderValue = "";
+        try
+        {
+            oldHeaderValue = await hybridCache.GetOrDefaultAsync<string>(HeaderKey, token: cancellationToken);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "CspStartupTask");
+        }
+
         var currentHeaderValue = await helper.CreateHeaderAsync(null, false);
 
         if (oldHeaderValue != currentHeaderValue)
