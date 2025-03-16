@@ -41,7 +41,7 @@ public class CspStartupTask(IServiceProvider provider, IFusionCache hybridCache,
         {
             oldHeaderValue = await hybridCache.GetOrDefaultAsync<string>(HeaderKey, token: cancellationToken);
         }
-        catch (Exception e)
+        catch (FusionCacheSerializationException e)
         {
             logger.LogError(e, "CspStartupTask");
         }
