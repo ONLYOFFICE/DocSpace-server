@@ -1532,11 +1532,25 @@ public class FileStorageService //: IFileStorageService
 
         await filesMessageService.SendAsync(MessageAction.FileCreated, file, file.Title);
 
-        await fileMarker.MarkAsNewAsync(file);
-
-        await socketManager.CreateFileAsync(file);
 
         var room = await folderDao.GetParentFoldersAsync(folder.Id).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+
+        if (file.IsForm && room?.FolderType == FolderType.VirtualDataRoom)
+        {
+            var users = (await fileSharing.GetSharedInfoAsync(room))
+            .Where(ace => ace is not { Access: FileShare.FillForms } && ace.Id != authContext.CurrentAccount.ID)
+            .Select(ace => ace.Id)
+            .ToList();
+            if (users.Any())
+            {
+                await fileMarker.MarkAsNewAsync(file, users);
+            }
+        }
+        else
+        {
+            await fileMarker.MarkAsNewAsync(file);
+        }
+        await socketManager.CreateFileAsync(file);
         if (room != null && !DocSpaceHelper.FormsFillingSystemFolders.Contains(folder.FolderType))
         {
             var whoCanRead = await fileSecurity.WhoCanReadAsync(room, true);
@@ -4468,7 +4482,7 @@ public class FileStorageService //: IFileStorageService
         await fileDao.SaveFormRoleMapping(formId, roles);
 
         var properties = await fileDao.GetProperties(formId) ?? new EntryProperties<T> { FormFilling = new FormFillingProperties<T>() };
-        if (roles == null || !roles.Any())
+        if (roles?.Any() == false)
         {
             await fileDao.SaveProperties(formId, null);
         }
@@ -4476,10 +4490,39 @@ public class FileStorageService //: IFileStorageService
         {
             properties.FormFilling.StartFilling = true;
             await fileDao.SaveProperties(formId, properties);
-            var roleUserIds = roles.Where(role => !role.UserId.Equals(authContext.CurrentAccount.ID)).Select(role => role.UserId).Distinct();
-            var aces = await fileSharing.GetPureSharesAsync(currentRoom, roleUserIds).Where(ace => ace is not { Access: FileShare.FillForms }).Select(role => role.Id).ToListAsync();
 
-            await notifyClient.SendFormStartedFilling(currentRoom, form, aces, authContext.CurrentAccount.ID);
+            var currentUserId = authContext.CurrentAccount.ID;
+            var recipients = roles
+                .Where(role => role.UserId != currentUserId)
+                .Select(role => role.UserId)
+                .Distinct();
+
+            if (recipients.Any())
+            {
+                var shares = await fileSharing.GetPureSharesAsync(currentRoom, recipients).ToListAsync();
+                var filteredRecipients = shares
+                    .Where(ace => ace is not { Access: FileShare.FillForms })
+                    .Select(ace => ace.Id);
+
+                if (filteredRecipients.Any())
+                {
+                    await notifyClient.SendFormStartedFilling(
+                        currentRoom, form, filteredRecipients, currentUserId);
+                }
+            }
+
+            var firstRole = roles.FirstOrDefault();
+            if (firstRole.UserId != currentUserId)
+            {
+                var firstUserShare = await fileSharing.GetPureSharesAsync(
+                    currentRoom, [firstRole.UserId])
+                    .FirstOrDefaultAsync();
+
+                if (firstUserShare is { Access: FileShare.FillForms })
+                {
+                    await socketManager.CreateFileAsync(form, [firstRole.UserId]);
+                }
+            }
         }
 
         await socketManager.UpdateFileAsync(form);

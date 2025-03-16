@@ -163,9 +163,7 @@ public class SocketManager(
             {
                 var aces = await fileSharing.GetSharedInfoAsync(room);
                 users = aces.Where(ace => ace.Access != FileShare.FillForms)
-                .Select(ace => ace.Id)
-                            .Where(id => id != authContext.CurrentAccount.ID)
-                            .ToList();
+                .Select(ace => ace.Id).ToList();
             }
         }
         return users;
