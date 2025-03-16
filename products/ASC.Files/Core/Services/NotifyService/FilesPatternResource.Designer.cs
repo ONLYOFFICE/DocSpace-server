@@ -200,6 +200,17 @@ namespace ASC.Files.Core.Services.NotifyService {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 
+        ///      Activity notification. The form &quot;$DocumentTitle&quot;:&quot;$DocumentURL&quot; was completely filled out, finalized, and signed in the room: &quot;$RoomTitle&quot;:&quot;$RoomURL&quot; — $__DateTime.
+        ///    .
+        /// </summary>
+        public static string pattern_FormWasCompletelyFilled {
+            get {
+                return ResourceManager.GetString("pattern_FormWasCompletelyFilled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to You have been invited to the room &quot;$RoomTitle&quot;.
         /// </summary>
         public static string pattern_InvitedToRoom_push {
@@ -273,6 +284,17 @@ namespace ASC.Files.Core.Services.NotifyService {
         public static string pattern_ShareFolder {
             get {
                 return ResourceManager.GetString("pattern_ShareFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 
+        ///      Activity notification.  &quot;$FromUserName&quot;:&quot;$FromUserLink&quot; stopped form filling: &quot;$DocumentTitle&quot;:&quot;$DocumentURL&quot; in the room: &quot;$RoomTitle&quot;:&quot;$RoomURL&quot; — $__DateTime.
+        ///    .
+        /// </summary>
+        public static string pattern_StoppedFormFilling {
+            get {
+                return ResourceManager.GetString("pattern_StoppedFormFilling", resourceCulture);
             }
         }
         
@@ -385,6 +407,15 @@ namespace ASC.Files.Core.Services.NotifyService {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to DocSpace notification..
+        /// </summary>
+        public static string subject_FormWasCompletelyFilled {
+            get {
+                return ResourceManager.GetString("subject_FormWasCompletelyFilled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Documents. Mailing is complete..
         /// </summary>
         public static string subject_MailMergeEnd {
@@ -471,6 +502,15 @@ namespace ASC.Files.Core.Services.NotifyService {
         public static string subject_ShareFolder_tg {
             get {
                 return ResourceManager.GetString("subject_ShareFolder_tg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to DocSpace notification..
+        /// </summary>
+        public static string subject_StoppedFormFilling {
+            get {
+                return ResourceManager.GetString("subject_StoppedFormFilling", resourceCulture);
             }
         }
         

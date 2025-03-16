@@ -188,5 +188,14 @@ $DocumentURL
     <subject resource="|subject_YourTurnFormFilling|ASC.Files.Core.Services.NotifyService.FilesPatternResource,ASC.Files.Core" />
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_YourTurnFormFilling|ASC.Files.Core.Services.NotifyService.FilesPatternResource,ASC.Files.Core" />
   </pattern>
-  
+
+  <pattern id="FormWasCompletelyFilled" sender="email.sender">
+    <subject resource="|subject_FormWasCompletelyFilled|ASC.Files.Core.Services.NotifyService.FilesPatternResource,ASC.Files.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_FormWasCompletelyFilled|ASC.Files.Core.Services.NotifyService.FilesPatternResource,ASC.Files.Core" />
+  </pattern>
+
+  <pattern id="StoppedFormFilling" sender="email.sender">
+    <subject resource="|subject_StoppedFormFilling|ASC.Files.Core.Services.NotifyService.FilesPatternResource,ASC.Files.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_StoppedFormFilling|ASC.Files.Core.Services.NotifyService.FilesPatternResource,ASC.Files.Core" />
+  </pattern>
 </patterns>

@@ -4506,8 +4506,8 @@ public class FileStorageService //: IFileStorageService
 
                 if (filteredRecipients.Any())
                 {
-                    await notifyClient.SendFormStartedFilling(
-                        currentRoom, form, filteredRecipients, currentUserId);
+                    await notifyClient.SendFormFillingEvent(
+                        currentRoom, form, filteredRecipients, NotifyConstants.EventFormStartedFilling, currentUserId);
                 }
             }
 
@@ -4598,6 +4598,7 @@ public class FileStorageService //: IFileStorageService
     public async Task ManageFormFilling<T>(T formId, FormFillingManageAction action)
     {
         var fileDao = daoFactory.GetFileDao<T>();
+        var folderDao = daoFactory.GetFolderDao<T>();
         var form = await fileDao.GetFileAsync(formId);
         await ValidateChangeRolesPermission(form);
 
@@ -4613,6 +4614,18 @@ public class FileStorageService //: IFileStorageService
                         UserId = authContext.CurrentAccount.ID,
                         RoleName = role?.RoleName
                     };
+                var room = await DocSpaceHelper.GetParentRoom(form, folderDao);
+                var allRoles = await fileDao.GetFormRoles(form.Id).ToListAsync();
+
+                var currentStep = allRoles.Where(r => !r.Submitted).Min(r => (int?)r.Sequence) ?? 0;
+                var submittedRoles = allRoles.Where(r => r.Submitted || r.Sequence == currentStep).Select(r => r.UserId);
+
+                var aces = await fileSharing.GetPureSharesAsync(room, allRoles.Where(r => !r.Submitted && r.Sequence != currentStep).Select(r => r.UserId)).ToListAsync();
+                var filteredUnsubmittedRoles = aces
+                    .Where(ace => ace is not { Access: FileShare.FillForms })
+                    .Select(ace => ace.Id);
+
+                await notifyClient.SendFormFillingEvent(room, form, submittedRoles.Concat(filteredUnsubmittedRoles), NotifyConstants.EventStoppedFormFilling, authContext.CurrentAccount.ID);
                 break;
 
             case FormFillingManageAction.Resume:

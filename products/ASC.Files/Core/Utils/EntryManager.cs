@@ -2207,11 +2207,11 @@ public class EntryManager(IDaoFactory daoFactory,
             {
                 if(nextRoleSequence == 0)
                 {
-                    //complete
-
-                }else if (nextRoleUserIds.Any())
+                    await notifyClient.SendFormFillingEvent(room, form, allRoles.Select(role => role.UserId), NotifyConstants.EventFormWasCompletelyFilled);
+                }
+                else if (nextRoleUserIds.Any())
                 {
-                    await notifyClient.SendYourTurnFormFilling(room, form, nextRoleUserIds);
+                    await notifyClient.SendFormFillingEvent(room, form, nextRoleUserIds, NotifyConstants.EventYourTurnFormFilling);
                 }
             }
         }

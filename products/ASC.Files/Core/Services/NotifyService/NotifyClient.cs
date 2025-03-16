@@ -568,8 +568,7 @@ public class NotifyClient(WorkContext notifyContext,
         }
         return notifiableUsers.ToArray();
     }
-
-    public async Task SendFormStartedFilling<T>(FileEntry<T> room, File<T> file, IEnumerable<Guid> aces, Guid userId)
+    public async Task SendFormFillingEvent<T>(FileEntry<T> room, File<T> file, IEnumerable<Guid> aces, INotifyAction action, Guid? userId = null)
     {
         if (aces.Count() == 0)
         {
@@ -582,16 +581,21 @@ public class NotifyClient(WorkContext notifyContext,
         var folderId = room.Id.ToString();
         var roomUrl = pathProvider.GetRoomsUrl(folderId, false);
 
-        var user = await userManager.GetUsersAsync(userId);
-        var userUrl = baseCommonLinkUtility.GetFullAbsolutePath(await commonLinkUtility.GetUserProfileAsync(userId));
-        var userName = user.DisplayUserName(displayUserSettingsHelper);
+        var userUrl = "";
+        var userName = "";
+        var user = await userManager.GetUsersAsync(userId ?? Guid.Empty);
+        if (user != null)
+        {
+            userUrl = baseCommonLinkUtility.GetFullAbsolutePath(await commonLinkUtility.GetUserProfileAsync(user.Id));
+            userName = user.DisplayUserName(displayUserSettingsHelper);
+        }
 
         foreach (var ace in aces)
         {
             var recipient = await notifySource.GetRecipientsProvider().GetRecipientAsync(ace.ToString());
 
             await client.SendNoticeAsync(
-                NotifyConstants.EventFormStartedFilling,
+                action,
                 room.UniqID,
                 recipient,
                 ConfigurationConstants.NotifyEMailSenderSysName,
@@ -602,35 +606,8 @@ public class NotifyClient(WorkContext notifyContext,
                 new TagValue(Tags.FromUserName, userName),
                 new TagValue(Tags.FromUserLink, userUrl)
                 );
-
         }
     }
-
-    public async Task SendYourTurnFormFilling<T>(FileEntry<T> room, File<T> file, IEnumerable<Guid> aces)
-    {
-        var client = notifyContext.RegisterClient(serviceProvider, notifySource);
-        var recipientsProvider = notifySource.GetRecipientsProvider();
-
-        var folderId = room.Id.ToString();
-        var roomUrl = pathProvider.GetRoomsUrl(folderId, false);
-
-        foreach (var ace in aces)
-        {
-            var recipient = await notifySource.GetRecipientsProvider().GetRecipientAsync(ace.ToString());
-
-            await client.SendNoticeAsync(
-                NotifyConstants.EventYourTurnFormFilling,
-                room.UniqID,
-                recipient,
-                ConfigurationConstants.NotifyEMailSenderSysName,
-                new TagValue(NotifyConstants.TagDocumentUrl, baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id))),
-                new TagValue(NotifyConstants.TagDocumentTitle, file.Title),
-                new TagValue(NotifyConstants.RoomTitle, room.Title),
-                new TagValue(NotifyConstants.RoomUrl, roomUrl)
-                );
-        }
-    }
-
     private async Task<bool> CanNotifyRoom<T>(FileEntry<T> room, UserInfo user)
     {
         if (room is not { FileEntryType: FileEntryType.Folder })
