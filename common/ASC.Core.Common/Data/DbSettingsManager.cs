@@ -77,11 +77,11 @@ public class SettingsManager(
                 if (lastModifiedStr == context.Request.Headers.IfModifiedSince)
                 {
                     context.Response.StatusCode = 304;
-                    context.Response.Headers.CacheControl = "no-cache";
                     return null;
                 }
-
+                
                 context.Response.Headers.LastModified = lastModifiedStr;
+                context.Response.Headers.CacheControl = "private, no-cache";
                 return settings;
             }
         }

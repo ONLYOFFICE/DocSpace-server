@@ -54,14 +54,16 @@ public class IpRestrictionsController(ApiContext apiContext,
         var result = await iPRestrictionsService.GetAsync(tenant.Id, etagFromRequest);
         var etag = await iPRestrictionsService.CalculateEtagAsync(result);
         
+        //weak
+        etag = "W/" + etag;
         if (etag == etagFromRequest)
         {
             HttpContext.Response.StatusCode = 304;
-            HttpContext.Response.Headers.CacheControl = "no-cache";
             return null;
         }
         
         HttpContext.Response.Headers.ETag = etag;
+        HttpContext.Response.Headers.CacheControl = "private, no-cache";
         
         return result;
     }
