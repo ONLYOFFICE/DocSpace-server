@@ -110,6 +110,23 @@ public class UserController(
     {
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(inDto.Type), Constants.Action_AddRemoveUser);
 
+        var invitationSettings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
+
+        if (inDto.Type is EmployeeType.Guest)
+        {
+            if (!invitationSettings.AllowInvitingGuests)
+            {
+                throw new SecurityException(Resource.ErrorAccessDenied);
+            }
+        }
+        else
+        {
+            if (!invitationSettings.AllowInvitingMembers)
+            {
+                throw new SecurityException(Resource.ErrorAccessDenied);
+            }
+        }
+
         var user = new UserInfo();
 
         inDto.PasswordHash = (inDto.PasswordHash ?? "").Trim();
@@ -215,6 +232,23 @@ public class UserController(
         }
 
         inDto.Type = linkData?.EmployeeType ?? inDto.Type;
+
+        var invitationSettings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
+
+        if (inDto.Type is EmployeeType.Guest)
+        {
+            if (!invitationSettings.AllowInvitingGuests)
+            {
+                throw new SecurityException(Resource.ErrorAccessDenied);
+            }
+        }
+        else
+        {
+            if (!invitationSettings.AllowInvitingMembers)
+            {
+                throw new SecurityException(Resource.ErrorAccessDenied);
+            }
+        }
 
         var user = new UserInfo();
 
@@ -343,6 +377,13 @@ public class UserController(
     public async Task<List<EmployeeDto>> InviteUsersAsync(InviteUsersRequestDto inDto)
     {
         ArgumentNullException.ThrowIfNull(inDto);
+
+        var invitationSettings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
+
+        if (!invitationSettings.AllowInvitingMembers)
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
 
         var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
         var currentUserType = await _userManager.GetUserTypeAsync(currentUser);
@@ -1766,6 +1807,15 @@ public class UserController(
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserTypeAsync(UpdateMemberTypeRequestDto inDto)
     {
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(inDto.Type), Constants.Action_AddRemoveUser);
+
+        if (inDto.Type is EmployeeType.Guest)
+        {
+            var invitationSettings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
+            if (!invitationSettings.AllowInvitingGuests)
+            {
+                throw new SecurityException(Resource.ErrorAccessDenied);
+            }
+        }
 
         var users = await inDto.UpdateMembers.UserIds
             .ToAsyncEnumerable()
