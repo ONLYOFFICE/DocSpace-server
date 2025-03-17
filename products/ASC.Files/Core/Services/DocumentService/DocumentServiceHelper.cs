@@ -643,14 +643,31 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
     {
         var canEdit = await fileSecurity.CanEditAsync(file);
         var canFill = await fileSecurity.CanFillFormsAsync(file);
-        var result = new FormOpenSetup<T>
-        {
-            CanEdit = canEdit && edit,
-            CanFill = canFill && fill,
-            CanStartFilling = canFill
-        };
 
-        result.EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
+        FormOpenSetup<T> result = null;
+        if (file.CreateBy == securityContext.CurrentAccount.ID) 
+        {
+            result = new FormOpenSetup<T>
+            {
+                CanEdit = edit,
+                CanFill = fill,
+                CanStartFilling = fill
+            };
+        }
+        else
+        {
+            result = new FormOpenSetup<T>
+            {
+                CanEdit = canEdit,
+                CanFill = canFill,
+                CanStartFilling = canFill
+            };
+        }
+
+        if (result.CanFill) 
+        {
+            result.EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
+        }
         return result;
     }
 }
