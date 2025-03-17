@@ -81,7 +81,7 @@ public class WebhooksController(ApiContext context,
     {
         _ = await CheckAdminPermissionsAsync();
 
-        await CheckWebhook(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.SSL);
+        await CheckWebhook(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.SSL, true);
 
         var webhook = await dbWorker.AddWebhookConfig(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.Enabled, inDto.SSL, inDto.Triggers);
 
@@ -102,7 +102,7 @@ public class WebhooksController(ApiContext context,
     [HttpPut("webhook")]
     public async Task<WebhooksConfigDto> UpdateWebhook(WebhooksConfigRequestsDto inDto)
     {
-        await CheckWebhook(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.SSL);
+        await CheckWebhook(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.SSL, false);
 
         var existingWebhook = await dbWorker.GetWebhookConfig(tenantManager.GetCurrentTenantId(), inDto.Id);
 
@@ -121,10 +121,14 @@ public class WebhooksController(ApiContext context,
 
         existingWebhook.Name = inDto.Name;
         existingWebhook.Uri = inDto.Uri;
-        existingWebhook.SecretKey = inDto.SecretKey;
         existingWebhook.Enabled = inDto.Enabled;
         existingWebhook.SSL = inDto.SSL;
         existingWebhook.Triggers = inDto.Triggers;
+
+        if (!string.IsNullOrEmpty(inDto.SecretKey))
+        {
+            existingWebhook.SecretKey = inDto.SecretKey;
+        }
 
         var webhook = await dbWorker.UpdateWebhookConfig(existingWebhook);
 
@@ -347,15 +351,19 @@ public class WebhooksController(ApiContext context,
         return false;
     }
 
-    private async Task CheckWebhook(string name, string uri, string secret, bool ssl)
+    private async Task CheckWebhook(string name, string uri, string secret, bool ssl, bool creation)
     {
         ArgumentNullException.ThrowIfNull(name);
-        ArgumentNullException.ThrowIfNull(secret);
         ArgumentNullException.ThrowIfNull(uri);
 
-        var passwordSettings = await settingsManager.LoadAsync<PasswordSettings>();
+        if (creation || !string.IsNullOrEmpty(secret))
+        {
+            ArgumentNullException.ThrowIfNull(secret);
 
-        passwordSettingsManager.CheckPassword(secret, passwordSettings);
+            var passwordSettings = await settingsManager.LoadAsync<PasswordSettings>();
+
+            passwordSettingsManager.CheckPassword(secret, passwordSettings);
+        }
 
         var restrictions = configuration.GetSection("webhooks:blacklist").Get<List<string>>() ?? [];
 
