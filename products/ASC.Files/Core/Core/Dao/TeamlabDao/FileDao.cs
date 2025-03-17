@@ -1407,63 +1407,6 @@ internal class FileDao(
 
         await filesDbContext.SaveChangesAsync();
     }
-    public async Task<FormRole> ReassignFormRoleToUser(int formId, string roleName, Guid userId, Guid toUserId)
-    {
-        var tenantId = _tenantManager.GetCurrentTenantId();
-
-        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-
-        var role = await filesDbContext.FilesFormRoleAsync(tenantId, formId, roleName, userId);
-
-        if (role != null)
-        {
-            filesDbContext.Remove(role);
-            var roleDb = new DbFilesFormRoleMapping
-            {
-                TenantId = tenantId,
-                FormId = formId,
-                UserId = toUserId,
-                RoleName = role.RoleName,
-                Sequence = role.Sequence,
-                Submitted = role.Submitted
-
-            };
-            await filesDbContext.FilesFormRoleMapping.AddAsync(roleDb);
-            await filesDbContext.SaveChangesAsync();
-
-            return mapper.Map<FormRole>(roleDb);
-        }
-        return null;
-    }
-
-    public async Task ReopenFormForUser(int formId, string roleName, Guid userId, bool resetSubsequentRoles)
-    {
-        var tenantId = _tenantManager.GetCurrentTenantId();
-
-        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var strategy = filesDbContext.Database.CreateExecutionStrategy();
-
-        await strategy.ExecuteAsync(async () => {
-
-            await using var context = await _dbContextFactory.CreateDbContextAsync();
-            var role = await context.FilesFormRoleAsync(tenantId, formId, roleName, userId);
-
-            if (role != null)
-            {
-                await using (var tx = await context.Database.BeginTransactionAsync())
-                {
-                    var query = context.FilesFormRoleMapping.Where(g =>
-                    g.TenantId == tenantId &&
-                    g.FormId == formId &&
-                    resetSubsequentRoles ? g.Sequence >= role.Sequence : g.Sequence == role.Sequence);
-
-                    await query.ExecuteUpdateAsync(r => r.SetProperty(x => x.Submitted, false));
-
-                    await tx.CommitAsync();
-                }
-            }
-        });
-    }
 
     public async Task<(int, IAsyncEnumerable<FormRole>)> GetUserFormRoles(int formId, Guid userId)
     {
@@ -1512,11 +1455,11 @@ internal class FileDao(
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var toDeleteFiles = await filesDbContext.DbFilesFormRoleMappingForDeleteAsync(tenantId, formId).ToListAsync();
+        var toDeleteRoles = await filesDbContext.DbFilesFormRoleMappingForDeleteAsync(tenantId, formId).ToListAsync();
 
-        if (toDeleteFiles.Any())
+        if (toDeleteRoles.Any())
         {
-            filesDbContext.RemoveRange(toDeleteFiles);
+            filesDbContext.RemoveRange(toDeleteRoles);
             await filesDbContext.SaveChangesAsync();
         }
     }

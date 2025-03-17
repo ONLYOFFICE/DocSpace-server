@@ -4527,32 +4527,6 @@ public class FileStorageService //: IFileStorageService
 
         await socketManager.UpdateFileAsync(form);
     }
-
-    public async Task<FormRole> ReassignFormRoleToUser<T>(T formId, string roleName, Guid userId, Guid toUserId)
-    {
-        var fileDao = daoFactory.GetFileDao<T>();
-        var form = await fileDao.GetFileAsync(formId);
-        await ValidateChangeRolesPermission(form);
-
-        if (userId == Guid.Empty)
-        {
-            throw new InvalidOperationException();
-        }
-        return await fileDao.ReassignFormRoleToUser(formId, roleName, userId, toUserId);
-    }
-
-    public async Task ReopenFormForUser<T>(T formId, string roleName, Guid userId, bool resetSubsequentRoles)
-    {
-        var fileDao = daoFactory.GetFileDao<T>();
-        var form = await fileDao.GetFileAsync(formId);
-        await ValidateChangeRolesPermission(form);
-
-        if (userId == Guid.Empty)
-        {
-            throw new InvalidOperationException();
-        }
-        await fileDao.ReopenFormForUser(formId, roleName, userId, resetSubsequentRoles);
-    }
     public async IAsyncEnumerable<FormRoleDto> GetAllFormRoles<T>(T formId)
     {
         var fileDao = daoFactory.GetFileDao<T>();

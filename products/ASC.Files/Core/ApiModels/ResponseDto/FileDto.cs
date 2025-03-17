@@ -222,7 +222,6 @@ public class FileDtoHelper(
         return result;
     }
 
-    private Dictionary<string, AceWrapper> shareCache = new();
     private async Task<FileDto<T>> GetFileWrapperAsync<T>(File<T> file, string order, TimeSpan? expiration, IFolder contextFolder = null)
     {
         var result = await GetAsync<FileDto<T>, T>(file);
@@ -306,8 +305,6 @@ public class FileDtoHelper(
 
                 if (currentStep != -1)
                 {
-                    var role = roleList.FirstOrDefault(r => !r.Submitted);
-
                     if (!DateTime.MinValue.Equals(properties.FormFilling.FillingStopedDate))
                     {
                         result.FormFillingStatus = FormFillingStatus.Stoped;
@@ -316,14 +313,23 @@ public class FileDtoHelper(
                     {
                         result.FormFillingStatus = FormFillingStatus.Complete;
                     }
-                    else if (role != null)
+                    else
                     {
-                        result.FormFillingStatus = currentStep == role.Sequence
-                            ? FormFillingStatus.YouTurn
-                            : FormFillingStatus.InProgress;
-                    }else if (roleList.Any())
-                    {
-                        result.FormFillingStatus = FormFillingStatus.InProgress;
+                        var unsubmittedRole = roleList.FirstOrDefault(r => !r.Submitted);
+                        switch (unsubmittedRole)
+                        {
+                            case not null:
+                                result.FormFillingStatus = currentStep == unsubmittedRole.Sequence
+                                    ? FormFillingStatus.YouTurn
+                                    : FormFillingStatus.InProgress;
+                                break;
+                            default:
+                                if (roleList.Count > 0)
+                                {
+                                    result.FormFillingStatus = FormFillingStatus.InProgress;
+                                }
+                                break;
+                        }
                     }
                 }
             }

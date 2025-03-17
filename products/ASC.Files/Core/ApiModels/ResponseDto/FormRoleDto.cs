@@ -26,8 +26,6 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
 public class FormRoleDto
 {
     public string RoleName { get; set; }
@@ -40,8 +38,7 @@ public class FormRoleDto
     public FormFillingStatus RoleStatus { get; set; }
 }
 [Scope]
-public class FormRoleDtoHelper(TenantUtil tenantUtil, EmployeeFullDtoHelper employeeFullDtoHelper,
-    UserManager userManager)
+public class FormRoleDtoHelper(TenantUtil tenantUtil, EmployeeFullDtoHelper employeeFullDtoHelper, UserManager userManager)
 {
     public async Task<FormRoleDto> Get<T>(EntryProperties<T> properties, FormRole role)
     {
@@ -77,7 +74,6 @@ public class FormRoleDtoHelper(TenantUtil tenantUtil, EmployeeFullDtoHelper empl
             result.History.Add((int)FormRoleHistory.StopDate, tenantUtil.DateTimeFromUtc(properties.FormFilling.FillingStopedDate));
         }
         return result;
-
     }
 }
 

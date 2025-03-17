@@ -26,9 +26,6 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
-/// <summary>
-/// 
-/// </summary>
 public class ManageFormFillingDto<T>
 {
     /// <summary>

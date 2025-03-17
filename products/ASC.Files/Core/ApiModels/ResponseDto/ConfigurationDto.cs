@@ -84,6 +84,9 @@ public class ConfigurationDto<T>
     /// </summary>
     public bool? FillingStatus { get; set; }
 
+    /// <summary>
+    /// Start filling mode
+    /// </summary>
     public StartFillingMode StartFillingMode { get; set; }
 
     /// <summary>
@@ -218,6 +221,10 @@ public class CustomizationConfigDto
     /// Submit form
     /// </summary>
     public SubmitForm SubmitForm { get; set; }
+
+    /// <summary>
+    /// Start filling form
+    /// </summary>
     public StartFillingForm StartFillingForm { get; set; }
 }
 
@@ -228,7 +235,7 @@ public class SubmitForm
     /// </summary>
     public bool Visible { get; set; }
     /// <summary>
-    /// ResultMessage
+    /// Result message
     /// </summary>
     public string ResultMessage { get; set; }
 }
