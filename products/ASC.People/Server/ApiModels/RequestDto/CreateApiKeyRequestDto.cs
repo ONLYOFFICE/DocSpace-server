@@ -26,9 +26,23 @@
 
 namespace ASC.People.ApiModels.RequestDto;
 
+/// <summary>
+/// Request parameters for creating a new API key
+/// </summary>
 public class CreateApiKeyRequestDto
 {
+    /// <summary>
+    /// Name of the API key
+    /// </summary>
     public string Name { get; set; }
+
+    /// <summary>
+    /// List of permissions granted to the API key
+    /// </summary>
     public List<string> Permissions { get; set; }
+
+    /// <summary>
+    /// Number of days until the API key expires (null for no expiration)
+    /// </summary>
     public int? ExpiresInDays { get; set; }
 }

@@ -31,17 +31,59 @@ using AutoMapper;
 
 namespace ASC.People.ApiModels.ResponseDto;
 
+/// <summary>
+/// Response data for API key operations
+/// </summary>
 public class ApiKeyResponseDto : IMapFrom<ApiKey>
 {
+    /// <summary>
+    /// Unique identifier of the API key
+    /// </summary>
     public Guid Id { get; set; }
+
+    /// <summary>
+    /// Name of the API key
+    /// </summary>
     public string Name { get; set; }
+
+    /// <summary>
+    /// Full API key value (only returned when creating a new key)
+    /// </summary>
     public string Key { get; set; }
+
+    /// <summary>
+    /// Prefix of the API key (used for identification)
+    /// </summary>
     public string KeyPrefix { get; set; }
-    public List<string> Permissions { get; set; } = new List<string>();
+
+    /// <summary>
+    /// List of permissions granted to the API key
+    /// </summary>
+    public List<string> Permissions { get; set; } = new();
+
+    /// <summary>
+    /// Date and time when the API key was last used
+    /// </summary>
     public DateTime? LastUsed { get; set; }
+
+    /// <summary>
+    /// Date and time when the API key was created
+    /// </summary>
     public DateTime CreateOn { get; set; } = DateTime.UtcNow;
+
+    /// <summary>
+    /// Identifier of the user who created the API key
+    /// </summary>
     public Guid CreateBy { get; set; }
+
+    /// <summary>
+    /// Date and time when the API key expires
+    /// </summary>
     public DateTime? ExpiresAt { get; set; }
+
+    /// <summary>
+    /// Indicates whether the API key is active
+    /// </summary>
     public bool IsActive { get; set; } = true;
     
     public void Mapping(Profile profile)
