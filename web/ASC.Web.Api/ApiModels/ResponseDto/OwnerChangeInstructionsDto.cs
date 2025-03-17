@@ -28,6 +28,13 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class OwnerChangeInstructionsDto
 {
+    /// <summary>
+    /// Status
+    /// </summary>
     public int Status { get; set; }
+
+    /// <summary>
+    /// Message
+    /// </summary>
     public string Message { get; set; }
 }

@@ -26,8 +26,13 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-public class BaseRoomTemplateStatusDto
+public class RoomTemplateStatusDto
 {
+    /// <summary>
+    /// Template id
+    /// </summary>
+    public int TemplateId { get; set; }
+
     /// <summary>
     /// Progress
     /// </summary>
@@ -44,18 +49,25 @@ public class BaseRoomTemplateStatusDto
     public bool IsCompleted { get; set; }
 }
 
-public class RoomTemplateStatusDto : BaseRoomTemplateStatusDto
-{
-    /// <summary>
-    /// Template id
-    /// </summary>
-    public int TemplateId { get; set; }
-}
-
-public class RoomFromTemplateStatusDto : BaseRoomTemplateStatusDto
+public class RoomFromTemplateStatusDto
 {
     /// <summary>
     /// Room id
     /// </summary>
     public int RoomId { get; set; }
+
+    /// <summary>
+    /// Progress
+    /// </summary>
+    public double Progress { get; set; }
+
+    /// <summary>
+    /// Error
+    /// </summary>
+    public string Error { get; set; }
+
+    /// <summary>
+    /// IsCompleted
+    /// </summary>
+    public bool IsCompleted { get; set; }
 }

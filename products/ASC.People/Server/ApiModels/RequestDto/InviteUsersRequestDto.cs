@@ -44,10 +44,16 @@ public class InviteUsersRequestDto
     public string Culture { get; set; }
 }
 
-public class UserInvitation : EmailInvitationDto
+public class UserInvitation
 {
     /// <summary>
     /// Employee type
     /// </summary>
     public EmployeeType Type { get; set; }
+
+    /// <summary>
+    /// Email address
+    /// </summary>
+    [EmailAddress]
+    public string Email { get; set; }
 }

@@ -29,8 +29,18 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// <summary>
 /// Security information request parameters
 /// </summary>
-public class SecurityInfoRequestDto : BaseBatchRequestDto
+public class SecurityInfoRequestDto
 {
+    /// <summary>
+    /// List of folder IDs
+    /// </summary>
+    public IEnumerable<JsonElement> FolderIds { get; set; } = new List<JsonElement>();
+
+    /// <summary>
+    /// List of file IDs
+    /// </summary>
+    public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
+
     /// <summary>
     /// Collection of sharing parameters
     /// </summary>

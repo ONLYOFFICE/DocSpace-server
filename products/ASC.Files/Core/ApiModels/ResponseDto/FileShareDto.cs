@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// Represents file sharing information and access rights
+/// </summary>
 public class FileShareDto
 {
     /// <summary>
@@ -60,40 +63,70 @@ public class FileShareDto
     public SubjectType SubjectType { get; set; }
 }
 
+/// <summary>
+/// Represents a shareable link for a file with its configuration and status
+/// </summary>
 public class FileShareLink
 {
     /// <summary>
-    /// Id
+    /// Unique identifier of the share link
     /// </summary>
     public Guid Id { get; set; }
 
     /// <summary>
-    /// Title
+    /// Title of the shared content
     /// </summary>
     public string Title { get; set; }
 
     /// <summary>
-    /// Share link
+    /// The URL for accessing the shared content
     /// </summary>
     public string ShareLink { get; set; }
 
     /// <summary>
-    /// Expiration date
+    /// The date when the share link expires
     /// </summary>
     public ApiDateTime ExpirationDate { get; set; }
 
     /// <summary>
-    /// link type
+    /// The type of sharing link (e.g., Invitation)
     /// </summary>
     public LinkType LinkType { get; set; }
+
+    /// <summary>
+    /// Password protection for accessing the shared content
+    /// </summary>
     public string Password { get; set; }
+
+    /// <summary>
+    /// Indicates whether downloading of the shared content is prohibited
+    /// </summary>
     public bool? DenyDownload { get; set; }
+
+    /// <summary>
+    /// Indicates whether the share link has expired
+    /// </summary>
     public bool? IsExpired { get; set; }
+
+    /// <summary>
+    /// Indicates whether this is the primary share link
+    /// </summary>
     public bool Primary { get; set; }
+
+    /// <summary>
+    /// Indicates whether the link is for internal sharing only
+    /// </summary>
     public bool? Internal { get; set; }
+
+    /// <summary>
+    /// Token for validating access requests
+    /// </summary>
     public string RequestToken { get; set; }
 }
 
+/// <summary>
+/// Defines the types of sharing links available
+/// </summary>
 public enum LinkType
 {
     [SwaggerEnum(Description = "Invitation")]

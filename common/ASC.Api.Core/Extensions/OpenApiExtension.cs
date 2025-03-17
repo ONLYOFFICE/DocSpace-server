@@ -141,7 +141,7 @@ public static class OpenApiExtension
 
     private static string CustomSchemaId(Type type)
     {
-        var name = type.FullName;
+        var name = type.Name;
 
         if (string.IsNullOrEmpty(name))
         {
@@ -150,12 +150,15 @@ public static class OpenApiExtension
         
         if (type.IsGenericType)
         {
-            name = $"{name.Split('`')[0]}.{string.Join(".", type.GenericTypeArguments.Select(CustomSchemaId))}";
+            name = name.Split('`')[0];
+
+            var genericArgs = string.Join("", type.GenericTypeArguments.Select(CustomSchemaId));
+            name += genericArgs;
         }
 
         // Fix for nested classes
         name = name.Replace("+", "_");
-
+        name = name.Replace("Int32", "Integer");
         return name;
     }
 

@@ -64,7 +64,7 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
         if (isPrimitive)
         {
             var typeName = GetPrimitiveTypeName(schema);
-            responseSchemaKey = $"SuccessApiResponse{typeName}";
+            responseSchemaKey = $"{typeName}Wrapper";
             var primitiveResponseProperty = new OpenApiSchema
             {
                 Type = schema.Type
@@ -74,7 +74,15 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
         else if (schema.Type == "array")
         {
             originalSchemaRef = schema.Items.Reference?.Id;
-            responseSchemaKey = $"SuccessApiResponseArray.{originalSchemaRef}";
+            if(originalSchemaRef == null)
+            {
+                originalSchemaRef = "Array";
+            }
+            if (originalSchemaRef.Contains("Dto"))
+            {
+                originalSchemaRef = originalSchemaRef.Replace("Dto", "");
+            }
+            responseSchemaKey = originalSchemaRef + "Wrapper";
 
             var arrayResponseProperty = new OpenApiSchema
             {
@@ -86,7 +94,7 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
         }
         else if (schema == null || (schema.Type == null && schema.Reference == null && schema.Items == null))
         {
-            responseSchemaKey = "SuccessApiResponseObject";
+            responseSchemaKey = "ObjectWrapper";
             if (!schemas.ContainsKey(responseSchemaKey))
             {
                 responseSchema = CreateSuccessApiResponseSchema(new OpenApiSchema { Type = "object" });
@@ -94,7 +102,11 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
         }
         else
         {
-            responseSchemaKey = $"SuccessApiResponse.{originalSchemaRef}";
+            if(originalSchemaRef.Contains("Dto"))
+            {
+                originalSchemaRef = originalSchemaRef.Replace("Dto", "");
+            }
+            responseSchemaKey = originalSchemaRef + "Wrapper";
             var responseProperty = originalSchemaRef != null
             ? new OpenApiSchema { Reference = new OpenApiReference { Id = originalSchemaRef, Type = ReferenceType.Schema } }
             : schema;

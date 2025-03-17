@@ -57,7 +57,7 @@ public class FillingFormResultDto<T>
     /// <summary>
     /// Is room member
     /// </summary>
-    public bool isRoomMember { get; set; }
+    public bool IsRoomMember { get; set; }
 
 }
 
@@ -107,7 +107,7 @@ public class FillingFormResultDtoHelper(
                     FormNumber = properties.FormFilling.ResultFormNumber,
                     Manager = await employeeFullDtoHelper.GetSimpleWithEmail(manager),
                     RoomId = record == null || record.EntryType == FileEntryType.Folder ? properties.FormFilling.RoomId : default,
-                    isRoomMember = currentType == EmployeeType.DocSpaceAdmin || aces.Exists(u => u.Id == authContext.CurrentAccount.ID)
+                    IsRoomMember = currentType == EmployeeType.DocSpaceAdmin || aces.Exists(u => u.Id == authContext.CurrentAccount.ID)
                 };
                 return result;
             }

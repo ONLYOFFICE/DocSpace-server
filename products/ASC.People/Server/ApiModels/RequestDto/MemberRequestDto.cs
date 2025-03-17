@@ -42,7 +42,7 @@ public class EmailMemberRequestDto
 /// <summary>
 /// Request parameters for setting new password
 /// </summary>
-public class MemberBaseRequestDto : EmailMemberRequestDto
+public class MemberBaseRequestDto
 {
     /// <summary>
     /// Password
@@ -53,6 +53,13 @@ public class MemberBaseRequestDto : EmailMemberRequestDto
     /// Password hash
     /// </summary>
     public string PasswordHash { get; set; }
+
+    /// <summary>
+    /// Email
+    /// </summary>
+    [EmailAddress]
+    [StringLength(255)]
+    public string Email { get; set; }
 }
 
 /// <summary>
@@ -76,8 +83,25 @@ public class MemberBaseByIdRequestDto
 /// <summary>
 /// Member request parameters
 /// </summary>
-public class MemberRequestDto : MemberBaseRequestDto
+public class MemberRequestDto
 {
+    /// <summary>
+    /// Password
+    /// </summary>
+    public string Password { get; set; }
+
+    /// <summary>
+    /// Password hash
+    /// </summary>
+    public string PasswordHash { get; set; }
+
+    /// <summary>
+    /// Email
+    /// </summary>
+    [EmailAddress]
+    [StringLength(255)]
+    public string Email { get; set; }
+
     /// <summary>
     /// Employee type
     /// </summary>
@@ -174,7 +198,7 @@ public class MemberRequestDto : MemberBaseRequestDto
 /// <summary>
 /// Request parameters for updating user information
 /// </summary>
-public class UpdateMemberRequestDto : MemberRequestDto
+public class UpdateMemberRequestDto
 {
     /// <summary>
     /// User ID
@@ -185,6 +209,86 @@ public class UpdateMemberRequestDto : MemberRequestDto
     /// Specifies whether to disable a user or not
     /// </summary>
     public bool? Disable { get; set; }
+
+    /// <summary>
+    /// Email
+    /// </summary>
+    [EmailAddress]
+    [StringLength(255)]
+    public string Email { get; set; }
+
+    /// <summary>
+    /// Specifies if this is a guest or a user
+    /// </summary>
+    public bool? IsUser { get; set; }
+
+    /// <summary>
+    /// First name
+    /// </summary>
+    [StringLength(255)]
+    public string FirstName { get; set; }
+
+    /// <summary>
+    /// Last name
+    /// </summary>
+    [StringLength(255)]
+    public string LastName { get; set; }
+
+    /// <summary>
+    /// List of user departments
+    /// </summary>
+    public Guid[] Department { get; set; }
+
+    /// <summary>
+    /// Title
+    /// </summary>
+    [StringLength(255)]
+    public string Title { get; set; }
+
+    /// <summary>
+    /// Location
+    /// </summary>
+    public string Location { get; set; }
+
+    /// <summary>
+    /// Sex (male or female)
+    /// </summary>
+    public SexEnum? Sex { get; set; }
+
+    /// <summary>
+    /// Birthday
+    /// </summary>
+    public ApiDateTime Birthday { get; set; }
+
+    /// <summary>
+    /// Registration date (if it is not specified, then the current date will be set)
+    /// </summary>
+    public ApiDateTime Worksfrom { get; set; }
+
+    /// <summary>
+    /// Comment
+    /// </summary>
+    public string Comment { get; set; }
+
+    /// <summary>
+    /// List of user contacts
+    /// </summary>
+    public IEnumerable<Contact> Contacts { get; set; }
+
+    /// <summary>
+    /// Avatar photo URL
+    /// </summary>
+    public string Files { get; set; }
+
+    /// <summary>
+    /// Language
+    /// </summary>
+    public string CultureName { get; set; }
+
+    /// <summary>
+    /// Spam
+    /// </summary>
+    public bool? Spam { get; set; }
 }
 
 /// <summary>

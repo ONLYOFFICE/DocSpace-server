@@ -29,8 +29,23 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// <summary>
 /// Link parameters
 /// </summary>
-public class RoomLinkRequest : LinkRequestDtoBase
+public class RoomLinkRequest
 {
+    /// <summary>
+    /// Link ID
+    /// </summary>
+    public Guid LinkId { get; set; }
+
+    /// <summary>
+    /// Sharing rights
+    /// </summary>
+    public FileShare Access { get; set; }
+
+    /// <summary>
+    /// Link expiration date
+    /// </summary>
+    public ApiDateTime ExpirationDate { get; set; }
+
     /// <summary>
     /// Link name
     /// </summary>

@@ -29,7 +29,7 @@ namespace ASC.People.ApiModels.RequestDto;
 /// <summary>
 /// Group request parameters
 /// </summary>
-public class UpdateGroupRequest : GroupRequestDtoBase
+public class UpdateGroupRequest
 {
     /// <summary>
     /// List of user IDs to add to the group
@@ -40,6 +40,17 @@ public class UpdateGroupRequest : GroupRequestDtoBase
     /// List of user IDs to remove from the group
     /// </summary>
     public IEnumerable<Guid> MembersToRemove { get; set; }
+
+    /// <summary>
+    /// Group manager ID
+    /// </summary>
+    public Guid GroupManager { get; set; }
+
+    /// <summary>
+    /// Group name
+    /// </summary>
+    [StringLength(128)]
+    public string GroupName { get; set; }
 }
 
 /// <summary>

@@ -40,7 +40,7 @@ public class LinkAccountRequestDto
 /// <summary>
 /// Request parameters for creating a third-party account
 /// </summary>
-public class SignupAccountRequestDto : LinkAccountRequestDto
+public class SignupAccountRequestDto
 {
     /// <summary>
     /// Employee type
@@ -77,4 +77,9 @@ public class SignupAccountRequestDto : LinkAccountRequestDto
     /// Culture
     /// </summary>
     public string Culture { get; set; }
+
+    /// <summary>
+    /// Third-party profile in the serialized format
+    /// </summary>
+    public string SerializedProfile { get; set; }
 }

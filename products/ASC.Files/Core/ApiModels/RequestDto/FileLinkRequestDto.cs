@@ -29,8 +29,23 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// <summary>
 /// External link parameters
 /// </summary>
-public class FileLinkRequest : LinkRequestDtoBase
+public class FileLinkRequest
 {
+    /// <summary>
+    /// Link ID
+    /// </summary>
+    public Guid LinkId { get; set; }
+
+    /// <summary>
+    /// Sharing rights
+    /// </summary>
+    public FileShare Access { get; set; }
+
+    /// <summary>
+    /// Link expiration date
+    /// </summary>
+    public ApiDateTime ExpirationDate { get; set; }
+
     /// <summary>
     /// Link scope
     /// </summary>

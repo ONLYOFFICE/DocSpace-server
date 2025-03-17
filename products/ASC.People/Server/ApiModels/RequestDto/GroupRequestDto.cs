@@ -29,12 +29,23 @@ namespace ASC.People.ApiModels.RequestDto;
 /// <summary>
 /// Group request parameters
 /// </summary>
-public class GroupRequestDto : GroupRequestDtoBase
+public class GroupRequestDto
 {
     /// <summary>
     /// List of group member IDs
     /// </summary>
     public IEnumerable<Guid> Members { get; init; }
+
+    /// <summary>
+    /// Group manager ID
+    /// </summary>
+    public Guid GroupManager { get; set; }
+
+    /// <summary>
+    /// Group name
+    /// </summary>
+    [StringLength(128)]
+    public string GroupName { get; set; }
 }
 
 /// <summary>

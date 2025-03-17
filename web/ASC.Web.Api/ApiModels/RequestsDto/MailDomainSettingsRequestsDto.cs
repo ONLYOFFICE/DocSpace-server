@@ -68,13 +68,25 @@ public class AdminMessageBaseSettingsRequestsDto
 /// <summary>
 /// Request parameters for administrator message settings
 /// </summary>
-public class AdminMessageSettingsRequestsDto : AdminMessageBaseSettingsRequestsDto
+public class AdminMessageSettingsRequestsDto
 {
     /// <summary>
     /// Message
     /// </summary>
     [StringLength(255)]
     public string Message { get; set; }
+
+    /// <summary>
+    /// Email
+    /// </summary>
+    [EmailAddress]
+    [StringLength(255)]
+    public string Email { get; set; }
+
+    /// <summary>
+    /// Culture
+    /// </summary>
+    public string Culture { get; set; }
 }
 
 /// <summary>
