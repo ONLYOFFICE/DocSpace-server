@@ -40,6 +40,8 @@ public class ApiKey : BaseEntity
     public bool IsActive { get; set; } = true;
     public int TenantId { get; set; }
     
+    public DbTenant Tenant { get; set; }
+    
     public override object[] GetKeys()
     {
         return [Id];
@@ -50,6 +52,8 @@ public static class DbApiKeyExtension
 {
     public static ModelBuilderWrapper AddDbApiKeys(this ModelBuilderWrapper modelBuilder)
     {
+        modelBuilder.Entity<ApiKey>().Navigation(e => e.Tenant).AutoInclude(false);
+
         return modelBuilder
             .Add(MySqlAddDbApiKeys, Provider.MySql)
             .Add(PgSqlAddDbApiKeys, Provider.PostgreSql);
@@ -189,6 +193,11 @@ public static class DbApiKeyExtension
                 .HasColumnName("tenant_id")
                 .HasColumnType("integer")
                 .IsRequired();
+            
+            entity.HasOne(e => e.Tenant)
+                .WithMany()
+                .HasForeignKey(e => e.TenantId)
+                .OnDelete(DeleteBehavior.Restrict);
           
         });
     }
