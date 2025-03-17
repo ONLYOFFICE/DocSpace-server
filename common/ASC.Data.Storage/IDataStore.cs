@@ -195,7 +195,7 @@ public interface IDataStore
 
     bool IsSupportedPreSignedUri { get; }
 
-    bool ContentAsAttachment { get; }
+    bool IsContentAsAttachment(string domain);
 
     ///<summary>
     /// Deletes file

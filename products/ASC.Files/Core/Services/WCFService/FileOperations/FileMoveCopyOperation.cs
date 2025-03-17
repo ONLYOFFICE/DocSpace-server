@@ -346,7 +346,8 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var fileSecurity = scope.ServiceProvider.GetRequiredService<FileSecurity>();
         var notifyClient = scope.ServiceProvider.GetRequiredService<NotifyClient>();
         var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
-
+        var fileStorageService = scope.ServiceProvider.GetService<FileStorageService>();
+        
         var toFolderId = toFolder.Id;
         var isToFolder = Equals(toFolderId, _daoFolderId);
 
@@ -671,6 +672,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
 
                                     newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
                                     newFolder = await folderDao.GetFolderAsync(newFolderId);
+                                    await fileStorageService.ReOrderAsync(newFolderId, true, true);
                                     await filesMessageService.SendMoveMessageAsync(newFolder, await parentFolderTask, toFolder, toFolderParents, true, _headers, [newFolder.Title, toFolder.Title, toFolder.Id.ToString()]);
 
                                     if (isToFolder)
@@ -734,10 +736,11 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                             
                                             await countRoomChecker.CheckAppend();
                                         
-                                        await socketManager.DeleteFolder(folder, action: async () =>
-                                        {
-                                            newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
-                                        });
+                                            await socketManager.DeleteFolder(folder, action: async () =>
+                                            {
+                                                newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
+                                                await fileStorageService.ReOrderAsync(newFolderId, true, true);
+                                            });
 
                                             var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountRoomFeature, int>();
                                             _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
@@ -758,6 +761,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     else
                                     {
                                         newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
+                                        await fileStorageService.ReOrderAsync(newFolderId, true, true);
                                     }
                                 }
                                 finally
