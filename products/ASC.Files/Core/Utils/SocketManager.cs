@@ -34,15 +34,12 @@ public class SocketManager(
     ITariffService tariffService,
     TenantManager tenantManager,
     ChannelWriter<SocketData> channelWriter,
-        MachinePseudoKeys machinePseudoKeys,
-        IConfiguration configuration,
-        FileDtoHelper filesWrapperHelper,
-        FolderDtoHelper folderDtoHelper,
-        FileSecurity fileSecurity,
-        UserManager userManager,
-        IDaoFactory daoFactory,
-        FileSharing fileSharing,
-        AuthContext authContext)
+    MachinePseudoKeys machinePseudoKeys,
+    IConfiguration configuration,
+    FileSecurity fileSecurity,
+    UserManager userManager,
+    IDaoFactory daoFactory,
+    FileSharing fileSharing)
     : SocketServiceClient(tariffService, tenantManager, channelWriter, machinePseudoKeys, configuration)
 {
     protected override string Hub => "files";
@@ -169,7 +166,7 @@ public class SocketManager(
     private async Task MakeCreateFormRequest<T>(string method, FileEntry<T> entry, IEnumerable<Guid> userIds, bool isOneMember)
     {
         var room = FolderRoom(entry.FolderIdDisplay);
-        var data = await Serialize(entry);
+        var data = Serialize(entry);
 
         await base.MakeRequest(method, new
         {
@@ -179,6 +176,7 @@ public class SocketManager(
             userIds,
             isOneMember
         });
+        
     }
     private async Task MakeRequest<T>(string method, FileEntry<T> entry, bool withData = false, IEnumerable<Guid> users = null, Func<Task> action = null)
     {
@@ -194,7 +192,7 @@ public class SocketManager(
 
         if (withData)
         {
-            data = await Serialize(entry);
+            data = Serialize(entry);
         }
 
         foreach (var userIds in whoCanRead.Chunk(1000))
@@ -223,12 +221,29 @@ public class SocketManager(
         return $"{tenantId}-DIR-{folderId}";
     }
 
-    private async Task<string> Serialize<T>(FileEntry<T> entry)
+    private string Serialize<T>(FileEntry<T> entry)
     {
         return entry switch
         {
-            File<T> file => JsonSerializer.Serialize(await filesWrapperHelper.GetAsync(file), typeof(FileDto<T>), FileEntryDtoContext.Default),
-            Folder<T> folder => JsonSerializer.Serialize(await folderDtoHelper.GetAsync(folder), typeof(FolderDto<T>), FileEntryDtoContext.Default),
+            File<T> file => JsonSerializer.Serialize(new FileDto<T>
+            {
+                Id = file.Id, 
+                FolderId = file.ParentId, 
+                Title = file.Title, 
+                Version = file.Version, 
+                VersionGroup = file.VersionGroup
+            }, _jsonSerializerOptions),
+            Folder<T> folder => JsonSerializer.Serialize(new FolderDto<T>
+            {
+                Id = folder.Id, 
+                ParentId = folder.ParentId, 
+                Title = folder.Title, 
+                RoomType = DocSpaceHelper.MapToRoomType(folder.FolderType), 
+                CreatedBy = new EmployeeDto
+                {
+                    Id = folder.CreateBy
+                }
+            }, _jsonSerializerOptions),
             _ => string.Empty
         };
     }
@@ -250,6 +265,12 @@ public class SocketManager(
     }
     
     private List<Guid> _admins;
+    private readonly JsonSerializerOptions _jsonSerializerOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
+    };
+
     private Task<IEnumerable<Guid>> Admins()
     {
         return _admins != null 

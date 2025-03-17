@@ -48,11 +48,9 @@ public class DiscDataStore(TempStream tempStream,
     public override bool IsSupportInternalUri => false;
     public override bool IsSupportedPreSignedUri => false;
     public override bool IsSupportChunking => true;
-    public override bool ContentAsAttachment => _contentAsAttachment;
 
     private readonly Dictionary<string, MappedPath> _mappedPaths = new();
     private ICrypt _crypt;
-    private bool _contentAsAttachment;
 
     public override IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator validator)
     {
@@ -60,8 +58,6 @@ public class DiscDataStore(TempStream tempStream,
         //Fill map path
         Modulename = moduleConfig.Name;
         DataList = new DataList(moduleConfig);
-
-        _contentAsAttachment = moduleConfig.ContentAsAttachment;
 
         foreach (var domain in moduleConfig.Domain)
         {
@@ -72,11 +68,12 @@ public class DiscDataStore(TempStream tempStream,
         _mappedPaths.Add(string.Empty, new MappedPath(_pathUtils, tenant, moduleConfig.AppendTenantId, PathUtils.Normalize(moduleConfig.Path), handlerConfig.GetProperties()));
 
         //Make expires
-        DomainsExpires =
-            moduleConfig.Domain.Where(x => x.Expires != TimeSpan.Zero).
-                ToDictionary(x => x.Name,
-                             y => y.Expires);
+        DomainsExpires = moduleConfig.Domain.Where(x => x.Expires != TimeSpan.Zero).ToDictionary(x => x.Name, y => y.Expires);
         DomainsExpires.Add(string.Empty, moduleConfig.Expires);
+
+        DomainsContentAsAttachment = moduleConfig.Domain.Where(x => x.ContentAsAttachment.HasValue).ToDictionary(x => x.Name, y => y.ContentAsAttachment.Value);
+        DomainsContentAsAttachment.Add(string.Empty, moduleConfig.ContentAsAttachment.HasValue ? moduleConfig.ContentAsAttachment.Value : false);
+
         var settings = moduleConfig.DisabledEncryption ? new EncryptionSettings() : encryptionSettingsHelper.Load();
         _crypt = encryptionFactory.GetCrypt(moduleConfig.Name, settings);
         DataStoreValidator = validator;
