@@ -2211,6 +2211,10 @@ public class EntryManager(IDaoFactory daoFactory,
                 }
                 else if (nextRoleUserIds.Any())
                 {
+                    var aces = await fileSharing.GetPureSharesAsync(room, nextRoleUserIds).ToListAsync();
+                    var formFillers = aces.Where(ace => ace is { Access: FileShare.FillForms }).Select(ace => ace.Id);
+
+                    await socketManager.CreateFileAsync(form, formFillers);
                     await notifyClient.SendFormFillingEvent(room, form, nextRoleUserIds, NotifyConstants.EventYourTurnFormFilling);
                 }
             }

@@ -1538,9 +1538,9 @@ public class FileStorageService //: IFileStorageService
         if (file.IsForm && room?.FolderType == FolderType.VirtualDataRoom)
         {
             var users = (await fileSharing.GetSharedInfoAsync(room))
-            .Where(ace => ace is not { Access: FileShare.FillForms } && ace.Id != authContext.CurrentAccount.ID)
-            .Select(ace => ace.Id)
-            .ToList();
+                .Where(ace => ace is not { Access: FileShare.FillForms } && ace.Id != authContext.CurrentAccount.ID)
+                .Select(ace => ace.Id)
+                .ToList();
             if (users.Any())
             {
                 await fileMarker.MarkAsNewAsync(file, users);

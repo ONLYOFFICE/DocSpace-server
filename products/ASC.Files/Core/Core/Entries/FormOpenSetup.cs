@@ -26,7 +26,7 @@
 
 namespace ASC.Files.Core.Core.Entries;
 
-public class FormOpenSetup<T>
+public record FormOpenSetup<T>
 {
     public bool CanEdit { get; set; }
     public bool CanFill { get; set; }

@@ -61,9 +61,9 @@ public class SocketManager(
 
     public async Task CreateFileAsync<T>(File<T> file, IEnumerable<Guid> users = null)
     {
-        if (users ==null)
+        if (users == null && file.IsForm)
         {
-            users = await GetUsersList(file);
+            users = await GetRecipientListForForm(file);
         }
         await MakeRequest("create-file", file, true, users);
     }
@@ -151,21 +151,19 @@ public class SocketManager(
         await MakeRequest("end-restore", new { tenantId, result });
     }
 
-    private async Task<IEnumerable<Guid>> GetUsersList<T>(File<T> file)
+    private async Task<IEnumerable<Guid>> GetRecipientListForForm<T>(File<T> form)
     {
         List<Guid> users = null;
 
-        if (file.IsForm)
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var room = await folderDao.GetFirstParentTypeFromFileEntryAsync(form);
+        if (room != null && room.FolderType == FolderType.VirtualDataRoom)
         {
-            var folderDao = daoFactory.GetFolderDao<T>();
-            var room = await folderDao.GetFirstParentTypeFromFileEntryAsync(file);
-            if (room != null && room.FolderType == FolderType.VirtualDataRoom)
-            {
-                var aces = await fileSharing.GetSharedInfoAsync(room);
-                users = aces.Where(ace => ace.Access != FileShare.FillForms)
-                .Select(ace => ace.Id).ToList();
-            }
+            var aces = await fileSharing.GetSharedInfoAsync(room);
+            users = aces.Where(ace => ace.Access != FileShare.FillForms)
+            .Select(ace => ace.Id).ToList();
         }
+
         return users;
     }
     private async Task MakeCreateFormRequest<T>(string method, FileEntry<T> entry, IEnumerable<Guid> userIds, bool isOneMember)

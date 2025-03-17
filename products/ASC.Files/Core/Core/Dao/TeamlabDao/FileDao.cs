@@ -325,6 +325,7 @@ internal class FileDao(
                 (f.Category == (int)FilterType.PdfForm &&
                     filesDbContext.FilesFormRoleMapping.Any(r =>
                         r.TenantId == tenantId && r.FormId == f.Id && r.UserId == securityContext.CurrentAccount.ID) &&
+                    (!filesDbContext.FilesFormRoleMapping.Any(r => r.TenantId == tenantId && r.FormId == f.Id && !r.Submitted) || (
                     filesDbContext.FilesFormRoleMapping
                         .Where(r => r.TenantId == tenantId && r.FormId == f.Id && !r.Submitted)
                         .Min(r => (int?)r.Sequence)
@@ -332,7 +333,7 @@ internal class FileDao(
                     filesDbContext.FilesFormRoleMapping
                         .Where(r => r.TenantId == tenantId && r.FormId == f.Id && r.UserId == securityContext.CurrentAccount.ID)
                         .Select(r => (int?)r.Sequence)
-                        .FirstOrDefault()
+                        .FirstOrDefault()))
                 )
             );
         }
