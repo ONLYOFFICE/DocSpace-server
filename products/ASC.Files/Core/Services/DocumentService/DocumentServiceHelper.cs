@@ -639,4 +639,18 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         return result;
     }
 
+    public async Task<FormOpenSetup<T>> GetFormOpenSetupForUserFolderAsync<T>(File<T> file, EditorType editorType, bool edit, bool fill)
+    {
+        var canEdit = await fileSecurity.CanEditAsync(file);
+        var canFill = await fileSecurity.CanFillFormsAsync(file);
+        var result = new FormOpenSetup<T>
+        {
+            CanEdit = canEdit && edit,
+            CanFill = canFill && fill,
+            CanStartFilling = canFill
+        };
+
+        result.EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
+        return result;
+    }
 }
