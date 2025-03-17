@@ -122,8 +122,7 @@ public class IpRestrictionsController(ApiContext apiContext,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var result = await settingsManager.LoadAsync<IPRestrictionsSettings>(HttpContext);
-        return result == null ? null : await settingsManager.LoadAsync<IPRestrictionsSettings>();
+        return await settingsManager.LoadAsync<IPRestrictionsSettings>(HttpContext);
     }
 
     /// <summary>

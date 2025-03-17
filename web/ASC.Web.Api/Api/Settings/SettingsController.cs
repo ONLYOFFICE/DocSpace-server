@@ -346,8 +346,7 @@ public partial class SettingsController(MessageService messageService,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var result = await settingsManager.LoadAsync<TenantUserQuotaSettings>(HttpContext);
-        return result == null ? null : await settingsManager.LoadAsync<TenantUserQuotaSettings>(HttpContext);
+        return await settingsManager.LoadAsync<TenantUserQuotaSettings>(HttpContext);
     }
 
     /// <summary>
@@ -446,8 +445,7 @@ public partial class SettingsController(MessageService messageService,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var result = await settingsManager.LoadAsync<TenantDeepLinkSettings>(HttpContext);
-        return result == null ? null : await settingsManager.LoadAsync<TenantDeepLinkSettings>();
+        return await settingsManager.LoadAsync<TenantDeepLinkSettings>(HttpContext);
     }
 
     /// <summary>

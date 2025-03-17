@@ -82,6 +82,7 @@ public class SettingsManager(
                 }
 
                 context.Response.Headers.LastModified = lastModifiedStr;
+                return settings;
             }
         }
 
