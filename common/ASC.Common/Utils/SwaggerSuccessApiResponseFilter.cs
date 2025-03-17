@@ -74,15 +74,9 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
         else if (schema.Type == "array")
         {
             originalSchemaRef = schema.Items.Reference?.Id;
-            if(originalSchemaRef == null)
-            {
-                originalSchemaRef = "Array";
-            }
-            if (originalSchemaRef.Contains("Dto"))
-            {
-                originalSchemaRef = originalSchemaRef.Replace("Dto", "");
-            }
-            responseSchemaKey = originalSchemaRef + "Wrapper";
+            responseSchemaKey = originalSchemaRef == null
+                ? "ArrayWrapper"
+                : originalSchemaRef.Contains("Dto") ? originalSchemaRef.Replace("Dto", "") + "Wrapper" : originalSchemaRef + "Wrapper";
 
             var arrayResponseProperty = new OpenApiSchema
             {
@@ -102,11 +96,7 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
         }
         else
         {
-            if(originalSchemaRef.Contains("Dto"))
-            {
-                originalSchemaRef = originalSchemaRef.Replace("Dto", "");
-            }
-            responseSchemaKey = originalSchemaRef + "Wrapper";
+            responseSchemaKey = originalSchemaRef.Contains("Dto") ? originalSchemaRef.Replace("Dto", "") + "Wrapper" : originalSchemaRef + "Wrapper";
             var responseProperty = originalSchemaRef != null
             ? new OpenApiSchema { Reference = new OpenApiReference { Id = originalSchemaRef, Type = ReferenceType.Schema } }
             : schema;
