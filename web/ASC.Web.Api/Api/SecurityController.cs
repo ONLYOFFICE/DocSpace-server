@@ -102,7 +102,13 @@ public class SecurityController(PermissionContext permissionContext,
 
         DemandBaseAuditPermission();
 
-        return (await auditEventsRepository.GetByFilterAsync(startIndex: 0, limit: 20)).Select(x => new AuditEventDto(x, auditActionMapper, apiDateTimeHelper));
+        var settings = await settingsManager.LoadAsync<TenantAuditSettings>();
+
+        var to = DateTime.UtcNow;
+        var from = to.Subtract(TimeSpan.FromDays(settings.AuditTrailLifeTime));
+
+        return (await auditEventsRepository.GetByFilterAsync(startIndex: 0, limit: 20, from: from, to: to))
+            .Select(x => new AuditEventDto(x, auditActionMapper, apiDateTimeHelper));
     }
 
     /// <summary>
