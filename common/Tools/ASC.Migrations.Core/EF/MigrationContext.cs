@@ -79,7 +79,6 @@ public class MigrationContext : DbContext
     public DbSet<WebhooksConfig> WebhooksConfigs { get; set; }
     public DbSet<WebhooksLog> WebhooksLogs { get; set; }
     public DbSet<DbWebhook> Webhooks { get; set; }
-    public DbSet<ApiKey> ApiKeys { get; set; }
 
     public DbSet<DbFile> Files { get; set; }
     public DbSet<DbFolder> Folders { get; set; }
@@ -179,7 +178,6 @@ public class MigrationContext : DbContext
             .AddDbWebhooks()
             .AddWebhooksConfig()
             .AddWebhooksLog()
-            .AddDbApiKeys()
             .AddShortLinks()
             .AddDbFileOrder()
             .AddDbRoomSettings()
