@@ -36,8 +36,6 @@ public class ApiKeyManager(
     PasswordHasher passwordHasher,
     TenantManager tenantManager)
 {
-    private readonly int _tenantId = tenantManager.GetCurrentTenantId();
-    private readonly Guid _currentUserId = authContext.CurrentAccount.ID;
     private readonly string _keyPrefix = "sk-";
 
     private string GenerateApiKey()
@@ -61,6 +59,7 @@ public class ApiKeyManager(
     public async Task<(string apiKey, ApiKey keyData)> CreateApiKeyAsync(string name, List<string> permissions = null,
         TimeSpan? expiresIn = null)
     {
+        var currentUserId = authContext.CurrentAccount.ID;
         var newKey = GenerateApiKey();
         var hashedKey = HashApiKey(newKey);
 
@@ -70,7 +69,7 @@ public class ApiKeyManager(
             Name = name,
             KeyPrefix = newKey.Substring(0, 8),
             HashedKey = hashedKey,
-            CreateBy = _currentUserId,
+            CreateBy = currentUserId,
             CreateOn = DateTime.UtcNow,
             Permissions = permissions ?? new List<string>(),
             ExpiresAt = expiresIn.HasValue ? DateTime.UtcNow.Add(expiresIn.Value) : null,
@@ -89,13 +88,17 @@ public class ApiKeyManager(
 
     public async Task<ApiKey> GetApiKeyAsync(Guid keyId)
     {
+        var tenantId = tenantManager.GetCurrentTenantId();
+        
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        return await context.GetApiKeyAsync(_tenantId, keyId);
+        return await context.GetApiKeyAsync(tenantId, keyId);
     }
 
     public async Task<ApiKey> ValidateApiKeyAsync(string apiKey)
     {
+        var tenantId = tenantManager.GetCurrentTenantId();
+
         if (string.IsNullOrEmpty(apiKey))
         {
             return null;
@@ -105,7 +108,7 @@ public class ApiKeyManager(
 
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        var keyData = await context.ValidateApiKeyAsync(_tenantId, hashedKey);
+        var keyData = await context.ValidateApiKeyAsync(tenantId, hashedKey);
 
         if (keyData != null)
         {
@@ -120,9 +123,11 @@ public class ApiKeyManager(
 
     public async Task<bool> ChangeStatusApiKeyAsync(Guid keyId)
     {
+        var tenantId = tenantManager.GetCurrentTenantId();
+
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        var apiKey = await context.GetApiKeyAsync(_tenantId, keyId);
+        var apiKey = await context.GetApiKeyAsync(tenantId, keyId);
 
         if (apiKey == null)
         {
@@ -139,18 +144,22 @@ public class ApiKeyManager(
 
     public async Task<bool> DeleteApiKeyAsync(Guid keyId)
     {
+        var tenantId = tenantManager.GetCurrentTenantId();
+
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        var result = await context.DeleteApiKeyAsync(_tenantId, keyId);
+        var result = await context.DeleteApiKeyAsync(tenantId, keyId);
 
         return result >= 0;
     }
 
     public async IAsyncEnumerable<ApiKey> GetAllApiKeysAsync()
     {
+        var tenantId = tenantManager.GetCurrentTenantId();
+
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        var apiKeys = context.GetAllApiKeyAsync(_tenantId);
+        var apiKeys = context.GetAllApiKeyAsync(tenantId);
 
         await foreach (var apiKey in apiKeys)
         {
@@ -160,9 +169,11 @@ public class ApiKeyManager(
 
     public async IAsyncEnumerable<ApiKey> GetApiKeysAsync(Guid userId)
     {
+        var tenantId = tenantManager.GetCurrentTenantId();
+        
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        var apiKeys =  context.ApiKeysForUserAsync(_tenantId, userId);
+        var apiKeys =  context.ApiKeysForUserAsync(tenantId, userId);
 
         await foreach (var apiKey in apiKeys)
         {

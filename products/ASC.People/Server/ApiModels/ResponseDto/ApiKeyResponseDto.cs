@@ -98,6 +98,8 @@ public class ApiKeyConverter(TenantUtil tenantUtil): ITypeConverter<ApiKey, ApiK
 {
     public ApiKeyResponseDto Convert(ApiKey source, ApiKeyResponseDto destination, ResolutionContext context)
     {
+        if (source.Id == Guid.Empty) return new ApiKeyResponseDto();
+        
         var apiKeyResponseDto = new ApiKeyResponseDto
         {
             Id = source.Id,
