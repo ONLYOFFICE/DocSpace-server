@@ -500,17 +500,10 @@ public class FoldersControllerCommon(
             withoutTrash = true;
         }
 
-        if (!isGuest)
+        var my = await globalFolderHelper.FolderMyAsync;
+        if (my != 0)
         {
-            yield return await globalFolderHelper.FolderMyAsync;
-        }
-        else
-        {
-            var my = await globalFolderHelper.FolderMyAsync;
-            if (my != 0)
-            {
-                yield return my;
-            }
+            yield return my;
         }
 
         if (!withoutTrash)

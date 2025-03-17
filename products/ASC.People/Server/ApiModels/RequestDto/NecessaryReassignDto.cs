@@ -28,6 +28,13 @@ namespace ASC.People.ApiModels.RequestDto;
 
 public class NecessaryReassignDto
 {
+    /// <summary>
+    /// User ID 
+    /// </summary>
     public Guid UserId { get; set; }
+
+    /// <summary>
+    /// Expected user type
+    /// </summary>
     public EmployeeType Type { get; set; }
 }
