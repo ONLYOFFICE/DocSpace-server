@@ -115,7 +115,7 @@ public class WebhooksController(ApiContext context,
         {
             if (existingWebhook.CreatedBy != authContext.CurrentAccount.ID)
             {
-                throw new SecurityException();
+                throw new SecurityException(Resource.ErrorAccessDenied);
             }
         }
 
@@ -160,7 +160,7 @@ public class WebhooksController(ApiContext context,
         {
             if (existingWebhook.CreatedBy != authContext.CurrentAccount.ID)
             {
-                throw new SecurityException();
+                throw new SecurityException(Resource.ErrorAccessDenied);
             }
         }
 
@@ -196,7 +196,7 @@ public class WebhooksController(ApiContext context,
         {
             if (existingWebhook.CreatedBy != authContext.CurrentAccount.ID)
             {
-                throw new SecurityException();
+                throw new SecurityException(Resource.ErrorAccessDenied);
             }
         }
 
@@ -267,7 +267,7 @@ public class WebhooksController(ApiContext context,
         {
             if (item.Config.CreatedBy != authContext.CurrentAccount.ID)
             {
-                throw new SecurityException();
+                throw new SecurityException(Resource.ErrorAccessDenied);
             }
         }
 
@@ -338,14 +338,14 @@ public class WebhooksController(ApiContext context,
 
         if (await userManager.IsGuestAsync(currentUser))
         {
-            throw new SecurityException();
+            throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
         var settings = await settingsManager.LoadAsync<TenantDevToolsAccessSettings>();
 
         if (settings.LimitedAccessForUsers)
         {
-            throw new SecurityException();
+            throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
         return false;
@@ -371,7 +371,7 @@ public class WebhooksController(ApiContext context,
             IPAddress.TryParse(parsedUri.Host, out _) &&
             restrictions.Any(r => IPAddressRange.MatchIPs(parsedUri.Host, r)))
         {
-            throw new SecurityException();
+            throw new ArgumentException();
         }
 
         var httpClientName = "";
@@ -387,7 +387,7 @@ public class WebhooksController(ApiContext context,
 
         if (response.StatusCode != HttpStatusCode.OK)
         {
-            throw new ArgumentException($"Webhook with {uri} is not avaliable. HEAD request is not responce 200 http status.");
+            throw new ArgumentException(Resource.ErrorWebhookUrlNotAvaliable);
         }
     }
 }
