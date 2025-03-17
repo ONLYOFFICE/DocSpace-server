@@ -64,24 +64,35 @@ public static class ServiceCollectionExtension
     }
 
     public static IServiceCollection AddHybridCache(this IServiceCollection services, IConnectionMultiplexer connection)
-    {       
+    {
         var cacheBuilder = services
             .AddFusionCache()
-            .WithSystemTextJsonSerializer()
+            .WithSystemTextJsonSerializer(new JsonSerializerOptions 
+            {
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+                WriteIndented = true 
+            })                
+            .WithOptions(new FusionCacheOptions
+            {
+                DistributedCacheKeyModifierMode = CacheKeyModifierMode.None,
+                DefaultEntryOptions = new FusionCacheEntryOptions
+                {
+                    Duration = TimeSpan.MaxValue
+                }
+            })
             .WithMemoryCache(new MemoryCache(new MemoryCacheOptions()))
-            .WithRegisteredLogger()
-            .AsHybridCache();
+            .WithRegisteredLogger();
         
         if (connection != null)
         {
-            cacheBuilder.WithDistributedCache(new RedisCache(new RedisCacheOptions {ConnectionMultiplexerFactory = () => Task.FromResult(connection)}));
-            cacheBuilder.WithBackplane(new RedisBackplane(new RedisBackplaneOptions { ConnectionMultiplexerFactory = () => Task.FromResult(connection)}));
+            cacheBuilder.WithDistributedCache(new RedisCache(new RedisCacheOptions { ConnectionMultiplexerFactory = () => Task.FromResult(connection) }));
+            cacheBuilder.WithBackplane(new RedisBackplane(new RedisBackplaneOptions { ConnectionMultiplexerFactory = () => Task.FromResult(connection) }));
         }
         else
         {
             cacheBuilder.WithDistributedCache(new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions())));
         }
-
+        
         return services;
     }
 
