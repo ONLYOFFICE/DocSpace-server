@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Text.Json.Nodes;
-
 using ASC.Core;
 using ASC.MessagingSystem.Core;
 using ASC.MessagingSystem.EF.Model;
@@ -38,11 +36,11 @@ public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory s
     private readonly JsonSerializerOptions _jsonSerializerOptions = new()
     {
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         IgnoreReadOnlyProperties = true
     };
 
     private const string SignatureHeader = "x-docspace-signature-256";
-    private const string DateTimeISO8601Format = "yyyy-MM-ddTHH:mm:ssZ";
 
     public const string WEBHOOK = "webhook";
     public const string WEBHOOK_SKIP_SSL = "webhookSkipSSL";
@@ -88,12 +86,15 @@ public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory s
 
                 if (retryCount > 0)
                 {
-                    var jsonNode = JsonNode.Parse(requestPayload);
+                    var now = DateTime.UtcNow;
+                    now = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second, DateTimeKind.Utc);
 
-                    jsonNode["webhook"]["retryCount"] = retryCount;
-                    jsonNode["webhook"]["retryOn"] = DateTime.UtcNow.ToString(DateTimeISO8601Format);
+                    var webhookPayload = JsonSerializer.Deserialize<WebhookPayload<object>>(requestPayload, _jsonSerializerOptions);
 
-                    requestPayload = jsonNode.ToString();
+                    webhookPayload.Webhook.RetryCount = retryCount;
+                    webhookPayload.Webhook.RetryOn = now;
+
+                    requestPayload = JsonSerializer.Serialize(webhookPayload, _jsonSerializerOptions);
                 }
 
                 request.Content = new StringContent(requestPayload, Encoding.UTF8, "application/json");

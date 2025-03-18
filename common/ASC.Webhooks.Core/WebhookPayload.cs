@@ -28,9 +28,13 @@ namespace ASC.Webhooks.Core;
 
 public class WebhookPayload<T>
 {
-    public WebhookPayloadActionInfo Action { get; init; }
-    public T Payload { get; init; }
-    public WebhookPayloadConfigInfo Webhook { get; init; }
+    public WebhookPayloadActionInfo Action { get; set; }
+    public T Payload { get; set; }
+    public WebhookPayloadConfigInfo Webhook { get; set; }
+
+    public WebhookPayload()
+    {
+    }
 
     public WebhookPayload(WebhookTrigger trigger, DbWebhooksConfig config, T data, Guid userId)
     {
