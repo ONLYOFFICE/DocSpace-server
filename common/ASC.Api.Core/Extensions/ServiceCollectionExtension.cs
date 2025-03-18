@@ -84,14 +84,21 @@ public static class ServiceCollectionExtension
             .WithRegisteredLogger();
         
         if (connection != null)
-        {
-            cacheBuilder.WithDistributedCache(new RedisCache(new RedisCacheOptions { ConnectionMultiplexerFactory = () => Task.FromResult(connection) }));
+        {        
+            //    hack for csp
+            services.AddStackExchangeRedisCache(config =>
+            {
+                config.ConnectionMultiplexerFactory = () => Task.FromResult(connection);
+            });
+            
             cacheBuilder.WithBackplane(new RedisBackplane(new RedisBackplaneOptions { ConnectionMultiplexerFactory = () => Task.FromResult(connection) }));
         }
         else
-        {
-            cacheBuilder.WithDistributedCache(new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions())));
+        {            
+            services.AddDistributedMemoryCache();
         }
+
+        cacheBuilder.WithRegisteredDistributedCache(false);
         
         return services;
     }

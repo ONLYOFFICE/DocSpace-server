@@ -95,7 +95,9 @@ public class FileStorageService //: IFileStorageService
     IDbContextFactory<UrlShortenerDbContext> dbContextFactory,
     WatermarkManager watermarkManager,
     CustomTagsService customTagsService,
-    IMapper mapper)
+    IMapper mapper,
+    FormRoleDtoHelper formRoleDtoHelper,
+    WebhookManager webhookManager)
 {
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
 
@@ -462,6 +464,8 @@ public class FileStorageService //: IFileStorageService
 
         await filesMessageService.SendAsync(MessageAction.FolderCreated, folder, folder.Title);
 
+        await webhookManager.PublishAsync(WebhookTrigger.FolderCreated, folder);
+
         return folder;
     }
 
@@ -634,6 +638,8 @@ public class FileStorageService //: IFileStorageService
         }
 
         await filesMessageService.SendAsync(MessageAction.RoomCreated, folder, folder.Title);
+
+        await webhookManager.PublishAsync(WebhookTrigger.RoomCreated, folder);
 
         if (folder.ParentId is int parent && parent == await globalFolderHelper.FolderRoomTemplatesAsync)
         {
@@ -871,14 +877,13 @@ public class FileStorageService //: IFileStorageService
 
         var folderDao = daoFactory.GetFolderDao<T>();
         var folder = await folderDao.GetFolderAsync(folderId);
+        var isRoom = DocSpaceHelper.IsRoom(folder.FolderType);
 
         if (maxTotalSize < quota)
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
-
-        var canEdit = DocSpaceHelper.IsRoom(folder.FolderType)
-            ? folder.RootFolderType != FolderType.Archive && await fileSecurity.CanEditRoomAsync(folder)
+        var canEdit = isRoom ? folder.RootFolderType != FolderType.Archive && await fileSecurity.CanEditRoomAsync(folder)
             : await fileSecurity.CanRenameAsync(folder);
 
         if (!canEdit)
@@ -906,6 +911,8 @@ public class FileStorageService //: IFileStorageService
         }
 
         await socketManager.UpdateFolderAsync(folder);
+
+        await webhookManager.PublishAsync(isRoom ? WebhookTrigger.RoomUpdated : WebhookTrigger.FolderUpdated, folder);
 
         return folder;
     }
@@ -1148,6 +1155,8 @@ public class FileStorageService //: IFileStorageService
 
         await socketManager.UpdateFolderAsync(folder);
 
+        await webhookManager.PublishAsync(isRoom ? WebhookTrigger.RoomUpdated : WebhookTrigger.FolderUpdated, folder);
+
         return folder;
     }
 
@@ -1211,10 +1220,14 @@ public class FileStorageService //: IFileStorageService
             if (DocSpaceHelper.IsRoom(renamedFolder.FolderType))
             {
                 await filesMessageService.SendAsync(MessageAction.RoomRenamed, oldTitle, renamedFolder, renamedFolder.Title);
+
+                await webhookManager.PublishAsync(WebhookTrigger.RoomUpdated, renamedFolder);
             }
             else
             {
                 await filesMessageService.SendAsync(MessageAction.FolderRenamed, renamedFolder, renamedFolder.Title, oldTitle);
+
+                await webhookManager.PublishAsync(WebhookTrigger.FolderUpdated, renamedFolder);
             }
 
             //if (!folder.ProviderEntry)
@@ -1528,11 +1541,26 @@ public class FileStorageService //: IFileStorageService
 
         await filesMessageService.SendAsync(MessageAction.FileCreated, file, file.Title);
 
-        await fileMarker.MarkAsNewAsync(file);
-
-        await socketManager.CreateFileAsync(file);
+        await webhookManager.PublishAsync(WebhookTrigger.FileCreated, file);
 
         var room = await folderDao.GetParentFoldersAsync(folder.Id).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+
+        if (file.IsForm && room?.FolderType == FolderType.VirtualDataRoom)
+        {
+            var users = (await fileSharing.GetSharedInfoAsync(room))
+                .Where(ace => ace is not { Access: FileShare.FillForms } && ace.Id != authContext.CurrentAccount.ID)
+                .Select(ace => ace.Id)
+                .ToList();
+            if (users.Any())
+            {
+                await fileMarker.MarkAsNewAsync(file, users);
+            }
+        }
+        else
+        {
+            await fileMarker.MarkAsNewAsync(file);
+        }
+        await socketManager.CreateFileAsync(file);
         if (room != null && !DocSpaceHelper.FormsFillingSystemFolders.Contains(folder.FolderType))
         {
             var whoCanRead = await fileSecurity.WhoCanReadAsync(room, true);
@@ -1591,6 +1619,8 @@ public class FileStorageService //: IFileStorageService
             if (file != null)
             {
                 await filesMessageService.SendAsync(MessageAction.FileUpdated, file, file.Title);
+
+                await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
             }
 
             return file;
@@ -1623,6 +1653,8 @@ public class FileStorageService //: IFileStorageService
             {
                 await filesMessageService.SendAsync(MessageAction.FileUpdated, file, file.Title);
                 await socketManager.UpdateFileAsync(file);
+
+                await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
             }
 
             return file;
@@ -1632,8 +1664,7 @@ public class FileStorageService //: IFileStorageService
             throw GenerateException(e);
         }
     }
-
-    public async Task StartFillingAsync<T>(T fileId)
+    public async Task<File<T>> StartFillingAsync<T>(T fileId)
     {
         var fileDao = daoFactory.GetFileDao<T>();
         var folderDao = daoFactory.GetFolderDao<T>();
@@ -1656,7 +1687,6 @@ public class FileStorageService //: IFileStorageService
 
             var properties = await fileDao.GetProperties(fileId) ?? new EntryProperties<T> { FormFilling = new FormFillingProperties<T>() };
             properties.FormFilling.StartFilling = true;
-            properties.FormFilling.CollectFillForm = true;
             properties.FormFilling.OriginalFormId = fileId;
 
             await fileDao.SaveProperties(fileId, properties);
@@ -1665,6 +1695,8 @@ public class FileStorageService //: IFileStorageService
             await socketManager.CreateFormAsync(file, securityContext.CurrentAccount.ID, count <= 1);
             await socketManager.CreateFileAsync(file);
         }
+
+        return file;
     }
 
     public async Task<string> StartEditAsync<T>(T fileId, bool editingAlone = false)
@@ -1737,6 +1769,8 @@ public class FileStorageService //: IFileStorageService
             {
                 await filesMessageService.SendAsync(MessageAction.FileRenamed, file, file.Title, oldTitle);
 
+                await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
+
                 //if (!file.ProviderEntry)
                 //{
                 //    FilesIndexer.UpdateAsync(FilesWrapper.GetFilesWrapper(ServiceProvider, file), true, r => r.Title);
@@ -1808,6 +1842,8 @@ public class FileStorageService //: IFileStorageService
 
         await socketManager.UpdateFileAsync(file);
 
+        await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
+
         return new KeyValuePair<File<T>, IAsyncEnumerable<File<T>>>(file, GetFileHistoryAsync(fileId));
     }
 
@@ -1838,6 +1874,8 @@ public class FileStorageService //: IFileStorageService
         comment = await fileDao.UpdateCommentAsync(fileId, version, comment);
 
         await filesMessageService.SendAsync(MessageAction.FileUpdatedRevisionComment, file, [file.Title, version.ToString(CultureInfo.InvariantCulture)]);
+
+        await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
 
         return comment;
     }
@@ -1937,6 +1975,8 @@ public class FileStorageService //: IFileStorageService
         }
 
         await socketManager.UpdateFileAsync(file);
+
+        await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
 
         return file;
     }
@@ -2048,6 +2088,8 @@ public class FileStorageService //: IFileStorageService
 
         await filesMessageService.SendAsync(MessageAction.FileRestoreVersion, file, file.Title, version.ToString(CultureInfo.InvariantCulture));
 
+        await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
+
         await foreach (var f in daoFactory.GetFileDao<T>().GetEditHistoryAsync(documentServiceHelper, file.Id))
         {
             yield return f;
@@ -2064,7 +2106,7 @@ public class FileStorageService //: IFileStorageService
         return result;
     }
 
-    public async Task SetFileOrder<T>(T fileId, int order)
+    public async Task<File<T>> SetFileOrder<T>(T fileId, int order)
     {
         var fileDao = daoFactory.GetFileDao<T>();
         var file = await fileDao.GetFileAsync(fileId);
@@ -2077,11 +2119,15 @@ public class FileStorageService //: IFileStorageService
         var newOrder = await fileDao.SetCustomOrder(fileId, file.ParentId, order);
         if (newOrder != 0 && newOrder != file.Order)
         {
+            file.Order = order;
             await filesMessageService.SendAsync(MessageAction.FileIndexChanged, file, file.Title, file.Order.ToString(), order.ToString());
+            await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
         }
+
+        return file;
     }
 
-    public async Task SetOrderAsync<T>(IEnumerable<OrdersItemRequestDto<T>> items)
+    public async IAsyncEnumerable<FileEntry<T>> SetOrderAsync<T>(IEnumerable<OrdersItemRequestDto<T>> items)
     {
         var contextId = Guid.NewGuid().ToString();
 
@@ -2121,7 +2167,9 @@ public class FileStorageService //: IFileStorageService
                         var newOrder = await fileDao.SetCustomOrder(file.Id, file.ParentId, item.Order);
                         if (newOrder != 0)
                         {
+                            entry.Order = item.Order;
                             await filesMessageService.SendAsync(MessageAction.FileIndexChanged, file, file.Title, file.Order.ToString(), item.Order.ToString(), contextId);
+                            await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
                         }
 
                         break;
@@ -2131,16 +2179,20 @@ public class FileStorageService //: IFileStorageService
                         var newOrder = await folderDao.SetCustomOrder(folder.Id, folder.ParentId, item.Order);
                         if (newOrder != 0)
                         {
+                            entry.Order = item.Order;
                             await filesMessageService.SendAsync(MessageAction.FolderIndexChanged, folder, folder.Title, folder.Order.ToString(), item.Order.ToString(), contextId);
+                            await webhookManager.PublishAsync(WebhookTrigger.FolderUpdated, folder);
                         }
 
                         break;
                     }
             }
+
+            yield return entry;
         }
     }
 
-    public async Task SetFolderOrder<T>(T folderId, int order)
+    public async Task<Folder<T>> SetFolderOrder<T>(T folderId, int order)
     {
         var folderDao = daoFactory.GetFolderDao<T>();
         var folder = await folderDao.GetFolderAsync(folderId);
@@ -2154,8 +2206,13 @@ public class FileStorageService //: IFileStorageService
 
         if (newOrder != 0 && newOrder != folder.Order)
         {
+            folder.Order = order;
             await filesMessageService.SendAsync(MessageAction.FolderIndexChanged, folder, folder.Title, folder.Order.ToString(), order.ToString());
+
+            await webhookManager.PublishAsync(WebhookTrigger.FolderUpdated, folder);
         }
+
+        return folder;
     }
 
     public async Task<IEnumerable<KeyValuePair<DateTime, IEnumerable<KeyValuePair<FileEntry, IEnumerable<FileEntry>>>>>> GetNewRoomFilesAsync()
@@ -2994,6 +3051,10 @@ public class FileStorageService //: IFileStorageService
                 await linkDao.DeleteAllLinkAsync(file.Id);
 
                 await fileDao.SaveProperties(file.Id, null);
+                if (file.IsForm)
+                {
+                    await fileDao.DeleteFormRolesAsync(file.Id);
+                }
             }
         }
 
@@ -3642,6 +3703,7 @@ public class FileStorageService //: IFileStorageService
                 await filesMessageService.SendAsync(MessageAction.FileCreated, result, result.Title);
                 await fileMarker.MarkAsNewAsync(result);
                 await socketManager.CreateFileAsync(result);
+                await webhookManager.PublishAsync(WebhookTrigger.FileCreated, result);
             }
 
             return result;
@@ -4178,6 +4240,8 @@ public class FileStorageService //: IFileStorageService
                 await filesMessageService.SendAsync(MessageAction.FileChangeOwner, newFolder, [
                     newFolder.Title, userInfo.DisplayUserName(false, displayUserSettingsHelper)
                 ]);
+
+                await webhookManager.PublishAsync(WebhookTrigger.FolderUpdated, newFolder);
             }
 
             yield return newFolder;
@@ -4258,6 +4322,8 @@ public class FileStorageService //: IFileStorageService
                 await filesMessageService.SendAsync(MessageAction.FileChangeOwner, newFile, [
                     newFile.Title, userInfo.DisplayUserName(false, displayUserSettingsHelper)
                 ]);
+
+                await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, newFile);
             }
 
             yield return newFile;
@@ -4447,6 +4513,180 @@ public class FileStorageService //: IFileStorageService
         return [..users];
     }
 
+    public async Task SaveFormRoleMapping<T>(T formId, IEnumerable<FormRole> roles)
+    {
+        var fileDao = daoFactory.GetFileDao<T>();
+        var folderDao = daoFactory.GetFolderDao<T>();
+
+        var form = await fileDao.GetFileAsync(formId);
+        var currentRoom = await DocSpaceHelper.GetParentRoom(form, folderDao);
+
+        await ValidateChangeRolesPermission(form);
+
+        await fileDao.SaveFormRoleMapping(formId, roles);
+
+        var properties = await fileDao.GetProperties(formId) ?? new EntryProperties<T> { FormFilling = new FormFillingProperties<T>() };
+        if (roles?.Any() == false)
+        {
+            await fileDao.SaveProperties(formId, null);
+        }
+        else
+        {
+            properties.FormFilling.StartFilling = true;
+            await fileDao.SaveProperties(formId, properties);
+
+            var currentUserId = authContext.CurrentAccount.ID;
+            var recipients = roles
+                .Where(role => role.UserId != currentUserId)
+                .Select(role => role.UserId)
+                .Distinct();
+
+            if (recipients.Any())
+            {
+                var shares = await fileSharing.GetPureSharesAsync(currentRoom, recipients).ToListAsync();
+                var filteredRecipients = shares
+                    .Where(ace => ace is not { Access: FileShare.FillForms })
+                    .Select(ace => ace.Id);
+
+                if (filteredRecipients.Any())
+                {
+                    await notifyClient.SendFormFillingEvent(
+                        currentRoom, form, filteredRecipients, NotifyConstants.EventFormStartedFilling, currentUserId);
+                }
+            }
+
+            var firstRole = roles.FirstOrDefault();
+            if (firstRole.UserId != currentUserId)
+            {
+                var firstUserShare = await fileSharing.GetPureSharesAsync(
+                    currentRoom, [firstRole.UserId])
+                    .FirstOrDefaultAsync();
+
+                if (firstUserShare is { Access: FileShare.FillForms })
+                {
+                    await socketManager.CreateFileAsync(form, [firstRole.UserId]);
+                }
+            }
+        }
+
+        await socketManager.UpdateFileAsync(form);
+    }
+    public async IAsyncEnumerable<FormRoleDto> GetAllFormRoles<T>(T formId)
+    {
+        var fileDao = daoFactory.GetFileDao<T>();
+        var form = await fileDao.GetFileAsync(formId);
+
+        if (form == null)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+        if (!form.IsForm)
+        {
+            throw new InvalidOperationException();
+        }
+        var roles = await fileDao.GetFormRoles(formId).ToListAsync();
+        var properties = await daoFactory.GetFileDao<T>().GetProperties(formId);
+        var currentStep = roles.Where(r => !r.Submitted).Min(r => (int?)r.Sequence) ?? 0;
+
+
+        foreach (var r in roles)
+        {
+            var role = await formRoleDtoHelper.Get(properties, r);
+            if (!DateTime.MinValue.Equals(properties.FormFilling.FillingStopedDate) &&
+                properties.FormFilling.FormFillingInterruption?.RoleName == role.RoleName)
+            {
+                role.RoleStatus = FormFillingStatus.Stoped;
+            }
+            else
+            {
+                role.RoleStatus = currentStep switch
+                {
+                    0 => FormFillingStatus.Complete,
+                    _ when currentStep > role.Sequence => FormFillingStatus.Complete,
+                    _ when currentStep < role.Sequence => FormFillingStatus.Draft,
+                    _ when currentStep == role.Sequence && !role.Submitted && r.OpenedAt.Equals(DateTime.MinValue) => FormFillingStatus.YouTurn,
+                    _ when currentStep == role.Sequence && !role.Submitted && !r.OpenedAt.Equals(DateTime.MinValue) => FormFillingStatus.InProgress,
+                    _ => FormFillingStatus.Complete
+                };
+            }
+
+            yield return role;
+        }
+    }
+    public async Task ManageFormFilling<T>(T formId, FormFillingManageAction action)
+    {
+        var fileDao = daoFactory.GetFileDao<T>();
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var form = await fileDao.GetFileAsync(formId);
+        await ValidateChangeRolesPermission(form);
+
+        var properties = await daoFactory.GetFileDao<T>().GetProperties(formId);
+        switch (action)
+        {
+            case FormFillingManageAction.Stop:
+                var role = await fileDao.GetFormRoles(formId).Where(r => r.Submitted == false).FirstOrDefaultAsync();
+                properties.FormFilling.FillingStopedDate = DateTime.UtcNow;
+                properties.FormFilling.FormFillingInterruption =
+                    new FormFillingInterruption
+                    {
+                        UserId = authContext.CurrentAccount.ID,
+                        RoleName = role?.RoleName
+                    };
+                var room = await DocSpaceHelper.GetParentRoom(form, folderDao);
+                var allRoles = await fileDao.GetFormRoles(form.Id).ToListAsync();
+
+                var currentStep = allRoles.Where(r => !r.Submitted).Min(r => (int?)r.Sequence) ?? 0;
+                var submittedRoles = allRoles.Where(r => r.Submitted || r.Sequence == currentStep).Select(r => r.UserId);
+
+                var aces = await fileSharing.GetPureSharesAsync(room, allRoles.Where(r => !r.Submitted && r.Sequence != currentStep).Select(r => r.UserId)).ToListAsync();
+                var filteredUnsubmittedRoles = aces
+                    .Where(ace => ace is not { Access: FileShare.FillForms })
+                    .Select(ace => ace.Id);
+
+                await notifyClient.SendFormFillingEvent(room, form, submittedRoles.Concat(filteredUnsubmittedRoles), NotifyConstants.EventStoppedFormFilling, authContext.CurrentAccount.ID);
+                break;
+
+            case FormFillingManageAction.Resume:
+                properties.FormFilling.FillingStopedDate = DateTime.MinValue;
+                properties.FormFilling.FormFillingInterruption = null;
+                break;
+
+            default:
+                throw new InvalidOperationException();
+        }
+
+        await fileDao.SaveProperties(formId, properties);
+        await socketManager.UpdateFileAsync(form);
+    }
+
+
+    private async Task ValidateChangeRolesPermission<T>(File<T> form)
+    {
+        if (form == null)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+        if (!form.IsForm)
+        {
+            throw new InvalidOperationException();
+        }
+        if (!await fileSecurity.CanEditRoomAsync(form))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
+        }
+
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var currentRoom = await DocSpaceHelper.GetParentRoom(form, folderDao);
+
+        if (currentRoom == null)
+        {
+            throw new InvalidOperationException();
+        }
+        if (!await fileSecurity.CanEditRoomAsync(currentRoom))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
+        }
+    }
     private Exception GenerateException(Exception error, bool warning = false)
     {
         if (warning || error is ItemNotFoundException or SecurityException or ArgumentException or TenantQuotaException or InvalidOperationException)
