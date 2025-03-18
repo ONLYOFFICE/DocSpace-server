@@ -33,7 +33,7 @@ public class FormRoleDto
     public EmployeeFullDto User { get; set; }
     public int Sequence { get; set; }
     public bool Submitted { get; set; }
-    public EmployeeFullDto? StopedBy { get; set; }
+    public EmployeeFullDto StopedBy { get; set; }
     public Dictionary<int, DateTime> History { get; set; }
     public FormFillingStatus RoleStatus { get; set; }
 }
@@ -47,7 +47,6 @@ public class FormRoleDtoHelper(TenantUtil tenantUtil, EmployeeFullDtoHelper empl
             return null;
         }
         var user = await employeeFullDtoHelper.GetFullAsync(await userManager.GetUsersAsync(role.UserId));
-        var history = new Dictionary<FormRoleHistory, DateTime>();
         var result = new FormRoleDto
         {
             RoleName = role.RoleName,
