@@ -155,9 +155,11 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/folder/{folderId}/order</path>
     [Tags("Files / Folders")]
     [HttpPut("folder/{folderId}/order")]
-    public async Task SetFileOrder(OrderFolderRequestDto<T> inDto)
+    public async Task<FolderDto<T>> SetFileOrder(OrderFolderRequestDto<T> inDto)
     {
-        await fileStorageService.SetFolderOrder(inDto.FolderId, inDto.Order.Order);
+        var folder = await fileStorageService.SetFolderOrder(inDto.FolderId, inDto.Order.Order);
+
+        return await _folderDtoHelper.GetAsync(folder);
     }
 
     /// <summary>
@@ -274,7 +276,7 @@ public abstract class FoldersController<T>(
     [SwaggerResponse(403, "You don't have enough permission to rename the folder")]
     [HttpPut("folder/{folderId}")]
     public async Task<FolderDto<T>> RenameFolderAsync(CreateFolderRequestDto<T> inDto)
-    {        
+    {
         var folder = await fileStorageService.FolderRenameAsync(inDto.FolderId, inDto.Folder.Title);
 
         return await _folderDtoHelper.GetAsync(folder);

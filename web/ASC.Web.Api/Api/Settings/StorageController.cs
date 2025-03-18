@@ -45,7 +45,7 @@ public class StorageController(ILoggerProvider option,
         StorageSettingsHelper storageSettingsHelper,
         IWebHostEnvironment webHostEnvironment,
         ConsumerFactory consumerFactory,
-        IMemoryCache memoryCache,
+        IFusionCache fusionCache,
         IPublishEndpoint eventBus,
         EncryptionSettingsHelper encryptionSettingsHelper,
         BackupAjaxHandler backupAjaxHandler,
@@ -54,7 +54,7 @@ public class StorageController(ILoggerProvider option,
         IHttpContextAccessor httpContextAccessor, 
         IDistributedLockProvider distributedLockProvider,
         TenantExtra tenantExtra)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     private readonly ILogger _log = option.CreateLogger("ASC.Api");
 

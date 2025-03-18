@@ -26,7 +26,7 @@
 
 namespace ASC.Webhooks.Core.EF.Model;
 
-public class DbWebhook : IMapFrom<Webhook>
+public class DbWebhook
 {
     public int Id { get; set; }
     [MaxLength(200)]

@@ -52,7 +52,8 @@ public class ChunkedUploaderHandlerService(
     FileDtoHelper filesWrapperHelper,
     AuthContext authContext,
     IDaoFactory daoFactory,
-    IPublishEndpoint eventBus)
+    IPublishEndpoint eventBus,
+    WebhookManager webhookManager)
 {
     public async Task Invoke(HttpContext context)
     {
@@ -128,6 +129,8 @@ public class ChunkedUploaderHandlerService(
                                 ? MessageAction.FileUploadedWithOverwriting 
                                 : MessageAction.FileUploaded, resumedSession.File, resumedSession.File.Title);
 
+                            await webhookManager.PublishAsync(WebhookTrigger.FileUploaded, resumedSession.File);
+
                             await socketManager.CreateFileAsync(resumedSession.File);
                             if (resumedSession.File.Version <= 1)
                             {
@@ -197,6 +200,8 @@ public class ChunkedUploaderHandlerService(
                     await filesMessageService.SendAsync(session.File.Version > 1 
                         ? MessageAction.FileUploadedWithOverwriting 
                         : MessageAction.FileUploaded, session.File, session.File.Title);
+
+                    await webhookManager.PublishAsync(WebhookTrigger.FileUploaded, session.File);
 
                     await socketManager.CreateFileAsync(session.File);
                     if (session.File.Version <= 1)

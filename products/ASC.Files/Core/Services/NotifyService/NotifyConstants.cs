@@ -47,6 +47,10 @@ public static class NotifyConstants
     public static readonly INotifyAction EventDocumentUploadedToRoom = new NotifyAction("DocumentUploadedTo");
     public static readonly INotifyAction EventDocumentsUploadedToRoom = new NotifyAction("DocumentsUploadedTo");
     public static readonly INotifyAction EventFolderCreatedInRoom = new NotifyAction("FolderCreatedInRoom");
+    public static readonly INotifyAction EventFormStartedFilling = new NotifyAction("FormStartedFilling");
+    public static readonly INotifyAction EventYourTurnFormFilling = new NotifyAction("YourTurnFormFilling");
+    public static readonly INotifyAction EventFormWasCompletelyFilled = new NotifyAction("FormWasCompletelyFilled");
+    public static readonly INotifyAction EventStoppedFormFilling = new NotifyAction("StoppedFormFilling");
 
     #endregion
 

@@ -20,14 +20,14 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 @"UPDATE identity_clients c
 	                JOIN core_user u ON c.created_by = u.email
 	                SET c.creator_id = u.id
-                    WHERE c.tenant_id = u.tenant;"
+                    WHERE c.tenant_id = u.tenant and u.removed = 0;"
             );
 
             migrationBuilder.Sql(
                 @"UPDATE identity_clients c
 	                JOIN core_user u ON c.modified_by = u.email
 	                SET c.modifier_id = u.id
-                    WHERE c.tenant_id = u.tenant;"
+                    WHERE c.tenant_id = u.tenant and u.removed = 0;"
             );
 
             migrationBuilder.Sql(
