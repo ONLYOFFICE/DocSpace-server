@@ -107,12 +107,14 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <short>Starts filling</short>
     /// <path>api/2.0/files/file/{fileId}/startfilling</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(200, "File information", typeof(FileDto<int>))]
     [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
     [HttpPut("{fileId}/startfilling")]
-    public async Task StartFillingAsync(StartFillingRequestDto<T> inDto)
+    public async Task<FileDto<T>> StartFillingAsync(StartFillingRequestDto<T> inDto)
     {
-        await fileStorageService.StartFillingAsync(inDto.FileId);
+        var file = await fileStorageService.StartFillingAsync(inDto.FileId);
+
+        return await _fileDtoHelper.GetAsync(file);
     }
 
     /// <summary>

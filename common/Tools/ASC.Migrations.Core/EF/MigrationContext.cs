@@ -76,8 +76,8 @@ public class MigrationContext : DbContext
 
     public DbSet<IntegrationEventLogEntry> IntegrationEventLogs { get; set; }
 
-    public DbSet<WebhooksConfig> WebhooksConfigs { get; set; }
-    public DbSet<WebhooksLog> WebhooksLogs { get; set; }
+    public DbSet<DbWebhooksConfig> WebhooksConfigs { get; set; }
+    public DbSet<DbWebhooksLog> WebhooksLogs { get; set; }
     public DbSet<DbWebhook> Webhooks { get; set; }
 
     public DbSet<DbFile> Files { get; set; }

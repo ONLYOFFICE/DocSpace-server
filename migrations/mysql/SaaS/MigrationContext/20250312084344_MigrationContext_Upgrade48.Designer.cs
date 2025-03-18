@@ -4,6 +4,7 @@ using ASC.Migrations.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    partial class MigrationContextModelSnapshot : ModelSnapshot
+    [Migration("20250312084344_MigrationContext_Upgrade48")]
+    partial class MigrationContext_Upgrade48
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -5891,65 +5894,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasAnnotation("MySql:CharSet", "utf8");
                 });
 
-            modelBuilder.Entity("ASC.Files.Core.EF.DbFilesFormRoleMapping", b =>
-                {
-                    b.Property<int>("TenantId")
-                        .HasColumnType("int")
-                        .HasColumnName("tenant_id");
-
-                    b.Property<int>("FormId")
-                        .HasColumnType("int")
-                        .HasColumnName("form_id");
-
-                    b.Property<string>("RoleName")
-                        .IsRequired()
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("role_name")
-                        .UseCollation("utf8_general_ci")
-                        .HasAnnotation("MySql:CharSet", "utf8");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("varchar(38)")
-                        .HasColumnName("user_id")
-                        .UseCollation("utf8_general_ci")
-                        .HasAnnotation("MySql:CharSet", "utf8");
-
-                    b.Property<DateTime>("OpenedAt")
-                        .HasColumnType("datetime")
-                        .HasColumnName("opened_at");
-
-                    b.Property<string>("RoleColor")
-                        .HasColumnType("char(6)")
-                        .HasColumnName("role_color")
-                        .UseCollation("utf8_general_ci")
-                        .HasAnnotation("MySql:CharSet", "utf8");
-
-                    b.Property<int>("Sequence")
-                        .HasColumnType("int")
-                        .HasColumnName("sequence");
-
-                    b.Property<DateTime>("SubmissionDate")
-                        .HasColumnType("datetime")
-                        .HasColumnName("submission_date");
-
-                    b.Property<bool>("Submitted")
-                        .HasColumnType("tinyint(1)")
-                        .HasColumnName("submitted");
-
-                    b.HasKey("TenantId", "FormId", "RoleName", "UserId")
-                        .HasName("PRIMARY");
-
-                    b.HasIndex("TenantId", "FormId")
-                        .HasDatabaseName("tenant_id_form_id");
-
-                    b.HasIndex("TenantId", "FormId", "UserId")
-                        .HasDatabaseName("tenant_id_form_id_user_id");
-
-                    b.ToTable("files_form_role_mapping", (string)null);
-
-                    b.HasAnnotation("MySql:CharSet", "utf8");
-                });
-
             modelBuilder.Entity("ASC.Files.Core.EF.DbFilesLink", b =>
                 {
                     b.Property<int>("TenantId")
@@ -7744,17 +7688,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 });
 
             modelBuilder.Entity("ASC.Files.Core.EF.DbFilesBunchObjects", b =>
-                {
-                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
-                        .WithMany()
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Tenant");
-                });
-
-            modelBuilder.Entity("ASC.Files.Core.EF.DbFilesFormRoleMapping", b =>
                 {
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
                         .WithMany()
