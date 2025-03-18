@@ -530,6 +530,33 @@ public abstract class FilesController<T>(
     {
         return await filesControllerHelper.SaveAsPdf(inDto.Id, inDto.File.FolderId, inDto.File.Title);
     }
+
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "Updated information about form role mappings", typeof(FormRole))]
+    [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
+    [HttpPost("file/{fileId}/formrolemapping")]
+    public async Task SaveFormRoleMapping(SaveFormRoleMappingDto<T> inDto)
+    {
+        await fileStorageService.SaveFormRoleMapping(inDto.FormId, inDto.Roles);
+    }
+
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "Successfully retrieved all roles for the form", typeof(IEnumerable<FormRole>))]
+    [SwaggerResponse(403, "You do not have enough permissions to view the form roles")]
+    [HttpGet("file/{fileId}/formroles")]
+    public IAsyncEnumerable<FormRoleDto> GetAllFormRoles(FileIdRequestDto<T> inDto)
+    {
+        return fileStorageService.GetAllFormRoles(inDto.FileId);
+    }
+
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "Successfully processed the form filling action")]
+    [SwaggerResponse(403, "You do not have enough permissions to perform this action")]
+    [HttpPut("file/{fileId}/manageformfilling")]
+    public async Task ManageFormFilling(ManageFormFillingDto<T> inDto)
+    {
+        await fileStorageService.ManageFormFilling(inDto.FormId, inDto.Action);
+    }
 }
 
 public class FilesControllerCommon(
