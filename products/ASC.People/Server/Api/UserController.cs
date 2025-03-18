@@ -714,19 +714,19 @@ public class UserController(
     /// <short>
     /// Approve a guest share link
     /// </short>
-    /// <path>api/2.0/people/guests/{userid:guid}/share</path>
+    /// <path>api/2.0/people/guests/share/approve</path>
     [Tags("People / Guests")]
     [SwaggerResponse(200, "Detailed profile information", typeof(EmployeeFullDto))]
     [SwaggerResponse(404, "User not found")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "GuestShareLink")]
-    [HttpPost("guests/{userid:guid}/share")]
-    public async Task<EmployeeFullDto> ApproveGuestShareLinkAsync(GuestShareRequestDto inDto)
+    [HttpPost("guests/share/approve")]
+    public async Task<EmployeeFullDto> ApproveGuestShareLinkAsync(EmailMemberRequestDto inDto)
     {
         await _apiContext.AuthByClaimAsync();
 
-        var targetUser = await _userManager.GetUsersAsync(inDto.UserId);
+        var targetUser = await _userManager.GetUserByEmailAsync(inDto.Email);
 
         if (Equals(targetUser, Constants.LostUser))
         {
