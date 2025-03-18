@@ -23,6 +23,9 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+using System.Reflection.Metadata;
+
+using Microsoft.OpenApi.Extensions;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -74,15 +77,36 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
         else if (schema.Type == "array")
         {
             originalSchemaRef = schema.Items.Reference?.Id;
-            responseSchemaKey = originalSchemaRef == null
-                ? "ArrayWrapper"
-                : originalSchemaRef.Contains("Dto") ? originalSchemaRef.Replace("Dto", "") + "Wrapper" : originalSchemaRef + "Wrapper";
-
-            var arrayResponseProperty = new OpenApiSchema
+            var schemaArray = schema.Items;
+            OpenApiSchema arrayResponseProperty;
+            if (schemaArray.Type == null && schemaArray.Reference == null && schemaArray.Items == null)
             {
-                Type = "array",
-                Items = originalSchemaRef != null ? new OpenApiSchema { Reference = schema.Items.Reference } : new OpenApiSchema { Type = schema.Items.Type }
-            };
+                responseSchemaKey = "ObjectArrayWrapper";
+                arrayResponseProperty = new OpenApiSchema
+                {
+                    Type = "array",
+                    Items = new OpenApiSchema { Type = "object" }
+                };
+            }
+            else if (schemaArray != null && schemaArray.Type == "array")
+            {
+                responseSchemaKey = "ArrayArrayWrapper";
+                arrayResponseProperty = new OpenApiSchema
+                {
+                    Type = "array",
+                    Items = new OpenApiSchema { Type = "array", Items = new OpenApiSchema { Type = schemaArray.Items.Type } }
+                };
+            }
+            else
+            {
+                responseSchemaKey = originalSchemaRef == null ? $"{schema.Items.Type.ToUpper()}ArrayWrapper" 
+                    : originalSchemaRef.Contains("Dto") ? originalSchemaRef.Replace("Dto", "") + "ArrayWrapper" : originalSchemaRef + "ArrayWrapper";
+                arrayResponseProperty = new OpenApiSchema
+                {
+                    Type = "array",
+                    Items = originalSchemaRef != null ? new OpenApiSchema { Reference = schema.Items.Reference } : new OpenApiSchema { Type = schema.Items.Type }
+                };
+            }
 
             responseSchema = CreateSuccessApiResponseSchema(arrayResponseProperty);
         }

@@ -36,7 +36,7 @@ public class InviteUsersRequestDto
     /// </summary>
     [MaxEmailInvitations]
     [Required]
-    public IEnumerable<UserInvitation> Invitations { get; set; }
+    public IEnumerable<UserInvitationRequestDto> Invitations { get; set; }
 
     /// <summary>
     /// Culture
@@ -44,7 +44,7 @@ public class InviteUsersRequestDto
     public string Culture { get; set; }
 }
 
-public class UserInvitation
+public class UserInvitationRequestDto
 {
     /// <summary>
     /// Employee type
