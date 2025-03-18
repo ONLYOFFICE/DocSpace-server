@@ -26,190 +26,193 @@
 
 namespace ASC.Web.Api.Models;
 
+/// <summary>
+/// The employee full parameters.
+/// </summary>
 public class EmployeeFullDto : EmployeeDto
 {
     /// <summary>
-    /// First name
+    /// The employee first name.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Mike")]
     public string FirstName { get; set; }
 
     /// <summary>
-    /// Last name
+    /// The employee last name.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Zanyatski")]
     public string LastName { get; set; }
 
     /// <summary>
-    /// Username
+    /// The employee first username.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Mike.Zanyatski")]
     public string UserName { get; set; }
 
     /// <summary>
-    /// Email
+    /// The employee first email.
     /// </summary>
     [SwaggerSchemaCustom(Example = "my@gmail.com")]
     [EmailAddress]
     public string Email { get; set; }
 
     /// <summary>
-    /// List of contacts
+    /// The list of contacts of employee.
     /// </summary>
     public List<Contact> Contacts { get; set; }
 
     /// <summary>
-    /// Birthday
+    /// The employee birthday.
     /// </summary>
     public ApiDateTime Birthday { get; set; }
 
     /// <summary>
-    /// Sex
+    /// The employee sex.
     /// </summary>
     [SwaggerSchemaCustom(Example = "male")]
     public string Sex { get; set; }
 
     /// <summary>
-    /// Employee status
+    /// The employee status.
     /// </summary>
     public EmployeeStatus Status { get; set; }
 
     /// <summary>
-    /// Employee activation status
+    /// The employee activation status.
     /// </summary>
     public EmployeeActivationStatus ActivationStatus { get; set; }
 
     /// <summary>
-    /// The date when the user account was terminated
+    /// The date when the user account was terminated.
     /// </summary>
     public ApiDateTime Terminated { get; set; }
 
     /// <summary>
-    /// Department
+    /// The employee department.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Marketing")]
     public string Department { get; set; }
 
     /// <summary>
-    /// Registration date
+    /// The employee registration date.
     /// </summary>
     public ApiDateTime WorkFrom { get; set; }
 
     /// <summary>
-    /// List of groups
+    /// The employee list of groups.
     /// </summary>
     public List<GroupSummaryDto> Groups { get; set; }
 
     /// <summary>
-    /// Location
+    /// The employee location.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Palo Alto")]
     public string Location { get; set; }
 
     /// <summary>
-    /// Notes
+    /// The employee notes.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Notes to worker")]
     public string Notes { get; set; }
 
     /// <summary>
-    /// Specifies if the user is an administrator or not
+    /// Specifies if the user is an administrator or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool IsAdmin { get; set; }
 
     /// <summary>
-    /// Specifies if the user is a room administrator or not
+    /// Specifies if the user is a room administrator or not.
     /// </summary>
     public bool IsRoomAdmin { get; set; }
 
     /// <summary>
-    /// Specifies if the LDAP settings are enabled for the user or not
+    /// Specifies if the LDAP settings are enabled for the user or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool IsLDAP { get; set; }
 
     /// <summary>
-    /// List of administrator modules
+    /// The list of administrator modules.
     /// </summary>
     [SwaggerSchemaCustom(Example = "[\"projects\", \"crm\"]")]
     public List<string> ListAdminModules { get; set; }
 
     /// <summary>
-    /// Specifies if the user is a portal owner or not
+    /// Specifies if the user is a portal owner or not.
     /// </summary>
     public bool IsOwner { get; set; }
 
     /// <summary>
-    /// Specifies if the user is a portal visitor or not
+    /// Specifies if the user is a portal visitor or not.
     /// </summary>
     public bool IsVisitor { get; set; }
 
     /// <summary>
-    /// Specifies if the user is a portal collaborator or not
+    /// Specifies if the user is a portal collaborator or not.
     /// </summary>
     public bool IsCollaborator { get; set; }
 
     /// <summary>
-    /// Language
+    /// The employee language info.
     /// </summary>
     [SwaggerSchemaCustom(Example = "en-EN")]
     public string CultureName { get; set; }
 
     /// <summary>
-    /// Mobile phone number
+    /// The mobile phone number.
     /// </summary>
     public string MobilePhone { get; set; }
 
     /// <summary>
-    /// Mobile phone activation status
+    /// The mobile phone activation status.
     /// </summary>
     public MobilePhoneActivationStatus MobilePhoneActivationStatus { get; set; }
 
     /// <summary>
-    /// Specifies if the SSO settings are enabled for the user or not
+    /// Specifies if the SSO settings are enabled for the user or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool IsSSO { get; set; }
 
     /// <summary>
-    /// Theme
+    /// The theme settings of the employee.
     /// </summary>
     public DarkThemeSettingsType? Theme { get; set; }
 
     /// <summary>
-    /// Quota limit
+    /// The employee quota limit.
     /// </summary>
     public long? QuotaLimit { get; set; }
 
     /// <summary>
-    /// Portal used space
+    /// The portal used space of the employee.
     /// </summary>
     [SwaggerSchemaCustom(Example = 12345)]
     public double? UsedSpace { get; set; }
 
     /// <summary>
-    /// Shared
+    /// Specifies if the employee is shared or not.
     /// </summary>
     public bool? Shared { get; set; }
 
     /// <summary>
-    /// Specifies if the user has a custom quota or not
+    /// Specifies if the user has a custom quota or not.
     /// </summary>
     public bool? IsCustomQuota { get; set; }
 
     /// <summary>
-    /// Current login event ID
+    /// The current login event ID.
     /// </summary>
     public int? LoginEventId { get; set; }
 
     /// <summary>
-    /// Created by
+    /// The employee created by.
     /// </summary>
     public EmployeeDto CreatedBy { get; set; }
 
     /// <summary>
-    /// Registration date
+    /// The employee registration date.
     /// </summary>
     public ApiDateTime RegistrationDate { get; set; }
 

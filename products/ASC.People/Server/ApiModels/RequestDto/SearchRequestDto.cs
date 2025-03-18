@@ -27,36 +27,36 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// Search model 
+/// The search model.
 /// </summary>
 public class SearchDto
 {
     /// <summary>
-    /// Employee status
+    /// The search employee status.
     /// </summary>
     [FromQuery(Name = "employeeStatus")]
     public EmployeeStatus? EmployeeStatus { get; set; }
 
     /// <summary>
-    /// Activation status
+    /// The search activation status.
     /// </summary>
     [FromQuery(Name = "activationStatus")]
     public EmployeeActivationStatus? ActivationStatus { get; set; }
 
     /// <summary>
-    /// Exclude shared
+    /// Specifies whether to exclude shared or not.
     /// </summary>
     [FromQuery(Name = "excludeShared")]
     public bool? ExcludeShared { get; set; }
 }
 
 /// <summary>
-/// Search model id
+/// The search model ID.
 /// </summary>
 public class SearchIdDto<T>
 {
     /// <summary>
-    /// Id
+    /// The search ID.
     /// </summary>
     [FromRoute(Name = "id")]
     public T Id { get; set; }
@@ -64,18 +64,18 @@ public class SearchIdDto<T>
 
 
 /// <summary>
-/// 
+/// The advanced search parameters.
 /// </summary>
 public class AdvancedSearchDto
 {
     /// <summary>
-    /// User status
+    /// The user status.
     /// </summary>
     [FromRoute(Name = "status")]
     public EmployeeStatus Status { get; set; }
 
     /// <summary>
-    /// Search query
+    /// The advanced search query.
     /// </summary>
     [FromQuery(Name = "query")]
     public string Query { get; set; }

@@ -27,54 +27,54 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for linking accounts
+/// The request parameters for linking accounts.
 /// </summary>
 public class LinkAccountRequestDto
 {
     /// <summary>
-    /// Third-party profile in the serialized format
+    /// The third-party profile in the serialized format.
     /// </summary>
     public string SerializedProfile { get; set; }
 }
 
 /// <summary>
-/// Request parameters for creating a third-party account
+/// The request parameters for creating a third-party account.
 /// </summary>
 public class SignupAccountRequestDto : LinkAccountRequestDto
 {
     /// <summary>
-    /// Employee type
+    /// The signup account employee type.
     /// </summary>
     public EmployeeType? EmployeeType { get; set; }
 
     /// <summary>
-    /// First name
+    /// The signup account first name.
     /// </summary>
     public string FirstName { get; set; }
 
     /// <summary>
-    /// Last name
+    /// The signup account last name.
     /// </summary>
     public string LastName { get; set; }
 
     /// <summary>
-    /// Email address
+    /// The signup account email address.
     /// </summary>
     [EmailAddress]
     public string Email { get; set; }
 
     /// <summary>
-    /// Password hash
+    /// The signup account password hash.
     /// </summary>
     public string PasswordHash { get; set; }
 
     /// <summary>
-    /// Link key
+    /// The signup account link key.
     /// </summary>
     public string Key { get; set; }
 
     /// <summary>
-    /// Culture
+    /// The signup account culture.
     /// </summary>
     public string Culture { get; set; }
 }

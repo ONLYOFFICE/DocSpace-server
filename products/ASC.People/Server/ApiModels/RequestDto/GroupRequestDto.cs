@@ -27,40 +27,40 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// Group request parameters
+/// The group request parameters.
 /// </summary>
 public class GroupRequestDto : GroupRequestDtoBase
 {
     /// <summary>
-    /// List of group member IDs
+    /// The list of group member IDs.
     /// </summary>
     public IEnumerable<Guid> Members { get; init; }
 }
 
 /// <summary>
-/// Group request parameters
+/// The member request.
 /// </summary>
 public class MembersRequest
 {
     /// <summary>
-    /// List of group member IDs
+    /// The list of group member IDs.
     /// </summary>
     public IEnumerable<Guid> Members { get; init; }
 }
 
 /// <summary>
-/// Group request parameters
+/// The members request parameters.
 /// </summary>
 public class MembersRequestDto
 {
     /// <summary>
-    /// Group ID
+    /// The group ID.
     /// </summary>
     [FromRoute(Name = "id")]
     public Guid Id { get; set; }
 
     /// <summary>
-    /// Members
+    /// The members request.
     /// </summary>
     [FromBody]
     public MembersRequest Members { get; set; }

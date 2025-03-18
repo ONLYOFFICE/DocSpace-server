@@ -27,22 +27,22 @@
 namespace ASC.People.ApiModels.ResponseDto;
 
 /// <summary>
-/// File upload result dto
+/// The file upload result dto.
 /// </summary>
 public class FileUploadResultDto
 {
     /// <summary>
-    /// Specifies if the operation is successful or not
+    /// Specifies if the operation is successful or not.
     /// </summary>
     public bool Success { get; set; }
 
     /// <summary>
-    /// Data
+    /// The file upload result data.
     /// </summary>
     public object Data { get; set; }
 
     /// <summary>
-    /// Message
+    /// The file upload result message.
     /// </summary>
     public string Message { get; set; }
 }

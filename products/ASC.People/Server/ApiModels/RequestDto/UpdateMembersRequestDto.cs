@@ -27,70 +27,70 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for updating user information
+/// The request parameters for updating user information.
 /// </summary>
 public class UpdateMembersRequestDto
 {
     /// <summary>
-    /// List of user IDs
+    /// The list of user IDs.
     /// </summary>
     public IEnumerable<Guid> UserIds { get; set; }
 
     /// <summary>
-    /// Specifies whether to resend invitation letters to all the users or not
+    /// Specifies whether to resend invitation letters to all the users or not.
     /// </summary>
     public bool ResendAll { get; set; }
 }
 
 /// <summary>
-/// 
+/// The request parameters for updating user status.
 /// </summary>
 public class UpdateMemberStatusRequestDto
 {
     /// <summary>
-    /// New user status
+    /// The new user status.
     /// </summary>
     [FromRoute(Name = "status")]
     public EmployeeStatus Status { get; set; }
 
     /// <summary>
-    /// Update members
+    /// The update members request parameters.
     /// </summary>
     [FromBody]
     public UpdateMembersRequestDto UpdateMembers { get; set; }
 }
 
 /// <summary>
-/// 
+/// The request parameters for updating user type.
 /// </summary>
 public class UpdateMemberTypeRequestDto
 {
     /// <summary>
-    /// New user type
+    /// The new user type.
     /// </summary>
     [FromRoute(Name = "type")]
     public EmployeeType Type { get; set; }
 
     /// <summary>
-    /// Update members
+    /// The update members request parameters.
     /// </summary>
     [FromBody]
     public UpdateMembersRequestDto UpdateMembers { get; set; }
 }
 
 /// <summary>
-/// 
+/// The request parameters for updating user activation status.
 /// </summary>
 public class UpdateMemberActivationStatusRequestDto
 {
     /// <summary>
-    /// Activation status
+    /// The user activation status.
     /// </summary>
     [FromRoute(Name = "activationstatus")]
     public EmployeeActivationStatus ActivationStatus { get; set; }
 
     /// <summary>
-    /// Update members
+    /// The update members request parameters.
     /// </summary>
     [FromBody]
     public UpdateMembersRequestDto UpdateMembers { get; set; }

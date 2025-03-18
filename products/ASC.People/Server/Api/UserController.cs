@@ -26,6 +26,9 @@
 
 namespace ASC.People.Api;
 
+///<summary>
+/// User API.
+///</summary>
 public class UserController(
     CommonLinkUtility commonLinkUtility,
     ICache cache,
@@ -77,7 +80,7 @@ public class UserController(
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
 {
     /// <summary>
-    /// Gets claims
+    /// Gets claims.
     /// </summary>
     /// <path>api/2.0/people/tokendiagnostics</path>
     [Tags("People / Profiles")]
@@ -626,10 +629,10 @@ public class UserController(
     }
 
     /// <summary>
-    /// Removes guests from the list and excludes them from rooms to which you have invited them
+    /// Removes guests from the list and excludes them from rooms to which you have invited them.
     /// </summary>
     /// <short>
-    /// Removes guests from the list and from rooms
+    /// Removes guests from the list and from rooms.
     /// </short>
     /// <path>api/2.0/people/guests</path>
     [SwaggerResponse(200, "Request parameters for deleting guests")]
@@ -891,7 +894,7 @@ public class UserController(
     }
 
     /// <summary>
-    /// Returns the information about the People module.
+    /// Returns the information about the "People" module.
     /// </summary>
     /// <short>Get the People information</short>
     /// <path>api/2.0/people/info</path>
@@ -2230,8 +2233,11 @@ public class UserControllerAdditional<T>(
     : ApiControllerBase 
 {
     /// <summary>
-    /// Gets users with shared in room ID specified in request
+    /// Gets users with shared in room ID specified in request.
     /// </summary>
+    /// <short>
+    /// Get users with shared
+    /// </short>
     /// <path>api/2.0/people/room/{id}</path>
     [Tags("People / Search")]
     [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<EmployeeFullDto>))]

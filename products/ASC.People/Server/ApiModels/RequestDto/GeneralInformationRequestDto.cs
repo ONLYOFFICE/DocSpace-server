@@ -26,20 +26,19 @@
 
 namespace ASC.People.ApiModels.RequestDto;
 
-
 /// <summary>
-/// 
+/// The general information request parameters.
 /// </summary>
 public class GeneralInformationRequestDto
 {
     /// <summary>
-    /// User ID
+    /// The user ID.
     /// </summary>
     [FromQuery(Name = "userId")]
     public Guid? UserId { get; set; }
 
     /// <summary>
-    /// Specifies if the user is a manager or not
+    /// Specifies if the user is a manager or not.
     /// </summary>
     [FromQuery(Name = "manager")]
     public bool? Manager { get; set; }

@@ -26,14 +26,13 @@
 
 namespace ASC.People.ApiModels.RequestDto;
 
-
 /// <summary>
-/// 
+/// The get by status request parameters.
 /// </summary>
 public class GetByStatusRequestDto
 {
     /// <summary>
-    /// User status
+    /// The user status.
     /// </summary>
     [FromRoute(Name = "status")]
     public EmployeeStatus Status {  get; set; }

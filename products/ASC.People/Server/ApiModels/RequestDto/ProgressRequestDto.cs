@@ -26,14 +26,13 @@
 
 namespace ASC.People.ApiModels.RequestDto;
 
-
 /// <summary>
-/// 
+/// The task progress request parameters.
 /// </summary>
 public class ProgressRequestDto
 {
     /// <summary>
-    /// User ID whose data is reassigned
+    /// The user ID whose data is reassigned.
     /// </summary>
     [FromRoute(Name = "userid")]
     public Guid UserId { get; set; }

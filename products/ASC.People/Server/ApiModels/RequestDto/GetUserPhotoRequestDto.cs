@@ -27,12 +27,12 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// 
+/// The get user photo request parameters.
 /// </summary>
 public class GetUserPhotoRequestDto
 {
     /// <summary>
-    /// User ID
+    /// The user ID.
     /// </summary>
     [FromRoute(Name = "userid")]
     public string UserId { get; set; }

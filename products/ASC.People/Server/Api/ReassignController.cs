@@ -26,6 +26,9 @@
 
 namespace ASC.People.Api;
 
+///<summary>
+/// Reassign API.
+///</summary>
 [DefaultRoute("reassign")]
 public class ReassignController(
     PermissionContext permissionContext,

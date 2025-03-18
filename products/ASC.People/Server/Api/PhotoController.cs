@@ -30,6 +30,9 @@ using UnknownImageFormatException = ASC.Web.Core.Users.UnknownImageFormatExcepti
 
 namespace ASC.People.Api;
 
+///<summary>
+/// Photo API.
+///</summary>
 public class PhotoController(
     UserManager userManager,
     PermissionContext permissionContext,

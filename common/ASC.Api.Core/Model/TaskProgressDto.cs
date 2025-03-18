@@ -25,15 +25,19 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Api.Core.Model;
+
+/// <summary>
+/// The task progress parameters.
+/// </summary>
 public class TaskProgressDto
 {
     /// <summary>
-    /// Specifies if the operation is completed or not
+    /// Specifies if the operation is completed or not.
     /// </summary>
     public bool IsCompleted { get; set; }
 
     /// <summary>
-    /// Progress percentage
+    /// The task progress percentage.
     /// </summary>
     [SwaggerSchemaCustom(Example = 0)]
     public int Progress { get; set; }

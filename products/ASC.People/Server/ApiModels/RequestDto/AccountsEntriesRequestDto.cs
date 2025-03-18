@@ -27,53 +27,54 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
+/// The account entries request parameters.
 /// </summary>
 public class AccountsEntriesRequestDto<T>
 {
     /// <summary>
-    /// ID
+    /// The ID of the account entry.
     /// </summary>
     [FromRoute(Name = "id")]
     public T Id { get; set; }
 
     /// <summary>
-    /// Employee status
+    /// The employee status.
     /// </summary>
     [FromQuery(Name = "employeeStatus")]
     public EmployeeStatus? EmployeeStatus { get; set; }
 
     /// <summary>
-    /// Activation status
+    /// The activation status.
     /// </summary>
     [FromQuery(Name = "activationStatus")]
     public EmployeeActivationStatus? ActivationStatus { get; set; }
 
     /// <summary>
-    /// Exclude shared
+    /// Specifies whether to exclude shared.
     /// </summary>
     [FromQuery(Name = "excludeShared")]
     public bool? ExcludeShared {  get; set; }
 
     /// <summary>
-    /// Invited by me
+    /// Specifies whether the account entry is invited by me.
     /// </summary>
     [FromQuery(Name = "invitedByMe")]
     public bool? InvitedByMe { get; set; }
 
     /// <summary>
-    /// Inviter Id
+    /// The inviter ID.
     /// </summary>
     [FromQuery(Name = "inviterId")]
     public Guid? InviterId { get; set; }
 
     /// <summary>
-    /// Area
+    /// The area of the account entry.
     /// </summary>
     [FromQuery(Name = "area")]
     public Area Area { get; set; } = Area.All;
 
     /// <summary>
-    /// Employee Types
+    /// The list of employee types.
     /// </summary>
     [FromQuery(Name = "employeeTypes")]
     public IEnumerable<EmployeeType> EmployeeTypes { get; set; } = new List<EmployeeType>();

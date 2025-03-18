@@ -26,7 +26,10 @@
 
 namespace ASC.People.Api;
 
-public class NotificationController    : ApiControllerBase
+///<summary>
+/// Notification API.
+///</summary>
+public class NotificationController : ApiControllerBase
     // UserManager userManager,
     //     SecurityContext securityContext,
     //     AuthContext authContext,

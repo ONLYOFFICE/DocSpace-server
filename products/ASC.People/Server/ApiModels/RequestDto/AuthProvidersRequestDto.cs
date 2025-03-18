@@ -26,32 +26,31 @@
 
 namespace ASC.People.ApiModels.RequestDto;
 
-
 /// <summary>
-/// 
+/// The authorization providers request parameters.
 /// </summary>
 public class AuthProvidersRequestDto
 {
     /// <summary>
-    /// Specifies whether to return providers that are available for invitation links, i.e. the user can login or register through these providers
+    /// Specifies whether to return providers that are available for invitation links, i.e. the user can login or register through these providers.
     /// </summary>
     [FromQuery(Name = "inviteView")]
     public bool InviteView {  get; set; }
 
     /// <summary>
-    /// Specifies whether to return URLs in the format that is used on the Settings page
+    /// Specifies whether to return URLs in the format that is used on the Settings page.
     /// </summary>
     [FromQuery(Name = "settingsView")]
     public bool SettingsView { get; set; }
 
     /// <summary>
-    /// Method that is called after authorization
+    /// The method that is called after authorization.
     /// </summary>
     [FromQuery(Name = "clientCallback")]
     public string ClientCallback { get; set; }
 
     /// <summary>
-    /// Provider name if the response only from this provider is needed
+    /// The provider name if the response only from this provider is needed.
     /// </summary>
     [FromQuery(Name = "fromOnly")]
     public string FromOnly { get; set; }

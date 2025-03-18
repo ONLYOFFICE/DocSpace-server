@@ -27,12 +27,12 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for terminating the reassignment process
+/// The request parameters for terminating the reassignment process.
 /// </summary>
 public class TerminateRequestDto
 {
     /// <summary>
-    /// User ID whose data is reassigned/removed
+    /// The user ID whose data is reassigned/removed.
     /// </summary>
     public Guid UserId { get; set; }
 }

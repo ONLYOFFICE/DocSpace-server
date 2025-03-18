@@ -27,18 +27,18 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// 
+/// The upload member photo request parameters.
 /// </summary>
 public class UploadMemberPhotoRequestDto
 {
     /// <summary>
-    /// User ID
+    /// The user ID.
     /// </summary>
     [FromRoute(Name = "userid")]
     public string UserId { get; set; }
 
     /// <summary>
-    /// Image data
+    /// The image data.
     /// </summary>
     [FromForm(Name = "formCollection")]
     public IFormCollection FormCollection { get; set; }
