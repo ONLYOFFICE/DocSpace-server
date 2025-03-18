@@ -101,10 +101,13 @@ public class DeleteVersionBatchRequestDto
     public bool DeleteAfter { get; set; }
 
     /// <summary>
-    /// Specifies whether to delete a file after the editing session is finished or not.
+    /// The file ID to delete.
     /// </summary>
     public int FileId { get; set; }
     
+    /// <summary>
+    /// The list of file versions.
+    /// </summary>
     public IEnumerable<int> Versions { get; set; } = new List<int>();
 }
 
