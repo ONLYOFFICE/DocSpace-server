@@ -34,6 +34,4 @@ public enum FormFillingStatus
     InProgress = 3,
     Complete = 4,
     Stoped = 5
-    
-    public DateTime LastModified { get; set; }
 }
