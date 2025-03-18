@@ -99,7 +99,8 @@ public enum StartFillingMode
 {
     None,
     ShareToFillOut,
-    StartFilling
+    StartFilling,
+    QuickSharing
 }
 
 public class EditorConfigurationDto

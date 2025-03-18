@@ -225,6 +225,15 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                     result.FillingStatus = true;
                 }
             }
+            else if (formOpenSetup.RootFolder.FolderType is FolderType.USER)
+            {
+                if (result.Document.Permissions.FillForms)
+                {
+                    result.StartFilling = true;
+                    result.StartFillingMode = StartFillingMode.QuickSharing;
+                    result.EditorConfig.Customization.StartFillingForm = new StartFillingForm { Text = FilesCommonResource.StartFillingModeEnum_ShareToFillOut };
+                }
+            }
             else
             {
                 if (result.Document.Permissions.Copy && !securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
