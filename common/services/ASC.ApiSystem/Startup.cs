@@ -183,7 +183,7 @@ public class Startup
 
         app.UseEndpoints(endpoints =>
         {
-            endpoints.MapCustomAsync().Wait();
+            endpoints.MapCustomAsync();
 
             endpoints.MapHealthChecks("/health", new HealthCheckOptions
             {

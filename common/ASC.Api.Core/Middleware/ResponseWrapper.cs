@@ -54,6 +54,7 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
                 message = e.Message;
                 break;
             case SecurityException:
+            case AuthorizingException:
                 status = HttpStatusCode.Forbidden;
                 message = "Access denied";
                 break;
