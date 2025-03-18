@@ -459,7 +459,7 @@ module.exports = (io) => {
     backupProgress,
     restoreProgress,
     endBackup,
-    endRestore
+    endRestore,
     encryptionProgress
   };
 };
