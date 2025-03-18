@@ -33,7 +33,8 @@ public class ApiKeysDbContext(DbContextOptions<ApiKeysDbContext> options) : Base
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         ModelBuilderWrapper.From(modelBuilder, Database)
-                           .AddDbApiKeys();
+                           .AddDbApiKeys()
+                           .AddDbTenant();
     }
     
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
