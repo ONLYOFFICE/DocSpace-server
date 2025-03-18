@@ -227,10 +227,10 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
             }
             else if (formOpenSetup.RootFolder.FolderType is FolderType.USER)
             {
-                if (result.Document.Permissions.FillForms)
+                if (formOpenSetup.CanStartFilling)
                 {
                     result.StartFilling = true;
-                    result.StartFillingMode = StartFillingMode.QuickSharing;
+                    result.StartFillingMode = StartFillingMode.ShareToFillOut;
                     result.EditorConfig.Customization.StartFillingForm = new StartFillingForm { Text = FilesCommonResource.StartFillingModeEnum_ShareToFillOut };
                 }
             }

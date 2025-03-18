@@ -651,7 +651,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             {
                 CanEdit = edit,
                 CanFill = fill,
-                CanStartFilling = fill
+                CanStartFilling = true
             };
         }
         else
@@ -660,7 +660,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             {
                 CanEdit = canEdit,
                 CanFill = canFill,
-                CanStartFilling = canFill
+                CanStartFilling = false
             };
         }
 
