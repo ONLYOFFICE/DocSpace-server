@@ -1425,6 +1425,17 @@ internal class FileDao(
             yield return role;
         }
     }
+    public async IAsyncEnumerable<FormRole> GetUserFormRolesInRoom(int roomId, Guid userId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await foreach (var r in filesDbContext.DbUserFormRolesInRoomQueryAsync(tenantId, roomId, userId))
+        {
+            yield return r;
+        }
+    }
     public async IAsyncEnumerable<FormRole> GetFormRoles(int formId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();

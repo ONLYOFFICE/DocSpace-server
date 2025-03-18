@@ -51,6 +51,11 @@ public class RoomInvitationRequest
     /// Culture
     /// </summary>
     public string Culture { get; set; }
+
+    /// <summary>
+    /// Force
+    /// </summary>
+    public bool Force { get; set; }
 }
 
 public class RoomInvitationRequestDto<T>

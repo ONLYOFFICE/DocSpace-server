@@ -3789,6 +3789,17 @@ public class FileStorageService //: IFileStorageService
         return fileReference;
     }
 
+    public async Task<bool> ShouldPreventUserDeletion<T>(Folder<T> room, Guid userId)
+    {
+        if (room.FolderType != FolderType.VirtualDataRoom)
+        {
+            return false;
+        }
+
+        var fileDao = daoFactory.GetFileDao<T>();
+        return await fileDao.GetUserFormRolesInRoom(room.Id, userId).AnyAsync();
+    }
+
     private async Task<List<MentionWrapper>> InternalSharedUsersAsync<T>(T fileId)
     {
         var fileDao = daoFactory.GetFileDao<T>();

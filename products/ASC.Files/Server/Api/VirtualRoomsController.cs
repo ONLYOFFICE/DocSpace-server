@@ -427,6 +427,18 @@ public abstract class VirtualRoomsController<T>(
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
         }
 
+        foreach(var invitation in inDto.RoomInvitation.Invitations)
+        {
+            if (invitation.Access == FileShare.None && !inDto.RoomInvitation.Force)
+            {
+                if (await _fileStorageService.ShouldPreventUserDeletion(room, invitation.Id))
+                {
+                    result.Error = RoomSecurityError.FormRoleBlockingDeletion;
+                    return result;
+                }
+            }
+        }
+
         var wrappers = _mapper.Map<IEnumerable<RoomInvitation>, List<AceWrapper>>(inDto.RoomInvitation.Invitations);
 
         var aceCollection = new AceCollection<T>

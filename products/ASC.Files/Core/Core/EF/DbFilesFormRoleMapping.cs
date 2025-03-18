@@ -30,6 +30,7 @@ public class DbFilesFormRoleMapping : BaseEntity, IDbFile
 {
     public int TenantId { get; set; }
     public int FormId { get; set; }
+    public int RoomId { get; set; }
     public Guid UserId { get; set; }
     [MaxLength(255)]
     public string RoleName { get; set; }
@@ -78,6 +79,7 @@ public static class DbFilesFormRoleMappingExtension
 
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
             entity.Property(e => e.FormId).HasColumnName("form_id");
+            entity.Property(e => e.RoomId).HasColumnName("room_id");
             entity.Property(e => e.UserId)
                 .HasColumnName("user_id")
                 .HasColumnType("varchar(38)")
@@ -130,6 +132,7 @@ public static class DbFilesFormRoleMappingExtension
 
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
             entity.Property(e => e.FormId).HasColumnName("form_id");
+            entity.Property(e => e.RoomId).HasColumnName("room_id");
 
             entity.Property(e => e.UserId)
                 .HasColumnName("user_id")
