@@ -1029,7 +1029,7 @@ public class S3Storage(TempStream tempStream,
         }
     }
 
-    public override IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator dataStoreValidator)
+    public override Task<IDataStore> ConfigureAsync(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator dataStoreValidator)
     {
         Tenant = tenant;
 
@@ -1138,7 +1138,7 @@ public class S3Storage(TempStream tempStream,
 
         DataStoreValidator = dataStoreValidator;
         
-        return this;
+        return Task.FromResult<IDataStore>(this);
     }
 
     protected override Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Stream stream, string attachmentFileName)
