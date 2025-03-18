@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Security.Cryptography;
+
 namespace ASC.Web.Api.Controllers.Settings;
 
 public partial class SettingsController(MessageService messageService,
@@ -514,9 +516,34 @@ public partial class SettingsController(MessageService messageService,
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("cultures")]
-    public IEnumerable<string> GetSupportedCultures()
-    {
-        return coreBaseSettings.EnabledCultures.Select(r => r.Name).ToList();
+    public async Task<IEnumerable<string>> GetSupportedCultures()
+    {        
+        var etagFromRequest = HttpContext.Request.Headers.IfNoneMatch;
+        var result = coreBaseSettings.EnabledCultures.Select(r => r.Name).ToList();
+        using var md5 = MD5.Create();
+        using var memoryStream = new MemoryStream();
+                
+        foreach (var culture in result)
+        {
+            await memoryStream.WriteAsync(Encoding.UTF8.GetBytes(culture).AsMemory(0, Encoding.UTF8.GetByteCount(culture)));
+        }
+
+        var hash = await md5.ComputeHashAsync(memoryStream);
+        var hex = BitConverter.ToString(hash);
+        var etag = hex.Replace("-", "");
+        
+        //weak
+        etag = "W/" + etag;
+        if (etag == etagFromRequest)
+        {
+            HttpContext.Response.StatusCode = 304;
+            return null;
+        }
+        
+        HttpContext.Response.Headers.ETag = etag;
+        HttpContext.Response.Headers.CacheControl = "private, no-cache";
+        
+        return result;
     }
 
     /// <summary>
