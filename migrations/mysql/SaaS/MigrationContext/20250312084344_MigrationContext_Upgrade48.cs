@@ -1,4 +1,3 @@
-using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -6,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     /// <inheritdoc />
-    public partial class MigrationContext_Upgrade47 : Migration
+    public partial class MigrationContext_Upgrade48 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
