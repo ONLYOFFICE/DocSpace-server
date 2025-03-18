@@ -26,20 +26,28 @@
 
 namespace ASC.Webhooks.Core.EF.Model;
 
-public class WebhooksConfig : BaseEntity
+public class DbWebhooksConfig : BaseEntity
 {
     public int Id { get; set; }
+    public int TenantId { get; set; }
     [MaxLength(50)]
     public string Name { get; set; }
+    public string Uri { get; set; }
     [MaxLength(50)]
     public string SecretKey { get; set; }
-    public int TenantId { get; set; }
-    public string Uri { get; set; }
     public bool Enabled { get; set; }
     public bool SSL { get; set; }
+    public WebhookTrigger Triggers { get; set; }
+
+    public Guid? CreatedBy { get; set; }
+    public DateTime? CreatedOn { get; set; }
+    public Guid? ModifiedBy { get; set; }
+    public DateTime? ModifiedOn { get; set; }
+    public DateTime? LastFailureOn { get; set; }
+    public string LastFailureContent { get; set; }
+    public DateTime? LastSuccessOn { get; set; }
 
     public DbTenant Tenant { get; set; }
-
     public override object[] GetKeys()
     {
         return [Id];
@@ -50,16 +58,17 @@ public static class WebhooksConfigExtension
 {
     public static ModelBuilderWrapper AddWebhooksConfig(this ModelBuilderWrapper modelBuilder)
     {
-        modelBuilder.Entity<WebhooksConfig>().Navigation(e => e.Tenant).AutoInclude(false);
+        modelBuilder.Entity<DbWebhooksConfig>().Navigation(e => e.Tenant).AutoInclude(false);
 
         modelBuilder
             .Add(MySqlAddWebhooksConfig, Provider.MySql)
             .Add(PgSqlAddWebhooksConfig, Provider.PostgreSql);
+
         return modelBuilder;
     }
     public static void MySqlAddWebhooksConfig(this ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<WebhooksConfig>(entity =>
+        modelBuilder.Entity<DbWebhooksConfig>(entity =>
         {
             entity.HasKey(e => new { e.Id })
                 .HasName("PRIMARY");
@@ -77,20 +86,20 @@ public static class WebhooksConfigExtension
             entity.Property(e => e.TenantId)
                 .HasColumnName("tenant_id");
 
+            entity.Property(e => e.Name)
+                .HasColumnName("name")
+                .IsRequired();
+
+            entity.Property(e => e.SecretKey)
+                .HasColumnName("secret_key")
+                .HasDefaultValueSql("''");
+
             entity.Property(e => e.Uri)
                 .HasColumnName("uri")
                 .HasDefaultValueSql("''")
                 .HasColumnType("text")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
-
-            entity.Property(e => e.SecretKey)
-                .HasColumnName("secret_key")
-                .HasDefaultValueSql("''");
-
-            entity.Property(e => e.Name)
-                .HasColumnName("name")
-                .IsRequired();
 
             entity.Property(e => e.Enabled)
                 .HasColumnName("enabled")
@@ -101,25 +110,65 @@ public static class WebhooksConfigExtension
                 .HasColumnName("ssl")
                 .HasDefaultValueSql("'1'")
                 .HasColumnType("tinyint(1)");
+
+            entity.Property(e => e.Triggers)
+                .HasColumnName("triggers")
+                .IsRequired();
+
+            entity.Property(e => e.CreatedBy)
+                .IsRequired(false)
+                .HasColumnName("created_by")
+                .HasColumnType("varchar(36)")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
+
+            entity.Property(e => e.CreatedOn)
+                .IsRequired(false)
+                .HasColumnName("created_on")
+                .HasColumnType("datetime");
+
+            entity.Property(e => e.ModifiedBy)
+                .IsRequired(false)
+                .HasColumnName("modified_by")
+                .HasColumnType("varchar(36)")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
+
+            entity.Property(e => e.ModifiedOn)
+                .IsRequired(false)
+                .HasColumnName("modified_on")
+                .HasColumnType("datetime");
+
+            entity.Property(e => e.LastFailureOn)
+                .IsRequired(false)
+                .HasColumnName("last_failure_on")
+                .HasColumnType("datetime");
+
+            entity.Property(e => e.LastFailureContent)
+                .IsRequired(false)
+                .HasColumnName("last_failure_content")
+                .HasColumnType("varchar(200)")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
+
+            entity.Property(e => e.LastSuccessOn)
+                .IsRequired(false)
+                .HasColumnName("last_success_on")
+                .HasColumnType("datetime");
         });
     }
 
     public static void PgSqlAddWebhooksConfig(this ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<WebhooksConfig>(entity =>
+        modelBuilder.Entity<DbWebhooksConfig>(entity =>
         {
-            // Defining the primary key.
             entity.HasKey(e => e.Id)
                 .HasName("webhooks_config_pkey");
 
-            // Index on TenantId for better performance on queries related to tenant IDs.
             entity.HasIndex(e => e.TenantId)
                 .HasDatabaseName("idx_webhooks_config_tenant_id");
 
-            // Mapping table name for PostgreSQL.
             entity.ToTable("webhooks_config");
-
-            // Configuring the properties.
 
             entity.Property(e => e.Id)
                 .HasColumnName("id")
@@ -129,37 +178,71 @@ public static class WebhooksConfigExtension
                 .HasColumnName("tenant_id")
                 .HasColumnType("integer");
 
-            entity.Property(e => e.Uri)
-                .HasColumnName("uri")
-                .IsRequired(false) // Uri can be null
-                .HasColumnType("text");
-
-            entity.Property(e => e.SecretKey)
-                .HasColumnName("secret_key")
-                .HasDefaultValueSql("''") // Empty string as default value
-                .HasColumnType("text");
-
             entity.Property(e => e.Name)
                 .HasColumnName("name")
                 .IsRequired()
                 .HasMaxLength(50)
                 .HasColumnType("character varying");
 
+            entity.Property(e => e.SecretKey)
+                .HasColumnName("secret_key")
+                .HasDefaultValueSql("''")
+                .HasColumnType("text");
+
+            entity.Property(e => e.Uri)
+                .HasColumnName("uri")
+                .IsRequired(false)
+                .HasColumnType("text");
+
             entity.Property(e => e.Enabled)
                 .HasColumnName("enabled")
-                .HasDefaultValueSql("true") // true as the default value
+                .HasDefaultValueSql("true")
                 .HasColumnType("boolean");
 
             entity.Property(e => e.SSL)
                 .HasColumnName("ssl")
-                .HasDefaultValueSql("true") // true as the default value
+                .HasDefaultValueSql("true")
                 .HasColumnType("boolean");
+
+            entity.Property(e => e.Triggers)
+                .HasColumnName("triggers")
+                .IsRequired();
+
+            entity.Property(e => e.CreatedBy)
+                .IsRequired(false)
+                .HasColumnName("created_by")
+                .HasColumnType("uuid");
+
+            entity.Property(e => e.CreatedOn)
+                .IsRequired(false)
+                .HasColumnName("created_on");
+
+            entity.Property(e => e.ModifiedBy)
+                .IsRequired(false)
+                .HasColumnName("modified_by")
+                .HasColumnType("uuid");
+
+            entity.Property(e => e.ModifiedOn)
+                .IsRequired(false)
+                .HasColumnName("modified_on");
+
+            entity.Property(e => e.LastFailureOn)
+                .IsRequired(false)
+                .HasColumnName("last_failure_on");
+
+            entity.Property(e => e.LastFailureContent)
+                .IsRequired(false)
+                .HasColumnName("last_failure_content");
+
+            entity.Property(e => e.LastSuccessOn)
+                .IsRequired(false)
+                .HasColumnName("last_success_on");
         });
     }
 }
 
 public class WebhooksConfigWithStatus
 {
-    public WebhooksConfig WebhooksConfig { get; init; }
+    public DbWebhooksConfig WebhooksConfig { get; init; }
     public int? Status { get; set; }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,19 +24,25 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Webhooks.Core;
+namespace ASC.Core.Tenants;
 
-public class WebHooksSettings : ISettings<WebHooksSettings>
+[Scope]
+[Serializable]
+public class TenantDevToolsAccessSettings : ISettings<TenantDevToolsAccessSettings>
 {
-    public List<int> Ids { get; init; }
+    public bool LimitedAccessForUsers { get; set; }
 
     [JsonIgnore]
-    public Guid ID => new("6EFA0EAB-D033-4720-BDB3-DEB057EBC140");
-
-    public WebHooksSettings GetDefault() => new()
+    public Guid ID
     {
-        Ids = []
-    };
+        get { return new Guid("{739F1C35-1688-4EEB-B46B-6E413FBCE834}"); }
+    }
+
+    public TenantDevToolsAccessSettings GetDefault()
+    {
+        return new TenantDevToolsAccessSettings
+        {
+            LimitedAccessForUsers = false
+        };
+    }
 }
-
-

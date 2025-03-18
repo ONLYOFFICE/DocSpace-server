@@ -35,7 +35,6 @@ public class FileIdRequestDto<T>
     public T FileId { get; set; }
 }
 
-
 public class FilePrimaryIdRequestDto<T>
 {
     /// <summary>
