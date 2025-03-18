@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for getting reference data
+/// Request parameters for getting reference data.
 /// </summary>
 public class GetReferenceDataDto<T>
 {

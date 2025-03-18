@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Parameters for updating a file.
+/// The parameters for updating a file.
 /// </summary>
 public class UpdateFile
 {
@@ -54,7 +54,7 @@ public class UpdateFileRequestDto<T>
     public T FileId { get; set; }
 
     /// <summary>
-    /// The file to update.
+    /// The parameters for updating a file.
     /// </summary>
     [FromBody]
     public UpdateFile File { get; set; }

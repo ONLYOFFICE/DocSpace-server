@@ -25,6 +25,10 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
+
+/// <summary>
+/// The room template parameters.
+/// </summary>
 public class CreateRoomFromTemplateDto
 {
     /// <summary>
@@ -33,17 +37,17 @@ public class CreateRoomFromTemplateDto
     public int TemplateId { get; set; }
 
     /// <summary>
-    /// The title of the room.
+    /// The room title.
     /// </summary>
     public string Title { get; set; }
 
     /// <summary>
-    /// The logo request.
+    /// The logo request parameters.
     /// </summary>
     public LogoRequest Logo { get; set; }
 
     /// <summary>
-    /// Specifies whether to copy logo or not.
+    /// Specifies whether to copy a logo or not.
     /// </summary>
     public bool CopyLogo { get; set; }
 

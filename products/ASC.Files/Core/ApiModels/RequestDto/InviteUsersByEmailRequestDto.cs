@@ -26,20 +26,23 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// The request parameters to invite users to the room using their email addresses.
+/// </summary>
 public class InviteUsersByEmailRequestDto
 {
     /// <summary>
-    /// Emails
+    /// The users' email addressess.
     /// </summary>
     public IEnumerable<string> Emails { get; set; }
 
     /// <summary>
-    /// Employee type
+    /// The employee type.
     /// </summary>
     public EmployeeType EmployeeType { get; set; }
 
     /// <summary>
-    /// Access
+    /// The sharing access rights.
     /// </summary>
     public FileShare Access { get; set; }
 }

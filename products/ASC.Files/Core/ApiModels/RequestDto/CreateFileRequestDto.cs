@@ -43,7 +43,7 @@ public class CreateFile<T>
     public T TemplateId { get; set; }
 
     /// <summary>
-    /// Specifies whether to allow the creation of external extension files or not while creation.
+    /// Specifies whether to allow the creation of external extension files or not.
     /// </summary>
     public bool EnableExternalExt { get; set; }
 

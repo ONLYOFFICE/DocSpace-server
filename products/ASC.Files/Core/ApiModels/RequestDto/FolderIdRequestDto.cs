@@ -44,7 +44,7 @@ public class FolderIdRequestDto<T>
 public class FolderPrimaryIdRequestDto<T>
 {
     /// <summary>
-    /// The request folder name.
+    /// The request folder ID.
     /// </summary>
     [FromRoute(Name = "id")]
     public T Id { get; set; }

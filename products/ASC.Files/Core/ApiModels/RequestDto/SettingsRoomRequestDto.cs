@@ -26,30 +26,37 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// The room settings.
+/// </summary>
 public class SettingsRoom
 {
     /// <summary>
-    /// Indexing
+    /// Specifies whether to create the room with indexing.
     /// </summary>
     public bool? Indexing { get; set; }
 
     /// <summary>
-    /// Deny download
+    /// Specifies whether to deny downloads from the room.
     /// </summary>
 
     public bool? DenyDownload { get; set; }
 }
 
+/// <summary>
+/// The request parameters of the room settings.
+/// </summary>
+/// <typeparam name="T"></typeparam>
 public class SettingsRoomRequestDto<T>
 {
     /// <summary>
-    /// Room Id
+    /// The room ID.
     /// </summary>
     [FromRoute(Name = "id")]
     public T Id { get; set; }
 
     /// <summary>
-    /// Room settings
+    /// The room settings.
     /// </summary>
     [FromBody]
     public SettingsRoom SettingsRoom { get; set; }

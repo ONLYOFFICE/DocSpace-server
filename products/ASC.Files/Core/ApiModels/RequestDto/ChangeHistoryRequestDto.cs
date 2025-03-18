@@ -37,7 +37,7 @@ public class ChangeHistory
     public int Version { get; set; }
 
     /// <summary>
-    /// Specifies if start a new version or continue revision of the change history.
+    /// Specifies whether to start a new version or continue revision of the change history.
     /// </summary>
     public bool ContinueVersion { get; set; }
 }

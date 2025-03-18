@@ -27,65 +27,65 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for adding watermarks
+/// The request parameters for adding watermarks.
 /// </summary>
 public class WatermarkRequestDto
 {
     /// <summary>
-    /// Specifies whether watermarks are on or off
+    /// Specifies whether watermarks are on or off.
     /// </summary>
     public bool? Enabled { get; set; }
 
     /// <summary>
-    /// Specifies whether to display: username, user email, user ip-adress, current date and room name 
+    /// Specifies whether to display the following addditional information or not: username, user email, user IP address, current date and room name.
     /// </summary>
     public WatermarkAdditions Additions { get; set; }
 
     /// <summary>
-    /// Watermark Text
+    /// The watermark text.
     /// </summary>
     [StringLength(255)]
     public string Text { get; set; }
 
     /// <summary>
-    /// Watermark text and image rotate
+    /// The watermark text and image rotate angle.
     /// </summary>
     public int Rotate { get; set; }
 
     /// <summary>
-    /// Watermark image scale
+    /// The watermark image scale.
     /// </summary>
     public int ImageScale { get; set; }
 
     /// <summary>
-    /// The path to the temporary image file
+    /// The path to the temporary image file.
     /// </summary>
     public string ImageUrl { get; set; }
 
     /// <summary>
-    /// Watermark image height
+    /// The watermark image height.
     /// </summary>
     public double ImageHeight { get; set; }
 
     /// <summary>
-    /// Watermark image width
+    /// The watermark image width.
     /// </summary>
     public double ImageWidth { get; set; }
 }
 
 /// <summary>
-/// Request parameters for adding watermarks
+/// The request parameters for adding watermarks.
 /// </summary>
 public class WatermarkRequestDto<T>
 {
     /// <summary>
-    /// Room ID
+    /// The room ID.
     /// </summary>
     [FromRoute(Name = "id")]
     public T Id { get; set; }
 
     /// <summary>
-    /// Watermark settings
+    /// The watermark settings.
     /// </summary>
     [FromBody]
     public WatermarkRequestDto Watermark { get; set; }

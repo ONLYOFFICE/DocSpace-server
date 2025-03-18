@@ -57,7 +57,7 @@ public class CreateThirdPartyRoom
     public bool Indexing { get; set; }
     
     /// <summary>
-    /// Specifies whether to deny download or not for the third-party room.
+    /// Specifies whether to deny downloads from the third-party room.
     /// </summary>
     public bool DenyDownload { get; set; }
     
@@ -77,7 +77,7 @@ public class CreateThirdPartyRoom
     public IEnumerable<string> Tags { get; set; }
 
     /// <summary>
-    /// The logo request of the third-party room.
+    /// The logo request parameters of the third-party room.
     /// </summary>
     public LogoRequest Logo { get; set; }
 }

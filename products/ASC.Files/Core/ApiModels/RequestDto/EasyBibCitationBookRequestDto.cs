@@ -26,10 +26,13 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// The request parameters of the EasyBib citation book.
+/// </summary>
 public class EasyBibCitationBookRequestDto
 {
     /// <summary>
-    /// Citation data
+    /// The EasyBib citation data.
     /// </summary>
     public string CitationData { get; set; }
 }

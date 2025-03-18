@@ -49,7 +49,7 @@ public class RoomLinkRequest : LinkRequestDtoBase
     public string Password { get; set; }
 
     /// <summary>
-    /// Specifies whether downloading the file from the link is disabled or not.
+    /// Specifies if downloading the file from the link is disabled or not.
     /// </summary>
     public bool DenyDownload { get; set; }
 }

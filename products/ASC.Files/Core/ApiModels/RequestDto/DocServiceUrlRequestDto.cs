@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// The document service URL parameters.
+/// </summary>
 public class DocServiceUrlRequestDto
 {
     /// <summary>

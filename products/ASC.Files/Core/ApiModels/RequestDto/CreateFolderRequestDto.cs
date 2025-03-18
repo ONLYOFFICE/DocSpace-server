@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Parameters for creating a folder: Title (string) - new folder title.
+/// The parameters for creating a folder.
 /// </summary>
 public class CreateFolder
 {
@@ -39,7 +39,7 @@ public class CreateFolder
 }
 
 /// <summary>
-/// Request parameters for creating a folder: Title (string) - new folder title.
+/// The request parameters for creating a folder.
 /// </summary>
 public class CreateFolderRequestDto<T>
 {
@@ -50,7 +50,7 @@ public class CreateFolderRequestDto<T>
     public T FolderId { get; set; }
 
     /// <summary>
-    /// The request folder to create.
+    /// The parameters for creating a folder.
     /// </summary>
     [FromBody]
     public CreateFolder Folder { get; set; }

@@ -103,7 +103,7 @@ public class InsertWithFileRequestDto<T>
     public T FolderId { get; set; }
 
     /// <summary>
-    /// The file information to be inserted.
+    /// The request parameters for inserting the file.
     /// </summary>
     [FromForm]
     [ModelBinder(BinderType = typeof(InsertFileModelBinder))]

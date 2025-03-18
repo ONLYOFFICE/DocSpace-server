@@ -55,13 +55,13 @@ public class OpenEditRequestDto<T>
     public EditorType EditorType { get; set; }
 
     /// <summary>
-    /// Specifies if the document is in edit mode or not.
+    /// Specifies if the document is opened in the editing mode or not.
     /// </summary>
     [FromQuery(Name = "edit")]
     public bool Edit { get; set; }
 
     /// <summary>
-    /// Specifies if the document is in fill mode or not.
+    /// Specifies if the document is opened in the form-filling mode or not.
     /// </summary>
     [FromQuery(Name = "fill")]
     public bool Fill { get; set; }

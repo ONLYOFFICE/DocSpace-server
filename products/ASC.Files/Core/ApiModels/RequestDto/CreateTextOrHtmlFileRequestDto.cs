@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Parameters for creating an HTML file.
+/// The parameters for creating an HTML or text file.
 /// </summary>
 public class CreateTextOrHtmlFile
 {
@@ -44,7 +44,7 @@ public class CreateTextOrHtmlFile
     public string Content { get; set; }
 
     /// <summary>
-    /// Specifies if to create new text or HTML file if it exists or not.
+    /// Specifies whether to create a new text or HTML file if it exists or not.
     /// </summary>
     public bool CreateNewIfExist { get; set; }
 }
@@ -61,7 +61,7 @@ public class CreateTextOrHtmlFileRequestDto<T>
     public T FolderId { get; set; }
 
     /// <summary>
-    /// The text or HTML file.
+    /// The parameters for creating an HTML or text file.
     /// </summary>
     [FromBody]
     public CreateTextOrHtmlFile File { get; set; }

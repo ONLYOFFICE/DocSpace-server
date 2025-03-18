@@ -54,7 +54,7 @@ public class UserInvitationRequestDto<T>
     public T Id { get; set; }
 
     /// <summary>
-    /// The user invitation.
+    /// The user invitation parameters.
     /// </summary>
     [FromBody]
     public UserInvitation UserInvitation { get; set; }

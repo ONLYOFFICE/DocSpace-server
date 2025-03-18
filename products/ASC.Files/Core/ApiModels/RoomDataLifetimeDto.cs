@@ -27,28 +27,29 @@
 namespace ASC.Files.Core.ApiModels;
 
 /// <summary>
+/// The room data lifetime information.
 /// </summary>
 public class RoomDataLifetimeDto : IMapFrom<RoomDataLifetime>
 {
     /// <summary>
-    /// Specifies action
+    /// Specifies whether to permanently delete the room data or not.
     /// </summary>
     public bool DeletePermanently { get; set; }
 
     /// <summary>
-    /// Specifies time period type
+    /// Specifies the time period type of the room data lifetime.
     /// </summary>
     [EnumDataType(typeof(RoomDataLifetimePeriod))]
     public RoomDataLifetimePeriod Period { get; set; }
 
     /// <summary>
-    /// Specifies time period value
+    /// Specifies the time period value of the room data lifetime.
     /// </summary>
     [Range(1, 999)]
     public int? Value { get; set; }
-    
+
     /// <summary>
-    /// Enabled
+    /// Specifies whether the room data lifetime setting is enabled or not.
     /// </summary>
     public bool? Enabled { get; set; }
 }

@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The public settings.
+/// The public settings of the room template.
 /// </summary>
 public class PublicDto
 {
@@ -39,7 +39,7 @@ public class PublicDto
 }
 
 /// <summary>
-/// The public settings to set.
+/// The public settings of the room template to set.
 /// </summary>
 public class SetPublicDto
 {
@@ -49,7 +49,7 @@ public class SetPublicDto
     public int Id { get; set; }
 
     /// <summary>
-    /// The public settings of the room template.
+    /// Specifies whether the room template is public or not.
     /// </summary>
     public bool Public { get; set; }
 }

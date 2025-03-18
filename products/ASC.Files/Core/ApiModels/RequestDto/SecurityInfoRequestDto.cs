@@ -48,7 +48,7 @@ public class SecurityInfoRequestDto : BaseBatchRequestDto
 }
 
 /// <summary>
-/// The cecurity information request parameters.
+/// The parameters of the security information simple request.
 /// </summary>
 public class SecurityInfoSimpleRequestDto
 {
@@ -69,7 +69,7 @@ public class SecurityInfoSimpleRequestDto
 }
 
 /// <summary>
-/// The security information request parameters.
+/// The parameters of the security information simple request for the specified file.
 /// </summary>
 public class FileSecurityInfoSimpleRequestDto<T>
 {
@@ -80,14 +80,14 @@ public class FileSecurityInfoSimpleRequestDto<T>
     public T FileId { get; set; }
 
     /// <summary>
-    /// The security info simple.
+    /// The parameters of the security information simple request.
     /// </summary>
     [FromBody]
     public SecurityInfoSimpleRequestDto SecurityInfoSimpe { get; set; }
 }
 
 /// <summary>
-/// The security information request parameters.
+/// The security information request parameters for the specified folder.
 /// </summary>
 public class FolderSecurityInfoSimpleRequestDto<T>
 {
@@ -98,7 +98,7 @@ public class FolderSecurityInfoSimpleRequestDto<T>
     public T FolderId { get; set; }
 
     /// <summary>
-    /// The security info simple request parameters.
+    /// The parameters of the security information simple request.
     /// </summary>
     [FromBody]
     public SecurityInfoSimpleRequestDto SecurityInfoSimpe { get; set; }

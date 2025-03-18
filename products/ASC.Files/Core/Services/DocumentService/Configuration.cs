@@ -68,20 +68,23 @@ public class ActionLinkConfig
     }
 }
 
+/// <summary>
+/// The co-editing configuration parameters.
+/// </summary>
 public class CoEditingConfig
 {
     /// <summary>
-    /// Specifies if the co editing configuration can be changed.
+    /// Specifies if the co-editing configuration can be changed.
     /// </summary>
     public bool Change { get; set; }
 
     /// <summary>
-    /// Specifies if the co editing configuration is fast.
+    /// Specifies if the co-editing configuration is fast.
     /// </summary>
     public bool Fast { get; init; }
 
     /// <summary>
-    /// The co editing configuration mode.
+    /// The co-editing configuration mode.
     /// </summary>
     public CoEditingConfigMode Mode
     {

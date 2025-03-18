@@ -32,7 +32,7 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 public class CoverRequestDto
 {
     /// <summary>
-    /// The color of the cover.
+    /// The cover color.
     /// </summary>
     public string Color { get; set; }
 
@@ -54,7 +54,7 @@ public class CoverRequestDto<T>
     public T Id { get; set; }
 
     /// <summary>
-    /// The parameters to change the room cover.
+    /// The room cover parameters.
     /// </summary>
     [FromBody]
     public CoverRequestDto Cover { get; set; } = null;

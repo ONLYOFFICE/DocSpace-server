@@ -32,7 +32,7 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 public class GetInfoUsersRequestDto
 {
     /// <summary>
-    /// The list of user ids form the request.
+    /// The list of user ids from the request.
     /// </summary>
     public List<Guid> UserIds { get; set; }
 }

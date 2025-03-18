@@ -58,7 +58,7 @@ public class LogoRequest
 }
 
 /// <summary>
-/// The logo request parameters.
+/// The logo request parameters for the specified room.
 /// </summary>
 public class LogoRequest<T>
 {
@@ -69,7 +69,7 @@ public class LogoRequest<T>
     public T Id { get; set; }
 
     /// <summary>
-    /// The logo request.
+    /// The logo request parameters.
     /// </summary>
     [FromBody]
     public LogoRequest Logo { get; set; }

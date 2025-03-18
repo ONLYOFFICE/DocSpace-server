@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// The parameters of the form-filling session result.
+/// </summary>
 public class GetFillResulteRequestDto
 {
     /// <summary>

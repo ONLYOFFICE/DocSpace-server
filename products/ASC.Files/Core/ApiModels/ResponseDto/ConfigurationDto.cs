@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// The configuration parameters.
+/// </summary>
 public class ConfigurationDto<T>
 {
     /// <summary>
@@ -80,26 +83,29 @@ public class ConfigurationDto<T>
     public bool? StartFilling { get; set; }
 
     /// <summary>
-    /// The file filling session Id.
+    /// The file filling session ID.
     /// </summary>
     public string FillingSessionId { get; set; }
 }
 
+/// <summary>
+/// The editor configuration parameters.
+/// </summary>
 public class EditorConfigurationDto
 {
     /// <summary>
-    /// The callback url of the editor.
+    /// The callback URL of the editor.
     /// </summary>
     [Url]
     public string CallbackUrl { get; set; }
 
     /// <summary>
-    /// The co editing configuration.
+    /// The co-editing configuration parameters.
     /// </summary>
     public CoEditingConfig CoEditing { get; set; }
 
     /// <summary>
-    /// The create url of the editor.
+    /// The creation URL of the editor.
     /// </summary>
     public string CreateUrl { get; set; }
 
@@ -109,7 +115,7 @@ public class EditorConfigurationDto
     public CustomizationConfigDto Customization { get; set; }
 
     /// <summary>
-    /// The embedded configuration.
+    /// The embedded configuration parameters for embedded documents.
     /// </summary>
     public EmbeddedConfig Embedded { get; set; }
 

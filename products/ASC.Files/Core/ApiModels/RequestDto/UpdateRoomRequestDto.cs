@@ -41,14 +41,14 @@ public class UpdateRoomRequest
     /// The room quota to update.
     /// </summary>
     public long? Quota { get; set; }
-    
+
     /// <summary>
-    /// Specifies the indexing of the room to update.
+    /// Specifies whether to create the third-party room with indexing.
     /// </summary>
     public bool? Indexing { get; set; }
-    
+
     /// <summary>
-    /// Specifies whether to deny the download of the room or not.
+    /// Specifies whether to deny downloads from the third-party room.
     /// </summary>
     public bool? DenyDownload { get; set; }
 

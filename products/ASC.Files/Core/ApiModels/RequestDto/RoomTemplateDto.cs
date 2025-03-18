@@ -52,12 +52,12 @@ public class RoomTemplateDto
     public bool CopyLogo { get; set; }
 
     /// <summary>
-    /// The collection of share user emails.
+    /// The collection of email addresses of users with whom to share a room.
     /// </summary>
     public IEnumerable<string> Share { get; set; }
 
     /// <summary>
-    /// The collection of share groups.
+    /// The collection of groups with whom to share a room.
     /// </summary>
     public List<Guid> Groups { get; set; }
 

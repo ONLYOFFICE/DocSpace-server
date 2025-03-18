@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Parameters for updating a comment.
+/// The parameters for updating a comment.
 /// </summary>
 public class UpdateComment
 {
