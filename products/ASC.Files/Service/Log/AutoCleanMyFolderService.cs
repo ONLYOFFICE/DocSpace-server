@@ -24,52 +24,21 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Data.Backup.Services;
+using ASC.Files.Service.Services;
 
-public abstract class BaseBackupProgressItem : DistributedTaskProgress
+namespace ASC.Files.Service.Log;
+
+internal static partial class AutoCleanMyFolderServiceLogger
 {
-    protected readonly IServiceScopeFactory _serviceScopeProvider;
+    [LoggerMessage(LogLevel.Information, "Found {count} users (without restrictions) in active portals")]
+    public static partial void InfoFoundUsers(this ILogger<AutoDeletePersonalFolderService> logger, int count);
 
-    public BaseBackupProgressItem()
-    {
-        
-    }
+    [LoggerMessage(LogLevel.Information, "Waiting for data. Sleep {time}.")]
+    public static partial void InfoWaitingForData(this ILogger<AutoDeletePersonalFolderService> logger, TimeSpan time);
 
-    protected BaseBackupProgressItem(IServiceScopeFactory serviceScopeFactory)
-    {
-        _serviceScopeProvider = serviceScopeFactory;
-    }
+    [LoggerMessage(LogLevel.Information, "Start clean up for user - {userId}")]
+    public static partial void InfoCleanUp(this ILogger<AutoDeletePersonalFolderService> logger, int userId);
 
-    public int NewTenantId { get; set; }
-    public int TenantId { get; set; }
-    public string Link { get; set; }
-    public BackupProgressItemType BackupProgressItemType { get; set; }
-
-    protected void Init()
-    {
-        TenantId = 0;
-        NewTenantId = 0;
-        Link = "";
-    }
-
-    public BackupProgress ToBackupProgress()
-    {
-        var progress = new BackupProgress
-        {
-            IsCompleted = IsCompleted,
-            Progress = (int)Percentage,
-            Error = Exception != null ? Exception.Message : "",
-            TenantId = TenantId,
-            BackupProgressEnum = BackupProgressItemType.Convert(),
-            TaskId = Id
-        };
-        if (BackupProgressItemType is BackupProgressItemType.Backup or BackupProgressItemType.Transfer && Link != null)
-        {
-            progress.Link = Link;
-        }
-
-        return progress;
-    }
-
-    public abstract object Clone();
+    [LoggerMessage(LogLevel.Information, "Finishclean up for user - {userId}")]
+    public static partial void InfoCleanUpFinish(this ILogger<AutoDeletePersonalFolderService> logger, int userId);
 }

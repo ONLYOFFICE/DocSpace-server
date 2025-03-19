@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Swashbuckle.AspNetCore.Annotations;
-
 namespace ASC.Data.Storage.Configuration;
 
 [Singleton]
@@ -211,8 +209,8 @@ public class StorageSettingsHelper
             return null;
         }
 
-        return _dataStore = ((IDataStore)_serviceProvider.GetService(handlerType))
-            .Configure((_tenantManager.GetCurrentTenantId()).ToString(), null, null, dataStoreConsumer, null);
+        return _dataStore = await ((IDataStore)_serviceProvider.GetService(handlerType))
+            .ConfigureAsync((_tenantManager.GetCurrentTenantId()).ToString(), null, null, dataStoreConsumer, null);
     }
 
     internal async Task ClearDataStoreCacheAsync()

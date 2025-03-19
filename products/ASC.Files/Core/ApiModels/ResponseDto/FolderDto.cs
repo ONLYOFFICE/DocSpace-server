@@ -177,8 +177,10 @@ public class FolderDtoHelper(
     WatermarkDtoHelper watermarkHelper,
     IMapper mapper,
     ExternalShare externalShare,
-    FileSecurityCommon fileSecurityCommon)
-    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
+    FileSecurityCommon fileSecurityCommon,
+    SecurityContext securityContext,
+    UserManager userManager)
+    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory)
     {
 
     public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<FileShareRecord<string>> currentUserRecords = null, string order = null, IFolder contextFolder = null)
