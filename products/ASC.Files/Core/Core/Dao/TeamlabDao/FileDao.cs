@@ -1397,6 +1397,7 @@ internal class FileDao(
                 TenantId = tenantId,
                 FormId = formId,
                 UserId = formRole.UserId,
+                RoomId = formRole.RoomId,
                 RoleName = formRole.RoleName,
                 RoleColor = formRole.RoleColor,
                 Sequence = sequence,
