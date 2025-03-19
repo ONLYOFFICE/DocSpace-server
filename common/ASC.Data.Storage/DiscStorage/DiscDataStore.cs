@@ -27,41 +27,38 @@
 namespace ASC.Data.Storage.DiscStorage;
 
 [Scope]
-public class DiscDataStore(TempStream tempStream,
-        TenantManager tenantManager,
-        PathUtils pathUtils,
-        EmailValidationKeyProvider emailValidationKeyProvider,
-        IHttpContextAccessor httpContextAccessor,
-        ILoggerProvider options,
-        ILogger<DiscDataStore> logger,
-        EncryptionSettingsHelper encryptionSettingsHelper,
-        EncryptionFactory encryptionFactory,
-        IHttpClientFactory clientFactory,
-        TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
-        QuotaSocketManager quotaSocketManager,
-        SettingsManager settingsManager,
-        IQuotaService quotaService,
-        UserManager userManager,
-        CustomQuota customQuota)
+public class DiscDataStore(
+    TempStream tempStream,
+    TenantManager tenantManager,
+    PathUtils pathUtils,
+    EmailValidationKeyProvider emailValidationKeyProvider,
+    IHttpContextAccessor httpContextAccessor,
+    ILoggerProvider options,
+    ILogger<DiscDataStore> logger,
+    EncryptionSettingsHelper encryptionSettingsHelper,
+    EncryptionFactory encryptionFactory,
+    IHttpClientFactory clientFactory,
+    TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
+    QuotaSocketManager quotaSocketManager,
+    SettingsManager settingsManager,
+    IQuotaService quotaService,
+    UserManager userManager,
+    CustomQuota customQuota)
     : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, options, logger, clientFactory, tenantQuotaFeatureStatHelper, quotaSocketManager, settingsManager, quotaService, userManager, customQuota)
 {
     public override bool IsSupportInternalUri => false;
     public override bool IsSupportedPreSignedUri => false;
     public override bool IsSupportChunking => true;
-    public override bool ContentAsAttachment => _contentAsAttachment;
 
     private readonly Dictionary<string, MappedPath> _mappedPaths = new();
     private ICrypt _crypt;
-    private bool _contentAsAttachment;
 
-    public override IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator validator)
+    public override async Task<IDataStore> ConfigureAsync(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator validator)
     {
         Tenant = tenant;
         //Fill map path
         Modulename = moduleConfig.Name;
         DataList = new DataList(moduleConfig);
-
-        _contentAsAttachment = moduleConfig.ContentAsAttachment;
 
         foreach (var domain in moduleConfig.Domain)
         {
@@ -72,12 +69,13 @@ public class DiscDataStore(TempStream tempStream,
         _mappedPaths.Add(string.Empty, new MappedPath(_pathUtils, tenant, moduleConfig.AppendTenantId, PathUtils.Normalize(moduleConfig.Path), handlerConfig.GetProperties()));
 
         //Make expires
-        DomainsExpires =
-            moduleConfig.Domain.Where(x => x.Expires != TimeSpan.Zero).
-                ToDictionary(x => x.Name,
-                             y => y.Expires);
+        DomainsExpires = moduleConfig.Domain.Where(x => x.Expires != TimeSpan.Zero).ToDictionary(x => x.Name, y => y.Expires);
         DomainsExpires.Add(string.Empty, moduleConfig.Expires);
-        var settings = moduleConfig.DisabledEncryption ? new EncryptionSettings() : encryptionSettingsHelper.Load();
+
+        DomainsContentAsAttachment = moduleConfig.Domain.Where(x => x.ContentAsAttachment.HasValue).ToDictionary(x => x.Name, y => y.ContentAsAttachment.Value);
+        DomainsContentAsAttachment.Add(string.Empty, moduleConfig.ContentAsAttachment.HasValue ? moduleConfig.ContentAsAttachment.Value : false);
+
+        var settings = moduleConfig.DisabledEncryption ? new EncryptionSettings() : await encryptionSettingsHelper.LoadAsync();
         _crypt = encryptionFactory.GetCrypt(moduleConfig.Name, settings);
         DataStoreValidator = validator;
         return this;

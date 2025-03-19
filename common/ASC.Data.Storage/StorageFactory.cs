@@ -203,8 +203,8 @@ public class StorageFactory(IServiceProvider serviceProvider,
             }
         }
 
-        return ((IDataStore)ActivatorUtilities.CreateInstance(serviceProvider, instanceType))
-            .Configure(tenantPath, handler, moduleElement, props, validator)
+        return (await ((IDataStore)ActivatorUtilities.CreateInstance(serviceProvider, instanceType))
+            .ConfigureAsync(tenantPath, handler, moduleElement, props, validator))
             .SetQuotaController(moduleElement.Count ? controller : null
             /*don't count quota if specified on module*/);
     }

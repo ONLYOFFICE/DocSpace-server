@@ -1960,6 +1960,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Webhook URL is not avaliable. HEAD request is not responce 200 http status..
+        /// </summary>
+        public static string ErrorWebhookUrlNotAvaliable {
+            get {
+                return ResourceManager.GetString("ErrorWebhookUrlNotAvaliable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Wrong plugin archive.
         /// </summary>
         public static string ErrorWebPluginArchive {

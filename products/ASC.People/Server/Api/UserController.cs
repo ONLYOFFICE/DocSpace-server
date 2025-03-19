@@ -38,6 +38,7 @@ public class UserController(
     ILogger<UserController> logger,
     PasswordHasher passwordHasher,
     QueueWorkerReassign queueWorkerReassign,
+    QueueWorkerUpdateUserType queueWorkerUpdateUserType,
     QueueWorkerRemove queueWorkerRemove,
     TenantUtil tenantUtil,
     UserFormatter userFormatter,
@@ -73,7 +74,9 @@ public class UserController(
     AuditEventsRepository auditEventsRepository,
     EmailValidationKeyModelHelper emailValidationKeyModelHelper,
     CountPaidUserStatistic countPaidUserStatistic,
-    UserSocketManager socketManager)
+    UserSocketManager socketManager,
+    GlobalFolderHelper globalFolderHelper,
+    UserWebhookManager webhookManager)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
 {
     /// <summary>
@@ -168,6 +171,8 @@ public class UserController(
         {
             await UpdatePhotoUrlAsync(inDto.Files, user);
         }
+
+        await webhookManager.PublishAsync(WebhookTrigger.UserCreated, user);
 
         return await employeeFullDtoHelper.GetFullAsync(user);
     }
@@ -310,11 +315,6 @@ public class UserController(
             await UpdatePhotoUrlAsync(inDto.Files, user);
         }
 
-        if (linkData is { LinkType: InvitationLinkType.CommonToRoom })
-        {
-            await invitationService.AddUserToRoomByInviteAsync(linkData, user, quotaLimit);
-        }
-
         if (inDto.IsUser.GetValueOrDefault(false))
         {
             messageService.Send(MessageAction.GuestCreated, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
@@ -322,6 +322,13 @@ public class UserController(
         else
         {
             messageService.Send(MessageAction.UserCreated, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper), user.Id);
+        }
+
+        await webhookManager.PublishAsync(WebhookTrigger.UserCreated, user);
+
+        if (linkData is { LinkType: InvitationLinkType.CommonToRoom })
+        {
+            await invitationService.AddUserToRoomByInviteAsync(linkData, user, quotaLimit);
         }
 
         return await employeeFullDtoHelper.GetFullAsync(user);
@@ -413,6 +420,8 @@ public class UserController(
             await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, inDto.Culture, true);
             messageService.Send(MessageAction.SendJoinInvite, MessageTarget.Create(user.Id), currentUser.DisplayUserName(displayUserSettingsHelper), user.Email);
             await socketManager.AddUserAsync(user);
+
+            await webhookManager.PublishAsync(WebhookTrigger.UserInvited, user);
         }
 
         var result = new List<EmployeeDto>();
@@ -571,6 +580,8 @@ public class UserController(
             await socketManager.DeleteUserAsync(user.Id);
         }
 
+        await webhookManager.PublishAsync(WebhookTrigger.UserDeleted, user);
+
         return await employeeFullDtoHelper.GetFullAsync(user);
     }
 
@@ -621,6 +632,8 @@ public class UserController(
         messageService.Send(MessageAction.CookieSettingsUpdated);
 
         await studioNotifyService.SendMsgProfileHasDeletedItselfAsync(user);
+
+        await webhookManager.PublishAsync(WebhookTrigger.UserUpdated, user);
 
         return await employeeFullDtoHelper.GetFullAsync(user);
     }
@@ -1131,6 +1144,8 @@ public class UserController(
             await _userManager.DeleteUserAsync(user.Id);
             await fileSecurity.RemoveSubjectAsync(user.Id, true);
             await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, false, false, isGuest);
+
+            await webhookManager.PublishAsync(WebhookTrigger.UserDeleted, user);
         }
 
         messageService.Send(MessageAction.UsersDeleted, MessageTarget.Create(users.Select(x => x.Id)), userNames);
@@ -1342,6 +1357,12 @@ public class UserController(
 
         result.LoginEventId = cookieStorage.GetLoginEventIdFromCookie(cookiesManager.GetCookies(CookiesType.AuthKey));
 
+        if (result.IsVisitor) 
+        {
+            var my = await globalFolderHelper.FolderMyAsync;
+            result.HasPersonalFolder = my != 0;
+        }
+
         return result;
     }
 
@@ -1534,6 +1555,8 @@ public class UserController(
                 }
             }
 
+            await webhookManager.PublishAsync(WebhookTrigger.UserUpdated, u);
+
             yield return await employeeFullDtoHelper.GetFullAsync(u);
         }
     }
@@ -1562,7 +1585,7 @@ public class UserController(
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser);
         await _userManager.ChangeUserCulture(user, inDto.UpdateMember.CultureName);
         messageService.Send(MessageAction.UserUpdatedLanguage, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
-        
+
         return await employeeFullDtoHelper.GetFullAsync(user);
     }
 
@@ -1729,6 +1752,8 @@ public class UserController(
                 await cookiesManager.ResetUserCookieAsync(user.Id);
                 messageService.Send(MessageAction.CookieSettingsUpdated);
             }
+
+            await webhookManager.PublishAsync(WebhookTrigger.UserUpdated, user);
         }
 
         return await employeeFullDtoHelper.GetFullAsync(user);
@@ -1840,6 +1865,8 @@ public class UserController(
 
         foreach (var user in users)
         {
+            await webhookManager.PublishAsync(WebhookTrigger.UserUpdated, user);
+
             yield return await employeeFullDtoHelper.GetFullAsync(user);
         }
     }
@@ -1879,6 +1906,7 @@ public class UserController(
             {
                 await socketManager.UpdateUserAsync(user);
             }
+            await socketManager.ChangeUserTypeAsync(user, true);
         }
 
         messageService.Send(MessageAction.UsersUpdatedType, MessageTarget.Create(users.Select(x => x.Id)),
@@ -1886,8 +1914,105 @@ public class UserController(
 
         foreach (var user in users)
         {
+            await webhookManager.PublishAsync(WebhookTrigger.UserUpdated, user);
+
             yield return await employeeFullDtoHelper.GetFullAsync(user);
         }
+    }
+
+    /// <summary>
+    /// Starts update type to user or guest with reassign rooms and shared files.
+    /// </summary>
+    /// <short>Start update user type</short>
+    /// <path>api/2.0/people/type</path>
+    [Tags("People / User type")]
+    [SwaggerResponse(200, "Update type progress", typeof(TaskProgressResponseDto))]
+    [SwaggerResponse(400, "Can not update user type")]
+    [HttpPost("type")]
+    public async Task<TaskProgressResponseDto> StartUpdateUserTypeAsync(StartUpdateUserTypeDto inDto)
+    {
+        await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(inDto.Type), Constants.Action_AddRemoveUser);
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var user = await userManager.GetUsersAsync(inDto.UserId);
+        var currentUser = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
+        var toUser = inDto.ReassignUserId.HasValue ? await userManager.GetUsersAsync(inDto.ReassignUserId.Value) : currentUser;
+
+        var userType = await userManager.GetUserTypeAsync(user);
+        var toUserType = await userManager.GetUserTypeAsync(toUser);
+
+        if (userManager.IsSystemUser(user.Id) 
+            || user.Status == EmployeeStatus.Terminated
+            || toUser.Status == EmployeeStatus.Terminated
+            || user.Id == toUser.Id
+            || user.Id == currentUser.Id)
+        {
+            throw new ArgumentException($"Can not update type");
+        }
+
+        if (inDto.Type is EmployeeType.RoomAdmin or EmployeeType.DocSpaceAdmin)
+        {
+            throw new ArgumentException($"Can not update to {inDto.Type}");
+        }
+
+        if (!currentUser.IsOwner(tenant) && userType is EmployeeType.DocSpaceAdmin)
+        {
+            throw new ArgumentException($"Can not update type for admin");
+        }
+
+        if (toUserType != EmployeeType.DocSpaceAdmin && toUserType != EmployeeType.RoomAdmin)
+        {
+            throw new ArgumentException($"Can not reassign to user - {inDto.ReassignUserId}");
+        }
+
+        var progressItem = await queueWorkerUpdateUserType.StartAsync(tenant.Id, user.Id, toUser.Id, securityContext.CurrentAccount.ID, inDto.Type);
+
+        return TaskProgressResponseDto.Get(progressItem);
+    }
+
+    /// <summary>
+    /// Returns the progress of the started update user type.
+    /// </summary>
+    /// <short>Get the update progress</short>
+    /// <path>api/2.0/people/type/progress/{userid}</path>
+    [Tags("People / User type")]
+    [SwaggerResponse(200, "Update type progress", typeof(TaskProgressResponseDto))]
+    [HttpGet("type/progress/{userid:guid}")]
+    public async Task<TaskProgressResponseDto> GetReassignProgressAsync(UserIdRequestDto inDto)
+    {
+        await permissionContext.DemandPermissionsAsync(Constants.Action_AddRemoveUser);
+
+        var tenant = tenantManager.GetCurrentTenant();
+        var progressItem = await queueWorkerUpdateUserType.GetProgressItemStatus(tenant.Id, inDto.UserId);
+
+        return TaskProgressResponseDto.Get(progressItem);
+    }
+
+    /// <summary>
+    /// Terminates the update type to user or guest.
+    /// </summary>
+    /// <short>Terminate update user type</short>
+    /// <path>api/2.0/people/type/terminate</path>
+    [Tags("People / User type")]
+    [SwaggerResponse(200, "Update type progress", typeof(TaskProgressResponseDto))]
+    [HttpPut("type/terminate")]
+    public async Task<TaskProgressResponseDto> TerminateReassignAsync(TerminateRequestDto inDto)
+    {
+        await permissionContext.DemandPermissionsAsync(Constants.Action_AddRemoveUser);
+
+        var tenant = tenantManager.GetCurrentTenant();
+        var progressItem = await queueWorkerUpdateUserType.GetProgressItemStatus(tenant.Id, inDto.UserId);
+
+        if (progressItem != null)
+        {
+            await queueWorkerUpdateUserType.Terminate(tenant.Id, inDto.UserId);
+
+            progressItem.Status = DistributedTaskStatus.Canceled;
+            progressItem.IsCompleted = true;
+        }
+
+        return TaskProgressResponseDto.Get(progressItem);
     }
 
     ///<summary>
