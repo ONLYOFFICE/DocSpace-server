@@ -1529,7 +1529,6 @@ public class EntryManager(IDaoFactory daoFactory,
             }
             file.ContentLength = tmpStream.Length;
             file.Comment = string.IsNullOrEmpty(comment) ? null : comment;
-            file.Category = (int)FilterType.PdfForm;
             if (replaceVersion)
             {
                 file = await fileDao.ReplaceFileVersionAsync(file, tmpStream);
@@ -2238,7 +2237,14 @@ public class EntryManager(IDaoFactory daoFactory,
 
         var shares = await fileSharingAceHelper.SetAceObjectAsync(aces, result, false, null);
 
-        await securityContext.AuthenticateMeWithoutCookieAsync(current);
+        if (current == ASC.Core.Configuration.Constants.Guest.ID) 
+        {
+            securityContext.Logout();
+        }
+        else
+        {
+            await securityContext.AuthenticateMeWithoutCookieAsync(current);
+        }
 
         return result;
     }
