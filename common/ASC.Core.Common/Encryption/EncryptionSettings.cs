@@ -80,13 +80,6 @@ public class EncryptionSettingsHelper(CoreConfiguration coreConfiguration, AscCa
         return await DeserializeAsync(settings);
     }
 
-    public EncryptionSettings Load()
-    {
-        var settings = coreConfiguration.GetSetting(Key);
-
-        return Deserialize(settings);
-    }
-
     private async Task<string> SerializeAsync(EncryptionSettings encryptionSettings)
     {
         return string.Join("#",

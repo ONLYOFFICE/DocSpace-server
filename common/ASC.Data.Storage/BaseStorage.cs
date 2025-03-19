@@ -48,12 +48,12 @@ public abstract class BaseStorage(TempStream tempStream,
     public virtual bool IsSupportCdnUri => false;
     public virtual bool IsSupportedPreSignedUri => true;
     public virtual bool IsSupportChunking => false;
-    public virtual bool ContentAsAttachment => false;
     internal string Modulename { get; set; }
     internal bool Cache { get; set; }
     internal DataList DataList { get; set; }
     internal string Tenant { get; set; }
     internal Dictionary<string, TimeSpan> DomainsExpires { get; set; } = new();
+    internal Dictionary<string, bool> DomainsContentAsAttachment { get; set; } = new();
     protected ILogger Logger { get; set; } = logger;
 
     protected readonly TempStream _tempStream = tempStream;
@@ -65,6 +65,11 @@ public abstract class BaseStorage(TempStream tempStream,
     public TimeSpan GetExpire(string domain)
     {
         return DomainsExpires.TryGetValue(domain, out var expire) ? expire : DomainsExpires[string.Empty];
+    }
+
+    public bool IsContentAsAttachment(string domain)
+    {
+        return DomainsContentAsAttachment.TryGetValue(domain, out var result) ? result : DomainsContentAsAttachment[string.Empty];
     }
 
     public async Task<Uri> GetUriAsync(string path)
@@ -335,9 +340,9 @@ public abstract class BaseStorage(TempStream tempStream,
         await CopyDirectoryAsync(string.Empty, dir, newDomain, newDir);
     }
 
-    public virtual IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator validator)
+    public virtual Task<IDataStore> ConfigureAsync(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator validator)
     {
-        return this;
+        return Task.FromResult<IDataStore>(this);
     }
 
     public IDataStore SetQuotaController(IQuotaController controller)

@@ -26,8 +26,6 @@
 
 using Microsoft.AspNetCore.Http.Extensions;
 
-using Serializer = ProtoBuf.Serializer;
-
 namespace ASC.Web.Files.Utils;
 
 [Singleton]
