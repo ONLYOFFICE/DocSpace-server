@@ -56,7 +56,7 @@ public class GoogleCloudStorage(TempStream tempStream,
     private Uri _bucketSSlRoot;
     private bool _lowerCasing = true;
 
-    public override IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator dataStoreValidator)
+    public override Task<IDataStore> ConfigureAsync(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator dataStoreValidator)
     {
         Tenant = tenant;
 
@@ -108,7 +108,7 @@ public class GoogleCloudStorage(TempStream tempStream,
 
         DataStoreValidator = dataStoreValidator;
         
-        return this;
+        return Task.FromResult<IDataStore>(this);
     }
 
     public static long DateToUnixTimestamp(DateTime date)

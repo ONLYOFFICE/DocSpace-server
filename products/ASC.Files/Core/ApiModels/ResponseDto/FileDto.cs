@@ -198,7 +198,6 @@ public class FileDtoHelper(
         FileDateTime fileDateTime,
         ExternalShare externalShare,
         BreadCrumbsManager breadCrumbsManager,
-        FileSharing fileSharing,
         FileChecker fileChecker)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime) 
 {
