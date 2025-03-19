@@ -2218,7 +2218,7 @@ public class EntryManager(IDaoFactory daoFactory,
             }
         }
 
-        var records = fileSecurity.GetPureSharesAsync(result, ShareFilterType.Link, null, null).Where(r=> r.Share == FileShare.FillForms);
+        var records = fileSecurity.GetPureSharesAsync(result, ShareFilterType.Link, null, null);
 
         var aces = new List<AceWrapper>();
 
