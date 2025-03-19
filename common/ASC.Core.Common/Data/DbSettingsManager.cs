@@ -60,33 +60,7 @@ public class SettingsManager(
     public async Task<T> LoadAsync<T>(HttpContext context = null) where T : class, ISettings<T>
     {
         var tenantId = tenantManager.GetCurrentTenantId();
-
-        if (context != null)
-        {
-            DateTime? lastModified = null;
-            if (DateTime.TryParse(context.Request.Headers.IfModifiedSince, CultureInfo.InvariantCulture, out var parsedLastModified))
-            {
-                lastModified = parsedLastModified;
-                lastModified = DateTime.SpecifyKind(lastModified.Value, DateTimeKind.Local);
-            }
-
-            var settings = await LoadAsync<T>(tenantId, Guid.Empty, lastModified);
-            if (settings.LastModified != DateTime.MinValue)
-            {
-                var lastModifiedStr = settings.LastModified.ToString(CultureInfo.InvariantCulture);
-                if (lastModifiedStr == context.Request.Headers.IfModifiedSince)
-                {
-                    context.Response.StatusCode = 304;
-                    return null;
-                }
-                
-                context.Response.Headers.LastModified = lastModifiedStr;
-                context.Response.Headers.CacheControl = "private, no-cache";
-                return settings;
-            }
-        }
-
-        return await LoadAsync<T>(tenantId, Guid.Empty);
+        return await LoadAsync<T>(tenantId, Guid.Empty, context);
     }
     
     public async Task<T> LoadAsync<T>(Guid userId) where T : class, ISettings<T>
@@ -101,14 +75,14 @@ public class SettingsManager(
         return await LoadAsync<T>(tenantId, user.Id);
     }
 
-    public Task<T> LoadAsync<T>(int tenantId) where T : class, ISettings<T>
+    public Task<T> LoadAsync<T>(int tenantId, HttpContext context = null) where T : class, ISettings<T>
     {
-        return LoadAsync<T>(tenantId, Guid.Empty);
+        return LoadAsync<T>(tenantId, Guid.Empty, context);
     }
 
-    public Task<T> LoadForDefaultTenantAsync<T>() where T : class, ISettings<T>
+    public Task<T> LoadForDefaultTenantAsync<T>(HttpContext context = null) where T : class, ISettings<T>
     {
-        return LoadAsync<T>(Tenant.DefaultTenant);
+        return LoadAsync<T>(Tenant.DefaultTenant, context);
     }
 
     public Task<T> LoadForCurrentUserAsync<T>() where T : class, ISettings<T>
@@ -156,32 +130,57 @@ public class SettingsManager(
         return await SaveAsync(settings);
     }
 
-    internal async Task<T> LoadAsync<T>(int tenantId, Guid userId, DateTime? lastModified = null) where T : class, ISettings<T>
+    internal async Task<T> LoadAsync<T>(int tenantId, Guid userId, HttpContext httpContext = null) where T : class, ISettings<T>
     {
         var def = GetDefault<T>();
         var key = def.ID.ToString() + tenantId + userId;
+        DateTime? lastModified = null;
 
-        return await fusionCache.GetOrSetAsync<T>(key, async (ctx, token) =>
+        if (httpContext != null)
+        {
+            if (DateTime.TryParse(httpContext.Request.Headers.IfModifiedSince, CultureInfo.InvariantCulture, out var parsedLastModified))
+            {
+                lastModified = parsedLastModified;
+                lastModified = DateTime.SpecifyKind(lastModified.Value, DateTimeKind.Local);
+            }
+        }
+
+        var settings = await fusionCache.GetOrSetAsync<T>(key, async (ctx, token) =>
         {
             if (lastModified.HasValue && ctx is { HasStaleValue: true, HasLastModified: true } && ctx.LastModified >= lastModified.Value)
             {
                 return ctx.NotModified();
             }
-            
+    
             await using var context = await dbContextFactory.CreateDbContextAsync(token);
             var result = await context.WebStudioSettingsAsync(tenantId, def.ID, userId);
             var settings = def;
             def.LastModified = DateTime.UtcNow;
-            
+    
             if (result != null)
             {
                 settings = Deserialize<T>(result.Data);
                 settings.LastModified = result.LastModified;
             }
-            
+    
             return ctx.Modified(settings, lastModified: settings.LastModified);
         },
         opt => opt.SetDuration(_expirationTimeout).SetFailSafe(true));
+            
+        if (httpContext != null && settings.LastModified != DateTime.MinValue)
+        {
+            var lastModifiedStr = settings.LastModified.ToString(CultureInfo.InvariantCulture);
+            if (lastModifiedStr == httpContext.Request.Headers.IfModifiedSince)
+            {
+                httpContext.Response.StatusCode = 304;
+                return null;
+            }
+            
+            httpContext.Response.Headers.LastModified = lastModifiedStr;
+            httpContext.Response.Headers.CacheControl = "private, no-cache";
+        }
+        
+        return settings;
     }
     
 

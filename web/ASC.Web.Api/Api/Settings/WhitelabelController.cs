@@ -569,9 +569,9 @@ public class WhitelabelController(
     [HttpGet("rebranding/company")]
     public async Task<CompanyWhiteLabelSettingsDto> GetCompanyWhiteLabelSettingsAsync()
     {
-        var settings = await settingsManager.LoadForDefaultTenantAsync<CompanyWhiteLabelSettings>();
+        var settings = await settingsManager.LoadForDefaultTenantAsync<CompanyWhiteLabelSettings>(HttpContext);
 
-        return mapper.Map<CompanyWhiteLabelSettings, CompanyWhiteLabelSettingsDto>(settings);
+        return settings != null ? mapper.Map<CompanyWhiteLabelSettings, CompanyWhiteLabelSettingsDto>(settings) : null;
     }
 
     /// <summary>
