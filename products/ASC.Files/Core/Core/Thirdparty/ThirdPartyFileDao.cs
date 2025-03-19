@@ -669,6 +669,11 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         return Task.CompletedTask;
     }
 
+    public Task ReassignFilesAsync(Guid newOwnerId, IEnumerable<string> fileIds)
+    {
+        return Task.CompletedTask;
+    }
+
     public IAsyncEnumerable<File<string>> GetFilesAsync(IEnumerable<string> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension,
         bool searchInContent)
     {

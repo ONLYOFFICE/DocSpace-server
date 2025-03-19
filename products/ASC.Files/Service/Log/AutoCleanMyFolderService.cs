@@ -24,25 +24,21 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-global using System.Security;
+using ASC.Files.Service.Services;
 
-global using ASC.Api.Core.Socket;
-global using ASC.Common;
-global using ASC.Common.Threading;
-global using ASC.Common.Threading.DistributedLock.Abstractions;
-global using ASC.Core;
-global using ASC.Core.Users;
-global using ASC.Data.Reassigns.Log;
-global using ASC.Files.Core;
-global using ASC.MessagingSystem.Core;
-global using ASC.MessagingSystem.EF.Model;
-global using ASC.Web.Core;
-global using ASC.Web.Core.PublicResources;
-global using ASC.Web.Core.Users;
-global using ASC.Web.Files.Services.WCFService;
-global using ASC.Web.Studio.Core.Notify;
+namespace ASC.Files.Service.Log;
 
-global using Microsoft.AspNetCore.Http;
-global using Microsoft.Extensions.DependencyInjection;
-global using Microsoft.Extensions.Logging;
-global using Microsoft.Extensions.Primitives;
+internal static partial class AutoCleanMyFolderServiceLogger
+{
+    [LoggerMessage(LogLevel.Information, "Found {count} users (without restrictions) in active portals")]
+    public static partial void InfoFoundUsers(this ILogger<AutoDeletePersonalFolderService> logger, int count);
+
+    [LoggerMessage(LogLevel.Information, "Waiting for data. Sleep {time}.")]
+    public static partial void InfoWaitingForData(this ILogger<AutoDeletePersonalFolderService> logger, TimeSpan time);
+
+    [LoggerMessage(LogLevel.Information, "Start clean up for user - {userId}")]
+    public static partial void InfoCleanUp(this ILogger<AutoDeletePersonalFolderService> logger, int userId);
+
+    [LoggerMessage(LogLevel.Information, "Finishclean up for user - {userId}")]
+    public static partial void InfoCleanUpFinish(this ILogger<AutoDeletePersonalFolderService> logger, int userId);
+}
