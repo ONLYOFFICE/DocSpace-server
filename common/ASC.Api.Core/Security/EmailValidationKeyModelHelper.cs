@@ -246,6 +246,16 @@ public class EmailValidationKeyModelHelper(
                 checkKeyResult = provider.ValidateEmailKey(email + type, key, validTimeInterval);
                 break;
 
+            case ConfirmType.GuestShareLink:
+                userInfo = await userManager.GetUserByEmailAsync(email);
+                if (Equals(userInfo, Constants.LostUser) || userInfo.Status == EmployeeStatus.Terminated)
+                {
+                    checkKeyResult = ValidationResult.Invalid;
+                    break;
+                }
+                checkKeyResult = provider.ValidateEmailKey(email + type + uiD + userInfo.Id, key, provider.ValidEmailKeyInterval);
+                break;
+
             default:
                 checkKeyResult = provider.ValidateEmailKey(email + type, key, provider.ValidEmailKeyInterval);
                 break;

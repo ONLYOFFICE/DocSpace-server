@@ -89,5 +89,8 @@ public enum ConfirmType
     TfaAuth,
 
     [SwaggerEnum("Wizard")]
-    Wizard
+    Wizard,
+
+    [SwaggerEnum("Guest share link")]
+    GuestShareLink
 }
