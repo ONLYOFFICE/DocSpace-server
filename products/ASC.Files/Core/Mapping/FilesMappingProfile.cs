@@ -69,5 +69,7 @@ public class FilesMappingProfile : Profile
             .ForMember(dest=> dest.EntryId, cfg => cfg.MapFrom(src => Convert.ToInt32(src.EntryId)));
         
         CreateMap<SecurityTreeRecord, FileShareRecord<string>>();
+
+        CreateMap<DbFilesFormRoleMapping, FormRole>();
     }
 }

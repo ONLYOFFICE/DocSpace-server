@@ -40,11 +40,11 @@ public class OwnerController(
     PermissionContext permissionContext,
     WebItemManager webItemManager,
     DisplayUserSettingsHelper displayUserSettingsHelper,
-    IMemoryCache memoryCache,
+    IFusionCache fusionCache,
     IHttpContextAccessor httpContextAccessor,
     IUrlShortener urlShortener,
     UserManagerWrapper userManagerWrapper)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
     /// Sends the instructions to change the DocSpace owner.

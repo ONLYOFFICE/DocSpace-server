@@ -36,10 +36,13 @@ public class Settings
     public Settings(IConfiguration configuration)
     {
         var cfg = configuration.GetSection("webhooks").Get<Settings>();
+
         RepeatCount = cfg.RepeatCount ?? 5;
         ThreadCount = cfg.ThreadCount ?? 10;
+        TrustedDaysCount = cfg.TrustedDaysCount ?? 3;
     }
-    
-    public int? RepeatCount { get; }
-    public int? ThreadCount { get; }
+
+    public int? RepeatCount { get; init; }
+    public int? ThreadCount { get; init; }
+    public int? TrustedDaysCount { get; init; }
 }

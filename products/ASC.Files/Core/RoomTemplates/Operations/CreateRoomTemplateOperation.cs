@@ -40,12 +40,13 @@ public class CreateRoomTemplateOperation : DistributedTaskProgress
     private string _color;
 
     private int _roomId;
-    private int? _templateId;
-    private int? _tenantId;
     private int _totalCount;
     private int _count;
     private readonly IServiceProvider _serviceProvider;
+    public int TenantId { get; set; }
 
+    public int TemplateId { get; set; }
+    
     public CreateRoomTemplateOperation()
     {
         
@@ -55,27 +56,7 @@ public class CreateRoomTemplateOperation : DistributedTaskProgress
     {
         _serviceProvider = serviceProvider;
     }
-
-    public int TenantId
-    {
-        get => _tenantId ?? this[nameof(_tenantId)];
-        set
-        {
-            _tenantId = value;
-            this[nameof(_tenantId)] = value;
-        }
-    }
-
-    public int TemplateId
-    {
-        get => _templateId ?? this[nameof(_templateId)];
-        set
-        {
-            _templateId = value;
-            this[nameof(_templateId)] = value;
-        }
-    }
-
+    
     public void Init(int tenantId,
         Guid userId,
         int roomId,

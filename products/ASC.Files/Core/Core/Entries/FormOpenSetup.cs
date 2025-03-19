@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,19 +24,18 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Webhooks.Core;
+namespace ASC.Files.Core.Core.Entries;
 
-public class WebHooksSettings : ISettings<WebHooksSettings>
+public record FormOpenSetup<T>
 {
-    public List<int> Ids { get; init; }
+    public bool CanEdit { get; set; }
+    public bool CanFill { get; set; }
+    public bool CanStartFilling { get; set; } = true;
+    public bool IsSubmitOnly { get; set; }
+    public string FillingSessionId { get; set; }
+    public EditorType EditorType { get; set; }
+    public File<T> Draft { get; set; }
+    public string RoleName { get; set; }
+    public Folder<T> RootFolder { get; set; }
 
-    [JsonIgnore]
-    public Guid ID => new("6EFA0EAB-D033-4720-BDB3-DEB057EBC140");
-
-    public WebHooksSettings GetDefault() => new()
-    {
-        Ids = []
-    };
 }
-
-

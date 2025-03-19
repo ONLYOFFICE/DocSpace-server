@@ -74,9 +74,9 @@ public class UsersQuotaSyncOperation(IServiceProvider serviceProvider, IDistribu
 [Transient]
 public class UsersQuotaSyncJob : DistributedTaskProgress
 {
-    private int? _tenantId;
     private readonly IServiceScopeFactory _serviceScopeFactory;
-
+    public int TenantId { get; set; }
+    
     public UsersQuotaSyncJob()
     {
         
@@ -85,19 +85,6 @@ public class UsersQuotaSyncJob : DistributedTaskProgress
     public UsersQuotaSyncJob(IServiceScopeFactory serviceScopeFactory)
     {
         _serviceScopeFactory = serviceScopeFactory;
-    }
-
-    public int TenantId
-    {
-        get
-        {
-            return _tenantId ?? this[nameof(_tenantId)];
-        }
-        private set
-        {
-            _tenantId = value;
-            this[nameof(_tenantId)] = value;
-        }
     }
 
     public void InitJob(Tenant tenant)
@@ -143,7 +130,6 @@ public class UsersQuotaSyncJob : DistributedTaskProgress
                 await securityContext.AuthenticateMeAsync(account);
 
                 await filesSpaceUsageStatManager.RecalculateUserQuota(TenantId, user.Id);
-
             }
 
             var userQuotaSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();

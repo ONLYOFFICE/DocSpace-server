@@ -164,7 +164,7 @@ public class LdapObjectExtension(TenantUtil tenantUtil, SettingsManager settings
             Id = Guid.Empty,
             UserName = userName,
             Sid = ldapUser.Sid,
-            ActivationStatus = settings.SendWelcomeEmail && !string.IsNullOrEmpty(mail) ? EmployeeActivationStatus.Pending : EmployeeActivationStatus.NotActivated,
+            ActivationStatus = settings.DisableEmailVerification ? EmployeeActivationStatus.Activated : settings.SendWelcomeEmail && !string.IsNullOrEmpty(mail) ? EmployeeActivationStatus.Pending : EmployeeActivationStatus.NotActivated,
             Status = ldapUser.IsDisabled ? EmployeeStatus.Terminated : EmployeeStatus.Active,
             Title = !string.IsNullOrEmpty(title) ? title : string.Empty,
             Location = !string.IsNullOrEmpty(location) ? location : string.Empty,

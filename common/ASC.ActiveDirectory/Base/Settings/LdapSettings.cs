@@ -121,7 +121,8 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
             AcceptCertificateHash = null,
             StartTls = false,
             Ssl = false,
-            SendWelcomeEmail = false
+            SendWelcomeEmail = false,
+            DisableEmailVerification = false
         };
 
         return settings;
@@ -136,6 +137,7 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
                && StartTls == settings.StartTls
                && Ssl == settings.Ssl
                && SendWelcomeEmail == settings.SendWelcomeEmail
+               && DisableEmailVerification == settings.DisableEmailVerification
                && (string.IsNullOrEmpty(Server)
                    && string.IsNullOrEmpty(settings.Server)
                    || Server == settings.Server)
@@ -171,6 +173,7 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
         hash = (hash * 2) + StartTls.GetHashCode();
         hash = (hash * 2) + Ssl.GetHashCode();
         hash = (hash * 2) + SendWelcomeEmail.GetHashCode();
+        hash = (hash * 2) + DisableEmailVerification.GetHashCode();
         hash = (hash * 2) + Server.GetHashCode();
         hash = (hash * 2) + UserDN.GetHashCode();
         hash = (hash * 2) + PortNumber.GetHashCode();
@@ -218,6 +221,10 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
     /// <summary>Specifies if the welcome email is sent or not</summary>
     /// <type>System.Boolean, System</type>
     public bool SendWelcomeEmail { get; set; }
+
+    /// <summary>Specifies if the email verification is disabled or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool DisableEmailVerification { get; set; }
 
     /// <summary>LDAP server URL address</summary>
     /// <type>System.String, System</type>

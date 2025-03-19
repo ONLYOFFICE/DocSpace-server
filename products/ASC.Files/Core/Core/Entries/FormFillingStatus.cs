@@ -24,17 +24,14 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.ActiveDirectory.ComplexOperations.Data;
+namespace ASC.Files.Core;
 
-public static class LdapTaskProperty
+public enum FormFillingStatus
 {
-    public static readonly string OWNER = "LDAPOwner";
-    public static readonly string OPERATION_TYPE = "LDAPOperationType";
-    public static readonly string SOURCE = "LDAPSource";
-    public static readonly string PROGRESS = "LDAPProgress";
-    public static readonly string RESULT = "LDAPResult";
-    public static readonly string ERROR = "LDAPError";
-    public static readonly string WARNING = "LDAPWarning";
-    public static readonly string CERT_REQUEST = "LDAPCertRequest";
-    public static readonly string FINISHED = "LDAPFinished";
+    None = 0,
+    Draft = 1,
+    YouTurn = 2,
+    InProgress = 3,
+    Complete = 4,
+    Stoped = 5
 }

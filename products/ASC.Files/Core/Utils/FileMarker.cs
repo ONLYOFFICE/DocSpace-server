@@ -86,7 +86,8 @@ public class FileMarker(
     RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
     FileMarkerCache fileMarkerCache,
     IDistributedLockProvider distributedLockProvider,
-    EntryStatusManager entryStatusManager)
+    EntryStatusManager entryStatusManager,
+    FileSharing fileSharing)
 {
     private const string CacheKeyFormat = "MarkedAsNew/{0}/folder_{1}";
     private const string LockKey = "file_marker";
@@ -504,7 +505,32 @@ public class FileMarker(
 
             taskData.UserIDs = projectTeam;
         }
+        if (fileEntry.RootFolderType == FolderType.VirtualRooms && userIDs.Count == 0)
+        {
+            var folderDao = daoFactory.GetFolderDao<T>();
+            var fileDao = daoFactory.GetFileDao<T>();
+            var room = await DocSpaceHelper.GetParentRoom(fileEntry, folderDao);
+            var file = await fileDao.GetFileAsync(fileEntry.Id);
 
+            if (file.IsForm && room.FolderType == FolderType.VirtualDataRoom)
+            {
+                var allRoles = await fileDao.GetFormRoles(file.Id).ToListAsync();
+
+                var aces = await fileSharing.GetPureSharesAsync(room, allRoles.Select(role => role.UserId)).ToListAsync();
+
+                var filteredUserIDs = aces
+                    .Where(ace => ace is not { Access: FileShare.FillForms })
+                    .Select(ace => ace.Id).ToList();
+
+                if (filteredUserIDs.Any())
+                {
+                    taskData.UserIDs = filteredUserIDs;
+                    var markerHelper = serviceProvider.GetService<FileMarkerHelper<T>>();
+                    await markerHelper.Add(taskData);
+                }
+                return;
+            }
+        }
         var fileMarkerHelper = serviceProvider.GetService<FileMarkerHelper<T>>();
         await fileMarkerHelper.Add(taskData);
     }

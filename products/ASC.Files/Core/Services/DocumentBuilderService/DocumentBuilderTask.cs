@@ -33,6 +33,10 @@ public abstract class DocumentBuilderTask<TId, TData> : DistributedTaskProgress
     protected TData _data;
     private readonly IServiceScopeFactory _serviceProvider;
 
+    public TId ResultFileId { get; set; }
+    public string ResultFileName { get; set; }
+    public string ResultFileUrl { get; set; }
+    
     public DocumentBuilderTask()
     {
         
@@ -53,9 +57,9 @@ public abstract class DocumentBuilderTask<TId, TData> : DistributedTaskProgress
         Id = DocumentBuilderTaskManager.GetTaskId(tenantId, userId);
         Status = DistributedTaskStatus.Created;
 
-        this["ResultFileId"] = default(TId);
-        this["ResultFileName"] = string.Empty;
-        this["ResultFileUrl"] = string.Empty;
+        ResultFileId = default;
+        ResultFileName = string.Empty;
+        ResultFileUrl = string.Empty;
     }
 
     protected override async Task DoJob()
@@ -102,9 +106,9 @@ public abstract class DocumentBuilderTask<TId, TData> : DistributedTaskProgress
 
             var file = await ProcessSourceFileAsync(scope.ServiceProvider, new Uri(fileUri), inputData);
 
-            this["ResultFileId"] = file.Id;
-            this["ResultFileName"] = file.Title;
-            this["ResultFileUrl"] = filesLinkUtility.GetFileWebEditorUrl(file.Id);
+            ResultFileId = file.Id;
+            ResultFileName = file.Title;
+            ResultFileUrl = filesLinkUtility.GetFileWebEditorUrl(file.Id);
 
             Percentage = 100;
 
