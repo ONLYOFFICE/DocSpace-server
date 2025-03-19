@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// The file history information.
+/// </summary>
 public record HistoryDto
 {
     /// <summary>

@@ -27,7 +27,7 @@
 namespace ASC.Web.Files.Core.Compress;
 
 /// <summary>
-/// Archives the data stream into the format .tar.gz
+/// Archives the data stream into the format .tar.gz.
 /// </summary>
 [Scope]
 public class CompressToTarGz : ICompress
@@ -36,7 +36,9 @@ public class CompressToTarGz : ICompress
     private TarOutputStream _gzip;
     private TarEntry _tarEntry;
 
-    /// <summary></summary>
+    /// <summary>
+    /// Initializes and sets a new output stream for archiving.
+    /// </summary>
     /// <param name="stream">Accepts a new stream, it will contain an archive upon completion of work</param>
     public Task SetStream(Stream stream)
     {
@@ -47,7 +49,7 @@ public class CompressToTarGz : ICompress
     }
 
     /// <summary>
-    /// The record name is created (the name of a separate file in the archive)
+    /// The record name is created (the name of a separate file in the archive).
     /// </summary>
     /// <param name="title">File name with extension, this name will have the file in the archive</param>
     /// <param name="lastModification"></param>
@@ -62,7 +64,7 @@ public class CompressToTarGz : ICompress
     }
 
     /// <summary>
-    /// Transfer the file itself to the archive
+    /// Transfer the file itself to the archive.
     /// </summary>
     /// <param name="readStream">File data</param>
     public async Task PutStream(Stream readStream)
@@ -72,7 +74,7 @@ public class CompressToTarGz : ICompress
     }
 
     /// <summary>
-    /// Put an entry on the output stream.
+    /// Put the entry on the output stream.
     /// </summary>
     public Task PutNextEntry()
     {
@@ -90,18 +92,20 @@ public class CompressToTarGz : ICompress
     }
 
     /// <summary>
-    /// Resource title (does not affect the work of the class)
+    /// Resource title (does not affect the work of the class).
     /// </summary>
     /// <returns></returns>
     public Task<string> GetTitle() => Task.FromResult(FilesUCResource.FilesWillBeCompressedTarGz);
 
     /// <summary>
-    /// Extension the archive (does not affect the work of the class)
+    /// Extension the archive (does not affect the work of the class).
     /// </summary>
     /// <returns></returns>
     public Task<string> GetArchiveExtension() => Task.FromResult(CompressToArchive.TarExt);
 
-    /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
+    /// <summary>
+    /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+    /// </summary>
     public void Dispose()
     {
         _gzip?.Dispose();

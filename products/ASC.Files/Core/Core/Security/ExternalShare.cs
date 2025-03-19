@@ -331,53 +331,84 @@ public class ExternalShare(Global global,
     }
 }
 
+/// <summary>
+/// The link data parameters.
+/// </summary>
 public class LinkData
 {
+    /// <summary>
+    /// The link URL address.
+    /// </summary>
     public string Url { get; init; }
+
+    /// <summary>
+    /// The link token.
+    /// </summary>
     public string Token { get; init; }
 }
 
 /// <summary>
+/// The validation info parameters.
 /// </summary>
 public class ValidationInfo
 {
-    /// <summary>External data status</summary>
+    /// <summary>
+    /// The external data status of the validation.
+    /// </summary>
     /// <type>ASC.Files.Core.Security.Status, ASC.Files.Core</type>
     public Status Status { get; set; }
    
-    /// <summary>External data ID</summary>
+    /// <summary>
+    /// The external data ID of the validation.
+    /// </summary>
     /// <type>System.String, System</type>
     public string Id { get; set; }
    
-    /// <summary>External data title</summary>
+    /// <summary>
+    /// The external data title of the validation.
+    /// </summary>
     /// <type>System.String, System</type>
     public string Title { get; set; }
 
-    /// <summary>Entity ID</summary>
+    /// <summary>
+    /// The entity ID of the validation.
+    /// </summary>
     /// <type>System.String, System</type>
     public string EntityId { get; set; }
    
-    /// <summary>Entity title</summary>
+    /// <summary>
+    /// The entity title of the validation.
+    /// </summary>
     /// <type>System.String, System</type>
     public string EntryTitle { get; set; }
     
-    /// <summary>Sharing rights</summary>
+    /// <summary>
+    /// The sharing rights of the validation.
+    /// </summary>
     /// <type>ASC.Files.Core.Security.FileShare, ASC.Files.Core</type>
     public FileShare Access { get; set; }
     
-    /// <summary>Tenant ID</summary>
+    /// <summary>
+    /// The tenant ID of the validation.
+    /// </summary>
     /// <type>System.Int32, System</type>
     public int TenantId { get; set; }
 
-    /// <summary>Specifies whether to share the external data or not</summary>
+    /// <summary>
+    /// Specifies whether to share the external data or not.
+    /// </summary>
     /// <type>System.Boolean, System</type>
     public bool Shared { get; set; }
     
-    /// <summary>Link ID</summary>
+    /// <summary>
+    /// The link ID of the validation.
+    /// </summary>
     /// <type>System.Guid, System</type>
     public Guid LinkId { get; set; }
     
-    /// <summary>Specifies whether the user is authenticated or not</summary>
+    /// <summary>
+    /// Specifies whether the user is authenticated or not.
+    /// </summary>
     /// <type>System.Boolean, System</type>
     public bool IsAuthenticated { get; set; }
 }

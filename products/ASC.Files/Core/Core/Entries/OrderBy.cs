@@ -69,17 +69,20 @@ public enum SortedByType
     UsedSpace
 }
 
+/// <summary>
+/// The ordering parameters.
+/// </summary>
 [DebuggerDisplay("{SortedBy} {IsAsc}")]
 public class OrderBy(SortedByType sortedByType, bool isAsc)
 {
     /// <summary>
-    /// Is asc
+    /// Specifies if the order is ascending.
     /// </summary>
     [JsonPropertyName("is_asc")]
     public bool IsAsc { get; init; } = isAsc;
 
     /// <summary>
-    /// Sorted by
+    /// The sorted by type of the ordering.
     /// </summary>
     [JsonPropertyName("property")]
     public SortedByType SortedBy { get; set; } = sortedByType;

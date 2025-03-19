@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// The file statistics result.
+/// The file statistics result parameters.
 /// </summary>
 public class FilesStatisticsResultDto
 {
@@ -53,7 +53,7 @@ public class FilesStatisticsResultDto
 }
 
 /// <summary>
-/// The folder title.
+/// The file statictics folder parameters.
 /// </summary>
 public class FilesStatisticsFolder
 {

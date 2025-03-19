@@ -26,18 +26,40 @@
 
 namespace ASC.Web.Files.Services.WCFService;
 
+/// <summary>
+/// The generic data wrapper parameters.
+/// </summary>
 public class DataWrapper<T>
 {
+    /// <summary>
+    /// The list of the file entries.
+    /// </summary>
     public List<FileEntry> Entries { get; init; }
+
+    /// <summary>
+    /// The total of the data wrapper.
+    /// </summary>
     public int Total { get; init; }
 
+    /// <summary>
+    /// The folder path parts of the data wrapper.
+    /// </summary>
     [JsonPropertyName("path_parts")]
     public List<object> FolderPathParts { get; init; }
 
+    /// <summary>
+    /// The folder info of the data wrapper.
+    /// </summary>
     [JsonPropertyName("folder_info")]
     public Folder<T> FolderInfo { get; init; }
     
+    /// <summary>
+    /// The parent room of the data wrapper.
+    /// </summary>
     public Folder<T> ParentRoom { get; init; }
 
+    /// <summary>
+    /// The new data wrapper.
+    /// </summary>
     public int New { get; init; }
 }

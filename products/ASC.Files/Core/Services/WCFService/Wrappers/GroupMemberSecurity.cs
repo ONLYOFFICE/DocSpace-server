@@ -26,11 +26,33 @@
 
 namespace ASC.Web.Files.Services.WCFService;
 
+/// <summary>
+/// The group member security parameters.
+/// </summary>
 public class GroupMemberSecurity
 {
+    /// <summary>
+    /// The group member user information.
+    /// </summary>
     public UserInfo User { get; init; }
+
+    /// <summary>
+    /// The group share.
+    /// </summary>
     public FileShare GroupShare { get; init; }
+
+    /// <summary>
+    /// The user share.
+    /// </summary>
     public FileShare? UserShare { get; init; }
+
+    /// <summary>
+    /// Specifies whether the group member can edit access or not.
+    /// </summary>
     public bool CanEditAccess { get; init; }
+
+    /// <summary>
+    /// Specifies whether the group member is owner.
+    /// </summary>
     public bool Owner { get; init; }
 }

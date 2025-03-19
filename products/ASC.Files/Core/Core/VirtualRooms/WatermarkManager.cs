@@ -44,14 +44,45 @@ public enum WatermarkAdditions
     [SwaggerEnum("Room name")]
     RoomName = 16
 }
+
+/// <summary>
+/// The watermark settings information.
+/// </summary>
 public class WatermarkSettings : IMapFrom<DbRoomWatermark>, IMapFrom<WatermarkRequestDto>
 {
+    /// <summary>
+    /// The watermark settings text.
+    /// </summary>
     public string Text { get; set; }
+
+    /// <summary>
+    /// The watermark settings additions.
+    /// </summary>
     public WatermarkAdditions Additions { get; set; }
+
+    /// <summary>
+    /// The watermark rotate angle.
+    /// </summary>
     public int Rotate { get; set; }
+
+    /// <summary>
+    /// The image width.
+    /// </summary>
     public double ImageWidth { get; set; }
+
+    /// <summary>
+    /// The image height.
+    /// </summary>
     public double ImageHeight { get; set; }
+
+    /// <summary>
+    /// The image URL.
+    /// </summary>
     public string ImageUrl { get; set; }
+
+    /// <summary>
+    /// The image scale.
+    /// </summary>
     public int ImageScale { get; set; }
 }
 

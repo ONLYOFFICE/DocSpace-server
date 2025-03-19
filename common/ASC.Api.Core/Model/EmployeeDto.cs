@@ -28,64 +28,67 @@ using System.Collections.Concurrent;
 
 namespace ASC.Web.Api.Models;
 
+/// <summary>
+/// The employee information.
+/// </summary>
 public class EmployeeDto
 {
     /// <summary>
-    /// ID
+    /// The employee ID.
     /// </summary>
     [SwaggerSchemaCustom(Example = "{00000000-0000-0000-0000-000000000000}")]
     public Guid Id { get; set; }
 
     /// <summary>
-    /// Display name
+    /// The employee display name.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Mike Zanyatski")]
     public string DisplayName { get; set; }
 
     /// <summary>
-    /// Title
+    /// The employee title.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Manager")]
     public string Title { get; set; }
 
     /// <summary>
-    /// Avatar
+    /// The employee avatar.
     /// </summary>
     public string Avatar { get; set; }
 
     /// <summary>
-    /// Original size avatar
+    /// The employee original size avatar.
     /// </summary>
     public string AvatarOriginal { get; set; }
 
     /// <summary>
-    /// Maximum size avatar
+    /// The employee maximum size avatar.
     /// </summary>
     public string AvatarMax { get; set; }
 
     /// <summary>
-    /// Medium size avatar
+    /// The employee medium size avatar.
     /// </summary>
     public string AvatarMedium { get; set; }
 
     /// <summary>
-    /// Small avatar
+    /// The employee small avatar.
     /// </summary>
     [SwaggerSchemaCustom(Example = "url to small avatar")]
     public string AvatarSmall { get; set; }
 
     /// <summary>
-    /// Profile URL
+    /// The employee profile URL.
     /// </summary>
     public string ProfileUrl { get; set; }
 
     /// <summary>
-    /// Specifies if the user has an avatar or not
+    /// Specifies if the user has an avatar or not.
     /// </summary>
     public bool HasAvatar { get; set; }
 
     /// <summary>
-    /// Specifies if the user is an anonim or not
+    /// Specifies if the user is an anonim or not.
     /// </summary>
     public bool IsAnonim { get; set; }
 }

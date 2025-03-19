@@ -44,16 +44,50 @@ public enum TagType
     FromRoom = 1024
 }
 
+/// <summary>
+/// The tag information.
+/// </summary>
 [DebuggerDisplay("{Name} ({Id}) entry {EntryType} ({EntryId})")]
 public sealed class Tag : IMapFrom<DbFilesTag>
 {
+    /// <summary>
+    /// The tag name.
+    /// </summary>
     public string Name { get; set; }
+
+    /// <summary>
+    /// The tag type.
+    /// </summary>
     public TagType Type { get; set; }
+
+    /// <summary>
+    /// The tag owner ID.
+    /// </summary>
     public Guid Owner { get; set; }
+
+    /// <summary>
+    /// The tag entry ID.
+    /// </summary>
     public object EntryId { get; set; }
+
+    /// <summary>
+    /// The tag entry type.
+    /// </summary>
     public FileEntryType EntryType { get; set; }
+
+    /// <summary>
+    /// The tag ID.
+    /// </summary>
     public int Id { get; set; }
+
+    /// <summary>
+    /// The tag count.
+    /// </summary>
     public int Count { get; set; }
+
+    /// <summary>
+    /// The date time when the tag created.
+    /// </summary>
     public DateTime? CreateOn { get; set; }
 
     public Tag() { }

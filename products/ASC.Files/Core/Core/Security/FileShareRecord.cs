@@ -26,19 +26,64 @@
 
 namespace ASC.Files.Core.Security;
 
+/// <summary>
+/// The file share record parameters.
+/// </summary>
 public class FileShareRecord<T>
 {
+    /// <summary>
+    /// The file share record tenant ID.
+    /// </summary>
     public int TenantId { get; set; }
+
+    /// <summary>
+    /// The file share record entry ID.
+    /// </summary>
     public T EntryId { get; set; }
+
+    /// <summary>
+    /// The file share record entry type.
+    /// </summary>
     public FileEntryType EntryType { get; set; }
+
+    /// <summary>
+    /// The file share record subject type.
+    /// </summary>
     public SubjectType SubjectType { get; set; }
+
+    /// <summary>
+    /// The file share record subject ID.
+    /// </summary>
     public Guid Subject { get; set; }
+
+    /// <summary>
+    /// The file share record owner ID.
+    /// </summary>
     public Guid Owner { get; set; }
+
+    /// <summary>
+    /// The file share.
+    /// </summary>
     public FileShare Share { get; set; }
+
+    /// <summary>
+    /// The file share options.
+    /// </summary>
     public FileShareOptions Options { get; set; }
+
+    /// <summary>
+    /// The file share record parent ID.
+    /// </summary>
     public T ParentId { get; set; }
     
+    /// <summary>
+    /// The file share record level.
+    /// </summary>
     public int Level { get; set; }
+
+    /// <summary>
+    /// Specifies if the file share record is link or not.
+    /// </summary>
     public bool IsLink => SubjectType is SubjectType.InvitationLink or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink;
 
     public class ShareComparer(FolderType rootFolderType) : IComparer<FileShare>
@@ -91,13 +136,39 @@ public class FileShareRecord<T>
     }
 }
 
+/// <summary>
+/// The small share record parameters.
+/// </summary>
 public class SmallShareRecord
 {
+    /// <summary>
+    /// The small share record subject ID.
+    /// </summary>
     public Guid Subject { get; set; }
+
+    /// <summary>
+    /// The small share record parent ID.
+    /// </summary>
     public Guid ShareParentTo { get; set; }
+
+    /// <summary>
+    /// The small share record owner ID.
+    /// </summary>
     public Guid Owner { get; set; }
+
+    /// <summary>
+    /// The small share record timestamp.
+    /// </summary>
     public DateTime TimeStamp { get; set; }
+
+    /// <summary>
+    /// The small share record file share.
+    /// </summary>
     public FileShare Share { get; set; }
+
+    /// <summary>
+    /// The small share record subject type.
+    /// </summary>
     public SubjectType SubjectType { get; set; }
 }
 

@@ -26,21 +26,48 @@
 
 namespace ASC.Files.Tests.Models;
 
+/// <summary>
+/// The folder content parameters.
+/// </summary>
 public class FolderContentDto
 {
+    /// <summary>
+    /// The list of files from folder.
+    /// </summary>
     public List<FileDto<int>> Files { get; set; }
     
+    /// <summary>
+    /// The list of folders from folder.
+    /// </summary>
     public List<FolderDto<int>> Folders { get; set; }
     
+    /// <summary>
+    /// The current folder.
+    /// </summary>
     public FolderDto<int> Current { get; set; }
     
+    /// <summary>
+    /// The pathparts of the folder.
+    /// </summary>
     public object PathParts { get; set; }
     
+    /// <summary>
+    /// The start index of the folder.
+    /// </summary>
     public int StartIndex { get; set; }
     
+    /// <summary>
+    /// The folder count.
+    /// </summary>
     public int Count { get; set; }
     
+    /// <summary>
+    /// The folder total.
+    /// </summary>
     public int Total { get; set; }
     
+    /// <summary>
+    /// The new folder.
+    /// </summary>
     public int New { get; set; }
 }

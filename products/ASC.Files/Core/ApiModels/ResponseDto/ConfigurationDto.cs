@@ -159,6 +159,10 @@ public class EditorConfigurationDto
     /// </summary>
     public UserConfig User { get; set; }
 }
+
+/// <summary>
+/// The customization config parameters.
+/// </summary>
 public class CustomizationConfigDto
 {
     /// <summary>
@@ -212,6 +216,9 @@ public class CustomizationConfigDto
     public bool SubmitForm { get; set; }
 }
 
+/// <summary>
+/// The logo config parameters.
+/// </summary>
 public class LogoConfigDto
 {
     /// <summary>
@@ -240,6 +247,9 @@ public class LogoConfigDto
     public bool Visible { get; set; }
 }
 
+/// <summary>
+/// The anonymous config parameters.
+/// </summary>
 public class AnonymousConfigDto
 {
     /// <summary>
@@ -248,6 +258,9 @@ public class AnonymousConfigDto
     public bool Request { get; set; }
 }
 
+/// <summary>
+/// The customer config parameters.
+/// </summary>
 public class CustomerConfigDto
 {
     /// <summary>
@@ -281,6 +294,9 @@ public class CustomerConfigDto
     public string Www  { get; set; }
 }
 
+/// <summary>
+/// The document config parameters.
+/// </summary>
 public class DocumentConfigDto
 {
     /// <summary>
@@ -340,6 +356,9 @@ public class DocumentConfigDto
     public Options Options { get; set; }
 }
 
+/// <summary>
+/// The information config parameters.
+/// </summary>
 public class InfoConfigDto
 {
     /// <summary>

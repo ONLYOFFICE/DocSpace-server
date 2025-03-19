@@ -27,11 +27,14 @@
 namespace ASC.Files.Core;
 
 /// <summary>
+/// The entry properties parameters.
 /// </summary>
 [DebuggerDisplay("")]
 public class EntryProperties<T>
 {
-    /// <summary>Form filling properties</summary>
+    /// <summary>
+    /// The form filling properties.
+    /// </summary>
     /// <type>ASC.Files.Core.FormFillingProperties, ASC.Files.Core</type>
     public FormFillingProperties<T> FormFilling { get; set; }
 
@@ -67,6 +70,7 @@ public class EntryProperties<T>
 }
 
 /// <summary>
+/// The form filling properties parameters.
 /// </summary>
 [Transient]
 public class FormFillingProperties<T>

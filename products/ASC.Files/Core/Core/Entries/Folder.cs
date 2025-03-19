@@ -112,6 +112,9 @@ public interface IFolder
     public IEnumerable<Tag> Tags { get; set; }
 }
 
+/// <summary>
+/// The generic folder parameters.
+/// </summary>
 [DebuggerDisplay("{Title} ({Id})")]
 [Transient(GenericArguments = [typeof(int)])]
 [Transient(GenericArguments = [typeof(string)])]

@@ -26,33 +26,89 @@
 
 namespace ASC.Files.Core;
 
+/// <summary>
+/// The submit forms data parameters.
+/// </summary>
 public class SubmitFormsData
 {
+    /// <summary>
+    /// The list of forms data.
+    /// </summary>
     [Nested]
     public IEnumerable<FormsItemData> FormsData { get; set; }
 }
 
+/// <summary>
+/// The forms item data parameters.
+/// </summary>
 public class FormsItemData
 {
+    /// <summary>
+    /// The forms item data key.
+    /// </summary>
     public string Key { get; set; }
+
+    /// <summary>
+    /// The forms item data tag.
+    /// </summary>
     public string Tag { get; set; }
+
+    /// <summary>
+    /// The forms item data value.
+    /// </summary>
     public string Value { get; set; }
+
+    /// <summary>
+    /// The forms item data type.
+    /// </summary>
     public string Type { get; set; }
 }
 
+/// <summary>
+/// The database forms item data search parameters.
+/// </summary>
 [Transient]
 public class DbFormsItemDataSearch : SubmitFormsData, ISearchItem
 {
+    /// <summary>
+    /// The database forms item data search ID.
+    /// </summary>
     public int Id { get; set; }
+
+    /// <summary>
+    /// The database forms item data search tenant ID.
+    /// </summary>
     public int TenantId { get; set; }
+
+    /// <summary>
+    /// The database forms item data search parent ID.
+    /// </summary>
     public int ParentId { get; set; }
+
+    /// <summary>
+    /// The database forms item data search original form ID.
+    /// </summary>
     public int OriginalFormId { get; set; }
+
+    /// <summary>
+    /// The database forms item data search room ID.
+    /// </summary>
     public int RoomId { get; set; }
+
+    /// <summary>
+    /// The database forms item data search creation time.
+    /// </summary>
     public DateTime CreateOn { get; set; }
 
+    /// <summary>
+    /// The database forms item data search index name.
+    /// </summary>
     [OpenSearch.Client.Ignore] 
     public string IndexName => "forms_data";
 
+    /// <summary>
+    /// Get the database forms item data search index name.
+    /// </summary>
     public Expression<Func<ISearchItem, object[]>> GetSearchContentFields(SearchSettingsHelper searchSettings)
     {
         return a => new object[] {  };

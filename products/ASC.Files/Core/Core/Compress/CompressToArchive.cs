@@ -27,7 +27,7 @@
 namespace ASC.Web.Files.Core.Compress;
 
 /// <summary>
-/// Archives the data stream in the format selected in the settings
+/// Archives the data stream in the format selected in the settings.
 /// </summary>
 [Scope]
 public class CompressToArchive(
@@ -67,7 +67,7 @@ public class CompressToArchive(
     }
 
     /// <summary>
-    /// The record name is created (the name of a separate file in the archive)
+    /// The record name is created (the name of a separate file in the archive).
     /// </summary>
     /// <param name="title">File name with extension, this name will have the file in the archive</param>
     /// <param name="lastModification"></param>
@@ -77,7 +77,7 @@ public class CompressToArchive(
     }
 
     /// <summary>
-    /// Transfer the file itself to the archive
+    /// Transfer the file itself to the archive.
     /// </summary>
     /// <param name="readStream">File data</param>
     public async Task PutStream(Stream readStream) => await (await GetCompress()).PutStream(readStream);
@@ -99,18 +99,20 @@ public class CompressToArchive(
     }
 
     /// <summary>
-    /// Resource title (does not affect the work of the class)
+    /// Resource title (does not affect the work of the class).
     /// </summary>
     /// <returns></returns>
     public async Task<string> GetTitle() => await (await GetCompress()).GetTitle();
 
     /// <summary>
-    /// Extension the archive (does not affect the work of the class)
+    /// Extension the archive (does not affect the work of the class).
     /// </summary>
     /// <returns></returns>
     public async Task<string> GetArchiveExtension() => await (await GetCompress()).GetArchiveExtension();
 
-    /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
+    /// <summary>
+    /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+    /// </summary>
     public void Dispose()
     {
         _compress?.Dispose();

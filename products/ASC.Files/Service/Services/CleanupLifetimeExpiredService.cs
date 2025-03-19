@@ -178,11 +178,33 @@ static file class Queries
                     .Select(r => r.file.Id));
 }
 
+/// <summary>
+/// The lifetime enabled room parameters.
+/// </summary>
 public class LifetimeEnabledRoom
 {
+    /// <summary>
+    /// The tenant ID of the lifetime enabled room.
+    /// </summary>
     public int TenantId { get; init; }
+
+    /// <summary>
+    /// The room ID of the lifetime enabled room.
+    /// </summary>
     public int RoomId { get; init; }
+
+    /// <summary>
+    /// The user ID of the lifetime enabled room.
+    /// </summary>
     public Guid UserId { get; init; }
+
+    /// <summary>
+    /// The data lifetime database room.
+    /// </summary>
     public DbRoomDataLifetime Lifetime { get; init; }
+
+    /// <summary>
+    /// The list of expired files.
+    /// </summary>
     public List<int> ExipiredFiles { get; set; }
 }

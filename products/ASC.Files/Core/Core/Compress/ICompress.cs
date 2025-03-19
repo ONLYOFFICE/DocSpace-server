@@ -26,20 +26,22 @@
 
 namespace ASC.Web.Files.Core.Compress;
 
-///<summary>Archiving Class Unification Interface</summary>
+///<summary>
+/// Archiving Class Unification Interface.
+///</summary>
 public interface ICompress : IDisposable
 {
     Task SetStream(Stream stream);
 
     /// <summary>
-    /// The record name is created (the name of a separate file in the archive)
+    /// The record name is created (the name of a separate file in the archive).
     /// </summary>
     /// <param name="title">File name with extension, this name will have the file in the archive</param>
     /// <param name="lastModification"></param>
     Task CreateEntry(string title, DateTime? lastModification = null);
 
     /// <summary>
-    /// Transfer the file itself to the archive
+    /// Transfer the file itself to the archive.
     /// </summary>
     /// <param name="readStream">File data</param>
         Task PutStream(Stream readStream);
@@ -55,13 +57,13 @@ public interface ICompress : IDisposable
     Task CloseEntry();
 
     /// <summary>
-    /// Resource title (does not affect the work of the class)
+    /// Resource title (does not affect the work of the class).
     /// </summary>
     /// <returns></returns>
     Task<string> GetTitle();
 
     /// <summary>
-    /// Extension the archive (does not affect the work of the class)
+    /// Extension the archive (does not affect the work of the class).
     /// </summary>
     /// <returns></returns>
     Task<string> GetArchiveExtension();

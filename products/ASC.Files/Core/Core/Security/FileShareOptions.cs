@@ -26,14 +26,39 @@
 
 namespace ASC.Files.Core.Security;
 
+/// <summary>
+/// The file share options parameters.
+/// </summary>
 public class FileShareOptions
 {
+    /// <summary>
+    /// The file share options title.
+    /// </summary>
     public string Title { get; set; }
+
+    /// <summary>
+    /// The file share options expiration date.
+    /// </summary>
     public DateTime ExpirationDate { get; set; }
+
+    /// <summary>
+    /// The file share options password.
+    /// </summary>
     public string Password { get; set; }
+
+    /// <summary>
+    /// Specifies if the file share options denies download or not.
+    /// </summary>
     public bool DenyDownload { get; set; }
+
+    /// <summary>
+    /// Specifies if the file share options are internal or not.
+    /// </summary>
     public bool Internal { get; set; }
 
+    /// <summary>
+    /// Specifies if the file share options are expired or not.
+    /// </summary>
     [JsonIgnore]
     public bool IsExpired => ExpirationDate != DateTime.MinValue && ExpirationDate < DateTime.UtcNow;
 }

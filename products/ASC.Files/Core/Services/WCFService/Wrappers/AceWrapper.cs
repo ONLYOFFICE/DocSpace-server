@@ -26,43 +26,111 @@
 
 namespace ASC.Web.Files.Services.WCFService;
 
+/// <summary>
+/// The ace collection parameters.
+/// </summary>
 public class AceCollection<T>
 {
+    /// <summary>
+    /// The ace collection files.
+    /// </summary>
     public IEnumerable<T> Files { get; init; }
+
+    /// <summary>
+    /// The ace collection folders.
+    /// </summary>
     public IEnumerable<T> Folders { get; init; }
+
+    /// <summary>
+    /// The ace collection aces.
+    /// </summary>
     public List<AceWrapper> Aces { get; init; }
+
+    /// <summary>
+    /// The ace collection message.
+    /// </summary>
     public string Message { get; init; }
+
+    /// <summary>
+    /// The ace collection advanced settings.
+    /// </summary>
     public AceAdvancedSettingsWrapper AdvancedSettings { get; init; }
 }
 
+/// <summary>
+/// The ace wrapper parameters.
+/// </summary>
 public class AceWrapper : IMapFrom<RoomInvitation>
 {
+    /// <summary>
+    /// The ace wrapper ID.
+    /// </summary>
     public Guid Id { get; set; }
+
+    /// <summary>
+    /// The ace wrapper email.
+    /// </summary>
     public string Email { get; init; }
+
+    /// <summary>
+    /// The ace wrapper subject type.
+    /// </summary>
     public SubjectType SubjectType { get; set; }
+
+    /// <summary>
+    /// The ace wrapper file share options.
+    /// </summary>
     public FileShareOptions FileShareOptions { get; init; }
     public bool CanEditAccess { get; set; }
 
+    /// <summary>
+    /// The ace wrapper subject name.
+    /// </summary>
     [JsonPropertyName("title")]
     public string SubjectName { get; set; }
 
+    /// <summary>
+    /// The ace wrapper link.
+    /// </summary>
     public string Link { get; set; }
 
+    /// <summary>
+    /// The ace wrapper subject group.
+    /// </summary>
     [JsonPropertyName("is_group")]
     public bool SubjectGroup { get; set; }
 
+    /// <summary>
+    /// Specifies whether the ace wrapper is the owner or not.
+    /// </summary>
     public bool Owner { get; set; }
 
+    /// <summary>
+    /// The ace wrapper file access.
+    /// </summary>
     [JsonPropertyName("ace_status")]
     public FileShare Access { get; set; }
 
+    /// <summary>
+    /// The ace wrapper locked rights.
+    /// </summary>
     [JsonPropertyName("locked")]
     public bool LockedRights { get; set; }
 
+    /// <summary>
+    /// Specifies whether to disable removing of the ace wrapper.
+    /// </summary>
     [JsonPropertyName("disable_remove")]
     public bool DisableRemove { get; set; }
+
+    /// <summary>
+    /// The request token of the ace wrapper.
+    /// </summary>
     public string RequestToken { get; set; }
 
+    /// <summary>
+    /// Specifies whether it is link or not.
+    /// </summary>
     [JsonIgnore] 
     public bool IsLink => (SubjectType is SubjectType.InvitationLink or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink) || !string.IsNullOrEmpty(Link);
 }
@@ -88,8 +156,18 @@ public class AceShortWrapper(string subjectName, string permission, bool isLink)
     public bool isLink { get; init; } = isLink;
 }
 
+/// <summary>
+/// The ace advanced settings wrapper parameters.
+/// </summary>
 public class AceAdvancedSettingsWrapper
 {
+    /// <summary>
+    /// Specifies whether to allow sharing private room.
+    /// </summary>
     public bool AllowSharingPrivateRoom { get; set; }
+
+    /// <summary>
+    /// Specifies whether it is the invitation link or not.
+    /// </summary>
     public bool InvitationLink { get; init; }
 }

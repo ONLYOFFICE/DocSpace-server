@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// The Privacy room keys response parameters.
+/// The privacy room keys response parameters.
 /// </summary>
 public class PrivacyRoomKeysResponse
 {

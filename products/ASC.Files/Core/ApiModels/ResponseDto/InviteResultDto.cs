@@ -26,20 +26,23 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// The invite result information.
+/// </summary>
 public class InviteResultDto
 {
     /// <summary>
-    /// Email
+    /// The email of the invite result.
     /// </summary>
     public string Email { get; set; }
 
     /// <summary>
-    /// Success
+    /// Specifies whether the invite result is success or not.
     /// </summary>
     public bool Success { get; set; }
 
     /// <summary>
-    /// Message
+    /// The invite result message.
     /// </summary>
     public string Message { get; set; }
 }

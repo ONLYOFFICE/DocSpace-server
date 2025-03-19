@@ -26,8 +26,18 @@
 
 namespace ASC.Files.Core.Services.OFormService;
 
+/// <summary>
+/// The form data.
+/// </summary>
 public class OFromData
 {
+    /// <summary>
+    /// The form ID.
+    /// </summary>
     public int Id { get; set; }
+
+    /// <summary>
+    /// The form data attributes.
+    /// </summary>
     public OFormDataAttributes Attributes { get; set; }
 }

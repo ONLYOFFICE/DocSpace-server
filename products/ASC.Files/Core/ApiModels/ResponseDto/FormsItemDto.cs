@@ -27,6 +27,6 @@
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// Forms item information.
+/// The forms item information.
 /// </summary>
 public record FormsItemDto(string Key, string Type);

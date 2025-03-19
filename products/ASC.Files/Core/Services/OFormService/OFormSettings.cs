@@ -26,13 +26,38 @@
 
 namespace ASC.Files.Core.Services.OFormService;
 
+/// <summary>
+/// The form settings.
+/// </summary>
 public class OFormSettings
 {
+    /// <summary>
+    /// The form settings domain.
+    /// </summary>
     public string Domain { get; set; }
+
+    /// <summary>
+    /// The form settings path.
+    /// </summary>
     public string Path { get; set; }
+
+    /// <summary>
+    /// The form settings dashboard.
+    /// </summary>
     public string Dashboard { get; set; }
+
+    /// <summary>
+    /// The form settings extension.
+    /// </summary>
     public string Ext { get; set; }
+
+    /// <summary>
+    /// The form settings signature.
+    /// </summary>
     public string Signature { get; set; }
 
+    /// <summary>
+    /// The form settings upload.
+    /// </summary>
     public OFormSettings Upload { get; set; }
 }

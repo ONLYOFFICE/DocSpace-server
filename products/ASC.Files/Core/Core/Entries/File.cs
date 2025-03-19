@@ -57,6 +57,9 @@ public enum FileStatus
     IsFillFormDraft = 0x80
 }
 
+/// <summary>
+/// The generic file parameters.
+/// </summary>
 [Transient(GenericArguments = [typeof(int)])]
 [Transient(GenericArguments = [typeof(string)])]
 [DebuggerDisplay("{Title} ({Id} v{Version})")]
@@ -80,19 +83,44 @@ public class File<T> : FileEntry<T>
         FileEntryType = FileEntryType.File;
     }
 
+    /// <summary>
+    /// The generic file version.
+    /// </summary>
     public int Version { get; set; }
+
+    /// <summary>
+    /// The generic file version group.
+    /// </summary>
     public int VersionGroup { get; set; }
+
+    /// <summary>
+    /// The generic file comment.
+    /// </summary>
     public string Comment { get; set; }
+
+    /// <summary>
+    /// The generic file pure title.
+    /// </summary>
     public string PureTitle
     {
         get => base.Title;
         set => base.Title = value;
     }
+
+    /// <summary>
+    /// The generic file content length.
+    /// </summary>
     public long ContentLength { get; set; }
 
+    /// <summary>
+    /// The generic file content length as string.
+    /// </summary>
     [JsonIgnore]
     public string ContentLengthString => FileSizeComment.FilesSizeToString(ContentLength);
 
+    /// <summary>
+    /// The generic file type.
+    /// </summary>
     [JsonIgnore]
     public FilterType FilterType
     {
@@ -121,25 +149,45 @@ public class File<T> : FileEntry<T>
             return FilterType.None;
         }
     }
-
+    /// <summary>
+    /// Get the generic file status.
+    /// </summary>
     public async Task<FileStatus> GetFileStatus()
     {
         _status = await FileHelper.GetFileStatus(this, _status);
         return _status;
     }
 
+    /// <summary>
+    /// Set the generic file status.
+    /// </summary>
     public void SetFileStatus(FileStatus value) => _status = value;
 
+    /// <summary>
+    /// Set the generic file unique ID.
+    /// </summary>
     public override string UniqID => $"file_{Id}";
 
+    /// <summary>
+    /// The generic file title.
+    /// </summary>
     [JsonIgnore]
     public override string Title => FileHelper.GetTitle(this);
 
-
+    /// <summary>
+    /// The generic file download URL.
+    /// </summary>
     [JsonIgnore]
     public string DownloadUrl => FileHelper.GetDownloadUrl(this);
 
+    /// <summary>
+    /// Specifies whether the generic file is locked or not.
+    /// </summary>
     public bool Locked { get; set; }
+
+    /// <summary>
+    /// Specifies whether the generic file is a form or not.
+    /// </summary>
     public bool IsForm {
         get
         {
@@ -147,9 +195,19 @@ public class File<T> : FileEntry<T>
         }
     }
 
+    /// <summary>
+    /// The category of the generic file.
+    /// </summary>
     public int Category { get; set; }
+
+    /// <summary>
+    /// The user who locked the generic file.
+    /// </summary>
     public string LockedBy { get; set; }
 
+    /// <summary>
+    /// Specifies whether the generic file is new or not.
+    /// </summary>
     [JsonIgnore]
     public override bool IsNew
     {
@@ -167,6 +225,9 @@ public class File<T> : FileEntry<T>
         }
     }
 
+    /// <summary>
+    /// Specifies whether the generic file is favorite or not.
+    /// </summary>
     [JsonIgnore]
     public bool IsFavorite
     {
@@ -184,6 +245,9 @@ public class File<T> : FileEntry<T>
         }
     }
 
+    /// <summary>
+    /// Specifies whether the generic file is template or not.
+    /// </summary>
     [JsonIgnore]
     public bool IsTemplate
     {
@@ -201,11 +265,29 @@ public class File<T> : FileEntry<T>
         }
     }
 
+    /// <summary>
+    /// Specifies whether the generic file is encrypted or not.
+    /// </summary>
     public bool Encrypted { get; set; }
+
+    /// <summary>
+    /// The generic file thumbnail status.
+    /// </summary>
     public Thumbnail ThumbnailStatus { get; set; }
+
+    /// <summary>
+    /// The generic file force save type.
+    /// </summary>
     public ForcesaveType Forcesave { get; set; }
+
+    /// <summary>
+    /// The generic file converted type.
+    /// </summary>
     public string ConvertedType { get; set; }
 
+    /// <summary>
+    /// The generic file converted extension.
+    /// </summary>
     [JsonIgnore]
     public string ConvertedExtension
     {
@@ -228,13 +310,34 @@ public class File<T> : FileEntry<T>
         }
     }
     
+    /// <summary>
+    /// The generic file last opened date and time.
+    /// </summary>
     public DateTime? LastOpened { get; set; }
+
+    /// <summary>
+    /// The generic form information.
+    /// </summary>
     public FormInfo<T> FormInfo { get; set; }
 }
 
+/// <summary>
+/// The generic form information.
+/// </summary>
 public record FormInfo<T>
 {
+    /// <summary>
+    /// The linked ID of the form.
+    /// </summary>
     public T LinkedId { get; init; }
+
+    /// <summary>
+    /// The form properties.
+    /// </summary>
     public EntryProperties<T> Properties { get; init; }
-    public static  FormInfo<T> Empty => new();
+    
+    /// <summary>
+    /// Empty form information.
+    /// </summary>
+    public static FormInfo<T> Empty => new();
 }

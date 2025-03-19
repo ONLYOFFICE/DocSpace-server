@@ -27,6 +27,7 @@
 namespace ASC.Common.Threading;
 
 /// <summary>
+/// The distributed task progress parameters.
 /// </summary>
 [ProtoContract(IgnoreUnknownSubTypes = true)]
 public class DistributedTaskProgress : DistributedTask
@@ -35,7 +36,9 @@ public class DistributedTaskProgress : DistributedTask
     [JsonInclude]
     private double _percentage;
 
-    /// <summary>Progress percentage</summary>
+    /// <summary>
+    /// The distributed task progress percentage.
+    /// </summary>
     /// <type>System.Double, System</type>
     public double Percentage
     {
@@ -43,12 +46,16 @@ public class DistributedTaskProgress : DistributedTask
         set => _percentage = value;
     }
 
-    /// <summary>Specifies if the process is completed or not</summary>
+    /// <summary>
+    /// Specifies if the distributed task process is completed or not.
+    /// </summary>
     /// <type>System.Boolean, System</type>
     [ProtoMember(2)]
     public bool IsCompleted { get; set; }
 
-    /// <summary>Number of steps</summary>
+    /// <summary>
+    /// The number of steps of the distributed task.
+    /// </summary>
     /// <type>System.Int32, System</type>
     [ProtoMember(3)]
     protected int StepCount { get; set; }

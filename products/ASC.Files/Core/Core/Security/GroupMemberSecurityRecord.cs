@@ -26,9 +26,23 @@
 
 namespace ASC.Files.Core.Security;
 
+/// <summary>
+/// The group member security record parameters.
+/// </summary>
 public class GroupMemberSecurityRecord
 {
+    /// <summary>
+    /// The group member security record user ID.
+    /// </summary>
     public Guid UserId { get; init; }
+
+    /// <summary>
+    /// The group member security record user share.
+    /// </summary>
     public FileShare? UserShare { get; init; }
+
+    /// <summary>
+    /// The group member security record group share.
+    /// </summary>
     public FileShare GroupShare { get; init; }
 }

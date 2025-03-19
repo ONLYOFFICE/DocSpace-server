@@ -31,12 +31,21 @@ using Polly.Timeout;
 
 namespace ASC.Files.Core.Helpers;
 
+/// <summary>
+/// The document service.
+/// </summary>
 public static class DocumentService
 {
     private const int Timeout = 120000;
 
+    /// <summary>
+    /// The custom SSL verification client.
+    /// </summary>
     public const string CustomSslVerificationClient = "CustomSSLVerificationClient";
 
+    /// <summary>
+    /// Gets the HTTP client name.
+    /// </summary>
     public static string GetHttpClientName(bool sslVerification) => nameof(DocumentService) + (sslVerification ? string.Empty : CustomSslVerificationClient);
 
     private static readonly JsonSerializerOptions _bodySettings = new()
@@ -69,7 +78,7 @@ public static class DocumentService
     }
 
     /// <summary>
-    /// The method is to convert the file to the required format
+    /// The method converts the file to the required format.
     /// </summary>
     /// <param name="documentConverterUrl">Url to the service of conversion</param>
     /// <param name="documentUri">Uri for the document to convert</param>
@@ -214,7 +223,7 @@ public static class DocumentService
     }
 
     /// <summary>
-    /// Request to Document Server with command
+    /// Inintiates the request to the document Server with command.
     /// </summary>
     /// <param name="documentTrackerUrl">Url to the command service</param>
     /// <param name="method">Name of method</param>
@@ -325,6 +334,9 @@ public static class DocumentService
         }
     }
 
+    /// <summary>
+    /// Inintiates the the document builder request.
+    /// </summary>
     public static Task<(string DocBuilderKey, Dictionary<string, string> Urls)> DocbuilderRequestAsync(
         string docbuilderUrl,
         string requestKey,
@@ -459,21 +471,45 @@ public static class DocumentService
         License
     }
 
+    /// <summary>
+    /// The command request parameters.
+    /// </summary>
     [DebuggerDisplay("{Key}")]
     public class CommandResponse
     {
+        /// <summary>
+        /// The command response error type.
+        /// </summary>
         public ErrorTypes Error { get; set; }
 
+        /// <summary>
+        /// The command response error string.
+        /// </summary>
         public string ErrorString { get; set; }
 
+        /// <summary>
+        /// The command response key.
+        /// </summary>
         public string Key { get; set; }
 
+        /// <summary>
+        /// The command response license.
+        /// </summary>
         public License License { get; set; }
 
+        /// <summary>
+        /// The command response server.
+        /// </summary>
         public ServerInfo Server { get; set; }
 
+        /// <summary>
+        /// The command response quota.
+        /// </summary>
         public QuotaInfo Quota { get; set; }
 
+        /// <summary>
+        /// The command response version.
+        /// </summary>
         public string Version { get; set; }
 
         public enum ErrorTypes
@@ -488,20 +524,45 @@ public static class DocumentService
             TokenExpire = 7
         }
 
+        /// <summary>
+        /// The command response server info.
+        /// </summary>
         [DebuggerDisplay("{BuildVersion}")]
         public class ServerInfo
         {
+            /// <summary>
+            /// The server build date.
+            /// </summary>
             public DateTime BuildDate { get; set; }
 
+            /// <summary>
+            /// The server build number.
+            /// </summary>
             public int BuildNumber { get; set; }
+
+            /// <summary>
+            /// The server build version.
+            /// </summary>
             public string BuildVersion { get; set; }
 
+            /// <summary>
+            /// The server package type.
+            /// </summary>
             public PackageTypes PackageType { get; set; }
 
+            /// <summary>
+            /// The server result type.
+            /// </summary>
             public ResultTypes ResultType { get; set; }
 
+            /// <summary>
+            /// The server worker count.
+            /// </summary>
             public int WorkersCount { get; set; }
 
+            /// <summary>
+            /// The server package types.
+            /// </summary>
             public enum PackageTypes
             {
                 OpenSource = 0,
@@ -509,6 +570,9 @@ public static class DocumentService
                 DeveloperEdition = 2
             }
 
+            /// <summary>
+            /// The server result types.
+            /// </summary>
             public enum ResultTypes
             {
                 Error = 1,
@@ -525,24 +589,45 @@ public static class DocumentService
             }
         }
 
+        /// <summary>
+        /// The command response quota info.
+        /// </summary>
         public class QuotaInfo
         {
+            /// <summary>
+            /// The quota list of users.
+            /// </summary>
             public List<User> Users { get; set; }
 
+            /// <summary>
+            /// The quota user info.
+            /// </summary>
             [DebuggerDisplay("{UserId} ({Expire})")]
             public class User
             {
+                /// <summary>
+                /// The user ID.
+                /// </summary>
                 [JsonPropertyName("userid")]
                 public string UserId { get; set; }
 
+                /// <summary>
+                /// The date and time when the user expires.
+                /// </summary>
                 public DateTime Expire { get; set; }
             }
         }
     }
 
+    /// <summary>
+    /// The command body.
+    /// </summary>
     [DebuggerDisplay("{Command} ({Key})")]
     private class CommandBody
     {
+        /// <summary>
+        /// The command method.
+        /// </summary>
         [JsonIgnore]
         public CommandMethod Command { get; init; }
 
@@ -551,102 +636,285 @@ public static class DocumentService
             get { return Command.ToString().ToLower(CultureInfo.InvariantCulture); }
         }
 
+        /// <summary>
+        /// The command callback.
+        /// </summary>
         public string Callback { get; set; }
 
+        /// <summary>
+        /// The command key.
+        /// </summary>
         public string Key { get; init; }
+
+        /// <summary>
+        /// The command metadata.
+        /// </summary>
         public MetaData Meta { get; set; }
 
+        /// <summary>
+        /// The command users.
+        /// </summary>
         public string[] Users { get; set; }
 
+        /// <summary>
+        /// The command token.
+        /// </summary>
         public string Token { get; set; }
 
         //not used
+        /// <summary>
+        /// The command user data.
+        /// </summary>
         [JsonPropertyName("userdata")]
         public string UserData { get; set; }
     }
 
+    /// <summary>
+    /// The PDF data.
+    /// </summary>
     public class PdfData
     {
+        /// <summary>
+        /// The PDF form.
+        /// </summary>
         public bool Form { get; set; }
     }
 
+    /// <summary>
+    /// The metadata information.
+    /// </summary>
     [DebuggerDisplay("{Title}")]
     public class MetaData
     {
+        /// <summary>
+        /// The metadata title.
+        /// </summary>
         public string Title { get; set; }
     }
 
+    /// <summary>
+    /// The thumbnail data.
+    /// </summary>
     [DebuggerDisplay("{Height}x{Width}")]
     public class ThumbnailData
     {
+        /// <summary>
+        /// The thumbnail aspect.
+        /// </summary>
         public int Aspect { get; set; }
+
+        /// <summary>
+        /// Specifies if the thumbnail is the first.
+        /// </summary>
         public bool First { get; set; }
+
+        /// <summary>
+        /// The thumbnail height.
+        /// </summary>
         public int Height { get; set; }
+
+        /// <summary>
+        /// The thumbnail width.
+        /// </summary>
         public int Width { get; set; }
     }
 
+    /// <summary>
+    /// The spreadsheet layout.
+    /// </summary>
     [DebuggerDisplay("SpreadsheetLayout {IgnorePrintArea} {Orientation} {FitToHeight} {FitToWidth} {Headings} {GridLines}")]
     public class SpreadsheetLayout
     {
+        /// <summary>
+        /// Specifies whether to ignore print area.
+        /// </summary>
         public bool IgnorePrintArea { get; set; }
+
+        /// <summary>
+        /// The orientation of the spreadsheet layout.
+        /// </summary>
         public string Orientation { get; set; }
+
+        /// <summary>
+        /// The fit to height of the spreadsheet layout.
+        /// </summary>
         public int FitToHeight { get; set; }
+
+        /// <summary>
+        /// The fit to width of the spreadsheet layout.
+        /// </summary>
         public int FitToWidth { get; set; }
+
+        /// <summary>
+        /// The headings of the spreadsheet layout.
+        /// </summary>
         public bool Headings { get; set; }
+
+        /// <summary>
+        /// The gridlines of the spreadsheet layout.
+        /// </summary>
         public bool GridLines { get; set; }
+
+        /// <summary>
+        /// The margins of the spreadsheet layout.
+        /// </summary>
         public LayoutMargins Margins { get; set; }
+
+        /// <summary>
+        /// The page size of the spreadsheet layout.
+        /// </summary>
         public LayoutPageSize PageSize { get; set; }
 
-
+        /// <summary>
+        /// The layout margins.
+        /// </summary>
         [DebuggerDisplay("Margins {Top} {Right} {Bottom} {Left}")]
         public class LayoutMargins
         {
+            /// <summary>
+            /// The left margins.
+            /// </summary>
             public string Left { get; set; }
+
+            /// <summary>
+            /// The right margins.
+            /// </summary>
             public string Right { get; set; }
+
+            /// <summary>
+            /// The top margins.
+            /// </summary>
             public string Top { get; set; }
+
+            /// <summary>
+            /// The bottom margins.
+            /// </summary>
             public string Bottom { get; set; }
         }
-
+        
+        /// <summary>
+        /// The layout page size.
+        /// </summary>
         [DebuggerDisplay("PageSize {Width} {Height}")]
         public class LayoutPageSize
         {
+            /// <summary>
+            /// The layout height.
+            /// </summary>
             public string Height { get; set; }
+
+            /// <summary>
+            /// The layout width.
+            /// </summary>
             public string Width { get; set; }
         }
     }
 
+    /// <summary>
+    /// The convertion body.
+    /// </summary>
     [DebuggerDisplay("{Title} from {FileType} to {OutputType} ({Key})")]
     private sealed class ConvertionBody
     {
+        /// <summary>
+        /// Specifies whether the convertion is async or not.
+        /// </summary>
         public bool Async { get; set; }
 
+        /// <summary>
+        /// The conversion file type.
+        /// </summary>
         [JsonPropertyName("filetype")]
         public required string FileType { get; init; }
+
+        /// <summary>
+        /// The conversion key.
+        /// </summary>
         public required string Key { get; init; }
 
+        /// <summary>
+        /// The conversion output type.
+        /// </summary>
         [JsonPropertyName("outputtype")]
         public required string OutputType { get; init; }
+
+        /// <summary>
+        /// The conversion password.
+        /// </summary>
         public string Password { get; set; }
+
+        /// <summary>
+        /// The conversion title.
+        /// </summary>
         public string Title { get; init; }
+
+        /// <summary>
+        /// The conversion thumbnail.
+        /// </summary>
         public ThumbnailData Thumbnail { get; set; }
+
+        /// <summary>
+        /// The conversion spreadsheet layout.
+        /// </summary>
         public SpreadsheetLayout SpreadsheetLayout { get; set; }
+
+        /// <summary>
+        /// The conversion URL.
+        /// </summary>
         public required string Url { get; set; }
+
+        /// <summary>
+        /// The conversion region.
+        /// </summary>
         public required string Region { get; set; }
-        public WatermarkOnDraw Watermark { get; set; }        
+
+        /// <summary>
+        /// The conversion watermark.
+        /// </summary>
+        public WatermarkOnDraw Watermark { get; set; }
+
+        /// <summary>
+        /// The conversion token.
+        /// </summary>        
         public string Token { get; set; }
+
+        /// <summary>
+        /// The conversion PDF.
+        /// </summary>
         public PdfData Pdf { get; set; }
 
     }
 
+    /// <summary>
+    /// The builder body.
+    /// </summary>
     [DebuggerDisplay("{Key}")]
     private sealed class BuilderBody
     {
+        /// <summary>
+        /// Specifies if the builder body is async or not.
+        /// </summary>
         public bool Async { get; set; }
+
+        /// <summary>
+        /// The builder body key.
+        /// </summary>
         public required string Key { get; init; }
+
+        /// <summary>
+        /// The builder body URL.
+        /// </summary>
         public required string Url { get; set; }
+
+        /// <summary>
+        /// The builder body token.
+        /// </summary>
         public string Token { get; set; }
     }
 
+    /// <summary>
+    /// The file link properties.
+    /// </summary>
     public class FileLink
     {
         /// <summary>
@@ -710,7 +978,7 @@ public static class DocumentService
     }
 
     /// <summary>
-    /// Processing document received from the editing service
+    /// Processing the document received from the editing service.
     /// </summary>
     /// <param name="jsonDocumentResponse">The resulting json from editing service</param>
     /// <returns>The percentage of completion of conversion and Uri to the converted document</returns>

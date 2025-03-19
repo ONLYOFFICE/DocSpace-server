@@ -39,6 +39,9 @@ public enum EditorType
     Embedded
 }
 
+/// <summary>
+/// The action link configuration parameters.
+/// </summary>
 public class ActionLinkConfig
 {
     /// <summary>
@@ -52,6 +55,9 @@ public class ActionLinkConfig
         return JsonSerializer.Serialize(actionLinkConfig);
     }
 
+    /// <summary>
+    /// The co-editing configuration parameters.
+    /// </summary>
     public class ActionConfig
     {
         /// <summary>
@@ -506,6 +512,9 @@ public class InfoConfig<T>(
     public string GetUploaded(File<T> file) => file.CreateOnString;
 }
 
+/// <summary>
+/// The permissions configuration parameters.
+/// </summary>
 public class PermissionsConfig
 {
     /// <summary>
@@ -613,6 +622,9 @@ public class Options
     }
 }
 
+/// <summary>
+/// The watermark on draw parameters.
+/// </summary>
 public class WatermarkOnDraw(double widthInPixels, double heightInPixels, string fill, int rotate, List<Paragraph> paragraphs)
 {
     private const double DotsPerInch = 96;
@@ -661,6 +673,9 @@ public class WatermarkOnDraw(double widthInPixels, double heightInPixels, string
     public List<Paragraph> Paragraphs { get; init; } = paragraphs;
 }
 
+/// <summary>
+/// The paragraph parameters.
+/// </summary>
 public class Paragraph
 {
     public Paragraph(List<Run> runs)
@@ -704,6 +719,9 @@ public class Run(string text, bool usedInHash = true)
     public string FontSize { get; set; } = "26";
 }
 
+/// <summary>
+/// The file reference parameters.
+/// </summary>
 public class FileReference
 {
     /// <summary>
@@ -748,6 +766,9 @@ public class FileReference
     public string Token { get; set; }
 }
 
+/// <summary>
+/// The file reference data parameters.
+/// </summary>
 public class FileReferenceData
 {
     /// <summary>
@@ -914,6 +935,9 @@ public class CustomizationConfig<T>(
     private FileSharing FileSharing { get; } = fileSharing;
 }
 
+/// <summary>
+/// The embedded configuration parameters.
+/// </summary>
 [Transient]
 public class EmbeddedConfig(BaseCommonLinkUtility baseCommonLinkUtility, FilesLinkUtility filesLinkUtility)
 {
@@ -943,6 +967,9 @@ public class EmbeddedConfig(BaseCommonLinkUtility baseCommonLinkUtility, FilesLi
     public string ToolbarDocked => "top";
 }
 
+/// <summary>
+/// The encryption keys configuration.
+/// </summary>
 public class EncryptionKeysConfig
 {
     /// <summary>
@@ -961,6 +988,9 @@ public class EncryptionKeysConfig
     public string PublicKey { get; set; }
 }
 
+/// <summary>
+/// The feedback configuration parameters.
+/// </summary>
 public class FeedbackConfig
 {
     /// <summary>
@@ -974,6 +1004,9 @@ public class FeedbackConfig
     public bool Visible { get => true; }
 }
 
+/// <summary>
+/// The go back configuration parameters.
+/// </summary>
 public class GobackConfig
 {
     /// <summary>
@@ -1062,6 +1095,9 @@ public class PluginsConfig
     }
 }
 
+/// <summary>
+/// The recent configuration parameters.
+/// </summary>
 public class RecentConfig
 {
     /// <summary>
@@ -1081,6 +1117,9 @@ public class RecentConfig
     public string Url { get; set; }
 }
 
+/// <summary>
+/// The templates configuration parameters.
+/// </summary>
 public class TemplatesConfig
 {
     /// <summary>
@@ -1100,6 +1139,9 @@ public class TemplatesConfig
     public string Url { get; set; }
 }
 
+/// <summary>
+/// The user configuration parameters.
+/// </summary>
 public class UserConfig
 {
     /// <summary>
