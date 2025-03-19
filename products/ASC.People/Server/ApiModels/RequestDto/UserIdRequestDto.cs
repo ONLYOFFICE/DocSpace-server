@@ -24,25 +24,17 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-global using System.Security;
+namespace ASC.People.ApiModels.RequestDto;
 
-global using ASC.Api.Core.Socket;
-global using ASC.Common;
-global using ASC.Common.Threading;
-global using ASC.Common.Threading.DistributedLock.Abstractions;
-global using ASC.Core;
-global using ASC.Core.Users;
-global using ASC.Data.Reassigns.Log;
-global using ASC.Files.Core;
-global using ASC.MessagingSystem.Core;
-global using ASC.MessagingSystem.EF.Model;
-global using ASC.Web.Core;
-global using ASC.Web.Core.PublicResources;
-global using ASC.Web.Core.Users;
-global using ASC.Web.Files.Services.WCFService;
-global using ASC.Web.Studio.Core.Notify;
 
-global using Microsoft.AspNetCore.Http;
-global using Microsoft.Extensions.DependencyInjection;
-global using Microsoft.Extensions.Logging;
-global using Microsoft.Extensions.Primitives;
+/// <summary>
+/// 
+/// </summary>
+public class UserIdRequestDto
+{
+    /// <summary>
+    /// User ID
+    /// </summary>
+    [FromRoute(Name = "userid")]
+    public Guid UserId { get; set; }
+}

@@ -200,7 +200,10 @@ public class FileEntryDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
     FileSecurity fileSecurity,
     GlobalFolderHelper globalFolderHelper,
     FilesSettingsHelper filesSettingsHelper,
-    FileDateTime fileDateTime)
+    FileDateTime fileDateTime,
+    SecurityContext securityContext,
+    UserManager userManager,
+    IDaoFactory daoFactory)
 {
     protected readonly FileSecurity _fileSecurity = fileSecurity;
     protected readonly GlobalFolderHelper _globalFolderHelper = globalFolderHelper;
@@ -255,6 +258,20 @@ public class FileEntryDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
     private async ValueTask<DateTime> GetDeletedPermanentlyOn<T>(FileEntry<T> entry)
     {
+        var isGuest = await userManager.IsGuestAsync(securityContext.CurrentAccount.ID);
+        if (isGuest) 
+        {
+            var myId = await _globalFolderHelper.GetFolderMyAsync<int>();
+
+            if (Equals(entry.FolderIdDisplay, myId) && myId != 0)
+            {
+                var folderDao = daoFactory.GetFolderDao<int>();
+                var my = await folderDao.GetFolderAsync(myId);
+
+                return fileDateTime.GetModifiedOnWithAutoCleanUp(my.ModifiedOn, DateToAutoCleanUp.OneMonth);
+            }
+        }
+
         if (entry.ModifiedOn.Equals(default) || !Equals(entry.FolderIdDisplay, await _globalFolderHelper.FolderTrashAsync))
         {
             return default;
