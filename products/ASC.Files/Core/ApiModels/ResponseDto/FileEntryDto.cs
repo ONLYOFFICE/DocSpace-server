@@ -207,6 +207,7 @@ public class FileEntryDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 {
     protected readonly FileSecurity _fileSecurity = fileSecurity;
     protected readonly GlobalFolderHelper _globalFolderHelper = globalFolderHelper;
+    protected readonly IDaoFactory _daoFactory = daoFactory;
 
     protected async Task<T> GetAsync<T, TId>(FileEntry<TId> entry) where T : FileEntryDto<TId>, new()
     {
@@ -265,7 +266,7 @@ public class FileEntryDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
 
             if (Equals(entry.FolderIdDisplay, myId) && myId != 0)
             {
-                var folderDao = daoFactory.GetFolderDao<int>();
+                var folderDao = _daoFactory.GetFolderDao<int>();
                 var my = await folderDao.GetFolderAsync(myId);
 
                 return fileDateTime.GetModifiedOnWithAutoCleanUp(my.ModifiedOn, DateToAutoCleanUp.OneMonth);
