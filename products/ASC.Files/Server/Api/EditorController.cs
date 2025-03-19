@@ -233,6 +233,10 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                     result.StartFillingMode = StartFillingMode.ShareToFillOut;
                     result.EditorConfig.Customization.StartFillingForm = new StartFillingForm { Text = FilesCommonResource.StartFillingModeEnum_ShareToFillOut };
                 }
+                if (formOpenSetup.CanFill)
+                {
+                    result.EditorConfig.Customization.SubmitForm.Visible = true;
+                }
             }
             else
             {
