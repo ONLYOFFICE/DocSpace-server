@@ -273,7 +273,8 @@ public class EmployeeFullDtoHelper(
         var result = new EmployeeFullDto
         {
             FirstName = userInfo.FirstName,
-            LastName = userInfo.LastName
+            LastName = userInfo.LastName,
+            DisplayName = _displayUserSettingsHelper.GetFullUserName(userInfo)
         };
 
         if (withGroups)
@@ -296,7 +297,6 @@ public class EmployeeFullDtoHelper(
     public async Task<EmployeeFullDto> GetSimpleWithEmail(UserInfo userInfo)
     {
         var result = await GetSimple(userInfo);
-        result.DisplayName = _displayUserSettingsHelper.GetFullUserName(userInfo);
         result.Email = userInfo.Email;
         return result;
     }
