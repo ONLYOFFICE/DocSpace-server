@@ -1526,7 +1526,6 @@ public class EntryManager(IDaoFactory daoFactory,
             }
             file.ContentLength = tmpStream.Length;
             file.Comment = string.IsNullOrEmpty(comment) ? null : comment;
-            file.Category = (int)FilterType.PdfForm;
             if (replaceVersion)
             {
                 file = await fileDao.ReplaceFileVersionAsync(file, tmpStream);
