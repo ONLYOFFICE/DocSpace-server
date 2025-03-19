@@ -328,7 +328,7 @@ public class GroupController(
         }
         else
         {
-            throw new ItemNotFoundException("user not found");
+            throw new ItemNotFoundException(Resource.ErrorUserNotFound);
         }
 
         return await GetGroupAsync(new DetailedInformationRequestDto { Id = inDto.Id });
@@ -364,7 +364,7 @@ public class GroupController(
         var group = await userManager.GetGroupInfoAsync(id);
         if (group == null || group.Removed || group.ID == Constants.LostGroupInfo.ID)
         {
-            throw new ItemNotFoundException("group not found");
+            throw new ItemNotFoundException(Resource.ErrorGroupNotFound);
         }
 
         return group;

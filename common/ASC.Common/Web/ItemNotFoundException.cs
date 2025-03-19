@@ -28,7 +28,7 @@ namespace ASC.Common.Web;
 
 public class ItemNotFoundException : HttpException
 {
-    public ItemNotFoundException() : base(404, "Not found") { }
+    public ItemNotFoundException() : base(404, "The record could not be found") { }
 
     public ItemNotFoundException(string message) : base(404, message) { }
 

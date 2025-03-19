@@ -787,7 +787,7 @@ public class UserController(
 
         if (user.Id == Constants.LostUser.Id)
         {
-            throw new ItemNotFoundException("User not found");
+            throw new ItemNotFoundException(Resource.ErrorUserNotFound);
         }
 
         if (isInvite)
@@ -841,7 +841,7 @@ public class UserController(
 
         if (user.Id == Constants.LostUser.Id)
         {
-            throw new ItemNotFoundException("User not found");
+            throw new ItemNotFoundException(Resource.ErrorUserNotFound);
         }
 
         if (isInvite)
