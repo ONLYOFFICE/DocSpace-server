@@ -56,10 +56,13 @@ public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory s
 
         var entry = await dbWorker.ReadJournal(webhookRequest.WebhookLogId);
 
+        var webhookPayload = JsonSerializer.Deserialize<WebhookPayload<object>>(entry.RequestPayload, _jsonSerializerOptions);
+        webhookPayload.Event.Id = entry.Id;
+
         var status = 0;
         string responsePayload = null;
         string responseHeaders = null;
-        string requestPayload = null;
+        string requestPayload = JsonSerializer.Serialize(webhookPayload, _jsonSerializerOptions);
         string requestHeaders = null;
 
         var clientName = entry.Config.SSL ? WEBHOOK : WEBHOOK_SKIP_SSL;
@@ -78,10 +81,6 @@ public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory s
             {
                 var request = new HttpRequestMessage(HttpMethod.Post, entry.Config.Uri);
 
-                request.Headers.Add("Accept", "*/*");
-                request.Headers.Add(SignatureHeader, $"sha256={GetSecretHash(entry.Config.SecretKey, entry.RequestPayload)}");
-
-                requestPayload = entry.RequestPayload;
                 var retryCount = (int)context["retryCount"];
 
                 if (retryCount > 0)
@@ -89,13 +88,14 @@ public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory s
                     var now = DateTime.UtcNow;
                     now = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second, DateTimeKind.Utc);
 
-                    var webhookPayload = JsonSerializer.Deserialize<WebhookPayload<object>>(requestPayload, _jsonSerializerOptions);
-
                     webhookPayload.Webhook.RetryCount = retryCount;
                     webhookPayload.Webhook.RetryOn = now;
 
                     requestPayload = JsonSerializer.Serialize(webhookPayload, _jsonSerializerOptions);
                 }
+
+                request.Headers.Add("Accept", "*/*");
+                request.Headers.Add(SignatureHeader, $"sha256={GetSecretHash(entry.Config.SecretKey, requestPayload)}");
 
                 request.Content = new StringContent(requestPayload, Encoding.UTF8, "application/json");
 

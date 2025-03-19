@@ -45,8 +45,9 @@ public class WebhookPayload<T>
         {
             CreateBy = userId,
             CreateOn = now,
-            Id = (int)trigger,
-            Trigger = trigger.ToStringFast()
+            Id = 0, // log Id is unknown until saved
+            Trigger = trigger.ToStringFast(),
+            TriggerId = (int)trigger
         };
 
         Payload = data;
@@ -75,10 +76,11 @@ public class WebhookPayload<T>
 
 public class WebhookPayloadEventInfo
 {
+    public int Id { get; set; }
     public DateTime CreateOn { get; set; }
     public Guid CreateBy { get; set; }
-    public int Id { get; set; }
     public string Trigger { get; set; }
+    public int TriggerId { get; set; }
 }
 
 public class WebhookPayloadConfigInfo
