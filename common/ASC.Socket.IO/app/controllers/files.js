@@ -112,6 +112,11 @@ module.exports = (files) => {
     res.end();
   });
 
+  router.post("/change-my-type", (req, res) => {
+    files.changeMyType(req.body);
+    res.end();
+  });
+
   router.post("/add-user", (req, res) => {
     files.addUser(req.body);
     res.end();

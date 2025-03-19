@@ -198,8 +198,10 @@ public class FileDtoHelper(
         FileDateTime fileDateTime,
         ExternalShare externalShare,
         BreadCrumbsManager breadCrumbsManager,
-        FileChecker fileChecker)
-    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime) 
+        FileChecker fileChecker,
+        SecurityContext securityContext,
+        UserManager userManager)
+    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory) 
 {
     private readonly ApiDateTimeHelper _apiDateTimeHelper = apiDateTimeHelper;
 
@@ -229,11 +231,11 @@ public class FileDtoHelper(
         var extension = FileUtility.GetFileExtension(file.Title);
         var fileType = FileUtility.GetFileTypeByExtention(extension);
 
-        var fileDao = daoFactory.GetFileDao<T>();
+        var fileDao = _daoFactory.GetFileDao<T>();
 
         if (file.IsForm)
         {
-            var folderDao = daoFactory.GetCacheFolderDao<T>();
+            var folderDao = _daoFactory.GetCacheFolderDao<T>();
 
             Task<T> linkedIdTask;
             Task<EntryProperties<T>> propertiesTask;
@@ -245,7 +247,7 @@ public class FileDtoHelper(
             }
             else
             {
-                linkedIdTask = daoFactory.GetLinkDao<T>().GetLinkedAsync(file.Id);
+                linkedIdTask = _daoFactory.GetLinkDao<T>().GetLinkedAsync(file.Id);
                 propertiesTask = fileDao.GetProperties(file.Id);
             }
             
@@ -368,7 +370,7 @@ public class FileDtoHelper(
 
         if (!file.ProviderEntry && file.RootFolderType == FolderType.VirtualRooms && !expiration.HasValue)
         {
-            var folderDao = daoFactory.GetCacheFolderDao<T>();
+            var folderDao = _daoFactory.GetCacheFolderDao<T>();
             var room = await DocSpaceHelper.GetParentRoom(file, folderDao);
             if (room?.SettingsLifetime != null)
             {

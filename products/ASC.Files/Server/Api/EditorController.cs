@@ -350,9 +350,9 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
         var currentDocServiceUrl = filesLinkUtility.GetDocServiceUrl();
         var currentDocServiceUrlInternal = filesLinkUtility.GetDocServiceUrlInternal();
         var currentDocServicePortalUrl = filesLinkUtility.GetDocServicePortalUrl();
-        var currentDocServiceSecretValue = filesLinkUtility.GetDocServiceSignatureSecret();
-        var currentDocServiceSecretHeader = filesLinkUtility.GetDocServiceSignatureHeader();
-        var currentDocServiceSslVerification = filesLinkUtility.GetDocServiceSslVerification();
+        var currentDocServiceSecretValue = await filesLinkUtility.GetDocServiceSignatureSecretAsync();
+        var currentDocServiceSecretHeader = await filesLinkUtility.GetDocServiceSignatureHeaderAsync();
+        var currentDocServiceSslVerification = await filesLinkUtility.GetDocServiceSslVerificationAsync();
 
         if (!ValidateUrl(inDto.DocServiceUrl) ||
             !ValidateUrl(inDto.DocServiceUrlInternal) ||
@@ -452,9 +452,9 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
             DocServiceUrl = filesLinkUtility.GetDocServiceUrl(),
             DocServiceUrlInternal =filesLinkUtility.GetDocServiceUrlInternal(),
             DocServicePortalUrl = filesLinkUtility.GetDocServicePortalUrl(),
-            DocServiceSignatureHeader = filesLinkUtility.GetDocServiceSignatureHeader(),
-            DocServiceSslVerification = filesLinkUtility.GetDocServiceSslVerification(),
-            IsDefault = filesLinkUtility.IsDefault
+            DocServiceSignatureHeader = await filesLinkUtility.GetDocServiceSignatureHeaderAsync(),
+            DocServiceSslVerification = await filesLinkUtility.GetDocServiceSslVerificationAsync(),
+            IsDefault = await filesLinkUtility.IsDefaultAsync()
         };
     }
 }

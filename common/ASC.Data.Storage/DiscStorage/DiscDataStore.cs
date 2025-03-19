@@ -27,22 +27,23 @@
 namespace ASC.Data.Storage.DiscStorage;
 
 [Scope]
-public class DiscDataStore(TempStream tempStream,
-        TenantManager tenantManager,
-        PathUtils pathUtils,
-        EmailValidationKeyProvider emailValidationKeyProvider,
-        IHttpContextAccessor httpContextAccessor,
-        ILoggerProvider options,
-        ILogger<DiscDataStore> logger,
-        EncryptionSettingsHelper encryptionSettingsHelper,
-        EncryptionFactory encryptionFactory,
-        IHttpClientFactory clientFactory,
-        TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
-        QuotaSocketManager quotaSocketManager,
-        SettingsManager settingsManager,
-        IQuotaService quotaService,
-        UserManager userManager,
-        CustomQuota customQuota)
+public class DiscDataStore(
+    TempStream tempStream,
+    TenantManager tenantManager,
+    PathUtils pathUtils,
+    EmailValidationKeyProvider emailValidationKeyProvider,
+    IHttpContextAccessor httpContextAccessor,
+    ILoggerProvider options,
+    ILogger<DiscDataStore> logger,
+    EncryptionSettingsHelper encryptionSettingsHelper,
+    EncryptionFactory encryptionFactory,
+    IHttpClientFactory clientFactory,
+    TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
+    QuotaSocketManager quotaSocketManager,
+    SettingsManager settingsManager,
+    IQuotaService quotaService,
+    UserManager userManager,
+    CustomQuota customQuota)
     : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, options, logger, clientFactory, tenantQuotaFeatureStatHelper, quotaSocketManager, settingsManager, quotaService, userManager, customQuota)
 {
     public override bool IsSupportInternalUri => false;
@@ -52,7 +53,7 @@ public class DiscDataStore(TempStream tempStream,
     private readonly Dictionary<string, MappedPath> _mappedPaths = new();
     private ICrypt _crypt;
 
-    public override IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator validator)
+    public override async Task<IDataStore> ConfigureAsync(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator validator)
     {
         Tenant = tenant;
         //Fill map path
@@ -74,7 +75,7 @@ public class DiscDataStore(TempStream tempStream,
         DomainsContentAsAttachment = moduleConfig.Domain.Where(x => x.ContentAsAttachment.HasValue).ToDictionary(x => x.Name, y => y.ContentAsAttachment.Value);
         DomainsContentAsAttachment.Add(string.Empty, moduleConfig.ContentAsAttachment.HasValue ? moduleConfig.ContentAsAttachment.Value : false);
 
-        var settings = moduleConfig.DisabledEncryption ? new EncryptionSettings() : encryptionSettingsHelper.Load();
+        var settings = moduleConfig.DisabledEncryption ? new EncryptionSettings() : await encryptionSettingsHelper.LoadAsync();
         _crypt = encryptionFactory.GetCrypt(moduleConfig.Name, settings);
         DataStoreValidator = validator;
         return this;

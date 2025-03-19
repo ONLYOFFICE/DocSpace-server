@@ -24,52 +24,17 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Data.Backup.Services;
+namespace ASC.People.ApiModels.RequestDto;
 
-public abstract class BaseBackupProgressItem : DistributedTaskProgress
+
+/// <summary>
+/// 
+/// </summary>
+public class UserIdRequestDto
 {
-    protected readonly IServiceScopeFactory _serviceScopeProvider;
-
-    public BaseBackupProgressItem()
-    {
-        
-    }
-
-    protected BaseBackupProgressItem(IServiceScopeFactory serviceScopeFactory)
-    {
-        _serviceScopeProvider = serviceScopeFactory;
-    }
-
-    public int NewTenantId { get; set; }
-    public int TenantId { get; set; }
-    public string Link { get; set; }
-    public BackupProgressItemType BackupProgressItemType { get; set; }
-
-    protected void Init()
-    {
-        TenantId = 0;
-        NewTenantId = 0;
-        Link = "";
-    }
-
-    public BackupProgress ToBackupProgress()
-    {
-        var progress = new BackupProgress
-        {
-            IsCompleted = IsCompleted,
-            Progress = (int)Percentage,
-            Error = Exception != null ? Exception.Message : "",
-            TenantId = TenantId,
-            BackupProgressEnum = BackupProgressItemType.Convert(),
-            TaskId = Id
-        };
-        if (BackupProgressItemType is BackupProgressItemType.Backup or BackupProgressItemType.Transfer && Link != null)
-        {
-            progress.Link = Link;
-        }
-
-        return progress;
-    }
-
-    public abstract object Clone();
+    /// <summary>
+    /// User ID
+    /// </summary>
+    [FromRoute(Name = "userid")]
+    public Guid UserId { get; set; }
 }
