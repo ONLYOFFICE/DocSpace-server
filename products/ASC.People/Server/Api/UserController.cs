@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Globalization;
+
 namespace ASC.People.Api;
 
 public class UserController(
@@ -791,6 +793,8 @@ public class UserController(
     [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,Everyone")]
     public async Task<EmployeeFullDto> GetByEmailAsync(GetMemberByEmailRequestDto inDto)
     {
+        var cultureInfo = string.IsNullOrEmpty(inDto.Culture) ? null : new CultureInfo(inDto.Culture);
+
         var user = await _userManager.GetUserByEmailAsync(inDto.Email);
 
         var isInvite = _httpContextAccessor.HttpContext!.User.Claims
@@ -798,7 +802,7 @@ public class UserController(
 
         if (user.Id == Constants.LostUser.Id)
         {
-            throw new ItemNotFoundException(Resource.ErrorUserNotFound);
+            throw new ItemNotFoundException(Resource.ResourceManager.GetString("ErrorUserNotFound", cultureInfo));
         }
 
         if (isInvite)
@@ -810,7 +814,7 @@ public class UserController(
 
         if (!await _userManager.CanUserViewAnotherUserAsync(currentUser, user))
         {
-            throw new SecurityException(Resource.ErrorAccessDenied);
+            throw new SecurityException(Resource.ResourceManager.GetString("ErrorAccessDenied", cultureInfo));
         }
 
         return await employeeFullDtoHelper.GetFullAsync(user);

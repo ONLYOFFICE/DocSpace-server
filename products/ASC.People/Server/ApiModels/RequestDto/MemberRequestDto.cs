@@ -259,7 +259,7 @@ public class GetMemberByIdRequestDto
 /// <summary>
 /// 
 /// </summary>
-public class GetMemberByEmailRequestDto
+public class GetMemberByEmailRequestDto: CultureRequestDto
 {
     /// <summary>
     /// User email address
@@ -333,4 +333,13 @@ public class ContactsRequestDto
     /// </summary>
     [FromBody]
     public ContactsRequest Contacts { get; set; }
+}
+
+public class CultureRequestDto
+{
+    /// <summary>
+    /// Culture
+    /// </summary>
+    [FromQuery(Name = "culture")]
+    public string Culture { get; set; }
 }
