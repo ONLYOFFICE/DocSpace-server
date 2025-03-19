@@ -67,7 +67,7 @@ public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory s
         var clientName = entry.Config.SSL ? WEBHOOK : WEBHOOK_SKIP_SSL;
         var httpClient = clientFactory.CreateClient(clientName);
         var policy = HttpPolicyExtensions.HandleTransientHttpError()
-                                          .OrResult(x => x.StatusCode != HttpStatusCode.OK)
+                                          .OrResult(x => !x.IsSuccessStatusCode)
                                           .WaitAndRetryAsync(settings.RepeatCount ?? 5,
                                                              retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
                                                              onRetry: (response, delay, retryCount, context) =>
