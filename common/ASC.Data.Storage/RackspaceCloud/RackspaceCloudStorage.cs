@@ -62,7 +62,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
     private Uri _cnameSSL;
     private readonly List<string> _domains = [];
 
-    public override IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator dataStoreValidator)
+    public override Task<IDataStore> ConfigureAsync(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator dataStoreValidator)
     {
         Tenant = tenant;
 
@@ -129,7 +129,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
 
         DataStoreValidator = dataStoreValidator;
         
-        return this;
+        return Task.FromResult<IDataStore>(this);
     }
 
     public override Task<Uri> GetInternalUriAsync(string domain, string path, TimeSpan expire, IEnumerable<string> headers)

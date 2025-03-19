@@ -759,6 +759,18 @@ public enum MessageAction
     [SwaggerEnum("Start storage decryption")]
     StartStorageDecryption = 5053,
 
+    [SwaggerEnum("DevTools access settings changed")]
+    DevToolsAccessSettingsChanged = 6054,
+
+    [SwaggerEnum("Webhook created")]
+    WebhookCreated = 6055,
+
+    [SwaggerEnum("Webhook updated")]
+    WebhookUpdated = 6056,
+
+    [SwaggerEnum("Webhook deleted")]
+    WebhookDeleted = 6057,
+
     #endregion
 
     #region others
