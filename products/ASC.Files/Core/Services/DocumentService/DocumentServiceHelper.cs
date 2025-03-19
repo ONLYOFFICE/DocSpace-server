@@ -667,7 +667,6 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         if (result.CanFill) 
         {
             result.EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
-            result.FillingSessionId = $"{file.Id}_{securityContext.CurrentAccount.ID}";
         }
         return result;
     }
