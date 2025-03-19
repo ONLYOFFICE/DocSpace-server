@@ -385,6 +385,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Developer Tools access settings changed.
+        /// </summary>
+        public static string DevToolsAccessSettingsChanged {
+            get {
+                return ResourceManager.GetString("DevToolsAccessSettingsChanged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to DNS Settings Updated.
         /// </summary>
         public static string DnsSettingsUpdated {
@@ -2505,6 +2514,33 @@ namespace ASC.AuditTrail {
         public static string UserUpdatedPassword {
             get {
                 return ResourceManager.GetString("UserUpdatedPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Webhook created: {0}.
+        /// </summary>
+        public static string WebhookCreated {
+            get {
+                return ResourceManager.GetString("WebhookCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Webhook deleted: {0}.
+        /// </summary>
+        public static string WebhookDeleted {
+            get {
+                return ResourceManager.GetString("WebhookDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Webhook updated: {0}.
+        /// </summary>
+        public static string WebhookUpdated {
+            get {
+                return ResourceManager.GetString("WebhookUpdated", resourceCulture);
             }
         }
     }

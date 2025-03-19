@@ -455,13 +455,15 @@ public abstract class FilesController<T>(
     /// </summary>
     /// <path>api/2.0/files/{fileId}/order</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Order is set")]
+    [SwaggerResponse(200, "Updated file information", typeof(FileDto<int>))]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "Not Found")]
     [HttpPut("{fileId}/order")]
-    public async Task SetOrderFile(OrderFileRequestDto<T> inDto)
+    public async Task<FileDto<T>> SetOrderFile(OrderFileRequestDto<T> inDto)
     {
-        await fileStorageService.SetFileOrder(inDto.FileId, inDto.Order.Order);
+        var file = await fileStorageService.SetFileOrder(inDto.FileId, inDto.Order.Order);
+
+        return await _fileDtoHelper.GetAsync(file);
     }
 
     /// <summary>
@@ -470,11 +472,16 @@ public abstract class FilesController<T>(
     /// <path>api/2.0/files/order</path>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Order is set")]
+    [SwaggerResponse(200, "Updated file entries information", typeof(IAsyncEnumerable<FileDto<int>>))]
     [HttpPut("order")]
-    public async Task SetFilesOrder(OrdersRequestDto<T> inDto)
+    public async IAsyncEnumerable<FileEntryDto<T>> SetFilesOrder(OrdersRequestDto<T> inDto)
     {
-        await fileStorageService.SetOrderAsync(inDto.Items);
+        await foreach (var e in fileStorageService.SetOrderAsync(inDto.Items))
+        {
+            yield return e.FileEntryType == FileEntryType.Folder
+                ? await _folderDtoHelper.GetAsync(e as Folder<T>)
+                : await _fileDtoHelper.GetAsync(e as File<T>);
+        }
     }
 
     /// <summary>

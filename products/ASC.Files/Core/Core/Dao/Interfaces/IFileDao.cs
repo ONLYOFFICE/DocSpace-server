@@ -344,6 +344,13 @@ public interface IFileDao<T>
     Task ReassignFilesAsync(Guid oldOwnerId, Guid newOwnerId, IEnumerable<T> exceptFolderIds);
 
     /// <summary>
+    /// Set created by
+    /// </summary>
+    /// <param name="newOwnerId"></param>
+    /// <param name="fileIds"></param>
+    Task ReassignFilesAsync(Guid newOwnerId, IEnumerable<T> fileIds);
+
+    /// <summary>
     /// Search files in SharedWithMe &amp; Projects
     /// </summary>
     /// <param name="parentIds"></param>

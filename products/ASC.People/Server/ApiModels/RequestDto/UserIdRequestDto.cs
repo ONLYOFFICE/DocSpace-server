@@ -24,19 +24,17 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Webhooks.Core;
+namespace ASC.People.ApiModels.RequestDto;
 
-public class WebHooksSettings : ISettings<WebHooksSettings>
+
+/// <summary>
+/// 
+/// </summary>
+public class UserIdRequestDto
 {
-    public List<int> Ids { get; init; }
-
-    [JsonIgnore]
-    public Guid ID => new("6EFA0EAB-D033-4720-BDB3-DEB057EBC140");
-
-    public WebHooksSettings GetDefault() => new()
-    {
-        Ids = []
-    };
+    /// <summary>
+    /// User ID
+    /// </summary>
+    [FromRoute(Name = "userid")]
+    public Guid UserId { get; set; }
 }
-
-

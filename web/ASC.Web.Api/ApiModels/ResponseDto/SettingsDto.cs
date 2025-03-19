@@ -188,9 +188,14 @@ public class SettingsDto
     public bool CookieSettingsEnabled { get; set; }
 
     /// <summary>
-    /// Limited access space
+    /// Limited access to Space Management
     /// </summary>
     public bool LimitedAccessSpace { get; set; }
+
+    /// <summary>
+    /// Limited access to Developer Tools for users
+    /// </summary>
+    public bool LimitedAccessDevToolsForUsers { get; set; }
 
     /// <summary>
     /// User name validation regex

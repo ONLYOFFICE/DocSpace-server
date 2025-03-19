@@ -31,11 +31,13 @@ global using System.ComponentModel.DataAnnotations;
 global using System.Diagnostics;
 global using System.Extensions;
 global using System.Globalization;
+global using ASC.Common.protos;
 global using System.Linq.Expressions;
 global using System.Net;
 global using System.Net.Http.Headers;
 global using System.Net.Mime;
 global using System.Net.Sockets;
+global using ASC.Core.Common.Quota.Custom;
 global using System.Runtime.Serialization;
 global using System.Security;
 global using System.Security.Cryptography;
@@ -170,6 +172,7 @@ global using ASC.Web.Files.Utils;
 global using ASC.Web.Studio.Core;
 global using ASC.Web.Studio.Core.Notify;
 global using ASC.Web.Studio.Utility;
+global using ASC.Webhooks.Core;
 
 global using AutoMapper;
 

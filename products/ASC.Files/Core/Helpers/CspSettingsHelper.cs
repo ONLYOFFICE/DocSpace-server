@@ -225,13 +225,15 @@ public class CspSettingsHelper(
 
         options.Add(defaultOptions);
 
-        if (Uri.IsWellFormedUriString(filesLinkUtility.GetDocServiceUrl(), UriKind.Absolute))
+        var docServiceUrl = filesLinkUtility.GetDocServiceUrl();
+        
+        if (Uri.IsWellFormedUriString(docServiceUrl, UriKind.Absolute))
         {
             options.Add(new CspOptions
             {
-                Script = [filesLinkUtility.GetDocServiceUrl()],
-                Frame = [filesLinkUtility.GetDocServiceUrl()],
-                Connect = [filesLinkUtility.GetDocServiceUrl()]
+                Script = [docServiceUrl],
+                Frame = [docServiceUrl],
+                Connect = [docServiceUrl]
             });
         }
 
