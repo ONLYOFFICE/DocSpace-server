@@ -1843,14 +1843,14 @@ public class UserController(
 
         var tenant = tenantManager.GetCurrentTenant();
 
-        var user = await userManager.GetUsersAsync(inDto.UserId);
-        var currentUser = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
-        var toUser = inDto.ReassignUserId.HasValue ? await userManager.GetUsersAsync(inDto.ReassignUserId.Value) : currentUser;
+        var user = await _userManager.GetUsersAsync(inDto.UserId);
+        var currentUser = await _userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
+        var toUser = inDto.ReassignUserId.HasValue ? await _userManager.GetUsersAsync(inDto.ReassignUserId.Value) : currentUser;
 
-        var userType = await userManager.GetUserTypeAsync(user);
-        var toUserType = await userManager.GetUserTypeAsync(toUser);
+        var userType = await _userManager.GetUserTypeAsync(user);
+        var toUserType = await _userManager.GetUserTypeAsync(toUser);
 
-        if (userManager.IsSystemUser(user.Id) 
+        if (_userManager.IsSystemUser(user.Id) 
             || user.Status == EmployeeStatus.Terminated
             || toUser.Status == EmployeeStatus.Terminated
             || user.Id == toUser.Id
@@ -1889,7 +1889,7 @@ public class UserController(
     [HttpGet("type/progress/{userid:guid}")]
     public async Task<TaskProgressResponseDto> GetReassignProgressAsync(UserIdRequestDto inDto)
     {
-        await permissionContext.DemandPermissionsAsync(Constants.Action_AddRemoveUser);
+        await _permissionContext.DemandPermissionsAsync(Constants.Action_AddRemoveUser);
 
         var tenant = tenantManager.GetCurrentTenant();
         var progressItem = await queueWorkerUpdateUserType.GetProgressItemStatus(tenant.Id, inDto.UserId);
@@ -1907,7 +1907,7 @@ public class UserController(
     [HttpPut("type/terminate")]
     public async Task<TaskProgressResponseDto> TerminateReassignAsync(TerminateRequestDto inDto)
     {
-        await permissionContext.DemandPermissionsAsync(Constants.Action_AddRemoveUser);
+        await _permissionContext.DemandPermissionsAsync(Constants.Action_AddRemoveUser);
 
         var tenant = tenantManager.GetCurrentTenant();
         var progressItem = await queueWorkerUpdateUserType.GetProgressItemStatus(tenant.Id, inDto.UserId);
