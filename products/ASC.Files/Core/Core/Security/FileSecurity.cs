@@ -2618,7 +2618,7 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         foreach (var s in shares)
         {
-            if (s is FileShare.Restrict or FileShare.None || s is FileShare.Read && fileType != FileType.Pdf)
+            if (s is FileShare.Restrict or FileShare.None || s is FileShare.Read && !file.IsForm)
             {
                 result.Add(s.ToStringFast(), true);
                 continue;
@@ -2633,9 +2633,9 @@ public class FileSecurity(IDaoFactory daoFactory,
             switch (s)
             {
                 case FileShare.Editing when canEdit:
-                case FileShare.FillForms when fileType is FileType.Pdf:
+                case FileShare.FillForms when file.IsForm:
                 case FileShare.CustomFilter when canCustomFiltering:
-                case FileShare.Comment when fileType != FileType.Pdf && canComment:
+                case FileShare.Comment when !file.IsForm && canComment:
                 case FileShare.Review when canReview:
                     result.Add(s.ToStringFast(), true);
                     break;

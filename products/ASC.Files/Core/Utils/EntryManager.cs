@@ -294,7 +294,8 @@ public class EntryManager(IDaoFactory daoFactory,
     FileChecker fileChecker,
     IFusionCache hybridCache,
     NotifyClient notifyClient,
-    ExternalShare externalShare)
+    ExternalShare externalShare,
+    FileSharingAceHelper fileSharingAceHelper)
 {
     private const string UpdateList = "filesUpdateList";
 
@@ -2216,6 +2217,30 @@ public class EntryManager(IDaoFactory daoFactory,
                 }
             }
         }
+
+        var records = fileSecurity.GetPureSharesAsync(result, ShareFilterType.Link, null, null).Where(r=> r.Share == FileShare.FillForms);
+
+        var aces = new List<AceWrapper>();
+
+        await foreach(var record in records)
+        {
+            aces.Add(new AceWrapper()
+            {
+                Access = FileShare.Read,
+                Id = record.Subject,
+                SubjectType = record.SubjectType,
+                FileShareOptions = record.Options
+            });
+        };
+
+        var current = securityContext.CurrentAccount.ID;
+
+        await securityContext.AuthenticateMeWithoutCookieAsync(result.CreateBy);
+
+        var shares = await fileSharingAceHelper.SetAceObjectAsync(aces, result, false, null);
+
+        await securityContext.AuthenticateMeWithoutCookieAsync(current);
+
         return result;
     }
 
