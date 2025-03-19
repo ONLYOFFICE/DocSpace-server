@@ -24,19 +24,14 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Webhooks.Core;
+namespace ASC.Files.Core;
 
-public class WebHooksSettings : ISettings<WebHooksSettings>
+public enum FormFillingStatus
 {
-    public List<int> Ids { get; init; }
-
-    [JsonIgnore]
-    public Guid ID => new("6EFA0EAB-D033-4720-BDB3-DEB057EBC140");
-
-    public WebHooksSettings GetDefault() => new()
-    {
-        Ids = []
-    };
+    None = 0,
+    Draft = 1,
+    YouTurn = 2,
+    InProgress = 3,
+    Complete = 4,
+    Stoped = 5
 }
-
-

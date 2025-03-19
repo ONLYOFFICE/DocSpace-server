@@ -137,6 +137,7 @@ public partial class SettingsController(MessageService messageService,
             settings.TagManagerId = setupInfo.TagManagerId;
             settings.SocketUrl = configuration["web:hub:url"] ?? "";
             settings.LimitedAccessSpace = (await settingsManager.LoadAsync<TenantAccessSpaceSettings>()).LimitedAccessSpace;
+            settings.LimitedAccessDevToolsForUsers = (await settingsManager.LoadAsync<TenantDevToolsAccessSettings>()).LimitedAccessForUsers;
 
             settings.Firebase = new FirebaseDto
             {
@@ -1125,6 +1126,44 @@ public partial class SettingsController(MessageService messageService,
     {
         var tenant = tenantManager.GetCurrentTenant();
         await telegramHelper.DisconnectAsync(authContext.CurrentAccount.ID, tenant.Id);
+    }
+
+    /// <summary>
+    /// Returns the Developer Tools access settings for the portal.
+    /// </summary>
+    /// <short>
+    /// Get the Developer Tools access settings
+    /// </short>
+    /// <path>api/2.0/settings/devtoolsaccess</path>
+    [Tags("Settings / Access to DevTools")]
+    [SwaggerResponse(200, "Developer Tools access settings", typeof(TenantDevToolsAccessSettings))]
+    [HttpGet("devtoolsaccess")]
+    public async Task<TenantDevToolsAccessSettings> GetTenantAccessDevToolsSettingsAsync()
+    {
+        return await settingsManager.LoadAsync<TenantDevToolsAccessSettings>();
+    }
+
+    /// <summary>
+    /// Sets the Developer Tools access settings for the portal.
+    /// </summary>
+    /// <short>
+    /// Set the Developer Tools access settings
+    /// </short>
+    /// <path>api/2.0/security/devtoolsaccess</path>
+    [Tags("Security / Access to DevTools")]
+    [SwaggerResponse(200, "Developer Tools access settings", typeof(TenantDevToolsAccessSettings))]
+    [HttpPost("devtoolsaccess")]
+    public async Task<TenantDevToolsAccessSettings> SetTenantDevToolsAccessSettingsAsync(TenantDevToolsAccessSettingsDto inDto)
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        var settings = new TenantDevToolsAccessSettings() { LimitedAccessForUsers = inDto.LimitedAccessForUsers };
+
+        await settingsManager.SaveAsync(settings);
+
+        messageService.Send(MessageAction.DevToolsAccessSettingsChanged);
+
+        return settings;
     }
 
     private async Task DemandStatisticPermissionAsync()
