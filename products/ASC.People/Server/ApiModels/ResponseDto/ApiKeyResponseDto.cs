@@ -64,22 +64,22 @@ public class ApiKeyResponseDto : IMapFrom<ApiKey>
     /// <summary>
     /// Date and time when the API key was last used
     /// </summary>
-    public DateTime? LastUsed { get; set; }
+    public ApiDateTime? LastUsed { get; set; }
 
     /// <summary>
     /// Date and time when the API key was created
     /// </summary>
-    public DateTime CreateOn { get; set; } = DateTime.UtcNow;
+    public ApiDateTime CreateOn { get; set; }
 
     /// <summary>
     /// Identifier of the user who created the API key
     /// </summary>
-    public Guid CreateBy { get; set; }
+    public EmployeeDto CreateBy { get; set; }
 
     /// <summary>
     /// Date and time when the API key expires
     /// </summary>
-    public DateTime? ExpiresAt { get; set; }
+    public ApiDateTime? ExpiresAt { get; set; }
 
     /// <summary>
     /// Indicates whether the API key is active
@@ -94,30 +94,27 @@ public class ApiKeyResponseDto : IMapFrom<ApiKey>
 }
 
 [Scope]
-public class ApiKeyConverter(TenantUtil tenantUtil): ITypeConverter<ApiKey, ApiKeyResponseDto>
+public class ApiKeyConverter(TenantUtil tenantUtil, 
+                             ApiDateTimeHelper apiDateTimeHelper,
+                             EmployeeDtoHelper employeeWrapperHelper): ITypeConverter<ApiKey, ApiKeyResponseDto>
 {
     public ApiKeyResponseDto Convert(ApiKey source, ApiKeyResponseDto destination, ResolutionContext context)
     {
         if (source.Id == Guid.Empty) return new ApiKeyResponseDto();
-        
-        var apiKeyResponseDto = new ApiKeyResponseDto
+              
+        var result = new ApiKeyResponseDto
         {
             Id = source.Id,
             Name = source.Name,
             KeyPrefix = source.KeyPrefix,
             Permissions = source.Permissions,
-            LastUsed = source.LastUsed,
-            CreateOn = tenantUtil.DateTimeFromUtc(source.CreateOn),
-            CreateBy = source.CreateBy,
-            ExpiresAt = source.ExpiresAt.HasValue ? tenantUtil.DateTimeFromUtc(source.ExpiresAt.Value) : null,
+            LastUsed = source.LastUsed.HasValue ? apiDateTimeHelper.Get(source.LastUsed.Value) : null,
+            CreateOn = apiDateTimeHelper.Get(source.CreateOn),
+            CreateBy =  employeeWrapperHelper.GetAsync(source.CreateBy).GetAwaiter().GetResult(),
+            ExpiresAt = source.ExpiresAt.HasValue ? apiDateTimeHelper.Get(source.ExpiresAt.Value) : null,
             IsActive = source.IsActive,
         };
 
-        apiKeyResponseDto.CreateOn = tenantUtil.DateTimeFromUtc(source.CreateOn);
-        apiKeyResponseDto.ExpiresAt = source.ExpiresAt.HasValue
-            ? tenantUtil.DateTimeFromUtc(source.ExpiresAt.Value)
-            : null;
-
-        return apiKeyResponseDto;
+        return result;
     }
 }
