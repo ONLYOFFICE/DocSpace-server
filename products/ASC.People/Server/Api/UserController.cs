@@ -1270,6 +1270,10 @@ public class UserController(
             var my = await globalFolderHelper.FolderMyAsync;
             result.HasPersonalFolder = my != 0;
         }
+        else
+        {
+            result.HasPersonalFolder = true;
+        }
 
         return result;
     }
