@@ -223,11 +223,6 @@ public class CoreConfiguration(CoreSettings coreSettings, TenantManager tenantMa
         return await coreSettings.GetSettingAsync(key, tenant);
     }
 
-    public string GetSetting(string key, int tenant = Tenant.DefaultTenant)
-    {
-        return coreSettings.GetSetting(key, tenant);
-    }
-
     #endregion
 
     #region Methods Get/Set Section
