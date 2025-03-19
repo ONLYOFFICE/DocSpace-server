@@ -454,7 +454,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
             DocServicePortalUrl = filesLinkUtility.GetDocServicePortalUrl(),
             DocServiceSignatureHeader = await filesLinkUtility.GetDocServiceSignatureHeaderAsync(),
             DocServiceSslVerification = await filesLinkUtility.GetDocServiceSslVerificationAsync(),
-            IsDefault = await filesLinkUtility.IsDefault()
+            IsDefault = await filesLinkUtility.IsDefaultAsync()
         };
     }
 }

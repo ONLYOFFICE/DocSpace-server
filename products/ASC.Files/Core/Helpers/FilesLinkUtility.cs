@@ -330,7 +330,7 @@ public class FilesLinkUtility
         await SetSslVerificationSettingAsync(value);
     }
 
-    public async Task<bool> IsDefault()
+    public async Task<bool> IsDefaultAsync()
     {
         if (!await IsDefaultUrlSettingAsync(PublicUrlKey))
         {
