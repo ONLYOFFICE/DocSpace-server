@@ -85,6 +85,11 @@ internal class FileConverterService<T>(
                 await securityContext.AuthenticateMeWithoutCookieAsync(converter.Account);
 
                 var file = await daoFactory.GetFileDao<T>().GetFileAsync(fileId, fileVersion);
+                if (file == null)
+                {
+                    continue;
+                }
+                
                 var fileUri = file.Id.ToString();
 
                 string convertedFileUrl;
