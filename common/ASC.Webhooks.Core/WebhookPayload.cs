@@ -28,7 +28,7 @@ namespace ASC.Webhooks.Core;
 
 public class WebhookPayload<T>
 {
-    public WebhookPayloadActionInfo Action { get; set; }
+    public WebhookPayloadEventInfo Event { get; set; }
     public T Payload { get; set; }
     public WebhookPayloadConfigInfo Webhook { get; set; }
 
@@ -41,7 +41,7 @@ public class WebhookPayload<T>
         var now = DateTime.UtcNow;
         now = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second, DateTimeKind.Utc);
 
-        Action = new WebhookPayloadActionInfo
+        Event = new WebhookPayloadEventInfo
         {
             CreateBy = userId,
             CreateOn = now,
@@ -73,7 +73,7 @@ public class WebhookPayload<T>
     }
 }
 
-public class WebhookPayloadActionInfo
+public class WebhookPayloadEventInfo
 {
     public DateTime CreateOn { get; set; }
     public Guid CreateBy { get; set; }
