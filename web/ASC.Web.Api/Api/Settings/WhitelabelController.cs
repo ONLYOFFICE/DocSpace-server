@@ -26,23 +26,24 @@
 
 namespace ASC.Web.Api.Controllers.Settings;
 
-public class WhitelabelController(ApiContext apiContext,
-        PermissionContext permissionContext,
-        SettingsManager settingsManager,
-        WebItemManager webItemManager,
-        TenantInfoSettingsHelper tenantInfoSettingsHelper,
-        TenantWhiteLabelSettingsHelper tenantWhiteLabelSettingsHelper,
-        TenantLogoManager tenantLogoManager,
-        CoreBaseSettings coreBaseSettings,
-        CommonLinkUtility commonLinkUtility,
-        IMemoryCache memoryCache,
-        IHttpContextAccessor httpContextAccessor,
-        IMapper mapper,
-        CompanyWhiteLabelSettingsHelper companyWhiteLabelSettingsHelper,
-        TenantManager tenantManager,
-        TenantExtra tenantExtra,
-        StorageFactory storageFactory)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+public class WhitelabelController(
+    ApiContext apiContext,
+    PermissionContext permissionContext,
+    SettingsManager settingsManager,
+    WebItemManager webItemManager,
+    TenantInfoSettingsHelper tenantInfoSettingsHelper,
+    TenantWhiteLabelSettingsHelper tenantWhiteLabelSettingsHelper,
+    TenantLogoManager tenantLogoManager,
+    CoreBaseSettings coreBaseSettings,
+    CommonLinkUtility commonLinkUtility,
+    IFusionCache fusionCache,
+    IHttpContextAccessor httpContextAccessor,
+    IMapper mapper,
+    CompanyWhiteLabelSettingsHelper companyWhiteLabelSettingsHelper,
+    TenantManager tenantManager,
+    TenantExtra tenantExtra,
+    StorageFactory storageFactory)
+    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     #region Logos
 
@@ -416,10 +417,10 @@ public class WhitelabelController(ApiContext apiContext,
     /// </short>
     /// <path>api/2.0/settings/whitelabel/logotext</path>
     [Tags("Settings / Rebranding")]
-    [SwaggerResponse(200, "Logo text", typeof(object))]
+    [SwaggerResponse(200, "Logo text", typeof(string))]
     [AllowNotPayment]
     [HttpGet("whitelabel/logotext")]
-    public async Task<object> GetWhiteLabelLogoTextAsync([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
+    public async Task<string> GetWhiteLabelLogoTextAsync([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -452,7 +453,7 @@ public class WhitelabelController(ApiContext apiContext,
         return new IsDefaultWhiteLabelLogosDto
         {
             Name = "logotext",
-            Default = tenantWhiteLabelSettings.LogoText.IsNullOrEmpty() || tenantWhiteLabelSettings.LogoText.Equals(TenantWhiteLabelSettings.DefaultLogoText)
+            Default = string.IsNullOrEmpty(tenantWhiteLabelSettings.LogoText)
         };
     }
 

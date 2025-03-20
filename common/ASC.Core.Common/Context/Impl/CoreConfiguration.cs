@@ -43,8 +43,7 @@ public class CoreBaseSettings(IConfiguration configuration)
 
     public bool CustomMode => _customMode ??= string.Equals(configuration["core:custom-mode"], "true", StringComparison.OrdinalIgnoreCase);
 
-    public List<CultureInfo> EnabledCultures => _enabledCultures ??= (configuration["web:cultures"] ?? "en-US")
-        .Split([','], StringSplitOptions.RemoveEmptyEntries)
+    public List<CultureInfo> EnabledCultures => _enabledCultures ??= (configuration.GetSection("web:cultures").Get<string[]>() ?? ["en-US"])
         .Distinct()
         .Select(l => CultureInfo.GetCultureInfo(l.Trim()))
         .ToList();
@@ -222,11 +221,6 @@ public class CoreConfiguration(CoreSettings coreSettings, TenantManager tenantMa
     public async Task<string> GetSettingAsync(string key, int tenant = Tenant.DefaultTenant)
     {
         return await coreSettings.GetSettingAsync(key, tenant);
-    }
-
-    public string GetSetting(string key, int tenant = Tenant.DefaultTenant)
-    {
-        return coreSettings.GetSetting(key, tenant);
     }
 
     #endregion

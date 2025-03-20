@@ -38,7 +38,7 @@ public class StudioNotifyService(
     TenantManager tenantManager,
     CoreBaseSettings coreBaseSettings,
     CommonLinkUtility commonLinkUtility,
-    SetupInfo setupInfo,
+    ExternalResourceSettingsHelper externalResourceSettingsHelper,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     UserInvitationLimitHelper userInvitationLimitHelper,
     SettingsManager settingsManager,
@@ -68,11 +68,11 @@ public class StudioNotifyService(
 
     public async Task SendMsgToSalesAsync(string email, string userName, string message)
     {
-        var settings = await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>();
+        var salesEmail = externalResourceSettingsHelper.Common.GetDefaultRegionalFullEntry("paymentemail");
 
         await studioNotifyServiceHelper.SendNoticeToAsync(
             Actions.UserMessageToSales,
-            await studioNotifyHelper.RecipientFromEmailAsync(settings.SalesEmail, false),
+            await studioNotifyHelper.RecipientFromEmailAsync(salesEmail, false),
             [EMailSenderName],
             new TagValue(Tags.Body, message),
             new TagValue(Tags.UserEmail, email),
@@ -377,6 +377,8 @@ public class StudioNotifyService(
         var img3 = studioNotifyHelper.GetNotificationImageUrl("collaborate.png");
         var img4 = studioNotifyHelper.GetNotificationImageUrl("chatgpt.png");
 
+        var url1 = externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("userguides", culture);
+
         await studioNotifyServiceHelper.SendNoticeToAsync(
         notifyAction,
            await studioNotifyHelper.RecipientFromEmailAsync(newUserInfo.Email, false),
@@ -390,6 +392,7 @@ public class StudioNotifyService(
         new TagValue("IMG2", img2),
         new TagValue("IMG3", img3),
         new TagValue("IMG4", img4),
+        new TagValue("URL1", url1),
         new TagValue(CommonTags.Footer, footer));
     }
 
@@ -431,6 +434,8 @@ public class StudioNotifyService(
         var img3 = studioNotifyHelper.GetNotificationImageUrl("collaborate.png");
         var img4 = studioNotifyHelper.GetNotificationImageUrl("chatgpt.png");
 
+        var url1 = externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("userguides", culture);
+
         await studioNotifyServiceHelper.SendNoticeToAsync(
         notifyAction,
            await studioNotifyHelper.RecipientFromEmailAsync(newUserInfo.Email, false),
@@ -444,6 +449,7 @@ public class StudioNotifyService(
         new TagValue("IMG2", img2),
         new TagValue("IMG3", img3),
         new TagValue("IMG4", img4),
+        new TagValue("URL1", url1),
         new TagValue(CommonTags.Footer, footer));
     }
 
@@ -720,8 +726,9 @@ public class StudioNotifyService(
                 [EMailSenderName],
                 TagValues.OrangeButton(orangeButtonText, url),
                 TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
+                new TagValue("URL1", externalResourceSettingsHelper.Common.GetRegionalFullEntry("legalterms", culture)),
                 new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("docspace_deactivated.gif")),
-                    new TagValue(Tags.OwnerName, owner.DisplayUserName(displayUserSettingsHelper)));
+                new TagValue(Tags.OwnerName, owner.DisplayUserName(displayUserSettingsHelper)));
     }
 
     #endregion
@@ -852,8 +859,7 @@ public class StudioNotifyService(
                 return;
             }
 
-            var settings = await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>();
-            var salesEmail = settings.SalesEmail ?? setupInfo.SalesEmail;
+            var salesEmail = externalResourceSettingsHelper.Common.GetDefaultRegionalFullEntry("paymentemail");
 
             if (string.IsNullOrEmpty(salesEmail))
             {
@@ -929,27 +935,8 @@ public class StudioNotifyService(
             [await studioNotifyHelper.ToRecipientAsync(u.Id)],
             [EMailSenderName],
             new TagValue(Tags.UserName, u.FirstName.HtmlEncode()),
-            new TagValue(Tags.PortalUrl, serverRootPath),
-            new TagValue(Tags.ControlPanelUrl, GetControlPanelUrl(serverRootPath)));
+            new TagValue(Tags.PortalUrl, serverRootPath));
         }
-    }
-
-    private string GetControlPanelUrl(string serverRootPath)
-    {
-        var controlPanelUrl = setupInfo.ControlPanelUrl;
-
-        if (string.IsNullOrEmpty(controlPanelUrl))
-        {
-            return string.Empty;
-        }
-
-        if (controlPanelUrl.StartsWith("http://", StringComparison.InvariantCultureIgnoreCase) ||
-            controlPanelUrl.StartsWith("https://", StringComparison.InvariantCultureIgnoreCase))
-        {
-            return controlPanelUrl;
-        }
-
-        return serverRootPath + "/" + controlPanelUrl.TrimStart('~', '/').TrimEnd('/');
     }
 
     #endregion

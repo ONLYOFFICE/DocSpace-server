@@ -599,11 +599,13 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                     return;
                 }
 
-                if (!string.IsNullOrEmpty(fileUtility.SignatureSecret))
+                var signatureSecret = filesLinkUtility.DocServiceSignatureSecret;
+                if (!string.IsNullOrEmpty(signatureSecret))
                 {
                     try
                     {
-                        var header = context.Request.Headers[fileUtility.SignatureHeader].FirstOrDefault();
+                        var signatureHeader = filesLinkUtility.DocServiceSignatureHeader;
+                        var header = context.Request.Headers[signatureHeader].FirstOrDefault();
                         if (string.IsNullOrEmpty(header) || !header.StartsWith("Bearer "))
                         {
                             var requestHeaderTrace = new StringBuilder();
@@ -613,7 +615,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                                 requestHeaderTrace.Append($"{requestHeader.Key}={requestHeader.Value}" + Environment.NewLine);
                             }
 
-                            var exceptionMessage = $"Invalid signature header {fileUtility.SignatureHeader} with value {header}." +
+                            var exceptionMessage = $"Invalid signature header {signatureHeader} with value {header}." +
                                                    $"Trace headers: {requestHeaderTrace}  ";
 
 
@@ -622,7 +624,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
 
                         header = header["Bearer ".Length..];
 
-                        var stringPayload = JsonWebToken.Decode(header, fileUtility.SignatureSecret);
+                        var stringPayload = JsonWebToken.Decode(header, signatureSecret);
 
                         logger.DebugDocServiceStreamFilePayload(stringPayload);
                         //var data = JObject.Parse(stringPayload);
@@ -741,11 +743,12 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         try
         {
             var fileName = context.Request.Query[FilesLinkUtility.FileTitle];
-            if (!string.IsNullOrEmpty(fileUtility.SignatureSecret))
+            var signatureSecret = filesLinkUtility.DocServiceSignatureSecret;
+            if (!string.IsNullOrEmpty(signatureSecret))
             {
                 try
                 {
-                    var header = context.Request.Headers[fileUtility.SignatureHeader].FirstOrDefault();
+                    var header = context.Request.Headers[filesLinkUtility.DocServiceSignatureHeader].FirstOrDefault();
                     if (string.IsNullOrEmpty(header) || !header.StartsWith("Bearer "))
                     {
                         throw new Exception("Invalid header " + header);
@@ -753,7 +756,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
 
                     header = header["Bearer ".Length..];
 
-                    var stringPayload = JsonWebToken.Decode(header, fileUtility.SignatureSecret);
+                    var stringPayload = JsonWebToken.Decode(header, signatureSecret);
 
                     logger.DebugDocServiceStreamFilePayload(stringPayload);
                     //var data = JObject.Parse(stringPayload);
@@ -1523,13 +1526,14 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 : $"{fileId}_{lastfileDataAction.UserId}")
             : string.Empty;
 
-        if (!string.IsNullOrEmpty(fileUtility.SignatureSecret))
+        var signatureSecret = filesLinkUtility.DocServiceSignatureSecret;
+        if (!string.IsNullOrEmpty(signatureSecret))
         {
             if (!string.IsNullOrEmpty(fileData.Token))
             {
                 try
                 {
-                    var dataString = JsonWebToken.Decode(fileData.Token, fileUtility.SignatureSecret);
+                    var dataString = JsonWebToken.Decode(fileData.Token, signatureSecret);
 
                     var data = JObject.Parse(dataString);
                     if (data == null)
@@ -1547,7 +1551,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             else
             {
                 //todo: remove old scheme
-                var header = context.Request.Headers[fileUtility.SignatureHeader].FirstOrDefault();
+                var header = context.Request.Headers[filesLinkUtility.DocServiceSignatureHeader].FirstOrDefault();
                 if (string.IsNullOrEmpty(header) || !header.StartsWith("Bearer "))
                 {
                     logger.ErrorDocServiceTrackHeaderIsNull();
@@ -1557,7 +1561,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
 
                 try
                 {
-                    var stringPayload = JsonWebToken.Decode(header, fileUtility.SignatureSecret);
+                    var stringPayload = JsonWebToken.Decode(header, signatureSecret);
 
                     logger.DebugDocServiceTrackPayload(stringPayload);
                     var jsonPayload = JObject.Parse(stringPayload);

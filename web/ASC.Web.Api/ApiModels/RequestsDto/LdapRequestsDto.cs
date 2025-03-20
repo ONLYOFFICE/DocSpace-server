@@ -52,6 +52,11 @@ public class LdapRequestsDto : IMapFrom<LdapSettings>
     public bool SendWelcomeEmail { get; set; }
 
     /// <summary>
+    /// Specifies if the email verification is disabled or not
+    /// </summary>
+    public bool DisableEmailVerification { get; set; }
+
+    /// <summary>
     /// LDAP server URL address
     /// </summary>
     public string Server { get; set; }

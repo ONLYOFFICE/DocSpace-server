@@ -31,7 +31,7 @@ public class FoldersControllerInternal(
     BreadCrumbsManager breadCrumbsManager,
     FolderContentDtoHelper folderContentDtoHelper,
     FileStorageService fileStorageService,
-    FileOperationsManager fileOperationsManager,
+    FileDeleteOperationsManager fileOperationsManager,
     FileOperationDtoHelper fileOperationDtoHelper,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
@@ -63,7 +63,7 @@ public class FoldersControllerInternal(
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "The required folder was not found")]
     [HttpGet("folder/{folderId:int}/log")]
-    public IAsyncEnumerable<HistoryDto> GetActivityHistoryAsync(HistoryFolderRequestDto inDto)
+    public IAsyncEnumerable<HistoryDto> GetFolderHistoryAsync(HistoryFolderRequestDto inDto)
     {
         return historyApiHelper.GetFolderHistoryAsync(inDto.FolderId, inDto.FromDate, inDto.ToDate);
     }
@@ -87,7 +87,7 @@ public class FoldersControllerThirdparty(
     BreadCrumbsManager breadCrumbsManager,
     FolderContentDtoHelper folderContentDtoHelper,
     FileStorageService fileStorageService,
-    FileOperationsManager fileOperationsManager,
+    FileDeleteOperationsManager fileOperationsManager,
     FileOperationDtoHelper fileOperationDtoHelper,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
@@ -107,7 +107,7 @@ public abstract class FoldersController<T>(
     BreadCrumbsManager breadCrumbsManager,
     FolderContentDtoHelper folderContentDtoHelper,
     FileStorageService fileStorageService,
-    FileOperationsManager fileOperationsManager,
+    FileDeleteOperationsManager fileOperationsManager,
     FileOperationDtoHelper fileOperationDtoHelper,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
@@ -141,7 +141,7 @@ public abstract class FoldersController<T>(
     [HttpDelete("folder/{folderId}")]
     public async IAsyncEnumerable<FileOperationDto> DeleteFolder(DeleteFolder<T> inDto)
     {
-        await fileOperationsManager.PublishDelete(new List<T> { inDto.FolderId }, new List<T>(), false, !inDto.Delete.DeleteAfter, inDto.Delete.Immediately);
+        await fileOperationsManager.Publish(new List<T> { inDto.FolderId }, new List<T>(), false, !inDto.Delete.DeleteAfter, inDto.Delete.Immediately);
         
         foreach (var e in await fileOperationsManager.GetOperationResults())
         {
@@ -155,9 +155,11 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/folder/{folderId}/order</path>
     [Tags("Files / Folders")]
     [HttpPut("folder/{folderId}/order")]
-    public async Task SetFileOrder(OrderFolderRequestDto<T> inDto)
+    public async Task<FolderDto<T>> SetFileOrder(OrderFolderRequestDto<T> inDto)
     {
-        await fileStorageService.SetFolderOrder(inDto.FolderId, inDto.Order.Order);
+        var folder = await fileStorageService.SetFolderOrder(inDto.FolderId, inDto.Order.Order);
+
+        return await _folderDtoHelper.GetAsync(folder);
     }
 
     /// <summary>
@@ -274,7 +276,7 @@ public abstract class FoldersController<T>(
     [SwaggerResponse(403, "You don't have enough permission to rename the folder")]
     [HttpPut("folder/{folderId}")]
     public async Task<FolderDto<T>> RenameFolderAsync(CreateFolderRequestDto<T> inDto)
-    {        
+    {
         var folder = await fileStorageService.FolderRenameAsync(inDto.FolderId, inDto.Folder.Title);
 
         return await _folderDtoHelper.GetAsync(folder);
@@ -500,9 +502,10 @@ public class FoldersControllerCommon(
             withoutTrash = true;
         }
 
-        if (!isGuest)
+        var my = await globalFolderHelper.FolderMyAsync;
+        if (my != 0)
         {
-            yield return await globalFolderHelper.FolderMyAsync;
+            yield return my;
         }
 
         if (!withoutTrash)

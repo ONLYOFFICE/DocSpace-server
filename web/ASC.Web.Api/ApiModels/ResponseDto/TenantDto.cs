@@ -143,6 +143,11 @@ public class TenantDto : IMapFrom<Tenant>
     /// </summary>
     public DateTime VersionChanged { get; set; }
 
+    /// <summary>
+    /// AWS region
+    /// </summary>
+    public string Region { get; set; }
+
     public void Mapping(Profile profile)
     {
         profile.CreateMap<Tenant, TenantDto>()

@@ -27,16 +27,18 @@
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
 [Transient]
-public class FileDuplicateOperation(IServiceProvider serviceProvider) : ComposeFileOperation<FileOperationData<string>, FileOperationData<int>>(serviceProvider)
-{
-    protected override FileOperationType FileOperationType => FileOperationType.Duplicate;
-
-    public override Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
+public class FileDuplicateOperation : ComposeFileOperation<FileOperationData<string>, FileOperationData<int>>
+{    
+    public override FileOperationType FileOperationType { get; set; } = FileOperationType.Duplicate;
+    public FileDuplicateOperation() { }
+    public FileDuplicateOperation(IServiceProvider serviceProvider) : base(serviceProvider) { }
+    
+    public override Task RunJob(CancellationToken cancellationToken)
     {
         DaoOperation = new FileDuplicateOperation<int>(_serviceProvider, Data);
         ThirdPartyOperation = new FileDuplicateOperation<string>(_serviceProvider, ThirdPartyData);
 
-        return base.RunJob(distributedTask, cancellationToken);
+        return base.RunJob(cancellationToken);
 
     }
 }
@@ -44,13 +46,13 @@ public class FileDuplicateOperation(IServiceProvider serviceProvider) : ComposeF
 class FileDuplicateOperation<T>(IServiceProvider serviceProvider, FileOperationData<T> data) : FileOperation<FileOperationData<T>, T>(serviceProvider, data)
 {
     private readonly IDictionary<string, string> _headers = data.Headers;
-    private DistributedTask _distributedTask;
     private CancellationToken _cancellationToken;
-    public override Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
+    public override FileOperationType FileOperationType { get; set; } = FileOperationType.Duplicate;
+    
+    public override Task RunJob(CancellationToken cancellationToken)
     {
-        _distributedTask = distributedTask;
         _cancellationToken = cancellationToken;
-        return base.RunJob(distributedTask, cancellationToken);
+        return base.RunJob(cancellationToken);
     }
 
     protected override async Task DoJob(AsyncServiceScope serviceScope)
@@ -69,58 +71,50 @@ class FileDuplicateOperation<T>(IServiceProvider serviceProvider, FileOperationD
     {
         var fileDao = scope.ServiceProvider.GetService<IFileDao<T>>();
         var file = await fileDao.GetFilesAsync([id]).FirstOrDefaultAsync(cancellationToken: _cancellationToken);
-        var copyOperationData = new FileMoveCopyOperationData<T>([], [id], CurrentTenantId, JsonSerializer.SerializeToElement(file.ParentId), true, FileConflictResolveType.Duplicate, true, _headers, SessionSnapshot);
+        var copyOperationData = new FileMoveCopyOperationData<T>([], [id], CurrentTenantId, CurrentUserId, JsonSerializer.SerializeToElement(file.ParentId), true, FileConflictResolveType.Duplicate, true, _headers, SessionSnapshot);
         var copyOperation = new FileMoveCopyOperation<T>(scope.ServiceProvider, copyOperationData) 
         { 
             Publication = FileMoveCopyOperationPublishChanges
         };
-        await copyOperation.RunJob(_distributedTask, _cancellationToken);
+        await copyOperation.RunJob(_cancellationToken);
     }
 
     private async Task DoFolderAsync(AsyncServiceScope scope, T id)
     {             
         var folderDao = scope.ServiceProvider.GetService<IFolderDao<T>>();   
         var folder = await folderDao.GetFolderAsync(id);
-        var copyOperationData = new FileMoveCopyOperationData<T>([id], [], CurrentTenantId,  JsonSerializer.SerializeToElement(folder.ParentId), true, FileConflictResolveType.Duplicate, true, _headers, SessionSnapshot);
+        var copyOperationData = new FileMoveCopyOperationData<T>([id], [], CurrentTenantId, CurrentUserId, JsonSerializer.SerializeToElement(folder.ParentId), true, FileConflictResolveType.Duplicate, true, _headers, SessionSnapshot);
         var copyOperation = new FileMoveCopyOperation<T>(scope.ServiceProvider, copyOperationData)        
         { 
             Publication = FileMoveCopyOperationPublishChanges
         };
-        await copyOperation.RunJob(_distributedTask, _cancellationToken);
+        await copyOperation.RunJob(_cancellationToken);
     }
 
-    private readonly Dictionary<string, Dictionary<string, dynamic>> _tasksProps = new();
+    private readonly Dictionary<string, FileOperation> _tasksProps = new();
     private async Task FileMoveCopyOperationPublishChanges(DistributedTask task)
     {
-        if (!_tasksProps.TryGetValue(task.Id, out var value))
-        {
-            value = new Dictionary<string, dynamic>();
-            _tasksProps.Add(task.Id, value);
-        }
+        _tasksProps[task.Id] = (FileOperation)task;
         
-        value[Process] = task[Process];
-        value[Res] = task[Res];
-        value[Err] = task[Err];
-
-        this[Process] = 0;
-        this[Res] = "";
+        Process = 0;
+        Result = "";
         
         foreach (var data in _tasksProps)
         {
-            this[Process] += data.Value[Process];
-            this[Res] += data.Value[Res];
-            var err = data.Value[Err];
+            Process += data.Value.Process;
+            Result += data.Value.Result;
+            var err = data.Value.Err;
             if (!string.IsNullOrEmpty(err))
             {
-                this[Err] = err;
+                Err = err;
             }
         }
         
         var progressSteps = Total;
 
-        var progress = (int)(this[Process] / (double)progressSteps * 100);
+        var progress = (int)(Process / (double)progressSteps * 100);
 
-        this[Progress] = progress < 100 ? progress : 100;
+        Progress = progress < 100 ? progress : 100;
         
         await PublishChanges();
     }

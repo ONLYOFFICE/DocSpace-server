@@ -18,7 +18,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn)
-                .HasAnnotation("ProductVersion", "8.0.8")
+                .HasAnnotation("ProductVersion", "8.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("ASC.Core.Common.EF.Acl", b =>
@@ -610,7 +610,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Subject = "88f11e7c-7407-4bea-b4cb-070010cdbb6b",
                             Action = "3e74aff2-7c0c-4089-b209-6495b8643471",
                             Object = "",
-                            AceType = 0
+                            AceType = 1
                         });
                 });
 
@@ -5891,6 +5891,65 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasAnnotation("MySql:CharSet", "utf8");
                 });
 
+            modelBuilder.Entity("ASC.Files.Core.EF.DbFilesFormRoleMapping", b =>
+                {
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<int>("FormId")
+                        .HasColumnType("int")
+                        .HasColumnName("form_id");
+
+                    b.Property<string>("RoleName")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("role_name")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("varchar(38)")
+                        .HasColumnName("user_id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<DateTime>("OpenedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("opened_at");
+
+                    b.Property<string>("RoleColor")
+                        .HasColumnType("char(6)")
+                        .HasColumnName("role_color")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<int>("Sequence")
+                        .HasColumnType("int")
+                        .HasColumnName("sequence");
+
+                    b.Property<DateTime>("SubmissionDate")
+                        .HasColumnType("datetime")
+                        .HasColumnName("submission_date");
+
+                    b.Property<bool>("Submitted")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("submitted");
+
+                    b.HasKey("TenantId", "FormId", "RoleName", "UserId")
+                        .HasName("PRIMARY");
+
+                    b.HasIndex("TenantId", "FormId")
+                        .HasDatabaseName("tenant_id_form_id");
+
+                    b.HasIndex("TenantId", "FormId", "UserId")
+                        .HasDatabaseName("tenant_id_form_id_user_id");
+
+                    b.ToTable("files_form_role_mapping", (string)null);
+
+                    b.HasAnnotation("MySql:CharSet", "utf8");
+                });
+
             modelBuilder.Entity("ASC.Files.Core.EF.DbFilesLink", b =>
                 {
                     b.Property<int>("TenantId")
@@ -6859,8 +6918,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("client_secret");
 
                     b.Property<string>("CreatedBy")
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
+                        .HasMaxLength(36)
+                        .HasColumnType("varchar(36)")
                         .HasColumnName("created_by");
 
                     b.Property<DateTime?>("CreatedOn")
@@ -6899,8 +6958,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("logout_redirect_uri");
 
                     b.Property<string>("ModifiedBy")
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
+                        .HasMaxLength(36)
+                        .HasColumnType("varchar(36)")
                         .HasColumnName("modified_by");
 
                     b.Property<DateTime?>("ModifiedOn")
@@ -6941,8 +7000,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasIndex(new[] { "ClientId" }, "UK_client_id")
                         .IsUnique();
 
-                    b.HasIndex(new[] { "ClientSecret" }, "UK_client_secret")
-                        .IsUnique();
+                    b.HasIndex(new[] { "ClientSecret" }, "idx_client_secret");
 
                     b.HasIndex(new[] { "TenantId" }, "idx_identity_clients_tenant_id");
 
@@ -7217,7 +7275,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasAnnotation("MySql:CharSet", "utf8");
                 });
 
-            modelBuilder.Entity("ASC.Webhooks.Core.EF.Model.WebhooksConfig", b =>
+            modelBuilder.Entity("ASC.Webhooks.Core.EF.Model.DbWebhooksConfig", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -7225,11 +7283,45 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("id")
                         .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("varchar(36)")
+                        .HasColumnName("created_by")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<DateTime?>("CreatedOn")
+                        .HasColumnType("datetime")
+                        .HasColumnName("created_on");
+
                     b.Property<bool>("Enabled")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(1)")
                         .HasColumnName("enabled")
                         .HasDefaultValueSql("'1'");
+
+                    b.Property<string>("LastFailureContent")
+                        .HasColumnType("varchar(200)")
+                        .HasColumnName("last_failure_content")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<DateTime?>("LastFailureOn")
+                        .HasColumnType("datetime")
+                        .HasColumnName("last_failure_on");
+
+                    b.Property<DateTime?>("LastSuccessOn")
+                        .HasColumnType("datetime")
+                        .HasColumnName("last_success_on");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("varchar(36)")
+                        .HasColumnName("modified_by")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<DateTime?>("ModifiedOn")
+                        .HasColumnType("datetime")
+                        .HasColumnName("modified_on");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -7254,6 +7346,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("int")
                         .HasColumnName("tenant_id");
 
+                    b.Property<int>("Triggers")
+                        .HasColumnType("int")
+                        .HasColumnName("triggers");
+
                     b.Property<string>("Uri")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("text")
@@ -7273,7 +7369,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasAnnotation("MySql:CharSet", "utf8");
                 });
 
-            modelBuilder.Entity("ASC.Webhooks.Core.EF.Model.WebhooksLog", b =>
+            modelBuilder.Entity("ASC.Webhooks.Core.EF.Model.DbWebhooksLog", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -7321,6 +7417,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Property<int>("TenantId")
                         .HasColumnType("int")
                         .HasColumnName("tenant_id");
+
+                    b.Property<int>("Trigger")
+                        .HasColumnType("int")
+                        .HasColumnName("trigger");
 
                     b.Property<string>("Uid")
                         .IsRequired()
@@ -7654,6 +7754,17 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Navigation("Tenant");
                 });
 
+            modelBuilder.Entity("ASC.Files.Core.EF.DbFilesFormRoleMapping", b =>
+                {
+                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
+                });
+
             modelBuilder.Entity("ASC.Files.Core.EF.DbFilesLink", b =>
                 {
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
@@ -7905,7 +8016,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Navigation("ScopeNameNavigation");
                 });
 
-            modelBuilder.Entity("ASC.Webhooks.Core.EF.Model.WebhooksConfig", b =>
+            modelBuilder.Entity("ASC.Webhooks.Core.EF.Model.DbWebhooksConfig", b =>
                 {
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
                         .WithMany()
@@ -7916,9 +8027,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Navigation("Tenant");
                 });
 
-            modelBuilder.Entity("ASC.Webhooks.Core.EF.Model.WebhooksLog", b =>
+            modelBuilder.Entity("ASC.Webhooks.Core.EF.Model.DbWebhooksLog", b =>
                 {
-                    b.HasOne("ASC.Webhooks.Core.EF.Model.WebhooksConfig", "Config")
+                    b.HasOne("ASC.Webhooks.Core.EF.Model.DbWebhooksConfig", "Config")
                         .WithMany()
                         .HasForeignKey("ConfigId")
                         .OnDelete(DeleteBehavior.Cascade)

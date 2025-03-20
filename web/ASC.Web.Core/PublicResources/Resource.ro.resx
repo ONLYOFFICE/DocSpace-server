@@ -274,13 +274,13 @@
     <value>Conectați Amazon AWS S3 pentru copierea de rezervă și stocarea datelor de pe portalul dvs.</value>
   </data>
   <data name="ConsumersS3Instruction" xml:space="preserve">
-    <value>Conectați Amazon AWS S3 pentru copierea de rezervă și stocarea datelor de pe portalul dvs. {0}Accesați Consola de Gestionare AWS și generaţi cheile de acces pentru ONLYOFFICE. Mai jos, lipiți datele pe care l-ați primit:</value>
+    <value>Conectați Amazon AWS S3 pentru copierea de rezervă și stocarea datelor de pe portalul dvs. {0}Accesați Consola de Gestionare AWS și generaţi cheile de acces pentru {LogoText}. Mai jos, lipiți datele pe care l-ați primit:</value>
   </data>
   <data name="ConsumersGoogleCloudDescription" xml:space="preserve">
     <value>Conectați serviciu de stocare în cloud Google pentru copierea de rezervă și stocarea datelor de pe portalul dvs.</value>
   </data>
   <data name="ConsumersGoogleCloudInstruction" xml:space="preserve">
-    <value>Conectați serviciu de stocare în cloud Google pentru copierea de rezervă și stocarea datelor de pe portalul dvs. {0}Accesaţi consola Google Cloud Platform și creați un nou cont de serviciu pentru ONLYOFFICE. Mai jos, lipiți datele pe care l-ați primit:</value>
+    <value>Conectați serviciu de stocare în cloud Google pentru copierea de rezervă și stocarea datelor de pe portalul dvs. {0}Accesaţi consola Google Cloud Platform și creați un nou cont de serviciu pentru {LogoText}. Mai jos, lipiți datele pe care l-ați primit:</value>
   </data>
   <data name="ConsumersRackspaceDescription" xml:space="preserve">
     <value>Conectați serviciu de stocare în cloud Rackspace pentru copierea de rezervă și stocarea datelor de pe portalul dvs.</value>
@@ -370,7 +370,7 @@
     <value>Permiteți aplicației semnarea digitală a documentelor dvs utilizând DocuSign.</value>
   </data>
   <data name="ConsumersWordpressInstruction" xml:space="preserve">
-    <value>Permiteţi aplicaţiei publicarea ușoară a documentelor pe site-ul WordPress.&lt;/value&gt; {0}Pe pagina de dezvoltatori Wordpress, și creați o soluție nouă pentru integrarea cu ONLYOFFICE. Mai jos, lipiți datele pe care l-ați primit:</value>
+    <value>Permiteţi aplicaţiei publicarea ușoară a documentelor pe site-ul WordPress.&lt;/value&gt; {0}Pe pagina de dezvoltatori Wordpress, și creați o soluție nouă pentru integrarea cu {LogoText}. Mai jos, lipiți datele pe care l-ați primit:</value>
   </data>
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>Permiteți aplicației importarea utilizatorilor din serviciu Yahoo.</value>
@@ -415,49 +415,49 @@
     <value>Permiteți aplicației conectarea la portalul folosind ID-ul Apple.</value>
   </data>
   <data name="ConsumersYahooInstruction" xml:space="preserve">
-    <value>Permiteți aplicației adăugarea utilizatorilor noi la portal din lista de contacte Yahoo. {0}Accesați pagina Creare aplicație pe rețeaua de dezvoltatori și creați o aplicație nouă pentru integrarea cu ONLYOFFICE. Mai jos, inserați datele pe care l-ați primit:</value>
+    <value>Permiteți aplicației adăugarea utilizatorilor noi la portal din lista de contacte Yahoo. {0}Accesați pagina Creare aplicație pe rețeaua de dezvoltatori și creați o aplicație nouă pentru integrarea cu {LogoText}. Mai jos, inserați datele pe care l-ați primit:</value>
   </data>
   <data name="ConsumersTwilioInstruction" xml:space="preserve">
     <value>Autorizați aplicația să permite utilizatorilor să își apeleze contactele din modulul CRM folosind Twilio. {0}Accesați consola Twilio și lipiți mai jos datele următoare:</value>
   </data>
   <data name="ConsumersFirebaseInstruction" xml:space="preserve">
-    <value>Autorizați aplicația să permite notificările la primirea mesajelor chiar și offline. {0}Accesați consola Firebase și adăugați un proiect nou pentru integrarea cu ONLYOFFICE. Mai jos, inserați datele pe care l-ați primit:</value>
+    <value>Autorizați aplicația să permite notificările la primirea mesajelor chiar și offline. {0}Accesați consola Firebase și adăugați un proiect nou pentru integrarea cu {LogoText}. Mai jos, inserați datele pe care l-ați primit:</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
-    <value>Autorizați aplicația să permite utilizatorilor să se conecteze la ONLYOFFICE utilizând ID-ul Apple. {0}Accesați Portalul pentru dezvoltatori Apple și creați o aplicație nouă pentru integrarea cu ONLYOFFICE. Mai jos, inserați datele pe care l-ați primit:</value>
+    <value>Autorizați aplicația să permite utilizatorilor să se conecteze la {LogoText} utilizând ID-ul Apple. {0}Accesați Portalul pentru dezvoltatori Apple și creați o aplicație nouă pentru integrarea cu {LogoText}. Mai jos, inserați datele pe care l-ați primit:</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
-    <value>Autorizați aplicația să permite utilizatorilor să se conecteze la ONLYOFFICE utilizând Facebook și să conecteze conturile de Facebook ale clienților la modulul CRM. {0}Accesați Portalul pentru dezvoltatori Facebook și creați o aplicație nouă pentru integrarea cu ONLYOFFICE. Mai jos, inserați datele pe care l-ați primit:</value>
+    <value>Autorizați aplicația să permite utilizatorilor să se conecteze la {LogoText} utilizând Facebook și să conecteze conturile de Facebook ale clienților la modulul CRM. {0}Accesați Portalul pentru dezvoltatori Facebook și creați o aplicație nouă pentru integrarea cu {LogoText}. Mai jos, inserați datele pe care l-ați primit:</value>
   </data>
   <data name="ConsumersMicrosoftInstruction" xml:space="preserve">
-    <value>Autorizați aplicația să permite utilizatorilor să se conecteze la ONLYOFFICE utilizând Microsoft. {0}Accesați Microsoft Azure și creați o soluție nouă pentru integrarea cu ONLYOFFICE. Mai jos, inserați datele pe care l-ați primit:</value>
+    <value>Autorizați aplicația să permite utilizatorilor să se conecteze la {LogoText} utilizând Microsoft. {0}Accesați Microsoft Azure și creați o soluție nouă pentru integrarea cu {LogoText}. Mai jos, inserați datele pe care l-ați primit:</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
-    <value>Autorizați aplicația să permite utilizatorilor să se conecteze la ONLYOFFICE utilizând contul LinkedIn. {0}Accesați site-ul pentru dezvoltatori LinkedIn și creați o soluție nouă pentru integrarea cu ONLYOFFICE. Mai jos, inserați datele pe care l-ați primit:</value>
+    <value>Autorizați aplicația să permite utilizatorilor să se conecteze la {LogoText} utilizând contul LinkedIn. {0}Accesați site-ul pentru dezvoltatori LinkedIn și creați o soluție nouă pentru integrarea cu {LogoText}. Mai jos, inserați datele pe care l-ați primit:</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Autorizaţi aplicaţia să permite utilizatorilor să se conecteze la ONLYOFFICE utilizând Twitter și să conecteze conturile de Twitter ale clienţilor la modulul CRM. {0}Accesați Portalul pentru dezvoltatori Twitter și creați o aplicație nouă pentru integrarea cu ONLYOFFICE. Mai jos, inserați datele pe care l-ați primit:</value>
+    <value>Autorizaţi aplicaţia să permite utilizatorilor să se conecteze la {LogoText} utilizând Twitter și să conecteze conturile de Twitter ale clienţilor la modulul CRM. {0}Accesați Portalul pentru dezvoltatori Twitter și creați o aplicație nouă pentru integrarea cu {LogoText}. Mai jos, inserați datele pe care l-ați primit:</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
-    <value>Autorizați aplicația să permite utilizatorilor să se conecteze la ONLYOFFICE utilizând contul Zoom. {0}Accesați site-ul pentru dezvoltatori Zoom și creați o soluție nouă pentru integrarea cu ONLYOFFICE. Mai jos, inserați datele pe care l-ați primit:</value>
+    <value>Autorizați aplicația să permite utilizatorilor să se conecteze la {LogoText} utilizând contul Zoom. {0}Accesați site-ul pentru dezvoltatori Zoom și creați o soluție nouă pentru integrarea cu {LogoText}. Mai jos, inserați datele pe care l-ați primit:</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
-    <value>Permiteți aplicației conectarea contului dvs Box la modulul Documente. Veți putea gestiona, edita și partaja fișiere din contul Box cu utilizatorii ONLYOFFICE. {0}Vă conectați la contul dvs. pe pagina de dezvoltatori Box și creați o aplicație nouă pentru integrarea cu ONLYOFFICE. Mai jos, inserați datele pe care l-ați primit:</value>
+    <value>Permiteți aplicației conectarea contului dvs Box la modulul Documente. Veți putea gestiona, edita și partaja fișiere din contul Box cu utilizatorii {LogoText}. {0}Vă conectați la contul dvs. pe pagina de dezvoltatori Box și creați o aplicație nouă pentru integrarea cu {LogoText}. Mai jos, inserați datele pe care l-ați primit:</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
-    <value>Permiteți aplicației conectarea contului dvs Dropbox la modulul Documente. Veți putea gestiona, edita și partaja fișiere din contul Dropbox cu utilizatorii ONLYOFFICE. {0}Vă conectați la contul dvs. pe site-ul de dezvoltatori Dropbox și creați o aplicație nouă pentru integrarea cu ONLYOFFICE. Mai jos, inserați datele pe care l-ați primit:</value>
+    <value>Permiteți aplicației conectarea contului dvs Dropbox la modulul Documente. Veți putea gestiona, edita și partaja fișiere din contul Dropbox cu utilizatorii {LogoText}. {0}Vă conectați la contul dvs. pe site-ul de dezvoltatori Dropbox și creați o aplicație nouă pentru integrarea cu {LogoText}. Mai jos, inserați datele pe care l-ați primit:</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
-    <value>Permiteţi aplicației conectarea contului dvs Google Drive la modulul Documente. Veți putea gestiona, edita și partaja fișiere din contul Google Drive cu utilizatorii ONLYOFFICE. {0}Accesați consola Google APIs și creați un proiect nou pentru integrarea cu ONLYOFFICE. Mai jos, inserați datele pe care l-ați primit:</value>
+    <value>Permiteţi aplicației conectarea contului dvs Google Drive la modulul Documente. Veți putea gestiona, edita și partaja fișiere din contul Google Drive cu utilizatorii {LogoText}. {0}Accesați consola Google APIs și creați un proiect nou pentru integrarea cu {LogoText}. Mai jos, inserați datele pe care l-ați primit:</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
-    <value>Permiteți aplicației conectarea contului dvs OneDrive la modulul Documente. Veți putea gestiona, edita și partaja fișiere din contul OneDrive cu utilizatorii ONLYOFFICE. {0}Vă conectați la contul dvs. Microsoft Azure și creați o aplicație nouă pentru integrarea cu ONLYOFFICE. Mai jos, inserați datele pe care l-ați primit:</value>
+    <value>Permiteți aplicației conectarea contului dvs OneDrive la modulul Documente. Veți putea gestiona, edita și partaja fișiere din contul OneDrive cu utilizatorii {LogoText}. {0}Vă conectați la contul dvs. Microsoft Azure și creați o aplicație nouă pentru integrarea cu {LogoText}. Mai jos, inserați datele pe care l-ați primit:</value>
   </data>
   <data name="ConsumersEasyBibInstruction" xml:space="preserve">
-    <value>Permiteţi aplicaţiei crearea listelor bibliografice în editorul ONLYOFFICE. {0}Accesaţi pagina de conectare EasyBib și completați formularul pentru adăugarea soluției de integrare cu ONLYOFFICE. După ce obțineți o cheie de aplicație, lipiți-o mai jos:</value>
+    <value>Permiteţi aplicaţiei crearea listelor bibliografice în editorul {LogoText}. {0}Accesaţi pagina de conectare EasyBib și completați formularul pentru adăugarea soluției de integrare cu {LogoText}. După ce obțineți o cheie de aplicație, lipiți-o mai jos:</value>
   </data>
   <data name="ConsumersDocuSignInstruction" xml:space="preserve">
-    <value>Permiteţi aplicaţiei semnarea digitală a documentelor utilizând DocuSign. {0}Accesați consola de administrator DocuSign și adăugați aplicația de integrare cu ONLYOFFICE. Mai jos, inserați datele pe care l-ați primit:</value>
+    <value>Permiteţi aplicaţiei semnarea digitală a documentelor utilizând DocuSign. {0}Accesați consola de administrator DocuSign și adăugați aplicația de integrare cu {LogoText}. Mai jos, inserați datele pe care l-ați primit:</value>
   </data>
   <data name="ConsumersBitlyInstruction" xml:space="preserve">
     <value>Permiteţi aplicaţiei prescurtarea link-urilor de invitație și linkurilor către documente. {0}Inserați mai jos numele de utilizator Bitly și cheia API:</value>
@@ -973,7 +973,7 @@
     <value>Regiunea US West (Oregon)</value>
   </data>
   <data name="ConsumersClickatellInstruction" xml:space="preserve">
-    <value>Utilizați această aplicație pentru activarea autentificării cu doi factori cu serviciu Clickatell. {0}Vă conectați la contul dvs. SMS Platform și creați o soluție de integrare nouă cu ONLYOFFICE. Copiați și inserași cheia API mai jos:</value>
+    <value>Utilizați această aplicație pentru activarea autentificării cu doi factori cu serviciu Clickatell. {0}Vă conectați la contul dvs. SMS Platform și creați o soluție de integrare nouă cu {LogoText}. Copiați și inserași cheia API mai jos:</value>
   </data>
   <data name="ConsumersSmscInstruction" xml:space="preserve">
     <value>Utilizați această aplicație pentru activarea autentificării cu doi factori cu serviciu Centru de SMS. {0}Inserați numele de utilizator și parola contului dvs smsc (sau parola MD5 hash) cu minuscule:</value>

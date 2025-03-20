@@ -27,10 +27,19 @@
 namespace ASC.Files.Core.Services.DocumentBuilderService;
 
 [Transient]
-public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : DocumentBuilderTask<int, RoomIndexExportTaskData>(serviceProvider)
-{
+public class RoomIndexExportTask : DocumentBuilderTask<int, RoomIndexExportTaskData>
+{    
     private const string ScriptName = "RoomIndexExport.docbuilder";
-
+    
+    public RoomIndexExportTask()
+    {
+        
+    }
+    
+    public RoomIndexExportTask(IServiceScopeFactory serviceProvider) : base(serviceProvider)
+    {
+    }
+    
     protected override async Task<DocumentBuilderInputData> GetDocumentBuilderInputDataAsync(IServiceProvider serviceProvider)
     {
         var (scriptFilePath, tempFileName, outputFileName) = await GetRoomIndexExportData(serviceProvider, _userId, _data.RoomId);
@@ -87,6 +96,7 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
         var daoFactory = serviceProvider.GetService<IDaoFactory>();
         var settingsManager = serviceProvider.GetService<SettingsManager>();
         var commonLinkUtility = serviceProvider.GetService<CommonLinkUtility>();
+        var tenantLogoManager = serviceProvider.GetService<TenantLogoManager>();
         var tenantWhiteLabelSettingsHelper = serviceProvider.GetService<TenantWhiteLabelSettingsHelper>();
         var displayUserSettingsHelper = serviceProvider.GetService<DisplayUserSettingsHelper>();
         var tenantUtil = serviceProvider.GetService<TenantUtil>();
@@ -104,6 +114,8 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
         var customColorThemesSettings = await settingsManager.LoadAsync<CustomColorThemesSettings>();
 
         var selectedColorTheme = customColorThemesSettings.Themes.First(x => x.Id == customColorThemesSettings.Selected);
+
+        var logoText = await tenantLogoManager.GetLogoTextAsync();
 
         var tenantWhiteLabelSettings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
 
@@ -143,7 +155,7 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
 
             info = new
             {
-                company = tenantWhiteLabelSettings.LogoText ?? TenantWhiteLabelSettings.DefaultLogoText,
+                company = logoText,
                 room = room.Title,
                 exportAuthor = user.DisplayUserName(false, displayUserSettingsHelper),
                 dateGenerated = tenantUtil.DateTimeNow().ConvertNumerals("g")
@@ -284,7 +296,23 @@ public class RoomIndexExportTask(IServiceScopeFactory serviceProvider) : Documen
         }
     }
 
-    private record FolderIndex(int ChildFoldersCount, string Order);
+    private record FolderIndex
+    {
+        public FolderIndex(int ChildFoldersCount, string Order)
+        {
+            this.ChildFoldersCount = ChildFoldersCount;
+            this.Order = Order;
+        }
+
+        public int ChildFoldersCount { get; init; }
+        public string Order { get; init; }
+
+        public void Deconstruct(out int ChildFoldersCount, out string Order)
+        {
+            ChildFoldersCount = this.ChildFoldersCount;
+            Order = this.Order;
+        }
+    }
 }
 
 public record RoomIndexExportTaskData(int RoomId, IDictionary<string, string> Headers);

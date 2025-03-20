@@ -34,72 +34,69 @@ public class Crypt(IConfiguration configuration, TempPath tempPath) : ICrypt
     private EncryptionSettings Settings { get; set; }
     private string TempDir { get; set; }
 
-    private IConfiguration Configuration { get; set; } = configuration;
-    public TempPath TempPath { get; } = tempPath;
-
     public void Init(string storageName, EncryptionSettings encryptionSettings)
     {
         Storage = storageName;
         Settings = encryptionSettings;
-        TempDir = TempPath.GetTempPath();
+        TempDir = tempPath.GetTempPath();
     }
 
     public byte Version { get { return 1; } }
 
-    public void EncryptFile(string filePath)
+    public async ValueTask EncryptFileAsync(string filePath)
     {
         if (string.IsNullOrEmpty(Settings.Password))
         {
             return;
         }
 
-        var metadata = new Metadata(Configuration);
+        var metadata = new Metadata(configuration);
 
         metadata.Initialize(Settings.Password);
 
-        using (var fileStream = File.OpenRead(filePath))
+        await using (var fileStream = File.OpenRead(filePath))
         {
-            if (metadata.TryReadFromStream(fileStream, Version))
+            if (await metadata.TryReadFromStreamAsync(fileStream, Version))
             {
                 return;
             }
         }
 
-        EncryptFile(filePath, Settings.Password);
+        await EncryptFileAsync(filePath, Settings.Password);
     }
 
-    public void DecryptFile(string filePath)
+    public async ValueTask DecryptFileAsync(string filePath)
     {
         if (Settings.Status == EncryprtionStatus.Decrypted)
         {
             return;
         }
 
-        DecryptFile(filePath, Settings.Password);
+        await DecryptFileAsync(filePath, Settings.Password);
     }
 
-    public Stream GetReadStream(string filePath)
+    public async Task<Stream> GetReadStreamAsync(string filePath)
     {
         if (Settings.Status == EncryprtionStatus.Decrypted)
         {
             return File.OpenRead(filePath);
         }
 
-        return GetReadStream(filePath, Settings.Password);
+        return await GetReadStreamAsync(filePath, Settings.Password);
     }
 
-    public long GetFileSize(string filePath)
+    public async Task<long> GetFileSizeAsync(string filePath)
     {
         if (Settings.Status == EncryprtionStatus.Decrypted)
         {
             return new FileInfo(filePath).Length;
         }
 
-        return GetFileSize(filePath, Settings.Password);
+        return await GetFileSize(filePath, Settings.Password);
     }
 
 
-    private void EncryptFile(string filePath, string password)
+    private async Task EncryptFileAsync(string filePath, string password)
     {
         var fileInfo = new FileInfo(filePath);
 
@@ -108,51 +105,51 @@ public class Crypt(IConfiguration configuration, TempPath tempPath) : ICrypt
             fileInfo.IsReadOnly = false;
         }
 
-        var ecryptedFilePath = GetUniqFileName(filePath, ".enc");
+        var encryptedFilePath = GetUniqFileName(filePath, ".enc");
         try
         {
-            var metadata = new Metadata(Configuration);
+            var metadata = new Metadata(configuration);
 
             metadata.Initialize(Version, password, fileInfo.Length);
 
-            using (var ecryptedFileStream = new FileStream(ecryptedFilePath, FileMode.Create))
+            await using (var encryptedFileStream = new FileStream(encryptedFilePath, FileMode.Create))
             {
-                metadata.WriteToStream(ecryptedFileStream);
+                await metadata.WriteToStreamAsync(encryptedFileStream);
 
                 using (var algorithm = metadata.GetCryptographyAlgorithm())
                 {
                     using var transform = algorithm.CreateEncryptor();
-                    using var cryptoStream = new CryptoStreamWrapper(ecryptedFileStream, transform, CryptoStreamMode.Write);
-                    using (var fileStream = File.OpenRead(filePath))
+                    await using var cryptoStream = new CryptoStreamWrapper(encryptedFileStream, transform, CryptoStreamMode.Write);
+                    await using (var fileStream = File.OpenRead(filePath))
                     {
-                        fileStream.CopyTo(cryptoStream);
+                        await fileStream.CopyToAsync(cryptoStream);
                         fileStream.Close();
                     }
 
-                    cryptoStream.FlushFinalBlock();
+                    await cryptoStream.FlushFinalBlockAsync();
 
-                    metadata.ComputeAndWriteHmacHash(ecryptedFileStream);
+                    await metadata.ComputeAndWriteHmacHashAsync(encryptedFileStream);
 
                     cryptoStream.Close();
                 }
 
-                ecryptedFileStream.Close();
+                encryptedFileStream.Close();
             }
 
-            ReplaceFile(ecryptedFilePath, filePath);
+            ReplaceFile(encryptedFilePath, filePath);
         }
         catch (Exception)
         {
-            if (File.Exists(ecryptedFilePath))
+            if (File.Exists(encryptedFilePath))
             {
-                File.Delete(ecryptedFilePath);
+                File.Delete(encryptedFilePath);
             }
 
             throw;
         }
     }
 
-    private void DecryptFile(string filePath, string password)
+    private async Task DecryptFileAsync(string filePath, string password)
     {
         var fileInfo = new FileInfo(filePath);
 
@@ -165,28 +162,28 @@ public class Crypt(IConfiguration configuration, TempPath tempPath) : ICrypt
 
         try
         {
-            var metadata = new Metadata(Configuration);
+            var metadata = new Metadata(configuration);
 
             metadata.Initialize(password);
 
-            using (var fileStream = File.OpenRead(filePath))
+            await using (var fileStream = File.OpenRead(filePath))
             {
-                if (!metadata.TryReadFromStream(fileStream, Version))
+                if (!await metadata.TryReadFromStreamAsync(fileStream, Version))
                 {
                     return;
                 }
 
                 metadata.ComputeAndValidateHmacHash(fileStream);
 
-                using (var decryptedFileStream = new FileStream(decryptedFilePath, FileMode.Create))
+                await using (var decryptedFileStream = new FileStream(decryptedFilePath, FileMode.Create))
                 {
                     using (var algorithm = metadata.GetCryptographyAlgorithm())
                     {
                         using var transform = algorithm.CreateDecryptor();
-                        using var cryptoStream = new CryptoStreamWrapper(decryptedFileStream, transform, CryptoStreamMode.Write);
-                        fileStream.CopyTo(cryptoStream);
+                        await using var cryptoStream = new CryptoStreamWrapper(decryptedFileStream, transform, CryptoStreamMode.Write);
+                        await fileStream.CopyToAsync(cryptoStream);
 
-                        cryptoStream.FlushFinalBlock();
+                        await cryptoStream.FlushFinalBlockAsync();
                         cryptoStream.Close();
                     }
 
@@ -209,15 +206,15 @@ public class Crypt(IConfiguration configuration, TempPath tempPath) : ICrypt
         }
     }
 
-    private Stream GetReadStream(string filePath, string password)
+    private async Task<Stream> GetReadStreamAsync(string filePath, string password)
     {
-        var metadata = new Metadata(Configuration);
+        var metadata = new Metadata(configuration);
 
         metadata.Initialize(password);
 
         var fileStream = File.OpenRead(filePath);
 
-        if (!metadata.TryReadFromStream(fileStream, Version))
+        if (!await metadata.TryReadFromStreamAsync(fileStream, Version))
         {
             fileStream.Seek(0, SeekOrigin.Begin);
             return fileStream;
@@ -230,14 +227,14 @@ public class Crypt(IConfiguration configuration, TempPath tempPath) : ICrypt
         return wrapper;
     }
 
-    private long GetFileSize(string filePath, string password)
+    private async Task<long> GetFileSize(string filePath, string password)
     {
-        var metadata = new Metadata(Configuration);
+        var metadata = new Metadata(configuration);
 
         metadata.Initialize(password);
 
-        using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, metadata.GetMetadataLength(), FileOptions.SequentialScan);
-        if (metadata.TryReadFromStream(fileStream, Version))
+        await using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, metadata.GetMetadataLength(), FileOptions.SequentialScan);
+        if (await metadata.TryReadFromStreamAsync(fileStream, Version))
         {
             return metadata.GetFileSize();
         }

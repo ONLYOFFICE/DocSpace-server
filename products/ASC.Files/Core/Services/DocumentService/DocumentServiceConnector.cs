@@ -61,7 +61,6 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
         try
         {
             return await ASC.Files.Core.Helpers.DocumentService.GetConvertedUriAsync(
-                fileUtility,
                 filesLinkUtility.DocServiceConverterUrl,
                 documentUri,
                 fromExtension,
@@ -73,7 +72,9 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
                 spreadsheetLayout,
                 options,
                 isAsync,
-                fileUtility.SignatureSecret,
+                filesLinkUtility.DocServiceSignatureSecret,
+                filesLinkUtility.DocServiceSignatureHeader,
+                await filesLinkUtility.GetDocServiceSslVerificationAsync(),
                 clientFactory,
                 toForm);
         }
@@ -95,14 +96,15 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
         try
         {
             var commandResponse = await CommandRequestAsync(
-                fileUtility,
                 filesLinkUtility.DocServiceCommandUrl,
                 method,
                 GenerateRevisionId(docKeyForTrack),
                 callbackUrl,
                 users,
                 meta,
-                fileUtility.SignatureSecret,
+                filesLinkUtility.DocServiceSignatureSecret,
+                filesLinkUtility.DocServiceSignatureHeader,
+                await filesLinkUtility.GetDocServiceSslVerificationAsync(),
                 clientFactory);
 
             if (commandResponse.Error == ErrorTypes.NoError)
@@ -153,12 +155,13 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
         try
         {
             return await ASC.Files.Core.Helpers.DocumentService.DocbuilderRequestAsync(
-                fileUtility,
                 filesLinkUtility.DocServiceDocbuilderUrl,
                 GenerateRevisionId(requestKey),
                 scriptUrl,
                 isAsync,
-                fileUtility.SignatureSecret,
+                filesLinkUtility.DocServiceSignatureSecret,
+                filesLinkUtility.DocServiceSignatureHeader,
+                await filesLinkUtility.GetDocServiceSslVerificationAsync(),
                 clientFactory);
         }
         catch (Exception ex)
@@ -173,14 +176,15 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
         try
         {
             var commandResponse = await CommandRequestAsync(
-                fileUtility,
                 filesLinkUtility.DocServiceCommandUrl,
                 CommandMethod.Version,
                 null,
                 null,
                 null,
                 null,
-                fileUtility.SignatureSecret,
+                filesLinkUtility.DocServiceSignatureSecret,
+                filesLinkUtility.DocServiceSignatureHeader,
+                await filesLinkUtility.GetDocServiceSslVerificationAsync(),
                 clientFactory);
 
             var version = commandResponse.Version;
@@ -220,7 +224,10 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
                     Method = HttpMethod.Head
                 };
 
-                using var httpClient = clientFactory.CreateClient();
+                using var httpClient = await filesLinkUtility.GetDocServiceSslVerificationAsync()
+                    ? clientFactory.CreateClient()
+                    : clientFactory.CreateClient(CustomSslVerificationClient);
+
                 using var response = await httpClient.SendAsync(request);
 
                 if (response.StatusCode != HttpStatusCode.OK)
@@ -236,11 +243,12 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
             }
         }
 
-        if (!string.IsNullOrEmpty(filesLinkUtility.DocServiceHealthcheckUrl))
+        var docServiceHealthcheckUrl = filesLinkUtility.DocServiceHealthcheckUrl;
+        if (!string.IsNullOrEmpty(docServiceHealthcheckUrl))
         {
             try
             {
-                if (!await HealthcheckRequestAsync(filesLinkUtility.DocServiceHealthcheckUrl, clientFactory))
+                if (!await HealthcheckRequestAsync(docServiceHealthcheckUrl, clientFactory))
                 {
                     throw new Exception("bad status");
                 }
@@ -265,7 +273,25 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
                 var fileUri = ReplaceCommunityAddress(url);
 
                 var key = GenerateRevisionId(Guid.NewGuid().ToString());
-                var uriTuple = await ASC.Files.Core.Helpers.DocumentService.GetConvertedUriAsync(fileUtility, filesLinkUtility.DocServiceConverterUrl, fileUri, fileExtension, toExtension, key, null, null, null, null, null, false, fileUtility.SignatureSecret, clientFactory, false);
+
+                var uriTuple = await ASC.Files.Core.Helpers.DocumentService.GetConvertedUriAsync(
+                    filesLinkUtility.DocServiceConverterUrl,
+                    fileUri,
+                    fileExtension,
+                    toExtension,
+                    key,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    false,
+                    filesLinkUtility.DocServiceSignatureSecret,
+                    filesLinkUtility.DocServiceSignatureHeader,
+                    await filesLinkUtility.GetDocServiceSslVerificationAsync(),
+                    clientFactory,
+                    false);
+
                 convertedFileUri = uriTuple.ConvertedDocumentUri;
             }
             catch (Exception ex)
@@ -303,7 +329,18 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
             try
             {
                 var key = GenerateRevisionId(Guid.NewGuid().ToString());
-                await CommandRequestAsync(fileUtility, filesLinkUtility.DocServiceCommandUrl, CommandMethod.Version, key, null, null, null, fileUtility.SignatureSecret, clientFactory);
+
+                await CommandRequestAsync(
+                    filesLinkUtility.DocServiceCommandUrl,
+                    CommandMethod.Version,
+                    key,
+                    null,
+                    null,
+                    null,
+                    filesLinkUtility.DocServiceSignatureSecret,
+                    filesLinkUtility.DocServiceSignatureHeader,
+                    await filesLinkUtility.GetDocServiceSslVerificationAsync(),
+                    clientFactory);
             }
             catch (Exception ex)
             {
@@ -322,7 +359,15 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
                 var scriptUrl = baseCommonLinkUtility.GetFullAbsolutePath(scriptUri.ToString());
                 scriptUrl = ReplaceCommunityAddress(scriptUrl);
 
-                await ASC.Files.Core.Helpers.DocumentService.DocbuilderRequestAsync(fileUtility, filesLinkUtility.DocServiceDocbuilderUrl, null, scriptUrl, false, fileUtility.SignatureSecret, clientFactory);
+                await ASC.Files.Core.Helpers.DocumentService.DocbuilderRequestAsync(
+                    filesLinkUtility.DocServiceDocbuilderUrl,
+                    null,
+                    scriptUrl,
+                    false,
+                    filesLinkUtility.DocServiceSignatureSecret,
+                    filesLinkUtility.DocServiceSignatureHeader,
+                    await filesLinkUtility.GetDocServiceSslVerificationAsync(),
+                    clientFactory);
             }
             catch (Exception ex)
             {

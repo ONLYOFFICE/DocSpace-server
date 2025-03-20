@@ -85,3 +85,14 @@ public class TimeZoneRequestDto
     /// </summary>
     public string TimeZoneID { get; set; }
 }
+
+/// <summary>
+/// Settings request parameters
+/// </summary>
+public class TenantDevToolsAccessSettingsDto
+{
+    /// <summary>
+    /// Limited access to Developer Tools for users
+    /// </summary>
+    public bool LimitedAccessForUsers { get; set; }
+}

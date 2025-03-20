@@ -33,10 +33,8 @@ public class MigrationWorker(
     ILogger<MigrationWorker> logger)
 {
     private static readonly SemaphoreSlim _semaphoreSlim = new(1);
-    private readonly DistributedTaskQueue _queue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, 60 * 60 * 24); // 1 day
-
-    public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "migration";
-
+    private readonly DistributedTaskQueue<MigrationOperation> _queue = queueFactory.CreateQueue<MigrationOperation>(60 * 60 * 24); // 1 day
+    
     public async Task StartParse(int tenantId, Guid userId, string migratorName)
     {
         await Start(tenantId, item => item.InitParse(tenantId, userId, migratorName));
@@ -52,7 +50,7 @@ public class MigrationWorker(
         try
         {
             await _semaphoreSlim.WaitAsync();
-            var item = (await _queue.GetAllTasks<MigrationOperation>()).FirstOrDefault(t => t.TenantId == tenantId);
+            var item = (await _queue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenantId);
 
             if (item is { IsCompleted: true })
             {
@@ -79,7 +77,7 @@ public class MigrationWorker(
 
     public async Task Stop(int tenantId)
     {
-        var tasks = (await _queue.GetAllTasks<MigrationOperation>()).Where(t => t.MigrationApiInfo.Operation == "parse" && t.TenantId == tenantId);
+        var tasks = (await _queue.GetAllTasks()).Where(t => t.MigrationApiInfo.Operation == "parse" && t.TenantId == tenantId);
 
         foreach (var t in tasks)
         {
@@ -89,7 +87,7 @@ public class MigrationWorker(
 
     public async Task Clear(int tenantId)
     {
-        var tasks = (await _queue.GetAllTasks<MigrationOperation>()).Where(t => t.MigrationApiInfo.Operation == "migration" && t.TenantId == tenantId && t.IsCompleted);
+        var tasks = (await _queue.GetAllTasks()).Where(t => t.MigrationApiInfo.Operation == "migration" && t.TenantId == tenantId && t.IsCompleted);
 
         foreach (var t in tasks)
         {
@@ -100,6 +98,6 @@ public class MigrationWorker(
     public async Task<MigrationOperation> GetStatusAsync(int tenantId)
     {
         logger.Debug($"try get status {tenantId}");
-        return (await _queue.GetAllTasks<MigrationOperation>()).FirstOrDefault(t => t.TenantId == tenantId);
+        return (await _queue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenantId);
     }
 }

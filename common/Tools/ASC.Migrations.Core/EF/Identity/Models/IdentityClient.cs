@@ -63,7 +63,7 @@ public static class IdentityClientExtension
 
             entity.HasIndex(e => e.ClientId, "UK_client_id").IsUnique();
 
-            entity.HasIndex(e => e.ClientSecret, "UK_client_secret").IsUnique();
+            entity.HasIndex(e => e.ClientSecret, "idx_client_secret");
 
             entity.HasIndex(e => e.TenantId, "idx_identity_clients_tenant_id");
 
@@ -75,7 +75,7 @@ public static class IdentityClientExtension
                 .HasColumnName("client_secret")
                 .IsRequired();
             entity.Property(e => e.CreatedBy)
-                .HasMaxLength(255)
+                .HasMaxLength(36)
                 .HasColumnName("created_by");
             entity.Property(e => e.CreatedOn)
                 .HasMaxLength(6)
@@ -95,7 +95,7 @@ public static class IdentityClientExtension
                 .HasColumnType("tinytext")
                 .HasColumnName("logout_redirect_uri");
             entity.Property(e => e.ModifiedBy)
-                .HasMaxLength(255)
+                .HasMaxLength(36)
                 .HasColumnName("modified_by");
             entity.Property(e => e.ModifiedOn)
                 .HasMaxLength(6)
@@ -191,14 +191,14 @@ public static class IdentityClientExtension
 
             entity.Property(e => e.CreatedBy)
                 .HasColumnName("created_by")
-                .HasMaxLength(255);
+                .HasMaxLength(36);
 
             entity.Property(e => e.ModifiedOn)
                 .HasColumnName("modified_on");
 
             entity.Property(e => e.ModifiedBy)
                 .HasColumnName("modified_by")
-                .HasMaxLength(255);
+                .HasMaxLength(36);
 
             entity.Property(e => e.Version)
                 .HasColumnName("version");

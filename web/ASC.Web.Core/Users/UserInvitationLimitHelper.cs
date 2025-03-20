@@ -31,7 +31,7 @@ public class UserInvitationLimitHelper(
     SetupInfo setupInfo,
     TenantManager tenantManager,
     QuotaSocketManager quotaSocketManager,
-    IDistributedCache distributedCache)
+    IFusionCache hybridCache)
 {
     private bool IsLimitEnabled()
     {
@@ -54,7 +54,7 @@ public class UserInvitationLimitHelper(
 
         var cacheKey = GetCacheKey();
 
-        var cacheValue = await distributedCache.GetStringAsync(cacheKey);
+        var cacheValue = await hybridCache.GetOrDefaultAsync<string>(cacheKey);
 
         return int.TryParse(cacheValue, out var result) ? result : setupInfo.InvitationLimit;
     }
@@ -68,7 +68,7 @@ public class UserInvitationLimitHelper(
 
         var cacheKey = GetCacheKey();
 
-        var cacheValue = await distributedCache.GetStringAsync(cacheKey);
+        var cacheValue = await hybridCache.GetOrDefaultAsync<string>(cacheKey);
 
         if (!int.TryParse(cacheValue, out var oldValue))
         {
@@ -77,7 +77,7 @@ public class UserInvitationLimitHelper(
 
         var newValue = int.Min(oldValue + 1, setupInfo.InvitationLimit);
 
-        await distributedCache.SetStringAsync(cacheKey, newValue.ToString());
+        await hybridCache.SetAsync(cacheKey, newValue.ToString());
 
         await quotaSocketManager.ChangeInvitationLimitValue(newValue);
     }
@@ -91,13 +91,13 @@ public class UserInvitationLimitHelper(
 
         var cacheKey = GetCacheKey();
 
-        var cacheValue = await distributedCache.GetStringAsync(cacheKey);
+        var cacheValue = await hybridCache.GetOrDefaultAsync<string>(cacheKey);
 
         if (int.TryParse(cacheValue, out var oldValue))
         {
             var newValue = int.Max(oldValue - 1, 0);
 
-            await distributedCache.SetStringAsync(cacheKey, newValue.ToString());
+            await hybridCache.SetAsync(cacheKey, newValue.ToString());
 
             await quotaSocketManager.ChangeInvitationLimitValue(newValue);
         }
@@ -105,7 +105,7 @@ public class UserInvitationLimitHelper(
         {
             var value = int.Max(setupInfo.InvitationLimit - 1, 0);
 
-            await distributedCache.SetStringAsync(cacheKey, value.ToString());
+            await hybridCache.SetAsync(cacheKey, value.ToString());
 
             await quotaSocketManager.ChangeInvitationLimitValue(value);
         }

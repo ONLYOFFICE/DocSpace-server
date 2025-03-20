@@ -141,9 +141,9 @@ public class FileSecurity(IDaoFactory daoFactory,
                 FolderType.VirtualDataRoom,
                 new Dictionary<SubjectType, HashSet<FileShare>>
                 {
-                    { SubjectType.User, [FileShare.RoomManager, FileShare.ContentCreator, FileShare.Editing, FileShare.Read, FileShare.None] },
-                    { SubjectType.Group, [FileShare.ContentCreator, FileShare.Editing, FileShare.Read, FileShare.None] },
-                    { SubjectType.InvitationLink, [FileShare.ContentCreator, FileShare.Editing, FileShare.Read, FileShare.None] }
+                    { SubjectType.User, [FileShare.RoomManager, FileShare.ContentCreator, FileShare.Editing, FileShare.Read, FileShare.FillForms, FileShare.None] },
+                    { SubjectType.Group, [FileShare.ContentCreator, FileShare.Editing, FileShare.Read, FileShare.FillForms, FileShare.None] },
+                    { SubjectType.InvitationLink, [FileShare.ContentCreator, FileShare.Editing, FileShare.Read, FileShare.FillForms, FileShare.None] }
                 }.ToFrozenDictionary()
             }
         }.ToFrozenDictionary();
@@ -201,7 +201,13 @@ public class FileSecurity(IDaoFactory daoFactory,
                     FilesSecurityActions.Convert,
                     FilesSecurityActions.CreateRoomFrom,
                     FilesSecurityActions.CopyLink,
-                    FilesSecurityActions.Embed
+                    FilesSecurityActions.Embed,
+                    FilesSecurityActions.StartFilling,
+                    FilesSecurityActions.FillingStatus,
+                    FilesSecurityActions.ResetFilling,
+                    FilesSecurityActions.StopFilling,
+                    FilesSecurityActions.OpenForm
+
                 }
             },
             {
@@ -893,7 +899,7 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         if (action == FilesSecurityActions.CreateRoomFrom)
         {
-            return e.RootFolderType == FolderType.USER && e.RootCreateBy == userId && !isUser && (folder is { FolderType: FolderType.DEFAULT } || file != null);
+            return e.RootFolderType == FolderType.USER && e.RootCreateBy == userId && !isUser && !isGuest && (folder is { FolderType: FolderType.DEFAULT } || file != null);
         }
 
         if (action == FilesSecurityActions.Embed)
@@ -1036,6 +1042,17 @@ public class FileSecurity(IDaoFactory daoFactory,
                 }
             }
         }
+        if (file == null || (file != null && !file.IsForm) || (file != null && file.IsForm && e.RootFolderType != FolderType.VirtualRooms))
+        {
+            switch (action)
+            {
+                case FilesSecurityActions.ResetFilling:
+                case FilesSecurityActions.StopFilling:
+                case FilesSecurityActions.StartFilling:
+                case FilesSecurityActions.FillingStatus:
+                    return false;
+            }
+        }
 
         switch (e.RootFolderType)
         {
@@ -1059,12 +1076,17 @@ public class FileSecurity(IDaoFactory daoFactory,
                 }
                 break;
             case FolderType.USER:
-                if (isOutsider || action == FilesSecurityActions.Lock || (isGuest && !e.Shared))
+                if (isOutsider || action == FilesSecurityActions.Lock)
                 {
                     return false;
                 }
                 if (e.RootCreateBy == userId)
                 {
+                    if(isGuest && action != FilesSecurityActions.Read && action != FilesSecurityActions.Download)
+                    {
+                        return false;
+                    }
+
                     // user has all right in his folder
                     return true;
                 }
@@ -1081,7 +1103,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 {
                     return false;
                 }
-                
+
                 if (isDocSpaceAdmin)
                 {
                     if (action == FilesSecurityActions.Download)
@@ -1122,26 +1144,89 @@ public class FileSecurity(IDaoFactory daoFactory,
                             return true;
                     }
 
-                    if (isRoom && action is FilesSecurityActions.Move or FilesSecurityActions.Pin or FilesSecurityActions.ChangeOwner or 
+                    if (isRoom && action is FilesSecurityActions.Move or FilesSecurityActions.Pin or FilesSecurityActions.ChangeOwner or
                             FilesSecurityActions.IndexExport)
                     {
                         return true;
                     }
                 }
-                
-                if (action == FilesSecurityActions.FillForms && file != null)
+
+
+
+                if (file != null && file.IsForm && (action is
+                    FilesSecurityActions.FillForms or
+                    FilesSecurityActions.Edit or
+                    FilesSecurityActions.StartFilling or
+                    FilesSecurityActions.FillingStatus or
+                    FilesSecurityActions.ResetFilling or
+                    FilesSecurityActions.StopFilling or
+                    FilesSecurityActions.SubmitToFormGallery or
+                    FilesSecurityActions.CopyLink or
+                    FilesSecurityActions.OpenForm))
                 {
-                    var parentFolders = await GetFileParentFolders(file.ParentId);
-                    if (parentFolders != null)
+                    var parentFolders = await GetFileParentFolders(e.ParentId);
+                    var fileFolder = parentFolders.FirstOrDefault(r => DocSpaceHelper.IsRoom(r.FolderType));
+
+                    if (action == FilesSecurityActions.FillForms && (fileFolder != null && ((fileFolder.FolderType == FolderType.FormFillingFolderInProgress && file.CreateBy != userId) || fileFolder.FolderType == FolderType.FormFillingFolderDone)))
                     {
-                        var fileFolder = parentFolders.LastOrDefault();
-                        if ((fileFolder.FolderType == FolderType.FormFillingFolderInProgress && file.CreateBy != userId) || fileFolder.FolderType == FolderType.FormFillingFolderDone)
+                        return false;
+                    }
+
+                    if (fileFolder != null && fileFolder.FolderType == FolderType.VirtualDataRoom)
+                    {
+                        var fileDao = daoFactory.GetFileDao<T>();
+                        var (currentStep, roles) = await fileDao.GetUserFormRoles(file.Id, userId);
+                        var myRoles = await roles.ToListAsync();
+                        var role = myRoles.Where(r => !r.Submitted).FirstOrDefault();
+                        var properties = await fileDao.GetProperties(file.Id);
+                        var formFilling = properties?.FormFilling;
+
+                        var userHasFullAccess = await HasFullAccessAsync(e, userId, isGuest, isRoom, isUser);
+                        var hasFullAccessToForm = userHasFullAccess || e.Access is FileShare.RoomManager or FileShare.ContentCreator;
+                        var IsFillingStoped = formFilling?.FillingStopedDate != null && !DateTime.MinValue.Equals(formFilling?.FillingStopedDate);
+                        return action switch
                         {
-                            return false;
+                            FilesSecurityActions.ResetFilling =>
+                                hasFullAccessToForm && formFilling?.StartFilling == true && IsFillingStoped,
+
+                            FilesSecurityActions.StopFilling =>
+                                hasFullAccessToForm && formFilling?.StartFilling == true && !IsFillingStoped && currentStep > 0,
+
+                            FilesSecurityActions.StartFilling =>
+                                hasFullAccessToForm && formFilling?.StartFilling == false || formFilling?.StartFilling == null,
+
+                            FilesSecurityActions.FillForms =>
+                                !IsFillingStoped && myRoles.Any(),
+
+                            FilesSecurityActions.Edit =>
+                                currentStep == -1 && (hasFullAccessToForm || e.Access is FileShare.Editing),
+
+                            FilesSecurityActions.FillingStatus =>
+                                formFilling?.StartFilling == true,
+
+                            FilesSecurityActions.OpenForm =>
+                                (formFilling?.StartFilling == true && role == null) || currentStep == 0 || IsFillingStoped,
+
+                            _ => false
+                        };
+                    }
+                    else if (fileFolder != null && fileFolder.FolderType == FolderType.FillingFormsRoom)
+                    {
+                        switch (action)
+                        {
+                            case FilesSecurityActions.ResetFilling:
+                            case FilesSecurityActions.StopFilling:
+                            case FilesSecurityActions.StartFilling:
+                            case FilesSecurityActions.FillingStatus:
+                                return false;
                         }
                     }
+                } 
+                else if ((file == null || !file.IsForm) && action is FilesSecurityActions.OpenForm)
+                {
+                    return false;
                 }
-                
+
                 if (action is 
                        FilesSecurityActions.Rename or 
                        FilesSecurityActions.Lock or 
@@ -2796,6 +2881,21 @@ public class FileSecurity(IDaoFactory daoFactory,
         [SwaggerEnum("Change owner")]        ChangeOwner,
 
         [SwaggerEnum("Index export")]
-        IndexExport
+        IndexExport,
+
+        [SwaggerEnum("Start filling")]
+        StartFilling,
+
+        [SwaggerEnum("Filling status")]
+        FillingStatus,
+
+        [SwaggerEnum("Reset filling")]
+        ResetFilling,
+
+        [SwaggerEnum("Start filling")]
+        StopFilling,
+
+        [SwaggerEnum("Open form")]
+        OpenForm
     }
 }

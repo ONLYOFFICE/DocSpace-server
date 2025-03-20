@@ -28,16 +28,16 @@ namespace ASC.Data.Storage.Log;
 internal static partial class EncryptionOperationLogger
 {
     [LoggerMessage(LogLevel.Debug, "Storage already {status}")]
-    public static partial void DebugStorageAlready(this ILogger logger, EncryprtionStatus status); 
+    public static partial void DebugStorageAlready(this ILogger logger, EncryprtionStatus status);
     
-    [LoggerMessage(LogLevel.Debug, "Percentage: {percentage}")]
-    public static partial void DebugPercentage(this ILogger logger, double percentage);    
+    [LoggerMessage(LogLevel.Debug, "Percentage: {tenantAlias} {module} {percentage}")]
+    public static partial void DebugPercentage(this ILogger logger, string tenantAlias, string module, double percentage);
     
     [LoggerMessage(LogLevel.Debug, "Save new EncryptionSettings")]
-    public static partial void DebugSaveNewEncryptionSettings(this ILogger logger);   
+    public static partial void DebugSaveNewEncryptionSettings(this ILogger logger);
     
     [LoggerMessage(LogLevel.Debug, "Tenant {tenantAlias} SetStatus Active")]
-    public static partial void DebugTenantSetStatusActive(this ILogger logger, string tenantAlias);  
+    public static partial void DebugTenantSetStatusActive(this ILogger logger, string tenantAlias);
     
     [LoggerMessage(LogLevel.Debug, "Tenant {tenantAlias} SendStorageEncryptionSuccess")]
     public static partial void DebugTenantSendStorageEncryptionSuccess(this ILogger logger, string tenantAlias);

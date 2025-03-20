@@ -28,6 +28,11 @@ namespace ASC.Webhooks.Core;
 
 public interface IWebhookPublisher
 {
-    public Task PublishAsync(int webhookId, string requestPayload);
-    public Task<WebhooksLog> PublishAsync(int webhookId, string requestPayload, int configId);
+    public Task<IEnumerable<DbWebhooksConfig>> GetWebhookConfigsAsync<T>(WebhookTrigger trigger, IWebhookAccessChecker<T> checker, T data);
+
+    public Task PublishAsync<T1, T2>(WebhookTrigger trigger, IEnumerable<DbWebhooksConfig> webhookConfigs, T1 data, T2 dataId);
+
+    public Task PublishAsync<T1, T2>(WebhookTrigger trigger, IWebhookAccessChecker<T1> checker, T1 data, T2 dataId);
+
+    public Task<DbWebhooksLog> RetryPublishAsync(DbWebhooksLog webhookLog);
 }

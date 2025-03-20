@@ -29,60 +29,40 @@ using System.Extensions;
 namespace ASC.Migration.Core;
 
 [Transient]
-public class MigrationOperation(
-    ILogger<MigrationOperation> logger,
-    MigrationCore migrationCore,
-    TenantManager tenantManager,
-    SecurityContext securityContext,
-    IDistributedCache cache)
-    : DistributedTaskProgress
+public class MigrationOperation : DistributedTaskProgress
 {
     private string _migratorName;
     private Guid _userId;
 
-    private int? _tenantId;
-    public int TenantId
+    public int TenantId { get; set; }
+    public MigrationApiInfo MigrationApiInfo { get; set; }
+    public List<string> ImportedUsers { get; set; }
+    public string LogName { get; set; }
+
+    private readonly ILogger<MigrationOperation> _logger;
+    private readonly MigrationCore _migrationCore;
+    private readonly TenantManager _tenantManager;
+    private readonly SecurityContext _securityContext;
+    private readonly IFusionCache _hybridCache;
+
+    public MigrationOperation()
     {
-        get => _tenantId ?? this[nameof(_tenantId)];
-        set
-        {
-            _tenantId = value;
-            this[nameof(_tenantId)] = value;
-        }
+        
+    }
+    
+    public MigrationOperation(ILogger<MigrationOperation> logger,
+        MigrationCore migrationCore,
+        TenantManager tenantManager,
+        SecurityContext securityContext,
+        IFusionCache hybridCache)
+    {
+        _logger = logger;
+        _migrationCore = migrationCore;
+        _tenantManager = tenantManager;
+        _securityContext = securityContext;
+        _hybridCache = hybridCache;
     }
 
-    private MigrationApiInfo _migrationApiInfo;
-    public MigrationApiInfo MigrationApiInfo
-    {
-        get => _migrationApiInfo ?? JsonSerializer.Deserialize<MigrationApiInfo>(this[nameof(_migrationApiInfo)]);
-        set
-        {
-            _migrationApiInfo = value;
-            this[nameof(_migrationApiInfo)] = JsonSerializer.Serialize(value);
-        }
-    }
-
-    private List<string> _importedUsers;
-    public List<string> ImportedUsers
-    {
-        get => _importedUsers ?? JsonSerializer.Deserialize<List<string>>(this[nameof(_importedUsers)]);
-        set
-        {
-            _importedUsers = value;
-            this[nameof(_importedUsers)] = JsonSerializer.Serialize(value);
-        }
-    }
-
-    private string _logName;
-    public string LogName
-    {
-        get => _logName ?? this[nameof(_logName)];
-        set
-        {
-            _logName = value;
-            this[nameof(_logName)] = value;
-        }
-    }
 
     public void InitParse(int tenantId, Guid userId, string migratorName)
     {
@@ -104,17 +84,17 @@ public class MigrationOperation(
         Migrator migrator = null;
         try
         {
-            var onlyParse = _migrationApiInfo == null;
-            var copyInfo = _migrationApiInfo.Clone();
+            var onlyParse = MigrationApiInfo == null;
+            var copyInfo = MigrationApiInfo.Clone();
             if (onlyParse)
             {
                 MigrationApiInfo = new MigrationApiInfo();
             }
             CustomSynchronizationContext.CreateContext();
 
-            await tenantManager.SetCurrentTenantAsync(TenantId);
-            await securityContext.AuthenticateMeWithoutCookieAsync(_userId);
-            migrator = migrationCore.GetMigrator(_migratorName);
+            await _tenantManager.SetCurrentTenantAsync(TenantId);
+            await _securityContext.AuthenticateMeWithoutCookieAsync(_userId);
+            migrator = _migrationCore.GetMigrator(_migratorName);
             migrator.OnProgressUpdateAsync = Migrator_OnProgressUpdateAsync;
 
             if (migrator == null)
@@ -122,7 +102,7 @@ public class MigrationOperation(
                 throw new ItemNotFoundException(MigrationResource.MigrationNotFoundException);
             }
 
-            var folder = await cache.GetStringAsync($"migration folder - {TenantId}");
+            var folder = await _hybridCache.GetOrDefaultAsync<string>($"migration folder - {TenantId}");
             await migrator.InitAsync(folder, onlyParse ? OperationType.Parse : OperationType.Migration, CancellationToken);
 
             await migrator.ParseAsync(onlyParse);
@@ -138,7 +118,7 @@ public class MigrationOperation(
         catch (Exception e)
         {
             Exception = e;
-            logger.ErrorWithException(e);
+            _logger.ErrorWithException(e);
             if (migrator is { MigrationInfo: not null })
             {
                 MigrationApiInfo = migrator.MigrationInfo.ToApiInfo();

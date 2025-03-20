@@ -141,6 +141,42 @@ public static class UserExtensions
             EmployeeType.RoomAdmin;
     }
 
+    public static async Task<bool> CanUserViewAnotherUserAsync(this UserManager userManager, UserInfo sourceUser, UserInfo targetUser)
+    {
+        if (sourceUser.Id == targetUser.Id)
+        {
+            return true;
+        }
+
+        var sourceUserType = await userManager.GetUserTypeAsync(sourceUser);
+
+        if (sourceUserType is EmployeeType.DocSpaceAdmin)
+        {
+            return true;
+        }
+
+        if (sourceUserType is EmployeeType.User or EmployeeType.Guest)
+        {
+            return false;
+        }
+
+        var targetUserType = await userManager.GetUserTypeAsync(targetUser);
+
+        if (targetUserType is EmployeeType.Guest)
+        {
+            if (targetUser.CreatedBy.HasValue && targetUser.CreatedBy.Value == sourceUser.Id)
+            {
+                return true;
+            }
+
+            var userRelations = await userManager.GetUserRelationsAsync(sourceUser.Id);
+
+            return userRelations.ContainsKey(targetUser.Id);
+        }
+
+        return true;
+    }
+
     private const string _extMobPhone = "extmobphone";
     private const string _mobPhone = "mobphone";
     private const string _extMail = "extmail";

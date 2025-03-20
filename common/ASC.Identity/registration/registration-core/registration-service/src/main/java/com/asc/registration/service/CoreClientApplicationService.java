@@ -29,6 +29,7 @@ package com.asc.registration.service;
 
 import com.asc.common.core.domain.entity.Audit;
 import com.asc.common.core.domain.value.ClientId;
+import com.asc.common.core.domain.value.Role;
 import com.asc.common.service.transfer.response.ClientResponse;
 import com.asc.registration.service.ports.input.service.ClientApplicationService;
 import com.asc.registration.service.transfer.request.create.CreateTenantClientCommand;
@@ -64,8 +65,8 @@ public class CoreClientApplicationService implements ClientApplicationService {
    * @param query The query containing the tenant ID and client ID.
    * @return A {@link ClientResponse} containing detailed client information.
    */
-  public ClientResponse getClient(TenantClientQuery query) {
-    return clientQueryHandler.getClient(query);
+  public ClientResponse getClient(Role role, TenantClientQuery query) {
+    return clientQueryHandler.getClient(role, query);
   }
 
   /**
@@ -84,8 +85,8 @@ public class CoreClientApplicationService implements ClientApplicationService {
    * @param query The query containing the client ID and optional tenant ID.
    * @return A {@link ClientInfoResponse} containing basic client information.
    */
-  public ClientInfoResponse getClientInfo(ClientInfoQuery query) {
-    return clientQueryHandler.getClientInfo(query);
+  public ClientInfoResponse getClientInfo(Role role, ClientInfoQuery query) {
+    return clientQueryHandler.getClientInfo(role, query);
   }
 
   /**
@@ -104,8 +105,9 @@ public class CoreClientApplicationService implements ClientApplicationService {
    * @param query The query containing the tenant ID, pagination parameters, and filters.
    * @return A {@link PageableResponse} containing a list of {@link ClientInfoResponse}.
    */
-  public PageableResponse<ClientInfoResponse> getClientsInfo(ClientInfoPaginationQuery query) {
-    return clientQueryHandler.getClientsInfo(query);
+  public PageableResponse<ClientInfoResponse> getClientsInfo(
+      Role role, ClientInfoPaginationQuery query) {
+    return clientQueryHandler.getClientsInfo(role, query);
   }
 
   /**
@@ -114,8 +116,9 @@ public class CoreClientApplicationService implements ClientApplicationService {
    * @param query The query containing the tenant ID, pagination parameters, and filters.
    * @return A {@link PageableResponse} containing a list of {@link ClientResponse}.
    */
-  public PageableResponse<ClientResponse> getClients(TenantClientsPaginationQuery query) {
-    return clientQueryHandler.getClients(query);
+  public PageableResponse<ClientResponse> getClients(
+      Role role, TenantClientsPaginationQuery query) {
+    return clientQueryHandler.getClients(role, query);
   }
 
   public List<ClientResponse> getClients(List<ClientId> clientIds) {
@@ -141,8 +144,8 @@ public class CoreClientApplicationService implements ClientApplicationService {
    * @return A {@link ClientSecretResponse} containing the new client secret.
    */
   public ClientSecretResponse regenerateSecret(
-      Audit audit, RegenerateTenantClientSecretCommand command) {
-    return clientUpdateCommandHandler.regenerateSecret(audit, command);
+      Audit audit, Role role, RegenerateTenantClientSecretCommand command) {
+    return clientUpdateCommandHandler.regenerateSecret(audit, role, command);
   }
 
   /**
@@ -151,8 +154,9 @@ public class CoreClientApplicationService implements ClientApplicationService {
    * @param audit The audit details of the operation, including the user performing it.
    * @param command The command containing the tenant ID, client ID, and new activation status.
    */
-  public void changeActivation(Audit audit, ChangeTenantClientActivationCommand command) {
-    clientUpdateCommandHandler.changeActivation(audit, command);
+  public void changeActivation(
+      Audit audit, Role role, ChangeTenantClientActivationCommand command) {
+    clientUpdateCommandHandler.changeActivation(audit, role, command);
   }
 
   /**
@@ -161,8 +165,9 @@ public class CoreClientApplicationService implements ClientApplicationService {
    * @param audit The audit details of the operation, including the user performing it.
    * @param command The command containing the tenant ID, client ID, and new visibility status.
    */
-  public void changeVisibility(Audit audit, ChangeTenantClientVisibilityCommand command) {
-    clientUpdateCommandHandler.changeVisibility(audit, command);
+  public void changeVisibility(
+      Audit audit, Role role, ChangeTenantClientVisibilityCommand command) {
+    clientUpdateCommandHandler.changeVisibility(audit, role, command);
   }
 
   /**
@@ -172,8 +177,8 @@ public class CoreClientApplicationService implements ClientApplicationService {
    * @param command The command containing the updated client details.
    * @return A {@link ClientResponse} containing the updated client's information.
    */
-  public ClientResponse updateClient(Audit audit, UpdateTenantClientCommand command) {
-    return clientUpdateCommandHandler.updateClient(audit, command);
+  public ClientResponse updateClient(Audit audit, Role role, UpdateTenantClientCommand command) {
+    return clientUpdateCommandHandler.updateClient(audit, role, command);
   }
 
   /**
@@ -181,8 +186,9 @@ public class CoreClientApplicationService implements ClientApplicationService {
    *
    * @param audit The audit details of the operation, including the user performing it.
    * @param command The command containing the tenant ID and client ID of the client to be deleted.
+   * @return the result of the delete operation, the number of rows affected.
    */
-  public void deleteClient(Audit audit, DeleteTenantClientCommand command) {
-    clientUpdateCommandHandler.deleteClient(audit, command);
+  public int deleteClient(Audit audit, Role role, DeleteTenantClientCommand command) {
+    return clientUpdateCommandHandler.deleteClient(audit, role, command);
   }
 }

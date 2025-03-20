@@ -465,16 +465,16 @@ docx, xlsx, pptx ilə ən yüksək uyğunluq.</value>
     <value>İstifadəçi</value>
   </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Birdən çox faylın Forma Doldurma otağına köçürülməsi dəstəklənmir. Hər dəfə bir ONLYOFFICE PDF formasını köçürün.</value>
+    <value>Birdən çox faylın Forma Doldurma otağına köçürülməsi dəstəklənmir. Hər dəfə bir {0} PDF formasını köçürün.</value>
   </data>
   <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Qovluqların Forma Doldurma otağına köçürülməsi dəstəklənmir. Hər dəfə bir ONLYOFFICE PDF formasını köçürün.</value>
+    <value>Qovluqların Forma Doldurma otağına köçürülməsi dəstəklənmir. Hər dəfə bir {0} PDF formasını köçürün.</value>
   </data>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Fayl bu otağa köçürülə bilməz. Lütfən, ONLYOFFICE PDF formasını köçürməyə cəhd edin.</value>
+    <value>Fayl bu otağa köçürülə bilməz. Lütfən, {0} PDF formasını köçürməyə cəhd edin.</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Fayl bu otağa yüklənə bilməz. Lütfən, ONLYOFFICE PDF formasını yükləməyə cəhd edin.</value>
+    <value>Fayl bu otağa yüklənə bilməz. Lütfən, {0} PDF formasını yükləməyə cəhd edin.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Doldurmaq üçün link</value>

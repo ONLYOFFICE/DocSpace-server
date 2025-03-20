@@ -24,12 +24,14 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using SecurityContext = ASC.Core.SecurityContext;
+
 namespace ASC.Data.Reassigns;
 
 /// <summary>
 /// </summary>
 [Transient]
-public class ReassignProgressItem(IServiceScopeFactory serviceScopeFactory) : DistributedTaskProgress
+public class ReassignProgressItem : DistributedTaskProgress
 {
     /// <summary>The user whose data is reassigned</summary>
     /// <type>System.Guid, System</type>
@@ -44,6 +46,19 @@ public class ReassignProgressItem(IServiceScopeFactory serviceScopeFactory) : Di
     private Guid _currentUserId;
     private bool _notify;
     private bool _deleteProfile;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
+
+    public ReassignProgressItem()
+    {
+        
+    }
+    
+    /// <summary>
+    /// </summary>
+    public ReassignProgressItem(IServiceScopeFactory serviceScopeFactory)
+    {
+        _serviceScopeFactory = serviceScopeFactory;
+    }
 
     public void Init(IDictionary<string, StringValues> httpHeaders, int tenantId, Guid fromUserId, Guid toUserId, Guid currentUserId, bool notify, bool deleteProfile)
     {
@@ -63,7 +78,7 @@ public class ReassignProgressItem(IServiceScopeFactory serviceScopeFactory) : Di
 
     protected override async Task DoJob()
     {
-        await using var scope = serviceScopeFactory.CreateAsyncScope();
+        await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var scopeClass = scope.ServiceProvider.GetService<ReassignProgressItemScope>();
         var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, displayUserSettingsHelper, options, socketManager) = scopeClass;
         var logger = options.CreateLogger("ASC.Web");
@@ -73,47 +88,53 @@ public class ReassignProgressItem(IServiceScopeFactory serviceScopeFactory) : Di
         {
             await securityContext.AuthenticateMeWithoutCookieAsync(_currentUserId);
 
-            await SetPercentageAndCheckCancellation(5, true);
+            await SetPercentageAndCheckCancellationAsync(5, true);
 
             await fileStorageService.DemandPermissionToReassignDataAsync(FromUser, ToUser);
 
-            await SetPercentageAndCheckCancellation(10, true);
+            await SetPercentageAndCheckCancellationAsync(10, true);
 
             List<int> personalFolderIds = null;
 
             if (_deleteProfile)
             {
-                await fileStorageService.DeletePersonalDataAsync<int>(FromUser);
+                var currentType = await userManager.GetUserTypeAsync(FromUser);
+                if (currentType != EmployeeType.Guest)
+                {
+                    await fileStorageService.MoveSharedFilesAsync(FromUser, ToUser);
+                    await SetPercentageAndCheckCancellationAsync(20, true);
+                }
+                await fileStorageService.DeletePersonalDataAsync(FromUser);
             }
             else
             {
                 personalFolderIds = await fileStorageService.GetPersonalFolderIdsAsync<int>(FromUser);
             }
 
-            await SetPercentageAndCheckCancellation(30, true);
+            await SetPercentageAndCheckCancellationAsync(30, true);
 
             await fileStorageService.ReassignProvidersAsync(FromUser, ToUser);
 
-            await SetPercentageAndCheckCancellation(50, true);
+            await SetPercentageAndCheckCancellationAsync(50, true);
 
             await fileStorageService.ReassignFoldersAsync(FromUser, ToUser, personalFolderIds);
 
-            await SetPercentageAndCheckCancellation(70, true);
+            await SetPercentageAndCheckCancellationAsync(70, true);
 
             await fileStorageService.ReassignFilesAsync(FromUser, ToUser, personalFolderIds);
 
-            await SetPercentageAndCheckCancellation(90, true);
+            await SetPercentageAndCheckCancellationAsync(90, true);
 
             await SendSuccessNotifyAsync(userManager, studioNotifyService, messageService, displayUserSettingsHelper);
 
-            await SetPercentageAndCheckCancellation(95, true);
+            await SetPercentageAndCheckCancellationAsync(95, true);
 
             if (_deleteProfile)
             {
                 await DeleteUserProfile(userManager, userPhotoManager, messageService, displayUserSettingsHelper, socketManager);
             }
 
-            await SetPercentageAndCheckCancellation(100, false);
+            await SetPercentageAndCheckCancellationAsync(100, false);
 
             Status = DistributedTaskStatus.Completed;
         }
@@ -142,7 +163,7 @@ public class ReassignProgressItem(IServiceScopeFactory serviceScopeFactory) : Di
         return MemberwiseClone();
     }
 
-    private async Task SetPercentageAndCheckCancellation(double percentage, bool publish)
+    private async Task SetPercentageAndCheckCancellationAsync(double percentage, bool publish)
     {
         Percentage = percentage;
 

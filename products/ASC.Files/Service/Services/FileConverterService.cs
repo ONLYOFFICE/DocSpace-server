@@ -51,11 +51,12 @@ internal class FileConverterService<T>(
 
             var conversionQueue = (await fileConverterQueue.GetAllTaskAsync<T>()).ToList();
 
-            if (conversionQueue.Count > 0)
+            if (conversionQueue.Count == 0)
             {
-                logger.DebugRunCheckConvertFilesStatus(conversionQueue.Count);
+                return;
             }
-
+            
+            logger.DebugRunCheckConvertFilesStatus(conversionQueue.Count);
             var filesIsConverting = conversionQueue
                                     .Where(x => string.IsNullOrEmpty(x.Processed))
                                     .ToList();
@@ -84,6 +85,11 @@ internal class FileConverterService<T>(
                 await securityContext.AuthenticateMeWithoutCookieAsync(converter.Account);
 
                 var file = await daoFactory.GetFileDao<T>().GetFileAsync(fileId, fileVersion);
+                if (file == null)
+                {
+                    continue;
+                }
+                
                 var fileUri = file.Id.ToString();
 
                 string convertedFileUrl;

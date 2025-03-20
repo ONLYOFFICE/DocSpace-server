@@ -501,7 +501,7 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Moving several files to the Form Filling room is not supported. Move one ONLYOFFICE PDF form at a time..
+        ///   Looks up a localized string similar to Moving several files to the Form Filling room is not supported. Move one {0} PDF form at a time..
         /// </summary>
         public static string ErrorMessage_FilesMoveFormFillingError {
             get {
@@ -528,7 +528,7 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Moving folders to the Form Filling room is not supported. Move one ONLYOFFICE PDF form at a time..
+        ///   Looks up a localized string similar to Moving folders to the Form Filling room is not supported. Move one {0} PDF form at a time..
         /// </summary>
         public static string ErrorMessage_FolderMoveFormFillingError {
             get {
@@ -618,7 +618,7 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The file cannot be moved to this room. Please try to move the ONLYOFFICE PDF form..
+        ///   Looks up a localized string similar to The file cannot be moved to this room. Please try to move the {0} PDF form..
         /// </summary>
         public static string ErrorMessage_MoveToFormRoom {
             get {
@@ -951,7 +951,7 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The file cannot be uploaded to this room. Please try to upload the ONLYOFFICE PDF form..
+        ///   Looks up a localized string similar to The file cannot be uploaded to this room. Please try to upload the {0} PDF form..
         /// </summary>
         public static string ErrorMessage_UploadToFormRoom {
             get {
@@ -1362,6 +1362,24 @@ namespace ASC.Files.Core.Resources {
         public static string RoomIndex_Type {
             get {
                 return ResourceManager.GetString("RoomIndex_Type", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Share to fill out.
+        /// </summary>
+        public static string StartFillingModeEnum_ShareToFillOut {
+            get {
+                return ResourceManager.GetString("StartFillingModeEnum_ShareToFillOut", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Start filling.
+        /// </summary>
+        public static string StartFillingModeEnum_StartFilling {
+            get {
+                return ResourceManager.GetString("StartFillingModeEnum_StartFilling", resourceCulture);
             }
         }
         

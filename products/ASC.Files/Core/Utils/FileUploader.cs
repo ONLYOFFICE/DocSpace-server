@@ -31,6 +31,7 @@ public class FileUploader(
     FileUtility fileUtility,
     UserManager userManager,
     TenantManager tenantManager,
+    TenantLogoManager tenantLogoManager,
     AuthContext authContext,
     SetupInfo setupInfo,
     MaxTotalSizeStatistic maxTotalSizeStatistic,
@@ -47,7 +48,8 @@ public class FileUploader(
     FileTrackerHelper fileTracker,
     SocketManager socketManager,
     FileChecker fileChecker,
-    TempStream tempStream )
+    TempStream tempStream,
+    WebhookManager webhookManager)
 {
     public async Task<File<T>> ExecAsync<T>(T folderId, string title, long contentLength, Stream data, bool createNewIfExist, bool deleteConvertStatus = true)
     {
@@ -70,6 +72,8 @@ public class FileUploader(
         {
             await fileConverter.ExecAsynchronouslyAsync(file, deleteConvertStatus, !createNewIfExist);
         }
+
+        await webhookManager.PublishAsync(WebhookTrigger.FileCreated, file);
 
         return file;
     }
@@ -322,7 +326,9 @@ public class FileUploader(
                     var currentRoom = await folderDao.GetFolderAsync(roomId);
                     if (currentRoom.FolderType == FolderType.FillingFormsRoom && !isForm)
                     {
-                        throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
+                        var logoText = await tenantLogoManager.GetLogoTextAsync();
+
+                        throw new Exception(string.Format(FilesCommonResource.ErrorMessage_UploadToFormRoom, logoText));
                     }
                 }
 

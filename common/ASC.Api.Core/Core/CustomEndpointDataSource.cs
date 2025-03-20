@@ -74,48 +74,15 @@ public class CustomEndpointDataSource : EndpointDataSource
 
 public static class EndpointExtension
 {
-    public static async Task<IEndpointRouteBuilder> MapCustomAsync(this IEndpointRouteBuilder endpoints, bool webhooksEnabled = false, IServiceProvider serviceProvider = null)
+    public static IEndpointRouteBuilder MapCustomAsync(this IEndpointRouteBuilder endpoints)
     {
         endpoints.MapControllers()
                  .WithRequirementAuthorization();
-
-        if (webhooksEnabled && serviceProvider != null)
-        {
-            await endpoints.RegisterWebhooks(serviceProvider);
-        }
 
         var sources = endpoints.DataSources.First();
         endpoints.DataSources.Clear();
         endpoints.DataSources.Add(new CustomEndpointDataSource(sources));
 
         return endpoints;
-    }
-
-    private static async Task RegisterWebhooks(this IEndpointRouteBuilder endpoints, IServiceProvider serviceProvider)
-    {
-        var toRegister = endpoints.DataSources.First().Endpoints
-            .Cast<RouteEndpoint>()
-            .SelectMany(r =>
-            {
-                var result = new List<Webhook>();
-                var httpMethodMetadata = r.Metadata.OfType<HttpMethodMetadata>().FirstOrDefault();
-                var disabled = r.Metadata.OfType<WebhookDisableAttribute>().FirstOrDefault();
-
-                if (disabled == null && httpMethodMetadata != null)
-                {
-                    result.AddRange(httpMethodMetadata.HttpMethods.Select(httpMethod => new Webhook { Method = httpMethod, Route = r.RoutePattern.RawText.ToLower() }));
-                }
-                return result;
-            })
-            .Where(r => DbWorker.MethodList.Contains(r.Method))
-            .DistinctBy(r => $"{r.Method}|{r.Route}")
-            .ToList();
-
-        using var scope = serviceProvider.CreateScope();
-        var dbWorker = scope.ServiceProvider.GetService<DbWorker>();
-        if (dbWorker != null)
-        {
-            await dbWorker.Register(toRegister);
-        }
     }
 }

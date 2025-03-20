@@ -38,12 +38,12 @@ public class LicenseController(ILoggerProvider option,
         SettingsManager settingsManager,
         WebItemManager webItemManager,
         CoreBaseSettings coreBaseSettings,
-        IMemoryCache memoryCache,
+        IFusionCache fusionCache,
         FirstTimeTenantSettings firstTimeTenantSettings,
         ITariffService tariffService,
         IHttpContextAccessor httpContextAccessor,
         DocumentServiceLicense documentServiceLicense)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     private readonly ILogger _log = option.CreateLogger("ASC.Api");
 
@@ -75,10 +75,10 @@ public class LicenseController(ILoggerProvider option,
     /// </short>
     /// <path>api/2.0/settings/license/accept</path>
     [Tags("Settings / License")]
-    [SwaggerResponse(200, "Message about the result of activating license", typeof(object))]
+    [SwaggerResponse(200, "Message about the result of activating license", typeof(string))]
     [AllowNotPayment]
     [HttpPost("accept")]
-    public async Task<object> AcceptLicenseAsync()
+    public async Task<string> AcceptLicenseAsync()
     {
         if (!tenantExtra.Enterprise)
         {
@@ -207,14 +207,14 @@ public class LicenseController(ILoggerProvider option,
     /// </short>
     /// <path>api/2.0/settings/license</path>
     [Tags("Settings / License")]
-    [SwaggerResponse(200, "License", typeof(object))]
+    [SwaggerResponse(200, "License", typeof(string))]
     [SwaggerResponse(400, "The uploaded file could not be found")]
     [SwaggerResponse(403, "Portal Access")]
     [SwaggerResponse(405, "Your pricing plan does not support this option")]
     [AllowNotPayment]
     [HttpPost("")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard, Administrators")]
-    public async Task<object> UploadLicenseAsync([FromForm] UploadLicenseRequestsDto inDto)
+    public async Task<string> UploadLicenseAsync([FromForm] UploadLicenseRequestsDto inDto)
     {
         try
         {

@@ -124,6 +124,6 @@
     <value>Setare parolă</value>
   </data>
   <data name="BackupNotFound" xml:space="preserve">
-    <value>Fișierul de rezervă nevalid. Utilizați fișierul, care a fost creat cu ONLYOFFICE v11.5 sau cu o versiune ulterioară.</value>
+    <value>Fișierul de rezervă nevalid. Vă rugăm să utilizați un fișier creat în același portal.</value>
   </data>
 </root>

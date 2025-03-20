@@ -43,10 +43,11 @@ import software.amazon.awssdk.enhanced.dynamodb.model.*;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
 /**
- * Repository implementation for managing clients stored in DynamoDB.
+ * Repository implementation for managing client entities in DynamoDB.
  *
- * <p>Provides CRUD operations for client entities, including query methods for retrieving clients
- * by various attributes and handling updates to client properties.
+ * <p>This class provides CRUD operations and query methods for {@link ClientDynamoEntity} objects
+ * using the AWS SDK's DynamoDB Enhanced Client. It supports pagination, filtering by tenant and
+ * creator, and updates to specific client attributes.
  */
 @Repository
 @Profile(value = "saas")
@@ -58,10 +59,13 @@ public class CoreDynamoClientRepository implements DynamoClientRepository {
   private final DynamoDbTable<ClientDynamoEntity> clientTable;
 
   /**
-   * Constructs a new instance of the repository with the given table name and DynamoDB enhanced
-   * client.
+   * Constructs a new instance of {@code CoreDynamoClientRepository} using the specified table name
+   * and DynamoDB enhanced client.
    *
-   * @param dynamoDbEnhancedClient the DynamoDB enhanced client.
+   * @param tableName the name of the DynamoDB table containing client entities, as configured by
+   *     {@code spring.cloud.aws.dynamodb.tables.registeredClient}
+   * @param dynamoDbEnhancedClient the enhanced DynamoDB client instance
+   * @throws BeanInitializationException if the provided table name is null or blank
    */
   public CoreDynamoClientRepository(
       @Value("${spring.cloud.aws.dynamodb.tables.registeredClient}") String tableName,
@@ -74,9 +78,9 @@ public class CoreDynamoClientRepository implements DynamoClientRepository {
   }
 
   /**
-   * Saves a new client entity in DynamoDB.
+   * Persists a new client entity into DynamoDB.
    *
-   * @param entity the client entity to save.
+   * @param entity the {@link ClientDynamoEntity} to be saved
    */
   public void save(ClientDynamoEntity entity) {
     clientTable.putItem(entity);
@@ -85,112 +89,142 @@ public class CoreDynamoClientRepository implements DynamoClientRepository {
   /**
    * Updates an existing client entity in DynamoDB.
    *
-   * @param entity the client entity to update.
-   * @return the updated client entity.
+   * @param entity the {@link ClientDynamoEntity} with updated attributes
+   * @return the updated {@link ClientDynamoEntity}
    */
   public ClientDynamoEntity update(ClientDynamoEntity entity) {
     return clientTable.updateItem(entity);
   }
 
   /**
-   * Finds a client by its unique client ID.
+   * Retrieves a client entity by its unique client ID.
    *
-   * @param clientId the client ID.
-   * @return the client entity, or {@code null} if not found.
+   * @param clientId the unique identifier of the client
+   * @return the corresponding {@link ClientDynamoEntity} if found, or {@code null} otherwise
    */
   public ClientDynamoEntity findById(String clientId) {
-    return clientTable
-        .query(QueryConditional.keyEqualTo(k -> k.partitionValue(clientId)))
-        .items()
-        .stream()
-        .findFirst()
-        .orElse(null);
+    var key = Key.builder().partitionValue(clientId).build();
+    return clientTable.getItem(key);
   }
 
   /**
-   * Finds a client by its ID and visibility status.
+   * Retrieves a client entity by its client ID and visibility status.
    *
-   * @param clientId the client ID.
-   * @param accessible the visibility status.
-   * @return an {@link Optional} containing the client entity, or empty if not found.
+   * @param clientId the unique identifier of the client
+   * @param accessible the desired visibility status (true for accessible, false otherwise)
+   * @return an {@link Optional} containing the matching {@link ClientDynamoEntity} if found, or an
+   *     empty {@link Optional} if not found
    */
   public Optional<ClientDynamoEntity> findByIdAndVisibility(String clientId, boolean accessible) {
-    return clientTable
-        .query(
-            r -> r.queryConditional(QueryConditional.keyEqualTo(k -> k.partitionValue(clientId))))
-        .items()
-        .stream()
-        .filter(client -> client.isAccessible() == accessible)
-        .findFirst();
+    var key = Key.builder().partitionValue(clientId).build();
+    var client = clientTable.getItem(key);
+    return (client != null && client.isAccessible() == accessible)
+        ? Optional.of(client)
+        : Optional.empty();
   }
 
   /**
-   * Finds all clients for a specific tenant with pagination support.
+   * Retrieves a paginated list of client entities for a specific tenant.
    *
-   * @param tenantId the tenant ID.
-   * @param limit the maximum number of clients to retrieve.
-   * @param nextClientId the next client ID for pagination.
-   * @param nextCreatedOn the creation timestamp for pagination.
-   * @return a list of client entities.
+   * <p>This method uses the "tenant-created-index" to query client entities by tenant ID.
+   * Pagination is supported through the use of {@code nextClientId} and {@code nextCreatedOn} as
+   * cursor parameters. Results are returned in descending order based on the creation timestamp.
+   *
+   * @param tenantId the tenant identifier
+   * @param limit the maximum number of client entities to return
+   * @param nextClientId the client ID serving as the pagination cursor, or {@code null} for the
+   *     first page
+   * @param nextCreatedOn the creation timestamp serving as the pagination cursor, or {@code null}
+   *     for the first page
+   * @return a list of {@link ClientDynamoEntity} objects matching the query
    */
   public List<ClientDynamoEntity> findAllByTenantId(
       long tenantId, int limit, String nextClientId, ZonedDateTime nextCreatedOn) {
     var index = clientTable.index("tenant-created-index");
     var queryConditional = QueryConditional.keyEqualTo(k -> k.partitionValue(tenantId));
 
-    Map<String, AttributeValue> lastEvaluatedKey = null;
-    var results = new ArrayList<ClientDynamoEntity>();
-
+    Map<String, AttributeValue> exclusiveStartKey = null;
     if (nextClientId != null && !nextClientId.isBlank() && nextCreatedOn != null)
-      lastEvaluatedKey =
+      exclusiveStartKey =
           Map.of(
               "tenant_id", AttributeValue.builder().n(String.valueOf(tenantId)).build(),
               "client_id", AttributeValue.builder().s(nextClientId).build(),
               "created_on", AttributeValue.builder().s(nextCreatedOn.toString()).build());
 
-    do {
-      var requestBuilder =
-          QueryEnhancedRequest.builder()
-              .queryConditional(queryConditional)
-              .scanIndexForward(false)
-              .limit(20);
+    var requestBuilder =
+        QueryEnhancedRequest.builder()
+            .queryConditional(queryConditional)
+            .scanIndexForward(false)
+            .limit(limit + 1);
+    if (exclusiveStartKey != null) requestBuilder.exclusiveStartKey(exclusiveStartKey);
 
-      if (lastEvaluatedKey != null) requestBuilder.exclusiveStartKey(lastEvaluatedKey);
-
-      var request = requestBuilder.build();
-      var queryResults = index.query(request);
-
-      var page = queryResults.stream().findFirst();
-      if (page.isPresent()) {
-        results.addAll(page.get().items());
-        lastEvaluatedKey = page.get().lastEvaluatedKey();
-      } else lastEvaluatedKey = null;
-    } while (lastEvaluatedKey != null && results.size() <= limit + 1);
-
-    return results;
+    var request = requestBuilder.build();
+    var page = index.query(request).stream().findFirst();
+    return page.map(Page::items).orElse(Collections.emptyList());
   }
 
   /**
-   * Finds a client by its client ID and tenant ID.
+   * Retrieves a paginated list of client entities created by a specific creator.
    *
-   * @param clientId the client ID.
-   * @param tenantId the tenant ID.
-   * @return an {@link Optional} containing the client entity, or empty if not found.
+   * <p>This method uses the "creator-created-index" to query client entities by creator ID.
+   * Pagination is supported through the use of {@code nextClientId} and {@code nextCreatedOn} as
+   * cursor parameters. Results are returned in descending order based on the creation timestamp.
+   *
+   * @param creatorId the identifier of the creator
+   * @param limit the maximum number of client entities to return
+   * @param nextClientId the client ID serving as the pagination cursor, or {@code null} for the
+   *     first page
+   * @param nextCreatedOn the creation timestamp serving as the pagination cursor, or {@code null}
+   *     for the first page
+   * @return a list of {@link ClientDynamoEntity} objects matching the query
+   */
+  public List<ClientDynamoEntity> findAllByCreatorId(
+      String creatorId, int limit, String nextClientId, ZonedDateTime nextCreatedOn) {
+    var index = clientTable.index("creator-created-index");
+    var queryConditional = QueryConditional.keyEqualTo(k -> k.partitionValue(creatorId));
+
+    Map<String, AttributeValue> exclusiveStartKey = null;
+    if (nextClientId != null && !nextClientId.isBlank() && nextCreatedOn != null)
+      exclusiveStartKey =
+          Map.of(
+              "created_by", AttributeValue.builder().s(creatorId).build(),
+              "client_id", AttributeValue.builder().s(nextClientId).build(),
+              "created_on", AttributeValue.builder().s(nextCreatedOn.toString()).build());
+
+    var requestBuilder =
+        QueryEnhancedRequest.builder()
+            .queryConditional(queryConditional)
+            .scanIndexForward(false)
+            .limit(limit + 1);
+    if (exclusiveStartKey != null) requestBuilder.exclusiveStartKey(exclusiveStartKey);
+
+    var request = requestBuilder.build();
+    var page = index.query(request).stream().findFirst();
+    return page.map(Page::items).orElse(Collections.emptyList());
+  }
+
+  /**
+   * Retrieves a client entity by its client ID and tenant ID.
+   *
+   * @param clientId the unique identifier of the client
+   * @param tenantId the tenant identifier
+   * @return an {@link Optional} containing the matching {@link ClientDynamoEntity} if found, or an
+   *     empty {@link Optional} if not found
    */
   public Optional<ClientDynamoEntity> findByClientIdAndTenantId(String clientId, long tenantId) {
-    return clientTable
-        .query(QueryConditional.keyEqualTo(k -> k.partitionValue(clientId)))
-        .items()
-        .stream()
-        .filter(c -> c.getTenantId() == tenantId)
-        .findFirst();
+    var key = Key.builder().partitionValue(clientId).build();
+    var client = clientTable.getItem(key);
+    return (client != null && client.getTenantId() == tenantId)
+        ? Optional.of(client)
+        : Optional.empty();
   }
 
   /**
-   * Finds all clients matching the given list of client IDs.
+   * Retrieves all client entities with any of the specified client IDs.
    *
-   * @param clientIds the list of client IDs.
-   * @return a list of client entities.
+   * @param clientIds a list of client IDs to search for; if {@code null} or empty, an empty list is
+   *     returned
+   * @return a list of matching {@link ClientDynamoEntity} objects
    */
   public List<ClientDynamoEntity> findAllByClientIds(List<String> clientIds) {
     if (clientIds == null || clientIds.isEmpty()) return Collections.emptyList();
@@ -213,11 +247,12 @@ public class CoreDynamoClientRepository implements DynamoClientRepository {
   }
 
   /**
-   * Deletes a client by its client ID and tenant ID.
+   * Deletes a client entity by its client ID and tenant ID.
    *
-   * @param clientId the client ID.
-   * @param tenantId the tenant ID.
-   * @return the deleted client entity.
+   * @param clientId the unique identifier of the client to delete
+   * @param tenantId the tenant identifier
+   * @return the deleted {@link ClientDynamoEntity} if deletion was successful, or {@code null}
+   *     otherwise
    */
   public ClientDynamoEntity deleteByIdAndTenantId(String clientId, long tenantId) {
     var keyEntity = new ClientDynamoEntity();
@@ -227,13 +262,16 @@ public class CoreDynamoClientRepository implements DynamoClientRepository {
   }
 
   /**
-   * Updates the client secret for a client.
+   * Updates the client secret for a specific client entity.
    *
-   * @param clientId the client ID.
-   * @param tenantId the tenant ID.
-   * @param secret the new client secret.
-   * @param modifiedOn the modification timestamp.
-   * @return the updated client entity.
+   * <p>This method retrieves the existing client entity, updates its secret and modification
+   * timestamp, and persists the changes.
+   *
+   * @param clientId the unique identifier of the client
+   * @param tenantId the tenant identifier
+   * @param secret the new client secret to set
+   * @param modifiedOn the timestamp when the update is performed
+   * @return the updated {@link ClientDynamoEntity}
    */
   public ClientDynamoEntity updateClientSecret(
       String clientId, long tenantId, String secret, ZonedDateTime modifiedOn) {
@@ -242,13 +280,16 @@ public class CoreDynamoClientRepository implements DynamoClientRepository {
   }
 
   /**
-   * Updates the visibility status for a client.
+   * Updates the visibility status for a specific client entity.
    *
-   * @param clientId the client ID.
-   * @param tenantId the tenant ID.
-   * @param accessible the new visibility status.
-   * @param modifiedOn the modification timestamp.
-   * @return the updated client entity.
+   * <p>This method retrieves the existing client entity, updates its accessibility flag and
+   * modification timestamp, and persists the changes.
+   *
+   * @param clientId the unique identifier of the client
+   * @param tenantId the tenant identifier
+   * @param accessible the new visibility status (true for accessible, false otherwise)
+   * @param modifiedOn the timestamp when the update is performed
+   * @return the updated {@link ClientDynamoEntity}
    */
   public ClientDynamoEntity updateVisibility(
       String clientId, long tenantId, boolean accessible, ZonedDateTime modifiedOn) {
@@ -258,13 +299,16 @@ public class CoreDynamoClientRepository implements DynamoClientRepository {
   }
 
   /**
-   * Updates the activation status for a client.
+   * Updates the activation status for a specific client entity.
    *
-   * @param clientId the client ID.
-   * @param tenantId the tenant ID.
-   * @param enabled the new activation status.
-   * @param modifiedOn the modification timestamp.
-   * @return the updated client entity.
+   * <p>This method retrieves the existing client entity, updates its enabled flag and modification
+   * timestamp, and persists the changes.
+   *
+   * @param clientId the unique identifier of the client
+   * @param tenantId the tenant identifier
+   * @param enabled the new activation status (true if enabled, false otherwise)
+   * @param modifiedOn the timestamp when the update is performed
+   * @return the updated {@link ClientDynamoEntity}
    */
   public ClientDynamoEntity updateActivation(
       String clientId, long tenantId, boolean enabled, ZonedDateTime modifiedOn) {
@@ -273,14 +317,20 @@ public class CoreDynamoClientRepository implements DynamoClientRepository {
   }
 
   /**
-   * Builds an updated client entity with modified attributes.
+   * Constructs an updated client entity with modified attributes.
    *
-   * @param clientId the client ID.
-   * @param tenantId the tenant ID.
-   * @param attributeName the name of the attribute to modify.
-   * @param value the new value for the attribute.
-   * @param modifiedOn the modification timestamp.
-   * @return the updated client entity.
+   * <p>This helper method retrieves the existing client entity by client ID and tenant ID, updates
+   * the specified attribute with the new value, and sets the modification timestamp.
+   *
+   * @param clientId the unique identifier of the client
+   * @param tenantId the tenant identifier
+   * @param attributeName the name of the attribute to update ("clientSecret", "accessible", or
+   *     "enabled")
+   * @param value the new value to set for the specified attribute
+   * @param modifiedOn the timestamp when the update is performed
+   * @return the updated {@link ClientDynamoEntity}
+   * @throws ClientNotFoundException if no client entity is found for the given client ID and tenant
+   *     ID
    */
   private ClientDynamoEntity buildUpdatedClient(
       String clientId,

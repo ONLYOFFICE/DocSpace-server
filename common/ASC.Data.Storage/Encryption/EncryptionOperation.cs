@@ -25,11 +25,12 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using Tenant = ASC.Core.Tenants.Tenant;
+using SocketManager = ASC.Core.Common.Quota.QuotaSocketManager;
 
 namespace ASC.Data.Storage.Encryption;
 
 [Transient]
-public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : DistributedTaskProgress
+public class EncryptionOperation : DistributedTaskProgress
 {
     private const string ProgressFileName = "EncryptionProgress.tmp";
 
@@ -40,6 +41,17 @@ public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : Dis
     private IEnumerable<string> _modules;
     private IEnumerable<Tenant> _tenants;
     private string _serverRootPath;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
+
+    public EncryptionOperation()
+    {
+        
+    }
+    
+    public EncryptionOperation(IServiceScopeFactory serviceScopeFactory)
+    {
+        _serviceScopeFactory = serviceScopeFactory;
+    }
 
     public void Init(EncryptionSettings encryptionSettings, string id, string serverRootPath)
     {
@@ -49,9 +61,27 @@ public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : Dis
         _serverRootPath = serverRootPath;
     }
 
+    private async Task PublishProgressAsync(SocketManager socketManager, bool complete = false)
+    {
+        if (complete)
+        {
+            Percentage = 100;
+            IsCompleted = true;
+
+            await PublishChanges();
+        }
+        else
+        {
+             await StepDone();
+        }
+
+        await socketManager.EncryptionProgressAsync((int)Percentage, Exception?.Message);
+    }
+
     protected override async Task DoJob()
     {
-        await using var scope = serviceScopeFactory.CreateAsyncScope();
+        await using var scope = _serviceScopeFactory.CreateAsyncScope();
+        var socketManager = scope.ServiceProvider.GetService<SocketManager>();
         var scopeClass = scope.ServiceProvider.GetService<EncryptionOperationScope>();
         var (log, storageFactoryConfig, storageFactory, tenantManager, coreBaseSettings, notifyHelper, encryptionSettingsHelper,   configuration) = scopeClass;
         notifyHelper.Init(_serverRootPath);
@@ -59,8 +89,7 @@ public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : Dis
         _modules = storageFactoryConfig.GetModuleList(exceptDisabledMigration: true);
         _useProgressFile = Convert.ToBoolean(configuration["storage:encryption:progressfile"] ?? "true");
 
-        Percentage = 10;
-        await PublishChanges();
+        StepCount = (_tenants.Count() * _modules.Count()) + 4; // number of calls to the StepDone method
 
         try
         {
@@ -76,8 +105,7 @@ public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : Dis
                 return;
             }
 
-            Percentage = 30;
-            await PublishChanges();
+            await PublishProgressAsync(socketManager);
 
             foreach (var tenant in _tenants)
             {
@@ -90,12 +118,11 @@ public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : Dis
 
                 await Parallel.ForEachAsync(dictionary, async (elem, _) =>
                 {
-                    await EncryptStoreAsync(tenant, elem.Key, elem.Value, storageFactoryConfig, log);
+                    await EncryptStoreAsync(tenant, elem.Key, elem.Value, storageFactoryConfig, socketManager, log);
                 });
             }
 
-            Percentage = 70;
-            await PublishChanges();
+            await PublishProgressAsync(socketManager);
 
             if (!_hasErrors)
             {
@@ -103,25 +130,21 @@ public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : Dis
                 await SaveNewSettingsAsync(encryptionSettingsHelper, log);
             }
 
-            Percentage = 90;
-            await PublishChanges();
+            await PublishProgressAsync(socketManager);
             await ActivateTenantsAsync(tenantManager, log, notifyHelper);
-
-            Percentage = 100;
-
-            IsCompleted = true;
-            await PublishChanges();
         }
         catch (Exception e)
         {
             Exception = e;
             log.ErrorEncryptionOperation(e);
-            IsCompleted = true;
-            await PublishChanges();
+        }
+        finally
+        {
+            await PublishProgressAsync(socketManager, true);
         }
     }
 
-    private async Task EncryptStoreAsync(Tenant tenant, string module, DiscDataStore store, StorageFactoryConfig storageFactoryConfig, ILogger log)
+    private async Task EncryptStoreAsync(Tenant tenant, string module, DiscDataStore store, StorageFactoryConfig storageFactoryConfig, SocketManager socketManager, ILogger log)
     {
         var domains = storageFactoryConfig.GetDomainList(module).ToList();
 
@@ -133,14 +156,14 @@ public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : Dis
         {
             var logParent = $"Tenant: {tenant.Alias}, Module: {module}, Domain: {domain}";
 
-            var files = await GetFilesAsync(domains, progress, store, domain);
+            var files = GetFilesAsync(domains, progress, store, domain);
 
-            EncryptFiles(store, domain, files, logParent, log);
+            await EncryptFilesAsync(store, domain, files, logParent, log);
         }
 
-        await StepDone();
+        await PublishProgressAsync(socketManager);
 
-        log.DebugPercentage(Percentage);
+        log.DebugPercentage(tenant.Alias, module, Percentage);
     }
 
     private async ValueTask<List<string>> ReadProgressAsync(DiscDataStore store)
@@ -171,9 +194,9 @@ public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : Dis
         return encryptedFiles;
     }
 
-    private static async Task<IEnumerable<string>> GetFilesAsync(IEnumerable<string> domains, List<string> progress, DiscDataStore targetStore, string targetDomain)
+    private static IAsyncEnumerable<string> GetFilesAsync(IEnumerable<string> domains, List<string> progress, DiscDataStore targetStore, string targetDomain)
     {
-        IEnumerable<string> files = await targetStore.ListFilesRelativeAsync(targetDomain, "\\", "*.*", true).ToListAsync();
+        var files = targetStore.ListFilesRelativeAsync(targetDomain, "\\", "*.*", true);
 
         if (progress.Count > 0)
         {
@@ -197,9 +220,9 @@ public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : Dis
         return files;
     }
 
-    private void EncryptFiles(DiscDataStore store, string domain, IEnumerable<string> files, string logParent, ILogger log)
+    private async Task EncryptFilesAsync(DiscDataStore store, string domain, IAsyncEnumerable<string> files, string logParent, ILogger log)
     {
-        foreach (var file in files)
+        await foreach (var file in files)
         {
             var logItem = $"{logParent}, File: {file}";
 
@@ -209,11 +232,11 @@ public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : Dis
             {
                 if (_isEncryption)
                 {
-                    store.Encrypt(domain, file);
+                    await store.EncryptAsync(domain, file);
                 }
                 else
                 {
-                    store.Decrypt(domain, file);
+                    await store.DecryptAsync(domain, file);
                 }
 
                 WriteProgress(store, file, _useProgressFile);
@@ -292,11 +315,11 @@ public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : Dis
                     {
                         if (_isEncryption)
                         {
-                           await notifyHelper.SendStorageEncryptionSuccess(tenant.Id);
+                           await notifyHelper.SendStorageEncryptionSuccessAsync(tenant.Id);
                         }
                         else
                         {
-                           await notifyHelper.SendStorageDecryptionSuccess(tenant.Id);
+                           await notifyHelper.SendStorageDecryptionSuccessAsync(tenant.Id);
                         }
                         log.DebugTenantSendStorageEncryptionSuccess(tenant.Alias);
                     }
@@ -305,11 +328,11 @@ public class EncryptionOperation(IServiceScopeFactory serviceScopeFactory) : Dis
                 {
                     if (_isEncryption)
                     {
-                        await notifyHelper.SendStorageEncryptionError(tenant.Id);
+                        await notifyHelper.SendStorageEncryptionErrorAsync(tenant.Id);
                     }
                     else
                     {
-                        await notifyHelper.SendStorageDecryptionError(tenant.Id);
+                        await notifyHelper.SendStorageDecryptionErrorAsync(tenant.Id);
                     }
 
                     log.DebugTenantSendStorageEncryptionError(tenant.Alias);

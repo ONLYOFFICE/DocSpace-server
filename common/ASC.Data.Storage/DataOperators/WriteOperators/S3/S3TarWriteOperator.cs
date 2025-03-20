@@ -38,14 +38,14 @@ public class S3TarWriteOperator : IDataWriteOperator
     private readonly TaskScheduler _scheduler = new ConcurrentExclusiveSchedulerPair(TaskScheduler.Default, Limit).ConcurrentScheduler;
     private readonly ConcurrentQueue<int> _queue = new();
     private readonly CancellationTokenSource _cts = new();
-    private readonly AscDistributedCache _cache;
+    private readonly IFusionCache _cache;
     public CancellationToken CancellationToken { get; set; }
 
     public string Hash { get; private set; }
     public string StoragePath { get; private set; }
     public bool NeedUpload => false;
 
-    public S3TarWriteOperator(CommonChunkedUploadSession chunkedUploadSession, CommonChunkedUploadSessionHolder sessionHolder, TempStream tempStream, AscDistributedCache cache)
+    public S3TarWriteOperator(CommonChunkedUploadSession chunkedUploadSession, CommonChunkedUploadSessionHolder sessionHolder, TempStream tempStream, IFusionCache cache)
     {
         _chunkedUploadSession = chunkedUploadSession;
         _sessionHolder = sessionHolder;
@@ -201,7 +201,7 @@ public class S3TarWriteOperator : IDataWriteOperator
                 chunk.Length = contentLength;
                 first = false;
             }
-            await _cache.InsertAsync($"{_chunkedUploadSession.Id} - {etag.PartNumber}", chunk, TimeSpan.FromHours(12));
+            await _cache.SetAsync($"{_chunkedUploadSession.Id} - {etag.PartNumber}", chunk, TimeSpan.FromHours(12));
         }
 
         StoragePath = await _sessionHolder.FinalizeAsync(_chunkedUploadSession);

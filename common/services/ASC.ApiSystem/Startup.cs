@@ -121,7 +121,7 @@ public class Startup
 
         var connectionMultiplexer = await services.GetRedisConnectionMultiplexerAsync(_configuration, GetType().Namespace);
 
-        services.AddDistributedCache(connectionMultiplexer)
+        services.AddHybridCache(connectionMultiplexer)
                 .AddEventBus(_configuration)
                 .AddDistributedTaskQueue()
                 .AddCacheNotify(_configuration)
@@ -183,7 +183,7 @@ public class Startup
 
         app.UseEndpoints(endpoints =>
         {
-            endpoints.MapCustomAsync().Wait();
+            endpoints.MapCustomAsync();
 
             endpoints.MapHealthChecks("/health", new HealthCheckOptions
             {

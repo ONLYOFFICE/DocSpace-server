@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Core.Notify.Socket;
-
 namespace ASC.Api.Core;
 
 public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment hostEnvironment)
@@ -79,7 +77,7 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
         
         var connectionMultiplexer = await services.GetRedisConnectionMultiplexerAsync(Configuration, GetType().Namespace);
 
-        services.AddDistributedCache(connectionMultiplexer)
+        services.AddHybridCache(connectionMultiplexer)
                 .AddEventBus(Configuration)
                 .AddDistributedTaskQueue()
                 .AddCacheNotify(Configuration)
