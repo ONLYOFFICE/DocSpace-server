@@ -46,17 +46,17 @@ public class WebhookPayload<T>
             CreateBy = userId,
             CreateOn = now,
             Id = 0, // log Id is unknown until saved
-            Trigger = trigger.ToStringFast(),
+            Trigger = trigger.ToCustomString(),
             TriggerId = (int)trigger
         };
 
         Payload = data;
 
         var triggers = config.Triggers == WebhookTrigger.All
-            ? [config.Triggers.ToStringFast()]
+            ? [config.Triggers.ToCustomString()]
             : Enum.GetValues<WebhookTrigger>()
                 .Where(flag => config.Triggers.HasFlag(flag) && flag != 0)
-                .Select(flag => flag.ToStringFast())
+                .Select(flag => flag.ToCustomString())
                 .ToArray();
 
         Webhook = new WebhookPayloadConfigInfo
