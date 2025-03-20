@@ -107,9 +107,23 @@ public class RestoreProgressItem : BaseBackupProgressItem
 
             _notifyHelper.SetServerBaseUri(_serverBaseUri);
 
-            await _notifyHelper.SendAboutRestoreStartedAsync(tenant, Notify);
-            tenant.SetStatus(TenantStatus.Restoring);
-            await _tenantManager.SaveTenantAsync(tenant);
+            if (Dump)
+            {
+                var tenants = await _tenantManager.GetTenantsAsync(true);
+
+                foreach(var t in tenants)
+                {
+                    await _notifyHelper.SendAboutRestoreStartedAsync(t, Notify);
+                    t.SetStatus(TenantStatus.Restoring);
+                    await _tenantManager.SaveTenantAsync(t);
+                }
+            }
+            else
+            {
+                await _notifyHelper.SendAboutRestoreStartedAsync(tenant, Notify);
+                tenant.SetStatus(TenantStatus.Restoring);
+                await _tenantManager.SaveTenantAsync(tenant);
+            }
 
             var restoreTask = scope.ServiceProvider.GetService<RestorePortalTask>();
 
@@ -156,13 +170,10 @@ public class RestoreProgressItem : BaseBackupProgressItem
             {
                 _cache.Reset();
 
-                if (Notify)
+                var tenants = await _tenantManager.GetTenantsAsync();
+                foreach (var t in tenants)
                 {
-                    var tenants = await _tenantManager.GetTenantsAsync();
-                    foreach (var t in tenants)
-                    {
-                        await _notifyHelper.SendAboutRestoreCompletedAsync(t, Notify);
-                    }
+                    await _notifyHelper.SendAboutRestoreCompletedAsync(t, Notify);
                 }
             }
             else
@@ -226,8 +237,20 @@ public class RestoreProgressItem : BaseBackupProgressItem
 
             if (tenant != null)
             {
-                tenant.SetStatus(TenantStatus.Active);
-                await _tenantManager.SaveTenantAsync(tenant);
+                if (Dump)
+                {
+                    var tenants = await _tenantManager.GetTenantsAsync();
+                    foreach (var t in tenants.Where(t => t.Status == TenantStatus.Restoring))
+                    {
+                        t.SetStatus(TenantStatus.Active);
+                        await _tenantManager.SaveTenantAsync(t);
+                    }
+                }
+                else
+                {
+                    tenant.SetStatus(TenantStatus.Active);
+                    await _tenantManager.SaveTenantAsync(tenant);
+                }
             }
         }
         finally
