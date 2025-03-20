@@ -100,8 +100,15 @@ public class BackupWorker(
     {
         await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
         {
-            var item = (await _backupProgressQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == request.TenantId);
-
+            BackupProgressItem item = null;
+            if (request.Dump) 
+            {
+                item = (await _backupProgressQueue.GetAllTasks()).FirstOrDefault(t => t.Dump);
+            }
+            else
+            {
+                item = (await _backupProgressQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == request.TenantId && !t.Dump);
+            }
             if (item is { IsCompleted: true })
             {
                 await _backupProgressQueue.DequeueTask(item.Id);
