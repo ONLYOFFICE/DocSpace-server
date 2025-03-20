@@ -123,15 +123,23 @@ module.exports = (io) => {
       socket.to(room).emit("refresh-folder", folderId);
     });
 
-    socket.on("restore-backup", () => {
-      const room = getRoom("restore");
+    socket.on("restore-backup", (dump) => {
       const sess = socket.handshake.session;
       const tenant = sess?.portal?.tenantId || "unknown";
       const user = sess?.user?.id || "unknown";
       const sessId = sess?.id;
 
       logger.info(`WS: restore backup in room ${room} session=[sessionId='sess:${sessId}' tenantId=${tenant}|${tenantId()} userId='${user}'|'${userId()}']`);
-      socket.to(room).emit("restore-backup");
+
+      if(dump)
+      {
+        var room = `backup`;
+      }
+      else
+      {
+        var room = getRoom("restore");
+      }
+      socket.to(room).emit("restore-backup", {dump : dump});
     });
 
     function changeSubscription(roomParts, individual, changeFunc) {
@@ -486,7 +494,7 @@ module.exports = (io) => {
       {
         var room = `${tenantId}-restore`;
       }
-    filesIO.to(room).emit("s:restore-progress", {progress: percentage});
+    filesIO.to(room).emit("s:restore-progress", {progress: percentage, dump: dump});
   }
 
   function endBackup({ tenantId, dump, result } = {})
