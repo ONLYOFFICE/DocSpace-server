@@ -30,9 +30,9 @@ namespace ASC.Core.Encryption;
 public interface ICrypt
 {
     byte Version { get; }
-    long GetFileSize(string filePath);
-    Stream GetReadStream(string filePath);
-    void DecryptFile(string filePath);
-    void EncryptFile(string filePath);
+    Task<long> GetFileSizeAsync(string filePath);
+    Task<Stream> GetReadStreamAsync(string filePath);
+    ValueTask DecryptFileAsync(string filePath);
+    ValueTask EncryptFileAsync(string filePath);
     void Init(string storageName, EncryptionSettings encryptionSettings);
 }
