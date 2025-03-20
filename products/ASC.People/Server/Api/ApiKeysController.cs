@@ -62,16 +62,16 @@ public class ApiKeysController(
         {
             var scopes = AuthorizationExtension.ScopesMap;
 
-            var orderedScopes =  scopes.AllKeys.SelectMany(key => scopes[key]?.Split(',')).Distinct().Order();
+            var orderedScopes = scopes.AllKeys.SelectMany(key => scopes[key]?.Split(',')).Distinct().Order();
 
-            var isValidPermission =  apiKey.Permissions.All(x => orderedScopes.Contains(x));
+            var isValidPermission = apiKey.Permissions.All(x => orderedScopes.Contains(x));
 
             if (!isValidPermission)
             {
                 throw new ArgumentException("Permissions are not valid.");
             }
         }
-        
+
         var result = await apiKeyManager.CreateApiKeyAsync(apiKey.Name,
             apiKey.Permissions,
             expiresAt);
@@ -83,7 +83,7 @@ public class ApiKeysController(
 
         return apiKeyResponseDto;
     }
-    
+
     /// <summary>
     ///  List of all available permissions for key
     /// </summary>  
@@ -100,8 +100,8 @@ public class ApiKeysController(
 
         return scopes.AllKeys.SelectMany(key => scopes[key]?.Split(',')).Distinct().Order();
     }
-    
-    
+
+
     /// <summary>
     ///  Get list api keys for user
     /// </summary>  
@@ -135,24 +135,23 @@ public class ApiKeysController(
     }
 
     /// <summary>
-    ///  Change status for a user api key. Change field isActive true|false
+    ///  Updates the existing api key changing the name, permissions and status
     /// </summary>  
     /// <short>
-    ///  Change status for a user api key
+    ///  Update optional params for user api keys
     /// </short>
-    /// <param name="keyId">Api key id</param>
     /// <path>api/2.0/keys/{keyId}</path>
     [Tags("Api keys")]
-    [SwaggerResponse(200, "Change status for a user api key", typeof(bool))]
-    [HttpPut("{keyId}")]
-    public async Task<bool> ChangeStatusApiKey(Guid keyId)
+    [SwaggerResponse(200, "Update optional params for user api keys", typeof(bool))]
+    [HttpPut("{keyId:guid}")]
+    public async Task<bool> UpdateApiKey(UpdateApiKeyRequestDto requestDto)
     {
         var currentType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
         var isAdmin = currentType is EmployeeType.DocSpaceAdmin;
 
         if (!isAdmin)
         {
-            var apiKey = await apiKeyManager.GetApiKeyAsync(keyId);
+            var apiKey = await apiKeyManager.GetApiKeyAsync(requestDto.KeyId);
 
             if (apiKey.CreateBy != authContext.CurrentAccount.ID)
             {
@@ -160,11 +159,14 @@ public class ApiKeysController(
             }
         }
 
-        var result = await apiKeyManager.ChangeStatusApiKeyAsync(keyId);
+        var result = await apiKeyManager.UpdateApiKeyAsync(requestDto.KeyId,
+            requestDto.Changed.Permissions,
+            requestDto.Changed.Name,
+            requestDto.Changed.IsActive);
 
         if (result)
         {
-            messageService.Send(MessageAction.ApiKeyChangedStatus, MessageTarget.Create(keyId));
+            messageService.Send(MessageAction.ApiKeyChangedStatus, MessageTarget.Create(requestDto.KeyId));
         }
 
         return result;

@@ -1387,11 +1387,11 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<string>("KeyPrefix")
+                    b.Property<string>("KeyPostfix")
                         .IsRequired()
-                        .HasMaxLength(8)
+                        .HasMaxLength(4)
                         .HasColumnType("varchar")
-                        .HasColumnName("key_prefix")
+                        .HasColumnName("key_postfix")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 

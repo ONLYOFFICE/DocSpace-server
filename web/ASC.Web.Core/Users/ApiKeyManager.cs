@@ -67,7 +67,7 @@ public class ApiKeyManager(
         {
             Id = Guid.NewGuid(),
             Name = name,
-            KeyPrefix = newKey.Substring(0, 8),
+            KeyPostfix = newKey.Substring(newKey.Length - 4, 4),
             HashedKey = hashedKey,
             CreateBy = currentUserId,
             CreateOn = DateTime.UtcNow,
@@ -121,7 +121,10 @@ public class ApiKeyManager(
         return keyData;
     }
 
-    public async Task<bool> ChangeStatusApiKeyAsync(Guid keyId)
+    public async Task<bool> UpdateApiKeyAsync(Guid keyId, 
+                                              List<string> permissions, 
+                                              string name, 
+                                              bool isActive)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
 
@@ -134,7 +137,9 @@ public class ApiKeyManager(
             return false;
         }
 
-        apiKey.IsActive = !apiKey.IsActive;
+        apiKey.IsActive = isActive;
+        apiKey.Permissions = permissions;
+        apiKey.Name = name;
         
         await context.AddOrUpdateAsync(q => q.DbApiKey, apiKey);
         await context.SaveChangesAsync();

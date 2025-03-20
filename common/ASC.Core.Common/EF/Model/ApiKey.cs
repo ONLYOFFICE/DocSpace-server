@@ -30,7 +30,7 @@ public class ApiKey : BaseEntity
 {
     public Guid Id { get; set; }
     public string Name { get; set; }
-    public string KeyPrefix { get; set; }
+    public string KeyPostfix { get; set; }
     public string HashedKey { get; set; }
     public List<string> Permissions { get; set; }
     public DateTime? LastUsed { get; set; }
@@ -83,10 +83,10 @@ public static class DbApiKeyExtension
                 .UseCollation("utf8_general_ci")
                 .IsRequired();
             
-            entity.Property(e => e.KeyPrefix)
-                .HasColumnName("key_prefix")
+            entity.Property(e => e.KeyPostfix)
+                .HasColumnName("key_postfix")
                 .HasColumnType("varchar")
-                .HasMaxLength(8)
+                .HasMaxLength(4)
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci")
                 .IsRequired();
@@ -153,10 +153,10 @@ public static class DbApiKeyExtension
                 .HasMaxLength(255)
                 .IsRequired();
             
-            entity.Property(e => e.KeyPrefix)
-                .HasColumnName("key_prefix")
+            entity.Property(e => e.KeyPostfix)
+                .HasColumnName("key_postfix")
                 .HasColumnType("varchar")
-                .HasMaxLength(8)
+                .HasMaxLength(4)
                 .IsRequired();
 
             entity.Property(e => e.HashedKey)

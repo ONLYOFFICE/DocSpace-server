@@ -52,9 +52,9 @@ public class ApiKeyResponseDto : IMapFrom<ApiKey>
     public string Key { get; set; }
 
     /// <summary>
-    /// Prefix of the API key (used for identification)
+    /// Postfix of the API key (used for identification)
     /// </summary>
-    public string KeyPrefix { get; set; }
+    public string KeyPostfix { get; set; }
 
     /// <summary>
     /// List of permissions granted to the API key
@@ -105,7 +105,8 @@ public class ApiKeyConverter(ApiDateTimeHelper apiDateTimeHelper,
         {
             Id = source.Id,
             Name = source.Name,
-            KeyPrefix = source.KeyPrefix,
+            Key = $"sk-***{source.KeyPostfix}",
+            KeyPostfix = source.KeyPostfix,
             Permissions = source.Permissions,
             LastUsed = source.LastUsed.HasValue ? apiDateTimeHelper.Get(source.LastUsed.Value) : null,
             CreateOn = apiDateTimeHelper.Get(source.CreateOn),
