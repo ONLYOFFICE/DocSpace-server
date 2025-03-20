@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -37,20 +37,31 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.util.UriComponentsBuilder;
 
-/** Controller for handling OAuth2 authorization consent requests. */
+/**
+ * Controller for handling OAuth2 authorization consent requests.
+ *
+ * <p>This controller processes incoming consent requests and redirects users to the login page with
+ * the necessary query parameters for OAuth2 consent flow.
+ */
 @Slf4j
 @Controller
 @RequiredArgsConstructor
 public class AuthorizationConsentController {
+  /** Query parameter name for the client ID. */
   private static final String CLIENT_ID = "client_id";
+
   private final HttpUtils httpUtils;
 
   /**
-   * Handles consent requests and redirects to the login page with appropriate query parameters.
+   * Handles consent requests and constructs a redirect URL to the login page.
+   *
+   * <p>This method extracts the client ID from the request, logs the consent event, and constructs
+   * a redirect URL to the login page. The URL includes query parameters such as the OAuth2 type and
+   * the client ID to maintain context during the login process.
    *
    * @param request the {@link HttpServletRequest} that triggered the consent request.
-   * @param clientId the client ID requesting consent.
-   * @return a redirect URL to the login page with query parameters.
+   * @param clientId the client ID requesting consent, provided as a query parameter.
+   * @return a redirect URL to the login page with appropriate query parameters.
    */
   @GetMapping(value = "/oauth2/consent")
   public String consent(HttpServletRequest request, @RequestParam(CLIENT_ID) String clientId) {

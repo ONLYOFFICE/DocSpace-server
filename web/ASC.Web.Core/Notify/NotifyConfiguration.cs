@@ -125,7 +125,7 @@ public class NotifyConfiguration(NotifyEngine notifyEngine, WorkContext workCont
                      if (!string.IsNullOrEmpty(logoText))
                      {
                          r.CurrentMessage.Body = r.CurrentMessage.Body
-                             .Replace("${{" + CommonTags.LetterLogoText + "}}", logoText);
+                             .Replace("${" + CommonTags.LetterLogoText + "}", logoText);
                      }
                  }
                  catch (Exception error)
@@ -188,11 +188,9 @@ public class NotifyTransferRequest(TenantManager tenantManager,
         UserManager userManager,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         ILogger<ProductSecurityInterceptor> logger,
-        TenantExtra tenantExtra,
         WebItemManager webItemManager,
         TenantLogoManager tenantLogoManager,
         TenantUtil tenantUtil,
-        CoreBaseSettings coreBaseSettings,
         CommonLinkUtility commonLinkUtility,
         SettingsManager settingsManager,
         StudioNotifyHelper studioNotifyHelper)
@@ -219,39 +217,34 @@ public class NotifyTransferRequest(TenantManager tenantManager,
         var productid = CallContext.GetData("asc.web.product_id");
         var product = productid != null ? webItemManager[(Guid)productid] as IProduct : null;
 
-        var logoText = TenantWhiteLabelSettings.DefaultLogoText;
-        if ((tenantExtra.Enterprise || coreBaseSettings.CustomMode) && !await MailWhiteLabelSettings.IsDefaultAsync(settingsManager))
-        {
-            logoText = await tenantLogoManager.GetLogoTextAsync();
-        }
+        var logoText =  await tenantLogoManager.GetLogoTextAsync();
+
+        var rootPath = commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
 
         request.Arguments.AddRange(new List<TagValue>
         {
             new(CommonTags.AuthorID, aid),
             new(CommonTags.AuthorName, aname),
             new(CommonTags.AuthorUrl, commonLinkUtility.GetFullAbsolutePath(await commonLinkUtility.GetUserProfileAsync(aid))),
-            new(CommonTags.VirtualRootPath, commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/')),
+            new(CommonTags.VirtualRootPath, rootPath),
+            new(CommonTags.VirtualRootHost, new Uri(rootPath).Host),
             new(CommonTags.ProductID, product?.ID ?? Guid.Empty),
             new(CommonTags.DateTime, tenantUtil.DateTimeNow()),
             new(CommonTags.RecipientID, Context.SysRecipient),
             new(CommonTags.ProfileUrl, commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetMyStaff())),
             new(CommonTags.RecipientSubscriptionConfigURL, commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetUnsubscribe())),
-            new(CommonTags.HelpLink, await commonLinkUtility.GetHelpLinkAsync(settingsManager, false)),
+            new(CommonTags.HelpLink, await commonLinkUtility.GetHelpLinkAsync(settingsManager)),
             new(CommonTags.SalesEmail, commonLinkUtility.GetSalesEmail()),
             new(CommonTags.SiteLink, commonLinkUtility.GetSiteLink()),
-            new(CommonTags.SupportLink, await commonLinkUtility.GetSupportLinkAsync(settingsManager, false)),
+            new(CommonTags.SupportLink, await commonLinkUtility.GetSupportLinkAsync(settingsManager)),
             new(CommonTags.SupportEmail, commonLinkUtility.GetSupportEmail()),
             new(CommonTags.LetterLogoText, logoText),
             new(CommonTags.MailWhiteLabelSettings, await MailWhiteLabelSettings.InstanceAsync(settingsManager)),
-            new(CommonTags.SendFrom, tenant.Name == "" ? Resource.PortalName : tenant.Name),
+            new(CommonTags.SendFrom, logoText),
             new(CommonTags.ImagePath, studioNotifyHelper.GetNotificationImageUrl("").TrimEnd('/'))
         });
 
-        var topGifTag = request.Arguments.Find(x => x.Tag == CommonTags.TopGif);
-        if (topGifTag == null || string.IsNullOrEmpty((string)topGifTag.Value))
-        {
-            await AddLetterLogoAsync(request);
-        }
+        await AddLetterLogoAsync(request);
     }
     public void AfterTransferRequest(NotifyRequest request)
     {
@@ -260,9 +253,20 @@ public class NotifyTransferRequest(TenantManager tenantManager,
 
     private async Task AddLetterLogoAsync(NotifyRequest request)
     {
-
         try
         {
+            var topGifTag = request.Arguments.Find(x => x.Tag == CommonTags.TopGif);
+            if (!string.IsNullOrEmpty((string)topGifTag?.Value))
+            {
+                var isDefaultLogoSettings = await tenantLogoManager.IsDefaultLogoSettingsAsync();
+                if (isDefaultLogoSettings)
+                {
+                    return;
+                }
+
+                request.Arguments.RemoveAll(x => x.Tag == CommonTags.TopGif);
+            }
+
             var culture = await request.GetCulture(tenantManager, userManager);
             var attachment = await tenantLogoManager.GetMailLogoAsAttachmentAsync(culture);
 

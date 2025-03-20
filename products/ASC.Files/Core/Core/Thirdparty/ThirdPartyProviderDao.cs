@@ -35,6 +35,12 @@ internal abstract class ThirdPartyProviderDao
         return Task.CompletedTask;
     }
 
+    public Task ReassignFilesAsync(Guid newOwnerId, IEnumerable<string> fileIds)
+    {
+        return Task.CompletedTask;
+    }
+
+
     public IAsyncEnumerable<File<string>> GetFilesAsync(IEnumerable<string> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, 
         bool searchInContent)
     {
@@ -190,6 +196,11 @@ internal abstract class ThirdPartyProviderDao
     }
 
     public Task<string> GetFolderIDVirtualRooms(bool createIfNotExists)
+    {
+        return Task.FromResult<string>(null);
+    }
+
+    public Task<string> GetFolderIDRoomTemplatesAsync(bool createIfNotExists)
     {
         return Task.FromResult<string>(null);
     }

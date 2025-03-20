@@ -38,14 +38,14 @@ public class Startup : BaseStartup
         }
     }
 
-    public override async Task ConfigureServices(IServiceCollection services)
+    public override async Task ConfigureServices(WebApplicationBuilder builder)
     {
-        await base.ConfigureServices(services);
-
-        services.Configure<DistributedTaskQueueFactoryOptions>(BackupWorker.CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME, x =>
-        {
-            x.MaxThreadsCount = 5;
-        });
+        var services = builder.Services;
+        await base.ConfigureServices(builder);
+        
+        services.RegisterQueue<BackupProgressItem>(5);
+        services.RegisterQueue<RestoreProgressItem>(5);
+        services.RegisterQueue<TransferProgressItem>(5);
         
         services.AddHostedService<BackupListenerService>();
         services.AddHostedService<BackupCleanerTempFileService>();

@@ -152,7 +152,7 @@ internal class ProviderFileDao(
     }
 
     public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
-        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = null, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null)
+        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = null, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null, bool applyFormStepFilter = false)
     {
         var selector = _selectorFactory.GetSelector(parentId);
 
@@ -316,6 +316,33 @@ internal class ProviderFileDao(
     {
         await DeleteFileAsync(fileId, Guid.Empty);
     }
+
+    public async Task DeleteFileVersionAsync(File<string> file, int version)
+    {
+        ArgumentNullException.ThrowIfNull(file);
+
+        if (file.Id == null)
+        {
+            throw new ArgumentException("No file id or folder id toFolderId determine provider");
+        }
+
+        var fileId = file.Id;
+        var folderId = file.ParentId;
+
+        //Convert
+        var selector = _selectorFactory.GetSelector(fileId);
+
+        file.Id = selector.ConvertId(fileId);
+        if (folderId != null)
+        {
+            file.ParentId = selector.ConvertId(folderId);
+        }
+
+        var fileDao = selector.GetFileDao(fileId);
+
+        await fileDao.DeleteFileVersionAsync(file, version);
+    }
+
     public async Task DeleteFileAsync(string fileId, Guid ownerId)
     {
         var selector = _selectorFactory.GetSelector(fileId);
@@ -453,6 +480,27 @@ internal class ProviderFileDao(
         var fileDao = selector.GetFileDao(file.Id);
 
         return fileDao.UseTrashForRemove(file);
+    }
+
+    public Task SaveFormRoleMapping(string formId, IEnumerable<FormRole> formRoles)
+    {
+        throw new NotImplementedException();
+    }
+    public IAsyncEnumerable<FormRole> GetFormRoles(string formId)
+    {
+        throw new NotImplementedException();
+    }
+    public Task<(int, IAsyncEnumerable<FormRole>)> GetUserFormRoles(string formId, Guid userId)
+    {
+        throw new NotImplementedException();
+    }
+    public Task<FormRole> ChangeUserFormRoleAsync(string formId, FormRole formRole)
+    {
+        throw new NotImplementedException();
+    }
+    public Task DeleteFormRolesAsync(string formId)
+    {
+        throw new NotImplementedException();
     }
 
     #region chunking

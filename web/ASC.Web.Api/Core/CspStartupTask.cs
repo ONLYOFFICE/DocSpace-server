@@ -24,9 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Microsoft.Extensions.Caching.Distributed;
+
 namespace ASC.Api.Core.Core;
 
-public class CspStartupTask(IServiceProvider provider, IDistributedCache distributedCache) : IStartupTask
+public class CspStartupTask(IServiceProvider provider, IDistributedCache distributedCache, IFusionCache cache) : IStartupTask
 {
     private const string HeaderKey = "csp";
 
@@ -35,11 +37,24 @@ public class CspStartupTask(IServiceProvider provider, IDistributedCache distrib
         await using var scope = provider.CreateAsyncScope();
         var serviceProvider = scope.ServiceProvider;
         var helper = serviceProvider.GetService<CspSettingsHelper>();
-
-        var oldHeaderValue = await distributedCache.GetStringAsync(HeaderKey, token: cancellationToken);
+        
+        
+        string oldHeaderValue;
+        var oldScheme = false;
+        
+        try
+        {
+            oldHeaderValue = await cache.GetOrDefaultAsync<string>(HeaderKey, token: cancellationToken);
+        }
+        catch (FusionCacheSerializationException)
+        {
+            oldHeaderValue = await distributedCache.GetStringAsync(HeaderKey, token: cancellationToken);
+            oldScheme = true;
+        }
+        
         var currentHeaderValue = await helper.CreateHeaderAsync(null, false);
 
-        if (oldHeaderValue != currentHeaderValue)
+        if (oldHeaderValue != currentHeaderValue || oldScheme)
         {        
             var tenantService = provider.GetService<ITenantService>();
             var tenants = await tenantService.GetTenantsAsync((DateTime)default);
@@ -67,6 +82,6 @@ public class CspStartupTask(IServiceProvider provider, IDistributedCache distrib
             await helper.SaveAsync(current.Domains, false);
         }
 
-        await distributedCache.SetStringAsync(HeaderKey, currentHeaderValue, token: cancellationToken);
+        await cache.SetAsync(HeaderKey, currentHeaderValue, token: cancellationToken);
     }
 }

@@ -84,8 +84,11 @@ public abstract class BaseStorageSettings<T> : ISettings<BaseStorageSettings<T>>
     /// Storage properties
     /// </summary>
     public Dictionary<string, string> Props { get; set; }
+    
+    [JsonIgnore]
     public virtual Func<DataStoreConsumer, DataStoreConsumer> Switch => d => d;
     public abstract Guid ID { get; }
+    
     internal ICacheNotify<DataStoreCacheItem> Cache { get; set; }
 
     public BaseStorageSettings<T> GetDefault()
@@ -204,8 +207,8 @@ public class StorageSettingsHelper
             return null;
         }
 
-        return _dataStore = ((IDataStore)_serviceProvider.GetService(handlerType))
-            .Configure((_tenantManager.GetCurrentTenantId()).ToString(), null, null, dataStoreConsumer, null);
+        return _dataStore = await ((IDataStore)_serviceProvider.GetService(handlerType))
+            .ConfigureAsync((_tenantManager.GetCurrentTenantId()).ToString(), null, null, dataStoreConsumer, null);
     }
 
     internal async Task ClearDataStoreCacheAsync()

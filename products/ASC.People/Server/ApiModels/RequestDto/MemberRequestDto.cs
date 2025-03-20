@@ -334,3 +334,15 @@ public class ContactsRequestDto
     [FromBody]
     public ContactsRequest Contacts { get; set; }
 }
+
+/// <summary>
+/// 
+/// </summary>
+public class GuestShareRequestDto
+{
+    /// <summary>
+    /// User ID
+    /// </summary>
+    [FromRoute(Name = "userid")]
+    public Guid UserId { get; set; }
+}

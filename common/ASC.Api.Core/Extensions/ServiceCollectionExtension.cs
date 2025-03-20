@@ -24,6 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Microsoft.Extensions.Caching.Memory;
+
+using ZiggyCreatures.Caching.Fusion;
+using ZiggyCreatures.Caching.Fusion.Backplane.StackExchangeRedis;
+
 namespace ASC.Api.Core.Extensions;
 
 public static class ServiceCollectionExtension
@@ -56,20 +61,43 @@ public static class ServiceCollectionExtension
         return services;
     }
 
-    public static IServiceCollection AddDistributedCache(this IServiceCollection services, IConnectionMultiplexer connection)
-    {        
+    public static IServiceCollection AddHybridCache(this IServiceCollection services, IConnectionMultiplexer connection)
+    {
+        var cacheBuilder = services
+            .AddFusionCache()
+            .WithSystemTextJsonSerializer(new JsonSerializerOptions 
+            {
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+                WriteIndented = true 
+            })                
+            .WithOptions(new FusionCacheOptions
+            {
+                DistributedCacheKeyModifierMode = CacheKeyModifierMode.None,
+                DefaultEntryOptions = new FusionCacheEntryOptions
+                {
+                    Duration = TimeSpan.MaxValue
+                }
+            })
+            .WithMemoryCache(new MemoryCache(new MemoryCacheOptions()))
+            .WithRegisteredLogger();
+        
         if (connection != null)
-        {
+        {        
+            //    hack for csp
             services.AddStackExchangeRedisCache(config =>
             {
                 config.ConnectionMultiplexerFactory = () => Task.FromResult(connection);
             });
+            
+            cacheBuilder.WithBackplane(new RedisBackplane(new RedisBackplaneOptions { ConnectionMultiplexerFactory = () => Task.FromResult(connection) }));
         }
         else
-        {
+        {            
             services.AddDistributedMemoryCache();
         }
 
+        cacheBuilder.WithRegisteredDistributedCache(false);
+        
         return services;
     }
 
@@ -322,8 +350,6 @@ public static class ServiceCollectionExtension
 
     public static IServiceCollection AddDistributedTaskQueue(this IServiceCollection services)
     {
-        services.AddTransient<DistributedTaskQueue>();
-
         services.AddSingleton<IDistributedTaskQueueFactory, DefaultDistributedTaskQueueFactory>();
 
         return services;

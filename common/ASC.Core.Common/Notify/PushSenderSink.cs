@@ -30,7 +30,7 @@ using Constants = ASC.Core.Configuration.Constants;
 
 namespace ASC.Core.Common.Notify;
 
-class PushSenderSink(INotifySender sender) : Sink
+public class PushSenderSink(INotifySender sender) : Sink
 {
     private static readonly string _senderName = Constants.NotifyPushSenderSysName;
     private readonly INotifySender _sender = sender ?? throw new ArgumentNullException(nameof(sender));
@@ -126,7 +126,7 @@ public class PushSenderSinkMessageCreator(UserManager userManager, TenantManager
 
         var serializeOptions = new JsonSerializerOptions
         {
-            PropertyNamingPolicy = new LowerCaseNamingPolicy(),
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             WriteIndented = true
         };
 

@@ -48,7 +48,9 @@ public class ThirdpartyController(
     TenantManager tenantManager,
     InvitationService invitationService,
     LoginProfileTransport loginProfileTransport,
-    EmailValidationKeyModelHelper emailValidationKeyModelHelper)
+    EmailValidationKeyModelHelper emailValidationKeyModelHelper,
+    UserSocketManager socketManager,
+    UserWebhookManager webhookManager)
     : ApiControllerBase
     {
 
@@ -217,6 +219,8 @@ public class ThirdpartyController(
             }
 
             await accountLinker.AddLinkAsync(userId, thirdPartyProfile);
+
+            await webhookManager.PublishAsync(WebhookTrigger.UserCreated, newUser);
         }
         finally
         {
@@ -297,11 +301,20 @@ public class ThirdpartyController(
         try
         {
             user = await userManagerWrapper.AddUserAsync(user, passwordHash, true, true, employeeType, fromInviteLink, updateExising: inviteByEmail);
+            if (employeeType is EmployeeType.Guest)
+            {
+                await socketManager.AddGuestAsync(user);
+            }
+            else
+            {
+                await socketManager.AddUserAsync(user);
+            }
         }
         catch (TenantQuotaException)
         {
             quotaLimit = true;
             user = await userManagerWrapper.AddUserAsync(user, passwordHash, true, true, EmployeeType.User, fromInviteLink, updateExising: inviteByEmail);
+            await socketManager.AddUserAsync(user);
         }
 
         return (user, quotaLimit);

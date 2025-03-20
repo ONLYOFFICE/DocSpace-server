@@ -28,46 +28,52 @@ namespace ASC.Common.Threading;
 
 /// <summary>
 /// </summary>
-[ProtoContract(IgnoreUnknownSubTypes = true)]
-[ProtoInclude(100, typeof(DistributedTaskProgress))]
+[JsonPolymorphic(UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FallBackToNearestAncestor)]
+[JsonDerivedType(typeof(DistributedTaskProgress))]
 public class DistributedTask
 {
-    [ProtoMember(10)]
+    [JsonInclude]
     protected string _exeption = String.Empty;
-
-    [ProtoMember(11)]
-    protected readonly Dictionary<string, string> _props = new();
-
+    
+    [JsonIgnore]
     public Func<DistributedTask, Task> Publication { get; set; }
 
     /// <summary>Instance ID</summary>
     /// <type>System.Int32, System</type>
-    [ProtoMember(1)]
     public int InstanceId { get; set; }
 
     /// <summary>ID</summary>
     /// <type>System.String, System</type>
-    [ProtoMember(2)]
     public string Id { get; set; } = Guid.NewGuid().ToString();
 
     /// <summary>Status</summary>
     /// <type>ASC.Common.Threading.DistributedTaskStatus, ASC.Common</type>
-    [ProtoMember(3)]
     public DistributedTaskStatus Status { get; set; }
 
     /// <summary>Last modified date</summary>
     /// <type>System.DateTime, System</type>
-    [ProtoMember(4)]
     public DateTime LastModifiedOn { get; set; }
 
     /// <summary>Exception</summary>
     /// <type>System.Object, System</type>
+    [JsonIgnore]
     public Exception Exception
     {
         get => new(_exeption);
         set => _exeption = value?.Message ?? "";
     }
 
+    protected CancellationToken CancellationToken { get; set; }
+
+    public virtual async Task RunJob(CancellationToken cancellationToken)
+    {
+        Status = DistributedTaskStatus.Running;
+        CancellationToken = cancellationToken;
+
+        await DoJob();
+    }
+
+    protected virtual Task DoJob() { return Task.CompletedTask; }
 
     public async Task PublishChanges()
     {
@@ -78,34 +84,7 @@ public class DistributedTask
 
         await Publication(this);
     }
-
-    public dynamic this[string propName]
-    {
-        get
-        {
-            if (!_props.TryGetValue(propName, out var propValue))
-            {
-                throw new ArgumentException($"Unknown propery {propName}. You must init the property before used.");
-            }
-
-            if (int.TryParse(propValue, out var resultAsInt))
-            {
-                return resultAsInt;
-            }
-
-            if (bool.TryParse(propValue, out var resultAsBool))
-            {
-                return resultAsBool;
-            }
-
-            return _props[propName];
-        }
-        set
-        {
-            _props[propName] = Convert.ToString(value);
-        }
-    }
-
+    
     public override int GetHashCode()
     {
         return Id.GetHashCode();

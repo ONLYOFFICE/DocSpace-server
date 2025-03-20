@@ -50,8 +50,14 @@ public class Startup
         }
     }
 
-    public async Task ConfigureServices(IServiceCollection services)
-    {
+    public async Task ConfigureServices(WebApplicationBuilder builder)
+    {        
+        var services = builder.Services;
+        if (_configuration.GetValue<bool>("openTelemetry:enable"))
+        {
+            builder.ConfigureOpenTelemetry();
+        }
+        
         services.AddCustomHealthCheck(_configuration);
         services.AddHttpContextAccessor();
         services.AddMemoryCache();
@@ -115,7 +121,7 @@ public class Startup
 
         var connectionMultiplexer = await services.GetRedisConnectionMultiplexerAsync(_configuration, GetType().Namespace);
 
-        services.AddDistributedCache(connectionMultiplexer)
+        services.AddHybridCache(connectionMultiplexer)
                 .AddEventBus(_configuration)
                 .AddDistributedTaskQueue()
                 .AddCacheNotify(_configuration)
@@ -177,7 +183,7 @@ public class Startup
 
         app.UseEndpoints(endpoints =>
         {
-            endpoints.MapCustomAsync().Wait();
+            endpoints.MapCustomAsync();
 
             endpoints.MapHealthChecks("/health", new HealthCheckOptions
             {

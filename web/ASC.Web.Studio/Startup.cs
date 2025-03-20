@@ -76,9 +76,10 @@ public class Startup : BaseStartup
             });
     }
 
-    public override async Task ConfigureServices(IServiceCollection services)
+    public override async Task ConfigureServices(WebApplicationBuilder builder)
     {
-        await base.ConfigureServices(services);
+        var services = builder.Services;
+        await base.ConfigureServices(builder);
 
         services.AddMemoryCache();
         services.AddBaseDbContextPool<FilesDbContext>();
@@ -96,29 +97,17 @@ public class Startup : BaseStartup
         
         var lifeTime = TimeSpan.FromMinutes(5);
 
-        Func<IServiceProvider, HttpRequestMessage, IAsyncPolicy<HttpResponseMessage>> policyHandler = (s, _) =>
-        {
-            var settings = s.GetRequiredService<Settings>();
-
-            return HttpPolicyExtensions
-                .HandleTransientHttpError()
-                .OrResult(msg => msg.StatusCode == HttpStatusCode.NotFound)
-                .WaitAndRetryAsync(settings.RepeatCount ?? 5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
-        };
-
         services.AddHttpClient(WebhookSender.WEBHOOK)
-        .SetHandlerLifetime(lifeTime)
-        .AddPolicyHandler(policyHandler);
-
+                .SetHandlerLifetime(lifeTime);
+             
         services.AddHttpClient(WebhookSender.WEBHOOK_SKIP_SSL)
-        .SetHandlerLifetime(lifeTime)
-        .AddPolicyHandler(policyHandler)
-        .ConfigurePrimaryHttpMessageHandler(_ =>
-        {
-            return new HttpClientHandler
-            {
-                ServerCertificateCustomValidationCallback = (_, _, _, _) => true
-            };
-        });
+                .SetHandlerLifetime(lifeTime)
+                .ConfigurePrimaryHttpMessageHandler(_ =>
+                {
+                    return new HttpClientHandler
+                    {
+                        ServerCertificateCustomValidationCallback = (_, _, _, _) => true
+                    };
+                });
     }
 }

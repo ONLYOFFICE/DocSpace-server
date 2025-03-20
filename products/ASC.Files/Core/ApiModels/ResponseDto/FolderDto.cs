@@ -177,8 +177,10 @@ public class FolderDtoHelper(
     WatermarkDtoHelper watermarkHelper,
     IMapper mapper,
     ExternalShare externalShare,
-    FileSecurityCommon fileSecurityCommon)
-    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
+    FileSecurityCommon fileSecurityCommon,
+    SecurityContext securityContext,
+    UserManager userManager)
+    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory)
     {
 
     public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<FileShareRecord<string>> currentUserRecords = null, string order = null, IFolder contextFolder = null)
@@ -190,7 +192,7 @@ public class FolderDtoHelper(
         {
             if (folder.Tags == null)
             {
-                var tagDao = daoFactory.GetTagDao<T>();
+                var tagDao = _daoFactory.GetTagDao<T>();
                 result.Tags = await tagDao.GetTagsAsync(TagType.Custom, [folder]).Select(t => t.Name).ToListAsync();
             }
             else
@@ -207,6 +209,7 @@ public class FolderDtoHelper(
                 {
                     FolderType.VirtualRooms => IdConverter.Convert<T>(await _globalFolderHelper.FolderVirtualRoomsAsync),
                     FolderType.Archive => IdConverter.Convert<T>(await _globalFolderHelper.FolderArchiveAsync),
+                    FolderType.RoomTemplates => IdConverter.Convert<T>(await _globalFolderHelper.FolderRoomTemplatesAsync),
                     _ => result.ParentId
                 };
             }
@@ -298,7 +301,7 @@ public class FolderDtoHelper(
     {
         var newBadges = folder.NewForMe;
 
-        if (folder.RootFolderType == FolderType.VirtualRooms)
+        if (folder.RootFolderType is FolderType.VirtualRooms or FolderType.RoomTemplates)
         {
             var isEnabledBadges = await badgesSettingsHelper.GetEnabledForCurrentUserAsync();
 
@@ -309,7 +312,7 @@ public class FolderDtoHelper(
         }
 
         var result = await GetAsync<FolderDto<T>, T>(folder);
-        if (folder.FolderType != FolderType.VirtualRooms)
+        if (folder.FolderType != FolderType.VirtualRooms && folder.FolderType != FolderType.RoomTemplates)
         {
             result.FilesCount = folder.FilesCount;
             result.FoldersCount = folder.FoldersCount;

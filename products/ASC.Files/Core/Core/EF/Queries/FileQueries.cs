@@ -190,11 +190,17 @@ public partial class FilesDbContext
     }
     
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid])]
-    public Task<int> ReassignFilesAsync(int tenantId, Guid oldOwnerId, Guid newOwnerId)
+    public Task<int> ReassignFilesByCreateByAsync(int tenantId, Guid oldOwnerId, Guid newOwnerId)
     {
-        return FileQueries.ReassignFilesAsync(this, tenantId, oldOwnerId, newOwnerId);
+        return FileQueries.ReassignFilesByCreateByAsync(this, tenantId, oldOwnerId, newOwnerId);
     }
-    
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, null])]
+    public Task<int> ReassignFilesAsync(int tenantId, Guid newOwnerId, IEnumerable<int> fileIds)
+    {
+        return FileQueries.ReassignFilesAsync(this, tenantId, newOwnerId, fileIds);
+    }
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid, null])]
     public Task<int> ReassignFilesPartiallyAsync(int tenantId, Guid oldOwnerId, Guid newOwnerId, IEnumerable<int> exceptFolderIds)
     {
@@ -290,6 +296,48 @@ public partial class FilesDbContext
     {
         return FileQueries.FilesConvertsAsync(this);
     }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null])]
+    public Task DeleteFormRoleMappingsAsync(int tenantId, int formId)
+    {
+        return FileQueries.DeleteFormRoleMappingsAsync(this, tenantId, formId);
+    }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    public IAsyncEnumerable<FormRole> DbFormUserRolesQueryAsync(int tenantId, int formId, Guid userId)
+    {
+        return FileQueries.DbFormUserRolesQueryAsync(this, tenantId, formId, userId);
+    }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    public Task<int> DbFormRoleCurrentStepAsync(int tenantId, int formId)
+    {
+        return FileQueries.DbFormRoleCurrentStepAsync(this, tenantId, formId);
+    }
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    public Task<bool> DbFormRoleExistsAsync(int tenantId, int formId)
+    {
+        return FileQueries.DbFormRoleExistsAsync(this, tenantId, formId);
+    }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    public IAsyncEnumerable<FormRole> DbFormRolesAsync(int tenantId, int formId)
+    {
+        return FileQueries.DbFormRolesAsync(this, tenantId, formId);
+    }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    public IAsyncEnumerable<DbFilesFormRoleMapping> DbFilesFormRoleMappingForDeleteAsync(int tenantId, int formId)
+    {
+        return FileQueries.DbFilesFormRoleMappingForDeleteAsync(this, tenantId, formId);
+    }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    public Task<DbFilesFormRoleMapping> FilesFormRoleAsync(int tenantId, int formId, string roleName, Guid userId)
+    {
+        return FileQueries.FilesFormRoleAsyncAsync(this, tenantId, formId, roleName, userId);
+    }
+
 }
 
 static file class FileQueries
@@ -659,13 +707,21 @@ static file class FileQueries
                     .Where(r => r.VersionGroup > versionGroup)
                     .ExecuteUpdate(f => f.SetProperty(p => p.VersionGroup, p => p.VersionGroup - 1)));
 
-    public static readonly Func<FilesDbContext, int, Guid, Guid, Task<int>> ReassignFilesAsync =
+    public static readonly Func<FilesDbContext, int, Guid, Guid, Task<int>> ReassignFilesByCreateByAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, Guid oldOwnerId, Guid newOwnerId) =>
                 ctx.Files
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.CreateBy == oldOwnerId)
                     .ExecuteUpdate(p => p.SetProperty(f => f.CreateBy, newOwnerId)));
+
+    public static readonly Func<FilesDbContext, int, Guid, IEnumerable<int>, Task<int>> ReassignFilesAsync =
+    Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+        (FilesDbContext ctx, int tenantId, Guid newOwnerId, IEnumerable<int> fileIds) =>
+            ctx.Files
+                .Where(r => r.TenantId == tenantId)
+                .Where(r => fileIds.Contains(r.Id))
+                .ExecuteUpdate(p => p.SetProperty(f => f.CreateBy, newOwnerId)));
 
     public static readonly Func<FilesDbContext, int, Guid, Guid, IEnumerable<int>, Task<int>> ReassignFilesPartiallyAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
@@ -854,4 +910,78 @@ static file class FileQueries
     
     public static readonly Func<FilesDbContext, IAsyncEnumerable<FilesConverts>> FilesConvertsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx) => ctx.FilesConverts);
+
+    public static readonly Func<FilesDbContext, int, int, Task<int>> DeleteFormRoleMappingsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int formId) =>
+                ctx.FilesFormRoleMapping
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => r.FormId == formId)
+                    .ExecuteDelete());
+
+    public static readonly Func<FilesDbContext, int, int, Guid, IAsyncEnumerable<FormRole>> DbFormUserRolesQueryAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int formId, Guid userId) =>
+                ctx.FilesFormRoleMapping
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => r.FormId == formId)
+                    .Where(r => r.UserId == userId)
+                    .OrderBy(r => r.Sequence)
+                    .Select(r => new FormRole
+                    {
+                        UserId = r.UserId,
+                        RoleName = r.RoleName,
+                        RoleColor = r.RoleColor,
+                        Sequence = r.Sequence,
+                        Submitted = r.Submitted,
+                        OpenedAt = r.OpenedAt,
+                        SubmissionDate = r.SubmissionDate
+                    })
+            );
+
+    public static readonly Func<FilesDbContext, int, int, Task<bool>> DbFormRoleExistsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int formId) =>
+                ctx.FilesFormRoleMapping
+                    .Any(r => r.TenantId == tenantId && r.FormId == formId));
+
+    public static readonly Func<FilesDbContext, int, int, Task<int>> DbFormRoleCurrentStepAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int formId) =>
+                ctx.FilesFormRoleMapping
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => r.FormId == formId)
+                    .Where(r => r.Submitted == false)
+                    .OrderBy(r => r.Sequence)
+                    .Select(r => r.Sequence)
+                    .FirstOrDefault());
+
+    public static readonly Func<FilesDbContext, int, int, IAsyncEnumerable<FormRole>> DbFormRolesAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int formId) =>
+                ctx.FilesFormRoleMapping
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => r.FormId == formId)
+                    .OrderBy(r => r.Sequence)
+                    .Select(r => new FormRole
+                    {
+                        UserId = r.UserId,
+                        RoleName = r.RoleName,
+                        RoleColor = r.RoleColor,
+                        Sequence = r.Sequence,
+                        Submitted = r.Submitted,
+                        OpenedAt = r.OpenedAt,
+                        SubmissionDate = r.SubmissionDate
+                    }));
+    public static readonly Func<FilesDbContext, int, int, IAsyncEnumerable<DbFilesFormRoleMapping>> DbFilesFormRoleMappingForDeleteAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int formId) =>
+                ctx.FilesFormRoleMapping
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => r.FormId == formId));
+
+    public static readonly Func<FilesDbContext, int, int, string, Guid, Task<DbFilesFormRoleMapping>> FilesFormRoleAsyncAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int formId, string roleName, Guid userId) =>
+                ctx.FilesFormRoleMapping.FirstOrDefault(r => r.TenantId == tenantId && r.FormId == formId && r.RoleName == roleName && r.UserId == userId));
 }

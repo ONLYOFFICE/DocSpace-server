@@ -119,12 +119,13 @@ public interface IFileDao<T>
     /// <param name="containingMyFiles"></param>
     /// <param name="parentType"></param>
     /// <param name="formsItemDto"></param>
+    /// <param name="applyFormStepFilter"></param>
     /// <returns>list of files</returns>
     /// <remarks>
     ///    Return only the latest versions of files of a folder
     /// </remarks>
     IAsyncEnumerable<File<T>> GetFilesAsync(T parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension,
-        bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, T roomId = default, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null);
+        bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, T roomId = default, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null, bool applyFormStepFilter = false);
 
     /// <summary>
     /// Get stream of file
@@ -206,6 +207,8 @@ public interface IFileDao<T>
     /// </summary>
     /// <param name="fileId">file id</param>
     Task DeleteFileAsync(T fileId);
+    Task DeleteFileVersionAsync(File<T> file, int version);
+    
     /// <summary>
     ///   Deletes a file including all previous versions
     /// </summary>
@@ -273,6 +276,43 @@ public interface IFileDao<T>
     /// <param name="file"></param>
     /// <returns></returns>
     bool UseTrashForRemove(File<T> file);
+    /// <summary>
+    /// Save form role mappings
+    /// </summary>
+    /// <param name="formId"></param>
+    /// <param name="formRoles"></param>
+    /// <returns></returns>
+    Task SaveFormRoleMapping(T formId, IEnumerable<FormRole> formRoles);
+
+    /// <summary>
+    /// Get form role mappings
+    /// </summary>
+    /// <param name="formId"></param>
+    /// <returns></returns>
+    IAsyncEnumerable<FormRole> GetFormRoles(T formId);
+
+    /// <summary>
+    /// Get form role mappings
+    /// </summary>
+    /// <param name="formId"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    Task<(int, IAsyncEnumerable<FormRole>)> GetUserFormRoles(T formId, Guid userId);
+    /// <summary>
+    /// Updates user role
+    /// </summary>
+    /// <param name="formId"></param>
+    /// <param name="formRole"></param>
+    /// <returns></returns>
+    Task<FormRole> ChangeUserFormRoleAsync(T formId, FormRole formRole);
+
+    /// <summary>
+    /// Deletes roles for form
+    /// </summary>
+    /// <param name="formId"></param>
+    /// <returns></returns>
+    Task DeleteFormRolesAsync(T formId);
+
     string GetUniqFilePath(File<T> file, string fileTitle);
 
     #region chunking
@@ -294,6 +334,13 @@ public interface IFileDao<T>
     /// <param name="newOwnerId"></param>
     /// <param name="exceptFolderIds"></param>
     Task ReassignFilesAsync(Guid oldOwnerId, Guid newOwnerId, IEnumerable<T> exceptFolderIds);
+
+    /// <summary>
+    /// Set created by
+    /// </summary>
+    /// <param name="newOwnerId"></param>
+    /// <param name="fileIds"></param>
+    Task ReassignFilesAsync(Guid newOwnerId, IEnumerable<T> fileIds);
 
     /// <summary>
     /// Search files in SharedWithMe &amp; Projects

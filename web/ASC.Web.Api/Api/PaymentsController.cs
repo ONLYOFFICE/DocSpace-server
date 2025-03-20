@@ -36,17 +36,19 @@ namespace ASC.Web.Api.Controllers;
 [ApiController]
 [AllowNotPayment]
 [ControllerName("portal")]
-public class PaymentController(UserManager userManager,
-        TenantManager tenantManager,
-        ITariffService tariffService,
-        SecurityContext securityContext,
-        RegionHelper regionHelper,
-        QuotaHelper tariffHelper,
-        IMemoryCache memoryCache,
-        IHttpContextAccessor httpContextAccessor,
-        MessageService messageService,
-        StudioNotifyService studioNotifyService,
-        PermissionContext permissionContext)
+public class PaymentController(
+    UserManager userManager,
+    TenantManager tenantManager,
+    ITariffService tariffService,
+    IQuotaService quotaService,
+    SecurityContext securityContext,
+    RegionHelper regionHelper,
+    QuotaHelper tariffHelper,
+    IFusionCache fusionCache,
+    IHttpContextAccessor httpContextAccessor,
+    MessageService messageService,
+    StudioNotifyService studioNotifyService,
+    PermissionContext permissionContext)
     : ControllerBase
 {
     private readonly int _maxCount = 10;
@@ -68,6 +70,16 @@ public class PaymentController(UserManager userManager,
         
         if ((await tariffService.GetPaymentsAsync(tenant.Id)).Any() ||
             !await userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID))
+        {
+            return null;
+        }
+
+        var monthQuotas = (await quotaService.GetTenantQuotasAsync())
+            .Where(q => !string.IsNullOrEmpty(q.ProductId) && q.Visible && !q.Year)
+            .ToList();
+
+        // TODO: Temporary restriction. Only monthly tariff available for purchase
+        if (inDto.Quantity.Count != 1 || !monthQuotas.Any(q => q.Name == inDto.Quantity.First().Key))
         {
             return null;
         }
@@ -107,6 +119,14 @@ public class PaymentController(UserManager userManager,
             return false;
         }
 
+        var quota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
+
+        // TODO: Temporary restriction. Only changing the quota for the current tariff is available
+        if (inDto.Quantity.Count != 1 || quota.Name != inDto.Quantity.First().Key)
+        {
+            return false;
+        }
+
         return await tariffService.PaymentChangeAsync(tenant.Id, inDto.Quantity);
     }
 
@@ -118,9 +138,9 @@ public class PaymentController(UserManager userManager,
     /// </short>
     /// <path>api/2.0/portal/payment/account</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The URL to the payment account", typeof(object))]
+    [SwaggerResponse(200, "The URL to the payment account", typeof(string))]
     [HttpGet("account")]
-    public async Task<object> GetPaymentAccountAsync(PaymentUrlRequestDto inDto)
+    public async Task<string> GetPaymentAccountAsync(PaymentUrlRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
         {
@@ -128,6 +148,13 @@ public class PaymentController(UserManager userManager,
         }
 
         var tenant = tenantManager.GetCurrentTenant();
+        var hasPayments = (await tariffService.GetPaymentsAsync(tenant.Id)).Any();
+
+        if (!hasPayments)
+        {
+            return null;
+        }
+
         var payerId = (await tariffService.GetTariffAsync(tenant.Id)).CustomerId;
         var payer = await userManager.GetUserByEmailAsync(payerId);
 
@@ -253,21 +280,22 @@ public class PaymentController(UserManager userManager,
             throw new Exception(Resource.ErrorEmptyMessage);
         }
 
-        CheckCache("salesrequest");
+        await CheckCache("salesrequest");
 
         await studioNotifyService.SendMsgToSalesAsync(inDto.Email, inDto.UserName, inDto.Message);
         messageService.Send(MessageAction.ContactSalesMailSent);
     }
-
-    private void CheckCache(string baseKey)
+    
+    private async Task CheckCache(string baseKey)
     {
-        var key = httpContextAccessor.HttpContext.Connection.RemoteIpAddress + baseKey;
-
-        if (memoryCache.TryGetValue<int>(key, out var count) && count > _maxCount)
+        var key = httpContextAccessor.HttpContext?.Connection.RemoteIpAddress + baseKey;
+        var countFromCache = await fusionCache.TryGetAsync<int>(key);
+        var count = countFromCache.HasValue ? countFromCache.Value : 0;
+        if (count > _maxCount)
         {
             throw new Exception(Resource.ErrorRequestLimitExceeded);
         }
 
-        memoryCache.Set(key, count + 1, TimeSpan.FromMinutes(_expirationMinutes));
+        await fusionCache.SetAsync(key, count + 1, TimeSpan.FromMinutes(_expirationMinutes));
     }
 }

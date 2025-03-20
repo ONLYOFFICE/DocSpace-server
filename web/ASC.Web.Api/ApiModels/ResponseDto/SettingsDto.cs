@@ -163,29 +163,9 @@ public class SettingsDto
     public string TenantAlias { get; set; }
 
     /// <summary>
-    /// Link to the help
-    /// </summary>
-    public string HelpLink { get; set; }
-    
-    /// <summary>
-    /// Link to the feedback and support
-    /// </summary>
-    public string FeedbackAndSupportLink { get; set; }
-
-    /// <summary>
-    /// Link to the forum
-    /// </summary>
-    public string ForumLink { get; set; }
-
-    /// <summary>
     /// Specifies whether to display the About section
     /// </summary>
     public bool DisplayAbout { get; set; }
-
-    /// <summary>
-    /// API documentation link
-    /// </summary>
-    public string ApiDocsLink { get; set; }
 
     /// <summary>
     /// Domain validator
@@ -203,34 +183,19 @@ public class SettingsDto
     public string TagManagerId { get; set; }
 
     /// <summary>
-    /// Email for training booking
-    /// </summary>
-    public string BookTrainingEmail { get; set; }
-
-    /// <summary>
-    /// Documentation email
-    /// </summary>
-    public string DocumentationEmail { get; set; }
-
-    /// <summary>
-    /// Legal terms
-    /// </summary>
-    public string LegalTerms { get; set; }
-
-    /// <summary>
-    /// License url
-    /// </summary>
-    public string LicenseUrl { get; set; }
-
-    /// <summary>
     /// Specifies whether the cookie settings are enabled
     /// </summary>
     public bool CookieSettingsEnabled { get; set; }
 
     /// <summary>
-    /// Limited access space
+    /// Limited access to Space Management
     /// </summary>
     public bool LimitedAccessSpace { get; set; }
+
+    /// <summary>
+    /// Limited access to Developer Tools for users
+    /// </summary>
+    public bool LimitedAccessDevToolsForUsers { get; set; }
 
     /// <summary>
     /// User name validation regex
@@ -261,4 +226,14 @@ public class SettingsDto
     /// Max image upload size
     /// </summary>
     public long MaxImageUploadSize { get; set; }
+
+    /// <summary>
+    /// White label logo text
+    /// </summary>
+    public string LogoText { get; set; }
+
+    /// <summary>
+    /// External resources
+    /// </summary>
+    public CultureSpecificExternalResources ExternalResources { get; set; }
 }

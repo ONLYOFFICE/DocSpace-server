@@ -38,7 +38,7 @@ public class S3Storage(TempStream tempStream,
         TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
         QuotaSocketManager quotaSocketManager,
         CoreBaseSettings coreBaseSettings,
-        AscDistributedCache cache,
+        IFusionCache cache,
         SettingsManager settingsManager,
         IQuotaService quotaService,
         UserManager userManager,
@@ -48,7 +48,6 @@ public class S3Storage(TempStream tempStream,
     public override bool IsSupportCdnUri => true;
     public static long ChunkSize => 1000 * 1024 * 1024;
     public override bool IsSupportChunking => true;
-    public override bool ContentAsAttachment => _contentAsAttachment;
 
     private readonly List<string> _domains = [];
     private Dictionary<string, S3CannedACL> _domainsAcl;
@@ -74,8 +73,6 @@ public class S3Storage(TempStream tempStream,
 
     private EncryptionMethod _encryptionMethod = EncryptionMethod.None;
     private string _encryptionKey;
-
-    private bool _contentAsAttachment;
 
     public Uri GetUriInternal(string path)
     {
@@ -1032,7 +1029,7 @@ public class S3Storage(TempStream tempStream,
         }
     }
 
-    public override IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator dataStoreValidator)
+    public override Task<IDataStore> ConfigureAsync(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator dataStoreValidator)
     {
         Tenant = tenant;
 
@@ -1041,12 +1038,14 @@ public class S3Storage(TempStream tempStream,
             Modulename = moduleConfig.Name;
             DataList = new DataList(moduleConfig);
 
-            _contentAsAttachment = moduleConfig.ContentAsAttachment;
             _domains.AddRange(moduleConfig.Domain.Select(x => $"{x.Name}/"));
 
             //Make expires
             DomainsExpires = moduleConfig.Domain.Where(x => x.Expires != TimeSpan.Zero).ToDictionary(x => x.Name, y => y.Expires);
             DomainsExpires.Add(string.Empty, moduleConfig.Expires);
+
+            DomainsContentAsAttachment = moduleConfig.Domain.Where(x => x.ContentAsAttachment.HasValue).ToDictionary(x => x.Name, y => y.ContentAsAttachment.Value);
+            DomainsContentAsAttachment.Add(string.Empty, moduleConfig.ContentAsAttachment.HasValue ? moduleConfig.ContentAsAttachment.Value : false);
 
             _domainsAcl = moduleConfig.Domain.ToDictionary(x => x.Name, y => GetS3Acl(y.Acl));
             _moduleAcl = GetS3Acl(moduleConfig.Acl);
@@ -1058,6 +1057,7 @@ public class S3Storage(TempStream tempStream,
 
             //Make expires
             DomainsExpires = new Dictionary<string, TimeSpan> { { string.Empty, TimeSpan.Zero } };
+            DomainsContentAsAttachment = new Dictionary<string, bool> { { string.Empty, false } };
 
             _domainsAcl = new Dictionary<string, S3CannedACL>();
             _moduleAcl = S3CannedACL.PublicRead;
@@ -1138,7 +1138,7 @@ public class S3Storage(TempStream tempStream,
 
         DataStoreValidator = dataStoreValidator;
         
-        return this;
+        return Task.FromResult<IDataStore>(this);
     }
 
     protected override Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Stream stream, string attachmentFileName)

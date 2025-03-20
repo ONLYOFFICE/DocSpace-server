@@ -49,7 +49,10 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
     ChunkedUploadSessionHelper chunkedUploadSessionHelper,
     SocketManager socketManager,
     FileDtoHelper filesWrapperHelper,
-    AuthContext authContext)
+    AuthContext authContext,
+    IDaoFactory daoFactory,
+    IEventBus eventBus,
+    WebhookManager webhookManager)
 {
     public async Task Invoke(HttpContext context)
     {
@@ -125,7 +128,33 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                                 ? MessageAction.FileUploadedWithOverwriting 
                                 : MessageAction.FileUploaded, resumedSession.File, resumedSession.File.Title);
 
+                            await webhookManager.PublishAsync(WebhookTrigger.FileUploaded, resumedSession.File);
+
                             await socketManager.CreateFileAsync(resumedSession.File);
+                            if (resumedSession.File.Version <= 1)
+                            {
+                                var folderDao = daoFactory.GetFolderDao<T>();
+                                var room = await folderDao.GetParentFoldersAsync(resumedSession.FolderId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+                                if (room != null)
+                                {
+                                    var data = room.Id is int rId && resumedSession.File.Id is int fId
+                                        ? new RoomNotifyIntegrationData<int> { RoomId = rId, FileId = fId }
+                                        : null;
+
+                                    var thirdPartyData = room.Id is string srId && resumedSession.File.Id is string sfId
+                                        ? new RoomNotifyIntegrationData<string> { RoomId = srId, FileId = sfId }
+                                        : null;
+
+                                    var evt = new RoomNotifyIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenant().Id)
+                                    {
+                                        Data = data,
+                                        ThirdPartyData = thirdPartyData
+                                    };
+
+                                    await eventBus.PublishAsync(evt);
+
+                                }
+                            }
                         }
                         else
                         {
@@ -171,7 +200,32 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                         ? MessageAction.FileUploadedWithOverwriting 
                         : MessageAction.FileUploaded, session.File, session.File.Title);
 
+                    await webhookManager.PublishAsync(WebhookTrigger.FileUploaded, session.File);
+
                     await socketManager.CreateFileAsync(session.File);
+                    if (session.File.Version <= 1)
+                    {
+                        var folderDao = daoFactory.GetFolderDao<T>();
+                        var room = await folderDao.GetParentFoldersAsync(session.FolderId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+                        if (room != null)
+                        {
+                            var data = room.Id is int rId && session.File.Id is int fId
+                                ? new RoomNotifyIntegrationData<int> { RoomId = rId, FileId = fId }
+                                : null;
+
+                            var thirdPartyData = room.Id is string srId && session.File.Id is string sfId
+                                ? new RoomNotifyIntegrationData<string> { RoomId = srId, FileId = sfId }
+                                : null;
+
+                            var evt = new RoomNotifyIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenant().Id)
+                            {
+                                Data = data,
+                                ThirdPartyData = thirdPartyData
+                            };
+
+                            await eventBus.PublishAsync(evt);
+                        }
+                    }
                     return;
             }
         }

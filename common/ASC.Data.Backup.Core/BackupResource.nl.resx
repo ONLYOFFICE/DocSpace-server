@@ -121,7 +121,7 @@
     <value>Wachtwoord instellen</value>
   </data>
   <data name="BackupNotFound" xml:space="preserve">
-    <value>Het back-up bestand is ongeldig. Gebruik een bestand dat is gemaakt in ONLYOFFICE v11.5 of later.</value>
+    <value>Het back-up bestand is ongeldig. Gebruik een bestand dat in dezelfde portal is gemaakt.</value>
   </data>
   <data name="LargeBackup" xml:space="preserve">
     <value>Back-up is groter dan de totale grootte van het portaal</value>

@@ -82,7 +82,7 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
 
     public async Task<string> GetLogoTextAsync(SettingsManager settingsManager)
     {
-        if (!string.IsNullOrEmpty(LogoText) && LogoText != DefaultLogoText)
+        if (!string.IsNullOrEmpty(LogoText))
         {
             return LogoText;
         }
@@ -93,7 +93,18 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
 
     public void SetLogoText(string val)
     {
-        LogoText = val;
+        LogoText = string.IsNullOrWhiteSpace(val) || val == DefaultLogoText ? null : val;
+    }
+
+    public async Task<bool> GetIsDefault(SettingsManager settingsManager)
+    {
+        if (!IsDefault())
+        {
+            return false;
+        }
+
+        var partnerSettings = await settingsManager.LoadForDefaultTenantAsync<TenantWhiteLabelSettings>();
+        return partnerSettings.IsDefault();
     }
 
     #endregion
@@ -163,7 +174,6 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
             LogoText = null
         };
     }
-    #endregion
 
     [JsonIgnore]
     public Guid ID
@@ -171,7 +181,21 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
         get { return new Guid("{05d35540-c80b-4b17-9277-abd9e543bf93}"); }
     }
 
+    #endregion
+
     #region Get/Set IsDefault and Extension
+
+    private bool IsDefault()
+    {
+        return LogoText == null
+            && IsDefaultLogoLightSmall
+            && IsDefaultLogoDark
+            && IsDefaultLogoFavicon
+            && IsDefaultLogoDocsEditor
+            && IsDefaultLogoDocsEditorEmbed
+            && IsDefaultLogoLeftMenu
+            && IsDefaultLogoAboutPage;
+    }
 
     public bool GetIsDefault(WhiteLabelLogoType type)
     {
@@ -318,7 +342,6 @@ public class TenantWhiteLabelSettingsHelper(
     WebImageSupplier webImageSupplier,
     UserPhotoManager userPhotoManager,
     StorageFactory storageFactory,
-    WhiteLabelHelper whiteLabelHelper,
     TenantManager tenantManager,
     AuthContext authContext,
     UserManager userManager,
@@ -330,7 +353,7 @@ public class TenantWhiteLabelSettingsHelper(
 
     #region Restore default
 
-    public async Task RestoreDefault(TenantWhiteLabelSettings tenantWhiteLabelSettings, TenantLogoManager tenantLogoManager, int tenantId, IDataStore storage = null)
+    public async Task RestoreDefaultLogos(TenantWhiteLabelSettings tenantWhiteLabelSettings, TenantLogoManager tenantLogoManager, int tenantId, IDataStore storage = null)
     {
         tenantWhiteLabelSettings.LogoLightSmallExt = null;
         tenantWhiteLabelSettings.DarkLogoLightSmallExt = null;
@@ -361,8 +384,6 @@ public class TenantWhiteLabelSettingsHelper(
         tenantWhiteLabelSettings.IsDefaultLogoLeftMenu = true;
         tenantWhiteLabelSettings.IsDefaultLogoAboutPage = true;
 
-        tenantWhiteLabelSettings.SetLogoText(null);
-
         var store = storage ?? await storageFactory.GetStorageAsync(tenantId, ModuleName);
 
         try
@@ -374,7 +395,16 @@ public class TenantWhiteLabelSettingsHelper(
             logger.ErrorRestoreDefault(e);
         }
 
-        await SaveAsync(tenantWhiteLabelSettings, tenantId, tenantLogoManager, true);
+        await settingsManager.SaveAsync(tenantWhiteLabelSettings, tenantId);
+
+        await tenantLogoManager.RemoveMailLogoDataFromCacheAsync();
+    }
+
+    public async Task RestoreDefaultLogoText(TenantWhiteLabelSettings tenantWhiteLabelSettings, int tenantId)
+    {
+        tenantWhiteLabelSettings.SetLogoText(null);
+
+        await settingsManager.SaveAsync(tenantWhiteLabelSettings, tenantId);
     }
 
     #endregion
@@ -753,57 +783,6 @@ public class TenantWhiteLabelSettingsHelper(
             _ => new MagickGeometry(0, 0)
         };
     }
-
-    #region Save for Resource replacement
-
-    private static readonly List<int> _appliedTenants = [];
-
-    public async Task ApplyAsync(TenantWhiteLabelSettings tenantWhiteLabelSettings, int tenantId)
-    {
-        if (_appliedTenants.Contains(tenantId))
-        {
-            return;
-        }
-
-        await SetNewLogoTextAsync(tenantWhiteLabelSettings, tenantId);
-
-        if (!_appliedTenants.Contains(tenantId))
-        {
-            _appliedTenants.Add(tenantId);
-        }
-    }
-
-    public async Task SaveAsync(TenantWhiteLabelSettings tenantWhiteLabelSettings, int tenantId, TenantLogoManager tenantLogoManager, bool restore = false)
-    {
-        await settingsManager.SaveAsync(tenantWhiteLabelSettings, tenantId);
-
-        if (tenantId == Tenant.DefaultTenant)
-        {
-            _appliedTenants.Clear();
-        }
-        else
-        {
-            await SetNewLogoTextAsync(tenantWhiteLabelSettings, tenantId, restore);
-            await tenantLogoManager.RemoveMailLogoDataFromCacheAsync();
-        }
-    }
-
-    private async Task SetNewLogoTextAsync(TenantWhiteLabelSettings tenantWhiteLabelSettings, int tenantId, bool restore = false)
-    {
-        whiteLabelHelper.DefaultLogoText = TenantWhiteLabelSettings.DefaultLogoText;
-        var partnerSettings = await settingsManager.LoadForDefaultTenantAsync<TenantWhiteLabelSettings>();
-
-        if (restore && string.IsNullOrEmpty(await partnerSettings.GetLogoTextAsync(settingsManager)))
-        {
-            whiteLabelHelper.RestoreOldText(tenantId);
-        }
-        else
-        {
-            whiteLabelHelper.SetNewText(tenantId, await tenantWhiteLabelSettings.GetLogoTextAsync(settingsManager));
-        }
-    }
-
-    #endregion
 
     #region Delete from Store
 

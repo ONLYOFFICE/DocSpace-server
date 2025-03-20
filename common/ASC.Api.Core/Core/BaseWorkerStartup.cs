@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Core.Notify.Socket;
-
 namespace ASC.Api.Core;
 
 public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment hostEnvironment)
@@ -33,9 +31,12 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
     protected IConfiguration Configuration { get; } = configuration;
     protected IHostEnvironment HostEnvironment { get; } = hostEnvironment;
     protected DIHelper DIHelper { get; } = new();
-
-    public virtual async Task ConfigureServices(IServiceCollection services)
+    
+    private bool OpenTelemetryEnabled { get; } = configuration.GetValue<bool>("openTelemetry:enable");
+    
+    public virtual async Task ConfigureServices(WebApplicationBuilder builder)
     {
+        var services = builder.Services;
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
             AppContext.SetSwitch("System.Net.Security.UseManagedNtlm", true);
@@ -43,7 +44,10 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
         
         services.AddHttpContextAccessor();
         services.AddCustomHealthCheck(Configuration);
-
+        if (OpenTelemetryEnabled)
+        {
+            builder.ConfigureOpenTelemetry();
+        }
         services.AddSingleton<EFLoggerFactory>();
         services.AddBaseDbContextPool<AccountLinkContext>();
         services.AddBaseDbContextPool<CoreDbContext>();
@@ -73,7 +77,7 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
         
         var connectionMultiplexer = await services.GetRedisConnectionMultiplexerAsync(Configuration, GetType().Namespace);
 
-        services.AddDistributedCache(connectionMultiplexer)
+        services.AddHybridCache(connectionMultiplexer)
                 .AddEventBus(Configuration)
                 .AddDistributedTaskQueue()
                 .AddCacheNotify(Configuration)

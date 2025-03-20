@@ -34,6 +34,7 @@ public class FirstTimeTenantSettings(
     SettingsManager settingsManager,
     UserManager userManager,
     SetupInfo setupInfo,
+    ExternalResourceSettingsHelper externalResourceSettingsHelper,
     SecurityContext securityContext,
     MessageService messageService,
     LicenseReader licenseReader,
@@ -87,6 +88,14 @@ public class FirstTimeTenantSettings(
                 throw new Exception(Resource.ErrorPasswordEmpty);
             }
 
+            if ((await tenantExtra.GetEnableTariffSettings() || ami) && tenantExtra.Enterprise)
+            {
+                await licenseReader.RefreshLicenseAsync(documentServiceLicense.ValidateLicense);
+
+                await TariffSettings.SetLicenseAcceptAsync(settingsManager);
+                messageService.Send(MessageAction.LicenseKeyUploaded);
+            }
+
             await securityContext.SetUserPasswordHashAsync(currentUser.Id, passwordHash);
 
             email = email.Trim();
@@ -97,14 +106,6 @@ public class FirstTimeTenantSettings(
             }
 
             await userManager.UpdateUserInfoAsync(currentUser);
-
-            if ((await tenantExtra.GetEnableTariffSettings() || ami) && tenantExtra.Enterprise)
-            {
-                await TariffSettings.SetLicenseAcceptAsync(settingsManager);
-                messageService.Send(MessageAction.LicenseKeyUploaded);
-
-                await licenseReader.RefreshLicenseAsync(documentServiceLicense.ValidateLicense);
-            }
 
             settings.Completed = true;
             await settingsManager.SaveAsync(settings);
@@ -237,14 +238,13 @@ public class FirstTimeTenantSettings(
     {
         try
         {
-            var url = (setupInfo.TeamlabSiteRedirect ?? "").Trim().TrimEnd('/');
+            var url = externalResourceSettingsHelper.Site.GetDefaultRegionalFullEntry("subscribe");
 
             if (string.IsNullOrEmpty(url))
             {
                 return;
             }
 
-            url += "/post.ashx";
             var request = new HttpRequestMessage
             {
                 RequestUri = new Uri(url)

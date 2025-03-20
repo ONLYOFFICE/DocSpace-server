@@ -33,7 +33,6 @@ public class RestoreProgressItem : BaseBackupProgressItem
     private readonly ILogger<RestoreProgressItem> _logger;
     private readonly ICache _cache;
     private TenantManager _tenantManager;
-    private TariffService _tariffService;
     private BackupStorageFactory _backupStorageFactory;
     private readonly NotifyHelper _notifyHelper;
     private BackupRepository _backupRepository;
@@ -43,6 +42,11 @@ public class RestoreProgressItem : BaseBackupProgressItem
     private string _region;
     private string _upgradesPath;
     private string _serverBaseUri;
+
+    public RestoreProgressItem()
+    {
+        
+    }
     
     public RestoreProgressItem(
         IConfiguration configuration,
@@ -93,7 +97,6 @@ public class RestoreProgressItem : BaseBackupProgressItem
             await using var scope = _serviceScopeProvider.CreateAsyncScope();
 
             _tenantManager = scope.ServiceProvider.GetService<TenantManager>();
-            _tariffService = scope.ServiceProvider.GetService<TariffService>();
             _backupStorageFactory = scope.ServiceProvider.GetService<BackupStorageFactory>();
             _backupRepository = scope.ServiceProvider.GetService<BackupRepository>();
             _socketManager = scope.ServiceProvider.GetService<SocketManager>();
@@ -177,17 +180,28 @@ public class RestoreProgressItem : BaseBackupProgressItem
                 await _tenantManager.RestoreTenantAsync(tenant.Id, restoredTenant);
                 TenantId = restoredTenant.Id;
 
-                await _tariffService.GetTariffAsync(tenant.Id);
-                await _tenantManager.GetCurrentTenantQuotaAsync(true);
-                await _notifyHelper.SendAboutRestoreCompletedAsync(restoredTenant, Notify);
+                try
+                {
+                    await _notifyHelper.SendAboutRestoreCompletedAsync(restoredTenant, Notify);
+                }
+                catch(Exception error)
+                {
+                    _logger.ErrorNotifyComplete(error);
+                }
             }
 
             Percentage = 75;
+            try
+            {
+                await _socketManager.RestoreProgressAsync(socketTenant, Dump, (int)Percentage);
+                await PublishChanges();
 
-            await _socketManager.RestoreProgressAsync(socketTenant, Dump, (int)Percentage);
-            await PublishChanges();
-
-            File.Delete(tempFile);
+                File.Delete(tempFile);
+            }
+            catch(Exception error)
+            {
+                _logger.ErrorDeleteFiles(error);
+            }
 
             Percentage = 100;
             IsCompleted = true;

@@ -209,12 +209,25 @@ public class SettingsController(
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Module information: ID, product class name, title, description, icon URL, large icon URL, start URL, primary or nor, help URL", typeof(Module))]
     [HttpGet("info")]
-    public Module GetModule()
+    public Module GetFilesModule()
     {
         productEntryPoint.Init();
         return new Module(productEntryPoint);
     }
 
+    /// <summary>
+    /// Hide confirmation dialog when canceling operation.
+    /// </summary>
+    /// <short>Hide confirmation dialog when canceling operation</short>
+    /// <path>api/2.0/files/hideconfirmroomlifetime</path>
+    [Tags("Files / Settings")]
+    [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
+    [HttpPut("hideconfirmcanceloperation")]
+    public async Task<bool> HideConfirmCancelOperation(SettingsRequestDto inDto)
+    {
+        return await filesSettingsHelper.SetHideConfirmCancelOperation(inDto.Set);
+    }
+    
     /// <summary>
     /// Hides the confirmation dialog for saving the file copy in the original format when converting a file.
     /// </summary>

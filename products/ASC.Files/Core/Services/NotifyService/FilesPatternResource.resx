@@ -136,9 +136,6 @@ $Message</value>
   <data name="subject_DocuSignStatus_push" xml:space="preserve">
     <value>Sign status changed</value>
   </data>
-  <data name="subject_EditorMentions_push" xml:space="preserve">
-    <value>Mentioned in document</value>
-  </data>
   <data name="subject_MailMergeEnd_push" xml:space="preserve">
     <value>Mailing is complete.</value>
   </data>
@@ -182,5 +179,64 @@ $OrangeButton</value>
   </data>
   <data name="subject_FormSubmitted" xml:space="preserve">
     <value>DocSpace notification. The form is filled out</value>
+  </data>
+  <data name="pattern_FormSubmitted_push" xml:space="preserve">
+    <value>Form "$DocumentTitle" has been filled out in the room "$RoomTitle"</value>
+  </data>
+  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
+    <value>$FromUserName moved the room "$RoomTitle" to the archive</value>
+  </data>
+  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
+    <value>You have been invited to the room "$RoomTitle"</value>
+  </data>
+  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
+    <value>Your role in the room "$RoomTitle" has been changed to "$RoomRole"</value>
+  </data>
+  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
+    <value>A new document "$DocumentTitle" has been created in the room "$RoomTitle"</value>
+  </data>
+  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
+    <value>A new file "$DocumentTitle" has been uploaded to the room "$RoomTitle"</value>
+  </data>
+  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
+    <value>A new files have been uploaded to the room "$RoomTitle" ($Count)</value>
+  </data>
+  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
+    <value>A new folder "$FolderTitle" has been created to the room "$RoomTitle"</value>
+  </data>
+  <data name="pattern_EditorMentions_push" xml:space="preserve">
+    <value>$ToUserName mentioned you in the document $DocumentTitle</value>
+  </data>
+  <data name="subject_FormStartedFilling" xml:space="preserve">
+    <value>DocSpace notification.</value>
+  </data>
+  <data name="pattern_FormStartedFilling" xml:space="preserve">
+    <value>
+      Activity notification. "$FromUserName":"$FromUserLink" started the form filling process:  "$DocumentTitle":"$DocumentURL" in the room: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="subject_YourTurnFormFilling" xml:space="preserve">
+    <value>DocSpace notification.</value>
+  </data>
+  <data name="pattern_YourTurnFormFilling" xml:space="preserve">
+    <value>
+      Activity notification. It’s your turn! Form filling is required: "$DocumentTitle":"$DocumentURL" in the room: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
+    <value>DocSpace notification.</value>
+  </data>
+  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
+    <value>
+      Activity notification. The form "$DocumentTitle":"$DocumentURL" was completely filled out, finalized, and signed in the room: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="subject_StoppedFormFilling" xml:space="preserve">
+    <value>DocSpace notification.</value>
+  </data>
+  <data name="pattern_StoppedFormFilling" xml:space="preserve">
+    <value>
+      Activity notification. "$FromUserName":"$FromUserLink" stopped form filling: "$DocumentTitle":"$DocumentURL" in the room: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
   </data>
 </root>

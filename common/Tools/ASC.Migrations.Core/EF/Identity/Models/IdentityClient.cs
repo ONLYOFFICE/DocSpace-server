@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace ASC.Migrations.Core.Identity;
 
-namespace ASC.Migrations.Core.Identity;
-
-public partial class IdentityClient
+public class IdentityClient
 {
     public string ClientId { get; set; } = null!;
 
@@ -41,9 +38,185 @@ public partial class IdentityClient
 
     public int Version { get; set; }
 
-    public virtual ICollection<IdentityAuthorization> IdentityAuthorizations { get; set; } = new List<IdentityAuthorization>();
-
-    public virtual ICollection<IdentityConsent> IdentityConsents { get; set; } = new List<IdentityConsent>();
-
     public DbTenant Tenant { get; set; }
+}
+
+public static class IdentityClientExtension
+{
+    public static ModelBuilderWrapper AddIIdentityClient(this ModelBuilderWrapper modelBuilder)
+    {
+        modelBuilder
+            .Add(MySqlAddIdentityClient, Provider.MySql)
+            .Add(PgSqlAddIdentityClient, Provider.PostgreSql)
+            ;
+
+        return modelBuilder;
+    }
+
+    public static void MySqlAddIdentityClient(this ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<IdentityClient>(entity =>
+        {
+            entity.HasKey(e => e.ClientId).HasName("PRIMARY");
+
+            entity.ToTable("identity_clients");
+
+            entity.HasIndex(e => e.ClientId, "UK_client_id").IsUnique();
+
+            entity.HasIndex(e => e.ClientSecret, "idx_client_secret");
+
+            entity.HasIndex(e => e.TenantId, "idx_identity_clients_tenant_id");
+
+            entity.Property(e => e.ClientId)
+                .HasMaxLength(36)
+                .HasColumnName("client_id");
+            entity.Property(e => e.ClientSecret)
+                .HasMaxLength(255)
+                .HasColumnName("client_secret")
+                .IsRequired();
+            entity.Property(e => e.CreatedBy)
+                .HasMaxLength(36)
+                .HasColumnName("created_by");
+            entity.Property(e => e.CreatedOn)
+                .HasMaxLength(6)
+                .HasColumnName("created_on");
+            entity.Property(e => e.Description).HasColumnName("description");
+            entity.Property(e => e.IsEnabled)
+                .HasDefaultValueSql("'1'")
+                .HasColumnName("is_enabled");
+            entity.Property(e => e.IsInvalidated)
+                .HasDefaultValueSql("'0'")
+                .HasColumnName("is_invalidated");
+            entity.Property(e => e.IsPublic)
+                .HasDefaultValueSql("'0'")
+                .HasColumnName("is_public");
+            entity.Property(e => e.Logo).HasColumnName("logo");
+            entity.Property(e => e.LogoutRedirectUri)
+                .HasColumnType("tinytext")
+                .HasColumnName("logout_redirect_uri");
+            entity.Property(e => e.ModifiedBy)
+                .HasMaxLength(36)
+                .HasColumnName("modified_by");
+            entity.Property(e => e.ModifiedOn)
+                .HasMaxLength(6)
+                .HasColumnName("modified_on");
+            entity.Property(e => e.Name)
+                .HasMaxLength(255)
+                .HasColumnName("name");
+            entity.Property(e => e.PolicyUrl)
+                .HasColumnType("tinytext")
+                .HasColumnName("policy_url");
+            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+            entity.Property(e => e.TermsUrl)
+                .HasColumnType("tinytext")
+                .HasColumnName("terms_url");
+            entity.Property(e => e.WebsiteUrl)
+                .HasColumnType("tinytext")
+                .HasColumnName("website_url");
+
+            entity.Property(e => e.Version)
+                .HasColumnName("version")
+                .HasDefaultValueSql("0");
+
+            entity.HasOne(e => e.Tenant)
+                   .WithMany()
+                   .HasForeignKey(b => b.TenantId)
+                   .OnDelete(DeleteBehavior.Cascade);
+        });
+    }
+
+    public static void PgSqlAddIdentityClient(this ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<IdentityClient>(entity =>
+        {
+            // Set up the primary key
+            entity.HasKey(e => e.ClientId);
+
+            // Map to a specific table
+            entity.ToTable("identity_clients");
+
+            // Map the properties to columns
+            entity.Property(e => e.ClientId)
+                .HasColumnName("client_id")
+                .IsRequired()
+                .HasMaxLength(255);
+
+            entity.Property(e => e.TenantId)
+                .HasColumnName("tenant_id")
+                .IsRequired();
+
+            entity.Property(e => e.ClientSecret)
+                .HasColumnName("client_secret")
+                .HasMaxLength(512);
+
+            entity.Property(e => e.Name)
+                .HasColumnName("name")
+                .HasMaxLength(255);
+
+            entity.Property(e => e.Description)
+                .HasColumnName("description")
+                .HasMaxLength(1000);
+
+            entity.Property(e => e.Logo)
+                .HasColumnName("logo")
+                .HasMaxLength(512);
+
+            entity.Property(e => e.WebsiteUrl)
+                .HasColumnName("website_url")
+                .HasMaxLength(512);
+
+            entity.Property(e => e.TermsUrl)
+                .HasColumnName("terms_url")
+                .HasMaxLength(512);
+
+            entity.Property(e => e.PolicyUrl)
+                .HasColumnName("policy_url")
+                .HasMaxLength(512);
+
+            entity.Property(e => e.LogoutRedirectUri)
+                .HasColumnName("logout_redirect_uri")
+                .HasMaxLength(512);
+
+            entity.Property(e => e.IsPublic)
+                .HasColumnName("is_public");
+
+            entity.Property(e => e.IsEnabled)
+                .HasColumnName("is_enabled");
+
+            entity.Property(e => e.IsInvalidated)
+                .HasColumnName("is_invalidated");
+
+            entity.Property(e => e.CreatedOn)
+                .HasColumnName("created_on");
+
+            entity.Property(e => e.CreatedBy)
+                .HasColumnName("created_by")
+                .HasMaxLength(36);
+
+            entity.Property(e => e.ModifiedOn)
+                .HasColumnName("modified_on");
+
+            entity.Property(e => e.ModifiedBy)
+                .HasColumnName("modified_by")
+                .HasMaxLength(36);
+
+            entity.Property(e => e.Version)
+                .HasColumnName("version");
+
+            // Define relationships
+            entity.HasOne(e => e.Tenant)
+                .WithMany()
+                .HasForeignKey(e => e.TenantId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("fk_identity_client_tenant");
+
+            // Optional: Set indexes if needed
+            entity.HasIndex(e => e.ClientId)
+                .HasDatabaseName("ix_identity_client_client_id")
+                .IsUnique();
+
+            entity.HasIndex(e => e.TenantId)
+                .HasDatabaseName("ix_identity_client_tenant_id");
+        });
+    }
 }

@@ -31,14 +31,39 @@ public class GlobalNotify
 {
     private ILogger Logger { get; set; }
     private readonly ICacheNotify<AscCacheItem> _notify;
+    private readonly ICacheNotify<ClearMyFolderItem> _notifyMyFolder;
 
-    public GlobalNotify(ICacheNotify<AscCacheItem> notify, ILoggerProvider options, CoreBaseSettings coreBaseSettings)
+    public GlobalNotify(ICacheNotify<AscCacheItem> notify, ICacheNotify<ClearMyFolderItem> notifyMyFolder, ILoggerProvider options, CoreBaseSettings coreBaseSettings)
     {
         _notify = notify;
+        _notifyMyFolder = notifyMyFolder;
         Logger = options.CreateLogger("ASC.Files");
         if (coreBaseSettings.Standalone)
         {
             ClearCache();
+        }
+        ClearMyFolderCache();
+    }
+
+    private void ClearMyFolderCache()
+    {
+        try
+        {
+            _notifyMyFolder.Subscribe(r =>
+            {
+                try
+                {
+                    GlobalFolder.UserRootFolderCache.Remove(r.Key, out _);
+                }
+                catch (Exception e)
+                {
+                    Logger.CriticalClearCacheAction(e);
+                }
+            }, CacheNotifyAction.Remove);
+        }
+        catch (Exception e)
+        {
+            Logger.CriticalClearCacheSubscribe(e);
         }
     }
 
@@ -51,7 +76,6 @@ public class GlobalNotify
                 try
                 {
                     GlobalFolder.ProjectsRootFolderCache.Clear();
-                    GlobalFolder.UserRootFolderCache.Clear();
                     GlobalFolder.CommonFolderCache.Clear();
                     GlobalFolder.ShareFolderCache.Clear();
                     GlobalFolder.RecentFolderCache.Clear();
@@ -421,6 +445,25 @@ public class GlobalFolder(
         return result;
     }
 
+    public async ValueTask<int> GetFolderRoomTemplatesAsync(IDaoFactory daoFactory, bool createIfNotExist = true)
+    {
+        var key = $"roomTemplates/{tenantManager.GetCurrentTenantId()}";
+
+        if (DocSpaceFolderCache.TryGetValue(key, out var result))
+        {
+            return result;
+        }
+
+        result = await daoFactory.GetFolderDao<int>().GetFolderIDRoomTemplatesAsync(createIfNotExist);
+
+        if (result != default)
+        {
+            DocSpaceFolderCache[key] = result;
+        }
+
+        return result;
+    }
+
     public async ValueTask<int> GetFolderArchiveAsync(IDaoFactory daoFactory)
     {
         var key = $"archive/{tenantManager.GetCurrentTenantId()}";
@@ -444,16 +487,29 @@ public class GlobalFolder(
             return 0;
         }
 
-        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
-        {
-            return 0;
-        }
-
         var cacheKey = $"my/{tenantManager.GetCurrentTenantId()}/{authContext.CurrentAccount.ID}";
 
-        var myFolderId = UserRootFolderCache.GetOrAdd(cacheKey, _ => new Lazy<int>(() => GetFolderIdAndProcessFirstVisitAsync(daoFactory, true).Result));
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
+        {
+            var myFolderId = UserRootFolderCache.GetOrAdd(cacheKey, _ => new Lazy<int>(() => GetFolderIDUserAsync(daoFactory).Result));
+            return myFolderId.Value;
+        }
+        else
+        {
+            var myFolderId = UserRootFolderCache.GetOrAdd(cacheKey, _ => new Lazy<int>(() => GetFolderIdAndProcessFirstVisitAsync(daoFactory, true).Result));
+            if (myFolderId.Value == 0)
+            {
+                UserRootFolderCache.Remove(cacheKey, out _);
+                myFolderId = UserRootFolderCache.GetOrAdd(cacheKey, _ => new Lazy<int>(() => GetFolderIdAndProcessFirstVisitAsync(daoFactory, true).Result));
+            }
+            return myFolderId.Value;
+        }
+    }
 
-        return myFolderId.Value;
+    private async Task<int> GetFolderIDUserAsync(IDaoFactory daoFactory)
+    {
+        var folderDao = daoFactory.GetFolderDao<int>();
+        return await folderDao.GetFolderIDUserAsync(false);
     }
 
     internal static readonly IDictionary<int, int> CommonFolderCache =
@@ -815,6 +871,7 @@ public class GlobalFolderHelper(IDaoFactory daoFactory, GlobalFolder globalFolde
     public ValueTask<int> FolderFavoritesAsync => globalFolder.GetFolderFavoritesAsync(daoFactory);
     public ValueTask<int> FolderTemplatesAsync => globalFolder.GetFolderTemplatesAsync(daoFactory);
     public ValueTask<int> FolderVirtualRoomsAsync => globalFolder.GetFolderVirtualRoomsAsync(daoFactory);
+    public ValueTask<int> FolderRoomTemplatesAsync => globalFolder.GetFolderRoomTemplatesAsync(daoFactory);
     public ValueTask<int> FolderArchiveAsync => globalFolder.GetFolderArchiveAsync(daoFactory);
 
     public async Task<T> GetFolderMyAsync<T>()
@@ -840,6 +897,11 @@ public class GlobalFolderHelper(IDaoFactory daoFactory, GlobalFolder globalFolde
     public async ValueTask<int> GetFolderArchive()
     {
         return await FolderArchiveAsync;
+    }
+
+    public async ValueTask<int> GetFolderRoomTemplatesAsync()
+    {
+        return await FolderRoomTemplatesAsync;
     }
 
     public async ValueTask<T> GetFolderShareAsync<T>()

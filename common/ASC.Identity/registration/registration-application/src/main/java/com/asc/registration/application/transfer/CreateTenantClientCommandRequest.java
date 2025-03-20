@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -111,7 +111,7 @@ public class CreateTenantClientCommandRequest implements Serializable {
   @Pattern(
       regexp = "^data:image\\/(?:png|jpeg|jpg|svg\\+xml);base64,.*.{1,}",
       message = "client logo is expected to be passed as base64")
-  @LogoSize(maxBytes = 1048576, maxLength = 2000000)
+  @LogoSize(maxBytes = 256000, maxLength = 2000000)
   private String logo;
 
   /** Indicates whether PKCE is allowed for the client. */

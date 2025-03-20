@@ -24,55 +24,131 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
+using ASC.Core.Tenants;
+
 namespace ASC.Webhooks.Core;
 
 [Scope(typeof(IWebhookPublisher))]
 public class WebhookPublisher(
     DbWorker dbWorker,
     IEventBus eventBus,
-    SecurityContext securityContext,
-    TenantManager tenantManager)
+    TenantUtil tenantUtil,
+    AuthContext authContext)
     : IWebhookPublisher
 {
-    public async Task PublishAsync(int webhookId, string requestPayload)
+    private readonly JsonSerializerOptions _serializerOptions = new()
     {
-        if (string.IsNullOrEmpty(requestPayload))
+        Converters = { new TenantToUtcDateTimeJsonConverter(tenantUtil) },
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+    };
+
+    private class TenantToUtcDateTimeJsonConverter(TenantUtil tenantUtil) : JsonConverter<DateTime>
+    {
+        public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            return;
+            return reader.GetDateTime();
         }
 
-        var webhookConfigs = await dbWorker.GetWebhookConfigs().Where(r => r.Enabled).ToListAsync();
+        public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
+        {
+            writer.WriteStringValue(value.Kind == DateTimeKind.Local ? tenantUtil.DateTimeToUtc(value) : value.ToUniversalTime());
+        }
+    }
+
+
+    public async Task<IEnumerable<DbWebhooksConfig>> GetWebhookConfigsAsync<T>(WebhookTrigger trigger, IWebhookAccessChecker<T> checker, T data)
+    {
+        var result = new List<DbWebhooksConfig>();
+
+        var webhookConfigs = await dbWorker.GetWebhookConfigs(enabled: true).ToListAsync();
 
         foreach (var config in webhookConfigs)
         {
-            await PublishAsync(webhookId, requestPayload, config.Id);
+            if (config.Triggers != WebhookTrigger.All && !config.Triggers.HasFlag(trigger))
+            {
+                continue;
+            }
+
+            if (checker != null && config.CreatedBy.HasValue && authContext.CurrentAccount.ID != config.CreatedBy.Value)
+            {
+                if (!await checker.CheckAccessAsync(data, config.CreatedBy.Value))
+                {
+                    continue;
+                }
+            }
+
+            result.Add(config);
+        }
+
+        return result;
+    }
+
+    public async Task PublishAsync<T>(WebhookTrigger trigger, IEnumerable<DbWebhooksConfig> webhookConfigs, T data)
+    {
+        foreach (var config in webhookConfigs)
+        {
+            _ = await PublishAsync(trigger, config, data);
         }
     }
 
-    public async Task<WebhooksLog> PublishAsync(int webhookId, string requestPayload, int configId)
+    public async Task PublishAsync<T>(WebhookTrigger trigger, IWebhookAccessChecker<T> checker, T data)
     {
-        if (string.IsNullOrEmpty(requestPayload))
-        {
-            return null;
-        }
+        var webhookConfigs = await GetWebhookConfigsAsync(trigger, checker, data);
 
-        var webhooksLog = new WebhooksLog
+        foreach (var config in webhookConfigs)
         {
-            WebhookId = webhookId,
+            _ = await PublishAsync(trigger, config, data);
+        }
+    }
+
+    private async Task<DbWebhooksLog> PublishAsync<T>(WebhookTrigger trigger, DbWebhooksConfig webhookConfig, T data)
+    {
+        var payload = new WebhookPayload<T>(trigger, webhookConfig, data, authContext.CurrentAccount.ID);
+
+        var payloadStr = JsonSerializer.Serialize(payload, _serializerOptions);
+
+        var webhooksLog = new DbWebhooksLog
+        {
+            TenantId = webhookConfig.TenantId,
+            ConfigId = webhookConfig.Id,
+            Uid = authContext.CurrentAccount.ID,
+            Trigger = trigger,
             CreationTime = DateTime.UtcNow,
-            RequestPayload = requestPayload,
-            ConfigId = configId
+            RequestPayload = payloadStr
         };
 
-        var webhook = await dbWorker.WriteToJournal(webhooksLog);
-
-        await eventBus.PublishAsync(new WebhookRequestIntegrationEvent(
-            securityContext.CurrentAccount.ID,
-            (tenantManager.GetCurrentTenant()).Id)
-        {
-            WebhookId = webhook.Id
-        });
-
-        return webhook;
+        return await PublishAsync(webhooksLog);
     }
+
+
+    public async Task<DbWebhooksLog> RetryPublishAsync(DbWebhooksLog webhookLog)
+    {
+        var webhooksLog = new DbWebhooksLog
+        {
+            TenantId = webhookLog.TenantId,
+            ConfigId = webhookLog.ConfigId,
+            Uid = authContext.CurrentAccount.ID,
+            Trigger = webhookLog.Trigger,
+            CreationTime = DateTime.UtcNow,
+            RequestPayload = webhookLog.RequestPayload
+        };
+
+        return await PublishAsync(webhooksLog);
+    }
+
+    private async Task<DbWebhooksLog> PublishAsync(DbWebhooksLog webhookLog)
+    {
+        var newWebhooksLog = await dbWorker.WriteToJournal(webhookLog);
+
+        var @event = new WebhookRequestIntegrationEvent(authContext.CurrentAccount.ID, newWebhooksLog.TenantId, newWebhooksLog.Id);
+
+        await eventBus.PublishAsync(@event);
+
+        return newWebhooksLog;
+    }
+
 }

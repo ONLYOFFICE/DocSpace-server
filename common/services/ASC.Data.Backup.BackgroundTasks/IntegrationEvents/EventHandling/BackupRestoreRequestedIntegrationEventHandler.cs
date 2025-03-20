@@ -42,7 +42,7 @@ public class BackupRestoreRequestedIntegrationEventHandler(
         {
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
 
-            if (!@event.Redelivered && await backupWorker.IsInstanceTooBusy())
+            if (!@event.Redelivered && await backupWorker.IsRestoreInstanceTooBusy())
             {
                 throw new IntegrationEventRejectExeption(@event.Id);
             }
