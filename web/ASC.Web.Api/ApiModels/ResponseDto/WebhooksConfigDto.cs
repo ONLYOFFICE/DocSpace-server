@@ -46,11 +46,6 @@ public class WebhooksConfigDto
     public string Uri { get; set; }
 
     /// <summary>
-    /// Secret key
-    /// </summary>
-    public string SecretKey { get; set; }
-
-    /// <summary>
     /// Specifies if the webhooks are enabled or not
     /// </summary>
     public bool Enabled { get; set; }
@@ -124,7 +119,6 @@ public class WebhooksConfigDtoHelper(TenantUtil tenantUtil, EmployeeDtoHelper em
             Id = dbWebhooksConfig.Id,
             Name = dbWebhooksConfig.Name,
             Uri = dbWebhooksConfig.Uri,
-            SecretKey = dbWebhooksConfig.SecretKey,
             Enabled = dbWebhooksConfig.Enabled,
             SSL = dbWebhooksConfig.SSL,
             Triggers = dbWebhooksConfig.Triggers,

@@ -81,7 +81,7 @@ public class WebhooksController(ApiContext context,
     {
         _ = await CheckAdminPermissionsAsync();
 
-        await CheckWebhook(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.SSL);
+        await CheckWebhook(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.SSL, true);
 
         var webhook = await dbWorker.AddWebhookConfig(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.Enabled, inDto.SSL, inDto.Triggers);
 
@@ -102,7 +102,7 @@ public class WebhooksController(ApiContext context,
     [HttpPut("webhook")]
     public async Task<WebhooksConfigDto> UpdateWebhook(WebhooksConfigRequestsDto inDto)
     {
-        await CheckWebhook(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.SSL);
+        await CheckWebhook(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.SSL, false);
 
         var existingWebhook = await dbWorker.GetWebhookConfig(tenantManager.GetCurrentTenantId(), inDto.Id);
 
@@ -115,16 +115,20 @@ public class WebhooksController(ApiContext context,
         {
             if (existingWebhook.CreatedBy != authContext.CurrentAccount.ID)
             {
-                throw new SecurityException();
+                throw new SecurityException(Resource.ErrorAccessDenied);
             }
         }
 
         existingWebhook.Name = inDto.Name;
         existingWebhook.Uri = inDto.Uri;
-        existingWebhook.SecretKey = inDto.SecretKey;
         existingWebhook.Enabled = inDto.Enabled;
         existingWebhook.SSL = inDto.SSL;
         existingWebhook.Triggers = inDto.Triggers;
+
+        if (!string.IsNullOrEmpty(inDto.SecretKey))
+        {
+            existingWebhook.SecretKey = inDto.SecretKey;
+        }
 
         var webhook = await dbWorker.UpdateWebhookConfig(existingWebhook);
 
@@ -156,7 +160,7 @@ public class WebhooksController(ApiContext context,
         {
             if (existingWebhook.CreatedBy != authContext.CurrentAccount.ID)
             {
-                throw new SecurityException();
+                throw new SecurityException(Resource.ErrorAccessDenied);
             }
         }
 
@@ -192,7 +196,7 @@ public class WebhooksController(ApiContext context,
         {
             if (existingWebhook.CreatedBy != authContext.CurrentAccount.ID)
             {
-                throw new SecurityException();
+                throw new SecurityException(Resource.ErrorAccessDenied);
             }
         }
 
@@ -263,7 +267,7 @@ public class WebhooksController(ApiContext context,
         {
             if (item.Config.CreatedBy != authContext.CurrentAccount.ID)
             {
-                throw new SecurityException();
+                throw new SecurityException(Resource.ErrorAccessDenied);
             }
         }
 
@@ -334,28 +338,32 @@ public class WebhooksController(ApiContext context,
 
         if (await userManager.IsGuestAsync(currentUser))
         {
-            throw new SecurityException();
+            throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
         var settings = await settingsManager.LoadAsync<TenantDevToolsAccessSettings>();
 
         if (settings.LimitedAccessForUsers)
         {
-            throw new SecurityException();
+            throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
         return false;
     }
 
-    private async Task CheckWebhook(string name, string uri, string secret, bool ssl)
+    private async Task CheckWebhook(string name, string uri, string secret, bool ssl, bool creation)
     {
         ArgumentNullException.ThrowIfNull(name);
-        ArgumentNullException.ThrowIfNull(secret);
         ArgumentNullException.ThrowIfNull(uri);
 
-        var passwordSettings = await settingsManager.LoadAsync<PasswordSettings>();
+        if (creation || !string.IsNullOrEmpty(secret))
+        {
+            ArgumentNullException.ThrowIfNull(secret);
 
-        passwordSettingsManager.CheckPassword(secret, passwordSettings);
+            var passwordSettings = await settingsManager.LoadAsync<PasswordSettings>();
+
+            passwordSettingsManager.CheckPassword(secret, passwordSettings);
+        }
 
         var restrictions = configuration.GetSection("webhooks:blacklist").Get<List<string>>() ?? [];
 
@@ -363,7 +371,7 @@ public class WebhooksController(ApiContext context,
             IPAddress.TryParse(parsedUri.Host, out _) &&
             restrictions.Any(r => IPAddressRange.MatchIPs(parsedUri.Host, r)))
         {
-            throw new SecurityException();
+            throw new ArgumentException();
         }
 
         var httpClientName = "";
@@ -379,7 +387,7 @@ public class WebhooksController(ApiContext context,
 
         if (response.StatusCode != HttpStatusCode.OK)
         {
-            throw new ArgumentException($"Webhook with {uri} is not avaliable. HEAD request is not responce 200 http status.");
+            throw new ArgumentException(Resource.ErrorWebhookUrlNotAvaliable);
         }
     }
 }

@@ -306,11 +306,24 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                         if (folder.FolderType is FolderType.FormFillingFolderInProgress or FolderType.FormFillingFolderDone)
                         {
                             await FolderDao.ChangeFolderTypeAsync(folder, FolderType.DEFAULT);
-                            foreach (var file in files)
+                            var tasks = files.Select(async file =>
                             {
                                 await LinkDao.DeleteAllLinkAsync(file.Id);
                                 await FileDao.SaveProperties(file.Id, null);
-                            }
+                            });
+
+                            await Task.WhenAll(tasks);
+                        }
+                       
+                        if (folder.ParentRoomType == FolderType.VirtualDataRoom)
+                        {
+                            var tasks = files.Where(file => file.IsForm).Select(async file =>
+                            {
+                                await FileDao.SaveProperties(file.Id, null);
+                                await FileDao.DeleteFormRolesAsync(file.Id);
+                            });
+
+                            await Task.WhenAll(tasks);
                         }
 
                         if (!_ignoreException && isError)
@@ -409,7 +422,10 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                 await fileMarker.RemoveMarkAsNewForAllAsync(file);
                 await LinkDao.DeleteAllLinkAsync(file.Id);
                 await FileDao.SaveProperties(file.Id, null);
-
+                if (file.IsForm)
+                {
+                    await FileDao.DeleteFormRolesAsync(file.Id);
+                }
                 if (!_immediately && FileDao.UseTrashForRemove(file))
                 {
                     try

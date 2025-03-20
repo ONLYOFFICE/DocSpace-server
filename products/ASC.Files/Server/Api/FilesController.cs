@@ -455,7 +455,7 @@ public abstract class FilesController<T>(
     /// </summary>
     /// <path>api/2.0/files/{fileId}/order</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Order is set")]
+    [SwaggerResponse(200, "Updated file information", typeof(FileDto<int>))]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "Not Found")]
     [HttpPut("{fileId}/order")]
@@ -472,7 +472,7 @@ public abstract class FilesController<T>(
     /// <path>api/2.0/files/order</path>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Order is set")]
+    [SwaggerResponse(200, "Updated file entries information", typeof(IAsyncEnumerable<FileDto<int>>))]
     [HttpPut("order")]
     public async IAsyncEnumerable<FileEntryDto<T>> SetFilesOrder(OrdersRequestDto<T> inDto)
     {
@@ -536,6 +536,33 @@ public abstract class FilesController<T>(
     public async Task<FileDto<T>> SaveAsPdf(SaveAsPdfRequestDto<T> inDto)
     {
         return await filesControllerHelper.SaveAsPdf(inDto.Id, inDto.File.FolderId, inDto.File.Title);
+    }
+
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "Updated information about form role mappings", typeof(FormRole))]
+    [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
+    [HttpPost("file/{fileId}/formrolemapping")]
+    public async Task SaveFormRoleMapping(SaveFormRoleMappingDto<T> inDto)
+    {
+        await fileStorageService.SaveFormRoleMapping(inDto.FormId, inDto.Roles);
+    }
+
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "Successfully retrieved all roles for the form", typeof(IEnumerable<FormRole>))]
+    [SwaggerResponse(403, "You do not have enough permissions to view the form roles")]
+    [HttpGet("file/{fileId}/formroles")]
+    public IAsyncEnumerable<FormRoleDto> GetAllFormRoles(FileIdRequestDto<T> inDto)
+    {
+        return fileStorageService.GetAllFormRoles(inDto.FileId);
+    }
+
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "Successfully processed the form filling action")]
+    [SwaggerResponse(403, "You do not have enough permissions to perform this action")]
+    [HttpPut("file/{fileId}/manageformfilling")]
+    public async Task ManageFormFilling(ManageFormFillingDto<T> inDto)
+    {
+        await fileStorageService.ManageFormFilling(inDto.FormId, inDto.Action);
     }
 }
 
