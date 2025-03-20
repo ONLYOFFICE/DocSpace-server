@@ -38,14 +38,13 @@ public class WebhookPayload<T>
 
     public WebhookPayload(WebhookTrigger trigger, DbWebhooksConfig config, T data, Guid userId)
     {
-        var now = DateTime.UtcNow;
-        now = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second, DateTimeKind.Utc);
+        var now = GetShortUtcNow();
 
         Event = new WebhookPayloadEventInfo
         {
             CreateBy = userId,
             CreateOn = now,
-            Id = 0, // log Id is unknown until saved
+            Id = 0, // log Id is unknown until saved. initialized on send
             Trigger = trigger.ToCustomString(),
             TriggerId = (int)trigger
         };
@@ -64,13 +63,17 @@ public class WebhookPayload<T>
             Id = config.Id,
             Name = config.Name,
             Url = config.Uri,
-            Triggers = triggers,
-            LastFailureOn = config.LastFailureOn,
-            LastFailureContent = config.LastFailureContent,
-            LastSuccessOn = config.LastSuccessOn,
-            RetryCount = 0,
-            RetryOn = now
+            Triggers = triggers
+
+            // initialized on send: LastFailureOn, LastFailureContent, LastSuccessOn, RetryCount, RetryOn
         };
+    }
+
+    public DateTime GetShortUtcNow()
+    {
+        var now = DateTime.UtcNow;
+        now = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second, DateTimeKind.Utc);
+        return now;
     }
 }
 

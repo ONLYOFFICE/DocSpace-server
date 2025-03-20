@@ -35,7 +35,7 @@ public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory s
 {
     private readonly JsonSerializerOptions _jsonSerializerOptions = new()
     {
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         IgnoreReadOnlyProperties = true
     };
@@ -58,6 +58,7 @@ public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory s
 
         var webhookPayload = JsonSerializer.Deserialize<WebhookPayload<object>>(entry.RequestPayload, _jsonSerializerOptions);
         webhookPayload.Event.Id = entry.Id;
+        webhookPayload.Webhook.RetryOn = webhookPayload.GetShortUtcNow();
 
         var status = 0;
         string responsePayload = null;
@@ -74,6 +75,7 @@ public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory s
                                                              onRetry: (response, delay, retryCount, context) =>
                                                              {
                                                                  context["retryCount"] = retryCount;
+                                                                 context["errorMessage"] = response.Exception?.Message;
                                                              });
         try
         {
@@ -85,11 +87,12 @@ public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory s
 
                 if (retryCount > 0)
                 {
-                    var now = DateTime.UtcNow;
-                    now = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second, DateTimeKind.Utc);
+                    webhookPayload.Webhook.LastFailureOn = webhookPayload.Webhook.RetryOn;
+                    webhookPayload.Webhook.LastFailureContent = (string)context["errorMessage"];
+                    webhookPayload.Webhook.LastSuccessOn = entry.Config.LastSuccessOn;
 
                     webhookPayload.Webhook.RetryCount = retryCount;
-                    webhookPayload.Webhook.RetryOn = now;
+                    webhookPayload.Webhook.RetryOn = webhookPayload.GetShortUtcNow();
 
                     requestPayload = JsonSerializer.Serialize(webhookPayload, _jsonSerializerOptions);
                 }
@@ -106,7 +109,7 @@ public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory s
                 response.EnsureSuccessStatusCode();
 
                 return response;
-            }, new Polly.Context { { "retryCount", 0 } });
+            }, new Context { { "retryCount", 0 }, { "errorMessage", "" } });
 
             status = (int)response.StatusCode;
             responseHeaders = JsonSerializer.Serialize(response.Headers.ToDictionary(r => r.Key, v => v.Value), _jsonSerializerOptions);
