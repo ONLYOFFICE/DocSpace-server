@@ -26,32 +26,43 @@
 
 namespace ASC.Webhooks.Core;
 
-public class WebhookPayload<T>
+public class WebhookPayload<T1, T2>
 {
-    public WebhookPayloadActionInfo Action { get; init; }
-    public T Payload { get; init; }
-    public WebhookPayloadConfigInfo Webhook { get; init; }
+    public WebhookPayloadEventInfo Event { get; set; }
+    public WebhookPayloadTargetInfo<T2> Target { get; set; } 
+    public T1 Payload { get; set; }
+    public WebhookPayloadConfigInfo Webhook { get; set; }
 
-    public WebhookPayload(WebhookTrigger trigger, DbWebhooksConfig config, T data, Guid userId)
+    public WebhookPayload()
     {
-        var now = DateTime.UtcNow;
-        now = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second, DateTimeKind.Utc);
+    }
 
-        Action = new WebhookPayloadActionInfo
+    public WebhookPayload(WebhookTrigger trigger, DbWebhooksConfig config, T1 data, T2 dataId, Guid userId)
+    {
+        var now = GetShortUtcNow();
+
+        Event = new WebhookPayloadEventInfo
         {
             CreateBy = userId,
             CreateOn = now,
-            Id = (int)trigger,
-            Trigger = trigger.ToStringFast()
+            Id = 0, // log Id is unknown until saved. initialized on send
+            Trigger = trigger.ToCustomString(),
+            TriggerId = (int)trigger
+        };
+
+        Target = new WebhookPayloadTargetInfo<T2>
+        { 
+            Id = dataId,
+            Type = trigger.GetTargetType()
         };
 
         Payload = data;
 
         var triggers = config.Triggers == WebhookTrigger.All
-            ? [config.Triggers.ToStringFast()]
+            ? [config.Triggers.ToCustomString()]
             : Enum.GetValues<WebhookTrigger>()
                 .Where(flag => config.Triggers.HasFlag(flag) && flag != 0)
-                .Select(flag => flag.ToStringFast())
+                .Select(flag => flag.ToCustomString())
                 .ToArray();
 
         Webhook = new WebhookPayloadConfigInfo
@@ -59,22 +70,33 @@ public class WebhookPayload<T>
             Id = config.Id,
             Name = config.Name,
             Url = config.Uri,
-            Triggers = triggers,
-            LastFailureOn = config.LastFailureOn,
-            LastFailureContent = config.LastFailureContent,
-            LastSuccessOn = config.LastSuccessOn,
-            RetryCount = 0,
-            RetryOn = now
+            Triggers = triggers
+
+            // initialized on send: LastFailureOn, LastFailureContent, LastSuccessOn, RetryCount, RetryOn
         };
+    }
+
+    public DateTime GetShortUtcNow()
+    {
+        var now = DateTime.UtcNow;
+        now = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second, DateTimeKind.Utc);
+        return now;
     }
 }
 
-public class WebhookPayloadActionInfo
+public class WebhookPayloadEventInfo
 {
+    public int Id { get; set; }
     public DateTime CreateOn { get; set; }
     public Guid CreateBy { get; set; }
-    public int Id { get; set; }
     public string Trigger { get; set; }
+    public int TriggerId { get; set; }
+}
+
+public class WebhookPayloadTargetInfo<T>
+{
+    public T Id { get; set; }
+    public string Type { get; set; }
 }
 
 public class WebhookPayloadConfigInfo
