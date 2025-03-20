@@ -56,8 +56,9 @@ public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory s
 
         var entry = await dbWorker.ReadJournal(webhookRequest.WebhookLogId);
 
-        var webhookPayload = JsonSerializer.Deserialize<WebhookPayload<object>>(entry.RequestPayload, _jsonSerializerOptions);
+        var webhookPayload = JsonSerializer.Deserialize<WebhookPayload<object, object>>(entry.RequestPayload, _jsonSerializerOptions);
         webhookPayload.Event.Id = entry.Id;
+        webhookPayload.Webhook.RetryCount = 0;
         webhookPayload.Webhook.RetryOn = webhookPayload.GetShortUtcNow();
 
         var status = 0;

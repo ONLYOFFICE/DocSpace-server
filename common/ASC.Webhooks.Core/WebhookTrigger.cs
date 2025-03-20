@@ -168,4 +168,9 @@ public static partial class WebhookTriggerExtensions
     {
         return _customStrings[value];
     }
+
+    public static string GetTargetType(this WebhookTrigger value)
+    {
+        return _customStrings[value].Split('.')[0];
+    }
 }

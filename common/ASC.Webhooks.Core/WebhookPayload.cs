@@ -26,17 +26,18 @@
 
 namespace ASC.Webhooks.Core;
 
-public class WebhookPayload<T>
+public class WebhookPayload<T1, T2>
 {
     public WebhookPayloadEventInfo Event { get; set; }
-    public T Payload { get; set; }
+    public WebhookPayloadTargetInfo<T2> Target { get; set; } 
+    public T1 Payload { get; set; }
     public WebhookPayloadConfigInfo Webhook { get; set; }
 
     public WebhookPayload()
     {
     }
 
-    public WebhookPayload(WebhookTrigger trigger, DbWebhooksConfig config, T data, Guid userId)
+    public WebhookPayload(WebhookTrigger trigger, DbWebhooksConfig config, T1 data, T2 dataId, Guid userId)
     {
         var now = GetShortUtcNow();
 
@@ -47,6 +48,12 @@ public class WebhookPayload<T>
             Id = 0, // log Id is unknown until saved. initialized on send
             Trigger = trigger.ToCustomString(),
             TriggerId = (int)trigger
+        };
+
+        Target = new WebhookPayloadTargetInfo<T2>
+        { 
+            Id = dataId,
+            Type = trigger.GetTargetType()
         };
 
         Payload = data;
@@ -84,6 +91,12 @@ public class WebhookPayloadEventInfo
     public Guid CreateBy { get; set; }
     public string Trigger { get; set; }
     public int TriggerId { get; set; }
+}
+
+public class WebhookPayloadTargetInfo<T>
+{
+    public T Id { get; set; }
+    public string Type { get; set; }
 }
 
 public class WebhookPayloadConfigInfo
