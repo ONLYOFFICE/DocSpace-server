@@ -59,12 +59,12 @@ public class ApiKeyResponseDto : IMapFrom<ApiKey>
     /// <summary>
     /// List of permissions granted to the API key
     /// </summary>
-    public List<string> Permissions { get; set; } = new();
+    public List<string> Permissions { get; set; }
 
     /// <summary>
     /// Date and time when the API key was last used
     /// </summary>
-    public ApiDateTime? LastUsed { get; set; }
+    public ApiDateTime LastUsed { get; set; }
 
     /// <summary>
     /// Date and time when the API key was created
@@ -79,7 +79,7 @@ public class ApiKeyResponseDto : IMapFrom<ApiKey>
     /// <summary>
     /// Date and time when the API key expires
     /// </summary>
-    public ApiDateTime? ExpiresAt { get; set; }
+    public ApiDateTime ExpiresAt { get; set; }
 
     /// <summary>
     /// Indicates whether the API key is active
@@ -94,8 +94,7 @@ public class ApiKeyResponseDto : IMapFrom<ApiKey>
 }
 
 [Scope]
-public class ApiKeyConverter(TenantUtil tenantUtil, 
-                             ApiDateTimeHelper apiDateTimeHelper,
+public class ApiKeyConverter(ApiDateTimeHelper apiDateTimeHelper,
                              EmployeeDtoHelper employeeWrapperHelper): ITypeConverter<ApiKey, ApiKeyResponseDto>
 {
     public ApiKeyResponseDto Convert(ApiKey source, ApiKeyResponseDto destination, ResolutionContext context)

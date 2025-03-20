@@ -30,7 +30,7 @@ public class ScopesAuthorizationHandler : AuthorizationHandler<ScopesRequirement
 {
     protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, ScopesRequirement requirement)
     {
-        if (!context.User.Identity.IsAuthenticated)
+        if (context.User.Identity != null && !context.User.Identity.IsAuthenticated)
         {
             return Task.CompletedTask;
         }
@@ -40,7 +40,7 @@ public class ScopesAuthorizationHandler : AuthorizationHandler<ScopesRequirement
             return Task.CompletedTask;
         }
 
-        if (context.User == null || requirement == null || string.IsNullOrWhiteSpace(requirement.Scopes))
+        if (requirement == null || string.IsNullOrWhiteSpace(requirement.Scopes))
         {
             return Task.CompletedTask;
         }
@@ -59,22 +59,16 @@ public class ScopesAuthorizationHandler : AuthorizationHandler<ScopesRequirement
             return Task.CompletedTask;
         }
 
-        var userScopeClaims = context.User.Claims.Where(c => string.Equals(c.Type, "scope", StringComparison.OrdinalIgnoreCase));
+        var userScopes = context.User.Claims.Where(c => string.Equals(c.Type, "scope", StringComparison.OrdinalIgnoreCase))
+                                                             .Select(c => c.Value)
+                                                             .ToList();
 
-        foreach (var claim in userScopeClaims)
+        if (userScopes.Contains(AuthConstants.Claim_ScopeRootWrite.Value) ||
+            expectedRequirements.All(x => userScopes.Contains(x)))
         {
-            var match = expectedRequirements
-                .Where(r => string.Equals(r, claim.Value, StringComparison.OrdinalIgnoreCase) ||
-                            string.Equals(AuthConstants.Claim_ScopeRootWrite.Value, claim.Value, StringComparison.OrdinalIgnoreCase));
-
-            if (match.Any())
-            {
-                context.Succeed(requirement);
-
-                break;
-            }
-        }
-
+            context.Succeed(requirement);
+        } 
+      
         return Task.CompletedTask;
     }
 }

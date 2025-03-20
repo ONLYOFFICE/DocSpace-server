@@ -24,9 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Auth;
 using ASC.Core.Common.EF.Model;
 
 using AutoMapper;
+
 
 namespace ASC.People.Api;
 
@@ -56,6 +58,20 @@ public class ApiKeysController(
     {
         var expiresAt = apiKey.ExpiresInDays.HasValue ? TimeSpan.FromDays(apiKey.ExpiresInDays.Value) : (TimeSpan?)null;
 
+        if (apiKey.Permissions != null && apiKey.Permissions.Any())
+        {
+            var scopes = AuthorizationExtension.ScopesMap;
+
+            var orderedScopes =  scopes.AllKeys.SelectMany(key => scopes[key]?.Split(',')).Distinct().Order();
+
+            var isValidPermission =  apiKey.Permissions.All(x => orderedScopes.Contains(x));
+
+            if (!isValidPermission)
+            {
+                throw new ArgumentException("Permissions are not valid.");
+            }
+        }
+        
         var result = await apiKeyManager.CreateApiKeyAsync(apiKey.Name,
             apiKey.Permissions,
             expiresAt);
@@ -67,7 +83,25 @@ public class ApiKeysController(
 
         return apiKeyResponseDto;
     }
-  
+    
+    /// <summary>
+    ///  List of all available permissions for key
+    /// </summary>  
+    /// <short>
+    ///  List of all available permissions for key
+    /// </short>
+    /// <path>api/2.0/keys/permissions</path>
+    [Tags("Api keys")]
+    [SwaggerResponse(200, "List of all available permissions for key", typeof(IEnumerable<string>))]
+    [HttpGet("permissions")]
+    public IEnumerable<string> GetAllPermissions()
+    {
+        var scopes = AuthorizationExtension.ScopesMap;
+
+        return scopes.AllKeys.SelectMany(key => scopes[key]?.Split(',')).Distinct().Order();
+    }
+    
+    
     /// <summary>
     ///  Get list api keys for user
     /// </summary>  

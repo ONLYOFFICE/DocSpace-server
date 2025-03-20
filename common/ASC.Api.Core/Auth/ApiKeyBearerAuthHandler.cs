@@ -62,11 +62,16 @@ public class ApiKeyBearerAuthHandler(
             {
                 throw new AuthenticationException("Api key is invalid");
             }
-
+            
             var claims = new List<Claim>
             {
                 AuthConstants.Claim_ScopeRootWrite
             };
+
+            if (apiKey.Permissions.Count != 0)
+            {
+                claims = apiKey.Permissions.ConvertAll(x => new Claim("scope", x));
+            }
             
             await securityContext.AuthenticateMeWithoutCookieAsync(apiKey.CreateBy, claims);
         }

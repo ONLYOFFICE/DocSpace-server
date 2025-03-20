@@ -428,7 +428,6 @@ public abstract class BaseStartup
                 options.DefaultScheme = MultiAuthSchemes;
                 options.DefaultChallengeScheme = MultiAuthSchemes;
             })
-            .AddScheme<AuthenticationSchemeOptions, ApiKeyBearerAuthHandler>(ApiKeyBearerDefaults.AuthenticationScheme, _ => { })
             .AddScheme<AuthenticationSchemeOptions, CookieAuthHandler>(CookieAuthenticationDefaults.AuthenticationScheme, _ => { })
             .AddScheme<AuthenticationSchemeOptions, BasicAuthHandler>(BasicAuthScheme, _ => { })
             .AddScheme<AuthenticationSchemeOptions, ConfirmAuthHandler>("confirm", _ => { })
@@ -467,7 +466,8 @@ public abstract class BaseStartup
                 };
             });
 
-        services.AddJwtBearerAuthentication();
+        services.AddApiKeyBearerAuthentication()
+                .AddJwtBearerAuthentication();
 
         services.AddAutoMapper(GetAutoMapperProfileAssemblies());
 
