@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Data.Storage.Encryption.IntegrationEvents.Events;
 using ASC.Files.Service.IntegrationEvents.EventHandling;
 
 using NLog;
@@ -83,7 +84,8 @@ try
     await eventBus.SubscribeAsync<RoomNotifyIntegrationEvent, RoomNotifyIntegrationEventHandler>();
     await eventBus.SubscribeAsync<CreateRoomTemplateIntegrationEvent, RoomTemplatesIntegrationEventHandler>();
     await eventBus.SubscribeAsync<CreateRoomFromTemplateIntegrationEvent, RoomTemplatesIntegrationEventHandler>();
-    
+    await eventBus.SubscribeAsync<DataStorageEncryptionIntegrationEvent, DataStorageEncryptionIntegrationEventHandler>();
+
     sp.GetRequiredService<FileTrackerHelper>().Subscribe();
 
     logger.Info("Starting web host ({applicationContext})...", AppName);

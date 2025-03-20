@@ -30,23 +30,26 @@ public class FakeCrypt : ICrypt
 {
     public byte Version => 1;
 
-    public void EncryptFile(string filePath)
+    public ValueTask EncryptFileAsync(string filePath)
     {
+        return ValueTask.CompletedTask;
     }
 
-    public void DecryptFile(string filePath)
+    public ValueTask DecryptFileAsync(string filePath)
     {
+        return ValueTask.CompletedTask;
     }
 
-    public Stream GetReadStream(string filePath)
+
+    public Task<long> GetFileSizeAsync(string filePath)
     {
-        return File.OpenRead(filePath);
+        return Task.FromResult(new FileInfo(filePath).Length);
     }
 
-    public long GetFileSize(string filePath)
+    public Task<Stream> GetReadStreamAsync(string filePath)
     {
-        return new FileInfo(filePath).Length;
+        return Task.FromResult<Stream>(File.OpenRead(filePath));
     }
-
+    
     public void Init(string storageName, EncryptionSettings encryptionSettings) { }
 }

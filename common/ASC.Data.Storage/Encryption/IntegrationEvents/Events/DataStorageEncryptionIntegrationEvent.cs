@@ -24,15 +24,28 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Webhooks.Core;
+namespace ASC.Data.Storage.Encryption.IntegrationEvents.Events;
 
-public interface IWebhookPublisher
+[ProtoContract]
+public record DataStorageEncryptionIntegrationEvent : IntegrationEvent
 {
-    public Task<IEnumerable<DbWebhooksConfig>> GetWebhookConfigsAsync<T>(WebhookTrigger trigger, IWebhookAccessChecker<T> checker, T data);
+    protected DataStorageEncryptionIntegrationEvent()
+    {
 
-    public Task PublishAsync<T1, T2>(WebhookTrigger trigger, IEnumerable<DbWebhooksConfig> webhookConfigs, T1 data, T2 dataId);
+    }
 
-    public Task PublishAsync<T1, T2>(WebhookTrigger trigger, IWebhookAccessChecker<T1> checker, T1 data, T2 dataId);
+    public DataStorageEncryptionIntegrationEvent(EncryptionSettings encryptionSettings,
+                                                     String serverRootPath,
+                                                     Guid createBy,
+                                                     int tenantId) : base(createBy, tenantId)
+    {
+        EncryptionSettings = encryptionSettings;
+        ServerRootPath = serverRootPath;
+    }
 
-    public Task<DbWebhooksLog> RetryPublishAsync(DbWebhooksLog webhookLog);
+    [ProtoMember(1)]
+    public EncryptionSettings EncryptionSettings { get; private set; }
+
+    [ProtoMember(2)]
+    public string ServerRootPath { get; private set; }
 }
