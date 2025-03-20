@@ -29,6 +29,8 @@ module.exports = (io) => {
   const moment = require("moment");
   const filesIO = io; //TODO: Restore .of("/files");
 
+  const commonRooms = ["storage-encryption"];
+
   filesIO.on("connection", (socket) => {
     const session = socket.handshake.session;
 
@@ -84,7 +86,7 @@ module.exports = (io) => {
     }
 
     const getRoom = (roomPart) => {
-      return `${tenantId()}-${roomPart}`;
+      return commonRooms.includes(roomPart) ? roomPart : `${tenantId()}-${roomPart}`;
     };
 
     const connectMessage = !session.anonymous ? 
