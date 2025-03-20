@@ -2637,7 +2637,7 @@ public class FileSecurity(IDaoFactory daoFactory,
 
             switch (s)
             {
-                case FileShare.Editing when canEdit && (file.IsForm || fileType != FileType.Pdf):
+                case FileShare.Editing when canEdit:
                 case FileShare.FillForms when file.IsForm:
                 case FileShare.CustomFilter when canCustomFiltering:
                 case FileShare.Comment when !file.IsForm && canComment:
