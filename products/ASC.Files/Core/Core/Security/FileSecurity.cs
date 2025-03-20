@@ -2623,7 +2623,7 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         foreach (var s in shares)
         {
-            if (s is FileShare.Restrict or FileShare.None || s is FileShare.Read && !file.IsForm)
+            if (s is FileShare.Read or FileShare.Restrict or FileShare.None && !file.IsForm)
             {
                 result.Add(s.ToStringFast(), true);
                 continue;
