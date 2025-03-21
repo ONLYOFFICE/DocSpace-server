@@ -24,12 +24,34 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Core.Data;
+using ASC.Data.Storage.Encryption;
+using ASC.Data.Storage.Encryption.IntegrationEvents.Events;
 
-[ProtoContract]
-public record SettingsCacheItem
+namespace ASC.Files.Service.IntegrationEvents.EventHandling;
+
+[Scope]
+public class DataStorageEncryptionIntegrationEventHandler(
+    ILogger<DataStorageEncryptionIntegrationEventHandler> logger,
+    EncryptionWorker encryptionWorker)
+    : IIntegrationEventHandler<DataStorageEncryptionIntegrationEvent>
 {
-    [ProtoMember(1)]
-    public string Key { get; set; }
-}
 
+    public async Task Handle(DataStorageEncryptionIntegrationEvent @event)
+    {
+        CustomSynchronizationContext.CreateContext();
+
+        using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
+        {
+            logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
+
+            try
+            {
+                await encryptionWorker.StartAsync(@event.EncryptionSettings, @event.ServerRootPath);
+            }
+            catch (Exception ex)
+            {
+                logger.ErrorWithException(ex);
+            }
+        }
+    }
+}

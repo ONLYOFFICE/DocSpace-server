@@ -68,8 +68,13 @@ public class EncryptionWorker(
 
     public async Task<double?> GetEncryptionProgress()
     {
-        var progress = (await _queue.GetAllTasks()).FirstOrDefault();
+        var item = (await _queue.GetAllTasks()).FirstOrDefault();
 
-        return progress?.Percentage;
+        if (item is { IsCompleted: true })
+        {
+            await _queue.DequeueTask(item.Id);
+        }
+
+        return item?.Percentage;
     }
 }

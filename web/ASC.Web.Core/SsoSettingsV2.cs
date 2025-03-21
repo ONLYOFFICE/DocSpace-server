@@ -90,6 +90,8 @@ public class SsoSettingsV2 : ISettings<SsoSettingsV2>
             DisableEmailVerification = false
         };
     }
+    
+    public DateTime LastModified { get; set; }
 
     /// <summary>
     /// Specifies if SSO is enabled or not

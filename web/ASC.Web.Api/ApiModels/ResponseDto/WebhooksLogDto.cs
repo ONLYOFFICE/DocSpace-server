@@ -117,7 +117,7 @@ public class WebhooksLogConverter(TenantUtil tenantUtil) : ITypeConverter<DbWebh
 
         if (source.Delivery.HasValue)
         {
-            source.Delivery = tenantUtil.DateTimeFromUtc(source.Delivery.Value);
+            result.Delivery = tenantUtil.DateTimeFromUtc(source.Delivery.Value);
         }
         
         return result;

@@ -44,6 +44,8 @@ public class TenantInfoSettings : ISettings<TenantInfoSettings>
             IsDefault = true
         };
     }
+    
+    public DateTime LastModified { get; set; }
 
     [JsonIgnore]
     public Guid ID

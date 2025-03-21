@@ -45,4 +45,6 @@ public class TenantAccessSpaceSettings : ISettings<TenantAccessSpaceSettings>
             LimitedAccessSpace = false
         };
     }
+    
+    public DateTime LastModified { get; set; }
 }
