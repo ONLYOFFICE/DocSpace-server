@@ -460,7 +460,7 @@ public class EntryManager(IDaoFactory daoFactory,
             {
                 orderBy.SortedBy = SortedByType.CustomOrder;
 
-                var folders = folderDao.GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, 0, -1, roomId);
+                var folders = folderDao.GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, 0, -1, roomId, parentType: room.FolderType, containingForms: parent.ShareRecord is { Share: FileShare.FillForms });
                 var files = fileDao.GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject, 0, -1, roomId, withShared, formsItemDto: formsItemDto, applyFormStepFilter: parent.ShareRecord is { Share: FileShare.FillForms });
                 
                 var temp = files.Concat(folders.Cast<FileEntry>())
@@ -2213,6 +2213,15 @@ public class EntryManager(IDaoFactory daoFactory,
                     var aces = await fileSharing.GetPureSharesAsync(room, nextRoleUserIds).ToListAsync();
                     var formFillers = aces.Where(ace => ace is { Access: FileShare.FillForms }).Select(ace => ace.Id);
 
+                    if (!form.ParentId.Equals(room.Id))
+                    {
+                        var folderDao = daoFactory.GetFolderDao<T>();
+                        var parentFolders = await folderDao.GetParentFoldersAsync(form.ParentId).Where(f => !DocSpaceHelper.IsRoom(f.FolderType)).ToListAsync();
+                        foreach(var folder in parentFolders)
+                        {
+                            await socketManager.CreateFolderAsync(folder, formFillers);
+                        }
+                    }
                     await socketManager.CreateFileAsync(form, formFillers);
                     await notifyClient.SendFormFillingEvent(room, form, nextRoleUserIds, NotifyConstants.EventYourTurnFormFilling);
                 }

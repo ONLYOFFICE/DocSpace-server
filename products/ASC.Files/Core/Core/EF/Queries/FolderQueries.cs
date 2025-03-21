@@ -327,6 +327,13 @@ public partial class FilesDbContext
     {
         return FolderQueries.RoomSettingsAsync(this, tenantId, roomId);
     }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    public Task<bool> ContainsFormsInFolder(int tenantId, int folderId)
+    {
+        return FolderQueries.ContainsFormsInFolder(this, tenantId, folderId);
+    }
+
 }
 
 static file class FolderQueries
@@ -952,4 +959,23 @@ static file class FolderQueries
             (FilesDbContext ctx, int tenantId, int roomId) =>
                 ctx.RoomSettings
                     .FirstOrDefault(r => r.TenantId == tenantId && r.RoomId == roomId));
+
+    public static readonly Func<FilesDbContext, int, int, Task<bool>> ContainsFormsInFolder =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int folderId) =>
+                ctx.Files
+                    .AsNoTracking()
+                    .Any(f =>
+                        f.TenantId == tenantId
+                        && f.Category == (int)FilterType.PdfForm
+                        && (f.ParentId == folderId
+                            || ctx.Tree
+                                .AsNoTracking()
+                                .Any(t =>
+                                    t.ParentId == folderId
+                                    && t.FolderId == f.ParentId
+                                    && t.Folder.TenantId == tenantId
+                                )
+                        )
+                    ));
 }

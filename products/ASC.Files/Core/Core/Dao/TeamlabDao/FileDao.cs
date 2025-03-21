@@ -323,8 +323,7 @@ internal class FileDao(
         }
         if (applyFormStepFilter)
         {
-            q = q.Where(f => f.Category != (int)FilterType.PdfForm ||
-                (f.Category == (int)FilterType.PdfForm &&
+            q = q.Where(f => f.Category == (int)FilterType.PdfForm &&
                     filesDbContext.FilesFormRoleMapping.Any(r =>
                         r.TenantId == tenantId && r.FormId == f.Id && r.UserId == securityContext.CurrentAccount.ID) &&
                     (!filesDbContext.FilesFormRoleMapping.Any(r => r.TenantId == tenantId && r.FormId == f.Id && !r.Submitted) || (
@@ -336,7 +335,6 @@ internal class FileDao(
                         .Where(r => r.TenantId == tenantId && r.FormId == f.Id && r.UserId == securityContext.CurrentAccount.ID)
                         .Select(r => (int?)r.Sequence)
                         .FirstOrDefault()))
-                )
             );
         }
 
