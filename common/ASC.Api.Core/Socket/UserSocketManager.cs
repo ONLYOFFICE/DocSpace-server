@@ -130,6 +130,12 @@ public class UserSocketManager(ITariffService tariffService,
         }
     }
 
+    public async Task DeleteGuestAsync(Guid CurrentUserId, Guid userId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await MakeRequest("delete-guest", new { tenantId, room = CurrentUserId, guestId = userId });
+    }
+
     public async Task DeleteGuestAsync(Guid userId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
