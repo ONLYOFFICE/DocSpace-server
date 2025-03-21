@@ -134,9 +134,9 @@ public class CspSettingsHelper(
         return headerValue;
     }
 
-    public async Task<CspSettings> LoadAsync(HttpContext context = null)
+    public async Task<CspSettings> LoadAsync(DateTime? lastModified = null)
     {
-        return await settingsManager.LoadAsync<CspSettings>(context);
+        return await settingsManager.LoadAsync<CspSettings>(lastModified);
     }
 
     public async Task RenameDomain(string oldDomain, string newDomain)

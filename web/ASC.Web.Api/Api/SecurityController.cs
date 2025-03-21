@@ -411,9 +411,10 @@ public class SecurityController(PermissionContext permissionContext,
     public async Task<CspDto> GetCsp()
     {
         //await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        var settings = await cspSettingsHelper.LoadAsync(HttpContext);
+        
+        var settings = await cspSettingsHelper.LoadAsync(HttpContext.GetIfModifiedSince());
 
-        if (settings == null)
+        if (HttpContext.TryGetFromCache(settings.LastModified))
         {
             return null;
         }

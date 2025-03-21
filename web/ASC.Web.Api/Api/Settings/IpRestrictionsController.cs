@@ -49,23 +49,12 @@ public class IpRestrictionsController(ApiContext apiContext,
     public async Task<IEnumerable<IPRestriction>> GetIpRestrictionsAsync()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        
         var tenant = tenantManager.GetCurrentTenant();
         var etagFromRequest = HttpContext.Request.Headers.IfNoneMatch;
         var result = await iPRestrictionsService.GetAsync(tenant.Id, etagFromRequest);
-        var etag = await iPRestrictionsService.CalculateEtagAsync(result);
         
-        //weak
-        etag = "W/" + etag;
-        if (etag == etagFromRequest)
-        {
-            HttpContext.Response.StatusCode = 304;
-            return null;
-        }
-        
-        HttpContext.Response.Headers.ETag = etag;
-        HttpContext.Response.Headers.CacheControl = "private, no-cache";
-        
-        return result;
+        return HttpContext.TryGetFromCache(await HttpContextExtension.CalculateEtagAsync(result.Select(r=> r.Ip))) ? null : result;
     }
 
     /// <summary>
@@ -123,8 +112,10 @@ public class IpRestrictionsController(ApiContext apiContext,
     public async Task<IPRestrictionsSettings> ReadIpRestrictionsSettingsAsync()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-
-        return await settingsManager.LoadAsync<IPRestrictionsSettings>(HttpContext);
+        
+        var settings = await settingsManager.LoadAsync<IPRestrictionsSettings>(HttpContext.GetIfModifiedSince());
+        
+        return HttpContext.TryGetFromCache(settings.LastModified) ? null : settings;
     }
 
     /// <summary>

@@ -348,8 +348,10 @@ public partial class SettingsController(MessageService messageService,
     public async Task<TenantUserQuotaSettings> GetUserQuotaSettings()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-
-        return await settingsManager.LoadAsync<TenantUserQuotaSettings>(HttpContext);
+        
+        var result = await settingsManager.LoadAsync<TenantUserQuotaSettings>(HttpContext.GetIfModifiedSince());
+        
+        return HttpContext.TryGetFromCache(result.LastModified) ? null : result;
     }
 
     /// <summary>
@@ -448,7 +450,9 @@ public partial class SettingsController(MessageService messageService,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        return await settingsManager.LoadAsync<TenantDeepLinkSettings>(HttpContext);
+        var result = await settingsManager.LoadAsync<TenantDeepLinkSettings>(HttpContext.GetIfModifiedSince());
+        
+        return HttpContext.TryGetFromCache(result.LastModified) ? null : result;
     }
 
     /// <summary>
@@ -518,32 +522,8 @@ public partial class SettingsController(MessageService messageService,
     [HttpGet("cultures")]
     public async Task<IEnumerable<string>> GetSupportedCultures()
     {        
-        var etagFromRequest = HttpContext.Request.Headers.IfNoneMatch;
         var result = coreBaseSettings.EnabledCultures.Select(r => r.Name).ToList();
-        using var md5 = MD5.Create();
-        using var memoryStream = new MemoryStream();
-                
-        foreach (var culture in result)
-        {
-            await memoryStream.WriteAsync(Encoding.UTF8.GetBytes(culture).AsMemory(0, Encoding.UTF8.GetByteCount(culture)));
-        }
-
-        var hash = await md5.ComputeHashAsync(memoryStream);
-        var hex = BitConverter.ToString(hash);
-        var etag = hex.Replace("-", "");
-        
-        //weak
-        etag = "W/" + etag;
-        if (etag == etagFromRequest)
-        {
-            HttpContext.Response.StatusCode = 304;
-            return null;
-        }
-        
-        HttpContext.Response.Headers.ETag = etag;
-        HttpContext.Response.Headers.CacheControl = "private, no-cache";
-        
-        return result;
+        return HttpContext.TryGetFromCache(await HttpContextExtension.CalculateEtagAsync(result)) ? null : result;
     }
 
     /// <summary>
@@ -659,9 +639,10 @@ public partial class SettingsController(MessageService messageService,
     [SwaggerResponse(200, "Portal logo image URL", typeof(string))]
     [HttpGet("logo")]
     public async Task<string> GetLogoAsync()
-    {
-        var result = await settingsManager.LoadAsync<TenantInfoSettings>(HttpContext);
-        return result == null ? null : await tenantInfoSettingsHelper.GetAbsoluteCompanyLogoPathAsync(result);
+    {        
+        var result = await settingsManager.LoadAsync<TenantInfoSettings>(HttpContext.GetIfModifiedSince());
+        
+        return HttpContext.TryGetFromCache(result.LastModified) ? null : await tenantInfoSettingsHelper.GetAbsoluteCompanyLogoPathAsync(result);
     }
 
     /// <summary>
@@ -721,9 +702,9 @@ public partial class SettingsController(MessageService messageService,
     [HttpGet("colortheme")]
     public async Task<CustomColorThemesSettingsDto> GetColorThemeAsync()
     {
-        var settings = await settingsManager.LoadAsync<CustomColorThemesSettings>(HttpContext);
-
-        return settings == null ? null : new CustomColorThemesSettingsDto(settings, customColorThemesSettingsHelper.Limit);
+        var settings = await settingsManager.LoadAsync<CustomColorThemesSettings>(HttpContext.GetIfModifiedSince());
+        
+        return HttpContext.TryGetFromCache(settings.LastModified) ? null : new CustomColorThemesSettingsDto(settings, customColorThemesSettingsHelper.Limit);
     }
 
     /// <summary>

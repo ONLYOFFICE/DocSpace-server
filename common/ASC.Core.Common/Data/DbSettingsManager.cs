@@ -57,10 +57,10 @@ public class SettingsManager(
         return settingsInstance.GetDefault();
     }
 
-    public async Task<T> LoadAsync<T>(HttpContext context = null) where T : class, ISettings<T>
+    public async Task<T> LoadAsync<T>(DateTime? lastModified = null) where T : class, ISettings<T>
     {
         var tenantId = tenantManager.GetCurrentTenantId();
-        return await LoadAsync<T>(tenantId, Guid.Empty, context);
+        return await LoadAsync<T>(tenantId, Guid.Empty, lastModified);
     }
     
     public async Task<T> LoadAsync<T>(Guid userId) where T : class, ISettings<T>
@@ -75,14 +75,14 @@ public class SettingsManager(
         return await LoadAsync<T>(tenantId, user.Id);
     }
 
-    public Task<T> LoadAsync<T>(int tenantId, HttpContext context = null) where T : class, ISettings<T>
+    public Task<T> LoadAsync<T>(int tenantId, DateTime? lastModified = null) where T : class, ISettings<T>
     {
-        return LoadAsync<T>(tenantId, Guid.Empty, context);
+        return LoadAsync<T>(tenantId, Guid.Empty, lastModified);
     }
 
-    public Task<T> LoadForDefaultTenantAsync<T>(HttpContext context = null) where T : class, ISettings<T>
+    public Task<T> LoadForDefaultTenantAsync<T>(DateTime? lastModified = null) where T : class, ISettings<T>
     {
-        return LoadAsync<T>(Tenant.DefaultTenant, context);
+        return LoadAsync<T>(Tenant.DefaultTenant, lastModified);
     }
 
     public Task<T> LoadForCurrentUserAsync<T>() where T : class, ISettings<T>
@@ -130,24 +130,14 @@ public class SettingsManager(
         return await SaveAsync(settings);
     }
 
-    internal async Task<T> LoadAsync<T>(int tenantId, Guid userId, HttpContext httpContext = null) where T : class, ISettings<T>
+    internal async Task<T> LoadAsync<T>(int tenantId, Guid userId, DateTime? lastModified = null) where T : class, ISettings<T>
     {
         var def = GetDefault<T>();
         var key = def.ID.ToString() + tenantId + userId;
-        DateTime? lastModified = null;
-
-        if (httpContext != null)
-        {
-            if (DateTime.TryParse(httpContext.Request.Headers.IfModifiedSince, CultureInfo.InvariantCulture, out var parsedLastModified))
-            {
-                lastModified = parsedLastModified;
-                lastModified = DateTime.SpecifyKind(lastModified.Value, DateTimeKind.Local);
-            }
-        }
-
+        
         var settings = await fusionCache.GetOrSetAsync<T>(key, async (ctx, token) =>
         {
-            if (lastModified.HasValue && ctx is { HasStaleValue: true, HasLastModified: true } && ctx.LastModified >= lastModified.Value)
+            if (lastModified.HasValue && ctx is { HasStaleValue: true, HasLastModified: true } && ctx.LastModified <= lastModified.Value)
             {
                 return ctx.NotModified();
             }
@@ -166,19 +156,6 @@ public class SettingsManager(
             return ctx.Modified(settings, lastModified: settings.LastModified);
         },
         opt => opt.SetDuration(_expirationTimeout).SetFailSafe(true));
-            
-        if (httpContext != null && settings.LastModified != DateTime.MinValue)
-        {
-            var lastModifiedStr = settings.LastModified.ToString(CultureInfo.InvariantCulture);
-            if (lastModifiedStr == httpContext.Request.Headers.IfModifiedSince)
-            {
-                httpContext.Response.StatusCode = 304;
-                return null;
-            }
-            
-            httpContext.Response.Headers.LastModified = lastModifiedStr;
-            httpContext.Response.Headers.CacheControl = "private, no-cache";
-        }
         
         return settings;
     }
