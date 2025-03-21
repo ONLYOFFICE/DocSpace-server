@@ -69,6 +69,7 @@ public class Startup : BaseWorkerStartup
 
             services.AddHostedService<ThumbnailBuilderService>();
             services.AddActivePassiveHostedService<AutoCleanTrashService>(Configuration);
+            services.AddActivePassiveHostedService<AutoDeletePersonalFolderService>(Configuration);
             services.AddActivePassiveHostedService<DeleteExpiredService>(Configuration);
             services.AddActivePassiveHostedService<CleanupLifetimeExpiredService>(Configuration);
 

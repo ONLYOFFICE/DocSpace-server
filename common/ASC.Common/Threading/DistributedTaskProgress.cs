@@ -28,10 +28,8 @@ namespace ASC.Common.Threading;
 
 /// <summary>
 /// </summary>
-[ProtoContract(IgnoreUnknownSubTypes = true)]
 public class DistributedTaskProgress : DistributedTask
 {
-    [ProtoMember(1)]
     [JsonInclude]
     private double _percentage;
 
@@ -45,12 +43,10 @@ public class DistributedTaskProgress : DistributedTask
 
     /// <summary>Specifies if the process is completed or not</summary>
     /// <type>System.Boolean, System</type>
-    [ProtoMember(2)]
     public bool IsCompleted { get; set; }
 
     /// <summary>Number of steps</summary>
     /// <type>System.Int32, System</type>
-    [ProtoMember(3)]
     protected int StepCount { get; set; }
 
     public override async Task RunJob(CancellationToken cancellationToken)

@@ -313,7 +313,7 @@ public class AuthorizationService
     if (ctx == null) return null;
 
     var signature =
-        ctx.getRequest().getAttribute(securityConfigurationProperties.getSignatureHeader());
+        ctx.getRequest().getAttribute(securityConfigurationProperties.getSignatureCookie());
     if (signature == null) return null;
 
     return (BasicSignature) signature;

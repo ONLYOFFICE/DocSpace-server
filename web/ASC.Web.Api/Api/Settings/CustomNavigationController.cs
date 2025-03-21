@@ -33,9 +33,9 @@ public class CustomNavigationController(MessageService messageService,
         SettingsManager settingsManager,
         WebItemManager webItemManager,
         StorageHelper storageHelper,
-        IMemoryCache memoryCache,
+        IFusionCache fusionCache,
         IHttpContextAccessor httpContextAccessor)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
     /// Returns a list of the custom navigation items.

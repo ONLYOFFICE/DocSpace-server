@@ -28,7 +28,9 @@ namespace ASC.Files.Core.Services.DocumentBuilderService;
 
 [Transient]
 public class RoomIndexExportTask : DocumentBuilderTask<int, RoomIndexExportTaskData>
-{
+{    
+    private const string ScriptName = "RoomIndexExport.docbuilder";
+    
     public RoomIndexExportTask()
     {
         
@@ -37,9 +39,7 @@ public class RoomIndexExportTask : DocumentBuilderTask<int, RoomIndexExportTaskD
     public RoomIndexExportTask(IServiceScopeFactory serviceProvider) : base(serviceProvider)
     {
     }
-
-    private const string ScriptName = "RoomIndexExport.docbuilder";
-
+    
     protected override async Task<DocumentBuilderInputData> GetDocumentBuilderInputDataAsync(IServiceProvider serviceProvider)
     {
         var (scriptFilePath, tempFileName, outputFileName) = await GetRoomIndexExportData(serviceProvider, _userId, _data.RoomId);

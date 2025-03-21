@@ -49,6 +49,8 @@ public class DarkThemeSettings : ISettings<DarkThemeSettings>
             Theme = DarkThemeSettingsType.System
         };
     }
+    
+    public DateTime LastModified { get; set; }
 }
 
 

@@ -933,4 +933,16 @@
   <data name="FileVersionRemoved" xml:space="preserve">
     <value>Files [{0}]. Version Deleted: {1}</value>
   </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>Developer Tools access settings changed</value>
+  </data>
+  <data name="WebhookCreated" xml:space="preserve">
+    <value>Webhook created: {0}</value>
+  </data>
+  <data name="WebhookDeleted" xml:space="preserve">
+    <value>Webhook deleted: {0}</value>
+  </data>
+  <data name="WebhookUpdated" xml:space="preserve">
+    <value>Webhook updated: {0}</value>
+  </data>
 </root>

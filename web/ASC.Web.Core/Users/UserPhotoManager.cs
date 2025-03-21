@@ -54,6 +54,8 @@ public sealed class ResizeWorkerItem : DistributedTask
     public Guid UserId { get; set; }
     public UserPhotoThumbnailSettings Settings { get; set; }
 
+    public string Key { get; set; }
+    
     public void Init(int tenantId, Guid userId, byte[] data, long maxFileSize, IMagickGeometry size, IDataStore dataStore, UserPhotoThumbnailSettings settings)
     {
         TenantId = tenantId;
@@ -638,7 +640,7 @@ public class UserPhotoManager
         resizeTask.Init(_tenantManager.GetCurrentTenantId(), userID, data, maxFileSize, size, await GetDataStoreAsync(), await _settingsManager.LoadAsync<UserPhotoThumbnailSettings>(userID));
         
         var key = $"{userID}{size}";
-        resizeTask["key"] = key;
+        resizeTask.Key = key;
 
         if (now)
         {
@@ -843,7 +845,7 @@ public class UserPhotoResizeManager(IDistributedTaskQueueFactory queueFactory)
 
     public async Task EnqueueTaskAsync(string key, ResizeWorkerItem resizeTask)
     {
-        if ((await _resizeQueue.GetAllTasks()).All(r => r["key"] != key))
+        if ((await _resizeQueue.GetAllTasks()).All(r => r.Key != key))
         {
             //Add
             await _resizeQueue.EnqueueTask(resizeTask);

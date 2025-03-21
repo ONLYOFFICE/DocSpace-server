@@ -46,4 +46,6 @@ public class EmailActivationSettings : ISettings<EmailActivationSettings>
     {
         return new EmailActivationSettings { Show = true };
     }
+    
+    public DateTime LastModified { get; set; }
 }

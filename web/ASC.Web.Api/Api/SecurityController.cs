@@ -102,7 +102,13 @@ public class SecurityController(PermissionContext permissionContext,
 
         DemandBaseAuditPermission();
 
-        return (await auditEventsRepository.GetByFilterAsync(startIndex: 0, limit: 20)).Select(x => new AuditEventDto(x, auditActionMapper, apiDateTimeHelper));
+        var settings = await settingsManager.LoadAsync<TenantAuditSettings>();
+
+        var to = DateTime.UtcNow;
+        var from = to.Subtract(TimeSpan.FromDays(settings.AuditTrailLifeTime));
+
+        return (await auditEventsRepository.GetByFilterAsync(startIndex: 0, limit: 20, from: from, to: to))
+            .Select(x => new AuditEventDto(x, auditActionMapper, apiDateTimeHelper));
     }
 
     /// <summary>
@@ -405,7 +411,14 @@ public class SecurityController(PermissionContext permissionContext,
     public async Task<CspDto> GetCsp()
     {
         //await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        var settings = await cspSettingsHelper.LoadAsync();
+        
+        var settings = await cspSettingsHelper.LoadAsync(HttpContext.GetIfModifiedSince());
+
+        if (HttpContext.TryGetFromCache(settings.LastModified))
+        {
+            return null;
+        }
+        
         return new CspDto
         {
             Domains = settings.Domains ?? [],
@@ -445,7 +458,7 @@ public class SecurityController(PermissionContext permissionContext,
                 new Claim("is_guest", isGuest.ToString().ToLower()),
                 new Claim("is_public", "true") // TODO: check OAuth enable for non-admin users
             },
-            expires: DateTime.Now.AddHours(1),
+            expires: DateTime.Now.AddDays(1),
             signingCredentials: creds);
 
         return new JwtSecurityTokenHandler().WriteToken(token);

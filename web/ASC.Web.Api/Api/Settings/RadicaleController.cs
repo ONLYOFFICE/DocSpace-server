@@ -37,10 +37,10 @@ public class RadicaleController(RadicaleClient radicaleClient,
         AuthContext authContext,
         WebItemSecurity webItemSecurity,
         ApiContext apiContext,
-        IMemoryCache memoryCache,
+        IFusionCache fusionCache,
         WebItemManager webItemManager,
         IHttpContextAccessor httpContextAccessor)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
     /// Creates a CardDav address book for a user with all portal users and returns a link to this address book.

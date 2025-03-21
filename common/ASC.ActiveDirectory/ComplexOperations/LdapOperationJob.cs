@@ -35,27 +35,15 @@ public class LdapOperationJob : DistributedTaskProgress
     private string _culture;
 
     private LdapSettings _ldapSettings;
-    private string _source;
-    private string _jobStatus;
-    private string _error;
-    private string _warning;
+    public string Source { get; set; }
+    public string Result { get; set; }
+    public string Error { get; set; }
+    public string Warning { get; set; }
+    public int TenantId { get; set; }
+    public bool Finished { get; set; }
+    public string CertRequest { get; set; }
 
-    private int? _tenantId;
-
-    public int TenantId
-    {
-        get
-        {
-            return _tenantId ?? this[nameof(_tenantId)];
-        }
-        private set
-        {
-            _tenantId = value;
-            this[nameof(_tenantId)] = value;
-        }
-    }
-
-    private LdapOperationType _operationType;
+    public LdapOperationType OperationType { get; set; }
     private LdapLocalization _resource;
 
     private SettingsManager _settingsManager;
@@ -106,17 +94,17 @@ public class LdapOperationJob : DistributedTaskProgress
 
         TenantId = tenant.Id;
 
-        _operationType = operationType;
+        OperationType = operationType;
 
         _culture = CultureInfo.CurrentCulture.Name;
 
         _ldapSettings = settings;
 
-        _source = "";
+        Source = "";
         Percentage = 0;
-        _jobStatus = "";
-        _error = "";
-        _warning = "";
+        Result = "";
+        Error = "";
+        Warning = "";
 
         _resource = resource ?? new LdapLocalization();
         _ldapUserManager.Init(_resource);
@@ -157,17 +145,17 @@ public class LdapOperationJob : DistributedTaskProgress
 
             if (_ldapSettings == null)
             {
-                _error = _resource.LdapSettingsErrorCantGetLdapSettings;
+                Error = _resource.LdapSettingsErrorCantGetLdapSettings;
                 _logger.ErrorSaveDefaultLdapSettings();
                 return;
             }
 
-            switch (_operationType)
+            switch (OperationType)
             {
                 case LdapOperationType.Save:
                 case LdapOperationType.SaveTest:
 
-                    _logger.InfoStartOperation(Enum.GetName(_operationType));
+                    _logger.InfoStartOperation(Enum.GetName(OperationType));
 
                     await SetProgress(1, _resource.LdapSettingsStatusCheckingLdapSettings);
 
@@ -175,9 +163,9 @@ public class LdapOperationJob : DistributedTaskProgress
 
                     await PrepareSettingsAsync(_ldapSettings);
 
-                    if (!string.IsNullOrEmpty(_error))
+                    if (!string.IsNullOrEmpty(Error))
                     {
-                        _logger.DebugPrepareSettingsError(_error);
+                        _logger.DebugPrepareSettingsError(Error);
                         return;
                     }
 
@@ -195,12 +183,12 @@ public class LdapOperationJob : DistributedTaskProgress
                         {
                             if (result == LdapSettingsStatus.CertificateRequest)
                             {
-                                this[LdapTaskProperty.CERT_REQUEST] = _novellLdapSettingsChecker.CertificateConfirmRequest;
+                                CertRequest = Convert.ToString(_novellLdapSettingsChecker.CertificateConfirmRequest);
                             }
 
-                            _error = GetError(result);
+                            Error = GetError(result);
 
-                            _logger.DebugCheckSettingsError(_error);
+                            _logger.DebugCheckSettingsError(Error);
 
                             return;
                         }
@@ -209,7 +197,7 @@ public class LdapOperationJob : DistributedTaskProgress
                     break;
                 case LdapOperationType.Sync:
                 case LdapOperationType.SyncTest:
-                    _logger.InfoStartOperation(Enum.GetName(_operationType));
+                    _logger.InfoStartOperation(Enum.GetName(OperationType));
 
                     _novellLdapUserImporter.Init(_ldapSettings, _resource);
                     break;
@@ -221,8 +209,8 @@ public class LdapOperationJob : DistributedTaskProgress
         }
         catch (AuthorizingException authError)
         {
-            _error = _resource.ErrorAccessDenied;
-            _logger.ErrorAuthorizing(_error, new SecurityException(_error, authError));
+            Error = _resource.ErrorAccessDenied;
+            _logger.ErrorAuthorizing(Error, new SecurityException(Error, authError));
         }
         catch (AggregateException ae)
         {
@@ -230,25 +218,25 @@ public class LdapOperationJob : DistributedTaskProgress
         }
         catch (TenantQuotaException e)
         {
-            _error = _resource.LdapSettingsTenantQuotaSettled;
+            Error = _resource.LdapSettingsTenantQuotaSettled;
             _logger.ErrorTenantQuota(e);
         }
         catch (FormatException e)
         {
-            _error = _resource.LdapSettingsErrorCantCreateUsers;
+            Error = _resource.LdapSettingsErrorCantCreateUsers;
             _logger.ErrorFormatException(e);
         }
         catch (Exception e)
         {
-            _error = _resource.LdapSettingsInternalServerError;
+            Error = _resource.LdapSettingsInternalServerError;
             _logger.ErrorInternal(e);
         }
         finally
         {
             try
             {
-                this[LdapTaskProperty.FINISHED] = true;
-                await PublishTaskInfo();
+                Finished = true;
+                await PublishChanges();
                 _securityContext.Logout();
             }
             catch (Exception ex)
@@ -262,7 +250,7 @@ public class LdapOperationJob : DistributedTaskProgress
     {
         try
         {
-            if (_operationType == LdapOperationType.Save)
+            if (OperationType == LdapOperationType.Save)
             {
                 await SetProgress(10, _resource.LdapSettingsStatusSavingSettings);
 
@@ -271,7 +259,7 @@ public class LdapOperationJob : DistributedTaskProgress
                 if (!await _settingsManager.SaveAsync(_ldapSettings))
                 {
                     _logger.ErrorSaveLdapSettings();
-                    _error = _resource.LdapSettingsErrorCantSaveLdapSettings;
+                    Error = _resource.LdapSettingsErrorCantSaveLdapSettings;
                     return;
                 }
             }
@@ -301,7 +289,7 @@ public class LdapOperationJob : DistributedTaskProgress
 
                 await SyncLDAPAsync();
 
-                if (!string.IsNullOrEmpty(_error))
+                if (!string.IsNullOrEmpty(Error))
                 {
                     return;
                 }
@@ -330,31 +318,31 @@ public class LdapOperationJob : DistributedTaskProgress
         {
             _logger.ErrorCheckSettings(
                 _ldapSettings.AcceptCertificate, _ldapSettings.AcceptCertificateHash, ex);
-            _error = _resource.LdapSettingsStatusCertificateVerification;
+            Error = _resource.LdapSettingsStatusCertificateVerification;
 
             //TaskInfo.SetProperty(CERT_REQUEST, ex.CertificateConfirmRequest);
         }
         catch (TenantQuotaException e)
         {
             _logger.ErrorTenantQuota(e);
-            _error = _resource.LdapSettingsTenantQuotaSettled;
+            Error = _resource.LdapSettingsTenantQuotaSettled;
         }
         catch (FormatException e)
         {
             _logger.ErrorFormatException(e);
-            _error = _resource.LdapSettingsErrorCantCreateUsers;
+            Error = _resource.LdapSettingsErrorCantCreateUsers;
         }
         catch (Exception e)
         {
             _logger.ErrorInternal(e);
-            _error = _resource.LdapSettingsInternalServerError;
+            Error = _resource.LdapSettingsInternalServerError;
         }
         finally
         {
             await SetProgress(99, _resource.LdapSettingsStatusDisconnecting, "");
         }
 
-        await SetProgress(100, _operationType is LdapOperationType.SaveTest or LdapOperationType.SyncTest
+        await SetProgress(100, OperationType is LdapOperationType.SaveTest or LdapOperationType.SyncTest
             ? JsonSerializer.Serialize(_ldapChanges)
             : "", "");
     }
@@ -378,7 +366,7 @@ public class LdapOperationJob : DistributedTaskProgress
         {
             await SetProgress(Convert.ToInt32(percentage), currentSource: $"({++index}/{count}): {_userFormatter.GetUserName(existingLDAPUser)}");
 
-            switch (_operationType)
+            switch (OperationType)
             {
                 case LdapOperationType.Save:
                 case LdapOperationType.Sync:
@@ -517,7 +505,7 @@ public class LdapOperationJob : DistributedTaskProgress
 
         if (currentUserRights.Count > 0)
         {
-            _warning = _resource.LdapSettingsErrorLostRights;
+            Warning = _resource.LdapSettingsErrorLostRights;
         }
 
         await _settingsManager.SaveAsync(_ldapSettings);
@@ -648,7 +636,7 @@ public class LdapOperationJob : DistributedTaskProgress
 
         if (ldapUsers.Count == 0)
         {
-            _error = _resource.LdapSettingsErrorUsersNotFound;
+            Error = _resource.LdapSettingsErrorUsersNotFound;
             return;
         }
 
@@ -659,7 +647,7 @@ public class LdapOperationJob : DistributedTaskProgress
         ldapUsers = await RemoveOldDbUsersAsync(ldapUsers);
 
         await SetProgress(30,
-            _operationType is LdapOperationType.Save or LdapOperationType.SaveTest
+            OperationType is LdapOperationType.Save or LdapOperationType.SaveTest
                 ? _resource.LdapSettingsStatusSavingUsers
                 : _resource.LdapSettingsStatusSyncingUsers,
             "");
@@ -679,7 +667,7 @@ public class LdapOperationJob : DistributedTaskProgress
 
         if (ldapGroups.Count == 0)
         {
-            _error = _resource.LdapSettingsErrorGroupsNotFound;
+            Error = _resource.LdapSettingsErrorGroupsNotFound;
             return;
         }
 
@@ -691,14 +679,14 @@ public class LdapOperationJob : DistributedTaskProgress
 
         if (uniqueLdapGroupUsers.Count == 0)
         {
-            _error = _resource.LdapSettingsErrorUsersNotFound;
+            Error = _resource.LdapSettingsErrorUsersNotFound;
             return;
         }
 
         _logger.DebugGetGroupsUsers(_novellLdapUserImporter.AllDomainUsers.Count);
 
         await SetProgress(30,
-            _operationType is LdapOperationType.Save or LdapOperationType.SaveTest
+            OperationType is LdapOperationType.Save or LdapOperationType.SaveTest
                 ? _resource.LdapSettingsStatusSavingUsers
                 : _resource.LdapSettingsStatusSyncingUsers,
             "");
@@ -759,7 +747,7 @@ public class LdapOperationJob : DistributedTaskProgress
     {
         if (ldapGroupUsers.Count == 0) // Skip empty groups
         {
-            if (_operationType is LdapOperationType.SaveTest or LdapOperationType.SyncTest)
+            if (OperationType is LdapOperationType.SaveTest or LdapOperationType.SyncTest)
             {
                 _ldapChanges.SetSkipGroupChange(ldapGroup);
             }
@@ -773,7 +761,7 @@ public class LdapOperationJob : DistributedTaskProgress
 
         if (groupMembersToAdd.Count != 0)
         {
-            switch (_operationType)
+            switch (OperationType)
             {
                 case LdapOperationType.Save:
                 case LdapOperationType.Sync:
@@ -801,7 +789,7 @@ public class LdapOperationJob : DistributedTaskProgress
         }
         else
         {
-            if (_operationType is LdapOperationType.SaveTest or LdapOperationType.SyncTest)
+            if (OperationType is LdapOperationType.SaveTest or LdapOperationType.SyncTest)
             {
                 _ldapChanges.SetSkipGroupChange(ldapGroup);
             }
@@ -832,7 +820,7 @@ public class LdapOperationJob : DistributedTaskProgress
             .SelectAwait(async q => await SearchDbUserBySidAsync(q.Sid)).Where(q => !Equals(q, Core.Users.Constants.LostUser)).ToListAsync();
 
 
-        switch (_operationType)
+        switch (OperationType)
         {
             case LdapOperationType.Save:
             case LdapOperationType.Sync:
@@ -934,7 +922,7 @@ public class LdapOperationJob : DistributedTaskProgress
         {
             await SetProgress(Convert.ToInt32(percentage), currentSource: $"({++index}/{count}): {_userFormatter.GetUserName(userInfo)}");
 
-            switch (_operationType)
+            switch (OperationType)
             {
                 case LdapOperationType.Save:
                 case LdapOperationType.Sync:
@@ -989,7 +977,7 @@ public class LdapOperationJob : DistributedTaskProgress
                 currentSource:
                 $"({++index}/{count}): {_userFormatter.GetUserName(removedUser)}");
 
-            switch (_operationType)
+            switch (OperationType)
             {
                 case LdapOperationType.Save:
                 case LdapOperationType.Sync:
@@ -1000,7 +988,7 @@ public class LdapOperationJob : DistributedTaskProgress
                     }
                     else
                     {
-                        _warning = _resource.LdapSettingsErrorRemovedYourself;
+                        Warning = _resource.LdapSettingsErrorRemovedYourself;
                         _logger.DebugRemoveOldDbUsersAttemptingExcludeYourself(removedUser.Id);
                     }
 
@@ -1054,7 +1042,7 @@ public class LdapOperationJob : DistributedTaskProgress
             await SetProgress(Convert.ToInt32(percentage),
                 currentSource: $"({++index}/{count}): {groupInfo.Name}");
 
-            switch (_operationType)
+            switch (OperationType)
             {
                 case LdapOperationType.Save:
                 case LdapOperationType.Sync:
@@ -1095,7 +1083,7 @@ public class LdapOperationJob : DistributedTaskProgress
                 $"({++index}/{count}): {_userFormatter.GetUserName(ldapGroupUser)}");
 
             UserInfo user;
-            switch (_operationType)
+            switch (OperationType)
             {
                 case LdapOperationType.Save:
                 case LdapOperationType.Sync:
@@ -1171,42 +1159,23 @@ public class LdapOperationJob : DistributedTaskProgress
 
         if (currentStatus != null)
         {
-            _jobStatus = currentStatus;
+            Result = currentStatus;
         }
 
         if (currentSource != null)
         {
-            _source = currentSource;
+            Source = currentSource;
         }
 
-        _logger.InfoProgress(Percentage, _jobStatus, _source);
+        _logger.InfoProgress(Percentage, Result, Source);
 
-        await PublishTaskInfo();
-    }
-
-    private async Task PublishTaskInfo()
-    {
-        FillDistributedTask();
         await PublishChanges();
     }
 
     private void InitDisturbedTask()
     {
-        this[LdapTaskProperty.FINISHED] = false;
-        this[LdapTaskProperty.CERT_REQUEST] = null;
-        FillDistributedTask();
-    }
-
-    private void FillDistributedTask()
-    {
-        this[LdapTaskProperty.SOURCE] = _source;
-        this[LdapTaskProperty.OPERATION_TYPE] = _operationType;
-        this[LdapTaskProperty.OWNER] = _tenantId;
-        this[LdapTaskProperty.PROGRESS] = Percentage < 100 ? Percentage : 100;
-        this[LdapTaskProperty.RESULT] = _jobStatus;
-        this[LdapTaskProperty.ERROR] = _error;
-        this[LdapTaskProperty.WARNING] = _warning;
-        //SetProperty(PROCESSED, successProcessed);
+        Finished = false;
+        CertRequest = null;
     }
 
     private async Task PrepareSettingsAsync(LdapSettings settings)
@@ -1214,7 +1183,7 @@ public class LdapOperationJob : DistributedTaskProgress
         if (settings == null)
         {
             _logger.ErrorWrongLdapSettings();
-            _error = _resource.LdapSettingsErrorCantGetLdapSettings;
+            Error = _resource.LdapSettingsErrorCantGetLdapSettings;
             return;
         }
 
@@ -1231,7 +1200,7 @@ public class LdapOperationJob : DistributedTaskProgress
         else
         {
             _logger.ErrorServerIsNullOrEmpty();
-            _error = _resource.LdapSettingsErrorCantGetLdapSettings;
+            Error = _resource.LdapSettingsErrorCantGetLdapSettings;
             return;
         }
 
@@ -1247,7 +1216,7 @@ public class LdapOperationJob : DistributedTaskProgress
         else
         {
             _logger.ErrorUserDnIsNullOrEmpty();
-            _error = _resource.LdapSettingsErrorCantGetLdapSettings;
+            Error = _resource.LdapSettingsErrorCantGetLdapSettings;
             return;
         }
 
@@ -1258,7 +1227,7 @@ public class LdapOperationJob : DistributedTaskProgress
         else
         {
             _logger.ErrorLoginAttributeIsNullOrEmpty();
-            _error = _resource.LdapSettingsErrorCantGetLdapSettings;
+            Error = _resource.LdapSettingsErrorCantGetLdapSettings;
             return;
         }
 
@@ -1301,7 +1270,7 @@ public class LdapOperationJob : DistributedTaskProgress
             else
             {
                 _logger.ErrorGroupDnIsNullOrEmpty();
-                _error = _resource.LdapSettingsErrorCantGetLdapSettings;
+                Error = _resource.LdapSettingsErrorCantGetLdapSettings;
                 return;
             }
 
@@ -1317,7 +1286,7 @@ public class LdapOperationJob : DistributedTaskProgress
             else
             {
                 _logger.ErrorGroupAttributeIsNullOrEmpty();
-                _error = _resource.LdapSettingsErrorCantGetLdapSettings;
+                Error = _resource.LdapSettingsErrorCantGetLdapSettings;
                 return;
             }
 
@@ -1328,7 +1297,7 @@ public class LdapOperationJob : DistributedTaskProgress
             else
             {
                 _logger.ErrorUserAttributeIsNullOrEmpty();
-                _error = _resource.LdapSettingsErrorCantGetLdapSettings;
+                Error = _resource.LdapSettingsErrorCantGetLdapSettings;
                 return;
             }
         }
@@ -1346,7 +1315,7 @@ public class LdapOperationJob : DistributedTaskProgress
         else
         {
             _logger.ErrorloginIsNullOrEmpty();
-            _error = _resource.LdapSettingsErrorCantGetLdapSettings;
+            Error = _resource.LdapSettingsErrorCantGetLdapSettings;
             return;
         }
 
@@ -1359,14 +1328,14 @@ public class LdapOperationJob : DistributedTaskProgress
                 if (settings.PasswordBytes == null)
                 {
                     _logger.ErrorPasswordBytesIsNullOrEmpty();
-                    _error = _resource.LdapSettingsErrorCantGetLdapSettings;
+                    Error = _resource.LdapSettingsErrorCantGetLdapSettings;
                     return;
                 }
             }
             else
             {
                 _logger.ErrorPasswordIsNullOrEmpty();
-                _error = _resource.LdapSettingsErrorCantGetLdapSettings;
+                Error = _resource.LdapSettingsErrorCantGetLdapSettings;
                 return;
             }
         }

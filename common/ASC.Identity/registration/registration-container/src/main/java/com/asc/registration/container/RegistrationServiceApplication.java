@@ -75,16 +75,16 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @SecuritySchemes({
   @SecurityScheme(
       name = "ascAuthAdmin",
-      paramName = "X-Signature",
+      paramName = "x-signature",
       description = "ASC JWT Signature for Admin Authorization",
       type = SecuritySchemeType.APIKEY,
-      in = SecuritySchemeIn.HEADER),
+      in = SecuritySchemeIn.COOKIE),
   @SecurityScheme(
       name = "ascAuthUser",
-      paramName = "X-Signature",
+      paramName = "x-signature",
       description = "ASC JWT Signature for User Authorization",
       type = SecuritySchemeType.APIKEY,
-      in = SecuritySchemeIn.HEADER)
+      in = SecuritySchemeIn.COOKIE)
 })
 public class RegistrationServiceApplication {
 

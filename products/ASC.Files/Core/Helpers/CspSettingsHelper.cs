@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Microsoft.Extensions.Caching.Distributed;
+
 namespace ASC.Web.Api.Core;
 
 [Scope]
@@ -35,6 +37,7 @@ public class CspSettingsHelper(
     GlobalStore globalStore,
     CoreBaseSettings coreBaseSettings,
     IFusionCache hybridCache,
+    IDistributedCache distributedCache,
     IHttpContextAccessor httpContextAccessor,
     IConfiguration configuration)
 {
@@ -83,9 +86,25 @@ public class CspSettingsHelper(
                 headerKeys.UnionWith(keys);
             }
             else
-            {
-                var domainsValue = await hybridCache.GetOrDefaultAsync<string>(domainsKey);
+            {                    
+                string domainsValue;
 
+                var oldScheme = false;
+                try
+                {
+                    domainsValue = await hybridCache.GetOrDefaultAsync<string>(domainsKey);
+                }
+                catch (FusionCacheSerializationException)
+                {
+                    domainsValue = await distributedCache.GetStringAsync(domainsKey);
+                    oldScheme = true;
+                }
+
+                if (oldScheme)
+                {
+                    await hybridCache.SetAsync(domainsKey, domainsValue);
+                }
+                
                 if (!string.IsNullOrEmpty(domainsValue))
                 {
                     headerKeys.UnionWith(domainsValue.Split(';'));
@@ -115,15 +134,26 @@ public class CspSettingsHelper(
         return headerValue;
     }
 
-    public async Task<CspSettings> LoadAsync()
+    public async Task<CspSettings> LoadAsync(DateTime? lastModified = null)
     {
-        return await settingsManager.LoadAsync<CspSettings>();
+        return await settingsManager.LoadAsync<CspSettings>(lastModified);
     }
 
     public async Task RenameDomain(string oldDomain, string newDomain)
     {
         var oldKey = GetKey(oldDomain);
-        var val = await hybridCache.GetOrDefaultAsync<string>(oldKey);
+        
+        string val;
+                
+        try
+        {
+            val = await hybridCache.GetOrDefaultAsync<string>(oldKey);
+        }
+        catch (FusionCacheSerializationException)
+        {
+            val = await distributedCache.GetStringAsync(oldKey);
+        }
+        
         if (!string.IsNullOrEmpty(val))
         {
             await hybridCache.RemoveAsync(oldKey);
@@ -148,7 +178,16 @@ public class CspSettingsHelper(
 
         var domain = tenantWithoutAlias.GetTenantDomain(coreSettings);
 
-        var val = await hybridCache.GetOrDefaultAsync<string>(GetKey(domain));
+        string val;
+                
+        try
+        {
+            val = await hybridCache.GetOrDefaultAsync<string>(GetKey(domain));
+        }
+        catch (FusionCacheSerializationException)
+        {
+            val = await distributedCache.GetStringAsync(GetKey(domain));
+        }
         
         await hybridCache.SetAsync(GetKey(baseDomain), val);
     }
@@ -186,13 +225,15 @@ public class CspSettingsHelper(
 
         options.Add(defaultOptions);
 
-        if (Uri.IsWellFormedUriString(filesLinkUtility.GetDocServiceUrl(), UriKind.Absolute))
+        var docServiceUrl = filesLinkUtility.GetDocServiceUrl();
+        
+        if (Uri.IsWellFormedUriString(docServiceUrl, UriKind.Absolute))
         {
             options.Add(new CspOptions
             {
-                Script = [filesLinkUtility.GetDocServiceUrl()],
-                Frame = [filesLinkUtility.GetDocServiceUrl()],
-                Connect = [filesLinkUtility.GetDocServiceUrl()]
+                Script = [docServiceUrl],
+                Frame = [docServiceUrl],
+                Connect = [docServiceUrl]
             });
         }
 

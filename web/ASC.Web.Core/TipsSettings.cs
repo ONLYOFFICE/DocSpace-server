@@ -45,4 +45,6 @@ public class TipsSettings : ISettings<TipsSettings>
     {
         return new TipsSettings { Show = true };
     }
+    
+    public DateTime LastModified { get; set; }
 }

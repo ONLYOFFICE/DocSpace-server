@@ -32,6 +32,7 @@ import com.asc.authorization.application.exception.authentication.Authentication
 import com.asc.authorization.application.security.authentication.BasicSignature;
 import com.asc.authorization.application.security.authentication.TenantAuthority;
 import com.asc.authorization.application.security.oauth.error.AuthenticationError;
+import com.asc.authorization.application.security.oauth.service.GrpcRegisteredClientService;
 import com.asc.authorization.application.security.service.SignatureService;
 import com.asc.common.application.proto.ClientResponse;
 import com.asc.common.core.domain.value.enums.AuditCode;
@@ -39,15 +40,15 @@ import com.asc.common.service.ports.output.message.publisher.AuditMessagePublish
 import com.asc.common.service.transfer.message.AuditMessage;
 import com.asc.common.utilities.HttpUtils;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
-import io.grpc.Deadline;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -74,14 +75,9 @@ public class SignatureAuthenticationProvider implements AuthenticationProvider {
   @Value("${spring.application.name}")
   private String serviceName;
 
-  /** gRPC client for interacting with the Client Registration Service. */
-  @GrpcClient("registrationService")
-  private com.asc.common.application.proto.ClientRegistrationServiceGrpc
-          .ClientRegistrationServiceBlockingStub
-      registrationService;
-
   private final HttpUtils httpUtils;
   private final SignatureService signatureService;
+  private final GrpcRegisteredClientService registeredClientService;
   private final AuditMessagePublisher auditMessagePublisher;
   private final SecurityConfigurationProperties configurationProperties;
 
@@ -120,15 +116,19 @@ public class SignatureAuthenticationProvider implements AuthenticationProvider {
           AuthenticationError.SOMETHING_WENT_WRONG_ERROR,
           "Authentication failed due to missing client ID in principal");
 
-    var token = request.getHeader(configurationProperties.getSignatureHeader());
-    if (token == null || token.isBlank())
+    var token =
+        Arrays.stream(Optional.ofNullable(request.getCookies()).orElse(new Cookie[0]))
+            .filter(c -> c.getName().equalsIgnoreCase(configurationProperties.getSignatureCookie()))
+            .findFirst()
+            .orElse(null);
+    if (token == null || token.getValue().isBlank())
       throw new AuthenticationProcessingException(
           AuthenticationError.MISSING_ASC_SIGNATURE,
           "Authentication failed due to missing asc signature");
 
     try (var ignored = MDC.putCloseable("client_id", clientId)) {
       var clientFuture = requestClient(clientId);
-      var signature = signatureService.validate(token, BasicSignature.class);
+      var signature = signatureService.validate(token.getValue(), BasicSignature.class);
       var client = clientFuture.get();
 
       validateClient(client);
@@ -152,12 +152,7 @@ public class SignatureAuthenticationProvider implements AuthenticationProvider {
     return CompletableFuture.supplyAsync(
         () -> {
           try {
-            return registrationService
-                .withDeadline(Deadline.after(1100, TimeUnit.MILLISECONDS))
-                .getClient(
-                    com.asc.common.application.proto.GetClientRequest.newBuilder()
-                        .setClientId(clientId)
-                        .build());
+            return registeredClientService.getClient(clientId);
           } catch (Exception e) {
             return null;
           }
@@ -193,7 +188,7 @@ public class SignatureAuthenticationProvider implements AuthenticationProvider {
    * @param signature the {@link BasicSignature} object containing user and tenant details.
    */
   private void setRequestAttributes(HttpServletRequest request, BasicSignature signature) {
-    request.setAttribute(configurationProperties.getSignatureHeader(), signature);
+    request.setAttribute(configurationProperties.getSignatureCookie(), signature);
   }
 
   /**

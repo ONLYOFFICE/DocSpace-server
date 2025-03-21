@@ -29,7 +29,6 @@ using ASC.Api.Core.Cors;
 using ASC.Api.Core.Cors.Enums;
 using ASC.Api.Core.Cors.Middlewares;
 using ASC.Common.Mapping;
-using ASC.Core.Notify.Socket;
 using ASC.MessagingSystem;
 using Flurl.Util;
 using IPNetwork = Microsoft.AspNetCore.HttpOverrides.IPNetwork;
@@ -46,8 +45,8 @@ public abstract class BaseStartup
     private static readonly JsonSerializerOptions _serializerOptions = new() { PropertyNameCaseInsensitive = true };
 
     protected bool AddAndUseSession { get; }
+
     protected DIHelper DIHelper { get; }
-    protected bool WebhooksEnabled { get; init; }
 
     protected bool OpenApiEnabled { get; init; }
 
@@ -78,6 +77,15 @@ public abstract class BaseStartup
 
         services.AddHttpClient();
         services.AddHttpClient("customHttpClient", _ => { }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
+        services.AddHttpClient("defaultHttpClientSslIgnore", _ => { })
+                .ConfigurePrimaryHttpMessageHandler(_ =>
+                {
+                    return new HttpClientHandler
+                    {
+                        ServerCertificateCustomValidationCallback = (_, _, _, _) => true
+                    };
+                });
+
 
         services.AddExceptionHandler<CustomExceptionHandler>();
         services.AddProblemDetails();
@@ -406,7 +414,6 @@ public abstract class BaseStartup
             config.Filters.Add(new TypeFilterAttribute(typeof(IpSecurityFilter)));
             config.Filters.Add(new TypeFilterAttribute(typeof(ProductSecurityFilter)));
             config.Filters.Add(new CustomResponseFilterAttribute());
-            config.Filters.Add(new TypeFilterAttribute(typeof(WebhooksGlobalFilterAttribute)));
         });
 
         if (OpenApiEnabled)
@@ -557,7 +564,7 @@ public abstract class BaseStartup
 
         app.UseEndpoints(endpoints =>
         {
-            endpoints.MapCustomAsync(WebhooksEnabled, app.ApplicationServices).Wait();
+            endpoints.MapCustomAsync();
 
             endpoints.MapHealthChecks("/health", new HealthCheckOptions { Predicate = _ => true, ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse }).ShortCircuit();
 

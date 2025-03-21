@@ -40,4 +40,6 @@ public class StudioTrustedDomainSettings : ISettings<StudioTrustedDomainSettings
     {
         return new StudioTrustedDomainSettings { InviteAsUsers = true };
     }
+    
+    public DateTime LastModified { get; set; }
 }

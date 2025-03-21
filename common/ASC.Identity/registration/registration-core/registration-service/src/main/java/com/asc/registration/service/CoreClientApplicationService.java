@@ -186,8 +186,9 @@ public class CoreClientApplicationService implements ClientApplicationService {
    *
    * @param audit The audit details of the operation, including the user performing it.
    * @param command The command containing the tenant ID and client ID of the client to be deleted.
+   * @return the result of the delete operation, the number of rows affected.
    */
-  public void deleteClient(Audit audit, Role role, DeleteTenantClientCommand command) {
-    clientUpdateCommandHandler.deleteClient(audit, role, command);
+  public int deleteClient(Audit audit, Role role, DeleteTenantClientCommand command) {
+    return clientUpdateCommandHandler.deleteClient(audit, role, command);
   }
 }

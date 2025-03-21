@@ -109,6 +109,8 @@ public class CompanyWhiteLabelSettings : ISettings<CompanyWhiteLabelSettings>
 
         return result;
     }
+    
+    public DateTime LastModified { get; set; }
 
     #endregion
 }
