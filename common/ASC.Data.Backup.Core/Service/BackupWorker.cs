@@ -157,21 +157,21 @@ public class BackupWorker(
 
     public async Task CancelBackupAsync(int tenantId)
     {
-        var tasks = (await _progressQueue.GetAllTasks<BackupProgressItem>()).Where(t => t.TenantId == tenantId && t.BackupProgressItemType == BackupProgressItemType.Backup);
+        var tasks = (await _backupProgressQueue.GetAllTasks()).Where(t => t.TenantId == tenantId && t.BackupProgressItemType == BackupProgressItemType.Backup);
 
         foreach (var t in tasks)
         {
-            await _progressQueue.DequeueTask(t.Id);
+            await _backupProgressQueue.DequeueTask(t.Id);
         }
     }
 
     public async Task CancelRestoreAsync(int tenantId)
     {
-        var tasks = (await _progressQueue.GetAllTasks<RestoreProgressItem>()).Where(t => (t.TenantId == tenantId || t.NewTenantId == tenantId) && t.BackupProgressItemType == BackupProgressItemType.Restore);
+        var tasks = (await _restoreProgressQueue.GetAllTasks()).Where(t => (t.TenantId == tenantId || t.NewTenantId == tenantId) && t.BackupProgressItemType == BackupProgressItemType.Restore);
 
         foreach (var t in tasks)
         {
-            await _progressQueue.DequeueTask(t.Id);
+            await _restoreProgressQueue.DequeueTask(t.Id);
         }
     }
 
