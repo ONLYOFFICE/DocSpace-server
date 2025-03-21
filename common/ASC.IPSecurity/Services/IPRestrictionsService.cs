@@ -26,54 +26,51 @@
 
 namespace ASC.IPSecurity;
 
-[Singleton]
-public class IPRestrictionsServiceCache
-{
-    public ICache Cache { get; set; }
-
-    private const string CacheKey = "iprestrictions";
-
-    internal readonly ICacheNotify<IPRestrictionItem> Notify;
-
-    public IPRestrictionsServiceCache(ICacheNotify<IPRestrictionItem> notify, ICache cache)
-    {
-        Cache = cache;
-        notify.Subscribe(r => Cache.Remove(GetCacheKey(r.TenantId)), CacheNotifyAction.InsertOrUpdate);
-        Notify = notify;
-    }
-
-    public static string GetCacheKey(int tenant)
-    {
-        return CacheKey + tenant;
-    }
-}
-
 [Scope]
-public class IPRestrictionsService(IPRestrictionsRepository iPRestrictionsRepository,
-    IPRestrictionsServiceCache iPRestrictionsServiceCache)
+public class IPRestrictionsService(IPRestrictionsRepository iPRestrictionsRepository, IFusionCache fusionCache)
 {
-    private readonly ICache _cache = iPRestrictionsServiceCache.Cache;
-    private readonly ICacheNotify<IPRestrictionItem> _notify = iPRestrictionsServiceCache.Notify;
-    private static readonly TimeSpan _timeout = TimeSpan.FromMinutes(5);
+    private const string CacheKey = "iprestrictions";
+    private static readonly TimeSpan _timeout = TimeSpan.FromSeconds(5);
 
-    public async Task<IEnumerable<IPRestriction>> GetAsync(int tenant)
+    public async Task<List<IPRestriction>> GetAsync(int tenant, string etagFromRequest = null)
     {
-        var key = IPRestrictionsServiceCache.GetCacheKey(tenant);
-        var restrictions = _cache.Get<List<IPRestriction>>(key);
-        if (restrictions == null)
-        {
-            restrictions = await iPRestrictionsRepository.GetAsync(tenant);
-            _cache.Insert(key, restrictions, _timeout);
-        }
-
-        return restrictions;
+        var key = CacheKey + tenant;
+        return await fusionCache.GetOrSetAsync<List<IPRestriction>>(key, async (ctx, token) =>
+            {
+                if (!string.IsNullOrEmpty(etagFromRequest) && ctx is { HasStaleValue: true, HasETag: true } && ctx.ETag == etagFromRequest)
+                {
+                    return ctx.NotModified();
+                }
+            
+                var result = await iPRestrictionsRepository.GetAsync(tenant, token);
+                var etag = await CalculateEtagAsync(result, token);
+                
+                return ctx.Modified(result, etag: etag);
+            },
+            opt => opt.SetDuration(_timeout).SetFailSafe(true));
     }
 
     public async Task<IEnumerable<IpRestrictionBase>> SaveAsync(IEnumerable<IpRestrictionBase> ips, int tenant)
     {
         var restrictions = await iPRestrictionsRepository.SaveAsync(ips, tenant);
-        await _notify.PublishAsync(new IPRestrictionItem { TenantId = tenant }, CacheNotifyAction.InsertOrUpdate);
-
+        await fusionCache.RemoveAsync(CacheKey + tenant);
         return restrictions;
+    }
+
+    public async Task<string> CalculateEtagAsync(IEnumerable<IpRestrictionBase> ips, CancellationToken token = default)
+    {
+        using var md5 = MD5.Create();
+        using var memoryStream = new MemoryStream();
+                
+        foreach (var restriction in ips)
+        {
+            var ip = IPAddress.Parse(restriction.Ip);
+            var ipBytes = ip.GetAddressBytes();
+            await memoryStream.WriteAsync(ipBytes, token);
+        }
+
+        var hash = await md5.ComputeHashAsync(memoryStream, token);
+        var hex = BitConverter.ToString(hash);
+        return hex.Replace("-", "");
     }
 }

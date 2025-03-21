@@ -40,4 +40,6 @@ public class StudioDefaultPageSettings : ISettings<StudioDefaultPageSettings>
     {
         return new StudioDefaultPageSettings { DefaultProductID = Guid.Empty };
     }
+    
+    public DateTime LastModified { get; set; }
 }

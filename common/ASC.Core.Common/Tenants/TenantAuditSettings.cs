@@ -53,6 +53,8 @@ public class TenantAuditSettings : ISettings<TenantAuditSettings>
             AuditTrailLifeTime = MaxLifeTime
         };
     }
+    
+    public DateTime LastModified { get; set; }
 }
 
 /// <summary>

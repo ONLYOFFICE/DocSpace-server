@@ -47,4 +47,6 @@ public class WizardSettings : ISettings<WizardSettings>
             Completed = true
         };
     }
+    
+    public DateTime LastModified { get; set; }
 }

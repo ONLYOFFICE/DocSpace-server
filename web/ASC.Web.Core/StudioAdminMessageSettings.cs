@@ -40,4 +40,6 @@ public class StudioAdminMessageSettings : ISettings<StudioAdminMessageSettings>
     {
         return new StudioAdminMessageSettings { Enable = false };
     }
+    
+    public DateTime LastModified { get; set; }
 }

@@ -42,4 +42,6 @@ public class TenantAccessSettings : ISettings<TenantAccessSettings>
     {
         return new TenantAccessSettings { Anyone = false, RegisterUsersImmediately = false };
     }
+    
+    public DateTime LastModified { get; set; }
 }

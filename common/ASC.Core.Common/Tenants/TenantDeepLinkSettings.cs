@@ -41,6 +41,8 @@ public class TenantDeepLinkSettings: ISettings<TenantDeepLinkSettings>
     {
         return new TenantDeepLinkSettings();
     }
+    
+    public DateTime LastModified { get; set; }
 }
 
 public enum DeepLinkHandlingMode

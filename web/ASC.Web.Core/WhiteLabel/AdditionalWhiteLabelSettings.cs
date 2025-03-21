@@ -96,6 +96,8 @@ public class AdditionalWhiteLabelSettings : ISettings<AdditionalWhiteLabelSettin
             LicenseAgreementsEnabled = !string.IsNullOrWhiteSpace(ExternalResourceSettingsHelper?.Common.GetDefaultRegionalFullEntry("license"))
         };
     }
+    
+    public DateTime LastModified { get; set; }
 }
 
 [Scope]

@@ -58,4 +58,6 @@ public class TenantQuotaSettings : ISettings<TenantQuotaSettings>
             Quota = -1
         };
     }
+    
+    public DateTime LastModified { get; set; }
 }

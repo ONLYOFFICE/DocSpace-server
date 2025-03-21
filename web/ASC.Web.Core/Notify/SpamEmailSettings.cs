@@ -46,6 +46,8 @@ public class SpamEmailSettings : ISettings<SpamEmailSettings>
             MailsSendedDate = DateTime.UtcNow.AddDays(-2)
         };
     }
+    
+    public DateTime LastModified { get; set; }
 
     public int MailsSended
     {
