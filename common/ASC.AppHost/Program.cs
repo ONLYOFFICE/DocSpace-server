@@ -67,6 +67,9 @@ builder.AddNpmApp("asc-socketIO", "../ASC.Socket.IO/", "start:build").WithHttpEn
 builder.AddNpmApp("asc-ssoAuth", "../ASC.SSoAuth/", "start:build").WithHttpEndpoint(targetPort: 9834).WithHttpHealthCheck("/health");
 builder.AddNpmApp("asc-webDav", "../ASC.WebDav/", "start:build").WithHttpEndpoint(targetPort: 1900).WithHttpHealthCheck("/health");
 
+builder.AddExecutable("asc-editor", "yarn", "..//..//..//client//packages//doceditor", "start");
+builder.AddExecutable("asc-login", "yarn", "..//..//..//client//packages//login", "start");
+
 await builder.Build().RunAsync();
 
 return;
