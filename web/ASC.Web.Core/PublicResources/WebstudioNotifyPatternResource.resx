@@ -2499,4 +2499,28 @@ $TrulyYours</comment>
   <data name="subject_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
     <value>Your ${LetterLogoText} DocSpace will be deleted</value>
   </data>
+  <data name="pattern_user_role_changed" xml:space="preserve">
+    <value>Hello!
+
+You are assigned a new role in the DocSpace room "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+
+Learn more about room roles and permissions in "Help Center":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_type_changed" xml:space="preserve">
+    <value>Hello!
+
+You are assigned a new user type in DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
+
+Learn more about user types and permissions in "Help Center":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_user_role_changed" xml:space="preserve">
+    <value>Your role in a DocSpace room has changed</value>
+  </data>
+  <data name="subject_user_type_changed" xml:space="preserve">
+    <value>Your DocSpace user type has changed</value>
+  </data>
 </root>
