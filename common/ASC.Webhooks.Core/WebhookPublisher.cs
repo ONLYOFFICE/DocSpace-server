@@ -43,7 +43,7 @@ public class WebhookPublisher(
     {
         Converters = { new TenantToUtcDateTimeJsonConverter(tenantUtil) },
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
     };
 
     private class TenantToUtcDateTimeJsonConverter(TenantUtil tenantUtil) : JsonConverter<DateTime>
@@ -87,27 +87,27 @@ public class WebhookPublisher(
         return result;
     }
 
-    public async Task PublishAsync<T>(WebhookTrigger trigger, IEnumerable<DbWebhooksConfig> webhookConfigs, T data)
+    public async Task PublishAsync<T1, T2>(WebhookTrigger trigger, IEnumerable<DbWebhooksConfig> webhookConfigs, T1 data, T2 dataId)
     {
         foreach (var config in webhookConfigs)
         {
-            _ = await PublishAsync(trigger, config, data);
+            _ = await PublishAsync(trigger, config, data, dataId);
         }
     }
 
-    public async Task PublishAsync<T>(WebhookTrigger trigger, IWebhookAccessChecker<T> checker, T data)
+    public async Task PublishAsync<T1, T2>(WebhookTrigger trigger, IWebhookAccessChecker<T1> checker, T1 data, T2 dataId)
     {
         var webhookConfigs = await GetWebhookConfigsAsync(trigger, checker, data);
 
         foreach (var config in webhookConfigs)
         {
-            _ = await PublishAsync(trigger, config, data);
+            _ = await PublishAsync(trigger, config, data, dataId);
         }
     }
 
-    private async Task<DbWebhooksLog> PublishAsync<T>(WebhookTrigger trigger, DbWebhooksConfig webhookConfig, T data)
+    private async Task<DbWebhooksLog> PublishAsync<T1, T2>(WebhookTrigger trigger, DbWebhooksConfig webhookConfig, T1 data, T2 dataId)
     {
-        var payload = new WebhookPayload<T>(trigger, webhookConfig, data, authContext.CurrentAccount.ID);
+        var payload = new WebhookPayload<T1, T2>(trigger, webhookConfig, data, dataId, authContext.CurrentAccount.ID);
 
         var payloadStr = JsonSerializer.Serialize(payload, _serializerOptions);
 

@@ -214,7 +214,7 @@ public class EmployeeFullDto : EmployeeDto
     public ApiDateTime RegistrationDate { get; set; }
 
     /// <summary>
-    /// Specifies if the guest has an personal folder or not
+    /// Specifies if the user has an personal folder or not
     /// </summary>
     public bool HasPersonalFolder { get; set; }
 }
@@ -277,7 +277,8 @@ public class EmployeeFullDtoHelper(
         var result = new EmployeeFullDto
         {
             FirstName = userInfo.FirstName,
-            LastName = userInfo.LastName
+            LastName = userInfo.LastName,
+            DisplayName = _displayUserSettingsHelper.GetFullUserName(userInfo)
         };
 
         if (withGroups)
@@ -300,7 +301,6 @@ public class EmployeeFullDtoHelper(
     public async Task<EmployeeFullDto> GetSimpleWithEmail(UserInfo userInfo)
     {
         var result = await GetSimple(userInfo);
-        result.DisplayName = _displayUserSettingsHelper.GetFullUserName(userInfo);
         result.Email = userInfo.Email;
         return result;
     }
