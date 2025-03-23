@@ -67,23 +67,21 @@ builder.AddNpmApp("asc-socketIO", "../ASC.Socket.IO/", "start:build").WithHttpEn
 builder.AddNpmApp("asc-ssoAuth", "../ASC.SSoAuth/", "start:build").WithHttpEndpoint(targetPort: 9834).WithHttpHealthCheck("/health");
 builder.AddNpmApp("asc-webDav", "../ASC.WebDav/", "start:build").WithHttpEndpoint(targetPort: 1900).WithHttpHealthCheck("/health");
 
-var clientPath = Path.GetFullPath(Path.Combine("..", "..", "..", "client", "packages", "client"));
-var loginPath = Path.GetFullPath(Path.Combine("..", "..", "..", "client", "packages", "login"));
-var managementPath = Path.GetFullPath(Path.Combine("..", "..", "..", "client", "packages", "management"));
+var clientBasePath = Path.GetFullPath(Path.Combine("..", "..", "..", "client"));
 
-builder.AddExecutable("asc-editor", "yarn", "..//..//..//client//packages//doceditor", "start");
-builder.AddExecutable("asc-login", "yarn", loginPath, "start");
-builder.AddExecutable("asc-client", "yarn", clientPath, "start");
-builder.AddExecutable("asc-management", "yarn", managementPath, "start");
+var installPackages = builder.AddExecutable("asc-install-packages", "yarn", clientBasePath, "install");
+var buildPackages = builder.AddExecutable("asc-build-packages", "yarn", clientBasePath, "build").WithRelationship(installPackages.Resource, "install").WaitForCompletion(installPackages);
+var startPackages = builder.AddExecutable("asc-start-packages", "yarn", clientBasePath, "start").WithRelationship(installPackages.Resource, "build").WaitForCompletion(buildPackages);
 
 builder.AddContainer("asc-openresty", "openresty/openresty", "latest")
     .WithBindMount(Path.GetFullPath(Path.Combine("..", "..", "..", "buildtools", "config", "nginx")), "/etc/nginx/conf.d/")
     .WithBindMount(Path.GetFullPath(Path.Combine("..", "..", "..", "buildtools", "config", "nginx", "includes")), "/etc/nginx/includes/")
     .WithBindMount(Path.GetFullPath(Path.Combine("..", "..", "..", "client", "public")), "/var/www/public")
-    .WithBindMount(clientPath, "/var/www/client")
-    .WithBindMount(loginPath, "/var/www/login")
-    .WithBindMount(managementPath, "/var/www/management")
-    .WithHttpEndpoint(8092, 8092);
+    .WithBindMount(Path.Combine(clientBasePath, "packages", "client"), "/var/www/client")
+    .WithBindMount(Path.Combine(clientBasePath, "packages", "login"), "/var/www/login")
+    .WithBindMount(Path.Combine(clientBasePath, "packages", "management"), "/var/www/management")
+    .WithHttpEndpoint(8092, 8092)
+    .WaitFor(startPackages);
 
 await builder.Build().RunAsync();
 
