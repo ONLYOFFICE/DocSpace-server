@@ -4007,7 +4007,7 @@ public class FileStorageService //: IFileStorageService
         
         var usersIdWithAccess = await WhoCanRead(file);
         var links = await fileSecurity.GetPureSharesAsync(file, ShareFilterType.Link, null, null)
-            .Select(x => x.Subject).ToListAsync();
+            .Select(x => x.Subject).ToHashSetAsync();
 
         var users = usersIdWithAccess
             .Where(id => !id.Equals(authContext.CurrentAccount.ID) && !links.Contains(id))
