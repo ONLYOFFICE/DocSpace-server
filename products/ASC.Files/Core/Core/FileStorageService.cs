@@ -4004,15 +4004,13 @@ public class FileStorageService //: IFileStorageService
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
-
-        var folderDao = daoFactory.GetFolderDao<T>();
-
-        var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(file);
-
-        var usersIdWithAccess = await WhoCanRead(await folderDao.GetFolderAsync(roomId));
+        
+        var usersIdWithAccess = await WhoCanRead(file);
+        var links = await fileSecurity.GetPureSharesAsync(file, ShareFilterType.Link, null, null)
+            .Select(x => x.Subject).ToListAsync();
 
         var users = usersIdWithAccess
-            .Where(id => !id.Equals(authContext.CurrentAccount.ID))
+            .Where(id => !id.Equals(authContext.CurrentAccount.ID) && !links.Contains(id))
             .Select(userManager.GetUsers);
 
         var result = await users
