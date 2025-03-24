@@ -26,10 +26,13 @@
 
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
+/// <summary>
+/// The finish parameters.
+/// </summary>
 public class FinishDto
 {
     /// <summary>
-    /// Is send welcome email
+    /// Specifies whether to send welcome email or not.
     /// </summary>
     public bool IsSendWelcomeEmail { get; set; }
 }

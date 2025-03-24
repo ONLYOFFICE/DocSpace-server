@@ -27,26 +27,30 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// IP restrictions request parameters
+/// The IP restrictions request parameters.
 /// </summary>
 public class IpRestrictionsBaseRequestsDto
 {
     /// <summary>
-    /// List of IP addresses
+    /// The list of IP restriction addresses.
     /// </summary>
     public IEnumerable<IpRestrictionBase> IpRestrictions { get; set; }
 }
 
 /// <summary>
-/// New IP restriction settings
+/// The new IP restriction settings.
 /// </summary>
 public class IpRestrictionsDto
 {
-    /// <summary>List of IP addresses</summary>
+    /// <summary>
+    /// The list of IP addresses.
+    /// </summary>
     /// <type>System.Collections.Generic.IEnumerable{ASC.IPSecurity.IpRestrictionBase}, System.Collections.Generic</type>
     public IEnumerable<IpRestrictionBase> IpRestrictions { get; set; }
 
-    /// <summary>Enables IP restrictions or not</summary>
+    /// <summary>
+    /// Specifies whether to enable IP restrictions or not.
+    /// </summary>
     /// <type>System.Boolean, System</type>
     public bool? Enable { get; set; }
 }

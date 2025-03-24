@@ -27,37 +27,37 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// Request parameters for authorization service
+/// The request parameters for authorization service.
 /// </summary>
 public class AuthServiceRequestsDto
 {
     /// <summary>
-    /// Name
+    /// The name of the auth service.
     /// </summary>
     public string Name { get; set; }
 
     /// <summary>
-    /// Title
+    /// The title of the auth service.
     /// </summary>
     public string Title { get; set; }
 
     /// <summary>
-    /// Description
+    /// The description of the auth service.
     /// </summary>
     public string Description { get; set; }
 
     /// <summary>
-    /// Instruction
+    /// The instruction of the auth service.
     /// </summary>
     public string Instruction { get; set; }
 
     /// <summary>
-    /// Specifies if the authentication service can be set or not
+    /// Specifies if the authentication service can be set or not.
     /// </summary>
     public bool CanSet { get; set; }
 
     /// <summary>
-    /// List of authorization keys
+    /// The list of the authorization keys.
     /// </summary>
     public List<AuthKey> Props { get; set; }
 

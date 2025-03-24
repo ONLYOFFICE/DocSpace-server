@@ -27,12 +27,12 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// LDAP cron request parameters
+/// The LDAP cron request parameters.
 /// </summary>
 public class LdapCronRequestDto
 {
     /// <summary>
-    /// Cron expression
+    /// The cron expression.
     /// </summary>
     public string Cron { get; set; }
 }

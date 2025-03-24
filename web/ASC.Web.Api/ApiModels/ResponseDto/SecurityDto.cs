@@ -26,32 +26,35 @@
 
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
+/// <summary>
+/// The security information.
+/// </summary>
 public class SecurityDto
 {
     /// <summary>
-    /// Module ID
+    /// The module ID of the web item.
     /// </summary>
     [SwaggerSchemaCustom(Example = "{00000000-0000-0000-0000-000000000000}")]
     public string WebItemId { get; set; }
 
     /// <summary>
-    /// List of users with the access to the module
+    /// The list of users with the access to the module.
     /// </summary>
     public List<EmployeeDto> Users { get; set; }
 
     /// <summary>
-    /// List of groups with the access to the module
+    /// The list of groups with the access to the module.
     /// </summary>
     public List<GroupSummaryDto> Groups { get; init; }
 
     /// <summary>
-    /// Specifies if the security settings are enabled or not
+    /// Specifies if the security settings are enabled or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = true)]
     public bool Enabled { get; set; }
 
     /// <summary>
-    /// Specifies if this module is a subitem or not
+    /// Specifies if this module is a subitem or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool IsSubItem { get; set; }

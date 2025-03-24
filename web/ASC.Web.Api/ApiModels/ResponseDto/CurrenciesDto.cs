@@ -26,20 +26,23 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
+/// <summary>
+/// The currencies parameters.
+/// </summary>
 public class CurrenciesDto
 {
     /// <summary>
-    /// ISO country code
+    /// The ISO country code.
     /// </summary>
     public string ISOCountryCode { get; set; }
 
     /// <summary>
-    /// ISO currency symbol
+    /// The ISO currency symbol.
     /// </summary>
     public string ISOCurrencySymbol { get; set; }
 
     /// <summary>
-    /// Currency native name
+    /// The currency native name.
     /// </summary>
     public string CurrencyNativeName { get; set; }
 

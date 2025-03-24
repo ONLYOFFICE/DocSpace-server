@@ -27,57 +27,60 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// 
+/// The portal extra tenant request parameters.
 /// </summary>
 public class PortalExtraTenantRequestDto
 {
     /// <summary>
-    /// Specifies whether the tariff will be refreshed
+    /// Specifies whether the tariff will be refreshed.
     /// </summary>
     [FromQuery(Name = "refresh")]
     public bool Refresh { get; set; }
 }
 
 /// <summary>
-/// 
+/// The portal path request parameters.
 /// </summary>
 public class PortalPathRequestDto
 {
     /// <summary>
-    /// Portal virtual path
+    /// The portal virtual path.
     /// </summary>
     [FromQuery(Name = "virtualPath")]
     public string VirtualPath { get; set; }
 }
 
 /// <summary>
-/// 
+/// The portal thumbnail request parameters.
 /// </summary>
 public class PortalThumbnailRequestDto
 {
     /// <summary>
-    /// Bookmark URL
+    /// The bookmark URL.
     /// </summary>
     [FromQuery(Name = "url")]
     public string Url { get; set; }
 }
 
 /// <summary>
-/// 
+/// The portal mobile app request parameters.
 /// </summary>
 public class PortalMobileAppRequestDto
 {
     /// <summary>
-    /// Mobile app type (IosProjects, AndroidProjects, IosDocuments, AndroidDocuments, or DesktopEditor)
+    /// The mobile app type (IosProjects, AndroidProjects, IosDocuments, AndroidDocuments, or DesktopEditor).
     /// </summary>
     [FromQuery(Name = "type")]
     public MobileAppType Type { get; set; }
 }
 
+/// <summary>
+/// The portal settings request parameters.
+/// </summary>
 public class PortalSettingsrequestDto
 {
     /// <summary>
-    /// Specifies if the password hasher settings will be returned or not
+    /// Specifies if the password hasher settings will be returned or not.
     /// </summary>
     [FromQuery(Name = "withpassword")]
     public bool? WithPassword { get; set; }

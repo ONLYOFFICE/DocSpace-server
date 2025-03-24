@@ -26,70 +26,73 @@
 
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
+/// <summary>
+/// The login event parameters.
+/// </summary>
 public class LoginEventDto(LoginEvent loginEvent, ApiDateTimeHelper apiDateTimeHelper)
 {
     /// <summary>
-    /// ID
+    /// The login ID.
     /// </summary>
     public int Id { get; set; } = loginEvent.Id;
 
     /// <summary>
-    /// Date
+    /// The login date.
     /// </summary>
     public ApiDateTime Date { get; set; } = apiDateTimeHelper.Get(loginEvent.Date);
 
     /// <summary>
-    /// User
+    /// The login user.
     /// </summary>
     public string User { get; set; } = loginEvent.UserName;
 
     /// <summary>
-    /// User ID
+    /// The login user ID.
     /// </summary>
     public Guid UserId { get; set; } = loginEvent.UserId;
 
     /// <summary>
-    /// Login
+    /// The login.
     /// </summary>
     public string Login { get; set; } = loginEvent.Login;
 
     /// <summary>
-    /// Action
+    /// The login action.
     /// </summary>
     public string Action { get; set; } = loginEvent.ActionText;
 
     /// <summary>
-    /// Action ID
+    /// The action ID.
     /// </summary>
     public MessageAction ActionId { get; set; } = (MessageAction)loginEvent.Action;
 
     /// <summary>
-    /// IP
+    /// The login IP.
     /// </summary>
     public string IP { get; set; } = loginEvent.IP;
 
     /// <summary>
-    /// Country
+    /// The login country.
     /// </summary>
     public string Country { get; set; } = loginEvent.Country;
 
     /// <summary>
-    /// City
+    /// The login city.
     /// </summary>
     public string City { get; set; } = loginEvent.City;
 
     /// <summary>
-    /// Browser
+    /// The login browser.
     /// </summary>
     public string Browser { get; set; } = loginEvent.Browser;
 
     /// <summary>
-    /// Platform
+    /// The login platform.
     /// </summary>
     public string Platform { get; set; } = loginEvent.Platform;
 
     /// <summary>
-    /// Page
+    /// The login page.
     /// </summary>
     public string Page { get; set; } = loginEvent.Page;
 }

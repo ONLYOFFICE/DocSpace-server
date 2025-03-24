@@ -26,93 +26,99 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
+/// <summary>
+/// The quota information.
+/// </summary>
 public class QuotaDto
 {
     /// <summary>
-    /// ID
+    /// The quota ID.
     /// </summary>
     public int Id { get; set; }
 
     /// <summary>
-    /// Title
+    /// The quota title.
     /// </summary>
     public string Title { get; set; }
 
     /// <summary>
-    /// Price
+    /// The price parameters.
     /// </summary>
     public PriceDto Price { get; set; }
 
     /// <summary>
-    /// Specifies if the quota is nonprofit or not
+    /// Specifies if the quota is nonprofit or not.
     /// </summary>
     public bool NonProfit { get; set; }
 
     /// <summary>
-    /// Specifies if the quota is free or not
+    /// Specifies if the quota is free or not.
     /// </summary>
     public bool Free { get; set; }
 
     /// <summary>
-    /// Specifies if the quota is trial or not
+    /// Specifies if the quota is trial or not.
     /// </summary>
     public bool Trial { get; set; }
 
     /// <summary>
-    /// List of quota features
+    /// The list of quota features.
     /// </summary>
     public IEnumerable<TenantQuotaFeatureDto> Features { get; set; }
 
     /// <summary>
-    /// User quota
+    /// The user quota.
     /// </summary>
     public TenantEntityQuotaSettings UsersQuota {  get; set; }
 
     /// <summary>
-    /// Room quota
+    /// The room quota.
     /// </summary>
     public TenantEntityQuotaSettings RoomsQuota {  get; set; }
 
     /// <summary>
-    /// Tenant custom quota
+    /// The tenant custom quota.
     /// </summary>
     public TenantQuotaSettings TenantCustomQuota { get; set; }
 }
 
+/// <summary>
+/// The tenant quota feature parameters.
+/// </summary>
 public class TenantQuotaFeatureDto : IEquatable<TenantQuotaFeatureDto>
 {
     /// <summary>
-    /// ID
+    /// The tenant quota feature ID.
     /// </summary>
     public string Id { get; set; }
 
     /// <summary>
-    /// Title
+    /// The tenant quota feature title.
     /// </summary>
     public string Title { get; set; }
 
     /// <summary>
-    /// Image URL
+    /// The tenant quota feature image URL.
     /// </summary>
     public string Image { get; set; }
 
     /// <summary>
-    /// Value
+    /// The tenant quota feature value.
     /// </summary>
     public object Value { get; set; }
 
     /// <summary>
-    /// Type
+    /// The tenant quota feature type.
     /// </summary>
     public string Type { get; set; }
 
     /// <summary>
-    /// Used feature parameters
+    /// The tenant quota used feature parameters.
     /// </summary>
     public FeatureUsedDto Used { get; set; }
 
     /// <summary>
-    /// Price title
+    /// The tenant quota feature price title.
     /// </summary>
     public string PriceTitle { get; set; }
 
@@ -130,29 +136,35 @@ public class TenantQuotaFeatureDto : IEquatable<TenantQuotaFeatureDto>
     public override int GetHashCode() => Id.GetHashCode();
 }
 
+/// <summary>
+/// The price parameters.
+/// </summary>
 public class PriceDto
 {
     /// <summary>
-    /// Value
+    /// The price value.
     /// </summary>
     [SwaggerSchemaCustom(Example = 10.0)]
     public decimal? Value { get; set; }
 
     /// <summary>
-    /// Currency symbol
+    /// The currency symbol.
     /// </summary>
     public string CurrencySymbol { get; set; }
 }
 
+/// <summary>
+/// The used feature parameters.
+/// </summary>
 public class FeatureUsedDto
 {
     /// <summary>
-    /// Value
+    /// The used feature value.
     /// </summary>
     public object Value { get; set; }
 
     /// <summary>
-    /// Title
+    /// The used feature title.
     /// </summary>
     public string Title { get; set; }
 }

@@ -27,38 +27,38 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// Wizard settings request parameters
+/// The wizard settings request parameters.
 /// </summary>
 public class WizardRequestsDto
 {
     /// <summary>
-    /// Email
+    /// The email of the wizard settings.
     /// </summary>
     [EmailAddress]
     public string Email { get; set; }
 
     /// <summary>
-    /// Password hash
+    /// The password hash of the wizard settings.
     /// </summary>
     public string PasswordHash { get; set; }
 
     /// <summary>
-    /// Language
+    /// The language of the wizard settings.
     /// </summary>
     public string Lng { get; set; }
 
     /// <summary>
-    /// Time zone
+    /// The time zone of the wizard settings.
     /// </summary>
     public string TimeZone { get; set; }
 
     /// <summary>
-    /// AMI ID
+    /// The AMI ID.
     /// </summary>
     public string AmiId { get; set; }
 
     /// <summary>
-    /// Subscribed from the site or not
+    /// The subscribed from the site or not.
     /// </summary>
     public bool SubscribeFromSite { get; set; }
 

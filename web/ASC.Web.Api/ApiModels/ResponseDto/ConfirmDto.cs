@@ -26,20 +26,23 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
+/// <summary>
+/// The confirmation parameters.
+/// </summary>
 public class ConfirmDto : IMapFrom<Validation>
 {
     /// <summary>
-    /// Result
+    /// The confirmation result.
     /// </summary>
     public ValidationResult Result { get; set; }
 
     /// <summary>
-    /// Room id
+    /// The room ID of the confirmation.
     /// </summary>
     public string RoomId { get; set; }
 
     /// <summary>
-    /// Title
+    /// The title of the confirmation.
     /// </summary>
     public string Title { get; set; }
 }

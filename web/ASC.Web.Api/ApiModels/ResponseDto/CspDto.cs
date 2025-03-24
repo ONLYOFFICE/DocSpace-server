@@ -26,15 +26,18 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
+/// <summary>
+/// The Csp (Content Security Policy) parameters.
+/// </summary>
 public class CspDto
 {
     /// <summary>
-    /// Domains
+    /// The list of domains of the Csp.
     /// </summary>
     public IEnumerable<string> Domains { get; set; }
 
     /// <summary>
-    /// Header
+    /// The header of the Csp.
     /// </summary>
     public string Header { get; set; }
 }

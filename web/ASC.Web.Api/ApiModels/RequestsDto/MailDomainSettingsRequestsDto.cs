@@ -27,63 +27,63 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// Request parameters for mail domain settings
+/// The request parameters for mail domain settings.
 /// </summary>
 public class MailDomainSettingsRequestsDto
 {
     /// <summary>
-    /// Trusted domain type
+    /// The trusted domain type.
     /// </summary>
     public TenantTrustedDomainsType Type { get; set; }
 
     /// <summary>
-    /// List of trusted domains
+    /// The list of trusted domains.
     /// </summary>
     public List<string> Domains { get; set; }
 
     /// <summary>
-    /// Invites as a user or not
+    /// Specifies whether to invite as a user or not.
     /// </summary>
     public bool InviteUsersAsVisitors { get; set; }
 }
 
 /// <summary>
-/// Request parameters for administrator message settings
+/// The request parameters for administrator message base settings.
 /// </summary>
 public class AdminMessageBaseSettingsRequestsDto
 {
     /// <summary>
-    /// Email
+    /// The administrator message email.
     /// </summary>
     [EmailAddress]
     [StringLength(255)]
     public string Email { get; set; }
 
     /// <summary>
-    /// Culture
+    /// The culture of the administrator message.
     /// </summary>
     public string Culture { get; set; }
 }
 
 /// <summary>
-/// Request parameters for administrator message settings
+/// The request parameters for administrator message settings.
 /// </summary>
 public class AdminMessageSettingsRequestsDto : AdminMessageBaseSettingsRequestsDto
 {
     /// <summary>
-    /// Message
+    /// The administrator message. 
     /// </summary>
     [StringLength(255)]
     public string Message { get; set; }
 }
 
 /// <summary>
-/// Request parameters for administrator message settings
+/// The request parameters for administrator message settings turning on.
 /// </summary>
 public class TurnOnAdminMessageSettingsRequestDto
 {
     /// <summary>
-    /// Specifies if the administrator messages are enabled or not
+    /// Specifies if the administrator messages are enabled or not.
     /// </summary>
     public bool TurnOn { get; set; }
 }

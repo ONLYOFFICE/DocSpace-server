@@ -27,33 +27,33 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// TFA settings request parameters
+/// The TFA settings request parameters.
 /// </summary>
 public class TfaRequestsDto
 {
     /// <summary>
-    /// TFA type (None, Sms, or App)
+    /// The TFA type (None, Sms, or App).
     /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public TfaRequestsDtoType? Type { get; set; }
 
     /// <summary>
-    /// User ID
+    /// The TFA user ID.
     /// </summary>
     public Guid? Id { get; set; }
 
     /// <summary>
-    /// List of trusted IP addresses
+    /// The list of trusted IP addresses.
     /// </summary>
     public List<string> TrustedIps { get; set; }
 
     /// <summary>
-    /// List of users who must use the TFA verification
+    /// The list of users who must use the TFA verification.
     /// </summary>
     public List<Guid> MandatoryUsers { get; set; }
 
     /// <summary>
-    /// List of groups who must use the TFA verification
+    /// The list of groups who must use the TFA verification.
     /// </summary>
     public List<Guid> MandatoryGroups { get; set; }
 }
@@ -71,12 +71,12 @@ public enum TfaRequestsDtoType
 }
 
 /// <summary>
-/// TFA validation request parameters
+/// The TFA validation request parameters.
 /// </summary>
 public class TfaValidateRequestsDto
 {
     /// <summary>
-    /// TFA code
+    /// The TFA code.
     /// </summary>
     public string Code { get; set; }
 }

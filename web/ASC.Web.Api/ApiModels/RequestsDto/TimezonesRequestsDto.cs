@@ -26,15 +26,18 @@
 
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
+/// <summary>
+/// The time zone request parameters.
+/// </summary>
 public class TimezonesRequestsDto
 {
     /// <summary>
-    /// Time zone ID
+    /// The time zone ID.
     /// </summary>
     public string Id { get; set; }
 
     /// <summary>
-    /// Time zone display name
+    /// The time zone display name.
     /// </summary>
     public string DisplayName { get; set; }
 }

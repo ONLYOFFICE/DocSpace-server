@@ -26,30 +26,33 @@
 
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
+/// <summary>
+/// The storage information.
+/// </summary>
 public class StorageDto
 {
     /// <summary>
-    /// ID
+    /// The storage ID.
     /// </summary>
     public string Id { get; set; }
 
     /// <summary>
-    /// Title
+    /// The storage title.
     /// </summary>
     public string Title { get; set; }
 
     /// <summary>
-    /// List of authentication keys
+    /// The list of authentication keys.
     /// </summary>
     public List<AuthKey> Properties { get; set; }
 
     /// <summary>
-    /// Specifies if this is the current storage or not
+    /// Specifies if this is the current storage or not.
     /// </summary>
     public bool Current { get; set; }
 
     /// <summary>
-    /// Specifies if this storage can be set or not
+    /// Specifies if this storage can be set or not.
     /// </summary>
     public bool IsSet { get; set; }
 

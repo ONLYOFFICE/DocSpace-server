@@ -180,43 +180,43 @@ public class EmailValidationKeyProvider
 }
 
 /// <summary>
-/// Confirmation email parameters
+/// The confirmation email parameters.
 /// </summary>
 public class EmailValidationKeyModel
 {
     /// <summary>
-    /// Key
+    /// The email validation key. 
     /// </summary>
     public string Key { get; set; }
 
     /// <summary>
-    /// Employee type
+    /// The email validation employee type.
     /// </summary>
     public EmployeeType? EmplType { get; init; }
 
     /// <summary>
-    /// Email
+    /// The email validation email.
     /// </summary>
     [EmailAddress]
     public string Email { get; init; }
 
     /// <summary>
-    /// User ID
+    /// The email validation user ID.
     /// </summary>
     public Guid? UiD { get; init; }
 
     /// <summary>
-    /// Confirmation email type
+    /// The email validation confirmation email type.
     /// </summary>
     public ConfirmType? Type { get; init; }
 
     /// <summary>
-    /// Access an account for the first time or not
+    /// Specifies whether it is the first time account access or not.
     /// </summary>
     public string First { get; init; }
 
     /// <summary>
-    /// Room ID
+    /// The email validation room ID.
     /// </summary>
     public string RoomId { get; init; }
 

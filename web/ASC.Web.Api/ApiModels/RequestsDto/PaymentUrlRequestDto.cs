@@ -27,12 +27,12 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// 
+/// The payment URL request parameters.
 /// </summary>
 public class PaymentUrlRequestDto
 {
     /// <summary>
-    /// Back URL
+    /// The payment back URL.
     /// </summary>
     [FromQuery(Name = "backUrl")]
     public string BackUrl { get; set; }
@@ -40,12 +40,12 @@ public class PaymentUrlRequestDto
 
 
 /// <summary>
-/// 
+/// The payment information request parameters.
 /// </summary>
 public class PaymentInformationRequestDto
 {
     /// <summary>
-    /// Refresh
+    /// Specifies whether to refresh payment information or not.
     /// </summary>
     [FromQuery(Name = "refresh")]
     public bool Refresh { get; set; }

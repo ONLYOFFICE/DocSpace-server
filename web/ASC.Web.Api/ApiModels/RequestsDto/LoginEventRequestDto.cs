@@ -25,32 +25,33 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Web.Api.ApiModels.RequestsDto;
+
+/// <summary>
+/// The login event action.
+/// </summary>
 public class LoginEventRequestDto
 {
     /// <summary>
-    /// User ID
+    /// The login event user ID.
     /// </summary>
     [FromQuery(Name = "userId")]
     public Guid UserId { get; set; }
 
     /// <summary>
-    /// Action
+    /// The login event action.
     /// </summary>
-
     [FromQuery(Name = "action")]
     public MessageAction Action { get; set; }
 
     /// <summary>
-    /// Start date
+    /// The login event start date.
     /// </summary>
-
     [FromQuery(Name = "from")]
     public ApiDateTime From { get; set; }
 
     /// <summary>
-    /// End date
+    /// The login event end date.
     /// </summary>
-
     [FromQuery(Name = "to")]
     public ApiDateTime To { get; set; }
 }

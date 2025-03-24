@@ -27,59 +27,59 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// 
+/// The web plugin requests parameters.
 /// </summary>
 public class WebPluginRequests
 {
     /// <summary>
-    /// Enabled
+    /// Specifies whether the web plugin is enabled or not.
     /// </summary>
     public bool Enabled { get; set; }
 
     /// <summary>
-    /// Settings
+    /// The web plugin settings.
     /// </summary>
     [StringLength(255)]
     public string Settings { get; set; }
 }
 
 /// <summary>
-/// 
+/// The web plugin request parameters.
 /// </summary>
 public class WebPluginRequestsDto
 {
     /// <summary>
-    /// Name
+    /// The web plugin name.
     /// </summary>
     [FromRoute(Name = "name")]
     public string Name { get; set; }
 
     /// <summary>
-    /// Web plugin
+    /// The web plugin requests.
     /// </summary>
     [FromBody]
     public WebPluginRequests WebPlugin { get; set; }
 }
 
 /// <summary>
-/// 
+/// The web plugin name request parameters.
 /// </summary>
 public class WebPluginNameRequestDto
 {
     /// <summary>
-    /// Name
+    /// The web plugin name.
     /// </summary>
     [FromRoute(Name = "name")]
     public string Name { get; set; }
 }
 
 /// <summary>
-/// 
+/// The file web plugin request parameters.
 /// </summary>
 public class WebPluginFromFileRequestDto
 {
     /// <summary>
-    /// System
+    /// Specifies whether the file web plugin is system one or not.
     /// </summary>
     [FromQuery(Name = "system")]
     public bool System { get; set; }
@@ -87,12 +87,12 @@ public class WebPluginFromFileRequestDto
 
 
 /// <summary>
-/// 
+/// The get web plugins request parameters.
 /// </summary>
 public class GetWebPluginsRequestDto
 {
     /// <summary>
-    /// Enabled
+    /// Specifies whether the get web plugins is enabled or not.
     /// </summary>
     [FromQuery(Name = "enabled")]
     public bool? Enabled { get; set; }

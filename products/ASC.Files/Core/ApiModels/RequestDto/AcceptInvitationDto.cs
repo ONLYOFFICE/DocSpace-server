@@ -26,10 +26,13 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// The accept invitation parameters.
+/// </summary>
 public class AcceptInvitationDto
 {
     /// <summary>
-    /// Link key
+    /// The link key of the accept invitation.
     /// </summary>
     public string Key { get; set; }
 }

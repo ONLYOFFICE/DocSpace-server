@@ -26,40 +26,43 @@
 
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
+/// <summary>
+/// The TFA settings parameters.
+/// </summary>
 public class TfaSettingsDto
 {
     /// <summary>
-    /// ID
+    /// The TFA ID.
     /// </summary>
     public string Id { get; set; }
 
     /// <summary>
-    /// Title
+    /// The TFA title.
     /// </summary>
     public string Title { get; set; }
 
     /// <summary>
-    /// Specifies if the TFA settings are enabled or not
+    /// Specifies if the TFA settings are enabled or not.
     /// </summary>
     public bool Enabled { get; set; }
 
     /// <summary>
-    /// Specifies if the TFA settings are available or not
+    /// Specifies if the TFA settings are available or not.
     /// </summary>
     public bool Avaliable { get; set; }
 
     /// <summary>
-    /// List of trusted IP addresses
+    /// The list of trusted IP addresses.
     /// </summary>
     public List<string> TrustedIps { get; set; }
 
     /// <summary>
-    /// List of users who must use the TFA verification
+    /// The list of users who must use the TFA verification.
     /// </summary>
     public List<Guid> MandatoryUsers { get; set; }
 
     /// <summary>
-    /// List of groups who must use the TFA verification
+    /// The list of groups who must use the TFA verification.
     /// </summary>
     public List<Guid> MandatoryGroups { get; set; }
 }

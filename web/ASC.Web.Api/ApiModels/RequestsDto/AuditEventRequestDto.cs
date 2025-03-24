@@ -27,60 +27,60 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// 
+/// The audit event request parameters.
 /// </summary>
 public class AuditEventRequestDto
 {
     /// <summary>
-    /// User ID
+    /// The audit event user ID.
     /// </summary>
     [FromQuery(Name = "userId")]
     public Guid UserId { get; set; }
 
     /// <summary>
-    /// Product
+    /// The audit event product type.
     /// </summary>
     [FromQuery(Name = "productType")]
     public ProductType ProductType { get; set; }
 
     /// <summary>
-    /// Module
+    /// The audit event module.
     /// </summary>
     [FromQuery(Name = "moduleType")]
     public ModuleType ModuleType { get; set; }
 
     /// <summary>
-    /// Action type
+    /// The audit event action type.
     /// </summary>
     [FromQuery(Name = "actionType")]
     public ActionType ActionType { get; set; }
 
     /// <summary>
-    /// Action
+    /// The audit event action.
     /// </summary>
     [FromQuery(Name = "action")]
     public MessageAction Action { get; set; }
 
     /// <summary>
-    /// Entry
+    /// The audit event entry.
     /// </summary>
     [FromQuery(Name = "entryType")]
     public EntryType EntryType { get; set; }
 
     /// <summary>
-    /// Target
+    /// The audit event target.
     /// </summary>
     [FromQuery(Name = "target")]
     public string Target {  get; set; }
 
     /// <summary>
-    /// Start date
+    /// The audit event start date.
     /// </summary>
     [FromQuery(Name = "from")]
     public ApiDateTime From { get; set; }
 
     /// <summary>
-    /// End date
+    /// The audit event end date.
     /// </summary>
     [FromQuery(Name = "to")]
     public ApiDateTime To { get; set; }

@@ -26,20 +26,23 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
+/// <summary>
+/// The tariff parameters.
+/// </summary>
 public class TariffDto : Tariff
 {
     /// <summary>
-    /// Open source
+    /// Specifies whether the tariff is open source or not.
     /// </summary>
     public bool? OpenSource { get; set; }
 
     /// <summary>
-    /// Enterprise
+    /// Specifies whether the tariff is enterprise or not.
     /// </summary>
     public bool? Enterprise { get; set; }
 
     /// <summary>
-    /// Developer
+    /// Specifies whether the tariff is developer or not.
     /// </summary>
     public bool? Developer { get; set; }
 }

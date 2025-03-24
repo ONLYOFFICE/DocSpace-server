@@ -26,73 +26,79 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
+/// <summary>
+/// The active connections parameters.
+/// </summary>
 public class ActiveConnectionsDto
 {
     /// <summary>
-    /// Login event
+    /// The login event.
     /// </summary>
     public int LoginEvent { get; set; }
 
     /// <summary>
-    /// Items
+    /// The active connections items.
     /// </summary>
     public List<ActiveConnectionsItemDto> Items { get; set; }
 }
 
+/// <summary>
+/// The active connections item parameters.
+/// </summary>
 public class ActiveConnectionsItemDto
 {
     /// <summary>
-    /// Id
+    /// The active connections item ID.
     /// </summary>
     public int Id { get; set; }
 
     /// <summary>
-    /// Tenant id
+    /// The active connections item tenant ID.
     /// </summary>
     public int TenantId { get; set; }
 
     /// <summary>
-    /// User id
+    /// The active connections item user ID.
     /// </summary>
     public Guid UserId { get; set; }
 
     /// <summary>
-    /// Mobile
+    /// Specifies if the item has mobile or not.
     /// </summary>
     public bool Mobile {  get; set; }
 
     /// <summary>
-    /// Ip
+    /// The Ip address of the active connections item.
     /// </summary>
     public string Ip { get; set; }
 
     /// <summary>
-    /// Country
+    /// The country of the active connections item.
     /// </summary>
     public string Country { get; set; }
 
     /// <summary>
-    /// City
+    /// The city of the active connections item.
     /// </summary>
     public string City { get; set; }
 
     /// <summary>
-    /// Browser
+    /// The browser of the active connections item.
     /// </summary>
     public string Browser { get; set; }
 
     /// <summary>
-    /// Platform
+    /// The platform of the active connections item.
     /// </summary>
     public string Platform { get; set; }
 
     /// <summary>
-    /// Date
+    /// The date of the active connections item.
     /// </summary>
     public ApiDateTime Date { get; set; }
 
     /// <summary>
-    /// Page
+    /// The page of the active connections item.
     /// </summary>
     public string Page { get; set; }
 }

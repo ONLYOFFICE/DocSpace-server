@@ -27,102 +27,105 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// Authentication request parameters
+/// The authentication request parameters.
 /// </summary>
 public class AuthRequestsDto
 {
     /// <summary>
-    /// Username / email
+    /// The username/email.
     /// </summary>
     public string UserName { get; set; }
 
     /// <summary>
-    /// Password
+    /// The password.
     /// </summary>
     public string Password { get; set; }
 
     /// <summary>
-    /// Password hash
+    /// The password hash.
     /// </summary>
     public string PasswordHash { get; set; }
 
     /// <summary>
-    /// Provider type
+    /// The provider type.
     /// </summary>
     public string Provider { get; set; }
 
     /// <summary>
-    /// Provider access token
+    /// The provider access token.
     /// </summary>
     public string AccessToken { get; set; }
 
     /// <summary>
-    /// Serialized user profile
+    /// The serialized user profile.
     /// </summary>
     public string SerializedProfile { get; set; }
 
     /// <summary>
-    /// Two-factor authentication code
+    /// The two-factor authentication code.
     /// </summary>
     public string Code { get; set; }
 
     /// <summary>
-    /// Code for getting a token
+    /// The code for getting a token.
     /// </summary>
     public string CodeOAuth { get; set; }
 
     /// <summary>
-    /// Session based authentication or not
+    /// Specifies whether it is session based authentication or not.
     /// </summary>
     public bool Session { get; set; }
 
     /// <summary>
-    /// Confirmation data
+    /// The confirmation data.
     /// </summary>
     public ConfirmData ConfirmData { get; set; }
 
     /// <summary>
-    /// Type of captcha
+    /// The type of captcha.
     /// </summary>
     public RecaptchaType RecaptchaType { get; set; }
 
     /// <summary>
-    /// reCAPTCHA response
+    /// The reCAPTCHA response.
     /// </summary>
     public string RecaptchaResponse { get; set; }
 
     /// <summary>
-    /// Culture
+    /// The culture of the authentication request.
     /// </summary>
     public string Culture { get; set; }
 }
 
 /// <summary>
-/// Mobile phone request parameters
+/// The mobile phone request parameters.
 /// </summary>
 public class MobileRequestsDto
 {
     /// <summary>
-    /// Mobile phone
+    /// The mobile phone.
     /// </summary>
     public string MobilePhone { get; set; }
 }
 
+/// <summary>
+/// The confirmation data parameters.
+/// </summary>
 public class ConfirmData
 {
     /// <summary>
-    /// Email address
+    /// The email address.
     /// </summary>
     [EmailAddress]
     public string Email { get; set; }
 
     /// <summary>
-    /// Access an account for the first time or not
+    /// Specifies whether it is the first access to account or not.
     /// </summary>
     public bool? First { get; set; }
 
     /// <summary>
-    /// Key
+    /// The confirmation key.
     /// </summary>
     public string Key { get; set; }
 }

@@ -29,6 +29,7 @@ using System.Runtime.InteropServices;
 namespace ASC.ActiveDirectory.Base.Settings;
 
 /// <summary>
+/// The LDAP settings parameters.
 /// </summary>
 [Scope]
 public class LdapSettings : ISettings<LdapSettings>, ICloneable
@@ -39,7 +40,9 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
         get { return new Guid("{197149b3-fbc9-44c2-b42a-232f7e729c16}"); }
     }
 
-    /// <summary>LDAP settings mapping</summary>
+    ///<summary>
+    /// The LDAP settings mapping.
+    /// </summary>
     public enum MappingFields
     {
         FirstNameAttribute,

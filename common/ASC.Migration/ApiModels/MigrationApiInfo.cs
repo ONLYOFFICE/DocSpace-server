@@ -26,107 +26,110 @@
 
 namespace ASC.Migration.Core.Models.Api;
 
+/// <summary>
+/// The migration API information.
+/// </summary>
 [ProtoContract]
 public class MigrationApiInfo
 {
     /// <summary>
-    /// Migrator name
+    /// The migrator name.
     /// </summary>
     [ProtoMember(1)]
     public string MigratorName { get; set; }
 
     /// <summary>
-    /// Operation
+    /// The migration operation.
     /// </summary>
     [ProtoMember(2)]
     public string Operation { get; set; }
 
     /// <summary>
-    /// Failed archives
+    /// The list of failed archives.
     /// </summary>
     [ProtoMember(3)]
     public List<string> FailedArchives { get; set; } = [];
 
     /// <summary>
-    /// Users
+    /// The list of migrating API users.
     /// </summary>
     [ProtoMember(4)]
     public List<MigratingApiUser> Users { get; set; } = [];
 
     /// <summary>
-    /// Without email users
+    /// The list of migrating API users without email.
     /// </summary>
     [ProtoMember(5)]
     public List<MigratingApiUser> WithoutEmailUsers { get; set; } = [];
 
     /// <summary>
-    /// Exist users
+    /// The list of migrating API existing users.
     /// </summary>
     [ProtoMember(6)]
     public List<MigratingApiUser> ExistUsers { get; set; } = [];
 
     /// <summary>
-    /// Groups
+    /// The list of migrating API groups.
     /// </summary>
     [ProtoMember(7)]
     public List<MigratingApiGroup> Groups { get; set; } = [];
 
     /// <summary>
-    /// Import personal files
+    /// Specifies whether to import personal files or not.
     /// </summary>
     [ProtoMember(8)]
     public bool ImportPersonalFiles { get; set; }
 
     /// <summary>
-    /// Import shared files
+    /// Specifies whether to import shared files or not.
     /// </summary>
     [ProtoMember(9)]
     public bool ImportSharedFiles { get; set; }
 
     /// <summary>
-    /// Import shared folders
+    /// Specifies whether to import shared folders or not.
     /// </summary>
     [ProtoMember(10)]
     public bool ImportSharedFolders { get; set; }
 
     /// <summary>
-    /// Import common files
+    /// Specifies whether to import common files or not.
     /// </summary>
     [ProtoMember(11)]
     public bool ImportCommonFiles { get; set; }
 
     /// <summary>
-    /// Import project files
+    /// Specifies whether to import project files or not.
     /// </summary>
     [ProtoMember(12)]
     public bool ImportProjectFiles { get; set; }
 
     /// <summary>
-    /// Import groups
+    /// Specifies whether to import groups or not.
     /// </summary>
     [ProtoMember(13)]
     public bool ImportGroups { get; set; }
 
     /// <summary>
-    /// Successed users
+    /// The migration number of successed users.
     /// </summary>
     [ProtoMember(14)]
     public int SuccessedUsers { get; set; }
 
     /// <summary>
-    /// Failed users
+    /// The migration failed users.
     /// </summary>
     [ProtoMember(15)]
     public int FailedUsers { get; set; }
 
     /// <summary>
-    /// Files
+    /// The migration list of files.
     /// </summary>
     [ProtoMember(16)]
     public List<string> Files { get; set; }
 
     /// <summary>
-    /// Errors
+    /// The migration list of errors.
     /// </summary>
     [ProtoMember(17)]
     public List<string> Errors { get; set; }

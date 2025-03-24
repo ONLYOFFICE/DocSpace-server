@@ -27,52 +27,52 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// 
+/// The third-party request parameters.
 /// </summary>
 public class ThirdpartyRequestsDto
 {
     /// <summary>
-    /// Code
+    /// The code of the third-party request.
     /// </summary>
     public string Code { get; set; }
 
     /// <summary>
-    /// Redirect
+    /// The redirect of the third-party request.
     /// </summary>
     public string Redirect { get; set; }
 }
 
 /// <summary>
-/// 
+/// The confirmation request parameters.
 /// </summary>
 public class ConfirmationCodeRequestDto
 {
     /// <summary>
-    /// URL where the user will be redirected to after they have granted the application access
+    /// The URL where the user will be redirected to after they have granted the application access.
     /// </summary>
     [FromQuery(Name = "redirect")]
     public string Redirect { get; set; }
 
     /// <summary>
-    /// Confirmation code that can be exchanged for an OAuth token
+    /// The confirmation code that can be exchanged for an OAuth token.
     /// </summary>
     [FromQuery(Name = "code")]
     public string Code { get; set; }
 
     /// <summary>
-    /// Error
+    /// The confirmation error.
     /// </summary>
     [FromQuery(Name = "error")]
     public string Error { get; set; }
 }
 
 /// <summary>
-/// 
+/// The confirmation code URL request parameters.
 /// </summary>
 public class ConfirmationCodeUrlRequestDto
 {
     /// <summary>
-    /// Provider
+    /// The login provider.
     /// </summary>
     [FromRoute(Name = "provider")]
     public LoginProvider Provider { get; set; }

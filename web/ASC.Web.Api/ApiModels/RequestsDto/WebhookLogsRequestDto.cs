@@ -26,53 +26,56 @@
 
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
+/// <summary>
+/// The webhook logs request parameters.
+/// </summary>
 public class WebhookLogsRequestDto
 {
     /// <summary>
-    /// Delivey start time
+    /// The delivey start time.
     /// </summary>
     [FromQuery(Name = "deliveryFrom")]
 
     public DateTime? DeliveryFrom { get; set; }
 
     /// <summary>
-    /// Delivey end time
+    /// The delivey end time.
     /// </summary>
     [FromQuery(Name = "deliveryTo")]
     public DateTime? DeliveryTo {  get; set; }
 
     /// <summary>
-    /// Hook URI
+    /// The hook URI.
     /// </summary>
     [FromQuery(Name = "hookUri")]
     public string HookUri { get; set; }
 
     /// <summary>
-    /// Config ID
+    /// The config ID.
     /// </summary>
     [FromQuery(Name = "configId")]
     public int? ConfigId {  get; set; }
 
     /// <summary>
-    /// Event ID
+    /// The event ID.
     /// </summary>
     [FromQuery(Name = "eventId")]
     public int? EventId { get; set; }
 
     /// <summary>
-    /// Webhook group status
+    /// The webhook group status.
     /// </summary>
     [FromQuery(Name = "groupStatus")]
     public WebhookGroupStatus? GroupStatus { get; set; }
 
     /// <summary>
-    /// User ID
+    /// The user ID.
     /// </summary>
     [FromQuery(Name = "userId")]
     public Guid? UserId { get; set; }
 
     /// <summary>
-    /// Trigger
+    /// The webhook trigger.
     /// </summary>
     [FromQuery(Name = "trigger")]
     public WebhookTrigger? Trigger { get; set; }

@@ -61,35 +61,38 @@ public class QuotaUsageManager(
     }
 }
 
+/// <summary>
+/// The quota usage parameters.
+/// </summary>
 public class QuotaUsageDto
 {
     /// <summary>
-    /// Storage size
+    /// The quota storage size.
     /// </summary>
     public ulong StorageSize { get; init; }
 
     /// <summary>
-    /// Maximum file size
+    /// The quota maximum file size.
     /// </summary>
     public ulong MaxFileSize { get; set; }
 
     /// <summary>
-    /// Used size
+    /// The quota used size.
     /// </summary>
     public ulong UsedSize { get; init; }
 
     /// <summary>
-    /// maximum number of room administrators
+    /// The quota maximum number of room administrators.
     /// </summary>
     public int MaxRoomAdminsCount { get; init; }
 
     /// <summary>
-    /// Number of room administrators
+    /// The quota number of room administrators.
     /// </summary>
     public int RoomAdminCount { get; init; }
 
     /// <summary>
-    /// Available size
+    /// The quota number available size.
     /// </summary>
     public ulong AvailableSize
     {
@@ -98,7 +101,7 @@ public class QuotaUsageDto
     }
 
     /// <summary>
-    /// Available number of users
+    /// The quota available number of users.
     /// </summary>
     public int AvailableUsersCount
     {
@@ -107,22 +110,22 @@ public class QuotaUsageDto
     }
 
     /// <summary>
-    /// Storage usage
+    /// The list of quota storage usage.
     /// </summary>
     public IList<QuotaUsage> StorageUsage { get; set; }
 
     /// <summary>
-    /// User storage size
+    /// The user storage size.
     /// </summary>
     public long UserStorageSize { get; set; }
 
     /// <summary>
-    /// User used size
+    /// The user used size.
     /// </summary>
     public long UserUsedSize { get; set; }
 
     /// <summary>
-    /// User available size
+    /// The user available size.
     /// </summary>
     public long UserAvailableSize
     {
@@ -131,12 +134,12 @@ public class QuotaUsageDto
     }
 
     /// <summary>
-    /// Maximum number of users
+    /// The maximum number of users.
     /// </summary>
     public long MaxUsers { get; set; }
 
     /// <summary>
-    /// Number of users
+    /// The number of users.
     /// </summary>
     public long UsersCount { get; set; }
 }
@@ -144,12 +147,12 @@ public class QuotaUsageDto
 public class QuotaUsage
 {
     /// <summary>
-    /// Path to the storage
+    /// The path to the storage.
     /// </summary>
     public string Path { get; set; }
 
     /// <summary>
-    /// Storage size
+    /// The storage size.
     /// </summary>
     public long Size { get; set; }
 }

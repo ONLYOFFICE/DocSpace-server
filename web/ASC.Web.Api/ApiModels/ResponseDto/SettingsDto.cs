@@ -26,214 +26,219 @@
 
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
+/// <summary>
+/// The settings information.
+/// </summary>
 public class SettingsDto
 {
     /// <summary>
-    /// Time zone
+    /// The time zone of the settings.
     /// </summary>
     [SwaggerSchemaCustom(Example = "UTC")]
     public string Timezone { get; set; }
 
     /// <summary>
-    /// List of trusted domains
+    /// The settings list of trusted domains.
     /// </summary>
     [SwaggerSchemaCustom(Example = "mydomain.com")]
     public List<string> TrustedDomains { get; set; }
 
     /// <summary>
-    /// Trusted domains type
+    /// The trusted domains type of the settings.
     /// </summary>
     public TenantTrustedDomainsType TrustedDomainsType { get; set; }
 
     /// <summary>
-    /// Language
+    /// The language of the settings.
     /// </summary>
     [SwaggerSchemaCustom(Example = "en-US")]
     public string Culture { get; set; }
 
     /// <summary>
-    /// UTC offset
+    /// The settings UTC offset.
     /// </summary>
     [SwaggerSchemaCustom(Example = "-8.5")]
     public TimeSpan UtcOffset { get; set; }
 
     /// <summary>
-    /// UTC hours offset
+    /// The settings UTC hours offset.
     /// </summary>
     public double UtcHoursOffset { get; set; }
 
     /// <summary>
-    /// Greeting settings
+    /// The greeting settings.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Web Office Applications")]
     public string GreetingSettings { get; set; }
 
     /// <summary>
-    /// Owner ID
+    /// The owner ID of the settings.
     /// </summary>
     public Guid OwnerId { get; set; }
 
     /// <summary>
-    /// Team template ID
+    /// The team template ID of the settings.
     /// </summary>
     public string NameSchemaId { get; set; }
 
     /// <summary>
-    /// Specifies if a user can join to the portal or not
+    /// Specifies if a user can join to the portal or not.
     /// </summary>
     public bool? EnabledJoin { get; set; }
 
     /// <summary>
-    /// Specifies if a user can send a message to the administrator or not
+    /// Specifies if a user can send a message to the administrator or not.
     /// </summary>
     public bool? EnableAdmMess { get; set; }
 
     /// <summary>
-    /// Specifies if a user can connect third-party providers or not
+    /// Specifies if a user can connect third-party providers or not.
     /// </summary>
     public bool? ThirdpartyEnable { get; set; }
 
     /// <summary>
-    /// Specifies if this is a DocSpace portal or not
+    /// Specifies if this is a DocSpace portal or not.
     /// </summary>
     public bool DocSpace { get; set; }
 
     /// <summary>
-    /// Specifies if this is a standalone portal or not
+    /// Specifies if this is a standalone portal or not.
     /// </summary>
     public bool Standalone { get; set; }
 
-    /// <summary>Specifies if this is a AMI instance or not</summary>
+    /// <summary>
+    /// Specifies if this is a AMI instance or not.
+    /// </summary>
     /// <type>System.Boolean, System</type>
     public bool IsAmi { get; set; }
 
     /// <summary>
-    /// Base domain
+    /// The base domain of the settings.
     /// </summary>
     public string BaseDomain { get; set; }
 
     /// <summary>
-    /// Wizard token
+    /// The wizard token of the settings.
     /// </summary>
     public string WizardToken { get; set; }
 
     /// <summary>
-    /// Password hash
+    /// The password hash of the settings.
     /// </summary>
     public PasswordHasher PasswordHash { get; set; }
 
     /// <summary>
-    /// Firebase parameters
+    /// The firebase parameters of the settings.
     /// </summary>
     public FirebaseDto Firebase { get; set; }
 
     /// <summary>
-    /// Version
+    /// The version of the settings.
     /// </summary>
     public string Version { get; set; }
 
     /// <summary>
-    /// Type of captcha
+    /// The type of captcha of the settings.
     /// </summary>
     public RecaptchaType RecaptchaType { get; set; }
 
     /// <summary>
-    /// ReCAPTCHA public key
+    /// The ReCAPTCHA public key of the settings.
     /// </summary>
     public string RecaptchaPublicKey { get; set; }
 
     /// <summary>
-    /// Specifies if the debug information will be sent or not
+    /// Specifies if the debug information will be sent or not.
     /// </summary>
     public bool DebugInfo { get; set; }
 
     /// <summary>
-    /// Socket URL
+    /// The socket URL of the settings.
     /// </summary>
     public string SocketUrl { get; set; }
 
     /// <summary>
-    /// Tenant status
+    /// The tenant status of the settings.
     /// </summary>
     public TenantStatus TenantStatus { get; set; }
 
     /// <summary>
-    /// Tenant alias
+    /// The tenant alias of the settings.
     /// </summary>
     public string TenantAlias { get; set; }
 
     /// <summary>
-    /// Specifies whether to display the About section
+    /// Specifies whether to display the "About" section.
     /// </summary>
     public bool DisplayAbout { get; set; }
 
     /// <summary>
-    /// Domain validator
+    /// The domain validator of the settings.
     /// </summary>
     public TenantDomainValidator DomainValidator { get; set; }
 
     /// <summary>
-    /// Zendesk key
+    /// The zendesk key of the settings.
     /// </summary>
     public string ZendeskKey { get; set; }
 
     /// <summary>
-    /// Tag manager ID
+    /// The tag manager ID of the settings.
     /// </summary>
     public string TagManagerId { get; set; }
 
     /// <summary>
-    /// Specifies whether the cookie settings are enabled
+    /// Specifies whether the cookie settings are enabled.
     /// </summary>
     public bool CookieSettingsEnabled { get; set; }
 
     /// <summary>
-    /// Limited access to Space Management
+    /// The limited access to Space Management.
     /// </summary>
     public bool LimitedAccessSpace { get; set; }
 
     /// <summary>
-    /// Limited access to Developer Tools for users
+    /// The limited access to Developer Tools for users.
     /// </summary>
     public bool LimitedAccessDevToolsForUsers { get; set; }
 
     /// <summary>
-    /// User name validation regex
+    /// The user name validation regex of the settings.
     /// </summary>
     public string UserNameRegex { get; set; }
 
     /// <summary>
-    /// Invitation limit
+    /// The invitation limit of the settings.
     /// </summary>
     public int? InvitationLimit { get; set; }
 
     /// <summary>
-    /// Plugins
+    /// The plugins of the settings.
     /// </summary>
     public PluginsDto Plugins { get; set; }
 
     /// <summary>
-    /// Deep link
+    /// The deep link of the settings.
     /// </summary>
     public DeepLinkDto DeepLink { get; set; }
 
     /// <summary>
-    /// Form gallery
+    /// The form gallery of the settings.
     /// </summary>
     public FormGalleryDto FormGallery { get; set; }
 
     /// <summary>
-    /// Max image upload size
+    /// The max image upload size of the settings.
     /// </summary>
     public long MaxImageUploadSize { get; set; }
 
     /// <summary>
-    /// White label logo text
+    /// The white label logo text of the settings.
     /// </summary>
     public string LogoText { get; set; }
 
     /// <summary>
-    /// External resources
+    /// The external resources of the settings.
     /// </summary>
     public CultureSpecificExternalResources ExternalResources { get; set; }
 }

@@ -27,33 +27,33 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// Security request parameters
+/// The security request parameters.
 /// </summary>
 public class SecurityRequestsDto
 {
     /// <summary>
-    /// Product ID
+    /// The product ID.
     /// </summary>
     public Guid ProductId { get; set; }
 
     /// <summary>
-    /// User ID
+    /// The user ID.
     /// </summary>
     public Guid UserId { get; set; }
 
     /// <summary>
-    /// Administrator or not
+    /// The administrator or not.
     /// </summary>
     public bool Administrator { get; set; }
 }
 
 /// <summary>
-/// 
+/// The security settings request parameters.
 /// </summary>
 public class SecuritySettingsRequestDto
 {
     /// <summary>
-    /// List of module IDs
+    /// The list of module IDs.
     /// </summary>
     [FromQuery(Name = "ids")]
     public IEnumerable<string> Ids { get; set; }

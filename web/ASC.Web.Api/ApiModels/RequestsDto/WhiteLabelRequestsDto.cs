@@ -27,47 +27,50 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// Request parameters for white label settings
+/// The request parameters for white label settings.
 /// </summary>
 public class WhiteLabelRequestsDto
 {
     /// <summary>
-    /// Logo text
+    /// The white label logo text.
     /// </summary>
     [StringLength(40)]
     public string LogoText { get; set; }
 
     /// <summary>
-    /// Tenant IDs with their logos (light or dark)
+    /// The white label tenant IDs with their logos (light or dark).
     /// </summary>
     public IEnumerable<ItemKeyValuePair<string, LogoRequestsDto>> Logo { get; set; }
 }
 
+/// <summary>
+/// The request parameters for logo.
+/// </summary>
 public class LogoRequestsDto
 {
     /// <summary>
-    /// Light theme logo
+    /// The light theme logo.
     /// </summary>
     public string Light { get; set; }
 
     /// <summary>
-    /// Dark theme logo
+    /// The dark theme logo.
     /// </summary>
     public string Dark { get; set; }
 }
 
 /// <summary>
-/// White label request parameters
+/// The white label request parameters.
 /// </summary>
 public class WhiteLabelQueryRequestsDto
 {
     /// <summary>
-    /// Specifies if the logo is for a dark theme or not
+    /// Specifies if the logo is for a dark theme or not.
     /// </summary>
     public bool? IsDark { get; set; }
 
     /// <summary>
-    /// Specifies if the logo is for a default tenant or not
+    /// Specifies if the logo is for a default tenant or not.
     /// </summary>
     public bool? IsDefault { get; set; }
 }

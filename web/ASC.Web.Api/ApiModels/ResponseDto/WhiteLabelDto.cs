@@ -28,33 +28,39 @@ using ImageMagick;
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
+/// <summary>
+/// The white label item parameters.
+/// </summary>
 public class WhiteLabelItemDto
 {
     /// <summary>
-    /// File name
+    /// The white label file name.
     /// </summary>
     public string Name { get; set; }
 
     /// <summary>
-    /// Size
+    /// The white label size.
     /// </summary>
     public IMagickGeometry Size { get; set; }
 
     /// <summary>
-    /// Path
+    /// The white label path.
     /// </summary>
     public WhiteLabelItemPathDto Path { get; set; }
 }
 
+/// <summary>
+/// The white label item path parameters.
+/// </summary>
 public class WhiteLabelItemPathDto
 {
     /// <summary>
-    /// Path to the light theme logo
+    /// The path to the light theme logo.
     /// </summary>
     public string Light { get; set; }
 
     /// <summary>
-    /// Path to the dark theme logo
+    /// The path to the dark theme logo.
     /// </summary>
     public string Dark { get; set; }
 }

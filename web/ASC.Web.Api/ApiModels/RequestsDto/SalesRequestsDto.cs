@@ -27,22 +27,22 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// Portal payment request parameters
+/// The portal payment request parameters.
 /// </summary>
 public class SalesRequestsDto
 {
     /// <summary>
-    /// User name
+    /// The user name of the sales request.
     /// </summary>
     public string UserName { get; set; }
 
     /// <summary>
-    /// Email address
+    /// The email address of the sales request.
     /// </summary>
     public string Email { get; set; }
 
     /// <summary>
-    /// Message
+    /// The message of the sales request.
     /// </summary>
     public string Message { get; set; }
 }

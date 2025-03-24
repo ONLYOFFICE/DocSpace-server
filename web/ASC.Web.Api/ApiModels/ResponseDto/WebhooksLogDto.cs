@@ -28,66 +28,67 @@
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
+/// The webhooks log parameters.
 /// </summary>
 public class WebhooksLogDto : IMapFrom<DbWebhooksLog>
 {
     /// <summary>
-    /// ID
+    /// The webhooks log ID.
     /// </summary>
     public int Id { get; set; }
 
     /// <summary>
-    /// Config name
+    /// The webhooks config name.
     /// </summary>
     public string ConfigName { get; set; }
 
     /// <summary>
-    /// Trigger
+    /// The webhooks trigger.
     /// </summary>
     public WebhookTrigger Trigger { get; set; }
 
     /// <summary>
-    /// Creation time
+    /// The webhooks creation time.
     /// </summary>
     public DateTime CreationTime { get; set; }
 
     /// <summary>
-    /// Method
+    /// The webhooks method.
     /// </summary>
     public string Method { get; set; }
 
     /// <summary>
-    /// Route
+    /// The webhooks route.
     /// </summary>
     public string Route { get; set; }
 
     /// <summary>
-    /// Request headers
+    /// The webhooks request headers.
     /// </summary>
     public string RequestHeaders { get; set; }
 
     /// <summary>
-    /// Request payload
+    /// The webhooks request payload.
     /// </summary>
     public string RequestPayload { get; set; }
 
     /// <summary>
-    /// Response headers
+    /// The webhooks response headers.
     /// </summary>
     public string ResponseHeaders { get; set; }
 
     /// <summary>
-    /// Response payload
+    /// The webhooks response payload.
     /// </summary>
     public string ResponsePayload { get; set; }
 
     /// <summary>
-    /// Status
+    /// The webhooks status.
     /// </summary>
     public int Status { get; set; }
 
     /// <summary>
-    /// Delivery time
+    /// The webhooks delivery time.
     /// </summary>
     public DateTime? Delivery { get; set; }
 

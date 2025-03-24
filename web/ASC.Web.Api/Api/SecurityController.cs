@@ -356,8 +356,11 @@ public class SecurityController(PermissionContext permissionContext,
     }
     
     /// <summary>
-    /// Csp
+    /// Returns the Csp (Content Security Policy).
     /// </summary>
+    /// <short>
+    /// Get Csp
+    /// </short>
     /// <path>api/2.0/security/csp</path>
     [Tags("Security / CSP")]
     [SwaggerResponse(200, "Ok", typeof(CspDto))]
@@ -399,8 +402,11 @@ public class SecurityController(PermissionContext permissionContext,
     }
 
     /// <summary>
-    /// Gets csp
+    /// Returns the Csp (Content Security Policy).
     /// </summary>
+    /// <short>
+    /// Get Csp
+    /// </short>
     /// <path>api/2.0/security/csp</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Security / CSP")]
@@ -420,8 +426,11 @@ public class SecurityController(PermissionContext permissionContext,
     }
 
     /// <summary>
-    /// Generate Jwt Token for communication between login (client) and identity services 
+    /// Generates Jwt Token for communication between login (client) and identity services. 
     /// </summary>
+    /// <short>
+    /// Generate Jwt Token
+    /// </short>
     /// <path>api/2.0/security/oauth2/token</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [HttpGet("oauth2/token")]

@@ -27,72 +27,72 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// Settings request parameters
+/// The owner ID settings request parameters.
 /// </summary>
 public class OwnerIdSettingsRequestDto
 {
     /// <summary>
-    /// Owner ID
+    /// The owner ID.
     /// </summary>
     public Guid OwnerId { get; set; }
 }
 
 /// <summary>
-/// Settings request parameters
+/// The settings request parameters.
 /// </summary>
 public class SettingsRequestsDto
 {
     /// <summary>
-    /// Version ID
+    /// The version ID.
     /// </summary>
     public int VersionId { get; set; }
 }
 
 /// <summary>
-/// Settings request parameters
+/// The tips request parameters.
 /// </summary>
 public class TipsRequestDto
 {
     /// <summary>
-    /// Specifies whether to show tips for the user or not
+    /// Specifies whether to show tips for the user or not.
     /// </summary>
     public bool Show { get; set; } //tips
 }
 
 /// <summary>
-/// Settings request parameters
+/// The default product request parameters.
 /// </summary>
 public class DefaultProductRequestDto
 {
     /// <summary>
-    /// Default product ID
+    /// The default product ID.
     /// </summary>
     public Guid DefaultProductID { get; set; }
 }
 
 /// <summary>
-/// Settings request parameters
+/// The time zone request parameters.
 /// </summary>
 public class TimeZoneRequestDto
 {
     /// <summary>
-    /// Language
+    /// The time zone language.
     /// </summary>
     public string Lng { get; set; }
 
     /// <summary>
-    /// Time zone ID
+    /// The time zone ID.
     /// </summary>
     public string TimeZoneID { get; set; }
 }
 
 /// <summary>
-/// Settings request parameters
+/// The settings request parameters.
 /// </summary>
 public class TenantDevToolsAccessSettingsDto
 {
     /// <summary>
-    /// Limited access to Developer Tools for users
+    /// The limited access to Developer Tools for users.
     /// </summary>
     public bool LimitedAccessForUsers { get; set; }
 }

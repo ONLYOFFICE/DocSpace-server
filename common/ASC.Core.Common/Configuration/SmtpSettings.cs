@@ -26,6 +26,9 @@
 
 namespace ASC.Core.Configuration;
 
+/// <summary>
+/// The SMTP settings parameters.
+/// </summary>
 public class SmtpSettings
 {
     public const int DefaultSmtpPort = 25;

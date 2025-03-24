@@ -26,71 +26,91 @@
 
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
+/// <summary>
+/// The generic ID request parameters.
+/// </summary>
 public class IdRequestDto<T>
 {
     /// <summary>
-    /// Id
+    /// The ID.
     /// </summary>
     [FromRoute(Name = "id")]
     public T Id { get; set; }
 }
 
+/// <summary>
+/// The login event request ID parameters.
+/// </summary>
 public class LoginEvenrIdRequestDto
 {
     /// <summary>
-    /// Login event ID
+    /// The login event ID.
     /// </summary>
     [FromRoute(Name = "loginEventId")]
     public int Id { get; set; }
 }
 
+/// <summary>
+/// The user request ID parameters.
+/// </summary>
 public class UserIdRequestDto
 {
     /// <summary>
-    /// User ID
+    /// The user ID.
     /// </summary>
     [FromRoute(Name = "userId")]
     public Guid Id { get; set; }
 }
 
+/// <summary>
+/// The user request ID parameters.
+/// </summary>
 public class UserIDRequestDto
 {
     /// <summary>
-    /// User ID
+    /// The user ID.
     /// </summary>
     [FromRoute(Name = "userID")]
     public Guid Id { get; set; }
 }
 
+/// <summary>
+/// The product ID request parameters.
+/// </summary>
 public class ProductIdRequestDto
 {
     /// <summary>
-    /// Product ID
+    /// The product ID.
     /// </summary>
     [FromRoute(Name = "productid")]
     public Guid ProductId { get; set; }
 }
 
+/// <summary>
+/// The user product ID request parameters.
+/// </summary>
 public class UserProductIdsRequestDto
 {
     /// <summary>
-    /// Product ID
+    /// The product ID.
     /// </summary>
     [FromQuery(Name = "productid")]
     public Guid ProductId { get; set; }
 
     /// <summary>
-    /// User ID
+    /// The user ID.
     /// </summary>
     [FromQuery(Name = "userid")]
     public Guid UserId { get; set; }
 }
 
-
+/// <summary>
+/// The migrator name request parameters.
+/// </summary>
 public class MigratorNameRequestDto
 {
     /// <summary>
-    /// Migrator name
+    /// The migrator name.
     /// </summary>
     [FromRoute(Name = "migratorName")]
     public string MigratorName { get; set; }

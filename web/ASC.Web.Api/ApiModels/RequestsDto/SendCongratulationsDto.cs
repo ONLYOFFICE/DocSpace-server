@@ -27,26 +27,33 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// Congratulations request parameters
+/// The congratulations request parameters.
 /// </summary>
 public class SendCongratulationsDto
 {
     /// <summary>
-    /// User ID
+    /// The user ID.
     /// </summary>
     public Guid Userid { get; set; }
 
     /// <summary>
-    /// Email key
+    /// The email key.
     /// </summary>
     public string Key { get; set; }
 }
 
+///<summary>
+/// The send remove instructions parameters.
+///</summary>
 public class SendRemoveInstructionsDto
 {
-    /// <summary>Uer ID</summary>
+    ///<summary>
+    /// The user ID.
+    ///</summary>
     public Guid Userid { get; set; }
 
-    /// <summary>Email key</summary>
+    ///<summary>
+    /// The email key.
+    ///</summary>
     public string Key { get; set; }
 }

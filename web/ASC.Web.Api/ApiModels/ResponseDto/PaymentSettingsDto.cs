@@ -26,18 +26,54 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
+/// <summary>
+/// The payment settings parameters.
+/// </summary>
 public class PaymentSettingsDto
 {
+    /// <summary>
+    /// The sales email of the payment setting.
+    /// </summary>
     public string SalesEmail { get; set; }
+
+    /// <summary>
+    /// The feedback and support URL of the payment setting.
+    /// </summary>
     public string FeedbackAndSupportUrl { get; set; }
+
+    /// <summary>
+    /// The buy URL of the payment setting.
+    /// </summary>
     public string BuyUrl { get; set; }
+
+    /// <summary>
+    /// Specifies whether the payment setting is standalone or not.
+    /// </summary>
     public bool Standalone { get; set; }
+
+    /// <summary>
+    /// The current license information.
+    /// </summary>
     public CurrentLicenseInfo CurrentLicense { get; set; }
+
+    /// <summary>
+    /// The maximum payment setting.
+    /// </summary>
     public int Max { get; set; }
 }
 
+/// <summary>
+/// The current license information information.
+/// </summary>
 public class CurrentLicenseInfo
 {
+    /// <summary>
+    /// Specifies whether it is the trial license or not.
+    /// </summary>
     public bool Trial { get; set; }
+
+    /// <summary>
+    /// The due date of the current license.
+    /// </summary>
     public DateTime DueDate { get; set; }
 }

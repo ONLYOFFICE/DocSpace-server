@@ -27,12 +27,12 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// Request parameters to upload a license
+/// The request parameters to upload a license.
 /// </summary>
 public class UploadLicenseRequestsDto
 {
     /// <summary>
-    /// License attachments
+    /// The list of license attachments.
     /// </summary>
     public IEnumerable<IFormFile> Files { get; set; }
 }

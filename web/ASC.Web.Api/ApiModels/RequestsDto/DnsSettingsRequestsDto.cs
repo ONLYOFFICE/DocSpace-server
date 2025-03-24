@@ -27,17 +27,17 @@
 namespace ASC.Web.Api.Models;
 
 /// <summary>
-/// DNS settings request parameters
+/// The DNS settings request parameters.
 /// </summary>
 public class DnsSettingsRequestsDto
 {
     /// <summary>
-    /// DNS
+    /// The DNS settings name.
     /// </summary>
     public string DnsName { get; set; }
 
     /// <summary>
-    /// Enabled or not
+    /// Specifies whether DNS settings is enabled or not.
     /// </summary>
     public bool Enable { get; set; }
 }

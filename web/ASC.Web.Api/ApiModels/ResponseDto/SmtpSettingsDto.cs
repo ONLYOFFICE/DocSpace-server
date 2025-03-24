@@ -27,67 +27,67 @@
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 /// <summary>
-/// SMTP settings
+/// The SMTP settings parameters.
 /// </summary>
 public class SmtpSettingsDto : IMapFrom<SmtpSettings>
 {
     /// <summary>
-    /// Host
+    /// The SMTP host.
     /// </summary>
     [SwaggerSchemaCustom(Example = "mail.example.com")]
     public string Host { get; set; }
 
     /// <summary>
-    /// Port
+    /// The SMTP port.
     /// </summary>
     [SwaggerSchemaCustom(Example = 25)]
     [Range(1, 65535)]
     public int? Port { get; set; }
 
     /// <summary>
-    /// Sender address
+    /// The sender address.
     /// </summary>
     [SwaggerSchemaCustom(Example = "notify@example.com")]
     public string SenderAddress { get; set; }
 
     /// <summary>
-    /// Sender display name
+    /// The sender display name.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Postman")]
     public string SenderDisplayName { get; set; }
 
     /// <summary>
-    /// Credentials username
+    /// The credentials username.
     /// </summary>
     [SwaggerSchemaCustom(Example = "notify@example.com")]
     [StringLength(255)]
     public string CredentialsUserName { get; set; }
 
     /// <summary>
-    /// Credentials user password
+    /// The credentials user password.
     /// </summary>
     [SwaggerSchemaCustom(Example = "{password}")]
     public string CredentialsUserPassword { get; set; }
 
     /// <summary>
-    /// Enables SSL or not
+    /// The enables SSL or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool EnableSSL { get; set; }
 
     /// <summary>
-    /// Enables authentication or not
+    /// The enables authentication or not.
     /// </summary>
     public bool EnableAuth { get; set; }
 
     /// <summary>
-    /// Specifies whether to use NTLM or not
+    /// Specifies whether to use NTLM or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool UseNtlm { get; set; }
 
     /// <summary>
-    /// Specifies if the current settings are default or not
+    /// Specifies if the current settings are default or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool IsDefaultSettings { get; set; }

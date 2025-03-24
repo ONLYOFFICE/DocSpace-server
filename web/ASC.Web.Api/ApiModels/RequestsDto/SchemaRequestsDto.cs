@@ -27,68 +27,68 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// Team template parameters
+/// The team template parameters.
 /// </summary>
 public class SchemaBaseRequestsDto
 {
     /// <summary>
-    /// Team template ID
+    /// The team template ID.
     /// </summary>
     public string Id { get; init; }
 }
 
 /// <summary>
-/// Team template parameters
+/// The team template parameters.
 /// </summary>
 public class SchemaRequestsDto : SchemaBaseRequestsDto
 {
     /// <summary>
-    /// Team template name
+    /// The team template name.
     /// </summary>
     public string Name { get; set; }
 
     /// <summary>
-    /// User caption
+    /// The user caption.
     /// </summary>
     public string UserCaption { get; init; }
 
     /// <summary>
-    /// Users caption
+    /// The users caption.
     /// </summary>
     public string UsersCaption { get; init; }
 
     /// <summary>
-    /// Group caption
+    /// The group caption.
     /// </summary>
     public string GroupCaption { get; init; }
 
     /// <summary>
-    /// Groups caption
+    /// The groups caption.
     /// </summary>
     public string GroupsCaption { get; init; }
 
     /// <summary>
-    /// User status caption
+    /// The user status caption.
     /// </summary>
     public string UserPostCaption { get; init; }
 
     /// <summary>
-    /// Registration date caption
+    /// The registration date caption.
     /// </summary>
     public string RegDateCaption { get; init; }
 
     /// <summary>
-    /// Group lead caption
+    /// The group lead caption.
     /// </summary>
     public string GroupHeadCaption { get; init; }
 
     /// <summary>
-    /// Guest caption
+    /// The guest caption.
     /// </summary>
     public string GuestCaption { get; init; }
 
     /// <summary>
-    /// Guests caption
+    /// The guests caption.
     /// </summary>
     public string GuestsCaption { get; init; }
 }

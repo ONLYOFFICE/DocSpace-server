@@ -27,17 +27,17 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// Request parameters for the room notification settings
+/// The request parameters for the room notification settings.
 /// </summary>
 public class RoomsNotificationsSettingsRequestDto
 {
     /// <summary>
-    /// Room ID
+    /// The room ID.
     /// </summary>
     public object RoomsId { get; set; }
 
     /// <summary>
-    /// Specifies if the room notifications are disabled or not
+    /// Specifies if the room notifications are disabled or not.
     /// </summary>
     public bool Mute { get; set; }
 }

@@ -26,95 +26,98 @@
 
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
+/// <summary>
+/// The audit event parameters.
+/// </summary>
 public class AuditEventDto
 {
     /// <summary>
-    /// ID
+    /// The audit event ID.
     /// </summary>
     public int Id { get; set; }
 
     /// <summary>
-    /// Date
+    /// The audit event date.
     /// </summary>
     public ApiDateTime Date { get; set; }
 
     /// <summary>
-    /// User
+    /// The audit event user.
     /// </summary>
     public string User { get; set; }
 
     /// <summary>
-    /// User ID
+    /// The audit event user ID.
     /// </summary>
     public Guid UserId { get; set; }
 
     /// <summary>
-    /// Action
+    /// The audit event action.
     /// </summary>
     public string Action { get; set; }
 
     /// <summary>
-    /// Action ID
+    /// The audit event action ID.
     /// </summary>
     public MessageAction ActionId { get; set; }
 
     /// <summary>
-    /// IP
+    /// The audit event IP.
     /// </summary>
     public string IP { get; set; }
 
     /// <summary>
-    /// Country
+    /// The audit event country.
     /// </summary>
     public string Country { get; set; }
 
     /// <summary>
-    /// City
+    /// The audit event city.
     /// </summary>
     public string City { get; set; }
 
     /// <summary>
-    /// Browser
+    /// The audit event browser.
     /// </summary>
     public string Browser { get; set; }
 
     /// <summary>
-    /// Platform
+    /// The audit event platform.
     /// </summary>
     public string Platform { get; set; }
 
     /// <summary>
-    /// Page
+    /// The audit event page.
     /// </summary>
     public string Page { get; set; }
 
     /// <summary>
-    /// Action type
+    /// The audit event action type.
     /// </summary>
     public ActionType ActionType { get; set; }
 
     /// <summary>
-    /// Product type
+    /// The audit event product type.
     /// </summary>
     public ProductType Product { get; set; }
 
     /// <summary>
-    /// Module type
+    /// The audit event module type.
     /// </summary>
     public ModuleType Module { get; set; }
 
     /// <summary>
-    /// List of targets
+    /// The audit event list of targets.
     /// </summary>
     public IEnumerable<string> Target { get; set; }
 
     /// <summary>
-    /// List of entry types
+    /// The audit event list of entry types.
     /// </summary>
     public IEnumerable<EntryType> Entries { get; set; }
 
     /// <summary>
-    /// Context
+    /// The audit event context.
     /// </summary>
     public string Context { get; set; }
     

@@ -26,22 +26,28 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
+/// <summary>
+/// The login settings parameters.
+/// </summary>
 public class LoginSettingsDto : IMapFrom<LoginSettings>
 {
     /// <summary>
-    /// Maximum number of the user attempts to log in
+    /// The maximum number of the user attempts to log in.
     /// </summary>
     public int AttemptCount { get; set; }
 
     /// <summary>
-    /// The time for which the user will be blocked after unsuccessful login attempts
+    /// The time for which the user will be blocked after unsuccessful login attempts.
     /// </summary>
     public int BlockTime { get; set; }
 
     /// <summary>
-    /// The time to wait for a response from the server
+    /// The time to wait for a response from the server.
     /// </summary>
     public int CheckPeriod { get; set; }
     
+    /// <summary>
+    /// Specifies whether the login settings is default or not.
+    /// </summary>
     public bool IsDefault { get; set; }
 }

@@ -26,40 +26,43 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
+/// <summary>
+/// The additional white label settings parameters.
+/// </summary>
 public class AdditionalWhiteLabelSettingsDto: IMapFrom<AdditionalWhiteLabelSettings>
 {
     /// <summary>
-    /// Specifies if the start document is enabled or not
+    /// Specifies if the start document is enabled or not.
     /// </summary>
     public bool StartDocsEnabled { get; set; }
 
     /// <summary>
-    /// Specifies if the help center is enabled or not
+    /// Specifies if the help center is enabled or not.
     /// </summary>
     public bool HelpCenterEnabled { get; set; }
 
     /// <summary>
-    /// Specifies if feedback and support are available or not
+    /// Specifies if feedback and support are available or not.
     /// </summary>
     public bool FeedbackAndSupportEnabled { get; set; }
 
     /// <summary>
-    /// Specifies if the user forum is enabled or not
+    /// Specifies if the user forum is enabled or not.
     /// </summary>
     public bool UserForumEnabled { get; set; }
 
     /// <summary>
-    /// Specifies if the video guides are enabled or not
+    /// Specifies if the video guides are enabled or not.
     /// </summary>
     public bool VideoGuidesEnabled { get; set; }
 
     /// <summary>
-    /// Specifies if the license agreements are enabled or not
+    /// Specifies if the license agreements are enabled or not.
     /// </summary>
     public bool LicenseAgreementsEnabled { get; set; }
 
     /// <summary>
-    /// Specifies if these settings are default or not
+    /// Specifies if these settings are default or not.
     /// </summary>
     public bool IsDefault { get; set; }
 

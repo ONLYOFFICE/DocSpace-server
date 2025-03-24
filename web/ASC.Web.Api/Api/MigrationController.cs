@@ -26,6 +26,10 @@
 
 namespace ASC.Api.Migration;
 
+/// <summary>
+/// Migration API.
+/// </summary>
+/// <name>migration</name>
 [DefaultRoute]
 [ApiController]
 [ControllerName("migration")]
@@ -38,8 +42,11 @@ public class MigrationController(
     MigrationLogger migrationLogger) : ControllerBase
 {
     /// <summary>
-    /// Gets migration list
+    /// Gets migration list.
     /// </summary>
+    /// <short>
+    /// Get migrations
+    /// </short>
     /// <path>api/2.0/migration/list</path>
     [Tags("Migration")]
     [SwaggerResponse(200, "Ok", typeof(string[]))]
@@ -52,8 +59,11 @@ public class MigrationController(
     }
 
     /// <summary>
-    /// Uploads and inits migration
+    /// Uploads and inits migration.
     /// </summary>
+    /// <short>
+    /// Upload and init migration
+    /// </short>
     /// <path>api/2.0/migration/init/{migratorName}</path>
     [Tags("Migration")]
     [SwaggerResponse(200, "Ok")]
@@ -67,8 +77,11 @@ public class MigrationController(
     }
 
     /// <summary>
-    /// Gets migration status
+    /// Gets migration status.
     /// </summary>
+    /// <short>
+    /// Get migration status
+    /// </short>
     /// <path>api/2.0/migration/status</path>
     [Tags("Migration")]
     [SwaggerResponse(200, "Ok", typeof(MigrationStatusDto))]
@@ -100,8 +113,11 @@ public class MigrationController(
     }
 
     /// <summary>
-    /// Cancels migration
+    /// Cancels migration.
     /// </summary>
+    /// <short>
+    /// Cancel migration
+    /// </short>
     /// <path>api/2.0/migration/cancel</path>
     [Tags("Migration")]
     [SwaggerResponse(200, "Ok")]
@@ -115,8 +131,11 @@ public class MigrationController(
     }
 
     /// <summary>
-    /// Clears migration
+    /// Clears migration.
     /// </summary>
+    /// <short>
+    /// Clear migration
+    /// </short>
     /// <path>api/2.0/migration/clear</path>
     [Tags("Migration")]
     [SwaggerResponse(200, "Ok")]
@@ -130,8 +149,11 @@ public class MigrationController(
     }
 
     /// <summary>
-    /// Migrates
+    /// Migrates.
     /// </summary>
+    /// <short>
+    /// Migrate
+    /// </short>
     /// <path>api/2.0/migration/migrate</path>
     [Tags("Migration")]
     [SwaggerResponse(200, "Ok")]
@@ -145,8 +167,11 @@ public class MigrationController(
     }
 
     /// <summary>
-    /// Gets migration logs
+    /// Returns migration logs.
     /// </summary>
+    /// <short>
+    /// Get migration logs
+    /// </short>
     /// <path>api/2.0/migration/logs</path>
     [Tags("Migration")]
     [SwaggerResponse(200, "Ok")]
@@ -172,8 +197,11 @@ public class MigrationController(
     }
 
     /// <summary>
-    /// Finishes migration
+    /// Finishes migration.
     /// </summary>
+    /// <short>
+    /// Finish migration
+    /// </short>
     /// <path>api/2.0/migration/finish</path>
     [Tags("Migration")]
     [SwaggerResponse(200, "Ok")]

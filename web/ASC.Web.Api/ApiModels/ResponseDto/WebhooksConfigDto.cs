@@ -27,84 +27,88 @@
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
+/// The webhooks configuration parameters.
 /// </summary>
 public class WebhooksConfigDto
 {
     /// <summary>
-    /// ID
+    /// The webhook ID.
     /// </summary>
     public int Id { get; set; }
 
     /// <summary>
-    /// Name
+    /// The webhook name.
     /// </summary>
     public string Name { get; set; }
 
     /// <summary>
-    /// URI
+    /// The webhook URI.
     /// </summary>
     public string Uri { get; set; }
 
     /// <summary>
-    /// Specifies if the webhooks are enabled or not
+    /// Specifies if the webhooks are enabled or not.
     /// </summary>
     public bool Enabled { get; set; }
 
     /// <summary>
-    /// SSL Verification
+    /// The webhook SSL verification.
     /// </summary>
     public bool SSL { get; set; }
 
     /// <summary>
-    /// Triggers
+    /// The webhook triggers.
     /// </summary>
     public WebhookTrigger Triggers { get; set; }
 
     /// <summary>
-    /// Create by
+    /// The webhook create by.
     /// </summary>
     public EmployeeDto CreatedBy { get; set; }
 
     /// <summary>
-    /// Create on
+    /// The webhook create on.
     /// </summary>
     public DateTime? CreatedOn { get; set; }
 
     /// <summary>
-    /// Modified by
+    /// The webhook modified by.
     /// </summary>
     public EmployeeDto ModifiedBy { get; set; }
 
     /// <summary>
-    /// Modified on
+    /// The webhook modified on.
     /// </summary>
     public DateTime? ModifiedOn { get; set; }
 
     /// <summary>
-    /// Last failure on
+    /// The webhook last failure on.
     /// </summary>
     public DateTime? LastFailureOn { get; set; }
 
     /// <summary>
-    /// Last failure content
+    /// The webhook last failure content.
     /// </summary>
     public string LastFailureContent { get; set; }
 
     /// <summary>
-    /// Last success on
+    /// The webhook last success on.
     /// </summary>
     public DateTime? LastSuccessOn { get; set; }
 }
 
+/// <summary>
+/// The webhooks configuration with status parameters.
+/// </summary>
 public class WebhooksConfigWithStatusDto
 {
     /// <summary>
-    /// Configs
+    /// The webhook configs.
     /// </summary>
     public WebhooksConfigDto Configs { get; set; }
 
     /// <summary>
-    /// Status
+    /// The webhooks status.
     /// </summary>
     public int Status { get; set; }
 }

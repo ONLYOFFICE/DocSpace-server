@@ -28,6 +28,9 @@ using Profile = AutoMapper.Profile;
 
 namespace ASC.Core.Tenants;
 
+/// <summary>
+/// The tenant parameters.
+/// </summary>
 [ProtoContract]
 public class Tenant : IMapFrom<DbTenant>
 {
