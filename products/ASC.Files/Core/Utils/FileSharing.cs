@@ -443,11 +443,6 @@ public class FileSharingHelper(
             return false;
         }
 
-        if (entry is File<T> { IsForm: true })
-        {
-            return false;
-        }
-
         if (entry.RootFolderType == FolderType.COMMON && await global.IsDocSpaceAdministratorAsync)
         {
             return true;

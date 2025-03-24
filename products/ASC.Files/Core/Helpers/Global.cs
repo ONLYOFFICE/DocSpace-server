@@ -76,6 +76,7 @@ public class GlobalNotify
                 try
                 {
                     GlobalFolder.ProjectsRootFolderCache.Clear();
+                    GlobalFolder.UserRootFolderCache.Clear();
                     GlobalFolder.CommonFolderCache.Clear();
                     GlobalFolder.ShareFolderCache.Clear();
                     GlobalFolder.RecentFolderCache.Clear();

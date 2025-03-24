@@ -32,8 +32,6 @@ namespace ASC.Files.Service.IntegrationEvents.EventHandling;
 [Scope]
 public class DataStorageEncryptionIntegrationEventHandler(
     ILogger<DataStorageEncryptionIntegrationEventHandler> logger,
-    TenantManager tenantManager,
-    SecurityContext securityContext,
     EncryptionWorker encryptionWorker)
     : IIntegrationEventHandler<DataStorageEncryptionIntegrationEvent>
 {
@@ -48,10 +46,6 @@ public class DataStorageEncryptionIntegrationEventHandler(
 
             try
             {
-                await tenantManager.SetCurrentTenantAsync(@event.TenantId);
-
-                await securityContext.AuthenticateMeWithoutCookieAsync(@event.TenantId, @event.CreateBy);
-
                 await encryptionWorker.StartAsync(@event.EncryptionSettings, @event.ServerRootPath);
             }
             catch (Exception ex)

@@ -48,17 +48,19 @@ public class WebItemSettings() : ISettings<WebItemSettings>
     {
         var settings = new WebItemSettings(_webItemManager);
         _webItemManager.GetItemsAll().ForEach(w =>
-    {
-        var opt = new WebItemOption
         {
-            ItemID = w.ID,
-            SortOrder = _webItemManager.GetSortOrder(w),
-            Disabled = false
-        };
-        settings.SettingsCollection.Add(opt);
-    });
+            var opt = new WebItemOption
+            {
+                ItemID = w.ID,
+                SortOrder = _webItemManager.GetSortOrder(w),
+                Disabled = false
+            };
+            settings.SettingsCollection.Add(opt);
+        });
         return settings;
     }
+    
+    public DateTime LastModified { get; set; }
 
     public class WebItemOption
     {

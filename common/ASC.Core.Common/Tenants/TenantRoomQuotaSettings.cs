@@ -38,4 +38,6 @@ public class TenantRoomQuotaSettings : TenantEntityQuotaSettings, ISettings<Tena
     {
         return new TenantRoomQuotaSettings();
     }
+    
+    public DateTime LastModified { get; set; }
 }
