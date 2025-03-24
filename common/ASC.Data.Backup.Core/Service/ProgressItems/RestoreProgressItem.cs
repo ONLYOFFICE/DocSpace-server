@@ -239,7 +239,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
             {
                 if (Dump)
                 {
-                    var tenants = await _tenantManager.GetTenantsAsync();
+                    var tenants = await _tenantManager.GetTenantsAsync(false);
                     foreach (var t in tenants.Where(t => t.Status == TenantStatus.Restoring))
                     {
                         t.SetStatus(TenantStatus.Active);
