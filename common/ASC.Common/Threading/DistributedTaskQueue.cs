@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using IDistributedLockProvider = ASC.Common.Threading.DistributedLock.Abstractions.IDistributedLockProvider;
+
 namespace ASC.Common.Threading;
 
 [Transient]
@@ -31,7 +33,8 @@ public class DistributedTaskQueue<T>(
     ChannelWriter<T> channelWriter,
     ICacheNotify<DistributedTaskCancelation> cancelTaskNotify,
     IFusionCache hybridCache,
-    ILogger<DistributedTaskQueue<T>> logger)  where T : DistributedTask
+    ILogger<DistributedTaskQueue<T>> logger,
+    IDistributedLockProvider distributedLockProvider)  where T : DistributedTask
 {
     public const string QUEUE_DEFAULT_PREFIX = "asc_distributed_task_queue_";
     public static readonly int INSTANCE_ID = Environment.ProcessId;
@@ -102,7 +105,7 @@ public class DistributedTaskQueue<T>(
     
     public async Task<List<T>> GetAllTasks(int? instanceId = null)
     {
-        var queueTasks = await (await LoadFromCache()).ToAsyncEnumerable().SelectAwait(async id => await hybridCache.GetOrDefaultAsync<T>(_name + id)).Where(t => t != null).ToListAsync();
+        var queueTasks = await (await LoadKeysFromCache()).ToAsyncEnumerable().SelectAwait(async id => await PeekTask(id)).Where(t => t != null).ToListAsync();
         
         if (instanceId.HasValue)
         {
@@ -137,6 +140,16 @@ public class DistributedTaskQueue<T>(
         distributedTask.Publication ??= GetPublication();
         await distributedTask.PublishChanges();
 
+        await using (await distributedLockProvider.TryAcquireFairLockAsync($"{Name}_lock"))
+        {
+            var tasks = await LoadKeysFromCache();
+            if (!tasks.Contains(distributedTask.Id))
+            {
+                tasks.Add(distributedTask.Id);
+                await SaveKeysToCache(tasks);
+            }
+        }
+
         return distributedTask.Id;
     }
 
@@ -144,7 +157,7 @@ public class DistributedTaskQueue<T>(
     {
         return async task =>
         {
-            var fromCache = task as T ?? await hybridCache.GetOrDefaultAsync<T>(_name + task.Id);
+            var fromCache = task as T ?? await PeekTask(task.Id);
 
             fromCache.LastModifiedOn = DateTime.UtcNow;
 
@@ -152,25 +165,18 @@ public class DistributedTaskQueue<T>(
             logger.TracePublicationDistributedTask(task.Id, task.InstanceId);
         };
     }
-    
-    public async Task SaveToCache(List<T> queueTasks)
-    {
-        if (queueTasks.Count == 0)
-        {
-            await hybridCache.RemoveAsync(_name);
-
-            return;
-        }
-        
-        await hybridCache.SetAsync(_name, queueTasks.Select(r => r.Id).ToList(), TimeSpan.FromDays(1));
-    }
 
     private async Task SaveToCache(T queueTask)
     {
         await hybridCache.SetAsync(_name + queueTask.Id, queueTask, TimeSpan.FromDays(1));
     }
     
-    private async Task<List<string>> LoadFromCache()
+    public async Task SaveKeysToCache(List<string> queueTasks)
+    {
+        await hybridCache.SetAsync(_name, queueTasks, TimeSpan.FromDays(1));
+    }
+    
+    public async Task<List<string>> LoadKeysFromCache()
     {
         return await hybridCache.GetOrDefaultAsync<List<string>>(_name) ?? [];
     }
@@ -178,7 +184,8 @@ public class DistributedTaskQueue<T>(
 
 public class DistributedTaskQueueService<T>(
     IServiceProvider serviceProvider,
-    ChannelReader<T> channelReader
+    ChannelReader<T> channelReader,
+    IDistributedLockProvider distributedLockProvider
 ) : BackgroundService   where T : DistributedTask
 {
     private readonly PeriodicTimer _timer = new(TimeSpan.FromSeconds(10));
@@ -205,11 +212,32 @@ public class DistributedTaskQueueService<T>(
         {
             while (await _timer.WaitForNextTickAsync(stoppingToken) && !stoppingToken.IsCancellationRequested)
             {
-                var queueTasks = await queue.GetAllTasks();
-                var removed = queueTasks.RemoveAll(r => r.LastModifiedOn.AddSeconds(queue.TimeUntilUnregisterInSeconds) < DateTime.UtcNow);
-                if (removed > 0)
+                var now = DateTime.UtcNow;
+                var queueTasks = await queue.LoadKeysFromCache();
+                var toRemove = new List<string>();
+                
+                foreach (var q in queueTasks)
                 {
-                    await queue.SaveToCache(queueTasks);
+                    var task = await queue.PeekTask(q);
+                    if (task == null)
+                    {
+                        toRemove.Add(q);
+                    }
+                    else if(task.LastModifiedOn.AddSeconds(queue.TimeUntilUnregisterInSeconds) < now)
+                    {
+                        toRemove.Add(q);
+                        await queue.DequeueTask(q);
+                    }
+                }
+                
+                if (toRemove.Count > 0)
+                { 
+                    await using (await distributedLockProvider.TryAcquireFairLockAsync($"{queue.Name}_lock"))
+                    {                    
+                        var queueTasksFromCache = await queue.LoadKeysFromCache();
+                        await queue.SaveKeysToCache(queueTasksFromCache.Except(toRemove).ToList());
+                    }
+
                 }
             }
         }, stoppingToken);

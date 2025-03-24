@@ -54,6 +54,8 @@ public class FileOperationsManagerHolder<T> where T : FileOperation
             if (o.Status > DistributedTaskStatus.Running)
             {
                 o.Progress = 100;
+                
+                await _tasks.DequeueTask(o.Id);
             }
             
             if (o.Hold || o.Progress != 100)
@@ -95,11 +97,7 @@ public class FileOperationsManagerHolder<T> where T : FileOperation
 
     public async Task<string> Publish(T task)
     {
-        var result = await _tasks.PublishTask(task);
-        var tasks = await _tasks.GetAllTasks();
-        tasks.Add(task);
-        await _tasks.SaveToCache(tasks);
-        return result;
+        return await _tasks.PublishTask(task);
     }
 
     public async Task CheckRunning(Guid userId, FileOperationType fileOperationType)
