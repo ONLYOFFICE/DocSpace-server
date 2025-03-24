@@ -821,4 +821,17 @@ public enum MessageAction
     GeneratePersonalAccessToken = 9909,
     
     #endregion
+
+    #region Ldap
+
+    [SwaggerEnum("Ldap enabled")]
+    LdapEnabled = 5501,
+
+    [SwaggerEnum("Ldap disabled")]
+    LdapDisabled = 5502,
+
+    [SwaggerEnum("LDAP synchronization completed")]
+    LdapSync = 5503
+
+    #endregion
 }
