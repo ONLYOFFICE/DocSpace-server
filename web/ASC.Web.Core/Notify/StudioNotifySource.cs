@@ -155,7 +155,10 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
                 Actions.DeveloperAdminPaymentWarningGracePeriodBeforeActivation,
                 Actions.DeveloperAdminPaymentWarningGracePeriodActivation,
                 Actions.DeveloperAdminPaymentWarningGracePeriodBeforeExpiration,
-                Actions.DeveloperAdminPaymentWarningGracePeriodExpiration
+                Actions.DeveloperAdminPaymentWarningGracePeriodExpiration,
+
+                Actions.UserTypeChanged,
+                Actions.UserRoleChanged
             );
     }
 

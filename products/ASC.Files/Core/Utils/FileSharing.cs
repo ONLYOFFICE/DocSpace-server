@@ -82,7 +82,7 @@ public class FileSharingAceHelper(
 
         foreach (var w in aceWrappers.OrderByDescending(ace => ace.SubjectGroup))
         {
-            if (entry.CreateBy == w.Id && (!beforeOwnerChange || w.Access != FileShare.RoomManager))
+            if (entry.CreateBy == w.Id && (!beforeOwnerChange || w.Access != FileShare.RoomManager && w.Access != FileShare.ContentCreator))
             {
                 continue;
             }
@@ -439,11 +439,6 @@ public class FileSharingHelper(
     public async Task<bool> CanSetAccessAsync<T>(FileEntry<T> entry)
     {
         if (entry == null)
-        {
-            return false;
-        }
-
-        if (entry is File<T> { IsForm: true })
         {
             return false;
         }

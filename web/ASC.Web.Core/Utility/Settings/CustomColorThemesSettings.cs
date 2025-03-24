@@ -48,6 +48,8 @@ public class CustomColorThemesSettings : ISettings<CustomColorThemesSettings>
         };
     }
 
+    public DateTime LastModified { get; set; }
+
     [JsonIgnore]
     public Guid ID
     {

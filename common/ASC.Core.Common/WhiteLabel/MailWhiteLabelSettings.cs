@@ -67,6 +67,8 @@ public class MailWhiteLabelSettings : ISettings<MailWhiteLabelSettings>
             FooterSocialEnabled = true
         };
     }
+    
+    public DateTime LastModified { get; set; }
 
     public bool IsDefault()
     {

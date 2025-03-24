@@ -41,6 +41,8 @@ public class BadgesSettings : ISettings<BadgesSettings>
             EnableBadges = true
         };
     }
+    
+    public DateTime LastModified { get; set; }
 }
 
 [Scope]

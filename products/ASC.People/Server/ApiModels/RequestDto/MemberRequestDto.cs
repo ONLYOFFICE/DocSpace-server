@@ -335,6 +335,18 @@ public class ContactsRequestDto
     public ContactsRequest Contacts { get; set; }
 }
 
+/// <summary>
+/// 
+/// </summary>
+public class GuestShareRequestDto
+{
+    /// <summary>
+    /// User ID
+    /// </summary>
+    [FromRoute(Name = "userid")]
+    public Guid UserId { get; set; }
+}
+
 public class CultureRequestDto
 {
     /// <summary>

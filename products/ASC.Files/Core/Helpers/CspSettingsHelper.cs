@@ -134,9 +134,9 @@ public class CspSettingsHelper(
         return headerValue;
     }
 
-    public async Task<CspSettings> LoadAsync()
+    public async Task<CspSettings> LoadAsync(DateTime? lastModified = null)
     {
-        return await settingsManager.LoadAsync<CspSettings>();
+        return await settingsManager.LoadAsync<CspSettings>(lastModified);
     }
 
     public async Task RenameDomain(string oldDomain, string newDomain)
@@ -225,13 +225,15 @@ public class CspSettingsHelper(
 
         options.Add(defaultOptions);
 
-        if (Uri.IsWellFormedUriString(filesLinkUtility.GetDocServiceUrl(), UriKind.Absolute))
+        var docServiceUrl = filesLinkUtility.GetDocServiceUrl();
+        
+        if (Uri.IsWellFormedUriString(docServiceUrl, UriKind.Absolute))
         {
             options.Add(new CspOptions
             {
-                Script = [filesLinkUtility.GetDocServiceUrl()],
-                Frame = [filesLinkUtility.GetDocServiceUrl()],
-                Connect = [filesLinkUtility.GetDocServiceUrl()]
+                Script = [docServiceUrl],
+                Frame = [docServiceUrl],
+                Connect = [docServiceUrl]
             });
         }
 

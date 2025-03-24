@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using SecurityContext = ASC.Core.SecurityContext;
+
 namespace ASC.Data.Reassigns;
 
 /// <summary>
@@ -86,47 +88,53 @@ public class ReassignProgressItem : DistributedTaskProgress
         {
             await securityContext.AuthenticateMeWithoutCookieAsync(_currentUserId);
 
-            await SetPercentageAndCheckCancellation(5, true);
+            await SetPercentageAndCheckCancellationAsync(5, true);
 
             await fileStorageService.DemandPermissionToReassignDataAsync(FromUser, ToUser);
 
-            await SetPercentageAndCheckCancellation(10, true);
+            await SetPercentageAndCheckCancellationAsync(10, true);
 
             List<int> personalFolderIds = null;
 
             if (_deleteProfile)
             {
-                await fileStorageService.DeletePersonalDataAsync<int>(FromUser);
+                var currentType = await userManager.GetUserTypeAsync(FromUser);
+                if (currentType != EmployeeType.Guest)
+                {
+                    await fileStorageService.MoveSharedFilesAsync(FromUser, ToUser);
+                    await SetPercentageAndCheckCancellationAsync(20, true);
+                }
+                await fileStorageService.DeletePersonalDataAsync(FromUser);
             }
             else
             {
                 personalFolderIds = await fileStorageService.GetPersonalFolderIdsAsync<int>(FromUser);
             }
 
-            await SetPercentageAndCheckCancellation(30, true);
+            await SetPercentageAndCheckCancellationAsync(30, true);
 
             await fileStorageService.ReassignProvidersAsync(FromUser, ToUser);
 
-            await SetPercentageAndCheckCancellation(50, true);
+            await SetPercentageAndCheckCancellationAsync(50, true);
 
             await fileStorageService.ReassignFoldersAsync(FromUser, ToUser, personalFolderIds);
 
-            await SetPercentageAndCheckCancellation(70, true);
+            await SetPercentageAndCheckCancellationAsync(70, true);
 
             await fileStorageService.ReassignFilesAsync(FromUser, ToUser, personalFolderIds);
 
-            await SetPercentageAndCheckCancellation(90, true);
+            await SetPercentageAndCheckCancellationAsync(90, true);
 
             await SendSuccessNotifyAsync(userManager, studioNotifyService, messageService, displayUserSettingsHelper);
 
-            await SetPercentageAndCheckCancellation(95, true);
+            await SetPercentageAndCheckCancellationAsync(95, true);
 
             if (_deleteProfile)
             {
                 await DeleteUserProfile(userManager, userPhotoManager, messageService, displayUserSettingsHelper, socketManager);
             }
 
-            await SetPercentageAndCheckCancellation(100, false);
+            await SetPercentageAndCheckCancellationAsync(100, false);
 
             Status = DistributedTaskStatus.Completed;
         }
@@ -155,7 +163,7 @@ public class ReassignProgressItem : DistributedTaskProgress
         return MemberwiseClone();
     }
 
-    private async Task SetPercentageAndCheckCancellation(double percentage, bool publish)
+    private async Task SetPercentageAndCheckCancellationAsync(double percentage, bool publish)
     {
         Percentage = percentage;
 

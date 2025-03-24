@@ -351,7 +351,7 @@ public interface IDataStore
 #pragma warning restore 1591
 
 
-    IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator validator);
+    Task<IDataStore> ConfigureAsync(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator validator);
     IDataStore SetQuotaController(IQuotaController controller);
 
     Task<string> SavePrivateAsync(string domain, string path, Stream stream, DateTime expires);

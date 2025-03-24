@@ -31,14 +31,39 @@ public class GlobalNotify
 {
     private ILogger Logger { get; set; }
     private readonly ICacheNotify<AscCacheItem> _notify;
+    private readonly ICacheNotify<ClearMyFolderItem> _notifyMyFolder;
 
-    public GlobalNotify(ICacheNotify<AscCacheItem> notify, ILoggerProvider options, CoreBaseSettings coreBaseSettings)
+    public GlobalNotify(ICacheNotify<AscCacheItem> notify, ICacheNotify<ClearMyFolderItem> notifyMyFolder, ILoggerProvider options, CoreBaseSettings coreBaseSettings)
     {
         _notify = notify;
+        _notifyMyFolder = notifyMyFolder;
         Logger = options.CreateLogger("ASC.Files");
         if (coreBaseSettings.Standalone)
         {
             ClearCache();
+        }
+        ClearMyFolderCache();
+    }
+
+    private void ClearMyFolderCache()
+    {
+        try
+        {
+            _notifyMyFolder.Subscribe(r =>
+            {
+                try
+                {
+                    GlobalFolder.UserRootFolderCache.Remove(r.Key, out _);
+                }
+                catch (Exception e)
+                {
+                    Logger.CriticalClearCacheAction(e);
+                }
+            }, CacheNotifyAction.Remove);
+        }
+        catch (Exception e)
+        {
+            Logger.CriticalClearCacheSubscribe(e);
         }
     }
 
@@ -463,16 +488,29 @@ public class GlobalFolder(
             return 0;
         }
 
-        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
-        {
-            return 0;
-        }
-
         var cacheKey = $"my/{tenantManager.GetCurrentTenantId()}/{authContext.CurrentAccount.ID}";
 
-        var myFolderId = UserRootFolderCache.GetOrAdd(cacheKey, _ => new Lazy<int>(() => GetFolderIdAndProcessFirstVisitAsync(daoFactory, true).Result));
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
+        {
+            var myFolderId = UserRootFolderCache.GetOrAdd(cacheKey, _ => new Lazy<int>(() => GetFolderIDUserAsync(daoFactory).Result));
+            return myFolderId.Value;
+        }
+        else
+        {
+            var myFolderId = UserRootFolderCache.GetOrAdd(cacheKey, _ => new Lazy<int>(() => GetFolderIdAndProcessFirstVisitAsync(daoFactory, true).Result));
+            if (myFolderId.Value == 0)
+            {
+                UserRootFolderCache.Remove(cacheKey, out _);
+                myFolderId = UserRootFolderCache.GetOrAdd(cacheKey, _ => new Lazy<int>(() => GetFolderIdAndProcessFirstVisitAsync(daoFactory, true).Result));
+            }
+            return myFolderId.Value;
+        }
+    }
 
-        return myFolderId.Value;
+    private async Task<int> GetFolderIDUserAsync(IDaoFactory daoFactory)
+    {
+        var folderDao = daoFactory.GetFolderDao<int>();
+        return await folderDao.GetFolderIDUserAsync(false);
     }
 
     internal static readonly IDictionary<int, int> CommonFolderCache =

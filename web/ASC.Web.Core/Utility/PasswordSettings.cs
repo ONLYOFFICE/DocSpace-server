@@ -76,6 +76,8 @@ public sealed class PasswordSettings : ISettings<PasswordSettings>
 
         return def;
     }
+    
+    public DateTime LastModified { get; set; }
 }
 
 [Singleton]

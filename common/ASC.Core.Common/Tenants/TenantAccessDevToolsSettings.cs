@@ -45,4 +45,6 @@ public class TenantDevToolsAccessSettings : ISettings<TenantDevToolsAccessSettin
             LimitedAccessForUsers = false
         };
     }
+
+    public DateTime LastModified { get; set; }
 }

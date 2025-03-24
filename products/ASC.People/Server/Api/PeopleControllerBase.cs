@@ -26,12 +26,13 @@
 
 namespace ASC.People.Api;
 
-public abstract class PeopleControllerBase(UserManager userManager,
-        PermissionContext permissionContext,
-        ApiContext apiContext,
-        UserPhotoManager userPhotoManager,
-        IHttpClientFactory httpClientFactory,
-        IHttpContextAccessor httpContextAccessor)
+public abstract class PeopleControllerBase(
+    UserManager userManager,
+    PermissionContext permissionContext,
+    ApiContext apiContext,
+    UserPhotoManager userPhotoManager,
+    IHttpClientFactory httpClientFactory,
+    IHttpContextAccessor httpContextAccessor)
     : ApiControllerBase
 {
     protected readonly UserManager _userManager = userManager;

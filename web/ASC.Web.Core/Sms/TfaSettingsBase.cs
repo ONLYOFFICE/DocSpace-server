@@ -42,6 +42,8 @@ public abstract class TfaSettingsBase<T> : ISettings<T> where T : ISettings<T>
     public List<Guid> MandatoryGroups { get; set; }
 
     public abstract T GetDefault();
+    
+    public DateTime LastModified { get; set; }
 }
 
 

@@ -27,22 +27,23 @@
 namespace ASC.Data.Storage.DiscStorage;
 
 [Scope]
-public class DiscDataStore(TempStream tempStream,
-        TenantManager tenantManager,
-        PathUtils pathUtils,
-        EmailValidationKeyProvider emailValidationKeyProvider,
-        IHttpContextAccessor httpContextAccessor,
-        ILoggerProvider options,
-        ILogger<DiscDataStore> logger,
-        EncryptionSettingsHelper encryptionSettingsHelper,
-        EncryptionFactory encryptionFactory,
-        IHttpClientFactory clientFactory,
-        TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
-        QuotaSocketManager quotaSocketManager,
-        SettingsManager settingsManager,
-        IQuotaService quotaService,
-        UserManager userManager,
-        CustomQuota customQuota)
+public class DiscDataStore(
+    TempStream tempStream,
+    TenantManager tenantManager,
+    PathUtils pathUtils,
+    EmailValidationKeyProvider emailValidationKeyProvider,
+    IHttpContextAccessor httpContextAccessor,
+    ILoggerProvider options,
+    ILogger<DiscDataStore> logger,
+    EncryptionSettingsHelper encryptionSettingsHelper,
+    EncryptionFactory encryptionFactory,
+    IHttpClientFactory clientFactory,
+    TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
+    QuotaSocketManager quotaSocketManager,
+    SettingsManager settingsManager,
+    IQuotaService quotaService,
+    UserManager userManager,
+    CustomQuota customQuota)
     : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, options, logger, clientFactory, tenantQuotaFeatureStatHelper, quotaSocketManager, settingsManager, quotaService, userManager, customQuota)
 {
     public override bool IsSupportInternalUri => false;
@@ -52,7 +53,7 @@ public class DiscDataStore(TempStream tempStream,
     private readonly Dictionary<string, MappedPath> _mappedPaths = new();
     private ICrypt _crypt;
 
-    public override IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator validator)
+    public override async Task<IDataStore> ConfigureAsync(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator validator)
     {
         Tenant = tenant;
         //Fill map path
@@ -74,7 +75,7 @@ public class DiscDataStore(TempStream tempStream,
         DomainsContentAsAttachment = moduleConfig.Domain.Where(x => x.ContentAsAttachment.HasValue).ToDictionary(x => x.Name, y => y.ContentAsAttachment.Value);
         DomainsContentAsAttachment.Add(string.Empty, moduleConfig.ContentAsAttachment.HasValue ? moduleConfig.ContentAsAttachment.Value : false);
 
-        var settings = moduleConfig.DisabledEncryption ? new EncryptionSettings() : encryptionSettingsHelper.Load();
+        var settings = moduleConfig.DisabledEncryption ? new EncryptionSettings() : await encryptionSettingsHelper.LoadAsync();
         _crypt = encryptionFactory.GetCrypt(moduleConfig.Name, settings);
         DataStoreValidator = validator;
         return this;
@@ -91,10 +92,10 @@ public class DiscDataStore(TempStream tempStream,
 
     public override Task<Stream> GetReadStreamAsync(string domain, string path)
     {
-        return Task.FromResult(GetReadStream(domain, path, true));
+        return GetReadStreamAsync(domain, path, true);
     }
 
-    private Stream GetReadStream(string domain, string path, bool withDescription)
+    private async Task<Stream> GetReadStreamAsync(string domain, string path, bool withDescription)
     {
         ArgumentNullException.ThrowIfNull(path);
 
@@ -102,13 +103,13 @@ public class DiscDataStore(TempStream tempStream,
 
         if (File.Exists(target))
         {
-            return withDescription ? _crypt.GetReadStream(target) : File.OpenRead(target);
+            return withDescription ? await _crypt.GetReadStreamAsync(target) : File.OpenRead(target);
         }
 
         throw new FileNotFoundException("File not found", Path.GetFullPath(target));
     }
 
-    public override Task<Stream> GetReadStreamAsync(string domain, string path, long offset)
+    public override async Task<Stream> GetReadStreamAsync(string domain, string path, long offset)
     {
         ArgumentNullException.ThrowIfNull(path);
 
@@ -116,7 +117,7 @@ public class DiscDataStore(TempStream tempStream,
 
         if (File.Exists(target))
         {
-            var stream = _crypt.GetReadStream(target);
+            var stream = await _crypt.GetReadStreamAsync(target);
             if (0 < offset && stream.CanSeek)
             {
                 stream.Seek(offset, SeekOrigin.Begin);
@@ -126,7 +127,7 @@ public class DiscDataStore(TempStream tempStream,
                 throw new InvalidOperationException("Seek stream is not impossible");
             }
 
-            return Task.FromResult(stream);
+            return stream;
         }
 
         throw new FileNotFoundException("File not found", Path.GetFullPath(target));
@@ -201,7 +202,7 @@ public class DiscDataStore(TempStream tempStream,
 
             await QuotaUsedAddAsync(domain, fslen, ownerId);
 
-            _crypt.EncryptFile(target);
+            await _crypt.EncryptFileAsync(target);
 
             return await GetUriAsync(domain, path);
         }
@@ -268,11 +269,11 @@ public class DiscDataStore(TempStream tempStream,
 
         if (QuotaController != null)
         {
-            var size = _crypt.GetFileSize(target);
+            var size = await _crypt.GetFileSizeAsync(target);
             await QuotaUsedAddAsync(domain, size);
         }
 
-        _crypt.EncryptFile(target);
+        await _crypt.EncryptFileAsync(target);
 
         return await GetUriAsync(domain, path);
     }
@@ -297,7 +298,7 @@ public class DiscDataStore(TempStream tempStream,
 
         if (File.Exists(target))
         {
-            var size = _crypt.GetFileSize(target);
+            var size = await _crypt.GetFileSizeAsync(target);
             File.Delete(target);
 
             await QuotaUsedDeleteAsync(domain, size);
@@ -321,7 +322,7 @@ public class DiscDataStore(TempStream tempStream,
                 continue;
             }
 
-            var size = _crypt.GetFileSize(target);
+            var size = await _crypt.GetFileSizeAsync(target);
             File.Delete(target);
 
             await QuotaUsedDeleteAsync(domain, size);
@@ -343,7 +344,7 @@ public class DiscDataStore(TempStream tempStream,
             var entries = Directory.GetFiles(targetDir, pattern, recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
             foreach (var entry in entries)
             {
-                var size = _crypt.GetFileSize(entry);
+                var size = await _crypt.GetFileSizeAsync(entry);
                 File.Delete(entry);
                 await QuotaUsedDeleteAsync(domain, size, ownerId);
             }
@@ -368,7 +369,7 @@ public class DiscDataStore(TempStream tempStream,
                 var fileInfo = new FileInfo(entry);
                 if (fileInfo.LastWriteTime >= fromDate && fileInfo.LastWriteTime <= toDate)
                 {
-                    var size = _crypt.GetFileSize(entry);
+                    var size = await _crypt.GetFileSizeAsync(entry);
                     File.Delete(entry);
                     await QuotaUsedDeleteAsync(domain, size);
                 }
@@ -416,7 +417,7 @@ public class DiscDataStore(TempStream tempStream,
                 Directory.CreateDirectory(Path.GetDirectoryName(newtarget));
             }
 
-            var flength = _crypt.GetFileSize(target);
+            var flength = await _crypt.GetFileSizeAsync(target);
 
             //Delete file if exists
             if (File.Exists(newtarget))
@@ -477,7 +478,7 @@ public class DiscDataStore(TempStream tempStream,
         }
 
         var entries = Directory.GetFiles(targetDir, "*.*", SearchOption.AllDirectories);
-        var size = entries.Where(r =>
+        var size = await entries.Where(r =>
         {
             if (QuotaController == null || string.IsNullOrEmpty(QuotaController.ExcludePattern))
             {
@@ -485,7 +486,7 @@ public class DiscDataStore(TempStream tempStream,
             }
             return !Path.GetFileName(r).StartsWith(QuotaController.ExcludePattern);
         }
-        ).Select(_crypt.GetFileSize).Sum();
+        ).ToAsyncEnumerable().SelectAwait(async r => await _crypt.GetFileSizeAsync(r)).SumAsync();
 
         var subDirs = Directory.GetDirectories(targetDir, "*", SearchOption.AllDirectories).ToList();
         subDirs.Reverse();
@@ -496,27 +497,28 @@ public class DiscDataStore(TempStream tempStream,
         await QuotaUsedDeleteAsync(domain, size, ownerId);
     }
 
-    public override Task<long> GetFileSizeAsync(string domain, string path)
+    public override async Task<long> GetFileSizeAsync(string domain, string path)
     {
         var target = GetTarget(domain, path);
 
         if (File.Exists(target))
         {
-            return Task.FromResult(_crypt.GetFileSize(target));
+            return await _crypt.GetFileSizeAsync(target);
         }
 
         throw new FileNotFoundException("file not found " + target);
     }
 
-    public override Task<long> GetDirectorySizeAsync(string domain, string path)
+    public override async Task<long> GetDirectorySizeAsync(string domain, string path)
     {
         var target = GetTarget(domain, path);
 
         if (Directory.Exists(target))
         {
-            return Task.FromResult(Directory.GetFiles(target, "*.*", SearchOption.AllDirectories)
-            .Select(entry => _crypt.GetFileSize(entry))
-                .Sum());
+            return await Directory.GetFiles(target, "*.*", SearchOption.AllDirectories)
+                .ToAsyncEnumerable()
+                .SelectAwait(async entry => await _crypt.GetFileSizeAsync(entry))
+                .SumAsync();
         }
 
         throw new FileNotFoundException("directory not found " + target);
@@ -551,7 +553,7 @@ public class DiscDataStore(TempStream tempStream,
             var finfo = new FileInfo(entry);
             if ((DateTime.UtcNow - finfo.CreationTimeUtc) > oldThreshold)
             {
-                var size = _crypt.GetFileSize(entry);
+                var size = await _crypt.GetFileSizeAsync(entry);
                 File.Delete(entry);
 
                 await QuotaUsedDeleteAsync(domain, size);
@@ -646,7 +648,7 @@ public class DiscDataStore(TempStream tempStream,
         return 0;
     }
 
-    public override Task<long> GetUsedQuotaAsync(string domain)
+    public override async Task<long> GetUsedQuotaAsync(string domain)
     {
         var target = GetTarget(domain, string.Empty);
         long size = 0;
@@ -654,9 +656,9 @@ public class DiscDataStore(TempStream tempStream,
         if (Directory.Exists(target))
         {
             var entries = Directory.GetFiles(target, "*.*", SearchOption.AllDirectories);
-            size = entries.Select(entry => _crypt.GetFileSize(entry)).Sum();
+            size = await entries.ToAsyncEnumerable().SelectAwait(async entry => await _crypt.GetFileSizeAsync(entry)).SumAsync();
         }
-        return Task.FromResult(size);
+        return size;
     }
 
     public override async Task<Uri> CopyAsync(string srcDomain, string srcpath, string newDomain, string newPath)
@@ -676,7 +678,7 @@ public class DiscDataStore(TempStream tempStream,
 
             File.Copy(target, newtarget, true);
 
-            var flength = _crypt.GetFileSize(target);
+            var flength = await _crypt.GetFileSizeAsync(target);
             await QuotaUsedAddAsync(newDomain, flength);
         }
         else
@@ -708,7 +710,7 @@ public class DiscDataStore(TempStream tempStream,
         return File.Open(target, fileMode);
     }
 
-    public void Decrypt(string domain, string path)
+    public async Task DecryptAsync(string domain, string path)
     {
         ArgumentNullException.ThrowIfNull(path);
 
@@ -716,7 +718,7 @@ public class DiscDataStore(TempStream tempStream,
 
         if (File.Exists(target))
         {
-            _crypt.DecryptFile(target);
+            await _crypt.DecryptFileAsync(target);
         }
         else
         {
@@ -745,7 +747,7 @@ public class DiscDataStore(TempStream tempStream,
         {
             var fp = CrossPlatform.PathCombine(target.ToString(), fi.Name);
             fi.CopyTo(fp, true);
-            var size = _crypt.GetFileSize(fp);
+            var size = await _crypt.GetFileSizeAsync(fp);
             await QuotaUsedAddAsync(newdomain, size);
         }
 
@@ -796,7 +798,7 @@ public class DiscDataStore(TempStream tempStream,
         }
     }
 
-    public void Encrypt(string domain, string path)
+    public async Task EncryptAsync(string domain, string path)
     {
         ArgumentNullException.ThrowIfNull(path);
 
@@ -804,7 +806,7 @@ public class DiscDataStore(TempStream tempStream,
 
         if (File.Exists(target))
         {
-            _crypt.EncryptFile(target);
+            await _crypt.EncryptFileAsync(target);
         }
         else
         {

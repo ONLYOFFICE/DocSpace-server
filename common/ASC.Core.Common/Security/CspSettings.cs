@@ -36,4 +36,6 @@ public class CspSettings : ISettings<CspSettings>
     {
         return new CspSettings { Domains = new List<string>() };
     }
+    
+    public DateTime LastModified { get; set; }
 }

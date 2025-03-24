@@ -36,9 +36,20 @@ public class UserSocketManager(ITariffService tariffService,
     EmployeeFullDtoHelper employeeFullDtoHelper,
     SecurityContext securityContext,
     UserManager userManager,
-    GroupFullDtoHelper groupFullDtoHelper) : SocketServiceClient(tariffService, tenantManager, channelWriter, machinePseudoKeys, configuration)
+    GroupFullDtoHelper groupFullDtoHelper,
+    DisplayUserSettingsHelper displayUserSettingsHelper) : SocketServiceClient(tariffService, tenantManager, channelWriter, machinePseudoKeys, configuration)
 {
     protected override string Hub => "files";
+
+    public async Task ChangeUserTypeAsync(UserInfo userInfo, bool hasPersonalFolder)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        var dto = await employeeFullDtoHelper.GetFullAsync(userInfo);
+        var currentUser = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
+        var name = currentUser.DisplayUserName(displayUserSettingsHelper);
+
+        await MakeRequest("change-my-type", new { tenantId, user = dto, admin = name, hasPersonalFolder });
+    }
 
     public async Task AddUserAsync(UserInfo userInfo)
     {
@@ -117,6 +128,12 @@ public class UserSocketManager(ITariffService tariffService,
         {
             await MakeRequest("update-guest", new { tenantId, room = admin.Id, guest = dto });
         }
+    }
+
+    public async Task DeleteGuestAsync(Guid CurrentUserId, Guid userId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await MakeRequest("delete-guest", new { tenantId, room = CurrentUserId, guestId = userId });
     }
 
     public async Task DeleteGuestAsync(Guid userId)
