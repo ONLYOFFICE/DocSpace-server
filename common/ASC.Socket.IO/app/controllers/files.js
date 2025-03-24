@@ -182,5 +182,10 @@ module.exports = (files) => {
     res.end();
   });
 
+  router.post("/encryption-progress", (req, res) => {
+    files.encryptionProgress(req.body);
+    res.end();
+  });
+
   return router;
 };

@@ -3595,6 +3595,10 @@ public class FileStorageService //: IFileStorageService
         var link = await fileSharing.GetPureSharesAsync(entry, ShareFilterType.PrimaryExternalLink, null, null, 0, 1).FirstOrDefaultAsync();
         if (link == null)
         {
+            if (entry is File<T> file && file.IsForm && share == FileShare.Read)
+            {
+                share = FileShare.Editing;
+            }
             return await SetExternalLinkAsync(
                 entry,
                 Guid.NewGuid(),

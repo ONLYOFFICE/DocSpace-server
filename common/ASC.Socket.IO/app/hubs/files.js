@@ -29,6 +29,8 @@ module.exports = (io) => {
   const moment = require("moment");
   const filesIO = io; //TODO: Restore .of("/files");
 
+  const commonRooms = ["storage-encryption"];
+
   filesIO.on("connection", (socket) => {
     const session = socket.handshake.session;
 
@@ -84,7 +86,7 @@ module.exports = (io) => {
     }
 
     const getRoom = (roomPart) => {
-      return `${tenantId()}-${roomPart}`;
+      return commonRooms.includes(roomPart) ? roomPart : `${tenantId()}-${roomPart}`;
     };
 
     const connectMessage = !session.anonymous ? 
@@ -522,6 +524,11 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:restore-progress", result);
   }
 
+  function encryptionProgress({ room, percentage, error } = {}) {
+    logger.info(`${room} progress ${percentage}, error ${error}`);
+    filesIO.to(room).emit("s:encryption-progress", { percentage, error });
+  }
+
   return {
     startEdit,
     stopEdit,
@@ -553,6 +560,7 @@ module.exports = (io) => {
     backupProgress,
     restoreProgress,
     endBackup,
-    endRestore
+    endRestore,
+    encryptionProgress
   };
 };

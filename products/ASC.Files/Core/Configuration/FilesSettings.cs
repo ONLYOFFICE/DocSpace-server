@@ -120,6 +120,8 @@ public class FilesSettings : ISettings<FilesSettings>
             OpenEditorInSameTab = false
         };
     }
+    
+    public DateTime LastModified { get; set; }
 
     [JsonIgnore]
     public Guid ID => new("{03B382BD-3C20-4f03-8AB9-5A33F016316E}");

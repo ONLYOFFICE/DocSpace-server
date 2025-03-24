@@ -44,6 +44,8 @@ public class RoomsNotificationSettings : ISettings<RoomsNotificationSettings>
             DisabledRooms = []
         };
     }
+    
+    public DateTime LastModified { get; set; }
 }
 
 [Scope]
