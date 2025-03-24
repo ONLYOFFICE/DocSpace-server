@@ -57,19 +57,10 @@ public class ApiKeysController(
     public async Task<ApiKeyResponseDto> CreateApiKey(CreateApiKeyRequestDto apiKey)
     {
         var expiresAt = apiKey.ExpiresInDays.HasValue ? TimeSpan.FromDays(apiKey.ExpiresInDays.Value) : (TimeSpan?)null;
-
-        if (apiKey.Permissions != null && apiKey.Permissions.Any())
+            
+        if (!IsValidPermission(apiKey.Permissions))
         {
-            var scopes = AuthorizationExtension.ScopesMap;
-
-            var orderedScopes = scopes.AllKeys.SelectMany(key => scopes[key]?.Split(',')).Distinct().Order();
-
-            var isValidPermission = apiKey.Permissions.All(x => orderedScopes.Contains(x));
-
-            if (!isValidPermission)
-            {
-                throw new ArgumentException("Permissions are not valid.");
-            }
+            throw new ArgumentException("Permissions are not valid.");
         }
 
         var result = await apiKeyManager.CreateApiKeyAsync(apiKey.Name,
@@ -159,7 +150,13 @@ public class ApiKeysController(
             }
         }
 
-        var result = await apiKeyManager.UpdateApiKeyAsync(requestDto.KeyId,
+        if (!IsValidPermission(requestDto.Changed.Permissions))
+        {
+            throw new ArgumentException("Permissions are not valid.");
+        }
+
+        var result = await apiKeyManager.UpdateApiKeyAsync(
+            requestDto.KeyId,
             requestDto.Changed.Permissions,
             requestDto.Changed.Name,
             requestDto.Changed.IsActive);
@@ -203,5 +200,21 @@ public class ApiKeysController(
         messageService.Send(MessageAction.ApiKeyDeleted, MessageTarget.Create(keyId));
 
         return result;
+    }
+
+    private bool IsValidPermission(List<string> permission)
+    {
+        if (permission == null || !permission.Any())
+        {
+            return true;
+        }
+
+        var scopes = AuthorizationExtension.ScopesMap;
+        var orderedScopes = scopes.AllKeys.SelectMany(key => scopes[key]?.Split(','))
+                                                                 .Concat(["*"])
+                                                                 .Distinct()
+                                                                 .Order();
+
+        return permission.All(x => orderedScopes.Contains(x));
     }
 }

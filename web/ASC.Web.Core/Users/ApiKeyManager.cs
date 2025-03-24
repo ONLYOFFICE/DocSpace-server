@@ -124,7 +124,7 @@ public class ApiKeyManager(
     public async Task<bool> UpdateApiKeyAsync(Guid keyId, 
                                               List<string> permissions, 
                                               string name, 
-                                              bool isActive)
+                                              bool? isActive)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
 
@@ -137,9 +137,25 @@ public class ApiKeyManager(
             return false;
         }
 
-        apiKey.IsActive = isActive;
-        apiKey.Permissions = permissions;
-        apiKey.Name = name;
+        if (isActive.HasValue)
+        {
+            apiKey.IsActive = isActive.Value;
+        }
+
+        if (permissions is { Count: > 0 })
+        {
+            if (permissions.Count == 1 && permissions[0] == "*")
+            {
+                permissions = null;
+            }
+            
+            apiKey.Permissions = permissions;
+        }
+
+        if (!string.IsNullOrEmpty(name))
+        {
+            apiKey.Name = name;
+        }
         
         await context.AddOrUpdateAsync(q => q.DbApiKey, apiKey);
         await context.SaveChangesAsync();
