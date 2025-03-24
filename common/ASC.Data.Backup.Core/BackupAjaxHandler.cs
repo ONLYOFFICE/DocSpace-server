@@ -340,17 +340,24 @@ public class BackupAjaxHandler(
         return await backupService.StartRestoreAsync(restoreRequest, enqueueTask, taskId);
     }
 
-    public async Task<BackupProgress> GetRestoreProgressAsync(bool dump)
+    public async Task<BackupProgress> GetRestoreProgressAsync(bool? dump)
     {
-        if (dump)
+        if (dump.HasValue) 
         {
-            return await backupService.GetDumpRestoreProgress();
+            if (dump.Value)
+            {
+                return await backupService.GetDumpRestoreProgressAsync();
+            }
+            else
+            {
+                var tenant = tenantManager.GetCurrentTenant();
+                return await backupService.GetRestoreProgressAsync(tenant.Id);
+            }
         }
         else
         {
             var tenant = tenantManager.GetCurrentTenant();
-
-            return await backupService.GetRestoreProgress(tenant.Id);
+            return await backupService.GetAnyRestoreProgressAsync(tenant.Id);
         }
     }
 

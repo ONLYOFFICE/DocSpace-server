@@ -173,12 +173,16 @@ public class BackupService(
         return await backupWorker.GetTransferProgressAsync(tenantId);
     }
 
-    public async Task<BackupProgress> GetRestoreProgress(int tenantId)
+    public async Task<BackupProgress> GetRestoreProgressAsync(int tenantId)
     {
         return await backupWorker.GetRestoreProgressAsync(tenantId);
     }
+    public async Task<BackupProgress> GetAnyRestoreProgressAsync(int tenantId)
+    {
+        return await backupWorker.GetAnyRestoreProgressAsync(tenantId);
+    }
 
-    public async Task<BackupProgress> GetDumpRestoreProgress()
+    public async Task<BackupProgress> GetDumpRestoreProgressAsync()
     {
         return await backupWorker.GetDumpRestoreProgressAsync();
     }

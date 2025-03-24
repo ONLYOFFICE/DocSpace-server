@@ -361,7 +361,7 @@ public class BackupController(
     [HttpGet("getrestoreprogress")]  //NOTE: this method doesn't check payment!!!
     [AllowAnonymous]
     [AllowNotPayment]
-    public async Task<BackupProgress> GetRestoreProgressAsync(DumpDto dto)
+    public async Task<BackupProgress> GetRestoreProgressAsync(RestoreDto dto)
     {
         return await backupAjaxHandler.GetRestoreProgressAsync(dto.Dump);
     }
