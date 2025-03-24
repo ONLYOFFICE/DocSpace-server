@@ -41,7 +41,7 @@ public static class OpenApiExtension
         return services.AddSwaggerGen(c =>
         {
             var assemblyName = Assembly.GetEntryAssembly().FullName.Split(',').First();
-
+            var docName = assemblyName.Split(".").Last();
             c.ResolveConflictingActions(a => a.First());
             c.CustomOperationIds(r =>
             {
@@ -52,7 +52,7 @@ public static class OpenApiExtension
 
             c.CustomSchemaIds(CustomSchemaId);
 
-            c.SwaggerDoc("common", new OpenApiInfo { Title = assemblyName, Version = "v2" });
+            c.SwaggerDoc("common", new OpenApiInfo { Title = docName, Version = "v2" });
             c.SchemaFilter<SwaggerSchemaCustomFilter>();
             c.DocumentFilter<LowercaseDocumentFilter>();
             c.DocumentFilter<HideRouteDocumentFilter>("/api/2.0/capabilities.json");
@@ -61,18 +61,26 @@ public static class OpenApiExtension
             c.OperationFilter<ContentTypeOperationFilter>();
             c.DocumentFilter<SwaggerSuccessApiResponseFilter>();
             c.EnableAnnotations();
-            var serverUrls = configuration.GetSection("openApi:servers").Get<List<string>>() ?? [];
-            var serverDescription = configuration.GetSection("openApi:serversDescription").Get<List<string>>() ?? [];
 
-            for (var i = 0; i < serverUrls.Count; i++)
+            var serverTemplate = configuration.GetValue<string>("openApi:server") ?? "";
+
+            var defaultUrl = configuration.GetValue<string>("openApi:url:default") ?? "";
+            var urlDescription = configuration.GetValue<string>("openApi:url:description") ?? "";
+
+            c.AddServer(new OpenApiServer
             {
-                c.AddServer(new OpenApiServer
+                Url = serverTemplate,
+                Description = "Server configuration",
+                Variables = new Dictionary<string, OpenApiServerVariable>
                 {
-                    Url = serverUrls[i], 
-                    Description = serverDescription.Count > i ? serverDescription[i] : null
-                });
-            }
-            
+                    ["baseUrl"] = new OpenApiServerVariable
+                    {
+                        Default = defaultUrl,
+                        Description = urlDescription
+                    }
+                }
+            });
+
             // ToDo: add security definitions
             c.AddSecurityDefinition(CookiesManager.AuthCookiesName, new OpenApiSecurityScheme
             {
