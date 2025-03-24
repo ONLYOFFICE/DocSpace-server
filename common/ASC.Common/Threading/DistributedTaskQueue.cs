@@ -98,15 +98,12 @@ public class DistributedTaskQueue<T>(
         await PublishTask(distributedTask);
         
         logger.TraceEnqueueTask(distributedTask.Id, INSTANCE_ID);
-
     }
     
     public async Task<List<T>> GetAllTasks(int? instanceId = null)
     {
-        var queueTasks = await LoadFromCache();
-
-        queueTasks = await DeleteOrphanCacheItem(queueTasks);
-
+        var queueTasks = await (await LoadFromCache()).ToAsyncEnumerable().SelectAwait(async id => await hybridCache.GetOrDefaultAsync<T>(_name + id)).Where(t => t != null).ToListAsync();
+        
         if (instanceId.HasValue)
         {
             queueTasks = queueTasks.Where(x => x.InstanceId == instanceId.Value).ToList();
@@ -123,35 +120,16 @@ public class DistributedTaskQueue<T>(
 
     public async Task<T> PeekTask(string id)
     {
-        var taskById = (await GetAllTasks()).FirstOrDefault(x => x.Id == id);
-
-        return taskById;
+        return await hybridCache.GetOrDefaultAsync<T>(_name + id);
     }
 
     public async Task DequeueTask(string id)
     {
-        var queueTasks = (await GetAllTasks()).ToList();
-
-        if (!queueTasks.Exists(x => x.Id == id))
-        {
-            return;
-        }
-
         await cancelTaskNotify.PublishAsync(new DistributedTaskCancelation { Id = id }, CacheNotifyAction.Remove);
-
-        queueTasks = queueTasks.FindAll(x => x.Id != id);
-
-        if (queueTasks.Count == 0)
-        {
-            await hybridCache.RemoveAsync(_name);
-        }
-        else
-        {
-            await SaveToCache(queueTasks);
-        }
-
+        
+        await hybridCache.RemoveAsync(_name + id);
+        
         logger.TraceEnqueueTask(id, INSTANCE_ID);
-
     }
 
     public async Task<string> PublishTask(T distributedTask)
@@ -166,20 +144,16 @@ public class DistributedTaskQueue<T>(
     {
         return async task =>
         {
-            var allTasks = (await GetAllTasks()).ToList();
-            var queueTasks = allTasks.FindAll(x => x.Id != task.Id);
+            var fromCache = task as T ?? await hybridCache.GetOrDefaultAsync<T>(_name + task.Id);
 
-            task.LastModifiedOn = DateTime.UtcNow;
+            fromCache.LastModifiedOn = DateTime.UtcNow;
 
-            queueTasks.Add((T)task);
-
-            await SaveToCache(queueTasks);
+            await SaveToCache(fromCache);
             logger.TracePublicationDistributedTask(task.Id, task.InstanceId);
         };
     }
-
-
-    private async Task SaveToCache(List<T> queueTasks)
+    
+    public async Task SaveToCache(List<T> queueTasks)
     {
         if (queueTasks.Count == 0)
         {
@@ -188,30 +162,17 @@ public class DistributedTaskQueue<T>(
             return;
         }
         
-        await hybridCache.SetAsync(_name, queueTasks, TimeSpan.FromDays(1));
+        await hybridCache.SetAsync(_name, queueTasks.Select(r => r.Id).ToList(), TimeSpan.FromDays(1));
+    }
 
+    private async Task SaveToCache(T queueTask)
+    {
+        await hybridCache.SetAsync(_name + queueTask.Id, queueTask, TimeSpan.FromDays(1));
     }
     
-    private async Task<List<T>> LoadFromCache()
+    private async Task<List<string>> LoadFromCache()
     {
-        return await hybridCache.GetOrDefaultAsync<List<T>>(_name) ?? [];
-    }
-
-    private async Task<List<T>> DeleteOrphanCacheItem(IEnumerable<T> queueTasks)
-    {
-        var listTasks = queueTasks.ToList();
-
-        if (listTasks.RemoveAll(IsOrphanCacheItem) > 0)
-        {
-            await SaveToCache(listTasks);
-        }
-
-        return listTasks;
-    }
-
-    private bool IsOrphanCacheItem(T obj)
-    {
-        return obj.LastModifiedOn.AddSeconds(TimeUntilUnregisterInSeconds) < DateTime.UtcNow;
+        return await hybridCache.GetOrDefaultAsync<List<string>>(_name) ?? [];
     }
 }
 
@@ -220,15 +181,14 @@ public class DistributedTaskQueueService<T>(
     ChannelReader<T> channelReader
 ) : BackgroundService   where T : DistributedTask
 {
+    private readonly PeriodicTimer _timer = new(TimeSpan.FromSeconds(10));
+    
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        int maxDegreeOfParallelism;
-        await using (var scope = serviceProvider.CreateAsyncScope())
-        {
-            var queueFactory = scope.ServiceProvider.GetRequiredService<IDistributedTaskQueueFactory>();
-            var queue = queueFactory.CreateQueue<T>();
-            maxDegreeOfParallelism = queue.MaxThreadsCount;
-        }
+        var scope = serviceProvider.CreateAsyncScope();
+        var queueFactory = scope.ServiceProvider.GetRequiredService<IDistributedTaskQueueFactory>();
+        var queue = queueFactory.CreateQueue<T>();
+        var maxDegreeOfParallelism = queue.MaxThreadsCount;
 
         var readers = maxDegreeOfParallelism == 0 ? [channelReader] : channelReader.Split(maxDegreeOfParallelism, cancellationToken: stoppingToken);
         
@@ -241,6 +201,21 @@ public class DistributedTaskQueueService<T>(
             }
         }, stoppingToken)).ToList();
 
+        var cleanerTask = Task.Run(async () =>
+        {
+            while (await _timer.WaitForNextTickAsync(stoppingToken) && !stoppingToken.IsCancellationRequested)
+            {
+                var queueTasks = await queue.GetAllTasks();
+                var removed = queueTasks.RemoveAll(r => r.LastModifiedOn.AddSeconds(queue.TimeUntilUnregisterInSeconds) < DateTime.UtcNow);
+                if (removed > 0)
+                {
+                    await queue.SaveToCache(queueTasks);
+                }
+            }
+        }, stoppingToken);
+        
+        tasks.Add(cleanerTask);
+        
         await Task.WhenAll(tasks);
     }
 

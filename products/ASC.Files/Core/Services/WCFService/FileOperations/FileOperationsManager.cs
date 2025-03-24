@@ -44,33 +44,34 @@ public class FileOperationsManagerHolder<T> where T : FileOperation
     }
     
     public async Task<List<FileOperationResult>> GetOperationResults(Guid userId)
-    {
-        var operations = (await _tasks.GetAllTasks())
-            .Where(t => t.Owner == userId)
-            .ToList();
+    {        
+        List<FileOperationResult> results = [];
         
-        foreach (var o in operations.Where(o => o.Status > DistributedTaskStatus.Running))
+        var operations = await _tasks.GetAllTasks();
+        
+        foreach (var o in operations.Where(t => t.Owner == userId))
         {
-            o.Progress = 100;
-
-            await _tasks.DequeueTask(o.Id);
-        }
-
-        var results = operations
-            .Where(o => o.Hold || o.Progress != 100)
-            .Select(o => new FileOperationResult
+            if (o.Status > DistributedTaskStatus.Running)
             {
-                Id = o.Id,
-                OperationType = o.FileOperationType,
-                Source = o.Src,
-                Progress = o.Progress,
-                Processed = Convert.ToString(o.Process),
-                Result = o.Result,
-                Error = o.Err,
-                Finished = o.Finish
-            })
-            .ToList();
-
+                o.Progress = 100;
+            }
+            
+            if (o.Hold || o.Progress != 100)
+            {
+                results.Add(new FileOperationResult
+                {
+                    Id = o.Id,
+                    OperationType = o.FileOperationType,
+                    Source = o.Src,
+                    Progress = o.Progress,
+                    Processed = Convert.ToString(o.Process),
+                    Result = o.Result,
+                    Error = o.Err,
+                    Finished = o.Finish
+                });
+            }
+        }
+        
         return results;
     }
 
@@ -92,9 +93,13 @@ public class FileOperationsManagerHolder<T> where T : FileOperation
         await _tasks.EnqueueTask(task);
     }
 
-    public Task<string> Publish(T task)
+    public async Task<string> Publish(T task)
     {
-        return _tasks.PublishTask(task);
+        var result = await _tasks.PublishTask(task);
+        var tasks = await _tasks.GetAllTasks();
+        tasks.Add(task);
+        await _tasks.SaveToCache(tasks);
+        return result;
     }
 
     public async Task CheckRunning(Guid userId, FileOperationType fileOperationType)
