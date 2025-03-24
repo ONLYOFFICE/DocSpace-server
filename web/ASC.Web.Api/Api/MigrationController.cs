@@ -29,6 +29,7 @@ namespace ASC.Api.Migration;
 [DefaultRoute]
 [ApiController]
 [ControllerName("migration")]
+[ApiExplorerSettings(IgnoreApi = true)]
 public class MigrationController(
     UserManager userManager,
     AuthContext authContext,
