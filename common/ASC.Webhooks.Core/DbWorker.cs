@@ -41,7 +41,7 @@ public class DbWorker(
 
         if (existingConfig != null)
         {
-            return existingConfig;
+            throw new ArgumentException("Webhook with the same name and payload URL already exists");
         }
 
         var toAdd = new DbWebhooksConfig
@@ -214,7 +214,7 @@ public class DbWorker(
     public async Task<DbWebhooksLog> UpdateWebhookJournal(
         int id,
         int status,
-        DateTime delivery,
+        DateTime? delivery,
         string requestPayload,
         string requestHeaders,
         string responsePayload,

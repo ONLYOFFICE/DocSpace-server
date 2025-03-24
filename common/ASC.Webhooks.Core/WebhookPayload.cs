@@ -111,5 +111,5 @@ public class WebhookPayloadConfigInfo
     public DateTime? LastSuccessOn { get; set; }
 
     public int RetryCount { get; set; }
-    public DateTime RetryOn { get; set; }
+    public DateTime? RetryOn { get; set; }
 }

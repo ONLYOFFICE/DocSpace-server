@@ -164,6 +164,11 @@ public class WebhooksController(ApiContext context,
             }
         }
 
+        if (inDto.Enabled)
+        {
+            await CheckWebhook(existingWebhook.Name, existingWebhook.Uri, existingWebhook.SecretKey, existingWebhook.SSL, false);
+        }
+
         existingWebhook.Enabled = inDto.Enabled;
 
         var webhook = await dbWorker.UpdateWebhookConfig(existingWebhook);
@@ -385,7 +390,7 @@ public class WebhooksController(ApiContext context,
         using var request = new HttpRequestMessage(HttpMethod.Head, uri);
         using var response = await httpClient.SendAsync(request);
 
-        if (response.StatusCode != HttpStatusCode.OK)
+        if (!response.IsSuccessStatusCode)
         {
             throw new ArgumentException(Resource.ErrorWebhookUrlNotAvaliable);
         }
