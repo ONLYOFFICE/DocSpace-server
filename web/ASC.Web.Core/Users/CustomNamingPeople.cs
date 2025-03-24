@@ -42,6 +42,8 @@ public class PeopleNamesSettings : ISettings<PeopleNamesSettings>
     {
         return new PeopleNamesSettings { ItemId = PeopleNamesItem.DefaultID };
     }
+    
+    public DateTime LastModified { get; set; }
 }
 
 public class PeopleNamesItem

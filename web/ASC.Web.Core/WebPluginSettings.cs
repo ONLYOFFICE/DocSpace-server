@@ -75,6 +75,8 @@ public class WebPluginSettings : ISettings<WebPluginSettings>
     {
         return new WebPluginSettings();
     }
+    
+    public DateTime LastModified { get; set; }
 }
 
 public class WebPluginState(bool enabled, string settings)

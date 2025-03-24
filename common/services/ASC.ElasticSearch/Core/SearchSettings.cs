@@ -60,6 +60,8 @@ public class SearchSettings : ISettings<SearchSettings>
     {
         return new SearchSettings();
     }
+    
+    public DateTime LastModified { get; set; }
 
     internal bool IsEnabled(string name)
     {

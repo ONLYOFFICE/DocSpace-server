@@ -43,4 +43,6 @@ public class AdminHelperSettings : ISettings<AdminHelperSettings>
             Viewed = false
         };
     }
+    
+    public DateTime LastModified { get; set; }
 }

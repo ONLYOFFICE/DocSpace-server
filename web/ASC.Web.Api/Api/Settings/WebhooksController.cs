@@ -324,7 +324,7 @@ public class WebhooksController(ApiContext context,
     [HttpGet("webhook/triggers")]
     public Dictionary<string, int> Triggers()
     {
-        return Enum.GetValues<WebhookTrigger>().ToDictionary(item => item.ToStringFast(), item => (int)item);
+        return Enum.GetValues<WebhookTrigger>().ToDictionary(item => item.ToCustomString(), item => (int)item);
     }
 
     private async Task<bool> CheckAdminPermissionsAsync()

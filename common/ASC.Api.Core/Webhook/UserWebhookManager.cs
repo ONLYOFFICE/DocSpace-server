@@ -37,12 +37,12 @@ public class UserWebhookManager(
 {
     public async Task PublishAsync(WebhookTrigger trigger, UserInfo userInfo)
     {
-        await webhookPublisher.PublishAsync(trigger, webhookUserAccessChecker, userInfo);
+        await webhookPublisher.PublishAsync(trigger, webhookUserAccessChecker, userInfo, userInfo.Id);
     }
 
     public async Task PublishAsync(WebhookTrigger trigger, ASC.Core.Users.GroupInfo groupInfo)
     {
-        await webhookPublisher.PublishAsync(trigger, webhookGroupAccessChecker, groupInfo);
+        await webhookPublisher.PublishAsync(trigger, webhookGroupAccessChecker, groupInfo, groupInfo.ID);
     }
 }
 

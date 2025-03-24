@@ -164,11 +164,6 @@ public static class UserExtensions
 
         if (targetUserType is EmployeeType.Guest)
         {
-            if (targetUser.CreatedBy.HasValue && targetUser.CreatedBy.Value == sourceUser.Id)
-            {
-                return true;
-            }
-
             var userRelations = await userManager.GetUserRelationsAsync(sourceUser.Id);
 
             return userRelations.ContainsKey(targetUser.Id);

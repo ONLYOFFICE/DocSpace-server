@@ -41,4 +41,6 @@ public class UserQuotaSettings : ISettings<UserQuotaSettings>
     {
         return new UserQuotaSettings();
     }
+    
+    public DateTime LastModified { get; set; }
 }
