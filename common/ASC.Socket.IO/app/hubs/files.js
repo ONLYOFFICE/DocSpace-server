@@ -135,7 +135,7 @@ module.exports = (io) => {
 
       if(dump)
       {
-        var room = `backup`;
+        var room = `restore`;
       }
       else
       {
