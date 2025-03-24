@@ -342,6 +342,11 @@ public class BackupAjaxHandler(
 
     public async Task<BackupProgress> GetRestoreProgressAsync(bool? dump)
     {
+        if (!coreBaseSettings.Standalone)
+        {
+            dump = false;
+        }
+
         if (dump.HasValue) 
         {
             if (dump.Value)
