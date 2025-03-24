@@ -141,7 +141,7 @@ module.exports = (io) => {
       {
         var room = getRoom("restore");
       }
-      socket.to(room).emit("restore-backup", {dump : dump});
+      socket.to(room).emit("restore-backup");
     });
 
     function changeSubscription(roomParts, individual, changeFunc) {
@@ -496,7 +496,7 @@ module.exports = (io) => {
       {
         var room = `${tenantId}-restore`;
       }
-    filesIO.to(room).emit("s:restore-progress", {progress: percentage, dump: dump});
+    filesIO.to(room).emit("s:restore-progress", {progress: percentage});
   }
 
   function endBackup({ tenantId, dump, result } = {})
