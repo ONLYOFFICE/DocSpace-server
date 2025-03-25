@@ -32,7 +32,7 @@ public class DbWorker(
     TenantManager tenantManager,
     AuthContext authContext)
 {
-    public async Task<DbWebhooksConfig> AddWebhookConfig(string name, string uri, string secretKey, bool enabled, bool ssl, WebhookTrigger triggers)
+    public async Task<DbWebhooksConfig> AddWebhookConfig(string name, string uri, string secretKey, bool enabled, bool ssl, WebhookTrigger triggers, string targetId)
     {
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
@@ -53,6 +53,7 @@ public class DbWorker(
             Enabled = enabled,
             SSL = ssl,
             Triggers = triggers,
+            TargetId = targetId,
             CreatedBy = authContext.CurrentAccount.ID,
             CreatedOn = DateTime.UtcNow
         };
@@ -112,6 +113,7 @@ public class DbWorker(
         updateObj.Enabled = dbWebhooksConfig.Enabled;
         updateObj.SSL = dbWebhooksConfig.SSL;
         updateObj.Triggers = dbWebhooksConfig.Triggers;
+        updateObj.TargetId = dbWebhooksConfig.TargetId;
 
         updateObj.ModifiedBy = dbWebhooksConfig.ModifiedBy ?? authContext.CurrentAccount.ID;
         updateObj.ModifiedOn = DateTime.UtcNow;

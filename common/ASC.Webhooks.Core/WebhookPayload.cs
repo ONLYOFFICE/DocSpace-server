@@ -58,18 +58,21 @@ public class WebhookPayload<T1, T2>
                 .Select(flag => flag.ToCustomString())
                 .ToArray();
 
+        var target = string.IsNullOrEmpty(config.TargetId)
+            ? null
+            : new WebhookPayloadTargetInfo<T2>
+                {
+                    Id = dataId,
+                    Type = trigger.GetTargetType()
+                };
+
         Webhook = new WebhookPayloadConfigInfo<T2>
         {
             Id = config.Id,
             Name = config.Name,
             Url = config.Uri,
             Triggers = triggers,
-
-            Target = new WebhookPayloadTargetInfo<T2>
-            {
-                Id = dataId,
-                Type = trigger.GetTargetType()
-            }
+            Target = target
 
             // initialized on send: LastFailureOn, LastFailureContent, LastSuccessOn, RetryCount, RetryOn
         };

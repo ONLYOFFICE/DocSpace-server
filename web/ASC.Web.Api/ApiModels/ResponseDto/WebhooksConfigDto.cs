@@ -61,6 +61,11 @@ public class WebhooksConfigDto
     public WebhookTrigger Triggers { get; set; }
 
     /// <summary>
+    /// Target ID
+    /// </summary>
+    public string TargetId { get; set; }
+
+    /// <summary>
     /// Create by
     /// </summary>
     public EmployeeDto CreatedBy { get; set; }
@@ -122,6 +127,7 @@ public class WebhooksConfigDtoHelper(TenantUtil tenantUtil, EmployeeDtoHelper em
             Enabled = dbWebhooksConfig.Enabled,
             SSL = dbWebhooksConfig.SSL,
             Triggers = dbWebhooksConfig.Triggers,
+            TargetId = dbWebhooksConfig.TargetId,
             CreatedBy = dbWebhooksConfig.CreatedBy.HasValue ? await employeeDtoHelper.GetAsync(dbWebhooksConfig.CreatedBy.Value) : null,
             CreatedOn = dbWebhooksConfig.CreatedOn.HasValue? tenantUtil.DateTimeFromUtc(dbWebhooksConfig.CreatedOn.Value) : null,
             ModifiedBy = dbWebhooksConfig.ModifiedBy.HasValue ? await employeeDtoHelper.GetAsync(dbWebhooksConfig.ModifiedBy.Value) : null,
