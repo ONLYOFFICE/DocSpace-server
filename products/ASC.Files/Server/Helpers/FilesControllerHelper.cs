@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -41,14 +41,16 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         FileConverter fileConverter,
         PathProvider pathProvider,
         FileChecker fileChecker,
-        FillingFormResultDtoHelper fillingFormResultDtoHelper)
+        FillingFormResultDtoHelper fillingFormResultDtoHelper,
+        WebhookManager webhookManager)
     : FilesHelperBase(filesSettingsHelper,
             fileUploader,
             socketManager,
             fileDtoHelper,
             fileStorageService,
             fileChecker,
-            httpContextAccessor)
+            httpContextAccessor,
+            webhookManager)
     {
     private readonly ILogger _logger = logger;
 

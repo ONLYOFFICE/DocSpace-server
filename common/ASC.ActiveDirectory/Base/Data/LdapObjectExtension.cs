@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -164,7 +164,7 @@ public class LdapObjectExtension(TenantUtil tenantUtil, SettingsManager settings
             Id = Guid.Empty,
             UserName = userName,
             Sid = ldapUser.Sid,
-            ActivationStatus = settings.SendWelcomeEmail && !string.IsNullOrEmpty(mail) ? EmployeeActivationStatus.Pending : EmployeeActivationStatus.NotActivated,
+            ActivationStatus = settings.DisableEmailVerification ? EmployeeActivationStatus.Activated : settings.SendWelcomeEmail && !string.IsNullOrEmpty(mail) ? EmployeeActivationStatus.Pending : EmployeeActivationStatus.NotActivated,
             Status = ldapUser.IsDisabled ? EmployeeStatus.Terminated : EmployeeStatus.Active,
             Title = !string.IsNullOrEmpty(title) ? title : string.Empty,
             Location = !string.IsNullOrEmpty(location) ? location : string.Empty,

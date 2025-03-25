@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,10 +31,10 @@ namespace ASC.Web.Api.Api.Settings;
 [DefaultRoute("push")]
 public class PushController(ApiContext apiContext,
         WebItemManager webItemManager,
-        IMemoryCache memoryCache,
+        IFusionCache fusionCache,
         FirebaseHelper firebaseHelper,
         IHttpContextAccessor httpContextAccessor)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
     /// Saves the Firebase device token specified in the request for the Documents application.

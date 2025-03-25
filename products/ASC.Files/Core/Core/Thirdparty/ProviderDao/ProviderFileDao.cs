@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -152,7 +152,7 @@ internal class ProviderFileDao(
     }
 
     public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
-        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = null, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null)
+        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = null, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null, bool applyFormStepFilter = false)
     {
         var selector = _selectorFactory.GetSelector(parentId);
 
@@ -480,6 +480,27 @@ internal class ProviderFileDao(
         var fileDao = selector.GetFileDao(file.Id);
 
         return fileDao.UseTrashForRemove(file);
+    }
+
+    public Task SaveFormRoleMapping(string formId, IEnumerable<FormRole> formRoles)
+    {
+        throw new NotImplementedException();
+    }
+    public IAsyncEnumerable<FormRole> GetFormRoles(string formId)
+    {
+        throw new NotImplementedException();
+    }
+    public Task<(int, IAsyncEnumerable<FormRole>)> GetUserFormRoles(string formId, Guid userId)
+    {
+        throw new NotImplementedException();
+    }
+    public Task<FormRole> ChangeUserFormRoleAsync(string formId, FormRole formRole)
+    {
+        throw new NotImplementedException();
+    }
+    public Task DeleteFormRolesAsync(string formId)
+    {
+        throw new NotImplementedException();
     }
 
     #region chunking

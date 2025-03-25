@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -37,10 +37,10 @@ public class RadicaleController(RadicaleClient radicaleClient,
         AuthContext authContext,
         WebItemSecurity webItemSecurity,
         ApiContext apiContext,
-        IMemoryCache memoryCache,
+        IFusionCache fusionCache,
         WebItemManager webItemManager,
         IHttpContextAccessor httpContextAccessor)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
     /// Creates a CardDav address book for a user with all portal users and returns a link to this address book.

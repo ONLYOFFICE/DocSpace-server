@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -36,10 +36,13 @@ public class Settings
     public Settings(IConfiguration configuration)
     {
         var cfg = configuration.GetSection("webhooks").Get<Settings>();
+
         RepeatCount = cfg.RepeatCount ?? 5;
         ThreadCount = cfg.ThreadCount ?? 10;
+        TrustedDaysCount = cfg.TrustedDaysCount ?? 3;
     }
-    
-    public int? RepeatCount { get; }
-    public int? ThreadCount { get; }
+
+    public int? RepeatCount { get; init; }
+    public int? ThreadCount { get; init; }
+    public int? TrustedDaysCount { get; init; }
 }

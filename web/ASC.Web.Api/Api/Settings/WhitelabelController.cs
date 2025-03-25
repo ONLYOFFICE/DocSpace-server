@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,23 +26,24 @@
 
 namespace ASC.Web.Api.Controllers.Settings;
 
-public class WhitelabelController(ApiContext apiContext,
-        PermissionContext permissionContext,
-        SettingsManager settingsManager,
-        WebItemManager webItemManager,
-        TenantInfoSettingsHelper tenantInfoSettingsHelper,
-        TenantWhiteLabelSettingsHelper tenantWhiteLabelSettingsHelper,
-        TenantLogoManager tenantLogoManager,
-        CoreBaseSettings coreBaseSettings,
-        CommonLinkUtility commonLinkUtility,
-        IMemoryCache memoryCache,
-        IHttpContextAccessor httpContextAccessor,
-        IMapper mapper,
-        CompanyWhiteLabelSettingsHelper companyWhiteLabelSettingsHelper,
-        TenantManager tenantManager,
-        TenantExtra tenantExtra,
-        StorageFactory storageFactory)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+public class WhitelabelController(
+    ApiContext apiContext,
+    PermissionContext permissionContext,
+    SettingsManager settingsManager,
+    WebItemManager webItemManager,
+    TenantInfoSettingsHelper tenantInfoSettingsHelper,
+    TenantWhiteLabelSettingsHelper tenantWhiteLabelSettingsHelper,
+    TenantLogoManager tenantLogoManager,
+    CoreBaseSettings coreBaseSettings,
+    CommonLinkUtility commonLinkUtility,
+    IFusionCache fusionCache,
+    IHttpContextAccessor httpContextAccessor,
+    IMapper mapper,
+    CompanyWhiteLabelSettingsHelper companyWhiteLabelSettingsHelper,
+    TenantManager tenantManager,
+    TenantExtra tenantExtra,
+    StorageFactory storageFactory)
+    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     #region Logos
 
@@ -568,9 +569,9 @@ public class WhitelabelController(ApiContext apiContext,
     [HttpGet("rebranding/company")]
     public async Task<CompanyWhiteLabelSettingsDto> GetCompanyWhiteLabelSettingsAsync()
     {
-        var settings = await settingsManager.LoadForDefaultTenantAsync<CompanyWhiteLabelSettings>();
-
-        return mapper.Map<CompanyWhiteLabelSettings, CompanyWhiteLabelSettingsDto>(settings);
+        var settings = await settingsManager.LoadForDefaultTenantAsync<CompanyWhiteLabelSettings>(HttpContext.GetIfModifiedSince());
+        
+        return HttpContext.TryGetFromCache(settings.LastModified) ? null :   mapper.Map<CompanyWhiteLabelSettings, CompanyWhiteLabelSettingsDto>(settings);
     }
 
     /// <summary>

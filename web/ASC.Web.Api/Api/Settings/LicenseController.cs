@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -38,12 +38,12 @@ public class LicenseController(ILoggerProvider option,
         SettingsManager settingsManager,
         WebItemManager webItemManager,
         CoreBaseSettings coreBaseSettings,
-        IMemoryCache memoryCache,
+        IFusionCache fusionCache,
         FirstTimeTenantSettings firstTimeTenantSettings,
         ITariffService tariffService,
         IHttpContextAccessor httpContextAccessor,
         DocumentServiceLicense documentServiceLicense)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     private readonly ILogger _log = option.CreateLogger("ASC.Api");
 

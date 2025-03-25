@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -244,6 +244,16 @@ public class EmailValidationKeyModelHelper(
                 var validTimeInterval = type == ConfirmType.PortalContinue ? TimeSpan.MaxValue : provider.ValidEmailKeyInterval;
 
                 checkKeyResult = provider.ValidateEmailKey(email + type, key, validTimeInterval);
+                break;
+
+            case ConfirmType.GuestShareLink:
+                userInfo = await userManager.GetUserByEmailAsync(email);
+                if (Equals(userInfo, Constants.LostUser) || userInfo.Status == EmployeeStatus.Terminated)
+                {
+                    checkKeyResult = ValidationResult.Invalid;
+                    break;
+                }
+                checkKeyResult = provider.ValidateEmailKey(email + type + uiD + userInfo.Id, key, provider.ValidEmailKeyInterval);
                 break;
 
             default:

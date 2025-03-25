@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,7 +28,9 @@ namespace ASC.Files.Core.Services.DocumentBuilderService;
 
 [Transient]
 public class RoomIndexExportTask : DocumentBuilderTask<int, RoomIndexExportTaskData>
-{
+{    
+    private const string ScriptName = "RoomIndexExport.docbuilder";
+    
     public RoomIndexExportTask()
     {
         
@@ -37,9 +39,7 @@ public class RoomIndexExportTask : DocumentBuilderTask<int, RoomIndexExportTaskD
     public RoomIndexExportTask(IServiceScopeFactory serviceProvider) : base(serviceProvider)
     {
     }
-
-    private const string ScriptName = "RoomIndexExport.docbuilder";
-
+    
     protected override async Task<DocumentBuilderInputData> GetDocumentBuilderInputDataAsync(IServiceProvider serviceProvider)
     {
         var (scriptFilePath, tempFileName, outputFileName) = await GetRoomIndexExportData(serviceProvider, _userId, _data.RoomId);

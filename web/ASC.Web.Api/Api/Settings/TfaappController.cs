@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -44,13 +44,13 @@ public class TfaappController(
     StudioSmsNotificationSettingsHelper studioSmsNotificationSettingsHelper,
     TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
     SmsProviderManager smsProviderManager,
-    IMemoryCache memoryCache,
+    IFusionCache fusionCache,
     InstanceCrypto instanceCrypto,
     Signature signature,
     SecurityContext securityContext,
     IHttpContextAccessor httpContextAccessor,
     TenantManager tenantManager)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
     /// Returns the current two-factor authentication settings.

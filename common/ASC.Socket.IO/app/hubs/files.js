@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,6 +28,8 @@ module.exports = (io) => {
   const logger = require("../log.js");
   const moment = require("moment");
   const filesIO = io; //TODO: Restore .of("/files");
+
+  const commonRooms = ["storage-encryption"];
 
   filesIO.on("connection", (socket) => {
     const session = socket.handshake.session;
@@ -84,7 +86,7 @@ module.exports = (io) => {
     }
 
     const getRoom = (roomPart) => {
-      return `${tenantId()}-${roomPart}`;
+      return commonRooms.includes(roomPart) ? roomPart : `${tenantId()}-${roomPart}`;
     };
 
     const connectMessage = !session.anonymous ? 
@@ -173,6 +175,8 @@ module.exports = (io) => {
         socket.join(room);
       }
     }
+
+    changeSubscription("change-my-type", true, subscribe);
 
     function unsubscribe(roomParts) {
       if (!roomParts) return;
@@ -363,6 +367,11 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:logout-session", loginEventId);
   }
 
+  function changeMyType({ tenantId, user, admin, hasPersonalFolder } = {}) {
+    var room = `${tenantId}-change-my-type-${user.id}`;
+    filesIO.to(room).emit("s:change-my-type",  {id: user.id, data: user, admin: admin, hasPersonalFolder: hasPersonalFolder});
+  }
+
   function addUser({ tenantId, user } = {}) {
     var room = `${tenantId}-users`;
     filesIO.to(room).emit("s:add-user",  {id: user.id, data: user});
@@ -424,6 +433,11 @@ module.exports = (io) => {
     filesIO.to(`${tenantId}-restore`).emit("s:restore-progress", result);
   }
 
+  function encryptionProgress({ room, percentage, error } = {}) {
+    logger.info(`${room} progress ${percentage}, error ${error}`);
+    filesIO.to(room).emit("s:encryption-progress", { percentage, error });
+  }
+
   return {
     startEdit,
     stopEdit,
@@ -442,6 +456,7 @@ module.exports = (io) => {
     changeInvitationLimitValue,
     updateHistory,
     logoutSession,
+    changeMyType,
     addUser,
     updateUser,
     deleteUser,
@@ -454,6 +469,7 @@ module.exports = (io) => {
     backupProgress,
     restoreProgress,
     endBackup,
-    endRestore
+    endRestore,
+    encryptionProgress
   };
 };

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -48,7 +48,8 @@ public class FileUploader(
     FileTrackerHelper fileTracker,
     SocketManager socketManager,
     FileChecker fileChecker,
-    TempStream tempStream )
+    TempStream tempStream,
+    WebhookManager webhookManager)
 {
     public async Task<File<T>> ExecAsync<T>(T folderId, string title, long contentLength, Stream data, bool createNewIfExist, bool deleteConvertStatus = true)
     {
@@ -71,6 +72,8 @@ public class FileUploader(
         {
             await fileConverter.ExecAsynchronouslyAsync(file, deleteConvertStatus, !createNewIfExist);
         }
+
+        await webhookManager.PublishAsync(WebhookTrigger.FileCreated, file);
 
         return file;
     }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,6 +23,8 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+using ASC.Files.Core.Services.DocumentBuilderService;
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
@@ -71,7 +73,7 @@ public class DocumentBuilderTaskDto
     /// </summary>
     public string ResultFileUrl { get; set; }
 
-    public static DocumentBuilderTaskDto Get(DistributedTaskProgress task)
+    public static DocumentBuilderTaskDto Get<TId, TData>(DocumentBuilderTask<TId, TData> task)
     {
         return task == null
             ? null
@@ -82,9 +84,9 @@ public class DocumentBuilderTaskDto
                 Percentage = (int)task.Percentage,
                 IsCompleted = task.IsCompleted,
                 Status = task.Status,
-                ResultFileId = task["ResultFileId"],
-                ResultFileName = task["ResultFileName"],
-                ResultFileUrl = task["ResultFileUrl"]
+                ResultFileId = task.ResultFileId,
+                ResultFileName = task.ResultFileName,
+                ResultFileUrl = task.ResultFileUrl
             };
     }
 }

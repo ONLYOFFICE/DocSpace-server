@@ -103,12 +103,8 @@ public class CoreDynamoClientRepository implements DynamoClientRepository {
    * @return the corresponding {@link ClientDynamoEntity} if found, or {@code null} otherwise
    */
   public ClientDynamoEntity findById(String clientId) {
-    return clientTable
-        .query(QueryConditional.keyEqualTo(k -> k.partitionValue(clientId)))
-        .items()
-        .stream()
-        .findFirst()
-        .orElse(null);
+    var key = Key.builder().partitionValue(clientId).build();
+    return clientTable.getItem(key);
   }
 
   /**
@@ -120,13 +116,11 @@ public class CoreDynamoClientRepository implements DynamoClientRepository {
    *     empty {@link Optional} if not found
    */
   public Optional<ClientDynamoEntity> findByIdAndVisibility(String clientId, boolean accessible) {
-    return clientTable
-        .query(
-            r -> r.queryConditional(QueryConditional.keyEqualTo(k -> k.partitionValue(clientId))))
-        .items()
-        .stream()
-        .filter(client -> client.isAccessible() == accessible)
-        .findFirst();
+    var key = Key.builder().partitionValue(clientId).build();
+    var client = clientTable.getItem(key);
+    return (client != null && client.isAccessible() == accessible)
+        ? Optional.of(client)
+        : Optional.empty();
   }
 
   /**
@@ -149,36 +143,24 @@ public class CoreDynamoClientRepository implements DynamoClientRepository {
     var index = clientTable.index("tenant-created-index");
     var queryConditional = QueryConditional.keyEqualTo(k -> k.partitionValue(tenantId));
 
-    Map<String, AttributeValue> lastEvaluatedKey = null;
-    var results = new ArrayList<ClientDynamoEntity>();
-
+    Map<String, AttributeValue> exclusiveStartKey = null;
     if (nextClientId != null && !nextClientId.isBlank() && nextCreatedOn != null)
-      lastEvaluatedKey =
+      exclusiveStartKey =
           Map.of(
               "tenant_id", AttributeValue.builder().n(String.valueOf(tenantId)).build(),
               "client_id", AttributeValue.builder().s(nextClientId).build(),
               "created_on", AttributeValue.builder().s(nextCreatedOn.toString()).build());
 
-    do {
-      var requestBuilder =
-          QueryEnhancedRequest.builder()
-              .queryConditional(queryConditional)
-              .scanIndexForward(false)
-              .limit(20);
+    var requestBuilder =
+        QueryEnhancedRequest.builder()
+            .queryConditional(queryConditional)
+            .scanIndexForward(false)
+            .limit(limit + 1);
+    if (exclusiveStartKey != null) requestBuilder.exclusiveStartKey(exclusiveStartKey);
 
-      if (lastEvaluatedKey != null) requestBuilder.exclusiveStartKey(lastEvaluatedKey);
-
-      var request = requestBuilder.build();
-      var queryResults = index.query(request);
-
-      var page = queryResults.stream().findFirst();
-      if (page.isPresent()) {
-        results.addAll(page.get().items());
-        lastEvaluatedKey = page.get().lastEvaluatedKey();
-      } else lastEvaluatedKey = null;
-    } while (lastEvaluatedKey != null && results.size() <= limit + 1);
-
-    return results;
+    var request = requestBuilder.build();
+    var page = index.query(request).stream().findFirst();
+    return page.map(Page::items).orElse(Collections.emptyList());
   }
 
   /**
@@ -201,36 +183,24 @@ public class CoreDynamoClientRepository implements DynamoClientRepository {
     var index = clientTable.index("creator-created-index");
     var queryConditional = QueryConditional.keyEqualTo(k -> k.partitionValue(creatorId));
 
-    Map<String, AttributeValue> lastEvaluatedKey = null;
-    var results = new ArrayList<ClientDynamoEntity>();
-
+    Map<String, AttributeValue> exclusiveStartKey = null;
     if (nextClientId != null && !nextClientId.isBlank() && nextCreatedOn != null)
-      lastEvaluatedKey =
+      exclusiveStartKey =
           Map.of(
-              "creator_id", AttributeValue.builder().s(creatorId).build(),
+              "created_by", AttributeValue.builder().s(creatorId).build(),
               "client_id", AttributeValue.builder().s(nextClientId).build(),
               "created_on", AttributeValue.builder().s(nextCreatedOn.toString()).build());
 
-    do {
-      var requestBuilder =
-          QueryEnhancedRequest.builder()
-              .queryConditional(queryConditional)
-              .scanIndexForward(false)
-              .limit(20);
+    var requestBuilder =
+        QueryEnhancedRequest.builder()
+            .queryConditional(queryConditional)
+            .scanIndexForward(false)
+            .limit(limit + 1);
+    if (exclusiveStartKey != null) requestBuilder.exclusiveStartKey(exclusiveStartKey);
 
-      if (lastEvaluatedKey != null) requestBuilder.exclusiveStartKey(lastEvaluatedKey);
-
-      var request = requestBuilder.build();
-      var queryResults = index.query(request);
-
-      var page = queryResults.stream().findFirst();
-      if (page.isPresent()) {
-        results.addAll(page.get().items());
-        lastEvaluatedKey = page.get().lastEvaluatedKey();
-      } else lastEvaluatedKey = null;
-    } while (lastEvaluatedKey != null && results.size() <= limit + 1);
-
-    return results;
+    var request = requestBuilder.build();
+    var page = index.query(request).stream().findFirst();
+    return page.map(Page::items).orElse(Collections.emptyList());
   }
 
   /**
@@ -242,12 +212,11 @@ public class CoreDynamoClientRepository implements DynamoClientRepository {
    *     empty {@link Optional} if not found
    */
   public Optional<ClientDynamoEntity> findByClientIdAndTenantId(String clientId, long tenantId) {
-    return clientTable
-        .query(QueryConditional.keyEqualTo(k -> k.partitionValue(clientId)))
-        .items()
-        .stream()
-        .filter(c -> c.getTenantId() == tenantId)
-        .findFirst();
+    var key = Key.builder().partitionValue(clientId).build();
+    var client = clientTable.getItem(key);
+    return (client != null && client.getTenantId() == tenantId)
+        ? Optional.of(client)
+        : Optional.empty();
   }
 
   /**

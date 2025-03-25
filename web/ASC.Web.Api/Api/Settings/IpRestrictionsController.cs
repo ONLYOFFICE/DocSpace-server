@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,10 +32,10 @@ public class IpRestrictionsController(ApiContext apiContext,
         SettingsManager settingsManager,
         WebItemManager webItemManager,
         IPRestrictionsService iPRestrictionsService,
-        IMemoryCache memoryCache,
+        IFusionCache fusionCache,
         TenantManager tenantManager,
         IHttpContextAccessor httpContextAccessor)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
     /// Returns the IP portal restrictions.
@@ -49,8 +49,12 @@ public class IpRestrictionsController(ApiContext apiContext,
     public async Task<IEnumerable<IPRestriction>> GetIpRestrictionsAsync()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        
         var tenant = tenantManager.GetCurrentTenant();
-        return await iPRestrictionsService.GetAsync(tenant.Id);
+        var etagFromRequest = HttpContext.Request.Headers.IfNoneMatch;
+        var result = await iPRestrictionsService.GetAsync(tenant.Id, etagFromRequest);
+        
+        return HttpContext.TryGetFromCache(await HttpContextExtension.CalculateEtagAsync(result.Select(r=> r.Ip))) ? null : result;
     }
 
     /// <summary>
@@ -108,8 +112,10 @@ public class IpRestrictionsController(ApiContext apiContext,
     public async Task<IPRestrictionsSettings> ReadIpRestrictionsSettingsAsync()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-
-        return await settingsManager.LoadAsync<IPRestrictionsSettings>();
+        
+        var settings = await settingsManager.LoadAsync<IPRestrictionsSettings>(HttpContext.GetIfModifiedSince());
+        
+        return HttpContext.TryGetFromCache(settings.LastModified) ? null : settings;
     }
 
     /// <summary>
