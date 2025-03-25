@@ -36,7 +36,7 @@ public class DistributedTaskQueue<T>(
     ILogger<DistributedTaskQueue<T>> logger,
     IDistributedLockProvider distributedLockProvider)  where T : DistributedTask
 {
-    public const string QUEUE_DEFAULT_PREFIX = "asc_distributed_task_queue_";
+    public const string QUEUE_DEFAULT_PREFIX = "asc_distributed_task_queue_v2_";
     public static readonly int INSTANCE_ID = Environment.ProcessId;
 
     private readonly ConcurrentDictionary<string, CancellationTokenSource> _cancelations = new();
