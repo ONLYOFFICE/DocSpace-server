@@ -126,26 +126,26 @@ public class SocketManager(
         await MakeRequest("mark-as-new-folder", result);
     }
 
-    public async Task BackupProgressAsync(int percentage)
+    public async Task BackupProgressAsync(int percentage, bool dump)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
-        await MakeRequest("backup-progress", new { tenantId, percentage });
+        await MakeRequest("backup-progress", new { tenantId, dump, percentage });
     }
 
-    public async Task EndBackupAsync<T>(T result)
+    public async Task EndBackupAsync<T>(T result, bool dump)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
-        await MakeRequest("end-backup", new { tenantId, result });
+        await MakeRequest("end-backup", new { tenantId, dump, result });
     }
 
-    public async Task RestoreProgressAsync(int tenantId, int percentage)
+    public async Task RestoreProgressAsync(int tenantId, bool dump, int percentage)
     {
-        await MakeRequest("restore-progress", new { tenantId, percentage });
+        await MakeRequest("restore-progress", new { tenantId, dump, percentage });
     }
 
-    public async Task EndRestoreAsync<T>(int tenantId, T result)
+    public async Task EndRestoreAsync<T>(int tenantId, bool dump, T result)
     {
-        await MakeRequest("end-restore", new { tenantId, result });
+        await MakeRequest("end-restore", new { tenantId, dump, result });
     }
 
     private async Task<IEnumerable<Guid>> GetRecipientListForForm<T>(File<T> form)

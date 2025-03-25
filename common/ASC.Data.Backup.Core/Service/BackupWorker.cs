@@ -100,8 +100,15 @@ public class BackupWorker(
     {
         await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
         {
-            var item = (await _backupProgressQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == request.TenantId);
-
+            BackupProgressItem item = null;
+            if (request.Dump) 
+            {
+                item = (await _backupProgressQueue.GetAllTasks()).FirstOrDefault(t => t.Dump);
+            }
+            else
+            {
+                item = (await _backupProgressQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == request.TenantId && !t.Dump);
+            }
             if (item is { IsCompleted: true })
             {
                 await _backupProgressQueue.DequeueTask(item.Id);
@@ -159,7 +166,15 @@ public class BackupWorker(
     {
         await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
         {
-            return ToBackupProgress((await _backupProgressQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenantId));
+            return ToBackupProgress((await _backupProgressQueue.GetAllTasks()).FirstOrDefault(t => !t.Dump && t.TenantId == tenantId && t.BackupProgressItemType == BackupProgressItemType.Backup));
+        }
+    }
+
+    public async Task<BackupProgress> GetDumpBackupProgressAsync()
+    {
+        await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
+        {
+            return ToBackupProgress((await _backupProgressQueue.GetAllTasks()).FirstOrDefault(t => t.Dump && t.BackupProgressItemType == BackupProgressItemType.Backup));
         }
     }
 
@@ -175,9 +190,26 @@ public class BackupWorker(
     {
         await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
         {
-            return ToBackupProgress((await _restoreProgressQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenantId || t.NewTenantId == tenantId));
+            return ToBackupProgress((await _restoreProgressQueue.GetAllTasks()).FirstOrDefault(t => !t.Dump && (t.TenantId == tenantId || t.NewTenantId == tenantId) && t.BackupProgressItemType == BackupProgressItemType.Restore));
         }
     }
+    
+    public async Task<BackupProgress> GetAnyRestoreProgressAsync(int tenantId)
+    {
+        await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
+        {
+            return ToBackupProgress((await _restoreProgressQueue.GetAllTasks()).FirstOrDefault(t => (t.Dump || t.TenantId == tenantId || t.NewTenantId == tenantId) && t.BackupProgressItemType == BackupProgressItemType.Restore));
+        }
+    }
+
+    public async Task<BackupProgress> GetDumpRestoreProgressAsync()
+    {
+        await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
+        {
+            return ToBackupProgress((await _restoreProgressQueue.GetAllTasks()).FirstOrDefault(t => t.Dump && t.BackupProgressItemType == BackupProgressItemType.Restore));
+        }
+    }
+
 
     public async Task ResetBackupErrorAsync(int tenantId)
     {
