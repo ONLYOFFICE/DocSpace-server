@@ -39,10 +39,12 @@ public class DistributedTaskQueue<T>(
     public const string QUEUE_DEFAULT_PREFIX = "asc_distributed_task_queue_v2_";
     public static readonly int INSTANCE_ID = Environment.ProcessId;
 
-    private readonly ConcurrentDictionary<string, CancellationTokenSource> _cancelations = new();
+    private readonly ConcurrentDictionary<string, CancellationTokenSource> _cancellations = new();
     private bool _subscribed;
     private int _maxThreadsCount = 1;
     private string _name;
+    public string LockKey {get => $"{Name}_lock";}
+    
 
     public int TimeUntilUnregisterInSeconds { get; set; }
 
@@ -79,13 +81,13 @@ public class DistributedTaskQueue<T>(
 
         var cancellation = new CancellationTokenSource();
         var token = cancellation.Token;
-        _cancelations[distributedTask.Id] = cancellation;
+        _cancellations[distributedTask.Id] = cancellation;
 
         if (!_subscribed)
         {
             cancelTaskNotify.Subscribe(c =>
             {
-                if (_cancelations.TryGetValue(c.Id, out var s))
+                if (_cancellations.TryGetValue(c.Id, out var s))
                 {
                     s.Cancel();
                 }
@@ -105,19 +107,33 @@ public class DistributedTaskQueue<T>(
     
     public async Task<List<T>> GetAllTasks(int? instanceId = null)
     {
-        var queueTasks = await (await LoadKeysFromCache()).ToAsyncEnumerable().SelectAwait(async id => await PeekTask(id)).Where(t => t != null).ToListAsync();
+        List<string> keys;
         
-        if (instanceId.HasValue)
-        {
-            queueTasks = queueTasks.Where(x => x.InstanceId == instanceId.Value).ToList();
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKey))
+        {                    
+            keys = (await LoadKeysFromCache()).ToList();
         }
 
-        foreach (var task in queueTasks)
+        List<T> result = [];
+
+        foreach (var key in keys)
         {
+            var task = await PeekTask(key);
+
+            if (task == null)
+            {
+                continue;
+            }
+                
+            if (instanceId == null || task.InstanceId == instanceId.Value)
+            {
+                result.Add(task);
+            }
+
             task.Publication ??= GetPublication();
         }
 
-        return queueTasks;
+        return result;
     }
     
 
@@ -140,7 +156,7 @@ public class DistributedTaskQueue<T>(
         distributedTask.Publication ??= GetPublication();
         await distributedTask.PublishChanges();
 
-        await using (await distributedLockProvider.TryAcquireFairLockAsync($"{Name}_lock"))
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKey))
         {
             var tasks = await LoadKeysFromCache();
             if (!tasks.Contains(distributedTask.Id))
@@ -232,7 +248,7 @@ public class DistributedTaskQueueService<T>(
                 
                 if (toRemove.Count > 0)
                 { 
-                    await using (await distributedLockProvider.TryAcquireFairLockAsync($"{queue.Name}_lock"))
+                    await using (await distributedLockProvider.TryAcquireFairLockAsync(queue.LockKey, cancellationToken: stoppingToken))
                     {                    
                         var queueTasksFromCache = await queue.LoadKeysFromCache();
                         await queue.SaveKeysToCache(queueTasksFromCache.Except(toRemove).ToList());
