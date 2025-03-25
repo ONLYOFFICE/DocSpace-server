@@ -48,13 +48,13 @@ public class ChangeHistory
 public class ChangeHistoryRequestDto<T>
 {
     /// <summary>
-    /// The file Id to get its version history.
+    /// The file Id to change its version history.
     /// </summary>
     [FromRoute(Name = "fileId")]
     public T FileId { get; set; }
 
     /// <summary>
-    /// The change history file.
+    /// The parameters for changing version history.
     /// </summary>
     [FromBody]
     public ChangeHistory File { get; set; }

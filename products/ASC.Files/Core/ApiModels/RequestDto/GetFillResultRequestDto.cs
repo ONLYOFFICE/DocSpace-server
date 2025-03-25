@@ -29,7 +29,7 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// <summary>
 /// The parameters of the form-filling session result.
 /// </summary>
-public class GetFillResulteRequestDto
+public class GetFillResultRequestDto
 {
     /// <summary>
     /// The form-filling session id.

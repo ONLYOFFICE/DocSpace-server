@@ -44,7 +44,7 @@ public class CreateFolder
 public class CreateFolderRequestDto<T>
 {
     /// <summary>
-    /// The request folder ID to create.
+    /// The folder ID for the folder creation.
     /// </summary>
     [FromRoute(Name = "folderId")]
     public T FolderId { get; set; }

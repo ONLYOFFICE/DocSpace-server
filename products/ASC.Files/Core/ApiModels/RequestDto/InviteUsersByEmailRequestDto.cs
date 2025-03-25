@@ -32,7 +32,7 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 public class InviteUsersByEmailRequestDto
 {
     /// <summary>
-    /// The users' email addressess.
+    /// The user's email addressess.
     /// </summary>
     public IEnumerable<string> Emails { get; set; }
 
@@ -42,7 +42,7 @@ public class InviteUsersByEmailRequestDto
     public EmployeeType EmployeeType { get; set; }
 
     /// <summary>
-    /// The sharing access rights.
+    /// The access rights.
     /// </summary>
     public FileShare Access { get; set; }
 }

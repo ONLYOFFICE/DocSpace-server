@@ -101,7 +101,7 @@ public class OrderFileRequestDto<T>
     public T FileId { get; set; }
 
     /// <summary>
-    /// The order request.
+    /// The order request parameters.
     /// </summary>
     [FromBody]
     public OrderRequestDto Order { get; set; }
@@ -119,7 +119,7 @@ public class OrderFolderRequestDto<T>
     public T FolderId { get; set; }
 
     /// <summary>
-    /// The order request.
+    /// The order request parameters.
     /// </summary>
     [FromBody]
     public OrderRequestDto Order { get; set; }

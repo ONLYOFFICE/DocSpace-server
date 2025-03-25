@@ -65,7 +65,7 @@ public class CreateFileRequestDto<T>
     public T FolderId { get; set; }
 
     /// <summary>
-    /// The file to create.
+    /// The parameters for creating a file.
     /// </summary>
     [FromBody]
     public CreateFile<JsonElement> File { get; set; }

@@ -32,7 +32,7 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 public class DocServiceUrlRequestDto
 {
     /// <summary>
-    /// Specifies if the editor has version or not.
+    /// Specifies whether to return the editor version or not.
     /// </summary>
     [FromQuery(Name = "version")]
     public bool Version { get; set; }

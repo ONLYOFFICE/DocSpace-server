@@ -139,7 +139,7 @@ public class DeleteRequestDto<T>
     public T FileId { get; set; }
 
     /// <summary>
-    /// The file to delete.
+    /// The parameters for deleting a file.
     /// </summary>
     [FromBody]
     public Delete File {  get; set; }

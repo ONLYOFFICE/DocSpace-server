@@ -260,7 +260,7 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "Ok", typeof(FillingFormResultDto<int>))]
     [AllowAnonymous]
     [HttpGet("file/fillresult")]
-    public async Task<FillingFormResultDto<T>> GetFillResultAsync(GetFillResulteRequestDto inDto)
+    public async Task<FillingFormResultDto<T>> GetFillResultAsync(GetFillResultRequestDto inDto)
     {
         var completedFormId = await hybridCache.GetOrDefaultAsync<string>(inDto.FillingSessionId);
 

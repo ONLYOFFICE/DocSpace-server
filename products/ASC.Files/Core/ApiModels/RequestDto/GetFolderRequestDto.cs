@@ -38,25 +38,25 @@ public class GetFolderRequestDto<T>
     public T FolderId { get; set; }
 
     /// <summary>
-    /// The user or group ID of the folder.
+    /// The user or group ID.
     /// </summary>
     [FromQuery(Name = "userIdOrGroupId")]
     public Guid? UserIdOrGroupId { get; set; }
 
     /// <summary>
-    /// The folder filter type.
+    /// The filter type.
     /// </summary>
     [FromQuery(Name = "filterType")]
     public FilterType? FilterType { get; set; }
 
     /// <summary>
-    /// The folder room ID.
+    /// The room ID.
     /// </summary>
     [FromQuery(Name = "roomId")]
     public T RoomId { get; set; }
-    
+
     /// <summary>
-    /// Specifies whether to exclude the folder subject or not.
+    /// Specifies whether to exclude search by user or group ID.
     /// </summary>
     [FromQuery(Name = "excludeSubject")]
     public bool? ExcludeSubject { get; set; }
@@ -74,19 +74,19 @@ public class GetFolderRequestDto<T>
     public string Extension { get; set; }
 
     /// <summary>
-    /// The search area of the folder.
+    /// The search area.
     /// </summary>
     [FromQuery(Name = "searchArea")]
     public SearchArea SearchArea { get; set; }
 
     /// <summary>
-    /// The forms item key of the folder.
+    /// The forms item key.
     /// </summary>
     [FromQuery(Name = "formsItemKey")]
     public string FormsItemKey { get; set; }
     
     /// <summary>
-    /// The forms item type of the folder.
+    /// The forms item type.
     /// </summary>
     [FromQuery(Name = "formsItemType")]
     public string FormsItemType{ get; set; }
@@ -98,13 +98,13 @@ public class GetFolderRequestDto<T>
 public class GetCommonFolderRequestDto
 {
     /// <summary>
-    /// The user or group ID of the "Common" folder.
+    /// The user or group ID.
     /// </summary>
     [FromQuery(Name = "userIdOrGroupId")]
     public Guid? UserIdOrGroupId { get; set; }
 
     /// <summary>
-    /// The filter type of the "Common" folder.
+    /// The filter type.
     /// </summary>
     [FromQuery(Name = "filterType")]
     public FilterType? FilterType { get; set; }
@@ -116,19 +116,19 @@ public class GetCommonFolderRequestDto
 public class GetMyTrashFolderRequestDto
 {
     /// <summary>
-    /// The user or group ID of the "My trash" folder.
+    /// The user or group ID.
     /// </summary>
     [FromQuery(Name = "userIdOrGroupId")]
     public Guid? UserIdOrGroupId { get; set; }
 
     /// <summary>
-    /// The filter type of the "My trash" folder.
+    /// The filter type.
     /// </summary>
     [FromQuery(Name = "filterType")]
     public FilterType? FilterType { get; set; }
 
     /// <summary>
-    /// Specifies whether to return only files, only folders or all elements from the "My trash" folder.
+    /// Specifies whether to return only files, only folders or all elements.
     /// </summary>
     [FromQuery(Name = "applyFilterOption")]
     public ApplyFilterOption? ApplyFilterOption { get; set; }
@@ -140,13 +140,13 @@ public class GetMyTrashFolderRequestDto
 public class GetRootFolderRequestDto
 {
     /// <summary>
-    /// The user or group ID of the root folder.
+    /// The user or group ID.
     /// </summary>
     [FromQuery(Name = "userIdOrGroupId")]
     public Guid? UserIdOrGroupId { get; set; }
 
     /// <summary>
-    /// The filter type of the root folder.
+    /// The filter type.
     /// </summary>
     [FromQuery(Name = "filterType")]
     public FilterType? FilterType { get; set; }
@@ -164,31 +164,31 @@ public class GetRootFolderRequestDto
 public class GetRecentFolderRequestDto
 {
     /// <summary>
-    /// The recent user or group ID of the "Recent" folder.
+    /// The user or group ID.
     /// </summary>
     [FromQuery(Name = "userIdOrGroupId")]
     public Guid? UserIdOrGroupId { get; set; }
 
     /// <summary>
-    /// The filter type of the "Recent" folder.
+    /// The filter type.
     /// </summary>
     [FromQuery(Name = "filterType")]
     public FilterType? FilterType { get; set; }
 
     /// <summary>
-    /// Specifies whether to exclude a subject from the search in the "Recent" folder.
+    /// Specifies whether to exclude search by user or group ID.
     /// </summary>
     [FromQuery(Name = "excludeSubject")]
     public bool? ExcludeSubject { get; set; }
 
     /// <summary>
-    /// The scope of filters of the "Recent" folder.
+    /// Specifies whether to return only files, only folders or all elements.
     /// </summary>
     [FromQuery(Name = "applyFilterOption")]
     public ApplyFilterOption? ApplyFilterOption { get; set; }
 
     /// <summary>
-    /// The search area of the "Recent" folder.
+    /// The search area.
     /// </summary>
     [FromQuery(Name = "searchArea")]
     public SearchArea? SearchArea { get; set; }

@@ -39,12 +39,12 @@ public class FileIdRequestDto<T>
 }
 
 /// <summary>
-/// The file primary ID request parameters.
+/// The file ID request parameters.
 /// </summary>
 public class FilePrimaryIdRequestDto<T>
 {
     /// <summary>
-    /// The file primary ID of the request.
+    /// The file ID of the request.
     /// </summary>
     [FromRoute(Name = "id")]
     public T Id { get; set; }

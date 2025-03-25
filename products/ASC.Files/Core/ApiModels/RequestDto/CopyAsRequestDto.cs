@@ -70,7 +70,7 @@ public class CopyAsRequestDto<T>
     public T FileId { get; set; }
 
     /// <summary>
-    /// The file to copy.
+    /// The parameters for copying a file
     /// </summary>
     [FromBody]
     public CopyAs<JsonElement> File { get; set; }

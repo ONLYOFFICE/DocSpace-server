@@ -97,7 +97,7 @@ public class InsertFileRequestDto : IModelWithFile, IDisposable
 public class InsertWithFileRequestDto<T>
 {
     /// <summary>
-    /// The folder ID of the file to be inserted.
+    /// The folder ID for inserting the file.
     /// </summary>
     [FromRoute(Name = "folderId")]
     public T FolderId { get; set; }

@@ -32,13 +32,13 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 public class GroupMemberSecurityRequestDto<T>
 {
     /// <summary>
-    /// The folder ID of the group member security settings.
+    /// The folder ID.
     /// </summary>
     [FromRoute(Name = "folderId")]
     public T FolderId { get; set; }
 
     /// <summary>
-    /// The group ID of the group member security settings.
+    /// The group ID.
     /// </summary>
     [FromRoute(Name = "groupId")]
     public Guid GroupId { get; set; }
