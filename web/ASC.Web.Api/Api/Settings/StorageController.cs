@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -223,7 +223,7 @@ public class StorageController(ILoggerProvider option,
 
         await encryptionSettingsHelper.SaveAsync(settings);
 
-        await eventBus.PublishAsync(new EncryptionDataStorageRequestedIntegrationEvent
+        await eventBus.PublishAsync(new DataStorageEncryptionIntegrationEvent
         (
               encryptionSettings: new EncryptionSettings
               {
@@ -483,11 +483,11 @@ public class StorageController(ILoggerProvider option,
     [SwaggerResponse(200, "List of the backup storages with the following parameters", typeof(List<StorageDto>))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("storage/backup")]
-    public async Task<List<StorageDto>> GetAllBackupStorages()
+    public async Task<List<StorageDto>> GetAllBackupStorages(AllBackupStoragesDto dto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var schedule = await backupAjaxHandler.GetScheduleAsync();
+        var schedule = await backupAjaxHandler.GetScheduleAsync(dto.Dump);
         var current = new StorageSettings();
 
         if (schedule is { StorageType: BackupStorageType.ThirdPartyConsumer })

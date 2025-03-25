@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -48,6 +48,8 @@ public class TfaAppUserSettings : ISettings<TfaAppUserSettings>
             SaltSetting = 0
         };
     }
+    
+    public DateTime LastModified { get; set; }
 
     public static async Task<long> GetSaltAsync(SettingsManager settingsManager, Guid userId)
     {

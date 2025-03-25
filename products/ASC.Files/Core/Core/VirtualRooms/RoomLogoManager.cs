@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -47,7 +47,8 @@ public class RoomLogoManager(
     FileSizeComment fileSizeComment,
     CommonLinkUtility commonLinkUtility, 
     ExternalShare externalShare,
-    GlobalFolderHelper globalFolderHelper)
+    GlobalFolderHelper globalFolderHelper,
+    WebhookManager webhookManager)
 {
     internal const string LogosPathSplitter = "_";
     private const string LogosPath = $"{{0}}{LogosPathSplitter}{{1}}.png";
@@ -97,6 +98,8 @@ public class RoomLogoManager(
         }
         
         await SaveLogo(tempFile, x, y, width, height, room, folderDao);
+
+        await webhookManager.PublishAsync(WebhookTrigger.RoomUpdated, room);
 
         return room;
     }
@@ -196,6 +199,7 @@ public class RoomLogoManager(
             if (EnableAudit)
             {
                 await filesMessageService.SendAsync(MessageAction.RoomLogoDeleted, room, room.Title);
+                await webhookManager.PublishAsync(WebhookTrigger.RoomUpdated, room);
             }
         }
         catch (Exception e)
@@ -388,6 +392,8 @@ public class RoomLogoManager(
                 {
                     await filesMessageService.SendAsync(MessageAction.RoomCoverChanged, room, room.Title);
                 }
+
+                await webhookManager.PublishAsync(WebhookTrigger.RoomUpdated, room);
             }
         }
 

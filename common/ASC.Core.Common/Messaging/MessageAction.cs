@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -769,6 +769,18 @@ public enum MessageAction
     StartStorageDecryption = 5053,
     
  
+
+    [SwaggerEnum("DevTools access settings changed")]
+    DevToolsAccessSettingsChanged = 6054,
+
+    [SwaggerEnum("Webhook created")]
+    WebhookCreated = 6055,
+
+    [SwaggerEnum("Webhook updated")]
+    WebhookUpdated = 6056,
+
+    [SwaggerEnum("Webhook deleted")]
+    WebhookDeleted = 6057,
 
     #endregion
 

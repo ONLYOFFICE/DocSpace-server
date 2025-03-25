@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -725,6 +725,11 @@ public class FileReferenceData
     /// Instance ID
     /// </summary>
     public string InstanceId { get; set; }
+
+    /// <summary>
+    /// Room ID
+    /// </summary>
+    public string RoomId { get; set; }
 }
 
 #endregion Nested Classes
@@ -870,11 +875,14 @@ public class CustomizationConfig<T>(
         return modeWrite ? null : "markup";
     }
 
-    public async Task<bool> GetSubmitForm(File<T> file)
+    public async Task<SubmitForm> GetSubmitForm(File<T> file)
     {
-
         var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
-        return file.RootFolderType != FolderType.Archive && await fileSecurity.CanFillFormsAsync(file) && properties is { FormFilling.CollectFillForm: true };
+        return new SubmitForm()
+        {
+            Visible = file.RootFolderType != FolderType.Archive && await fileSecurity.CanFillFormsAsync(file) && properties is { FormFilling.StartFilling: true },
+            ResultMessage = ""
+        };
     }
 
     private FileSharing FileSharing { get; } = fileSharing;
@@ -1082,4 +1090,9 @@ public class UserConfig
     /// Image
     /// </summary>
     public string Image { get; set; }
+
+    /// <summary>
+    /// Roles
+    /// </summary>
+    public List<string> Roles { get; set; }
 }

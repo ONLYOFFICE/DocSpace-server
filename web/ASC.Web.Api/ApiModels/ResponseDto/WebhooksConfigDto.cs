@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,7 +26,9 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
-public class WebhooksConfigDto : IMapFrom<WebhooksConfig>
+/// <summary>
+/// </summary>
+public class WebhooksConfigDto
 {
     /// <summary>
     /// ID
@@ -44,22 +46,62 @@ public class WebhooksConfigDto : IMapFrom<WebhooksConfig>
     public string Uri { get; set; }
 
     /// <summary>
-    /// Secret key
-    /// </summary>
-    public string SecretKey { get; set; }
-
-    /// <summary>
     /// Specifies if the webhooks are enabled or not
     /// </summary>
     public bool Enabled { get; set; }
 
     /// <summary>
-    /// SSL
+    /// SSL Verification
     /// </summary>
     public bool SSL { get; set; }
+
+    /// <summary>
+    /// Triggers
+    /// </summary>
+    public WebhookTrigger Triggers { get; set; }
+
+    /// <summary>
+    /// Target ID
+    /// </summary>
+    public string TargetId { get; set; }
+
+    /// <summary>
+    /// Create by
+    /// </summary>
+    public EmployeeDto CreatedBy { get; set; }
+
+    /// <summary>
+    /// Create on
+    /// </summary>
+    public DateTime? CreatedOn { get; set; }
+
+    /// <summary>
+    /// Modified by
+    /// </summary>
+    public EmployeeDto ModifiedBy { get; set; }
+
+    /// <summary>
+    /// Modified on
+    /// </summary>
+    public DateTime? ModifiedOn { get; set; }
+
+    /// <summary>
+    /// Last failure on
+    /// </summary>
+    public DateTime? LastFailureOn { get; set; }
+
+    /// <summary>
+    /// Last failure content
+    /// </summary>
+    public string LastFailureContent { get; set; }
+
+    /// <summary>
+    /// Last success on
+    /// </summary>
+    public DateTime? LastSuccessOn { get; set; }
 }
 
-public class WebhooksConfigWithStatusDto : IMapFrom<WebhooksConfigWithStatus>
+public class WebhooksConfigWithStatusDto
 {
     /// <summary>
     /// Configs
@@ -70,11 +112,37 @@ public class WebhooksConfigWithStatusDto : IMapFrom<WebhooksConfigWithStatus>
     /// Status
     /// </summary>
     public int Status { get; set; }
+}
 
-    public void Mapping(Profile profile)
+[Scope]
+public class WebhooksConfigDtoHelper(TenantUtil tenantUtil, EmployeeDtoHelper employeeDtoHelper)
+{
+    public async Task<WebhooksConfigDto> GetAsync(DbWebhooksConfig dbWebhooksConfig)
     {
-        profile.CreateMap<WebhooksConfigWithStatus, WebhooksConfigWithStatusDto>()
-            .ForMember(src => src.Configs, ex => ex
-                .MapFrom(map => map.WebhooksConfig));
+        return new WebhooksConfigDto
+        {
+            Id = dbWebhooksConfig.Id,
+            Name = dbWebhooksConfig.Name,
+            Uri = dbWebhooksConfig.Uri,
+            Enabled = dbWebhooksConfig.Enabled,
+            SSL = dbWebhooksConfig.SSL,
+            Triggers = dbWebhooksConfig.Triggers,
+            TargetId = dbWebhooksConfig.TargetId,
+            CreatedBy = dbWebhooksConfig.CreatedBy.HasValue ? await employeeDtoHelper.GetAsync(dbWebhooksConfig.CreatedBy.Value) : null,
+            CreatedOn = dbWebhooksConfig.CreatedOn.HasValue? tenantUtil.DateTimeFromUtc(dbWebhooksConfig.CreatedOn.Value) : null,
+            ModifiedBy = dbWebhooksConfig.ModifiedBy.HasValue ? await employeeDtoHelper.GetAsync(dbWebhooksConfig.ModifiedBy.Value) : null,
+            ModifiedOn = dbWebhooksConfig.ModifiedOn.HasValue ? tenantUtil.DateTimeFromUtc(dbWebhooksConfig.ModifiedOn.Value) : null,
+            LastFailureOn = dbWebhooksConfig.LastFailureOn.HasValue ? tenantUtil.DateTimeFromUtc(dbWebhooksConfig.LastFailureOn.Value) : null,
+            LastFailureContent = dbWebhooksConfig.LastFailureContent,
+            LastSuccessOn = dbWebhooksConfig.LastSuccessOn.HasValue ? tenantUtil.DateTimeFromUtc(dbWebhooksConfig.LastSuccessOn.Value) : null
+        };
+    }
+
+    public async Task<WebhooksConfigWithStatusDto> GetAsync(WebhooksConfigWithStatus webhooksConfigWithStatus)
+    {
+        return new WebhooksConfigWithStatusDto {
+            Configs = await GetAsync(webhooksConfigWithStatus.WebhooksConfig),
+            Status = webhooksConfigWithStatus.Status ?? 0
+        };
     }
 }

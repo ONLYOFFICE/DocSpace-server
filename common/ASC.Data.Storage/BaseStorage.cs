@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -340,9 +340,9 @@ public abstract class BaseStorage(TempStream tempStream,
         await CopyDirectoryAsync(string.Empty, dir, newDomain, newDir);
     }
 
-    public virtual IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator validator)
+    public virtual Task<IDataStore> ConfigureAsync(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator validator)
     {
-        return this;
+        return Task.FromResult<IDataStore>(this);
     }
 
     public IDataStore SetQuotaController(IQuotaController controller)
