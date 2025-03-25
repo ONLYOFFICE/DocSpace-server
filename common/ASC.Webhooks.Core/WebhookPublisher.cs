@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -73,11 +73,19 @@ public class WebhookPublisher(
                 continue;
             }
 
-            if (checker != null && config.CreatedBy.HasValue && authContext.CurrentAccount.ID != config.CreatedBy.Value)
+            if (checker != null)
             {
-                if (!await checker.CheckAccessAsync(data, config.CreatedBy.Value))
+                if (!string.IsNullOrEmpty(config.TargetId) && !checker.CheckIsTarget(data, config.TargetId))
                 {
                     continue;
+                }
+
+                if (config.CreatedBy.HasValue && authContext.CurrentAccount.ID != config.CreatedBy.Value)
+                {
+                    if (!await checker.CheckAccessAsync(data, config.CreatedBy.Value))
+                    {
+                        continue;
+                    }
                 }
             }
 
