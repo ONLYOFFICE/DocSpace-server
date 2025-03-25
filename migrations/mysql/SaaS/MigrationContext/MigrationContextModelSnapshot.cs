@@ -7347,6 +7347,13 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("secret_key")
                         .HasDefaultValueSql("''");
 
+                    b.Property<string>("TargetId")
+                        .HasMaxLength(36)
+                        .HasColumnType("varchar(36)")
+                        .HasColumnName("target_id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
                     b.Property<int>("TenantId")
                         .HasColumnType("int")
                         .HasColumnName("tenant_id");

@@ -28,7 +28,7 @@ namespace ASC.Webhooks.Core;
 
 public enum WebhookTrigger
 {
-    [SwaggerEnum("all")]
+    [SwaggerEnum("*")]
     All = 0,
 
 

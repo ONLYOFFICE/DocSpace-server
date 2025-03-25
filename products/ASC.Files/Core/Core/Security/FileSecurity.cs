@@ -1688,6 +1688,11 @@ public class FileSecurity(IDaoFactory daoFactory,
 
                         break;
                     default:
+                        if (ace is { SubjectType: SubjectType.ExternalLink or SubjectType.PrimaryExternalLink } && ace.Subject != userId)
+                        {
+                            return false;
+                        }
+
                         return true;
                 }
 

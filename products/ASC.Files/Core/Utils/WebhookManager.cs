@@ -67,6 +67,11 @@ public class WebhookManager(
 [Scope(GenericArguments = [typeof(string)])]
 public class WebhookFileEntryAccessChecker<T>(FileSecurity fileSecurity) : IWebhookAccessChecker<FileEntry<T>>
 {
+    public bool CheckIsTarget(FileEntry<T> fileEntry, string targetId)
+    {
+        return fileEntry.Id.ToString() == targetId;
+    }
+
     public async Task<bool> CheckAccessAsync(FileEntry<T> fileEntry, Guid userId)
     {
         return await fileSecurity.CanReadAsync(fileEntry, userId);
