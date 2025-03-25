@@ -573,19 +573,26 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                     };
 
                     using (var responseDownload = await httpClient.SendAsync(requestDownload))
-                    await using (var streamDownload = await responseDownload.Content.ReadAsStreamAsync())
-                    await using (var downloadStream = new ResponseStream(streamDownload, streamDownload.Length))
                     {
-                        const int bufferSize = 2048;
-                        var buffer = new byte[bufferSize];
-                        int readed;
-                        attach = new MemoryStream();
-                        while ((readed = await downloadStream.ReadAsync(buffer.AsMemory(0, bufferSize))) > 0)
+                        if (!responseDownload.IsSuccessStatusCode)
                         {
-                            await attach.WriteAsync(buffer.AsMemory(0, readed));
+                            throw new Exception($"{FilesCommonResource.ErrorMessage_DocServiceException} {responseDownload.StatusCode}");
                         }
 
-                        attach.Position = 0;
+                        await using (var streamDownload = await responseDownload.Content.ReadAsStreamAsync())
+                        await using (var downloadStream = new ResponseStream(streamDownload, streamDownload.Length))
+                        {
+                            const int bufferSize = 2048;
+                            var buffer = new byte[bufferSize];
+                            int readed;
+                            attach = new MemoryStream();
+                            while ((readed = await downloadStream.ReadAsync(buffer.AsMemory(0, bufferSize))) > 0)
+                            {
+                                await attach.WriteAsync(buffer.AsMemory(0, readed));
+                            }
+
+                            attach.Position = 0;
+                        }
                     }
 
                     if (string.IsNullOrEmpty(fileData.MailMerge.Title))
@@ -609,10 +616,17 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                     };
 
                     using (var httpResponse = await httpClient.SendAsync(httpRequest))
-                    await using (var stream = await httpResponse.Content.ReadAsStreamAsync())
                     {
-                        using var reader = new StreamReader(stream, Encoding.GetEncoding(Encoding.UTF8.WebName));
-                        message = await reader.ReadToEndAsync();
+                        if (!httpResponse.IsSuccessStatusCode)
+                        {
+                            throw new Exception($"{FilesCommonResource.ErrorMessage_DocServiceException} {httpResponse.StatusCode}");
+                        }
+
+                        await using (var stream = await httpResponse.Content.ReadAsStreamAsync())
+                        {
+                            using var reader = new StreamReader(stream, Encoding.GetEncoding(Encoding.UTF8.WebName));
+                            message = await reader.ReadToEndAsync();
+                        }
                     }
 
                     break;
@@ -681,7 +695,13 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
             };
 
             var httpClient = clientFactory.CreateClient(nameof(ASC.Files.Core.Helpers.DocumentService));
-            using (var response = await httpClient.SendAsync(request))
+            using var response = await httpClient.SendAsync(request);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"{FilesCommonResource.ErrorMessage_DocServiceException} {response.StatusCode}");
+            }
+
             await using (var stream = await response.Content.ReadAsStreamAsync())
             await using (var fileStream = new ResponseStream(stream, stream.Length))
             {
@@ -722,6 +742,12 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
 
             var httpClient = clientFactory.CreateClient(nameof(ASC.Files.Core.Helpers.DocumentService));
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"{FilesCommonResource.ErrorMessage_DocServiceException} {response.StatusCode}");
+            }
+
             await using var differenceStream = await ResponseStream.FromMessageAsync(response);
             await fileDao.SaveEditHistoryAsync(file, changes, differenceStream);
         }

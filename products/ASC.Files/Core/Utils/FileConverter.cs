@@ -350,6 +350,11 @@ public class FileConverter(
         var httpClient = clientFactory.CreateClient(nameof(DocumentService));
         var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
 
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new Exception($"{FilesCommonResource.ErrorMessage_DocServiceException} {response.StatusCode}");
+        }
+
         return await ResponseStream.FromMessageAsync(response);
     }
 
@@ -538,6 +543,12 @@ public class FileConverter(
         try
         {
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"{FilesCommonResource.ErrorMessage_DocServiceException} {response.StatusCode}");
+            }
+
             await using var convertedFileStream = await ResponseStream.FromMessageAsync(response);
             newFile.ContentLength = convertedFileStream.Length;
             newFile = await fileDao.SaveFileAsync(newFile, convertedFileStream);
