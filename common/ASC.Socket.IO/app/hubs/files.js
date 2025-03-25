@@ -125,7 +125,7 @@ module.exports = (io) => {
       socket.to(room).emit("refresh-folder", folderId);
     });
 
-    socket.on("restore-backup", (dump) => {
+    socket.on("restore-backup", (data) => {
       const sess = socket.handshake.session;
       const tenant = sess?.portal?.tenantId || "unknown";
       const user = sess?.user?.id || "unknown";
@@ -133,7 +133,7 @@ module.exports = (io) => {
 
       logger.info(`WS: restore backup in room ${room} session=[sessionId='sess:${sessId}' tenantId=${tenant}|${tenantId()} userId='${user}'|'${userId()}']`);
 
-      if(dump)
+      if(data.dump)
       {
         var room = `restore`;
       }
