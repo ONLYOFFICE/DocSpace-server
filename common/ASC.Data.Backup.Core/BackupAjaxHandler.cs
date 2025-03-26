@@ -36,11 +36,9 @@ public class BackupAjaxHandler(
     TenantManager tenantManager,
     MessageService messageService,
     CoreBaseSettings coreBaseSettings,
-    CoreConfiguration coreConfiguration,
     PermissionContext permissionContext,
     AuthContext authContext,
     UserManager userManager,
-    ConsumerFactory consumerFactory,
     StorageFactory storageFactory,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity)
