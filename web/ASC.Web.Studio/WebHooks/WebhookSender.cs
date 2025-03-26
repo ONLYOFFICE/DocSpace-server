@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,18 +24,22 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core;
+using ASC.MessagingSystem.Core;
+using ASC.MessagingSystem.EF.Model;
+
 namespace ASC.Webhooks;
 
 [Singleton]
-public class WebhookSender(ILoggerProvider options, IServiceScopeFactory scopeFactory, IHttpClientFactory clientFactory)
+public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory scopeFactory, IHttpClientFactory clientFactory, Settings settings)
 {
-    private readonly ILogger _log = options.CreateLogger("ASC.Webhooks.Core");
-
     private readonly JsonSerializerOptions _jsonSerializerOptions = new()
     {
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         IgnoreReadOnlyProperties = true
     };
+
     private const string SignatureHeader = "x-docspace-signature-256";
 
     public const string WEBHOOK = "webhook";
@@ -43,39 +47,83 @@ public class WebhookSender(ILoggerProvider options, IServiceScopeFactory scopeFa
 
     public async Task Send(WebhookRequestIntegrationEvent webhookRequest, CancellationToken cancellationToken)
     {
-        using var scope = scopeFactory.CreateScope();
+        await using var scope = scopeFactory.CreateAsyncScope();
         var dbWorker = scope.ServiceProvider.GetRequiredService<DbWorker>();
+        var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
+        var messageService = scope.ServiceProvider.GetRequiredService<MessageService>();
 
-        var entry = await dbWorker.ReadJournal(webhookRequest.WebhookId);
+        await tenantManager.SetCurrentTenantAsync(webhookRequest.TenantId);
 
-        var ssl = entry.Config.SSL;
+        var entry = await dbWorker.ReadJournal(webhookRequest.WebhookLogId);
+
+        var webhookPayload = JsonSerializer.Deserialize<WebhookPayload<object, object>>(entry.RequestPayload, _jsonSerializerOptions);
+        webhookPayload.Event.Id = entry.Id;
+        webhookPayload.Webhook.LastFailureOn = null;
+        webhookPayload.Webhook.LastFailureContent = null;
+        webhookPayload.Webhook.LastSuccessOn = null;
+        webhookPayload.Webhook.RetryCount = 0;
+        webhookPayload.Webhook.RetryOn = null;
 
         var status = 0;
+        DateTime? delivery = null;
+        DateTime requestDate = webhookPayload.GetShortUtcNow();
         string responsePayload = null;
         string responseHeaders = null;
+        string requestPayload = JsonSerializer.Serialize(webhookPayload, _jsonSerializerOptions);
         string requestHeaders = null;
 
+        var clientName = entry.Config.SSL ? WEBHOOK : WEBHOOK_SKIP_SSL;
+        var httpClient = clientFactory.CreateClient(clientName);
+        var policy = HttpPolicyExtensions.HandleTransientHttpError()
+                                          .OrResult(x => !x.IsSuccessStatusCode)
+                                          .WaitAndRetryAsync(settings.RepeatCount ?? 5,
+                                                             retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
+                                                             onRetry: (response, delay, retryCount, context) =>
+                                                             {
+                                                                 context["retryCount"] = retryCount;
+                                                                 context["errorMessage"] = response.Exception?.Message;
+                                                             });
         try
         {
-            var clientName = ssl ? WEBHOOK : WEBHOOK_SKIP_SSL;
-
-            var httpClient = clientFactory.CreateClient(clientName);
-            var request = new HttpRequestMessage(HttpMethod.Post, entry.Config.Uri)
+            var response = await policy.ExecuteAsync(async (context) =>
             {
-                Content = new StringContent(entry.RequestPayload, Encoding.UTF8, "application/json")
-            };
+                var request = new HttpRequestMessage(HttpMethod.Post, entry.Config.Uri);
 
-            request.Headers.Add("Accept", "*/*");
-            request.Headers.Add(SignatureHeader, $"sha256={GetSecretHash(entry.Config.SecretKey, entry.RequestPayload)}");
-            requestHeaders = JsonSerializer.Serialize(request.Headers.ToDictionary(r => r.Key, v => v.Value), _jsonSerializerOptions);
+                var retryCount = (int)context["retryCount"];
 
-            var response = await httpClient.SendAsync(request, cancellationToken);
+                if (retryCount > 0)
+                {
+                    webhookPayload.Webhook.LastFailureOn = webhookPayload.Webhook.RetryOn ?? requestDate;
+                    webhookPayload.Webhook.LastFailureContent = (string)context["errorMessage"];
+                    webhookPayload.Webhook.LastSuccessOn = entry.Config.LastSuccessOn;
+
+                    webhookPayload.Webhook.RetryCount = retryCount;
+                    webhookPayload.Webhook.RetryOn = webhookPayload.GetShortUtcNow();
+
+                    requestPayload = JsonSerializer.Serialize(webhookPayload, _jsonSerializerOptions);
+                }
+
+                request.Headers.Add("Accept", "*/*");
+                request.Headers.Add(SignatureHeader, $"sha256={GetSecretHash(entry.Config.SecretKey, requestPayload)}");
+
+                request.Content = new StringContent(requestPayload, Encoding.UTF8, "application/json");
+
+                requestHeaders = JsonSerializer.Serialize(request.Headers.ToDictionary(r => r.Key, v => v.Value), _jsonSerializerOptions);
+
+                var response = await httpClient.SendAsync(request, cancellationToken);
+
+                response.EnsureSuccessStatusCode();
+
+                return response;
+            }, new Context { { "retryCount", 0 }, { "errorMessage", "" } });
 
             status = (int)response.StatusCode;
             responseHeaders = JsonSerializer.Serialize(response.Headers.ToDictionary(r => r.Key, v => v.Value), _jsonSerializerOptions);
             responsePayload = await response.Content.ReadAsStringAsync(cancellationToken);
 
-            _log.DebugResponse(response);
+            entry.Config.LastSuccessOn = delivery = DateTime.UtcNow;
+
+            logger.DebugResponse(response);
         }
         catch (HttpRequestException e)
         {
@@ -84,32 +132,56 @@ public class WebhookSender(ILoggerProvider options, IServiceScopeFactory scopeFa
                 status = (int)e.StatusCode.Value;
             }
 
-            //if (e.InnerException is SocketException se)
-            //{
-            //    status = (int)se.SocketErrorCode;
-            //}
+            if (e.StatusCode == HttpStatusCode.Gone)
+            {
+                await dbWorker.RemoveWebhookConfigAsync(entry.ConfigId);
+                messageService.SendHeadersMessage(MessageAction.WebhookDeleted, MessageTarget.Create(entry.ConfigId), null, $"{entry.Config.Name} (HTTP status 410)");
+                return;
+            }
 
             responsePayload = e.Message;
 
-            _log.ErrorWithException(e);
+            entry.Config.LastFailureContent = e.Message;
+            entry.Config.LastFailureOn = DateTime.UtcNow;
+
+            var lastSuccessOn = entry.Config.LastSuccessOn ?? entry.Config.CreatedOn;
+
+            if (lastSuccessOn.HasValue && entry.Config.LastFailureOn - lastSuccessOn.Value > TimeSpan.FromDays(settings.TrustedDaysCount ?? 3))
+            {
+                entry.Config.Enabled = false;
+            }
+
+            logger.ErrorWithException(e);
         }
         catch (Exception e)
         {
+            responsePayload = e.Message;
+
+            entry.Config.LastFailureContent = e.Message;
+            entry.Config.LastFailureOn = DateTime.UtcNow;
+
             status = (int)HttpStatusCode.InternalServerError;
-            _log.ErrorWithException(e);
+            logger.ErrorWithException(e);
         }
 
-        var delivery = DateTime.UtcNow;
+        await dbWorker.UpdateWebhookJournal(entry.Id, status, delivery, requestPayload, requestHeaders, responsePayload, responseHeaders);
+        await dbWorker.UpdateWebhookConfig(entry.Config);
 
-        await dbWorker.UpdateWebhookJournal(entry.Id, status, delivery, requestHeaders, responsePayload, responseHeaders);
+        if (!entry.Config.Enabled)
+        {
+            messageService.SendHeadersMessage(MessageAction.WebhookUpdated, MessageTarget.Create(entry.ConfigId), null, $"{entry.Config.Name} (more than {settings.TrustedDaysCount} days without success)");
+        }
     }
 
     private string GetSecretHash(string secretKey, string body)
     {
         var secretBytes = Encoding.UTF8.GetBytes(secretKey);
+
         using var hasher = new HMACSHA256(secretBytes);
+
         var data = Encoding.UTF8.GetBytes(body);
         var hash = hasher.ComputeHash(data);
+
         return Convert.ToHexString(hash);
     }
-}
+  }

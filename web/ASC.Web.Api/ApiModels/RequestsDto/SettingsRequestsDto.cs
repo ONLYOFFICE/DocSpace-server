@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -84,4 +84,15 @@ public class TimeZoneRequestDto
     /// Time zone ID
     /// </summary>
     public string TimeZoneID { get; set; }
+}
+
+/// <summary>
+/// Settings request parameters
+/// </summary>
+public class TenantDevToolsAccessSettingsDto
+{
+    /// <summary>
+    /// Limited access to Developer Tools for users
+    /// </summary>
+    public bool LimitedAccessForUsers { get; set; }
 }

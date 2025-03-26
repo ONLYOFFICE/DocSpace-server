@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -47,6 +47,10 @@ public static class NotifyConstants
     public static readonly INotifyAction EventDocumentUploadedToRoom = new NotifyAction("DocumentUploadedTo");
     public static readonly INotifyAction EventDocumentsUploadedToRoom = new NotifyAction("DocumentsUploadedTo");
     public static readonly INotifyAction EventFolderCreatedInRoom = new NotifyAction("FolderCreatedInRoom");
+    public static readonly INotifyAction EventFormStartedFilling = new NotifyAction("FormStartedFilling");
+    public static readonly INotifyAction EventYourTurnFormFilling = new NotifyAction("YourTurnFormFilling");
+    public static readonly INotifyAction EventFormWasCompletelyFilled = new NotifyAction("FormWasCompletelyFilled");
+    public static readonly INotifyAction EventStoppedFormFilling = new NotifyAction("StoppedFormFilling");
 
     #endregion
 

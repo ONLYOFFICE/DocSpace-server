@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -47,12 +47,6 @@ public class WebhookLogsRequestDto
     public string HookUri { get; set; }
 
     /// <summary>
-    /// Webhook ID
-    /// </summary>
-    [FromQuery(Name = "webhookId")]
-    public int? WebhookId {  get; set; }
-
-    /// <summary>
     /// Config ID
     /// </summary>
     [FromQuery(Name = "configId")]
@@ -69,4 +63,16 @@ public class WebhookLogsRequestDto
     /// </summary>
     [FromQuery(Name = "groupStatus")]
     public WebhookGroupStatus? GroupStatus { get; set; }
+
+    /// <summary>
+    /// User ID
+    /// </summary>
+    [FromQuery(Name = "userId")]
+    public Guid? UserId { get; set; }
+
+    /// <summary>
+    /// Trigger
+    /// </summary>
+    [FromQuery(Name = "trigger")]
+    public WebhookTrigger? Trigger { get; set; }
 }
