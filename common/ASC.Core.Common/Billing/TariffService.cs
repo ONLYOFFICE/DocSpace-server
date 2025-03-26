@@ -64,6 +64,7 @@ public class TariffService(
     IDistributedLockProvider distributedLockProvider,
     ILogger<TariffService> logger,
     BillingClient billingClient,
+    AccountingClient accountingClient,
     IServiceProvider serviceProvider,
     TenantExtraConfig tenantExtraConfig)
     : ITariffService
@@ -337,11 +338,17 @@ public class TariffService(
         return $"{tenantId}:billing:payments";
     }
 
+    internal static string GetAccountingBalanceCacheKey(int tenantId)
+    {
+        return $"{tenantId}:accounting:balance";
+    }
+
 
     private async Task ClearCacheAsync(int tenantId)
     {
         await hybridCache.RemoveAsync(GetTariffCacheKey(tenantId));
         await hybridCache.RemoveAsync(GetBillingPaymentCacheKey(tenantId));
+        await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
     }
 
     public async Task<IEnumerable<PaymentInfo>> GetPaymentsAsync(int tenantId)
@@ -849,7 +856,80 @@ public class TariffService(
     {
         return billingClient.Configured;
     }
-    
+
+
+    #region Accounting
+
+    public bool IsAccountingClientConfigured()
+    {
+        return accountingClient.Configured;
+    }
+
+    public async Task<decimal> GetBalanceAsync(int tenantId)
+    {
+        var cacheKey = GetAccountingBalanceCacheKey(tenantId);
+
+        var balanceStr = await GetFromCache<string>(cacheKey);
+
+        if (decimal.TryParse(balanceStr, out var balance))
+        {
+            return balance;
+        }
+
+        await using (await distributedLockProvider.TryAcquireLockAsync($"{cacheKey}_lock"))
+        {
+            balanceStr = await GetFromCache<string>(cacheKey);
+
+            if (decimal.TryParse(balanceStr, out balance))
+            {
+                return balance;
+            }
+
+            if (accountingClient.Configured)
+            {
+                try
+                {
+                    var portalId = await coreSettings.GetKeyAsync(tenantId);
+                    balance = await accountingClient.GetBalance(portalId, true);
+                }
+                catch (Exception error)
+                {
+                    LogError(error, tenantId.ToString());
+                }
+            }
+
+            await hybridCache.SetAsync(cacheKey, balance.ToString(), TimeSpan.FromMinutes(10));
+        }
+
+        return balance;
+    }
+
+    public async Task<bool> BlockMoneyAsync(int tenantId, decimal amount)
+    {
+        var portalId = await coreSettings.GetKeyAsync(tenantId);
+        return await accountingClient.BlockMoney(portalId, amount);
+    }
+
+    public async Task<decimal> TakeOffMoneyAsync(int tenantId, decimal amount)
+    {
+        var portalId = await coreSettings.GetKeyAsync(tenantId);
+        var balance = await accountingClient.TakeOffMoney(portalId, amount);
+
+        var cacheKey = GetAccountingBalanceCacheKey(tenantId);
+        await hybridCache.SetAsync(cacheKey, balance.ToString(), TimeSpan.FromMinutes(10));
+
+        return balance;
+    }
+
+    public async Task<List<PurchaseInfo>> GetReportAsync(int tenantId, DateTime utcFrom, DateTime utcTo)
+    {
+        var portalId = await coreSettings.GetKeyAsync(tenantId);
+        return await accountingClient.GetReport(portalId, utcFrom, utcTo);
+    }
+
+    #endregion
+
+
     private TimeSpan GetCacheExpiration()
     {
         if (coreBaseSettings.Standalone && _cacheExpiration < _standaloneCacheExpiration)

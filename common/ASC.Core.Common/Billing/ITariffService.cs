@@ -39,4 +39,10 @@ public interface ITariffService
     int GetPaymentDelay();
     Task<Tariff> GetBillingInfoAsync(int? tenant = null, int? id = null);
     bool IsConfigured();
+
+    bool IsAccountingClientConfigured();
+    Task<decimal> GetBalanceAsync(int tenantId);
+    Task<bool> BlockMoneyAsync(int tenantId, decimal amount);
+    Task<decimal> TakeOffMoneyAsync(int tenantId, decimal amount);
+    Task<List<PurchaseInfo>> GetReportAsync(int tenantId, DateTime utcFrom, DateTime utcTo);
 }
