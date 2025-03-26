@@ -285,7 +285,108 @@ public class PaymentController(
         await studioNotifyService.SendMsgToSalesAsync(inDto.Email, inDto.UserName, inDto.Message);
         messageService.Send(MessageAction.ContactSalesMailSent);
     }
-    
+
+    /// <summary>
+    /// Returns the portal balance from the accounting service.
+    /// </summary>
+    /// <short>
+    /// Get the portal balance
+    /// </short>
+    /// <path>api/2.0/portal/payment/accounting/balance</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The portal balance", typeof(decimal))]
+    [HttpGet("accounting/balance")]
+    public async Task<decimal> GetBalanceAsync()
+    {
+        var tenant = await CheckAccountingAndReturnTenantAsync();
+        var result = await tariffService.GetBalanceAsync(tenant.Id);
+        return result;
+    }
+
+    /// <summary>
+    /// Trying to block amount money on the portal balance.
+    /// </summary>
+    /// <short>
+    /// Block amount money on the portal balance
+    /// </short>
+    /// <path>api/2.0/portal/payment/accounting/blockmoney</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The money is blocked successfully or not", typeof(bool))]
+    [HttpPost("accounting/blockmoney")]
+    public async Task<bool> BlockMoneyAsync(AccountingBlockMoneyRequestDto inDto)
+    {
+        var tenant = await CheckAccountingAndReturnTenantAsync();
+        var result = await tariffService.BlockMoneyAsync(tenant.Id, inDto.Amount);
+        return result;
+    }
+
+    /// <summary>
+    /// Take off amount money on the portal balance and return new balance.
+    /// </summary>
+    /// <short>
+    /// Take off amount money on the portal balance
+    /// </short>
+    /// <path>api/2.0/portal/payment/accounting/takeoffmoney</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The new portal balance", typeof(decimal))]
+    [HttpPost("accounting/takeoffmoney")]
+    public async Task<decimal> TakeOffMoneyAsync(AccountingTakeOffMoneyRequestDto inDto)
+    {
+        var tenant = await CheckAccountingAndReturnTenantAsync();
+        var result = await tariffService.TakeOffMoneyAsync(tenant.Id, inDto.Amount);
+        return result;
+    }
+
+    /// <summary>
+    /// Returns the portal accounting report from the accounting service.
+    /// </summary>
+    /// <short>
+    /// Get the accounting report
+    /// </short>
+    /// <path>api/2.0/portal/payment/accounting/report</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The accounting report", typeof(List<PurchaseInfo>))]
+    [HttpGet("accounting/report")]
+    public async Task<List<PurchaseInfo>> GetReportAsync(AccountingReportRequestDto inDto)
+    {
+        var tenant = await CheckAccountingAndReturnTenantAsync();
+        var result = await tariffService.GetReportAsync(tenant.Id, inDto.From, inDto.To);
+        return result;
+    }
+
+    private async Task<Tenant> CheckAccountingAndReturnTenantAsync()
+    {
+        if (!tariffService.IsAccountingClientConfigured())
+        {
+            throw new AccountingNotConfiguredException("Accounting service is not configured");
+        }
+
+        if (!tariffService.IsAccountingClientConfigured())
+        {
+            throw new AccountingNotConfiguredException("Accounting service is not configured");
+        }
+
+        var tenant = tenantManager.GetCurrentTenant();
+        var hasPayments = (await tariffService.GetPaymentsAsync(tenant.Id)).Any();
+
+        if (!hasPayments)
+        {
+            throw new AccountingNotFoundException("No one payment found");
+        }
+
+        var payerId = (await tariffService.GetTariffAsync(tenant.Id)).CustomerId;
+        var payer = await userManager.GetUserByEmailAsync(payerId);
+
+        if (securityContext.CurrentAccount.ID != payer.Id &&
+            securityContext.CurrentAccount.ID != tenant.OwnerId)
+        {
+            throw new SecurityException();
+        }
+
+        return tenant;
+    }
+
+
     private async Task CheckCache(string baseKey)
     {
         var key = httpContextAccessor.HttpContext?.Connection.RemoteIpAddress + baseKey;
