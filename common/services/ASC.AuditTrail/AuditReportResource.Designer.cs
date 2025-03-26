@@ -889,11 +889,47 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Users [{0}]. Completely filled out form: {1}.
+        /// </summary>
+        public static string FormCompletelyFilled {
+            get {
+                return ResourceManager.GetString("FormCompletelyFilled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to File Opened For Filling: {0}.
         /// </summary>
         public static string FormOpenedForFilling {
             get {
                 return ResourceManager.GetString("FormOpenedForFilling", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Users [{0}]. Filled out part of form: {1}.
+        /// </summary>
+        public static string FormPartiallyFilled {
+            get {
+                return ResourceManager.GetString("FormPartiallyFilled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Users [{0}]. Started to fill: {1}.
+        /// </summary>
+        public static string FormStartedToFill {
+            get {
+                return ResourceManager.GetString("FormStartedToFill", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Users [{0}]. Form stopped: {1}.
+        /// </summary>
+        public static string FormStopped {
+            get {
+                return ResourceManager.GetString("FormStopped", resourceCulture);
             }
         }
         

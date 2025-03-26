@@ -4704,6 +4704,8 @@ public class FileStorageService //: IFileStorageService
         {
             properties.FormFilling.StartFilling = true;
             await fileDao.SaveProperties(formId, properties);
+            var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+            await filesMessageService.SendAsync(MessageAction.FormStartedToFill, form, MessageInitiator.DocsService, user?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
 
             var currentUserId = authContext.CurrentAccount.ID;
             var recipients = roles
@@ -4813,6 +4815,8 @@ public class FileStorageService //: IFileStorageService
                     .Where(ace => ace is not { Access: FileShare.FillForms })
                     .Select(ace => ace.Id);
 
+                var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+                await filesMessageService.SendAsync(MessageAction.FormStopped, form, MessageInitiator.DocsService, user?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
                 await notifyClient.SendFormFillingEvent(room, form, submittedRoles.Concat(filteredUnsubmittedRoles), NotifyConstants.EventStoppedFormFilling, authContext.CurrentAccount.ID);
                 break;
 

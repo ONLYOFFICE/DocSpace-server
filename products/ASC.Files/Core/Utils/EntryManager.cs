@@ -294,7 +294,8 @@ public class EntryManager(IDaoFactory daoFactory,
     IFusionCache hybridCache,
     NotifyClient notifyClient,
     ExternalShare externalShare,
-    FileSharingAceHelper fileSharingAceHelper)
+    FileSharingAceHelper fileSharingAceHelper,
+    DisplayUserSettingsHelper displayUserSettingsHelper)
 {
     private const string UpdateList = "filesUpdateList";
 
@@ -2267,12 +2268,15 @@ public class EntryManager(IDaoFactory daoFactory,
 
             if(nextRoleSequence != -1)
             {
-                if(nextRoleSequence == 0)
+                var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+                if (nextRoleSequence == 0)
                 {
+                    await filesMessageService.SendAsync(MessageAction.FormCompletelyFilled, form, MessageInitiator.DocsService, user?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
                     await notifyClient.SendFormFillingEvent(room, form, allRoles.Select(role => role.UserId), NotifyConstants.EventFormWasCompletelyFilled);
                 }
                 else if (nextRoleUserIds.Any())
                 {
+                    await filesMessageService.SendAsync(MessageAction.FormPartiallyFilled, form, MessageInitiator.DocsService, user?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
                     var aces = await fileSharing.GetPureSharesAsync(room, nextRoleUserIds).ToListAsync();
                     var formFillers = aces.Where(ace => ace is { Access: FileShare.FillForms }).Select(ace => ace.Id);
 
