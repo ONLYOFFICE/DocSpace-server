@@ -177,12 +177,12 @@ public class BatchRequestDto
     /// <summary>
     /// Destination folder ID
     /// </summary>
-    public required JsonElement DestFolderId { get; set; }
+    public JsonElement DestFolderId { get; set; }
 
     /// <summary>
     /// Overwriting behavior
     /// </summary>
-    public required FileConflictResolveType ConflictResolveType { get; set; }
+    public FileConflictResolveType ConflictResolveType { get; set; }
 
     /// <summary>
     /// Specifies whether to delete a folder after the editing session is finished or not

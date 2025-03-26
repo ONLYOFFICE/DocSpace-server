@@ -34,7 +34,7 @@ public class CheckConversionRequestDto<T>
     /// <summary>
     /// File ID
     /// </summary>
-    public required T FileId { get; set; }
+    public T FileId { get; set; }
 
     /// <summary>
     /// Specifies if the conversion process is synchronous or not

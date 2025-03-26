@@ -78,7 +78,37 @@ public static class OpenApiExtension
             {
                 Type = SecuritySchemeType.ApiKey,
                 In = ParameterLocation.Cookie,
-                Name = CookiesManager.AuthCookiesName
+                Name = CookiesManager.AuthCookiesName,
+                Description = "Use Cookie authentication"
+            });
+
+            // Basic Authentication
+            c.AddSecurityDefinition("Basic", new OpenApiSecurityScheme
+            {
+                Name = "Authorization",
+                Type = SecuritySchemeType.Http,
+                Scheme = "basic",
+                Description = "Enter your username and password"
+            });
+
+            // JWT Authentication
+            c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                Name = "Authorization",
+                Type = SecuritySchemeType.Http,
+                Scheme = "bearer",
+                BearerFormat = "JWT",
+                Description = "Enter 'Bearer {JWT Token}'"
+            });
+
+            // API Key Authentication
+            c.AddSecurityDefinition("ApiKeyBearer", new OpenApiSecurityScheme
+            {
+                Name = "Authorization",
+                Type = SecuritySchemeType.Http,
+                Scheme = "bearer",
+                BearerFormat = "API Key",
+                Description = "Enter 'Bearer {your_api_key}'"
             });
 
             var xmlPath = Path.Combine(AppContext.BaseDirectory, $"{assemblyName}.xml");
@@ -188,6 +218,18 @@ public static class OpenApiExtension
                             Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = CookiesManager.AuthCookiesName }
                         },
                         ["read", "write"]
+                    },
+                    {
+                        new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" } },
+                        new List<string>()
+                    },
+                    {
+                        new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "ApiKeyBearer" } },
+                        new List<string>()
+                    },
+                    {
+                        new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Basic" } },
+                        new List<string>()
                     }
                 });
 
