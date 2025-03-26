@@ -45,7 +45,7 @@ public class UpdateApiKeyRequest
     /// <summary>
     /// Indicates whether the API key should be active
     /// </summary>
-    public bool IsActive { get; set; }
+    public bool? IsActive { get; set; }
 }
 
 /// <summary>

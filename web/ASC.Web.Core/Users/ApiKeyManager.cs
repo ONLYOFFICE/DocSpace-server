@@ -62,6 +62,11 @@ public class ApiKeyManager(
         var currentUserId = authContext.CurrentAccount.ID;
         var newKey = GenerateApiKey();
         var hashedKey = HashApiKey(newKey);
+        
+        if (permissions is { Count: > 0 } && permissions.Exists(x=> x == "*"))
+        { 
+            permissions = null;
+        }
 
         var apiKey = new ApiKey
         {

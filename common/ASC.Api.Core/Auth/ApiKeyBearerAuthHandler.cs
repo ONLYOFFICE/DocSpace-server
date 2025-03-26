@@ -68,7 +68,7 @@ public class ApiKeyBearerAuthHandler(
                 AuthConstants.Claim_ScopeRootWrite
             };
 
-            if (apiKey.Permissions.Count != 0)
+            if (apiKey.Permissions is { Count: > 0 } && !apiKey.Permissions.Exists(x=> x == "*"))
             {
                 claims = apiKey.Permissions.ConvertAll(x => new Claim("scope", x));
             }
