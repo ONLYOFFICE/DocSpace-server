@@ -729,14 +729,26 @@ public enum MessageAction
     [SwaggerEnum("Custom quota per user disabled")]
     CustomQuotaPerUserDisabled = 6053,
     
+    [SwaggerEnum("DevTools access settings changed")]
+    DevToolsAccessSettingsChanged = 6054,
+
+    [SwaggerEnum("Webhook created")]
+    WebhookCreated = 6055,
+
+    [SwaggerEnum("Webhook updated")]
+    WebhookUpdated = 6056,
+
+    [SwaggerEnum("Webhook deleted")]
+    WebhookDeleted = 6057,
+    
     [SwaggerEnum("Created api key")]
-    ApiKeyCreated = 6054,
+    ApiKeyCreated = 6058,
 
     [SwaggerEnum("Revoked api key")]
-    ApiKeyChangedStatus = 6055,
+    ApiKeyChangedStatus = 6059,
 
     [SwaggerEnum("Deleted User api key")]
-    ApiKeyDeleted = 6056,
+    ApiKeyDeleted = 6060,
 
     [SwaggerEnum("Document service location setting")]
     DocumentServiceLocationSetting = 5037,
@@ -770,17 +782,7 @@ public enum MessageAction
     
  
 
-    [SwaggerEnum("DevTools access settings changed")]
-    DevToolsAccessSettingsChanged = 6054,
-
-    [SwaggerEnum("Webhook created")]
-    WebhookCreated = 6055,
-
-    [SwaggerEnum("Webhook updated")]
-    WebhookUpdated = 6056,
-
-    [SwaggerEnum("Webhook deleted")]
-    WebhookDeleted = 6057,
+  
 
     #endregion
 
