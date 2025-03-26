@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -101,7 +101,7 @@ public class OrderFileRequestDto<T>
     public T FileId { get; set; }
 
     /// <summary>
-    /// The order request.
+    /// The order request parameters.
     /// </summary>
     [FromBody]
     public OrderRequestDto Order { get; set; }
@@ -119,7 +119,7 @@ public class OrderFolderRequestDto<T>
     public T FolderId { get; set; }
 
     /// <summary>
-    /// The order request.
+    /// The order request parameters.
     /// </summary>
     [FromBody]
     public OrderRequestDto Order { get; set; }

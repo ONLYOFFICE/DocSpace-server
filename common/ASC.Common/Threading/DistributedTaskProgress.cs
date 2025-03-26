@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,10 +29,8 @@ namespace ASC.Common.Threading;
 /// <summary>
 /// The distributed task progress parameters.
 /// </summary>
-[ProtoContract(IgnoreUnknownSubTypes = true)]
 public class DistributedTaskProgress : DistributedTask
 {
-    [ProtoMember(1)]
     [JsonInclude]
     private double _percentage;
 
@@ -50,14 +48,12 @@ public class DistributedTaskProgress : DistributedTask
     /// Specifies if the distributed task process is completed or not.
     /// </summary>
     /// <type>System.Boolean, System</type>
-    [ProtoMember(2)]
     public bool IsCompleted { get; set; }
 
     /// <summary>
     /// The number of steps of the distributed task.
     /// </summary>
     /// <type>System.Int32, System</type>
-    [ProtoMember(3)]
     protected int StepCount { get; set; }
 
     public override async Task RunJob(CancellationToken cancellationToken)

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,13 +29,13 @@ namespace ASC.Web.Api.Controllers.Settings;
 [DefaultRoute("notification")]
 public class NotificationController(
     ApiContext apiContext,
-    IMemoryCache memoryCache,
+    IFusionCache fusionCache,
     WebItemManager webItemManager,
     NotificationControllerHelper notificationControllerHelper,
     RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
     IMapper mapper,
     IHttpContextAccessor httpContextAccessor)
-: BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+: BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
     /// Checks if the notification type specified in the request is enabled or not.

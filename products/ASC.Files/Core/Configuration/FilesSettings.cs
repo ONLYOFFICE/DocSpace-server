@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -192,6 +192,8 @@ public class FilesSettings : ISettings<FilesSettings>
             OpenEditorInSameTab = false
         };
     }
+    
+    public DateTime LastModified { get; set; }
 
     [JsonIgnore]
     public Guid ID => new("{03B382BD-3C20-4f03-8AB9-5A33F016316E}");

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,8 +23,6 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-
-using Swashbuckle.AspNetCore.Annotations;
 
 namespace ASC.Data.Storage.Configuration;
 
@@ -97,6 +95,8 @@ public abstract class BaseStorageSettings<T> : ISettings<BaseStorageSettings<T>>
     {
         throw new NotImplementedException();
     }
+    
+    public DateTime LastModified { get; set; }
 }
 
 /// <summary>
@@ -120,6 +120,7 @@ public class CdnStorageSettings : BaseStorageSettings<CdnStorageSettings>, ISett
     [JsonIgnore]
     public override Guid ID => new("0E9AE034-F398-42FE-B5EE-F86D954E9FB2");
 
+    [JsonIgnore]
     public override Func<DataStoreConsumer, DataStoreConsumer> Switch => d => d.Cdn;
 
     CdnStorageSettings ISettings<CdnStorageSettings>.GetDefault()
@@ -209,8 +210,8 @@ public class StorageSettingsHelper
             return null;
         }
 
-        return _dataStore = ((IDataStore)_serviceProvider.GetService(handlerType))
-            .Configure((_tenantManager.GetCurrentTenantId()).ToString(), null, null, dataStoreConsumer, null);
+        return _dataStore = await ((IDataStore)_serviceProvider.GetService(handlerType))
+            .ConfigureAsync((_tenantManager.GetCurrentTenantId()).ToString(), null, null, dataStoreConsumer, null);
     }
 
     internal async Task ClearDataStoreCacheAsync()

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -216,6 +216,10 @@ public class EmployeeFullDto : EmployeeDto
     /// </summary>
     public ApiDateTime RegistrationDate { get; set; }
 
+    /// <summary>
+    /// Specifies if the user has an personal folder or not
+    /// </summary>
+    public bool HasPersonalFolder { get; set; }
 }
 [Scope]
 public class EmployeeFullDtoHelper(
@@ -276,7 +280,8 @@ public class EmployeeFullDtoHelper(
         var result = new EmployeeFullDto
         {
             FirstName = userInfo.FirstName,
-            LastName = userInfo.LastName
+            LastName = userInfo.LastName,
+            DisplayName = _displayUserSettingsHelper.GetFullUserName(userInfo)
         };
 
         if (withGroups)
@@ -299,7 +304,6 @@ public class EmployeeFullDtoHelper(
     public async Task<EmployeeFullDto> GetSimpleWithEmail(UserInfo userInfo)
     {
         var result = await GetSimple(userInfo);
-        result.DisplayName = _displayUserSettingsHelper.GetFullUserName(userInfo);
         result.Email = userInfo.Email;
         return result;
     }

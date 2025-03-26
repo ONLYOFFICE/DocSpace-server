@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -139,7 +139,7 @@ public class DeleteRequestDto<T>
     public T FileId { get; set; }
 
     /// <summary>
-    /// The file to delete.
+    /// The parameters for deleting a file.
     /// </summary>
     [FromBody]
     public Delete File {  get; set; }

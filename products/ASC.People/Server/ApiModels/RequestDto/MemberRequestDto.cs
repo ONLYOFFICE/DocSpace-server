@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -333,4 +333,16 @@ public class ContactsRequestDto
     /// </summary>
     [FromBody]
     public ContactsRequest Contacts { get; set; }
+}
+
+/// <summary>
+/// 
+/// </summary>
+public class GuestShareRequestDto
+{
+    /// <summary>
+    /// User ID
+    /// </summary>
+    [FromRoute(Name = "userid")]
+    public Guid UserId { get; set; }
 }

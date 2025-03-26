@@ -1137,4 +1137,7 @@
   <data name="Tariffs_adminyear" xml:space="preserve">
     <value>Business</value>
   </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>Webhook URL is not avaliable. HEAD request is not responce 200 http status.</value>
+  </data>
 </root>

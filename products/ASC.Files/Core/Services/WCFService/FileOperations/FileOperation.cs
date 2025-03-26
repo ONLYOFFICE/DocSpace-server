@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,15 +32,18 @@ public abstract class FileOperation : DistributedTaskProgress
 {
     protected readonly IServiceProvider _serviceProvider;
     public const string SplitChar = ":";
-    public const string Owner = "Owner";
-    public const string OpType = "OperationType";
-    public const string Src = "Source";
-    public const string Progress = "Progress";
-    public const string Res = "Result";
-    public const string Err = "Error";
-    public const string Process = "Processed";
-    public const string Finish = "Finished";
-    public const string Hold = "Hold";
+    public Guid Owner { get; set; }
+    public abstract FileOperationType FileOperationType { get; set; }
+    public string Err { get; set; }
+    public int Process { get; set; }
+    
+    public string Src { get; set; }
+    public int Progress { get; set; }
+    
+    public string Result { get; set; }
+    
+    public bool Finish { get; set; }
+    public bool Hold { get; set; }
 
     protected readonly IPrincipal _principal;
     protected readonly string _culture;
@@ -61,27 +64,27 @@ public abstract class FileOperation : DistributedTaskProgress
 
         if (_principal is { Identity: IAccount { IsAuthenticated: true } account })
         {
-            this[Owner] = account.ID.ToString();
+            Owner = account.ID;
         }
         else
         {
             var externalShare = serviceProvider.GetRequiredService<ExternalShare>();
-            this[Owner] = externalShare.GetSessionId().ToString();
+            Owner = externalShare.GetSessionId();
         }
 
-        this[Src] = _props.ContainsValue(Src) ? this[Src] : "";
-        this[Progress] = 0;
-        this[Res] = "";
-        this[Err] = "";
-        this[Process] = 0;
-        this[Finish] = false;
+        Src = "";
+        Progress = 0;
+        Result = "";
+        Err = "";
+        Process = 0;
+        Finish = false;
     }
 
     protected void IncrementProgress()
     {
         _processed++;
         var progress = Total != 0 ? 100 * _processed / Total : 0;
-        this[Progress] = progress < 100 ? progress : 100;
+        Progress = progress < 100 ? progress : 100;
     }
 
     protected abstract Task DoJob(AsyncServiceScope serviceScope);
@@ -99,8 +102,7 @@ public abstract class ComposeFileOperation<T1, T2> : FileOperation
     protected ComposeFileOperation(IServiceProvider serviceProvider) : base(serviceProvider)
     {
     }
-
-    protected abstract FileOperationType FileOperationType { get; }
+    
     protected FileOperation<T1, string> ThirdPartyOperation { get; set; }
     protected FileOperation<T2, int> DaoOperation { get; set; }
     
@@ -110,8 +112,7 @@ public abstract class ComposeFileOperation<T1, T2> : FileOperation
 
     public void Init(bool holdResult)
     {
-        this[OpType] = (int)FileOperationType;
-        this[Hold] = holdResult;
+        Hold = holdResult;
     }
 
     public virtual void Init(T2 data, T1 thirdPartyData, string taskId)
@@ -127,8 +128,8 @@ public abstract class ComposeFileOperation<T1, T2> : FileOperation
         var daoOperation = DaoOperation.Files.Count != 0 || DaoOperation.Folders.Count != 0;
         var thirdPartyOperation = ThirdPartyOperation.Files.Count != 0 || ThirdPartyOperation.Folders.Count != 0;
 
-        DaoOperation[Finish] = !daoOperation;
-        ThirdPartyOperation[Finish] = !thirdPartyOperation;
+        DaoOperation.Finish = !daoOperation;
+        ThirdPartyOperation.Finish = !thirdPartyOperation;
 
         if (daoOperation)
         {
@@ -148,50 +149,50 @@ public abstract class ComposeFileOperation<T1, T2> : FileOperation
         var thirdpartyTask = ThirdPartyOperation;
         var daoTask = DaoOperation;
 
-        var error1 = thirdpartyTask[Err];
-        var error2 = daoTask[Err];
+        var error1 = thirdpartyTask.Err;
+        var error2 = daoTask.Err;
 
         if (!string.IsNullOrEmpty(error1))
         {
-            this[Err] = error1;
+            Err = error1;
         }
         else if (!string.IsNullOrEmpty(error2))
         {
-            this[Err] = error2;
+            Err = error2;
         }
 
-        var status1 = thirdpartyTask[Res];
-        var status2 = daoTask[Res];
+        var status1 = thirdpartyTask.Result;
+        var status2 = daoTask.Result;
 
         if (!string.IsNullOrEmpty(status1))
         {
-            this[Res] = status1;
+            Result = status1;
         }
         else if (!string.IsNullOrEmpty(status2))
         {
-            this[Res] = status2;
+            Result = status2;
         }
 
-        bool finished1 = thirdpartyTask[Finish];
-        bool finished2 = daoTask[Finish];
+        var finished1 = thirdpartyTask.Finish;
+        var finished2 = daoTask.Finish;
 
         if (finished1 && finished2)
         {
-            this[Finish] = true;
+            Finish = true;
         }
 
-        this[Process] = thirdpartyTask[Process] + daoTask[Process];
+        Process = thirdpartyTask.Process + daoTask.Process;
 
         var progress = 0;
 
         if (ThirdPartyOperation.Total != 0)
         {
-            progress += thirdpartyTask[Progress];
+            progress += thirdpartyTask.Progress;
         }
 
         if (DaoOperation.Total != 0)
         {
-            progress += daoTask[Progress];
+            progress += daoTask.Progress;
         }
 
         if (ThirdPartyOperation.Total != 0 && DaoOperation.Total != 0)
@@ -199,7 +200,7 @@ public abstract class ComposeFileOperation<T1, T2> : FileOperation
             progress /= 2;
         }
 
-        this[Progress] = progress < 100 ? progress : 100;
+        Progress = progress < 100 ? progress : 100;
         await PublishChanges();
     }
 
@@ -278,7 +279,7 @@ public abstract class FileOperation<T, TId> : FileOperation where T : FileOperat
     {
         Files = fileOperationData.Files?.ToList() ?? [];
         Folders = fileOperationData.Folders?.ToList() ?? [];
-        this[Hold] = fileOperationData.HoldResult;
+        Hold = fileOperationData.HoldResult;
         CurrentUserId = fileOperationData.UserId;
         CurrentTenantId = fileOperationData.TenantId;
         Headers = fileOperationData.Headers?.ToDictionary(x => x.Key, x => new StringValues(x.Value));
@@ -295,7 +296,7 @@ public abstract class FileOperation<T, TId> : FileOperation where T : FileOperat
         FolderDao = daoFactory.GetFolderDao<TId>();
 
         Total = InitTotalProgressSteps();
-        this[Src] = string.Join(SplitChar, Folders.Select(f => "folder_" + f).Concat(Files.Select(f => "file_" + f)).ToArray());
+        Src = string.Join(SplitChar, Folders.Select(f => "folder_" + f).Concat(Files.Select(f => "file_" + f)).ToArray());
     }
 
     public override async Task RunJob(CancellationToken cancellationToken)
@@ -335,8 +336,8 @@ public abstract class FileOperation<T, TId> : FileOperation where T : FileOperat
         }
         catch (AuthorizingException authError)
         {
-            this[Err] = FilesCommonResource.ErrorMessage_SecurityException;
-            Logger.ErrorWithException(new SecurityException(this[Err], authError));
+            Err = FilesCommonResource.ErrorMessage_SecurityException;
+            Logger.ErrorWithException(new SecurityException(Err, authError));
         }
         catch (AggregateException ae)
         {
@@ -350,7 +351,7 @@ public abstract class FileOperation<T, TId> : FileOperation where T : FileOperat
         {
             try
             {
-                this[Finish] = true;
+                Finish = true;
                 await PublishChanges();
             }
             catch
@@ -392,10 +393,10 @@ public abstract class FileOperation<T, TId> : FileOperation where T : FileOperat
 
     protected bool ProcessedFolder(TId folderId)
     {
-        this[Process]++;
+        Process++;
         if (Folders.Contains(folderId))
         {
-            this[Res] += $"folder_{folderId}{SplitChar}";
+            Result += $"folder_{folderId}{SplitChar}";
 
             return true;
         }
@@ -405,10 +406,10 @@ public abstract class FileOperation<T, TId> : FileOperation where T : FileOperat
 
     protected bool ProcessedFile(TId fileId)
     {
-        this[Process]++;
+        Process++;
         if (Files.Contains(fileId))
         {
-            this[Res] += $"file_{fileId}{SplitChar}";
+            Result += $"file_{fileId}{SplitChar}";
 
             return true;
         }

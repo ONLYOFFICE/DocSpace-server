@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -42,6 +42,8 @@ public abstract class TfaSettingsBase<T> : ISettings<T> where T : ISettings<T>
     public List<Guid> MandatoryGroups { get; set; }
 
     public abstract T GetDefault();
+    
+    public DateTime LastModified { get; set; }
 }
 
 

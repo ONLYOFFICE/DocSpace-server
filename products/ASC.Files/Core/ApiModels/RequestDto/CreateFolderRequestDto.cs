@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -44,7 +44,7 @@ public class CreateFolder
 public class CreateFolderRequestDto<T>
 {
     /// <summary>
-    /// The request folder ID to create.
+    /// The folder ID for the folder creation.
     /// </summary>
     [FromRoute(Name = "folderId")]
     public T FolderId { get; set; }

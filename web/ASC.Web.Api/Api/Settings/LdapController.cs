@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,7 +31,7 @@ namespace ASC.Web.Api.Controllers.Settings;
 public class LdapController(
     ApiContext apiContext,
     WebItemManager webItemManager,
-    IMemoryCache memoryCache,
+    IFusionCache fusionCache,
     SettingsManager settingsManager,
     TenantManager tenantManager,
     LdapNotifyService ldapNotifyHelper,
@@ -41,7 +41,7 @@ public class LdapController(
     CoreBaseSettings coreBaseSettings,
     IHttpContextAccessor httpContextAccessor,
     IMapper mapper)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
     /// Returns the current portal LDAP settings.

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -58,10 +58,20 @@ public class WebhooksConfigRequestsDto
     /// <summary>
     /// Enabled or not
     /// </summary>
-    public bool? Enabled { get; set; }
+    public bool Enabled { get; set; }
 
     /// <summary>
-    /// SSL
+    /// SSL Verification
     /// </summary>
-    public bool? SSL { get; set;}
+    public bool SSL { get; set;}
+
+    /// <summary>
+    /// Triggers
+    /// </summary>
+    public WebhookTrigger Triggers { get; set; }
+
+    /// <summary>
+    /// Target ID
+    /// </summary>
+    public string TargetId { get; set; }
 }

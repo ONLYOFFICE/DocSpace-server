@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,7 +32,7 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 public class DocServiceUrlRequestDto
 {
     /// <summary>
-    /// Specifies if the editor has version or not.
+    /// Specifies whether to return the editor version or not.
     /// </summary>
     [FromQuery(Name = "version")]
     public bool Version { get; set; }

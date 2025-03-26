@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -25,11 +25,12 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Webhooks.Service.Log;
+
 internal static partial class WorkerServiceLogger
 {
     [LoggerMessage(LogLevel.Trace, "Procedure: Waiting for data. Sleep {waitingPeriod}.")]
     public static partial void TraceProcedure(this ILogger<WorkerService> logger, TimeSpan waitingPeriod);
 
-    [LoggerMessage(LogLevel.Debug, "Response: {response}")]
-    public static partial void DebugResponse(this ILogger logger, HttpResponseMessage response);
+    [LoggerMessage(LogLevel.Debug, "Procedure: Finish.")]
+    public static partial void DebugProcedureFinish(this ILogger<WorkerService> logger);
 }

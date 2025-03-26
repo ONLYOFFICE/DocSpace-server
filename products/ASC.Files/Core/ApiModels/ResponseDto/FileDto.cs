@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -65,7 +65,7 @@ public class FileDto<T> : FileEntryDto<T>
     public FileStatus FileStatus { get; set; }
 
     /// <summary>
-    /// Specifies if the file notifications are muted or not.
+    /// Is the file muted or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool Mute { get; set; }
@@ -100,7 +100,7 @@ public class FileDto<T> : FileEntryDto<T>
     public string Comment { get; set; }
 
     /// <summary>
-    /// Specifies if the file is encrypted or not.
+    /// Is the file encrypted or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool? Encrypted { get; set; }
@@ -117,7 +117,7 @@ public class FileDto<T> : FileEntryDto<T>
     public Thumbnail ThumbnailStatus { get; set; }
 
     /// <summary>
-    /// Specifies if the file is locked or not.
+    /// Is the file locked or not.
     /// </summary>
     public bool? Locked { get; set; }
 
@@ -131,6 +131,12 @@ public class FileDto<T> : FileEntryDto<T>
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool? HasDraft { get; set; }
+
+    /// <summary>
+    /// The status of the form filling process.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
+    public FormFillingStatus FormFillingStatus { get; set; } = FormFillingStatus.None;
 
     /// <summary>
     /// Specifies if the file is a form or not.
@@ -155,12 +161,12 @@ public class FileDto<T> : FileEntryDto<T>
     public string InProcessFolderTitle { get; set; }
 
     /// <summary>
-    /// The file draft information with its location.
+    /// The file draft info with its location.
     /// </summary>
     public DraftLocation<T> DraftLocation { get; set; }
 
     /// <summary>
-    /// The access rights to view a file.
+    /// The file accessibility.
     /// </summary>
     public IDictionary<Accessibility, bool> ViewAccessibility { get; set; }
 
@@ -175,7 +181,7 @@ public class FileDto<T> : FileEntryDto<T>
     public ApiDateTime LastOpened { get; set; }
 
     /// <summary>
-    /// The date when the external link to the file will be expired.
+    /// The date when the file will be expired.
     /// </summary>
     public ApiDateTime Expired { get; set; }
 
@@ -202,9 +208,10 @@ public class FileDtoHelper(
         FileDateTime fileDateTime,
         ExternalShare externalShare,
         BreadCrumbsManager breadCrumbsManager,
-        FileSharing fileSharing,
-        FileChecker fileChecker)
-    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime) 
+        FileChecker fileChecker,
+        SecurityContext securityContext,
+        UserManager userManager)
+    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory) 
 {
     private readonly ApiDateTimeHelper _apiDateTimeHelper = apiDateTimeHelper;
 
@@ -226,7 +233,6 @@ public class FileDtoHelper(
         return result;
     }
 
-    private Dictionary<string, AceWrapper> shareCache = new();
     private async Task<FileDto<T>> GetFileWrapperAsync<T>(File<T> file, string order, TimeSpan? expiration, IFolder contextFolder = null)
     {
         var result = await GetAsync<FileDto<T>, T>(file);
@@ -235,11 +241,11 @@ public class FileDtoHelper(
         var extension = FileUtility.GetFileExtension(file.Title);
         var fileType = FileUtility.GetFileTypeByExtention(extension);
 
-        var fileDao = daoFactory.GetFileDao<T>();
+        var fileDao = _daoFactory.GetFileDao<T>();
 
-        if (fileType == FileType.Pdf)
+        if (file.IsForm)
         {
-            var folderDao = daoFactory.GetCacheFolderDao<T>();
+            var folderDao = _daoFactory.GetCacheFolderDao<T>();
 
             Task<T> linkedIdTask;
             Task<EntryProperties<T>> propertiesTask;
@@ -251,7 +257,7 @@ public class FileDtoHelper(
             }
             else
             {
-                linkedIdTask = daoFactory.GetLinkDao<T>().GetLinkedAsync(file.Id);
+                linkedIdTask = _daoFactory.GetLinkDao<T>().GetLinkedAsync(file.Id);
                 propertiesTask = fileDao.GetProperties(file.Id);
             }
             
@@ -282,13 +288,6 @@ public class FileDtoHelper(
                 _ = await _fileSecurity.SetSecurity(new[] { currentRoom }.ToAsyncEnumerable()).ToListAsync();
             }
 
-            var currentRoomId = currentRoom.Id?.ToString();
-            if (currentRoomId != null && !shareCache.TryGetValue(currentRoomId, out var ace))
-            {
-                ace = await fileSharing.GetPureSharesAsync(currentRoom, [authContext.CurrentAccount.ID]).FirstOrDefaultAsync();
-                shareCache.TryAdd(currentRoomId, ace);
-            }
-
             if (!file.IsForm && (FilterType)file.Category == FilterType.None)
             {
                 result.IsForm = await fileChecker.CheckExtendedPDF(file);
@@ -304,6 +303,47 @@ public class FileDtoHelper(
             }
 
             result.HasDraft = result.IsForm == true ? !Equals(linkedId, default(T)) : null;
+
+            if (currentRoom is { FolderType: FolderType.VirtualDataRoom })
+            {
+                var (currentStep, roles) = await fileDao.GetUserFormRoles(file.Id, authContext.CurrentAccount.ID);
+                var roleList = await roles.ToListAsync();
+
+                if (currentStep == -1 && result.Security[FileSecurity.FilesSecurityActions.Edit])
+                {
+                    result.FormFillingStatus = FormFillingStatus.Draft;
+                }
+
+                if (currentStep != -1)
+                {
+                    if (!DateTime.MinValue.Equals(properties.FormFilling.FillingStopedDate))
+                    {
+                        result.FormFillingStatus = FormFillingStatus.Stoped;
+                    }
+                    else if (currentStep == 0)
+                    {
+                        result.FormFillingStatus = FormFillingStatus.Complete;
+                    }
+                    else
+                    {
+                        var unsubmittedRole = roleList.FirstOrDefault(r => !r.Submitted);
+                        switch (unsubmittedRole)
+                        {
+                            case not null:
+                                result.FormFillingStatus = currentStep == unsubmittedRole.Sequence
+                                    ? FormFillingStatus.YouTurn
+                                    : FormFillingStatus.InProgress;
+                                break;
+                            default:
+                                if (roleList.Count > 0)
+                                {
+                                    result.FormFillingStatus = FormFillingStatus.InProgress;
+                                }
+                                break;
+                        }
+                    }
+                }
+            }
 
             var formFilling = properties?.FormFilling;
             if (formFilling != null)
@@ -340,7 +380,7 @@ public class FileDtoHelper(
 
         if (!file.ProviderEntry && file.RootFolderType == FolderType.VirtualRooms && !expiration.HasValue)
         {
-            var folderDao = daoFactory.GetCacheFolderDao<T>();
+            var folderDao = _daoFactory.GetCacheFolderDao<T>();
             var room = await DocSpaceHelper.GetParentRoom(file, folderDao);
             if (room?.SettingsLifetime != null)
             {

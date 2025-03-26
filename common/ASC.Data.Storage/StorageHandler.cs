@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -78,7 +78,7 @@ public class StorageHandler(string storagePath, string module, string domain, bo
 
         var headers = header is { Length: > 0 } ? header.Split('&').Select(HttpUtility.UrlDecode).ToList() : [];
 
-        if (storage.ContentAsAttachment)
+        if (storage.IsContentAsAttachment(domain))
         {
             headers.Add("Content-Disposition:attachment");
         }

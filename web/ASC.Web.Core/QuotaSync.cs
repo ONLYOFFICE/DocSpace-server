@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -66,7 +66,6 @@ public class QuotaSyncOperation(IServiceProvider serviceProvider, IDistributedTa
 [Transient]
 public class QuotaSyncJob : DistributedTaskProgress
 {
-    private int? _tenantId;
     private readonly IServiceScopeFactory _serviceScopeFactory;
 
     public QuotaSyncJob()
@@ -79,23 +78,13 @@ public class QuotaSyncJob : DistributedTaskProgress
         _serviceScopeFactory = serviceScopeFactory;
     }
 
-    public int TenantId
-    {
-        get
-        {
-            return _tenantId ?? this[nameof(_tenantId)];
-        }
-        private set
-        {
-            _tenantId = value;
-            this[nameof(_tenantId)] = value;
-        }
-    }
+    public int TenantId { get; set; }
 
     public void InitJob(Tenant tenant)
     {
         TenantId = tenant.Id;
     }
+    
     protected override async Task DoJob()
     {
         try
