@@ -48,7 +48,7 @@ public class DeleteFileTest(
             RequestUri = new Uri($"{_filesClient.BaseAddress}file/{createdFile.Id}"),
             Method = HttpMethod.Delete,
             Content = new StringContent(jsonData, Encoding.UTF8, "application/json")
-        });
+        }, TestContext.Current.CancellationToken);
         
         var results = await HttpClientHelper.ReadFromJson<List<FileOperationResult>>(responseMessage);
         if (results.Any(r => !r.Finished))
