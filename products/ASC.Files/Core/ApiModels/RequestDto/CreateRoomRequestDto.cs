@@ -42,7 +42,10 @@ public enum RoomType
     PublicRoom = 6,
 
     [SwaggerEnum(Description = "Virtual data room")]
-    VirtualDataRoom = 8
+    VirtualDataRoom = 8,
+    
+    [SwaggerEnum(Description = "AI room")]
+    AiRoom = 9
 }
 
 public static class RoomTypeExtensions
@@ -61,6 +64,7 @@ public static class RoomTypeExtensions
             RoomType.CustomRoom => FilterType.CustomRooms,
             RoomType.PublicRoom => FilterType.PublicRooms,
             RoomType.VirtualDataRoom => FilterType.VirtualDataRooms,
+            RoomType.AiRoom => FilterType.AiRooms,
             _ => FilterType.CustomRooms
         }).ToHashSet();
     }
