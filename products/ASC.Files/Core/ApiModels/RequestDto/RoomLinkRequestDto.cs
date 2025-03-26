@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -55,7 +55,7 @@ public class RoomLinkRequest
     /// <summary>
     /// Link type
     /// </summary>
-    public LinkType LinkType { get; set; }
+    public required LinkType LinkType { get; set; }
 
     /// <summary>
     /// Link password
@@ -69,8 +69,6 @@ public class RoomLinkRequest
     public bool DenyDownload { get; set; }
 }
 
-
-
 /// <summary>
 /// Link request parameters
 /// </summary>
@@ -80,7 +78,7 @@ public class RoomLinkRequestDto<T>
     /// Room ID
     /// </summary>
     [FromRoute(Name = "id")]
-    public T Id { get; set; }
+    public required T Id { get; set; }
 
     /// <summary>
     /// Room link

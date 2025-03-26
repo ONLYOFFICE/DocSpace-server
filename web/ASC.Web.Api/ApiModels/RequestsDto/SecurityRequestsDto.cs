@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,12 +34,12 @@ public class SecurityRequestsDto
     /// <summary>
     /// Product ID
     /// </summary>
-    public Guid ProductId { get; set; }
+    public required Guid ProductId { get; set; }
 
     /// <summary>
     /// User ID
     /// </summary>
-    public Guid UserId { get; set; }
+    public required Guid UserId { get; set; }
 
     /// <summary>
     /// Administrator or not
@@ -48,7 +48,7 @@ public class SecurityRequestsDto
 }
 
 /// <summary>
-/// 
+/// Security settings request parameters
 /// </summary>
 public class SecuritySettingsRequestDto
 {

@@ -32,5 +32,5 @@ public class InvitationLinkRequestDto
     /// Employee type (All, RoomAdmin, Guest, DocSpaceAdmin, User)
     /// </summary>
     [FromRoute(Name = "employeeType")]
-    public EmployeeType EmployeeType { get; set; }
+    public required EmployeeType EmployeeType { get; set; }
 }

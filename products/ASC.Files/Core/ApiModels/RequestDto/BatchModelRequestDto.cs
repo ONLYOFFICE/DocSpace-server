@@ -71,12 +71,12 @@ public class DownloadRequestItemDto
     /// <summary>
     /// The unique identifier or reference key for the file to be downloaded
     /// </summary>
-    public JsonElement Key { get; init; }
+    public required JsonElement Key { get; init; }
 
     /// <summary>
     /// The target format or conversion type for the file download
     /// </summary>
-    public string Value { get; init; }
+    public required string Value { get; init; }
 
     /// <summary>
     /// Optional password for accessing protected files
@@ -120,9 +120,9 @@ public class DeleteVersionBatchRequestDto
     /// </summary>
     public bool DeleteAfter { get; set; }
     
-    public int FileId { get; set; }
+    public required int FileId { get; set; }
     
-    public IEnumerable<int> Versions { get; set; } = new List<int>();
+    public required IEnumerable<int> Versions { get; set; } = new List<int>();
 }
 
 /// <summary>
@@ -150,13 +150,13 @@ public class DeleteRequestDto<T>
     /// File ID
     /// </summary>
     [FromRoute(Name = "fileId")]
-    public T FileId { get; set; }
+    public required T FileId { get; set; }
 
     /// <summary>
     /// File
     /// </summary>
     [FromBody]
-    public Delete File {  get; set; }
+    public required Delete File {  get; set; }
 }
 
 /// <summary>
@@ -177,12 +177,12 @@ public class BatchRequestDto
     /// <summary>
     /// Destination folder ID
     /// </summary>
-    public JsonElement DestFolderId { get; set; }
+    public required JsonElement DestFolderId { get; set; }
 
     /// <summary>
     /// Overwriting behavior
     /// </summary>
-    public FileConflictResolveType ConflictResolveType { get; set; }
+    public required FileConflictResolveType ConflictResolveType { get; set; }
 
     /// <summary>
     /// Specifies whether to delete a folder after the editing session is finished or not
@@ -204,5 +204,5 @@ public class FileOperationResultRequestDto
     /// Specifies the type of file operation to be retrieved.
     /// </summary>
     [FromRoute(Name = "operationType")]
-    public FileOperationType OperationType { get; set; }
+    public required FileOperationType OperationType { get; set; }
 }

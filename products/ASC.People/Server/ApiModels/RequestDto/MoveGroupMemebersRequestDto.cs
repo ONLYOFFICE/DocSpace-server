@@ -36,11 +36,11 @@ public class MoveGroupMemebersRequestDto
     /// Group ID to move from
     /// </summary>
     [FromRoute(Name = "fromId")]
-    public Guid FromId { get; set; }
+    public required Guid FromId { get; set; }
 
     /// <summary>
     /// Group ID to move to
     /// </summary>
     [FromRoute(Name = "toId")]
-    public Guid ToId { get; set; }
+    public required Guid ToId { get; set; }
 }

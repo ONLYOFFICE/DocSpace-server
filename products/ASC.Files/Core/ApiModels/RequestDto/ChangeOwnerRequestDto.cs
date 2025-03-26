@@ -44,5 +44,5 @@ public class ChangeOwnerRequestDto
     /// <summary>
     /// New file owner ID
     /// </summary>
-    public Guid UserId { get; set; }
+    public required Guid UserId { get; set; }
 }

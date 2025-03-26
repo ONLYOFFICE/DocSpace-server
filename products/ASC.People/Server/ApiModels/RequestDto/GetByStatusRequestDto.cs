@@ -36,5 +36,5 @@ public class GetByStatusRequestDto
     /// User status
     /// </summary>
     [FromRoute(Name = "status")]
-    public EmployeeStatus Status {  get; set; }
+    public required EmployeeStatus Status {  get; set; }
 }

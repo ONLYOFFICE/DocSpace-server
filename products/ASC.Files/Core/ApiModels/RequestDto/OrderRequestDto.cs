@@ -108,7 +108,7 @@ public class OrderFileRequestDto<T>
     /// The unique identifier of the file
     /// </summary>
     [FromRoute(Name = "fileId")]
-    public T FileId { get; set; }
+    public required T FileId { get; set; }
 
     /// <summary>
     /// Order information for the file
@@ -126,7 +126,7 @@ public class OrderFolderRequestDto<T>
     /// The unique identifier of the folder
     /// </summary>
     [FromRoute(Name = "folderId")]
-    public T FolderId { get; set; }
+    public required T FolderId { get; set; }
 
     /// <summary>
     /// Order information for the folder

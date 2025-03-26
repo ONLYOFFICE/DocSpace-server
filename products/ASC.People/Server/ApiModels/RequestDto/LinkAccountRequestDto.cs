@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,7 +34,8 @@ public class LinkAccountRequestDto
     /// <summary>
     /// Third-party profile in the serialized format
     /// </summary>
-    public string SerializedProfile { get; set; }
+    [Required]
+    public required string SerializedProfile { get; set; }
 }
 
 /// <summary>

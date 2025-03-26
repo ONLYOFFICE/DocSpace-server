@@ -51,7 +51,7 @@ public class CoverRequestDto<T>
     /// Room ID
     /// </summary>
     [FromRoute(Name = "id")]
-    public T Id { get; set; }
+    public required T Id { get; set; }
 
     /// <summary>
     /// Parameters to change the room cover

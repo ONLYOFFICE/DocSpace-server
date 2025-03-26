@@ -34,7 +34,7 @@ public class SessionRequest
     /// <summary>
     /// File name
     /// </summary>
-    public string FileName { get; set; }
+    public required string FileName { get; set; }
 
     /// <summary>
     /// File length in bytes
@@ -69,7 +69,7 @@ public class SessionRequestDto<T>
     /// Folder ID
     /// </summary>
     [FromRoute(Name = "folderId")]
-    public T FolderId { get; set; }
+    public required T FolderId { get; set; }
 
     /// <summary>
     /// Session

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,6 +34,7 @@ public class EmailMemberRequestDto
     /// <summary>
     /// Email
     /// </summary>
+    [Required]
     [EmailAddress]
     [StringLength(255)]
     public string Email { get; set; }
@@ -71,7 +72,7 @@ public class MemberBaseByIdRequestDto
     /// User ID
     /// </summary>
     [FromRoute(Name = "userid")]
-    public Guid UserId { get; set; }
+    public required Guid UserId { get; set; }
 
     /// <summary>
     /// Member base
@@ -281,11 +282,6 @@ public class UpdateMemberRequestDto
     public string Files { get; set; }
 
     /// <summary>
-    /// Language
-    /// </summary>
-    public string CultureName { get; set; }
-
-    /// <summary>
     /// Spam
     /// </summary>
     public bool? Spam { get; set; }
@@ -300,7 +296,7 @@ public class UpdateMemberByIdRequestDto
     /// User ID
     /// </summary>
     [FromRoute(Name = "userid")]
-    public string UserId { get; set; }
+    public required string UserId { get; set; }
 
     /// <summary>
     /// Update member
@@ -308,7 +304,20 @@ public class UpdateMemberByIdRequestDto
     [FromBody]
     public UpdateMemberRequestDto UpdateMember { get; set; }
 }
+public class UpdateMemberCultureByIdRequestDto
+{
+    /// <summary>
+    /// User ID
+    /// </summary>
+    [FromRoute(Name = "userid")]
+    public required string UserId { get; set; }
 
+    /// <summary>
+    /// Language
+    /// </summary>
+    [FromBody]
+    public string CultureName { get; set; }
+}
 public enum SexEnum
 {
     [SwaggerEnum("Female")]
@@ -338,7 +347,7 @@ public class UpdatePhotoMemberRequestDto
     /// User ID
     /// </summary>
     [FromRoute(Name = "userid")]
-    public string UserId { get; set; }
+    public required string UserId { get; set; }
 
     /// <summary>
     /// Update photo
@@ -357,7 +366,7 @@ public class GetMemberByIdRequestDto
     /// User ID
     /// </summary>
     [FromRoute(Name = "userid")]
-    public string UserId { get; set; }
+    public required string UserId { get; set; }
 }
 
 /// <summary>
@@ -383,7 +392,7 @@ public class GetMemberByQueryRequestDto
     /// Search query
     /// </summary>
     [FromRoute(Name = "query")]
-    public string Query { get; set; }
+    public required string Query { get; set; }
 }
 
 /// <summary>
@@ -430,7 +439,7 @@ public class ContactsRequestDto
     /// User ID
     /// </summary>
     [FromRoute(Name = "userid")]
-    public string UserId { get; set; }
+    public required string UserId { get; set; }
 
     /// <summary>
     /// Contacts

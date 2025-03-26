@@ -62,7 +62,7 @@ public class UpdateGroupRequestDto
     /// Group ID
     /// </summary>
     [FromRoute(Name = "id")]
-    public Guid Id { get; set; }
+    public required Guid Id { get; set; }
 
     /// <summary>
     /// Update group parameters

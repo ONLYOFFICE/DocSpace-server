@@ -34,7 +34,7 @@ public class WebItemSecurityRequestsDto
     /// <summary>
     /// Module ID
     /// </summary>
-    public string Id { get; set; }
+    public required string Id { get; set; }
 
     /// <summary>
     /// Specifies if the module security settings are enabled or not

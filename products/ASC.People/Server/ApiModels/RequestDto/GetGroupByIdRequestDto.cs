@@ -36,7 +36,7 @@ public class GetGroupByUserIdRequestDto
     /// User ID
     /// </summary>
     [FromRoute(Name = "userid")]
-    public Guid UserId { get; set; }
+    public required Guid UserId { get; set; }
 }
 
 /// <summary>
@@ -48,5 +48,5 @@ public class GetGroupByIdRequestDto
     /// Group ID
     /// </summary>
     [FromRoute(Name = "id")]
-    public Guid Id { get; set; }
+    public required Guid Id { get; set; }
 }

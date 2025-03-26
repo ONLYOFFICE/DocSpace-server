@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -75,7 +75,7 @@ public class CreateRoomRequestDto
     /// Room name
     /// </summary>
     [StringLength(170)]
-    public string Title { get; set; }
+    public required string Title { get; set; }
 
     /// <summary>
     /// Room quota
@@ -127,7 +127,7 @@ public class CreateRoomRequestDto
     /// <summary>
     /// Room type
     /// </summary>
-    public RoomType RoomType { get; set; }
+    public required RoomType RoomType { get; set; }
 
     /// <summary>
     /// Private

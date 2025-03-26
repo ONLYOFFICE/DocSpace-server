@@ -35,11 +35,11 @@ public class UploadMemberPhotoRequestDto
     /// User ID
     /// </summary>
     [FromRoute(Name = "userid")]
-    public string UserId { get; set; }
+    public required string UserId { get; set; }
 
     /// <summary>
     /// Image data
     /// </summary>
     [FromForm(Name = "formCollection")]
-    public IFormCollection FormCollection { get; set; }
+    public required IFormCollection FormCollection { get; set; }
 }

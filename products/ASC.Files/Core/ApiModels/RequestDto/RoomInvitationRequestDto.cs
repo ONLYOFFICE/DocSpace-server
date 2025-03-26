@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,6 +35,7 @@ public class RoomInvitationRequest
     /// Collection of invitation parameters
     /// </summary>
     [MaxEmailInvitations]
+    [Required]
     public IEnumerable<RoomInvitation> Invitations { get; set; }
 
     /// <summary>
@@ -59,7 +60,7 @@ public class RoomInvitationRequestDto<T>
     /// Room ID
     /// </summary>
     [FromRoute(Name = "id")]
-    public T Id { get; set; }
+    public required T Id { get; set; }
 
     /// <summary>
     /// Room invitation

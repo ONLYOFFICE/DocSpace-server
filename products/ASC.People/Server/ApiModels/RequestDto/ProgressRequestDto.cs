@@ -36,5 +36,5 @@ public class ProgressRequestDto
     /// User ID whose data is reassigned
     /// </summary>
     [FromRoute(Name = "userid")]
-    public Guid UserId { get; set; }
+    public required Guid UserId { get; set; }
 }

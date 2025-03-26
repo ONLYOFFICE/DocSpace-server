@@ -34,7 +34,7 @@ public class NotificationSettingsRequestsDto
     /// <summary>
     /// Notification type
     /// </summary>
-    public NotificationType Type { get; set; }
+    public required NotificationType Type { get; set; }
 
     /// <summary>
     /// Specifies if the notification type is enabled or not
@@ -52,5 +52,5 @@ public class NotificationTypeRequestsDto
     /// Notification type (Badges, RoomsActivity, DailyFeed, UsefullTips)
     /// </summary>
     [FromRoute(Name = "type")]
-    public NotificationType Type { get; set; }
+    public required NotificationType Type { get; set; }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,7 +34,7 @@ public class CheckConversionRequestDto<T>
     /// <summary>
     /// File ID
     /// </summary>
-    public T FileId { get; set; }
+    public required T FileId { get; set; }
 
     /// <summary>
     /// Specifies if the conversion process is synchronous or not
@@ -76,7 +76,7 @@ public class StartConversionRequestDto<T>
     /// File ID
     /// </summary>
     [FromRoute(Name = "fileId")]
-    public T FileId { get; set; }
+    public required T FileId { get; set; }
 
     /// <summary>
     /// Check conversion  
@@ -94,7 +94,7 @@ public class CheckConversionStatusRequestDto<T>
     /// File ID
     /// </summary>
     [FromRoute(Name = "fileId")]
-    public T FileId { get; set; }
+    public required T FileId { get; set; }
 
     /// <summary>
     /// Specifies if a conversion operation is started or not

@@ -35,7 +35,7 @@ public class FileStreamRequestDto<T> : IModelWithFile
     /// File ID
     /// </summary>
     [FromRoute(Name = "fileId")]
-    public T FileId { get; set; }
+    public required T FileId { get; set; }
 
     /// <summary>
     /// Request input stream

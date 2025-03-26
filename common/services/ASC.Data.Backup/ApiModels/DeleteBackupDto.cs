@@ -35,5 +35,5 @@ public class DeleteBackupDto
     /// Backup Id
     /// </summary>
     [FromRoute(Name = "id")]
-    public Guid BackupId { get; set; }
+    public required Guid BackupId { get; set; }
 }

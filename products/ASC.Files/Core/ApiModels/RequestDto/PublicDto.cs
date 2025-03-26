@@ -32,7 +32,7 @@ public class PublicDto
     /// Template id
     /// </summary>
     [FromRoute(Name="id")]
-    public int Id { get; set; }
+    public required int Id { get; set; }
 }
 
 
@@ -41,7 +41,7 @@ public class SetPublicDto
     /// <summary>
     /// Template id
     /// </summary>
-    public int Id { get; set; }
+    public required int Id { get; set; }
 
     /// <summary>
     /// Public settings

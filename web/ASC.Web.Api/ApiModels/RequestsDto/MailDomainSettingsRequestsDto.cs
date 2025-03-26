@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,12 +34,12 @@ public class MailDomainSettingsRequestsDto
     /// <summary>
     /// Trusted domain type
     /// </summary>
-    public TenantTrustedDomainsType Type { get; set; }
+    public required TenantTrustedDomainsType Type { get; set; }
 
     /// <summary>
     /// List of trusted domains
     /// </summary>
-    public List<string> Domains { get; set; }
+    public required List<string> Domains { get; set; }
 
     /// <summary>
     /// Invites as a user or not
@@ -57,7 +57,7 @@ public class AdminMessageBaseSettingsRequestsDto
     /// </summary>
     [EmailAddress]
     [StringLength(255)]
-    public string Email { get; set; }
+    public required string Email { get; set; }
 
     /// <summary>
     /// Culture
@@ -74,14 +74,14 @@ public class AdminMessageSettingsRequestsDto
     /// Message
     /// </summary>
     [StringLength(255)]
-    public string Message { get; set; }
+    public required string Message { get; set; }
 
     /// <summary>
     /// Email
     /// </summary>
     [EmailAddress]
     [StringLength(255)]
-    public string Email { get; set; }
+    public required string Email { get; set; }
 
     /// <summary>
     /// Culture
