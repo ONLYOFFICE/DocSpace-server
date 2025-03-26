@@ -213,7 +213,7 @@ public class LicenseReader(
             || string.IsNullOrEmpty(license.Signature)
             || invalidLicenseType)
         {
-            throw new BillingNotConfiguredException("License not correct", license.OriginalLicense);
+            throw new BillingNotConfiguredException("License not correct");
         }
 
         return license.DueDate.Date;

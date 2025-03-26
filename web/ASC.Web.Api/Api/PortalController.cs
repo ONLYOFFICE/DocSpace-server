@@ -439,7 +439,7 @@ public class PortalController(
     {
         if (!SetupInfo.IsVisibleSettings(nameof(ManagementType.PortalSecurity)))
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption, "PortalRename");
+            throw new BillingException(Resource.ErrorNotAllowedOption);
         }
 
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);

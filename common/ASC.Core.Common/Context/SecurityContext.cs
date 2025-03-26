@@ -226,7 +226,7 @@ public class SecurityContext(
             {
                 if (!(await tenantManager.GetTenantQuotaAsync(tenant.Id)).Ldap)
                 {
-                    throw new BillingException("Your tariff plan does not support this option.", "Ldap");
+                    throw new BillingException("Your tariff plan does not support this option.");
                 }
             }
 

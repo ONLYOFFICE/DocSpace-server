@@ -2141,7 +2141,7 @@ public class UserController(
         if (!coreBaseSettings.Standalone
             && !(await tenantManager.GetCurrentTenantQuotaAsync()).Statistic)
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption, "Statistic");
+            throw new BillingException(Resource.ErrorNotAllowedOption);
         }
 
         var users = await inDto.UserIds.ToAsyncEnumerable()
