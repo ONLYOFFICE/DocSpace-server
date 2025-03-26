@@ -1991,6 +1991,15 @@ public class UserController(
     {
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(inDto.Type), Constants.Action_AddRemoveUser);
 
+        if (inDto.Type is EmployeeType.Guest)
+        {
+            var invitationSettings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
+            if (!invitationSettings.AllowInvitingGuests)
+            {
+                throw new SecurityException(Resource.ErrorAccessDenied);
+            }
+        }
+
         var tenant = tenantManager.GetCurrentTenant();
 
         var user = await _userManager.GetUsersAsync(inDto.UserId);
