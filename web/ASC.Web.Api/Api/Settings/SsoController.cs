@@ -277,7 +277,7 @@ public class SsoController(TenantManager tenantManager,
             && (!SetupInfo.IsVisibleSettings(ManagementType.SingleSignOnSettings.ToStringFast())
                 || !(await tenantManager.GetCurrentTenantQuotaAsync()).Sso))
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption, "Sso");
+            throw new BillingException(Resource.ErrorNotAllowedOption);
         }
     }
 

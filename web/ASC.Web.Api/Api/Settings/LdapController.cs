@@ -309,7 +309,7 @@ public class LdapController(
             && (!SetupInfo.IsVisibleSettings(ManagementType.LdapSettings.ToStringFast())
                 || !(await tenantManager.GetCurrentTenantQuotaAsync()).Ldap))
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption, "Ldap");
+            throw new BillingException(Resource.ErrorNotAllowedOption);
         }
     }
 }

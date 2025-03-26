@@ -42,12 +42,12 @@ public class BaseTest(
     private readonly Func<Task> _resetDatabase = filesFactory.ResetDatabaseAsync;
     protected readonly FilesApiFactory _filesFactory = filesFactory;
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         await Initializer.InitializeAsync(_filesFactory, apiFactory, peopleFactory, filesServiceProgram);
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await _resetDatabase();
     }
@@ -56,7 +56,7 @@ public class BaseTest(
     {
         await _filesClient.Authenticate(user);
         
-        var response = await _filesClient.GetAsync("@root");
+        var response = await _filesClient.GetAsync("@root", TestContext.Current.CancellationToken);
         var rootFolder = await HttpClientHelper.ReadFromJson<IEnumerable<FolderContentDto>>(response);
         var folderId = rootFolder.FirstOrDefault(r => r.Current.RootFolderType == folderType).Current.Id;
         
@@ -79,7 +79,7 @@ public class BaseTest(
 
         while (true)
         {
-            var response = await _filesClient.GetAsync("fileops");
+            var response = await _filesClient.GetAsync("fileops", TestContext.Current.CancellationToken);
             statuses = await HttpClientHelper.ReadFromJson<List<FileOperationResult>>(response);
 
             if (statuses.TrueForAll(r => r.Finished))

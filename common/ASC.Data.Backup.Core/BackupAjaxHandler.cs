@@ -36,11 +36,9 @@ public class BackupAjaxHandler(
     TenantManager tenantManager,
     MessageService messageService,
     CoreBaseSettings coreBaseSettings,
-    CoreConfiguration coreConfiguration,
     PermissionContext permissionContext,
     AuthContext authContext,
     UserManager userManager,
-    ConsumerFactory consumerFactory,
     StorageFactory storageFactory,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity)
@@ -292,7 +290,7 @@ public class BackupAjaxHandler(
 
         if (!coreBaseSettings.Standalone && !SetupInfo.IsVisibleSettings(nameof(ManagementType.Backup)))
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption, "Backup");
+            throw new BillingException(Resource.ErrorNotAllowedOption);
         }
     }
 
@@ -373,12 +371,12 @@ public class BackupAjaxHandler(
         var quota = await tenantManager.GetTenantQuotaAsync(tenantManager.GetCurrentTenantId());
         if (!SetupInfo.IsVisibleSettings("Restore") || (!coreBaseSettings.Standalone && !quota.AutoBackupRestore))
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption, "Restore");
+            throw new BillingException(Resource.ErrorNotAllowedOption);
         }
 
         if (!coreBaseSettings.Standalone && (!SetupInfo.IsVisibleSettings("Restore") || !quota.AutoBackupRestore))
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption, "Restore");
+            throw new BillingException(Resource.ErrorNotAllowedOption);
         }
     }
 
@@ -388,7 +386,7 @@ public class BackupAjaxHandler(
 
         if (!SetupInfo.IsVisibleSettings("AutoBackup") || !(await tenantManager.GetTenantQuotaAsync(tenantManager.GetCurrentTenantId())).AutoBackupRestore)
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption, "AutoBackup");
+            throw new BillingException(Resource.ErrorNotAllowedOption);
         }
     }
 

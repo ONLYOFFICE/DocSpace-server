@@ -471,7 +471,7 @@ public class SecurityController(PermissionContext permissionContext,
             && (!SetupInfo.IsVisibleSettings(ManagementType.LoginHistory.ToStringFast())
                 || !(await tenantManager.GetCurrentTenantQuotaAsync()).Audit))
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption, "Audit");
+            throw new BillingException(Resource.ErrorNotAllowedOption);
         }
     }
 
@@ -480,7 +480,7 @@ public class SecurityController(PermissionContext permissionContext,
         if (!coreBaseSettings.Standalone
             && !SetupInfo.IsVisibleSettings(ManagementType.LoginHistory.ToStringFast()))
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption, "Audit");
+            throw new BillingException(Resource.ErrorNotAllowedOption);
         }
     }
 }
