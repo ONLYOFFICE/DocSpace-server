@@ -27,147 +27,148 @@
 namespace ASC.Web.Files.Services.WCFService;
 
 /// <summary>
-/// The ace collection parameters.
+/// The collection of the user access rights.
 /// </summary>
 public class AceCollection<T>
 {
     /// <summary>
-    /// The ace collection files.
+    /// The collection of shared files.
     /// </summary>
     public IEnumerable<T> Files { get; init; }
 
     /// <summary>
-    /// The ace collection folders.
+    /// The collection of shared folders.
     /// </summary>
     public IEnumerable<T> Folders { get; init; }
 
     /// <summary>
-    /// The ace collection aces.
+    /// The collection of access rights.
     /// </summary>
     public List<AceWrapper> Aces { get; init; }
 
     /// <summary>
-    /// The ace collection message.
+    /// A message to send when notifying about the shared file.
     /// </summary>
     public string Message { get; init; }
 
     /// <summary>
-    /// The ace collection advanced settings.
+    /// The information about the advanced settings which allow to share the document with other users.
     /// </summary>
     public AceAdvancedSettingsWrapper AdvancedSettings { get; init; }
 }
 
 /// <summary>
-/// The ace wrapper parameters.
+/// The parameters of the access rights.
 /// </summary>
 public class AceWrapper : IMapFrom<RoomInvitation>
 {
     /// <summary>
-    /// The ace wrapper ID.
+    /// The user ID.
     /// </summary>
     public Guid Id { get; set; }
 
     /// <summary>
-    /// The ace wrapper email.
+    /// The user email.
     /// </summary>
     public string Email { get; init; }
 
     /// <summary>
-    /// The ace wrapper subject type.
+    /// The subject type.
     /// </summary>
     public SubjectType SubjectType { get; set; }
 
     /// <summary>
-    /// The ace wrapper file share options.
+    /// Specifies whether a user with the access rights to a file can edit it or not.
     /// </summary>
     public FileShareOptions FileShareOptions { get; init; }
     public bool CanEditAccess { get; set; }
 
     /// <summary>
-    /// The ace wrapper subject name.
+    /// The subject name.
     /// </summary>
     [JsonPropertyName("title")]
     public string SubjectName { get; set; }
 
     /// <summary>
-    /// The ace wrapper link.
+    /// The external or invitation link.
     /// </summary>
     public string Link { get; set; }
 
     /// <summary>
-    /// The ace wrapper subject group.
+    /// Specifies whether the subject type is a group or not.
     /// </summary>
     [JsonPropertyName("is_group")]
     public bool SubjectGroup { get; set; }
 
     /// <summary>
-    /// Specifies whether the ace wrapper is the owner or not.
+    /// Specifies whether the access rights subject is the owner or not.
     /// </summary>
     public bool Owner { get; set; }
 
     /// <summary>
-    /// The ace wrapper file access.
+    /// The access rights type.
     /// </summary>
     [JsonPropertyName("ace_status")]
     public FileShare Access { get; set; }
 
     /// <summary>
-    /// The ace wrapper locked rights.
+    /// Specifies if the access rights are locked or not.
     /// </summary>
     [JsonPropertyName("locked")]
     public bool LockedRights { get; set; }
 
     /// <summary>
-    /// Specifies whether to disable removing of the ace wrapper.
+    /// Specifies if the access rights can be removed or not.
     /// </summary>
     [JsonPropertyName("disable_remove")]
     public bool DisableRemove { get; set; }
 
     /// <summary>
-    /// The request token of the ace wrapper.
+    /// The request token of the access rights.
     /// </summary>
     public string RequestToken { get; set; }
 
     /// <summary>
-    /// Specifies whether it is link or not.
+    /// Specifies whether the subject type is a link or not.
     /// </summary>
     [JsonIgnore] 
     public bool IsLink => (SubjectType is SubjectType.InvitationLink or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink) || !string.IsNullOrEmpty(Link);
 }
 
 /// <summary>
-/// The ace short wrapper parameters.
+/// The information about the settings which allow to share the document with other users.
 /// </summary>
 public class AceShortWrapper(string subjectName, string permission, bool isLink)
 {
     /// <summary>
-    /// The user of the wrapper.
+    /// The name of the user the document will be shared with.
     /// </summary>
     public string User { get; init; } = subjectName;
 
     /// <summary>
-    /// The user access rights to the file.
+    /// The access rights for the user with the name above.
+    /// Can be "Full Access", "Read Only", or "Deny Access".
     /// </summary>
     public string Permissions { get; init; } = permission;
 
     /// <summary>
-    /// Specifies whether the message is link.
+    /// Specifies whether to change the user icon to the link icon.
     /// </summary>
     public bool isLink { get; init; } = isLink;
 }
 
 /// <summary>
-/// The ace advanced settings wrapper parameters.
+/// The information about the advanced settings which allow to share the document with other users.
 /// </summary>
 public class AceAdvancedSettingsWrapper
 {
     /// <summary>
-    /// Specifies whether to allow sharing private room.
+    /// Specifies whether to allow sharing private room or not.
     /// </summary>
     public bool AllowSharingPrivateRoom { get; set; }
 
     /// <summary>
-    /// Specifies whether it is the invitation link or not.
+    /// Specifies whether to allow creating an invitation link or not.
     /// </summary>
     public bool InvitationLink { get; init; }
 }

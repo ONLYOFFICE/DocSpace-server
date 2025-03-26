@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// The delete the WordPress plugin information response parameters.
+/// The information response parameters of the WordPress deletion.
 /// </summary>
 public class DeleteWordpressInfoResponse(bool success)
 {

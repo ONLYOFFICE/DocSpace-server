@@ -52,6 +52,9 @@ public enum ShareFilterType
     Group = 32
 }
 
+/// <summary>
+/// The subject type of the access right.
+/// </summary>
 public enum SubjectType
 {
     [SwaggerEnum("User")]

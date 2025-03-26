@@ -32,7 +32,7 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 public class FileShareDto
 {
     /// <summary>
-    /// The file sharing rights.
+    /// The access rights type.
     /// </summary>
     public FileShare Access { get; set; }
 
@@ -42,18 +42,18 @@ public class FileShareDto
     public object SharedTo { get; set; }
 
     /// <summary>
-    /// Specifies if the file is locked by this user or not.
+    /// Specifies if the access right is locked or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool IsLocked { get; set; }
 
     /// <summary>
-    /// Specifies if this user is an owner of the specified file or not.
+    /// Specifies if the user is an owner of the specified file or not.
     /// </summary>
     public bool IsOwner { get; set; }
 
     /// <summary>
-    /// Spceifies if this user can edit the access to the specified file or not.
+    /// Specifies if the user can edit the access to the specified file or not.
     /// </summary>
     public bool CanEditAccess { get; set; }
 
@@ -79,17 +79,17 @@ public class FileShareLink
     public string Title { get; set; }
 
     /// <summary>
-    /// The file share link.
+    /// The file sharing link.
     /// </summary>
     public string ShareLink { get; set; }
 
     /// <summary>
-    /// The file expiration date.
+    /// The sharing link expiration date.
     /// </summary>
     public ApiDateTime ExpirationDate { get; set; }
 
     /// <summary>
-    /// The file link type.
+    /// The file sharing link type.
     /// </summary>
     public LinkType LinkType { get; set; }
 
@@ -104,22 +104,22 @@ public class FileShareLink
     public bool? DenyDownload { get; set; }
 
     /// <summary>
-    /// Specifies whether the file share link is expired or not.
+    /// Specifies whether the file sharing link is expired or not.
     /// </summary>
     public bool? IsExpired { get; set; }
 
     /// <summary>
-    /// Specifies whether the file share link is primary or not.
+    /// Specifies whether the file sharing link is primary or not.
     /// </summary>
     public bool Primary { get; set; }
 
     /// <summary>
-    /// Specifies whether the file share link is internal or not.
+    /// Specifies whether the file sharing link is internal or not.
     /// </summary>
     public bool? Internal { get; set; }
 
     /// <summary>
-    /// The file share link's request token.
+    /// The file sharing link's request token.
     /// </summary>
     public string RequestToken { get; set; }
 }

@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// Result of file conversation operation.
+/// The result of file convertion operation.
 /// </summary>
 public class ConversationResultDto
 {

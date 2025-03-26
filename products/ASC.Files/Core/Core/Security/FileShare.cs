@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.Security;
 
+/// <summary>
+/// The access rights type.
+/// </summary>
 [EnumExtensions]
 [JsonConverter(typeof(FileShareConverter))]
 public enum FileShare

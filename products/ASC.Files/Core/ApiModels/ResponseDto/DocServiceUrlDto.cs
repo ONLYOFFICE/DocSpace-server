@@ -37,22 +37,22 @@ public class DocServiceUrlDto
     public required string Version { get; set; }
 
     /// <summary>
-    /// The document service url api.
+    /// The document service URL API.
     /// </summary>
     public required string DocServiceUrlApi { get; set; }
 
     /// <summary>
-    /// The document service url.
+    /// The document service URL.
     /// </summary>
     public required string DocServiceUrl { get; set; }
 
     /// <summary>
-    /// The document service url internal.
+    /// The internal document service URL.
     /// </summary>
     public required string DocServiceUrlInternal { get; set; }
 
     /// <summary>
-    /// The document service portal url.
+    /// The document service portal URL.
     /// </summary>
     public required string DocServicePortalUrl { get; set; }
 

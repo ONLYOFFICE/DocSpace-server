@@ -52,7 +52,7 @@ public class Logo
     public string Small { get; set; }
 
     /// <summary>
-    /// The color of the logo.
+    /// The logo color.
     /// </summary>
     public string Color { get; set; }
 

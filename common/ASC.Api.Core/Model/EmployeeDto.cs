@@ -29,56 +29,56 @@ using System.Collections.Concurrent;
 namespace ASC.Web.Api.Models;
 
 /// <summary>
-/// The employee information.
+/// The user information.
 /// </summary>
 public class EmployeeDto
 {
     /// <summary>
-    /// The employee ID.
+    /// The user ID.
     /// </summary>
     [SwaggerSchemaCustom(Example = "{00000000-0000-0000-0000-000000000000}")]
     public Guid Id { get; set; }
 
     /// <summary>
-    /// The employee display name.
+    /// The user display name.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Mike Zanyatski")]
     public string DisplayName { get; set; }
 
     /// <summary>
-    /// The employee title.
+    /// The user title.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Manager")]
     public string Title { get; set; }
 
     /// <summary>
-    /// The employee avatar.
+    /// The user avatar.
     /// </summary>
     public string Avatar { get; set; }
 
     /// <summary>
-    /// The employee original size avatar.
+    /// The user original size avatar.
     /// </summary>
     public string AvatarOriginal { get; set; }
 
     /// <summary>
-    /// The employee maximum size avatar.
+    /// The user maximum size avatar.
     /// </summary>
     public string AvatarMax { get; set; }
 
     /// <summary>
-    /// The employee medium size avatar.
+    /// The user medium size avatar.
     /// </summary>
     public string AvatarMedium { get; set; }
 
     /// <summary>
-    /// The employee small avatar.
+    /// The user small size avatar.
     /// </summary>
     [SwaggerSchemaCustom(Example = "url to small avatar")]
     public string AvatarSmall { get; set; }
 
     /// <summary>
-    /// The employee profile URL.
+    /// The user profile URL.
     /// </summary>
     public string ProfileUrl { get; set; }
 
@@ -88,7 +88,7 @@ public class EmployeeDto
     public bool HasAvatar { get; set; }
 
     /// <summary>
-    /// Specifies if the user is an anonim or not.
+    /// Specifies if the user is anonymous or not.
     /// </summary>
     public bool IsAnonim { get; set; }
 }

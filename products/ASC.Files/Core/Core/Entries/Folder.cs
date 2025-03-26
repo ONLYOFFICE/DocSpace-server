@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core;
 
+/// <summary>
+/// The folder type.
+/// </summary>
 public enum FolderType
 {
     [SwaggerEnum(Description = "Default")]

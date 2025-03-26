@@ -65,7 +65,7 @@ public class FileDto<T> : FileEntryDto<T>
     public FileStatus FileStatus { get; set; }
 
     /// <summary>
-    /// Is the file muted or not.
+    /// Specifies if the file notifications are muted or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool Mute { get; set; }
@@ -100,7 +100,7 @@ public class FileDto<T> : FileEntryDto<T>
     public string Comment { get; set; }
 
     /// <summary>
-    /// Is the file encrypted or not.
+    /// Specifies if the file is encrypted or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool? Encrypted { get; set; }
@@ -117,7 +117,7 @@ public class FileDto<T> : FileEntryDto<T>
     public Thumbnail ThumbnailStatus { get; set; }
 
     /// <summary>
-    /// Is the file locked or not.
+    /// Specifies if the file is locked or not.
     /// </summary>
     public bool? Locked { get; set; }
 
@@ -127,13 +127,13 @@ public class FileDto<T> : FileEntryDto<T>
     public string LockedBy { get; set; }
 
     /// <summary>
-    /// Does the file have a draft or not.
+    /// Specifies if the file has a draft or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool? HasDraft { get; set; }
 
     /// <summary>
-    /// Does the file have a form or not.
+    /// Specifies if the file is a form or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool? IsForm { get; set; }
@@ -155,12 +155,12 @@ public class FileDto<T> : FileEntryDto<T>
     public string InProcessFolderTitle { get; set; }
 
     /// <summary>
-    /// The file draft info with its location.
+    /// The file draft information with its location.
     /// </summary>
     public DraftLocation<T> DraftLocation { get; set; }
 
     /// <summary>
-    /// The file accessibility.
+    /// The access rights to view a file.
     /// </summary>
     public IDictionary<Accessibility, bool> ViewAccessibility { get; set; }
 
@@ -175,7 +175,7 @@ public class FileDto<T> : FileEntryDto<T>
     public ApiDateTime LastOpened { get; set; }
 
     /// <summary>
-    /// The date when the file will be expired.
+    /// The date when the external link to the file will be expired.
     /// </summary>
     public ApiDateTime Expired { get; set; }
 

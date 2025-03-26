@@ -43,7 +43,7 @@ public class FileOperationDto
     public FileOperationType OperationType { get; init; }
 
     /// <summary>
-    /// The file operation progress.
+    /// The file operation progress in percentage.
     /// </summary>
     [SwaggerSchemaCustom(Example = 100)]
     public int Progress { get; set; }

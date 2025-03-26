@@ -44,13 +44,13 @@ public class FolderDto<T> : FileEntryDto<T>
     public int FilesCount { get; set; }
 
     /// <summary>
-    /// The Number of folders.
+    /// The number of folders that the folder contains.
     /// </summary>
     [SwaggerSchemaCustom(Example = 7)]
     public int FoldersCount { get; set; }
 
     /// <summary>
-    /// Specifies if the folder is shareable or not.
+    /// Specifies if the folder can be shared or not.
     /// </summary>
     public bool? IsShareable { get; set; }
 
@@ -60,12 +60,12 @@ public class FolderDto<T> : FileEntryDto<T>
     public bool? IsFavorite { get; set; }
 
     /// <summary>
-    /// The number for a new folder.
+    /// The new element index in the folder.
     /// </summary>
     public int New { get; set; }
 
     /// <summary>
-    /// Specifies if the folder is muted or not.
+    /// Specifies if the folder notifications are enabled or not.
     /// </summary>
     public bool Mute { get; set; }
 
@@ -95,12 +95,12 @@ public class FolderDto<T> : FileEntryDto<T>
     public bool Private { get; set; }
 
     /// <summary>
-    /// Specifies if the folder has indexing or not.
+    /// Specifies if the folder is indexed or not.
     /// </summary>
     public bool Indexing { get; set; }
 
     /// <summary>
-    /// Specifies if the folder denies download or not.
+    /// Specifies if the folder can be downloaded or not.
     /// </summary>
     public bool DenyDownload { get; set; }
 
@@ -120,7 +120,7 @@ public class FolderDto<T> : FileEntryDto<T>
     public FolderType? Type { get; set; }
 
     /// <summary>
-    /// Specifies if the folder InRoom or not.
+    /// Specifies if the folder is placed in the room or not.
     /// </summary>
     public bool? InRoom { get; set; }
 
@@ -140,17 +140,17 @@ public class FolderDto<T> : FileEntryDto<T>
     public long? UsedSpace { get; set; }
 
     /// <summary>
-    /// Specifies if the folder link is external or not.
+    /// Specifies if the folder can be accessed via an external link or not.
     /// </summary>
     public bool? External { get; set; }
 
     /// <summary>
-    /// Specifies if the folder password is protected or not.
+    /// Specifies if the folder is password protected or not.
     /// </summary>
     public bool? PasswordProtected { get; set; }
 
     /// <summary>
-    /// Is the folder expired or not.
+    /// Specifies if an external link to the folder is expired or not.
     /// </summary>
     public bool? Expired { get; set; }
 

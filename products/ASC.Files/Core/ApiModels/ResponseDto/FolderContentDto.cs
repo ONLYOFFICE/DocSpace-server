@@ -32,12 +32,12 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 public class FolderContentDto<T>
 {
     /// <summary>
-    /// The list of files in the forlder content.
+    /// The list of files in the folder.
     /// </summary>
     public List<FileEntryDto> Files { get; set; }
 
     /// <summary>
-    /// The list of folders in the forlder content. 
+    /// The list of folders in the folder. 
     /// </summary>
     public List<FileEntryDto> Folders { get; set; }
 

@@ -27,6 +27,9 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 
+/// <summary>
+/// The room type.
+/// </summary>
 public enum RoomType
 {
     [SwaggerEnum(Description = "Form filling room")]

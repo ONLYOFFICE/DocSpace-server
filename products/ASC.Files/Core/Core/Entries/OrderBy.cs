@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core;
 
+/// <summary>
+/// The parameters by which the files will be sorted.
+/// </summary>
 [EnumExtensions]
 public enum SortedByType
 {
@@ -70,7 +73,7 @@ public enum SortedByType
 }
 
 /// <summary>
-/// The ordering parameters.
+/// The sorting parameters.
 /// </summary>
 [DebuggerDisplay("{SortedBy} {IsAsc}")]
 public class OrderBy(SortedByType sortedByType, bool isAsc)
@@ -82,7 +85,7 @@ public class OrderBy(SortedByType sortedByType, bool isAsc)
     public bool IsAsc { get; init; } = isAsc;
 
     /// <summary>
-    /// The sorted by type of the ordering.
+    /// The parameters by which the files will be sorted.
     /// </summary>
     [JsonPropertyName("property")]
     public SortedByType SortedBy { get; set; } = sortedByType;

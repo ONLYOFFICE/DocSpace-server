@@ -58,12 +58,12 @@ public class ConfigurationDto<T>
     public string EditorUrl { get; set; }
 
     /// <summary>
-    /// The token of the file configuration.
+    /// The encrypted signature added to the config in the form of a token.
     /// </summary>
     public string Token { get; set; }
 
     /// <summary>
-    /// The platform type.
+    /// The platform type ("desktop", "mobile", or "embedded").
     /// </summary>
     public string Type { get; set; }
 
@@ -105,7 +105,7 @@ public class EditorConfigurationDto
     public CoEditingConfig CoEditing { get; set; }
 
     /// <summary>
-    /// The creation URL of the editor.
+    /// The absolute URL of the document where it will be created and available after creation.
     /// </summary>
     public string CreateUrl { get; set; }
 
@@ -125,17 +125,17 @@ public class EditorConfigurationDto
     public EncryptionKeysConfig EncryptionKeys { get; set; }
 
     /// <summary>
-    /// The language of the editor configuration.
+    /// The editor interface language which is set using the two letter (de, ru, it, etc.) language codes.
     /// </summary>
     public string Lang { get; set; }
 
     /// <summary>
-    /// The mode of the editor configuration.
+    /// The editor opening mode ("view" or "edit").
     /// </summary>
     public string Mode { get; set; }
 
     /// <summary>
-    /// Specifies if the mode is write of the editor configuration.
+    /// Specifies whether the user can write any data to the document.
     /// </summary>
     public bool ModeWrite { get; set; }
 
@@ -145,17 +145,17 @@ public class EditorConfigurationDto
     public PluginsConfig Plugins { get; set; }
 
     /// <summary>
-    /// The recent configuration of the editor.
+    /// The presence or absence of the documents in the "Open Recent..." menu option.
     /// </summary>
     public List<RecentConfig> Recent { get; set; }
 
     /// <summary>
-    /// The templates of the editor configuration.
+    /// The presence or absence of the templates in the "Create New..." menu option.
     /// </summary>
     public List<TemplatesConfig> Templates { get; set; }
 
     /// <summary>
-    /// The user configuration of the editor.
+    /// The user currently viewing or editing the document.
     /// </summary>
     public UserConfig User { get; set; }
 }
@@ -166,78 +166,80 @@ public class EditorConfigurationDto
 public class CustomizationConfigDto
 {
     /// <summary>
-    /// Specifies if the customization is about.
+    /// Defines if the "About" menu button is displayed or hidden.
     /// </summary>
     public bool About { get; set; }
 
     /// <summary>
-    /// The customization customer configuration.
+    /// The information which will be displayed in the editor "About" section and visible to all the editor users.
     /// </summary>
     public CustomerConfigDto Customer { get; set; }
 
     /// <summary>
-    /// The anonymous configuration of the customization.
+    /// Specifies whether to add a request for the anonymous name.
     /// </summary>
     public AnonymousConfigDto Anonymous { get; set; }
 
     /// <summary>
-    /// The feedback configuration of the customization.
+    /// The settings for the "Feedback & Support" menu button.
     /// </summary>
     public FeedbackConfig Feedback  { get; set; }
 
     /// <summary>
-    /// Specifies if the customization should be force saved.
+    /// Specifies whether to add a request for the file force saving to the callback handler
+    /// when saving the document within the document editing service.
     /// </summary>
     public bool? Forcesave { get; set; }
 
     /// <summary>
-    /// The go back configuration of the customization.
+    /// The settings for the "Open file location" menu button and upper right corner button.
     /// </summary>
     public GobackConfig Goback { get; set; }
 
     /// <summary>
-    /// The logo of the customization.
+    /// The parameters of the image file at the top left corner of the editor header.
     /// </summary>
     public LogoConfigDto Logo { get; set; }
 
     /// <summary>
-    /// Specifies if the share should be mentioned.
+    /// Specifies whether a hint indicates that the user will receive a notification and access to the document (true)
+    /// or only a notification of the mention (false).
     /// </summary>
     public bool MentionShare { get; set; }
 
     /// <summary>
-    /// The review display of the customization.
+    /// The review editing mode in the document editor ("markup", "simple", "final", or "original").
     /// </summary>
     public string ReviewDisplay { get; set; }
 
     /// <summary>
-    /// Specifies if the form should be submitted.
+    /// Specifies whether the Complete & Submit button will be displayed or hidden on the top toolbar.
     /// </summary>
     public bool SubmitForm { get; set; }
 }
 
 /// <summary>
-/// The logo config parameters.
+/// The parameters of the image file at the top left corner of the editor header.
 /// </summary>
 public class LogoConfigDto
 {
     /// <summary>
-    /// The image of the logo.
+    /// The path to the image file used to show in the common work mode or in the embedded mode. 
     /// </summary>
     public string Image { get; set; }
 
     /// <summary>
-    /// The dark image of the logo.
+    /// The path to the image file used for the dark header.
     /// </summary>
     public string ImageDark { get; set; }
 
     /// <summary>
-    /// The embedded image of the logo.
+    /// The path to the image file used to show in the embedded mode.
     /// </summary>
     public string ImageEmbedded { get; set; }
 
     /// <summary>
-    /// The url link of the logo.
+    /// The absolute URL which will be used when someone clicks the logo image.
     /// </summary>
     public string Url { get; set; }
 
@@ -248,48 +250,48 @@ public class LogoConfigDto
 }
 
 /// <summary>
-/// The anonymous config parameters.
+/// Specifies whether to add a request for the anonymous name.
 /// </summary>
 public class AnonymousConfigDto
 {
     /// <summary>
-    /// Specifies if the anonymous is a request.
+    /// Defines if the request is sent or not.
     /// </summary>
     public bool Request { get; set; }
 }
 
 /// <summary>
-/// The customer config parameters.
+/// The information which will be displayed in the editor "About" section and visible to all the editor users.
 /// </summary>
 public class CustomerConfigDto
 {
     /// <summary>
-    /// The address of the customer configuration.
+    /// The postal address of the company or person who gives access to the editors or the editor authors.
     /// </summary>
     public string Address { get; set; }
 
     /// <summary>
-    /// The logo of the customer configuration.
+    /// The path to the image logo.
     /// </summary>
     public string Logo { get; set; }
 
     /// <summary>
-    /// The dark logo of the customer configuration.
+    /// The path to the image logo for the dark theme.
     /// </summary>
     public string LogoDark { get; set; }
 
     /// <summary>
-    /// The mail address of the customer configuration.
+    /// The email address of the company or person who gives access to the editors or the editor authors.
     /// </summary>
     public string Mail { get; set; }
 
     /// <summary>
-    /// The name of the customer configuration.
+    /// The name of the company or person who gives access to the editors or the editor authors.
     /// </summary>
     public string Name  { get; set; }
 
     /// <summary>
-    /// The site web address of the customer configuration.
+    /// The home website address of the above company or person.
     /// </summary>
     public string Www  { get; set; }
 }
@@ -300,22 +302,22 @@ public class CustomerConfigDto
 public class DocumentConfigDto
 {
     /// <summary>
-    /// The file type of the document.
+    /// The type of the file for the source viewed or edited document.
     /// </summary>
     public string FileType  { get; set; }
 
     /// <summary>
-    /// The configuration information of the document.
+    /// The additional parameters of the document.
     /// </summary>
     public InfoConfigDto Info { get; set; }
 
     /// <summary>
-    /// Specifies if the documnet is linked for current user.
+    /// Specifies if the documnet is linked to the current user.
     /// </summary>
     public bool IsLinkedForMe { get; set; }
 
     /// <summary>
-    /// The document key.
+    /// The unique document identifier used by the service to recognize the document.
     /// </summary>
     public string Key { get; set; }
 
@@ -325,69 +327,70 @@ public class DocumentConfigDto
     public PermissionsConfig Permissions { get; set; }
 
     /// <summary>
-    /// The shared link parameter of the document.
+    /// The shared link parameter.
     /// </summary>
     public string SharedLinkParam { get; set; }
 
     /// <summary>
-    /// The shared link key of the document.
+    /// The shared link key.
     /// </summary>
     public string SharedLinkKey { get; set; }
 
     /// <summary>
-    /// The reference data of the document.
+    /// An object that is generated by the integrator to uniquely identify a file in its system.
     /// </summary>
     public FileReferenceData ReferenceData { get; set; }
 
     /// <summary>
-    /// The document title.
+    /// The desired file name for the viewed or edited document
+    /// which will also be used as file name when the document is downloaded.
     /// </summary>
     public string Title { get; set; }
 
     /// <summary>
-    /// The document url.
+    /// The absolute URL where the source viewed or edited document is stored.
     /// </summary>
     [Url]
     public string Url { get; set; }
 
     /// <summary>
-    /// The options of the document.
+    /// The document options.
     /// </summary>
     public Options Options { get; set; }
 }
 
 /// <summary>
-/// The information config parameters.
+/// The additional parameters of the document.
 /// </summary>
 public class InfoConfigDto
 {
     /// <summary>
-    /// Specifies if the file is favorite or not.
+    /// The highlighting state of the "Favorite" icon.
     /// </summary>
     public bool? Favorite { get; set; }
 
     /// <summary>
-    /// The folder of the file.
+    /// The folder where the document is stored.
     /// </summary>
     public string Folder { get; set; }
 
     /// <summary>
-    /// The file owner.
+    /// The name of the document owner/creator.
     /// </summary>
     public string Owner { get; set; }
 
     /// <summary>
-    /// The sharing settings of the file.
+    /// The information about the settings which allow to share the document with other users.
     /// </summary>
     public List<AceShortWrapper> SharingSettings{ get; set; }
 
     /// <summary>
-    /// The editor type of the file.
+    /// The editor type.
     /// </summary>
     public EditorType Type { get; set; }
 
     /// <summary>
-    /// The uploaded file.
+    /// The document uploading date.
     /// </summary>
     public string Uploaded { get; set; }
 }

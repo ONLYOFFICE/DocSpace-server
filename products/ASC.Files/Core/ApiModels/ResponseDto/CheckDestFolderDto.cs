@@ -32,7 +32,7 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 public class CheckDestFolderDto
 {
     /// <summary>
-    /// The result of the opertaion.
+    /// The result of the operation.
     /// </summary>
     public CheckDestFolderResult Result { get; set; }
 

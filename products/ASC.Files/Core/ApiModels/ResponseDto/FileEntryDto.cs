@@ -51,7 +51,7 @@ public abstract class FileEntryDto
     public string Title { get; set; }
 
     /// <summary>
-    /// The access rights of the file entry.
+    /// The access rights to the file entry.
     /// </summary>
     public FileShare Access { get; set; }
 
@@ -93,17 +93,17 @@ public abstract class FileEntryDto
     public FolderType RootFolderType { get; set; }
 
     /// <summary>
-    /// The first parent folder type of the file entry.
+    /// The parent room type of the file entry.
     /// </summary>
     public FolderType? ParentRoomType { get; set; }
 
     /// <summary>
-    /// The employer user who updated the file entry.
+    /// The user who updated the file entry.
     /// </summary>
     public EmployeeDto UpdatedBy { get; set; }
 
     /// <summary>
-    /// Is file entry provider is specified or not.
+    /// Specifies if the file entry provider is specified or not.
     /// </summary>
     public bool? ProviderItem { get; set; }
 
@@ -148,24 +148,24 @@ public abstract class FileEntryDto
 public abstract class FileEntryDto<T> : FileEntryDto
 {
     /// <summary>
-    /// The file entry Id.
+    /// The file entry ID.
     /// </summary>
     [SwaggerSchemaCustom(Example = 10)]
     public T Id { get; set; }
 
     /// <summary>
-    /// The root folder id of the file entry.
+    /// The root folder ID of the file entry.
     /// </summary>
     public T RootFolderId { get; set; }
 
     /// <summary>
-    /// The origin id of the file entry.
+    /// The origin ID of the file entry.
     /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public T OriginId { get; set; }
 
     /// <summary>
-    /// The origin room id of the file entry.
+    /// The origin room ID of the file entry.
     /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public T OriginRoomId { get; set; }
@@ -181,12 +181,12 @@ public abstract class FileEntryDto<T> : FileEntryDto
     public string OriginRoomTitle { get; set; }
 
     /// <summary>
-    /// Can the file entry share or not.
+    /// Specifies if the file entry can be shared or not.
     /// </summary>
     public bool CanShare { get; set; }
 
     /// <summary>
-    /// The security of the file entry.
+    /// The actions that can be perforrmed with the file entry.
     /// </summary>
     public IDictionary<FilesSecurityActions, bool> Security { get; set; }
 

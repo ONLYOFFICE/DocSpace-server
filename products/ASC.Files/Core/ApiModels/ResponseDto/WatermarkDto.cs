@@ -27,12 +27,12 @@
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// The watermark information.
+/// The watermark settings.
 /// </summary>
 public class WatermarkDto
 {
     /// <summary>
-    /// Specifies whether to display: username, user email, user ip-adress, current date and room name.
+    /// Specifies whether to display in the watermark: username, user email, user ip-adress, current date, and room name.
     /// </summary>
     public WatermarkAdditions Additions { get; set; }
 

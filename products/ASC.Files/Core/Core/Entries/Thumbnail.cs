@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core;
 
+/// <summary>
+/// The file thumbnail status.
+/// </summary>
 [DataContract(Namespace = "")]
 public enum Thumbnail
 {

@@ -2698,6 +2698,9 @@ public class FileSecurity(IDaoFactory daoFactory,
         }
     }
 
+    /// <summary>
+    /// The actions that can be performed with the file.
+    /// </summary>
     public enum FilesSecurityActions
     {
         [SwaggerEnum("Read")]
