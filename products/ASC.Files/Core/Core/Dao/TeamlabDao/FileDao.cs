@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -66,7 +66,9 @@ internal class FileDao(
     FileChecker fileChecker,
     EntryManager entryManager,
     FileSharing fileSharing,
-    FilesMessageService filesMessageService)
+    FilesMessageService filesMessageService,
+    QuotaSocketManager quotaSocketManager,
+    CustomQuota customQuota)
     : AbstractDao(dbContextManager,
               userManager,
               tenantManager,
@@ -1018,6 +1020,10 @@ internal class FileDao(
 
         var trashId = await globalFolder.GetFolderTrashAsync(daoFactory);
 
+        var toUser = await _userManager.GetUsersAsync(toFolder.RootCreateBy);
+        var fromUser = await _userManager.GetUsersAsync(fromFolder.RootCreateBy);
+
+
         if (toRoomId != -1 && fromRoomId != toRoomId)
         {
             var toRoom = DocSpaceHelper.IsRoom(toFolder.FolderType) ? toFolder : await folderDao.GetFolderAsync(toRoomId);
@@ -1051,6 +1057,28 @@ internal class FileDao(
                     if (userQuotaLimit - userUsedSpace < fileContentLength)
                     {
                         throw FileSizeComment.GetUserFreeSpaceException(userQuotaLimit);
+                    }
+                }
+            }
+        }
+        else
+        {
+            if (toUser != fromUser && toFolder.RootFolderType is FolderType.USER && fromFolder.RootFolderType is FolderType.USER) 
+            {
+                var quotaUserSettings = await _settingsManager.LoadAsync<TenantUserQuotaSettings>();
+                if (quotaUserSettings.EnableQuota)
+                {
+                    var toUserQuotaData = await _settingsManager.LoadAsync<UserQuotaSettings>(toUser);
+                    var toUserQuotaLimit = toUserQuotaData.UserQuota == toUserQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : toUserQuotaData.UserQuota;
+                    var toUserUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenantId, toUser.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
+                    if (toUserQuotaLimit != TenantEntityQuotaSettings.NoQuota)
+                    {
+                        if (toUserQuotaLimit - toUserUsedSpace < fileContentLength)
+                        {
+                            await _settingsManager.SaveAsync(new UserQuotaSettings { UserQuota = toUserQuotaLimit + fileContentLength }, toUser);
+
+                            _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(tenantId, customQuota.GetFeature<UserCustomQuotaFeature>().Name, quotaUserSettings.EnableQuota, toUserUsedSpace, toUserQuotaLimit + fileContentLength, [toUser.Id]);
+                        }
                     }
                 }
             }
@@ -1132,6 +1160,21 @@ internal class FileDao(
                         await tagDao.RemoveTagLinksAsync(fileId, FileEntryType.File, TagType.FromRoom);
                         await tagDao.RemoveTagLinksAsync(fileId, FileEntryType.File, TagType.Origin);
                     }
+                }
+
+                if (toUser != fromUser && toFolder.RootFolderType is FolderType.USER && fromFolder.RootFolderType is FolderType.USER)
+                {
+                    await storageFactory.QuotaUsedAddAsync(
+                        _tenantManager.GetCurrentTenantId(),
+                        FileConstant.ModuleId, "",
+                        WebItemManager.DocumentsProductID.ToString(),
+                        file.ContentLength, toUser.Id);
+
+                    await storageFactory.QuotaUsedDeleteAsync(
+                        _tenantManager.GetCurrentTenantId(),
+                        FileConstant.ModuleId, "",
+                        WebItemManager.DocumentsProductID.ToString(),
+                        file.ContentLength, fromUser.Id);
                 }
 
                 if (deleteLinks)
@@ -1560,12 +1603,21 @@ internal class FileDao(
 
         if (exceptFolderIds == null || !exceptFolderIds.Any())
         {
-            await filesDbContext.ReassignFilesAsync(tenantId, oldOwnerId, newOwnerId);
+            await filesDbContext.ReassignFilesByCreateByAsync(tenantId, oldOwnerId, newOwnerId);
         }
         else
         {
             await filesDbContext.ReassignFilesPartiallyAsync(tenantId, oldOwnerId, newOwnerId, exceptFolderIds);
         }
+    }
+
+    public async Task ReassignFilesAsync(Guid newOwnerId, IEnumerable<int> fileIds)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await filesDbContext.ReassignFilesAsync(tenantId, newOwnerId, fileIds);
     }
 
     public IAsyncEnumerable<File<int>> GetFilesAsync(IEnumerable<int> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, bool searchInContent)

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,9 +30,9 @@ namespace ASC.Core.Encryption;
 public interface ICrypt
 {
     byte Version { get; }
-    long GetFileSize(string filePath);
-    Stream GetReadStream(string filePath);
-    void DecryptFile(string filePath);
-    void EncryptFile(string filePath);
+    Task<long> GetFileSizeAsync(string filePath);
+    Task<Stream> GetReadStreamAsync(string filePath);
+    ValueTask DecryptFileAsync(string filePath);
+    ValueTask EncryptFileAsync(string filePath);
     void Init(string storageName, EncryptionSettings encryptionSettings);
 }

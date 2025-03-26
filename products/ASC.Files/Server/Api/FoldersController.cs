@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -502,9 +502,10 @@ public class FoldersControllerCommon(
             withoutTrash = true;
         }
 
-        if (!isGuest)
+        var my = await globalFolderHelper.FolderMyAsync;
+        if (my != 0)
         {
-            yield return await globalFolderHelper.FolderMyAsync;
+            yield return my;
         }
 
         if (!withoutTrash)

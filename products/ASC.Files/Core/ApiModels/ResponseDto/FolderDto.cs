@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -177,8 +177,10 @@ public class FolderDtoHelper(
     WatermarkDtoHelper watermarkHelper,
     IMapper mapper,
     ExternalShare externalShare,
-    FileSecurityCommon fileSecurityCommon)
-    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
+    FileSecurityCommon fileSecurityCommon,
+    SecurityContext securityContext,
+    UserManager userManager)
+    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory)
     {
 
     public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<FileShareRecord<string>> currentUserRecords = null, string order = null, IFolder contextFolder = null)
@@ -190,7 +192,7 @@ public class FolderDtoHelper(
         {
             if (folder.Tags == null)
             {
-                var tagDao = daoFactory.GetTagDao<T>();
+                var tagDao = _daoFactory.GetTagDao<T>();
                 result.Tags = await tagDao.GetTagsAsync(TagType.Custom, [folder]).Select(t => t.Name).ToListAsync();
             }
             else

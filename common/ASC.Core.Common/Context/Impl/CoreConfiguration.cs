@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -221,11 +221,6 @@ public class CoreConfiguration(CoreSettings coreSettings, TenantManager tenantMa
     public async Task<string> GetSettingAsync(string key, int tenant = Tenant.DefaultTenant)
     {
         return await coreSettings.GetSettingAsync(key, tenant);
-    }
-
-    public string GetSetting(string key, int tenant = Tenant.DefaultTenant)
-    {
-        return coreSettings.GetSetting(key, tenant);
     }
 
     #endregion

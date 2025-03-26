@@ -1829,6 +1829,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
+                    b.Property<DateTime>("LastModified")
+                        .HasColumnType("datetime")
+                        .HasColumnName("last_modified");
+
                     b.HasKey("TenantId", "Id", "UserId")
                         .HasName("PRIMARY");
 
@@ -1845,7 +1849,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             TenantId = 1,
                             Id = "9a925891-1f92-4ed7-b277-d6f649739f06",
                             UserId = "00000000-0000-0000-0000-000000000000",
-                            Data = "{\"Completed\":false}"
+                            Data = "{\"Completed\":false}",
+                            LastModified = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         });
                 });
 
@@ -7341,6 +7346,13 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("varchar(50)")
                         .HasColumnName("secret_key")
                         .HasDefaultValueSql("''");
+
+                    b.Property<string>("TargetId")
+                        .HasMaxLength(36)
+                        .HasColumnType("varchar(36)")
+                        .HasColumnName("target_id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<int>("TenantId")
                         .HasColumnType("int")

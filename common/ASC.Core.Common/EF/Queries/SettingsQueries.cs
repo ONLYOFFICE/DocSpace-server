@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,12 +29,6 @@ namespace ASC.Core.Common.EF.Context;
 public partial class WebstudioDbContext
 {
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid])]
-    public Task<string> DataAsync(int tenantId, Guid id, Guid userId)
-    {
-        return Queries.DataAsync(this, tenantId, id, userId);
-    }
-
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid])]
     public Task<DbWebstudioSettings> WebStudioSettingsAsync(int tenantId, Guid id, Guid userId)
     {
         return Queries.WebStudioSettingsAsync(this, tenantId, id, userId);
@@ -43,16 +37,6 @@ public partial class WebstudioDbContext
 
 static file class Queries
 {
-    public static readonly Func<WebstudioDbContext, int, Guid, Guid, Task<string>> DataAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (WebstudioDbContext ctx, int tenantId, Guid id, Guid userId) =>
-                ctx.WebstudioSettings
-                    .Where(r => r.Id == id)
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.UserId == userId)
-                    .Select(r => r.Data)
-                    .FirstOrDefault());
-    
     public static readonly Func<WebstudioDbContext, int, Guid, Guid, Task<DbWebstudioSettings>> WebStudioSettingsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (WebstudioDbContext ctx, int tenantId, Guid id, Guid userId) =>

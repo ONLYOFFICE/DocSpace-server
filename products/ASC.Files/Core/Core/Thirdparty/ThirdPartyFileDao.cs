@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -665,6 +665,11 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     public abstract Task AbortUploadSessionAsync(ChunkedUploadSession<string> uploadSession);
 
     public Task ReassignFilesAsync(Guid oldOwner, Guid newOwnerId, IEnumerable<string> exceptFolderIds)
+    {
+        return Task.CompletedTask;
+    }
+
+    public Task ReassignFilesAsync(Guid newOwnerId, IEnumerable<string> fileIds)
     {
         return Task.CompletedTask;
     }

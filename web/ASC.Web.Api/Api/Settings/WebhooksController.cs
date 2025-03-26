@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -83,7 +83,7 @@ public class WebhooksController(ApiContext context,
 
         await CheckWebhook(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.SSL, true);
 
-        var webhook = await dbWorker.AddWebhookConfig(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.Enabled, inDto.SSL, inDto.Triggers);
+        var webhook = await dbWorker.AddWebhookConfig(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.Enabled, inDto.SSL, inDto.Triggers, inDto.TargetId);
 
         messageService.Send(MessageAction.WebhookCreated, MessageTarget.Create(webhook.Id), webhook.Name);
 
@@ -124,6 +124,7 @@ public class WebhooksController(ApiContext context,
         existingWebhook.Enabled = inDto.Enabled;
         existingWebhook.SSL = inDto.SSL;
         existingWebhook.Triggers = inDto.Triggers;
+        existingWebhook.TargetId = inDto.TargetId;
 
         if (!string.IsNullOrEmpty(inDto.SecretKey))
         {
@@ -162,6 +163,11 @@ public class WebhooksController(ApiContext context,
             {
                 throw new SecurityException(Resource.ErrorAccessDenied);
             }
+        }
+
+        if (inDto.Enabled)
+        {
+            await CheckWebhook(existingWebhook.Name, existingWebhook.Uri, existingWebhook.SecretKey, existingWebhook.SSL, false);
         }
 
         existingWebhook.Enabled = inDto.Enabled;
@@ -324,7 +330,7 @@ public class WebhooksController(ApiContext context,
     [HttpGet("webhook/triggers")]
     public Dictionary<string, int> Triggers()
     {
-        return Enum.GetValues<WebhookTrigger>().ToDictionary(item => item.ToStringFast(), item => (int)item);
+        return Enum.GetValues<WebhookTrigger>().ToDictionary(item => item.ToCustomString(), item => (int)item);
     }
 
     private async Task<bool> CheckAdminPermissionsAsync()
@@ -385,7 +391,7 @@ public class WebhooksController(ApiContext context,
         using var request = new HttpRequestMessage(HttpMethod.Head, uri);
         using var response = await httpClient.SendAsync(request);
 
-        if (response.StatusCode != HttpStatusCode.OK)
+        if (!response.IsSuccessStatusCode)
         {
             throw new ArgumentException(Resource.ErrorWebhookUrlNotAvaliable);
         }

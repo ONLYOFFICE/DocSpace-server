@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -43,7 +43,7 @@ public class WebhookPublisher(
     {
         Converters = { new TenantToUtcDateTimeJsonConverter(tenantUtil) },
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
     };
 
     private class TenantToUtcDateTimeJsonConverter(TenantUtil tenantUtil) : JsonConverter<DateTime>
@@ -73,12 +73,20 @@ public class WebhookPublisher(
                 continue;
             }
 
-            if (checker != null && config.CreatedBy.HasValue && authContext.CurrentAccount.ID != config.CreatedBy.Value)
+            if (checker != null)
             {
+                if (!string.IsNullOrEmpty(config.TargetId) && !checker.CheckIsTarget(data, config.TargetId))
+                {
+                    continue;
+                }
+
+                if (config.CreatedBy.HasValue && authContext.CurrentAccount.ID != config.CreatedBy.Value)
+                {
                 if (!await checker.CheckAccessAsync(data, config.CreatedBy.Value))
                 {
                     continue;
                 }
+            }
             }
 
             result.Add(config);
@@ -87,27 +95,27 @@ public class WebhookPublisher(
         return result;
     }
 
-    public async Task PublishAsync<T>(WebhookTrigger trigger, IEnumerable<DbWebhooksConfig> webhookConfigs, T data)
+    public async Task PublishAsync<T1, T2>(WebhookTrigger trigger, IEnumerable<DbWebhooksConfig> webhookConfigs, T1 data, T2 dataId)
     {
         foreach (var config in webhookConfigs)
         {
-            _ = await PublishAsync(trigger, config, data);
+            _ = await PublishAsync(trigger, config, data, dataId);
         }
     }
 
-    public async Task PublishAsync<T>(WebhookTrigger trigger, IWebhookAccessChecker<T> checker, T data)
+    public async Task PublishAsync<T1, T2>(WebhookTrigger trigger, IWebhookAccessChecker<T1> checker, T1 data, T2 dataId)
         {
         var webhookConfigs = await GetWebhookConfigsAsync(trigger, checker, data);
 
         foreach (var config in webhookConfigs)
         {
-            _ = await PublishAsync(trigger, config, data);
+            _ = await PublishAsync(trigger, config, data, dataId);
         }
     }
 
-    private async Task<DbWebhooksLog> PublishAsync<T>(WebhookTrigger trigger, DbWebhooksConfig webhookConfig, T data)
+    private async Task<DbWebhooksLog> PublishAsync<T1, T2>(WebhookTrigger trigger, DbWebhooksConfig webhookConfig, T1 data, T2 dataId)
     {
-        var payload = new WebhookPayload<T>(trigger, webhookConfig, data, authContext.CurrentAccount.ID);
+        var payload = new WebhookPayload<T1, T2>(trigger, webhookConfig, data, dataId, authContext.CurrentAccount.ID);
 
         var payloadStr = JsonSerializer.Serialize(payload, _serializerOptions);
 

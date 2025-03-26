@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,28 +24,35 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Data.Storage.Encryption.IntegrationEvents.Events;
+using ASC.Data.Storage.Encryption;
+using ASC.Data.Storage.Encryption.IntegrationEvents.Events;
 
-[ProtoContract]
-public record EncryptionDataStorageRequestedIntegrationEvent : IntegrationEvent
+namespace ASC.Files.Service.IntegrationEvents.EventHandling;
+
+[Scope]
+public class DataStorageEncryptionIntegrationEventConsumer(
+    ILogger<DataStorageEncryptionIntegrationEventConsumer> logger,
+    EncryptionWorker encryptionWorker)
+    : IConsumer<DataStorageEncryptionIntegrationEvent>
 {
-    protected EncryptionDataStorageRequestedIntegrationEvent()
+
+    public async Task Consume(ConsumeContext<DataStorageEncryptionIntegrationEvent> context)
     {
+        var @event = context.Message;
+        CustomSynchronizationContext.CreateContext();
 
+        using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
+        {
+            logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
+
+            try
+            {
+                await encryptionWorker.StartAsync(@event.EncryptionSettings, @event.ServerRootPath);
+            }
+            catch (Exception ex)
+            {
+                logger.ErrorWithException(ex);
+            }
+        }
     }
-
-    public EncryptionDataStorageRequestedIntegrationEvent(EncryptionSettings encryptionSettings,
-                                                     String serverRootPath,
-                                                     Guid createBy,
-                                                     int tenantId) : base(createBy, tenantId)
-    {
-        EncryptionSettings = encryptionSettings;
-        ServerRootPath = serverRootPath;
-    }
-
-    [ProtoMember(1)]
-    public EncryptionSettings EncryptionSettings { get; private set; }
-
-    [ProtoMember(2)]
-    public string ServerRootPath { get; private set; }
 }

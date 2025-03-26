@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -127,6 +127,8 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
 
         return settings;
     }
+    
+    public DateTime LastModified { get; set; }
 
     public override bool Equals(object obj)
     {
@@ -443,6 +445,8 @@ public class LdapCronSettings : ISettings<LdapCronSettings>
             Cron = null
         };
     }
+    
+    public DateTime LastModified { get; set; }
 
     public string Cron { get; set; }
 }
@@ -459,6 +463,8 @@ public class LdapCurrentAcccessSettings : ISettings<LdapCurrentAcccessSettings>
     {
         return new LdapCurrentAcccessSettings { CurrentAccessRights = null };
     }
+    
+    public DateTime LastModified { get; set; }
 
     public Dictionary<LdapSettings.AccessRight, List<string>> CurrentAccessRights { get; set; } = new();
 }
@@ -475,6 +481,8 @@ public class LdapCurrentUserPhotos : ISettings<LdapCurrentUserPhotos>
     {
         return new LdapCurrentUserPhotos { CurrentPhotos = null };
     }
+    
+    public DateTime LastModified { get; set; }
 
     public Dictionary<Guid, string> CurrentPhotos { get; set; } = new();
 }
@@ -491,6 +499,8 @@ public class LdapCurrentDomain : ISettings<LdapCurrentDomain>
     {
         return new LdapCurrentDomain { CurrentDomain = null };
     }
+    
+    public DateTime LastModified { get; set; }
 
     public string CurrentDomain { get; set; }
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -74,7 +74,7 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
                 isAsync,
                 filesLinkUtility.DocServiceSignatureSecret,
                 filesLinkUtility.DocServiceSignatureHeader,
-                filesLinkUtility.DocServiceSslVerification,
+                await filesLinkUtility.GetDocServiceSslVerificationAsync(),
                 clientFactory,
                 toForm);
         }
@@ -104,7 +104,7 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
                 meta,
                 filesLinkUtility.DocServiceSignatureSecret,
                 filesLinkUtility.DocServiceSignatureHeader,
-                filesLinkUtility.DocServiceSslVerification,
+                await filesLinkUtility.GetDocServiceSslVerificationAsync(),
                 clientFactory);
 
             if (commandResponse.Error == ErrorTypes.NoError)
@@ -161,7 +161,7 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
                 isAsync,
                 filesLinkUtility.DocServiceSignatureSecret,
                 filesLinkUtility.DocServiceSignatureHeader,
-                filesLinkUtility.DocServiceSslVerification,
+                await filesLinkUtility.GetDocServiceSslVerificationAsync(),
                 clientFactory);
         }
         catch (Exception ex)
@@ -184,7 +184,7 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
                 null,
                 filesLinkUtility.DocServiceSignatureSecret,
                 filesLinkUtility.DocServiceSignatureHeader,
-                filesLinkUtility.DocServiceSslVerification,
+                await filesLinkUtility.GetDocServiceSslVerificationAsync(),
                 clientFactory);
 
             var version = commandResponse.Version;
@@ -224,7 +224,7 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
                     Method = HttpMethod.Head
                 };
 
-                using var httpClient = filesLinkUtility.DocServiceSslVerification
+                using var httpClient = await filesLinkUtility.GetDocServiceSslVerificationAsync()
                     ? clientFactory.CreateClient()
                     : clientFactory.CreateClient(CustomSslVerificationClient);
 
@@ -243,11 +243,12 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
             }
         }
 
-        if (!string.IsNullOrEmpty(filesLinkUtility.DocServiceHealthcheckUrl))
+        var docServiceHealthcheckUrl = filesLinkUtility.DocServiceHealthcheckUrl;
+        if (!string.IsNullOrEmpty(docServiceHealthcheckUrl))
         {
             try
             {
-                if (!await HealthcheckRequestAsync(filesLinkUtility.DocServiceHealthcheckUrl, clientFactory))
+                if (!await HealthcheckRequestAsync(docServiceHealthcheckUrl, clientFactory))
                 {
                     throw new Exception("bad status");
                 }
@@ -287,7 +288,7 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
                     false,
                     filesLinkUtility.DocServiceSignatureSecret,
                     filesLinkUtility.DocServiceSignatureHeader,
-                    filesLinkUtility.DocServiceSslVerification,
+                    await filesLinkUtility.GetDocServiceSslVerificationAsync(),
                     clientFactory,
                     false);
 
@@ -338,7 +339,7 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
                     null,
                     filesLinkUtility.DocServiceSignatureSecret,
                     filesLinkUtility.DocServiceSignatureHeader,
-                    filesLinkUtility.DocServiceSslVerification,
+                    await filesLinkUtility.GetDocServiceSslVerificationAsync(),
                     clientFactory);
             }
             catch (Exception ex)
@@ -365,7 +366,7 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
                     false,
                     filesLinkUtility.DocServiceSignatureSecret,
                     filesLinkUtility.DocServiceSignatureHeader,
-                    filesLinkUtility.DocServiceSslVerification,
+                    await filesLinkUtility.GetDocServiceSslVerificationAsync(),
                     clientFactory);
             }
             catch (Exception ex)

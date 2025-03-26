@@ -1,25 +1,25 @@
-// (c) Copyright Ascensio System SIA 2009-2024
-//
+// (c) Copyright Ascensio System SIA 2009-2025
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -96,6 +96,7 @@ public class FileStorageService //: IFileStorageService
     WatermarkManager watermarkManager,
     CustomTagsService customTagsService,
     IMapper mapper,
+    ICacheNotify<ClearMyFolderItem> NotifyMyFolder,
     FormRoleDtoHelper formRoleDtoHelper,
     WebhookManager webhookManager)
 {
@@ -2987,16 +2988,115 @@ public class FileStorageService //: IFileStorageService
         return await folderDao.GetFilesUsedSpace();
     }
 
-    public async Task DeletePersonalDataAsync<T>(Guid userFromId, bool checkPermission = false)
+
+    public async Task<bool> AnyRoomsAsync(Guid user)
+    {
+        var tenant = tenantManager.GetCurrentTenant();
+        var initiator = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
+
+        var any = (await GetFolderItemsAsync(
+                    await globalFolderHelper.GetFolderVirtualRooms(),
+                    0,
+                    -1,
+                    new List<FilterType>() { FilterType.FoldersOnly },
+                    false,
+                    user.ToString(),
+                    "",
+                    [],
+                    false,
+                    false,
+                    null,
+                    SearchArea.Active)).Entries.Any();
+
+        return any;
+    }
+
+    public async Task ReassignRoomsAsync(Guid user, Guid? reassign)
+    {
+        var initiator = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
+
+        var rooms = (await GetFolderItemsAsync(
+                    await globalFolderHelper.GetFolderVirtualRooms(),
+                    0,
+                    -1,
+                    new List<FilterType>() { FilterType.FoldersOnly },
+                    false,
+                    user.ToString(),
+                    "",
+                    [],
+                    false,
+                    false,
+                    null,
+                    SearchArea.Active)).Entries;
+
+        var ids = rooms.Where(r => r is Folder<int>).Select(e => ((Folder<int>)e).Id);
+        var thirdIds = rooms.Where(r => r is Folder<string>).Select(e => ((Folder<string>)e).Id);
+
+        await ChangeOwnerAsync(ids, [], reassign.HasValue ? reassign.Value : securityContext.CurrentAccount.ID, FileShare.ContentCreator).ToListAsync();
+        await ChangeOwnerAsync(thirdIds, [], reassign.HasValue ? reassign.Value : securityContext.CurrentAccount.ID, FileShare.ContentCreator).ToListAsync();
+    }
+
+    public async Task<IEnumerable<FileEntry>> GetSharedFilesAsync(Guid user)
+    {
+        var initUser = securityContext.CurrentAccount.ID;
+
+        var fileDao = daoFactory.GetFileDao<int>();
+        var folderDao = daoFactory.GetFolderDao<int>();
+
+        var my = await folderDao.GetFolderIDUserAsync(false, user);
+        if (my == 0)
+        {
+            return [];
+        }
+         var shared = await fileDao.GetFilesAsync(my, null, default, false, Guid.Empty, string.Empty, null, false, true, withShared: true).Where(q => q.Shared).ToListAsync();
+
+        return shared;
+    }
+
+    public async Task MoveSharedFilesAsync(Guid user, Guid toUser)
+    {
+        var initUser = securityContext.CurrentAccount.ID;
+
+        var fileDao = daoFactory.GetFileDao<int>();
+        var folderDao = daoFactory.GetFolderDao<int>();
+
+        var my = await folderDao.GetFolderIDUserAsync(false, user);
+        if (my == 0)
+        {
+            return;
+        }
+
+        var shared = await fileDao.GetFilesAsync(my, null, default, false, Guid.Empty, string.Empty, null, false, true, withShared: true).Where(q => q.Shared).ToListAsync();
+
+        await securityContext.AuthenticateMeWithoutCookieAsync(toUser);
+        if (shared.Count > 0)
+        {
+            await securityContext.AuthenticateMeWithoutCookieAsync(toUser);
+            var userInfo = await userManager.GetUsersAsync(user);
+            var folder = await CreateFolderAsync(await globalFolderHelper.FolderMyAsync, $"Documents of user {userInfo.FirstName} {userInfo.LastName}");
+            foreach (var file in shared)
+            {
+                await socketManager.DeleteFileAsync(file, action: async () => await fileDao.MoveFileAsync(file.Id, folder.Id));
+                await socketManager.CreateFileAsync(file);
+            }
+            var ids = shared.Select(s => s.Id).ToList();
+            await DeleteFromRecentAsync([], ids, true);
+            await fileDao.ReassignFilesAsync(toUser, ids);
+        }
+
+        await securityContext.AuthenticateMeWithoutCookieAsync(initUser);
+    }
+
+    public async Task DeletePersonalDataAsync(Guid userFromId, bool checkPermission = false)
     {
         if (checkPermission)
         {
             await DemandPermissionToDeletePersonalDataAsync(userFromId);
         }
 
-        var folderDao = daoFactory.GetFolderDao<T>();
-        var fileDao = daoFactory.GetFileDao<T>();
-        var linkDao = daoFactory.GetLinkDao<T>();
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var fileDao = daoFactory.GetFileDao<int>();
+        var linkDao = daoFactory.GetLinkDao<int>();
 
         if (folderDao == null || fileDao == null || linkDao == null)
         {
@@ -3013,8 +3113,8 @@ public class FileStorageService //: IFileStorageService
             var fileIdsFromMy = await fileDao.GetFilesAsync(folderIdMy).ToListAsync();
             var folderIdsFromMy = await folderDao.GetFoldersAsync(folderIdMy).ToListAsync();
 
-            await DeleteFilesAsync(fileIdsFromMy);
-            await DeleteFoldersAsync(folderIdsFromMy);
+            await DeleteFilesAsync(fileIdsFromMy, folderIdTrash);
+            await DeleteFoldersAsync(folderIdsFromMy, folderIdTrash);
 
             await folderDao.DeleteFolderAsync(folderIdMy);
         }
@@ -3024,56 +3124,113 @@ public class FileStorageService //: IFileStorageService
             var fileIdsFromTrash = await fileDao.GetFilesAsync(folderIdTrash).ToListAsync();
             var folderIdsFromTrash = await folderDao.GetFoldersAsync(folderIdTrash).ToListAsync();
 
-            await DeleteFilesAsync(fileIdsFromTrash);
-            await DeleteFoldersAsync(folderIdsFromTrash);
+            await DeleteFilesAsync(fileIdsFromTrash, folderIdTrash);
+            await DeleteFoldersAsync(folderIdsFromTrash, folderIdTrash);
 
             await folderDao.DeleteFolderAsync(folderIdTrash);
         }
 
         await fileSecurity.RemoveSubjectAsync(userFromId, true);
         return;
+    }
 
-        async Task DeleteFilesAsync(IEnumerable<T> fileIds)
+    public async Task UpdatePersonalFolderModified(Guid userId)
+    {
+        await DemandPermissionToDeletePersonalDataAsync(userId);
+
+        var folderDao = daoFactory.GetFolderDao<int>();
+
+        var folderIdMy = await folderDao.GetFolderIDUserAsync(false, userId);
+        if (folderIdMy == 0)
         {
-            foreach (var fileId in fileIds)
-            {
-                var file = await fileDao.GetFileAsync(fileId);
-
-                await fileMarker.RemoveMarkAsNewForAllAsync(file);
-
-                await fileDao.DeleteFileAsync(file.Id, file.GetFileQuotaOwner());
-
-                if (file.RootFolderType == FolderType.TRASH && !Equals(folderIdTrash, 0))
-                {
-                    await folderDao.ChangeTreeFolderSizeAsync(folderIdTrash, (-1) * file.ContentLength);
-                }
-
-                await linkDao.DeleteAllLinkAsync(file.Id);
-
-                await fileDao.SaveProperties(file.Id, null);
-                if (file.IsForm)
-                {
-                    await fileDao.DeleteFormRolesAsync(file.Id);
-                }
-            }
+            return;
         }
 
-        async Task DeleteFoldersAsync(IEnumerable<Folder<T>> folders)
+        var my = await folderDao.GetFolderAsync(folderIdMy);
+        await folderDao.SaveFolderAsync(my);
+    }
+
+    public async Task DeletePersonalFolderAsync(Guid userId, bool checkPermission = false)
+    {
+        if (checkPermission)
         {
-            foreach (var folder in folders)
+            await DemandPermissionToDeletePersonalDataAsync(userId);
+        }
+
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var fileDao = daoFactory.GetFileDao<int>();
+        var linkDao = daoFactory.GetLinkDao<int>();
+
+        if (folderDao == null || fileDao == null || linkDao == null)
+        {
+            return;
+        }
+
+        _logger.InformationDeletePersonalData(userId);
+
+        var folderIdMy = await folderDao.GetFolderIDUserAsync(false, userId);
+        var my = await folderDao.GetFolderAsync(folderIdMy);
+        var folderIdTrash = await folderDao.GetFolderIDTrashAsync(false, userId);
+
+        if (!Equals(folderIdMy, 0))
+        {
+            var fileIdsFromMy = await fileDao.GetFilesAsync(folderIdMy).ToListAsync();
+            var folderIdsFromMy = await folderDao.GetFoldersAsync(folderIdMy).ToListAsync();
+
+            await DeleteFilesAsync(fileIdsFromMy, folderIdTrash);
+            await DeleteFoldersAsync(folderIdsFromMy, folderIdTrash);
+
+            await socketManager.DeleteFolder(my, action: async () => await folderDao.DeleteFolderAsync(folderIdMy));
+
+            var cacheKey = $"my/{tenantManager.GetCurrentTenantId()}/{userId}";
+            await NotifyMyFolder.PublishAsync(new ClearMyFolderItem { Key = cacheKey }, CacheNotifyAction.Remove);
+        }
+        return;
+    }
+
+    private async Task DeleteFilesAsync<T>(IEnumerable<T> fileIds, T folderIdTrash)
+    {
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var fileDao = daoFactory.GetFileDao<T>();
+        var linkDao = daoFactory.GetLinkDao<T>();
+
+        foreach (var fileId in fileIds)
+        {
+            var file = await fileDao.GetFileAsync(fileId);
+
+            await fileMarker.RemoveMarkAsNewForAllAsync(file);
+
+            await socketManager.DeleteFileAsync(file, action: async () => await fileDao.DeleteFileAsync(file.Id, file.GetFileQuotaOwner()));
+
+            if (file.RootFolderType == FolderType.TRASH && !Equals(folderIdTrash, 0))
             {
-                await fileMarker.RemoveMarkAsNewForAllAsync(folder);
+                await folderDao.ChangeTreeFolderSizeAsync(folderIdTrash, (-1) * file.ContentLength);
+            }
 
-                var files = await fileDao.GetFilesAsync(folder.Id).ToListAsync();
-                await DeleteFilesAsync(files);
+            await linkDao.DeleteAllLinkAsync(file.Id);
 
-                var subfolders = await folderDao.GetFoldersAsync(folder.Id).ToListAsync();
-                await DeleteFoldersAsync(subfolders);
+            await fileDao.SaveProperties(file.Id, null);
+        }
+    }
 
-                if (await folderDao.IsEmptyAsync(folder.Id))
-                {
-                    await folderDao.DeleteFolderAsync(folder.Id);
-                }
+    private async Task DeleteFoldersAsync<T>(IEnumerable<Folder<T>> folders, T folderIdTrash)
+    {
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var fileDao = daoFactory.GetFileDao<T>();
+
+        foreach (var folder in folders)
+        {
+            await fileMarker.RemoveMarkAsNewForAllAsync(folder);
+
+            var files = await fileDao.GetFilesAsync(folder.Id).ToListAsync();
+            await DeleteFilesAsync(files, folderIdTrash);
+
+            var subfolders = await folderDao.GetFoldersAsync(folder.Id).ToListAsync();
+            await DeleteFoldersAsync(subfolders, folderIdTrash);
+
+            if (await folderDao.IsEmptyAsync(folder.Id))
+            {
+                await socketManager.DeleteFolder(folder, action: async () => await folderDao.DeleteFolderAsync(folder.Id));
             }
         }
     }
@@ -3438,6 +3595,10 @@ public class FileStorageService //: IFileStorageService
         var link = await fileSharing.GetPureSharesAsync(entry, ShareFilterType.PrimaryExternalLink, null, null, 0, 1).FirstOrDefaultAsync();
         if (link == null)
         {
+            if (entry is File<T> file && file.IsForm && share == FileShare.Read)
+            {
+                share = FileShare.Editing;
+            }
             return await SetExternalLinkAsync(
                 entry,
                 Guid.NewGuid(),
@@ -3843,15 +4004,13 @@ public class FileStorageService //: IFileStorageService
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
-
-        var folderDao = daoFactory.GetFolderDao<T>();
-
-        var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(file);
-
-        var usersIdWithAccess = await WhoCanRead(await folderDao.GetFolderAsync(roomId));
+        
+        var usersIdWithAccess = await WhoCanRead(file);
+        var links = await fileSecurity.GetPureSharesAsync(file, ShareFilterType.Link, null, null)
+            .Select(x => x.Subject).ToHashSetAsync();
 
         var users = usersIdWithAccess
-            .Where(id => !id.Equals(authContext.CurrentAccount.ID))
+            .Where(id => !id.Equals(authContext.CurrentAccount.ID) && !links.Contains(id))
             .Select(userManager.GetUsers);
 
         var result = await users
@@ -4170,7 +4329,7 @@ public class FileStorageService //: IFileStorageService
         return [..fileKeyPair];
     }
 
-    public async IAsyncEnumerable<FileEntry> ChangeOwnerAsync<T>(IEnumerable<T> foldersId, IEnumerable<T> filesId, Guid userId)
+    public async IAsyncEnumerable<FileEntry> ChangeOwnerAsync<T>(IEnumerable<T> foldersId, IEnumerable<T> filesId, Guid userId, FileShare newShare = FileShare.RoomManager)
     {
         var userInfo = await userManager.GetUsersAsync(userId);
         if (Equals(userInfo, Constants.LostUser) ||
@@ -4215,7 +4374,7 @@ public class FileStorageService //: IFileStorageService
                     Aces =
                     [
                         new AceWrapper { Access = FileShare.None, Id = userInfo.Id },
-                        new AceWrapper { Access = FileShare.RoomManager, Id = createBy }
+                        new AceWrapper { Access = newShare, Id = createBy }
                     ]
                 }, false, socket: false, beforeOwnerChange: true);
 

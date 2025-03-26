@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,6 +23,8 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+using System.Security.Cryptography;
 
 namespace ASC.Web.Api.Controllers.Settings;
 
@@ -346,8 +348,10 @@ public partial class SettingsController(MessageService messageService,
     public async Task<TenantUserQuotaSettings> GetUserQuotaSettings()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-
-        return await settingsManager.LoadAsync<TenantUserQuotaSettings>();
+        
+        var result = await settingsManager.LoadAsync<TenantUserQuotaSettings>(HttpContext.GetIfModifiedSince());
+        
+        return HttpContext.TryGetFromCache(result.LastModified) ? null : result;
     }
 
     /// <summary>
@@ -446,7 +450,9 @@ public partial class SettingsController(MessageService messageService,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        return await settingsManager.LoadAsync<TenantDeepLinkSettings>();
+        var result = await settingsManager.LoadAsync<TenantDeepLinkSettings>(HttpContext.GetIfModifiedSince());
+        
+        return HttpContext.TryGetFromCache(result.LastModified) ? null : result;
     }
 
     /// <summary>
@@ -514,9 +520,10 @@ public partial class SettingsController(MessageService messageService,
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("cultures")]
-    public IEnumerable<string> GetSupportedCultures()
-    {
-        return coreBaseSettings.EnabledCultures.Select(r => r.Name).ToList();
+    public async Task<IEnumerable<string>> GetSupportedCultures()
+    {        
+        var result = coreBaseSettings.EnabledCultures.Select(r => r.Name).ToList();
+        return HttpContext.TryGetFromCache(await HttpContextExtension.CalculateEtagAsync(result)) ? null : result;
     }
 
     /// <summary>
@@ -632,8 +639,10 @@ public partial class SettingsController(MessageService messageService,
     [SwaggerResponse(200, "Portal logo image URL", typeof(string))]
     [HttpGet("logo")]
     public async Task<string> GetLogoAsync()
-    {
-        return await tenantInfoSettingsHelper.GetAbsoluteCompanyLogoPathAsync(await settingsManager.LoadAsync<TenantInfoSettings>());
+    {        
+        var result = await settingsManager.LoadAsync<TenantInfoSettings>(HttpContext.GetIfModifiedSince());
+        
+        return HttpContext.TryGetFromCache(result.LastModified) ? null : await tenantInfoSettingsHelper.GetAbsoluteCompanyLogoPathAsync(result);
     }
 
     /// <summary>
@@ -693,7 +702,9 @@ public partial class SettingsController(MessageService messageService,
     [HttpGet("colortheme")]
     public async Task<CustomColorThemesSettingsDto> GetColorThemeAsync()
     {
-        return new CustomColorThemesSettingsDto(await settingsManager.LoadAsync<CustomColorThemesSettings>(), customColorThemesSettingsHelper.Limit);
+        var settings = await settingsManager.LoadAsync<CustomColorThemesSettings>(HttpContext.GetIfModifiedSince());
+        
+        return HttpContext.TryGetFromCache(settings.LastModified) ? null : new CustomColorThemesSettingsDto(settings, customColorThemesSettingsHelper.Limit);
     }
 
     /// <summary>

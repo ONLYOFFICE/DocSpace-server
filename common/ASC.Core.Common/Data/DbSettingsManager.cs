@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,49 +26,29 @@
 
 namespace ASC.Core.Common.Settings;
 
-[Singleton]
-public class DbSettingsManagerCache
-{
-    public ICache Cache { get; }
-    private readonly ICacheNotify<SettingsCacheItem> _notify;
-
-    public DbSettingsManagerCache(ICacheNotify<SettingsCacheItem> notify, ICache cache)
-    {
-        Cache = cache;
-        _notify = notify;
-        _notify.Subscribe(i => Cache.Remove(i.Key), CacheNotifyAction.Remove);
-    }
-
-    public async Task RemoveAsync(string key)
-    {
-        await _notify.PublishAsync(new SettingsCacheItem { Key = key }, CacheNotifyAction.Remove);
-    }
-}
-
 [Scope]
 public class SettingsManager(
     IServiceProvider serviceProvider,
-    DbSettingsManagerCache dbSettingsManagerCache,
     ILogger<SettingsManager> logger,
     AuthContext authContext,
     TenantManager tenantManager,
-    IDbContextFactory<WebstudioDbContext> dbContextFactory)
+    IDbContextFactory<WebstudioDbContext> dbContextFactory,
+    IFusionCache fusionCache)
 {
     private static readonly TimeSpan _expirationTimeout = TimeSpan.FromMinutes(5);
-    private readonly ICache _cache = dbSettingsManagerCache.Cache;
     private static readonly JsonSerializerOptions  _options = new()
     {
-        PropertyNameCaseInsensitive = true
+        PropertyNameCaseInsensitive = true,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
     };
     
-
     public async Task ClearCacheAsync<T>() where T : class, ISettings<T>
     {
         var tenantId = tenantManager.GetCurrentTenantId();
         var settings = await LoadAsync<T>(tenantId, Guid.Empty);
         var key = $"{settings.ID}{tenantId}{Guid.Empty}";
 
-        await dbSettingsManagerCache.RemoveAsync(key);
+        await fusionCache.RemoveAsync(key);
     }
 
     public T GetDefault<T>() where T : class, ISettings<T>
@@ -77,10 +57,10 @@ public class SettingsManager(
         return settingsInstance.GetDefault();
     }
 
-    public async Task<T> LoadAsync<T>() where T : class, ISettings<T>
+    public async Task<T> LoadAsync<T>(DateTime? lastModified = null) where T : class, ISettings<T>
     {
         var tenantId = tenantManager.GetCurrentTenantId();
-        return await LoadAsync<T>(tenantId, Guid.Empty);
+        return await LoadAsync<T>(tenantId, Guid.Empty, lastModified);
     }
     
     public async Task<T> LoadAsync<T>(Guid userId) where T : class, ISettings<T>
@@ -95,14 +75,14 @@ public class SettingsManager(
         return await LoadAsync<T>(tenantId, user.Id);
     }
 
-    public Task<T> LoadAsync<T>(int tenantId) where T : class, ISettings<T>
+    public Task<T> LoadAsync<T>(int tenantId, DateTime? lastModified = null) where T : class, ISettings<T>
     {
-        return LoadAsync<T>(tenantId, Guid.Empty);
+        return LoadAsync<T>(tenantId, Guid.Empty, lastModified);
     }
 
-    public Task<T> LoadForDefaultTenantAsync<T>() where T : class, ISettings<T>
+    public Task<T> LoadForDefaultTenantAsync<T>(DateTime? lastModified = null) where T : class, ISettings<T>
     {
-        return LoadAsync<T>(Tenant.DefaultTenant);
+        return LoadAsync<T>(Tenant.DefaultTenant, lastModified);
     }
 
     public Task<T> LoadForCurrentUserAsync<T>() where T : class, ISettings<T>
@@ -150,40 +130,36 @@ public class SettingsManager(
         return await SaveAsync(settings);
     }
 
-    internal Task<T> LoadAsync<T>(int tenantId, Guid userId) where T : class, ISettings<T>
+    internal async Task<T> LoadAsync<T>(int tenantId, Guid userId, DateTime? lastModified = null) where T : class, ISettings<T>
     {
         var def = GetDefault<T>();
         var key = def.ID.ToString() + tenantId + userId;
-
-        try
+        
+        var settings = await fusionCache.GetOrSetAsync<T>(key, async (ctx, token) =>
         {
-            var settings = _cache.Get<T>(key);
-            if (settings != null)
+            if (lastModified.HasValue && ctx is { HasStaleValue: true, HasLastModified: true } && ctx.LastModified <= lastModified.Value)
             {
-                return Task.FromResult(settings);
+                return ctx.NotModified();
             }
-
-            return LoadАFromDbAsync(tenantId, userId, def, key);
-        }
-        catch (Exception ex)
-        {
-            logger.ErrorLoadSettingsFor(ex);
-        }
-
-        return Task.FromResult(def);
-    }
-
-    private async Task<T> LoadАFromDbAsync<T>(int tenantId, Guid userId, T def, string key) where T : class, ISettings<T>
-    {
-        await using var context = await dbContextFactory.CreateDbContextAsync();
-        var result = await context.DataAsync(tenantId, def.ID, userId);
-
-        var settings = result != null ? Deserialize<T>(result) : def;
-
-        _cache.Insert(key, settings, _expirationTimeout);
-
+    
+            await using var context = await dbContextFactory.CreateDbContextAsync(token);
+            var result = await context.WebStudioSettingsAsync(tenantId, def.ID, userId);
+            var settings = def;
+            def.LastModified = DateTime.UtcNow;
+    
+            if (result != null)
+            {
+                settings = Deserialize<T>(result.Data);
+                settings.LastModified = result.LastModified;
+            }
+    
+            return ctx.Modified(settings, lastModified: settings.LastModified);
+        },
+        opt => opt.SetDuration(_expirationTimeout).SetFailSafe(true));
+        
         return settings;
     }
+    
 
     private async Task<bool> SaveAsync<T>(T settings, int tenantId, Guid userId) where T : class, ISettings<T>
     {
@@ -215,17 +191,16 @@ public class SettingsManager(
                     Id = settings.ID,
                     UserId = userId,
                     TenantId = tenantId,
-                    Data = data
+                    Data = data,
+                    LastModified = DateTime.UtcNow
                 };
 
                 await context.AddOrUpdateAsync(q => q.WebstudioSettings, s);
             }
 
             await context.SaveChangesAsync();
-
-            await dbSettingsManagerCache.RemoveAsync(key);
-
-            _cache.Insert(key, settings, _expirationTimeout);
+            
+            await fusionCache.RemoveAsync(key);
 
             return true;
         }
@@ -242,8 +217,12 @@ public class SettingsManager(
         return JsonSerializer.Deserialize<T>(data, _options);
     }
 
-    private string Serialize<T>(T settings)
+    private string Serialize<T>(T settings) where T : class, ISettings<T>
     {
-        return JsonSerializer.Serialize(settings);
+        var temp = settings.LastModified;
+        settings.LastModified = default;
+        var result = JsonSerializer.Serialize(settings, _options);
+        settings.LastModified = temp;
+        return result;
     }
 }

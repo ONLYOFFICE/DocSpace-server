@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -146,9 +146,10 @@ public class SecurityController(
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Everyone")]
     public async Task<PasswordSettingsDto> GetPasswordSettingsAsync()
-    {
-        var settings = await settingsManager.LoadAsync<PasswordSettings>();
-        return passwordSettingsConverter.Convert(settings);
+    {        
+        var settings = await settingsManager.LoadAsync<PasswordSettings>(HttpContext.GetIfModifiedSince());
+        
+        return HttpContext.TryGetFromCache(settings.LastModified) ? null :  passwordSettingsConverter.Convert(settings);
     }
 
     /// <summary>
@@ -416,9 +417,9 @@ public class SecurityController(
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var settings = await settingsManager.LoadAsync<LoginSettings>();
-
-        return mapper.Map<LoginSettings, LoginSettingsDto>(settings);
+        var settings = await settingsManager.LoadAsync<LoginSettings>(HttpContext.GetIfModifiedSince());
+        
+        return HttpContext.TryGetFromCache(settings.LastModified) ? null :  mapper.Map<LoginSettings, LoginSettingsDto>(settings);
     }
 
     /// <summary>
