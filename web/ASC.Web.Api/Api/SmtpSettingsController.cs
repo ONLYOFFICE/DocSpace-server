@@ -202,7 +202,7 @@ public class SmtpSettingsController(
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         if (!SetupInfo.IsVisibleSettings(nameof(ManagementType.SmtpSettings)))
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption, "Smtp");
+            throw new BillingException(Resource.ErrorNotAllowedOption);
         }
     }
 }

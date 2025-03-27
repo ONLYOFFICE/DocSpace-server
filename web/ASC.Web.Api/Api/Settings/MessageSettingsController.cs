@@ -103,7 +103,7 @@ public class MessageSettingsController(MessageService messageService,
 
         if (!SetupInfo.IsVisibleSettings("CookieSettings"))
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption, "CookieSettings");
+            throw new BillingException(Resource.ErrorNotAllowedOption);
         }
 
         await cookiesManager.SetLifeTimeAsync(inDto.LifeTime, inDto.Enabled);

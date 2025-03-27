@@ -215,7 +215,7 @@ public static class Initializer
             {
                 UserName = user.Email, 
                 PasswordHash = _passwordHasher.GetClientPassword(user.Password)
-            }, JsonRequestSerializerOptions);
+            }, JsonRequestSerializerOptions, TestContext.Current.CancellationToken);
             var authenticationTokenDto = await HttpClientHelper.ReadFromJson<AuthenticationTokenDto>(authenticationResponse);
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authenticationTokenDto?.Token);
         }
