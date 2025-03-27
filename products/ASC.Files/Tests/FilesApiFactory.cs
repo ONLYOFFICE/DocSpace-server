@@ -43,30 +43,15 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
     private static readonly Faker<FakePass> _fakerPassword = new Faker<FakePass>()
         .RuleFor(x => x.Password, f => f.Internet.Password(10, 12, true, true, true));
     
-    private readonly MySqlContainer _mySqlContainer = new MySqlBuilder()
-        .WithImage("mysql:8.4.3")
-        .Build();
+    private readonly MySqlContainer _mySqlContainer;
     
-    private readonly PostgreSqlContainer _postgresSqlContainer = new PostgreSqlBuilder()
-        .WithImage("postgres:17.2")
-        .Build();
+    private readonly PostgreSqlContainer _postgresSqlContainer;
     
-    private readonly RedisContainer _redisContainer = new RedisBuilder()
-        .WithImage("redis:7.0")
-        .Build();
+    private readonly RedisContainer _redisContainer;
     
-    private readonly RabbitMqContainer _rabbitMqContainer = new RabbitMqBuilder()
-        .WithImage("rabbitmq:3.13")
-        .Build();
+    private readonly RabbitMqContainer _rabbitMqContainer;
     
-    private readonly IContainer _openSearchContainer = new ContainerBuilder()
-        .WithImage("opensearchproject/opensearch:2.18.0")
-        .WithPortBinding(9200, true)
-        .WithEnvironment("OPENSEARCH_INITIAL_ADMIN_PASSWORD", _fakerPassword.Generate().Password)
-        .WithEnvironment("discovery.type", "single-node")
-        .WithEnvironment("plugins.security.disabled", "true")
-        .WithWaitStrategy(Wait.ForUnixContainer().UntilHttpRequestIsSucceeded(r => r.ForPort(9200)))
-        .Build();
+    private readonly IContainer _openSearchContainer;
     
     private DbConnection _dbconnection = null!;
     private Respawner _respawner = null!;
@@ -80,6 +65,79 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
     public JsonSerializerOptions JsonRequestSerializerOptions { get; } = new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault };
 
     public CustomProviderInfo ProviderInfo;
+
+    private readonly Provider _dbProviderType;
+    
+    public FilesApiFactory()
+    {        
+        var config = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json")
+            .AddEnvironmentVariables()
+            .Build();
+        
+        var containers = config.GetSection("containers").Get<List<Container>>() ?? [];
+        var postgresSqlContainer = containers.FirstOrDefault(r => r.Name == "postgres") ?? new Container
+        {
+            Name = "postgres",
+            Image = "postgres",
+            Tag = "17.2"
+        };
+        
+        _postgresSqlContainer = new PostgreSqlBuilder()
+            .WithImage($"{postgresSqlContainer.Image}:{postgresSqlContainer.Tag}")
+            .Build();
+        
+        var redisContainer = containers.FirstOrDefault(r => r.Name == "redis") ?? new Container
+        {
+            Name = "redis",
+            Image = "redis",
+            Tag = "7.0"
+        };
+        _redisContainer = new RedisBuilder()
+            .WithImage($"{redisContainer.Image}:{redisContainer.Tag}")
+            .Build();
+
+        var rabbitMqContainer = containers.FirstOrDefault(r => r.Name == "rabbitmq") ?? new Container
+        {
+            Name = "rabbitmq", 
+            Image = "rabbitmq", 
+            Tag = "3.13"
+        };
+        
+        _rabbitMqContainer = new RabbitMqBuilder()
+            .WithImage($"{rabbitMqContainer.Image}:{rabbitMqContainer.Tag}")
+            .Build();
+
+        var openSearchContainer = containers.FirstOrDefault(r => r.Name == "opensearch") ?? new Container
+        {
+            Name = "opensearch", 
+            Image = "opensearchproject/opensearch", 
+            Tag = "2.18.0"
+        };
+        
+        _openSearchContainer = new ContainerBuilder()
+            .WithImage($"{openSearchContainer.Image}:{openSearchContainer.Tag}")
+            .WithPortBinding(9200, true)
+            .WithEnvironment("OPENSEARCH_INITIAL_ADMIN_PASSWORD", _fakerPassword.Generate().Password)
+            .WithEnvironment("discovery.type", "single-node")
+            .WithEnvironment("plugins.security.disabled", "true")
+            .WithWaitStrategy(Wait.ForUnixContainer().UntilHttpRequestIsSucceeded(r => r.ForPort(9200)))
+            .Build();
+
+        var mysqlContainer = containers.FirstOrDefault(r => r.Name == "mysql") ?? new Container
+        {
+            Name = "mysql", 
+            Image = "mysql", 
+            Tag = "8.4.3"
+        };
+        
+        _mySqlContainer = new MySqlBuilder()
+            .WithImage($"{mysqlContainer.Image}:{mysqlContainer.Tag}")
+            .Build();
+        
+        _dbProviderType = config.GetValue<Provider>("dbProviderType");
+    }
     
     protected override IHost CreateHost(IHostBuilder builder)
     {
@@ -120,7 +178,7 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
 
     public async ValueTask InitializeAsync()
     {
-        ProviderInfo = GetProviderInfo("mysql");
+        ProviderInfo = GetProviderInfo();
         
         await StartAllContainersAsync(ProviderInfo.Provider == Provider.MySql ? _mySqlContainer : _postgresSqlContainer, _redisContainer, _rabbitMqContainer, _openSearchContainer);
         
@@ -187,22 +245,22 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
         await Task.WhenAll(tasks);
     }
 
-    private CustomProviderInfo GetProviderInfo(string dbType)
+    private CustomProviderInfo GetProviderInfo()
     {
-        switch (dbType)
+        switch (_dbProviderType)
         {
-            case "mysql":
+            case Provider.MySql:
                 return new CustomProviderInfo
                 {
                     Provider = Provider.MySql,
                     ConnectionString = _mySqlContainer.GetConnectionString,
                     ProviderFullName = "MySql.Data.MySqlClient"
                 };
-            case "postgres":
+            case Provider.PostgreSql:
                 return new CustomProviderInfo
-                {
-                    ConnectionString = _postgresSqlContainer.GetConnectionString,
+                {                    
                     Provider = Provider.PostgreSql,
+                    ConnectionString = _postgresSqlContainer.GetConnectionString,
                     ProviderFullName = "Npgsql"
                 };
         }
@@ -216,4 +274,11 @@ public class CustomProviderInfo
     public Func<string> ConnectionString { get; set; }
     public Provider Provider { get; set; }
     public string ProviderFullName { get; set; }
+}
+
+public class Container
+{
+    public required string Name { get; init; }
+    public required string Image { get; init; }
+    public required string Tag { get; init; }
 }
