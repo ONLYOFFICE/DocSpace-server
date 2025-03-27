@@ -62,6 +62,7 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
         services.AddBaseDbContextPool<IntegrationEventLogContext>();
         services.AddBaseDbContextPool<MessagesContext>();
         services.AddBaseDbContextPool<WebhooksDbContext>();
+        services.AddBaseDbContextPool<ApiKeysDbContext>();
 
 
         services.RegisterFeature();
