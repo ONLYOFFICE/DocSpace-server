@@ -309,10 +309,10 @@ public class PaymentController(
     /// <short>
     /// Block amount money on the portal balance
     /// </short>
-    /// <path>api/2.0/portal/payment/accounting/blockmoney</path>
+    /// <path>api/2.0/portal/payment/accounting/money/block</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The money is blocked successfully or not", typeof(bool))]
-    [HttpPost("accounting/blockmoney")]
+    [HttpPost("accounting/money/block")]
     public async Task<bool> BlockMoneyAsync(AccountingBlockMoneyRequestDto inDto)
     {
         var tenant = await CheckAccountingAndReturnTenantAsync();
@@ -326,10 +326,10 @@ public class PaymentController(
     /// <short>
     /// Take off amount money on the portal balance
     /// </short>
-    /// <path>api/2.0/portal/payment/accounting/takeoffmoney</path>
+    /// <path>api/2.0/portal/payment/accounting/money/takeoff</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The new portal balance", typeof(decimal))]
-    [HttpPost("accounting/takeoffmoney")]
+    [HttpPost("accounting/money/takeoff")]
     public async Task<decimal> TakeOffMoneyAsync(AccountingTakeOffMoneyRequestDto inDto)
     {
         var tenant = await CheckAccountingAndReturnTenantAsync();
@@ -353,6 +353,23 @@ public class PaymentController(
         var result = await tariffService.GetReportAsync(tenant.Id, inDto.From, inDto.To);
         return result;
     }
+
+    /// <summary>
+    /// Returns the list of currencies from accounting service.
+    /// </summary>
+    /// <short>
+    /// Get list of currencies
+    /// </short>
+    /// <path>api/2.0/portal/payment/accounting/currency/all</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The list of currencies", typeof(List<CurrencyInfo>))]
+    [HttpGet("accounting/currency/all")]
+    public async Task<List<CurrencyInfo>> GetAllCurrenciesAsync()
+    {
+        var result = await tariffService.GetAllCurrenciesAsync();
+        return result;
+    }
+    
 
     private async Task<Tenant> CheckAccountingAndReturnTenantAsync()
     {

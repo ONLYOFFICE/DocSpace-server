@@ -44,8 +44,6 @@ public class AccountingClient
         _configuration.Url = (_configuration.Url ?? "").Trim().TrimEnd('/');
         if (!string.IsNullOrEmpty(_configuration.Url))
         {
-            _configuration.Url += "/accounting/";
-
             Configured = true;
         }
     }
@@ -53,22 +51,27 @@ public class AccountingClient
 
     public async Task<decimal> GetBalance(string portalId, bool addPolicy = false)
     {
-        return await RequestAsync<decimal>(HttpMethod.Post, "GetBalance", portalId, addPolicy: addPolicy);
+        return await RequestAsync<decimal>(HttpMethod.Post, "/balance", portalId, addPolicy: addPolicy);
     }
 
     public async Task<bool> BlockMoney(string portalId, decimal amount)
     {
-        return await RequestAsync<bool>(HttpMethod.Post, "BlockMoney", portalId, [Tuple.Create("Amount", amount.ToString())]);
+        return await RequestAsync<bool>(HttpMethod.Post, "/money/block", portalId, [Tuple.Create("Amount", amount.ToString())]);
     }
 
     public async Task<decimal> TakeOffMoney(string portalId, decimal amount)
     {
-        return await RequestAsync<decimal>(HttpMethod.Post, "TakeOffMoney", portalId, [Tuple.Create("Amount", amount.ToString())]);
+        return await RequestAsync<decimal>(HttpMethod.Post, "/money/takeoff", portalId, [Tuple.Create("Amount", amount.ToString())]);
     }
 
     public async Task<List<PurchaseInfo>> GetReport(string portalId, DateTime utcFrom, DateTime utcTo)
     {
-        return await RequestAsync<List<PurchaseInfo>>(HttpMethod.Post, "GetReport", portalId, [Tuple.Create("From", utcFrom.ToString("o")), Tuple.Create("To", utcTo.ToString("o"))]);
+        return await RequestAsync<List<PurchaseInfo>>(HttpMethod.Post, "/report", portalId, [Tuple.Create("From", utcFrom.ToString("o")), Tuple.Create("To", utcTo.ToString("o"))]);
+    }
+
+    public async Task<List<CurrencyInfo>> GetAllCurrenciesAsync()
+    {
+        return await RequestAsync<List<CurrencyInfo>>(HttpMethod.Get, "/currency/all", null);
     }
 
 
@@ -174,19 +177,12 @@ public class AccountingClient
     }
 }
 
-public class PurchaseInfo
-{
-    public DateTime Date { get; set; }
-    public string Service { get; set; }
+/// <summary>
+/// UOM = Unit of measurement
+/// </summary>
+public record PurchaseInfo(DateTime Date,string Service, string UOM, decimal Quantity, decimal Price);
 
-    /// <summary>
-    /// Unit of measurement
-    /// </summary>
-    public string UOM { get; set; }
-
-    public decimal Quantity { get; set; }
-    public decimal Price { get; set; }
-}
+public record CurrencyInfo(int Id, string Code);
 
 public static class AccountingHttplClientExtension
 {

@@ -45,4 +45,5 @@ public interface ITariffService
     Task<bool> BlockMoneyAsync(int tenantId, decimal amount);
     Task<decimal> TakeOffMoneyAsync(int tenantId, decimal amount);
     Task<List<PurchaseInfo>> GetReportAsync(int tenantId, DateTime utcFrom, DateTime utcTo);
+    Task<List<CurrencyInfo>> GetAllCurrenciesAsync();
 }

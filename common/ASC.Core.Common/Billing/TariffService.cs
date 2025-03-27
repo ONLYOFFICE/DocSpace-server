@@ -927,6 +927,11 @@ public class TariffService(
         return await accountingClient.GetReport(portalId, utcFrom, utcTo);
     }
 
+    public async Task<List<CurrencyInfo>> GetAllCurrenciesAsync()
+    {
+        return await accountingClient.GetAllCurrenciesAsync();
+    }
+
     #endregion
 
 
