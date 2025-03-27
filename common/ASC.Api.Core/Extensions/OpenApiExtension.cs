@@ -95,6 +95,7 @@ public static class OpenApiExtension
             {
                 Name = "Authorization",
                 Type = SecuritySchemeType.Http,
+                In = ParameterLocation.Header,
                 Scheme = "basic",
                 Description = "Enter your username and password"
             });
@@ -104,6 +105,7 @@ public static class OpenApiExtension
             {
                 Name = "Authorization",
                 Type = SecuritySchemeType.Http,
+                In = ParameterLocation.Header,
                 Scheme = "bearer",
                 BearerFormat = "JWT",
                 Description = "Enter 'Bearer {JWT Token}'"
