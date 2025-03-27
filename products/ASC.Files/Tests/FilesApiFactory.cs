@@ -26,7 +26,6 @@
 
 extern alias ASCFiles;
 using ASC.Core.Common.EF;
-using ASC.Files.Tests.Data;
 
 using DotNet.Testcontainers.Builders;
 
@@ -64,9 +63,7 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
     public HttpClient HttpClient { get; private set;} = null!;
     public JsonSerializerOptions JsonRequestSerializerOptions { get; } = new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault };
 
-    public CustomProviderInfo ProviderInfo;
-
-    private readonly Provider _dbProviderType;
+    public readonly CustomProviderInfo ProviderInfo;
     
     public FilesApiFactory()
     {        
@@ -136,7 +133,7 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
             .WithImage($"{mysqlContainer.Image}:{mysqlContainer.Tag}")
             .Build();
         
-        _dbProviderType = config.GetValue<Provider>("dbProviderType");
+        ProviderInfo = GetProviderInfo(config.GetValue<Provider>("dbProviderType"));
     }
     
     protected override IHost CreateHost(IHostBuilder builder)
@@ -178,8 +175,6 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
 
     public async ValueTask InitializeAsync()
     {
-        ProviderInfo = GetProviderInfo();
-        
         await StartAllContainersAsync(ProviderInfo.Provider == Provider.MySql ? _mySqlContainer : _postgresSqlContainer, _redisContainer, _rabbitMqContainer, _openSearchContainer);
         
         _dbconnection =  ProviderInfo.Provider == Provider.MySql ?  new MySqlConnection(_mySqlContainer.GetConnectionString()) : new NpgsqlConnection(_postgresSqlContainer.GetConnectionString());
@@ -245,35 +240,22 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
         await Task.WhenAll(tasks);
     }
 
-    private CustomProviderInfo GetProviderInfo()
+    private CustomProviderInfo GetProviderInfo(Provider dbProviderType)
     {
-        switch (_dbProviderType)
+        return dbProviderType switch
         {
-            case Provider.MySql:
-                return new CustomProviderInfo
-                {
-                    Provider = Provider.MySql,
-                    ConnectionString = _mySqlContainer.GetConnectionString,
-                    ProviderFullName = "MySql.Data.MySqlClient"
-                };
-            case Provider.PostgreSql:
-                return new CustomProviderInfo
-                {                    
-                    Provider = Provider.PostgreSql,
-                    ConnectionString = _postgresSqlContainer.GetConnectionString,
-                    ProviderFullName = "Npgsql"
-                };
-        }
-        
-        return new CustomProviderInfo();
+            Provider.MySql => new CustomProviderInfo { Provider = Provider.MySql, ConnectionString = _mySqlContainer.GetConnectionString, ProviderFullName = "MySql.Data.MySqlClient" },
+            Provider.PostgreSql => new CustomProviderInfo { Provider = Provider.PostgreSql, ConnectionString = _postgresSqlContainer.GetConnectionString, ProviderFullName = "Npgsql" },
+            _ => throw new ArgumentException("Unknown provider type", nameof(dbProviderType))
+        };
     }
 }
 
 public class CustomProviderInfo
 {
-    public Func<string> ConnectionString { get; set; }
-    public Provider Provider { get; set; }
-    public string ProviderFullName { get; set; }
+    public required Func<string> ConnectionString { get; init; }
+    public Provider Provider { get; init; }
+    public required string ProviderFullName { get; init; }
 }
 
 public class Container
