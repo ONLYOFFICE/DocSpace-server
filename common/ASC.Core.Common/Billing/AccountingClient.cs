@@ -36,6 +36,8 @@ public class AccountingClient
 
     internal const string HttpClientOption = "accounting";
 
+    private readonly JsonSerializerOptions _jsonSerializerOptions = new() { PropertyNameCaseInsensitive = true };
+
     public AccountingClient(IConfiguration configuration, IHttpClientFactory httpClientFactory)
     {
         _configuration = configuration.GetSection("core:accounting").Get<AccountingConfiguration>() ?? new AccountingConfiguration();
@@ -118,9 +120,12 @@ public class AccountingClient
             }
         }
 
-        var body = JsonSerializer.Serialize(data);
+        if (data.Count > 0)
+        {
+            var body = JsonSerializer.Serialize(data);
 
-        request.Content = new StringContent(body, Encoding.UTF8, "application/json");
+            request.Content = new StringContent(body, Encoding.UTF8, "application/json");
+        }
 
         string responseString = null;
 
@@ -147,7 +152,7 @@ public class AccountingClient
 
         if (!responseString.StartsWith("{\"Message\":\"error", true, null))
         {
-            var result = JsonSerializer.Deserialize<T>(responseString);
+            var result = JsonSerializer.Deserialize<T>(responseString, _jsonSerializerOptions);
 
             return result;
         }
