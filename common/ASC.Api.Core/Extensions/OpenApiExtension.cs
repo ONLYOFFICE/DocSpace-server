@@ -116,7 +116,7 @@ public static class OpenApiExtension
                 Type = SecuritySchemeType.Http,
                 Scheme = "bearer",
                 BearerFormat = "API Key",
-                Description = "Enter 'Bearer {your_api_key}'"
+                Description = "Authentication is determined by the 'Authorization' header"
             });
 
             var xmlPath = Path.Combine(AppContext.BaseDirectory, $"{assemblyName}.xml");
