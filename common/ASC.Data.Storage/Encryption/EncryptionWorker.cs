@@ -32,7 +32,7 @@ public class EncryptionWorker(
     IServiceProvider serviceProvider,
     IDistributedLockProvider distributedLockProvider)
 {
-    private readonly DistributedTaskQueue<EncryptionOperation> _queue = queueFactory.CreateQueue<EncryptionOperation>(60 * 60 * 24); // 1 day
+    private readonly DistributedTaskQueue<EncryptionOperation> _queue = queueFactory.CreateQueue<EncryptionOperation>();
 
     public async Task StartAsync(EncryptionSettings encryptionSettings, string serverRootPath)
     {

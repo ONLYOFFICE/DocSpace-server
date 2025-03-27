@@ -43,9 +43,9 @@ public class Startup : BaseStartup
         var services = builder.Services;
         await base.ConfigureServices(builder);
         
-        services.RegisterQueue<BackupProgressItem>(5);
-        services.RegisterQueue<RestoreProgressItem>(5);
-        services.RegisterQueue<TransferProgressItem>(5);
+        services.RegisterQueue<BackupProgressItem>(5, 60 * 60 * 24);
+        services.RegisterQueue<RestoreProgressItem>(5, 60 * 60 * 24);
+        services.RegisterQueue<TransferProgressItem>(5, 60 * 60 * 24);
         
         services.AddHostedService<BackupListenerService>();
         services.AddHostedService<BackupCleanerTempFileService>();

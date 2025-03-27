@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Data.Storage.Encryption;
+using ASC.Files.Core.RoomTemplates.Operations;
 using ASC.Files.Core.Services.NotifyService;
 using ASC.Files.Service.Services;
 using ASC.Files.Service.Services.Thumbnail;
@@ -80,11 +82,16 @@ public class Startup : BaseWorkerStartup
             }
         }
         
+        services.RegisterQueue<RoomIndexExportTask>();
         services.RegisterQueue<FileDeleteOperation>(10);
         services.RegisterQueue<FileMoveCopyOperation>(10);
         services.RegisterQueue<FileDuplicateOperation>(10);
         services.RegisterQueue<FileDownloadOperation>(10);
         services.RegisterQueue<FileMarkAsReadOperation>(10);
+        services.RegisterQueue<FormFillingReportTask>();
+        services.RegisterQueue<CreateRoomTemplateOperation>();
+        services.RegisterQueue<CreateRoomFromTemplateOperation>();
+        services.RegisterQueue<EncryptionOperation>(timeUntilUnregisterInSeconds: 60 * 60 * 24);
         
         services.RegisterQuotaFeature();
         services.AddBaseDbContextPool<FilesDbContext>();
