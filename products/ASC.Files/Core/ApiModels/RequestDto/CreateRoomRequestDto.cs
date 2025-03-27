@@ -69,12 +69,65 @@ public static class RoomTypeExtensions
 /// <summary>
 /// Request parameters for creating a room
 /// </summary>
-public class CreateRoomRequestDto : UpdateRoomRequest
+public class CreateRoomRequestDto
 {
+    /// <summary>
+    /// Room name
+    /// </summary>
+    [StringLength(170)]
+    public required string Title { get; set; }
+
+    /// <summary>
+    /// Room quota
+    /// </summary>
+    public long? Quota { get; set; }
+
+    /// <summary>
+    /// Indexing
+    /// </summary>
+    public bool? Indexing { get; set; }
+
+    /// <summary>
+    /// Room quota
+    /// </summary>
+    public bool? DenyDownload { get; set; }
+
+    /// <summary>
+    /// Lifetime
+    /// </summary>
+    public RoomDataLifetimeDto Lifetime { get; set; }
+
+    /// <summary>
+    /// Watermark settings
+    /// </summary>
+    public WatermarkRequestDto Watermark { get; set; }
+
+    /// <summary>
+    /// Logo
+    /// </summary>
+    public LogoRequest Logo { get; set; }
+
+    /// <summary>
+    /// List of tags
+    /// </summary>
+    public IEnumerable<string> Tags { get; set; }
+
+    /// <summary>
+    /// Color
+    /// </summary>
+    [StringLength(6)]
+    public string Color { get; set; }
+
+    /// <summary>
+    /// Cover
+    /// </summary>
+    [StringLength(50)]
+    public string Cover { get; set; }
+
     /// <summary>
     /// Room type
     /// </summary>
-    public RoomType RoomType { get; set; }
+    public required RoomType RoomType { get; set; }
 
     /// <summary>
     /// Private

@@ -40,8 +40,13 @@ public class SchemaBaseRequestsDto
 /// <summary>
 /// Team template parameters
 /// </summary>
-public class SchemaRequestsDto : SchemaBaseRequestsDto
+public class SchemaRequestsDto
 {
+    /// <summary>
+    /// Team template ID
+    /// </summary>
+    public string Id { get; init; }
+
     /// <summary>
     /// Team template name
     /// </summary>

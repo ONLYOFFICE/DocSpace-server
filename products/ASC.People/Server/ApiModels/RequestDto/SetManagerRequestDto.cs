@@ -34,7 +34,7 @@ public class SetManagerRequest
     /// <summary>
     /// User ID
     /// </summary>
-    public Guid UserId { get; set; }
+    public required Guid UserId { get; set; }
 }
 
 /// <summary>
@@ -46,7 +46,7 @@ public class SetManagerRequestDto
     /// Group ID
     /// </summary>
     [FromRoute(Name = "id")]
-    public Guid Id { get; set; }
+    public required Guid Id { get; set; }
 
     /// <summary>
     /// Set manager

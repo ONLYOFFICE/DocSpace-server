@@ -32,18 +32,18 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 public class WizardRequestsDto
 {
     /// <summary>
-    /// Email
+    /// Email address
     /// </summary>
     [EmailAddress]
-    public string Email { get; set; }
+    public required string Email { get; set; }
 
     /// <summary>
     /// Password hash
     /// </summary>
-    public string PasswordHash { get; set; }
+    public required string PasswordHash { get; set; }
 
     /// <summary>
-    /// Language
+    /// Language code
     /// </summary>
     public string Lng { get; set; }
 

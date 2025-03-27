@@ -32,5 +32,5 @@ public class ProviderIdRequestDto
     /// Provider ID
     /// </summary>
     [FromRoute(Name = "providerId")]
-    public int ProviderId { get; set; }
+    public required int ProviderId { get; set; }
 }

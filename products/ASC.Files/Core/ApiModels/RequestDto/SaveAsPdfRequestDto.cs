@@ -34,12 +34,12 @@ public class SaveAsPdf<T>
     /// <summary>
     /// Folder ID
     /// </summary>
-    public T FolderId { get; set; }
+    public required T FolderId { get; set; }
 
     /// <summary>
     /// File title
     /// </summary>
-    public string Title { get; set; }
+    public required string Title { get; set; }
 }
 
 
@@ -52,7 +52,7 @@ public class SaveAsPdfRequestDto<T>
     /// File ID
     /// </summary>
     [FromRoute(Name = "id")]
-    public T Id { get; set; }
+    public required T Id { get; set; }
 
     /// <summary>
     /// Parameters for saving file as pdf

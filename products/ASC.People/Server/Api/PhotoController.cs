@@ -209,6 +209,10 @@ public class PhotoController(
     /// <path>api/2.0/people/{userid}/photo</path>
     [Tags("People / Photos")]
     [SwaggerResponse(200, "Result of file uploading", typeof(FileUploadResultDto))]
+    [SwaggerResponse(400, "The uploaded file could not be found")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(413, "Image size is too large")]
+    [SwaggerResponse(415, "Unknown image file type")]
     [HttpPost("{userid}/photo")]
     public async Task<FileUploadResultDto> UploadMemberPhoto(UploadMemberPhotoRequestDto inDto)
     {

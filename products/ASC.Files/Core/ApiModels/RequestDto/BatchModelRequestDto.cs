@@ -45,26 +45,60 @@ public class BaseBatchRequestDto
 /// <summary>
 /// Request parameters for downloading files
 /// </summary>
-public class DownloadRequestDto : BaseBatchRequestDto
+public class DownloadRequestDto
 {
+    /// <summary>
+    /// List of folder IDs
+    /// </summary>
+    public IEnumerable<JsonElement> FolderIds { get; set; } = new List<JsonElement>();
+
+    /// <summary>
+    /// List of file IDs
+    /// </summary>
+    public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
+
     /// <summary>
     /// List of file IDs which will be converted
     /// </summary>
     public IEnumerable<DownloadRequestItemDto> FileConvertIds { get; set; } = new List<DownloadRequestItemDto>();
 }
 
+/// <summary>
+/// Represents an item in the download request with conversion parameters and security settings
+/// </summary>
 public class DownloadRequestItemDto
 {
-    public JsonElement Key { get; init; }
-    public string Value { get; init; }
+    /// <summary>
+    /// The unique identifier or reference key for the file to be downloaded
+    /// </summary>
+    public required JsonElement Key { get; init; }
+
+    /// <summary>
+    /// The target format or conversion type for the file download
+    /// </summary>
+    public required string Value { get; init; }
+
+    /// <summary>
+    /// Optional password for accessing protected files
+    /// </summary>
     public string Password { get; init; }
 }
 
 /// <summary>
 /// Request parameters for deleting files
 /// </summary>
-public class DeleteBatchRequestDto : BaseBatchRequestDto
+public class DeleteBatchRequestDto
 {
+    /// <summary>
+    /// List of folder IDs
+    /// </summary>
+    public IEnumerable<JsonElement> FolderIds { get; set; } = new List<JsonElement>();
+
+    /// <summary>
+    /// List of file IDs
+    /// </summary>
+    public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
+
     /// <summary>
     /// Specifies whether to delete a file after the editing session is finished or not
     /// </summary>
@@ -86,9 +120,9 @@ public class DeleteVersionBatchRequestDto
     /// </summary>
     public bool DeleteAfter { get; set; }
     
-    public int FileId { get; set; }
+    public required int FileId { get; set; }
     
-    public IEnumerable<int> Versions { get; set; } = new List<int>();
+    public required IEnumerable<int> Versions { get; set; } = new List<int>();
 }
 
 /// <summary>
@@ -116,20 +150,30 @@ public class DeleteRequestDto<T>
     /// File ID
     /// </summary>
     [FromRoute(Name = "fileId")]
-    public T FileId { get; set; }
+    public required T FileId { get; set; }
 
     /// <summary>
     /// File
     /// </summary>
     [FromBody]
-    public Delete File {  get; set; }
+    public required Delete File {  get; set; }
 }
 
 /// <summary>
 /// Request parameters for copying/moving files
 /// </summary>
-public class BatchRequestDto : BaseBatchRequestDto
+public class BatchRequestDto
 {
+    /// <summary>
+    /// List of folder IDs
+    /// </summary>
+    public IEnumerable<JsonElement> FolderIds { get; set; } = new List<JsonElement>();
+
+    /// <summary>
+    /// List of file IDs
+    /// </summary>
+    public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
+
     /// <summary>
     /// Destination folder ID
     /// </summary>
@@ -160,5 +204,5 @@ public class FileOperationResultRequestDto
     /// Specifies the type of file operation to be retrieved.
     /// </summary>
     [FromRoute(Name = "operationType")]
-    public FileOperationType OperationType { get; set; }
+    public required FileOperationType OperationType { get; set; }
 }

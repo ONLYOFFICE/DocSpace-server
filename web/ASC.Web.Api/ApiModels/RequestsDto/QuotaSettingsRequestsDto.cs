@@ -39,5 +39,5 @@ public class QuotaSettingsRequestsDto
     /// <summary>
     /// Default quota value
     /// </summary>
-    public JsonElement DefaultQuota { get; set; }
+    public required JsonElement DefaultQuota { get; set; }
 }

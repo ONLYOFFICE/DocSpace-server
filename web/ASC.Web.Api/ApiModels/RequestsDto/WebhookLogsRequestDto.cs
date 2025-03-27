@@ -32,7 +32,6 @@ public class WebhookLogsRequestDto
     /// Delivey start time
     /// </summary>
     [FromQuery(Name = "deliveryFrom")]
-
     public DateTime? DeliveryFrom { get; set; }
 
     /// <summary>
