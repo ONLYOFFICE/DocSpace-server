@@ -37,7 +37,6 @@ public class DistributedTaskProgress : DistributedTask
     /// <summary>
     /// The distributed task progress percentage.
     /// </summary>
-    /// <type>System.Double, System</type>
     public double Percentage
     {
         get => Math.Min(100.0, Math.Max(0, _percentage));
@@ -47,13 +46,11 @@ public class DistributedTaskProgress : DistributedTask
     /// <summary>
     /// Specifies if the distributed task process is completed or not.
     /// </summary>
-    /// <type>System.Boolean, System</type>
     public bool IsCompleted { get; set; }
 
     /// <summary>
     /// The number of steps of the distributed task.
     /// </summary>
-    /// <type>System.Int32, System</type>
     protected int StepCount { get; set; }
 
     public override async Task RunJob(CancellationToken cancellationToken)

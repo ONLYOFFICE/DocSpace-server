@@ -33,7 +33,14 @@ namespace ASC.Files.Core.Core.Entries;
 /// </summary>
 public class FileWithShare : IMapFrom<DbFileQueryWithSecurity>
 {
+    /// <summary>
+    /// The generic file.
+    /// </summary>
     public File<int> File { get; set; }
+
+    /// <summary>
+    /// The small share record.
+    /// </summary>
     public SmallShareRecord ShareRecord { get; set; }
 
     public void Mapping(Profile profile)

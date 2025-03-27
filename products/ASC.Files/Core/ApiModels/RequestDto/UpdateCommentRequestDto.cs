@@ -43,7 +43,7 @@ public class UpdateComment
 }
 
 /// <summary>
-/// Request parameters for updating a comment.
+/// The request parameters for updating a comment.
 /// </summary>
 public class UpdateCommentRequestDto<T>
 {

@@ -26,15 +26,18 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// The parameters for saving form role mapping.
+/// </summary>
 public class SaveFormRoleMappingDto<T>
 {
     /// <summary>
-    /// Form ID
+    /// The ID of the form.
     /// </summary>
     public T FormId { get; set; }
 
     /// <summary>
-    /// Form roles
+    /// The collection of roles.
     /// </summary>
     public IEnumerable<FormRole> Roles { get; set; }
 }

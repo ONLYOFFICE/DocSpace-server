@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for track file changes when editing.
+/// The request parameters for track file changes when editing.
 /// </summary>
 public class TrackEditFileRequestDto<T>
 {

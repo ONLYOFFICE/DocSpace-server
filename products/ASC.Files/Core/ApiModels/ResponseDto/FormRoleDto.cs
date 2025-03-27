@@ -26,15 +26,49 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// The form role parameters.
+/// </summary>
 public class FormRoleDto
-{
+{ 
+    /// <summary>
+    /// The name of the role.
+    /// </summary>
     public string RoleName { get; set; }
+
+    /// <summary>
+    /// The color of the role.
+    /// </summary>
     public string RoleColor { get; set; }
+
+    /// <summary>
+    /// The user of the role.
+    /// </summary>
     public EmployeeFullDto User { get; set; }
+
+    /// <summary>
+    /// The sequence of the role.
+    /// </summary>
     public int Sequence { get; set; }
+
+    /// <summary>
+    /// Specifies if the role is submitted.
+    /// </summary>
     public bool Submitted { get; set; }
+
+    /// <summary>
+    /// The user who stopped the role.
+    /// </summary>
     public EmployeeFullDto StopedBy { get; set; }
+
+    /// <summary>
+    /// The history of the role.
+    /// </summary>
     public Dictionary<int, DateTime> History { get; set; }
+
+    /// <summary>
+    /// The status of the role.
+    /// </summary>
     public FormFillingStatus RoleStatus { get; set; }
 }
 [Scope]
@@ -76,9 +110,17 @@ public class FormRoleDtoHelper(TenantUtil tenantUtil, EmployeeFullDtoHelper empl
     }
 }
 
+/// <summary>
+/// The form role history type.
+/// </summary>
 public enum FormRoleHistory
 {
-    OpenedAtDate = 0 ,
+    [SwaggerEnum("Opened at date")]
+    OpenedAtDate = 0,
+
+    [SwaggerEnum("Submission date")]
     SubmissionDate = 1,
+
+    [SwaggerEnum("Stop date")]
     StopDate = 2
 }

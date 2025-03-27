@@ -81,6 +81,10 @@ public class AceWrapper : IMapFrom<RoomInvitation>
     /// Specifies whether a user with the access rights to a file can edit it or not.
     /// </summary>
     public FileShareOptions FileShareOptions { get; init; }
+
+    /// <summary>
+    /// Specifies whether a user with the access rights to a file can edit it or not.
+    /// </summary>
     public bool CanEditAccess { get; set; }
 
     /// <summary>

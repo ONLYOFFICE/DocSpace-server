@@ -34,19 +34,16 @@ public class EncryptionKeyPairDto
     /// <summary>
     /// The private key.
     /// </summary>
-    /// <type>System.String, System</type>
     public string PrivateKeyEnc { get; set; }
 
     /// <summary>
     /// The public key.
     /// </summary>
-    /// <type>System.String, System</type>
     public string PublicKey { get; set; }
 
     /// <summary>
     /// The user ID of the encryption key.
     /// </summary>
-    /// <type>System.String, System</type>
     public Guid UserId { get; set; }
 }
 

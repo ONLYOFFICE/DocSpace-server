@@ -161,12 +161,12 @@ public class BatchRequestDto : BaseBatchRequestDto
     public FileConflictResolveType ConflictResolveType { get; set; }
 
     /// <summary>
-    /// Specifies whether to delete the folder after the editing session is finished or not.
+    /// Specifies whether to delete the source files/folders after they are moved or copied to the destination folder.
     /// </summary>
     public bool DeleteAfter { get; set; }
 
     /// <summary>
-    ///  Specifies whether to copy or move the file content or not.
+    ///  Specifies whether to copy or move the folder content or not.
     /// </summary>
     public bool Content { get; set; }
 }

@@ -154,7 +154,7 @@ public class EmployeeFullDto : EmployeeDto
     public bool IsCollaborator { get; set; }
 
     /// <summary>
-    /// The user language.
+    /// The user culture code.
     /// </summary>
     [SwaggerSchemaCustom(Example = "en-EN")]
     public string CultureName { get; set; }
@@ -176,7 +176,7 @@ public class EmployeeFullDto : EmployeeDto
     public bool IsSSO { get; set; }
 
     /// <summary>
-    /// The user dark theme settings.
+    /// The user theme settings.
     /// </summary>
     public DarkThemeSettingsType? Theme { get; set; }
 
@@ -217,7 +217,7 @@ public class EmployeeFullDto : EmployeeDto
     public ApiDateTime RegistrationDate { get; set; }
 
     /// <summary>
-    /// Specifies if the user has an personal folder or not
+    /// Specifies if the user has a personal folder or not
     /// </summary>
     public bool HasPersonalFolder { get; set; }
 }

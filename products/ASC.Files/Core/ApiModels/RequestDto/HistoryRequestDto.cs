@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for file history.
+/// The request parameters for file history.
 /// </summary>
 public class HistoryRequestDto
 {

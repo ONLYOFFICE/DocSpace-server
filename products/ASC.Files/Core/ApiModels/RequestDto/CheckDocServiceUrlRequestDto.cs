@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for checking the document service location.
+/// The request parameters for checking the document service location.
 /// </summary>
 public class CheckDocServiceUrlRequestDto
 {
@@ -42,7 +42,7 @@ public class CheckDocServiceUrlRequestDto
     public string DocServiceUrlInternal { get; set; }
 
     /// <summary>
-    /// The community server url address.
+    /// The document server url address.
     /// </summary>
     public string DocServiceUrlPortal { get; set; }
 

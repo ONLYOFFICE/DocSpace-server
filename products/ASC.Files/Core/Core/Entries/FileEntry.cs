@@ -259,12 +259,18 @@ public abstract class FileEntry<T> : FileEntry, IEquatable<FileEntry<T>>
         _securityContext = securityContext;
     }
 
+    /// <summary>
+    /// The folder ID display.
+    /// </summary>
     public T FolderIdDisplay
     {
         get => !EqualityComparer<T>.Default.Equals(_folderIdDisplay, default) ? _folderIdDisplay : ParentId;
         set => _folderIdDisplay = value;
     }
 
+    /// <summary>
+    /// The root ID.
+    /// </summary>
     public T RootId { get; set; }
 
     [JsonIgnore]

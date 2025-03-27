@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Base batch request parameters.
+/// The base batch request parameters.
 /// </summary>
 public class GetInfoUsersRequestDto
 {

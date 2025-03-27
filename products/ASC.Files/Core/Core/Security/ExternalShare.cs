@@ -355,61 +355,51 @@ public class ValidationInfo
     /// <summary>
     /// The external data status of the validation.
     /// </summary>
-    /// <type>ASC.Files.Core.Security.Status, ASC.Files.Core</type>
     public Status Status { get; set; }
    
     /// <summary>
     /// The external data ID of the validation.
     /// </summary>
-    /// <type>System.String, System</type>
     public string Id { get; set; }
    
     /// <summary>
     /// The external data title of the validation.
     /// </summary>
-    /// <type>System.String, System</type>
     public string Title { get; set; }
 
     /// <summary>
     /// The entity ID of the validation.
     /// </summary>
-    /// <type>System.String, System</type>
     public string EntityId { get; set; }
    
     /// <summary>
     /// The entity title of the validation.
     /// </summary>
-    /// <type>System.String, System</type>
     public string EntryTitle { get; set; }
     
     /// <summary>
     /// The sharing rights of the validation.
     /// </summary>
-    /// <type>ASC.Files.Core.Security.FileShare, ASC.Files.Core</type>
     public FileShare Access { get; set; }
     
     /// <summary>
     /// The tenant ID of the validation.
     /// </summary>
-    /// <type>System.Int32, System</type>
     public int TenantId { get; set; }
 
     /// <summary>
     /// Specifies whether to share the external data or not.
     /// </summary>
-    /// <type>System.Boolean, System</type>
     public bool Shared { get; set; }
     
     /// <summary>
     /// The link ID of the validation.
     /// </summary>
-    /// <type>System.Guid, System</type>
     public Guid LinkId { get; set; }
     
     /// <summary>
     /// Specifies whether the user is authenticated or not.
     /// </summary>
-    /// <type>System.Boolean, System</type>
     public bool IsAuthenticated { get; set; }
 }
 
@@ -444,6 +434,9 @@ public class ExternalSessionSnapshot
     public string PasswordKey { get; init; }
 }
 
+/// <summary>
+/// The external data status.
+/// </summary>
 public enum Status
 {
     [SwaggerEnum(Description = "Ok")]

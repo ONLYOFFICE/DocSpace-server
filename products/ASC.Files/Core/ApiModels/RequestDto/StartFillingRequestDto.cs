@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters to start filling a file.
+/// The request parameters to start filling a file.
 /// </summary>
 public class StartFillingRequestDto<T>
 {

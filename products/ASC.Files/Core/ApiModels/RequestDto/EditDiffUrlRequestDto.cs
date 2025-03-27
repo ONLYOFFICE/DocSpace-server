@@ -32,13 +32,13 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 public class EditDiffUrlRequestDto<T>
 {
     /// <summary>
-    /// File ID
+    /// File ID.
     /// </summary>
     [FromRoute(Name = "fileId")]
     public T FileId { get; set; }
 
     /// <summary>
-    /// File version
+    /// File version.
     /// </summary>
     [FromQuery(Name = "version")]
     public int Version { get; set; } = 0;

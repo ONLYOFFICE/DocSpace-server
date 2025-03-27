@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Parameters for locking a file.
+/// The parameters for locking a file.
 /// </summary>
 public class LockFileParameters
 {
@@ -38,7 +38,7 @@ public class LockFileParameters
 }
 
 /// <summary>
-/// Request parameters for locking a file.
+/// The request parameters for locking a file.
 /// </summary>
 public class LockFileRequestDto<T>
 {
@@ -49,7 +49,7 @@ public class LockFileRequestDto<T>
     public T FileId { get; set; }
 
     /// <summary>
-    /// Parameters for locking a file.
+    /// The parameters for locking a file.
     /// </summary>
     [FromBody]
     public LockFileParameters File { get; set; }

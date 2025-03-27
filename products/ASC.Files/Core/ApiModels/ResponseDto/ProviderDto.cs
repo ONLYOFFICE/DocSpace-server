@@ -64,6 +64,5 @@ public record ProviderDto(string Name, string Key, bool Connected, bool Oauth = 
     /// <summary>
     /// The provider Oauth client ID.
     /// </summary>
-    /// <type>System.String, System</type>
     public string ClientId { get; init; } = ClientId;
 }

@@ -50,7 +50,7 @@ public class CreateTextOrHtmlFile
 }
 
 /// <summary>
-/// Request parameters for creating an HTML file.
+/// The request parameters for creating an HTML file.
 /// </summary>
 public class CreateTextOrHtmlFileRequestDto<T>
 {

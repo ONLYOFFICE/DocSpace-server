@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Parameters for checking the form draft filling.
+/// The parameters for checking the form draft filling.
 /// </summary>
 public class CheckFillFormDraft
 {
@@ -54,7 +54,7 @@ public class CheckFillFormDraft
 
 
 /// <summary>
-/// Request parameters for checking the form draft filling.
+/// The request parameters for checking the form draft filling.
 /// </summary>
 public class CheckFillFormDraftRequestDto<T>
 {

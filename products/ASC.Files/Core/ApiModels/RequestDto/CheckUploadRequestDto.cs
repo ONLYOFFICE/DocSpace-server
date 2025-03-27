@@ -32,7 +32,7 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 public class CheckUploadRequest
 {
     /// <summary>
-    /// The file title.
+    /// The list of file titles.
     /// </summary>
     public IEnumerable<string> FilesTitle { get; set; }
 }

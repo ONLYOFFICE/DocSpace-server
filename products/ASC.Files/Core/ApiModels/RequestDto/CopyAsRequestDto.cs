@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Parameters for copying a file
+/// The parameters for copying a file.
 /// </summary>
 public class CopyAs<T>
 {
@@ -54,12 +54,11 @@ public class CopyAs<T>
     /// <summary>
     /// Specifies whether to convert the file to form or not.
     /// </summary>
-    /// <type>System.Boolean, System</type>
     public bool ToForm { get; set; }
 }
 
 /// <summary>
-/// Request parameters for copying a file.
+/// The request parameters for copying a file.
 /// </summary>
 public class CopyAsRequestDto<T>
 {
@@ -70,7 +69,7 @@ public class CopyAsRequestDto<T>
     public T FileId { get; set; }
 
     /// <summary>
-    /// The parameters for copying a file
+    /// The parameters for copying a file.
     /// </summary>
     [FromBody]
     public CopyAs<JsonElement> File { get; set; }

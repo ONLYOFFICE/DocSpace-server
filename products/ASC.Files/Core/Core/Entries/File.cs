@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core;
 
+/// <summary>
+/// The file status.
+/// </summary>
 [Flags]
 public enum FileStatus
 {

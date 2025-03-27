@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Parameters for changing version history.
+/// The parameters for changing version history.
 /// </summary>
 public class ChangeHistory
 {
@@ -43,7 +43,7 @@ public class ChangeHistory
 }
 
 /// <summary>
-/// Request parameters for changing version history.
+/// The request parameters for changing version history.
 /// </summary>
 public class ChangeHistoryRequestDto<T>
 {

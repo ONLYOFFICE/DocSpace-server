@@ -35,7 +35,6 @@ public class EntryProperties<T>
     /// <summary>
     /// The form filling properties.
     /// </summary>
-    /// <type>ASC.Files.Core.FormFillingProperties, ASC.Files.Core</type>
     public FormFillingProperties<T> FormFilling { get; set; }
 
     public static EntryProperties<T> Deserialize(string data, ILogger logger)
@@ -75,21 +74,70 @@ public class EntryProperties<T>
 [Transient]
 public class FormFillingProperties<T>
 {
+    /// <summary>
+    /// Specifies if the form filling has started or not.
+    /// </summary>
     public bool StartFilling { get; set; }
+
+    /// <summary>
+    /// The title of the form.
+    /// </summary>
     public string Title { get; set; }
+
+    /// <summary>
+    /// The room ID of the form.
+    /// </summary>
     public T RoomId { get; set; }
+
+    /// <summary>
+    /// The folder ID to which the form is added.
+    /// </summary>
     public T ToFolderId { get; set; }
+
+    /// <summary>
+    /// The original form ID.
+    /// </summary>
     public T OriginalFormId { get; set; }
+
+    /// <summary>
+    /// The results folder ID.
+    /// </summary>
     public T ResultsFolderId { get; set; }
+
+    /// <summary>
+    /// The results file ID.
+    /// </summary>
     public T ResultsFileID { get; set; }
+
+    /// <summary>
+    /// The result form number.
+    /// </summary>
     public int ResultFormNumber { get; set; }
+
+    /// <summary>
+    /// The date when the form filling was stopped.
+    /// </summary>
     public DateTime FillingStopedDate { get; set; }
+
+    /// <summary>
+    /// The form filling interruption.
+    /// </summary>
     public FormFillingInterruption? FormFillingInterruption { get; set; }
 
 }
 
+/// <summary>
+/// The form filling interruption parameters.
+/// </summary>
 public struct FormFillingInterruption
 {
+    /// <summary>
+    /// The user ID of the form filling interruption.
+    /// </summary>
     public Guid UserId { get; set; }
+
+    /// <summary>
+    /// The role name of the form filling interruption.
+    /// </summary>
     public string RoleName { get; set; }
 }

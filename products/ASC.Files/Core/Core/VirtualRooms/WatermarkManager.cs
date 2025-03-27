@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.VirtualRooms;
 
+/// <summary>
+/// The watermark additions.
+/// </summary>
 [Flags]
 public enum WatermarkAdditions
 {

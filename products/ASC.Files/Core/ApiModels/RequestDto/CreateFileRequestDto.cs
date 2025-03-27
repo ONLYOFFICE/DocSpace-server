@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Parameters for creating a file.
+/// The parameters for creating a file.
 /// </summary>
 public class CreateFile<T>
 {
@@ -54,7 +54,7 @@ public class CreateFile<T>
 }
 
 /// <summary>
-/// Request parameters for creating a file.
+/// The request parameters for creating a file.
 /// </summary>
 public class CreateFileRequestDto<T>
 {

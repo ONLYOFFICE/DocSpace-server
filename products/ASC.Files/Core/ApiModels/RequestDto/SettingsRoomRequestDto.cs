@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The room settings.
+/// The room settings parameters.
 /// </summary>
 public class SettingsRoom
 {
@@ -39,14 +39,12 @@ public class SettingsRoom
     /// <summary>
     /// Specifies whether to deny downloads from the room.
     /// </summary>
-
     public bool? DenyDownload { get; set; }
 }
 
 /// <summary>
 /// The request parameters of the room settings.
 /// </summary>
-/// <typeparam name="T"></typeparam>
 public class SettingsRoomRequestDto<T>
 {
     /// <summary>
@@ -56,7 +54,7 @@ public class SettingsRoomRequestDto<T>
     public T Id { get; set; }
 
     /// <summary>
-    /// The room settings.
+    /// The room settings parameters.
     /// </summary>
     [FromBody]
     public SettingsRoom SettingsRoom { get; set; }
