@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -69,11 +69,11 @@ public class FileSecurity(IDaoFactory daoFactory,
             {
                 { 
                     SubjectType.ExternalLink, 
-                    [FileShare.Editing, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.Restrict, FileShare.None]
+                    [FileShare.Editing, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.FillForms, FileShare.Restrict, FileShare.None]
                 },
                 { 
                     SubjectType.PrimaryExternalLink, 
-                    [FileShare.Editing, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.Restrict, FileShare.None]
+                    [FileShare.Editing, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.FillForms, FileShare.Restrict, FileShare.None]
                 }
             }.ToFrozenDictionary()
         }
@@ -1435,7 +1435,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
-                        if (e.Access is FileShare.Editing or FileShare.Review or FileShare.FillForms)
+                        if (e.Access is FileShare.FillForms)
                         {
                             return true;
                         }
@@ -1688,6 +1688,11 @@ public class FileSecurity(IDaoFactory daoFactory,
 
                         break;
                     default:
+                        if (ace is { SubjectType: SubjectType.ExternalLink or SubjectType.PrimaryExternalLink } && ace.Subject != userId)
+                        {
+                            return false;
+                        }
+
                         return true;
                 }
 
@@ -2623,7 +2628,7 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         foreach (var s in shares)
         {
-            if (s is FileShare.Read or FileShare.Restrict or FileShare.None)
+            if (s is  FileShare.Restrict or FileShare.None || (s is FileShare.Read && !file.IsForm))
             {
                 result.Add(s.ToStringFast(), true);
                 continue;
@@ -2638,9 +2643,9 @@ public class FileSecurity(IDaoFactory daoFactory,
             switch (s)
             {
                 case FileShare.Editing when canEdit:
-                case FileShare.FillForms when fileType is FileType.Pdf:
+                case FileShare.FillForms when file.IsForm:
                 case FileShare.CustomFilter when canCustomFiltering:
-                case FileShare.Comment when canComment:
+                case FileShare.Comment when !file.IsForm && canComment:
                 case FileShare.Review when canReview:
                     result.Add(s.ToStringFast(), true);
                     break;

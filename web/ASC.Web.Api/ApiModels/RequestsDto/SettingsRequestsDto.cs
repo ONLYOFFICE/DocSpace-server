@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,29 +27,29 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// Settings request parameters
+/// Settings request parameters for owner operations
 /// </summary>
 public class OwnerIdSettingsRequestDto
 {
     /// <summary>
     /// Owner ID
     /// </summary>
-    public Guid OwnerId { get; set; }
+    public required Guid OwnerId { get; set; }
 }
 
 /// <summary>
-/// Settings request parameters
+/// Settings request parameters for version operations
 /// </summary>
 public class SettingsRequestsDto
 {
     /// <summary>
     /// Version ID
     /// </summary>
-    public int VersionId { get; set; }
+    public required int VersionId { get; set; }
 }
 
 /// <summary>
-/// Settings request parameters
+/// Settings request parameters for tips operations
 /// </summary>
 public class TipsRequestDto
 {
@@ -60,25 +60,25 @@ public class TipsRequestDto
 }
 
 /// <summary>
-/// Settings request parameters
+/// Settings request parameters for default product operations
 /// </summary>
 public class DefaultProductRequestDto
 {
     /// <summary>
     /// Default product ID
     /// </summary>
-    public Guid DefaultProductID { get; set; }
+    public required Guid DefaultProductID { get; set; }
 }
 
 /// <summary>
-/// Settings request parameters
+/// Settings request parameters for time zone operations
 /// </summary>
 public class TimeZoneRequestDto
 {
     /// <summary>
     /// Language
     /// </summary>
-    public string Lng { get; set; }
+    public required string Lng { get; set; }
 
     /// <summary>
     /// Time zone ID

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -674,6 +674,52 @@ public class StudioNotifyService(
            await studioNotifyHelper.RecipientFromEmailAsync(newUserInfo.Email, false),
            [EMailSenderName],
         tagValues.ToArray());
+    }
+
+    public async Task SendMsgUserTypeChangedAsync(UserInfo u, string userType)
+    {
+        try
+        {
+            var culture = GetCulture(u);
+            var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
+
+            await studioNotifyServiceHelper.SendNoticeToAsync(
+                Actions.UserTypeChanged,
+                await studioNotifyHelper.RecipientFromEmailAsync(u.Email, false),
+                [EMailSenderName],
+                new TagValue("UserType", userType),
+                new TagValue("HelpCenterUrl", externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("accessrights", culture)),
+                new TagValue(CommonTags.Culture, culture.Name),
+                TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours));
+        }
+        catch (Exception error)
+        {
+            _log.ErrorSendCongratulations(error);
+        }
+    }
+
+    public async Task SendMsgUserRoleChangedAsync(UserInfo u, string roomTitle, string roomUrl, string userRole)
+    {
+        try
+        {
+            var culture = GetCulture(u);
+            var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
+
+            await studioNotifyServiceHelper.SendNoticeToAsync(
+                Actions.UserRoleChanged,
+                await studioNotifyHelper.RecipientFromEmailAsync(u.Email, false),
+                [EMailSenderName],
+                new TagValue("RoomTitle", roomTitle),
+                new TagValue("RoomUrl", roomUrl),
+                new TagValue("UserRole", userRole),
+                new TagValue("HelpCenterUrl", externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("accessrights", culture)),
+                new TagValue(CommonTags.Culture, culture.Name),
+                TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours));
+        }
+        catch (Exception error)
+        {
+            _log.ErrorSendCongratulations(error);
+        }
     }
 
     #region Portal Deactivation & Deletion

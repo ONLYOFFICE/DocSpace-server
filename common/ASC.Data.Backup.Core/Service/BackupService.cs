@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,7 +33,9 @@ public class BackupService(
         ILogger<BackupService> logger,
         BackupStorageFactory backupStorageFactory,
         BackupWorker backupWorker,
-        BackupRepository backupRepository)
+        BackupRepository backupRepository,
+        TenantExtra tenantExtra,
+        TenantManager tenantManager)
     {
     public async Task<string> StartBackupAsync(StartBackupRequest request, bool enqueueTask = true, string taskId = null)
     {
@@ -48,6 +50,14 @@ public class BackupService(
     public async Task DeleteBackupAsync(Guid backupId)
     {
         var backupRecord = await backupRepository.GetBackupRecordAsync(backupId);
+        if(backupRecord.TenantId == -1)
+        {
+            await tenantExtra.DemandAccessSpacePermissionAsync();
+        }
+        if (backupRecord.TenantId != tenantManager.GetCurrentTenantId())
+        {
+            return;
+        }
         await backupRepository.DeleteBackupRecordAsync(backupRecord.Id);
 
         var storage = await backupStorageFactory.GetBackupStorageAsync(backupRecord);
@@ -153,14 +163,28 @@ public class BackupService(
         return await backupWorker.GetBackupProgressAsync(tenantId);
     }
 
+    public async Task<BackupProgress> GetDumpBackupProgress()
+    {
+        return await backupWorker.GetDumpBackupProgressAsync();
+    }
+
     public async Task<BackupProgress> GetTransferProgress(int tenantId)
     {
         return await backupWorker.GetTransferProgressAsync(tenantId);
     }
 
-    public async Task<BackupProgress> GetRestoreProgress(int tenantId)
+    public async Task<BackupProgress> GetRestoreProgressAsync(int tenantId)
     {
         return await backupWorker.GetRestoreProgressAsync(tenantId);
+    }
+    public async Task<BackupProgress> GetAnyRestoreProgressAsync(int tenantId)
+    {
+        return await backupWorker.GetAnyRestoreProgressAsync(tenantId);
+    }
+
+    public async Task<BackupProgress> GetDumpRestoreProgressAsync()
+    {
+        return await backupWorker.GetDumpRestoreProgressAsync();
     }
 
     public string GetTmpFolder()
@@ -188,9 +212,9 @@ public class BackupService(
         await backupRepository.DeleteBackupScheduleAsync(tenantId);
     }
 
-    public async Task<ScheduleResponse> GetScheduleAsync(int tenantId)
+    public async Task<ScheduleResponse> GetScheduleAsync(int tenantId, bool? dump)
     {
-        var schedule = await backupRepository.GetBackupScheduleAsync(tenantId);
+        var schedule = await backupRepository.GetBackupScheduleAsync(tenantId, dump);
         if (schedule != null)
         {
             var tmp = new ScheduleResponse

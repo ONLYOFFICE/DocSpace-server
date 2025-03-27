@@ -2098,6 +2098,36 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Hello!
+        ///
+        ///You are assigned a new role in the DocSpace room &quot;${RoomTitle}&quot;:&quot;${RoomUrl}&quot;: ${UserRole}.
+        ///
+        ///Learn more about room roles and permissions in &quot;Help Center&quot;:&quot;${HelpCenterUrl}&quot;.
+        ///
+        ///$TrulyYours.
+        /// </summary>
+        public static string pattern_user_role_changed {
+            get {
+                return ResourceManager.GetString("pattern_user_role_changed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hello!
+        ///
+        ///You are assigned a new user type in DocSpace &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;: ${UserType}.
+        ///
+        ///Learn more about user types and permissions in &quot;Help Center&quot;:&quot;${HelpCenterUrl}&quot;.
+        ///
+        ///$TrulyYours.
+        /// </summary>
+        public static string pattern_user_type_changed {
+            get {
+                return ResourceManager.GetString("pattern_user_type_changed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to h1. Welcome to &lt;span style=&quot;color:#FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace!
         ///
         ///
@@ -2967,6 +2997,24 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_user_ldap_activation {
             get {
                 return ResourceManager.GetString("subject_user_ldap_activation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your role in a DocSpace room has changed.
+        /// </summary>
+        public static string subject_user_role_changed {
+            get {
+                return ResourceManager.GetString("subject_user_role_changed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your DocSpace user type has changed.
+        /// </summary>
+        public static string subject_user_type_changed {
+            get {
+                return ResourceManager.GetString("subject_user_type_changed", resourceCulture);
             }
         }
         

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,12 +35,12 @@ public class TfaRequestsDto
     /// TFA type (None, Sms, or App)
     /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public TfaRequestsDtoType? Type { get; set; }
+    public required TfaRequestsDtoType Type { get; set; }
 
     /// <summary>
     /// User ID
     /// </summary>
-    public Guid? Id { get; set; }
+    public required Guid Id { get; set; }
 
     /// <summary>
     /// List of trusted IP addresses
@@ -78,5 +78,5 @@ public class TfaValidateRequestsDto
     /// <summary>
     /// TFA code
     /// </summary>
-    public string Code { get; set; }
+    public required string Code { get; set; }
 }

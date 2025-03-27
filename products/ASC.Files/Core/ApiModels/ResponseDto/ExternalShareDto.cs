@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,6 +28,9 @@ using Status = ASC.Files.Core.Security.Status;
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// Represents external sharing information and validation data
+/// </summary>
 public class ExternalShareDto : IMapFrom<ValidationInfo>
 {
     /// <summary>
@@ -50,8 +53,14 @@ public class ExternalShareDto : IMapFrom<ValidationInfo>
     /// </summary>
     public int TenantId { get; set; }
 
+    /// <summary>
+    /// The unique identifier of the shared entity
+    /// </summary>
     public string EntityId { get; set; }
    
+    /// <summary>
+    /// The title of the shared entry
+    /// </summary>
     public string EntryTitle { get; set; }
 
     /// <summary>
@@ -64,6 +73,8 @@ public class ExternalShareDto : IMapFrom<ValidationInfo>
     /// </summary>
     public Guid LinkId { get; set; }
     
-    /// <summary>Specifies whether the user is authenticated or not</summary>
+    /// <summary>
+    /// Specifies whether the user is authenticated or not
+    /// </summary>
     public bool IsAuthenticated { get; set; }
 }

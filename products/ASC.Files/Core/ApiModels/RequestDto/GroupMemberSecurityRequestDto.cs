@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,11 +32,11 @@ public class GroupMemberSecurityRequestDto<T>
     /// Folder Id
     /// </summary>
     [FromRoute(Name = "folderId")]
-    public T FolderId { get; set; }
+    public required T FolderId { get; set; }
 
     /// <summary>
     /// Group Id
     /// </summary>
     [FromRoute(Name = "groupId")]
-    public Guid GroupId { get; set; }
+    public required Guid GroupId { get; set; }
 }

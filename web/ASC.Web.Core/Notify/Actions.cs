@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -155,4 +155,7 @@ public static class Actions
     public static readonly INotifyAction DeveloperAdminPaymentWarningGracePeriodActivation = new NotifyAction("developer_admin_payment_warning_grace_period_activation");
     public static readonly INotifyAction DeveloperAdminPaymentWarningGracePeriodBeforeExpiration = new NotifyAction("developer_admin_payment_warning_grace_period_before_expiration");
     public static readonly INotifyAction DeveloperAdminPaymentWarningGracePeriodExpiration = new NotifyAction("developer_admin_payment_warning_grace_period_expiration");
+
+    public static readonly INotifyAction UserTypeChanged = new NotifyAction("user_type_changed");
+    public static readonly INotifyAction UserRoleChanged = new NotifyAction("user_role_changed");
 }

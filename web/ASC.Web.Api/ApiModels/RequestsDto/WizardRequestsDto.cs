@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,18 +32,18 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 public class WizardRequestsDto
 {
     /// <summary>
-    /// Email
+    /// Email address
     /// </summary>
     [EmailAddress]
-    public string Email { get; set; }
+    public required string Email { get; set; }
 
     /// <summary>
     /// Password hash
     /// </summary>
-    public string PasswordHash { get; set; }
+    public required string PasswordHash { get; set; }
 
     /// <summary>
-    /// Language
+    /// Language code
     /// </summary>
     public string Lng { get; set; }
 

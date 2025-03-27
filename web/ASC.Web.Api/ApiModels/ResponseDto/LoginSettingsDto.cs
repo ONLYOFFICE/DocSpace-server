@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -42,6 +42,9 @@ public class LoginSettingsDto : IMapFrom<LoginSettings>
     /// The time to wait for a response from the server
     /// </summary>
     public int CheckPeriod { get; set; }
-    
+
+    /// <summary>
+    /// Specifies if these settings are default or not
+    /// </summary>
     public bool IsDefault { get; set; }
 }

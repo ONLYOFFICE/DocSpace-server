@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,7 +32,7 @@ public class DbWorker(
     TenantManager tenantManager,
     AuthContext authContext)
 {
-    public async Task<DbWebhooksConfig> AddWebhookConfig(string name, string uri, string secretKey, bool enabled, bool ssl, WebhookTrigger triggers)
+    public async Task<DbWebhooksConfig> AddWebhookConfig(string name, string uri, string secretKey, bool enabled, bool ssl, WebhookTrigger triggers, string targetId)
     {
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
@@ -41,7 +41,7 @@ public class DbWorker(
 
         if (existingConfig != null)
         {
-            return existingConfig;
+            throw new ArgumentException("Webhook with the same name and payload URL already exists");
         }
 
         var toAdd = new DbWebhooksConfig
@@ -53,6 +53,7 @@ public class DbWorker(
             Enabled = enabled,
             SSL = ssl,
             Triggers = triggers,
+            TargetId = targetId,
             CreatedBy = authContext.CurrentAccount.ID,
             CreatedOn = DateTime.UtcNow
         };
@@ -112,6 +113,7 @@ public class DbWorker(
         updateObj.Enabled = dbWebhooksConfig.Enabled;
         updateObj.SSL = dbWebhooksConfig.SSL;
         updateObj.Triggers = dbWebhooksConfig.Triggers;
+        updateObj.TargetId = dbWebhooksConfig.TargetId;
 
         updateObj.ModifiedBy = dbWebhooksConfig.ModifiedBy ?? authContext.CurrentAccount.ID;
         updateObj.ModifiedOn = DateTime.UtcNow;
@@ -214,7 +216,7 @@ public class DbWorker(
     public async Task<DbWebhooksLog> UpdateWebhookJournal(
         int id,
         int status,
-        DateTime delivery,
+        DateTime? delivery,
         string requestPayload,
         string requestHeaders,
         string responsePayload,

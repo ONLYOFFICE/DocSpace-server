@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -439,11 +439,6 @@ public class FileSharingHelper(
     public async Task<bool> CanSetAccessAsync<T>(FileEntry<T> entry)
     {
         if (entry == null)
-        {
-            return false;
-        }
-
-        if (entry is File<T> { IsForm: true })
         {
             return false;
         }

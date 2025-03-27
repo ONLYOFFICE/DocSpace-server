@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -277,7 +277,7 @@ public class SsoController(TenantManager tenantManager,
             && (!SetupInfo.IsVisibleSettings(ManagementType.SingleSignOnSettings.ToStringFast())
                 || !(await tenantManager.GetCurrentTenantQuotaAsync()).Sso))
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption, "Sso");
+            throw new BillingException(Resource.ErrorNotAllowedOption);
         }
     }
 

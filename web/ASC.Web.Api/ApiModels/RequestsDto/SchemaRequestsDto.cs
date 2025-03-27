@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -40,8 +40,13 @@ public class SchemaBaseRequestsDto
 /// <summary>
 /// Team template parameters
 /// </summary>
-public class SchemaRequestsDto : SchemaBaseRequestsDto
+public class SchemaRequestsDto
 {
+    /// <summary>
+    /// Team template ID
+    /// </summary>
+    public string Id { get; init; }
+
     /// <summary>
     /// Team template name
     /// </summary>

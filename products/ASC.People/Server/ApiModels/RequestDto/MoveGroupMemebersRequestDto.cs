@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -36,11 +36,11 @@ public class MoveGroupMemebersRequestDto
     /// Group ID to move from
     /// </summary>
     [FromRoute(Name = "fromId")]
-    public Guid FromId { get; set; }
+    public required Guid FromId { get; set; }
 
     /// <summary>
     /// Group ID to move to
     /// </summary>
     [FromRoute(Name = "toId")]
-    public Guid ToId { get; set; }
+    public required Guid ToId { get; set; }
 }

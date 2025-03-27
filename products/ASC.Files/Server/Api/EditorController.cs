@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -159,6 +159,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                 FolderType.FormFillingFolderInProgress => documentServiceHelper.GetFormOpenSetupForFolderInProgress(file, inDto.EditorType),
                 FolderType.FormFillingFolderDone => documentServiceHelper.GetFormOpenSetupForFolderDone<T>(inDto.EditorType),
                 FolderType.VirtualDataRoom => await documentServiceHelper.GetFormOpenSetupForVirtualDataRoomAsync(file, inDto.EditorType),
+                FolderType.USER => await documentServiceHelper.GetFormOpenSetupForUserFolderAsync(file, inDto.EditorType, inDto.Edit, inDto.Fill),
                 _ => new FormOpenSetup<T>
                 {
                     CanEdit = !inDto.Fill,
@@ -224,6 +225,19 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                 {
                     result.EditorConfig.User.Roles = new List<string> { formOpenSetup.RoleName };
                     result.FillingStatus = true;
+                }
+            }
+            else if (formOpenSetup.RootFolder.FolderType is FolderType.USER)
+            {
+                if (formOpenSetup.CanStartFilling)
+                {
+                    result.StartFilling = true;
+                    result.StartFillingMode = StartFillingMode.ShareToFillOut;
+                    result.EditorConfig.Customization.StartFillingForm = new StartFillingForm { Text = FilesCommonResource.StartFillingModeEnum_ShareToFillOut };
+                }
+                if (formOpenSetup.CanFill && file.CreateBy != securityContext.CurrentAccount.ID)
+                {
+                    result.EditorConfig.Customization.SubmitForm.Visible = true;
                 }
             }
             else

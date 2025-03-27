@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -39,12 +39,12 @@ public class CreateThirdPartyRoom
     /// <summary>
     /// Room name
     /// </summary>
-    public string Title { get; set; }
+    public required string Title { get; set; }
 
     /// <summary>
     /// Room type
     /// </summary>
-    public RoomType RoomType { get; set; }
+    public required RoomType RoomType { get; set; }
 
     /// <summary>
     /// Private
@@ -92,7 +92,7 @@ public class CreateThirdPartyRoomRequestDto
     /// ID of the folder in the third-party storage in which the contents of the room will be stored
     /// </summary>
     [FromRoute(Name = "id")]
-    public string Id { get; set; }
+    public required string Id { get; set; }
 
     /// <summary>
     /// ThirdParty room

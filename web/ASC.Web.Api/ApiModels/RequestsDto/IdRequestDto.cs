@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,7 +32,7 @@ public class IdRequestDto<T>
     /// Id
     /// </summary>
     [FromRoute(Name = "id")]
-    public T Id { get; set; }
+    public required T Id { get; set; }
 }
 
 public class LoginEvenrIdRequestDto
@@ -41,7 +41,7 @@ public class LoginEvenrIdRequestDto
     /// Login event ID
     /// </summary>
     [FromRoute(Name = "loginEventId")]
-    public int Id { get; set; }
+    public required int Id { get; set; }
 }
 
 public class UserIdRequestDto
@@ -50,7 +50,7 @@ public class UserIdRequestDto
     /// User ID
     /// </summary>
     [FromRoute(Name = "userId")]
-    public Guid Id { get; set; }
+    public required Guid Id { get; set; }
 }
 
 public class UserIDRequestDto
@@ -59,7 +59,7 @@ public class UserIDRequestDto
     /// User ID
     /// </summary>
     [FromRoute(Name = "userID")]
-    public Guid Id { get; set; }
+    public required Guid Id { get; set; }
 }
 
 public class ProductIdRequestDto
@@ -68,7 +68,7 @@ public class ProductIdRequestDto
     /// Product ID
     /// </summary>
     [FromRoute(Name = "productid")]
-    public Guid ProductId { get; set; }
+    public required Guid ProductId { get; set; }
 }
 
 public class UserProductIdsRequestDto
@@ -93,5 +93,5 @@ public class MigratorNameRequestDto
     /// Migrator name
     /// </summary>
     [FromRoute(Name = "migratorName")]
-    public string MigratorName { get; set; }
+    public required string MigratorName { get; set; }
 }

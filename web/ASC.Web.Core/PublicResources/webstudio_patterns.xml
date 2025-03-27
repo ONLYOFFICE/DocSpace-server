@@ -712,4 +712,16 @@ $activity.Key
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_developer_admin_payment_warning_grace_period_expiration|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
+  <!-- user type changed -->
+  <pattern id="user_type_changed">
+    <subject resource="|subject_user_type_changed|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core"/>
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_user_type_changed|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+
+  <!-- user role changed -->
+  <pattern id="user_role_changed">
+    <subject resource="|subject_user_role_changed|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core"/>
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_user_role_changed|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+
 </patterns>

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -36,7 +36,7 @@ public class InviteUsersRequestDto
     /// </summary>
     [MaxEmailInvitations]
     [Required]
-    public IEnumerable<UserInvitation> Invitations { get; set; }
+    public IEnumerable<UserInvitationRequestDto> Invitations { get; set; }
 
     /// <summary>
     /// Culture
@@ -44,10 +44,16 @@ public class InviteUsersRequestDto
     public string Culture { get; set; }
 }
 
-public class UserInvitation : EmailInvitationDto
+public class UserInvitationRequestDto
 {
     /// <summary>
     /// Employee type
     /// </summary>
     public EmployeeType Type { get; set; }
+
+    /// <summary>
+    /// Email address
+    /// </summary>
+    [EmailAddress]
+    public string Email { get; set; }
 }
