@@ -514,17 +514,10 @@ public class FileMarker(
 
             if (file.IsForm && room.FolderType == FolderType.VirtualDataRoom)
             {
-                var allRoles = await fileDao.GetFormRoles(file.Id).ToListAsync();
-
-                var aces = await fileSharing.GetPureSharesAsync(room, allRoles.Select(role => role.UserId)).ToListAsync();
-
-                var filteredUserIDs = aces
-                    .Where(ace => ace is not { Access: FileShare.FillForms })
-                    .Select(ace => ace.Id).ToList();
-
-                if (filteredUserIDs.Any())
+                var allRoleUserIds = await fileDao.GetFormRoles(file.Id).Where(r => r.UserId != authContext.CurrentAccount.ID).Select(r => r.UserId).ToListAsync();
+                if (allRoleUserIds.Any())
                 {
-                    taskData.UserIDs = filteredUserIDs;
+                    taskData.UserIDs = allRoleUserIds;
                     var markerHelper = serviceProvider.GetService<FileMarkerHelper<T>>();
                     await markerHelper.Add(taskData);
                 }

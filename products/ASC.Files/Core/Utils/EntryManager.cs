@@ -2277,19 +2277,6 @@ public class EntryManager(IDaoFactory daoFactory,
                 else if (nextRoleUserIds.Any())
                 {
                     await filesMessageService.SendAsync(MessageAction.FormPartiallyFilled, form, MessageInitiator.DocsService, user?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
-                    var aces = await fileSharing.GetPureSharesAsync(room, nextRoleUserIds).ToListAsync();
-                    var formFillers = aces.Where(ace => ace is { Access: FileShare.FillForms }).Select(ace => ace.Id);
-
-                    if (!form.ParentId.Equals(room.Id))
-                    {
-                        var folderDao = daoFactory.GetFolderDao<T>();
-                        var parentFolders = await folderDao.GetParentFoldersAsync(form.ParentId).Where(f => !DocSpaceHelper.IsRoom(f.FolderType)).ToListAsync();
-                        foreach(var folder in parentFolders)
-                        {
-                            await socketManager.CreateFolderAsync(folder, formFillers);
-                        }
-                    }
-                    await socketManager.CreateFileAsync(form, formFillers);
                     await notifyClient.SendFormFillingEvent(room, form, nextRoleUserIds, NotifyConstants.EventYourTurnFormFilling);
                 }
             }

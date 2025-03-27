@@ -4715,30 +4715,29 @@ public class FileStorageService //: IFileStorageService
 
             if (recipients.Any())
             {
-                var shares = await fileSharing.GetPureSharesAsync(currentRoom, recipients).ToListAsync();
-                var filteredRecipients = shares
-                    .Where(ace => ace is not { Access: FileShare.FillForms })
-                    .Select(ace => ace.Id);
-
-                if (filteredRecipients.Any())
-                {
-                    await notifyClient.SendFormFillingEvent(
-                        currentRoom, form, filteredRecipients, NotifyConstants.EventFormStartedFilling, currentUserId);
-                }
+                await notifyClient.SendFormFillingEvent(
+                    currentRoom, form, recipients, NotifyConstants.EventFormStartedFilling, currentUserId);
             }
 
-            var firstRole = roles.FirstOrDefault();
-            if (firstRole.UserId != currentUserId)
+            var roleUserIds = roles.Where(r => r.UserId != currentUserId).Select(r => r.UserId);
+
+            var aces = fileSecurity.GetPureSharesAsync(currentRoom, roleUserIds);
+
+            var formFillers = await aces.Where(ace => ace is { Share: FileShare.FillForms }).Select(s => s.Subject).ToListAsync();
+
+            if (formFillers.Any())
             {
-                var firstUserShare = await fileSharing.GetPureSharesAsync(
-                    currentRoom, [firstRole.UserId])
-                    .FirstOrDefaultAsync();
-
-                if (firstUserShare is { Access: FileShare.FillForms })
+                if (!form.ParentId.Equals(currentRoom.Id))
                 {
-                    await socketManager.CreateFileAsync(form, [firstRole.UserId]);
+                    var parentFolders = await folderDao.GetParentFoldersAsync(form.ParentId).Where(f => !DocSpaceHelper.IsRoom(f.FolderType)).ToListAsync();
+                    foreach (var folder in parentFolders)
+                    {
+                        await socketManager.CreateFolderAsync(folder, formFillers);
+                    }
                 }
+                await socketManager.CreateFileAsync(form, formFillers);
             }
+
         }
 
         await socketManager.UpdateFileAsync(form);
@@ -4805,19 +4804,11 @@ public class FileStorageService //: IFileStorageService
                         RoleName = role?.RoleName
                     };
                 var room = await DocSpaceHelper.GetParentRoom(form, folderDao);
-                var allRoles = await fileDao.GetFormRoles(form.Id).ToListAsync();
-
-                var currentStep = allRoles.Where(r => !r.Submitted).Min(r => (int?)r.Sequence) ?? 0;
-                var submittedRoles = allRoles.Where(r => r.Submitted || r.Sequence == currentStep).Select(r => r.UserId);
-
-                var aces = await fileSharing.GetPureSharesAsync(room, allRoles.Where(r => !r.Submitted && r.Sequence != currentStep).Select(r => r.UserId)).ToListAsync();
-                var filteredUnsubmittedRoles = aces
-                    .Where(ace => ace is not { Access: FileShare.FillForms })
-                    .Select(ace => ace.Id);
+                var allRoleUserIds = await fileDao.GetFormRoles(form.Id).Where(role => role.UserId != authContext.CurrentAccount.ID).Select(r => r.UserId).ToListAsync();
 
                 var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
                 await filesMessageService.SendAsync(MessageAction.FormStopped, form, MessageInitiator.DocsService, user?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
-                await notifyClient.SendFormFillingEvent(room, form, submittedRoles.Concat(filteredUnsubmittedRoles), NotifyConstants.EventStoppedFormFilling, authContext.CurrentAccount.ID);
+                await notifyClient.SendFormFillingEvent(room, form, allRoleUserIds, NotifyConstants.EventStoppedFormFilling, authContext.CurrentAccount.ID);
                 break;
 
             case FormFillingManageAction.Resume:

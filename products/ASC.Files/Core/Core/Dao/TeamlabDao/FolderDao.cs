@@ -305,16 +305,7 @@ internal class FolderDao(
                     f.Category == (int)FilterType.PdfForm &&
                     f.TenantId == r.TenantId &&
                     filesDbContext.FilesFormRoleMapping.Any(r =>
-                            r.TenantId == tenantId && r.FormId == f.Id && r.UserId == _authContext.CurrentAccount.ID) &&
-                                (!filesDbContext.FilesFormRoleMapping.Any(r => r.TenantId == tenantId && r.FormId == f.Id && !r.Submitted) || (
-                                filesDbContext.FilesFormRoleMapping
-                                    .Where(r => r.TenantId == tenantId && r.FormId == f.Id && !r.Submitted)
-                                    .Min(r => (int?)r.Sequence)
-                                >=
-                                filesDbContext.FilesFormRoleMapping
-                                    .Where(r => r.TenantId == tenantId && r.FormId == f.Id && r.UserId == _authContext.CurrentAccount.ID)
-                                    .Select(r => (int?)r.Sequence)
-                                    .FirstOrDefault()))
+                            r.TenantId == tenantId && r.FormId == f.Id && r.UserId == _authContext.CurrentAccount.ID)
                 ) ||
                 filesDbContext.Tree.Any(fft =>
                     fft.ParentId == r.Id &&
@@ -323,16 +314,7 @@ internal class FolderDao(
                         ff.Category == (int)FilterType.PdfForm &&
                         ff.TenantId == r.TenantId &&
                         filesDbContext.FilesFormRoleMapping.Any(r =>
-                            r.TenantId == tenantId && r.FormId == ff.Id && r.UserId == _authContext.CurrentAccount.ID) &&
-                                (!filesDbContext.FilesFormRoleMapping.Any(r => r.TenantId == tenantId && r.FormId == ff.Id && !r.Submitted) || (
-                                filesDbContext.FilesFormRoleMapping
-                                    .Where(r => r.TenantId == tenantId && r.FormId == ff.Id && !r.Submitted)
-                                    .Min(r => (int?)r.Sequence)
-                                >=
-                                filesDbContext.FilesFormRoleMapping
-                                    .Where(r => r.TenantId == tenantId && r.FormId == ff.Id && r.UserId == _authContext.CurrentAccount.ID)
-                                    .Select(r => (int?)r.Sequence)
-                                    .FirstOrDefault()))
+                            r.TenantId == tenantId && r.FormId == ff.Id && r.UserId == _authContext.CurrentAccount.ID)
                     )
                 )
             );
