@@ -890,7 +890,7 @@ public class TariffService(
                 try
                 {
                     var portalId = await coreSettings.GetKeyAsync(tenantId);
-                    balance = await accountingClient.GetBalance(portalId, true);
+                    balance = await accountingClient.GetBalanceAsync(portalId, true);
                 }
                 catch (Exception error)
                 {
@@ -907,13 +907,13 @@ public class TariffService(
     public async Task<bool> BlockMoneyAsync(int tenantId, decimal amount)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
-        return await accountingClient.BlockMoney(portalId, amount);
+        return await accountingClient.BlockMoneyAsync(portalId, amount);
     }
 
     public async Task<decimal> TakeOffMoneyAsync(int tenantId, decimal amount)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
-        var balance = await accountingClient.TakeOffMoney(portalId, amount);
+        var balance = await accountingClient.TakeOffMoneyAsync(portalId, amount);
 
         var cacheKey = GetAccountingBalanceCacheKey(tenantId);
         await hybridCache.SetAsync(cacheKey, balance.ToString(), TimeSpan.FromMinutes(10));
@@ -924,7 +924,7 @@ public class TariffService(
     public async Task<List<PurchaseInfo>> GetReportAsync(int tenantId, DateTime utcFrom, DateTime utcTo)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
-        return await accountingClient.GetReport(portalId, utcFrom, utcTo);
+        return await accountingClient.GetReportAsync(portalId, utcFrom, utcTo);
     }
 
     public async Task<List<CurrencyInfo>> GetAllCurrenciesAsync()

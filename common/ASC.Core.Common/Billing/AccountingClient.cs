@@ -51,22 +51,22 @@ public class AccountingClient
     }
 
 
-    public async Task<decimal> GetBalance(string portalId, bool addPolicy = false)
+    public async Task<decimal> GetBalanceAsync(string portalId, bool addPolicy = false)
     {
         return await RequestAsync<decimal>(HttpMethod.Post, "/balance", portalId, addPolicy: addPolicy);
     }
 
-    public async Task<bool> BlockMoney(string portalId, decimal amount)
+    public async Task<bool> BlockMoneyAsync(string portalId, decimal amount)
     {
         return await RequestAsync<bool>(HttpMethod.Post, "/money/block", portalId, [Tuple.Create("Amount", amount.ToString())]);
     }
 
-    public async Task<decimal> TakeOffMoney(string portalId, decimal amount)
+    public async Task<decimal> TakeOffMoneyAsync(string portalId, decimal amount)
     {
         return await RequestAsync<decimal>(HttpMethod.Post, "/money/takeoff", portalId, [Tuple.Create("Amount", amount.ToString())]);
     }
 
-    public async Task<List<PurchaseInfo>> GetReport(string portalId, DateTime utcFrom, DateTime utcTo)
+    public async Task<List<PurchaseInfo>> GetReportAsync(string portalId, DateTime utcFrom, DateTime utcTo)
     {
         return await RequestAsync<List<PurchaseInfo>>(HttpMethod.Post, "/report", portalId, [Tuple.Create("From", utcFrom.ToString("o")), Tuple.Create("To", utcTo.ToString("o"))]);
     }
