@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -247,13 +247,12 @@ public class BillingClient
             return result;
         }
 
-        var info = new { Method = method, PortalId = portalId, Params = parameters != null ? string.Join(", ", parameters.Select(p => p.Item1 + ": " + p.Item2)) : "" };
-        if (result.Contains("{\"Message\":\"error: cannot find "))
+       if (result.Contains("{\"Message\":\"error: cannot find "))
         {
-            throw new BillingNotFoundException(result, info);
+            throw new BillingNotFoundException(result);
         }
 
-        throw new BillingException(result, info);
+        throw new BillingException(result);
     }
 }
 
@@ -283,7 +282,7 @@ public static class BillingHttplClientExtension
 
 public class BillingException : Exception
 {
-    public BillingException(string message, object debugInfo = null) : base(message + (debugInfo != null ? " Debug info: " + debugInfo : string.Empty))
+    public BillingException(string message) : base(message)
     {
     }
 
@@ -292,11 +291,11 @@ public class BillingException : Exception
     }
 }
 
-public class BillingNotFoundException(string message, object debugInfo = null) : BillingException(message, debugInfo);
+public class BillingNotFoundException(string message) : BillingException(message);
 
 public class BillingNotConfiguredException : BillingException
 {
-    public BillingNotConfiguredException(string message, object debugInfo = null) : base(message, debugInfo)
+    public BillingNotConfiguredException(string message) : base(message)
     {
     }
 

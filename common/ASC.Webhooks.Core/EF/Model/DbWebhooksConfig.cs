@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -38,6 +38,8 @@ public class DbWebhooksConfig : BaseEntity
     public bool Enabled { get; set; }
     public bool SSL { get; set; }
     public WebhookTrigger Triggers { get; set; }
+    [MaxLength(36)]
+    public string TargetId { get; set; }
 
     public Guid? CreatedBy { get; set; }
     public DateTime? CreatedOn { get; set; }
@@ -114,6 +116,13 @@ public static class WebhooksConfigExtension
             entity.Property(e => e.Triggers)
                 .HasColumnName("triggers")
                 .IsRequired();
+
+            entity.Property(e => e.TargetId)
+                .IsRequired(false)
+                .HasColumnName("target_id")
+                .HasColumnType("varchar(36)")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.CreatedBy)
                 .IsRequired(false)
@@ -207,6 +216,12 @@ public static class WebhooksConfigExtension
             entity.Property(e => e.Triggers)
                 .HasColumnName("triggers")
                 .IsRequired();
+
+            entity.Property(e => e.TargetId)
+                .IsRequired(false)
+                .HasColumnName("target_id")
+                .HasMaxLength(36)
+                .HasColumnType("character varying");
 
             entity.Property(e => e.CreatedBy)
                 .IsRequired(false)

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -1027,7 +1027,7 @@ public partial class SettingsController(MessageService messageService,
         if (!SetupInfo.IsVisibleSettings(nameof(ManagementType.ThirdPartyAuthorization))
             || !saveAvailable)
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption, "ThirdPartyAuthorization");
+            throw new BillingException(Resource.ErrorNotAllowedOption);
         }
 
         var changed = false;
@@ -1198,7 +1198,7 @@ public partial class SettingsController(MessageService messageService,
         if (!coreBaseSettings.Standalone
             && !(await tenantManager.GetCurrentTenantQuotaAsync()).Statistic)
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption, "Statistic");
+            throw new BillingException(Resource.ErrorNotAllowedOption);
         }
     }
 }

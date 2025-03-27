@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -51,7 +51,7 @@ public class UpdateMemberStatusRequestDto
     /// New user status
     /// </summary>
     [FromRoute(Name = "status")]
-    public EmployeeStatus Status { get; set; }
+    public required EmployeeStatus Status { get; set; }
 
     /// <summary>
     /// Update members
@@ -69,7 +69,7 @@ public class UpdateMemberTypeRequestDto
     /// New user type
     /// </summary>
     [FromRoute(Name = "type")]
-    public EmployeeType Type { get; set; }
+    public required EmployeeType Type { get; set; }
 
     /// <summary>
     /// Update members
@@ -87,7 +87,7 @@ public class UpdateMemberActivationStatusRequestDto
     /// Activation status
     /// </summary>
     [FromRoute(Name = "activationstatus")]
-    public EmployeeActivationStatus ActivationStatus { get; set; }
+    public required EmployeeActivationStatus ActivationStatus { get; set; }
 
     /// <summary>
     /// Update members

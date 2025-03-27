@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,7 +34,7 @@ public class StorageRequestsDto
     /// <summary>
     /// Storage name
     /// </summary>
-    public string Module { get; set; }
+    public required string Module { get; set; }
 
     /// <summary>
     /// Storage properties

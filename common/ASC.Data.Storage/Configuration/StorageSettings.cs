@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -120,6 +120,7 @@ public class CdnStorageSettings : BaseStorageSettings<CdnStorageSettings>, ISett
     [JsonIgnore]
     public override Guid ID => new("0E9AE034-F398-42FE-B5EE-F86D954E9FB2");
 
+    [JsonIgnore]
     public override Func<DataStoreConsumer, DataStoreConsumer> Switch => d => d.Cdn;
 
     CdnStorageSettings ISettings<CdnStorageSettings>.GetDefault()

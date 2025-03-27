@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -58,10 +58,15 @@ public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory s
 
         var webhookPayload = JsonSerializer.Deserialize<WebhookPayload<object, object>>(entry.RequestPayload, _jsonSerializerOptions);
         webhookPayload.Event.Id = entry.Id;
+        webhookPayload.Webhook.LastFailureOn = null;
+        webhookPayload.Webhook.LastFailureContent = null;
+        webhookPayload.Webhook.LastSuccessOn = null;
         webhookPayload.Webhook.RetryCount = 0;
-        webhookPayload.Webhook.RetryOn = webhookPayload.GetShortUtcNow();
+        webhookPayload.Webhook.RetryOn = null;
 
         var status = 0;
+        DateTime? delivery = null;
+        DateTime requestDate = webhookPayload.GetShortUtcNow();
         string responsePayload = null;
         string responseHeaders = null;
         string requestPayload = JsonSerializer.Serialize(webhookPayload, _jsonSerializerOptions);
@@ -88,7 +93,7 @@ public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory s
 
                 if (retryCount > 0)
                 {
-                    webhookPayload.Webhook.LastFailureOn = webhookPayload.Webhook.RetryOn;
+                    webhookPayload.Webhook.LastFailureOn = webhookPayload.Webhook.RetryOn ?? requestDate;
                     webhookPayload.Webhook.LastFailureContent = (string)context["errorMessage"];
                     webhookPayload.Webhook.LastSuccessOn = entry.Config.LastSuccessOn;
 
@@ -116,7 +121,7 @@ public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory s
             responseHeaders = JsonSerializer.Serialize(response.Headers.ToDictionary(r => r.Key, v => v.Value), _jsonSerializerOptions);
             responsePayload = await response.Content.ReadAsStringAsync(cancellationToken);
 
-            entry.Config.LastSuccessOn = DateTime.UtcNow;
+            entry.Config.LastSuccessOn = delivery = DateTime.UtcNow;
 
             logger.DebugResponse(response);
         }
@@ -139,8 +144,9 @@ public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory s
             entry.Config.LastFailureContent = e.Message;
             entry.Config.LastFailureOn = DateTime.UtcNow;
 
-            if (entry.Config.LastSuccessOn.HasValue &&
-                (entry.Config.LastFailureOn - entry.Config.LastSuccessOn.Value > TimeSpan.FromDays(settings.TrustedDaysCount ?? 3)))
+            var lastSuccessOn = entry.Config.LastSuccessOn ?? entry.Config.CreatedOn;
+
+            if (lastSuccessOn.HasValue && entry.Config.LastFailureOn - lastSuccessOn.Value > TimeSpan.FromDays(settings.TrustedDaysCount ?? 3))
             {
                 entry.Config.Enabled = false;
             }
@@ -158,7 +164,7 @@ public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory s
             logger.ErrorWithException(e);
         }
 
-        await dbWorker.UpdateWebhookJournal(entry.Id, status, delivery: DateTime.UtcNow, requestPayload, requestHeaders, responsePayload, responseHeaders);
+        await dbWorker.UpdateWebhookJournal(entry.Id, status, delivery, requestPayload, requestHeaders, responsePayload, responseHeaders);
         await dbWorker.UpdateWebhookConfig(entry.Config);
 
         if (!entry.Config.Enabled)

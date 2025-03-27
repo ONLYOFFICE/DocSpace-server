@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,7 +28,18 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class ProductAdministratorDto
 {
+    /// <summary>
+    /// Unique identifier of the product
+    /// </summary>
     public Guid ProductId { get; set; }
+
+    /// <summary>
+    /// Unique identifier of the user
+    /// </summary>
     public Guid UserId { get; set; }
+
+    /// <summary>
+    /// Indicates whether the user has administrator privileges for the product
+    /// </summary>
     public bool Administrator { get; set; }
 }

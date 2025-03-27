@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -43,9 +43,9 @@ public class Startup : BaseStartup
         var services = builder.Services;
         await base.ConfigureServices(builder);
         
-        services.RegisterQueue<BackupProgressItem>(5);
-        services.RegisterQueue<RestoreProgressItem>(5);
-        services.RegisterQueue<TransferProgressItem>(5);
+        services.RegisterQueue<BackupProgressItem>(5, 60 * 60 * 24);
+        services.RegisterQueue<RestoreProgressItem>(5, 60 * 60 * 24);
+        services.RegisterQueue<TransferProgressItem>(5, 60 * 60 * 24);
         
         services.AddHostedService<BackupListenerService>();
         services.AddHostedService<BackupCleanerTempFileService>();

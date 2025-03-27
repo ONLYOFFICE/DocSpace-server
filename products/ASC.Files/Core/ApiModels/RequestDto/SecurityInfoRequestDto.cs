@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,8 +29,18 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// <summary>
 /// Security information request parameters
 /// </summary>
-public class SecurityInfoRequestDto : BaseBatchRequestDto
+public class SecurityInfoRequestDto
 {
+    /// <summary>
+    /// List of folder IDs
+    /// </summary>
+    public IEnumerable<JsonElement> FolderIds { get; set; } = new List<JsonElement>();
+
+    /// <summary>
+    /// List of file IDs
+    /// </summary>
+    public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
+
     /// <summary>
     /// Collection of sharing parameters
     /// </summary>
@@ -77,7 +87,7 @@ public class FileSecurityInfoSimpleRequestDto<T>
     /// File ID
     /// </summary>
     [FromRoute(Name = "fileId")]
-    public T FileId { get; set; }
+    public required T FileId { get; set; }
 
     /// <summary>
     /// Security info simple
@@ -95,7 +105,7 @@ public class FolderSecurityInfoSimpleRequestDto<T>
     /// Folder ID
     /// </summary>
     [FromRoute(Name = "folderId")]
-    public T FolderId { get; set; }
+    public required T FolderId { get; set; }
 
     /// <summary>
     /// Security info simple

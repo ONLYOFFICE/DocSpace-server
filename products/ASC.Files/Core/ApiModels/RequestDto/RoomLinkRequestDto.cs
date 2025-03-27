@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,8 +29,23 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// <summary>
 /// Link parameters
 /// </summary>
-public class RoomLinkRequest : LinkRequestDtoBase
+public class RoomLinkRequest
 {
+    /// <summary>
+    /// Link ID
+    /// </summary>
+    public Guid LinkId { get; set; }
+
+    /// <summary>
+    /// Sharing rights
+    /// </summary>
+    public FileShare Access { get; set; }
+
+    /// <summary>
+    /// Link expiration date
+    /// </summary>
+    public ApiDateTime ExpirationDate { get; set; }
+
     /// <summary>
     /// Link name
     /// </summary>
@@ -40,7 +55,7 @@ public class RoomLinkRequest : LinkRequestDtoBase
     /// <summary>
     /// Link type
     /// </summary>
-    public LinkType LinkType { get; set; }
+    public required LinkType LinkType { get; set; }
 
     /// <summary>
     /// Link password
@@ -54,8 +69,6 @@ public class RoomLinkRequest : LinkRequestDtoBase
     public bool DenyDownload { get; set; }
 }
 
-
-
 /// <summary>
 /// Link request parameters
 /// </summary>
@@ -65,7 +78,7 @@ public class RoomLinkRequestDto<T>
     /// Room ID
     /// </summary>
     [FromRoute(Name = "id")]
-    public T Id { get; set; }
+    public required T Id { get; set; }
 
     /// <summary>
     /// Room link

@@ -1,31 +1,32 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
-//
+﻿// (c) Copyright Ascensio System SIA 2009-2025
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Webhook;
 using ASC.Core.Common;
-using ASC.Files.Core;
+using ASC.Webhooks.Core;
 
 using SecurityContext = ASC.Core.SecurityContext;
 
@@ -39,6 +40,7 @@ public class UpdateUserTypeProgressItem: DistributedTaskProgress
     private int _tenantId;
     private Guid _currentUserId;
     private EmployeeType _employeeType;
+    private IDictionary<string, StringValues> _httpHeaders;
     private UserInfo _userInfo;
     private readonly IServiceScopeFactory _serviceScopeFactory;
 
@@ -53,13 +55,14 @@ public class UpdateUserTypeProgressItem: DistributedTaskProgress
         _serviceScopeFactory = serviceScopeFactory;
     }
 
-    public void Init(int tenantId, Guid user, Guid toUserId, Guid currentUserId, EmployeeType employeeType)
+    public void Init(int tenantId, Guid user, Guid toUserId, Guid currentUserId, EmployeeType employeeType, IDictionary<string, StringValues> httpHeaders)
     {
         _tenantId = tenantId;
         User = user;
         ToUser = toUserId;
         _currentUserId = currentUserId;
         _employeeType = employeeType;
+        _httpHeaders = httpHeaders.ToDictionary();
         Id = QueueWorkerUpdateUserType.GetProgressItemId(tenantId, user);
         Status = DistributedTaskStatus.Created;
         Exception = null;
@@ -71,7 +74,7 @@ public class UpdateUserTypeProgressItem: DistributedTaskProgress
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var scopeClass = scope.ServiceProvider.GetService<ChangeUserTypeProgressItemScope>();
-        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, displayUserSettingsHelper, options, webItemSecurityCache, distributedLockProvider, socketManager, userFormatter, daoFactory) = scopeClass;
+        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, displayUserSettingsHelper, options, webItemSecurityCache, distributedLockProvider, socketManager, webhookManager, userFormatter, daoFactory) = scopeClass;
         var logger = options.CreateLogger("ASC.Web");
         await tenantManager.SetCurrentTenantAsync(_tenantId);
         _userInfo = await userManager.GetUsersAsync(User);
@@ -102,7 +105,7 @@ public class UpdateUserTypeProgressItem: DistributedTaskProgress
             await SetPercentageAndCheckCancellationAsync(100, false);
 
             Status = DistributedTaskStatus.Completed;
-            await SendSuccessNotifyAsync(userManager, studioNotifyService, messageService, displayUserSettingsHelper);
+            await SendSuccessNotifyAsync(userManager, studioNotifyService, messageService, webhookManager, displayUserSettingsHelper);
         }
         catch (OperationCanceledException)
         {
@@ -213,7 +216,7 @@ public class UpdateUserTypeProgressItem: DistributedTaskProgress
         CancellationToken.ThrowIfCancellationRequested();
     }
 
-    private async Task SendSuccessNotifyAsync(UserManager userManager, StudioNotifyService studioNotifyService, MessageService messageService, DisplayUserSettingsHelper displayUserSettingsHelper)
+    private async Task SendSuccessNotifyAsync(UserManager userManager, StudioNotifyService studioNotifyService, MessageService messageService, UserWebhookManager webhookManager, DisplayUserSettingsHelper displayUserSettingsHelper)
     {
         var toUser = await userManager.GetUsersAsync(ToUser);
 
@@ -222,7 +225,9 @@ public class UpdateUserTypeProgressItem: DistributedTaskProgress
         var fromUserName = _userInfo.DisplayUserName(false, displayUserSettingsHelper);
         var toUserName = toUser.DisplayUserName(false, displayUserSettingsHelper);
 
-        messageService.Send(MessageAction.UsersUpdatedType, MessageTarget.Create([User]));
+        messageService.SendHeadersMessage(MessageAction.UsersUpdatedType, MessageTarget.Create([User]), _httpHeaders, [fromUserName], [_userInfo.Id], _employeeType);
+
+        await webhookManager.PublishAsync(WebhookTrigger.UserUpdated, _userInfo);
     }
 
     private async Task SendErrorNotifyAsync(UserManager userManager, StudioNotifyService studioNotifyService, string errorMessage)
@@ -247,5 +252,6 @@ public record ChangeUserTypeProgressItemScope(
     WebItemSecurityCache WebItemSecurityCache,
     IDistributedLockProvider DistributedLockProvider,
     UserSocketManager SocketManager,
+    UserWebhookManager WebhookManager,
     UserFormatter UserFormatter,
     IDaoFactory DaoFactory);

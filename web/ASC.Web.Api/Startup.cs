@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -51,7 +51,10 @@ public class Startup : BaseStartup
         services.AddBaseDbContextPool<FilesDbContext>();
         services.AddBaseDbContextPool<BackupsContext>();
         services.RegisterQuotaFeature();
-
+        services.RegisterQueue<LdapOperationJob>();
+        services.RegisterQueue<SmtpJob>();
+        services.RegisterQueue<UsersQuotaSyncJob>();
+        
         services.AddStartupTask<CspStartupTask>()
                    .TryAddSingleton(services);
                 

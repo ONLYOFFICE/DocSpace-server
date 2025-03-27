@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -110,7 +110,7 @@ public class QueueWorkerUpdateUserType(IHttpContextAccessor httpContextAccessor,
     {
         var result = _serviceProvider.GetService<UpdateUserTypeProgressItem>();
 
-        result.Init(tenantId, userId, toUserId, currentUserId, employeeType);
+        result.Init(tenantId, userId, toUserId, currentUserId, employeeType, _httpHeaders);
 
         return await StartAsync(tenantId, userId, result);
     }
