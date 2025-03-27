@@ -81,7 +81,7 @@ public class AccountingClient
     {
         if (!Configured)
         {
-            throw new AccountingNotConfiguredException("Accounting is not configured");
+            throw new AccountingNotConfiguredException();
         }
 
         var request = new HttpRequestMessage
@@ -157,19 +157,7 @@ public class AccountingClient
             return result;
         }
 
-        var info = new {
-            HttpMethod = httpMethod.Method,
-            Url = url,
-            PortalId = portalId,
-            Params = string.Join(", ", parameters?.Select(p => p.Item1 + ": " + p.Item2) ?? [])
-        };
-
-        if (responseString.StartsWith("{\"Message\":\"error: cannot find", true, null))
-        {
-            throw new AccountingNotFoundException(responseString, info);
-        }
-
-        throw new AccountingException(responseString, info);
+        throw new AccountingException(responseString);
     }
 
     private static string CreateAuthToken(string pkey, string machinekey)
@@ -201,7 +189,7 @@ public static class AccountingHttplClientExtension
                     (msg =>
                     {
                         var result = msg.Content.ReadAsStringAsync().Result;
-                        return result.Contains("{\"Message\":\"error: cannot find ");
+                        return result.StartsWith("{\"Message\":\"error: cannot find", true, null);
                     })
                     .WaitAndRetryAsync(2, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
             });
@@ -210,7 +198,7 @@ public static class AccountingHttplClientExtension
 
 public class AccountingException : Exception
 {
-    public AccountingException(string message, object debugInfo = null) : base(message + (debugInfo != null ? " Debug info: " + debugInfo : string.Empty))
+    public AccountingException(string message) : base(message)
     {
     }
 
@@ -219,6 +207,4 @@ public class AccountingException : Exception
     }
 }
 
-public class AccountingNotFoundException(string message, object debugInfo = null) : AccountingException(message, debugInfo);
-
-public class AccountingNotConfiguredException(string message) : AccountingException(message);
+public class AccountingNotConfiguredException(string message = "Accounting service is not configured") : AccountingException(message);

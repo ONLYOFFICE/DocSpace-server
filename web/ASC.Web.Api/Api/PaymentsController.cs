@@ -375,12 +375,7 @@ public class PaymentController(
     {
         if (!tariffService.IsAccountingClientConfigured())
         {
-            throw new AccountingNotConfiguredException("Accounting service is not configured");
-        }
-
-        if (!tariffService.IsAccountingClientConfigured())
-        {
-            throw new AccountingNotConfiguredException("Accounting service is not configured");
+            throw new AccountingNotConfiguredException();
         }
 
         var tenant = tenantManager.GetCurrentTenant();
@@ -388,7 +383,7 @@ public class PaymentController(
 
         if (!hasPayments)
         {
-            throw new AccountingNotFoundException("No one payment found");
+            throw new BillingNotFoundException("No one payment found");
         }
 
         var payerId = (await tariffService.GetTariffAsync(tenant.Id)).CustomerId;
