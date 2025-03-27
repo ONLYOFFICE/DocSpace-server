@@ -313,9 +313,17 @@ public class UpdateMemberCultureByIdRequestDto
     public required string UserId { get; set; }
 
     /// <summary>
-    /// Language
+    /// Culture parameters
     /// </summary>
     [FromBody]
+    public Culture Culture { get; set; }
+}
+
+public class Culture
+{
+    /// <summary>
+    /// Language
+    /// </summary>
     public string CultureName { get; set; }
 }
 public enum SexEnum
