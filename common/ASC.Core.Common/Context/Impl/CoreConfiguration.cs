@@ -49,7 +49,7 @@ public class CoreBaseSettings(IConfiguration configuration)
     public string ServerRoot => _serverRoot ??= configuration["core:server-root"] ?? string.Empty;
 
     /// <summary>
-    /// The core base server root.
+    /// Specifies if it is the standalone .
     /// </summary>
     public bool Standalone => _standalone ??= Basedomain == "localhost";
 

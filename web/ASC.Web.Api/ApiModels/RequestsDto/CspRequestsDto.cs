@@ -27,12 +27,12 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The Csp (Content Security Policy) request parameters.
+/// The request parameters for configuring Content Security Policy (CSP) settings.
 /// </summary>
 public class CspRequestsDto
 {
     /// <summary>
-    /// The list of domains of the Csp.
+    /// The collection of allowed domains in the Content Security Policy (CSP).
     /// </summary>
     public IEnumerable<string> Domains { get; set; }
 }

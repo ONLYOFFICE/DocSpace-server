@@ -27,12 +27,12 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The curent portal tariff request parameters.
+/// The request parameters for handling current portal tariff request parameters.
 /// </summary>
 public class CurrentPortalTariffRequestDto
 {
     /// <summary>
-    /// Specifies whether the tariff will be refreshed or not.
+    /// The value indicating whether the current portal tariff information should be refreshed.
     /// </summary>
     [FromQuery(Name = "refresh")]
     public bool Refresh { get; set; }

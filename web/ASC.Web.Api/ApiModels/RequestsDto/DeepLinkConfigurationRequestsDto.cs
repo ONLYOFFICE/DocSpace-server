@@ -27,12 +27,12 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// The deeplink configuration request parameters.
+/// The request parameters for managing deeplink configuration.
 /// </summary>
 public class DeepLinkConfigurationRequestsDto
 {
     /// <summary>
-    /// The tenant deeplink settings parameters.
+    /// The deep link settings specific to the tenant.
     /// </summary>
     public TenantDeepLinkSettings DeepLinkSettings { get; set; }
 }

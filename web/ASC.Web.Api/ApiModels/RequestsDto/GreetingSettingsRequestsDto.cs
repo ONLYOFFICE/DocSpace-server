@@ -27,12 +27,12 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// The greeting settings request parameters.
+/// Represents the request parameters for managing greeting settings.
 /// </summary>
 public class GreetingSettingsRequestsDto
 {
     /// <summary>
-    /// The greeting settings tenant title.
+    /// The title of the greeting settings for the tenant.
     /// </summary>
     [StringLength(255)]
     public string Title { get; set; }

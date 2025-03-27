@@ -27,18 +27,18 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The audit trail types request parameters.
+/// Represents the parameters for filtering audit trail types.
 /// </summary>
 public class AuditTrailTypesRequestDto
 {
     /// <summary>
-    /// The product type of the audit trail.
+    /// The type of product related to the audit trail.
     /// </summary>
     [FromQuery(Name = "productType")]
     public ProductType? ProductType { get; set; }
 
     /// <summary>
-    /// The module type of the audit trail.
+    /// The module within the product associated with the audit trail.
     /// </summary>
     [FromQuery(Name = "moduleType")]
     public ModuleType? ModuleType { get; set; }

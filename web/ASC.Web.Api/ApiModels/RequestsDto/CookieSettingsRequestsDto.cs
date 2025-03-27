@@ -27,17 +27,17 @@
 namespace ASC.Web.Api.Models;
 
 /// <summary>
-/// The cookies settings request parameters.
+/// Represents the request parameters for managing cookie settings.
 /// </summary>
 public class CookieSettingsRequestsDto
 {
     /// <summary>
-    /// The lifetime value in minutes.
+    /// The lifespan of cookies in minutes.
     /// </summary>
     public int LifeTime { get; set; }
 
     /// <summary>
-    /// Specifies if the cookie settings are enabled or not.
+    /// Specifies whether the cookie settings are enabled or disabled.
     /// </summary>
     public bool Enabled { get; set; }
 }

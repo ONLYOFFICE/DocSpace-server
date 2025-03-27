@@ -27,17 +27,17 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The portal theme settings.
+/// The request parameters for managing portal theme settings.
 /// </summary>
 public class CustomColorThemesSettingsRequestsDto
 {
     /// <summary>
-    /// The custom color theme settings item.
+    /// The custom color theme configuration.
     /// </summary>
     public CustomColorThemesSettingsItem Theme { get; set; }
 
     /// <summary>
-    /// Specifies whether the custom color themes settings selected or not.
+    /// Specifies the optional value indicating the selected custom color theme.
     /// </summary>
     public int? Selected { get; set; }
 }

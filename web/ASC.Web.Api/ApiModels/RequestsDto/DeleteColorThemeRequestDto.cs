@@ -27,12 +27,12 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The delete color theme request parameters.
+/// The request parameters for handling requests to delete a custom color theme.
 /// </summary>
 public class DeleteColorThemeRequestDto
 {
     /// <summary>
-    /// The portal theme ID to delete.
+    /// The ID of the portal theme to delete.
     /// </summary>
     [FromQuery(Name = "id")]
     public int Id { get; set; }

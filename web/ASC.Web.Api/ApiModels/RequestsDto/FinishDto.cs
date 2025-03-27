@@ -27,7 +27,7 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The finish parameters.
+/// The parameters for finalizing a process or operation.
 /// </summary>
 public class FinishDto
 {

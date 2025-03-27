@@ -27,17 +27,17 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The firebase request parameters.
+/// The Firebase-related request parameters.
 /// </summary>
 public class FirebaseRequestsDto
 {
     /// <summary>
-    /// The firebase device token.
+    /// The Firebase device token.
     /// </summary>
     public string FirebaseDeviceToken { get; set; }
 
     /// <summary>
-    /// Specifies if the user is subscribed to the push notification or not.
+    /// Specifies the value indicating whether the user is subscribed to push notifications.
     /// </summary>
     public bool IsSubscribed { get; set; }
 }

@@ -27,60 +27,60 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The audit event request parameters.
+/// Represents the parameters for filtering and retrieving audit event records.
 /// </summary>
 public class AuditEventRequestDto
 {
     /// <summary>
-    /// The audit event user ID.
+    /// The ID of the user who triggered the audit event.
     /// </summary>
     [FromQuery(Name = "userId")]
     public Guid UserId { get; set; }
 
     /// <summary>
-    /// The audit event product type.
+    /// The type of product related to the audit event.
     /// </summary>
     [FromQuery(Name = "productType")]
     public ProductType ProductType { get; set; }
 
     /// <summary>
-    /// The audit event module.
+    /// The module within the product where the audit event occurred.
     /// </summary>
     [FromQuery(Name = "moduleType")]
     public ModuleType ModuleType { get; set; }
 
     /// <summary>
-    /// The audit event action type.
+    /// The type of action performed in the audit event (e.g., Create, Update, Delete).
     /// </summary>
     [FromQuery(Name = "actionType")]
     public ActionType ActionType { get; set; }
 
     /// <summary>
-    /// The audit event action.
+    /// The specific action that occurred within the audit event.
     /// </summary>
     [FromQuery(Name = "action")]
     public MessageAction Action { get; set; }
 
     /// <summary>
-    /// The audit event entry.
+    /// The type of audit entry (e.g., Folder, User, File).
     /// </summary>
     [FromQuery(Name = "entryType")]
     public EntryType EntryType { get; set; }
 
     /// <summary>
-    /// The audit event target.
+    /// The target object affected by the audit event (e.g., document ID, user account).
     /// </summary>
     [FromQuery(Name = "target")]
     public string Target {  get; set; }
 
     /// <summary>
-    /// The audit event start date.
+    /// The starting date and time for filtering audit events.
     /// </summary>
     [FromQuery(Name = "from")]
     public ApiDateTime From { get; set; }
 
     /// <summary>
-    /// The audit event end date.
+    /// The ending date and time for filtering audit events.
     /// </summary>
     [FromQuery(Name = "to")]
     public ApiDateTime To { get; set; }

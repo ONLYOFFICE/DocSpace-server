@@ -27,12 +27,12 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The employee type (All, RoomAdmin, Guest, DocSpaceAdmin, User).
+/// The request paarmeters for handling invitation link requests with specific employee type parameters.
 /// </summary>
 public class InvitationLinkRequestDto
 {
     /// <summary>
-    /// The employee type (All, RoomAdmin, Guest, DocSpaceAdmin, User).
+    /// Specifies the type of employee role for the invitation link (All, RoomAdmin, Guest, DocSpaceAdmin, User).
     /// </summary>
     [FromRoute(Name = "employeeType")]
     public EmployeeType EmployeeType { get; set; }
