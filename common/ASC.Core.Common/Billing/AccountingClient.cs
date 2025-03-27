@@ -24,12 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Collections.Specialized;
+
 namespace ASC.Core.Billing;
 
 [Singleton]
 public class AccountingClient
 {
     public readonly bool Configured;
+    public readonly bool Test;
 
     private readonly AccountingConfiguration _configuration;
     private readonly IHttpClientFactory _httpClientFactory;
@@ -47,46 +50,99 @@ public class AccountingClient
         if (!string.IsNullOrEmpty(_configuration.Url))
         {
             Configured = true;
+            Test = _configuration.Test;
         }
     }
 
 
-    public async Task<decimal> GetBalanceAsync(string portalId, bool addPolicy = false)
+    public async Task<Balance> GetCustomerBalanceAsync(string portalId, bool addPolicy = false)
     {
-        return await RequestAsync<decimal>(HttpMethod.Post, "/balance", portalId, addPolicy: addPolicy);
+        if (Test && !string.IsNullOrEmpty(_configuration.TestCustomer))
+        {
+            portalId = _configuration.TestCustomer;
+        }
+
+        return await RequestAsync<Balance>(HttpMethod.Get, $"/customer/balance/{portalId}", addPolicy: addPolicy);
     }
 
-    public async Task<bool> BlockMoneyAsync(string portalId, decimal amount)
+    public async Task<bool> BlockCustomerMoneyAsync(string portalId, string currency, decimal amount)
     {
-        return await RequestAsync<bool>(HttpMethod.Post, "/money/block", portalId, [Tuple.Create("Amount", amount.ToString())]);
+        if (Test && !string.IsNullOrEmpty(_configuration.TestCustomer))
+        {
+            portalId = _configuration.TestCustomer;
+        }
+
+        var bodyParams = new[]
+        {
+            Tuple.Create("currency", currency),
+            Tuple.Create("amount", amount.ToString())
+        };
+
+        return await RequestAsync<bool>(HttpMethod.Post, $"/customer/money/{portalId}/block", bodyParams: bodyParams);
     }
 
-    public async Task<decimal> TakeOffMoneyAsync(string portalId, decimal amount)
+    public async Task<Balance> TakeOffCustomerMoneyAsync(string portalId, string currency, decimal amount)
     {
-        return await RequestAsync<decimal>(HttpMethod.Post, "/money/takeoff", portalId, [Tuple.Create("Amount", amount.ToString())]);
+        if (Test && !string.IsNullOrEmpty(_configuration.TestCustomer))
+        {
+            portalId = _configuration.TestCustomer;
+        }
+
+        var bodyParams = new[]
+        {
+            Tuple.Create("currency", currency),
+            Tuple.Create("amount", amount.ToString())
+        };
+
+        return await RequestAsync<Balance>(HttpMethod.Post, $"/customer/money/{portalId}/takeoff", bodyParams: bodyParams);
     }
 
-    public async Task<List<PurchaseInfo>> GetReportAsync(string portalId, DateTime utcFrom, DateTime utcTo)
+    public async Task<Report> GetCustomerOperationsAsync(string portalId, DateTime utcStartDate, DateTime utcEndDate)
     {
-        return await RequestAsync<List<PurchaseInfo>>(HttpMethod.Post, "/report", portalId, [Tuple.Create("From", utcFrom.ToString("o")), Tuple.Create("To", utcTo.ToString("o"))]);
+        if (Test && !string.IsNullOrEmpty(_configuration.TestCustomer))
+        {
+            portalId = _configuration.TestCustomer;
+        }
+
+        var queryParams = new NameValueCollection
+        {
+            { "startDate", utcStartDate.ToString("o") },
+            { "endDate", utcEndDate.ToString("o") }
+        };
+
+        return await RequestAsync<Report>(HttpMethod.Get, $"/customer/operations/{portalId}", queryParams);
     }
 
-    public async Task<List<CurrencyInfo>> GetAllCurrenciesAsync()
+    public async Task<List<Currency>> GetAllCurrenciesAsync()
     {
-        return await RequestAsync<List<CurrencyInfo>>(HttpMethod.Get, "/currency/all", null);
+        return await RequestAsync<List<Currency>>(HttpMethod.Get, "/currency/all", null);
     }
 
 
-    private async Task<T> RequestAsync<T>(HttpMethod httpMethod, string url, string portalId, Tuple<string, string>[] parameters = null, bool addPolicy = false)
+    private async Task<T> RequestAsync<T>(HttpMethod httpMethod, string path, NameValueCollection queryParams = null, Tuple<string, string>[] bodyParams = null, bool addPolicy = false)
     {
         if (!Configured)
         {
             throw new AccountingNotConfiguredException();
         }
 
+        var uriBuilder = new UriBuilder(_configuration.Url + path);
+
+        if (queryParams != null)
+        {
+            var query = HttpUtility.ParseQueryString(string.Empty);
+
+            foreach (string key in queryParams)
+            {
+                query[key] = queryParams[key];
+            }
+
+            uriBuilder.Query = query.ToString();
+        }
+
         var request = new HttpRequestMessage
         {
-            RequestUri = new Uri(_configuration.Url + url),
+            RequestUri = uriBuilder.Uri,
             Method = httpMethod
         };
 
@@ -98,16 +154,11 @@ public class AccountingClient
         var httpClient = _httpClientFactory.CreateClient(addPolicy ? HttpClientOption : "");
         httpClient.Timeout = TimeSpan.FromMilliseconds(60000);
 
-        var data = new Dictionary<string, List<string>>();
-
-        if (!string.IsNullOrEmpty(portalId))
+        if (bodyParams != null)
         {
-            data.Add("PortalId", [portalId]);
-        }
+            var data = new Dictionary<string, List<string>>();
 
-        if (parameters != null)
-        {
-            foreach (var parameter in parameters)
+            foreach (var parameter in bodyParams)
             {
                 if (data.TryGetValue(parameter.Item1, out var value))
                 {
@@ -118,16 +169,11 @@ public class AccountingClient
                     data.Add(parameter.Item1, [parameter.Item2]);
                 }
             }
-        }
 
-        if (data.Count > 0)
-        {
             var body = JsonSerializer.Serialize(data);
 
             request.Content = new StringContent(body, Encoding.UTF8, "application/json");
         }
-
-        string responseString = null;
 
         try
         {
@@ -138,26 +184,21 @@ public class AccountingClient
                 throw new Exception($"Accounting request failed with status code {response.StatusCode}");
             }
 
-            responseString = await response.Content.ReadAsStringAsync();
+            var responseString = await response.Content.ReadAsStringAsync();
+
+            if (string.IsNullOrEmpty(responseString))
+            {
+                throw new Exception("Accounting responseString is null or empty");
+            }
+
+            var result = JsonSerializer.Deserialize<T>(responseString, _jsonSerializerOptions);
+
+            return result;
         }
         catch (Exception ex)
         {
             throw new AccountingException(ex.Message, ex);
         }
-
-        if (string.IsNullOrEmpty(responseString))
-        {
-            throw new AccountingException("Accounting responseString is null");
-        }
-
-        if (!responseString.StartsWith("{\"Message\":\"error", true, null))
-        {
-            var result = JsonSerializer.Deserialize<T>(responseString, _jsonSerializerOptions);
-
-            return result;
-        }
-
-        throw new AccountingException(responseString);
     }
 
     private static string CreateAuthToken(string pkey, string machinekey)
@@ -170,12 +211,17 @@ public class AccountingClient
     }
 }
 
-/// <summary>
-/// UOM = Unit of measurement
-/// </summary>
-public record PurchaseInfo(DateTime Date,string Service, string UOM, decimal Quantity, decimal Price);
 
-public record CurrencyInfo(int Id, string Code);
+public record Balance(int AccountNumber, List<SubAccount> SubAccounts);
+
+public record SubAccount(string Currency, decimal Amount);
+
+public record Report(List<Operation> Collection, int Offset, int Limit, int TotalQuantity, int TotalPage, int CurrentPage);
+
+public record Operation(DateTime Date,string Service, string ServiceUnit, int Quantity, decimal Amount);
+
+public record Currency(int Id, string Code);
+
 
 public static class AccountingHttplClientExtension
 {

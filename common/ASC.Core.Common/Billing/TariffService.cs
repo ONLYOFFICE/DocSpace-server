@@ -860,27 +860,28 @@ public class TariffService(
 
     #region Accounting
 
-    public bool IsAccountingClientConfigured()
+    public bool IsAccountingClientConfigured(out bool test)
     {
+        test = accountingClient.Configured && accountingClient.Test;
         return accountingClient.Configured;
     }
 
-    public async Task<decimal> GetBalanceAsync(int tenantId)
+    public async Task<Balance> GetCustomerBalanceAsync(int tenantId)
     {
         var cacheKey = GetAccountingBalanceCacheKey(tenantId);
 
-        var balanceStr = await GetFromCache<string>(cacheKey);
+        var balance = await GetFromCache<Balance>(cacheKey);
 
-        if (decimal.TryParse(balanceStr, out var balance))
+        if (balance != null)
         {
             return balance;
         }
 
         await using (await distributedLockProvider.TryAcquireLockAsync($"{cacheKey}_lock"))
         {
-            balanceStr = await GetFromCache<string>(cacheKey);
+            balance = await GetFromCache<Balance>(cacheKey);
 
-            if (decimal.TryParse(balanceStr, out balance))
+            if (balance != null)
             {
                 return balance;
             }
@@ -890,30 +891,29 @@ public class TariffService(
                 try
                 {
                     var portalId = await coreSettings.GetKeyAsync(tenantId);
-                    balance = await accountingClient.GetBalanceAsync(portalId, true);
+                    balance = await accountingClient.GetCustomerBalanceAsync(portalId, true);
+                    await hybridCache.SetAsync(cacheKey, balance, TimeSpan.FromMinutes(10));
                 }
                 catch (Exception error)
                 {
                     LogError(error, tenantId.ToString());
                 }
             }
-
-            await hybridCache.SetAsync(cacheKey, balance.ToString(), TimeSpan.FromMinutes(10));
         }
 
         return balance;
     }
 
-    public async Task<bool> BlockMoneyAsync(int tenantId, decimal amount)
+    public async Task<bool> BlockCustomerMoneyAsync(int tenantId, string currency, decimal amount)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
-        return await accountingClient.BlockMoneyAsync(portalId, amount);
+        return await accountingClient.BlockCustomerMoneyAsync(portalId, currency, amount);
     }
 
-    public async Task<decimal> TakeOffMoneyAsync(int tenantId, decimal amount)
+    public async Task<Balance> TakeOffCustomerMoneyAsync(int tenantId, string currency, decimal amount)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
-        var balance = await accountingClient.TakeOffMoneyAsync(portalId, amount);
+        var balance = await accountingClient.TakeOffCustomerMoneyAsync(portalId, currency, amount);
 
         var cacheKey = GetAccountingBalanceCacheKey(tenantId);
         await hybridCache.SetAsync(cacheKey, balance.ToString(), TimeSpan.FromMinutes(10));
@@ -921,13 +921,13 @@ public class TariffService(
         return balance;
     }
 
-    public async Task<List<PurchaseInfo>> GetReportAsync(int tenantId, DateTime utcFrom, DateTime utcTo)
+    public async Task<Report> GetCustomerOperationsAsync(int tenantId, DateTime utcStartDate, DateTime utcEndDate)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
-        return await accountingClient.GetReportAsync(portalId, utcFrom, utcTo);
+        return await accountingClient.GetCustomerOperationsAsync(portalId, utcStartDate, utcEndDate);
     }
 
-    public async Task<List<CurrencyInfo>> GetAllCurrenciesAsync()
+    public async Task<List<Currency>> GetAllCurrenciesAsync()
     {
         return await accountingClient.GetAllCurrenciesAsync();
     }

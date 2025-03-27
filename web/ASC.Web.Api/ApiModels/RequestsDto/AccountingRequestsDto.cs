@@ -29,8 +29,13 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 /// <summary>
 /// Money blocking request parameters
 /// </summary>
-public class AccountingBlockMoneyRequestDto
+public class BlockCustomerMoneyRequestDto
 {
+    /// <summary>
+    /// Currency
+    /// </summary>
+    public string Currency { get; set; }
+
     /// <summary>
     /// Amount of money
     /// </summary>
@@ -40,8 +45,13 @@ public class AccountingBlockMoneyRequestDto
 /// <summary>
 /// Money taking off request parameters
 /// </summary>
-public class AccountingTakeOffMoneyRequestDto
+public class TakeOffCustomerMoneyRequestDto
 {
+    /// <summary>
+    /// Currency
+    /// </summary>
+    public string Currency { get; set; }
+
     /// <summary>
     /// Amount of money
     /// </summary>
@@ -54,12 +64,14 @@ public class AccountingTakeOffMoneyRequestDto
 public class AccountingReportRequestDto
 {
     /// <summary>
-    /// UTC date from
+    /// start date
     /// </summary>
-    public DateTime From { get; set; }
+    [FromQuery(Name = "startDate")]
+    public DateTime StartDate { get; set; }
 
     /// <summary>
-    /// UTC date to
+    /// end date
     /// </summary>
-    public DateTime To { get; set; }
+    [FromQuery(Name = "endDate")]
+    public DateTime EndDate { get; set; }
 }

@@ -48,7 +48,8 @@ public class PaymentController(
     IHttpContextAccessor httpContextAccessor,
     MessageService messageService,
     StudioNotifyService studioNotifyService,
-    PermissionContext permissionContext)
+    PermissionContext permissionContext,
+    TenantUtil tenantUtil)
     : ControllerBase
 {
     private readonly int _maxCount = 10;
@@ -287,70 +288,72 @@ public class PaymentController(
     }
 
     /// <summary>
-    /// Returns the portal balance from the accounting service.
+    /// Returns the customer balance from the accounting service.
     /// </summary>
     /// <short>
-    /// Get the portal balance
+    /// Get the customer balance
     /// </short>
-    /// <path>api/2.0/portal/payment/accounting/balance</path>
+    /// <path>api/2.0/portal/payment/customer/balance</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The portal balance", typeof(decimal))]
-    [HttpGet("accounting/balance")]
-    public async Task<decimal> GetBalanceAsync()
+    [SwaggerResponse(200, "The customer balance", typeof(Balance))]
+    [HttpGet("customer/balance")]
+    public async Task<Balance> GetCustomerBalanceAsync()
     {
         var tenant = await CheckAccountingAndReturnTenantAsync();
-        var result = await tariffService.GetBalanceAsync(tenant.Id);
+        var result = await tariffService.GetCustomerBalanceAsync(tenant.Id);
         return result;
     }
 
     /// <summary>
-    /// Trying to block amount money on the portal balance.
+    /// Trying to block amount money on the customer balance.
     /// </summary>
     /// <short>
-    /// Block amount money on the portal balance
+    /// Block amount money on the customer balance
     /// </short>
-    /// <path>api/2.0/portal/payment/accounting/money/block</path>
+    /// <path>api/2.0/portal/payment/customer/blockmoney</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The money is blocked successfully or not", typeof(bool))]
-    [HttpPost("accounting/money/block")]
-    public async Task<bool> BlockMoneyAsync(AccountingBlockMoneyRequestDto inDto)
+    [HttpPost("customer/blockmoney")]
+    public async Task<bool> BlockCustomerMoneyAsync(BlockCustomerMoneyRequestDto inDto)
     {
         var tenant = await CheckAccountingAndReturnTenantAsync();
-        var result = await tariffService.BlockMoneyAsync(tenant.Id, inDto.Amount);
+        var result = await tariffService.BlockCustomerMoneyAsync(tenant.Id, inDto.Currency, inDto.Amount);
         return result;
     }
 
     /// <summary>
-    /// Take off amount money on the portal balance and return new balance.
+    /// Take off amount money from the customer balance and return new balance.
     /// </summary>
     /// <short>
-    /// Take off amount money on the portal balance
+    /// Take off amount money from the customer balance
     /// </short>
-    /// <path>api/2.0/portal/payment/accounting/money/takeoff</path>
+    /// <path>api/2.0/portal/payment/customer/takeoffmoney</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The new portal balance", typeof(decimal))]
-    [HttpPost("accounting/money/takeoff")]
-    public async Task<decimal> TakeOffMoneyAsync(AccountingTakeOffMoneyRequestDto inDto)
+    [SwaggerResponse(200, "The new customer balance", typeof(Balance))]
+    [HttpPost("customer/takeoffmoney")]
+    public async Task<Balance> TakeOffCustomerMoneyAsync(TakeOffCustomerMoneyRequestDto inDto)
     {
         var tenant = await CheckAccountingAndReturnTenantAsync();
-        var result = await tariffService.TakeOffMoneyAsync(tenant.Id, inDto.Amount);
+        var result = await tariffService.TakeOffCustomerMoneyAsync(tenant.Id, inDto.Currency, inDto.Amount);
         return result;
     }
 
     /// <summary>
-    /// Returns the portal accounting report from the accounting service.
+    /// Returns the report of customer operations from the accounting service.
     /// </summary>
     /// <short>
-    /// Get the accounting report
+    /// Get the customer operations
     /// </short>
-    /// <path>api/2.0/portal/payment/accounting/report</path>
+    /// <path>api/2.0/portal/payment/customer/operations</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The accounting report", typeof(List<PurchaseInfo>))]
-    [HttpGet("accounting/report")]
-    public async Task<List<PurchaseInfo>> GetReportAsync(AccountingReportRequestDto inDto)
+    [SwaggerResponse(200, "The customer operations", typeof(Report))]
+    [HttpGet("customer/operations")]
+    public async Task<Report> GetCustomerOperationsAsync(AccountingReportRequestDto inDto)
     {
         var tenant = await CheckAccountingAndReturnTenantAsync();
-        var result = await tariffService.GetReportAsync(tenant.Id, inDto.From, inDto.To);
+        var utcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate);
+        var utcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate);
+        var result = await tariffService.GetCustomerOperationsAsync(tenant.Id, utcStartDate, utcEndDate);
         return result;
     }
 
@@ -360,11 +363,11 @@ public class PaymentController(
     /// <short>
     /// Get list of currencies
     /// </short>
-    /// <path>api/2.0/portal/payment/accounting/currency/all</path>
+    /// <path>api/2.0/portal/payment/accounting/currencies</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The list of currencies", typeof(List<CurrencyInfo>))]
-    [HttpGet("accounting/currency/all")]
-    public async Task<List<CurrencyInfo>> GetAllCurrenciesAsync()
+    [SwaggerResponse(200, "The list of currencies", typeof(List<Currency>))]
+    [HttpGet("accounting/currencies")]
+    public async Task<List<Currency>> GetAllCurrenciesAsync()
     {
         var result = await tariffService.GetAllCurrenciesAsync();
         return result;
@@ -373,13 +376,13 @@ public class PaymentController(
 
     private async Task<Tenant> CheckAccountingAndReturnTenantAsync()
     {
-        if (!tariffService.IsAccountingClientConfigured())
+        if (!tariffService.IsAccountingClientConfigured(out var test))
         {
             throw new AccountingNotConfiguredException();
         }
 
         var tenant = tenantManager.GetCurrentTenant();
-        var hasPayments = (await tariffService.GetPaymentsAsync(tenant.Id)).Any();
+        var hasPayments = test ? true : (await tariffService.GetPaymentsAsync(tenant.Id)).Any();
 
         if (!hasPayments)
         {

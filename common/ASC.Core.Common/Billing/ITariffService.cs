@@ -40,10 +40,10 @@ public interface ITariffService
     Task<Tariff> GetBillingInfoAsync(int? tenant = null, int? id = null);
     bool IsConfigured();
 
-    bool IsAccountingClientConfigured();
-    Task<decimal> GetBalanceAsync(int tenantId);
-    Task<bool> BlockMoneyAsync(int tenantId, decimal amount);
-    Task<decimal> TakeOffMoneyAsync(int tenantId, decimal amount);
-    Task<List<PurchaseInfo>> GetReportAsync(int tenantId, DateTime utcFrom, DateTime utcTo);
-    Task<List<CurrencyInfo>> GetAllCurrenciesAsync();
+    bool IsAccountingClientConfigured(out bool test);
+    Task<Balance> GetCustomerBalanceAsync(int tenantId);
+    Task<bool> BlockCustomerMoneyAsync(int tenantId, string currency, decimal amount);
+    Task<Balance> TakeOffCustomerMoneyAsync(int tenantId, string currency, decimal amount);
+    Task<Report> GetCustomerOperationsAsync(int tenantId, DateTime utcStartDate, DateTime utcEndDate);
+    Task<List<Currency>> GetAllCurrenciesAsync();
 }
