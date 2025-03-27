@@ -43,7 +43,7 @@ public class CountRoomChecker(
     {
         if ((await tariffService.GetTariffAsync(tenantId)).State > TariffState.Paid)
         {
-            throw new BillingNotFoundException(Resource.ErrorNotAllowedOption, "room");
+            throw new BillingNotFoundException(Resource.ErrorNotAllowedOption);
         }
 
         await base.CheckAddAsync(tenantId, newValue);

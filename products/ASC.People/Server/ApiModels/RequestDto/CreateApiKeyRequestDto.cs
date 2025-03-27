@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,42 +24,25 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Constants = ASC.Core.Users.Constants;
+namespace ASC.People.ApiModels.RequestDto;
 
-namespace ASC.Web.Core.Quota;
-
-[Scope]
-public class CountPaidUserChecker(
-    ITenantQuotaFeatureStat<CountPaidUserFeature, int> tenantQuotaFeatureStatistic, 
-    TenantManager tenantManager, 
-    ITariffService tariffService)
-    : TenantQuotaFeatureCheckerCount<CountPaidUserFeature>(tenantQuotaFeatureStatistic, tenantManager)
+/// <summary>
+/// Request parameters for creating a new API key
+/// </summary>
+public class CreateApiKeyRequestDto
 {
+    /// <summary>
+    /// Name of the API key
+    /// </summary>
+    public required string Name { get; set; }
 
-    public override string GetExceptionMessage(long count)
-    {
-        return string.Format(Resource.TariffsFeature_manager_exception, count);
-    }
-    
-    public override async Task CheckAddAsync(int tenantId, int newValue)
-    {
-        if ((await tariffService.GetTariffAsync(tenantId)).State > TariffState.Paid)
-        {
-            throw new BillingNotFoundException(Resource.ErrorNotAllowedOption);
-        }
+    /// <summary>
+    /// List of permissions granted to the API key
+    /// </summary>
+    public List<string> Permissions { get; set; }
 
-        await base.CheckAddAsync(tenantId, newValue);
-    }
-}
-
-[Scope]
-public class CountPaidUserStatistic(IServiceProvider serviceProvider) : ITenantQuotaFeatureStat<CountPaidUserFeature, int>
-{
-    public async Task<int> GetValueAsync()
-    {
-        var userManager = serviceProvider.GetService<UserManager>();
-        var adminsCount = (await userManager.GetUsersByGroupAsync(Constants.GroupRoomAdmin.ID)).Length;
-
-        return adminsCount;
-    }
+    /// <summary>
+    /// Number of days until the API key expires (null for no expiration)
+    /// </summary>
+    public int? ExpiresInDays { get; set; }
 }

@@ -118,7 +118,7 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
         await ExecuteScriptAsync(script);
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         ProviderInfo = GetProviderInfo("mysql");
         
@@ -139,11 +139,6 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
             TablesToIgnore = tablesToIgnore.ToArray(),
             WithReseed = true
         });
-    }
-
-    public new Task DisposeAsync()
-    {
-        return Task.CompletedTask;
     }
 
     internal async Task BackupTables()

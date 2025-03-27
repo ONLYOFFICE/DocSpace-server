@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Microsoft.AspNetCore.RateLimiting;
+
 namespace ASC.Web.Api.Controllers.Settings;
 
 [WebhookDisable]
@@ -255,6 +257,7 @@ public class WebhooksController(ApiContext context,
     [SwaggerResponse(400, "Id incorrect")]
     [SwaggerResponse(404, "Item not found")]
     [HttpPut("webhook/{id:int}/retry")]
+    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task<WebhooksLogDto> RetryWebhook(IdRequestDto<int> inDto)
     {
         if (inDto.Id == 0)
@@ -293,6 +296,7 @@ public class WebhooksController(ApiContext context,
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "Logs of the webhook activities", typeof(IAsyncEnumerable<WebhooksLogDto>))]
     [HttpPut("webhook/retry")]
+    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async IAsyncEnumerable<WebhooksLogDto> RetryWebhooks(WebhookRetryRequestsDto inDto)
     {
         var isAdmin = await CheckAdminPermissionsAsync();
