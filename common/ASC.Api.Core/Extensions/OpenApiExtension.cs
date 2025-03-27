@@ -114,6 +114,7 @@ public static class OpenApiExtension
             {
                 Name = "Authorization",
                 Type = SecuritySchemeType.Http,
+                In = ParameterLocation.Header,
                 Scheme = "bearer",
                 BearerFormat = "API Key",
                 Description = "Authentication is determined by the 'Authorization' header"
