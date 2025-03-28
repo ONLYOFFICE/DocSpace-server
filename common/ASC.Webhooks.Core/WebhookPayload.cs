@@ -29,9 +29,8 @@ namespace ASC.Webhooks.Core;
 public class WebhookPayload<T1, T2>
 {
     public WebhookPayloadEventInfo Event { get; set; }
-    public WebhookPayloadTargetInfo<T2> Target { get; set; } 
     public T1 Payload { get; set; }
-    public WebhookPayloadConfigInfo Webhook { get; set; }
+    public WebhookPayloadConfigInfo<T2> Webhook { get; set; }
 
     public WebhookPayload()
     {
@@ -50,12 +49,6 @@ public class WebhookPayload<T1, T2>
             TriggerId = (int)trigger
         };
 
-        Target = new WebhookPayloadTargetInfo<T2>
-        { 
-            Id = dataId,
-            Type = trigger.GetTargetType()
-        };
-
         Payload = data;
 
         var triggers = config.Triggers == WebhookTrigger.All
@@ -65,12 +58,21 @@ public class WebhookPayload<T1, T2>
                 .Select(flag => flag.ToCustomString())
                 .ToArray();
 
-        Webhook = new WebhookPayloadConfigInfo
+        var target = string.IsNullOrEmpty(config.TargetId)
+            ? null
+            : new WebhookPayloadTargetInfo<T2>
+                {
+                    Id = dataId,
+                    Type = trigger.GetTargetType()
+                };
+
+        Webhook = new WebhookPayloadConfigInfo<T2>
         {
             Id = config.Id,
             Name = config.Name,
             Url = config.Uri,
-            Triggers = triggers
+            Triggers = triggers,
+            Target = target
 
             // initialized on send: LastFailureOn, LastFailureContent, LastSuccessOn, RetryCount, RetryOn
         };
@@ -99,17 +101,19 @@ public class WebhookPayloadTargetInfo<T>
     public string Type { get; set; }
 }
 
-public class WebhookPayloadConfigInfo
+public class WebhookPayloadConfigInfo<T2>
 {
     public int Id { get; set; }
     public string Name { get; set; }
     public string Url { get; set; }
     public string[] Triggers { get; set; }
 
+    public WebhookPayloadTargetInfo<T2> Target { get; set; }
+
     public DateTime? LastFailureOn { get; set; }
     public string LastFailureContent { get; set; }
     public DateTime? LastSuccessOn { get; set; }
 
     public int RetryCount { get; set; }
-    public DateTime RetryOn { get; set; }
+    public DateTime? RetryOn { get; set; }
 }

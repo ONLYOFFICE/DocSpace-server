@@ -39,6 +39,8 @@ public class BackupStorageFactory(ConsumerBackupStorage consumerBackupStorage,
     {
         try
         {
+            var storageParams = JsonSerializer.Deserialize<Dictionary<string, string>>(record.StorageParams);
+            record.TenantId = record.TenantId == -1 ? int.Parse(storageParams["tenantId"]) : record.TenantId;
             return await GetBackupStorageAsync(record.StorageType, record.TenantId, JsonSerializer.Deserialize<Dictionary<string, string>>(record.StorageParams));
         }
         catch (Exception error)

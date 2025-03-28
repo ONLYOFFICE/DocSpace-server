@@ -26,7 +26,7 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
-public class TariffDto : Tariff
+public class TariffDto
 {
     /// <summary>
     /// Open source
@@ -42,4 +42,39 @@ public class TariffDto : Tariff
     /// Developer
     /// </summary>
     public bool? Developer { get; set; }
+
+    /// <summary>
+    /// ID
+    /// </summary>
+    public int Id { get; set; }
+
+    /// <summary>
+    /// Tariff state
+    /// </summary>
+    public TariffState State { get; set; }
+
+    /// <summary>
+    /// Due date
+    /// </summary>
+    public DateTime DueDate { get; set; }
+
+    /// <summary>
+    /// Delay due date
+    /// </summary>
+    public DateTime DelayDueDate { get; set; }
+
+    /// <summary>
+    /// License date
+    /// </summary>
+    public DateTime LicenseDate { get; set; }
+
+    /// <summary>
+    /// Customer ID
+    /// </summary>
+    public string CustomerId { get; set; }
+
+    /// <summary>
+    /// List of quotas
+    /// </summary>
+    public List<Quota> Quotas { get; set; }
 }

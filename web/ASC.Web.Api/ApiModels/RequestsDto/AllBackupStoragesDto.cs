@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,31 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Notify.IntegrationEvents.EventHandling;
+namespace ASC.Web.Api.ApiModels.RequestsDto;
 
-[Scope]
-public class EncryptionDataStorageRequestedIntegrationEventHandler : IIntegrationEventHandler<EncryptionDataStorageRequestedIntegrationEvent>
+public class AllBackupStoragesDto
 {
-    private readonly ILogger _logger;
-    private readonly EncryptionWorker _encryptionWorker;
-    
-    public EncryptionDataStorageRequestedIntegrationEventHandler(EncryptionWorker encryptionWorker,
-                                                                 ILogger<EncryptionDataStorageRequestedIntegrationEventHandler> logger)
-    {
-        _encryptionWorker = encryptionWorker ?? throw new ArgumentNullException(nameof(encryptionWorker));
-        _logger = logger;
-    }
-
-    public async Task Handle(EncryptionDataStorageRequestedIntegrationEvent @event)
-    {
-        CustomSynchronizationContext.CreateContext();
-        using (_logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
-        {
-            _logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
-
-            _encryptionWorker.Start(@event.EncryptionSettings, @event.ServerRootPath);
-
-            await Task.CompletedTask;
-        }
-    }
+    [FromQuery]
+    public bool Dump { get;set; }
 }

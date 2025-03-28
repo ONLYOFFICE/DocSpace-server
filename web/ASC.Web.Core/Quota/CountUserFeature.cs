@@ -44,7 +44,7 @@ public class CountUserChecker(
     {
         if ((await tariffService.GetTariffAsync(tenantId)).State > TariffState.Paid)
         {
-            throw new BillingNotFoundException(Resource.ErrorNotAllowedOption, "users");
+            throw new BillingNotFoundException(Resource.ErrorNotAllowedOption);
         }
 
         await base.CheckAddAsync(tenantId, newValue);

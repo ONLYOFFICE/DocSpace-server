@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,22 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Data.Storage.Encryption;
+namespace ASC.Data.Backup.ApiModels;
 
-public class Startup : BaseStartup
+public class RestoreDto
 {
-    public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
-        : base(configuration, hostEnvironment)
-    {
-    }
-
-    public override void ConfigureServices(IServiceCollection services)
-    {
-        base.ConfigureServices(services);
-
-        DIHelper.TryAdd<EncryptionDataStorageRequestedIntegrationEventHandler>();
-        DIHelper.TryAdd<EncryptionOperation>();
-        DIHelper.TryAdd<ICrypt, Crypt>();
-    }
+    [FromQuery]
+    public bool? Dump { get; set; }
 }
-

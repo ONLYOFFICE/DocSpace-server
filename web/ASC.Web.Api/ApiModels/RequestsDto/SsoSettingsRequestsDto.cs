@@ -32,7 +32,7 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 public class SsoSettingsRequestsDto
 {
     /// <summary>
-    /// Serialized SSO settings
+    /// SSO settings in JSON format
     /// </summary>
-    public string SerializeSettings { get; set; }
+    public required string SerializeSettings { get; set; }
 }

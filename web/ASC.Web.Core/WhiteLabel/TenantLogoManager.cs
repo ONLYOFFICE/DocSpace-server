@@ -159,7 +159,7 @@ public class TenantLogoManager(
     {
         if (!await GetEnableWhitelabelAsync())
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption, "Customization");
+            throw new BillingException(Resource.ErrorNotAllowedOption);
         }
     }
     

@@ -34,5 +34,5 @@ public class TerminateRequestDto
     /// <summary>
     /// User ID whose data is reassigned/removed
     /// </summary>
-    public Guid UserId { get; set; }
+    public required Guid UserId { get; set; }
 }

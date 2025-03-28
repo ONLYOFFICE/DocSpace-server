@@ -25,17 +25,18 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
+
 public class CreateRoomFromTemplateDto
 {
     /// <summary>
     /// Template id
     /// </summary>
-    public int TemplateId { get; set; }
+    public required int TemplateId { get; set; }
 
     /// <summary>
     /// Title
     /// </summary>
-    public string Title { get; set; }
+    public required string Title { get; set; }
 
     /// <summary>
     /// Logo

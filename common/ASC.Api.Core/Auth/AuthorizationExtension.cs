@@ -30,33 +30,21 @@ namespace ASC.Api.Core.Auth;
 
 public static class AuthorizationExtension
 {
-    private static readonly NameValueCollection _scopesMap = new()
+    public static readonly NameValueCollection ScopesMap = new()
     {
         { "GET api/[0-9].[0-9]/files/rooms", "rooms:read" },
-        { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/files/rooms", "rooms:write" },
-        { "GET api/[0-9].[0-9]/files", "files:read,files:write" },
-        { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/files", "files:write" },
+        { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/files/rooms", "rooms:read,rooms:write" },
+        { "GET api/[0-9].[0-9]/files", "files:read" },
+        { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/files", "files:read,files:write" },
         { "GET api/[0-9].[0-9]/people/@self", "accounts.self:read" },
-        { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/people/@self", "account.self:write" },
+        { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/people/@self", "accounts.self:read,accounts.self:write" },
         { "GET api/[0-9].[0-9]/people", "accounts:read" },
-        { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/people", "accounts:write" }
+        { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/people", "accounts:read,accounts:write" }
     };
-
-    private static readonly string[] _allScopes =
-    [
-        "files:read",
-    "files:write",
-    "rooms:read",
-    "rooms:write",
-    "account.self:read",
-    "account.self:write",
-    "accounts:read",
-    "accounts:write"
-    ];
 
     private static string GetAuthorizePolicy(string routePattern, string httpMethod)
     {
-        foreach (var regexPattern in _scopesMap.AllKeys)
+        foreach (var regexPattern in ScopesMap.AllKeys)
         {
             var regex = new Regex(regexPattern);
 
@@ -65,7 +53,7 @@ public static class AuthorizationExtension
                 continue;
             }
 
-            var scopes = _scopesMap[regexPattern];
+            var scopes = ScopesMap[regexPattern];
 
             return scopes;
         }
@@ -80,6 +68,19 @@ public static class AuthorizationExtension
 
         services.AddAuthentication()
                 .AddScheme<AuthenticationSchemeOptions, JwtBearerAuthHandler>(JwtBearerDefaults.AuthenticationScheme, _ => { });
+
+        return services;
+
+    }
+    
+    public static IServiceCollection AddApiKeyBearerAuthentication(this IServiceCollection services)
+    {
+        services.AddSingleton<IAuthorizationHandler, ScopesAuthorizationHandler>();
+        services.AddSingleton<IAuthorizationPolicyProvider, AuthorizationPolicyProvider>();
+
+        services.AddAuthentication()
+            .AddScheme<AuthenticationSchemeOptions, ApiKeyBearerAuthHandler>(ApiKeyBearerDefaults.AuthenticationScheme,
+                _ => { });
 
         return services;
 

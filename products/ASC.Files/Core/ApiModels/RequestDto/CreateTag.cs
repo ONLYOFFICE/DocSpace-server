@@ -35,5 +35,5 @@ public class CreateTagRequestDto
     /// Tag name
     /// </summary>
     [StringLength(255)]
-    public string Name { get; set; }
+    public required string Name { get; set; }
 }

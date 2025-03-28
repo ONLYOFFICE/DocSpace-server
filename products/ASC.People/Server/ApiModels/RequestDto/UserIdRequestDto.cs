@@ -36,5 +36,5 @@ public class UserIdRequestDto
     /// User ID
     /// </summary>
     [FromRoute(Name = "userid")]
-    public Guid UserId { get; set; }
+    public required Guid UserId { get; set; }
 }

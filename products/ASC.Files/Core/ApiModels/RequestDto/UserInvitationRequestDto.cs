@@ -51,7 +51,7 @@ public class UserInvitationRequestDto<T>
     /// Room Id
     /// </summary>
     [FromRoute(Name = "id")]
-    public T Id { get; set; }
+    public required T Id { get; set; }
 
     /// <summary>
     /// User invitation

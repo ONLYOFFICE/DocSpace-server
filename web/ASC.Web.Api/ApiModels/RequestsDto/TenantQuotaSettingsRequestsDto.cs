@@ -34,7 +34,7 @@ public class TenantQuotaSettingsRequestsDto
     /// <summary>
     /// Tenant ID
     /// </summary>
-    public int TenantId { get; set; }
+    public required int TenantId { get; set; }
 
     /// <summary>
     /// Quota

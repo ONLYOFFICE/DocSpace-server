@@ -34,7 +34,7 @@ public class StorageRequestsDto
     /// <summary>
     /// Storage name
     /// </summary>
-    public string Module { get; set; }
+    public required string Module { get; set; }
 
     /// <summary>
     /// Storage properties

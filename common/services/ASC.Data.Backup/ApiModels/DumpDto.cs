@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2009-2024
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,18 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-global using System.Reflection;
+namespace ASC.Data.Backup.ApiModels;
 
-global using ASC.Api.Core;
-global using ASC.Api.Core.Extensions;
-global using ASC.Common;
-global using ASC.Core;
-global using ASC.Core.Encryption;
-global using ASC.Data.Encryption;
-global using ASC.Data.Storage.Encryption;
-global using ASC.Data.Storage.Encryption.IntegrationEvents.Events;
-global using ASC.EventBus.Abstractions;
-global using ASC.EventBus.Log;
-global using ASC.Notify.IntegrationEvents.EventHandling;
-
-global using Microsoft.Extensions.Hosting.WindowsServices;
+public class DumpDto
+{
+    [FromQuery]
+    public bool Dump { get; set; }
+}

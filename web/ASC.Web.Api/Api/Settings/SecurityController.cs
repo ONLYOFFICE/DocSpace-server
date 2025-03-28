@@ -350,7 +350,7 @@ public class SecurityController(
                         (await tenantManager.GetCurrentTenantQuotaAsync()).Free;
         if (isStartup)
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption, "Administrator");
+            throw new BillingException(Resource.ErrorNotAllowedOption);
         }
 
         await webItemSecurity.SetProductAdministrator(inDto.ProductId, inDto.UserId, inDto.Administrator);

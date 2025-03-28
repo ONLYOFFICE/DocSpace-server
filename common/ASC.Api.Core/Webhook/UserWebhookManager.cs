@@ -51,6 +51,11 @@ public class WebhookGroupAccessChecker(
     UserManager userManager,
     IPermissionResolver permissionResolver) : IWebhookAccessChecker<ASC.Core.Users.GroupInfo>
 {
+    public bool CheckIsTarget(ASC.Core.Users.GroupInfo data, string targetId)
+    {
+        return data.ID.ToString() == targetId;
+    }
+
     public async Task<bool> CheckAccessAsync(ASC.Core.Users.GroupInfo data, Guid userId)
     {
         var user = await userManager.GetUsersAsync(userId);
@@ -69,6 +74,11 @@ public class WebhookGroupAccessChecker(
 [Scope]
 public class WebhookUserAccessChecker(UserManager userManager) : IWebhookAccessChecker<UserInfo>
 {
+    public bool CheckIsTarget(UserInfo data, string targetId)
+    {
+        return data.Id.ToString() == targetId;
+    }
+
     public async Task<bool> CheckAccessAsync(UserInfo data, Guid userId)
     {
         var user = await userManager.GetUsersAsync(userId);

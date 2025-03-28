@@ -69,4 +69,9 @@ public class WebhooksConfigRequestsDto
     /// Triggers
     /// </summary>
     public WebhookTrigger Triggers { get; set; }
+
+    /// <summary>
+    /// Target ID
+    /// </summary>
+    public string TargetId { get; set; }
 }

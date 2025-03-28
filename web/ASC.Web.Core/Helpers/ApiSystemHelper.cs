@@ -52,7 +52,7 @@ public class ApiSystemHelper
     private const string TenantRegionKey = "tenant_region";
     private const string TenantDomainKey = "tenant_domain";
     private readonly string _regionTableName;
-    private readonly Dictionary<string, string> _regions = new Dictionary<string, string> { { "us-west-2", "US" }, { "eu-central-1", "DEU" } };
+    private readonly Dictionary<string, string> _regions = new Dictionary<string, string> { { "us-west-2", "US" }, { "us-east-2", "US" }, { "eu-central-1", "DEU" } };
 
     public ApiSystemHelper(
         IConfiguration configuration,
