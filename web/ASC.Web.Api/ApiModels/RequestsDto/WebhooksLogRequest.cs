@@ -27,42 +27,42 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The webhooks log request parameters.
+/// The request parameters for querying webhook delivery logs with filtering criteria.
 /// </summary>
 public class WebhooksLogRequest
 {
     /// <summary>
-    /// The delivery start time.
+    /// Start of the time range for filtering webhook deliveries.
     /// </summary>
     public DateTime? DeliveryFrom { get; set; }
 
     /// <summary>
-    /// The delivery end time.
+    /// The end of the time range for filtering webhook deliveries.
     /// </summary>
     public DateTime? DeliveryTo { get; set; }
 
     /// <summary>
-    /// The hook URI.
+    /// The destination URL where webhooks are delivered.
     /// </summary>
     public string HookUri { get; set; }
 
     /// <summary>
-    /// The webhook ID.
+    /// The ID of a specific webhook delivery.
     /// </summary>
     public int? WebhookId { get; set; }
 
     /// <summary>
-    /// The config ID.
+    /// The ID of the webhook configuration identifier.
     /// </summary>
     public int? ConfigId { get; set; }
 
     /// <summary>
-    /// The event ID.
+    /// The ID of the event that triggered the webhook.
     /// </summary>
     public int? EventId { get; set; }
 
     /// <summary>
-    /// The webhook group status.
+    /// The status of the webhook delivery group.
     /// </summary>
     public WebhookGroupStatus? GroupStatus { get; set; }
 }

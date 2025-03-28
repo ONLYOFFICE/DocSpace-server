@@ -32,13 +32,13 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 public class VisitStatisticsRequestDto
 {
     /// <summary>
-    /// The start period date.
+    /// The start date of the statistics period (inclusive).
     /// </summary>
     [FromQuery(Name = "fromDate")]
     public ApiDateTime FromDate { get; set; }
 
     /// <summary>
-    /// The end period date.
+    /// The end date of the statistics period (inclusive).
     /// </summary>
     [FromQuery(Name = "toDate")]
     public ApiDateTime ToDate { get; set; }

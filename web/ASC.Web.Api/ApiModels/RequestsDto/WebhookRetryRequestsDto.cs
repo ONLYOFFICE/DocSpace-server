@@ -27,12 +27,12 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The request parameters to retry webhooks.
+/// The request parameters for requesting webhook delivery retries.
 /// </summary>
 public class WebhookRetryRequestsDto
 {
     /// <summary>
-    /// The list of webhook IDs.
+    /// The list of webhook delivery IDs to retry.
     /// </summary>
     public List<int> Ids { get; set; }
 }
