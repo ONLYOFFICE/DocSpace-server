@@ -201,7 +201,7 @@ namespace ASC.Files.Core.Services.NotifyService {
         
         /// <summary>
         ///   Looks up a localized string similar to 
-        ///      Activity notification. The form &quot;$DocumentTitle&quot;:&quot;$DocumentURL&quot; was completely filled out, finalized, and signed in the room: &quot;$RoomTitle&quot;:&quot;$RoomURL&quot; — $__DateTime.
+        ///      Activity notification. The form &quot;$DocumentTitle&quot;:&quot;$DocumentURL&quot; was completely filled out in the room: &quot;$RoomTitle&quot;:&quot;$RoomURL&quot; — $__DateTime.
         ///    .
         /// </summary>
         public static string pattern_FormWasCompletelyFilled {
@@ -289,7 +289,7 @@ namespace ASC.Files.Core.Services.NotifyService {
         
         /// <summary>
         ///   Looks up a localized string similar to 
-        ///      Activity notification.  &quot;$FromUserName&quot;:&quot;$FromUserLink&quot; stopped form filling: &quot;$DocumentTitle&quot;:&quot;$DocumentURL&quot; in the room: &quot;$RoomTitle&quot;:&quot;$RoomURL&quot; — $__DateTime.
+        ///      Activity notification. &quot;$FromUserName&quot;:&quot;$FromUserLink&quot; stopped form filling: &quot;$DocumentTitle&quot;:&quot;$DocumentURL&quot; in the room: &quot;$RoomTitle&quot;:&quot;$RoomURL&quot; — $__DateTime.
         ///    .
         /// </summary>
         public static string pattern_StoppedFormFilling {
