@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    [Migration("20250318110110_MigrationContext_Upgrade48")]
-    partial class MigrationContext_Upgrade48
+    [Migration("20250317113146_MigrationContext_Upgrade50")]
+    partial class MigrationContext_Upgrade50
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1351,6 +1351,80 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasDatabaseName("uid");
 
                     b.ToTable("account_links", (string)null);
+
+                    b.HasAnnotation("MySql:CharSet", "utf8");
+                });
+
+            modelBuilder.Entity("ASC.Core.Common.EF.Model.ApiKey", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("CreateBy")
+                        .IsRequired()
+                        .HasColumnType("varchar(38)")
+                        .HasColumnName("create_by")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<DateTime>("CreateOn")
+                        .HasColumnType("datetime")
+                        .HasColumnName("create_on");
+
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("expires_at");
+
+                    b.Property<string>("HashedKey")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar")
+                        .HasColumnName("hashed_key")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("KeyPostfix")
+                        .IsRequired()
+                        .HasMaxLength(4)
+                        .HasColumnType("varchar")
+                        .HasColumnName("key_postfix")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<DateTime?>("LastUsed")
+                        .HasColumnType("datetime")
+                        .HasColumnName("last_used");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar")
+                        .HasColumnName("name")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<string>("Permissions")
+                        .HasColumnType("longtext")
+                        .HasColumnName("permissions");
+
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id")
+                        .HasName("PRIMARY");
+
+                    b.HasIndex("IsActive")
+                        .HasDatabaseName("is_active");
+
+                    b.HasIndex("TenantId", "HashedKey")
+                        .HasDatabaseName("hashed_key");
+
+                    b.ToTable("core_user_api_key", (string)null);
 
                     b.HasAnnotation("MySql:CharSet", "utf8");
                 });
@@ -5894,71 +5968,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasAnnotation("MySql:CharSet", "utf8");
                 });
 
-            modelBuilder.Entity("ASC.Files.Core.EF.DbFilesFormRoleMapping", b =>
-                {
-                    b.Property<int>("TenantId")
-                        .HasColumnType("int")
-                        .HasColumnName("tenant_id");
-
-                    b.Property<int>("FormId")
-                        .HasColumnType("int")
-                        .HasColumnName("form_id");
-
-                    b.Property<string>("RoleName")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar")
-                        .HasColumnName("role_name")
-                        .UseCollation("utf8_general_ci")
-                        .HasAnnotation("MySql:CharSet", "utf8");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("varchar(38)")
-                        .HasColumnName("user_id")
-                        .UseCollation("utf8_general_ci")
-                        .HasAnnotation("MySql:CharSet", "utf8");
-
-                    b.Property<DateTime>("OpenedAt")
-                        .HasColumnType("datetime")
-                        .HasColumnName("opened_at");
-
-                    b.Property<string>("RoleColor")
-                        .HasMaxLength(6)
-                        .HasColumnType("char")
-                        .HasColumnName("role_color")
-                        .UseCollation("utf8_general_ci")
-                        .HasAnnotation("MySql:CharSet", "utf8");
-
-                    b.Property<int>("RoomId")
-                        .HasColumnType("int")
-                        .HasColumnName("room_id");
-
-                    b.Property<int>("Sequence")
-                        .HasColumnType("int")
-                        .HasColumnName("sequence");
-
-                    b.Property<DateTime>("SubmissionDate")
-                        .HasColumnType("datetime")
-                        .HasColumnName("submission_date");
-
-                    b.Property<bool>("Submitted")
-                        .HasColumnType("tinyint(1)")
-                        .HasColumnName("submitted");
-
-                    b.HasKey("TenantId", "FormId", "RoleName", "UserId")
-                        .HasName("PRIMARY");
-
-                    b.HasIndex("TenantId", "FormId")
-                        .HasDatabaseName("tenant_id_form_id");
-
-                    b.HasIndex("TenantId", "FormId", "UserId")
-                        .HasDatabaseName("tenant_id_form_id_user_id");
-
-                    b.ToTable("files_form_role_mapping", (string)null);
-
-                    b.HasAnnotation("MySql:CharSet", "utf8");
-                });
-
             modelBuilder.Entity("ASC.Files.Core.EF.DbFilesLink", b =>
                 {
                     b.Property<int>("TenantId")
@@ -7501,6 +7510,17 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Navigation("Tenant");
                 });
 
+            modelBuilder.Entity("ASC.Core.Common.EF.Model.ApiKey", b =>
+                {
+                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
+                });
+
             modelBuilder.Entity("ASC.Core.Common.EF.Model.DbCoreSettings", b =>
                 {
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
@@ -7711,17 +7731,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 });
 
             modelBuilder.Entity("ASC.Files.Core.EF.DbFilesBunchObjects", b =>
-                {
-                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
-                        .WithMany()
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Tenant");
-                });
-
-            modelBuilder.Entity("ASC.Files.Core.EF.DbFilesFormRoleMapping", b =>
                 {
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
                         .WithMany()
