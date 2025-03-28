@@ -185,6 +185,11 @@ public class AccountingClient
 
             var responseString = await response.Content.ReadAsStringAsync();
 
+            if (typeof(T) == typeof(string))
+            {
+                return (T)(object)responseString;
+            }
+
             if (string.IsNullOrEmpty(responseString))
             {
                 throw new Exception("Accounting responseString is null or empty");
