@@ -45,6 +45,13 @@ var redis = builder
     .WithLifetime(ContainerLifetime.Persistent);
     //.WithRedisInsight();
 
+var editors = builder
+    .AddContainer("asc-editors", "onlyoffice/documentserver", "latest")
+    .WithHttpEndpoint(8085, 80)
+    .WithEnvironment("JWT_ENABLED", "true")
+    .WithEnvironment("JWT_SECRET", "secret")
+    .WithEnvironment("JWT_HEADER", "AuthorizationJwt");
+
 var migrate = builder
     .AddExecutable("migrate",path, Path.GetDirectoryName(path) ?? "")
     .WithReference(mySql)
@@ -70,8 +77,10 @@ builder.AddNpmApp("asc-webDav", "../ASC.WebDav/", "start:build").WithHttpEndpoin
 var clientBasePath = Path.GetFullPath(Path.Combine("..", "..", "..", "client"));
 
 var installPackages = builder.AddExecutable("asc-install-packages", "yarn", clientBasePath, "install");
-var buildPackages = builder.AddExecutable("asc-build-packages", "yarn", clientBasePath, "build").WithRelationship(installPackages.Resource, "install").WaitForCompletion(installPackages);
-var startPackages = builder.AddExecutable("asc-start-packages", "yarn", clientBasePath, "start").WithRelationship(installPackages.Resource, "build").WaitForCompletion(buildPackages);
+var buildPackages = builder.AddExecutable("asc-build-packages", "yarn", clientBasePath, "build").WaitForCompletion(installPackages);
+var startPackages = builder.AddExecutable("asc-start-packages", "yarn", clientBasePath, "start").WaitForCompletion(buildPackages);
+installPackages.WithRelationship(buildPackages.Resource, "Parent");
+buildPackages.WithRelationship(startPackages.Resource, "Parent");
 
 builder.AddContainer("asc-openresty", "openresty/openresty", "latest")
     .WithBindMount(Path.GetFullPath(Path.Combine("..", "..", "..", "buildtools", "config", "nginx")), "/etc/nginx/conf.d/")
@@ -100,7 +109,9 @@ void AddProjectWithDefaultConfiguration<TProject>(bool includeHealthCheck = true
         .WithReference(mySql, "default:connectionString")
         .WithReference(rabbitMq, "rabbitMQ")
         .WithReference(redis, "redis")
+        .WithEnvironment("files:docservice:url:portal", "http://host.docker.internal:8092")
         .WaitFor(migrate)
         .WaitFor(rabbitMq)
-        .WaitFor(redis);
+        .WaitFor(redis)
+        .WaitFor(editors);
 }
