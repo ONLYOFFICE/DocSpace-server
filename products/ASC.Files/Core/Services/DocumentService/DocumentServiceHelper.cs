@@ -660,9 +660,13 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             {
                 CanEdit = canEdit,
                 CanFill = canFill,
-                CanStartFilling = false,
-                IsSubmitOnly = canFill
+                CanStartFilling = false
             };
+        }
+
+        if (securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID) && result.CanFill)
+        {
+            result.IsSubmitOnly = canFill;
         }
 
         if (result.CanFill) 
