@@ -27,17 +27,17 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// The storage settings request parameters.
+/// The request parameters for configuring storage module settings.
 /// </summary>
 public class StorageRequestsDto
 {
     /// <summary>
-    /// The storage module name.
+    /// The name for the storage module to be configured.
     /// </summary>
     public string Module { get; set; }
 
     /// <summary>
-    /// The list of storage properties.
+    /// The list of configuration key-value pairs for the storage module.
     /// </summary>
     public IEnumerable<ItemKeyValuePair<string, string>> Props { get; set; }
 }

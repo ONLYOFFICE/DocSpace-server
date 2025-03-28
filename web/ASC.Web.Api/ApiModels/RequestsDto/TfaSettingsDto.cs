@@ -27,42 +27,42 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// The TFA settings parameters.
+/// The parameters representing Two-Factor Authentication (TFA) configuration settings.
 /// </summary>
 public class TfaSettingsDto
 {
     /// <summary>
-    /// The TFA ID.
+    /// The ID for the TFA configuration.
     /// </summary>
     public string Id { get; set; }
 
     /// <summary>
-    /// The TFA title.
+    /// The display name or description for the TFA configuration.
     /// </summary>
     public string Title { get; set; }
 
     /// <summary>
-    /// Specifies if the TFA settings are enabled or not.
+    /// Indicates whether this TFA configuration is currently active.
     /// </summary>
     public bool Enabled { get; set; }
 
     /// <summary>
-    /// Specifies if the TFA settings are available or not.
+    /// Indicates whether this TFA configuration can be used.
     /// </summary>
     public bool Avaliable { get; set; }
 
     /// <summary>
-    /// The list of trusted IP addresses.
+    /// The list of IP addresses that are exempt from TFA requirements.
     /// </summary>
     public List<string> TrustedIps { get; set; }
 
     /// <summary>
-    /// The list of users who must use the TFA verification.
+    /// The list of user IDs that are required to use TFA.
     /// </summary>
     public List<Guid> MandatoryUsers { get; set; }
 
     /// <summary>
-    /// The list of groups who must use the TFA verification.
+    /// The list of group IDs whose members are required to use TFA.
     /// </summary>
     public List<Guid> MandatoryGroups { get; set; }
 }

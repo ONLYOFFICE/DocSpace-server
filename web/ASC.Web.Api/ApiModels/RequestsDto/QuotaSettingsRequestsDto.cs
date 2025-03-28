@@ -27,17 +27,17 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// The request parameters for the user quota settings.
+/// The request parameters for managing user storage quota configurations.
 /// </summary>
 public class QuotaSettingsRequestsDto
 {
     /// <summary>
-    /// Specifies if the quota settings are enabled or not.
+    /// Specifies whether storage quota restrictions are enforced.
     /// </summary>
     public bool EnableQuota { get; set; }
 
     /// <summary>
-    /// The default quota value.
+    /// The default storage quota value applied to new users.
     /// </summary>
     public JsonElement DefaultQuota { get; set; }
 }

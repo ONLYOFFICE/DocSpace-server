@@ -27,36 +27,36 @@
 namespace ASC.Api.Settings.Smtp;
 
 /// <summary>
-/// The SMTP operations status request parameters.
+/// The request parameters for tracking SMTP (Simple Mail Transfer Protocol) operation status.
 /// </summary>
 public class SmtpOperationStatusRequestsDto
 {
     /// <summary>
-    /// Specifies if the SMTP operation is completed or not.
+    /// Specifies whether the SMTP operation has finished processing.
     /// </summary>
     [SwaggerSchemaCustom(Example = true)]
     public bool Completed { get; set; }
 
     /// <summary>
-    /// The SMTP operation ID.
+    /// The unique identifier for tracking the SMTP operation.
     /// </summary>
     [SwaggerSchemaCustom(Example = "{some-random-guid}")]
     public string Id { get; set; }
 
     /// <summary>
-    /// The SMTP operation error.
+    /// The error message if the SMTP operation encountered issues.
     /// </summary>
     [SwaggerSchemaCustom(Example = "")]
     public string Error { get; set; }
 
     /// <summary>
-    /// The SMTP operation status.
+    /// The current state of the SMTP operation.
     /// </summary>
     [SwaggerSchemaCustom(Example = "")]
     public string Status { get; set; }
 
     /// <summary>
-    /// The percentage of SMTP operation completion.
+    /// The progress indicator showing completion percentage of the operation.
     /// </summary>
     [SwaggerSchemaCustom(Example = 0)]
     public int Percents { get; set; }

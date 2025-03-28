@@ -27,7 +27,7 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// The IP restrictions request parameters.
+/// The base parameters for managing IP restriction settings.
 /// </summary>
 public class IpRestrictionsBaseRequestsDto
 {
@@ -38,19 +38,17 @@ public class IpRestrictionsBaseRequestsDto
 }
 
 /// <summary>
-/// The new IP restriction settings.
+/// The parameters for configuring new IP restriction settings.
 /// </summary>
 public class IpRestrictionsDto
 {
     /// <summary>
-    /// The list of IP addresses.
+    /// The list of IP restriction addresses.
     /// </summary>
-    /// <type>System.Collections.Generic.IEnumerable{ASC.IPSecurity.IpRestrictionBase}, System.Collections.Generic</type>
     public IEnumerable<IpRestrictionBase> IpRestrictions { get; set; }
 
     /// <summary>
     /// Specifies whether to enable IP restrictions or not.
     /// </summary>
-    /// <type>System.Boolean, System</type>
     public bool? Enable { get; set; }
 }

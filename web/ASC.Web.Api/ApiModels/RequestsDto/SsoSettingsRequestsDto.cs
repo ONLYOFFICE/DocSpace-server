@@ -27,12 +27,12 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// The SSO settings request parameters.
+/// The request parameters for Single Sign-On (SSO) configuration settings.
 /// </summary>
 public class SsoSettingsRequestsDto
 {
     /// <summary>
-    /// The serialized SSO settings.
+    /// The JSON-serialized SSO configuration settings.
     /// </summary>
     public string SerializeSettings { get; set; }
 }

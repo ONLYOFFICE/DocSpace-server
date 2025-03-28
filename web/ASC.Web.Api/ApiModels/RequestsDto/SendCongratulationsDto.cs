@@ -27,33 +27,33 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The congratulations request parameters.
+/// The parameters for sending congratulatory email notifications.
 /// </summary>
 public class SendCongratulationsDto
 {
     /// <summary>
-    /// The user ID.
+    /// The user ID to receive the congratulatory message.
     /// </summary>
     public Guid Userid { get; set; }
 
     /// <summary>
-    /// The email key.
+    /// The template identifier or email configuration key.
     /// </summary>
     public string Key { get; set; }
 }
 
 ///<summary>
-/// The send remove instructions parameters.
+/// The instructions parameters for sending account removal or deactivation instructions.
 ///</summary>
 public class SendRemoveInstructionsDto
 {
     ///<summary>
-    /// The user ID.
+    /// The ID of the user requesting account removal.
     ///</summary>
     public Guid Userid { get; set; }
 
     ///<summary>
-    /// The email key.
+    /// The email configuration key.
     ///</summary>
     public string Key { get; set; }
 }

@@ -27,37 +27,37 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The LDAP settings request parameters.
+/// The parameters for configuring LDAP (Lightweight Directory Access Protocol) integration settings.
 /// </summary>
 public class LdapRequestsDto : IMapFrom<LdapSettings>
 {
     /// <summary>
-    /// Specifies if the LDAP authentication is enabled or not.
+    /// Specifies whether LDAP authentication is active in the system.
     /// </summary>
     public bool EnableLdapAuthentication { get; set; }
 
     /// <summary>
-    /// Specifies if the StartTLS is enabled or not.
+    /// Specifies whether the StartTLS (Transport Layer Security) protocol for secure LDAP communication is enabled or not.
     /// </summary>
     public bool StartTls { get; set; }
 
     /// <summary>
-    /// Specifies if the SSL is enabled or not.
+    /// Specifies whether the SSL (Secure Sockets Layer) encryption for LDAP communication is enabled or not.
     /// </summary>
     public bool Ssl { get; set; }
 
     /// <summary>
-    /// Specifies if the welcome email is sent or not.
+    /// Specifies whether the automatic welcome email dispatch to new LDAP users is enabled or not.
     /// </summary>
     public bool SendWelcomeEmail { get; set; }
 
     /// <summary>
-    /// Specifies if the email verification is disabled or not.
+    /// Specifies if email verification requirement for LDAP users is enabled or not.
     /// </summary>
     public bool DisableEmailVerification { get; set; }
 
     /// <summary>
-    /// The LDAP server URL address.
+    /// The LDAP server's hostname or IP address.
     /// </summary>
     public string Server { get; set; }
 
@@ -67,7 +67,7 @@ public class LdapRequestsDto : IMapFrom<LdapSettings>
     public string UserDN { get; set; }
 
     /// <summary>
-    /// The port number of the LDAP.
+    /// The network port number for LDAP server connection.
     /// </summary>
     public int PortNumber { get; set; }
 
@@ -129,22 +129,22 @@ public class LdapRequestsDto : IMapFrom<LdapSettings>
     public bool Authentication { get; set; }
 
     /// <summary>
-    /// The user login. 
+    /// The username for LDAP server authentication.
     /// </summary>
     public string Login { get; set; }
 
     /// <summary>
-    /// The user password.
+    /// The password for LDAP server authentication.
     /// </summary>
     public string Password { get; set; }
 
     /// <summary>
-    /// Specifies if the certificate is accepted or not.
+    /// Specifies the SSL certificate validation behavior.
     /// </summary>
     public bool AcceptCertificate { get; set; }
 
     /// <summary>
-    /// The users type.
+    /// The default employee type assigned to imported LDAP users.
     /// </summary>
     public EmployeeType UsersType { get; set; }
 

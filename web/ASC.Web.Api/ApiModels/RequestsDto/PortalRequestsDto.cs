@@ -27,60 +27,60 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The portal extra tenant request parameters.
+/// The request parameters for managing additional tenant information in a portal.
 /// </summary>
 public class PortalExtraTenantRequestDto
 {
     /// <summary>
-    /// Specifies whether the tariff will be refreshed.
+    /// Specifies whether to fetch fresh tariff information.
     /// </summary>
     [FromQuery(Name = "refresh")]
     public bool Refresh { get; set; }
 }
 
 /// <summary>
-/// The portal path request parameters.
+/// The request parameters for portal path configuration.
 /// </summary>
 public class PortalPathRequestDto
 {
     /// <summary>
-    /// The portal virtual path.
+    /// The virtual path for portal resource access.
     /// </summary>
     [FromQuery(Name = "virtualPath")]
     public string VirtualPath { get; set; }
 }
 
 /// <summary>
-/// The portal thumbnail request parameters.
+/// The request parameters for managing portal thumbnail generation.
 /// </summary>
 public class PortalThumbnailRequestDto
 {
     /// <summary>
-    /// The bookmark URL.
+    /// The URL of the content to generate thumbnail from.
     /// </summary>
     [FromQuery(Name = "url")]
     public string Url { get; set; }
 }
 
 /// <summary>
-/// The portal mobile app request parameters.
+/// The request parameters for mobile application configuration in the portal.
 /// </summary>
 public class PortalMobileAppRequestDto
 {
     /// <summary>
-    /// The mobile app type (IosProjects, AndroidProjects, IosDocuments, AndroidDocuments, or DesktopEditor).
+    /// Specifies the target mobile platform or application type (IosProjects, AndroidProjects, IosDocuments, AndroidDocuments, or DesktopEditor).
     /// </summary>
     [FromQuery(Name = "type")]
     public MobileAppType Type { get; set; }
 }
 
 /// <summary>
-/// The portal settings request parameters.
+/// The request parameters for portal security and configuration settings.
 /// </summary>
 public class PortalSettingsrequestDto
 {
     /// <summary>
-    /// Specifies if the password hasher settings will be returned or not.
+    /// Specifies if the inclusion of password hashing configuration in response.
     /// </summary>
     [FromQuery(Name = "withpassword")]
     public bool? WithPassword { get; set; }

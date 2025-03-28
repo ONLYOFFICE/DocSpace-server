@@ -27,33 +27,33 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// The security request parameters.
+/// The request parameters for managing user security and access permissions.
 /// </summary>
 public class SecurityRequestsDto
 {
     /// <summary>
-    /// The product ID.
+    /// The product ID for which permissions are being set.
     /// </summary>
     public Guid ProductId { get; set; }
 
     /// <summary>
-    /// The user ID.
+    /// The ID of the user whose permissions are being configured.
     /// </summary>
     public Guid UserId { get; set; }
 
     /// <summary>
-    /// The administrator or not.
+    /// Specifies whether the user has administrative privileges.
     /// </summary>
     public bool Administrator { get; set; }
 }
 
 /// <summary>
-/// The security settings request parameters.
+/// The request parameters for retrieving security settings across multiple modules.
 /// </summary>
 public class SecuritySettingsRequestDto
 {
     /// <summary>
-    /// The list of module IDs.
+    /// The list of module identifiers for which to retrieve security settings.
     /// </summary>
     [FromQuery(Name = "ids")]
     public IEnumerable<string> Ids { get; set; }

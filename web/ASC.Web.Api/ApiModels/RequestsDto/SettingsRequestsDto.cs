@@ -27,72 +27,72 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// The owner ID settings request parameters.
+/// The request parameters for managing owner-specific settings.
 /// </summary>
 public class OwnerIdSettingsRequestDto
 {
     /// <summary>
-    /// The owner ID.
+    /// The ID of the owner whose settings are being managed.
     /// </summary>
     public Guid OwnerId { get; set; }
 }
 
 /// <summary>
-/// The settings request parameters.
+/// The request parameters for version-specific settings configuration.
 /// </summary>
 public class SettingsRequestsDto
 {
     /// <summary>
-    /// The version ID.
+    /// The ID representing the settings version.
     /// </summary>
     public int VersionId { get; set; }
 }
 
 /// <summary>
-/// The tips request parameters.
+/// The request parameters for managing user interface tips visibility.
 /// </summary>
 public class TipsRequestDto
 {
     /// <summary>
-    /// Specifies whether to show tips for the user or not.
+    /// Controls the visibility of user interface tips.
     /// </summary>
     public bool Show { get; set; } //tips
 }
 
 /// <summary>
-/// The default product request parameters.
+/// The request parameters for setting the default product configuration.
 /// </summary>
 public class DefaultProductRequestDto
 {
     /// <summary>
-    /// The default product ID.
+    /// The ID of the product to be set as default.
     /// </summary>
     public Guid DefaultProductID { get; set; }
 }
 
 /// <summary>
-/// The time zone request parameters.
+/// The request parameters for configuring time zone preferences.
 /// </summary>
 public class TimeZoneRequestDto
 {
     /// <summary>
-    /// The time zone language.
+    /// The language code for time zone localization.
     /// </summary>
     public string Lng { get; set; }
 
     /// <summary>
-    /// The time zone ID.
+    /// The IANA time zone identifier.
     /// </summary>
     public string TimeZoneID { get; set; }
 }
 
 /// <summary>
-/// The settings request parameters.
+/// The request parameters for managing tenant-level developer tools access settings.
 /// </summary>
 public class TenantDevToolsAccessSettingsDto
 {
     /// <summary>
-    /// The limited access to Developer Tools for users.
+    /// Determines if users have restricted access to developer tools.
     /// </summary>
     public bool LimitedAccessForUsers { get; set; }
 }

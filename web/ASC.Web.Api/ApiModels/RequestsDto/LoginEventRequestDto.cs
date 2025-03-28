@@ -27,30 +27,30 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The login event action.
+/// The login for querying user login events within a specified time range.
 /// </summary>
 public class LoginEventRequestDto
 {
     /// <summary>
-    /// The login event user ID.
+    /// The ID of the user whose login events are being queried.
     /// </summary>
     [FromQuery(Name = "userId")]
     public Guid UserId { get; set; }
 
     /// <summary>
-    /// The login event action.
+    /// The login-related action to filter events by.
     /// </summary>
     [FromQuery(Name = "action")]
     public MessageAction Action { get; set; }
 
     /// <summary>
-    /// The login event start date.
+    /// The login events query range.
     /// </summary>
     [FromQuery(Name = "from")]
     public ApiDateTime From { get; set; }
 
     /// <summary>
-    /// The login event end date.
+    /// The date and time for the login events query range.
     /// </summary>
     [FromQuery(Name = "to")]
     public ApiDateTime To { get; set; }

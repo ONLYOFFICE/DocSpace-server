@@ -27,52 +27,52 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// The third-party request parameters.
+/// The request parameters for handling third-party OAuth authentication requests.
 /// </summary>
 public class ThirdpartyRequestsDto
 {
     /// <summary>
-    /// The code of the third-party request.
+    /// The authorization code received from the third-party OAuth provider.
     /// </summary>
     public string Code { get; set; }
 
     /// <summary>
-    /// The redirect of the third-party request.
+    /// The callback URL where the user should be redirected after authentication.
     /// </summary>
     public string Redirect { get; set; }
 }
 
 /// <summary>
-/// The confirmation request parameters.
+/// The request parameters for handling OAuth confirmation responses.
 /// </summary>
 public class ConfirmationCodeRequestDto
 {
     /// <summary>
-    /// The URL where the user will be redirected to after they have granted the application access.
+    /// The callback URL for redirecting the user after successful authentication.
     /// </summary>
     [FromQuery(Name = "redirect")]
     public string Redirect { get; set; }
 
     /// <summary>
-    /// The confirmation code that can be exchanged for an OAuth token.
+    /// The OAuth authorization code received from the identity provider.
     /// </summary>
     [FromQuery(Name = "code")]
     public string Code { get; set; }
 
     /// <summary>
-    /// The confirmation error.
+    /// The error message or code returned by the OAuth provider if authentication fails.
     /// </summary>
     [FromQuery(Name = "error")]
     public string Error { get; set; }
 }
 
 /// <summary>
-/// The confirmation code URL request parameters.
+/// The request parameters for generating OAuth confirmation URLs.
 /// </summary>
 public class ConfirmationCodeUrlRequestDto
 {
     /// <summary>
-    /// The login provider.
+    /// The identity provider to use for authentication.
     /// </summary>
     [FromRoute(Name = "provider")]
     public LoginProvider Provider { get; set; }

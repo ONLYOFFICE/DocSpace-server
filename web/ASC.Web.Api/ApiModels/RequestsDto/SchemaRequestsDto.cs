@@ -27,68 +27,68 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// The team template parameters.
+/// The parameters for team template identification.
 /// </summary>
 public class SchemaBaseRequestsDto
 {
     /// <summary>
-    /// The team template ID.
+    /// The ID for the team template.
     /// </summary>
     public string Id { get; init; }
 }
 
 /// <summary>
-/// The team template parameters.
+/// The parameters for comprehensive team template configuration.
 /// </summary>
 public class SchemaRequestsDto : SchemaBaseRequestsDto
 {
     /// <summary>
-    /// The team template name.
+    /// The display name for the team template.
     /// </summary>
     public string Name { get; set; }
 
     /// <summary>
-    /// The user caption.
+    /// The label for single user references.
     /// </summary>
     public string UserCaption { get; init; }
 
     /// <summary>
-    /// The users caption.
+    /// The label for multiple user references.
     /// </summary>
     public string UsersCaption { get; init; }
 
     /// <summary>
-    /// The group caption.
+    /// The label for single group references.
     /// </summary>
     public string GroupCaption { get; init; }
 
     /// <summary>
-    /// The groups caption.
+    /// The labels for multiple group references.
     /// </summary>
     public string GroupsCaption { get; init; }
 
     /// <summary>
-    /// The user status caption.
+    /// The label for user position or status.
     /// </summary>
     public string UserPostCaption { get; init; }
 
     /// <summary>
-    /// The registration date caption.
+    /// The member registration date caption.
     /// </summary>
     public string RegDateCaption { get; init; }
 
     /// <summary>
-    /// The group lead caption.
+    /// The label for group leader position.
     /// </summary>
     public string GroupHeadCaption { get; init; }
 
     /// <summary>
-    /// The guest caption.
+    /// The label for single guest/external user.
     /// </summary>
     public string GuestCaption { get; init; }
 
     /// <summary>
-    /// The guests caption.
+    /// The label for multiple guests/external users.
     /// </summary>
     public string GuestsCaption { get; init; }
 }

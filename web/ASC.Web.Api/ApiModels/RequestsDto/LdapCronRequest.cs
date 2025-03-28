@@ -27,12 +27,12 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The LDAP cron request parameters.
+/// The request parameters for handling LDAP (Lightweight Directory Access Protocol) synchronization scheduling.
 /// </summary>
 public class LdapCronRequestDto
 {
     /// <summary>
-    /// The cron expression.
+    /// The cron expression that defines the schedule for LDAP synchronization.
     /// </summary>
     public string Cron { get; set; }
 }
