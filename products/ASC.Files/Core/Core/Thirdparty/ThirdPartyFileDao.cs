@@ -808,6 +808,10 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     {
         throw new NotImplementedException();
     }
+    public IAsyncEnumerable<FormRole> GetUserFormRolesInRoom(string roomId, Guid userId)
+    {
+        throw new NotImplementedException();
+    }
     public Task<FormRole> ChangeUserFormRoleAsync(string formId, FormRole formRole)
     {
         throw new NotImplementedException();

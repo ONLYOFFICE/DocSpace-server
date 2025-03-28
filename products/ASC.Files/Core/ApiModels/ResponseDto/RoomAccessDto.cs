@@ -37,4 +37,15 @@ public class RoomSecurityDto
     /// Warning
     /// </summary>
     public string Warning { get; set; }
+
+    /// <summary>
+    /// Error
+    /// </summary>
+    public RoomSecurityError Error { get; set; }
+}
+
+public enum RoomSecurityError
+{
+    None,
+    FormRoleBlockingDeletion
 }

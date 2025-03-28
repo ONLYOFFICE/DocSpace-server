@@ -55,6 +55,12 @@ public class AccountsEntriesRequestDto<T>
     public bool? ExcludeShared {  get; set; }
 
     /// <summary>
+    /// Include shared
+    /// </summary>
+    [FromQuery(Name = "includeShared")]
+    public bool? IncludeShared { get; set; }
+
+    /// <summary>
     /// Invited by me
     /// </summary>
     [FromQuery(Name = "invitedByMe")]
