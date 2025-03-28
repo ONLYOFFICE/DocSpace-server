@@ -287,6 +287,96 @@ public class PaymentController(
         messageService.Send(MessageAction.ContactSalesMailSent);
     }
 
+
+    /// <summary>
+    /// Returns the URL to the chechout setup page.
+    /// </summary>
+    /// <short>
+    /// Get the chechout setup page URL
+    /// </short>
+    /// <path>api/2.0/portal/payment/chechoutsetupurl</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The URL to the chechout setup page", typeof(Uri))]
+    [HttpGet("chechoutsetupurl")]
+    public async Task<Uri> GetChechoutSetupUrlAsync()
+    {
+        var tenant = tenantManager.GetCurrentTenant();
+
+        if ((await tariffService.GetPaymentsAsync(tenant.Id)).Any() ||
+            !await userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID))
+        {
+            return null;
+        }
+
+        var currency = await regionHelper.GetCurrencyFromRequestAsync();
+
+        return await tariffService.GetShoppingUriAsync(
+            tenant.Id,
+            tenant.AffiliateId,
+            tenant.PartnerId,
+            currency,
+            CultureInfo.CurrentCulture.TwoLetterISOLanguageName,
+            (await userManager.GetUsersAsync(securityContext.CurrentAccount.ID)).Email,
+            [],
+            null,
+            true);
+    }
+
+    /// <summary>
+    /// Returns the customer info.
+    /// </summary>
+    /// <short>
+    /// Get the customer info
+    /// </short>
+    /// <path>api/2.0/portal/payment/customerinfo</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The customer info", typeof(string))]
+    [HttpGet("customerinfo")]
+    public async Task<string> GetCustomerInfoAsync()
+    {
+        var tenant = tenantManager.GetCurrentTenant();
+
+        if (!(await tariffService.GetPaymentsAsync(tenant.Id)).Any() ||
+            !await userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID))
+        {
+            return null;
+        }
+
+        return await tariffService.GetCustomerInfoAsync(tenant.Id);
+    }
+
+    /// <summary>
+    /// Returns result of putting money on deposit.
+    /// </summary>
+    /// <short>
+    /// Put money on deposit
+    /// </short>
+    /// <path>api/2.0/portal/payment/deposit</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "Success status", typeof(string))]
+    [HttpPost("deposit")]
+    public async Task<string> PutOnDepositAsync(PutOnDepositRequestDto inDto)
+    {
+        var tenant = tenantManager.GetCurrentTenant();
+        var hasPayments = (await tariffService.GetPaymentsAsync(tenant.Id)).Any();
+
+        if (!hasPayments)
+        {
+            return null;
+        }
+
+        var payerId = (await tariffService.GetTariffAsync(tenant.Id)).CustomerId;
+        var payer = await userManager.GetUserByEmailAsync(payerId);
+
+        if (securityContext.CurrentAccount.ID != payer.Id &&
+            securityContext.CurrentAccount.ID != tenant.OwnerId)
+        {
+            throw new SecurityException();
+        }
+
+        return await tariffService.PutOnDepositAsync(tenant.Id, inDto.Amount, inDto.Currency);
+    }
+
     /// <summary>
     /// Returns the customer balance from the accounting service.
     /// </summary>

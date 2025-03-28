@@ -129,30 +129,16 @@ public class BillingClient
     }
 
 
-    #region Draft
-
-    private async Task<string> GetCustomerInfoAsync(string portalId)
+    public async Task<string> GetCustomerInfoAsync(string portalId)
     {
-        var result = await RequestAsync("GetCustomerInfo", portalId);
-        var info = JsonSerializer.Deserialize<string>(result);
-        return info;
+        return await RequestAsync("GetCustomerInfo", portalId);
     }
 
-    private async Task<string> GetCheckoutSetupLinkAsync(string portalId, string backUrl)
+    public async Task<string> PutOnDepositAsync(string portalId, long amount, string currency)
     {
-        var result = await RequestAsync("GetCheckoutSetupLink", portalId, [Tuple.Create("BackRef", backUrl)]);
-        var link = JsonSerializer.Deserialize<string>(result);
-        return link;
+        return await RequestAsync("Deposit", portalId, [Tuple.Create("Amount", amount.ToString()), Tuple.Create("Currency", currency)]);
     }
 
-    private async Task<decimal> TakeOffMoneyAsync(string portalId, decimal amount)
-    {
-        var result = await RequestAsync("TakeOffMoney", portalId, [Tuple.Create("Amount", amount.ToString())]);
-        var balance = JsonSerializer.Deserialize<decimal>(result);
-        return balance;
-    }
-
-    #endregion
 
     public async Task<bool> ChangePaymentAsync(string portalId, IEnumerable<string> products, IEnumerable<int> quantity)
     {

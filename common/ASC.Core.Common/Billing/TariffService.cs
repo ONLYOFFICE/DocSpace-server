@@ -395,7 +395,7 @@ public class TariffService(
         return payments;
     }
 
-    public async Task<Uri> GetShoppingUriAsync(int tenant, string affiliateId, string partnerId, string currency = null, string language = null, string customerEmail = null, Dictionary<string, int> quantity = null, string backUrl = null)
+    public async Task<Uri> GetShoppingUriAsync(int tenant, string affiliateId, string partnerId, string currency = null, string language = null, string customerEmail = null, Dictionary<string, int> quantity = null, string backUrl = null, bool checkoutSetup = false)
     {
         List<TenantQuota> newQuotas = [];
 
@@ -440,7 +440,7 @@ public class TariffService(
             url = string.Empty;
             if (billingClient.Configured)
             {
-                var productIds = newQuotas.Select(q => q.ProductId);
+                var productIds = checkoutSetup ? [] : newQuotas.Select(q => q.ProductId);
 
                 try
                 {
@@ -533,7 +533,7 @@ public class TariffService(
         
         return !string.IsNullOrEmpty(url) ? new Uri(url) : null;
     }
-    
+
     public async Task<Tariff> GetBillingInfoAsync(int? tenant = null, int? id = null)
     {
         await using var coreDbContext = await coreDbContextManager.CreateDbContextAsync();
@@ -857,6 +857,17 @@ public class TariffService(
         return billingClient.Configured;
     }
 
+    public async Task<string> GetCustomerInfoAsync(int tenant)
+    {
+        var portalId = await coreSettings.GetKeyAsync(tenant);
+        return await billingClient.GetCustomerInfoAsync(portalId);
+    }
+
+    public async Task<string> PutOnDepositAsync(int tenant, long amount, string currency)
+    {
+        var portalId = await coreSettings.GetKeyAsync(tenant);
+        return await billingClient.PutOnDepositAsync(portalId, amount, currency);
+    }
 
     #region Accounting
 
@@ -949,7 +960,7 @@ public class TariffService(
     {
         return await hybridCache.GetOrDefaultAsync<T>(key);
     }
-    
+
     private void ResetCacheExpiration()
     {
         if (coreBaseSettings.Standalone)

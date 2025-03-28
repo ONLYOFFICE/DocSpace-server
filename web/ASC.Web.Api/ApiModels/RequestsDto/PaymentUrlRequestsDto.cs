@@ -47,3 +47,19 @@ public class QuantityRequestDto
     /// </summary>
     public Dictionary<string, int> Quantity { get; set; }
 }
+
+/// <summary>
+/// Put money on deposit request parameters
+/// </summary>
+public class PutOnDepositRequestDto
+{
+    /// <summary>
+    /// Amount
+    /// </summary>
+    public long Amount { get; set; }
+
+    /// <summary>
+    /// Currency
+    /// </summary>
+    public string Currency { get; set; }
+}
