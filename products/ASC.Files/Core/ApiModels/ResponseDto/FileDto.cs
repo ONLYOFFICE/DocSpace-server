@@ -81,6 +81,12 @@ public class FileDto<T> : FileEntryDto<T>
     public string WebUrl { get; set; }
 
     /// <summary>
+    /// Short Web URL
+    /// </summary>
+    [Url]
+    public string ShortWebUrl { get; set; }
+
+    /// <summary>
     /// File type
     /// </summary>
     public FileType FileType { get; set; }
@@ -200,7 +206,8 @@ public class FileDtoHelper(
         BreadCrumbsManager breadCrumbsManager,
         FileChecker fileChecker,
         SecurityContext securityContext,
-        UserManager userManager)
+        UserManager userManager,
+        IUrlShortener urlShortener)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory) 
 {
     private readonly ApiDateTimeHelper _apiDateTimeHelper = apiDateTimeHelper;
@@ -413,7 +420,7 @@ public class FileDtoHelper(
             result.ViewUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl), result.RequestToken);
 
             result.WebUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version, externalMediaAccess)), result.RequestToken);
-
+            result.ShortWebUrl = !string.IsNullOrEmpty(result.WebUrl) ? await urlShortener.GetShortenLinkAsync(result.WebUrl) : "";
             result.ThumbnailStatus = file.ThumbnailStatus;
 
             var cacheKey = Math.Abs(result.Updated.GetHashCode());
