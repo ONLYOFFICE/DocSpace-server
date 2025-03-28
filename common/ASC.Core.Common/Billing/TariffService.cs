@@ -904,21 +904,17 @@ public class TariffService(
         return balance;
     }
 
-    public async Task<bool> BlockCustomerMoneyAsync(int tenantId, string currency, decimal amount)
+    public async Task<Session> OpenCustomerSessionAsync(int tenantId, int serviceAccount, string externalRef, int quantity)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
-        return await accountingClient.BlockCustomerMoneyAsync(portalId, currency, amount);
+        return await accountingClient.OpenCustomerSessionAsync(portalId, serviceAccount, externalRef, quantity);
     }
 
-    public async Task<Balance> TakeOffCustomerMoneyAsync(int tenantId, string currency, decimal amount)
+    public async Task<bool> PerformCustomerOperationAsync(int tenantId, int serviceAccount, int sessionId, int quantity)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
-        var balance = await accountingClient.TakeOffCustomerMoneyAsync(portalId, currency, amount);
-
-        var cacheKey = GetAccountingBalanceCacheKey(tenantId);
-        await hybridCache.SetAsync(cacheKey, balance.ToString(), TimeSpan.FromMinutes(10));
-
-        return balance;
+        await accountingClient.PerformCustomerOperationAsync(portalId, serviceAccount, sessionId, quantity);
+        return true;
     }
 
     public async Task<Report> GetCustomerOperationsAsync(int tenantId, DateTime utcStartDate, DateTime utcEndDate)

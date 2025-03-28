@@ -39,7 +39,16 @@ public class AccountingClient
 
     internal const string HttpClientOption = "accounting";
 
-    private readonly JsonSerializerOptions _jsonSerializerOptions = new() { PropertyNameCaseInsensitive = true };
+    private readonly JsonSerializerOptions _deserializationOptions = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
+
+    private readonly JsonSerializerOptions _serializationOptions = new()
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    };
 
     public AccountingClient(IConfiguration configuration, IHttpClientFactory httpClientFactory)
     {
@@ -65,36 +74,40 @@ public class AccountingClient
         return await RequestAsync<Balance>(HttpMethod.Get, $"/customer/balance/{portalId}", addPolicy: addPolicy);
     }
 
-    public async Task<bool> BlockCustomerMoneyAsync(string portalId, string currency, decimal amount)
+    public async Task<Session> OpenCustomerSessionAsync(string portalId, int serviceAccount, string externalRef, int quantity)
     {
         if (Test && !string.IsNullOrEmpty(_configuration.TestCustomer))
         {
             portalId = _configuration.TestCustomer;
         }
 
-        var bodyParams = new[]
+        var data = new
         {
-            Tuple.Create("currency", currency),
-            Tuple.Create("amount", amount.ToString())
+            CustomerName = portalId,
+            ServiceAccount = serviceAccount,
+            ExternalRef = externalRef,
+            Quantity = quantity
         };
 
-        return await RequestAsync<bool>(HttpMethod.Post, $"/customer/money/{portalId}/block", bodyParams: bodyParams);
+        return await RequestAsync<Session>(HttpMethod.Post, "/session/open", data: data);
     }
 
-    public async Task<Balance> TakeOffCustomerMoneyAsync(string portalId, string currency, decimal amount)
+    public async Task PerformCustomerOperationAsync(string portalId, int serviceAccount, int sessionId, int quantity)
     {
         if (Test && !string.IsNullOrEmpty(_configuration.TestCustomer))
         {
             portalId = _configuration.TestCustomer;
         }
 
-        var bodyParams = new[]
+        var data = new
         {
-            Tuple.Create("currency", currency),
-            Tuple.Create("amount", amount.ToString())
+            CustomerName = portalId,
+            ServiceAccount = serviceAccount,
+            SessionId = sessionId,
+            Quantity = quantity
         };
 
-        return await RequestAsync<Balance>(HttpMethod.Post, $"/customer/money/{portalId}/takeoff", bodyParams: bodyParams);
+        _ = await RequestAsync<string>(HttpMethod.Post, "/operation/provided", data: data);
     }
 
     public async Task<Report> GetCustomerOperationsAsync(string portalId, DateTime utcStartDate, DateTime utcEndDate)
@@ -119,7 +132,7 @@ public class AccountingClient
     }
 
 
-    private async Task<T> RequestAsync<T>(HttpMethod httpMethod, string path, NameValueCollection queryParams = null, Tuple<string, string>[] bodyParams = null, bool addPolicy = false)
+    private async Task<T> RequestAsync<T>(HttpMethod httpMethod, string path, NameValueCollection queryParams = null, object data = null, bool addPolicy = false)
     {
         if (!Configured)
         {
@@ -154,23 +167,9 @@ public class AccountingClient
         var httpClient = _httpClientFactory.CreateClient(addPolicy ? HttpClientOption : "");
         httpClient.Timeout = TimeSpan.FromMilliseconds(60000);
 
-        if (bodyParams != null)
+        if (data != null)
         {
-            var data = new Dictionary<string, List<string>>();
-
-            foreach (var parameter in bodyParams)
-            {
-                if (data.TryGetValue(parameter.Item1, out var value))
-                {
-                    value.Add(parameter.Item2);
-                }
-                else
-                {
-                    data.Add(parameter.Item1, [parameter.Item2]);
-                }
-            }
-
-            var body = JsonSerializer.Serialize(data);
+            var body = JsonSerializer.Serialize(data, _serializationOptions);
 
             request.Content = new StringContent(body, Encoding.UTF8, "application/json");
         }
@@ -191,7 +190,7 @@ public class AccountingClient
                 throw new Exception("Accounting responseString is null or empty");
             }
 
-            var result = JsonSerializer.Deserialize<T>(responseString, _jsonSerializerOptions);
+            var result = JsonSerializer.Deserialize<T>(responseString, _deserializationOptions);
 
             return result;
         }
@@ -215,6 +214,8 @@ public class AccountingClient
 public record Balance(int AccountNumber, List<SubAccount> SubAccounts);
 
 public record SubAccount(string Currency, decimal Amount);
+
+public record Session(int SessionId, decimal ReservedAmount, string Currency);
 
 public record Report(List<Operation> Collection, int Offset, int Limit, int TotalQuantity, int TotalPage, int CurrentPage);
 

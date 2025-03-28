@@ -42,8 +42,8 @@ public interface ITariffService
 
     bool IsAccountingClientConfigured(out bool test);
     Task<Balance> GetCustomerBalanceAsync(int tenantId);
-    Task<bool> BlockCustomerMoneyAsync(int tenantId, string currency, decimal amount);
-    Task<Balance> TakeOffCustomerMoneyAsync(int tenantId, string currency, decimal amount);
+    Task<Session> OpenCustomerSessionAsync(int tenantId, int serviceAccount, string externalRef, int quantity);
+    Task<bool> PerformCustomerOperationAsync(int tenantId, int serviceAccount, int sessionId, int quantity);
     Task<Report> GetCustomerOperationsAsync(int tenantId, DateTime utcStartDate, DateTime utcEndDate);
     Task<List<Currency>> GetAllCurrenciesAsync();
 }

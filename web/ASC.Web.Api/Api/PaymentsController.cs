@@ -305,36 +305,36 @@ public class PaymentController(
     }
 
     /// <summary>
-    /// Trying to block amount money on the customer balance.
+    /// Trying to open a customer session and block amount money on the balance.
     /// </summary>
     /// <short>
-    /// Block amount money on the customer balance
+    /// Open customer session
     /// </short>
-    /// <path>api/2.0/portal/payment/customer/blockmoney</path>
+    /// <path>api/2.0/portal/payment/customer/opensession</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The money is blocked successfully or not", typeof(bool))]
-    [HttpPost("customer/blockmoney")]
-    public async Task<bool> BlockCustomerMoneyAsync(BlockCustomerMoneyRequestDto inDto)
+    [SwaggerResponse(200, "The customer session", typeof(Session))]
+    [HttpPost("customer/opensession")]
+    public async Task<Session> OpenCustomerSessionAsync(OpenCustomerSessionRequestDto inDto)
     {
         var tenant = await CheckAccountingAndReturnTenantAsync();
-        var result = await tariffService.BlockCustomerMoneyAsync(tenant.Id, inDto.Currency, inDto.Amount);
+        var result = await tariffService.OpenCustomerSessionAsync(tenant.Id, inDto.ServiceAccount, inDto.ExternalRef, inDto.Quantity);
         return result;
     }
 
     /// <summary>
-    /// Take off amount money from the customer balance and return new balance.
+    /// Perform customer operation and return true if the operation is succesfully provided.
     /// </summary>
     /// <short>
-    /// Take off amount money from the customer balance
+    /// Perform customer operation
     /// </short>
-    /// <path>api/2.0/portal/payment/customer/takeoffmoney</path>
+    /// <path>api/2.0/portal/payment/customer/performoperation</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The new customer balance", typeof(Balance))]
-    [HttpPost("customer/takeoffmoney")]
-    public async Task<Balance> TakeOffCustomerMoneyAsync(TakeOffCustomerMoneyRequestDto inDto)
+    [SwaggerResponse(200, "Boolean value: true if the operation is succesfully provided", typeof(bool))]
+    [HttpPost("customer/performoperation")]
+    public async Task<bool> PerformCustomerOperationAsync(PerformCustomerOperationRequestDto inDto)
     {
         var tenant = await CheckAccountingAndReturnTenantAsync();
-        var result = await tariffService.TakeOffCustomerMoneyAsync(tenant.Id, inDto.Currency, inDto.Amount);
+        var result = await tariffService.PerformCustomerOperationAsync(tenant.Id, inDto.ServiceAccount, inDto.SessionId, inDto.Quantity);
         return result;
     }
 
@@ -348,7 +348,7 @@ public class PaymentController(
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The customer operations", typeof(Report))]
     [HttpGet("customer/operations")]
-    public async Task<Report> GetCustomerOperationsAsync(AccountingReportRequestDto inDto)
+    public async Task<Report> GetCustomerOperationsAsync(CustomerOperationsRequestDto inDto)
     {
         var tenant = await CheckAccountingAndReturnTenantAsync();
         var utcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate);

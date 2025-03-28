@@ -27,50 +27,60 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// Money blocking request parameters
+/// Client session opening parameters
 /// </summary>
-public class BlockCustomerMoneyRequestDto
+public class OpenCustomerSessionRequestDto
 {
     /// <summary>
-    /// Currency
+    /// Service account
     /// </summary>
-    public string Currency { get; set; }
+    public int ServiceAccount { get; set; }
 
     /// <summary>
-    /// Amount of money
+    /// External reference
     /// </summary>
-    public decimal Amount { get; set; }
+    public string ExternalRef { get; set; }
+
+    /// <summary>
+    /// Quantity
+    /// </summary>
+    public int Quantity { get; set; }
 }
 
 /// <summary>
-/// Money taking off request parameters
+/// Parameters for performing a customer operation
 /// </summary>
-public class TakeOffCustomerMoneyRequestDto
+public class PerformCustomerOperationRequestDto
 {
     /// <summary>
-    /// Currency
+    /// Service account
     /// </summary>
-    public string Currency { get; set; }
+    public int ServiceAccount { get; set; }
 
     /// <summary>
-    /// Amount of money
+    /// Session ID
     /// </summary>
-    public decimal Amount { get; set; }
+    public int SessionId { get; set; }
+
+    /// <summary>
+    /// Quantity
+    /// </summary>
+    public int Quantity { get; set; }
 }
 
 /// <summary>
-/// Accounting report request parameters
+/// Parameters of the request for receiving the report on client operations
 /// </summary>
-public class AccountingReportRequestDto
+public class CustomerOperationsRequestDto
 {
     /// <summary>
-    /// start date
+    /// Start date
     /// </summary>
     [FromQuery(Name = "startDate")]
     public DateTime StartDate { get; set; }
 
     /// <summary>
-    /// end date
+    /// End date
     /// </summary>
     [FromQuery(Name = "endDate")]
     public DateTime EndDate { get; set; }
