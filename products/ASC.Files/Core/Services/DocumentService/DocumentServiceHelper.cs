@@ -660,7 +660,8 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             {
                 CanEdit = canEdit,
                 CanFill = canFill,
-                CanStartFilling = false
+                CanStartFilling = false,
+                IsSubmitOnly = canFill
             };
         }
 
