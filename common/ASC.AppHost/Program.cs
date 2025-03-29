@@ -26,6 +26,9 @@
 
 using Projects;
 
+var editorPort = Random.Shared.Next(8086, 8090);
+const int restyPort = 8092;
+
 var builder = DistributedApplication.CreateBuilder(args);
 
 var mySql = builder
@@ -47,7 +50,7 @@ var redis = builder
 
 var editors = builder
     .AddContainer("asc-editors", "onlyoffice/documentserver", "latest")
-    .WithHttpEndpoint(8085, 80)
+    .WithHttpEndpoint(editorPort, 80)
     .WithEnvironment("JWT_ENABLED", "true")
     .WithEnvironment("JWT_SECRET", "secret")
     .WithEnvironment("JWT_HEADER", "AuthorizationJwt");
@@ -63,7 +66,7 @@ AddProjectWithDefaultConfiguration<ASC_Data_Backup>();
 AddProjectWithDefaultConfiguration<ASC_Data_Backup_BackgroundTasks>();
 AddProjectWithDefaultConfiguration<ASC_Notify>(false);
 AddProjectWithDefaultConfiguration<ASC_Web_Api>();
-AddProjectWithDefaultConfiguration<ASC_People>( );
+AddProjectWithDefaultConfiguration<ASC_People>();
 AddProjectWithDefaultConfiguration<ASC_Files>();
 AddProjectWithDefaultConfiguration<ASC_Files_Service>();
 AddProjectWithDefaultConfiguration<ASC_Studio_Notify>();
@@ -74,7 +77,8 @@ builder.AddNpmApp("asc-socketIO", "../ASC.Socket.IO/", "start:build").WithHttpEn
 builder.AddNpmApp("asc-ssoAuth", "../ASC.SSoAuth/", "start:build").WithHttpEndpoint(targetPort: 9834).WithHttpHealthCheck("/health");
 builder.AddNpmApp("asc-webDav", "../ASC.WebDav/", "start:build").WithHttpEndpoint(targetPort: 1900).WithHttpHealthCheck("/health");
 
-var clientBasePath = Path.GetFullPath(Path.Combine("..", "..", "..", "client"));
+var basePath = Path.GetFullPath(Path.Combine("..", "..", ".."));
+var clientBasePath = Path.Combine(basePath, "client");
 
 var installPackages = builder.AddExecutable("asc-install-packages", "yarn", clientBasePath, "install");
 var buildPackages = builder.AddExecutable("asc-build-packages", "yarn", clientBasePath, "build").WaitForCompletion(installPackages);
@@ -83,13 +87,13 @@ installPackages.WithRelationship(buildPackages.Resource, "Parent");
 buildPackages.WithRelationship(startPackages.Resource, "Parent");
 
 builder.AddContainer("asc-openresty", "openresty/openresty", "latest")
-    .WithBindMount(Path.GetFullPath(Path.Combine("..", "..", "..", "buildtools", "config", "nginx")), "/etc/nginx/conf.d/")
-    .WithBindMount(Path.GetFullPath(Path.Combine("..", "..", "..", "buildtools", "config", "nginx", "includes")), "/etc/nginx/includes/")
-    .WithBindMount(Path.GetFullPath(Path.Combine("..", "..", "..", "client", "public")), "/var/www/public")
+    .WithBindMount(Path.Combine(basePath, "buildtools", "config", "nginx"), "/etc/nginx/conf.d/")
+    .WithBindMount(Path.Combine(basePath, "buildtools", "config", "nginx", "includes"), "/etc/nginx/includes/")
+    .WithBindMount(Path.Combine(clientBasePath, "public"), "/var/www/public")
     .WithBindMount(Path.Combine(clientBasePath, "packages", "client"), "/var/www/client")
     .WithBindMount(Path.Combine(clientBasePath, "packages", "login"), "/var/www/login")
     .WithBindMount(Path.Combine(clientBasePath, "packages", "management"), "/var/www/management")
-    .WithHttpEndpoint(8092, 8092)
+    .WithHttpEndpoint(restyPort, restyPort)
     .WaitFor(startPackages);
 
 await builder.Build().RunAsync();
@@ -109,7 +113,8 @@ void AddProjectWithDefaultConfiguration<TProject>(bool includeHealthCheck = true
         .WithReference(mySql, "default:connectionString")
         .WithReference(rabbitMq, "rabbitMQ")
         .WithReference(redis, "redis")
-        .WithEnvironment("files:docservice:url:portal", "http://host.docker.internal:8092")
+        .WithEnvironment("files:docservice:url:portal", $"http://host.docker.internal:{restyPort.ToString()}")
+        .WithEnvironment("files:docservice:url:portal", $"http://localhost:{editorPort.ToString()}")
         .WaitFor(migrate)
         .WaitFor(rabbitMq)
         .WaitFor(redis)
