@@ -106,7 +106,7 @@ public class UploadRequestDto : IModelWithFile, IDisposable
 }
 
 /// <summary>
-/// 
+/// Request parameters for uploading a file to a specific folder
 /// </summary>
 public class UploadWithFolderRequestDto<T>
 {
@@ -114,7 +114,7 @@ public class UploadWithFolderRequestDto<T>
     /// Folder ID
     /// </summary>
     [FromRoute(Name = "folderId")]
-    public T FolderId { get; set; }
+    public required T FolderId { get; set; }
 
     /// <summary>
     /// Upload data

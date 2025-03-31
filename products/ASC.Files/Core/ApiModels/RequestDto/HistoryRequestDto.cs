@@ -35,7 +35,7 @@ public class HistoryRequestDto
     /// File ID
     /// </summary>
     [FromRoute(Name = "fileId")]
-    public int FileId { get; set; }
+    public required int FileId { get; set; }
 
     /// <summary>
     /// Start date
@@ -56,10 +56,10 @@ public class HistoryRequestDto
 public class HistoryFolderRequestDto
 {
     /// <summary>
-    /// File ID
+    /// Folder ID
     /// </summary>
     [FromRoute(Name = "folderId")]
-    public int FolderId { get; set; }
+    public required int FolderId { get; set; }
 
     /// <summary>
     /// Start date

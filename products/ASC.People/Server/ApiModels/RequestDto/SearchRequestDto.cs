@@ -59,7 +59,7 @@ public class SearchIdDto<T>
     /// Id
     /// </summary>
     [FromRoute(Name = "id")]
-    public T Id { get; set; }
+    public required T Id { get; set; }
 }
 
 
@@ -72,7 +72,7 @@ public class AdvancedSearchDto
     /// User status
     /// </summary>
     [FromRoute(Name = "status")]
-    public EmployeeStatus Status { get; set; }
+    public required EmployeeStatus Status { get; set; }
 
     /// <summary>
     /// Search query

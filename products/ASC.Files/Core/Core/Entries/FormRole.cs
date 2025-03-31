@@ -28,6 +28,7 @@ namespace ASC.Files.Core.Core.Entries;
 
 public class FormRole
 {
+    public int RoomId { get; set; }
     public string RoleName { get; set; }
     public string RoleColor { get; set; }
     public Guid UserId { get; set; }

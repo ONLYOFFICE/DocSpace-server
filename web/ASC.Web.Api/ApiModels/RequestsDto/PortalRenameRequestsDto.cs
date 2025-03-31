@@ -34,5 +34,5 @@ public class PortalRenameRequestsDto
     /// <summary>
     /// Portal name
     /// </summary>
-    public string Alias { get; set; }
+    public required string Alias { get; set; }
 }

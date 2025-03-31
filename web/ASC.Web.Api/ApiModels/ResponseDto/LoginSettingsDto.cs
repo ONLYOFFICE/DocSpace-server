@@ -42,6 +42,9 @@ public class LoginSettingsDto : IMapFrom<LoginSettings>
     /// The time to wait for a response from the server
     /// </summary>
     public int CheckPeriod { get; set; }
-    
+
+    /// <summary>
+    /// Specifies if these settings are default or not
+    /// </summary>
     public bool IsDefault { get; set; }
 }

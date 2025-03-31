@@ -46,7 +46,7 @@ public class StartEditRequestDto<T>
     /// File ID
     /// </summary>
     [FromRoute(Name = "fileId")]
-    public T FileId { get; set; }
+    public required T FileId { get; set; }
 
     /// <summary>
     /// Parameters for starting file editing

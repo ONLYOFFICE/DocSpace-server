@@ -35,5 +35,5 @@ public class StartFillingRequestDto<T>
     /// File ID
     /// </summary>
     [FromRoute(Name = "fileId")]
-    public T FileId { get; set; }
+    public required T FileId { get; set; }
 }

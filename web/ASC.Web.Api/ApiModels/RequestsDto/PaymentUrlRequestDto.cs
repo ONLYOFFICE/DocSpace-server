@@ -27,7 +27,7 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// 
+/// Request parameters for payment URL operations
 /// </summary>
 public class PaymentUrlRequestDto
 {
@@ -40,7 +40,7 @@ public class PaymentUrlRequestDto
 
 
 /// <summary>
-/// 
+/// Request parameters for payment information operations
 /// </summary>
 public class PaymentInformationRequestDto
 {

@@ -29,4 +29,5 @@ namespace ASC.Common.Threading;
 public class DistributedTaskQueueFactoryOptions
 {
     public int MaxThreadsCount { get; set; }
+    public int TimeUntilUnregisterInSeconds { get; set; }
 }

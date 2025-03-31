@@ -39,10 +39,10 @@ public class SalesRequestsDto
     /// <summary>
     /// Email address
     /// </summary>
-    public string Email { get; set; }
+    public required string Email { get; set; }
 
     /// <summary>
     /// Message
     /// </summary>
-    public string Message { get; set; }
+    public required string Message { get; set; }
 }

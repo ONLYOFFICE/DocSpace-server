@@ -35,9 +35,9 @@ public static class Initializer
     public static readonly User Owner = new("test@example.com", "11111111");
     
     private static bool _initialized;
-    private static HttpClient? _apiClient;
-    private static HttpClient? _peopleClient;
-    private static PasswordHasher? _passwordHasher;
+    private static HttpClient _apiClient = null!;
+    private static HttpClient _peopleClient = null!;
+    private static PasswordHasher _passwordHasher = null!;
     
     private static readonly List<KeyValuePair<string, string?>> _settings =
     [

@@ -163,7 +163,8 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
     MailMergeTaskRunner mailMergeTaskRunner,
     FileTrackerHelper fileTracker,
     IHttpClientFactory clientFactory,
-    IHttpContextAccessor httpContextAccessor)
+    IHttpContextAccessor httpContextAccessor,
+    WebhookManager webhookManager)
 {
     public string GetCallbackUrl<T>(T fileId)
     {
@@ -507,6 +508,8 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
         }
         
         await filesMessageService.SendAsync(forceSave && fileData.ForceSaveType == TrackerData.ForceSaveInitiator.UserSubmit ? MessageAction.FormSubmit : MessageAction.UserFileUpdated, file, MessageInitiator.DocsService, userName, file.Title);
+
+        await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
 
         if (!forceSave)
         {

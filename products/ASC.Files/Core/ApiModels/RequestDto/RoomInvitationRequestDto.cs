@@ -51,6 +51,11 @@ public class RoomInvitationRequest
     /// Culture
     /// </summary>
     public string Culture { get; set; }
+
+    /// <summary>
+    /// Force
+    /// </summary>
+    public bool Force { get; set; }
 }
 
 public class RoomInvitationRequestDto<T>
@@ -59,7 +64,7 @@ public class RoomInvitationRequestDto<T>
     /// Room ID
     /// </summary>
     [FromRoute(Name = "id")]
-    public T Id { get; set; }
+    public required T Id { get; set; }
 
     /// <summary>
     /// Room invitation

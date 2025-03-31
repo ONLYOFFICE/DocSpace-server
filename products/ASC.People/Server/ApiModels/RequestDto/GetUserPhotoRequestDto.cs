@@ -35,5 +35,5 @@ public class GetUserPhotoRequestDto
     /// User ID
     /// </summary>
     [FromRoute(Name = "userid")]
-    public string UserId { get; set; }
+    public required string UserId { get; set; }
 }

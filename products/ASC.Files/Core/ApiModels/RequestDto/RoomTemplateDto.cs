@@ -30,7 +30,7 @@ public class RoomTemplateDto
     /// <summary>
     /// Room id
     /// </summary>
-    public int RoomId { get; set; }
+    public required int RoomId { get; set; }
 
     /// <summary>
     /// Title

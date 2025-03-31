@@ -569,6 +569,18 @@ public enum MessageAction
     [SwaggerEnum("Room index export saved")]
     RoomIndexExportSaved = 5106,
 
+    [SwaggerEnum("Form started to fill")]
+    FormStartedToFill = 5150,
+
+    [SwaggerEnum("Form partially filled")]
+    FormPartiallyFilled = 5151,
+
+    [SwaggerEnum("Form completely filled")]
+    FormCompletelyFilled = 5152,
+
+    [SwaggerEnum("Form stopped")]
+    FormStopped = 5153,
+
     #endregion
 
     #region Settings

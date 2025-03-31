@@ -32,7 +32,7 @@ public class GetFolderRequestDto<T>
     /// Folder ID
     /// </summary>
     [FromRoute(Name = "folderId")]
-    public T FolderId { get; set; }
+    public required T FolderId { get; set; }
 
     /// <summary>
     /// User or group ID

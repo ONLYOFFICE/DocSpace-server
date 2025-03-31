@@ -34,7 +34,7 @@ public class UpdateComment
     /// <summary>
     /// File version
     /// </summary>
-    public int Version { get; set; }
+    public required int Version { get; set; }
 
     /// <summary>
     /// Comment text
@@ -51,7 +51,7 @@ public class UpdateCommentRequestDto<T>
     /// File ID
     /// </summary>
     [FromRoute(Name = "fileId")]
-    public T FileId { get; set; }
+    public required T FileId { get; set; }
 
     /// <summary>
     /// Parameters for updating a comment

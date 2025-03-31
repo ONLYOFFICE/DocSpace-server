@@ -34,12 +34,12 @@ public class PrivacyRoomRequestDto
     /// <summary>
     /// Public key
     /// </summary>
-    public string PublicKey { get; set; }
+    public required string PublicKey { get; set; }
 
     /// <summary>
     /// Private key
     /// </summary>
-    public string PrivateKeyEnc { get; set; }
+    public required string PrivateKeyEnc { get; set; }
 
     /// <summary>
     /// Encryption keys need to be updated or not

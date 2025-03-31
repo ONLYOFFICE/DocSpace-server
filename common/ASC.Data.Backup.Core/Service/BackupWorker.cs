@@ -37,9 +37,9 @@ public class BackupWorker(
 
     public string TempFolder { get; } = Path.Combine(tempPath.GetTempPath(), "backup");
 
-    private DistributedTaskQueue<BackupProgressItem> _backupProgressQueue = queueFactory.CreateQueue<BackupProgressItem>(60 * 60 * 24); // 1 day
-    private DistributedTaskQueue<RestoreProgressItem> _restoreProgressQueue = queueFactory.CreateQueue<RestoreProgressItem>(60 * 60 * 24); // 1 day
-    private DistributedTaskQueue<TransferProgressItem> _transferProgressQueue = queueFactory.CreateQueue<TransferProgressItem>(60 * 60 * 24); // 1 day
+    private DistributedTaskQueue<BackupProgressItem> _backupProgressQueue = queueFactory.CreateQueue<BackupProgressItem>();
+    private DistributedTaskQueue<RestoreProgressItem> _restoreProgressQueue = queueFactory.CreateQueue<RestoreProgressItem>();
+    private DistributedTaskQueue<TransferProgressItem> _transferProgressQueue = queueFactory.CreateQueue<TransferProgressItem>();
     private int _limit;
     private string _upgradesPath;
     
