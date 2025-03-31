@@ -125,11 +125,6 @@ public class AccountLinker(
         await accountLinkerStorage.RemoveFromCacheAsync(CacheKey(tenant));
     }
 
-    public async Task AddLinkAsync(Guid obj, string id, string provider)
-    {
-        await AddLinkAsync(obj, new LoginProfile { Id = id, Provider = provider });
-    }
-
     public async Task RemoveProviderAsync(string obj, string provider = null, string hashId = null)
     {
         await using var accountLinkContext = await accountLinkContextManager.CreateDbContextAsync();
