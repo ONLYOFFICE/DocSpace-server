@@ -52,7 +52,10 @@ public class Startup : BaseStartup
         services.RegisterQuotaFeature();
         services.AddScoped<IWebItem, ProductEntryPoint>();
         services.AddDocumentServiceHttpClient(_configuration);
-
+        
+        services.RegisterQueue<AsyncTaskData<int>>();
+        services.RegisterQueue<AsyncTaskData<string>>();
+        
         services.AddStartupTask<CheckPdfStartupTask>()
            .TryAddSingleton(services);
     }

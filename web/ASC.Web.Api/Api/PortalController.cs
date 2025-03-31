@@ -98,7 +98,7 @@ public class PortalController(
 
         if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
         {
-            dto.Region = await apiSystemHelper.GetTenantRegionAsync(dto.Name);
+            dto.Region = await apiSystemHelper.GetTenantRegionAsync(dto.TenantAlias);
         }
         return dto;
     }

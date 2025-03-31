@@ -43,5 +43,11 @@ public class Startup : BaseStartup
         var services = builder.Services;
         services.AddBaseDbContextPool<FilesDbContext>();
         services.RegisterQuotaFeature();
+        
+        services.RegisterQueue<UsersQuotaSyncJob>();
+        services.RegisterQueue<RemoveProgressItem>();
+        services.RegisterQueue<DeletePersonalFolderProgressItem>();
+        services.RegisterQueue<UpdateUserTypeProgressItem>();
+        services.RegisterQueue<ReassignProgressItem>();
     }
 }

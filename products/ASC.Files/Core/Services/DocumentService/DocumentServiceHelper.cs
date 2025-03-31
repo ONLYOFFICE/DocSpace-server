@@ -664,6 +664,11 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             };
         }
 
+        if (securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID) && result.CanFill)
+        {
+            result.IsSubmitOnly = canFill;
+        }
+
         if (result.CanFill) 
         {
             result.EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;

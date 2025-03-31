@@ -110,7 +110,7 @@ public class QueueWorkerUpdateUserType(IHttpContextAccessor httpContextAccessor,
     {
         var result = _serviceProvider.GetService<UpdateUserTypeProgressItem>();
 
-        result.Init(tenantId, userId, toUserId, currentUserId, employeeType);
+        result.Init(tenantId, userId, toUserId, currentUserId, employeeType, _httpHeaders);
 
         return await StartAsync(tenantId, userId, result);
     }

@@ -184,6 +184,18 @@ public class MessageService(
         SendRequestHeadersMessage(action, target, httpHeaders, references, d1?.ToArray());
     }
 
+    public void SendHeadersMessage(MessageAction action, MessageTarget target, IDictionary<string, StringValues> httpHeaders, IEnumerable<string> d1, List<Guid> userIds, EmployeeType userType)
+    {
+        if (TryAddNotificationParam(action, userIds, out var parametr, userType))
+        {
+            SendRequestHeadersMessage(action, target, httpHeaders, description: [string.Join(", ", d1), parametr]);
+        }
+        else
+        {
+            SendRequestHeadersMessage(action, target, httpHeaders, description: string.Join(", ", d1));
+        }
+    }
+
     private void SendRequestHeadersMessage(MessageAction action, MessageTarget target = null, IDictionary<string, StringValues> httpHeaders = null, 
         IEnumerable<FilesAuditReference> references = null, params string[] description)
     {
