@@ -298,7 +298,7 @@ public class PaymentController(
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The URL to the chechout setup page", typeof(Uri))]
     [HttpGet("chechoutsetupurl")]
-    public async Task<Uri> GetChechoutSetupUrlAsync()
+    public async Task<Uri> GetChechoutSetupUrlAsync(ChechoutSetupUrlRequestsDto inDto)
     {
         var tenant = await CheckAccountingAndReturnTenantAsync();
         var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
@@ -312,7 +312,7 @@ public class PaymentController(
             CultureInfo.CurrentCulture.TwoLetterISOLanguageName,
             user.Email,
             [],
-            null,
+            inDto.BackUrl,
             true);
     }
 
@@ -430,10 +430,11 @@ public class PaymentController(
     [HttpGet("accounting/currencies")]
     public async Task<List<Currency>> GetAllCurrenciesAsync()
     {
+        _ = await CheckAccountingAndReturnTenantAsync();
         var result = await tariffService.GetAllCurrenciesAsync();
         return result;
     }
-    
+
 
     private async Task<Tenant> CheckAccountingAndReturnTenantAsync()
     {

@@ -925,6 +925,7 @@ public class TariffService(
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
         await accountingClient.PerformCustomerOperationAsync(portalId, serviceAccount, sessionId, quantity);
+        await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
         return true;
     }
 

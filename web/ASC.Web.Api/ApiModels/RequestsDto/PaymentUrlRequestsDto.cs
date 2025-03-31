@@ -54,6 +54,18 @@ public class QuantityRequestDto
 }
 
 /// <summary>
+/// Chechout setup URL request parameters
+/// </summary>
+public class ChechoutSetupUrlRequestsDto
+{
+    /// <summary>
+    /// Back URL
+    /// </summary>
+    [FromQuery]
+    public string BackUrl { get; set; }
+}
+
+/// <summary>
 /// Put money on deposit request parameters
 /// </summary>
 public class PutOnDepositRequestDto
