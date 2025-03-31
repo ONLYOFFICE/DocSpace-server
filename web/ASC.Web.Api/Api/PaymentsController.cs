@@ -300,14 +300,8 @@ public class PaymentController(
     [HttpGet("chechoutsetupurl")]
     public async Task<Uri> GetChechoutSetupUrlAsync()
     {
-        var tenant = tenantManager.GetCurrentTenant();
-
-        if ((await tariffService.GetPaymentsAsync(tenant.Id)).Any() ||
-            !await userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID))
-        {
-            return null;
-        }
-
+        var tenant = await CheckAccountingAndReturnTenantAsync();
+        var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
         var currency = await regionHelper.GetCurrencyFromRequestAsync();
 
         return await tariffService.GetShoppingUriAsync(
@@ -316,7 +310,7 @@ public class PaymentController(
             tenant.PartnerId,
             currency,
             CultureInfo.CurrentCulture.TwoLetterISOLanguageName,
-            (await userManager.GetUsersAsync(securityContext.CurrentAccount.ID)).Email,
+            user.Email,
             [],
             null,
             true);
@@ -334,14 +328,7 @@ public class PaymentController(
     [HttpGet("customerinfo")]
     public async Task<string> GetCustomerInfoAsync()
     {
-        var tenant = tenantManager.GetCurrentTenant();
-
-        if (!(await tariffService.GetPaymentsAsync(tenant.Id)).Any() ||
-            !await userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID))
-        {
-            return null;
-        }
-
+        var tenant = await CheckAccountingAndReturnTenantAsync();
         return await tariffService.GetCustomerInfoAsync(tenant.Id);
     }
 
@@ -357,23 +344,7 @@ public class PaymentController(
     [HttpPost("deposit")]
     public async Task<string> PutOnDepositAsync(PutOnDepositRequestDto inDto)
     {
-        var tenant = tenantManager.GetCurrentTenant();
-        var hasPayments = (await tariffService.GetPaymentsAsync(tenant.Id)).Any();
-
-        if (!hasPayments)
-        {
-            return null;
-        }
-
-        var payerId = (await tariffService.GetTariffAsync(tenant.Id)).CustomerId;
-        var payer = await userManager.GetUserByEmailAsync(payerId);
-
-        if (securityContext.CurrentAccount.ID != payer.Id &&
-            securityContext.CurrentAccount.ID != tenant.OwnerId)
-        {
-            throw new SecurityException();
-        }
-
+        var tenant = await CheckAccountingAndReturnTenantAsync();
         return await tariffService.PutOnDepositAsync(tenant.Id, inDto.Amount, inDto.Currency);
     }
 
