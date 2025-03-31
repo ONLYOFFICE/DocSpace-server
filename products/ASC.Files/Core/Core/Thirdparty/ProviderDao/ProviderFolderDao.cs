@@ -224,6 +224,11 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         }
         
         var selector = _selectorFactory.GetSelector(folderId);
+        if (selector == null)
+        {
+            yield break;
+        }
+
         var folderDao = selector.GetFolderDao(folderId);
 
         await foreach (var folder in folderDao.GetParentFoldersAsync(selector.ConvertId(folderId)))
