@@ -35,7 +35,7 @@ public class QueueWorker<T>(
 {
     protected readonly IServiceProvider _serviceProvider = serviceProvider;
     private readonly DistributedTaskQueue<T> _queue = queueFactory.CreateQueue<T>();
-    protected readonly IDictionary<string, StringValues> _httpHeaders = httpContextAccessor.HttpContext?.Request.Headers;
+    protected readonly IDictionary<string, StringValues> _httpHeaders = ASC.MessagingSystem.MessageSettings.GetHttpHeaders(httpContextAccessor.HttpContext?.Request);
 
     public static string GetProgressItemId(int tenantId, Guid userId)
     {

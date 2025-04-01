@@ -55,7 +55,7 @@ public class RoomLinkRequest
     /// <summary>
     /// Link type
     /// </summary>
-    public required LinkType LinkType { get; set; }
+    public LinkType LinkType { get; set; }
 
     /// <summary>
     /// Link password
