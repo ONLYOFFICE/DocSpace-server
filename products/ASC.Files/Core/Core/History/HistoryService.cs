@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -96,7 +96,11 @@ public class HistoryService(
         MessageAction.RoomColorChanged,
         MessageAction.RoomCoverChanged,
         MessageAction.RoomIndexExportSaved,
-        MessageAction.RoomInviteResend
+        MessageAction.RoomInviteResend,
+        MessageAction.FormStartedToFill,
+        MessageAction.FormPartiallyFilled,
+        MessageAction.FormCompletelyFilled,
+        MessageAction.FormStopped
     ];
 
     private static HashSet<int> FilterFolderActions => [
@@ -112,7 +116,11 @@ public class HistoryService(
         (int)MessageAction.FileMoved,
         (int)MessageAction.FileRenamed,
         (int)MessageAction.FormSubmit,
-        (int)MessageAction.FormOpenedForFilling
+        (int)MessageAction.FormOpenedForFilling,
+        (int)MessageAction.FormStartedToFill,
+        (int)MessageAction.FormPartiallyFilled,
+        (int)MessageAction.FormCompletelyFilled,
+        (int)MessageAction.FormStopped
     ];
     
     public async IAsyncEnumerable<HistoryEntry> GetHistoryAsync(

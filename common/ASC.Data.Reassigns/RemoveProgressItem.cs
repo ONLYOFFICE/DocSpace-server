@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,6 +26,8 @@
 
 using ASC.Web.Core.WebZones;
 
+using SecurityContext = ASC.Core.SecurityContext;
+
 namespace ASC.Data.Reassigns;
 
 /// <summary>
@@ -35,7 +37,7 @@ public class RemoveProgressItem : DistributedTaskProgress
 {
     /// <summary>ID of the user whose data is deleted</summary>
     /// <type>System.Guid, System</type>
-    public Guid FromUser { get; private set; }
+    public Guid UserId { get; private set; }
 
     /// <summary>The user whose data is deleted</summary>
     /// <type>ASC.Core.Users.UserInfo, ASC.Core.Common</type>
@@ -73,11 +75,11 @@ public class RemoveProgressItem : DistributedTaskProgress
         _httpHeaders = httpHeaders;
         _tenantId = tenantId;
         User = user;
-        FromUser = user.Id;
+        UserId = user.Id;
         _currentUserId = currentUserId;
         _notify = notify;
         _deleteProfile = deleteProfile;
-        Id = QueueWorkerRemove.GetProgressItemId(tenantId, FromUser);
+        Id = QueueWorkerRemove.GetProgressItemId(tenantId, UserId);
         Status = DistributedTaskStatus.Created;
         Exception = null;
         Percentage = 0;
@@ -111,23 +113,24 @@ public class RemoveProgressItem : DistributedTaskProgress
 
             var wrapper = await GetUsageSpace(webItemManagerSecurity);
 
-            Percentage = 30;
+            if (!IsGuest)
+            {
+                await fileStorageService.MoveSharedFilesAsync(UserId, _currentUserId);
+                Percentage = 30;
+                await PublishChanges();
+            }
+
+            await fileStorageService.DeletePersonalDataAsync(UserId);
+
+            Percentage = 50;
             await PublishChanges();
 
-            await fileStorageService.DeletePersonalDataAsync<int>(FromUser);
-
-            if (IsGuest)
-            {
-                Percentage = 50;
-                await PublishChanges();
-
-                await fileStorageService.ReassignRoomsFilesAsync(FromUser);
+            await fileStorageService.ReassignRoomsFilesAsync(UserId);
                 
-                Percentage = 70;
-                await PublishChanges();
+            Percentage = 70;
+            await PublishChanges();
                 
-                await fileStorageService.ReassignRoomsFoldersAsync(FromUser);
-            }
+            await fileStorageService.ReassignRoomsFoldersAsync(UserId);
 
             Percentage = 95;
             await PublishChanges();
@@ -183,7 +186,7 @@ public class RemoveProgressItem : DistributedTaskProgress
                     continue;
                 }
 
-                usageSpaceWrapper.DocsSpace = await manager.GetUserSpaceUsageAsync(FromUser);
+                usageSpaceWrapper.DocsSpace = await manager.GetUserSpaceUsageAsync(UserId);
             }
 
             if (item.ID == WebItemManager.MailProductID)
@@ -194,7 +197,7 @@ public class RemoveProgressItem : DistributedTaskProgress
                     continue;
                 }
 
-                usageSpaceWrapper.MailSpace = await manager.GetUserSpaceUsageAsync(FromUser);
+                usageSpaceWrapper.MailSpace = await manager.GetUserSpaceUsageAsync(UserId);
             }
 
             if (item.ID == WebItemManager.TalkProductID)
@@ -205,7 +208,7 @@ public class RemoveProgressItem : DistributedTaskProgress
                     continue;
                 }
 
-                usageSpaceWrapper.TalkSpace = await manager.GetUserSpaceUsageAsync(FromUser);
+                usageSpaceWrapper.TalkSpace = await manager.GetUserSpaceUsageAsync(UserId);
             }
         }
         return usageSpaceWrapper;
@@ -213,16 +216,16 @@ public class RemoveProgressItem : DistributedTaskProgress
 
     private async Task DeleteUserProfile(UserManager userManager, UserPhotoManager userPhotoManager, MessageService messageService, string userName)
     {
-        await userPhotoManager.RemovePhotoAsync(FromUser);
-        await userManager.DeleteUserAsync(FromUser);
+        await userPhotoManager.RemovePhotoAsync(UserId);
+        await userManager.DeleteUserAsync(UserId);
 
         if (_httpHeaders != null)
         {
-            messageService.SendHeadersMessage(MessageAction.UserDeleted, MessageTarget.Create(FromUser), _httpHeaders, userName);
+            messageService.SendHeadersMessage(MessageAction.UserDeleted, MessageTarget.Create(UserId), _httpHeaders, userName);
         }
         else
         {
-            messageService.Send(MessageAction.UserDeleted, MessageTarget.Create(FromUser), userName);
+            messageService.Send(MessageAction.UserDeleted, MessageTarget.Create(UserId), userName);
         }
     }
 
@@ -235,11 +238,11 @@ public class RemoveProgressItem : DistributedTaskProgress
 
         if (_httpHeaders != null)
         {
-            messageService.SendHeadersMessage(MessageAction.UserDataRemoving, MessageTarget.Create(FromUser), _httpHeaders, userName);
+            messageService.SendHeadersMessage(MessageAction.UserDataRemoving, MessageTarget.Create(UserId), _httpHeaders, userName);
         }
         else
         {
-            messageService.Send(MessageAction.UserDataRemoving, MessageTarget.Create(FromUser), userName);
+            messageService.Send(MessageAction.UserDataRemoving, MessageTarget.Create(UserId), userName);
         }
     }
 

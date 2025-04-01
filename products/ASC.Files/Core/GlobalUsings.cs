@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,11 +31,13 @@ global using System.ComponentModel.DataAnnotations;
 global using System.Diagnostics;
 global using System.Extensions;
 global using System.Globalization;
+global using ASC.Common.protos;
 global using System.Linq.Expressions;
 global using System.Net;
 global using System.Net.Http.Headers;
 global using System.Net.Mime;
 global using System.Net.Sockets;
+global using ASC.Core.Common.Quota.Custom;
 global using System.Runtime.Serialization;
 global using System.Security;
 global using System.Security.Cryptography;

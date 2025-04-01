@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -70,6 +70,11 @@ public class QuotaSocketManager(
         var tenantId = _tenantManager.GetCurrentTenantId();
 
         await MakeRequest("logout-session", new { room = $"{tenantId}-{userId}", loginEventId });
+    }
+
+    public async Task EncryptionProgressAsync(int percentage, string error)
+    {
+        await MakeRequest("encryption-progress", new { room = "storage-encryption", percentage, error }, tenantId: -1);
     }
 
     private string GetQuotaRoom()

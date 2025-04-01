@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -79,6 +79,12 @@ public class FileDto<T> : FileEntryDto<T>
     /// </summary>
     [Url]
     public string WebUrl { get; set; }
+
+    /// <summary>
+    /// Short Web URL
+    /// </summary>
+    [Url]
+    public string ShortWebUrl { get; set; }
 
     /// <summary>
     /// File type
@@ -208,8 +214,11 @@ public class FileDtoHelper(
         FileDateTime fileDateTime,
         ExternalShare externalShare,
         BreadCrumbsManager breadCrumbsManager,
-        FileChecker fileChecker)
-    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime) 
+        FileChecker fileChecker,
+        SecurityContext securityContext,
+        UserManager userManager,
+        IUrlShortener urlShortener)
+    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory) 
 {
     private readonly ApiDateTimeHelper _apiDateTimeHelper = apiDateTimeHelper;
 
@@ -239,11 +248,11 @@ public class FileDtoHelper(
         var extension = FileUtility.GetFileExtension(file.Title);
         var fileType = FileUtility.GetFileTypeByExtention(extension);
 
-        var fileDao = daoFactory.GetFileDao<T>();
+        var fileDao = _daoFactory.GetFileDao<T>();
 
         if (file.IsForm)
         {
-            var folderDao = daoFactory.GetCacheFolderDao<T>();
+            var folderDao = _daoFactory.GetCacheFolderDao<T>();
 
             Task<T> linkedIdTask;
             Task<EntryProperties<T>> propertiesTask;
@@ -255,7 +264,7 @@ public class FileDtoHelper(
             }
             else
             {
-                linkedIdTask = daoFactory.GetLinkDao<T>().GetLinkedAsync(file.Id);
+                linkedIdTask = _daoFactory.GetLinkDao<T>().GetLinkedAsync(file.Id);
                 propertiesTask = fileDao.GetProperties(file.Id);
             }
             
@@ -380,7 +389,7 @@ public class FileDtoHelper(
 
         if (!file.ProviderEntry && file.RootFolderType == FolderType.VirtualRooms && !expiration.HasValue)
         {
-            var folderDao = daoFactory.GetCacheFolderDao<T>();
+            var folderDao = _daoFactory.GetCacheFolderDao<T>();
             var room = await DocSpaceHelper.GetParentRoom(file, folderDao);
             if (room?.SettingsLifetime != null)
             {
@@ -423,7 +432,7 @@ public class FileDtoHelper(
             result.ViewUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl), result.RequestToken);
 
             result.WebUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version, externalMediaAccess)), result.RequestToken);
-
+            result.ShortWebUrl = await urlShortener.GetShortenLinkAsync(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebEditorUrl(file.Id)));
             result.ThumbnailStatus = file.ThumbnailStatus;
 
             var cacheKey = Math.Abs(result.Updated.GetHashCode());

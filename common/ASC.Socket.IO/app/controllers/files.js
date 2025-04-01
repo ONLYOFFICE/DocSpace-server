@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -112,6 +112,11 @@ module.exports = (files) => {
     res.end();
   });
 
+  router.post("/change-my-type", (req, res) => {
+    files.changeMyType(req.body);
+    res.end();
+  });
+
   router.post("/add-user", (req, res) => {
     files.addUser(req.body);
     res.end();
@@ -174,6 +179,11 @@ module.exports = (files) => {
 
   router.post("/end-restore", (req, res) => {
     files.endRestore(req.body);
+    res.end();
+  });
+
+  router.post("/encryption-progress", (req, res) => {
+    files.encryptionProgress(req.body);
     res.end();
   });
 

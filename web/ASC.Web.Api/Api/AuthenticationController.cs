@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -543,6 +543,14 @@ public class AuthenticationController(
             {
                 userInfo = await userManager.GetUsersAsync(userId);
             }
+            else if(!string.IsNullOrEmpty(loginProfile.EMail) && !string.IsNullOrEmpty(loginProfile.HashId))
+            {
+                userInfo = await userManager.GetUserByEmailAsync(loginProfile.EMail);
+                if (userInfo.Id != Constants.LostUser.Id)
+                {
+                    await accountLinker.AddLinkAsync(userInfo.Id, loginProfile);
+                }
+            }
 
             // var isNew = false;
             //
@@ -661,12 +669,11 @@ public class AuthenticationController(
         {
             if (Guid.TryParse(profileId, out var tmp) && await userManager.UserExistsAsync(tmp))
             {
-                userId = tmp;
-                break;
+                return (true, userId);
             }
         }
 
-        return (true, userId);
+        return (false, userId);
     }
 }
 

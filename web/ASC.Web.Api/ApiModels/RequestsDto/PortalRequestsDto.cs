@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,7 +27,7 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// 
+/// Request parameters for portal extra tenant operations
 /// </summary>
 public class PortalExtraTenantRequestDto
 {
@@ -39,7 +39,7 @@ public class PortalExtraTenantRequestDto
 }
 
 /// <summary>
-/// 
+/// Request parameters for portal path operations
 /// </summary>
 public class PortalPathRequestDto
 {
@@ -51,7 +51,7 @@ public class PortalPathRequestDto
 }
 
 /// <summary>
-/// 
+/// Request parameters for portal thumbnail operations
 /// </summary>
 public class PortalThumbnailRequestDto
 {
@@ -63,7 +63,7 @@ public class PortalThumbnailRequestDto
 }
 
 /// <summary>
-/// 
+/// Request parameters for portal mobile app operations
 /// </summary>
 public class PortalMobileAppRequestDto
 {
@@ -74,6 +74,9 @@ public class PortalMobileAppRequestDto
     public MobileAppType Type { get; set; }
 }
 
+/// <summary>
+/// Request parameters for portal settings operations
+/// </summary>
 public class PortalSettingsrequestDto
 {
     /// <summary>

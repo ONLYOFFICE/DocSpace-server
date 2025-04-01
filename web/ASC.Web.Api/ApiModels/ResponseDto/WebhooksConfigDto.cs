@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -59,6 +59,11 @@ public class WebhooksConfigDto
     /// Triggers
     /// </summary>
     public WebhookTrigger Triggers { get; set; }
+
+    /// <summary>
+    /// Target ID
+    /// </summary>
+    public string TargetId { get; set; }
 
     /// <summary>
     /// Create by
@@ -122,6 +127,7 @@ public class WebhooksConfigDtoHelper(TenantUtil tenantUtil, EmployeeDtoHelper em
             Enabled = dbWebhooksConfig.Enabled,
             SSL = dbWebhooksConfig.SSL,
             Triggers = dbWebhooksConfig.Triggers,
+            TargetId = dbWebhooksConfig.TargetId,
             CreatedBy = dbWebhooksConfig.CreatedBy.HasValue ? await employeeDtoHelper.GetAsync(dbWebhooksConfig.CreatedBy.Value) : null,
             CreatedOn = dbWebhooksConfig.CreatedOn.HasValue? tenantUtil.DateTimeFromUtc(dbWebhooksConfig.CreatedOn.Value) : null,
             ModifiedBy = dbWebhooksConfig.ModifiedBy.HasValue ? await employeeDtoHelper.GetAsync(dbWebhooksConfig.ModifiedBy.Value) : null,

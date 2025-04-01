@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,7 +35,7 @@ public class UsersWithRoomSharedRequestDto<T>
     /// Id
     /// </summary>
     [FromRoute(Name = "id")]
-    public T Id { get; set; }
+    public required T Id { get; set; }
 
     /// <summary>
     /// Employee status
@@ -54,6 +54,12 @@ public class UsersWithRoomSharedRequestDto<T>
     /// </summary>
     [FromQuery(Name = "excludeShared")]
     public bool? ExcludeShared { get; set; }
+
+    /// <summary>
+    /// Include shared
+    /// </summary>
+    [FromQuery(Name = "includeShared")]
+    public bool? IncludeShared { get; set; }
 
     /// <summary>
     /// Invited by me

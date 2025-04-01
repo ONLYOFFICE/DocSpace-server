@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -326,7 +326,9 @@ public class EntryManager(IDaoFactory daoFactory,
     FileChecker fileChecker,
     IFusionCache hybridCache,
     NotifyClient notifyClient,
-    ExternalShare externalShare)
+    ExternalShare externalShare,
+    FileSharingAceHelper fileSharingAceHelper,
+    DisplayUserSettingsHelper displayUserSettingsHelper)
 {
     private const string UpdateList = "filesUpdateList";
 
@@ -493,7 +495,7 @@ public class EntryManager(IDaoFactory daoFactory,
             {
                 orderBy.SortedBy = SortedByType.CustomOrder;
 
-                var folders = folderDao.GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, 0, -1, roomId);
+                var folders = folderDao.GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, 0, -1, roomId, parentType: room.FolderType, containingForms: parent.ShareRecord is { Share: FileShare.FillForms });
                 var files = fileDao.GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject, 0, -1, roomId, withShared, formsItemDto: formsItemDto, applyFormStepFilter: parent.ShareRecord is { Share: FileShare.FillForms });
                 
                 var temp = files.Concat(folders.Cast<FileEntry>())
@@ -1538,6 +1540,12 @@ public class EntryManager(IDaoFactory daoFactory,
 
                 var httpClient = clientFactory.CreateClient(nameof(DocumentService));
                 using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new Exception($"{FilesCommonResource.ErrorMessage_DocServiceException} {response.StatusCode}");
+                }
+
                 await using var editedFileStream = await response.Content.ReadAsStreamAsync();
                 await editedFileStream.CopyToAsync(tmpStream);
             }
@@ -1545,21 +1553,22 @@ public class EntryManager(IDaoFactory daoFactory,
             if (file.Forcesave == ForcesaveType.UserSubmit)
             {
                 var folderDao = daoFactory.GetFolderDao<T>();
-                var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(file);
+                var rootFolder = await documentServiceHelper.GetRootFolderAsync(file);
 
-                var room = await folderDao.GetFolderAsync((T)Convert.ChangeType(roomId, typeof(T))).NotFoundIfNull();
-                if (room.FolderType == FolderType.FillingFormsRoom)
+                if (rootFolder.FolderType == FolderType.FillingFormsRoom)
                 {
-                    return await SubmitFillingRoomFormAsync(file, room, fillingSessionId, formsDataUrl, tmpStream, comment, fileDao, folderDao);
+                    return await SubmitFillingRoomFormAsync(file, rootFolder, fillingSessionId, formsDataUrl, tmpStream, comment, fileDao, folderDao);
                 }
-                else if (room.FolderType == FolderType.VirtualDataRoom)
+                else if (rootFolder.FolderType == FolderType.VirtualDataRoom)
                 {
-                    return await SubmitVDRFormAsync(room, file, fileDao);
+                    return await SubmitVDRFormAsync(rootFolder, file, fileDao);
+                }else if (rootFolder.FolderType == FolderType.USER)
+                {
+                    return await SubmitUserFormAsync(file, fileDao, tmpStream);
                 }
             }
             file.ContentLength = tmpStream.Length;
             file.Comment = string.IsNullOrEmpty(comment) ? null : comment;
-            file.Category = (int)FilterType.PdfForm;
             if (replaceVersion)
             {
                 file = await fileDao.ReplaceFileVersionAsync(file, tmpStream);
@@ -2219,6 +2228,67 @@ public class EntryManager(IDaoFactory daoFactory,
         }
     }
 
+    private async Task<File<T>> SubmitUserFormAsync<T>(File<T> pdfFile, IFileDao<T> fileDao, Stream stream)
+    {
+        pdfFile.Category = (int)FilterType.Pdf;
+        pdfFile.Forcesave = ForcesaveType.None;
+
+        File<T> result;
+        if (stream.CanSeek)
+        {
+            pdfFile.ContentLength = stream.Length;
+            result = await fileDao.SaveFileAsync(pdfFile, stream, false);
+        }
+        else
+        {
+            var (buffered, isNew) = await tempStream.TryGetBufferedAsync(stream);
+            try
+            {
+                pdfFile.ContentLength = buffered.Length;
+                result = await fileDao.SaveFileAsync(pdfFile, buffered, false);
+            }
+            finally
+            {
+                if (isNew)
+                {
+                    await buffered.DisposeAsync();
+                }
+            }
+        }
+
+        var records = fileSecurity.GetPureSharesAsync(result, ShareFilterType.Link, null, null);
+
+        var aces = new List<AceWrapper>();
+
+        await foreach(var record in records)
+        {
+            aces.Add(new AceWrapper()
+            {
+                Access = FileShare.Read,
+                Id = record.Subject,
+                SubjectType = record.SubjectType,
+                FileShareOptions = record.Options
+            });
+        };
+
+        var current = securityContext.CurrentAccount.ID;
+
+        await securityContext.AuthenticateMeWithoutCookieAsync(result.CreateBy);
+
+        var shares = await fileSharingAceHelper.SetAceObjectAsync(aces, result, false, null);
+
+        if (current == ASC.Core.Configuration.Constants.Guest.ID) 
+        {
+            securityContext.Logout();
+        }
+        else
+        {
+            await securityContext.AuthenticateMeWithoutCookieAsync(current);
+        }
+
+        return result;
+    }
+
     private async Task<File<T>> SubmitVDRFormAsync<T>(Folder<T> room, File<T> form, IFileDao<T> fileDao)
     {
         var allRoles = await fileDao.GetFormRoles(form.Id).ToListAsync();
@@ -2237,16 +2307,15 @@ public class EntryManager(IDaoFactory daoFactory,
 
             if(nextRoleSequence != -1)
             {
-                if(nextRoleSequence == 0)
+                var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+                if (nextRoleSequence == 0)
                 {
+                    await filesMessageService.SendAsync(MessageAction.FormCompletelyFilled, form, MessageInitiator.DocsService, user?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
                     await notifyClient.SendFormFillingEvent(room, form, allRoles.Select(role => role.UserId), NotifyConstants.EventFormWasCompletelyFilled);
                 }
                 else if (nextRoleUserIds.Any())
                 {
-                    var aces = await fileSharing.GetPureSharesAsync(room, nextRoleUserIds).ToListAsync();
-                    var formFillers = aces.Where(ace => ace is { Access: FileShare.FillForms }).Select(ace => ace.Id);
-
-                    await socketManager.CreateFileAsync(form, formFillers);
+                    await filesMessageService.SendAsync(MessageAction.FormPartiallyFilled, form, MessageInitiator.DocsService, user?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
                     await notifyClient.SendFormFillingEvent(room, form, nextRoleUserIds, NotifyConstants.EventYourTurnFormFilling);
                 }
             }

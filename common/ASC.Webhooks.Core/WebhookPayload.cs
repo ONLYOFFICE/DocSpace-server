@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,68 +26,94 @@
 
 namespace ASC.Webhooks.Core;
 
-public class WebhookPayload<T>
+public class WebhookPayload<T1, T2>
 {
-    public WebhookPayloadActionInfo Action { get; init; }
-    public T Payload { get; init; }
-    public WebhookPayloadConfigInfo Webhook { get; init; }
+    public WebhookPayloadEventInfo Event { get; set; }
+    public T1 Payload { get; set; }
+    public WebhookPayloadConfigInfo<T2> Webhook { get; set; }
 
-    public WebhookPayload(WebhookTrigger trigger, DbWebhooksConfig config, T data, Guid userId)
+    public WebhookPayload()
     {
-        var now = DateTime.UtcNow;
-        now = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second, DateTimeKind.Utc);
+    }
 
-        Action = new WebhookPayloadActionInfo
+    public WebhookPayload(WebhookTrigger trigger, DbWebhooksConfig config, T1 data, T2 dataId, Guid userId)
+    {
+        var now = GetShortUtcNow();
+
+        Event = new WebhookPayloadEventInfo
         {
             CreateBy = userId,
             CreateOn = now,
-            Id = (int)trigger,
-            Trigger = trigger.ToStringFast()
+            Id = 0, // log Id is unknown until saved. initialized on send
+            Trigger = trigger.ToCustomString(),
+            TriggerId = (int)trigger
         };
 
         Payload = data;
 
         var triggers = config.Triggers == WebhookTrigger.All
-            ? [config.Triggers.ToStringFast()]
+            ? [config.Triggers.ToCustomString()]
             : Enum.GetValues<WebhookTrigger>()
                 .Where(flag => config.Triggers.HasFlag(flag) && flag != 0)
-                .Select(flag => flag.ToStringFast())
+                .Select(flag => flag.ToCustomString())
                 .ToArray();
 
-        Webhook = new WebhookPayloadConfigInfo
+        var target = string.IsNullOrEmpty(config.TargetId)
+            ? null
+            : new WebhookPayloadTargetInfo<T2>
+                {
+                    Id = dataId,
+                    Type = trigger.GetTargetType()
+                };
+
+        Webhook = new WebhookPayloadConfigInfo<T2>
         {
             Id = config.Id,
             Name = config.Name,
             Url = config.Uri,
             Triggers = triggers,
-            LastFailureOn = config.LastFailureOn,
-            LastFailureContent = config.LastFailureContent,
-            LastSuccessOn = config.LastSuccessOn,
-            RetryCount = 0,
-            RetryOn = now
+            Target = target
+
+            // initialized on send: LastFailureOn, LastFailureContent, LastSuccessOn, RetryCount, RetryOn
         };
+    }
+
+    public DateTime GetShortUtcNow()
+    {
+        var now = DateTime.UtcNow;
+        now = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second, DateTimeKind.Utc);
+        return now;
     }
 }
 
-public class WebhookPayloadActionInfo
+public class WebhookPayloadEventInfo
 {
+    public int Id { get; set; }
     public DateTime CreateOn { get; set; }
     public Guid CreateBy { get; set; }
-    public int Id { get; set; }
     public string Trigger { get; set; }
+    public int TriggerId { get; set; }
 }
 
-public class WebhookPayloadConfigInfo
+public class WebhookPayloadTargetInfo<T>
+{
+    public T Id { get; set; }
+    public string Type { get; set; }
+}
+
+public class WebhookPayloadConfigInfo<T2>
 {
     public int Id { get; set; }
     public string Name { get; set; }
     public string Url { get; set; }
     public string[] Triggers { get; set; }
 
+    public WebhookPayloadTargetInfo<T2> Target { get; set; }
+
     public DateTime? LastFailureOn { get; set; }
     public string LastFailureContent { get; set; }
     public DateTime? LastSuccessOn { get; set; }
 
     public int RetryCount { get; set; }
-    public DateTime RetryOn { get; set; }
+    public DateTime? RetryOn { get; set; }
 }

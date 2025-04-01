@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -41,6 +41,7 @@ public abstract class BaseBackupProgressItem : DistributedTaskProgress
     }
 
     public int NewTenantId { get; set; }
+    public bool Dump {get; set; }
     public int TenantId { get; set; }
     public string Link { get; set; }
     public BackupProgressItemType BackupProgressItemType { get; set; }

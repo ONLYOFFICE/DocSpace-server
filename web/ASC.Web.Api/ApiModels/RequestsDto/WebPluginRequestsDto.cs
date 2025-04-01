@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,7 +27,7 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// 
+/// Parameters for web plugin operations
 /// </summary>
 public class WebPluginRequests
 {
@@ -44,7 +44,7 @@ public class WebPluginRequests
 }
 
 /// <summary>
-/// 
+/// Request parameters for web plugin operations
 /// </summary>
 public class WebPluginRequestsDto
 {
@@ -52,7 +52,7 @@ public class WebPluginRequestsDto
     /// Name
     /// </summary>
     [FromRoute(Name = "name")]
-    public string Name { get; set; }
+    public required string Name { get; set; }
 
     /// <summary>
     /// Web plugin
@@ -62,7 +62,7 @@ public class WebPluginRequestsDto
 }
 
 /// <summary>
-/// 
+/// Request parameters for web plugin name operations
 /// </summary>
 public class WebPluginNameRequestDto
 {
@@ -70,11 +70,11 @@ public class WebPluginNameRequestDto
     /// Name
     /// </summary>
     [FromRoute(Name = "name")]
-    public string Name { get; set; }
+    public required string Name { get; set; }
 }
 
 /// <summary>
-/// 
+/// Request parameters for web plugin file operations
 /// </summary>
 public class WebPluginFromFileRequestDto
 {
@@ -87,7 +87,7 @@ public class WebPluginFromFileRequestDto
 
 
 /// <summary>
-/// 
+/// Request parameters for getting web plugins
 /// </summary>
 public class GetWebPluginsRequestDto
 {

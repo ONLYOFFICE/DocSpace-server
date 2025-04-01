@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,12 +34,12 @@ public class CopyAs<T>
     /// <summary>
     /// Destination file title
     /// </summary>
-    public string DestTitle { get; set; }
+    public required string DestTitle { get; set; }
 
     /// <summary>
     /// Destination folder ID
     /// </summary>
-    public T DestFolderId { get; set; }
+    public required T DestFolderId { get; set; }
 
     /// <summary>
     /// Specifies whether to allow the creation of external extension files or not
@@ -65,7 +65,7 @@ public class CopyAsRequestDto<T>
     /// File id
     /// </summary>
     [FromRoute(Name = "fileId")]
-    public T FileId { get; set; }
+    public required T FileId { get; set; }
 
     /// <summary>
     /// File

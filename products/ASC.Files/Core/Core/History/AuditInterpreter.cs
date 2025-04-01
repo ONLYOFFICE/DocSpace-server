@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -88,7 +88,11 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
         { (int)MessageAction.RoomExternalLinkDeleted, new RoomExternalLinkDeletedInterpreter() },
         { (int)MessageAction.RoomExternalLinkRevoked, new RoomExternalLinkRevokedInterpreter() },
         { (int)MessageAction.FormSubmit, _userFileUpdatedInterpreter },
+        { (int)MessageAction.FormStartedToFill, _userFileUpdatedInterpreter },
         { (int)MessageAction.FormOpenedForFilling, _userFileUpdatedInterpreter },
+        { (int)MessageAction.FormPartiallyFilled, _userFileUpdatedInterpreter },
+        { (int)MessageAction.FormCompletelyFilled, _userFileUpdatedInterpreter },
+        { (int)MessageAction.FormStopped, _userFileUpdatedInterpreter },
         { (int)MessageAction.RoomIndexingEnabled, _roomIndexingInterpreter },
         { (int)MessageAction.RoomIndexingDisabled, _roomIndexingInterpreter },
         { (int)MessageAction.RoomLifeTimeSet, new RoomLifeTimeSetInterpreter() },

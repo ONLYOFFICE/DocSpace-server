@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -182,6 +182,18 @@ public class MessageService(
     public void SendHeadersMessage(MessageAction action, MessageTarget target, IDictionary<string, StringValues> httpHeaders, IEnumerable<string> d1, IEnumerable<FilesAuditReference> references = null)
     {
         SendRequestHeadersMessage(action, target, httpHeaders, references, d1?.ToArray());
+    }
+
+    public void SendHeadersMessage(MessageAction action, MessageTarget target, IDictionary<string, StringValues> httpHeaders, IEnumerable<string> d1, List<Guid> userIds, EmployeeType userType)
+    {
+        if (TryAddNotificationParam(action, userIds, out var parametr, userType))
+        {
+            SendRequestHeadersMessage(action, target, httpHeaders, description: [string.Join(", ", d1), parametr]);
+        }
+        else
+        {
+            SendRequestHeadersMessage(action, target, httpHeaders, description: string.Join(", ", d1));
+        }
     }
 
     private void SendRequestHeadersMessage(MessageAction action, MessageTarget target = null, IDictionary<string, StringValues> httpHeaders = null, 

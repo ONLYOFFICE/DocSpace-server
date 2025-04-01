@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -258,7 +258,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         orangeButtonText2 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetStarted", c);
                         orangeButtonUrl2 = c => externalResourceSettingsHelper.Integrations.GetRegionalFullEntry("zapier", c);
                         orangeButtonText3 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetFreeApp", c);
-                        orangeButtonUrl3 = c => externalResourceSettingsHelper.Site.GetRegionalFullEntry("wordpress", c);
+                        orangeButtonUrl3 = c => externalResourceSettingsHelper.Integrations.GetRegionalFullEntry("wordpress", c);
                         orangeButtonText4 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetFreeApp", c);
                         orangeButtonUrl4 = c => externalResourceSettingsHelper.Integrations.GetRegionalFullEntry("drupal", c);
                         orangeButtonText5 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetFreeApp", c);

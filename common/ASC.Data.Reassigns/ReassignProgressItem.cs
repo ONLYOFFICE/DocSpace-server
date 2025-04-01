@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,6 +23,11 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+using ASC.Api.Core.Webhook;
+using ASC.Webhooks.Core;
+
+using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.Data.Reassigns;
 
@@ -78,7 +83,7 @@ public class ReassignProgressItem : DistributedTaskProgress
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var scopeClass = scope.ServiceProvider.GetService<ReassignProgressItemScope>();
-        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, displayUserSettingsHelper, options, socketManager) = scopeClass;
+        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, displayUserSettingsHelper, options, socketManager, webhookManager) = scopeClass;
         var logger = options.CreateLogger("ASC.Web");
         await tenantManager.SetCurrentTenantAsync(_tenantId);
 
@@ -86,47 +91,53 @@ public class ReassignProgressItem : DistributedTaskProgress
         {
             await securityContext.AuthenticateMeWithoutCookieAsync(_currentUserId);
 
-            await SetPercentageAndCheckCancellation(5, true);
+            await SetPercentageAndCheckCancellationAsync(5, true);
 
             await fileStorageService.DemandPermissionToReassignDataAsync(FromUser, ToUser);
 
-            await SetPercentageAndCheckCancellation(10, true);
+            await SetPercentageAndCheckCancellationAsync(10, true);
 
             List<int> personalFolderIds = null;
 
             if (_deleteProfile)
             {
-                await fileStorageService.DeletePersonalDataAsync<int>(FromUser);
+                var currentType = await userManager.GetUserTypeAsync(FromUser);
+                if (currentType != EmployeeType.Guest)
+                {
+                    await fileStorageService.MoveSharedFilesAsync(FromUser, ToUser);
+                    await SetPercentageAndCheckCancellationAsync(20, true);
+                }
+                await fileStorageService.DeletePersonalDataAsync(FromUser);
             }
             else
             {
                 personalFolderIds = await fileStorageService.GetPersonalFolderIdsAsync<int>(FromUser);
             }
 
-            await SetPercentageAndCheckCancellation(30, true);
+            await SetPercentageAndCheckCancellationAsync(30, true);
 
             await fileStorageService.ReassignProvidersAsync(FromUser, ToUser);
 
-            await SetPercentageAndCheckCancellation(50, true);
+            await SetPercentageAndCheckCancellationAsync(50, true);
 
             await fileStorageService.ReassignFoldersAsync(FromUser, ToUser, personalFolderIds);
 
-            await SetPercentageAndCheckCancellation(70, true);
+            await SetPercentageAndCheckCancellationAsync(70, true);
 
             await fileStorageService.ReassignFilesAsync(FromUser, ToUser, personalFolderIds);
 
-            await SetPercentageAndCheckCancellation(90, true);
+            await SetPercentageAndCheckCancellationAsync(90, true);
 
             await SendSuccessNotifyAsync(userManager, studioNotifyService, messageService, displayUserSettingsHelper);
 
-            await SetPercentageAndCheckCancellation(95, true);
+            await SetPercentageAndCheckCancellationAsync(95, true);
 
             if (_deleteProfile)
             {
-                await DeleteUserProfile(userManager, userPhotoManager, messageService, displayUserSettingsHelper, socketManager);
+                await DeleteUserProfile(userManager, userPhotoManager, messageService, displayUserSettingsHelper, socketManager, webhookManager);
             }
 
-            await SetPercentageAndCheckCancellation(100, false);
+            await SetPercentageAndCheckCancellationAsync(100, false);
 
             Status = DistributedTaskStatus.Completed;
         }
@@ -155,7 +166,7 @@ public class ReassignProgressItem : DistributedTaskProgress
         return MemberwiseClone();
     }
 
-    private async Task SetPercentageAndCheckCancellation(double percentage, bool publish)
+    private async Task SetPercentageAndCheckCancellationAsync(double percentage, bool publish)
     {
         Percentage = percentage;
 
@@ -198,7 +209,7 @@ public class ReassignProgressItem : DistributedTaskProgress
         await studioNotifyService.SendMsgReassignsFailedAsync(_currentUserId, fromUser, toUser, errorMessage);
     }
 
-    private async Task DeleteUserProfile(UserManager userManager, UserPhotoManager userPhotoManager, MessageService messageService, DisplayUserSettingsHelper displayUserSettingsHelper, UserSocketManager socketManager)
+    private async Task DeleteUserProfile(UserManager userManager, UserPhotoManager userPhotoManager, MessageService messageService, DisplayUserSettingsHelper displayUserSettingsHelper, UserSocketManager socketManager, UserWebhookManager webhookManager)
     {
         var user = await userManager.GetUsersAsync(FromUser);
         var userName = user.DisplayUserName(false, displayUserSettingsHelper);
@@ -215,6 +226,8 @@ public class ReassignProgressItem : DistributedTaskProgress
         {
             messageService.Send(MessageAction.UserDeleted, MessageTarget.Create(FromUser), userName);
         }
+
+        await webhookManager.PublishAsync(WebhookTrigger.UserDeleted, user);
     }
 }
 
@@ -229,4 +242,5 @@ public record ReassignProgressItemScope(
     UserPhotoManager UserPhotoManager,
     DisplayUserSettingsHelper DisplayUserSettingsHelper,
     ILoggerProvider Options,
-    UserSocketManager SocketManager);
+    UserSocketManager SocketManager,
+    UserWebhookManager WebhookManager);

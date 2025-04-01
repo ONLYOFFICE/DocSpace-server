@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,28 +24,42 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Data.Storage.Encryption.IntegrationEvents.Events;
+namespace ASC.People.ApiModels.RequestDto;
 
-[ProtoContract]
-public record EncryptionDataStorageRequestedIntegrationEvent : IntegrationEvent
+
+/// <summary>
+/// Request parameters for updating an existing API key
+/// </summary>
+public class UpdateApiKeyRequest
 {
-    protected EncryptionDataStorageRequestedIntegrationEvent()
-    {
+    /// <summary>
+    /// New name for the API key
+    /// </summary>
+    public String Name { get; set; }
 
-    }
+    /// <summary>
+    /// Updated list of permissions for the API key
+    /// </summary>
+    public List<String> Permissions { get; set; }
 
-    public EncryptionDataStorageRequestedIntegrationEvent(EncryptionSettings encryptionSettings,
-                                                     String serverRootPath,
-                                                     Guid createBy,
-                                                     int tenantId) : base(createBy, tenantId)
-    {
-        EncryptionSettings = encryptionSettings;
-        ServerRootPath = serverRootPath;
-    }
+    /// <summary>
+    /// Indicates whether the API key should be active
+    /// </summary>
+    public bool? IsActive { get; set; }
+}
 
-    [ProtoMember(1)]
-    public EncryptionSettings EncryptionSettings { get; private set; }
+/// <summary>
+/// Request parameters for updating an existing API key
+/// </summary>
+public class UpdateApiKeyRequestDto
+{
+    /// <summary>
+    /// Unique identifier of the API key to update
+    /// </summary>
+    [FromRoute(Name = "keyId")] public Guid KeyId { get; set; }
 
-    [ProtoMember(2)]
-    public string ServerRootPath { get; private set; }
+    /// <summary>
+    ///  Request parameters for updating an existing API key
+    /// </summary>
+    [FromBody] public UpdateApiKeyRequest Changed { get; set; }
 }
