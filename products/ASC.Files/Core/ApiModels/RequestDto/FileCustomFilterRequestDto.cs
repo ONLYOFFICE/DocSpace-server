@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,62 +27,30 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Link parameters
+/// Parameters for setting Custom Filter editing mode
 /// </summary>
-public class RoomLinkRequest
+public class CustomFilterParameters
 {
     /// <summary>
-    /// Link ID
+    /// Specifies Custom Filter editing mode enabled or not
     /// </summary>
-    public Guid LinkId { get; set; }
-
-    /// <summary>
-    /// Sharing rights
-    /// </summary>
-    public FileShare Access { get; set; }
-
-    /// <summary>
-    /// Link expiration date
-    /// </summary>
-    public ApiDateTime ExpirationDate { get; set; }
-
-    /// <summary>
-    /// Link name
-    /// </summary>
-    [StringLength(255)]
-    public string Title { get; set; }
-
-    /// <summary>
-    /// Link type
-    /// </summary>
-    public LinkType LinkType { get; set; }
-
-    /// <summary>
-    /// Link password
-    /// </summary>
-    [StringLength(255)]
-    public string Password { get; set; }
-
-    /// <summary>
-    /// Specifies whether downloading a file from a link is disabled or not
-    /// </summary>
-    public bool DenyDownload { get; set; }
+    public bool Enabled { get; set; }
 }
 
 /// <summary>
-/// Link request parameters
+/// Request parameters for setting Custom Filter editing mode for a file
 /// </summary>
-public class RoomLinkRequestDto<T>
+public class FileCustomFilterRequestDto<T>
 {
     /// <summary>
-    /// Room ID
+    /// File ID
     /// </summary>
-    [FromRoute(Name = "id")]
-    public required T Id { get; set; }
+    [FromRoute(Name = "fileId")]
+    public T FileId { get; set; }
 
     /// <summary>
-    /// Room link
+    /// Parameters for setting Custom Filter editing mode
     /// </summary>
     [FromBody]
-    public RoomLinkRequest RoomLink { get; set; }
+    public CustomFilterParameters Parameters { get; set; }
 }

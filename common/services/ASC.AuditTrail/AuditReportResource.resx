@@ -957,4 +957,10 @@
   <data name="FormStopped" xml:space="preserve">
     <value>Users [{0}]. Form stopped: {1}</value>
   </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>File: {0}. Custom filter disabled</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>File: {0}. Custom filter enabled</value>
+  </data>
 </root>

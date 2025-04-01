@@ -38,7 +38,24 @@ public class LockerManager(AuthContext authContext, IDaoFactory daoFactory)
 
         return lockedBy != Guid.Empty && lockedBy != userId;
     }
+}
+
+[Scope]
+public class CustomFilterManager(AuthContext authContext, IDaoFactory daoFactory, FileUtility fileUtility)
+{
+    public async Task<bool> CustomFilterEnabledForMeAsync<T>(File<T> file)
+    {
+        if (file.RootFolderType != FolderType.VirtualRooms || !fileUtility.CanWebCustomFilterEditing(file.Title))
+        {
+            return false;
+        }
+
+        var tagDao = daoFactory.GetTagDao<T>();
+        var customFilterTag = await tagDao.GetTagsAsync(file.Id, FileEntryType.File, TagType.CustomFilter).FirstOrDefaultAsync();
+
+        return customFilterTag != null && customFilterTag.Owner != authContext.CurrentAccount.ID;
     }
+}
 
 [Scope]
 public class BreadCrumbsManager(
@@ -131,7 +148,7 @@ public class BreadCrumbsManager(
 }
 
 [Scope]
-public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext, Global global)
+public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext, Global global, FileUtility fileUtility)
 {
     public async Task SetFileStatusAsync<T>(File<T> file)
     {
@@ -158,6 +175,14 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
         var tags = await tagsTask;
         var tagsNew = await tagsNewTask;
 
+        var spreadsheets = files.Where(file =>
+            file.RootFolderType == FolderType.VirtualRooms &&
+            fileUtility.CanWebCustomFilterEditing(file.Title));
+
+        var customFilterTags = spreadsheets.Any()
+            ? await tagDao.GetTagsAsync(TagType.CustomFilter, spreadsheets).ToDictionaryAsync(k => k.EntryId, v => v)
+            : [];
+
         foreach (var file in files)
         {
             if (tags.TryGetValue(file.Id, out var lockedTag))
@@ -172,6 +197,14 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
             if (tagsNew.Exists(r => r.EntryId.Equals(file.Id)))
             {
                 file.IsNew = true;
+            }
+
+            if (customFilterTags.TryGetValue(file.Id, out var customFilterTag))
+            {
+                file.CustomFilterEnabled = true;
+                file.CustomFilterEnabledBy = customFilterTag.Owner != authContext.CurrentAccount.ID
+                    ? await global.GetUserNameAsync(customFilterTag.Owner)
+                    : null;
             }
         }
     }
