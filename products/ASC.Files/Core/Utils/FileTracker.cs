@@ -203,6 +203,13 @@ public class FileTrackerHelper
             : [];
     }
 
+    public string GetTrackerDocKey<T>(T fileId)
+    {
+        var tracker = GetTracker(fileId);
+
+        return tracker?.DocKey;
+    }
+
     private FileTracker GetTracker<T>(T fileId)
     {
         if (EqualityComparer<T>.Default.Equals(fileId, default))

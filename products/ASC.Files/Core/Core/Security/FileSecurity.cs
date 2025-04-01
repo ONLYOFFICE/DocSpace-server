@@ -1512,11 +1512,20 @@ public class FileSecurity(IDaoFactory daoFactory,
 
                         break;
                     default:
-                        if (e.Access is FileShare.RoomManager or FileShare.ContentCreator || (e.Access is FileShare.Editing && !MustConvert(e)))
+                        if (isRoom)
                         {
-                            return true;
+                            if (e.Access is FileShare.RoomManager)
+                            {
+                                return true;
+                            }
                         }
-
+                        else
+                        {
+                            if (e.Access is FileShare.RoomManager or FileShare.ContentCreator || (e.Access is FileShare.Editing && !MustConvert(e)))
+                            {
+                                return true;
+                            }
+                        }
                         break;
                 }
 
@@ -2602,22 +2611,30 @@ public class FileSecurity(IDaoFactory daoFactory,
 
     public static void CorrectSecurityByLockedStatus<T>(FileEntry<T> entry)
     {
-        if (entry is not File<T> file || file.Security == null || file.LockedBy == null)
+        if (entry is not File<T> file || file.Security == null)
         {
             return;
         }
 
-        foreach (var action in _securityEntries[FileEntryType.File])
+        if (file.LockedBy != null)
         {
-            if (action != FilesSecurityActions.Read &&
-                action != FilesSecurityActions.ReadHistory &&
-                action != FilesSecurityActions.Copy &&
-                action != FilesSecurityActions.Duplicate &&
-                action != FilesSecurityActions.Lock &&
-                action != FilesSecurityActions.Download)
+            foreach (var action in _securityEntries[FileEntryType.File])
             {
-                file.Security[action] = false;
+                if (action != FilesSecurityActions.Read &&
+                    action != FilesSecurityActions.ReadHistory &&
+                    action != FilesSecurityActions.Copy &&
+                    action != FilesSecurityActions.Duplicate &&
+                    action != FilesSecurityActions.Lock &&
+                    action != FilesSecurityActions.Download)
+                {
+                    file.Security[action] = false;
+                }
             }
+        }
+
+        if (file.CustomFilterEnabledBy != null)
+        {
+            file.Security[FilesSecurityActions.Edit] = false;
         }
     }
 

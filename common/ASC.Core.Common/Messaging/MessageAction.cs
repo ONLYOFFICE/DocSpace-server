@@ -329,6 +329,12 @@ public enum MessageAction
     [SwaggerEnum("File index changed")]
     FileIndexChanged = 5111,
 
+    [SwaggerEnum("File custom filter enabled")]
+    FileCustomFilterEnabled = 5120,
+
+    [SwaggerEnum("File custom filter disabled")]
+    FileCustomFilterDisabled = 5121,
+
     [SwaggerEnum("Folder created")]
     FolderCreated = 5019,
 
