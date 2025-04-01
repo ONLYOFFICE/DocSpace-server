@@ -1520,7 +1520,12 @@ public class EntryManager(IDaoFactory daoFactory,
             if (file.Forcesave == ForcesaveType.UserSubmit)
             {
                 var folderDao = daoFactory.GetFolderDao<T>();
-                var rootFolder = await documentServiceHelper.GetRootFolderAsync(file);
+
+                var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(file);
+
+                var rootFolder = int.TryParse(roomId?.ToString(), out var curRoomId) && curRoomId != -1 ? 
+                    await folderDao.GetFolderAsync((T)Convert.ChangeType(roomId, typeof(T))).NotFoundIfNull() : 
+                    await documentServiceHelper.GetRootFolderAsync(file);
 
                 if (rootFolder.FolderType == FolderType.FillingFormsRoom)
                 {
