@@ -191,7 +191,7 @@ public class InvitationValidator(
 
     private void SaveLinkVisitMessage(string email, string key)
     {
-        var headers = httpContextAccessor?.HttpContext?.Request.Headers;
+        var headers = ASC.MessagingSystem.MessageSettings.GetHttpHeaders(httpContextAccessor?.HttpContext?.Request);
         var target = MessageTarget.Create(email);
 
         messageService.SendHeadersMessage(MessageAction.RoomInviteLinkUsed, target, headers, key);

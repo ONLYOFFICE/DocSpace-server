@@ -206,7 +206,7 @@ public class MessageService(
 
         if (httpHeaders == null && Request != null)
         {
-            httpHeaders = Request.Headers.ToDictionary(k => k.Key, v => v.Value);
+            httpHeaders = MessageSettings.GetHttpHeaders(Request);
         }
 
         var message = messageFactory.Create(httpHeaders, action, target, references, description);
