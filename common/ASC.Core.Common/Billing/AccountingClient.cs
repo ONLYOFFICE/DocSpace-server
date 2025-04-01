@@ -66,21 +66,11 @@ public class AccountingClient
 
     public async Task<Balance> GetCustomerBalanceAsync(string portalId, bool addPolicy = false)
     {
-        if (Test && !string.IsNullOrEmpty(_configuration.TestCustomer))
-        {
-            portalId = _configuration.TestCustomer;
-        }
-
         return await RequestAsync<Balance>(HttpMethod.Get, $"/customer/balance/{portalId}", addPolicy: addPolicy);
     }
 
     public async Task<Session> OpenCustomerSessionAsync(string portalId, int serviceAccount, string externalRef, int quantity)
     {
-        if (Test && !string.IsNullOrEmpty(_configuration.TestCustomer))
-        {
-            portalId = _configuration.TestCustomer;
-        }
-
         var data = new
         {
             CustomerName = portalId,
@@ -94,11 +84,6 @@ public class AccountingClient
 
     public async Task PerformCustomerOperationAsync(string portalId, int serviceAccount, int sessionId, int quantity)
     {
-        if (Test && !string.IsNullOrEmpty(_configuration.TestCustomer))
-        {
-            portalId = _configuration.TestCustomer;
-        }
-
         var data = new
         {
             CustomerName = portalId,
@@ -112,11 +97,6 @@ public class AccountingClient
 
     public async Task<Report> GetCustomerOperationsAsync(string portalId, DateTime utcStartDate, DateTime utcEndDate)
     {
-        if (Test && !string.IsNullOrEmpty(_configuration.TestCustomer))
-        {
-            portalId = _configuration.TestCustomer;
-        }
-
         var queryParams = new NameValueCollection
         {
             { "startDate", utcStartDate.ToString("o") },
