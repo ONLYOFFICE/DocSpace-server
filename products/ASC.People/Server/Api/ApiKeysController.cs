@@ -54,6 +54,7 @@ public class ApiKeysController(
     [Tags("Api keys")]
     [SwaggerResponse(200, "Create a user api key", typeof(ApiKeyResponseDto))]
     [HttpPost]
+    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task<ApiKeyResponseDto> CreateApiKey(CreateApiKeyRequestDto apiKey)
     {
         var expiresAt = apiKey.ExpiresInDays.HasValue ? TimeSpan.FromDays(apiKey.ExpiresInDays.Value) : (TimeSpan?)null;
