@@ -443,20 +443,28 @@ public class SecurityController(PermissionContext permissionContext,
         var isAdmin = await userManager.GetUserTypeAsync(userInfo.Id) is EmployeeType.DocSpaceAdmin;
         var isGuest = await userManager.IsGuestAsync(userId);
         var serverRootPath = baseCommonLinkUtility.ServerRootPath;
-       
+        var isPublic = true;
+
+        var tenantDevToolsAccessSettings = await settingsManager.LoadAsync<TenantDevToolsAccessSettings>();
+
+        if (tenantDevToolsAccessSettings != null)
+        {
+            isPublic = !tenantDevToolsAccessSettings.LimitedAccessForUsers;
+        }
+        
         var token = new JwtSecurityToken(
             issuer: serverRootPath,
             audience: serverRootPath,
             claims: new List<Claim>() {
-                new Claim("sub", securityContext.CurrentAccount.ID.ToString()), 
-                new Claim("user_id", securityContext.CurrentAccount.ID.ToString()), 
-                new Claim("user_name", userFormatter.GetUserName(userInfo)),
-                new Claim("user_email", userInfo.Email),
-                new Claim("tenant_id", tenant.Id.ToString()),
-                new Claim("tenant_url", serverRootPath),
-                new Claim("is_admin", isAdmin.ToString().ToLower()),
-                new Claim("is_guest", isGuest.ToString().ToLower()),
-                new Claim("is_public", "true") // TODO: check OAuth enable for non-admin users
+                new("sub", securityContext.CurrentAccount.ID.ToString()), 
+                new("user_id", securityContext.CurrentAccount.ID.ToString()), 
+                new("user_name", userFormatter.GetUserName(userInfo)),
+                new("user_email", userInfo.Email),
+                new("tenant_id", tenant.Id.ToString()),
+                new("tenant_url", serverRootPath),
+                new("is_admin", isAdmin.ToString().ToLower()),
+                new("is_guest", isGuest.ToString().ToLower()),
+                new("is_public", isPublic.ToString().ToLower()) // TODO: check OAuth enable for non-admin users
             },
             expires: DateTime.Now.AddDays(1),
             signingCredentials: creds);
