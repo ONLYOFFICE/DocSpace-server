@@ -164,7 +164,7 @@ public class ApiKeysController(
 
         if (result)
         {
-            messageService.Send(MessageAction.ApiKeyChangedStatus, MessageTarget.Create(requestDto.KeyId));
+            messageService.Send(MessageAction.ApiKeyUpdated, MessageTarget.Create(requestDto.KeyId));
         }
 
         return result;
