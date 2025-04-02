@@ -35,6 +35,7 @@ public class UpdateApiKeyRequest
     /// <summary>
     /// New name for the API key
     /// </summary>
+    [StringLength(30, ErrorMessage = "Incorrect name. Length must be less than 30")]
     public String Name { get; set; }
 
     /// <summary>
