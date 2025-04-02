@@ -448,8 +448,6 @@ public partial class SettingsController(MessageService messageService,
     [HttpGet("deeplink")]
     public async Task<TenantDeepLinkSettings> GettDeepLinkSettings()
     {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-
         var result = await settingsManager.LoadAsync<TenantDeepLinkSettings>(HttpContext.GetIfModifiedSince());
         
         return HttpContext.TryGetFromCache(result.LastModified) ? null : result;
