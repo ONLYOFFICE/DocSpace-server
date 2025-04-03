@@ -133,7 +133,7 @@ public class WebhooksController(ApiContext context,
             existingWebhook.SecretKey = inDto.SecretKey;
         }
 
-        var webhook = await dbWorker.UpdateWebhookConfig(existingWebhook);
+        var webhook = await dbWorker.UpdateWebhookConfig(existingWebhook, true);
 
         messageService.Send(MessageAction.WebhookUpdated, MessageTarget.Create(webhook.Id), webhook.Name);
 
@@ -174,7 +174,7 @@ public class WebhooksController(ApiContext context,
 
         existingWebhook.Enabled = inDto.Enabled;
 
-        var webhook = await dbWorker.UpdateWebhookConfig(existingWebhook);
+        var webhook = await dbWorker.UpdateWebhookConfig(existingWebhook, true);
 
         messageService.Send(MessageAction.WebhookUpdated, MessageTarget.Create(webhook.Id), webhook.Name);
 

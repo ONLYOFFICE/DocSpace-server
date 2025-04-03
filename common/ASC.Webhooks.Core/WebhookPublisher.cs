@@ -64,7 +64,7 @@ public class WebhookPublisher(
     {
         var result = new List<DbWebhooksConfig>();
 
-        var webhookConfigs = await dbWorker.GetWebhookConfigs(enabled: true).ToListAsync();
+        var webhookConfigs = await dbWorker.GetActiveWebhookConfigsFromCache();
 
         foreach (var config in webhookConfigs)
         {
