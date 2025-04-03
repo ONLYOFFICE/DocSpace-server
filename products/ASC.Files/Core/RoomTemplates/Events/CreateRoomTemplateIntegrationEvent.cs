@@ -58,6 +58,9 @@ public record CreateRoomTemplateIntegrationEvent : IntegrationEvent
     [ProtoMember(15)]
     public string Color { get; set; }
 
+    [ProtoMember(16)]
+    public long? Quota { get; set; }
+
     public CreateRoomTemplateIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId)
     {
     }

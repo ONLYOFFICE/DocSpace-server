@@ -64,4 +64,9 @@ public class CreateRoomFromTemplateDto
     /// </summary>
     [StringLength(50)]
     public string Cover { get; set; }
+
+    /// <summary>
+    /// Room quota
+    /// </summary>
+    public long? Quota { get; set; }
 }
