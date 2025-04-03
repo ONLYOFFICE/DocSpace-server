@@ -66,48 +66,22 @@ AddProjectWithDefaultConfiguration<ASC_Data_Backup>();
 AddProjectWithDefaultConfiguration<ASC_Data_Backup_BackgroundTasks>();
 AddProjectWithDefaultConfiguration<ASC_Notify>(false);
 AddProjectWithDefaultConfiguration<ASC_Web_Api>();
-AddProjectWithDefaultConfiguration<ASC_People>();
 AddProjectWithDefaultConfiguration<ASC_Files_Service>();
 AddProjectWithDefaultConfiguration<ASC_Studio_Notify>();
 AddProjectWithDefaultConfiguration<ASC_Web_Studio>();
 
 var basePath = Path.GetFullPath(Path.Combine("..", "..", ".."));
-var filesBasePath = Path.Combine(basePath, "server", "products", "ASC.Files", "Server");
 
 if (String.Compare(builder.Configuration["Docker"], "true", StringComparison.OrdinalIgnoreCase) == 0)
 {
-    var filesPort = 5007;
-    builder
-    .AddDockerfile("asc-files", filesBasePath, stage: "base")
-    .WithBindMount(filesBasePath, "/app")
-    .WithBindMount(Path.Combine(basePath, "buildtools"), "/buildtools")
-    .WithBindMount(Path.Combine(basePath, "Data"), "/data")
-    .WithBindMount(Path.Combine(basePath, "Logs"), "/logs")
-    .WithEnvironment("log:dir", "/logs")
-    .WithEnvironment("log:name", "/files")
-    .WithEnvironment("$STORAGE_ROOT", "/data")
-    .WithEnvironment("files:docservice:url:portal", $"http://host.docker.internal:{restyPort.ToString()}")
-    .WithEnvironment("files:docservice:url:portal", $"http://localhost:{editorPort.ToString()}")
-    .WithEnvironment("ASPNETCORE_HTTP_PORTS", filesPort.ToString())
-    .WithReference(mySql, "default:connectionString")
-    .WithReference(rabbitMq, "rabbitMQ")
-    .WithReference(redis, "redis")
-    .WaitFor(migrate)
-    .WaitFor(rabbitMq)
-    .WaitFor(redis)
-    .WaitFor(editors)
-    .WithArgs("/app/bin/Debug/net9.0/ASC.Files.dll")
-    .WithEntrypoint("dotnet")
-    .WithHttpEndpoint(filesPort, filesPort, isProxied:false);
+    AddProjectDocker<ASC_Files>(5007);
+    AddProjectDocker<ASC_People>(5004);
 }
 else
 {
     AddProjectWithDefaultConfiguration<ASC_Files>();
+    AddProjectWithDefaultConfiguration<ASC_People>();
 }
-
-
-
-
 
 builder.AddNpmApp("asc-socketIO", "../ASC.Socket.IO/", "start:build").WithHttpEndpoint(targetPort: 9899).WithHttpHealthCheck("/health");
 builder.AddNpmApp("asc-ssoAuth", "../ASC.SSoAuth/", "start:build").WithHttpEndpoint(targetPort: 9834).WithHttpHealthCheck("/health");
@@ -137,18 +111,51 @@ return;
 void AddProjectWithDefaultConfiguration<TProject>(bool includeHealthCheck = true) where TProject : IProjectMetadata, new()
 {
     var project = builder.AddProject<TProject>(typeof(TProject).Name.ToLower().Replace('_', '-'));
+    AddBaseConfig(project, includeHealthCheck);
+}
+
+void AddProjectDocker<TProject>(int projectPort, bool includeHealthCheck = true) where TProject : IProjectMetadata, new()
+{
+    var projectMetadata = new TProject();
+    var projectBasePath = Path.GetDirectoryName(projectMetadata.ProjectPath) ?? basePath;
     
+    var name = typeof(TProject).Name;
+    var resourceBuilder = builder.AddDockerfile(name.ToLower().Replace('_', '-'), projectBasePath, stage: "base");
+    AddBaseConfig(resourceBuilder, includeHealthCheck);
+
+    var dllPath = "/app/bin/Debug/";
+    if (File.Exists(Path.Combine(projectBasePath, "bin", "Debug", "net9.0")))
+    {
+        dllPath += "net9.0/";
+    }
+    
+    resourceBuilder
+        .WithBindMount(projectBasePath, "/app")
+        .WithBindMount(Path.Combine(basePath, "buildtools"), "/buildtools")
+        .WithBindMount(Path.Combine(basePath, "Data"), "/data")
+        .WithBindMount(Path.Combine(basePath, "Logs"), "/logs")
+        .WithEnvironment("log:dir", "/logs")
+        .WithEnvironment("log:name", "/files")
+        .WithEnvironment("$STORAGE_ROOT", "/data")
+        .WithEnvironment("ASPNETCORE_HTTP_PORTS", projectPort.ToString())
+        .WithArgs($"{dllPath}{name.Replace('_', '.')}.dll")
+        .WithEntrypoint("dotnet")
+        .WithHttpEndpoint(projectPort, projectPort, isProxied:false);
+}
+
+void AddBaseConfig<T>(IResourceBuilder<T> resourceBuilder, bool includeHealthCheck = true) where T : IResourceWithEnvironment, IResourceWithWaitSupport, IResourceWithEndpoints
+{
     if (includeHealthCheck)
     {
-        project.WithHttpHealthCheck("/health");
+        resourceBuilder.WithHttpHealthCheck("/health");
     }
 
-    project
+    resourceBuilder
+        .WithEnvironment("files:docservice:url:portal", $"http://host.docker.internal:{restyPort.ToString()}")
+        .WithEnvironment("files:docservice:url:public", $"http://localhost:{editorPort.ToString()}")
         .WithReference(mySql, "default:connectionString")
         .WithReference(rabbitMq, "rabbitMQ")
         .WithReference(redis, "redis")
-        .WithEnvironment("files:docservice:url:portal", $"http://host.docker.internal:{restyPort.ToString()}")
-        .WithEnvironment("files:docservice:url:public", $"http://localhost:{editorPort.ToString()}")
         .WaitFor(migrate)
         .WaitFor(rabbitMq)
         .WaitFor(redis)
