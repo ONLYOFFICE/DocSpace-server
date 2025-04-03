@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// The base room template status parameters.
+/// The base room template status.
 /// </summary>
 public class BaseRoomTemplateStatusDto
 {
@@ -37,12 +37,12 @@ public class BaseRoomTemplateStatusDto
     public double Progress { get; set; }
 
     /// <summary>
-    /// The error message of the base room template creation process.
+    /// The error message that is sent when the base room template is not created successfully.
     /// </summary>
     public string Error { get; set; }
 
     /// <summary>
-    /// Specifies whether the the base room template creation process is completed.
+    /// Specifies whether the process of creating the base room template is completed.
     /// </summary>
     public bool IsCompleted { get; set; }
 }
@@ -53,18 +53,18 @@ public class BaseRoomTemplateStatusDto
 public class RoomTemplateStatusDto : BaseRoomTemplateStatusDto
 {
     /// <summary>
-    /// The room template id.
+    /// The room template ID.
     /// </summary>
     public int TemplateId { get; set; }
 }
 
 /// <summary>
-/// The room from template status parameters.
+/// The progress parameters of creating a room from the template.
 /// </summary>
 public class RoomFromTemplateStatusDto : BaseRoomTemplateStatusDto
 {
     /// <summary>
-    /// The room ID from template.
+    /// The room ID.
     /// </summary>
     public int RoomId { get; set; }
 }

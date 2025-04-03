@@ -27,12 +27,12 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The created edit session request.
+/// The request parameters for creating the editing session.
 /// </summary>
 public class CreateEditSessionRequestDto<T>
 {
     /// <summary>
-    /// The file ID of the edit session request.
+    /// The file ID.
     /// </summary>
     [FromRoute(Name = "fileId")]
     public T FileId { get; set; }

@@ -26,15 +26,49 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// The form role parameters.
+/// </summary>
 public class FormRoleDto
 {
+    /// <summary>
+    /// The role name.
+    /// </summary>
     public string RoleName { get; set; }
+    
+    /// <summary>
+    /// The role color.
+    /// </summary>
     public string RoleColor { get; set; }
+    
+    /// <summary>
+    /// The current user parameters.
+    /// </summary>
     public EmployeeFullDto User { get; set; }
+    
+    /// <summary>
+    /// The order in which the fillers receive and sign the document.
+    /// </summary>
     public int Sequence { get; set; }
+    
+    /// <summary>
+    /// Specifies if the completed form has been submitted or not.
+    /// </summary>
     public bool Submitted { get; set; }
+    
+    /// <summary>
+    /// The parameters of the user who stopped filling out the form.
+    /// </summary>
     public EmployeeFullDto StopedBy { get; set; }
+    
+    /// <summary>
+    /// The history of filling out the form by the current role.
+    /// </summary>
     public Dictionary<int, DateTime> History { get; set; }
+
+    /// <summary>
+    /// The form filling status.
+    /// </summary>
     public FormFillingStatus RoleStatus { get; set; }
 }
 [Scope]
@@ -76,6 +110,9 @@ public class FormRoleDtoHelper(TenantUtil tenantUtil, EmployeeFullDtoHelper empl
     }
 }
 
+/// <summary>
+/// The history of filling out the form.
+/// </summary>
 public enum FormRoleHistory
 {
     OpenedAtDate = 0 ,

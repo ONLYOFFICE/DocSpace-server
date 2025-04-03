@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Parameters for creating a file.
+/// The parameters for creating a file.
 /// </summary>
 public class CreateFile<T>
 {
@@ -43,7 +43,7 @@ public class CreateFile<T>
     public T TemplateId { get; set; }
 
     /// <summary>
-    /// Specifies whether to allow the creation of external extension files or not.
+    /// Specifies whether to allow creating a file of an external extension or not.
     /// </summary>
     public bool EnableExternalExt { get; set; }
 
@@ -54,7 +54,7 @@ public class CreateFile<T>
 }
 
 /// <summary>
-/// Request parameters for creating a file.
+/// The request parameters for creating a file.
 /// </summary>
 public class CreateFileRequestDto<T>
 {

@@ -32,138 +32,140 @@ namespace ASC.Web.Files.Classes;
 public class FilesSettings : ISettings<FilesSettings>
 {
     /// <summary>
-    /// Specifies whether to enable third-party setting.
+    /// Specifies whether to allow users to connect third-party storages.
     /// </summary>
     [JsonPropertyName("EnableThirdpartySettings")]
     public bool EnableThirdpartySetting { get; set; }
 
     /// <summary>
-    /// Specifies whether to fast delete setting.
+    /// Specifies whether to display notification when moving the element to the trash.
     /// </summary>
     [JsonPropertyName("FastDelete")]
     public bool FastDeleteSetting { get; set; }
 
     /// <summary>
-    /// Specifies whether to store original file setting.
+    /// Specifies whether to save the file copy in the original format as well.
     /// </summary>
     [JsonPropertyName("StoreOriginalFiles")]
     public bool StoreOriginalFilesSetting { get; set; }
 
     /// <summary>
-    /// Specifies whether to keep new file name.
+    /// Specifies whether to assign a default name to the newly created file.
     /// </summary>
     [JsonPropertyName("KeepNewFileName")]
     public bool KeepNewFileName { get; set; }
 
     /// <summary>
-    /// Specifies whether to display file extension.
+    /// Specifies whether to display file extension next to file name.
     /// </summary>
     public bool DisplayFileExtension { get; set; }
 
     /// <summary>
-    /// Specifies whether to convert notify settings.
+    /// Specifies whether to notify about file conversion.
     /// </summary>
     [JsonPropertyName("ConvertNotify")]
     public bool ConvertNotifySetting { get; set; }
 
     /// <summary>
-    /// Specifies the default sorted by settings.
+    /// Specifies the default parameters by which the files will be sorted.
     /// </summary>
     [JsonPropertyName("DefaultSortedBy")]
     public SortedByType DefaultSortedBySetting { get; set; }
 
     /// <summary>
-    /// Specifies the default sorted by settings.
+    /// Specifies the default file order (ascending or not).
     /// </summary>
     [JsonPropertyName("DefaultSortedAsc")]
     public bool DefaultSortedAscSetting { get; set; }
-    
+
     /// <summary>
-    /// Specifies whether to confirm the cancel operation.
+    /// Specifies whether to hide the confirmation dialog for the cancel operation.
     /// </summary>
     [JsonPropertyName("HideConfirmCancelOperation")]
     public bool HideConfirmCancelOperationSetting { get; set; }
 
     /// <summary>
-    /// Specifies whether to hide confirm convert save.
+    /// Specifies whether to hide the confirmation dialog
+    /// for saving the file copy in the original format when converting a file.
     /// </summary>
     [JsonPropertyName("HideConfirmConvertSave")]
     public bool HideConfirmConvertSaveSetting { get; set; }
 
     /// <summary>
-    /// Specifies whether to hide confirm convert open settings.
+    /// Specifies whether to hide the confirmation dialog
+    /// for opening the conversion result.
     /// </summary>
     [JsonPropertyName("HideConfirmConvertOpen")]
     public bool HideConfirmConvertOpenSetting { get; set; }
 
     /// <summary>
-    /// Specifies whether to hide confirm room lifetime settings.
+    /// Specifies whether to hide the confirmation dialog about the file lifetime in the room.
     /// </summary>
     [JsonPropertyName("HideConfirmRoomLifetime")]
     public bool HideConfirmRoomLifetimeSetting { get; set; }
 
     /// <summary>
-    /// Specifies whether to forcesave settings.
+    /// Specifies whether to forcesave the files or not.
     /// </summary>
     [JsonPropertyName("Forcesave")]
     public bool ForcesaveSetting { get; set; }
 
     /// <summary>
-    /// Specifies whether to store forsave settings.
+    /// Specifies whether to store the forcesaved file versions or not.
     /// </summary>
     [JsonPropertyName("StoreForcesave")]
     public bool StoreForcesaveSetting { get; set; }
 
     /// <summary>
-    /// Specifies whether to hide recent settings.
+    /// Specifies if the "Recent" section is hidden or not.
     /// </summary>
     [JsonPropertyName("HideRecent")]
     public bool HideRecentSetting { get; set; }
 
     /// <summary>
-    /// Specifies whether to hide favourites.
+    /// Specifies if the "Favorites" section is hidden or not.
     /// </summary>
     [JsonPropertyName("HideFavorites")]
     public bool HideFavoritesSetting { get; set; }
 
     /// <summary>
-    /// Specifies whether to hide templates.
+    /// Specifies if the "Templates" section is hidden or not.
     /// </summary>
     [JsonPropertyName("HideTemplates")]
     public bool HideTemplatesSetting { get; set; }
 
     /// <summary>
-    /// Specifies whether to download .tar.gz. settings.
+    /// Specifies whether to download the .tar.gz files or not.
     /// </summary>
     [JsonPropertyName("DownloadZip")]
     public bool DownloadTarGzSetting { get; set; }
 
     /// <summary>
-    /// Specifies whether to share link.
+    /// Specifies whether to disable sharing external links to the files.
     /// </summary>
     [JsonPropertyName("ShareLink")]
     public bool DisableShareLinkSetting { get; set; }
 
     /// <summary>
-    /// Specifies whether to disable share social media setting.
+    /// Specifies whether to disable sharing files on social media.
     /// </summary>
     [JsonPropertyName("ShareLinkSocialMedia")]
     public bool DisableShareSocialMediaSetting { get; set; }
 
     /// <summary>
-    /// The automatically clean up setting.
+    /// The auto-clearing setting parameters.
     /// </summary>
     [JsonPropertyName("AutomaticallyCleanUp")]
     public AutoCleanUpData AutomaticallyCleanUpSetting { get; set; }
 
     /// <summary>
-    /// The list of default sharing access rights.
+    /// The default access rights in sharing settings.
     /// </summary>
     [JsonPropertyName("DefaultSharingAccessRights")]
     public List<FileShare> DefaultSharingAccessRightsSetting { get; set; }
-    
+
     /// <summary>
-    /// Specifies whether to open the editor in the same tab.
+    /// Specifies whether to open the editor in the same tab or not.
     /// </summary>
     [JsonPropertyName("OpenEditorInSameTab")]
     public bool OpenEditorInSameTab { get; set; }

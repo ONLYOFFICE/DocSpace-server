@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for checking file conversion.
+/// The request parameters for checking file conversion.
 /// </summary>
 public class CheckConversionRequestDto<T>
 {
@@ -47,17 +47,17 @@ public class CheckConversionRequestDto<T>
     public bool StartConvert { get; set; }
 
     /// <summary>
-    /// The file version of the conversion.
+    /// The file version that is converted.
     /// </summary>
     public int Version { get; set; }
 
     /// <summary>
-    /// The password of the file conversion.
+    /// The password of the converted file.
     /// </summary>
     public string Password { get; set; }
-    
+
     /// <summary>
-    /// The output type of the conversion.
+    /// The conversion output type.
     /// </summary>
     public string OutputType { get; set; }
 
@@ -68,7 +68,7 @@ public class CheckConversionRequestDto<T>
 }
 
 /// <summary>
-/// Request parameters for starting file conversion.
+/// The request parameters for starting file conversion.
 /// </summary>
 public class StartConversionRequestDto<T>
 {
@@ -79,14 +79,14 @@ public class StartConversionRequestDto<T>
     public T FileId { get; set; }
 
     /// <summary>
-    /// Check conversion of the file.
+    /// The request parameters for checking file conversion.
     /// </summary>
     [FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)]
     public CheckConversionRequestDto<T> CheckConversion { get; set; }
 }
 
 /// <summary>
-/// Request parameters for checking file conversion status.
+/// The request parameters for checking file conversion status.
 /// </summary>
 public class CheckConversionStatusRequestDto<T>
 {

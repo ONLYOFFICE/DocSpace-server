@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for folder ID.
+/// The request parameters for the folder ID.
 /// </summary>
 public class FolderIdRequestDto<T>
 {
@@ -39,7 +39,7 @@ public class FolderIdRequestDto<T>
 }
 
 /// <summary>
-/// Request parameters for folder primary ID.
+/// The request parameters for the folder primary ID.
 /// </summary>
 public class FolderPrimaryIdRequestDto<T>
 {

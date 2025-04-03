@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// The parameters of the filling forms result.
+/// The parameters of the form filling result.
 /// </summary>
 public class FillingFormResultDto<T>
 {

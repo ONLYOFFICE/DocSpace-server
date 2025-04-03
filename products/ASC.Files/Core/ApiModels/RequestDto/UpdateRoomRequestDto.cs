@@ -27,23 +27,23 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The parameters for updating the room.
+/// The request parameters for updating a room.
 /// </summary>
 public class UpdateRoomRequest
 {
     /// <summary>
-    /// The room title to update.
+    /// The room title.
     /// </summary>
     [StringLength(170)]
     public string Title { get; set; }
 
     /// <summary>
-    /// The room quota to update.
+    /// The room quota.
     /// </summary>
     public long? Quota { get; set; }
 
     /// <summary>
-    /// Specifies whether to create the third-party room with indexing.
+    /// Specifies whether to create a third-party room with indexing.
     /// </summary>
     public bool? Indexing { get; set; }
 
@@ -63,7 +63,7 @@ public class UpdateRoomRequest
     public WatermarkRequestDto Watermark { get; set; }
 
     /// <summary>
-    /// The request logo.
+    /// The room logo.
     /// </summary>
     public LogoRequest Logo { get; set; }
 
@@ -73,20 +73,20 @@ public class UpdateRoomRequest
     public IEnumerable<string> Tags { get; set; }
     
     /// <summary>
-    /// The color of the room to update.
+    /// The room color.
     /// </summary>
     [StringLength(6)]
     public string Color { get; set; }
 
     /// <summary>
-    /// The cover of the room to update.
+    /// The room cover.
     /// </summary>
     [StringLength(50)]
     public string Cover { get; set; }
 }
 
 /// <summary>
-/// The request parameters for updating the room.
+/// The request parameters for updating a room.
 /// </summary>
 public class UpdateRoomRequestDto<T>
 {
@@ -97,7 +97,7 @@ public class UpdateRoomRequestDto<T>
     public T Id { get; set; }
 
     /// <summary>
-    /// The update room request parameters.
+    /// The request parameters for updating a room.
     /// </summary>
     [FromBody]
     public UpdateRoomRequest UpdateRoom { get; set; }

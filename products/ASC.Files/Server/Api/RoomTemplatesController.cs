@@ -37,7 +37,7 @@ public class RoomTemplatesController(IEventBus eventBus,
 {
 
     /// <summary>
-    /// Starts creation of the room template.
+    /// Starts creating the room template.
     /// </summary>
     /// <short>Start creating room template</short>
     /// <path>api/2.0/files/roomtemplate</path>
@@ -93,7 +93,7 @@ public class RoomTemplatesController(IEventBus eventBus,
     }
 
     /// <summary>
-    /// Gets the progress status of the room template creation process.
+    /// Returns the progress status of the room template creation process.
     /// </summary>
     /// <short>Get status of room template creation</short>
     /// <path>api/2.0/files/roomtemplate/status</path>
@@ -126,7 +126,7 @@ public class RoomTemplatesController(IEventBus eventBus,
 
 
     /// <summary>
-    /// Gets public settings of the room template specifying its ID.
+    /// Returns the public settings of the room template with the ID specified in the request.
     /// </summary>
     /// <short>Get public settings</short>
     /// <path>api/2.0/files/roomtemplate/{id}/public</path>
@@ -139,7 +139,7 @@ public class RoomTemplatesController(IEventBus eventBus,
 
 
     /// <summary>
-    /// Sets the public settings of the room template.
+    /// Sets the public settings for the room template with the ID specified in the request.
     /// </summary>
     /// <short>Set public settings</short>
     /// <path>api/2.0/files/roomtemplate/public</path>

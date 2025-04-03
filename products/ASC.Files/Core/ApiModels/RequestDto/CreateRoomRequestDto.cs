@@ -70,7 +70,7 @@ public static class RoomTypeExtensions
 }
 
 /// <summary>
-/// The request parameters for creating the room.
+/// The request parameters for creating a room.
 /// </summary>
 public class CreateRoomRequestDto : UpdateRoomRequest
 {

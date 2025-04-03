@@ -37,29 +37,29 @@ public class DataWrapper<T>
     public List<FileEntry> Entries { get; init; }
 
     /// <summary>
-    /// The total of the data wrapper.
+    /// The total number of items in the folder.
     /// </summary>
     public int Total { get; init; }
 
     /// <summary>
-    /// The folder path parts of the data wrapper.
+    /// The directory / file names that form part of a folder path.
     /// </summary>
     [JsonPropertyName("path_parts")]
     public List<object> FolderPathParts { get; init; }
 
     /// <summary>
-    /// The folder info of the data wrapper.
+    /// The folder information.
     /// </summary>
     [JsonPropertyName("folder_info")]
     public Folder<T> FolderInfo { get; init; }
     
     /// <summary>
-    /// The parent room of the data wrapper.
+    /// The folder parent room.
     /// </summary>
     public Folder<T> ParentRoom { get; init; }
 
     /// <summary>
-    /// The new data wrapper.
+    /// The number of items in the folder that the user has not seen yet.
     /// </summary>
     public int New { get; init; }
 }

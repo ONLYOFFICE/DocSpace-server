@@ -46,7 +46,6 @@ public class SettingsRoom
 /// <summary>
 /// The request parameters of the room settings.
 /// </summary>
-/// <typeparam name="T"></typeparam>
 public class SettingsRoomRequestDto<T>
 {
     /// <summary>

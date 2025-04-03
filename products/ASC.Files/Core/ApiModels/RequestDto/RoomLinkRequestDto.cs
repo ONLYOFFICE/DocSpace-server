@@ -68,7 +68,7 @@ public class RoomLinkRequestDto<T>
     public T Id { get; set; }
 
     /// <summary>
-    /// The room link.
+    /// The room link request parameters.
     /// </summary>
     [FromBody]
     public RoomLinkRequest RoomLink { get; set; }

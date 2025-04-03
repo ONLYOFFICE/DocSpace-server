@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters for creating the tag.
+/// The request parameters for creating a tag.
 /// </summary>
 public class CreateTagRequestDto
 {

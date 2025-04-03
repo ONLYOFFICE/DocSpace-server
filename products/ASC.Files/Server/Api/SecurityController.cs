@@ -161,9 +161,9 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     }
 
     /// <summary>
-    /// Gets group memebers with their folder security.
+    /// Returns the group memebers with their folder security information.
     /// </summary>
-    /// <short>Get group members with folder security</short>
+    /// <short>Get group members with security information</short>
     /// <path>api/2.0/files/folder/{folderId}/group/{groupId}/share</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]

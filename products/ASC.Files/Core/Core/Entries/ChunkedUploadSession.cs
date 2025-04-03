@@ -48,13 +48,13 @@ public class ChunkedUploadSession<T>(File<T> file, long bytesTotal) : CommonChun
     public bool Encrypted { get; set; }
 
     /// <summary>
-    /// Specifies if to keep the chunked upload session data or not.
+    /// Specifies whether to keep the file version after the chunked upload session or not.
     /// </summary>
     public bool KeepVersion { get; set; }
 
     //hack for Backup bug 48873
     /// <summary>
-    /// Specifies if to check quota of the chunked upload session data or not.
+    /// Specifies whether to check quota of the chunked upload session data or not.
     /// </summary>
     [NonSerialized]
     public bool CheckQuota = true;

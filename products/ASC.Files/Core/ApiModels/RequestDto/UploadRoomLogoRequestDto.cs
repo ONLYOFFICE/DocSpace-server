@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The upload room logo request parameters.
+/// The request parameters for uploading room logo.
 /// </summary>
 public class UploadRoomLogoRequestDto
 {

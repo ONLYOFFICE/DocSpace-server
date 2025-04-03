@@ -27,12 +27,12 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The parameters for creating the third-party room.
+/// The parameters for creating a third-party room.
 /// </summary>
 public class CreateThirdPartyRoom
 {
     /// <summary>
-    /// Specifies whether to create a third-party room as the new folder or not.
+    /// Specifies whether to create a third-party room as a new folder or not.
     /// </summary>
     public bool CreateAsNewFolder { get; set; }
 
@@ -84,7 +84,7 @@ public class CreateThirdPartyRoom
 
 
 /// <summary>
-/// The request parameters for creating the third-party room.
+/// The request parameters for creating a third-party room.
 /// </summary>
 public class CreateThirdPartyRoomRequestDto
 {

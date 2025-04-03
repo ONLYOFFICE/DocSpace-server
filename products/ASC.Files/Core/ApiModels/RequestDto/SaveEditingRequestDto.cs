@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for saving file edits.
+/// The request parameters for saving file edits.
 /// </summary>
 public class SaveEditingRequestDto<T> : IModelWithFile
 {

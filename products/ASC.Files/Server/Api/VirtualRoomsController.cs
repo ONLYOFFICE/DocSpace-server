@@ -66,9 +66,9 @@ public class VirtualRoomsInternalController(
         apiDateTimeHelper)
     {
     /// <summary>
-    /// Creates the room in the "Rooms" section.
+    /// Creates a room in the "Rooms" section.
     /// </summary>
-    /// <short>Create the room</short>
+    /// <short>Create a room</short>
     /// <path>api/2.0/files/rooms</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
@@ -87,9 +87,9 @@ public class VirtualRoomsInternalController(
     }
 
     /// <summary>
-    /// Start create the room in the "Rooms" section based on the template.
+    /// Creates a room in the "Rooms" section based on the template.
     /// </summary>
-    /// <short>Start create the room based on the template</short>
+    /// <short>Create a room from the template</short>
     /// <path>api/2.0/files/rooms/fromTemplate</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Status", typeof(RoomFromTemplateStatusDto))]
@@ -134,9 +134,9 @@ public class VirtualRoomsInternalController(
     }
 
     /// <summary>
-    /// Gets progress creating room based a template.
+    /// Returns the progress of creating a room from the template.
     /// </summary>
-    /// <short>Get progress creating room</short>
+    /// <short>Get the room creation progress</short>
     /// <path>api/2.0/files/rooms/fromTemplate/status</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Status", typeof(RoomFromTemplateStatusDto))]
@@ -258,9 +258,9 @@ public abstract class VirtualRoomsController<T>(
     }
 
     /// <summary>
-    /// Renames the room with the ID specified in the request.
+    /// Updates a room with the ID specified in the request.
     /// </summary>
-    /// <short>Rename a room</short>
+    /// <short>Update a room</short>
     /// <path>api/2.0/files/rooms/{id}</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Updated room information", typeof(FolderDto<int>))]
@@ -338,9 +338,9 @@ public abstract class VirtualRoomsController<T>(
 
 
     /// <summary>
-    /// Removes the room with the ID specified in the request.
+    /// Removes a room with the ID specified in the request.
     /// </summary>
-    /// <short>Remove the room</short>
+    /// <short>Remove a room</short>
     /// <path>api/2.0/files/rooms/{id}</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "File operation", typeof(FileOperationDto))]
@@ -377,9 +377,9 @@ public abstract class VirtualRoomsController<T>(
     }
 
     /// <summary>
-    /// Moves the room with the ID specified in the request from the "Archive" section to the "Rooms" section.
+    /// Moves a room with the ID specified in the request from the "Archive" section to the "Rooms" section.
     /// </summary>
-    /// <short>Unarchive the room</short>
+    /// <short>Unarchive a room</short>
     /// <path>api/2.0/files/rooms/{id}/unarchive</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "File operation", typeof(FileOperationDto))]
@@ -402,7 +402,7 @@ public abstract class VirtualRoomsController<T>(
     /// <summary>
     /// Sets the access rights to the room with the ID specified in the request.
     /// </summary>
-    /// <short>Set room access rights</short>
+    /// <short>Set the room access rights</short>
     /// <path>api/2.0/files/rooms/{id}/share</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Room security information", typeof(RoomSecurityDto))]
@@ -448,7 +448,7 @@ public abstract class VirtualRoomsController<T>(
     /// <summary>
     /// Returns the access rights of a room with the ID specified in the request.
     /// </summary>
-    /// <short>Get room access rights</short>
+    /// <short>Get the room access rights</short>
     /// <path>api/2.0/files/rooms/{id}/share</path>
     /// <collection>list</collection>
     [Tags("Files / Rooms")]
@@ -470,9 +470,9 @@ public abstract class VirtualRoomsController<T>(
     }
 
     /// <summary>
-    /// Sets the external or invitation link with the ID specified in the request.
+    /// Sets the room external or invitation link with the ID specified in the request.
     /// </summary>
-    /// <short>Set the external or invitation link</short>
+    /// <short>Set the room external or invitation link</short>
     /// <path>api/2.0/files/rooms/{id}/links</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Room security information", typeof(FileShareDto))]
@@ -493,7 +493,7 @@ public abstract class VirtualRoomsController<T>(
     /// <summary>
     /// Returns the links of the room with the ID specified in the request.
     /// </summary>
-    /// <short>Get room links</short>
+    /// <short>Get the room links</short>
     /// <path>api/2.0/files/rooms/{id}/links</path>
     /// <collection>list</collection>
     [Tags("Files / Rooms")]
@@ -523,7 +523,7 @@ public abstract class VirtualRoomsController<T>(
     /// <summary>
     /// Returns the primary external link of the room with the ID specified in the request.
     /// </summary>
-    /// <short>Get primary external link</short>
+    /// <short>Get the room primary external link</short>
     /// <path>api/2.0/files/rooms/{id}/link</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Room security information", typeof(FileShareDto))]
@@ -539,7 +539,7 @@ public abstract class VirtualRoomsController<T>(
     /// <summary>
     /// Adds the tags to a room with the ID specified in the request.
     /// </summary>
-    /// <short>Add room tags</short>
+    /// <short>Add the room tags</short>
     /// <path>api/2.0/files/rooms/{id}/tags</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
@@ -553,9 +553,9 @@ public abstract class VirtualRoomsController<T>(
     }
 
     /// <summary>
-    /// Removes the tags from the room with the ID specified in the request.
+    /// Removes the tags from a room with the ID specified in the request.
     /// </summary>
-    /// <short>Remove room tags</short>
+    /// <short>Remove the room tags</short>
     /// <path>api/2.0/files/rooms/{id}/tags</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
@@ -570,9 +570,9 @@ public abstract class VirtualRoomsController<T>(
 
     
     /// <summary>
-    /// Creates the logo for the room with the ID specified in the request.
+    /// Creates a logo for a room with the ID specified in the request.
     /// </summary>
-    /// <short>Create the room logo</short>
+    /// <short>Create a room logo</short>
     /// <path>api/2.0/files/rooms/{id}/logo</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
@@ -588,7 +588,7 @@ public abstract class VirtualRoomsController<T>(
     }
 
     /// <summary>
-    /// Changes the room cover.
+    /// Changes a cover of a room with the ID specified in the request.
     /// </summary>
     /// <short>Change the room cover</short>
     /// <path>api/2.0/files/rooms/{id}/cover</path>
@@ -607,7 +607,7 @@ public abstract class VirtualRoomsController<T>(
     }
 
     /// <summary>
-    /// Gets the list of covers.
+    /// Returns a list of all covers.
     /// </summary>
     /// <short>Get covers</short>
     /// <path>api/2.0/files/rooms/covers</path>
@@ -624,9 +624,9 @@ public abstract class VirtualRoomsController<T>(
     }
 
     /// <summary>
-    /// Removes the logo from the room with the ID specified in the request.
+    /// Removes a logo from a room with the ID specified in the request.
     /// </summary>
-    /// <short>Remove the room logo</short>
+    /// <short>Remove a room logo</short>
     /// <path>api/2.0/files/rooms/{id}/logo</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
@@ -641,9 +641,9 @@ public abstract class VirtualRoomsController<T>(
     }
 
     /// <summary>
-    /// Pins the room with the ID specified in the request to the top of the list.
+    /// Pins a room with the ID specified in the request to the top of the list.
     /// </summary>
-    /// <short>Pin the room</short>
+    /// <short>Pin a room</short>
     /// <path>api/2.0/files/rooms/{id}/pin</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
@@ -656,9 +656,9 @@ public abstract class VirtualRoomsController<T>(
     }
 
     /// <summary>
-    /// Unpins the room with the ID specified in the request from the top of the list.
+    /// Unpins a room with the ID specified in the request from the top of the list.
     /// </summary>
-    /// <short>Unpin the room</short>
+    /// <short>Unpin a room</short>
     /// <path>api/2.0/files/rooms/{id}/unpin</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
@@ -673,7 +673,7 @@ public abstract class VirtualRoomsController<T>(
     /// <summary>
     /// Resends the email invitations to a room with the ID specified in the request to the selected users.
     /// </summary>
-    /// <short>Resend room invitations</short>
+    /// <short>Resend the room invitations</short>
     /// <path>api/2.0/files/rooms/{id}/resend</path>
     [Tags("Files / Rooms")]
     [HttpPost("{id}/resend")]
@@ -684,9 +684,9 @@ public abstract class VirtualRoomsController<T>(
     }
 
     /// <summary>
-    /// Reorders to the room with ID specified in the request.
+    /// Reorders the room with ID specified in the request.
     /// </summary>
-    /// <short>Reorder to the room</short>
+    /// <short>Reorder the room</short>
     /// <path>api/2.0/files/rooms/{id}/reorder</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
@@ -700,9 +700,9 @@ public abstract class VirtualRoomsController<T>(
     }
 
     /// <summary>
-    /// Returns the list of all the new items from a room with the ID specified in the request.
+    /// Returns a list of all the new items from a room with the ID specified in the request.
     /// </summary>
-    /// <short>Get new room items</short>
+    /// <short>Get the new room items</short>
     /// <path>api/2.0/files/rooms/{id}/news</path>
     /// <collection>list</collection>
     [Tags("Files / Rooms")]
@@ -811,9 +811,9 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     }
 
     /// <summary>
-    /// Creates the custom tag with the parameters specified in the request.
+    /// Creates a custom tag with the parameters specified in the request.
     /// </summary>
-    /// <short>Create the tag</short>
+    /// <short>Create a tag</short>
     /// <path>api/2.0/files/tags</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "New tag name", typeof(object))]
@@ -826,7 +826,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     }
 
     /// <summary>
-    /// Returns the list of custom tags.
+    /// Returns a list of custom tags.
     /// </summary>
     /// <short>Get tags</short>
     /// <path>api/2.0/files/tags</path>
@@ -846,7 +846,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     }
 
     /// <summary>
-    /// Deletes the bunch of custom tags specified in the request.
+    /// Deletes a bunch of custom tags specified in the request.
     /// </summary>
     /// <short>Delete tags</short>
     /// <path>api/2.0/files/tags</path>
@@ -860,9 +860,9 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     }
 
     /// <summary>
-    /// Uploads the temporary image to create the room logo.
+    /// Uploads a temporary image to create a room logo.
     /// </summary>
-    /// <short>Upload the image for room logo</short>
+    /// <short>Upload a room logo image</short>
     /// <path>api/2.0/files/logos</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Upload result", typeof(UploadResultDto))]
@@ -903,10 +903,10 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     }
 
     /// <summary>
-    /// Starts room index export.
+    /// Starts the index export of a room with the ID specified in the request.
     /// </summary>
-    /// <short>Start room index export</short>
-    /// <path>api/2.0/files/rooms/{id:int}/indexexport</path>
+    /// <short>Start the room index export</short>
+    /// <path>api/2.0/files/rooms/{id}/indexexport</path>
     /// <exception cref="NotSupportedException"></exception>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Ok", typeof(DocumentBuilderTaskDto))]
@@ -957,9 +957,9 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     }
 
     /// <summary>
-    /// Gets room index export.
+    /// Returns the room index export.
     /// </summary>
-    /// <short>Get room index export</short>
+    /// <short>Get the room index export</short>
     /// <path>api/2.0/files/rooms/indexexport</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Ok", typeof(DocumentBuilderTaskDto))]
@@ -975,9 +975,9 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     }
 
     /// <summary>
-    /// Terminates room index export.
+    /// Terminates the room index export.
     /// </summary>
-    /// <short>Terminate room index export</short>
+    /// <short>Terminate the room index export</short>
     /// <path>api/2.0/files/rooms/indexexport</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Ok")]
@@ -993,9 +993,9 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     }
 
     /// <summary>
-    /// Gets room new items
+    /// Returns the room new items.
     /// </summary>
-    /// <short>Get room new items</short>
+    /// <short>Get the room new items</short>
     /// <path>api/2.0/files/rooms/news</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "List of new items", typeof(List<NewItemsDto<RoomNewItemsDto>>))]

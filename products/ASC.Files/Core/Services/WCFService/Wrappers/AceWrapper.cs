@@ -78,9 +78,13 @@ public class AceWrapper : IMapFrom<RoomInvitation>
     public SubjectType SubjectType { get; set; }
 
     /// <summary>
-    /// Specifies whether a user with the access rights to a file can edit it or not.
+    /// The parameters of the file shared link.
     /// </summary>
     public FileShareOptions FileShareOptions { get; init; }
+
+    /// <summary>
+    /// Specifies whether a user with the access rights to a file can edit it or not.
+    /// </summary>
     public bool CanEditAccess { get; set; }
 
     /// <summary>

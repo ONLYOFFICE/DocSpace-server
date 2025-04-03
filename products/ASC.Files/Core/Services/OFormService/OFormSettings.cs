@@ -32,32 +32,32 @@ namespace ASC.Files.Core.Services.OFormService;
 public class OFormSettings
 {
     /// <summary>
-    /// The form settings domain.
+    /// The form domain.
     /// </summary>
     public string Domain { get; set; }
 
     /// <summary>
-    /// The form settings path.
+    /// The form path.
     /// </summary>
     public string Path { get; set; }
 
     /// <summary>
-    /// The form settings dashboard.
+    /// The form dashboard.
     /// </summary>
     public string Dashboard { get; set; }
 
     /// <summary>
-    /// The form settings extension.
+    /// The form extension.
     /// </summary>
     public string Ext { get; set; }
 
     /// <summary>
-    /// The form settings signature.
+    /// The form signature.
     /// </summary>
     public string Signature { get; set; }
 
     /// <summary>
-    /// The form settings upload.
+    /// The form uploading settings.
     /// </summary>
     public OFormSettings Upload { get; set; }
 }

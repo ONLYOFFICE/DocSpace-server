@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters for hiding the confirmation dialog.
+/// The request parameters for hiding the confirmation dialog when converting.
 /// </summary>
 public class HideConfirmConvertRequestDto
 {

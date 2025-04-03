@@ -48,7 +48,7 @@ public class RoomInvitationRequest
     public string Message { get; set; }
 
     /// <summary>
-    /// The culture of the room invitation.
+    /// The language of the room invitation.
     /// </summary>
     public string Culture { get; set; }
 }

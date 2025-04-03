@@ -32,7 +32,7 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 public class CreateTextOrHtmlFile
 {
     /// <summary>
-    /// The file title for text or HTML.
+    /// The file title for text or HTML file.
     /// </summary>
     [Required]
     [StringLength(165)]
@@ -50,7 +50,7 @@ public class CreateTextOrHtmlFile
 }
 
 /// <summary>
-/// Request parameters for creating an HTML file.
+/// The request parameters for creating an HTML or text file.
 /// </summary>
 public class CreateTextOrHtmlFileRequestDto<T>
 {

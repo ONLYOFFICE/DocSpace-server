@@ -179,32 +179,32 @@ static file class Queries
 }
 
 /// <summary>
-/// The lifetime enabled room parameters.
+/// The file lifetime settings enabled for the specified room.
 /// </summary>
 public class LifetimeEnabledRoom
 {
     /// <summary>
-    /// The tenant ID of the lifetime enabled room.
+    /// The tenant ID.
     /// </summary>
     public int TenantId { get; init; }
 
     /// <summary>
-    /// The room ID of the lifetime enabled room.
+    /// The room ID.
     /// </summary>
     public int RoomId { get; init; }
 
     /// <summary>
-    /// The user ID of the lifetime enabled room.
+    /// The ID of the user who enabled the lifetime settings.
     /// </summary>
     public Guid UserId { get; init; }
 
     /// <summary>
-    /// The data lifetime database room.
+    /// The room data lifetime database.
     /// </summary>
     public DbRoomDataLifetime Lifetime { get; init; }
 
     /// <summary>
-    /// The list of expired files.
+    /// The list of the expired files.
     /// </summary>
     public List<int> ExipiredFiles { get; set; }
 }

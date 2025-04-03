@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core;
 
+/// <summary>
+/// The form filling status.
+/// </summary>
 public enum FormFillingStatus
 {
     None = 0,

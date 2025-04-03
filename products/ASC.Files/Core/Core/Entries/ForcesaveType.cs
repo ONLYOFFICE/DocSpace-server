@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core;
 
+/// <summary>
+/// The file force save type.
+/// </summary>
 public enum ForcesaveType
 {
     None = 0,

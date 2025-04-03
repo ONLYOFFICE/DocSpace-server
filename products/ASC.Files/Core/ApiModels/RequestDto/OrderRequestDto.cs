@@ -90,12 +90,12 @@ public class OrderRequestDtoConverter : System.Text.Json.Serialization.JsonConve
 }
 
 /// <summary>
-/// The order file request parameters.
+/// The file order request parameters.
 /// </summary>
 public class OrderFileRequestDto<T>
 {
     /// <summary>
-    /// The file ID of the order.
+    /// The file ID.
     /// </summary>
     [FromRoute(Name = "fileId")]
     public T FileId { get; set; }
@@ -108,12 +108,12 @@ public class OrderFileRequestDto<T>
 }
 
 /// <summary>
-/// The order folder request parameters.
+/// The folder order request parameters.
 /// </summary>
 public class OrderFolderRequestDto<T>
 {
     /// <summary>
-    /// The folder ID of the order.
+    /// The folder ID.
     /// </summary>
     [FromRoute(Name = "folderId")]
     public T FolderId { get; set; }

@@ -27,7 +27,7 @@
 namespace ASC.Web.Files.Services.WCFService;
 
 /// <summary>
-/// The third party parameters.
+/// The third-party account parameters.
 /// </summary>
 public class ThirdPartyParams
 {

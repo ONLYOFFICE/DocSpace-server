@@ -173,9 +173,9 @@ public class SettingsController(
     }
 
     /// <summary>
-    /// Changes the ability to force save a file.
+    /// Specifies if the file forcesaving is enabled or not.
     /// </summary>
-    /// <short>Change the forcasaving ability</short>
+    /// <short>Change the forcesaving ability</short>
     /// <path>api/2.0/files/forcesave</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
@@ -204,7 +204,7 @@ public class SettingsController(
     /// <summary>
     /// Returns the information about the "Documents" module.
     /// </summary>
-    /// <short>Get the Documents information</short>
+    /// <short>Get the "Documents" information</short>
     /// <path>api/2.0/files/info</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Module information: ID, product class name, title, description, icon URL, large icon URL, start URL, primary or nor, help URL", typeof(Module))]
@@ -216,10 +216,10 @@ public class SettingsController(
     }
 
     /// <summary>
-    /// Hides confirmation dialog when canceling operation.
+    /// Hides the confirmation dialog when canceling operations.
     /// </summary>
-    /// <short>Hide confirmation dialog when canceling operation</short>
-    /// <path>api/2.0/files/hideconfirmroomlifetime</path>
+    /// <short>Hide confirmation dialog when canceling operations</short>
+    /// <path>api/2.0/files/hideconfirmcanceloperation</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
     [HttpPut("hideconfirmcanceloperation")]
@@ -242,7 +242,7 @@ public class SettingsController(
     }
 
     /// <summary>
-    /// Hides confirmation dialog when changing room lifetime settings.
+    /// Hides the confirmation dialog when changing the room lifetime settings.
     /// </summary>
     /// <short>Hide confirmation dialog when changing room lifetime settings</short>
     /// <path>api/2.0/files/hideconfirmroomlifetime</path>
@@ -257,7 +257,7 @@ public class SettingsController(
     /// <summary>
     /// Checks if the "Private Room" settings are available or not.
     /// </summary>
-    /// <short>Check the Private Room availability</short>
+    /// <short>Check the "Private Room" availability</short>
     /// <path>api/2.0/files/@privacy/available</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the Private Room settings are available", typeof(bool))]

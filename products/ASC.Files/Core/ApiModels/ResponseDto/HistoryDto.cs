@@ -42,7 +42,7 @@ public record HistoryDto
     public EmployeeDto Initiator { get; init; }
 
     /// <summary>
-    /// The date and time when an action on the file performed.
+    /// The date and time when an action on the file was performed.
     /// </summary>
     public ApiDateTime Date { get; init; }
 

@@ -37,27 +37,27 @@ public class ThirdPartyBackupRequestDto
     public string Url { get; set; }
 
     /// <summary>
-    /// The login for the third-party backup request.
+    /// The login.
     /// </summary>
     public string Login { get; set; }
 
     /// <summary>
-    /// The password for the third-party backup request.
+    /// The password.
     /// </summary>
     public string Password { get; set; }
 
     /// <summary>
-    /// The authentication token for the third-party backup request.
+    /// The authentication token.
     /// </summary>
     public string Token { get; set; }
 
     /// <summary>
-    /// The customer title for the third-party backup request.
+    /// The customer title.
     /// </summary>
     public string CustomerTitle { get; set; }
 
     /// <summary>
-    /// The provider key for the third-party backup request.
+    /// The provider key.
     /// </summary>
     public string ProviderKey { get; set; }
 }

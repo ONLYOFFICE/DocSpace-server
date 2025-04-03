@@ -154,7 +154,7 @@ public class EmployeeFullDto : EmployeeDto
     public bool IsCollaborator { get; set; }
 
     /// <summary>
-    /// The user language.
+    /// The user culture code.
     /// </summary>
     [SwaggerSchemaCustom(Example = "en-EN")]
     public string CultureName { get; set; }

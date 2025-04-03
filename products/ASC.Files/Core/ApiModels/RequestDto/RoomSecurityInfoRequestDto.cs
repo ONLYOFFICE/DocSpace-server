@@ -27,18 +27,18 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The room security info request parameters.
+/// The room security request parameters.
 /// </summary>
 public class RoomSecurityInfoRequestDto<T>
 {
     /// <summary>
-    /// The room ID for getting security info.
+    /// The room ID.
     /// </summary>
     [FromRoute(Name = "id")]
     public T Id { get; set; }
 
     /// <summary>
-    /// The share filter type for getting security info.
+    /// The filter type of the access rights.
     /// </summary>
     [FromQuery(Name = "filterType")]
     public ShareFilterType FilterType { get; set; } = ShareFilterType.UserOrGroup;

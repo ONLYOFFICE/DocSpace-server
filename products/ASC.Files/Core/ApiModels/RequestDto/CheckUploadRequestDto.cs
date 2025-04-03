@@ -27,18 +27,18 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters for checking files uploading.
+/// The request parameters for checking file uploads.
 /// </summary>
 public class CheckUploadRequest
 {
     /// <summary>
-    /// The file title.
+    /// The titles of files.
     /// </summary>
     public IEnumerable<string> FilesTitle { get; set; }
 }
 
 /// <summary>
-/// The generic request parameters for checking files uploading.
+/// The generic request parameters for checking file uploads.
 /// </summary>
 public class CheckUploadRequestDto<T>
 {
@@ -49,7 +49,7 @@ public class CheckUploadRequestDto<T>
     public T FolderId { get; set; }
 
     /// <summary>
-    /// The parameters for checking files uploading.
+    /// The request parameters for checking file uploads.
     /// </summary>
     [FromBody]
     public CheckUploadRequest Check { get; set; }

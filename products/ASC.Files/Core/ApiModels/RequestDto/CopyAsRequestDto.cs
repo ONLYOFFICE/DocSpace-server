@@ -27,50 +27,49 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Parameters for copying a file
+/// The parameters for copying a file.
 /// </summary>
 public class CopyAs<T>
 {
     /// <summary>
-    /// The copy destination file title.
+    /// The copied file name.
     /// </summary>
     public string DestTitle { get; set; }
 
     /// <summary>
-    /// The copy destination folder ID.
+    /// The destination folder ID of the copied file.
     /// </summary>
     public T DestFolderId { get; set; }
 
     /// <summary>
-    /// Specifies whether to allow the creation of external extension files or not.
+    /// Specifies whether to allow creating the copied file of an external extension or not.
     /// </summary>
     public bool EnableExternalExt { get; set; }
 
     /// <summary>
-    /// The copy file password.
+    /// The copied file password.
     /// </summary>
     public string Password { get; set; }
 
     /// <summary>
     /// Specifies whether to convert the file to form or not.
     /// </summary>
-    /// <type>System.Boolean, System</type>
     public bool ToForm { get; set; }
 }
 
 /// <summary>
-/// Request parameters for copying a file.
+/// The request parameters for copying a file.
 /// </summary>
 public class CopyAsRequestDto<T>
 {
     /// <summary>
-    /// The file id to copy.
+    /// The file ID to copy.
     /// </summary>
     [FromRoute(Name = "fileId")]
     public T FileId { get; set; }
 
     /// <summary>
-    /// The parameters for copying a file
+    /// The parameters for copying a file.
     /// </summary>
     [FromBody]
     public CopyAs<JsonElement> File { get; set; }

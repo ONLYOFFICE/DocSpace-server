@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The link request parameters.
+/// The request parameters for getting the room links.
 /// </summary>
 public class GetRoomLinksRequestDto<T>
 {

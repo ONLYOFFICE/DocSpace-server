@@ -32,17 +32,17 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 public class UploadResultDto
 {
     /// <summary>
-    /// Specifies if the operation is successful or not.
+    /// Specifies if the upload operation is successful or not.
     /// </summary>
     public bool Success { get; set; }
 
     /// <summary>
-    /// The data of the upload result.
+    /// The uploaded data.
     /// </summary>
     public object Data { get; set; }
 
     /// <summary>
-    /// The message of the upload result.
+    /// The message sent after the successful upload operation.
     /// </summary>
     public string Message { get; set; }
 }

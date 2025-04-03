@@ -32,10 +32,8 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 public class DuplicateRequestDto
 {
     /// <summary>The list of folder IDs.</summary>
-    /// <type>System.Collections.Generic.IEnumerable{System.Text.Json.JsonElement}, System.Collections.Generic</type>
     public IEnumerable<JsonElement> FolderIds { get; set; } = new List<JsonElement>();
 
     /// <summary>The list of file IDs.</summary>
-    /// <type>System.Collections.Generic.IEnumerable{System.Text.Json.JsonElement}, System.Collections.Generic</type>
     public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
 }

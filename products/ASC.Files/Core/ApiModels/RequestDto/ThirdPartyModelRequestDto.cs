@@ -42,27 +42,27 @@ public class ThirdPartyRequestDto
     public string Login { get; set; }
 
     /// <summary>
-    /// The password for the third-party request.
+    /// The third-party request password.
     /// </summary>
     public string Password { get; set; }
 
     /// <summary>
-    /// The authentication token for the third-party request.
+    /// The authentication token.
     /// </summary>
     public string Token { get; set; }
 
     /// <summary>
-    /// The customer title for the third-party request. 
+    /// The customer title. 
     /// </summary>
     public string CustomerTitle { get; set; }
 
     /// <summary>
-    /// The provider key for the third-party request.
+    /// The provider key.
     /// </summary>
     public string ProviderKey { get; set; }
 
     /// <summary>
-    /// The provider ID for the third-party request.
+    /// The provider ID.
     /// </summary>
     public int? ProviderId { get; set; }
 }

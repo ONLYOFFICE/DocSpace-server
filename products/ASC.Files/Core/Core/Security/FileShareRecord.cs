@@ -27,62 +27,62 @@
 namespace ASC.Files.Core.Security;
 
 /// <summary>
-/// The file share record parameters.
+/// The record of the file entry sharing settings.
 /// </summary>
 public class FileShareRecord<T>
 {
     /// <summary>
-    /// The file share record tenant ID.
+    /// The ID of the user/group who hasthe access rights to the  file entry.
     /// </summary>
     public int TenantId { get; set; }
 
     /// <summary>
-    /// The file share record entry ID.
+    /// The file entry ID.
     /// </summary>
     public T EntryId { get; set; }
 
     /// <summary>
-    /// The file share record entry type.
+    /// The file entry type.
     /// </summary>
     public FileEntryType EntryType { get; set; }
 
     /// <summary>
-    /// The file share record subject type.
+    /// The subject type of the access right.
     /// </summary>
     public SubjectType SubjectType { get; set; }
 
     /// <summary>
-    /// The file share record subject ID.
+    /// The subject ID.
     /// </summary>
     public Guid Subject { get; set; }
 
     /// <summary>
-    /// The file share record owner ID.
+    /// The ID of the file entry owner.
     /// </summary>
     public Guid Owner { get; set; }
 
     /// <summary>
-    /// The file share.
+    /// The access rights type.
     /// </summary>
     public FileShare Share { get; set; }
 
     /// <summary>
-    /// The file share options.
+    /// The parameters of the file shared link.
     /// </summary>
     public FileShareOptions Options { get; set; }
 
     /// <summary>
-    /// The file share record parent ID.
+    /// The parent ID of the file entry.
     /// </summary>
     public T ParentId { get; set; }
     
     /// <summary>
-    /// The file share record level.
+    /// The level of the file entry access right.
     /// </summary>
     public int Level { get; set; }
 
     /// <summary>
-    /// Specifies if the file share record is link or not.
+    /// Specifies if the sharing settings recird is a shared link or not.
     /// </summary>
     public bool IsLink => SubjectType is SubjectType.InvitationLink or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink;
 
@@ -137,37 +137,37 @@ public class FileShareRecord<T>
 }
 
 /// <summary>
-/// The small share record parameters.
+/// The short record of the file entry sharing settings.
 /// </summary>
 public class SmallShareRecord
 {
     /// <summary>
-    /// The small share record subject ID.
+    /// The subject ID.
     /// </summary>
     public Guid Subject { get; set; }
 
     /// <summary>
-    /// The small share record parent ID.
+    /// The ID of the file entry parent.
     /// </summary>
     public Guid ShareParentTo { get; set; }
 
     /// <summary>
-    /// The small share record owner ID.
+    /// The ID of the file entry owner.
     /// </summary>
     public Guid Owner { get; set; }
 
     /// <summary>
-    /// The small share record timestamp.
+    /// The date and time when the sharing setting record was created.
     /// </summary>
     public DateTime TimeStamp { get; set; }
 
     /// <summary>
-    /// The small share record file share.
+    /// The access rights type.
     /// </summary>
     public FileShare Share { get; set; }
 
     /// <summary>
-    /// The small share record subject type.
+    /// The subject type of the access right.
     /// </summary>
     public SubjectType SubjectType { get; set; }
 }

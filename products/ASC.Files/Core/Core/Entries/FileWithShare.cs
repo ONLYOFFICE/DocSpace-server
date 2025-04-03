@@ -29,11 +29,18 @@ using Profile = AutoMapper.Profile;
 namespace ASC.Files.Core.Core.Entries;
 
 /// <summary>
-/// The file with share parameters.
+/// The file with its sharing settings.
 /// </summary>
 public class FileWithShare : IMapFrom<DbFileQueryWithSecurity>
 {
+    /// <summary>
+    /// The file parameters.
+    /// </summary>
     public File<int> File { get; set; }
+
+    /// <summary>
+    /// The short record of the file entry sharing settings.
+    /// </summary>
     public SmallShareRecord ShareRecord { get; set; }
 
     public void Mapping(Profile profile)

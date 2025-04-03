@@ -32,32 +32,32 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 public class SessionRequest
 {
     /// <summary>
-    /// The file name of the session.
+    /// The file name.
     /// </summary>
     public string FileName { get; set; }
 
     /// <summary>
-    /// The file length in bytes of the session.
+    /// The file size.
     /// </summary>
     public long FileSize { get; set; }
 
     /// <summary>
-    /// The relative path to the folder of the session.
+    /// The relative path to the file.
     /// </summary>
     public string RelativePath { get; set; }
 
     /// <summary>
-    /// The creation time of the session.
+    /// The date and time when the file was created.
     /// </summary>
     public ApiDateTime CreateOn { get; set; }
 
     /// <summary>
-    /// Specifies whether to encrypt a file or not.
+    /// Specifies whether the file is encrypted or not.
     /// </summary>
     public bool Encrypted { get; set; }
 
     /// <summary>
-    /// Create new if exists.
+    /// Specifies whether to create a new file if it already exists or not.
     /// </summary>
     public bool CreateNewIfExist { get; set; }
 }
@@ -74,7 +74,7 @@ public class SessionRequestDto<T>
     public T FolderId { get; set; }
 
     /// <summary>
-    /// The session request.
+    /// The session request parameters.
     /// </summary>
     [FromBody]
     public SessionRequest Session {  get; set; }

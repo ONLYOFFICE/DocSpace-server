@@ -39,9 +39,6 @@ public abstract class FileEntry : ICloneable
     [JsonIgnore]
     public FileHelper FileHelper { get; set; }
 
-    /// <summary>
-    /// The global file entry.
-    /// </summary>
     [JsonIgnore] 
     private Global Global { get; }
 
@@ -59,12 +56,12 @@ public abstract class FileEntry : ICloneable
     public virtual string Title { get; set; }
 
     /// <summary>
-    /// The file entry creat by ID.
+    /// The ID of the user who created the file entry.
     /// </summary>
     public Guid CreateBy { get; set; }
 
     /// <summary>
-    /// The file entry create by string.
+    /// The name of the user who created the file entry.
     /// </summary>
     [JsonIgnore]
     public string CreateByString
@@ -74,12 +71,12 @@ public abstract class FileEntry : ICloneable
     }
 
     /// <summary>
-    /// The ID who modified the file entry.
+    /// The ID of the user who modified the file entry.
     /// </summary>
     public Guid ModifiedBy { get; set; }
 
     /// <summary>
-    /// The file entry modified by string.
+    /// The name of the user who modified the file entry.
     /// </summary>
     [JsonIgnore]
     public string ModifiedByString
@@ -106,7 +103,7 @@ public abstract class FileEntry : ICloneable
     public string Error { get; set; }
 
     /// <summary>
-    /// The access to the file entry.
+    /// The access rights of the file entry.
     /// </summary>
     public FileShare Access { get; set; }
 
@@ -132,27 +129,27 @@ public abstract class FileEntry : ICloneable
     public bool ProviderEntry => !string.IsNullOrEmpty(ProviderKey);
 
     /// <summary>
-    /// The date and time of the file entry creation.
+    /// The date and time when the file entry was created.
     /// </summary>
     public DateTime CreateOn { get; set; }
 
     /// <summary>
-    /// The date and time of the file entry modification.
+    /// The date and time when the file entry was modified.
     /// </summary>
     public DateTime ModifiedOn { get; set; }
 
     /// <summary>
-    /// The file entry folder type.
+    /// The root folder type of the file entry.
     /// </summary>
     public FolderType RootFolderType { get; set; }
 
     /// <summary>
-    /// The file entry parent folder type.
+    /// The parent room type of the file entry.
     /// </summary>
     public FolderType? ParentRoomType { get; set; }
 
     /// <summary>
-    /// The root create by of the file entry.
+    /// The ID of the user who created the root folder of the file entry.
     /// </summary>
     public Guid RootCreateBy { get; set; }
 
@@ -190,7 +187,7 @@ public abstract class FileEntry : ICloneable
     private string _createByString;
 
     /// <summary>
-    /// Convert the file entry object to string.
+    /// Converts the file entry object to the string.
     /// </summary>
     public override string ToString()
     {
@@ -198,7 +195,7 @@ public abstract class FileEntry : ICloneable
     }
 
     /// <summary>
-    /// Clone the file entry object.
+    /// Clones the file entry object.
     /// </summary>
     public object Clone()
     {
@@ -207,42 +204,42 @@ public abstract class FileEntry : ICloneable
 }
 
 /// <summary>
-/// The generic file entry parameters.
+/// The file entry parameters.
 /// </summary>
 public abstract class FileEntry<T> : FileEntry, IEquatable<FileEntry<T>>
 {
     /// <summary>
-    /// The generic file entry ID.
+    /// The file entry ID.
     /// </summary>
     public T Id { get; set; }
 
     /// <summary>
-    /// The generic file entry parent ID.
+    /// The file entry parent ID.
     /// </summary>
     public T ParentId { get; set; }
 
     /// <summary>
-    /// The generic file entry origin ID.
+    /// The file entry origin ID.
     /// </summary>
     public T OriginId { get; set; }
 
     /// <summary>
-    /// The generic file entry origin room ID.
+    /// The file entry origin room ID.
     /// </summary>
     public T OriginRoomId { get; set; }
 
     /// <summary>
-    /// Specifies if the generic file entry ID is mutable or not.
+    /// Specifies if the file entry ID is mutable or not.
     /// </summary>
     public bool MutableId { get; set; }
 
     /// <summary>
-    /// The file share record.
+    /// The record of the file entry sharing settings.
     /// </summary>
     public FileShareRecord<T> ShareRecord { get; set; }
 
     /// <summary>
-    /// The file entry security actions by boolean result.
+    /// The actions that can be performed with the file entry.
     /// </summary>
     public IDictionary<FilesSecurityActions, bool> Security { get; set; }
 
@@ -259,12 +256,18 @@ public abstract class FileEntry<T> : FileEntry, IEquatable<FileEntry<T>>
         _securityContext = securityContext;
     }
 
+    /// <summary>
+    /// The folder ID to display.
+    /// </summary>
     public T FolderIdDisplay
     {
         get => !EqualityComparer<T>.Default.Equals(_folderIdDisplay, default) ? _folderIdDisplay : ParentId;
         set => _folderIdDisplay = value;
     }
 
+    /// <summary>
+    /// The root folder ID.
+    /// </summary>
     public T RootId { get; set; }
 
     [JsonIgnore]

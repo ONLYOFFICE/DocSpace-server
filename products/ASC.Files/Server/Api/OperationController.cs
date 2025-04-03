@@ -172,7 +172,7 @@ public class OperationController(
     /// <summary>
     /// Retrieves the statuses of operations filtered by the specified operation type.
     /// </summary>
-    /// <param name="inDto">The data transfer object containing the operation type for which statuses are retrieved.</param>
+    /// <short>Get file operation statuses</short>
     /// <path>api/2.0/files/fileops/{operationType}</path>
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>
@@ -218,9 +218,9 @@ public class OperationController(
     }
 
     /// <summary>
-    /// Moves all the selected files and folders to the folder with the ID specified in the request.
+    /// Moves or copies all the selected files and folders to the folder with the ID specified in the request.
     /// </summary>
-    /// <short>Move to a folder</short>
+    /// <short>Move or copy to a folder</short>
     /// <path>api/2.0/files/fileops/move</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
@@ -256,11 +256,11 @@ public class OperationController(
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
     }
-    
+
     /// <summary>
-    /// Moves or copies all the destination folder.
+    /// Checks if files can be moved or copied to the specified folder.
     /// </summary>
-    /// <short>Move or copy the folder</short>
+    /// <short>Check for moving or copying to a folder</short>
     /// <path>api/2.0/files/fileops/checkdestfolder</path>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Result", typeof(CheckDestFolderDto))]
@@ -303,9 +303,9 @@ public class OperationController(
     }
 
     /// <summary>
-    /// Checks a batch of files and folders for conflicts when moving or copying them to the folder with the ID specified in the request.
+    /// Checks if files or folders can be moved or copied to the specified folder, moves or copies them, and returns their information.
     /// </summary>
-    /// <short>Check files and folders for conflicts</short>
+    /// <short>Check and move or copy to a folder</short>
     /// <path>api/2.0/files/fileops/move</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]

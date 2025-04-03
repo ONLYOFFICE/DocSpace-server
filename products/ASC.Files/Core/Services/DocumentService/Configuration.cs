@@ -43,12 +43,12 @@ public enum EditorType
 }
 
 /// <summary>
-/// The action link configuration parameters.
+/// The config parameter which contains the information about the action in the document that will be scrolled to.
 /// </summary>
 public class ActionLinkConfig
 {
     /// <summary>
-    /// The information about the comment in the document that will be scrolled to.
+    /// The information about the action in the document that will be scrolled to.
     /// </summary>
     [JsonPropertyName("action")]
     public ActionConfig Action { get; set; }
@@ -59,18 +59,18 @@ public class ActionLinkConfig
     }
 
     /// <summary>
-    /// The information about the comment in the document that will be scrolled to.
+    /// The information about the action in the document that will be scrolled to.
     /// </summary>
     public class ActionConfig
     {
         /// <summary>
-        /// The comment data that will be scrolled to.
+        /// The action data that will be scrolled to.
         /// </summary>
         [JsonPropertyName("data")]
         public string Data { get; set; }
 
         /// <summary>
-        /// The action type of the action link.
+        /// The action type.
         /// </summary>
         [JsonPropertyName("type")]
         public string Type { get; set; }

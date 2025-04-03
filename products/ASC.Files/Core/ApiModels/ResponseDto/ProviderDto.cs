@@ -47,23 +47,22 @@ public record ProviderDto(string Name, string Key, bool Connected, bool Oauth = 
     public bool Connected { get; init; } = Connected;
 
     /// <summary>
-    /// Specifies whether the provider is the Oauth.
+    /// Specifies if the provider is OAuth.
     /// </summary>
     public bool Oauth { get; init; } = Oauth;
 
     /// <summary>
-    /// The provider redirect url.
+    /// The provider redirect URL.
     /// </summary>
     public string RedirectUrl { get; init; } = RedirectUrl;
 
     /// <summary>
-    /// The required connection url flag.
+    /// The required connection URL flag.
     /// </summary>
     public bool RequiredConnectionUrl { get; init; } = RequiredConnectionUrl;
     
     /// <summary>
-    /// The provider Oauth client ID.
+    /// The provider OAuth client ID.
     /// </summary>
-    /// <type>System.String, System</type>
     public string ClientId { get; init; } = ClientId;
 }

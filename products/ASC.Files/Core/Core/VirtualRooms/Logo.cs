@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.VirtualRooms;
 
 /// <summary>
-/// The logo information.
+/// The room logo information.
 /// </summary>
 public class Logo
 {

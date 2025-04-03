@@ -27,7 +27,7 @@
 namespace ASC.Files.Core;
 
 /// <summary>
-/// The submit forms data parameters.
+/// The data of the submitted forms.
 /// </summary>
 public class SubmitFormsData
 {
@@ -39,76 +39,73 @@ public class SubmitFormsData
 }
 
 /// <summary>
-/// The forms item data parameters.
+/// The data of the separate form item.
 /// </summary>
 public class FormsItemData
 {
     /// <summary>
-    /// The forms item data key.
+    /// The form data key.
     /// </summary>
     public string Key { get; set; }
 
     /// <summary>
-    /// The forms item data tag.
+    /// The form data tag.
     /// </summary>
     public string Tag { get; set; }
 
     /// <summary>
-    /// The forms item data value.
+    /// The form data value.
     /// </summary>
     public string Value { get; set; }
 
     /// <summary>
-    /// The forms item data type.
+    /// The form data type.
     /// </summary>
     public string Type { get; set; }
 }
 
 /// <summary>
-/// The database forms item data search parameters.
+/// The database of forms items data.
 /// </summary>
 [Transient]
 public class DbFormsItemDataSearch : SubmitFormsData, ISearchItem
 {
     /// <summary>
-    /// The database forms item data search ID.
+    /// The form ID.
     /// </summary>
     public int Id { get; set; }
 
     /// <summary>
-    /// The database forms item data search tenant ID.
+    /// The tenant ID.
     /// </summary>
     public int TenantId { get; set; }
 
     /// <summary>
-    /// The database forms item data search parent ID.
+    /// The form parent ID.
     /// </summary>
     public int ParentId { get; set; }
 
     /// <summary>
-    /// The database forms item data search original form ID.
+    /// The original form ID.
     /// </summary>
     public int OriginalFormId { get; set; }
 
     /// <summary>
-    /// The database forms item data search room ID.
+    /// The ID of the room where the form is located.
     /// </summary>
     public int RoomId { get; set; }
 
     /// <summary>
-    /// The database forms item data search creation time.
+    /// The date and time when the form was created.
     /// </summary>
     public DateTime CreateOn { get; set; }
 
     /// <summary>
-    /// The database forms item data search index name.
+    /// The form index name.
     /// </summary>
     [OpenSearch.Client.Ignore] 
     public string IndexName => "forms_data";
 
-    /// <summary>
-    /// Get the database forms item data search index name.
-    /// </summary>
     public Expression<Func<ISearchItem, object[]>> GetSearchContentFields(SearchSettingsHelper searchSettings)
     {
         return a => new object[] {  };

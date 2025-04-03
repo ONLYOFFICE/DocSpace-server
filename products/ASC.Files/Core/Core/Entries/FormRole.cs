@@ -26,13 +26,43 @@
 
 namespace ASC.Files.Core.Core.Entries;
 
+/// <summary>
+/// The form role parameters.
+/// </summary>
 public class FormRole
 {
+    /// <summary>
+    /// The role name.
+    /// </summary>
     public string RoleName { get; set; }
+    
+    /// <summary>
+    /// The role color.
+    /// </summary>
     public string RoleColor { get; set; }
+    
+    /// <summary>
+    /// The ID of user who has the current role.
+    /// </summary>
     public Guid UserId { get; set; }
+
+    /// <summary>
+    /// The order in which the role receives and signs the document.
+    /// </summary>
     public int Sequence { get; set; }
+
+    /// <summary>
+    /// Specifies whether the form filled by the role was submitted or not.
+    /// </summary>
     public bool Submitted { get; set; }
+    
+    /// <summary>
+    /// The date and time when the form was opened by the role.
+    /// </summary>
     public DateTime OpenedAt { get; set; }
+    
+    /// <summary>
+    /// The date and time when the form was submitted by the role.
+    /// </summary>
     public DateTime SubmissionDate { get; set; }
 }

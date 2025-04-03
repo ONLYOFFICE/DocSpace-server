@@ -46,9 +46,9 @@ public abstract class TagsController<T>(FileStorageService fileStorageService,
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
-    /// Adds the file with the ID specified in the request to the "Recent" section.
+    /// Adds a file with the ID specified in the request to the "Recent" section.
     /// </summary>
-    /// <short>Add the file to the "Recent" section</short>
+    /// <short>Add a file to the "Recent" section</short>
     /// <path>api/2.0/files/file/{fileId}/recent</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]

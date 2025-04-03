@@ -27,7 +27,7 @@
 namespace ASC.Files.Core;
 
 /// <summary>
-/// The entry properties parameters.
+/// The entry properties.
 /// </summary>
 [DebuggerDisplay("")]
 public class EntryProperties<T>
@@ -35,7 +35,6 @@ public class EntryProperties<T>
     /// <summary>
     /// The form filling properties.
     /// </summary>
-    /// <type>ASC.Files.Core.FormFillingProperties, ASC.Files.Core</type>
     public FormFillingProperties<T> FormFilling { get; set; }
 
     public static EntryProperties<T> Deserialize(string data, ILogger logger)
@@ -70,26 +69,76 @@ public class EntryProperties<T>
 }
 
 /// <summary>
-/// The form filling properties parameters.
+/// The form filling properties.
 /// </summary>
 [Transient]
 public class FormFillingProperties<T>
 {
+    /// <summary>
+    /// Specifies if the form filling has been already started.
+    /// </summary>
     public bool StartFilling { get; set; }
+  
+    
+    /// <summary>
+    /// The form document title.
+    /// </summary>
     public string Title { get; set; }
+    
+    /// <summary>
+    /// The room ID where the form document is located.
+    /// </summary>
     public T RoomId { get; set; }
+    
+    /// <summary>
+    /// The folder ID where the resulting forms will be saved.
+    /// </summary>
     public T ToFolderId { get; set; }
+    
+    /// <summary>
+    /// The original form ID.
+    /// </summary>
     public T OriginalFormId { get; set; }
+    
+    /// <summary>
+    /// The folder ID where the resulting forms are located.
+    /// </summary>
     public T ResultsFolderId { get; set; }
+    
+    /// <summary>
+    /// The resulting form ID.
+    /// </summary>
     public T ResultsFileID { get; set; }
+    
+    /// <summary>
+    /// The number of the resulting forms.
+    /// </summary>
     public int ResultFormNumber { get; set; }
+    
+    /// <summary>
+    /// The date and time when the form filling has been stopped.
+    /// </summary>
     public DateTime FillingStopedDate { get; set; }
+    
+    /// <summary>
+    /// The parameters of the user who interrupted form filling.
+    /// </summary>
     public FormFillingInterruption? FormFillingInterruption { get; set; }
 
 }
 
+/// <summary>
+/// The parameters of the user who interrupted form filling.
+/// </summary>
 public struct FormFillingInterruption
 {
+    /// <summary>
+    /// The uset ID.
+    /// </summary>
     public Guid UserId { get; set; }
+    
+    /// <summary>
+    /// The user role name.
+    /// </summary>
     public string RoleName { get; set; }
 }

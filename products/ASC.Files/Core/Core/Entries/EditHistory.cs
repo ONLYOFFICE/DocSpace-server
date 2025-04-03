@@ -264,7 +264,7 @@ public class EditHistoryChanges
 public class EditHistoryDataDto
 {
     /// <summary>
-    /// The url address of the file with the document changes data.
+    /// The URL address of the file with the document changes data.
     /// </summary>
     [Url]
     public string ChangesUrl { get; set; }
@@ -285,7 +285,7 @@ public class EditHistoryDataDto
     public string Token { get; set; }
 
     /// <summary>
-    /// The url address of the current document version.
+    /// The URL address of the current document version.
     /// </summary>
     [Url]
     public string Url { get; set; }

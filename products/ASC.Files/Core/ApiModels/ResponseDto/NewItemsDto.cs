@@ -27,12 +27,12 @@
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// The date and time when the new item created.
+/// The new item parameters.
 /// </summary>
 public class NewItemsDto<TItem>
 {
     /// <summary>
-    /// The date and time when the new item created.
+    /// The date and time when the new item was created.
     /// </summary>
     public ApiDateTime Date { get; init; }
 

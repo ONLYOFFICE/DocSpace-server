@@ -63,7 +63,7 @@ public class LogoRequest
 public class LogoRequest<T>
 {
     /// <summary>
-    /// The room Id.
+    /// The room ID.
     /// </summary>
     [FromRoute(Name = "id")]
     public T Id { get; set; }

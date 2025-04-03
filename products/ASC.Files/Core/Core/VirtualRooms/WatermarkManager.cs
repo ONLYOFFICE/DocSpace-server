@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.VirtualRooms;
 
+/// <summary>
+/// The watermark additions.
+/// </summary>
 [Flags]
 public enum WatermarkAdditions
 {
@@ -51,12 +54,12 @@ public enum WatermarkAdditions
 public class WatermarkSettings : IMapFrom<DbRoomWatermark>, IMapFrom<WatermarkRequestDto>
 {
     /// <summary>
-    /// The watermark settings text.
+    /// The watermark text.
     /// </summary>
     public string Text { get; set; }
 
     /// <summary>
-    /// The watermark settings additions.
+    /// The watermark additions.
     /// </summary>
     public WatermarkAdditions Additions { get; set; }
 
@@ -66,22 +69,22 @@ public class WatermarkSettings : IMapFrom<DbRoomWatermark>, IMapFrom<WatermarkRe
     public int Rotate { get; set; }
 
     /// <summary>
-    /// The image width.
+    /// The watermark image width.
     /// </summary>
     public double ImageWidth { get; set; }
 
     /// <summary>
-    /// The image height.
+    /// The watermark image height.
     /// </summary>
     public double ImageHeight { get; set; }
 
     /// <summary>
-    /// The image URL.
+    /// The watermark image URL.
     /// </summary>
     public string ImageUrl { get; set; }
 
     /// <summary>
-    /// The image scale.
+    /// The watermark image scale.
     /// </summary>
     public int ImageScale { get; set; }
 }

@@ -27,37 +27,37 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for checking the document service location.
+/// The request parameters for checking the document service location.
 /// </summary>
 public class CheckDocServiceUrlRequestDto
 {
     /// <summary>
-    /// The document server url address.
+    /// The ONLYOFFICE Docs URL address.
     /// </summary>
     public string DocServiceUrl { get; set; }
 
     /// <summary>
-    /// The document server url address in the local private network.
+    /// The ONLYOFFICE Docs URL address in the local private network.
     /// </summary>
     public string DocServiceUrlInternal { get; set; }
 
     /// <summary>
-    /// The community server url address.
+    /// The DocSpace portal URL address.
     /// </summary>
     public string DocServiceUrlPortal { get; set; }
 
     /// <summary>
-    /// The signature secret of the document server.
+    /// The signature secret of the ONLYOFFICE Docs.
     /// </summary>
     public string DocServiceSignatureSecret { get; set; }
 
     /// <summary>
-    /// The signature header of the document server.
+    /// The signature header of the ONLYOFFICE Docs.
     /// </summary>
     public string DocServiceSignatureHeader { get; set; }
 
     /// <summary>
-    /// Specifies if the SSL verification of the document server is enabled or not.
+    /// Specifies if the SSL verification of the ONLYOFFICE Docs is enabled or not.
     /// </summary>
     public bool? DocServiceSslVerification { get; set; }
 }

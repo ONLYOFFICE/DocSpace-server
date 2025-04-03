@@ -32,17 +32,17 @@ namespace ASC.Files.Core.Security;
 public class GroupMemberSecurityRecord
 {
     /// <summary>
-    /// The group member security record user ID.
+    /// The user ID of the group member.
     /// </summary>
     public Guid UserId { get; init; }
 
     /// <summary>
-    /// The group member security record user share.
+    /// The user access rights of the group member.
     /// </summary>
     public FileShare? UserShare { get; init; }
 
     /// <summary>
-    /// The group member security record group share.
+    /// The group access rights of the group member.
     /// </summary>
     public FileShare GroupShare { get; init; }
 }

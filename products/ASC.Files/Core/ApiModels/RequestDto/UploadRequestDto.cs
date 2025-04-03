@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters for uploading the file.
+/// The request parameters for uploading a file.
 /// </summary>
 public class UploadRequestDto : IModelWithFile, IDisposable
 {
@@ -106,18 +106,18 @@ public class UploadRequestDto : IModelWithFile, IDisposable
 }
 
 /// <summary>
-/// The request parameters for uploading the file with folder.
+/// The request parameters for uploading a file to the folder.
 /// </summary>
 public class UploadWithFolderRequestDto<T>
 {
     /// <summary>
-    /// The folder ID of the file to be uploaded.
+    /// The folder ID to upload a file.
     /// </summary>
     [FromRoute(Name = "folderId")]
     public T FolderId { get; set; }
 
     /// <summary>
-    /// The folder data to be uploaded.
+    /// The request parameters for uploading a file.
     /// </summary>
     [FromBody]
     [ModelBinder(BinderType = typeof(UploadModelBinder))]

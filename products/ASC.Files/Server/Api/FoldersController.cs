@@ -51,7 +51,7 @@ public class FoldersControllerInternal(
         fileShareDtoHelper)
 {
     /// <summary>
-    /// Gets the activity history of a folder with a specified identifier.
+    /// Returns the activity history of a folder with a specified identifier.
     /// </summary>
     /// <short>
     /// Get folder history
@@ -69,7 +69,7 @@ public class FoldersControllerInternal(
     }
 
     /// <summary>
-    /// Gets form filter of a folder with id specified in request.
+    /// Returns the form filter of a folder with the ID specified in the request.
     /// </summary>
     /// <short>Get folder form filter</short>
     /// <path>api/2.0/files/{folderId}/formfilter</path>
@@ -152,7 +152,7 @@ public abstract class FoldersController<T>(
     }
 
     /// <summary>
-    /// Sets file order in the folder with ID specified in the request.
+    /// Sets the file order in the folder with ID specified in the request.
     /// </summary>
     /// <short>
     /// Set file order

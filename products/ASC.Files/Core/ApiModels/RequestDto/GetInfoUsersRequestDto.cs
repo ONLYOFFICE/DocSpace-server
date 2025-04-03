@@ -27,12 +27,12 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Base batch request parameters.
+/// The base batch request parameters.
 /// </summary>
 public class GetInfoUsersRequestDto
 {
     /// <summary>
-    /// The list of user ids from the request.
+    /// The list of user IDs from the request.
     /// </summary>
     public List<Guid> UserIds { get; set; }
 }

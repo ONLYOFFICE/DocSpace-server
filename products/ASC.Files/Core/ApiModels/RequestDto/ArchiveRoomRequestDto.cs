@@ -27,18 +27,18 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The parameters for archiving the room.
+/// The parameters for archiving a room.
 /// </summary>
 public class ArchiveRoomRequest
 {
     /// <summary>
-    /// Specifies whether to archive the room after the editing session is finished or not.
+    /// Specifies whether to archive a room after the editing session is finished or not.
     /// </summary>
     public bool DeleteAfter { get; set; }
 }
 
 /// <summary>
-/// The request parameters for archiving the room.
+/// The request parameters for archiving a room.
 /// </summary>
 public class ArchiveRoomRequestDto<T>
 {
@@ -49,7 +49,7 @@ public class ArchiveRoomRequestDto<T>
     public T Id { get; set; }
 
     /// <summary>
-    /// The parameters for archiving the room.
+    /// The parameters for archiving a room.
     /// </summary>
     [FromBody]
     public ArchiveRoomRequest ArchiveRoom { get; set; }

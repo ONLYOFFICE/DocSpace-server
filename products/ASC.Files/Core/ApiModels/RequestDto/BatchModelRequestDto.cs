@@ -91,7 +91,7 @@ public class DeleteBatchRequestDto : BaseBatchRequestDto
 }
 
 /// <summary>
-/// The request parameters for deleting file's version.
+/// The request parameters for deleting file versions.
 /// </summary>
 public class DeleteVersionBatchRequestDto
 {

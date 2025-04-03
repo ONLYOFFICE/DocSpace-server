@@ -28,6 +28,9 @@ using Profile = AutoMapper.Profile;
 
 namespace ASC.Files.Core;
 
+/// <summary>
+/// The tag type.
+/// </summary>
 [Flags]
 public enum TagType
 {
@@ -71,7 +74,7 @@ public sealed class Tag : IMapFrom<DbFilesTag>
     public object EntryId { get; set; }
 
     /// <summary>
-    /// The tag entry type.
+    /// The file entry type for which the tag has been created.
     /// </summary>
     public FileEntryType EntryType { get; set; }
 
@@ -81,12 +84,12 @@ public sealed class Tag : IMapFrom<DbFilesTag>
     public int Id { get; set; }
 
     /// <summary>
-    /// The tag count.
+    /// The number of tags.
     /// </summary>
     public int Count { get; set; }
 
     /// <summary>
-    /// The date time when the tag created.
+    /// The date and time when the tag was created.
     /// </summary>
     public DateTime? CreateOn { get; set; }
 

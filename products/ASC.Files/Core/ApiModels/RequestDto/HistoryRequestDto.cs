@@ -51,7 +51,7 @@ public class HistoryRequestDto
 }
 
 /// <summary>
-/// Request parameters for folder history.
+/// The request parameters for the folder history.
 /// </summary>
 public class HistoryFolderRequestDto
 {

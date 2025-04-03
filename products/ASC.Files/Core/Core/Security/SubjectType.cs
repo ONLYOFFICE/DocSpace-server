@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.Security;
 
+/// <summary>
+/// The filter type of the access rights.
+/// </summary>
 [Flags]
 public enum ShareFilterType
 {

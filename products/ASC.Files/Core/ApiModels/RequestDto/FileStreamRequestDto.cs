@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for updating file contents.
+/// The request parameters for updating file contents.
 /// </summary>
 public class FileStreamRequestDto<T> : IModelWithFile
 {

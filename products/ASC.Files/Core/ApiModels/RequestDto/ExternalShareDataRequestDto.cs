@@ -27,18 +27,18 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The external share data request parameters.
+/// The external shared data request parameters.
 /// </summary>
 public class ExternalShareDataRequestDto
 {
     /// <summary>
-    /// The unique key of the external share data.
+    /// The unique key of the external shared data.
     /// </summary>
     [FromRoute(Name = "key")]
     public string Key { get; set; }
 
     /// <summary>
-    /// The unique document identifier
+    /// The unique document identifier.
     /// </summary>
     [FromQuery(Name = "fileId")]
     public string FileId { get; set; } = null;

@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for getting reference data.
+/// The request parameters for getting reference data.
 /// </summary>
 public class GetReferenceDataDto<T>
 {
@@ -37,22 +37,22 @@ public class GetReferenceDataDto<T>
     public T FileKey { get; set; }
 
     /// <summary>
-    /// The unique system identifier of the reference.
+    /// The unique system identifier.
     /// </summary>
     public string InstanceId { get; set; }
 
     /// <summary>
-    /// The source file ID of the reference.
+    /// The source file ID.
     /// </summary>
     public T SourceFileId { get; set; }
 
     /// <summary>
-    /// The file name or relative path for the formula editor of the reference.
+    /// The file name or relative path for the formula editor.
     /// </summary>
     public string Path { get; set; }
 
     /// <summary>
-    /// The link to file of the reference.
+    /// The file link.
     /// </summary>
     public string Link { get; set; }
 }

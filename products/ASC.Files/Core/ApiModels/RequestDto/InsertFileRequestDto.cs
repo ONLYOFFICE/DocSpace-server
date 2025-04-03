@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters for inserting the file.
+/// The request parameters for inserting a file.
 /// </summary>
 public class InsertFileRequestDto : IModelWithFile, IDisposable
 {
@@ -92,18 +92,18 @@ public class InsertFileRequestDto : IModelWithFile, IDisposable
 }
 
 /// <summary>
-/// The generic request parameters for inserting the file.
+/// The generic request parameters for inserting a file.
 /// </summary>
 public class InsertWithFileRequestDto<T>
 {
     /// <summary>
-    /// The folder ID for inserting the file.
+    /// The folder ID for inserting a file.
     /// </summary>
     [FromRoute(Name = "folderId")]
     public T FolderId { get; set; }
 
     /// <summary>
-    /// The request parameters for inserting the file.
+    /// The request parameters for inserting a file.
     /// </summary>
     [FromForm]
     [ModelBinder(BinderType = typeof(InsertFileModelBinder))]

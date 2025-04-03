@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for setting encryption keys for the privacy room.
+/// The request parameters for setting encryption keys for the privacy room.
 /// </summary>
 public class PrivacyRoomRequestDto
 {
@@ -48,7 +48,7 @@ public class PrivacyRoomRequestDto
 }
 
 /// <summary>
-/// Request parameters for setting encryption keys.
+/// The request parameters for setting encryption keys.
 /// </summary>
 public class PrivacyRoomEnableRequestDto
 {

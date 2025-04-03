@@ -62,7 +62,7 @@ public class RoomContentRequestDto
     public string Tags { get; set; }
 
     /// <summary>
-    /// Specifies whether to exclude the subject or not.
+    /// Specifies whether to exclude search by user or group ID..
     /// </summary>
     [FromQuery(Name = "excludeSubject")]
     public bool? ExcludeSubject { get; set; }
@@ -74,7 +74,7 @@ public class RoomContentRequestDto
     public ProviderFilter? Provider { get; set; }
 
     /// <summary>
-    /// The filter by subject (Owner - 0, Member - 1).
+    /// The filter by user (Owner - 0, Member - 1).
     /// </summary>
     [FromQuery(Name = "subjectFilter")]
     public SubjectFilter? SubjectFilter { get; set; }

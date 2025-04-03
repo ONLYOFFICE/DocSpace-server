@@ -102,6 +102,9 @@ public class RoomDataLifetime : IMapFrom<DbRoomDataLifetime>, IMapFrom<RoomDataL
     }
 }
 
+/// <summary>
+/// The room data lifetime period.
+/// </summary>
 [EnumExtensions]
 public enum RoomDataLifetimePeriod
 {

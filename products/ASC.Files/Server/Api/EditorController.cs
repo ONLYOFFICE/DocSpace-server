@@ -105,7 +105,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <summary>
     /// Starts filling a file with the ID specified in the request.
     /// </summary>
-    /// <short>Starts filling</short>
+    /// <short>Start file filling</short>
     /// <path>api/2.0/files/file/{fileId}/startfilling</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File information", typeof(FileDto<int>))]
@@ -284,7 +284,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <summary>
     /// Returns a list of users with their access rights to the file with the ID specified in the request.
     /// </summary>
-    /// <short>Get shared users</short>
+    /// <short>Get user access rights by file ID</short>
     /// <path>api/2.0/files/file/{fileId}/sharedusers</path>
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
@@ -297,9 +297,9 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     }
 
     /// <summary>
-    /// Return list of users with their access rights to the file.
+    /// Returns a list of users with their access rights to the file.
     /// </summary>
-    /// <short>Return list of users with their access rights to the file</short>
+    /// <short>Get user access rights</short>
     /// <path>api/2.0/files/infousers</path>
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
@@ -327,7 +327,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <summary>
     /// Returns a list of users with their access rights to the protected file with the ID specified in the request.
     /// </summary>
-    /// <short>Get users with the access to the protected file</short>
+    /// <short>Get users access rights to the protected file</short>
     /// <path>api/2.0/files/file/{fileId}/protectusers</path>
     /// <collection>list</collection>
     [Tags("Files / Files")]
@@ -350,7 +350,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
-    /// Checks the document service location url.
+    /// Checks the document service location URL.
     /// </summary>
     /// <short>Check the document service URL</short>
     /// <path>api/2.0/files/docservice</path>

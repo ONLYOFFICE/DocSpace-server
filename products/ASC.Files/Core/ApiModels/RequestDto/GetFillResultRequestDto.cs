@@ -32,7 +32,7 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 public class GetFillResultRequestDto
 {
     /// <summary>
-    /// The form-filling session id.
+    /// The form-filling session ID.
     /// </summary>
     [FromQuery(Name = "fillingSessionId")]
     public string FillingSessionId { get; set; }

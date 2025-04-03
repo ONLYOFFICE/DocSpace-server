@@ -49,7 +49,7 @@ public class FilesControllerInternal(
         hybridCache)
 {
     /// <summary>
-    /// Get the list of actions performed on the file with the specified identifier.
+    /// Returns the list of actions performed on the file with the specified identifier.
     /// </summary>
     /// <short>
     /// Get file history
@@ -137,7 +137,7 @@ public abstract class FilesController<T>(
 
     /// <summary>
     /// Returns a pre-signed URL to download a file with the specified ID.
-    /// This temporary link allows secure access to the file.
+    /// This temporary link provides secure access to the file.
     /// </summary>
     /// <short>Get file download link</short>
     /// <path>api/2.0/files/file/{fileId}/presigneduri</path>
@@ -249,10 +249,10 @@ public abstract class FilesController<T>(
     }
 
     /// <summary>
-    /// Retrieve the result of a form-filling session.
+    /// Retrieves the result of a form-filling session.
     /// </summary>
     /// <short>
-    /// Get form-filling result.
+    /// Get form-filling result
     /// </short>
     /// <path>api/2.0/files/file/fillresult</path>
     /// <requiresAuthorization>false</requiresAuthorization>
@@ -459,6 +459,9 @@ public abstract class FilesController<T>(
     /// <summary>
     /// Sets order of the file with ID specified in the request.
     /// </summary>
+    /// <short>
+    /// Set file order
+    /// </short>
     /// <path>api/2.0/files/{fileId}/order</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Updated file information", typeof(FileDto<int>))]
@@ -476,7 +479,7 @@ public abstract class FilesController<T>(
     /// Sets order of the files.
     /// </summary>
     /// <short>
-    /// Set files order
+    /// Set order of files
     /// </short>
     /// <path>api/2.0/files/order</path>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
@@ -536,7 +539,7 @@ public abstract class FilesController<T>(
     /// <summary>
     /// Saves a file with the identifier specified in the request as a PDF document.
     /// </summary>
-    /// <short>Save as pdf</short>
+    /// <short>Save a file as PDF</short>
     /// <path>api/2.0/files/file/{id}/saveaspdf</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
@@ -547,6 +550,11 @@ public abstract class FilesController<T>(
         return await filesControllerHelper.SaveAsPdf(inDto.Id, inDto.File.FolderId, inDto.File.Title);
     }
 
+    /// <summary>
+    /// Saves the form role mapping.
+    /// </summary>
+    /// <short>Save form role mapping</short>
+    /// <path>api/2.0/files/file/{fileId}/formrolemapping</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Updated information about form role mappings", typeof(FormRole))]
     [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
@@ -556,6 +564,12 @@ public abstract class FilesController<T>(
         await fileStorageService.SaveFormRoleMapping(inDto.FormId, inDto.Roles);
     }
 
+    /// <summary>
+    /// Returns all roles for the specified form.
+    /// </summary>
+    /// <short>Get form roles</short>
+    /// <path>api/2.0/files/file/{fileId}/formroles</path>
+    /// <collection>list</collection>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Successfully retrieved all roles for the form", typeof(IEnumerable<FormRole>))]
     [SwaggerResponse(403, "You do not have enough permissions to view the form roles")]
@@ -565,6 +579,11 @@ public abstract class FilesController<T>(
         return fileStorageService.GetAllFormRoles(inDto.FileId);
     }
 
+    /// <summary>
+    /// Performs the specified form filling action.
+    /// </summary>
+    /// <short>Perform form filling action</short>
+    /// <path>api/2.0/files/file/{fileId}/manageformfilling</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Successfully processed the form filling action")]
     [SwaggerResponse(403, "You do not have enough permissions to perform this action")]
@@ -656,7 +675,7 @@ public class FilesControllerCommon(
     /// <summary>
     /// Creates thumbnails for the files with the IDs specified in the request.
     /// </summary>
-    /// <short>Create thumbnails</short>
+    /// <short>Create file thumbnails</short>
     /// <path>api/2.0/files/thumbnails</path>
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>

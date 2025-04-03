@@ -32,7 +32,7 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 public class RoomInvitation : EmailInvitationDto
 {
     /// <summary>
-    /// The ID of the user with whom we want to share a room.
+    /// The ID of the user to share a room with.
     /// </summary>
     public Guid Id { get; set; }
 

@@ -27,10 +27,17 @@
 namespace ASC.Files.Core;
 
 /// <summary>
-/// The generic file options parameters.
+/// The file options.
 /// </summary>
 public class FileOptions<T>
 {
+    /// <summary>
+    /// Specifies if the file can be renamed or not.
+    /// </summary>
     public bool Renamed { get; init; }
+    
+    /// <summary>
+    /// The file parameters.
+    /// </summary>
     public File<T> File { get; init; }
 }

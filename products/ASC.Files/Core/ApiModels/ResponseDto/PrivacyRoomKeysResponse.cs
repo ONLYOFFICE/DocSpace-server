@@ -27,12 +27,12 @@
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// The privacy room keys response parameters.
+/// The Private Room keys response parameters.
 /// </summary>
 public class PrivacyRoomKeysResponse
 {
     /// <summary>
-    /// Specifies if the Privacy room key is set or not.
+    /// Specifies if the Private Room keys are set or not.
     /// </summary>
     public bool IsSet { get; set; }
 }

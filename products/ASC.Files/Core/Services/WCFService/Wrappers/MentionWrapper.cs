@@ -34,23 +34,23 @@ public class MentionWrapper
     internal MentionWrapper() { }
 
     /// <summary>
-    /// The user information of the mention.
+    /// The user information.
     /// </summary>
     public UserInfo User { get; internal set; }
 
     /// <summary>
-    /// The user email of the mention.
+    /// The email address of the user.
     /// </summary>
     [EmailAddress]
     public string Email { get; internal set; }
 
     /// <summary>
-    /// The user ID of the mention.
+    /// The identification of the user.
     /// </summary>
     public string Id { get; internal set; }
 
     /// <summary>
-    /// The user image of the mention.
+    /// The path to the user's avatar.
     /// </summary>
     public string Image { get; internal set; }
 
@@ -60,7 +60,7 @@ public class MentionWrapper
     public bool HasAccess { get; internal set; }
 
     /// <summary>
-    /// The user display name of the mention.
+    /// The full name of the user.
     /// </summary>
     public string Name { get; internal set; }
 }
@@ -71,7 +71,7 @@ public class MentionWrapper
 public class MentionMessageWrapper
 {
     /// <summary>
-    /// The config parameter which contains the information about the comment in the document that will be scrolled to.
+    /// The config parameter which contains the information about the action in the document that will be scrolled to.
     /// </summary>
     public ActionLinkConfig ActionLink { get; set; }
 

@@ -269,7 +269,7 @@ public class FilesSettingsDto
     public bool Forcesave { get; set; }
 
     /// <summary>
-    /// Specifies whether to store the forcesaves file versions or not.
+    /// Specifies whether to store the forcesaved file versions or not.
     /// </summary>
     public bool StoreForcesave { get; set; }
 
@@ -289,7 +289,7 @@ public class FilesSettingsDto
     public bool TemplatesSection { get; set; }
 
     /// <summary>
-    /// Specifies whether to download in the .tar.gz files or not.
+    /// Specifies whether to download the .tar.gz files or not.
     /// </summary>
     public bool DownloadTarGz { get; set; }
 

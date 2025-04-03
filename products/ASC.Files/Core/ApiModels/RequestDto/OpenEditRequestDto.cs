@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters to open the file.
+/// The request parameters to open the file for editing.
 /// </summary>
 public class OpenEditRequestDto<T>
 {
@@ -36,6 +36,7 @@ public class OpenEditRequestDto<T>
     /// </summary>
     [FromRoute(Name = "fileId")]
     public T FileId { get; set; }
+
     /// <summary>
     /// The file version to open.
     /// </summary>

@@ -27,37 +27,37 @@
 namespace ASC.Files.Core.Entries;
 
 /// <summary>
-/// The tag info parameters.
+/// The tag information.
 /// </summary>
 public class TagInfo : IMapFrom<DbFilesTag>
 {
     /// <summary>
-    /// The tag info ID.
+    /// The tag ID.
     /// </summary>
     public int Id { get; set; }
 
     /// <summary>
-    /// The tag info name.
+    /// The tag name.
     /// </summary>
     public string Name { get; init; }
 
     /// <summary>
-    /// The tag info owner ID.
+    /// The tag owner ID.
     /// </summary>
     public Guid Owner { get; set; }
 
     /// <summary>
-    /// The tag info type.
+    /// The tag type.
     /// </summary>
     public TagType Type { get; set; }
 
     /// <summary>
-    /// The tag info entry ID.
+    /// The tag entry ID.
     /// </summary>
     public object EntryId { get; set; }
 
     /// <summary>
-    /// The tag info entry type.
+    /// The file entry type for which the tag has been created.
     /// </summary>
     public FileEntryType EntryType { get; set; }
 }
