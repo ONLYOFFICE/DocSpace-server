@@ -26,6 +26,9 @@
 
 namespace ASC.Core.Common.Core;
 
+/// <summary>
+/// The area of the account entries.
+/// </summary>
 public enum Area
 {
     [SwaggerEnum("All")]

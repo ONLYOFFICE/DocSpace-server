@@ -28,7 +28,7 @@ namespace ASC.People.ApiModels.RequestDto;
 
 
 /// <summary>
-/// The group by user ID request parameters.
+/// The request parameters for getting groups by the user ID.
 /// </summary>
 public class GetGroupByUserIdRequestDto
 {
@@ -40,7 +40,7 @@ public class GetGroupByUserIdRequestDto
 }
 
 /// <summary>
-/// The group by ID request parameters.
+/// The request parameters for getting a group by its ID.
 /// </summary>
 public class GetGroupByIdRequestDto
 {

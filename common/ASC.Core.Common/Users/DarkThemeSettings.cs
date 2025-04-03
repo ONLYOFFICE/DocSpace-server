@@ -27,14 +27,13 @@
 namespace ASC.Web.Core.Users;
 
 /// <summary>
-/// The dark theme settings parameters.
+/// The theme parameters.
 /// </summary>
 public class DarkThemeSettings : ISettings<DarkThemeSettings>
 {
     /// <summary>
-    /// The dark theme settings ID.
+    /// The theme settings ID.
     /// </summary>
-    /// <type>System.Guid, System</type>
     [JsonIgnore]
     public Guid ID
     {
@@ -42,9 +41,8 @@ public class DarkThemeSettings : ISettings<DarkThemeSettings>
     }
 
     /// <summary>
-    /// The dark theme.
+    /// The theme type.
     /// </summary>
-    /// <type>ASC.Web.Core.Users.DarkThemeSettingsType, ASC.Core.Common</type>
     public DarkThemeSettingsType Theme { get; init; }
 
     public DarkThemeSettings GetDefault()
@@ -57,6 +55,9 @@ public class DarkThemeSettings : ISettings<DarkThemeSettings>
 }
 
 
+/// <summary>
+/// The theme type.
+/// </summary>
 [JsonConverter(typeof(JsonStringEnumConverter<DarkThemeSettingsType>))]
 public enum DarkThemeSettingsType
 {

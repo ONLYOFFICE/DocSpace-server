@@ -59,12 +59,12 @@ public class GroupDto
     public bool IsLDAP { get; set; }
 
     /// <summary>
-    /// The employee manager full information.
+    /// The group manager full information.
     /// </summary>
     public EmployeeFullDto Manager { get; set; }
 
     /// <summary>
-    /// The list of members.
+    /// The list of group members.
     /// </summary>
     public List<EmployeeFullDto> Members { get; set; }
 
@@ -74,7 +74,7 @@ public class GroupDto
     public bool? Shared { get; set; }
 
     /// <summary>
-    /// The group members count.
+    /// The number of group members.
     /// </summary>
     public int MembersCount { get; set; }
 }

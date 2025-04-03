@@ -27,58 +27,58 @@
 namespace ASC.Web.Api.Models;
 
 /// <summary>
-/// The employee full parameters.
+/// The full list of user parameters.
 /// </summary>
 public class EmployeeFullDto : EmployeeDto
 {
     /// <summary>
-    /// The employee first name.
+    /// The user first name.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Mike")]
     public string FirstName { get; set; }
 
     /// <summary>
-    /// The employee last name.
+    /// The user last name.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Zanyatski")]
     public string LastName { get; set; }
 
     /// <summary>
-    /// The employee first username.
+    /// The user username.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Mike.Zanyatski")]
     public string UserName { get; set; }
 
     /// <summary>
-    /// The employee first email.
+    /// The user email.
     /// </summary>
     [SwaggerSchemaCustom(Example = "my@gmail.com")]
     [EmailAddress]
     public string Email { get; set; }
 
     /// <summary>
-    /// The list of contacts of employee.
+    /// The list of user contacts.
     /// </summary>
     public List<Contact> Contacts { get; set; }
 
     /// <summary>
-    /// The employee birthday.
+    /// The user birthday.
     /// </summary>
     public ApiDateTime Birthday { get; set; }
 
     /// <summary>
-    /// The employee sex.
+    /// The user sex.
     /// </summary>
     [SwaggerSchemaCustom(Example = "male")]
     public string Sex { get; set; }
 
     /// <summary>
-    /// The employee status.
+    /// The user status.
     /// </summary>
     public EmployeeStatus Status { get; set; }
 
     /// <summary>
-    /// The employee activation status.
+    /// The user activation status.
     /// </summary>
     public EmployeeActivationStatus ActivationStatus { get; set; }
 
@@ -88,29 +88,29 @@ public class EmployeeFullDto : EmployeeDto
     public ApiDateTime Terminated { get; set; }
 
     /// <summary>
-    /// The employee department.
+    /// The user department.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Marketing")]
     public string Department { get; set; }
 
     /// <summary>
-    /// The employee registration date.
+    /// The user registration date.
     /// </summary>
     public ApiDateTime WorkFrom { get; set; }
 
     /// <summary>
-    /// The employee list of groups.
+    /// The list of user groups.
     /// </summary>
     public List<GroupSummaryDto> Groups { get; set; }
 
     /// <summary>
-    /// The employee location.
+    /// The user location.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Palo Alto")]
     public string Location { get; set; }
 
     /// <summary>
-    /// The employee notes.
+    /// The user notes.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Notes to worker")]
     public string Notes { get; set; }
@@ -133,7 +133,7 @@ public class EmployeeFullDto : EmployeeDto
     public bool IsLDAP { get; set; }
 
     /// <summary>
-    /// The list of administrator modules.
+    /// The list of the administrator modules.
     /// </summary>
     [SwaggerSchemaCustom(Example = "[\"projects\", \"crm\"]")]
     public List<string> ListAdminModules { get; set; }
@@ -154,13 +154,13 @@ public class EmployeeFullDto : EmployeeDto
     public bool IsCollaborator { get; set; }
 
     /// <summary>
-    /// The employee language info.
+    /// The user culture code.
     /// </summary>
     [SwaggerSchemaCustom(Example = "en-EN")]
     public string CultureName { get; set; }
 
     /// <summary>
-    /// The mobile phone number.
+    /// The user mobile phone number.
     /// </summary>
     public string MobilePhone { get; set; }
 
@@ -176,23 +176,23 @@ public class EmployeeFullDto : EmployeeDto
     public bool IsSSO { get; set; }
 
     /// <summary>
-    /// The theme settings of the employee.
+    /// The user theme settings.
     /// </summary>
     public DarkThemeSettingsType? Theme { get; set; }
 
     /// <summary>
-    /// The employee quota limit.
+    /// The user quota limit.
     /// </summary>
     public long? QuotaLimit { get; set; }
 
     /// <summary>
-    /// The portal used space of the employee.
+    /// The portal used space of the user.
     /// </summary>
     [SwaggerSchemaCustom(Example = 12345)]
     public double? UsedSpace { get; set; }
 
     /// <summary>
-    /// Specifies if the employee is shared or not.
+    /// Specifies if the user has access rights.
     /// </summary>
     public bool? Shared { get; set; }
 
@@ -207,12 +207,12 @@ public class EmployeeFullDto : EmployeeDto
     public int? LoginEventId { get; set; }
 
     /// <summary>
-    /// The employee created by.
+    /// The user who created the current user.
     /// </summary>
     public EmployeeDto CreatedBy { get; set; }
 
     /// <summary>
-    /// The employee registration date.
+    /// The user registration date.
     /// </summary>
     public ApiDateTime RegistrationDate { get; set; }
 

@@ -38,7 +38,7 @@ public class DetailedInformationRequestDto
     public Guid Id { get; set; }
 
     /// <summary>
-    /// Specifies whether to include members or not.
+    /// Specifies whether to include the group members or not.
     /// </summary>
     [FromQuery(Name = "includeMembers")]
     public bool IncludeMembers { get; set; } = true;

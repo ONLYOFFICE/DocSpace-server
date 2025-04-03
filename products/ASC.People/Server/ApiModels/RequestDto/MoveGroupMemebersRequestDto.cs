@@ -28,7 +28,7 @@ namespace ASC.People.ApiModels.RequestDto;
 
 
 /// <summary>
-/// The group members request parameters.
+/// The request parameters for moving members from one group to another.
 /// </summary>
 public class MoveGroupMemebersRequestDto
 {

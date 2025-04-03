@@ -27,12 +27,12 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// The member request parameters.
+/// The request parameters fir the user email.
 /// </summary>
 public class EmailMemberRequestDto
 {
     /// <summary>
-    /// The email of the member.
+    /// The user email address.
     /// </summary>
     [EmailAddress]
     [StringLength(255)]
@@ -40,23 +40,23 @@ public class EmailMemberRequestDto
 }
 
 /// <summary>
-/// The request parameters for setting new password.
+/// The request parameters for the user generic information.
 /// </summary>
 public class MemberBaseRequestDto : EmailMemberRequestDto
 {
     /// <summary>
-    /// The password of the member.
+    /// The user password.
     /// </summary>
     public string Password { get; set; }
 
     /// <summary>
-    /// The password hash of the member.
+    /// The user password hash.
     /// </summary>
     public string PasswordHash { get; set; }
 }
 
 /// <summary>
-/// The request parameters for setting new password.
+/// The request parameters for getting the generic user information by their ID.
 /// </summary>
 public class MemberBaseByIdRequestDto
 {
@@ -67,7 +67,7 @@ public class MemberBaseByIdRequestDto
     public Guid UserId { get; set; }
 
     /// <summary>
-    /// The member base.
+    /// The request parameters for the user generic information.
     /// </summary>
     [FromBody]
     public MemberBaseRequestDto MemberBase { get; set; }
@@ -79,65 +79,65 @@ public class MemberBaseByIdRequestDto
 public class MemberRequestDto : MemberBaseRequestDto
 {
     /// <summary>
-    /// The employee type of the member.
+    /// The user type.
     /// </summary>
     public EmployeeType Type { get; set; }
 
     /// <summary>
-    /// Specifies if this is the guest or the user.
+    /// Specifies if this is a guest or a user.
     /// </summary>
     public bool? IsUser { get; set; }
 
     /// <summary>
-    /// The first name.
+    /// The user first name.
     /// </summary>
     [StringLength(255)]
     public string FirstName { get; set; }
 
     /// <summary>
-    /// The last name.
+    /// The user last name.
     /// </summary>
     [StringLength(255)]
     public string LastName { get; set; }
 
     /// <summary>
-    /// The list of user departments.
+    /// The list of the user departments IDs.
     /// </summary>
     public Guid[] Department { get; set; }
 
     /// <summary>
-    /// The title of the member.
+    /// The user title.
     /// </summary>
     [StringLength(255)]
     public string Title { get; set; }
 
     /// <summary>
-    /// The location of the member.
+    /// The user location.
     /// </summary>
     public string Location { get; set; }
 
     /// <summary>
-    /// The sex (male or female).
+    /// The user sex (male or female).
     /// </summary>
     public SexEnum? Sex { get; set; }
 
     /// <summary>
-    /// The birthday of the member.
+    /// The user birthday.
     /// </summary>
     public ApiDateTime Birthday { get; set; }
 
     /// <summary>
-    /// The registration date (if it is not specified, then the current date will be set).
+    /// The user registration date (if it is not specified, then the current date will be set).
     /// </summary>
     public ApiDateTime Worksfrom { get; set; }
 
     /// <summary>
-    /// The comment of the member.
+    /// The user comment.
     /// </summary>
     public string Comment { get; set; }
 
     /// <summary>
-    /// The list of user contacts.
+    /// The list of the user contacts.
     /// </summary>
     public IEnumerable<Contact> Contacts { get; set; }
 
@@ -152,27 +152,28 @@ public class MemberRequestDto : MemberBaseRequestDto
     public bool FromInviteLink { get; set; }
 
     /// <summary>
-    /// The key of the member.
+    /// The user key.
     /// </summary>
     public string Key { get; set; }
 
     /// <summary>
-    /// The language of the member.
+    /// The user culture code.
     /// </summary>
     public string CultureName { get; set; }
 
     /// <summary>
-    /// The target of the member.
+    /// The user target ID.
     /// </summary>
     public Guid Target { get; set; }
 
-    /// <summary>Specifies if the member is spam or not.</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if tips, updates and offers are allowed to be sent to the user or not.
+    /// </summary>
     public bool? Spam { get; set; }
 }
 
 /// <summary>
-/// The request parameters for updating user information.
+/// The request parameters for updating the user information.
 /// </summary>
 public class UpdateMemberRequestDto : MemberRequestDto
 {
@@ -182,13 +183,13 @@ public class UpdateMemberRequestDto : MemberRequestDto
     public string UserId { get; set; }
 
     /// <summary>
-    /// Specifies whether to disable the user or not.
+    /// Specifies whether to disable a user or not.
     /// </summary>
     public bool? Disable { get; set; }
 }
 
 /// <summary>
-/// The request parameters for updating user information by ID.
+/// The request parameters for updating the user information by ID.
 /// </summary>
 public class UpdateMemberByIdRequestDto
 {
@@ -199,12 +200,15 @@ public class UpdateMemberByIdRequestDto
     public string UserId { get; set; }
 
     /// <summary>
-    /// The update member request parameters.
+    /// The request parameters for updating the user information.
     /// </summary>
     [FromBody]
     public UpdateMemberRequestDto UpdateMember { get; set; }
 }
 
+/// <summary>
+/// The user sex.
+/// </summary>
 public enum SexEnum
 {
     [SwaggerEnum("Female")]
@@ -215,7 +219,7 @@ public enum SexEnum
 }
 
 /// <summary>
-/// Request parameters for updating user photo.
+/// The request parameters for updating a photo.
 /// </summary>
 public class UpdatePhotoMemberRequest
 {
@@ -226,7 +230,7 @@ public class UpdatePhotoMemberRequest
 }
 
 /// <summary>
-/// The request parameters for updating user photo.
+/// The request parameters for updating a user photo.
 /// </summary>
 public class UpdatePhotoMemberRequestDto
 {
@@ -237,7 +241,7 @@ public class UpdatePhotoMemberRequestDto
     public string UserId { get; set; }
 
     /// <summary>
-    /// The update photo request parameters.
+    /// The request parameters for updating a photo.
     /// </summary>
     [FromBody]
     public UpdatePhotoMemberRequest UpdatePhoto { get; set; }
@@ -245,7 +249,7 @@ public class UpdatePhotoMemberRequestDto
 
 
 /// <summary>
-/// The request parameters for getting user ID.
+/// The request parameters for getting a user by their ID.
 /// </summary>
 public class GetMemberByIdRequestDto
 {
@@ -257,7 +261,7 @@ public class GetMemberByIdRequestDto
 }
 
 /// <summary>
-/// The request parameters for getting user email.
+/// The request parameters for getting a user by the email address.
 /// </summary>
 public class GetMemberByEmailRequestDto
 {
@@ -271,7 +275,7 @@ public class GetMemberByEmailRequestDto
 }
 
 /// <summary>
-/// The request parameters for getting user search query.
+/// The request parameters for getting a user by the search query.
 /// </summary>
 public class GetMemberByQueryRequestDto
 {
@@ -283,7 +287,7 @@ public class GetMemberByQueryRequestDto
 }
 
 /// <summary>
-/// The request parameters for getting people search query.
+/// The request parameters for getting people by the search query.
 /// </summary>
 public class GetPeopleByQueryRequestDto
 {
@@ -306,7 +310,7 @@ public class UpdateMemberSimpleRequestDto
 }
 
 /// <summary>
-/// The parameters for updating user contacts.
+/// The contacts request.
 /// </summary>
 public class ContactsRequest
 {

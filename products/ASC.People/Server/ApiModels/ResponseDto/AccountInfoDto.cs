@@ -43,7 +43,7 @@ public class AccountInfoDto
     public string Url { get; set; }
 
     /// <summary>
-    /// Specifies if an account is linked or not.
+    /// Specifies if an account is linked with other profiles or not.
     /// </summary>
     public bool Linked { get; set; }
 }

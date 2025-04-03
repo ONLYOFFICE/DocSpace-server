@@ -27,7 +27,7 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// The update group request parameters.
+/// The request for updating a group.
 /// </summary>
 public class UpdateGroupRequest : GroupRequestDtoBase
 {
@@ -43,7 +43,7 @@ public class UpdateGroupRequest : GroupRequestDtoBase
 }
 
 /// <summary>
-/// The group request parameters.
+/// The request parameters for updating a group.
 /// </summary>
 public class UpdateGroupRequestDto
 {
@@ -54,7 +54,7 @@ public class UpdateGroupRequestDto
     public Guid Id { get; set; }
 
     /// <summary>
-    /// Update group parameters.
+    /// The request for updating a group.
     /// </summary>
     [FromBody]
     public UpdateGroupRequest Update {  get; set; }

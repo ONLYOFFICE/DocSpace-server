@@ -34,19 +34,19 @@ namespace ASC.Web.Api.Models;
 public class GroupSummaryDto
 {
     /// <summary>
-    /// The ID of the group summary.
+    /// The group ID.
     /// </summary>
     [SwaggerSchemaCustom(Example = "{00000000-0000-0000-0000-000000000000}")]
     public Guid Id { get; set; }
 
     /// <summary>
-    /// The group summary name.
+    /// The group name.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Group Name")]
     public string Name { get; init; }
 
     /// <summary>
-    /// The group summary manager.
+    /// The group manager.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Jake.Zazhitski")]
     public string Manager { get; set; }

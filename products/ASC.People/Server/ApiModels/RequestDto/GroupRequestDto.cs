@@ -49,7 +49,7 @@ public class MembersRequest
 }
 
 /// <summary>
-/// The members request parameters.
+/// The member request parameters.
 /// </summary>
 public class MembersRequestDto
 {
@@ -60,7 +60,7 @@ public class MembersRequestDto
     public Guid Id { get; set; }
 
     /// <summary>
-    /// The members request.
+    /// The member request.
     /// </summary>
     [FromBody]
     public MembersRequest Members { get; set; }

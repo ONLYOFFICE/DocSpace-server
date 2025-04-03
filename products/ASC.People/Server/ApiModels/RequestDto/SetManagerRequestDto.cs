@@ -27,7 +27,7 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters for setting a group manager.
+/// The request for setting a group manager.
 /// </summary>
 public class SetManagerRequest
 {
@@ -49,7 +49,7 @@ public class SetManagerRequestDto
     public Guid Id { get; set; }
 
     /// <summary>
-    /// Set manager request parameters.
+    /// The request for setting a group manager.
     /// </summary>
     [FromBody]
     public SetManagerRequest SetManager { get; set; }

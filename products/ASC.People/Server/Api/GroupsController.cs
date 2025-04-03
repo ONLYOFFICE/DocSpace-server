@@ -425,8 +425,9 @@ public class GroupControllerAdditional<T>(
     GroupFullDtoHelper groupFullDtoHelper) : ControllerBase
 {
     /// <summary>
-    /// Gets groups with shared.
+    /// Returns groups with their sharing settings.
     /// </summary>
+    /// <short>Get groups with sharing settings</short>
     /// <path>api/2.0/group/room/{id}</path>
     /// <collection>list</collection>
     [Tags("Group / Rooms")]

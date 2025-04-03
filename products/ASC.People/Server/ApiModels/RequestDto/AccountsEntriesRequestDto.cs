@@ -27,36 +27,36 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// The account entries request parameters.
+/// The request parameters for getting accounts.
 /// </summary>
 public class AccountsEntriesRequestDto<T>
 {
     /// <summary>
-    /// The ID of the account entry.
+    /// The user ID.
     /// </summary>
     [FromRoute(Name = "id")]
     public T Id { get; set; }
 
     /// <summary>
-    /// The employee status.
+    /// The user status.
     /// </summary>
     [FromQuery(Name = "employeeStatus")]
     public EmployeeStatus? EmployeeStatus { get; set; }
 
     /// <summary>
-    /// The activation status.
+    /// The user activation status.
     /// </summary>
     [FromQuery(Name = "activationStatus")]
     public EmployeeActivationStatus? ActivationStatus { get; set; }
 
     /// <summary>
-    /// Specifies whether to exclude shared.
+    /// Specifies whether to exclude the account sharing settings from the response.
     /// </summary>
     [FromQuery(Name = "excludeShared")]
     public bool? ExcludeShared {  get; set; }
 
     /// <summary>
-    /// Specifies whether the account entry is invited by me.
+    /// Specifies whether the user is invited by the current user or not.
     /// </summary>
     [FromQuery(Name = "invitedByMe")]
     public bool? InvitedByMe { get; set; }
@@ -68,13 +68,13 @@ public class AccountsEntriesRequestDto<T>
     public Guid? InviterId { get; set; }
 
     /// <summary>
-    /// The area of the account entry.
+    /// The area of the account entries.
     /// </summary>
     [FromQuery(Name = "area")]
     public Area Area { get; set; } = Area.All;
 
     /// <summary>
-    /// The list of employee types.
+    /// The list of the user types.
     /// </summary>
     [FromQuery(Name = "employeeTypes")]
     public IEnumerable<EmployeeType> EmployeeTypes { get; set; } = new List<EmployeeType>();
