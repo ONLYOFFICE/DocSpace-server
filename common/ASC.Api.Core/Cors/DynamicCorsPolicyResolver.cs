@@ -29,6 +29,7 @@ using System.Text.Json.Nodes;
 using ASC.Api.Core.Cors.Resolvers;
 using ASC.Core.Security.Authentication;
 
+using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace ASC.Api.Core.Cors;
@@ -41,7 +42,6 @@ public class DynamicCorsPolicyResolver(
     TenantManager tenantManager,
     CommonLinkUtility linkUtility,
     SetupInfo setupInfo,
-    ApiKeyManager apiKeyManager,
     IMemoryCache memoryCache,
     ILogger<DynamicCorsPolicyResolver> logger)
     : IDynamicCorsPolicyResolver
@@ -61,7 +61,7 @@ public class DynamicCorsPolicyResolver(
         }
     }
 
-    public async Task<bool> ResolveForOrigin(string origin)
+    public async Task<bool> ResolveForOrigin(CorsPolicy policy, StringValues origin)
     {
         logger.DebugCheckOrigin(origin);
         
@@ -69,7 +69,7 @@ public class DynamicCorsPolicyResolver(
 
         if (string.IsNullOrEmpty(accessToken) || accessToken.IndexOf("Bearer", 0, StringComparison.Ordinal) == -1)
         {
-            return false;
+            return DefaultResolveForOrigin(policy, origin);
         }
 
         accessToken = accessToken.Trim();
@@ -81,16 +81,19 @@ public class DynamicCorsPolicyResolver(
         {
             var origins = await GetOriginsFromOAuth2App(accessToken);
 
+            if (!origins.Any())
+            {
+                return DefaultResolveForOrigin(policy, origin);
+            }
+            
             return origins.Any(x => x.Equals(origin, StringComparison.InvariantCultureIgnoreCase));
         }
-        else
-        {
-            var apiKey = await apiKeyManager.ValidateApiKeyAsync(accessToken);
-
-            return apiKey != null; // return true if api key exist
-        }
+        
+        return DefaultResolveForOrigin(policy, origin);
     }
 
+    private bool DefaultResolveForOrigin(CorsPolicy policy, StringValues origin) => policy.AllowAnyOrigin || policy.IsOriginAllowed(origin);
+    
     private async Task<IEnumerable<string>> GetOriginsFromOAuth2App(string accessToken)
     {        
         // Validated token early in JwtBearerAuthHandler
