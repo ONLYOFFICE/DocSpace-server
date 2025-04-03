@@ -62,7 +62,7 @@ public class RoomContentRequestDto
     public string Tags { get; set; }
 
     /// <summary>
-    /// Specifies whether to exclude search by user or group ID..
+    /// Specifies whether to exclude search by user or group ID.
     /// </summary>
     [FromQuery(Name = "excludeSubject")]
     public bool? ExcludeSubject { get; set; }
