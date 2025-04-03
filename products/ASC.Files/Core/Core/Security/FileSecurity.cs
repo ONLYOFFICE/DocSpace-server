@@ -2275,6 +2275,14 @@ public class FileSecurity(IDaoFactory daoFactory,
             {
                 case SearchArea.Archive when entry.RootFolderType == FolderType.Archive:
                 case SearchArea.Templates when entry.RootFolderType == FolderType.RoomTemplates:
+                    {
+                        if (entry.CreateBy != authContext.CurrentAccount.ID) 
+                        {
+                            entry.ShareRecord = record;
+                            entry.Access = record?.Share ?? FileShare.None;
+                        }
+                        return true;
+                    }
                 case SearchArea.Active when entry.RootFolderType == FolderType.VirtualRooms:
                 case SearchArea.Any when entry.RootFolderType is FolderType.VirtualRooms or FolderType.Archive:
                     {
