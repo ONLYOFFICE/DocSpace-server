@@ -24,6 +24,18 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "distributionName": "Ubuntu-20.04"
+    },
+    "Docker": {
+      "commandName": "Docker",
+      "launchBrowser": false,
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
+      "environmentVariables": {
+        "$STORAGE_ROOT": "/app/Data",
+        "log__name": "files",
+        "log__dir": "/app/Logs",
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "publishAllPorts": true
     }
   }
 }

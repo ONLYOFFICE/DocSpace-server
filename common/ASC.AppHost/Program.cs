@@ -67,19 +67,53 @@ AddProjectWithDefaultConfiguration<ASC_Data_Backup_BackgroundTasks>();
 AddProjectWithDefaultConfiguration<ASC_Notify>(false);
 AddProjectWithDefaultConfiguration<ASC_Web_Api>();
 AddProjectWithDefaultConfiguration<ASC_People>();
-AddProjectWithDefaultConfiguration<ASC_Files>();
 AddProjectWithDefaultConfiguration<ASC_Files_Service>();
 AddProjectWithDefaultConfiguration<ASC_Studio_Notify>();
 AddProjectWithDefaultConfiguration<ASC_Web_Studio>();
+
+var basePath = Path.GetFullPath(Path.Combine("..", "..", ".."));
+var filesBasePath = Path.Combine(basePath, "server", "products", "ASC.Files", "Server");
+
+if (String.Compare(builder.Configuration["Docker"], "true", StringComparison.OrdinalIgnoreCase) == 0)
+{
+    var filesPort = 5007;
+    builder
+    .AddDockerfile("asc-files", filesBasePath, stage: "base")
+    .WithBindMount(filesBasePath, "/app")
+    .WithBindMount(Path.Combine(basePath, "buildtools"), "/buildtools")
+    .WithBindMount(Path.Combine(basePath, "Data"), "/data")
+    .WithBindMount(Path.Combine(basePath, "Logs"), "/logs")
+    .WithEnvironment("log:dir", "/logs")
+    .WithEnvironment("log:name", "/files")
+    .WithEnvironment("$STORAGE_ROOT", "/data")
+    .WithEnvironment("files:docservice:url:portal", $"http://host.docker.internal:{restyPort.ToString()}")
+    .WithEnvironment("files:docservice:url:portal", $"http://localhost:{editorPort.ToString()}")
+    .WithEnvironment("ASPNETCORE_HTTP_PORTS", filesPort.ToString())
+    .WithReference(mySql, "default:connectionString")
+    .WithReference(rabbitMq, "rabbitMQ")
+    .WithReference(redis, "redis")
+    .WaitFor(migrate)
+    .WaitFor(rabbitMq)
+    .WaitFor(redis)
+    .WaitFor(editors)
+    .WithArgs("/app/bin/Debug/net9.0/ASC.Files.dll")
+    .WithEntrypoint("dotnet")
+    .WithHttpEndpoint(filesPort, filesPort, isProxied:false);
+}
+else
+{
+    AddProjectWithDefaultConfiguration<ASC_Files>();
+}
+
+
+
 
 
 builder.AddNpmApp("asc-socketIO", "../ASC.Socket.IO/", "start:build").WithHttpEndpoint(targetPort: 9899).WithHttpHealthCheck("/health");
 builder.AddNpmApp("asc-ssoAuth", "../ASC.SSoAuth/", "start:build").WithHttpEndpoint(targetPort: 9834).WithHttpHealthCheck("/health");
 builder.AddNpmApp("asc-webDav", "../ASC.WebDav/", "start:build").WithHttpEndpoint(targetPort: 1900).WithHttpHealthCheck("/health");
 
-var basePath = Path.GetFullPath(Path.Combine("..", "..", ".."));
 var clientBasePath = Path.Combine(basePath, "client");
-
 var installPackages = builder.AddExecutable("asc-install-packages", "yarn", clientBasePath, "install");
 var buildPackages = builder.AddExecutable("asc-build-packages", "yarn", clientBasePath, "build").WaitForCompletion(installPackages);
 var startPackages = builder.AddExecutable("asc-start-packages", "yarn", clientBasePath, "start").WaitForCompletion(buildPackages);
@@ -114,7 +148,7 @@ void AddProjectWithDefaultConfiguration<TProject>(bool includeHealthCheck = true
         .WithReference(rabbitMq, "rabbitMQ")
         .WithReference(redis, "redis")
         .WithEnvironment("files:docservice:url:portal", $"http://host.docker.internal:{restyPort.ToString()}")
-        .WithEnvironment("files:docservice:url:portal", $"http://localhost:{editorPort.ToString()}")
+        .WithEnvironment("files:docservice:url:public", $"http://localhost:{editorPort.ToString()}")
         .WaitFor(migrate)
         .WaitFor(rabbitMq)
         .WaitFor(redis)
