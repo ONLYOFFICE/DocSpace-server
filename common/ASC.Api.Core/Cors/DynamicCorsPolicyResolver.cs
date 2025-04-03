@@ -32,6 +32,7 @@ using ASC.Core.Security.Authentication;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace ASC.Api.Core.Cors;
+
 public class DynamicCorsPolicyResolver(
     IHttpContextAccessor httpContextAccessor,
     IHttpClientFactory httpClientFactory,
@@ -40,6 +41,7 @@ public class DynamicCorsPolicyResolver(
     TenantManager tenantManager,
     CommonLinkUtility linkUtility,
     SetupInfo setupInfo,
+    ApiKeyManager apiKeyManager,
     IMemoryCache memoryCache,
     ILogger<DynamicCorsPolicyResolver> logger)
     : IDynamicCorsPolicyResolver
@@ -62,19 +64,12 @@ public class DynamicCorsPolicyResolver(
     public async Task<bool> ResolveForOrigin(string origin)
     {
         logger.DebugCheckOrigin(origin);
-
-        var origins = await GetOriginsFromOAuth2App();
-
-        return origins.Any(x => x.Equals(origin, StringComparison.InvariantCultureIgnoreCase));
-    }
-
-    private async Task<IEnumerable<string>> GetOriginsFromOAuth2App()
-    {        
+        
         var accessToken = _context.Request.Headers.Authorization.ToString();
 
         if (string.IsNullOrEmpty(accessToken) || accessToken.IndexOf("Bearer", 0, StringComparison.Ordinal) == -1)
         {
-            return new List<string>();
+            return false;
         }
 
         accessToken = accessToken.Trim();
@@ -82,11 +77,22 @@ public class DynamicCorsPolicyResolver(
 
         var jwtHandler = new JwtSecurityTokenHandler();
 
-        if (!jwtHandler.CanReadToken(accessToken))
+        if (jwtHandler.CanReadToken(accessToken))
         {
-            return new List<string>();
-        }
+            var origins = await GetOriginsFromOAuth2App(accessToken);
 
+            return origins.Any(x => x.Equals(origin, StringComparison.InvariantCultureIgnoreCase));
+        }
+        else
+        {
+            var apiKey = await apiKeyManager.ValidateApiKeyAsync(accessToken);
+
+            return apiKey != null; // return true if api key exist
+        }
+    }
+
+    private async Task<IEnumerable<string>> GetOriginsFromOAuth2App(string accessToken)
+    {        
         // Validated token early in JwtBearerAuthHandler
         var token = new JwtSecurityToken(accessToken);
 

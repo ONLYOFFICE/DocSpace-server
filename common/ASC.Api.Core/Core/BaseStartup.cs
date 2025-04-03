@@ -532,11 +532,6 @@ public abstract class BaseStartup
             await next(context);
         });
 
-        if (!string.IsNullOrEmpty(_corsOrigin))
-        {
-            app.UseDynamicCorsMiddleware(CorsPoliciesEnums.DynamicCorsPolicyName);
-        }
-
         if (AddAndUseSession)
         {
             app.UseSession();
@@ -545,6 +540,11 @@ public abstract class BaseStartup
         app.UseSynchronizationContextMiddleware();
 
         app.UseTenantMiddleware();
+        
+        if (!string.IsNullOrEmpty(_corsOrigin))
+        {
+            app.UseDynamicCorsMiddleware(CorsPoliciesEnums.DynamicCorsPolicyName);
+        }
         
         app.UseAuthentication();
 
