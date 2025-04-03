@@ -60,27 +60,35 @@ var migrate = builder
     .WithReference(mySql)
     .WaitFor(mySql);
 
-AddProjectWithDefaultConfiguration<ASC_ApiSystem>();
-AddProjectWithDefaultConfiguration<ASC_ClearEvents>();
-AddProjectWithDefaultConfiguration<ASC_Data_Backup>();
-AddProjectWithDefaultConfiguration<ASC_Data_Backup_BackgroundTasks>();
-AddProjectWithDefaultConfiguration<ASC_Notify>(false);
-AddProjectWithDefaultConfiguration<ASC_Web_Api>();
-AddProjectWithDefaultConfiguration<ASC_Files_Service>();
-AddProjectWithDefaultConfiguration<ASC_Studio_Notify>();
-AddProjectWithDefaultConfiguration<ASC_Web_Studio>();
-
 var basePath = Path.GetFullPath(Path.Combine("..", "..", ".."));
 
 if (String.Compare(builder.Configuration["Docker"], "true", StringComparison.OrdinalIgnoreCase) == 0)
 {
     AddProjectDocker<ASC_Files>(5007);
     AddProjectDocker<ASC_People>(5004);
+    AddProjectDocker<ASC_Web_Api>(5000);
+    AddProjectDocker<ASC_ApiSystem>(5010);
+    AddProjectDocker<ASC_ClearEvents>(5027);
+    AddProjectDocker<ASC_Data_Backup>(5012);
+    AddProjectDocker<ASC_Data_Backup_BackgroundTasks>(5032);
+    AddProjectDocker<ASC_Notify>(0, false);
+    AddProjectDocker<ASC_Files_Service>(5009);
+    AddProjectDocker<ASC_Studio_Notify>(5006);
+    AddProjectDocker<ASC_Web_Studio>(5003);
 }
 else
 {
     AddProjectWithDefaultConfiguration<ASC_Files>();
     AddProjectWithDefaultConfiguration<ASC_People>();
+    AddProjectWithDefaultConfiguration<ASC_Web_Api>();
+    AddProjectWithDefaultConfiguration<ASC_ApiSystem>();
+    AddProjectWithDefaultConfiguration<ASC_ClearEvents>();
+    AddProjectWithDefaultConfiguration<ASC_Data_Backup>();
+    AddProjectWithDefaultConfiguration<ASC_Data_Backup_BackgroundTasks>();
+    AddProjectWithDefaultConfiguration<ASC_Notify>(false);
+    AddProjectWithDefaultConfiguration<ASC_Files_Service>();
+    AddProjectWithDefaultConfiguration<ASC_Studio_Notify>();
+    AddProjectWithDefaultConfiguration<ASC_Web_Studio>();
 }
 
 builder.AddNpmApp("asc-socketIO", "../ASC.Socket.IO/", "start:build").WithHttpEndpoint(targetPort: 9899).WithHttpHealthCheck("/health");
@@ -124,12 +132,13 @@ void AddProjectDocker<TProject>(int projectPort, bool includeHealthCheck = true)
     AddBaseConfig(resourceBuilder, includeHealthCheck);
 
     var dllPath = "/app/bin/Debug/";
-    if (File.Exists(Path.Combine(projectBasePath, "bin", "Debug", "net9.0")))
+    if (Directory.Exists(Path.Combine(projectBasePath, "bin", "Debug", "net9.0")))
     {
         dllPath += "net9.0/";
     }
     
     resourceBuilder
+        .WithImageTag("dev")
         .WithBindMount(projectBasePath, "/app")
         .WithBindMount(Path.Combine(basePath, "buildtools"), "/buildtools")
         .WithBindMount(Path.Combine(basePath, "Data"), "/data")
@@ -137,10 +146,15 @@ void AddProjectDocker<TProject>(int projectPort, bool includeHealthCheck = true)
         .WithEnvironment("log:dir", "/logs")
         .WithEnvironment("log:name", "/files")
         .WithEnvironment("$STORAGE_ROOT", "/data")
-        .WithEnvironment("ASPNETCORE_HTTP_PORTS", projectPort.ToString())
         .WithArgs($"{dllPath}{name.Replace('_', '.')}.dll")
-        .WithEntrypoint("dotnet")
-        .WithHttpEndpoint(projectPort, projectPort, isProxied:false);
+        .WithEntrypoint("dotnet");
+
+    if (projectPort != 0)
+    {
+        resourceBuilder
+            .WithEnvironment("ASPNETCORE_HTTP_PORTS", projectPort.ToString())
+            .WithHttpEndpoint(projectPort, projectPort, isProxied: false);
+    }
 }
 
 void AddBaseConfig<T>(IResourceBuilder<T> resourceBuilder, bool includeHealthCheck = true) where T : IResourceWithEnvironment, IResourceWithWaitSupport, IResourceWithEndpoints

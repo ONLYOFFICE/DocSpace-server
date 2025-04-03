@@ -14,6 +14,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <NoWarn>NU1701;1701;1702;1591</NoWarn>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
   <ItemGroup>
@@ -32,6 +33,12 @@
     <ProjectReference Include="..\..\ASC.Api.Core\ASC.Api.Core.csproj" />
     <ProjectReference Include="..\..\ASC.Common\ASC.Common.csproj" />
     <ProjectReference Include="..\..\ASC.Core.Common\ASC.Core.Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\..\..\.dockerignore">
+      <Link>.dockerignore</Link>
+    </Content>
   </ItemGroup>
 
 </Project>
