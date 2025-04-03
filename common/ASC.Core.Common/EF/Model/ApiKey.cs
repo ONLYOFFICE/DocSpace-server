@@ -42,6 +42,8 @@ public class ApiKey : BaseEntity
     
     public DbTenant Tenant { get; set; }
     
+    public string Key => $"sk-***{KeyPostfix}";
+    
     public override object[] GetKeys()
     {
         return [Id];
