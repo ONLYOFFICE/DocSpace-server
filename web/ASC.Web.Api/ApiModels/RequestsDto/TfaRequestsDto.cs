@@ -35,12 +35,12 @@ public class TfaRequestsDto
     /// TFA type (None, Sms, or App)
     /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public required TfaRequestsDtoType Type { get; set; }
+    public TfaRequestsDtoType Type { get; set; }
 
     /// <summary>
     /// User ID
     /// </summary>
-    public required Guid Id { get; set; }
+    public Guid Id { get; set; }
 
     /// <summary>
     /// List of trusted IP addresses
