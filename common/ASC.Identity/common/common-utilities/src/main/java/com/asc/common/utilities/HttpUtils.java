@@ -44,6 +44,7 @@ public class HttpUtils {
   private static final String X_FORWARDED_PROTO = "X-Forwarded-Proto";
   private static final String HOST = "Host";
   private static final String[] IP_HEADERS = {
+    "X-Remote-Ip-Address",
     "X-Forwarded-Host",
     "X-Forwarded-For",
     "Proxy-Client-IP",
