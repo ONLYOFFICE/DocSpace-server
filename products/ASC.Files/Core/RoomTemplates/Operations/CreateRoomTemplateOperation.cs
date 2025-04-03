@@ -38,6 +38,7 @@ public class CreateRoomTemplateOperation : DistributedTaskProgress
     private string _title;
     private string _cover;
     private string _color;
+    private long? _quota;
 
     private int _roomId;
     private int _totalCount;
@@ -67,7 +68,8 @@ public class CreateRoomTemplateOperation : DistributedTaskProgress
         IEnumerable<string> tags,
         IEnumerable<Guid> groups,
         string cover,
-        string color)
+        string color,
+        long? quota)
     {
         TenantId = tenantId;
         _userId = userId;
@@ -80,6 +82,7 @@ public class CreateRoomTemplateOperation : DistributedTaskProgress
         _groups = groups;
         _cover = cover;
         _color = color;
+        _quota = quota;
         TemplateId = -1;
     }
 
@@ -169,6 +172,11 @@ public class CreateRoomTemplateOperation : DistributedTaskProgress
                     await fileDao.CopyFileAsync(file, newFolder.Id);
                     await PublishAsync();
                 }
+            }
+
+            if (_quota.HasValue)
+            {
+                await fileStorageService.FolderQuotaChangeAsync(template.Id, _quota.Value);
             }
 
             Percentage = 100;

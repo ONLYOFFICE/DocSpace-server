@@ -117,6 +117,7 @@ public class VirtualRoomsInternalController(
           dto.Tags,
           dto.Cover,
           dto.Color,
+          dto.Quota,
           false);
 
         await eventBus.PublishAsync(new CreateRoomFromTemplateIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId())
@@ -128,6 +129,7 @@ public class VirtualRoomsInternalController(
             Tags = dto.Tags,
             Cover = dto.Cover,
             Color = dto.Color,
+            Quota = dto.Quota,
             TaskId = taskId
         });
         return await GetRoomCreatingStatus();

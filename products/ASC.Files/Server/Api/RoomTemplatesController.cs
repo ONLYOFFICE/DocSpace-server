@@ -74,6 +74,7 @@ public class RoomTemplatesController(IEventBus eventBus,
             dto.Groups,
             dto.Cover,
             dto.Color,
+            dto.Quota,
             false);
 
         await eventBus.PublishAsync(new CreateRoomTemplateIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId())
@@ -87,7 +88,8 @@ public class RoomTemplatesController(IEventBus eventBus,
             TaskId = taskId,
             CopyLogo = dto.CopyLogo,
             Cover = dto.Cover,
-            Color = dto.Color
+            Color = dto.Color,
+            Quota = dto.Quota
         });
         return await GetTemplateCreatingStatus();
     }
