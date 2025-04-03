@@ -41,6 +41,7 @@ public class ApiKeysController(
     AuthContext authContext,
     UserManager userManager,
     MessageService messageService,
+    SettingsManager settingsManager,
     IMapper mapper) : ControllerBase
 {
     /// <summary>
@@ -57,6 +58,16 @@ public class ApiKeysController(
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task<ApiKeyResponseDto> CreateApiKey(CreateApiKeyRequestDto apiKey)
     {
+        var currentType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+        var isAdmin = currentType is EmployeeType.DocSpaceAdmin;
+
+        var tenantDevToolsAccessSettings  = await settingsManager.LoadAsync<TenantDevToolsAccessSettings>();
+           
+        if (!isAdmin && tenantDevToolsAccessSettings is { LimitedAccessForUsers: true })
+        {
+            throw new UnauthorizedAccessException("This operation available only for owner/admins");
+        }
+        
         var expiresAt = apiKey.ExpiresInDays.HasValue ? TimeSpan.FromDays(apiKey.ExpiresInDays.Value) : (TimeSpan?)null;
             
         if (!IsValidPermission(apiKey.Permissions))
@@ -117,6 +128,7 @@ public class ApiKeysController(
         }
         else
         {
+           
             result = apiKeyManager.GetApiKeysAsync(authContext.CurrentAccount.ID);
         }
 
