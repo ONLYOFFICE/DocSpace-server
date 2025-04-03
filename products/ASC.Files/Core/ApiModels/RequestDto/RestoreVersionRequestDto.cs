@@ -35,7 +35,7 @@ public class RestoreVersionRequestDto<T>
     /// The file ID of the restore version.
     /// </summary>
     [FromRoute(Name = "fileId")]
-    public T FileId { get; set; }
+    public required T FileId { get; set; }
 
     /// <summary>
     /// The file version of the restore.

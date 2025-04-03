@@ -100,7 +100,7 @@ public class InsertWithFileRequestDto<T>
     /// The folder ID for inserting a file.
     /// </summary>
     [FromRoute(Name = "folderId")]
-    public T FolderId { get; set; }
+    public required T FolderId { get; set; }
 
     /// <summary>
     /// The request parameters for inserting a file.

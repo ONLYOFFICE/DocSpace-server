@@ -58,8 +58,9 @@ internal class FilesActionMapper : IModuleActionMapper
                         ActionType.Update, [
                             MessageAction.FileRenamed, MessageAction.FileUpdated, MessageAction.UserFileUpdated, MessageAction.FileUpdatedRevisionComment,
                             MessageAction.FileLocked, MessageAction.FileUnlocked, MessageAction.FileOpenedForChange, MessageAction.FileMarkedAsFavorite,
+                            MessageAction.FormStartedToFill, MessageAction.FormPartiallyFilled, MessageAction.FormCompletelyFilled, MessageAction.FormStopped,
                             MessageAction.FileRemovedFromFavorite, MessageAction.FileMarkedAsRead, MessageAction.FileReaded, MessageAction.FormSubmit, MessageAction.FormOpenedForFilling,
-                            MessageAction.FileIndexChanged, MessageAction.FolderIndexReordered
+                            MessageAction.FileIndexChanged, MessageAction.FolderIndexReordered, MessageAction.FileCustomFilterEnabled, MessageAction.FileCustomFilterDisabled
                         ]
                     },
                     { ActionType.Delete, [MessageAction.FileDeletedVersion, MessageAction.FileDeleted, MessageAction.TrashEmptied, MessageAction.FileVersionRemoved

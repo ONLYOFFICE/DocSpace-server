@@ -32,6 +32,11 @@ namespace ASC.Files.Core.Core.Entries;
 public class FormRole
 {
     /// <summary>
+    /// The room ID.
+    /// </summary>
+    public int RoomId { get; set; }
+    
+    /// <summary>
     /// The role name.
     /// </summary>
     public string RoleName { get; set; }

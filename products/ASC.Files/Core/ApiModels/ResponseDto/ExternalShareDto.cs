@@ -29,7 +29,7 @@ using Status = ASC.Files.Core.Security.Status;
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// The external data status information.
+/// The external sharing information and validation data.
 /// </summary>
 public class ExternalShareDto : IMapFrom<ValidationInfo>
 {
@@ -54,12 +54,12 @@ public class ExternalShareDto : IMapFrom<ValidationInfo>
     public int TenantId { get; set; }
 
     /// <summary>
-    /// The entity ID.
+    /// The unique identifier of the shared entity.
     /// </summary>
     public string EntityId { get; set; }
    
     /// <summary>
-    /// The entity title.
+    /// The title of the shared entry.
     /// </summary>
     public string EntryTitle { get; set; }
 
@@ -74,7 +74,7 @@ public class ExternalShareDto : IMapFrom<ValidationInfo>
     public Guid LinkId { get; set; }
     
     /// <summary>
-    /// Specifies whether the user is authenticated or not.
+    /// Specifies whether the user is authenticated or not
     /// </summary>
     public bool IsAuthenticated { get; set; }
 }

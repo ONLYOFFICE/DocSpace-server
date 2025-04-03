@@ -176,7 +176,7 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
         {
             if (!PrivacyRoomSettings.IsAvailable())
             {
-                throw new BillingException(Resource.ErrorNotAllowedOption, "PrivacyRoom");
+                throw new BillingException(Resource.ErrorNotAllowedOption);
             }
         }
 

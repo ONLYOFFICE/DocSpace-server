@@ -47,7 +47,7 @@ public class BatchTagsRequestDto<T>
     /// The room Id.
     /// </summary>
     [FromRoute(Name = "id")]
-    public T Id { get; set; }
+    public required T Id { get; set; }
 
     /// <summary>
     /// The parameters for adding tags.

@@ -29,8 +29,13 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// <summary>
 /// The request parameters for updating the room quota.
 /// </summary>
-public class UpdateRoomsQuotaRequestDto<T> : UpdateRoomsRoomIdsRequestDto<T>
+public class UpdateRoomsQuotaRequestDto<T>
 {
+    /// <summary>
+    /// The list of room IDs.
+    /// </summary>
+    public IEnumerable<JsonElement> RoomIds { get; set; } = new List<JsonElement>();
+
     /// <summary>
     /// The room quota.
     /// </summary>

@@ -76,7 +76,7 @@ public class StartConversionRequestDto<T>
     /// The file ID to start conversion proccess.
     /// </summary>
     [FromRoute(Name = "fileId")]
-    public T FileId { get; set; }
+    public required T FileId { get; set; }
 
     /// <summary>
     /// The parameters for checking file conversion.
@@ -94,7 +94,7 @@ public class CheckConversionStatusRequestDto<T>
     /// The file ID to check conversion status.
     /// </summary>
     [FromRoute(Name = "fileId")]
-    public T FileId { get; set; }
+    public required T FileId { get; set; }
 
     /// <summary>
     /// Specifies whether a conversion operation is started or not.

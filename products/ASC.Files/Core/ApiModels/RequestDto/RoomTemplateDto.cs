@@ -34,7 +34,7 @@ public class RoomTemplateDto
     /// <summary>
     /// The room template ID.
     /// </summary>
-    public int RoomId { get; set; }
+    public required int RoomId { get; set; }
 
     /// <summary>
     /// The room template title.

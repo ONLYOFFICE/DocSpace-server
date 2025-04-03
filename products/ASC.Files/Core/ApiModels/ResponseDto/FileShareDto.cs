@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// The file sharing rights information.
+/// The file sharing information and access rights.
 /// </summary>
 public class FileShareDto
 {
@@ -64,68 +64,68 @@ public class FileShareDto
 }
 
 /// <summary>
-/// The file sharing link information.
+/// A shareable link for a file with its configuration and status.
 /// </summary>
 public class FileShareLink
 {
     /// <summary>
-    /// The file ID.
+    /// The unique identifier of the shared link.
     /// </summary>
     public Guid Id { get; set; }
 
     /// <summary>
-    /// The file title.
+    /// The title of the shared content.
     /// </summary>
     public string Title { get; set; }
 
     /// <summary>
-    /// The file sharing link.
+    /// The URL for accessing the shared content.
     /// </summary>
     public string ShareLink { get; set; }
 
     /// <summary>
-    /// The sharing link expiration date.
+    /// The date when the shared link expires.
     /// </summary>
     public ApiDateTime ExpirationDate { get; set; }
 
     /// <summary>
-    /// The file sharing link type.
+    /// The sharing link type (e.g., Invitation).
     /// </summary>
     public LinkType LinkType { get; set; }
 
     /// <summary>
-    /// The file password.
+    /// The password protection for accessing the shared content.
     /// </summary>
     public string Password { get; set; }
 
     /// <summary>
-    /// Specifies whether to deny the file download or not.
+    /// Indicates whether downloading of the shared content is prohibited.
     /// </summary>
     public bool? DenyDownload { get; set; }
 
     /// <summary>
-    /// Specifies whether the file sharing link is expired or not.
+    /// Indicates whether the shared link has expired.
     /// </summary>
     public bool? IsExpired { get; set; }
 
     /// <summary>
-    /// Specifies whether the file sharing link is primary or not.
+    /// Indicates whether this is the primary shared link.
     /// </summary>
     public bool Primary { get; set; }
 
     /// <summary>
-    /// Specifies whether the file sharing link is internal or not.
+    /// Indicates whether the link is for the internal sharing only.
     /// </summary>
     public bool? Internal { get; set; }
 
     /// <summary>
-    /// The file sharing link's request token.
+    /// The token for validating access requests.
     /// </summary>
     public string RequestToken { get; set; }
 }
 
 /// <summary>
-/// The file sharing link type information.
+/// Defines the types of the sharing links.
 /// </summary>
 public enum LinkType
 {

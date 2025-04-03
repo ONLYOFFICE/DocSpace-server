@@ -37,6 +37,7 @@ public class PaymentAccountHandler
         ITariffService tariffService,
         UserManager userManager,
         SecurityContext securityContext,
+        CommonLinkUtility commonLinkUtility,
         TenantManager tenantManager)
     {
         var tenant = tenantManager.GetCurrentTenant();
@@ -50,7 +51,9 @@ public class PaymentAccountHandler
         }
 
         var backUrl = context.Request.Query["backUrl"];
-        context.Response.Redirect((await tariffService.GetAccountLinkAsync(tenant.Id, backUrl)).AbsoluteUri);
+        var accountLink = await tariffService.GetAccountLinkAsync(tenant.Id, backUrl);
+
+        context.Response.Redirect(accountLink?.AbsoluteUri ?? commonLinkUtility.GetFullAbsolutePath(""));
     }
 }
 

@@ -39,12 +39,12 @@ public class CreateThirdPartyRoom
     /// <summary>
     /// The third-party room name to be created.
     /// </summary>
-    public string Title { get; set; }
+    public required string Title { get; set; }
 
     /// <summary>
     /// The third-party room type to be created.
     /// </summary>
-    public RoomType RoomType { get; set; }
+    public required RoomType RoomType { get; set; }
 
     /// <summary>
     /// Specifies whether to create the private third-party room or not.
@@ -92,7 +92,7 @@ public class CreateThirdPartyRoomRequestDto
     /// The ID of the folder in the third-party storage in which the contents of the room will be stored.
     /// </summary>
     [FromRoute(Name = "id")]
-    public string Id { get; set; }
+    public required string Id { get; set; }
 
     /// <summary>
     /// The third-party room information.

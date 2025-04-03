@@ -51,7 +51,7 @@ public class UpdateFileRequestDto<T>
     /// The file ID to update.
     /// </summary>
     [FromRoute(Name = "fileId")]
-    public T FileId { get; set; }
+    public required T FileId { get; set; }
 
     /// <summary>
     /// The parameters for updating a file.

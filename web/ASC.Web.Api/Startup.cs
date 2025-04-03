@@ -51,7 +51,10 @@ public class Startup : BaseStartup
         services.AddBaseDbContextPool<FilesDbContext>();
         services.AddBaseDbContextPool<BackupsContext>();
         services.RegisterQuotaFeature();
-
+        services.RegisterQueue<LdapOperationJob>();
+        services.RegisterQueue<SmtpJob>();
+        services.RegisterQueue<UsersQuotaSyncJob>();
+        
         services.AddStartupTask<CspStartupTask>()
                    .TryAddSingleton(services);
                 

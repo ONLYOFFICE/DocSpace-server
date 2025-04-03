@@ -29,10 +29,25 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// <summary>
 /// The external link request parameters.
 /// </summary>
-public class FileLinkRequest : LinkRequestDtoBase
+public class FileLinkRequest
 {
     /// <summary>
-    /// Specifies the link scope, whether it is internal or not.
+    /// The external link ID.
+    /// </summary>
+    public Guid LinkId { get; set; }
+
+    /// <summary>
+    /// The link sharing rights.
+    /// </summary>
+    public FileShare Access { get; set; }
+
+    /// <summary>
+    /// The link expiration date.
+    /// </summary>
+    public ApiDateTime ExpirationDate { get; set; }
+
+    /// <summary>
+    /// The link scope, whether it is internal or not.
     /// </summary>
     public bool Internal { get; set; }
 
@@ -52,7 +67,7 @@ public class FileLinkRequestDto<T>
     /// The file ID.
     /// </summary>
     [FromRoute(Name = "id")]
-    public T Id { get; set; }
+    public required T Id { get; set; }
 
     /// <summary>
     /// The file external link parameters.

@@ -35,5 +35,5 @@ public class RoomIdRequestDto<T>
     /// The room ID of the request.
     /// </summary>
     [FromRoute(Name = "id")]
-    public T Id { get; set; }
+    public required T Id { get; set; }
 }

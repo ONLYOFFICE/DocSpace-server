@@ -36,11 +36,9 @@ public class BackupAjaxHandler(
     TenantManager tenantManager,
     MessageService messageService,
     CoreBaseSettings coreBaseSettings,
-    CoreConfiguration coreConfiguration,
     PermissionContext permissionContext,
     AuthContext authContext,
     UserManager userManager,
-    ConsumerFactory consumerFactory,
     StorageFactory storageFactory,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity)
@@ -90,11 +88,18 @@ public class BackupAjaxHandler(
         return await backupService.StartBackupAsync(backupRequest, enqueueTask, taskId);
     }
 
-    public async Task<BackupProgress> GetBackupProgressAsync()
+    public async Task<BackupProgress> GetBackupProgressAsync(bool dump)
     {
         await DemandPermissionsBackupAsync();
 
-        return await backupService.GetBackupProgress(GetCurrentTenantIdAsync());
+        if (dump)
+        {
+            return await backupService.GetDumpBackupProgress();
+        }
+        else
+        {
+            return await backupService.GetBackupProgress(GetCurrentTenantIdAsync());
+        }
     }
 
     public async Task<BackupProgress> GetBackupProgressAsync(int tenantId)
@@ -111,18 +116,32 @@ public class BackupAjaxHandler(
         await backupService.DeleteBackupAsync(id);
     }
 
-    public async Task DeleteAllBackupsAsync()
+    public async Task DeleteAllBackupsAsync(bool dump)
     {
         await DemandPermissionsBackupAsync();
 
-        await backupService.DeleteAllBackupsAsync(GetCurrentTenantIdAsync());
+        if (dump)
+        {
+            await backupService.DeleteAllBackupsAsync(-1);
+        }
+        else
+        {
+            await backupService.DeleteAllBackupsAsync(GetCurrentTenantIdAsync());
+        }
     }
 
-    public async Task<List<BackupHistoryRecord>> GetBackupHistory()
+    public async Task<List<BackupHistoryRecord>> GetBackupHistoryAsync(bool dump)
     {
         await DemandPermissionsBackupAsync();
 
-        return await backupService.GetBackupHistoryAsync(GetCurrentTenantIdAsync());
+        if (dump)
+        {
+            return await backupService.GetBackupHistoryAsync(-1);
+        }
+        else
+        {
+            return await backupService.GetBackupHistoryAsync(GetCurrentTenantIdAsync());
+        }
     }
 
     public async Task CheckAccessToFileAsync<T>(T fileId)
@@ -184,13 +203,18 @@ public class BackupAjaxHandler(
 
         var scheduleRequest = new CreateScheduleRequest
         {
-            TenantId = tenantManager.GetCurrentTenantId(),
+            TenantId =  dump ? -1 : tenantManager.GetCurrentTenantId(),
             Cron = cronParams.ToString(),
             NumberOfBackupsStored = backupsStored,
             StorageType = storageType,
             StorageParams = storageParams,
             Dump = dump
         };
+
+        if (dump)
+        {
+            scheduleRequest.StorageParams.Add("tenantId", tenantManager.GetCurrentTenantId().ToString());
+        }
 
         switch (storageType)
         {
@@ -211,11 +235,18 @@ public class BackupAjaxHandler(
         await backupService.CreateScheduleAsync(scheduleRequest);
     }
 
-    public async Task<Schedule> GetScheduleAsync()
+    public async Task<Schedule> GetScheduleAsync(bool? dump)
     {
         await DemandPermissionsBackupAsync();
-
-        var response = await backupService.GetScheduleAsync(GetCurrentTenantIdAsync());
+        ScheduleResponse response = null;
+        if (dump.HasValue && dump.Value) 
+        {
+            response = await backupService.GetScheduleAsync(-1, dump);
+        }
+        else
+        {
+            response = await backupService.GetScheduleAsync(GetCurrentTenantIdAsync(), dump);
+        }
         if (response == null)
         {
             return null;
@@ -231,42 +262,7 @@ public class BackupAjaxHandler(
             Dump = response.Dump
         };
 
-        if (response.StorageType == BackupStorageType.CustomCloud)
-        {
-            var amazonSettings = await coreConfiguration.GetSectionAsync<AmazonS3Settings>();
-
-            var consumer = consumerFactory.GetByKey<DataStoreConsumer>("s3");
-            if (!await consumer.GetIsSetAsync())
-            {
-                await consumer.SetAsync("acesskey", amazonSettings.AccessKeyId);
-                await consumer.SetAsync("secretaccesskey", amazonSettings.SecretAccessKey);
-
-                await consumer.SetAsync("bucket", amazonSettings.Bucket);
-                await consumer.SetAsync("region", amazonSettings.Region);
-            }
-
-            schedule.StorageType = BackupStorageType.ThirdPartyConsumer;
-            schedule.StorageParams = new Dictionary<string, string>();
-            foreach (var r in consumer.AdditionalKeys)
-            {
-                schedule.StorageParams.Add(r, await consumer.GetAsync(r));
-            }
-            schedule.StorageParams.Add("module", "S3");
-
-            var scheduleRequest = new CreateScheduleRequest
-            {
-                TenantId = tenantManager.GetCurrentTenantId(),
-                Cron = schedule.CronParams.ToString(),
-                NumberOfBackupsStored = schedule.BackupsStored ?? 0,
-                StorageType = schedule.StorageType,
-                StorageParams = schedule.StorageParams,
-                Dump = schedule.Dump
-            };
-
-            await backupService.CreateScheduleAsync(scheduleRequest);
-
-        }
-        else if (response.StorageType != BackupStorageType.ThirdPartyConsumer)
+        if (response.StorageType != BackupStorageType.ThirdPartyConsumer)
         {
             schedule.StorageParams["folderId"] = response.StorageBasePath;
         }
@@ -274,11 +270,18 @@ public class BackupAjaxHandler(
         return schedule;
     }
 
-    public async Task DeleteScheduleAsync()
+    public async Task DeleteScheduleAsync(bool dump)
     {
         await DemandPermissionsBackupAsync();
 
-        await backupService.DeleteScheduleAsync(GetCurrentTenantIdAsync());
+        if (dump)
+        {
+            await backupService.DeleteScheduleAsync(-1);
+        }
+        else 
+        {
+            await backupService.DeleteScheduleAsync(GetCurrentTenantIdAsync());
+        }
     }
 
     private async Task DemandPermissionsBackupAsync()
@@ -287,7 +290,7 @@ public class BackupAjaxHandler(
 
         if (!coreBaseSettings.Standalone && !SetupInfo.IsVisibleSettings(nameof(ManagementType.Backup)))
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption, "Backup");
+            throw new BillingException(Resource.ErrorNotAllowedOption);
         }
     }
 
@@ -335,11 +338,30 @@ public class BackupAjaxHandler(
         return await backupService.StartRestoreAsync(restoreRequest, enqueueTask, taskId);
     }
 
-    public async Task<BackupProgress> GetRestoreProgressAsync()
+    public async Task<BackupProgress> GetRestoreProgressAsync(bool? dump)
     {
-        var tenant = tenantManager.GetCurrentTenant();
+        if (!coreBaseSettings.Standalone)
+        {
+            dump = false;
+        }
 
-        return await backupService.GetRestoreProgress(tenant.Id);
+        if (dump.HasValue) 
+        {
+            if (dump.Value)
+            {
+                return await backupService.GetDumpRestoreProgressAsync();
+            }
+            else
+            {
+                var tenant = tenantManager.GetCurrentTenant();
+                return await backupService.GetRestoreProgressAsync(tenant.Id);
+            }
+        }
+        else
+        {
+            var tenant = tenantManager.GetCurrentTenant();
+            return await backupService.GetAnyRestoreProgressAsync(tenant.Id);
+        }
     }
 
     public async Task DemandPermissionsRestoreAsync()
@@ -349,12 +371,12 @@ public class BackupAjaxHandler(
         var quota = await tenantManager.GetTenantQuotaAsync(tenantManager.GetCurrentTenantId());
         if (!SetupInfo.IsVisibleSettings("Restore") || (!coreBaseSettings.Standalone && !quota.AutoBackupRestore))
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption, "Restore");
+            throw new BillingException(Resource.ErrorNotAllowedOption);
         }
 
         if (!coreBaseSettings.Standalone && (!SetupInfo.IsVisibleSettings("Restore") || !quota.AutoBackupRestore))
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption, "Restore");
+            throw new BillingException(Resource.ErrorNotAllowedOption);
         }
     }
 
@@ -364,7 +386,7 @@ public class BackupAjaxHandler(
 
         if (!SetupInfo.IsVisibleSettings("AutoBackup") || !(await tenantManager.GetTenantQuotaAsync(tenantManager.GetCurrentTenantId())).AutoBackupRestore)
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption, "AutoBackup");
+            throw new BillingException(Resource.ErrorNotAllowedOption);
         }
     }
 

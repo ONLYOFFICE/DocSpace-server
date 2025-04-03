@@ -29,10 +29,20 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// <summary>
 /// The request parameters for changing the file owner.
 /// </summary>
-public class ChangeOwnerRequestDto : BaseBatchRequestDto
+public class ChangeOwnerRequestDto
 {
+    /// <summary>
+    /// The list of folder IDs to change the owner.
+    /// </summary>
+    public IEnumerable<JsonElement> FolderIds { get; set; } = new List<JsonElement>();
+
+    /// <summary>
+    /// The list of file IDs to change the owner.
+    /// </summary>
+    public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
+
     /// <summary>
     /// The new file owner ID.
     /// </summary>
-    public Guid UserId { get; set; }
+    public required Guid UserId { get; set; }
 }

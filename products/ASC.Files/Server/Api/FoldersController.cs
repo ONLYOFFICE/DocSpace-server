@@ -446,7 +446,7 @@ public class FoldersControllerCommon(
 
         await foreach (var folder in foldersIds)
         {
-            yield return await folderContentDtoHelper.GetAsync(folder, inDto.UserIdOrGroupId, inDto.FilterType, 0, true, true, false, ApplyFilterOption.All, null);
+            yield return await folderContentDtoHelper.GetAsync(folder, inDto.UserIdOrGroupId, inDto.FilterType, 0, true, false, false, ApplyFilterOption.All, null);
         }
     }
 

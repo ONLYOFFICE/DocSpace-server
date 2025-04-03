@@ -51,6 +51,11 @@ public class RoomInvitationRequest
     /// The language of the room invitation.
     /// </summary>
     public string Culture { get; set; }
+
+    /// <summary>
+    /// Force
+    /// </summary>
+    public bool Force { get; set; }
 }
 
 /// <summary>
@@ -62,7 +67,7 @@ public class RoomInvitationRequestDto<T>
     /// The room ID.
     /// </summary>
     [FromRoute(Name = "id")]
-    public T Id { get; set; }
+    public required T Id { get; set; }
 
     /// <summary>
     /// The room invitation request.

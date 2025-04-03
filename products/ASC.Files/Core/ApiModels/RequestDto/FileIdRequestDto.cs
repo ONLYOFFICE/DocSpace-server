@@ -35,7 +35,7 @@ public class FileIdRequestDto<T>
     /// The file ID of the request.
     /// </summary>
     [FromRoute(Name = "fileId")]
-    public T FileId { get; set; }
+    public required T FileId { get; set; }
 }
 
 /// <summary>
@@ -47,7 +47,7 @@ public class FilePrimaryIdRequestDto<T>
     /// The file ID of the request.
     /// </summary>
     [FromRoute(Name = "id")]
-    public T Id { get; set; }
+    public required T Id { get; set; }
 }
 
 /// <summary>
@@ -59,5 +59,5 @@ public class OperationIdRequestDto
     /// The operation ID of the request.
     /// </summary>
     [FromRoute(Name = "id")]
-    public string Id { get; set; } = null;
+    public required string Id { get; set; } = null;
 }

@@ -34,7 +34,7 @@ public class GetReferenceDataDto<T>
     /// <summary>
     /// The unique document identifier used by the service to get a link to the file.
     /// </summary>
-    public T FileKey { get; set; }
+    public required T FileKey { get; set; }
 
     /// <summary>
     /// The unique system identifier.

@@ -29,10 +29,20 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// <summary>
 /// The security information request parameters.
 /// </summary>
-public class SecurityInfoRequestDto : BaseBatchRequestDto
+public class SecurityInfoRequestDto
 {
     /// <summary>
-    /// The collection of file sharing parameters.
+    /// The list of the shared folder IDs.
+    /// </summary>
+    public IEnumerable<JsonElement> FolderIds { get; set; } = new List<JsonElement>();
+
+    /// <summary>
+    /// The list of the shared file IDs.
+    /// </summary>
+    public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
+
+    /// <summary>
+    /// The collection of sharing parameters.
     /// </summary>
     public IEnumerable<FileShareParams> Share { get; set; }
 
@@ -77,7 +87,7 @@ public class FileSecurityInfoSimpleRequestDto<T>
     /// The file ID.
     /// </summary>
     [FromRoute(Name = "fileId")]
-    public T FileId { get; set; }
+    public required T FileId { get; set; }
 
     /// <summary>
     /// The parameters of the security information simple request.
@@ -95,7 +105,7 @@ public class FolderSecurityInfoSimpleRequestDto<T>
     /// The folder ID.
     /// </summary>
     [FromRoute(Name = "folderId")]
-    public T FolderId { get; set; }
+    public required T FolderId { get; set; }
 
     /// <summary>
     /// The parameters of the security information simple request.

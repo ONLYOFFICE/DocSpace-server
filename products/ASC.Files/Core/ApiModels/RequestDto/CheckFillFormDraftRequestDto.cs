@@ -62,7 +62,7 @@ public class CheckFillFormDraftRequestDto<T>
     /// The file ID of the form draft.
     /// </summary>
     [FromRoute(Name = "fileId")]
-    public T FileId { get; set; }
+    public required T FileId { get; set; }
 
     /// <summary>
     /// The parameters for checking the form draft filling.

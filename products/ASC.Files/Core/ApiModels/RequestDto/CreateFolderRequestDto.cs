@@ -35,7 +35,7 @@ public class CreateFolder
     /// The folder title to create.
     /// </summary>
     [StringLength(165)]
-    public string Title { get; set; }
+    public required string Title { get; set; }
 }
 
 /// <summary>
@@ -47,7 +47,7 @@ public class CreateFolderRequestDto<T>
     /// The folder ID for the folder creation.
     /// </summary>
     [FromRoute(Name = "folderId")]
-    public T FolderId { get; set; }
+    public required T FolderId { get; set; }
 
     /// <summary>
     /// The parameters for creating a folder.

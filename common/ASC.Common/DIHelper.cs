@@ -434,10 +434,7 @@ public class DIHelper
     public void RegisterDistributedTask<T>() where T : DistributedTask
     {
         _serviceCollection.TryAddSingleton(Channel.CreateUnbounded<T>());
-        _serviceCollection.TryAddSingleton(svc => svc.GetRequiredService<Channel<T>>().Reader);
         _serviceCollection.TryAddSingleton(svc => svc.GetRequiredService<Channel<T>>().Writer);
         _serviceCollection.TryAddTransient<DistributedTaskQueue<T>>();
-        _serviceCollection.TryAddSingleton<DistributedTaskQueueService<T>>();
-        _serviceCollection.AddHostedService<DistributedTaskQueueService<T>>();
     }
 }

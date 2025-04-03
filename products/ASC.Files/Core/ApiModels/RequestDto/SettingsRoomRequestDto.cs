@@ -51,7 +51,7 @@ public class SettingsRoomRequestDto<T>
     /// The room ID.
     /// </summary>
     [FromRoute(Name = "id")]
-    public T Id { get; set; }
+    public required T Id { get; set; }
 
     /// <summary>
     /// The room settings parameters.

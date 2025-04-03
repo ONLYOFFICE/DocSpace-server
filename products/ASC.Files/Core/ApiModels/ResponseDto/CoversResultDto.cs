@@ -27,17 +27,17 @@
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// The cover result parameters.
+/// The result of the cover request containing the cover image data.
 /// </summary>
 public class CoversResultDto
 {
     /// <summary>
-    /// The cover ID.
+    /// The cover unique identifier.
     /// </summary>
     public string Id { get; set; }
 
     /// <summary>
-    /// The cover result data.
+    /// The cover image data.
     /// </summary>
     public string Data { get; set; }
 }

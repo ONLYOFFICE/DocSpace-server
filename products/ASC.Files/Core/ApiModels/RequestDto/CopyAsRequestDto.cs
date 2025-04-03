@@ -34,12 +34,12 @@ public class CopyAs<T>
     /// <summary>
     /// The copied file name.
     /// </summary>
-    public string DestTitle { get; set; }
+    public required string DestTitle { get; set; }
 
     /// <summary>
     /// The destination folder ID of the copied file.
     /// </summary>
-    public T DestFolderId { get; set; }
+    public required T DestFolderId { get; set; }
 
     /// <summary>
     /// Specifies whether to allow creating the copied file of an external extension or not.
@@ -66,7 +66,7 @@ public class CopyAsRequestDto<T>
     /// The file ID to copy.
     /// </summary>
     [FromRoute(Name = "fileId")]
-    public T FileId { get; set; }
+    public required T FileId { get; set; }
 
     /// <summary>
     /// The parameters for copying a file.

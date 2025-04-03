@@ -35,7 +35,7 @@ public class PublicDto
     /// The room template ID.
     /// </summary>
     [FromRoute(Name="id")]
-    public int Id { get; set; }
+    public required int Id { get; set; }
 }
 
 /// <summary>
@@ -46,7 +46,7 @@ public class SetPublicDto
     /// <summary>
     /// The room template ID.
     /// </summary>
-    public int Id { get; set; }
+    public required int Id { get; set; }
 
     /// <summary>
     /// Specifies whether the room template is public or not.

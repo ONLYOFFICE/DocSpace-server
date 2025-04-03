@@ -187,9 +187,14 @@ public class File<T> : FileEntry<T>
     /// Specifies whether the file is locked or not.
     /// </summary>
     public bool Locked { get; set; }
+    
+    /// <summary>
+    /// The name of the user who locked the file.
+    /// </summary>
+    public string LockedBy { get; set; }
 
     /// <summary>
-    /// Specifies whether the file is a form or not.
+    /// Specifies if the file is a form or not.
     /// </summary>
     public bool IsForm {
         get
@@ -199,14 +204,19 @@ public class File<T> : FileEntry<T>
     }
 
     /// <summary>
+    /// Specifies if a Custom Filter editing mode is enabled for a file or not.
+    /// </summary>
+    public bool CustomFilterEnabled { get; set; }
+
+    /// <summary>
+    /// The name of the user who enabled a Custom Filter editing mode for a file.
+    /// </summary>
+    public string CustomFilterEnabledBy { get; set; }
+
+    /// <summary>
     /// The file category.
     /// </summary>
     public int Category { get; set; }
-
-    /// <summary>
-    /// The user who locked the file.
-    /// </summary>
-    public string LockedBy { get; set; }
 
     /// <summary>
     /// Specifies whether the file is new or not.

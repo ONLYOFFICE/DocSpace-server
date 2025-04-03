@@ -51,7 +51,7 @@ public class DeleteFolder<T>
     /// The folder ID to delete.
     /// </summary>
     [FromRoute(Name = "folderId")]
-    public T FolderId { get; set; }
+    public required T FolderId { get; set; }
 
     /// <summary>
     /// The parameters for deleting a folder.

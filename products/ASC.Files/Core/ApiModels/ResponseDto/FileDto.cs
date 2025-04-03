@@ -65,7 +65,7 @@ public class FileDto<T> : FileEntryDto<T>
     public FileStatus FileStatus { get; set; }
 
     /// <summary>
-    /// Is the file muted or not.
+    /// Specifiess if the file is muted or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool Mute { get; set; }
@@ -84,6 +84,12 @@ public class FileDto<T> : FileEntryDto<T>
     public string WebUrl { get; set; }
 
     /// <summary>
+    /// The short Web URL.
+    /// </summary>
+    [Url]
+    public string ShortWebUrl { get; set; }
+
+    /// <summary>
     /// The file type.
     /// </summary>
     public FileType FileType { get; set; }
@@ -100,7 +106,7 @@ public class FileDto<T> : FileEntryDto<T>
     public string Comment { get; set; }
 
     /// <summary>
-    /// Is the file encrypted or not.
+    /// Specifies if the file is encrypted or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool? Encrypted { get; set; }
@@ -117,7 +123,7 @@ public class FileDto<T> : FileEntryDto<T>
     public Thumbnail ThumbnailStatus { get; set; }
 
     /// <summary>
-    /// Is the file locked or not.
+    /// Specifies if the file is locked or not.
     /// </summary>
     public bool? Locked { get; set; }
 
@@ -145,7 +151,17 @@ public class FileDto<T> : FileEntryDto<T>
     public bool? IsForm { get; set; }
 
     /// <summary>
-    /// Specifies if the file filling has started or not.
+    /// Specifies if the Custom Filter editing mode is enabled for a file or not.
+    /// </summary>
+    public bool? CustomFilterEnabled { get; set; }
+
+    /// <summary>
+    /// The name of the user who enabled a Custom Filter editing mode for a file.
+    /// </summary>
+    public string CustomFilterEnabledBy { get; set; }
+
+    /// <summary>
+    /// Specifies if the filling has started or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool? StartFilling { get; set; }
@@ -161,7 +177,7 @@ public class FileDto<T> : FileEntryDto<T>
     public string InProcessFolderTitle { get; set; }
 
     /// <summary>
-    /// The file draft info with its location.
+    /// The file draft information with its location.
     /// </summary>
     public DraftLocation<T> DraftLocation { get; set; }
 
@@ -210,7 +226,8 @@ public class FileDtoHelper(
         BreadCrumbsManager breadCrumbsManager,
         FileChecker fileChecker,
         SecurityContext securityContext,
-        UserManager userManager)
+        UserManager userManager,
+        IUrlShortener urlShortener)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory) 
 {
     private readonly ApiDateTimeHelper _apiDateTimeHelper = apiDateTimeHelper;
@@ -377,6 +394,8 @@ public class FileDtoHelper(
         result.LockedBy = file.LockedBy;
         result.Access = file.Access;
         result.LastOpened = _apiDateTimeHelper.Get(file.LastOpened);
+        result.CustomFilterEnabled = file.CustomFilterEnabled.NullIfDefault();
+        result.CustomFilterEnabledBy = file.CustomFilterEnabledBy;
 
         if (!file.ProviderEntry && file.RootFolderType == FolderType.VirtualRooms && !expiration.HasValue)
         {
@@ -423,7 +442,7 @@ public class FileDtoHelper(
             result.ViewUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl), result.RequestToken);
 
             result.WebUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version, externalMediaAccess)), result.RequestToken);
-
+            result.ShortWebUrl = await urlShortener.GetShortenLinkAsync(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebEditorUrl(file.Id)));
             result.ThumbnailStatus = file.ThumbnailStatus;
 
             var cacheKey = Math.Abs(result.Updated.GetHashCode());

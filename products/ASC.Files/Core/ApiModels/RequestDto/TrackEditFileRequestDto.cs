@@ -35,7 +35,7 @@ public class TrackEditFileRequestDto<T>
     /// The file ID to track editing changes.
     /// </summary>
     [FromRoute(Name = "fileId")]
-    public T FileId { get; set; }
+    public required T FileId { get; set; }
 
     /// <summary>
     /// The tab ID to track editing changes.

@@ -35,7 +35,7 @@ public class GetFolderRequestDto<T>
     /// The folder ID of the request.
     /// </summary>
     [FromRoute(Name = "folderId")]
-    public T FolderId { get; set; }
+    public required T FolderId { get; set; }
 
     /// <summary>
     /// The user or group ID.

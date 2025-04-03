@@ -46,7 +46,7 @@ public class CheckUploadRequestDto<T>
     /// The folder ID.
     /// </summary>
     [FromRoute(Name = "folderId")]
-    public T FolderId { get; set; }
+    public required T FolderId { get; set; }
 
     /// <summary>
     /// The request parameters for checking file uploads.

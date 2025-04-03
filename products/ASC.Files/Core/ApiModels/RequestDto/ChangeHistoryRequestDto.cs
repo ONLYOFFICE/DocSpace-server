@@ -34,7 +34,7 @@ public class ChangeHistory
     /// <summary>
     /// The file version of the change history.
     /// </summary>
-    public int Version { get; set; }
+    public required int Version { get; set; }
 
     /// <summary>
     /// Specifies whether to start a new version or continue revision of the change history.
@@ -51,7 +51,7 @@ public class ChangeHistoryRequestDto<T>
     /// The file Id to change its version history.
     /// </summary>
     [FromRoute(Name = "fileId")]
-    public T FileId { get; set; }
+    public required T FileId { get; set; }
 
     /// <summary>
     /// The parameters for changing version history.

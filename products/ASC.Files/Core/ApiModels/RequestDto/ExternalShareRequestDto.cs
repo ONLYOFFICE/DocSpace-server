@@ -46,7 +46,7 @@ public class ExternalShareRequestDto
     /// The unique document identifier.
     /// </summary>
     [FromRoute(Name = "key")]
-    public string Key { get; set; }
+    public required string Key { get; set; }
 
     /// <summary>
     /// The external data share request parameters.

@@ -65,7 +65,10 @@ public enum TagType
     RecentByLink = 512,
 
     [SwaggerEnum("From room")]
-    FromRoom = 1024
+    FromRoom = 1024,
+
+    [SwaggerEnum("Custom filter")]
+    CustomFilter = 2048
 }
 
 /// <summary>

@@ -78,10 +78,18 @@ public class DynamicCorsPolicyResolver(
         }
 
         accessToken = accessToken.Trim();
-        accessToken = accessToken["Bearer ".Length..];
+        accessToken = accessToken["Bearer ".Length..].Trim();
+
+        var jwtHandler = new JwtSecurityTokenHandler();
+
+        if (!jwtHandler.CanReadToken(accessToken))
+        {
+            return new List<string>();
+        }
 
         // Validated token early in JwtBearerAuthHandler
         var token = new JwtSecurityToken(accessToken);
+
         var subject = token.Subject;
 
         if (!Guid.TryParse(subject, out var userId))

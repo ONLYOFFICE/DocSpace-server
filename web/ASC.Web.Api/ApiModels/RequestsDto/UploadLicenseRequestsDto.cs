@@ -34,5 +34,5 @@ public class UploadLicenseRequestsDto
     /// <summary>
     /// License attachments
     /// </summary>
-    public IEnumerable<IFormFile> Files { get; set; }
+    public required IEnumerable<IFormFile> Files { get; set; }
 }

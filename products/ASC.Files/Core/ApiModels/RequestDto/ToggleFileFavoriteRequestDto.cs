@@ -35,7 +35,7 @@ public class ToggleFileFavoriteRequestDto<T>
     /// The file ID.
     /// </summary>
     [FromRoute(Name = "fileId")]
-    public T FileId { get; set; }
+    public required T FileId { get; set; }
 
     /// <summary>
     /// Specifies if the file is marked as favorite or not.

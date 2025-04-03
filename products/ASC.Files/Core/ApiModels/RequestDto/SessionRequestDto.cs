@@ -34,7 +34,7 @@ public class SessionRequest
     /// <summary>
     /// The file name.
     /// </summary>
-    public string FileName { get; set; }
+    public required string FileName { get; set; }
 
     /// <summary>
     /// The file size.
@@ -71,7 +71,7 @@ public class SessionRequestDto<T>
     /// The folder ID of the session.
     /// </summary>
     [FromRoute(Name = "folderId")]
-    public T FolderId { get; set; }
+    public required T FolderId { get; set; }
 
     /// <summary>
     /// The session parameters.

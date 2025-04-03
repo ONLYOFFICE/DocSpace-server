@@ -35,11 +35,11 @@ public class GroupMemberSecurityRequestDto<T>
     /// The folder ID.
     /// </summary>
     [FromRoute(Name = "folderId")]
-    public T FolderId { get; set; }
+    public required T FolderId { get; set; }
 
     /// <summary>
     /// The group ID.
     /// </summary>
     [FromRoute(Name = "groupId")]
-    public Guid GroupId { get; set; }
+    public required Guid GroupId { get; set; }
 }

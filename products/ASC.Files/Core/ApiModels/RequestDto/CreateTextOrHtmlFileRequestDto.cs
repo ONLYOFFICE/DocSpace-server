@@ -34,9 +34,8 @@ public class CreateTextOrHtmlFile
     /// <summary>
     /// The file title for text or HTML file.
     /// </summary>
-    [Required]
     [StringLength(165)]
-    public string Title { get; set; }
+    public required string Title { get; set; }
 
     /// <summary>
     /// The text or HTML file contents.
@@ -58,7 +57,7 @@ public class CreateTextOrHtmlFileRequestDto<T>
     /// The folder ID to create the text or HTML file.
     /// </summary>
     [FromRoute(Name = "folderId")]
-    public T FolderId { get; set; }
+    public required T FolderId { get; set; }
 
     /// <summary>
     /// The parameters for creating an HTML or text file.

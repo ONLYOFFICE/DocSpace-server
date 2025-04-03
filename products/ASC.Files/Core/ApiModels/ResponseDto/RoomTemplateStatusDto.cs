@@ -27,44 +27,53 @@
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// The base room template status.
+/// The room template status.
 /// </summary>
-public class BaseRoomTemplateStatusDto
-{
-    /// <summary>
-    /// The progress of the base room template creation process.
-    /// </summary>
-    public double Progress { get; set; }
-
-    /// <summary>
-    /// The error message that is sent when the base room template is not created successfully.
-    /// </summary>
-    public string Error { get; set; }
-
-    /// <summary>
-    /// Specifies whether the process of creating the base room template is completed.
-    /// </summary>
-    public bool IsCompleted { get; set; }
-}
-
-/// <summary>
-/// The room template status parameters.
-/// </summary>
-public class RoomTemplateStatusDto : BaseRoomTemplateStatusDto
+public class RoomTemplateStatusDto
 {
     /// <summary>
     /// The room template ID.
     /// </summary>
     public int TemplateId { get; set; }
+
+    /// <summary>
+    /// The progress of the room template creation process.
+    /// </summary>
+    public double Progress { get; set; }
+
+    /// <summary>
+    /// The error message that is sent when the room template is not created successfully.
+    /// </summary>
+    public string Error { get; set; }
+
+    /// <summary>
+    /// Specifies whether the process of creating the room template is completed.
+    /// </summary>
+    public bool IsCompleted { get; set; }
 }
 
 /// <summary>
 /// The progress parameters of creating a room from the template.
 /// </summary>
-public class RoomFromTemplateStatusDto : BaseRoomTemplateStatusDto
+public class RoomFromTemplateStatusDto
 {
     /// <summary>
     /// The room ID.
     /// </summary>
     public int RoomId { get; set; }
+
+    /// <summary>
+    /// The progress of creating a room from the template.
+    /// </summary>
+    public double Progress { get; set; }
+
+    /// <summary>
+    /// The error message that is sent when a room is not created successfully from the template.
+    /// </summary>
+    public string Error { get; set; }
+
+    /// <summary>
+    /// Specifies whether the process of creating a room from the template is completed.
+    /// </summary>
+    public bool IsCompleted { get; set; }
 }

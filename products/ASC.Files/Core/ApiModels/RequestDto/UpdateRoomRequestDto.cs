@@ -94,7 +94,7 @@ public class UpdateRoomRequestDto<T>
     /// The room ID.
     /// </summary>
     [FromRoute(Name = "id")]
-    public T Id { get; set; }
+    public required T Id { get; set; }
 
     /// <summary>
     /// The request parameters for updating a room.

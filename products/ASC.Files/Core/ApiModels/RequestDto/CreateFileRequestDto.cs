@@ -35,7 +35,7 @@ public class CreateFile<T>
     /// The file title for creation.
     /// </summary>
     [StringLength(165)]
-    public string Title { get; set; }
+    public required string Title { get; set; }
 
     /// <summary>
     /// The template file ID for creation.
@@ -62,7 +62,7 @@ public class CreateFileRequestDto<T>
     /// The folder ID for the file creation.
     /// </summary>
     [FromRoute(Name = "folderId")]
-    public T FolderId { get; set; }
+    public required T FolderId { get; set; }
 
     /// <summary>
     /// The parameters for creating a file.

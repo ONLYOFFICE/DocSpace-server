@@ -323,20 +323,9 @@ internal class FileDao(
         }
         if (applyFormStepFilter)
         {
-            q = q.Where(f => f.Category != (int)FilterType.PdfForm ||
-                (f.Category == (int)FilterType.PdfForm &&
+            q = q.Where(f => f.Category == (int)FilterType.PdfForm &&
                     filesDbContext.FilesFormRoleMapping.Any(r =>
-                        r.TenantId == tenantId && r.FormId == f.Id && r.UserId == securityContext.CurrentAccount.ID) &&
-                    (!filesDbContext.FilesFormRoleMapping.Any(r => r.TenantId == tenantId && r.FormId == f.Id && !r.Submitted) || (
-                    filesDbContext.FilesFormRoleMapping
-                        .Where(r => r.TenantId == tenantId && r.FormId == f.Id && !r.Submitted)
-                        .Min(r => (int?)r.Sequence)
-                    >=
-                    filesDbContext.FilesFormRoleMapping
-                        .Where(r => r.TenantId == tenantId && r.FormId == f.Id && r.UserId == securityContext.CurrentAccount.ID)
-                        .Select(r => (int?)r.Sequence)
-                        .FirstOrDefault()))
-                )
+                        r.TenantId == tenantId && r.FormId == f.Id && r.UserId == securityContext.CurrentAccount.ID)
             );
         }
 
@@ -1440,6 +1429,7 @@ internal class FileDao(
                 TenantId = tenantId,
                 FormId = formId,
                 UserId = formRole.UserId,
+                RoomId = formRole.RoomId,
                 RoleName = formRole.RoleName,
                 RoleColor = formRole.RoleColor,
                 Sequence = sequence,
@@ -1466,6 +1456,17 @@ internal class FileDao(
         await foreach (var role in context.DbFormUserRolesQueryAsync(tenantId, formId, userId))
         {
             yield return role;
+        }
+    }
+    public async IAsyncEnumerable<FormRole> GetUserFormRolesInRoom(int roomId, Guid userId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await foreach (var r in filesDbContext.DbUserFormRolesInRoomQueryAsync(tenantId, roomId, userId))
+        {
+            yield return r;
         }
     }
     public async IAsyncEnumerable<FormRole> GetFormRoles(int formId)

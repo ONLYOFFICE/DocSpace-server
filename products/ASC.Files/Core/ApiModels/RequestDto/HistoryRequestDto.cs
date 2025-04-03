@@ -35,7 +35,7 @@ public class HistoryRequestDto
     /// The file ID of the history request.
     /// </summary>
     [FromRoute(Name = "fileId")]
-    public int FileId { get; set; }
+    public required int FileId { get; set; }
 
     /// <summary>
     /// The start date of the history.
@@ -59,7 +59,7 @@ public class HistoryFolderRequestDto
     /// The folder ID of the history request.
     /// </summary>
     [FromRoute(Name = "folderId")]
-    public int FolderId { get; set; }
+    public required int FolderId { get; set; }
 
     /// <summary>
     /// The start date of the history request.

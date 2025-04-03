@@ -945,4 +945,22 @@
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Webhook updated: {0}</value>
   </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>Users [{0}]. Started to fill: {1}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>Users [{0}]. Filled out part of form: {1}</value>
+  </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>Users [{0}]. Completely filled out form: {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>Users [{0}]. Form stopped: {1}</value>
+  </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>File: {0}. Custom filter disabled</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>File: {0}. Custom filter enabled</value>
+  </data>
 </root>

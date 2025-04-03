@@ -35,7 +35,7 @@ public class EditDiffUrlRequestDto<T>
     /// The file ID.
     /// </summary>
     [FromRoute(Name = "fileId")]
-    public T FileId { get; set; }
+    public required T FileId { get; set; }
 
     /// <summary>
     /// The file version.

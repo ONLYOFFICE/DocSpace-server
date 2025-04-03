@@ -35,7 +35,7 @@ public class FolderIdRequestDto<T>
     /// The request folder ID.
     /// </summary>
     [FromRoute(Name = "folderId")]
-    public T FolderId { get; set; }
+    public required T FolderId { get; set; }
 }
 
 /// <summary>
@@ -47,5 +47,5 @@ public class FolderPrimaryIdRequestDto<T>
     /// The request folder ID.
     /// </summary>
     [FromRoute(Name = "id")]
-    public T Id { get; set; }
+    public required T Id { get; set; }
 }
