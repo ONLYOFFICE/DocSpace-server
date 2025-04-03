@@ -91,7 +91,7 @@ else
     AddProjectWithDefaultConfiguration<ASC_Web_Studio>();
 }
 
-builder.AddNpmApp("asc-socketIO", "../ASC.Socket.IO/", "start:build").WithHttpEndpoint(targetPort: 9899).WithHttpHealthCheck("/health");
+builder.AddNpmApp("asc-socketIO", "../ASC.Socket.IO/", "start:build").WithReference(redis, "redis").WithHttpEndpoint(targetPort: 9899).WithHttpHealthCheck("/health");
 builder.AddNpmApp("asc-ssoAuth", "../ASC.SSoAuth/", "start:build").WithHttpEndpoint(targetPort: 9834).WithHttpHealthCheck("/health");
 builder.AddNpmApp("asc-webDav", "../ASC.WebDav/", "start:build").WithHttpEndpoint(targetPort: 1900).WithHttpHealthCheck("/health");
 

@@ -53,6 +53,8 @@ function getAndSaveAppsettings(){
     nconf.file("redisWithEnv", path.join(appsettings, 'redis.' + env + '.json'));
     nconf.file("redis", path.join(appsettings, 'redis.json'));
 
+    var redisConnectionString = nconf.get("ConnectionStrings__redis");
+    
     var redis = nconf.get("Redis");
     if(redis != null)
     {
@@ -64,6 +66,13 @@ function getAndSaveAppsettings(){
             host: redis.Hosts[0].Host,
             port: redis.Hosts[0].Port
         };
+
+        if(redisConnectionString != null){
+            var parts = redisConnectionString.split(":");
+            redis.socket.host = parts[0];
+            redis.socket.port = parts[1];
+        }
+
         nconf.set("Redis", redis);
     }
 }
