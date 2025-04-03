@@ -57,7 +57,7 @@ public class SessionRequest
     public bool Encrypted { get; set; }
 
     /// <summary>
-    /// Specifies whether to create a new file if it already exists or not.
+    /// Specifies whether to create a new file if it already exists.
     /// </summary>
     public bool CreateNewIfExist { get; set; }
 }
@@ -74,7 +74,7 @@ public class SessionRequestDto<T>
     public T FolderId { get; set; }
 
     /// <summary>
-    /// The session request parameters.
+    /// The session parameters.
     /// </summary>
     [FromBody]
     public SessionRequest Session {  get; set; }

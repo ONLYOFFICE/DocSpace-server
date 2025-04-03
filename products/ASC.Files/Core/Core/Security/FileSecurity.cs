@@ -2886,7 +2886,8 @@ public class FileSecurity(IDaoFactory daoFactory,
         [SwaggerEnum("Embed")]
         Embed,
 
-        [SwaggerEnum("Change owner")]        ChangeOwner,
+        [SwaggerEnum("Change owner")]        
+        ChangeOwner,
 
         [SwaggerEnum("Index export")]
         IndexExport,

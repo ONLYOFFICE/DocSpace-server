@@ -32,7 +32,7 @@ namespace ASC.Files.Core.ApiModels;
 public class FileShareParams
 {
     /// <summary>
-    /// The ID of the user with whom we want to share a file.
+    /// The ID of the user to whom the file will be shared.
     /// </summary>
     public Guid ShareTo { get; set; }
 

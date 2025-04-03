@@ -31,9 +31,13 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// </summary>
 public class DuplicateRequestDto
 {
-    /// <summary>The list of folder IDs.</summary>
+    /// <summary>
+    /// The list of folder IDs.
+    /// </summary>
     public IEnumerable<JsonElement> FolderIds { get; set; } = new List<JsonElement>();
 
-    /// <summary>The list of file IDs.</summary>
+    /// <summary>
+    /// The list of file IDs.
+    /// </summary>
     public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
 }

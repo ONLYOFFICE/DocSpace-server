@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.VirtualRooms;
 
 /// <summary>
-/// The search area type.
+/// The search area.
 /// </summary>
 public enum SearchArea
 {

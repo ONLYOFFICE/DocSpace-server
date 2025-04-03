@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Parameters for deleting a folder.
+/// The parameters for deleting a folder.
 /// </summary>
 public class DeleteFolder
 {
@@ -43,7 +43,7 @@ public class DeleteFolder
 }
 
 /// <summary>
-/// Request parameters for deleting a folder.
+/// The request parameters for deleting a folder.
 /// </summary>
 public class DeleteFolder<T>
 {

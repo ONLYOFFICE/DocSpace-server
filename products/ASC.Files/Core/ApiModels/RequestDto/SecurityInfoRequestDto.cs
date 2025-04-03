@@ -48,7 +48,7 @@ public class SecurityInfoRequestDto : BaseBatchRequestDto
 }
 
 /// <summary>
-/// The parameters of the security information simple request.
+/// The parameters of the security information request.
 /// </summary>
 public class SecurityInfoSimpleRequestDto
 {
@@ -69,7 +69,7 @@ public class SecurityInfoSimpleRequestDto
 }
 
 /// <summary>
-/// The parameters of the security information simple request for the specified file.
+/// The parameters of the security information request for the specified file.
 /// </summary>
 public class FileSecurityInfoSimpleRequestDto<T>
 {

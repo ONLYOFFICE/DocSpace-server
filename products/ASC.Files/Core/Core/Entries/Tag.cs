@@ -34,16 +34,37 @@ namespace ASC.Files.Core;
 [Flags]
 public enum TagType
 {
+    [SwaggerEnum("New")]
     New = 1,
+
+    [SwaggerEnum("Favorite")]
     Favorite = 2,
+
+    [SwaggerEnum("System")]
     System = 4,
+
+    [SwaggerEnum("Locked")]
     Locked = 8,
+
+    [SwaggerEnum("Recent")]
     Recent = 16,
+
+    [SwaggerEnum("Template")]
     Template = 32,
+
+    [SwaggerEnum("Custom")]
     Custom = 64,
+
+    [SwaggerEnum("Pin")]
     Pin = 128,
+
+    [SwaggerEnum("Origin")]
     Origin = 256,
+
+    [SwaggerEnum("Recent by link")]
     RecentByLink = 512,
+
+    [SwaggerEnum("From room")]
     FromRoom = 1024
 }
 

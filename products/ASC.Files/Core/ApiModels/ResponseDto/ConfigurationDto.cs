@@ -103,8 +103,13 @@ public class ConfigurationDto<T>
 /// </summary>
 public enum StartFillingMode
 {
+    [SwaggerEnum("None")]
     None,
+
+    [SwaggerEnum("Share to fill out")]
     ShareToFillOut,
+
+    [SwaggerEnum("Start filling")]
     StartFilling
 }
 
@@ -231,7 +236,7 @@ public class CustomizationConfigDto
     public string ReviewDisplay { get; set; }
 
     /// <summary>
-    /// The "Complete & Submit" button settings.
+    /// The "Complete &amp; Submit" button settings.
     /// </summary>
     public SubmitForm SubmitForm { get; set; }
 
@@ -242,7 +247,7 @@ public class CustomizationConfigDto
 }
 
 /// <summary>
-/// The "Complete & Submit" button settings.
+/// The "Complete &amp; Submit" button settings.
 /// </summary>
 public class SubmitForm
 {
@@ -255,6 +260,7 @@ public class SubmitForm
     /// </summary>
     public string ResultMessage { get; set; }
 }
+
 /// <summary>
 /// The parameters of the button that starts filling out the form.
 /// </summary>
@@ -265,6 +271,7 @@ public class StartFillingForm
     /// </summary>
     public string Text { get; set; }
 }
+
 /// <summary>
 /// The logo config parameters.
 /// </summary>

@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters for adding/deleting tags.
+/// The parameters for adding tags.
 /// </summary>
 public class BatchTagsRequestDto
 {
@@ -50,7 +50,7 @@ public class BatchTagsRequestDto<T>
     public T Id { get; set; }
 
     /// <summary>
-    /// The request parameters for adding tags.
+    /// The parameters for adding tags.
     /// </summary>
     [FromBody]
     public BatchTagsRequestDto BatchTags { get; set; }

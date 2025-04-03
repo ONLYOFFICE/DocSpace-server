@@ -257,7 +257,7 @@ public abstract class FileEntry<T> : FileEntry, IEquatable<FileEntry<T>>
     }
 
     /// <summary>
-    /// The folder ID to display.
+    /// The folder ID display.
     /// </summary>
     public T FolderIdDisplay
     {
@@ -266,7 +266,7 @@ public abstract class FileEntry<T> : FileEntry, IEquatable<FileEntry<T>>
     }
 
     /// <summary>
-    /// The root folder ID.
+    /// The root ID.
     /// </summary>
     public T RootId { get; set; }
 

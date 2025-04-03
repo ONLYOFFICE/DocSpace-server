@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The room link request parameters.
+/// The room link parameters.
 /// </summary>
 public class RoomLinkRequest : LinkRequestDtoBase
 {
@@ -68,7 +68,7 @@ public class RoomLinkRequestDto<T>
     public T Id { get; set; }
 
     /// <summary>
-    /// The room link request parameters.
+    /// The room link parameters.
     /// </summary>
     [FromBody]
     public RoomLinkRequest RoomLink { get; set; }

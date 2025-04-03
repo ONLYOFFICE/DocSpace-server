@@ -75,70 +75,69 @@ public class EntryProperties<T>
 public class FormFillingProperties<T>
 {
     /// <summary>
-    /// Specifies if the form filling has been already started.
+    /// Specifies if the form filling has started or not.
     /// </summary>
     public bool StartFilling { get; set; }
-  
-    
+
     /// <summary>
-    /// The form document title.
+    /// The form title.
     /// </summary>
     public string Title { get; set; }
-    
+
     /// <summary>
-    /// The room ID where the form document is located.
+    /// The room ID of the form.
     /// </summary>
     public T RoomId { get; set; }
-    
+
     /// <summary>
-    /// The folder ID where the resulting forms will be saved.
+    /// The ID of the folder where the form is added.
     /// </summary>
     public T ToFolderId { get; set; }
-    
+
     /// <summary>
     /// The original form ID.
     /// </summary>
     public T OriginalFormId { get; set; }
-    
+
     /// <summary>
-    /// The folder ID where the resulting forms are located.
+    /// The ID of the folder where the form filling results are saved.
     /// </summary>
     public T ResultsFolderId { get; set; }
     
     /// <summary>
-    /// The resulting form ID.
+    /// The ID of the file with form filling results.
     /// </summary>
     public T ResultsFileID { get; set; }
-    
+
     /// <summary>
-    /// The number of the resulting forms.
+    /// The result form number.
     /// </summary>
     public int ResultFormNumber { get; set; }
-    
+
     /// <summary>
-    /// The date and time when the form filling has been stopped.
+    /// The date when the form filling was stopped.
     /// </summary>
     public DateTime FillingStopedDate { get; set; }
-    
+
     /// <summary>
-    /// The parameters of the user who interrupted form filling.
+    /// The form filling interruption.
     /// </summary>
     public FormFillingInterruption? FormFillingInterruption { get; set; }
 
 }
 
 /// <summary>
-/// The parameters of the user who interrupted form filling.
+/// The form filling interruption parameters.
 /// </summary>
 public struct FormFillingInterruption
 {
     /// <summary>
-    /// The uset ID.
+    /// The user ID of the form filling interruption.
     /// </summary>
     public Guid UserId { get; set; }
-    
+
     /// <summary>
-    /// The user role name.
+    /// The role name of the form filling interruption.
     /// </summary>
     public string RoleName { get; set; }
 }

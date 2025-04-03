@@ -42,7 +42,7 @@ public class CheckDocServiceUrlRequestDto
     public string DocServiceUrlInternal { get; set; }
 
     /// <summary>
-    /// The DocSpace portal URL address.
+    /// The ONLYOFFICE Docs URL address.
     /// </summary>
     public string DocServiceUrlPortal { get; set; }
 

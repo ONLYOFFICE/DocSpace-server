@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Parameters for starting file editing.
+/// The parameters for starting file editing.
 /// </summary>
 public class StartEdit
 {
@@ -38,7 +38,7 @@ public class StartEdit
 }
 
 /// <summary>
-/// Request parameters for starting file editing.
+/// The request parameters for starting file editing.
 /// </summary>
 public class StartEditRequestDto<T>
 {

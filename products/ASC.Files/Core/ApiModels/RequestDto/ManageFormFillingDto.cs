@@ -27,27 +27,30 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The form filling action parameters.
+/// The parameters for managing form filling.
 /// </summary>
 public class ManageFormFillingDto<T>
 {
     /// <summary>
-    /// The form ID.
+    /// The ID of the form to manage.
     /// </summary>
     public T FormId { get; set; }
 
     /// <summary>
-    /// The action performed on the current form.
+    /// The action to perform on the form.
     /// </summary>
     public FormFillingManageAction Action { get; set; }
 }
 
 /// <summary>
-/// The action performed on the current form.
+/// The action to perform on the form.
 /// </summary>
 public enum FormFillingManageAction
 {
+    [SwaggerEnum("Stop")]
     Stop,
+
+    [SwaggerEnum("Resume")]
     Resume
 }
 

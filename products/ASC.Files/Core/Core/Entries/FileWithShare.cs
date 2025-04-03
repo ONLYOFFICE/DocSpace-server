@@ -34,7 +34,7 @@ namespace ASC.Files.Core.Core.Entries;
 public class FileWithShare : IMapFrom<DbFileQueryWithSecurity>
 {
     /// <summary>
-    /// The file parameters.
+    /// The generic file.
     /// </summary>
     public File<int> File { get; set; }
 
