@@ -87,7 +87,8 @@ public class SecurityUtils {
       throws IOException {
     var errorRedirectUri =
         UriComponentsBuilder.fromUriString(
-                String.format("%s://%s", request.getScheme(), httpUtils.getFirstRequestIP(request)))
+                String.format(
+                    "%s://%s", request.getScheme(), httpUtils.getFirstForwardedHost(request)))
             .path("/login")
             .queryParam("type", "oauth2")
             .queryParam("client_id", clientId)

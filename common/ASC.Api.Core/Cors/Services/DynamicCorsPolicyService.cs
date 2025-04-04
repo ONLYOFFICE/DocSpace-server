@@ -201,8 +201,6 @@ public class DynamicCorsPolicyService : IDynamicCorsPolicyService
             return false;
         }
 
-        return policy.AllowAnyOrigin
-               || policy.IsOriginAllowed(origin) 
-               || await _dynamicCorsPolicyResolver.ResolveForOrigin(origin);
+        return  await _dynamicCorsPolicyResolver.ResolveForOrigin(policy, origin);
     }
 }

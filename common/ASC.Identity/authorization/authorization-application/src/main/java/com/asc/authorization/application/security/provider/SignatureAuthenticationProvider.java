@@ -220,12 +220,7 @@ public class SignatureAuthenticationProvider implements AuthenticationProvider {
       HttpServletRequest request, BasicSignature signature, ClientResponse client) {
     auditMessagePublisher.publish(
         AuditMessage.builder()
-            .ip(
-                httpUtils
-                    .getRequestClientAddress(request)
-                    .map(httpUtils::extractHostFromUrl)
-                    .orElseGet(
-                        () -> httpUtils.extractHostFromUrl(httpUtils.getFirstRequestIP(request))))
+            .ip(httpUtils.extractHostFromUrl(httpUtils.getFirstRequestIP(request)))
             .initiator(serviceName)
             .target(client.getClientId())
             .browser(httpUtils.getClientBrowser(request))

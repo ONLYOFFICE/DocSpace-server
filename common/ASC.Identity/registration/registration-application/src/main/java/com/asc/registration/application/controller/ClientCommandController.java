@@ -341,12 +341,7 @@ public class ClientCommandController {
 
       messagePublisher.publish(
           AuditMessage.builder()
-              .ip(
-                  httpUtils
-                      .getRequestClientAddress(request)
-                      .map(httpUtils::extractHostFromUrl)
-                      .orElseGet(
-                          () -> httpUtils.extractHostFromUrl(httpUtils.getFirstRequestIP(request))))
+              .ip(httpUtils.extractHostFromUrl(httpUtils.getFirstRequestIP(request)))
               .initiator(serviceName)
               .target(clientId)
               .browser(httpUtils.getClientBrowser(request))
@@ -491,12 +486,7 @@ public class ClientCommandController {
       BasicSignatureTokenPrincipal principal,
       AuditCode auditCode) {
     return Audit.Builder.builder()
-        .ip(
-            httpUtils
-                .getRequestClientAddress(request)
-                .map(httpUtils::extractHostFromUrl)
-                .orElseGet(
-                    () -> httpUtils.extractHostFromUrl(httpUtils.getFirstRequestIP(request))))
+        .ip(httpUtils.extractHostFromUrl(httpUtils.getFirstRequestIP(request)))
         .initiator(serviceName)
         .target(clientId)
         .browser(httpUtils.getClientBrowser(request))
