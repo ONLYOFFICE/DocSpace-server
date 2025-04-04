@@ -24,9 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.Utils;
+
 namespace ASC.Files.Core.Log;
-internal static partial class AuditReportUploaderLogger
+internal static partial class CsvFileUploaderLogger
 {
-    [LoggerMessage(LogLevel.Error, "Error while uploading login report:")]
-    public static partial void ErrorWhileUploading(this ILogger<AuditReportUploader> logger, Exception exception);
+    [LoggerMessage(LogLevel.Error, "Error while uploading csv file:")]
+    public static partial void ErrorWhileUploading(this ILogger<CsvFileUploader> logger, Exception exception);
 }

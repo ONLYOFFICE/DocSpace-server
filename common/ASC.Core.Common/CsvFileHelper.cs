@@ -24,17 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Globalization;
-using System.Text;
-
 using CsvHelper;
+using CsvHelper.Configuration;
+using CsvHelper.TypeConversion;
 
-namespace ASC.AuditTrail;
+namespace ASC.Core.Common;
 
 [Scope]
-public class AuditReportCreator(ILogger<AuditReportCreator> logger)
+public class CsvFileHelper(ILogger<CsvFileHelper> logger)
 {
-    public Stream CreateCsvReport<TEvent>(IEnumerable<TEvent> events) where TEvent : BaseEvent
+    public Stream CreateFile<T>(IEnumerable<T> rows, ClassMap<T> mapper)
     {
         try
         {
@@ -42,11 +41,14 @@ public class AuditReportCreator(ILogger<AuditReportCreator> logger)
             var writer = new StreamWriter(stream, Encoding.UTF8);
             var csv = new CsvWriter(writer, CultureInfo.CurrentCulture);
 
-            csv.Context.RegisterClassMap(new BaseEventMap<TEvent>());
+            if (mapper != null)
+            {
+                csv.Context.RegisterClassMap(mapper);
+            }
 
-            csv.WriteHeader<TEvent>();
+            csv.WriteHeader<T>();
             csv.NextRecord();
-            csv.WriteRecords(events);
+            csv.WriteRecords(rows);
             writer.Flush();
 
             return stream;
@@ -55,6 +57,22 @@ public class AuditReportCreator(ILogger<AuditReportCreator> logger)
         {
             logger.ErrorWhileCreating(ex);
             throw;
+        }
+    }
+
+    public class CsvDateTimeConverter : DateTimeConverter
+    {
+        public override string ConvertToString(object value, IWriterRow row, MemberMapData memberMapData)
+        {
+            if (value is not DateTime dateTime)
+            {
+                return base.ConvertToString(value, row, memberMapData);
+            }
+
+            var culture = memberMapData.TypeConverterOptions.CultureInfo;
+            var format = $"{culture?.DateTimeFormat.ShortDatePattern} {culture?.DateTimeFormat.ShortTimePattern}";
+
+            return $"=\"{dateTime.ToString(format)}\"";
         }
     }
 }

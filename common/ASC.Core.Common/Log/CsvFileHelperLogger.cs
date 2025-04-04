@@ -24,9 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AuditTrail.Log;
-internal static partial class AuditReportCreatorLogger
+namespace ASC.Core.Common.Log;
+internal static partial class CsvFileHelperLogger
 {
-    [LoggerMessage(LogLevel.Error, "Error while creating login report:")]
-    public static partial void ErrorWhileCreating(this ILogger<AuditReportCreator> logger, Exception exception);
+    [LoggerMessage(LogLevel.Error, "Error while creating csv file:")]
+    public static partial void ErrorWhileCreating(this ILogger<CsvFileHelper> logger, Exception exception);
 }

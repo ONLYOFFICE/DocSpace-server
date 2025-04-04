@@ -24,20 +24,20 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AuditTrail;
+namespace ASC.Files.Core.Utils;
 
 [Scope]
-public class AuditReportUploader(GlobalFolderHelper globalFolderHelper,
-    ILogger<AuditReportUploader> logger,
+public class CsvFileUploader(GlobalFolderHelper globalFolderHelper,
+    ILogger<CsvFileUploader> logger,
     FileUploader fileUploader,
     FilesLinkUtility filesLinkUtility,
     CommonLinkUtility commonLinkUtility)
 {
-    public async Task<string> UploadCsvReport(Stream stream, string reportName)
+    public async Task<string> UploadFile(Stream stream, string fileName)
     {
         try
         {
-            var file = await fileUploader.ExecAsync(await globalFolderHelper.FolderMyAsync, reportName, stream.Length, stream, true);
+            var file = await fileUploader.ExecAsync(await globalFolderHelper.FolderMyAsync, fileName, stream.Length, stream, true);
             var fileUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebEditorUrl(file.Id));
 
             fileUrl += $"&options={{\"codePage\":{Encoding.UTF8.CodePage}}}";
