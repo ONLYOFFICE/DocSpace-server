@@ -293,6 +293,8 @@ public class BillingException : Exception
 
 public class BillingNotFoundException(string message) : BillingException(message);
 
+public class BillingLicenseTypeException(string message) : BillingException(message);
+
 public class BillingNotConfiguredException : BillingException
 {
     public BillingNotConfiguredException(string message) : base(message)

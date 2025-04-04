@@ -126,6 +126,9 @@
   <data name="LicenseKeyNotFound" xml:space="preserve">
     <value>You must enter a license key</value>
   </data>
+  <data name="LicenseTypeNotCorrect" xml:space="preserve">
+    <value>License Conflict. Please ensure that you have installed the correct edition of {0} DocSpace (Enterprise or Developer). If you have any questions, feel free to contact your sales manager.</value>
+  </data>
   <data name="NewDocument" xml:space="preserve">
     <value>New document</value>
   </data>
