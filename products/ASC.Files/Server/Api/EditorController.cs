@@ -263,6 +263,11 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                 };
             }
         }
+
+        if (rootFolder.RootFolderType == FolderType.RoomTemplates)
+        {
+            result.File.CanShare = false;
+        }
         return result;
     }
 
