@@ -212,12 +212,20 @@ public class ReassignProgressItem : DistributedTaskProgress
     private async Task DeleteUserProfile(UserManager userManager, UserPhotoManager userPhotoManager, MessageService messageService, DisplayUserSettingsHelper displayUserSettingsHelper, UserSocketManager socketManager, UserWebhookManager webhookManager)
     {
         var user = await userManager.GetUsersAsync(FromUser);
+        var isGuest = await userManager.IsGuestAsync(FromUser);
         var userName = user.DisplayUserName(false, displayUserSettingsHelper);
 
         await userPhotoManager.RemovePhotoAsync(user.Id);
         await userManager.DeleteUserAsync(user.Id);
-        await socketManager.DeleteUserAsync(user.Id);
 
+        if (isGuest)
+        {
+            await socketManager.DeleteGuestAsync(user.Id);
+        }
+        else
+        {
+            await socketManager.DeleteUserAsync(user.Id);
+        }
         if (_httpHeaders != null)
         {
             messageService.SendHeadersMessage(MessageAction.UserDeleted, MessageTarget.Create(FromUser), _httpHeaders, userName);
