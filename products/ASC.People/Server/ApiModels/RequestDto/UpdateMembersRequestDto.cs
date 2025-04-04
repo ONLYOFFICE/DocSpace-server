@@ -27,7 +27,7 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters for updating user information.
+/// The request parameters for updating the user information.
 /// </summary>
 public class UpdateMembersRequestDto
 {
@@ -43,7 +43,7 @@ public class UpdateMembersRequestDto
 }
 
 /// <summary>
-/// The request parameters for updating user status.
+/// The request parameters for updating the user status.
 /// </summary>
 public class UpdateMemberStatusRequestDto
 {
@@ -54,14 +54,14 @@ public class UpdateMemberStatusRequestDto
     public EmployeeStatus Status { get; set; }
 
     /// <summary>
-    /// The update members request parameters.
+    /// The request parameters for updating the user information.
     /// </summary>
     [FromBody]
     public UpdateMembersRequestDto UpdateMembers { get; set; }
 }
 
 /// <summary>
-/// The request parameters for updating user type.
+/// The request parameters for updating the user type.
 /// </summary>
 public class UpdateMemberTypeRequestDto
 {
@@ -72,25 +72,25 @@ public class UpdateMemberTypeRequestDto
     public EmployeeType Type { get; set; }
 
     /// <summary>
-    /// The update members request parameters.
+    /// The request parameters for updating the user information.
     /// </summary>
     [FromBody]
     public UpdateMembersRequestDto UpdateMembers { get; set; }
 }
 
 /// <summary>
-/// The request parameters for updating user activation status.
+/// The request parameters for updating the user activation status.
 /// </summary>
 public class UpdateMemberActivationStatusRequestDto
 {
     /// <summary>
-    /// The user activation status.
+    /// The new user activation status.
     /// </summary>
     [FromRoute(Name = "activationstatus")]
     public EmployeeActivationStatus ActivationStatus { get; set; }
 
     /// <summary>
-    /// The update members request parameters.
+    /// The request parameters for updating the user information.
     /// </summary>
     [FromBody]
     public UpdateMembersRequestDto UpdateMembers { get; set; }

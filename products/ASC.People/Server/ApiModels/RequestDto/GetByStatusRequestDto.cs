@@ -27,7 +27,7 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// The get by status request parameters.
+/// The request parameters for getting profiles by the user status.
 /// </summary>
 public class GetByStatusRequestDto
 {

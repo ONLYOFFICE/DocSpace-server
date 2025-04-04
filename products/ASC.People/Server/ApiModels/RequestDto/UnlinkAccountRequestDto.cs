@@ -27,7 +27,7 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// The unlink account request parameters.
+/// The request parameters for unlinking a third-party account.
 /// </summary>
 public class UnlinkAccountRequestDto
 {

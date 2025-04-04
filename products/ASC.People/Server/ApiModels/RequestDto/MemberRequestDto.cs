@@ -27,7 +27,7 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters fir the user email.
+/// The request parameters for the user email.
 /// </summary>
 public class EmailMemberRequestDto
 {

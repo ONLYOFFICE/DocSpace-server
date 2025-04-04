@@ -27,7 +27,7 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// The group request parameters.
+/// The generic group request parameters.
 /// </summary>
 public abstract class GroupRequestDtoBase
 {

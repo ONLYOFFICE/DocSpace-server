@@ -27,17 +27,17 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// The transfer group members request parameters.
+/// The request parameters for transferring the group members to another group.
 /// </summary>
 public class TransferGroupMembersRequestDto
 {
     /// <summary>
-    /// The transfer group ID.
+    /// The group ID.
     /// </summary>
     public Guid GroupId { get; set; }
 
     /// <summary>
-    /// The new transfer group ID.
+    /// The new group ID.
     /// </summary>
     public Guid NewGroupId { get; set; }
 }

@@ -27,36 +27,36 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// The simple by filter request parameters.
+/// The filter request parameters.
 /// </summary>
 public class SimpleByFilterRequestDto
 {
     /// <summary>
-    /// The simple by filter user status.
+    /// The user status.
     /// </summary>
     [FromQuery(Name = "employeeStatus")]
     public EmployeeStatus? EmployeeStatus { get; set; }
 
     /// <summary>
-    /// The simple by filter group ID.
+    /// The group ID.
     /// </summary>
     [FromQuery(Name = "groupId")]
     public Guid? GroupId { get; set; }
 
     /// <summary>
-    /// The simple by filter activation status.
+    /// The user activation status.
     /// </summary>
     [FromQuery(Name = "activationStatus")]
     public EmployeeActivationStatus? ActivationStatus { get; set; }
 
     /// <summary>
-    /// The simple by filter user type.
+    /// The user type.
     /// </summary>
     [FromQuery(Name = "employeeType")]
     public EmployeeType? EmployeeType { get; set; }
 
     /// <summary>
-    /// The simple by filter list of user types.
+    /// The list of user types.
     /// </summary>
     [FromQuery(Name = "employeeTypes")]
     public EmployeeType[] EmployeeTypes { get; set; }
@@ -68,19 +68,19 @@ public class SimpleByFilterRequestDto
     public bool? IsAdministrator { get; set; }
 
     /// <summary>
-    /// The simple by filter user payment status.
+    /// The user payment status.
     /// </summary>
     [FromQuery(Name = "payments")]
     public Payments? Payments { get; set; }
 
     /// <summary>
-    /// The simple by filter account login type.
+    /// The account login type.
     /// </summary>
     [FromQuery(Name = "accountLoginType")]
     public AccountLoginType? AccountLoginType { get; set; }
 
     /// <summary>
-    /// The simple by filter by quota (All - 0, Default - 1, Custom - 2).
+    /// The quota filter (All - 0, Default - 1, Custom - 2).
     /// </summary>
     [FromQuery(Name = "quotaFilter")]
     public QuotaFilter? QuotaFilter { get; set; }
@@ -92,25 +92,25 @@ public class SimpleByFilterRequestDto
     public bool? WithoutGroup { get; set; }
 
     /// <summary>
-    /// Specifies whether or not the user should be a member of the group with the specified ID.
+    /// Specifies whether the user should be a member of the group with the specified ID.
     /// </summary>
     [FromQuery(Name = "excludeGroup")]
     public bool? ExcludeGroup { get; set; }
 
     /// <summary>
-    /// Specifies whether the simple by filter is invited by me or not.
+    /// Specifies whether the user is invited by the current user or not.
     /// </summary>
     [FromQuery(Name = "invitedByMe")]
     public bool? InvitedByMe { get; set; }
 
     /// <summary>
-    /// The simple by filter inviter ID.
+    /// The inviter ID.
     /// </summary>
     [FromQuery(Name = "inviterId")]
     public Guid? InviterId { get; set; }
 
     /// <summary>
-    /// The simple by filter area.
+    /// The filter area.
     /// </summary>
     [FromQuery(Name = "area")]
     public Area Area { get; set; } = Area.All;

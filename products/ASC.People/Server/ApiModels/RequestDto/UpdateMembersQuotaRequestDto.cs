@@ -27,7 +27,7 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters for updating user information.
+/// The request parameters for updating a user quota.
 /// </summary>
 public class UpdateMembersQuotaRequestDto
 {

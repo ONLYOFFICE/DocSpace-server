@@ -61,25 +61,25 @@ public class ThumbnailsDataDto
     public string Retina { get; set; }
 
     /// <summary>
-    /// The thumbnail maximum size.
+    /// The thumbnail maximum size photo.
     /// </summary>
     [SwaggerSchemaCustom(Example = "default_user_photo_size_200-200.png")]
     public string Max { get; set; }
 
     /// <summary>
-    /// The thumbnail big.
+    /// The thumbnail big size photo.
     /// </summary>
     [SwaggerSchemaCustom(Example = "default_user_photo_size_82-82.png")]
     public string Big { get; set; }
 
     /// <summary>
-    /// The thumbnail medium.
+    /// The thumbnail medium size photo.
     /// </summary>
     [SwaggerSchemaCustom(Example = "default_user_photo_size_48-48.png")]
     public string Medium { get; set; }
 
     /// <summary>
-    /// The small thumbnail.
+    /// The thumbnail small size photo.
     /// </summary>
     [SwaggerSchemaCustom(Example = "default_user_photo_size_32-32.png")]
     public string Small { get; set; }

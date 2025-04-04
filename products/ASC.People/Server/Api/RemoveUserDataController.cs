@@ -58,7 +58,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     }
 
     /// <summary>
-    /// Sends instructions for deleting a user profile.
+    /// Sends the instructions for deleting a user profile.
     /// </summary>
     /// <short>
     /// Send the deletion instructions

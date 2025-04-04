@@ -43,38 +43,38 @@ public class LinkAccountRequestDto
 public class SignupAccountRequestDto : LinkAccountRequestDto
 {
     /// <summary>
-    /// The signup account employee type.
+    /// The user type.
     /// </summary>
     public EmployeeType? EmployeeType { get; set; }
 
     /// <summary>
-    /// The signup account first name.
+    /// The user first name.
     /// </summary>
     public string FirstName { get; set; }
 
     /// <summary>
-    /// The signup account last name.
+    /// The user last name.
     /// </summary>
     public string LastName { get; set; }
 
     /// <summary>
-    /// The signup account email address.
+    /// The user email address.
     /// </summary>
     [EmailAddress]
     public string Email { get; set; }
 
     /// <summary>
-    /// The signup account password hash.
+    /// The user password hash.
     /// </summary>
     public string PasswordHash { get; set; }
 
     /// <summary>
-    /// The signup account link key.
+    /// The user link key.
     /// </summary>
     public string Key { get; set; }
 
     /// <summary>
-    /// The signup account culture.
+    /// The user culture code.
     /// </summary>
     public string Culture { get; set; }
 }

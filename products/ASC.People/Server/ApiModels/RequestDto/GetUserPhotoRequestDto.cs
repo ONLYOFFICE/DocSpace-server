@@ -27,7 +27,7 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// The get user photo request parameters.
+/// The request parameters for getting a user photo.
 /// </summary>
 public class GetUserPhotoRequestDto
 {

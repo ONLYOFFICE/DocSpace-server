@@ -27,7 +27,7 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters for terminating the reassignment process.
+/// The request parameters for terminating the reassignment/deletion process.
 /// </summary>
 public class TerminateRequestDto
 {

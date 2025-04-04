@@ -32,19 +32,19 @@ namespace ASC.People.ApiModels.RequestDto;
 public class SearchDto
 {
     /// <summary>
-    /// The search employee status.
+    /// The user status.
     /// </summary>
     [FromQuery(Name = "employeeStatus")]
     public EmployeeStatus? EmployeeStatus { get; set; }
 
     /// <summary>
-    /// The search activation status.
+    /// The user activation status.
     /// </summary>
     [FromQuery(Name = "activationStatus")]
     public EmployeeActivationStatus? ActivationStatus { get; set; }
 
     /// <summary>
-    /// Specifies whether to exclude shared or not.
+    /// Specifies whether to exclude the user sharing settings or not.
     /// </summary>
     [FromQuery(Name = "excludeShared")]
     public bool? ExcludeShared { get; set; }

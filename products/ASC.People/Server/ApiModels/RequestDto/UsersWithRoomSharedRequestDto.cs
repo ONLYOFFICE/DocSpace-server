@@ -27,7 +27,7 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// The users with room shared request parameters.
+/// The request parameters for the user with the room sharing settings.
 /// </summary>
 public class UsersWithRoomSharedRequestDto<T>
 {
@@ -38,7 +38,7 @@ public class UsersWithRoomSharedRequestDto<T>
     public T Id { get; set; }
 
     /// <summary>
-    /// The employee status.
+    /// The user status.
     /// </summary>
     [FromQuery(Name = "employeeStatus")]
     public EmployeeStatus? EmployeeStatus { get; set; }
@@ -50,19 +50,19 @@ public class UsersWithRoomSharedRequestDto<T>
     public EmployeeActivationStatus? ActivationStatus { get; set; }
 
     /// <summary>
-    /// Specifies whether to exclude shared or not.
+    /// Specifies whether to exclude the usee sharing settings or not.
     /// </summary>
     [FromQuery(Name = "excludeShared")]
     public bool? ExcludeShared { get; set; }
 
     /// <summary>
-    /// Specifies whether the user is invited by me or not.
+    /// Specifies if the user is invited by the current user or not.
     /// </summary>
     [FromQuery(Name = "invitedByMe")]
     public bool? InvitedByMe { get; set; }
 
     /// <summary>
-    /// The user inviter ID.
+    /// The inviter ID.
     /// </summary>
     [FromQuery(Name = "inviterId")]
     public Guid? InviterId { get; set; }
@@ -74,7 +74,7 @@ public class UsersWithRoomSharedRequestDto<T>
     public Area Area { get; set; } = Area.All;
 
     /// <summary>
-    /// The list of employee types.
+    /// The list of user types.
     /// </summary>
     [FromQuery(Name = "employeeTypes")]
     public IEnumerable<EmployeeType> EmployeeTypes { get; set; } = new List<EmployeeType>();

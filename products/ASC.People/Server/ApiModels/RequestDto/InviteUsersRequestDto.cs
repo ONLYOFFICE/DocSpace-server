@@ -39,18 +39,18 @@ public class InviteUsersRequestDto
     public IEnumerable<UserInvitation> Invitations { get; set; }
 
     /// <summary>
-    /// The culture of invitations.
+    /// The culture code of invitations.
     /// </summary>
     public string Culture { get; set; }
 }
 
 /// <summary>
-/// The users invitation parameters.
+/// The user invitation parameters.
 /// </summary>
 public class UserInvitation : EmailInvitationDto
 {
     /// <summary>
-    /// The employee type of the user invitation.
+    /// The user type.
     /// </summary>
     public EmployeeType Type { get; set; }
 }

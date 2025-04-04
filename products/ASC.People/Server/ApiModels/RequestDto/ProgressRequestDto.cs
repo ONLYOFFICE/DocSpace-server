@@ -32,7 +32,7 @@ namespace ASC.People.ApiModels.RequestDto;
 public class ProgressRequestDto
 {
     /// <summary>
-    /// The user ID whose data is reassigned.
+    /// The user ID whose data is reassigned/removed.
     /// </summary>
     [FromRoute(Name = "userid")]
     public Guid UserId { get; set; }
