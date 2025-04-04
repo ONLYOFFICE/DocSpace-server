@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,7 +35,7 @@ public class UsersWithRoomSharedRequestDto<T>
     /// The user ID.
     /// </summary>
     [FromRoute(Name = "id")]
-    public T Id { get; set; }
+    public required T Id { get; set; }
 
     /// <summary>
     /// The user status.
@@ -50,13 +50,19 @@ public class UsersWithRoomSharedRequestDto<T>
     public EmployeeActivationStatus? ActivationStatus { get; set; }
 
     /// <summary>
-    /// Specifies whether to exclude the usee sharing settings or not.
+    /// Specifies whether to exclude the user sharing settings or not.
     /// </summary>
     [FromQuery(Name = "excludeShared")]
     public bool? ExcludeShared { get; set; }
 
     /// <summary>
-    /// Specifies if the user is invited by the current user or not.
+    /// Specifies whether to include the user sharing settings or not.
+    /// </summary>
+    [FromQuery(Name = "includeShared")]
+    public bool? IncludeShared { get; set; }
+
+    /// <summary>
+    /// Specifies whether the user was invited by the current user or not.
     /// </summary>
     [FromQuery(Name = "invitedByMe")]
     public bool? InvitedByMe { get; set; }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -140,6 +140,8 @@ public class File<T> : FileEntry<T>
     public string DownloadUrl => FileHelper.GetDownloadUrl(this);
 
     public bool Locked { get; set; }
+    public string LockedBy { get; set; }
+
     public bool IsForm {
         get
         {
@@ -147,8 +149,10 @@ public class File<T> : FileEntry<T>
         }
     }
 
+    public bool CustomFilterEnabled { get; set; }
+    public string CustomFilterEnabledBy { get; set; }
+
     public int Category { get; set; }
-    public string LockedBy { get; set; }
 
     [JsonIgnore]
     public override bool IsNew

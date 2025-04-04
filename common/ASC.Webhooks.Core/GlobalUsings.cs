@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -25,20 +25,19 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 global using System.ComponentModel.DataAnnotations;
-global using System.Text.Json.Serialization;
 
 global using ASC.Api.Core.Extensions;
 global using ASC.Common;
-global using ASC.Common.Mapping;
+global using ASC.Common.Caching;
 global using ASC.Core;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Model;
-global using ASC.Core.Common.Settings;
 global using ASC.EventBus.Abstractions;
 global using ASC.EventBus.Events;
 global using ASC.Webhooks.Core.EF.Context;
 global using ASC.Webhooks.Core.EF.Model;
 global using ASC.Webhooks.Core.IntegrationEvents.Events;
-global using ASC.Webhooks.Core.Resources;
 
 global using Microsoft.EntityFrameworkCore;
+
+global using ProtoBuf;

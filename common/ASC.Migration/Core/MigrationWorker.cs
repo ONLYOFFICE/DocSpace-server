@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,7 +33,7 @@ public class MigrationWorker(
     ILogger<MigrationWorker> logger)
 {
     private static readonly SemaphoreSlim _semaphoreSlim = new(1);
-    private readonly DistributedTaskQueue<MigrationOperation> _queue = queueFactory.CreateQueue<MigrationOperation>(60 * 60 * 24); // 1 day
+    private readonly DistributedTaskQueue<MigrationOperation> _queue = queueFactory.CreateQueue<MigrationOperation>();
     
     public async Task StartParse(int tenantId, Guid userId, string migratorName)
     {

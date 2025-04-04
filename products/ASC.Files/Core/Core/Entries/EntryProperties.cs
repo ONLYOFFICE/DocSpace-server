@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -71,7 +71,6 @@ public class EntryProperties<T>
 [Transient]
 public class FormFillingProperties<T>
 {
-    public bool CollectFillForm { get; set; }
     public bool StartFilling { get; set; }
     public string Title { get; set; }
     public T RoomId { get; set; }
@@ -80,5 +79,13 @@ public class FormFillingProperties<T>
     public T ResultsFolderId { get; set; }
     public T ResultsFileID { get; set; }
     public int ResultFormNumber { get; set; }
+    public DateTime FillingStopedDate { get; set; }
+    public FormFillingInterruption? FormFillingInterruption { get; set; }
 
+}
+
+public struct FormFillingInterruption
+{
+    public Guid UserId { get; set; }
+    public string RoleName { get; set; }
 }

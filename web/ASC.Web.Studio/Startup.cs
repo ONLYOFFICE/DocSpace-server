@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,6 +26,7 @@
 
 using System.Threading.Channels;
 
+using ASC.Common.Threading;
 using ASC.MessagingSystem.Data;
 
 namespace ASC.Web.Studio;
@@ -50,7 +51,6 @@ public class Startup : BaseStartup
             _configuration.Bind("openApi:endpoints", endpoints);
             app.UseOpenApiUI(endpoints);
         }
-
 
         app.UseRouting();
 
@@ -95,31 +95,22 @@ public class Startup : BaseStartup
         services.AddSingleton<MessageSenderService>();
         services.AddHostedService<MessageSenderService>();
         
+        services.RegisterQueue<RemovePortalOperation>();
+        services.RegisterQueue<MigrationOperation>(timeUntilUnregisterInSeconds: 60 * 60 * 24);
+        
         var lifeTime = TimeSpan.FromMinutes(5);
 
-        Func<IServiceProvider, HttpRequestMessage, IAsyncPolicy<HttpResponseMessage>> policyHandler = (s, _) =>
-        {
-            var settings = s.GetRequiredService<Settings>();
-
-            return HttpPolicyExtensions
-                .HandleTransientHttpError()
-                .OrResult(msg => msg.StatusCode == HttpStatusCode.NotFound)
-                .WaitAndRetryAsync(settings.RepeatCount ?? 5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
-        };
-
         services.AddHttpClient(WebhookSender.WEBHOOK)
-        .SetHandlerLifetime(lifeTime)
-        .AddPolicyHandler(policyHandler);
-
+                .SetHandlerLifetime(lifeTime);
+             
         services.AddHttpClient(WebhookSender.WEBHOOK_SKIP_SSL)
-        .SetHandlerLifetime(lifeTime)
-        .AddPolicyHandler(policyHandler)
-        .ConfigurePrimaryHttpMessageHandler(_ =>
-        {
-            return new HttpClientHandler
-            {
-                ServerCertificateCustomValidationCallback = (_, _, _, _) => true
-            };
-        });
+                .SetHandlerLifetime(lifeTime)
+                .ConfigurePrimaryHttpMessageHandler(_ =>
+                {
+                    return new HttpClientHandler
+                    {
+                        ServerCertificateCustomValidationCallback = (_, _, _, _) => true
+                    };
+                });
     }
 }

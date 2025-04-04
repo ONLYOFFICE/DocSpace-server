@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,12 +28,11 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
 [Transient]
 public class FileDuplicateOperation : ComposeFileOperation<FileOperationData<string>, FileOperationData<int>>
-{
+{    
+    public override FileOperationType FileOperationType { get; set; } = FileOperationType.Duplicate;
     public FileDuplicateOperation() { }
     public FileDuplicateOperation(IServiceProvider serviceProvider) : base(serviceProvider) { }
-
-    protected override FileOperationType FileOperationType => FileOperationType.Duplicate;
-
+    
     public override Task RunJob(CancellationToken cancellationToken)
     {
         DaoOperation = new FileDuplicateOperation<int>(_serviceProvider, Data);
@@ -48,6 +47,8 @@ class FileDuplicateOperation<T>(IServiceProvider serviceProvider, FileOperationD
 {
     private readonly IDictionary<string, string> _headers = data.Headers;
     private CancellationToken _cancellationToken;
+    public override FileOperationType FileOperationType { get; set; } = FileOperationType.Duplicate;
+    
     public override Task RunJob(CancellationToken cancellationToken)
     {
         _cancellationToken = cancellationToken;
@@ -90,38 +91,30 @@ class FileDuplicateOperation<T>(IServiceProvider serviceProvider, FileOperationD
         await copyOperation.RunJob(_cancellationToken);
     }
 
-    private readonly Dictionary<string, Dictionary<string, dynamic>> _tasksProps = new();
+    private readonly Dictionary<string, FileOperation> _tasksProps = new();
     private async Task FileMoveCopyOperationPublishChanges(DistributedTask task)
     {
-        if (!_tasksProps.TryGetValue(task.Id, out var value))
-        {
-            value = new Dictionary<string, dynamic>();
-            _tasksProps.Add(task.Id, value);
-        }
+        _tasksProps[task.Id] = (FileOperation)task;
         
-        value[Process] = task[Process];
-        value[Res] = task[Res];
-        value[Err] = task[Err];
-
-        this[Process] = 0;
-        this[Res] = "";
+        Process = 0;
+        Result = "";
         
         foreach (var data in _tasksProps)
         {
-            this[Process] += data.Value[Process];
-            this[Res] += data.Value[Res];
-            var err = data.Value[Err];
+            Process += data.Value.Process;
+            Result += data.Value.Result;
+            var err = data.Value.Err;
             if (!string.IsNullOrEmpty(err))
             {
-                this[Err] = err;
+                Err = err;
             }
         }
         
         var progressSteps = Total;
 
-        var progress = (int)(this[Process] / (double)progressSteps * 100);
+        var progress = (int)(Process / (double)progressSteps * 100);
 
-        this[Progress] = progress < 100 ? progress : 100;
+        Progress = progress < 100 ? progress : 100;
         
         await PublishChanges();
     }

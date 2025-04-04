@@ -207,4 +207,36 @@ $OrangeButton</value>
   <data name="pattern_EditorMentions_push" xml:space="preserve">
     <value>$ToUserName mentioned you in the document $DocumentTitle</value>
   </data>
+  <data name="subject_FormStartedFilling" xml:space="preserve">
+    <value>DocSpace notification.</value>
+  </data>
+  <data name="pattern_FormStartedFilling" xml:space="preserve">
+    <value>
+      Activity notification. "$FromUserName":"$FromUserLink" started the form filling process:  "$DocumentTitle":"$DocumentURL" in the room: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="subject_YourTurnFormFilling" xml:space="preserve">
+    <value>DocSpace notification.</value>
+  </data>
+  <data name="pattern_YourTurnFormFilling" xml:space="preserve">
+    <value>
+      Activity notification. It’s your turn! Form filling is required: "$DocumentTitle":"$DocumentURL" in the room: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
+    <value>DocSpace notification.</value>
+  </data>
+  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
+    <value>
+      Activity notification. The form "$DocumentTitle":"$DocumentURL" was completely filled out in the room: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="subject_StoppedFormFilling" xml:space="preserve">
+    <value>DocSpace notification.</value>
+  </data>
+  <data name="pattern_StoppedFormFilling" xml:space="preserve">
+    <value>
+      Activity notification. "$FromUserName":"$FromUserLink" stopped form filling: "$DocumentTitle":"$DocumentURL" in the room: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
 </root>

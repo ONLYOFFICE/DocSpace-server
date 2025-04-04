@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,12 +34,12 @@ public class SocketManager(
     ITariffService tariffService,
     TenantManager tenantManager,
     ChannelWriter<SocketData> channelWriter,
-        MachinePseudoKeys machinePseudoKeys,
-        IConfiguration configuration,
-        FileDtoHelper filesWrapperHelper,
-        FolderDtoHelper folderDtoHelper,
-        FileSecurity fileSecurity,
-        UserManager userManager)
+    MachinePseudoKeys machinePseudoKeys,
+    IConfiguration configuration,
+    FileSecurity fileSecurity,
+    UserManager userManager,
+    IDaoFactory daoFactory,
+    FileSharing fileSharing)
     : SocketServiceClient(tariffService, tenantManager, channelWriter, machinePseudoKeys, configuration)
 {
     protected override string Hub => "files";
@@ -58,6 +58,10 @@ public class SocketManager(
 
     public async Task CreateFileAsync<T>(File<T> file, IEnumerable<Guid> users = null)
     {
+        if (users == null && file.IsForm)
+        {
+            users = await GetRecipientListForForm(file);
+        }
         await MakeRequest("create-file", file, true, users);
     }
 
@@ -122,32 +126,47 @@ public class SocketManager(
         await MakeRequest("mark-as-new-folder", result);
     }
 
-    public async Task BackupProgressAsync(int percentage)
+    public async Task BackupProgressAsync(int percentage, bool dump)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
-        await MakeRequest("backup-progress", new { tenantId, percentage });
+        await MakeRequest("backup-progress", new { tenantId, dump, percentage });
     }
 
-    public async Task EndBackupAsync<T>(T result)
+    public async Task EndBackupAsync<T>(T result, bool dump)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
-        await MakeRequest("end-backup", new { tenantId, result });
+        await MakeRequest("end-backup", new { tenantId, dump, result });
     }
 
-    public async Task RestoreProgressAsync(int tenantId, int percentage)
+    public async Task RestoreProgressAsync(int tenantId, bool dump, int percentage)
     {
-        await MakeRequest("restore-progress", new { tenantId, percentage });
+        await MakeRequest("restore-progress", new { tenantId, dump, percentage });
     }
 
-    public async Task EndRestoreAsync<T>(int tenantId, T result)
+    public async Task EndRestoreAsync<T>(int tenantId, bool dump, T result)
     {
-        await MakeRequest("end-restore", new { tenantId, result });
+        await MakeRequest("end-restore", new { tenantId, dump, result });
     }
 
+    private async Task<IEnumerable<Guid>> GetRecipientListForForm<T>(File<T> form)
+    {
+        List<Guid> users = null;
+
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var room = await folderDao.GetFirstParentTypeFromFileEntryAsync(form);
+        if (room != null && room.FolderType == FolderType.VirtualDataRoom)
+        {
+            var aces = await fileSharing.GetSharedInfoAsync(room);
+            users = aces.Where(ace => ace.Access != FileShare.FillForms)
+            .Select(ace => ace.Id).ToList();
+        }
+
+        return users;
+    }
     private async Task MakeCreateFormRequest<T>(string method, FileEntry<T> entry, IEnumerable<Guid> userIds, bool isOneMember)
     {
         var room = FolderRoom(entry.FolderIdDisplay);
-        var data = await Serialize(entry);
+        var data = Serialize(entry);
 
         await base.MakeRequest(method, new
         {
@@ -157,6 +176,7 @@ public class SocketManager(
             userIds,
             isOneMember
         });
+        
     }
     private async Task MakeRequest<T>(string method, FileEntry<T> entry, bool withData = false, IEnumerable<Guid> users = null, Func<Task> action = null)
     {
@@ -172,7 +192,7 @@ public class SocketManager(
 
         if (withData)
         {
-            data = await Serialize(entry);
+            data = Serialize(entry);
         }
 
         foreach (var userIds in whoCanRead.Chunk(1000))
@@ -201,12 +221,29 @@ public class SocketManager(
         return $"{tenantId}-DIR-{folderId}";
     }
 
-    private async Task<string> Serialize<T>(FileEntry<T> entry)
+    private string Serialize<T>(FileEntry<T> entry)
     {
         return entry switch
         {
-            File<T> file => JsonSerializer.Serialize(await filesWrapperHelper.GetAsync(file), typeof(FileDto<T>), FileEntryDtoContext.Default),
-            Folder<T> folder => JsonSerializer.Serialize(await folderDtoHelper.GetAsync(folder), typeof(FolderDto<T>), FileEntryDtoContext.Default),
+            File<T> file => JsonSerializer.Serialize(new FileDto<T>
+            {
+                Id = file.Id, 
+                FolderId = file.ParentId, 
+                Title = file.Title, 
+                Version = file.Version, 
+                VersionGroup = file.VersionGroup
+            }, _jsonSerializerOptions),
+            Folder<T> folder => JsonSerializer.Serialize(new FolderDto<T>
+            {
+                Id = folder.Id, 
+                ParentId = folder.ParentId, 
+                Title = folder.Title, 
+                RoomType = DocSpaceHelper.MapToRoomType(folder.FolderType), 
+                CreatedBy = new EmployeeDto
+                {
+                    Id = folder.CreateBy
+                }
+            }, _jsonSerializerOptions),
             _ => string.Empty
         };
     }
@@ -228,6 +265,12 @@ public class SocketManager(
     }
     
     private List<Guid> _admins;
+    private readonly JsonSerializerOptions _jsonSerializerOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
+    };
+
     private Task<IEnumerable<Guid>> Admins()
     {
         return _admins != null 

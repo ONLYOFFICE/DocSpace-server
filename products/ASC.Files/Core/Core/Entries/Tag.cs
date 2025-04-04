@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -41,7 +41,8 @@ public enum TagType
     Pin = 128,
     Origin = 256,
     RecentByLink = 512,
-    FromRoom = 1024
+    FromRoom = 1024,
+    CustomFilter = 2048
 }
 
 [DebuggerDisplay("{Name} ({Id}) entry {EntryType} ({EntryId})")]

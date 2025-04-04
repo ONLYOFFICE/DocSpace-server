@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -59,7 +59,7 @@ public class SearchIdDto<T>
     /// The search ID.
     /// </summary>
     [FromRoute(Name = "id")]
-    public T Id { get; set; }
+    public required T Id { get; set; }
 }
 
 
@@ -72,7 +72,7 @@ public class AdvancedSearchDto
     /// The user status.
     /// </summary>
     [FromRoute(Name = "status")]
-    public EmployeeStatus Status { get; set; }
+    public required EmployeeStatus Status { get; set; }
 
     /// <summary>
     /// The advanced search query.

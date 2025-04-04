@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -40,11 +40,11 @@ public class OwnerController(
     PermissionContext permissionContext,
     WebItemManager webItemManager,
     DisplayUserSettingsHelper displayUserSettingsHelper,
-    IMemoryCache memoryCache,
+    IFusionCache fusionCache,
     IHttpContextAccessor httpContextAccessor,
     IUrlShortener urlShortener,
     UserManagerWrapper userManagerWrapper)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
     /// Sends the instructions to change the DocSpace owner.

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,7 +27,7 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// 
+/// Request parameters for third-party operations
 /// </summary>
 public class ThirdpartyRequestsDto
 {
@@ -43,7 +43,7 @@ public class ThirdpartyRequestsDto
 }
 
 /// <summary>
-/// 
+/// Request parameters for confirmation code operations
 /// </summary>
 public class ConfirmationCodeRequestDto
 {
@@ -67,7 +67,7 @@ public class ConfirmationCodeRequestDto
 }
 
 /// <summary>
-/// 
+/// Request parameters for confirmation code URL operations
 /// </summary>
 public class ConfirmationCodeUrlRequestDto
 {
@@ -75,5 +75,5 @@ public class ConfirmationCodeUrlRequestDto
     /// Provider
     /// </summary>
     [FromRoute(Name = "provider")]
-    public LoginProvider Provider { get; set; }
+    public required LoginProvider Provider { get; set; }
 }

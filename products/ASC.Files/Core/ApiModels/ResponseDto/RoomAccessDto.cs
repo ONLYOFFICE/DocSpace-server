@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -37,4 +37,15 @@ public class RoomSecurityDto
     /// Warning
     /// </summary>
     public string Warning { get; set; }
+
+    /// <summary>
+    /// Error
+    /// </summary>
+    public RoomSecurityError Error { get; set; }
+}
+
+public enum RoomSecurityError
+{
+    None,
+    FormRoleBlockingDeletion
 }

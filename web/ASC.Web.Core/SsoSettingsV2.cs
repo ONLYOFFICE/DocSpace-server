@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -86,9 +86,12 @@ public class SsoSettingsV2 : ISettings<SsoSettingsV2>
             },
             SpLoginLabel = SSO_SP_LOGIN_LABEL,
             HideAuthPage = false,
-            UsersType = (int)EmployeeType.User
+            UsersType = (int)EmployeeType.User,
+            DisableEmailVerification = false
         };
     }
+    
+    public DateTime LastModified { get; set; }
 
     /// <summary>
     /// Specifies if SSO is enabled or not
@@ -138,6 +141,10 @@ public class SsoSettingsV2 : ISettings<SsoSettingsV2>
     /// <summary>Users type</summary>
     /// <type>ASC.Core.Users.EmployeeType, ASC.Core.Common</type>
     public int UsersType { get; set; }
+
+    /// <summary>Specifies if the email verification is disabled or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool DisableEmailVerification { get; set; }
 }
 
 

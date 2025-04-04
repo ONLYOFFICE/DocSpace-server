@@ -32,6 +32,7 @@ import com.asc.authorization.application.exception.authentication.Authentication
 import com.asc.authorization.application.security.authentication.BasicSignature;
 import com.asc.authorization.application.security.authentication.TenantAuthority;
 import com.asc.authorization.application.security.oauth.error.AuthenticationError;
+import com.asc.authorization.application.security.oauth.service.GrpcRegisteredClientService;
 import com.asc.authorization.application.security.service.SignatureService;
 import com.asc.common.application.proto.ClientResponse;
 import com.asc.common.core.domain.value.enums.AuditCode;
@@ -39,7 +40,6 @@ import com.asc.common.service.ports.output.message.publisher.AuditMessagePublish
 import com.asc.common.service.transfer.message.AuditMessage;
 import com.asc.common.utilities.HttpUtils;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
-import io.grpc.Deadline;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
@@ -47,10 +47,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -77,14 +75,9 @@ public class SignatureAuthenticationProvider implements AuthenticationProvider {
   @Value("${spring.application.name}")
   private String serviceName;
 
-  /** gRPC client for interacting with the Client Registration Service. */
-  @GrpcClient("registrationService")
-  private com.asc.common.application.proto.ClientRegistrationServiceGrpc
-          .ClientRegistrationServiceBlockingStub
-      registrationService;
-
   private final HttpUtils httpUtils;
   private final SignatureService signatureService;
+  private final GrpcRegisteredClientService registeredClientService;
   private final AuditMessagePublisher auditMessagePublisher;
   private final SecurityConfigurationProperties configurationProperties;
 
@@ -159,12 +152,7 @@ public class SignatureAuthenticationProvider implements AuthenticationProvider {
     return CompletableFuture.supplyAsync(
         () -> {
           try {
-            return registrationService
-                .withDeadline(Deadline.after(1100, TimeUnit.MILLISECONDS))
-                .getClient(
-                    com.asc.common.application.proto.GetClientRequest.newBuilder()
-                        .setClientId(clientId)
-                        .build());
+            return registeredClientService.getClient(clientId);
           } catch (Exception e) {
             return null;
           }
@@ -232,12 +220,7 @@ public class SignatureAuthenticationProvider implements AuthenticationProvider {
       HttpServletRequest request, BasicSignature signature, ClientResponse client) {
     auditMessagePublisher.publish(
         AuditMessage.builder()
-            .ip(
-                httpUtils
-                    .getRequestClientAddress(request)
-                    .map(httpUtils::extractHostFromUrl)
-                    .orElseGet(
-                        () -> httpUtils.extractHostFromUrl(httpUtils.getFirstRequestIP(request))))
+            .ip(httpUtils.extractHostFromUrl(httpUtils.getFirstRequestIP(request)))
             .initiator(serviceName)
             .target(client.getClientId())
             .browser(httpUtils.getClientBrowser(request))

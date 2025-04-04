@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -41,7 +41,8 @@ public class UploadControllerHelper(
     SecurityContext securityContext,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
-    FileChecker fileChecker)
+    FileChecker fileChecker,
+    WebhookManager webhookManager)
     : FilesHelperBase(
         filesSettingsHelper,
         fileUploader,
@@ -49,7 +50,8 @@ public class UploadControllerHelper(
         fileDtoHelper,
         fileStorageService,
         fileChecker,
-        httpContextAccessor)
+        httpContextAccessor,
+        webhookManager)
     {
     public async Task<object> CreateEditSessionAsync<T>(T fileId, long fileSize)
     {

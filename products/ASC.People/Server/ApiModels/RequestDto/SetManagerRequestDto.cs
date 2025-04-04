@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,7 +34,7 @@ public class SetManagerRequest
     /// <summary>
     /// The user ID.
     /// </summary>
-    public Guid UserId { get; set; }
+    public required Guid UserId { get; set; }
 }
 
 /// <summary>
@@ -46,7 +46,7 @@ public class SetManagerRequestDto
     /// The group ID.
     /// </summary>
     [FromRoute(Name = "id")]
-    public Guid Id { get; set; }
+    public required Guid Id { get; set; }
 
     /// <summary>
     /// The request for setting a group manager.

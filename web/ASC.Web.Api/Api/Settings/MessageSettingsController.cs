@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -37,12 +37,12 @@ public class MessageSettingsController(MessageService messageService,
         SettingsManager settingsManager,
         WebItemManager webItemManager,
         CustomNamingPeople customNamingPeople,
-        IMemoryCache memoryCache,
+        IFusionCache fusionCache,
         IHttpContextAccessor httpContextAccessor,
         TenantManager tenantManager,
         CookiesManager cookiesManager,
         CountPaidUserChecker countPaidUserChecker)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
     /// Displays the contact form on the "Sign In" page, allowing users to send a message to the DocSpace administrator in case they encounter any issues while accessing DocSpace.
@@ -103,7 +103,7 @@ public class MessageSettingsController(MessageService messageService,
 
         if (!SetupInfo.IsVisibleSettings("CookieSettings"))
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption, "CookieSettings");
+            throw new BillingException(Resource.ErrorNotAllowedOption);
         }
 
         await cookiesManager.SetLifeTimeAsync(inDto.LifeTime, inDto.Enabled);
@@ -149,7 +149,7 @@ public class MessageSettingsController(MessageService messageService,
             throw new Exception(Resource.ErrorEmptyMessage);
         }
 
-        CheckCache("sendadmmail");
+        await CheckCache("sendadmmail");
 
         await studioNotifyService.SendMsgToAdminFromNotAuthUserAsync(inDto.Email, message, inDto.Culture);
         messageService.Send(MessageAction.ContactAdminMailSent);
@@ -191,7 +191,7 @@ public class MessageSettingsController(MessageService messageService,
                 throw new Exception(Resource.ErrorNotCorrectEmail);
             }
             
-            CheckCache("sendjoininvite");
+            await CheckCache("sendjoininvite");
 
             var user = await userManager.GetUserByEmailAsync(email);
             if (!user.Id.Equals(Constants.LostUser.Id))

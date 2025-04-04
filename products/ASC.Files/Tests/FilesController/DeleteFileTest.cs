@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -48,7 +48,7 @@ public class DeleteFileTest(
             RequestUri = new Uri($"{_filesClient.BaseAddress}file/{createdFile.Id}"),
             Method = HttpMethod.Delete,
             Content = new StringContent(jsonData, Encoding.UTF8, "application/json")
-        });
+        }, TestContext.Current.CancellationToken);
         
         var results = await HttpClientHelper.ReadFromJson<List<FileOperationResult>>(responseMessage);
         if (results.Any(r => !r.Finished))

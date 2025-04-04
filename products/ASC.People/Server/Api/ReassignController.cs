@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -37,7 +37,8 @@ public class ReassignController(
     AuthContext authContext,
     TenantManager tenantManager,
     SecurityContext securityContext,
-    WebItemSecurity webItemSecurity)
+    WebItemSecurity webItemSecurity,
+    FileStorageService fileStorageService)
     : ApiControllerBase
     {
     /// <summary>
@@ -48,7 +49,7 @@ public class ReassignController(
     [Tags("People / User data")]
     [SwaggerResponse(200, "Reassignment progress", typeof(TaskProgressResponseDto))]
     [HttpGet("progress/{userid:guid}")]
-    public async Task<TaskProgressResponseDto> GetReassignProgressAsync(ProgressRequestDto inDto)
+    public async Task<TaskProgressResponseDto> GetReassignProgressAsync(UserIdRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
 
@@ -125,5 +126,37 @@ public class ReassignController(
         }
 
         return TaskProgressResponseDto.Get(progressItem);
+    }
+
+    /// <summary>
+    /// Checks if the reassignment of rooms and shared files is necessary or not.
+    /// </summary>
+    /// <short>Check the data reassignment need</short>
+    /// <path>api/2.0/people/reassign/necessary</path>
+    [Tags("People / User data")]
+    [SwaggerResponse(200, "Boolean value: true if neccessary reassign", typeof(bool))]
+    [HttpGet("necessary")]
+    public async Task<bool> NecessaryReassignAsync([FromQuery] NecessaryReassignDto inDto)
+    {
+        await permissionContext.DemandPermissionsAsync(new UserSecurityProvider(inDto.Type), Constants.Action_AddRemoveUser);
+
+        var currentUser = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
+        var user = await userManager.GetUsersAsync(inDto.UserId);
+        var userType = await userManager.GetUserTypeAsync(user);
+        var tenant = tenantManager.GetCurrentTenant();
+
+        if (!currentUser.IsOwner(tenant) && userType is EmployeeType.DocSpaceAdmin)
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
+        var result = await fileStorageService.AnyRoomsAsync(inDto.UserId);
+
+        if (inDto.Type is EmployeeType.Guest && !result)
+        {
+            result = (await fileStorageService.GetSharedFilesAsync(inDto.UserId)).Any();
+        }
+
+        return result;
     }
 }

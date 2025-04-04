@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -155,9 +155,11 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/folder/{folderId}/order</path>
     [Tags("Files / Folders")]
     [HttpPut("folder/{folderId}/order")]
-    public async Task SetFileOrder(OrderFolderRequestDto<T> inDto)
+    public async Task<FolderDto<T>> SetFileOrder(OrderFolderRequestDto<T> inDto)
     {
-        await fileStorageService.SetFolderOrder(inDto.FolderId, inDto.Order.Order);
+        var folder = await fileStorageService.SetFolderOrder(inDto.FolderId, inDto.Order.Order);
+
+        return await _folderDtoHelper.GetAsync(folder);
     }
 
     /// <summary>
@@ -274,7 +276,7 @@ public abstract class FoldersController<T>(
     [SwaggerResponse(403, "You don't have enough permission to rename the folder")]
     [HttpPut("folder/{folderId}")]
     public async Task<FolderDto<T>> RenameFolderAsync(CreateFolderRequestDto<T> inDto)
-    {        
+    {
         var folder = await fileStorageService.FolderRenameAsync(inDto.FolderId, inDto.Folder.Title);
 
         return await _folderDtoHelper.GetAsync(folder);
@@ -438,7 +440,7 @@ public class FoldersControllerCommon(
 
         await foreach (var folder in foldersIds)
         {
-            yield return await folderContentDtoHelper.GetAsync(folder, inDto.UserIdOrGroupId, inDto.FilterType, 0, true, true, false, ApplyFilterOption.All, null);
+            yield return await folderContentDtoHelper.GetAsync(folder, inDto.UserIdOrGroupId, inDto.FilterType, 0, true, false, false, ApplyFilterOption.All, null);
         }
     }
 
@@ -500,9 +502,10 @@ public class FoldersControllerCommon(
             withoutTrash = true;
         }
 
-        if (!isGuest)
+        var my = await globalFolderHelper.FolderMyAsync;
+        if (my != 0)
         {
-            yield return await globalFolderHelper.FolderMyAsync;
+            yield return my;
         }
 
         if (!withoutTrash)

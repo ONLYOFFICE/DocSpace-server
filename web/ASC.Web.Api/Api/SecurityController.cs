@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -102,7 +102,13 @@ public class SecurityController(PermissionContext permissionContext,
 
         DemandBaseAuditPermission();
 
-        return (await auditEventsRepository.GetByFilterAsync(startIndex: 0, limit: 20)).Select(x => new AuditEventDto(x, auditActionMapper, apiDateTimeHelper));
+        var settings = await settingsManager.LoadAsync<TenantAuditSettings>();
+
+        var to = DateTime.UtcNow;
+        var from = to.Subtract(TimeSpan.FromDays(settings.AuditTrailLifeTime));
+
+        return (await auditEventsRepository.GetByFilterAsync(startIndex: 0, limit: 20, from: from, to: to))
+            .Select(x => new AuditEventDto(x, auditActionMapper, apiDateTimeHelper));
     }
 
     /// <summary>
@@ -405,7 +411,14 @@ public class SecurityController(PermissionContext permissionContext,
     public async Task<CspDto> GetCsp()
     {
         //await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        var settings = await cspSettingsHelper.LoadAsync();
+        
+        var settings = await cspSettingsHelper.LoadAsync(HttpContext.GetIfModifiedSince());
+
+        if (HttpContext.TryGetFromCache(settings.LastModified))
+        {
+            return null;
+        }
+        
         return new CspDto
         {
             Domains = settings.Domains ?? [],
@@ -430,22 +443,30 @@ public class SecurityController(PermissionContext permissionContext,
         var isAdmin = await userManager.GetUserTypeAsync(userInfo.Id) is EmployeeType.DocSpaceAdmin;
         var isGuest = await userManager.IsGuestAsync(userId);
         var serverRootPath = baseCommonLinkUtility.ServerRootPath;
-       
+        var isPublic = true;
+
+        var tenantDevToolsAccessSettings = await settingsManager.LoadAsync<TenantDevToolsAccessSettings>();
+
+        if (tenantDevToolsAccessSettings != null)
+        {
+            isPublic = !tenantDevToolsAccessSettings.LimitedAccessForUsers;
+        }
+        
         var token = new JwtSecurityToken(
             issuer: serverRootPath,
             audience: serverRootPath,
             claims: new List<Claim>() {
-                new Claim("sub", securityContext.CurrentAccount.ID.ToString()), 
-                new Claim("user_id", securityContext.CurrentAccount.ID.ToString()), 
-                new Claim("user_name", userFormatter.GetUserName(userInfo)),
-                new Claim("user_email", userInfo.Email),
-                new Claim("tenant_id", tenant.Id.ToString()),
-                new Claim("tenant_url", serverRootPath),
-                new Claim("is_admin", isAdmin.ToString().ToLower()),
-                new Claim("is_guest", isGuest.ToString().ToLower()),
-                new Claim("is_public", "true") // TODO: check OAuth enable for non-admin users
+                new("sub", securityContext.CurrentAccount.ID.ToString()), 
+                new("user_id", securityContext.CurrentAccount.ID.ToString()), 
+                new("user_name", userFormatter.GetUserName(userInfo)),
+                new("user_email", userInfo.Email),
+                new("tenant_id", tenant.Id.ToString()),
+                new("tenant_url", serverRootPath),
+                new("is_admin", isAdmin.ToString().ToLower()),
+                new("is_guest", isGuest.ToString().ToLower()),
+                new("is_public", isPublic.ToString().ToLower()) // TODO: check OAuth enable for non-admin users
             },
-            expires: DateTime.Now.AddDays(1),
+            expires: DateTime.Now.AddMinutes(15),
             signingCredentials: creds);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
@@ -458,7 +479,7 @@ public class SecurityController(PermissionContext permissionContext,
             && (!SetupInfo.IsVisibleSettings(ManagementType.LoginHistory.ToStringFast())
                 || !(await tenantManager.GetCurrentTenantQuotaAsync()).Audit))
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption, "Audit");
+            throw new BillingException(Resource.ErrorNotAllowedOption);
         }
     }
 
@@ -467,7 +488,7 @@ public class SecurityController(PermissionContext permissionContext,
         if (!coreBaseSettings.Standalone
             && !SetupInfo.IsVisibleSettings(ManagementType.LoginHistory.ToStringFast()))
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption, "Audit");
+            throw new BillingException(Resource.ErrorNotAllowedOption);
         }
     }
 }

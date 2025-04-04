@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,9 +34,7 @@ namespace ASC.Web.Api.Controllers.Settings;
 [DefaultRoute]
 [ApiController]
 [ControllerName("settings")]
-public class BaseSettingsController(ApiContext apiContext, IMemoryCache memoryCache, WebItemManager webItemManager,
-        IHttpContextAccessor httpContextAccessor)
-    : ControllerBase
+public class BaseSettingsController(ApiContext apiContext, IFusionCache fusionCache, WebItemManager webItemManager, IHttpContextAccessor httpContextAccessor) : ControllerBase
 {
     //private const int ONE_THREAD = 1;
 
@@ -50,15 +48,17 @@ public class BaseSettingsController(ApiContext apiContext, IMemoryCache memoryCa
     private readonly int _maxCount = 10;
     private readonly int _expirationMinutes = 2;
 
-    internal void CheckCache(string baseKey)
+    internal async Task CheckCache(string baseKey)
     {
         var key = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress + baseKey;
-        if (memoryCache.TryGetValue<int>(key, out var count) && count > _maxCount)
+        var countFromCache = await fusionCache.TryGetAsync<int>(key);
+        var count = countFromCache.HasValue ? countFromCache.Value : 0;
+        if (count > _maxCount)
         {
             throw new Exception(Resource.ErrorRequestLimitExceeded);
         }
 
-        memoryCache.Set(key, count + 1, TimeSpan.FromMinutes(_expirationMinutes));
+        await fusionCache.SetAsync(key, count + 1, TimeSpan.FromMinutes(_expirationMinutes));
     }
 
     internal string GetProductName(Guid productId)

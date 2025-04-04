@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,40 +34,11 @@ public class MigrationOperation : DistributedTaskProgress
     private string _migratorName;
     private Guid _userId;
 
-    private int? _tenantId;
-    public int TenantId
-    {
-        get => _tenantId ?? this[nameof(_tenantId)];
-        set
-        {
-            _tenantId = value;
-            this[nameof(_tenantId)] = value;
-        }
-    }
+    public int TenantId { get; set; }
+    public MigrationApiInfo MigrationApiInfo { get; set; }
+    public List<string> ImportedUsers { get; set; }
+    public string LogName { get; set; }
 
-    private MigrationApiInfo _migrationApiInfo;
-    public MigrationApiInfo MigrationApiInfo
-    {
-        get => _migrationApiInfo ?? JsonSerializer.Deserialize<MigrationApiInfo>(this[nameof(_migrationApiInfo)]);
-        set
-        {
-            _migrationApiInfo = value;
-            this[nameof(_migrationApiInfo)] = JsonSerializer.Serialize(value);
-        }
-    }
-
-    private List<string> _importedUsers;
-    public List<string> ImportedUsers
-    {
-        get => _importedUsers ?? JsonSerializer.Deserialize<List<string>>(this[nameof(_importedUsers)]);
-        set
-        {
-            _importedUsers = value;
-            this[nameof(_importedUsers)] = JsonSerializer.Serialize(value);
-        }
-    }
-
-    private string _logName;
     private readonly ILogger<MigrationOperation> _logger;
     private readonly MigrationCore _migrationCore;
     private readonly TenantManager _tenantManager;
@@ -92,15 +63,6 @@ public class MigrationOperation : DistributedTaskProgress
         _hybridCache = hybridCache;
     }
 
-    public string LogName
-    {
-        get => _logName ?? this[nameof(_logName)];
-        set
-        {
-            _logName = value;
-            this[nameof(_logName)] = value;
-        }
-    }
 
     public void InitParse(int tenantId, Guid userId, string migratorName)
     {
@@ -122,8 +84,8 @@ public class MigrationOperation : DistributedTaskProgress
         Migrator migrator = null;
         try
         {
-            var onlyParse = _migrationApiInfo == null;
-            var copyInfo = _migrationApiInfo.Clone();
+            var onlyParse = MigrationApiInfo == null;
+            var copyInfo = MigrationApiInfo.Clone();
             if (onlyParse)
             {
                 MigrationApiInfo = new MigrationApiInfo();

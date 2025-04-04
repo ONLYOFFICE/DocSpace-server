@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -36,18 +36,19 @@ namespace ASC.Web.Api.Controllers;
 [ApiController]
 [AllowNotPayment]
 [ControllerName("portal")]
-public class PaymentController(UserManager userManager,
-        TenantManager tenantManager,
-        ITariffService tariffService,
-        IQuotaService quotaService,
-        SecurityContext securityContext,
-        RegionHelper regionHelper,
-        QuotaHelper tariffHelper,
-        IMemoryCache memoryCache,
-        IHttpContextAccessor httpContextAccessor,
-        MessageService messageService,
-        StudioNotifyService studioNotifyService,
-        PermissionContext permissionContext)
+public class PaymentController(
+    UserManager userManager,
+    TenantManager tenantManager,
+    ITariffService tariffService,
+    IQuotaService quotaService,
+    SecurityContext securityContext,
+    RegionHelper regionHelper,
+    QuotaHelper tariffHelper,
+    IFusionCache fusionCache,
+    IHttpContextAccessor httpContextAccessor,
+    MessageService messageService,
+    StudioNotifyService studioNotifyService,
+    PermissionContext permissionContext)
     : ControllerBase
 {
     private readonly int _maxCount = 10;
@@ -279,21 +280,22 @@ public class PaymentController(UserManager userManager,
             throw new Exception(Resource.ErrorEmptyMessage);
         }
 
-        CheckCache("salesrequest");
+        await CheckCache("salesrequest");
 
         await studioNotifyService.SendMsgToSalesAsync(inDto.Email, inDto.UserName, inDto.Message);
         messageService.Send(MessageAction.ContactSalesMailSent);
     }
-
-    private void CheckCache(string baseKey)
+    
+    private async Task CheckCache(string baseKey)
     {
-        var key = httpContextAccessor.HttpContext.Connection.RemoteIpAddress + baseKey;
-
-        if (memoryCache.TryGetValue<int>(key, out var count) && count > _maxCount)
+        var key = httpContextAccessor.HttpContext?.Connection.RemoteIpAddress + baseKey;
+        var countFromCache = await fusionCache.TryGetAsync<int>(key);
+        var count = countFromCache.HasValue ? countFromCache.Value : 0;
+        if (count > _maxCount)
         {
             throw new Exception(Resource.ErrorRequestLimitExceeded);
         }
 
-        memoryCache.Set(key, count + 1, TimeSpan.FromMinutes(_expirationMinutes));
+        await fusionCache.SetAsync(key, count + 1, TimeSpan.FromMinutes(_expirationMinutes));
     }
 }

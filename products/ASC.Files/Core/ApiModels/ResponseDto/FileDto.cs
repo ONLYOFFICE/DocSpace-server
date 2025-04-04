@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -81,6 +81,12 @@ public class FileDto<T> : FileEntryDto<T>
     public string WebUrl { get; set; }
 
     /// <summary>
+    /// Short Web URL
+    /// </summary>
+    [Url]
+    public string ShortWebUrl { get; set; }
+
+    /// <summary>
     /// File type
     /// </summary>
     public FileType FileType { get; set; }
@@ -119,7 +125,7 @@ public class FileDto<T> : FileEntryDto<T>
     public bool? Locked { get; set; }
 
     /// <summary>
-    /// User ID who locked a file
+    /// User name who locked a file
     /// </summary>
     public string LockedBy { get; set; }
 
@@ -130,10 +136,26 @@ public class FileDto<T> : FileEntryDto<T>
     public bool? HasDraft { get; set; }
 
     /// <summary>
+    /// Status of the form filling process
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
+    public FormFillingStatus FormFillingStatus { get; set; } = FormFillingStatus.None;
+
+    /// <summary>
     /// Is there a form or not
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool? IsForm { get; set; }
+
+    /// <summary>
+    /// Is Custom Filter editing mode enabled for a file or not
+    /// </summary>
+    public bool? CustomFilterEnabled { get; set; }
+
+    /// <summary>
+    /// User name who enabled a Custom Filter editing mode for a file
+    /// </summary>
+    public string CustomFilterEnabledBy { get; set; }
 
     /// <summary>
     /// Specifies if the filling has started or not
@@ -192,9 +214,11 @@ public class FileDtoHelper(
         FileDateTime fileDateTime,
         ExternalShare externalShare,
         BreadCrumbsManager breadCrumbsManager,
-        FileSharing fileSharing,
-        FileChecker fileChecker)
-    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime) 
+        FileChecker fileChecker,
+        SecurityContext securityContext,
+        UserManager userManager,
+        IUrlShortener urlShortener)
+    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory) 
 {
     private readonly ApiDateTimeHelper _apiDateTimeHelper = apiDateTimeHelper;
 
@@ -216,7 +240,6 @@ public class FileDtoHelper(
         return result;
     }
 
-    private Dictionary<string, AceWrapper> shareCache = new();
     private async Task<FileDto<T>> GetFileWrapperAsync<T>(File<T> file, string order, TimeSpan? expiration, IFolder contextFolder = null)
     {
         var result = await GetAsync<FileDto<T>, T>(file);
@@ -225,11 +248,11 @@ public class FileDtoHelper(
         var extension = FileUtility.GetFileExtension(file.Title);
         var fileType = FileUtility.GetFileTypeByExtention(extension);
 
-        var fileDao = daoFactory.GetFileDao<T>();
+        var fileDao = _daoFactory.GetFileDao<T>();
 
-        if (fileType == FileType.Pdf)
+        if (file.IsForm)
         {
-            var folderDao = daoFactory.GetCacheFolderDao<T>();
+            var folderDao = _daoFactory.GetCacheFolderDao<T>();
 
             Task<T> linkedIdTask;
             Task<EntryProperties<T>> propertiesTask;
@@ -241,7 +264,7 @@ public class FileDtoHelper(
             }
             else
             {
-                linkedIdTask = daoFactory.GetLinkDao<T>().GetLinkedAsync(file.Id);
+                linkedIdTask = _daoFactory.GetLinkDao<T>().GetLinkedAsync(file.Id);
                 propertiesTask = fileDao.GetProperties(file.Id);
             }
             
@@ -272,13 +295,6 @@ public class FileDtoHelper(
                 _ = await _fileSecurity.SetSecurity(new[] { currentRoom }.ToAsyncEnumerable()).ToListAsync();
             }
 
-            var currentRoomId = currentRoom.Id?.ToString();
-            if (currentRoomId != null && !shareCache.TryGetValue(currentRoomId, out var ace))
-            {
-                ace = await fileSharing.GetPureSharesAsync(currentRoom, [authContext.CurrentAccount.ID]).FirstOrDefaultAsync();
-                shareCache.TryAdd(currentRoomId, ace);
-            }
-
             if (!file.IsForm && (FilterType)file.Category == FilterType.None)
             {
                 result.IsForm = await fileChecker.CheckExtendedPDF(file);
@@ -294,6 +310,47 @@ public class FileDtoHelper(
             }
 
             result.HasDraft = result.IsForm == true ? !Equals(linkedId, default(T)) : null;
+
+            if (currentRoom is { FolderType: FolderType.VirtualDataRoom })
+            {
+                var (currentStep, roles) = await fileDao.GetUserFormRoles(file.Id, authContext.CurrentAccount.ID);
+                var roleList = await roles.ToListAsync();
+
+                if (currentStep == -1 && result.Security[FileSecurity.FilesSecurityActions.Edit])
+                {
+                    result.FormFillingStatus = FormFillingStatus.Draft;
+                }
+
+                if (currentStep != -1)
+                {
+                    if (!DateTime.MinValue.Equals(properties.FormFilling.FillingStopedDate))
+                    {
+                        result.FormFillingStatus = FormFillingStatus.Stoped;
+                    }
+                    else if (currentStep == 0)
+                    {
+                        result.FormFillingStatus = FormFillingStatus.Complete;
+                    }
+                    else
+                    {
+                        var unsubmittedRole = roleList.FirstOrDefault(r => !r.Submitted);
+                        switch (unsubmittedRole)
+                        {
+                            case not null:
+                                result.FormFillingStatus = currentStep == unsubmittedRole.Sequence
+                                    ? FormFillingStatus.YouTurn
+                                    : FormFillingStatus.InProgress;
+                                break;
+                            default:
+                                if (roleList.Count > 0)
+                                {
+                                    result.FormFillingStatus = FormFillingStatus.InProgress;
+                                }
+                                break;
+                        }
+                    }
+                }
+            }
 
             var formFilling = properties?.FormFilling;
             if (formFilling != null)
@@ -327,10 +384,12 @@ public class FileDtoHelper(
         result.LockedBy = file.LockedBy;
         result.Access = file.Access;
         result.LastOpened = _apiDateTimeHelper.Get(file.LastOpened);
+        result.CustomFilterEnabled = file.CustomFilterEnabled.NullIfDefault();
+        result.CustomFilterEnabledBy = file.CustomFilterEnabledBy;
 
         if (!file.ProviderEntry && file.RootFolderType == FolderType.VirtualRooms && !expiration.HasValue)
         {
-            var folderDao = daoFactory.GetCacheFolderDao<T>();
+            var folderDao = _daoFactory.GetCacheFolderDao<T>();
             var room = await DocSpaceHelper.GetParentRoom(file, folderDao);
             if (room?.SettingsLifetime != null)
             {
@@ -373,7 +432,7 @@ public class FileDtoHelper(
             result.ViewUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl), result.RequestToken);
 
             result.WebUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version, externalMediaAccess)), result.RequestToken);
-
+            result.ShortWebUrl = await urlShortener.GetShortenLinkAsync(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebEditorUrl(file.Id)));
             result.ThumbnailStatus = file.ThumbnailStatus;
 
             var cacheKey = Math.Abs(result.Updated.GetHashCode());

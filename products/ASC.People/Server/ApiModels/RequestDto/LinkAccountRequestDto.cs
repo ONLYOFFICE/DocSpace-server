@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -40,7 +40,7 @@ public class LinkAccountRequestDto
 /// <summary>
 /// The request parameters for creating a third-party account.
 /// </summary>
-public class SignupAccountRequestDto : LinkAccountRequestDto
+public class SignupAccountRequestDto
 {
     /// <summary>
     /// The user type.
@@ -77,4 +77,9 @@ public class SignupAccountRequestDto : LinkAccountRequestDto
     /// The user culture code.
     /// </summary>
     public string Culture { get; set; }
+
+    /// <summary>
+    /// Third-party profile in the serialized format
+    /// </summary>
+    public string SerializedProfile { get; set; }
 }

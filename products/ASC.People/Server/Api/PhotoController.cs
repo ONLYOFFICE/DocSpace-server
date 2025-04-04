@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -46,7 +46,8 @@ public class PhotoController(
     SetupInfo setupInfo,
     IHttpClientFactory httpClientFactory,
     IHttpContextAccessor httpContextAccessor,
-    TenantManager tenantManager)
+    TenantManager tenantManager,
+    UserWebhookManager webhookManager)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
 {
     /// <summary>
@@ -137,6 +138,7 @@ public class PhotoController(
         await _userPhotoManager.RemovePhotoAsync(user.Id);
         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
         messageService.Send(MessageAction.UserDeletedAvatar, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
+        await webhookManager.PublishAsync(WebhookTrigger.UserUpdated, user);
 
         return await ThumbnailsDataDto.Create(user, _userPhotoManager);
     }
@@ -199,6 +201,7 @@ public class PhotoController(
 
         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
         messageService.Send(MessageAction.UserAddedAvatar, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
+        await webhookManager.PublishAsync(WebhookTrigger.UserUpdated, user);
 
         return await ThumbnailsDataDto.Create(user, _userPhotoManager);
     }
@@ -212,6 +215,10 @@ public class PhotoController(
     /// <path>api/2.0/people/{userid}/photo</path>
     [Tags("People / Photos")]
     [SwaggerResponse(200, "Result of file uploading", typeof(FileUploadResultDto))]
+    [SwaggerResponse(400, "The uploaded file could not be found")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(413, "Image size is too large")]
+    [SwaggerResponse(415, "Unknown image file type")]
     [HttpPost("{userid}/photo")]
     public async Task<FileUploadResultDto> UploadMemberPhoto(UploadMemberPhotoRequestDto inDto)
     {
@@ -280,6 +287,9 @@ public class PhotoController(
                             medium = await _userPhotoManager.GetMediumPhotoURL(userId) + $"?hash={cacheKey}",
                             small = await _userPhotoManager.GetSmallPhotoURL(userId) + $"?hash={cacheKey}"
                         };
+
+                    messageService.Send(MessageAction.UserAddedAvatar, MessageTarget.Create(userId), userInfo.DisplayUserName(false, displayUserSettingsHelper));
+                    await webhookManager.PublishAsync(WebhookTrigger.UserUpdated, userInfo);
                 }
                 else
                 {

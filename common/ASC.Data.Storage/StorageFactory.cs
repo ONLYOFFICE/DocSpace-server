@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -203,8 +203,8 @@ public class StorageFactory(IServiceProvider serviceProvider,
             }
         }
 
-        return ((IDataStore)ActivatorUtilities.CreateInstance(serviceProvider, instanceType))
-            .Configure(tenantPath, handler, moduleElement, props, validator)
+        return (await ((IDataStore)ActivatorUtilities.CreateInstance(serviceProvider, instanceType))
+            .ConfigureAsync(tenantPath, handler, moduleElement, props, validator))
             .SetQuotaController(moduleElement.Count ? controller : null
             /*don't count quota if specified on module*/);
     }

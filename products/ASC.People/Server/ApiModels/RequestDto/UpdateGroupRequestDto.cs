@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,7 +29,7 @@ namespace ASC.People.ApiModels.RequestDto;
 /// <summary>
 /// The request for updating a group.
 /// </summary>
-public class UpdateGroupRequest : GroupRequestDtoBase
+public class UpdateGroupRequest
 {
     /// <summary>
     /// The list of user IDs to add to the group.
@@ -40,6 +40,17 @@ public class UpdateGroupRequest : GroupRequestDtoBase
     /// The list of user IDs to remove from the group.
     /// </summary>
     public IEnumerable<Guid> MembersToRemove { get; set; }
+
+    /// <summary>
+    /// The group manager ID.
+    /// </summary>
+    public Guid GroupManager { get; set; }
+
+    /// <summary>
+    /// The group name.
+    /// </summary>
+    [StringLength(128)]
+    public string GroupName { get; set; }
 }
 
 /// <summary>
@@ -51,7 +62,7 @@ public class UpdateGroupRequestDto
     /// The group ID.
     /// </summary>
     [FromRoute(Name = "id")]
-    public Guid Id { get; set; }
+    public required Guid Id { get; set; }
 
     /// <summary>
     /// The request for updating a group.

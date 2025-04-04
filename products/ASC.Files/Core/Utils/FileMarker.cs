@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -504,7 +504,25 @@ public class FileMarker(
 
             taskData.UserIDs = projectTeam;
         }
+        if (fileEntry.RootFolderType == FolderType.VirtualRooms && userIDs.Count == 0)
+        {
+            var folderDao = daoFactory.GetFolderDao<T>();
+            var fileDao = daoFactory.GetFileDao<T>();
+            var room = await DocSpaceHelper.GetParentRoom(fileEntry, folderDao);
+            var file = await fileDao.GetFileAsync(fileEntry.Id);
 
+            if (file.IsForm && room.FolderType == FolderType.VirtualDataRoom)
+            {
+                var allRoleUserIds = await fileDao.GetFormRoles(file.Id).Where(r => r.UserId != authContext.CurrentAccount.ID).Select(r => r.UserId).ToListAsync();
+                if (allRoleUserIds.Any())
+                {
+                    taskData.UserIDs = allRoleUserIds;
+                    var markerHelper = serviceProvider.GetService<FileMarkerHelper<T>>();
+                    await markerHelper.Add(taskData);
+                }
+                return;
+            }
+        }
         var fileMarkerHelper = serviceProvider.GetService<FileMarkerHelper<T>>();
         await fileMarkerHelper.Add(taskData);
     }

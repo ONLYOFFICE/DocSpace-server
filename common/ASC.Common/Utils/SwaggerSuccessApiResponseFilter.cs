@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,6 +23,9 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+using System.Reflection.Metadata;
+
+using Microsoft.OpenApi.Extensions;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -64,7 +67,7 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
         if (isPrimitive)
         {
             var typeName = GetPrimitiveTypeName(schema);
-            responseSchemaKey = $"SuccessApiResponse{typeName}";
+            responseSchemaKey = $"{typeName}Wrapper";
             var primitiveResponseProperty = new OpenApiSchema
             {
                 Type = schema.Type
@@ -74,19 +77,42 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
         else if (schema.Type == "array")
         {
             originalSchemaRef = schema.Items.Reference?.Id;
-            responseSchemaKey = $"SuccessApiResponseArray.{originalSchemaRef}";
-
-            var arrayResponseProperty = new OpenApiSchema
+            var schemaArray = schema.Items;
+            OpenApiSchema arrayResponseProperty;
+            if (schemaArray.Type == null && schemaArray.Reference == null && schemaArray.Items == null)
             {
-                Type = "array",
-                Items = originalSchemaRef != null ? new OpenApiSchema { Reference = schema.Items.Reference } : new OpenApiSchema { Type = schema.Items.Type }
-            };
+                responseSchemaKey = "ObjectArrayWrapper";
+                arrayResponseProperty = new OpenApiSchema
+                {
+                    Type = "array",
+                    Items = new OpenApiSchema { Type = "object" }
+                };
+            }
+            else if (schemaArray != null && schemaArray.Type == "array")
+            {
+                responseSchemaKey = "ArrayArrayWrapper";
+                arrayResponseProperty = new OpenApiSchema
+                {
+                    Type = "array",
+                    Items = new OpenApiSchema { Type = "array", Items = new OpenApiSchema { Type = schemaArray.Items.Type } }
+                };
+            }
+            else
+            {
+                responseSchemaKey = originalSchemaRef == null ? $"{schema.Items.Type.ToUpper()}ArrayWrapper" 
+                    : originalSchemaRef.Contains("Dto") ? originalSchemaRef.Replace("Dto", "") + "ArrayWrapper" : originalSchemaRef + "ArrayWrapper";
+                arrayResponseProperty = new OpenApiSchema
+                {
+                    Type = "array",
+                    Items = originalSchemaRef != null ? new OpenApiSchema { Reference = schema.Items.Reference } : new OpenApiSchema { Type = schema.Items.Type }
+                };
+            }
 
             responseSchema = CreateSuccessApiResponseSchema(arrayResponseProperty);
         }
         else if (schema == null || (schema.Type == null && schema.Reference == null && schema.Items == null))
         {
-            responseSchemaKey = "SuccessApiResponseObject";
+            responseSchemaKey = "ObjectWrapper";
             if (!schemas.ContainsKey(responseSchemaKey))
             {
                 responseSchema = CreateSuccessApiResponseSchema(new OpenApiSchema { Type = "object" });
@@ -94,7 +120,7 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
         }
         else
         {
-            responseSchemaKey = $"SuccessApiResponse.{originalSchemaRef}";
+            responseSchemaKey = originalSchemaRef.Contains("Dto") ? originalSchemaRef.Replace("Dto", "") + "Wrapper" : originalSchemaRef + "Wrapper";
             var responseProperty = originalSchemaRef != null
             ? new OpenApiSchema { Reference = new OpenApiReference { Id = originalSchemaRef, Type = ReferenceType.Schema } }
             : schema;

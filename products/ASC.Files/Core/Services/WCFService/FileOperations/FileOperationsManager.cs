@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -44,40 +44,43 @@ public class FileOperationsManagerHolder<T> where T : FileOperation
     }
     
     public async Task<List<FileOperationResult>> GetOperationResults(Guid userId)
-    {
-        var operations = (await _tasks.GetAllTasks())
-            .Where(t => new Guid(t[FileOperation.Owner]) == userId)
-            .ToList();
+    {        
+        List<FileOperationResult> results = [];
         
-        foreach (var o in operations.Where(o => o.Status > DistributedTaskStatus.Running))
+        var operations = await _tasks.GetAllTasks();
+        
+        foreach (var o in operations.Where(t => t.Owner == userId))
         {
-            o[FileOperation.Progress] = 100;
-
-            await _tasks.DequeueTask(o.Id);
-        }
-
-        var results = operations
-            .Where(o => o[FileOperation.Hold] || o[FileOperation.Progress] != 100)
-            .Select(o => new FileOperationResult
+            if (o.Status > DistributedTaskStatus.Running)
             {
-                Id = o.Id,
-                OperationType = (FileOperationType)o[FileOperation.OpType],
-                Source = o[FileOperation.Src],
-                Progress = o[FileOperation.Progress],
-                Processed = Convert.ToString(o[FileOperation.Process]),
-                Result = o[FileOperation.Res],
-                Error = o[FileOperation.Err],
-                Finished = o[FileOperation.Finish]
-            })
-            .ToList();
-
+                o.Progress = 100;
+                
+                await _tasks.DequeueTask(o.Id);
+            }
+            
+            if (o.Hold || o.Progress != 100)
+            {
+                results.Add(new FileOperationResult
+                {
+                    Id = o.Id,
+                    OperationType = o.FileOperationType,
+                    Source = o.Src,
+                    Progress = o.Progress,
+                    Processed = Convert.ToString(o.Process),
+                    Result = o.Result,
+                    Error = o.Err,
+                    Finished = o.Finish
+                });
+            }
+        }
+        
         return results;
     }
 
     public async Task<List<FileOperationResult>> CancelOperations(Guid userId, string id = null)
     {
         var operations = (await _tasks.GetAllTasks())
-            .Where(t => (string.IsNullOrEmpty(id) || t.Id == id) && new Guid(t[FileOperation.Owner]) == userId);
+            .Where(t => (string.IsNullOrEmpty(id) || t.Id == id) && t.Owner == userId);
 
         foreach (var o in operations)
         {
@@ -92,16 +95,16 @@ public class FileOperationsManagerHolder<T> where T : FileOperation
         await _tasks.EnqueueTask(task);
     }
 
-    public Task<string> Publish(T task)
+    public async Task<string> Publish(T task)
     {
-        return _tasks.PublishTask(task);
+        return await _tasks.PublishTask(task);
     }
 
     public async Task CheckRunning(Guid userId, FileOperationType fileOperationType)
     {
         var operations = (await _tasks.GetAllTasks())
-            .Where(t => new Guid(t[FileOperation.Owner]) == userId)
-            .Where(t => (FileOperationType)t[FileOperation.OpType] == fileOperationType);
+            .Where(t => t.Owner == userId)
+            .Where(t => t.FileOperationType == fileOperationType);
         
         if (operations.Any(o => o.Status <= DistributedTaskStatus.Running))
         {

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -188,9 +188,14 @@ public class SettingsDto
     public bool CookieSettingsEnabled { get; set; }
 
     /// <summary>
-    /// Limited access space
+    /// Limited access to Space Management
     /// </summary>
     public bool LimitedAccessSpace { get; set; }
+
+    /// <summary>
+    /// Limited access to Developer Tools for users
+    /// </summary>
+    public bool LimitedAccessDevToolsForUsers { get; set; }
 
     /// <summary>
     /// User name validation regex

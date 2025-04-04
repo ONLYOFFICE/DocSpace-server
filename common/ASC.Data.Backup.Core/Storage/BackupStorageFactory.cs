@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -39,6 +39,8 @@ public class BackupStorageFactory(ConsumerBackupStorage consumerBackupStorage,
     {
         try
         {
+            var storageParams = JsonSerializer.Deserialize<Dictionary<string, string>>(record.StorageParams);
+            record.TenantId = record.TenantId == -1 ? int.Parse(storageParams["tenantId"]) : record.TenantId;
             return await GetBackupStorageAsync(record.StorageType, record.TenantId, JsonSerializer.Deserialize<Dictionary<string, string>>(record.StorageParams));
         }
         catch (Exception error)

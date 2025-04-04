@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -121,11 +121,14 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
             AcceptCertificateHash = null,
             StartTls = false,
             Ssl = false,
-            SendWelcomeEmail = false
+            SendWelcomeEmail = false,
+            DisableEmailVerification = false
         };
 
         return settings;
     }
+    
+    public DateTime LastModified { get; set; }
 
     public override bool Equals(object obj)
     {
@@ -136,6 +139,7 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
                && StartTls == settings.StartTls
                && Ssl == settings.Ssl
                && SendWelcomeEmail == settings.SendWelcomeEmail
+               && DisableEmailVerification == settings.DisableEmailVerification
                && (string.IsNullOrEmpty(Server)
                    && string.IsNullOrEmpty(settings.Server)
                    || Server == settings.Server)
@@ -171,6 +175,7 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
         hash = (hash * 2) + StartTls.GetHashCode();
         hash = (hash * 2) + Ssl.GetHashCode();
         hash = (hash * 2) + SendWelcomeEmail.GetHashCode();
+        hash = (hash * 2) + DisableEmailVerification.GetHashCode();
         hash = (hash * 2) + Server.GetHashCode();
         hash = (hash * 2) + UserDN.GetHashCode();
         hash = (hash * 2) + PortNumber.GetHashCode();
@@ -218,6 +223,10 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
     /// <summary>Specifies if the welcome email is sent or not</summary>
     /// <type>System.Boolean, System</type>
     public bool SendWelcomeEmail { get; set; }
+
+    /// <summary>Specifies if the email verification is disabled or not</summary>
+    /// <type>System.Boolean, System</type>
+    public bool DisableEmailVerification { get; set; }
 
     /// <summary>LDAP server URL address</summary>
     /// <type>System.String, System</type>
@@ -436,6 +445,8 @@ public class LdapCronSettings : ISettings<LdapCronSettings>
             Cron = null
         };
     }
+    
+    public DateTime LastModified { get; set; }
 
     public string Cron { get; set; }
 }
@@ -452,6 +463,8 @@ public class LdapCurrentAcccessSettings : ISettings<LdapCurrentAcccessSettings>
     {
         return new LdapCurrentAcccessSettings { CurrentAccessRights = null };
     }
+    
+    public DateTime LastModified { get; set; }
 
     public Dictionary<LdapSettings.AccessRight, List<string>> CurrentAccessRights { get; set; } = new();
 }
@@ -468,6 +481,8 @@ public class LdapCurrentUserPhotos : ISettings<LdapCurrentUserPhotos>
     {
         return new LdapCurrentUserPhotos { CurrentPhotos = null };
     }
+    
+    public DateTime LastModified { get; set; }
 
     public Dictionary<Guid, string> CurrentPhotos { get; set; } = new();
 }
@@ -484,6 +499,8 @@ public class LdapCurrentDomain : ISettings<LdapCurrentDomain>
     {
         return new LdapCurrentDomain { CurrentDomain = null };
     }
+    
+    public DateTime LastModified { get; set; }
 
     public string CurrentDomain { get; set; }
 }

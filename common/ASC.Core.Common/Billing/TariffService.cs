@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -757,7 +757,7 @@ public class TariffService(
         {
             logger.DebugPaymentTenant(tenantId, error.Message);
         }
-        else if (error is BillingNotConfiguredException)
+        else if (error is BillingNotConfiguredException or BillingLicenseTypeException)
         {
             logger.DebugBillingTenant(tenantId, error.Message);
         }

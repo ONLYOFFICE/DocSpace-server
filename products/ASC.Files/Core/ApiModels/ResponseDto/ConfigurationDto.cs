@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -80,9 +80,26 @@ public class ConfigurationDto<T>
     public bool? StartFilling { get; set; }
 
     /// <summary>
+    /// FillingStatus
+    /// </summary>
+    public bool? FillingStatus { get; set; }
+
+    /// <summary>
+    /// Start filling mode
+    /// </summary>
+    public StartFillingMode StartFillingMode { get; set; }
+
+    /// <summary>
     /// Filling session Id
     /// </summary>
     public string FillingSessionId { get; set; }
+}
+
+public enum StartFillingMode
+{
+    None,
+    ShareToFillOut,
+    StartFilling
 }
 
 public class EditorConfigurationDto
@@ -203,9 +220,32 @@ public class CustomizationConfigDto
     /// <summary>
     /// Submit form
     /// </summary>
-    public bool SubmitForm { get; set; }
+    public SubmitForm SubmitForm { get; set; }
+
+    /// <summary>
+    /// Start filling form
+    /// </summary>
+    public StartFillingForm StartFillingForm { get; set; }
 }
 
+public class SubmitForm
+{
+    /// <summary>
+    /// Visible
+    /// </summary>
+    public bool Visible { get; set; }
+    /// <summary>
+    /// Result message
+    /// </summary>
+    public string ResultMessage { get; set; }
+}
+public class StartFillingForm
+{
+    /// <summary>
+    /// Text
+    /// </summary>
+    public string Text { get; set; }
+}
 public class LogoConfigDto
 {
     /// <summary>
@@ -327,6 +367,11 @@ public class DocumentConfigDto
     /// </summary>
     [Url]
     public string Url { get; set; }
+
+    /// <summary>
+    /// Indicates whether this is a form
+    /// </summary>
+    public bool IsForm { get; set; }
 
     /// <summary>
     /// Options
@@ -570,6 +615,7 @@ public class DocumentConfigConverter<T>(InfoConfigConverter<T> configConverter)
         var result = new DocumentConfigDto
         {
             FileType = source.GetFileType(file),
+            IsForm = file.IsForm,
             Info = await configConverter.Convert(source.Info, file),
             IsLinkedForMe = source.IsLinkedForMe,
             Key = source.Key,

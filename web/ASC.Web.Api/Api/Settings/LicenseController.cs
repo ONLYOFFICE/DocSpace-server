@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,18 +32,19 @@ public class LicenseController(ILoggerProvider option,
         ApiContext apiContext,
         UserManager userManager,
         TenantManager tenantManager,
+        TenantLogoManager tenantLogoManager,
         TenantExtra tenantExtra,
         AuthContext authContext,
         LicenseReader licenseReader,
         SettingsManager settingsManager,
         WebItemManager webItemManager,
         CoreBaseSettings coreBaseSettings,
-        IMemoryCache memoryCache,
+        IFusionCache fusionCache,
         FirstTimeTenantSettings firstTimeTenantSettings,
         ITariffService tariffService,
         IHttpContextAccessor httpContextAccessor,
         DocumentServiceLicense documentServiceLicense)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     private readonly ILogger _log = option.CreateLogger("ASC.Api");
 
@@ -99,6 +100,11 @@ public class LicenseController(ILoggerProvider option,
         catch (BillingNotConfiguredException)
         {
             return UserControlsCommonResource.LicenseKeyNotCorrect;
+        }
+        catch (BillingLicenseTypeException)
+        {
+            var logoText = await tenantLogoManager.GetLogoTextAsync();
+            return string.Format(UserControlsCommonResource.LicenseTypeNotCorrect, logoText);
         }
         catch (BillingException)
         {
@@ -271,6 +277,12 @@ public class LicenseController(ILoggerProvider option,
         {
             _log.ErrorLicenseUpload(ex);
             throw new Exception(Resource.LicenseErrorPortal);
+        }
+        catch (BillingLicenseTypeException ex)
+        {
+            _log.ErrorLicenseUpload(ex);
+            var logoText = await tenantLogoManager.GetLogoTextAsync();
+            throw new Exception(string.Format(UserControlsCommonResource.LicenseTypeNotCorrect, logoText));
         }
         catch (Exception ex)
         {

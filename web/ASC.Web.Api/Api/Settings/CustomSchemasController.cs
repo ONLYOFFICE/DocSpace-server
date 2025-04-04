@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,15 +27,16 @@
 namespace ASC.Web.Api.Controllers.Settings;
 
 [DefaultRoute("customschemas")]
+[ApiExplorerSettings(IgnoreApi = true)]
 public class CustomSchemasController(MessageService messageService,
         ApiContext apiContext,
         TenantManager tenantManager,
         PermissionContext permissionContext,
         WebItemManager webItemManager,
         CustomNamingPeople customNamingPeople,
-        IMemoryCache memoryCache,
+        IFusionCache fusionCache,
         IHttpContextAccessor httpContextAccessor)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
     /// Returns all portal team templates that allow users to name their organization (or group), add members, and define their activities within the portal.

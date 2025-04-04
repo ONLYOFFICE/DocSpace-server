@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,8 +26,14 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// Represents the response for a WordPress information deletion operation
+/// </summary>
 public class DeleteWordpressInfoResponse(bool success)
 {
+    /// <summary>
+    /// Indicates whether the WordPress information deletion was successful
+    /// </summary>
     public bool Success { get; set; } = success;
 
     // Convenience factory methods

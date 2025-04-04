@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -51,7 +51,8 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
     public DbSet<UserGroup> UserGroup { get; set; }
     public DbSet<DbFilesAuditReference> FilesAuditReference { get; set; }
     public DbSet<DbUserRelation> UserRelations { get; set; }
-    
+    public DbSet<DbFilesFormRoleMapping> FilesFormRoleMapping { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         ModelBuilderWrapper
@@ -63,6 +64,7 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
             .AddDbFilesBunchObjects()
             .AddDbFilesSecurity()
             .AddDbFilesThirdpartyIdMapping()
+            .AddDbFilesFormRoleMapping()
             .AddDbFilesTagLink()
             .AddDbFilesTag()
             .AddDbDbFilesThirdpartyApp()
