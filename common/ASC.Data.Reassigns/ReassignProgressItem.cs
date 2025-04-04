@@ -101,12 +101,9 @@ public class ReassignProgressItem : DistributedTaskProgress
 
             if (_deleteProfile)
             {
-                var currentType = await userManager.GetUserTypeAsync(FromUser);
-                if (currentType != EmployeeType.Guest)
-                {
-                    await fileStorageService.MoveSharedFilesAsync(FromUser, ToUser);
-                    await SetPercentageAndCheckCancellationAsync(20, true);
-                }
+                await fileStorageService.MoveSharedFilesAsync(FromUser, ToUser);
+
+                await SetPercentageAndCheckCancellationAsync(20, true);
                 await fileStorageService.DeletePersonalDataAsync(FromUser);
             }
             else
