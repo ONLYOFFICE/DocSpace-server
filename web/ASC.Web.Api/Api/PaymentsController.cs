@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.Utils;
+
 namespace ASC.Web.Api.Controllers;
 
 ///<summary>
@@ -49,7 +51,9 @@ public class PaymentController(
     MessageService messageService,
     StudioNotifyService studioNotifyService,
     PermissionContext permissionContext,
-    TenantUtil tenantUtil)
+    TenantUtil tenantUtil,
+    CsvFileHelper csvFileHelper,
+    CsvFileUploader csvFileUploader)
     : ControllerBase
 {
     private readonly int _maxCount = 10;
@@ -419,6 +423,51 @@ public class PaymentController(
     }
 
     /// <summary>
+    /// Generates the customer operations report as csv file and save in Documents.
+    /// </summary>
+    /// <short>
+    /// Generate the customer operations report
+    /// </short>
+    /// <path>api/2.0/portal/payment/customer/operationsreport</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "URL to the csv report file", typeof(string))]
+    [HttpPost("customer/operationsreport")]
+    public async Task<string> CreateCustomerOperationsReportAsync()
+    {
+        var tenant = await CheckAccountingAndReturnTenantAsync();
+
+        var to = DateTime.UtcNow;
+        var from = tenant.CreationDateTime;
+
+        var reportName = string.Format(Resource.AccountingCustomerOperationsReportName + ".csv", from.ToString("MM.dd.yyyy", CultureInfo.InvariantCulture), to.ToString("MM.dd.yyyy", CultureInfo.InvariantCulture));
+
+        var report = await tariffService.GetCustomerOperationsAsync(tenant.Id, from, to);
+
+        await using var stream = csvFileHelper.CreateFile(report.Collection, new OperationMap());
+
+        var result = await csvFileUploader.UploadFile(stream, reportName);
+
+        //TODO: add audit
+        //messageService.Send(MessageAction.CustomerOperationsReportDownloaded);
+
+        return result;
+    }
+
+    internal class OperationMap : ClassMap<Operation>
+    {
+        public OperationMap()
+        {
+            Map(item => item.Date).TypeConverter<CsvFileHelper.CsvDateTimeConverter>();
+
+            Map(item => item.Date).Name(Resource.AccountingCustomerOperationDate);
+            Map(item => item.Service).Name(Resource.AccountingCustomerOperationService);
+            Map(item => item.ServiceUnit).Name(Resource.AccountingCustomerOperationServiceUnit);
+            Map(item => item.Quantity).Name(Resource.AccountingCustomerOperationQuantity);
+            Map(item => item.Amount).Name(Resource.AccountingCustomerOperationAmount);
+        }
+    }
+
+    /// <summary>
     /// Returns the list of currencies from accounting service.
     /// </summary>
     /// <short>
@@ -435,7 +484,7 @@ public class PaymentController(
         return result;
     }
 
-
+    // TODO: add tags [SwaggerResponse(403, "You don't have enough permission")]
     private async Task<Tenant> CheckAccountingAndReturnTenantAsync()
     {
         if (!tariffService.IsAccountingClientConfigured(out var test))
