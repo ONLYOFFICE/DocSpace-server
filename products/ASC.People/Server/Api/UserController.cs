@@ -726,10 +726,10 @@ public class UserController(
     }
 
     /// <summary>
-    /// Approve a guest share link and returns the detailed information about a guest.
+    /// Approves a guest sharing link and returns the detailed information about a guest.
     /// </summary>
     /// <short>
-    /// Approve a guest share link
+    /// Approve a guest sharing link
     /// </short>
     /// <path>api/2.0/people/guests/share/approve</path>
     [Tags("People / Guests")]
