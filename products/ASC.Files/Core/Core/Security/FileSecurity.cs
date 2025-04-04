@@ -1790,6 +1790,11 @@ public class FileSecurity(IDaoFactory daoFactory,
                 {
                     return true;
                 }
+                
+                if(e.RootFolderType == FolderType.RoomTemplates)
+                {
+                    return true;
+                }
 
                 if (isRoom)
                 {
