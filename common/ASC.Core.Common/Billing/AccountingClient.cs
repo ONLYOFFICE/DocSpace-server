@@ -95,13 +95,23 @@ public class AccountingClient
         _ = await RequestAsync<string>(HttpMethod.Post, "/operation/provided", data: data);
     }
 
-    public async Task<Report> GetCustomerOperationsAsync(string portalId, DateTime utcStartDate, DateTime utcEndDate)
+    public async Task<Report> GetCustomerOperationsAsync(string portalId, DateTime utcStartDate, DateTime utcEndDate, bool? credit, bool? withdrawal)
     {
         var queryParams = new NameValueCollection
         {
             { "startDate", utcStartDate.ToString("o") },
             { "endDate", utcEndDate.ToString("o") }
         };
+
+        if (credit.HasValue)
+        {
+            queryParams.Add("credit", credit.Value.ToString().ToLowerInvariant());
+        }
+
+        if (withdrawal.HasValue)
+        {
+            queryParams.Add("withdrawal", withdrawal.Value.ToString().ToLowerInvariant());
+        }
 
         return await RequestAsync<Report>(HttpMethod.Get, $"/customer/operations/{portalId}", queryParams);
     }
@@ -204,7 +214,7 @@ public record Session(int SessionId, decimal ReservedAmount, string Currency);
 
 public record Report(List<Operation> Collection, int Offset, int Limit, int TotalQuantity, int TotalPage, int CurrentPage);
 
-public record Operation(DateTime Date,string Service, string ServiceUnit, int Quantity, decimal Amount);
+public record Operation(DateTime Date, string Service, string ServiceUnit, int Quantity, string Currency, decimal Credit, decimal Withdrawal);
 
 public record Currency(int Id, string Code);
 

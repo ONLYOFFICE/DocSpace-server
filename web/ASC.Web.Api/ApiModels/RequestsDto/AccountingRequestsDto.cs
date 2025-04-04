@@ -84,4 +84,16 @@ public class CustomerOperationsRequestDto
     /// </summary>
     [FromQuery(Name = "endDate")]
     public DateTime EndDate { get; set; }
+
+    /// <summary>
+    /// Include credit operations
+    /// </summary>
+    [FromQuery(Name = "credit")]
+    public bool? Credit { get; set; }
+
+    /// <summary>
+    /// Include withdrawal operations
+    /// </summary>
+    [FromQuery(Name = "withdrawal")]
+    public bool? Withdrawal { get; set; }
 }

@@ -61,11 +61,20 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Amount.
+        ///   Looks up a localized string similar to Credit.
         /// </summary>
-        public static string AccountingCustomerOperationAmount {
+        public static string AccountingCustomerOperationCredit {
             get {
-                return ResourceManager.GetString("AccountingCustomerOperationAmount", resourceCulture);
+                return ResourceManager.GetString("AccountingCustomerOperationCredit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Currency.
+        /// </summary>
+        public static string AccountingCustomerOperationCurrency {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationCurrency", resourceCulture);
             }
         }
         
@@ -111,6 +120,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string AccountingCustomerOperationsReportName {
             get {
                 return ResourceManager.GetString("AccountingCustomerOperationsReportName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Withdrawal.
+        /// </summary>
+        public static string AccountingCustomerOperationWithdrawal {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationWithdrawal", resourceCulture);
             }
         }
         

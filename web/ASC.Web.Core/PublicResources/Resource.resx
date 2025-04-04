@@ -1140,8 +1140,8 @@
   <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
     <value>Webhook URL is not avaliable. HEAD request is not responce 200 http status.</value>
   </data>
-  <data name="AccountingCustomerOperationAmount" xml:space="preserve">
-    <value>Amount</value>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>Currency</value>
   </data>
   <data name="AccountingCustomerOperationDate" xml:space="preserve">
     <value>Date and time</value>
@@ -1157,5 +1157,11 @@
   </data>
   <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
     <value>Customer operations report ({0}-{1})</value>
+  </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>Credit</value>
+  </data>
+  <data name="AccountingCustomerOperationWithdrawal" xml:space="preserve">
+    <value>Withdrawal</value>
   </data>
 </root>

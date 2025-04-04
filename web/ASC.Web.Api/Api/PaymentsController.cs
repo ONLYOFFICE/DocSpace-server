@@ -418,7 +418,7 @@ public class PaymentController(
         var tenant = await CheckAccountingAndReturnTenantAsync();
         var utcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate);
         var utcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate);
-        var result = await tariffService.GetCustomerOperationsAsync(tenant.Id, utcStartDate, utcEndDate);
+        var result = await tariffService.GetCustomerOperationsAsync(tenant.Id, utcStartDate, utcEndDate, inDto.Credit, inDto.Withdrawal);
         return result;
     }
 
@@ -441,7 +441,7 @@ public class PaymentController(
 
         var reportName = string.Format(Resource.AccountingCustomerOperationsReportName + ".csv", from.ToString("MM.dd.yyyy", CultureInfo.InvariantCulture), to.ToString("MM.dd.yyyy", CultureInfo.InvariantCulture));
 
-        var report = await tariffService.GetCustomerOperationsAsync(tenant.Id, from, to);
+        var report = await tariffService.GetCustomerOperationsAsync(tenant.Id, from, to, true, true);
 
         await using var stream = csvFileHelper.CreateFile(report.Collection, new OperationMap());
 
@@ -463,7 +463,9 @@ public class PaymentController(
             Map(item => item.Service).Name(Resource.AccountingCustomerOperationService);
             Map(item => item.ServiceUnit).Name(Resource.AccountingCustomerOperationServiceUnit);
             Map(item => item.Quantity).Name(Resource.AccountingCustomerOperationQuantity);
-            Map(item => item.Amount).Name(Resource.AccountingCustomerOperationAmount);
+            Map(item => item.Currency).Name(Resource.AccountingCustomerOperationCurrency);
+            Map(item => item.Credit).Name(Resource.AccountingCustomerOperationCredit);
+            Map(item => item.Withdrawal).Name(Resource.AccountingCustomerOperationWithdrawal);
         }
     }
 
