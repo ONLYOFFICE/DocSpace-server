@@ -28,6 +28,9 @@ using Projects;
 
 var editorPort = Random.Shared.Next(8086, 8090);
 const int restyPort = 8092;
+const int socketIoPort = 9899;
+const int ssoAuthPort = 9834;
+const int webDavPort = 1900;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
@@ -75,6 +78,38 @@ if (String.Compare(builder.Configuration["Docker"], "true", StringComparison.Ord
     AddProjectDocker<ASC_Files_Service>(5009);
     AddProjectDocker<ASC_Studio_Notify>(5006);
     AddProjectDocker<ASC_Web_Studio>(5003);
+    
+    builder.AddDockerfile("asc-socketIO", "../ASC.Socket.IO/")
+        .WithImageTag("dev")
+        .WithBindMount(Path.Combine(basePath, "buildtools"), "/buildtools")
+        .WithBindMount(Path.Combine(basePath, "Data"), "/data")
+        .WithBindMount(Path.Combine(basePath, "Logs"), "/logs")
+        .WithEnvironment("log:dir", "/logs")
+        .WithEnvironment("log:name", "socketIO")
+        .WithReference(redis, "redis")
+        .WithHttpEndpoint(socketIoPort, socketIoPort, isProxied: false)
+        .WithHttpHealthCheck("/health");
+    
+    builder.AddDockerfile("asc-ssoAuth", "../ASC.SSoAuth/")
+        .WithImageTag("dev")
+        .WithBindMount(Path.Combine(basePath, "buildtools"), "/buildtools")
+        .WithBindMount(Path.Combine(basePath, "Data"), "/data")
+        .WithBindMount(Path.Combine(basePath, "Logs"), "/logs")
+        .WithEnvironment("log:dir", "/logs")
+        .WithEnvironment("log:name", "ssoAuth")
+        .WithEnvironment("app:appsettings", "/buildtools/config")
+        .WithHttpEndpoint(ssoAuthPort, ssoAuthPort, isProxied: false)
+        .WithHttpHealthCheck("/health");
+    
+    builder.AddDockerfile("asc-webDav", "../ASC.WebDav/")
+        .WithImageTag("dev")
+        .WithBindMount(Path.Combine(basePath, "buildtools"), "/buildtools")
+        .WithBindMount(Path.Combine(basePath, "Data"), "/data")
+        .WithBindMount(Path.Combine(basePath, "Logs"), "/logs")
+        .WithEnvironment("log:dir", "/logs")
+        .WithEnvironment("log:name", "webDav")
+        .WithHttpEndpoint(webDavPort, webDavPort, isProxied: false)
+        .WithHttpHealthCheck("/health");
 }
 else
 {
@@ -89,11 +124,11 @@ else
     AddProjectWithDefaultConfiguration<ASC_Files_Service>();
     AddProjectWithDefaultConfiguration<ASC_Studio_Notify>();
     AddProjectWithDefaultConfiguration<ASC_Web_Studio>();
+    
+    builder.AddNpmApp("asc-socketIO", "../ASC.Socket.IO/", "start:build").WithReference(redis, "redis").WithHttpEndpoint(targetPort: socketIoPort).WithHttpHealthCheck("/health");
+    builder.AddNpmApp("asc-ssoAuth", "../ASC.SSoAuth/", "start:build").WithHttpEndpoint(targetPort: 9834).WithHttpHealthCheck("/health");
+    builder.AddNpmApp("asc-webDav", "../ASC.WebDav/", "start:build").WithHttpEndpoint(targetPort: 1900).WithHttpHealthCheck("/health");
 }
-
-builder.AddNpmApp("asc-socketIO", "../ASC.Socket.IO/", "start:build").WithReference(redis, "redis").WithHttpEndpoint(targetPort: 9899).WithHttpHealthCheck("/health");
-builder.AddNpmApp("asc-ssoAuth", "../ASC.SSoAuth/", "start:build").WithHttpEndpoint(targetPort: 9834).WithHttpHealthCheck("/health");
-builder.AddNpmApp("asc-webDav", "../ASC.WebDav/", "start:build").WithHttpEndpoint(targetPort: 1900).WithHttpHealthCheck("/health");
 
 var clientBasePath = Path.Combine(basePath, "client");
 var installPackages = builder.AddExecutable("asc-install-packages", "yarn", clientBasePath, "install");
@@ -144,8 +179,9 @@ void AddProjectDocker<TProject>(int projectPort, bool includeHealthCheck = true)
         .WithBindMount(Path.Combine(basePath, "Data"), "/data")
         .WithBindMount(Path.Combine(basePath, "Logs"), "/logs")
         .WithEnvironment("log:dir", "/logs")
-        .WithEnvironment("log:name", "/files")
+        .WithEnvironment("log:name", $"/{name.ToLower()["asc-".Length..].Replace('_', '.')}")
         .WithEnvironment("$STORAGE_ROOT", "/data")
+        .WithEnvironment("web:hub:internal", "http://asc-socketIO:9899")
         .WithArgs($"{dllPath}{name.Replace('_', '.')}.dll")
         .WithEntrypoint("dotnet");
 
