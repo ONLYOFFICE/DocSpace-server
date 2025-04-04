@@ -26,6 +26,8 @@
 
 using System.Collections.Specialized;
 
+using Polly.Extensions.Http;
+
 namespace ASC.Core.Billing;
 
 [Singleton]
@@ -37,7 +39,7 @@ public class AccountingClient
     private readonly AccountingConfiguration _configuration;
     private readonly IHttpClientFactory _httpClientFactory;
 
-    internal const string HttpClientOption = "accounting";
+    internal const string HttpClientName = "accountingHttpClient";
 
     private readonly JsonSerializerOptions _deserializationOptions = new()
     {
@@ -154,7 +156,7 @@ public class AccountingClient
             request.Headers.Add("Authorization", CreateAuthToken(_configuration.Key, _configuration.Secret));
         }
 
-        var httpClient = _httpClientFactory.CreateClient(addPolicy ? HttpClientOption : "");
+        var httpClient = _httpClientFactory.CreateClient(addPolicy ? HttpClientName : "");
         httpClient.Timeout = TimeSpan.FromMilliseconds(60000);
 
         if (data != null)
@@ -223,18 +225,12 @@ public static class AccountingHttplClientExtension
 {
     public static void AddAccountingHttpClient(this IServiceCollection services)
     {
-        services.AddHttpClient(AccountingClient.HttpClientOption)
+        services.AddHttpClient(AccountingClient.HttpClientName)
             .SetHandlerLifetime(TimeSpan.FromMinutes(5))
-            .AddPolicyHandler((_, request) =>
-            {
-                return Policy.HandleResult<HttpResponseMessage>
-                    (msg =>
-                    {
-                        var result = msg.Content.ReadAsStringAsync().Result;
-                        return result.StartsWith("{\"Message\":\"error: cannot find", true, null);
-                    })
-                    .WaitAndRetryAsync(2, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
-            });
+            .AddPolicyHandler((_, _) => HttpPolicyExtensions.HandleTransientHttpError()
+                .OrResult(x => !x.IsSuccessStatusCode)
+                .WaitAndRetryAsync(2, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));
+
     }
 }
 
