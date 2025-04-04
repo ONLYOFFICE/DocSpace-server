@@ -162,12 +162,7 @@ public class PersonalAccessTokenAuthenticationProvider implements Authentication
 
       auditMessagePublisher.publish(
           AuditMessage.builder()
-              .ip(
-                  httpUtils
-                      .getRequestClientAddress(request)
-                      .map(httpUtils::extractHostFromUrl)
-                      .orElseGet(
-                          () -> httpUtils.extractHostFromUrl(httpUtils.getFirstRequestIP(request))))
+              .ip(httpUtils.extractHostFromUrl(httpUtils.getFirstRequestIP(request)))
               .initiator(serviceName)
               .target(registeredClient.getClientId())
               .browser(httpUtils.getClientBrowser(request))
