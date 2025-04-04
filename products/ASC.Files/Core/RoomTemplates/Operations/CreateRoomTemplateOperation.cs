@@ -95,6 +95,7 @@ public class CreateRoomTemplateOperation : DistributedTaskProgress
         var roomLogoManager = _serviceProvider.GetService<RoomLogoManager>();
         var dbFactory = _serviceProvider.GetService<IDbContextFactory<FilesDbContext>>();
         var daoFactory = _serviceProvider.GetService<IDaoFactory>();
+        var logger = _serviceProvider.GetService<ILogger<CreateRoomTemplateOperation>>();
         var fileDao = daoFactory.GetFileDao<int>();
         var folderDao = daoFactory.GetFolderDao<int>();
 
@@ -159,18 +160,32 @@ public class CreateRoomTemplateOperation : DistributedTaskProgress
             
             await foreach (var file in files)
             {
-                await fileDao.CopyFileAsync(file, TemplateId);
-                await PublishAsync();
+                try
+                {
+                    await fileDao.CopyFileAsync(file, TemplateId);
+                    await PublishAsync();
+                }
+                catch(Exception ex)
+                {
+                    logger.WarningCanNotCopyFile(ex);
+                }
             }
 
             await foreach (var f in folders)
             {
-                var newFolder = await folderDao.CopyFolderAsync(f, TemplateId, CancellationToken);
-                var folderFiles = fileDao.GetFilesAsync(f);
-                await foreach (var file in folderFiles)
+                try
                 {
-                    await fileDao.CopyFileAsync(file, newFolder.Id);
-                    await PublishAsync();
+                    var newFolder = await folderDao.CopyFolderAsync(f, TemplateId, CancellationToken);
+                    var folderFiles = fileDao.GetFilesAsync(f);
+                    await foreach (var file in folderFiles)
+                    {
+                        await fileDao.CopyFileAsync(file, newFolder.Id);
+                        await PublishAsync();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    logger.WarningCanNotCopyFolder(ex);
                 }
             }
 
@@ -184,6 +199,7 @@ public class CreateRoomTemplateOperation : DistributedTaskProgress
         }
         catch (Exception ex)
         {
+            logger.ErrorCreateRoomTemplate(ex);
             Exception = ex;
             IsCompleted = true;
             if (TemplateId != -1) 
