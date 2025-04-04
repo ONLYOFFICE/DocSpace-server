@@ -217,7 +217,7 @@ public class EmployeeFullDto : EmployeeDto
     public ApiDateTime RegistrationDate { get; set; }
 
     /// <summary>
-    /// Specifies if the user has an personal folder or not
+    /// Specifies if the user has a personal folder or not.
     /// </summary>
     public bool HasPersonalFolder { get; set; }
 }
