@@ -32,8 +32,10 @@ namespace ASC.People.ApiModels.RequestDto;
 public class CreateApiKeyRequestDto
 {
     /// <summary>
-    /// Name of the API key
+    /// Name of the API key.
     /// </summary>
+    [StringLength(30, ErrorMessage = "Incorrect name. Length must be less than 30")]
+    [Required]
     public required string Name { get; set; }
 
     /// <summary>
@@ -44,5 +46,6 @@ public class CreateApiKeyRequestDto
     /// <summary>
     /// Number of days until the API key expires (null for no expiration)
     /// </summary>
+    [Range(1, 365, ErrorMessage = "Incorrect number of days. Value must be between 1 and 365")]
     public int? ExpiresInDays { get; set; }
 }

@@ -33,6 +33,7 @@ public class CreateRoomFromTemplateOperation : DistributedTaskProgress
     private string _title;
     private string _cover;
     private string _color;
+    private long? _quota;
     private LogoSettings _logo;
     private bool _copyLogo;
     private IEnumerable<string> _tags;
@@ -62,7 +63,8 @@ public class CreateRoomFromTemplateOperation : DistributedTaskProgress
         bool copyLogo,
         IEnumerable<string> tags,
         string cover,
-        string color)
+        string color,
+        long? quota)
     {
         TenantId = tenantId;
         _userId = userId;
@@ -73,6 +75,7 @@ public class CreateRoomFromTemplateOperation : DistributedTaskProgress
         _tags = tags;
         _cover = cover;
         _color = color;
+        _quota = quota;
         RoomId = -1;
     }
 
@@ -82,6 +85,7 @@ public class CreateRoomFromTemplateOperation : DistributedTaskProgress
         var securityContext = _serviceProvider.GetService<SecurityContext>();
         var fileStorageService = _serviceProvider.GetService<FileStorageService>();
         var roomLogoManager = _serviceProvider.GetService<RoomLogoManager>();
+        var logger = _serviceProvider.GetService<ILogger<CreateRoomFromTemplateOperation>>();
         var daoFactory = _serviceProvider.GetService<IDaoFactory>();
         var folderDao = daoFactory.GetFolderDao<int>();
 
@@ -126,25 +130,45 @@ public class CreateRoomFromTemplateOperation : DistributedTaskProgress
 
             foreach (var file in files)
             {
-                await fileDao.CopyFileAsync(file, RoomId);
-                await PublishAsync();
+                try
+                {
+                    await fileDao.CopyFileAsync(file, RoomId);
+                    await PublishAsync();
+                }
+                catch(Exception ex)
+                {
+                    logger.WarningCanNotCopyFile(ex);
+                }
             }
 
             foreach (var f in folders)
             {
-                var newFolder = await folderDao.CopyFolderAsync(f, RoomId, CancellationToken);
-                var folderFiles = await fileDao.GetFilesAsync(f).ToListAsync();
-                foreach (var file in folderFiles)
+                try
                 {
-                    await fileDao.CopyFileAsync(file, newFolder.Id);
-                    await PublishAsync();
+                    var newFolder = await folderDao.CopyFolderAsync(f, RoomId, CancellationToken);
+                    var folderFiles = await fileDao.GetFilesAsync(f).ToListAsync();
+                    foreach (var file in folderFiles)
+                    {
+                        await fileDao.CopyFileAsync(file, newFolder.Id);
+                        await PublishAsync();
+                    }
                 }
+                catch (Exception ex)
+                {
+                    logger.WarningCanNotCopyFolder(ex);
+                }
+            }
+
+            if (_quota.HasValue)
+            {
+                await fileStorageService.FolderQuotaChangeAsync(room.Id, _quota.Value);
             }
 
             Percentage = 100;
         }
         catch (Exception ex)
         {
+            logger.ErrorCreateRoomFromTemplate(ex);
             Exception = ex;
             if (RoomId != -1)
             {

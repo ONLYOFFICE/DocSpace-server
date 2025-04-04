@@ -764,7 +764,7 @@ public class TariffService(
         {
             logger.DebugPaymentTenant(tenantId, error.Message);
         }
-        else if (error is BillingNotConfiguredException)
+        else if (error is BillingNotConfiguredException or BillingLicenseTypeException)
         {
             logger.DebugBillingTenant(tenantId, error.Message);
         }

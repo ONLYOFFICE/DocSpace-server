@@ -105,7 +105,7 @@ public class ApiKeyConverter(ApiDateTimeHelper apiDateTimeHelper,
         {
             Id = source.Id,
             Name = source.Name,
-            Key = $"sk-***{source.KeyPostfix}",
+            Key = source.Key,
             KeyPostfix = source.KeyPostfix,
             Permissions = source.Permissions,
             LastUsed = source.LastUsed.HasValue ? apiDateTimeHelper.Get(source.LastUsed.Value) : null,

@@ -125,7 +125,7 @@ public class FileDto<T> : FileEntryDto<T>
     public bool? Locked { get; set; }
 
     /// <summary>
-    /// User ID who locked a file
+    /// User name who locked a file
     /// </summary>
     public string LockedBy { get; set; }
 
@@ -146,6 +146,16 @@ public class FileDto<T> : FileEntryDto<T>
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool? IsForm { get; set; }
+
+    /// <summary>
+    /// Is Custom Filter editing mode enabled for a file or not
+    /// </summary>
+    public bool? CustomFilterEnabled { get; set; }
+
+    /// <summary>
+    /// User name who enabled a Custom Filter editing mode for a file
+    /// </summary>
+    public string CustomFilterEnabledBy { get; set; }
 
     /// <summary>
     /// Specifies if the filling has started or not
@@ -374,6 +384,8 @@ public class FileDtoHelper(
         result.LockedBy = file.LockedBy;
         result.Access = file.Access;
         result.LastOpened = _apiDateTimeHelper.Get(file.LastOpened);
+        result.CustomFilterEnabled = file.CustomFilterEnabled.NullIfDefault();
+        result.CustomFilterEnabledBy = file.CustomFilterEnabledBy;
 
         if (!file.ProviderEntry && file.RootFolderType == FolderType.VirtualRooms && !expiration.HasValue)
         {

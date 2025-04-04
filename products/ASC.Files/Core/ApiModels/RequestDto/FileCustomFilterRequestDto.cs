@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,67 +24,33 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.RoomTemplates.Events;
+namespace ASC.Files.Core.ApiModels.RequestDto;
 
-[ProtoContract]
-public record CreateRoomTemplateIntegrationEvent : IntegrationEvent
+/// <summary>
+/// Parameters for setting Custom Filter editing mode
+/// </summary>
+public class CustomFilterParameters
 {
-    [ProtoMember(6)]
-    public int RoomId { get; set; }
-
-    [ProtoMember(7)]
-    public string Title { get; set; }
-
-    [ProtoMember(8)]
-    public LogoSettings Logo { get; set; }
-
-    [ProtoMember(9)]
-    public IEnumerable<string> Tags { get; set; }
-
-    [ProtoMember(10)]
-    public IEnumerable<string> Emails { get; set; }
-
-    [ProtoMember(11)]
-    public IEnumerable<Guid> Groups { get; set; } 
-    [ProtoMember(12)]
-    public string TaskId { get; set; }
-
-    [ProtoMember(13)]
-    public bool CopyLogo { get; set; }
-
-    [ProtoMember(14)]
-    public string Cover { get; set; }
-
-    [ProtoMember(15)]
-    public string Color { get; set; }
-
-    [ProtoMember(16)]
-    public long? Quota { get; set; }
-
-    public CreateRoomTemplateIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId)
-    {
-    }
-
-    protected CreateRoomTemplateIntegrationEvent()
-    {
-    }
+    /// <summary>
+    /// Specifies Custom Filter editing mode enabled or not
+    /// </summary>
+    public bool Enabled { get; set; }
 }
 
-[ProtoContract]
-public record LogoSettings
+/// <summary>
+/// Request parameters for setting Custom Filter editing mode for a file
+/// </summary>
+public class FileCustomFilterRequestDto<T>
 {
-    [ProtoMember(1)]
-    public string TmpFile { get; set; }
+    /// <summary>
+    /// File ID
+    /// </summary>
+    [FromRoute(Name = "fileId")]
+    public T FileId { get; set; }
 
-    [ProtoMember(2)]
-    public int X { get; set; }
-
-    [ProtoMember(3)]
-    public int Y { get; set; }
-
-    [ProtoMember(4)]
-    public uint Width { get; set; }
-
-    [ProtoMember(5)]
-    public uint Height { get; set; }
+    /// <summary>
+    /// Parameters for setting Custom Filter editing mode
+    /// </summary>
+    [FromBody]
+    public CustomFilterParameters Parameters { get; set; }
 }

@@ -957,4 +957,19 @@
   <data name="FormStopped" xml:space="preserve">
     <value>Users [{0}]. Form stopped: {1}</value>
   </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>File: {0}. Custom filter disabled</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>File: {0}. Custom filter enabled</value>
+  </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>User Api Key Created: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>User Api Key Updated: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>User Api Key Deleted: {0}</value>
+  </data>
 </root>

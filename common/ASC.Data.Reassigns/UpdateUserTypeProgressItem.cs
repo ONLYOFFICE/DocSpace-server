@@ -62,7 +62,7 @@ public class UpdateUserTypeProgressItem: DistributedTaskProgress
         ToUser = toUserId;
         _currentUserId = currentUserId;
         _employeeType = employeeType;
-        _httpHeaders = httpHeaders.ToDictionary();
+        _httpHeaders = httpHeaders;
         Id = QueueWorkerUpdateUserType.GetProgressItemId(tenantId, user);
         Status = DistributedTaskStatus.Created;
         Exception = null;
