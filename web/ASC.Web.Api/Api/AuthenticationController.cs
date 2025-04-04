@@ -669,7 +669,7 @@ public class AuthenticationController(
         {
             if (Guid.TryParse(profileId, out var tmp) && await userManager.UserExistsAsync(tmp))
             {
-                return (true, userId);
+                return (true, tmp);
             }
         }
 

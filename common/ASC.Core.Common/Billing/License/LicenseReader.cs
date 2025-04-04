@@ -143,7 +143,7 @@ public class LicenseReader(
                 File.Delete(_licensePathBcp);
             }
         }
-        catch (BillingNotConfiguredException ex)
+        catch (BillingException ex) when (ex is BillingNotConfiguredException or BillingLicenseTypeException)
         {
             if (bcp)
             {
@@ -207,13 +207,16 @@ public class LicenseReader(
 
     private DateTime Validate(License license)
     {
-        var invalidLicenseType = _licenseType == LicenseType.Enterprise ? license.Developer : !license.Developer;
-
         if (string.IsNullOrEmpty(license.CustomerId)
-            || string.IsNullOrEmpty(license.Signature)
-            || invalidLicenseType)
+            || string.IsNullOrEmpty(license.Signature))
         {
-            throw new BillingNotConfiguredException("License not correct");
+            throw new BillingNotConfiguredException("License file is not correct");
+        }
+
+        var invalidLicenseType = _licenseType == LicenseType.Enterprise ? license.Developer : !license.Developer;
+        if (invalidLicenseType)
+        {
+            throw new BillingLicenseTypeException("License type is not correct");
         }
 
         return license.DueDate.Date;

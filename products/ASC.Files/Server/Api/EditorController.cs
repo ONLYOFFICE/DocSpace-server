@@ -149,9 +149,9 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         var (file, lastVersion) = await documentServiceHelper.GetCurFileInfoAsync(inDto.FileId, inDto.Version);
         FormOpenSetup<T> formOpenSetup = null;
 
-        if (file.IsForm)
+        var rootFolder = await documentServiceHelper.GetRootFolderAsync(file);
+        if (file.IsForm && rootFolder.RootFolderType != FolderType.RoomTemplates)
         {
-            var rootFolder = await documentServiceHelper.GetRootFolderAsync(file);
 
             formOpenSetup = rootFolder.FolderType switch
             {

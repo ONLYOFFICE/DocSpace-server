@@ -1118,6 +1118,10 @@ public class FileSecurity(IDaoFactory daoFactory,
                 break;
 
             case FolderType.RoomTemplates:
+                if (action == FilesSecurityActions.FillForms)
+                {
+                    return false;
+                }
                 if (await HasFullAccessAsync(e, userId, isGuest, isRoom, isUser))
                 {
                     return true;
@@ -1787,6 +1791,11 @@ public class FileSecurity(IDaoFactory daoFactory,
                 }
 
                 if (e.RootFolderType == FolderType.USER || (e.Access != FileShare.Read && e.Access != FileShare.None))
+                {
+                    return true;
+                }
+                
+                if(e.RootFolderType == FolderType.RoomTemplates)
                 {
                     return true;
                 }
