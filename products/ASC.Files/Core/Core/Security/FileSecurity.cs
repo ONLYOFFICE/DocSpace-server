@@ -1118,6 +1118,10 @@ public class FileSecurity(IDaoFactory daoFactory,
                 break;
 
             case FolderType.RoomTemplates:
+                if (action == FilesSecurityActions.FillForms)
+                {
+                    return false;
+                }
                 if (await HasFullAccessAsync(e, userId, isGuest, isRoom, isUser))
                 {
                     return true;
