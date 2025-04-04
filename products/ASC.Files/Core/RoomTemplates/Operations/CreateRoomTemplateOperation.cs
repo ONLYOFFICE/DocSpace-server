@@ -175,6 +175,11 @@ public class CreateRoomTemplateOperation : DistributedTaskProgress
             {
                 try
                 {
+                    var folder = await folderDao.GetFolderAsync(f);
+                    if (folder.FolderType != FolderType.DEFAULT)
+                    {
+                        continue;
+                    }
                     var newFolder = await folderDao.CopyFolderAsync(f, TemplateId, CancellationToken);
                     var folderFiles = fileDao.GetFilesAsync(f);
                     await foreach (var file in folderFiles)
