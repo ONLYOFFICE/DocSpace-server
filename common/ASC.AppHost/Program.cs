@@ -31,6 +31,8 @@ const int restyPort = 8092;
 const int socketIoPort = 9899;
 const int ssoAuthPort = 9834;
 const int webDavPort = 1900;
+const int identityRegistrationPort = 8080;
+const int identityAuthorizationPort = 9090;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
@@ -129,6 +131,28 @@ else
     builder.AddNpmApp("asc-ssoAuth", "../ASC.SSoAuth/", "start:build").WithHttpEndpoint(targetPort: 9834).WithHttpHealthCheck("/health");
     builder.AddNpmApp("asc-webDav", "../ASC.WebDav/", "start:build").WithHttpEndpoint(targetPort: 1900).WithHttpHealthCheck("/health");
 }
+
+builder.AddDockerfile("asc-identity-registration", "../ASC.Identity/")
+    .WithImageTag("dev")
+    .WithEnvironment("log:dir", "/logs")
+    .WithEnvironment("log:name", "identity.registration")
+    .WithEnvironment("SERVER_PORT", identityRegistrationPort.ToString())
+    .WithEnvironment("SPRING_PROFILES_ACTIVE", "dev,server")
+    .WithEnvironment("SPRING_APPLICATION_NAME", "ASC.Identity.Registration")
+    .WithEnvironment("GRPC_CLIENT_AUTHORIZATION_ADDRESS", "static://authorization-service:9999")
+    .WithHttpEndpoint(identityRegistrationPort, identityRegistrationPort, isProxied: false)
+    .WithBuildArg("MODULE", "registration/registration-container");
+
+builder.AddDockerfile("asc-identity-authorization", "../ASC.Identity/")
+    .WithImageTag("dev")
+    .WithEnvironment("log:dir", "/logs")
+    .WithEnvironment("log:name", "identity.authorization")
+    .WithEnvironment("SERVER_PORT", identityAuthorizationPort.ToString())
+    .WithEnvironment("SPRING_PROFILES_ACTIVE", "dev,server")
+    .WithEnvironment("SPRING_APPLICATION_NAME", "ASC.Identity.Authorization")
+    .WithEnvironment("GRPC_CLIENT_AUTHORIZATION_ADDRESS", "static://registration-service:8888")
+    .WithHttpEndpoint(identityAuthorizationPort, identityAuthorizationPort, isProxied: false)
+    .WithBuildArg("MODULE", "authorization/authorization-container");
 
 var clientBasePath = Path.Combine(basePath, "client");
 var installPackages = builder.AddExecutable("asc-install-packages", "yarn", clientBasePath, "install");
