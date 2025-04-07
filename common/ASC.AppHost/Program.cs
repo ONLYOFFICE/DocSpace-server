@@ -33,8 +33,8 @@ const int restyPort = 8092;
 const int socketIoPort = 9899;
 const int ssoAuthPort = 9834;
 const int webDavPort = 1900;
-const int identityRegistrationPort = 8080;
-const int identityAuthorizationPort = 9090;
+const int identityRegistrationPort = 9090;
+const int identityAuthorizationPort = 8080;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
@@ -104,6 +104,7 @@ var migrate = builder
 
 var basePath = Path.GetFullPath(Path.Combine("..", "..", ".."));
 
+var ascSocketio = "asc-socketIO";
 if (String.Compare(builder.Configuration["Docker"], "true", StringComparison.OrdinalIgnoreCase) == 0)
 {
     AddProjectDocker<ASC_Files>(5007);
@@ -118,37 +119,34 @@ if (String.Compare(builder.Configuration["Docker"], "true", StringComparison.Ord
     AddProjectDocker<ASC_Studio_Notify>(5006);
     AddProjectDocker<ASC_Web_Studio>(5003);
     
-    builder.AddDockerfile("asc-socketIO", "../ASC.Socket.IO/")
+    var socketIoResourceBuilder = builder
+        .AddDockerfile(ascSocketio, "../ASC.Socket.IO/")
         .WithImageTag("dev")
-        .WithBindMount(Path.Combine(basePath, "buildtools"), "/buildtools")
-        .WithBindMount(Path.Combine(basePath, "Data"), "/data")
-        .WithBindMount(Path.Combine(basePath, "Logs"), "/logs")
-        .WithEnvironment("log:dir", "/logs")
         .WithEnvironment("log:name", "socketIO")
         .WithReference(redis, "redis")
         .WithHttpEndpoint(socketIoPort, socketIoPort, isProxied: false)
         .WithHttpHealthCheck("/health");
     
-    builder.AddDockerfile("asc-ssoAuth", "../ASC.SSoAuth/")
+    AddBaseBind(socketIoResourceBuilder);
+    
+    var ssoAuthResourceBuilder = builder
+        .AddDockerfile("asc-ssoAuth", "../ASC.SSoAuth/")
         .WithImageTag("dev")
-        .WithBindMount(Path.Combine(basePath, "buildtools"), "/buildtools")
-        .WithBindMount(Path.Combine(basePath, "Data"), "/data")
-        .WithBindMount(Path.Combine(basePath, "Logs"), "/logs")
-        .WithEnvironment("log:dir", "/logs")
         .WithEnvironment("log:name", "ssoAuth")
         .WithEnvironment("app:appsettings", "/buildtools/config")
         .WithHttpEndpoint(ssoAuthPort, ssoAuthPort, isProxied: false)
         .WithHttpHealthCheck("/health");
     
-    builder.AddDockerfile("asc-webDav", "../ASC.WebDav/")
+    AddBaseBind(ssoAuthResourceBuilder);
+    
+    var webDavResourceBuilder = builder
+        .AddDockerfile("asc-webDav", "../ASC.WebDav/")
         .WithImageTag("dev")
-        .WithBindMount(Path.Combine(basePath, "buildtools"), "/buildtools")
-        .WithBindMount(Path.Combine(basePath, "Data"), "/data")
-        .WithBindMount(Path.Combine(basePath, "Logs"), "/logs")
-        .WithEnvironment("log:dir", "/logs")
         .WithEnvironment("log:name", "webDav")
         .WithHttpEndpoint(webDavPort, webDavPort, isProxied: false)
         .WithHttpHealthCheck("/health");
+    
+    AddBaseBind(webDavResourceBuilder);
 }
 else
 {
@@ -164,32 +162,37 @@ else
     AddProjectWithDefaultConfiguration<ASC_Studio_Notify>();
     AddProjectWithDefaultConfiguration<ASC_Web_Studio>();
     
-    builder.AddNpmApp("asc-socketIO", "../ASC.Socket.IO/", "start:build").WithReference(redis, "redis").WithHttpEndpoint(targetPort: socketIoPort).WithHttpHealthCheck("/health");
+    builder.AddNpmApp(ascSocketio, "../ASC.Socket.IO/", "start:build").WithReference(redis, "redis").WithHttpEndpoint(targetPort: socketIoPort).WithHttpHealthCheck("/health");
     builder.AddNpmApp("asc-ssoAuth", "../ASC.SSoAuth/", "start:build").WithHttpEndpoint(targetPort: 9834).WithHttpHealthCheck("/health");
     builder.AddNpmApp("asc-webDav", "../ASC.WebDav/", "start:build").WithHttpEndpoint(targetPort: 1900).WithHttpHealthCheck("/health");
 }
 
-var registrationBuilder = builder.AddDockerfile("asc-identity-registration", "../ASC.Identity/")
+var ascIdentityRegistration = "asc-identity-registration";
+var ascIdentityAuthorization = "asc-identity-authorization";
+
+var registrationBuilder = builder
+    .AddDockerfile(ascIdentityRegistration, "../ASC.Identity/")
     .WithImageTag("dev")
     .WithEnvironment("log:dir", "/logs")
     .WithEnvironment("log:name", "identity.registration")
     .WithEnvironment("SERVER_PORT", identityRegistrationPort.ToString())
     .WithEnvironment("SPRING_PROFILES_ACTIVE", "dev,server")
     .WithEnvironment("SPRING_APPLICATION_NAME", "ASC.Identity.Registration")
-    .WithEnvironment("GRPC_CLIENT_AUTHORIZATION_ADDRESS", "static://authorization-service:9999")
+    .WithEnvironment("GRPC_CLIENT_AUTHORIZATION_ADDRESS", $"static://{ascIdentityAuthorization}:9999")
     .WithHttpEndpoint(identityRegistrationPort, identityRegistrationPort, isProxied: false)
     .WithBuildArg("MODULE", "registration/registration-container");
 
 AddIdentityEnv(registrationBuilder);
 
-var authorizationBuilder = builder.AddDockerfile("asc-identity-authorization", "../ASC.Identity/")
+var authorizationBuilder = builder
+    .AddDockerfile(ascIdentityAuthorization, "../ASC.Identity/")
     .WithImageTag("dev")
     .WithEnvironment("log:dir", "/logs")
     .WithEnvironment("log:name", "identity.authorization")
     .WithEnvironment("SERVER_PORT", identityAuthorizationPort.ToString())
     .WithEnvironment("SPRING_PROFILES_ACTIVE", "dev,server")
     .WithEnvironment("SPRING_APPLICATION_NAME", "ASC.Identity.Authorization")
-    .WithEnvironment("GRPC_CLIENT_AUTHORIZATION_ADDRESS", "static://registration-service:8888")
+    .WithEnvironment("GRPC_CLIENT_AUTHORIZATION_ADDRESS", $"static://{ascIdentityRegistration}:8888")
     .WithHttpEndpoint(identityAuthorizationPort, identityAuthorizationPort, isProxied: false)
     .WithBuildArg("MODULE", "authorization/authorization-container");
 
@@ -236,20 +239,18 @@ void AddProjectDocker<TProject>(int projectPort, bool includeHealthCheck = true)
     {
         dllPath += "net9.0/";
     }
-    
+
     resourceBuilder
         .WithImageTag("dev")
         .WithBindMount(projectBasePath, "/app")
-        .WithBindMount(Path.Combine(basePath, "buildtools"), "/buildtools")
-        .WithBindMount(Path.Combine(basePath, "Data"), "/data")
-        .WithBindMount(Path.Combine(basePath, "Logs"), "/logs")
-        .WithEnvironment("log:dir", "/logs")
         .WithEnvironment("log:name", $"/{name.ToLower()["asc-".Length..].Replace('_', '.')}")
         .WithEnvironment("$STORAGE_ROOT", "/data")
-        .WithEnvironment("web:hub:internal", "http://asc-socketIO:9899")
+        .WithEnvironment("web:hub:internal", $"http://{ascSocketio}:9899")
         .WithArgs($"{dllPath}{name.Replace('_', '.')}.dll")
         .WithEntrypoint("dotnet");
 
+    AddBaseBind(resourceBuilder);
+    
     if (projectPort != 0)
     {
         resourceBuilder
@@ -312,4 +313,13 @@ void AddIdentityEnv<T>(IResourceBuilder<T> resourceBuilder) where T : ContainerR
         .WithEnvironment("REDIS_PORT", () => redisPort ?? string.Empty);
     
     AddWaitFor(resourceBuilder, includeEditors: false);
+}
+
+void AddBaseBind<T>(IResourceBuilder<T> resourceBuilder) where T : ContainerResource
+{
+    resourceBuilder
+        .WithBindMount(Path.Combine(basePath, "buildtools"), "/buildtools")
+        .WithBindMount(Path.Combine(basePath, "Data"), "/data")
+        .WithBindMount(Path.Combine(basePath, "Logs"), "/logs")
+        .WithEnvironment("log:dir", "/logs");
 }
