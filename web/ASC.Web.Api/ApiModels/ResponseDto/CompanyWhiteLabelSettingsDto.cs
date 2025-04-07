@@ -60,6 +60,11 @@ public class CompanyWhiteLabelSettingsDto: IMapFrom<CompanyWhiteLabelSettings>
     public bool IsLicensor { get; set; }
 
     /// <summary>
+    /// Specifies if the About page is visible or not
+    /// </summary>
+    public bool HideAbout { get; set; }
+
+    /// <summary>
     /// Specifies if these settings are default or not
     /// </summary>
     public bool IsDefault { get; set; }

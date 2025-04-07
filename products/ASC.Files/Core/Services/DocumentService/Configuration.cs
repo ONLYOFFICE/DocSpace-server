@@ -774,7 +774,7 @@ public class CustomizationConfig<T>(
     [JsonIgnore]
     public string GobackUrl;
 
-    public async Task<bool> IsAboutEnabled()
+    public async Task<bool> IsAboutPageVisible()
     {
         if (!coreBaseSettings.Standalone && !coreBaseSettings.CustomMode)
         {
@@ -787,8 +787,8 @@ public class CustomizationConfig<T>(
             return true;
         }
 
-        var additionalWhiteLabelSettings = await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>();
-        return additionalWhiteLabelSettings.AboutEnabled;
+        var companyWhiteLabelSettings = await settingsManager.LoadForDefaultTenantAsync<CompanyWhiteLabelSettings>();
+        return !companyWhiteLabelSettings.HideAbout;
     }
 
     public CustomerConfig Customer { get; set; } = customerConfig;

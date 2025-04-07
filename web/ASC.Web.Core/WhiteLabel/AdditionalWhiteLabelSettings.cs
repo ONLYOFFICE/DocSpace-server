@@ -42,11 +42,6 @@ public class AdditionalWhiteLabelSettings : ISettings<AdditionalWhiteLabelSettin
     public ExternalResourceSettingsHelper ExternalResourceSettingsHelper;
 
     /// <summary>
-    /// Specifies if the About dialog is available or not
-    /// </summary>
-    public bool AboutEnabled { get; init; }
-
-    /// <summary>
     /// Specifies if the start document is enabled or not
     /// </summary>
     public bool StartDocsEnabled { get; init; }
@@ -93,7 +88,6 @@ public class AdditionalWhiteLabelSettings : ISettings<AdditionalWhiteLabelSettin
     {
         return new AdditionalWhiteLabelSettings(ExternalResourceSettingsHelper)
         {
-            AboutEnabled = true,
             StartDocsEnabled = true,
             HelpCenterEnabled = !string.IsNullOrWhiteSpace(ExternalResourceSettingsHelper?.Helpcenter.GetDefaultRegionalDomain()),
             FeedbackAndSupportEnabled = !string.IsNullOrWhiteSpace(ExternalResourceSettingsHelper?.Support.GetDefaultRegionalDomain()),
@@ -115,8 +109,7 @@ public class AdditionalWhiteLabelSettingsHelper(ExternalResourceSettingsHelper e
 
         var defaultSettings = settings.GetDefault();
 
-        return settings.AboutEnabled == defaultSettings.AboutEnabled &&
-                settings.StartDocsEnabled == defaultSettings.StartDocsEnabled &&
+        return settings.StartDocsEnabled == defaultSettings.StartDocsEnabled &&
                 settings.HelpCenterEnabled == defaultSettings.HelpCenterEnabled &&
                 settings.FeedbackAndSupportEnabled == defaultSettings.FeedbackAndSupportEnabled &&
                 settings.UserForumEnabled == defaultSettings.UserForumEnabled &&

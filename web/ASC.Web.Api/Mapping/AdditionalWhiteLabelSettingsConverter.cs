@@ -36,7 +36,6 @@ public class AdditionalWhiteLabelSettingsConverter(
     {
         var result = new AdditionalWhiteLabelSettingsDto
         {
-            AboutEnabled = source.AboutEnabled,
             FeedbackAndSupportEnabled = source.FeedbackAndSupportEnabled,
             HelpCenterEnabled = source.HelpCenterEnabled,
             IsDefault = additionalWhiteLabelSettingsHelper.IsDefault(source),

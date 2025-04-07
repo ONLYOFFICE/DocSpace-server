@@ -80,6 +80,11 @@ public class CompanyWhiteLabelSettings : ISettings<CompanyWhiteLabelSettings>
     [JsonPropertyName("IsLicensor")]
     public bool IsLicensor { get; set; }
 
+    /// <summary>
+    /// Specifies if the About page is visible or not
+    /// </summary>
+    public bool HideAbout { get; set; }
+
     public CompanyWhiteLabelSettings(CoreSettings coreSettings)
     {
         CoreSettings = coreSettings;
@@ -109,7 +114,7 @@ public class CompanyWhiteLabelSettings : ISettings<CompanyWhiteLabelSettings>
 
         return result;
     }
-    
+
     public DateTime LastModified { get; set; }
 
     #endregion
@@ -133,6 +138,7 @@ public class CompanyWhiteLabelSettingsHelper(CoreSettings coreSettings, Settings
                 settings.Email == defaultSettings.Email &&
                 settings.Address == defaultSettings.Address &&
                 settings.Phone == defaultSettings.Phone &&
-                settings.IsLicensor == defaultSettings.IsLicensor;
+                settings.IsLicensor == defaultSettings.IsLicensor &&
+                settings.HideAbout == defaultSettings.HideAbout;
     }
 }
