@@ -72,6 +72,7 @@ public class EntryProperties<T>
 public class FormFillingProperties<T>
 {
     public bool StartFilling { get; set; }
+    public Guid StartedByUserId { get; set; }
     public string Title { get; set; }
     public T RoomId { get; set; }
     public T ToFolderId { get; set; }

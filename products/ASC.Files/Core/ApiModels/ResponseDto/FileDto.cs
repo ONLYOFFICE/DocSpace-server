@@ -342,7 +342,7 @@ public class FileDtoHelper(
                                     : FormFillingStatus.InProgress;
                                 break;
                             default:
-                                if (roleList.Count > 0)
+                                if (roleList.Count > 0 || properties.FormFilling.StartedByUserId.Equals(authContext.CurrentAccount.ID))
                                 {
                                     result.FormFillingStatus = FormFillingStatus.InProgress;
                                 }
