@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using MySqlConnector;
+
 using Projects;
 
 var editorPort = Random.Shared.Next(8086, 8090);
@@ -41,6 +43,16 @@ var mySql = builder
     .WithLifetime(ContainerLifetime.Persistent)
     .AddDatabase("docspace");
 
+MySqlConnectionStringBuilder? mySqlConnectionStringBuilder = null;
+builder.Eventing.Subscribe(mySql.Resource, (Func<ConnectionStringAvailableEvent, CancellationToken, Task>) (async (_, ct) =>
+{
+    var connectionString = await mySql.Resource.ConnectionStringExpression.GetValueAsync(ct).ConfigureAwait(false);
+    if (connectionString != null && mySqlConnectionStringBuilder == null)
+    {
+        mySqlConnectionStringBuilder = new MySqlConnectionStringBuilder(connectionString);
+    }
+}));
+
 var path = Path.GetFullPath(Path.Combine("..", "Tools", "ASC.Migration.Runner", "bin", "Debug", "ASC.Migration.Runner.exe"));
 
 var rabbitMq = builder
@@ -48,11 +60,36 @@ var rabbitMq = builder
     .WithLifetime(ContainerLifetime.Persistent)
     .WithManagementPlugin();
 
+Uri? rabbitMqUri = null;
+builder.Eventing.Subscribe(rabbitMq.Resource, (Func<ConnectionStringAvailableEvent, CancellationToken, Task>) (async (_, ct) =>
+{
+    var connectionString = await rabbitMq.Resource.ConnectionStringExpression.GetValueAsync(ct).ConfigureAwait(false);
+    if (connectionString != null && rabbitMqUri == null && Uri.IsWellFormedUriString(connectionString, UriKind.Absolute))
+    {
+        rabbitMqUri = new Uri(connectionString);
+    }
+}));
+
 var redis = builder
     .AddRedis("cache")
     .WithLifetime(ContainerLifetime.Persistent);
     //.WithRedisInsight();
 
+string? redisHost = null;
+string? redisPort = null;
+builder.Eventing.Subscribe(redis.Resource, (Func<ConnectionStringAvailableEvent, CancellationToken, Task>) (async (_, ct) =>
+{
+    var connectionString = await redis.Resource.ConnectionStringExpression.GetValueAsync(ct).ConfigureAwait(false);
+    if (connectionString != null)
+    {
+        var splitted = connectionString.Split(':');
+        if (splitted.Length == 2)
+        {
+            redisHost = splitted[0];
+            redisPort = splitted[1];
+        }
+    }
+}));
 var editors = builder
     .AddContainer("asc-editors", "onlyoffice/documentserver", "latest")
     .WithHttpEndpoint(editorPort, 80)
@@ -132,7 +169,7 @@ else
     builder.AddNpmApp("asc-webDav", "../ASC.WebDav/", "start:build").WithHttpEndpoint(targetPort: 1900).WithHttpHealthCheck("/health");
 }
 
-builder.AddDockerfile("asc-identity-registration", "../ASC.Identity/")
+var registrationBuilder = builder.AddDockerfile("asc-identity-registration", "../ASC.Identity/")
     .WithImageTag("dev")
     .WithEnvironment("log:dir", "/logs")
     .WithEnvironment("log:name", "identity.registration")
@@ -143,7 +180,9 @@ builder.AddDockerfile("asc-identity-registration", "../ASC.Identity/")
     .WithHttpEndpoint(identityRegistrationPort, identityRegistrationPort, isProxied: false)
     .WithBuildArg("MODULE", "registration/registration-container");
 
-builder.AddDockerfile("asc-identity-authorization", "../ASC.Identity/")
+AddIdentityEnv(registrationBuilder);
+
+var authorizationBuilder = builder.AddDockerfile("asc-identity-authorization", "../ASC.Identity/")
     .WithImageTag("dev")
     .WithEnvironment("log:dir", "/logs")
     .WithEnvironment("log:name", "identity.authorization")
@@ -153,6 +192,8 @@ builder.AddDockerfile("asc-identity-authorization", "../ASC.Identity/")
     .WithEnvironment("GRPC_CLIENT_AUTHORIZATION_ADDRESS", "static://registration-service:8888")
     .WithHttpEndpoint(identityAuthorizationPort, identityAuthorizationPort, isProxied: false)
     .WithBuildArg("MODULE", "authorization/authorization-container");
+
+AddIdentityEnv(authorizationBuilder);
 
 var clientBasePath = Path.Combine(basePath, "client");
 var installPackages = builder.AddExecutable("asc-install-packages", "yarn", clientBasePath, "install");
@@ -213,7 +254,7 @@ void AddProjectDocker<TProject>(int projectPort, bool includeHealthCheck = true)
     {
         resourceBuilder
             .WithEnvironment("ASPNETCORE_HTTP_PORTS", projectPort.ToString())
-            .WithHttpEndpoint(projectPort, projectPort, isProxied: false);
+            .WithHttpEndpoint(projectPort, projectPort);
     }
 }
 
@@ -229,9 +270,46 @@ void AddBaseConfig<T>(IResourceBuilder<T> resourceBuilder, bool includeHealthChe
         .WithEnvironment("files:docservice:url:public", $"http://localhost:{editorPort.ToString()}")
         .WithReference(mySql, "default:connectionString")
         .WithReference(rabbitMq, "rabbitMQ")
-        .WithReference(redis, "redis")
-        .WaitFor(migrate)
-        .WaitFor(rabbitMq)
-        .WaitFor(redis)
-        .WaitFor(editors);
+        .WithReference(redis, "redis");
+
+    AddWaitFor(resourceBuilder);
+}
+
+void AddWaitFor<T>(IResourceBuilder<T> resourceBuilder, bool includeMigrate = true, bool includeRabbitMq = true, bool includeRedis = true, bool includeEditors = true) where T : IResourceWithWaitSupport
+{
+    if (includeMigrate)
+    {
+        resourceBuilder.WaitFor(migrate);
+    }
+    if (includeRabbitMq)
+    {
+        resourceBuilder.WaitFor(rabbitMq);
+    }
+    if (includeRedis)
+    {
+        resourceBuilder.WaitFor(redis);
+    }
+    if (includeEditors)
+    {
+        resourceBuilder.WaitFor(editors);
+    }
+}
+
+void AddIdentityEnv<T>(IResourceBuilder<T> resourceBuilder) where T : ContainerResource
+{
+    resourceBuilder
+        .WithEnvironment("JDBC_URL", () => mySqlConnectionStringBuilder != null ? $"{mySqlConnectionStringBuilder.Server.Replace("localhost", "host.docker.internal")}:{mySqlConnectionStringBuilder.Port}" : string.Empty)
+        .WithEnvironment("JDBC_DATABASE", () => mySqlConnectionStringBuilder != null ? $"{mySqlConnectionStringBuilder.Database}" : string.Empty)
+        .WithEnvironment("JDBC_USER_NAME", () => mySqlConnectionStringBuilder != null ? $"{mySqlConnectionStringBuilder.UserID}" : string.Empty)
+        .WithEnvironment("JDBC_PASSWORD", () => mySqlConnectionStringBuilder != null ? $"{mySqlConnectionStringBuilder.Password}" : string.Empty);
+    
+    resourceBuilder
+        .WithEnvironment("RABBIT_HOST", () => rabbitMqUri != null ? $"{rabbitMqUri.Host.Replace("localhost", "host.docker.internal")}" : string.Empty)
+        .WithEnvironment("RABBIT_URI", () => rabbitMqUri != null ? rabbitMqUri.ToString().Replace("localhost", "host.docker.internal") : string.Empty);
+    
+    resourceBuilder
+        .WithEnvironment("REDIS_HOST", () => redisHost?.Replace("localhost", "host.docker.internal") ?? string.Empty)
+        .WithEnvironment("REDIS_PORT", () => redisPort ?? string.Empty);
+    
+    AddWaitFor(resourceBuilder, includeEditors: false);
 }
