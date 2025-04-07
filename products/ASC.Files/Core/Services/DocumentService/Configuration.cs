@@ -757,6 +757,7 @@ public class CustomerConfig(
 [Transient(GenericArguments = [typeof(string)])]
 public class CustomizationConfig<T>(
     CoreBaseSettings coreBaseSettings,
+    TenantManager tenantManager,
     SettingsManager settingsManager,
     FileUtility fileUtility,
     FilesSettingsHelper filesSettingsHelper,
@@ -773,7 +774,22 @@ public class CustomizationConfig<T>(
     [JsonIgnore]
     public string GobackUrl;
 
-    public bool About => !coreBaseSettings.Standalone && !coreBaseSettings.CustomMode;
+    public async Task<bool> IsAboutEnabled()
+    {
+        if (!coreBaseSettings.Standalone && !coreBaseSettings.CustomMode)
+        {
+            return true;
+        }
+
+        var quota = await tenantManager.GetCurrentTenantQuotaAsync();
+        if (!quota.Branding)
+        {
+            return true;
+        }
+
+        var additionalWhiteLabelSettings = await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>();
+        return additionalWhiteLabelSettings.AboutEnabled;
+    }
 
     public CustomerConfig Customer { get; set; } = customerConfig;
 

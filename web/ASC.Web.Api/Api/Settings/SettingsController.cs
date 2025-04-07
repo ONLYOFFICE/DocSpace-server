@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Security.Cryptography;
-
 namespace ASC.Web.Api.Controllers.Settings;
 
 public partial class SettingsController(MessageService messageService,
@@ -93,6 +91,7 @@ public partial class SettingsController(MessageService messageService,
         var additionalWhiteLabelSettings = await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>();
 
         var tenant = tenantManager.GetCurrentTenant();
+        var quota = await tenantManager.GetCurrentTenantQuotaAsync();
 
         var settings = new SettingsDto
         {
@@ -108,7 +107,7 @@ public partial class SettingsController(MessageService messageService,
             EnableAdmMess = studioAdminMessageSettings.Enable || await tenantExtra.IsNotPaidAsync(),
             CookieSettingsEnabled = tenantCookieSettings.Enabled,
             UserNameRegex = userFormatter.UserNameRegex.ToString(),
-            DisplayAbout = (!coreBaseSettings.Standalone && !coreBaseSettings.CustomMode) || !(await tenantManager.GetCurrentTenantQuotaAsync()).Branding,
+            DisplayAbout = (!coreBaseSettings.Standalone && !coreBaseSettings.CustomMode) || !quota.Branding || (quota.Branding && additionalWhiteLabelSettings.AboutEnabled),
             DeepLink = new DeepLinkDto
             {
                 AndroidPackageName = configuration["deeplink:androidpackagename"] ?? "",

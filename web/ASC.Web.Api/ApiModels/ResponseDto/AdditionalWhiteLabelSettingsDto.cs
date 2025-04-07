@@ -29,6 +29,11 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 public class AdditionalWhiteLabelSettingsDto: IMapFrom<AdditionalWhiteLabelSettings>
 {
     /// <summary>
+    /// Specifies if the About dialog is available or not
+    /// </summary>
+    public bool AboutEnabled { get; init; }
+
+    /// <summary>
     /// Specifies if the start document is enabled or not
     /// </summary>
     public bool StartDocsEnabled { get; set; }
