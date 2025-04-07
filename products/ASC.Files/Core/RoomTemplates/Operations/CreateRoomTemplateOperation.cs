@@ -146,11 +146,18 @@ public class CreateRoomTemplateOperation : DistributedTaskProgress
 
             if (_copyLogo)
             {
-                var room = await folderDao.GetFolderAsync(_roomId);
-                if (await roomLogoManager.CopyAsync(room, template))
+                try
                 {
-                    template.SettingsHasLogo = true;
-                    await folderDao.SaveFolderAsync(template);
+                    var room = await folderDao.GetFolderAsync(_roomId);
+                    if (await roomLogoManager.CopyAsync(room, template))
+                    {
+                        template.SettingsHasLogo = true;
+                        await folderDao.SaveFolderAsync(template);
+                    }
+                }
+                catch(Exception ex)
+                {
+                    logger.WarningCanNotCopyLogo(ex);
                 }
             }
 

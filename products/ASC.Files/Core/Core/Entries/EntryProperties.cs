@@ -35,6 +35,8 @@ public class EntryProperties<T>
     /// <type>ASC.Files.Core.FormFillingProperties, ASC.Files.Core</type>
     public FormFillingProperties<T> FormFilling { get; set; }
 
+    public bool CopyToFillOut { get; set; }
+
     public static EntryProperties<T> Deserialize(string data, ILogger logger)
     {
         var options = new JsonSerializerOptions
@@ -72,6 +74,7 @@ public class EntryProperties<T>
 public class FormFillingProperties<T>
 {
     public bool StartFilling { get; set; }
+    public Guid StartedByUserId { get; set; }
     public string Title { get; set; }
     public T RoomId { get; set; }
     public T ToFolderId { get; set; }
