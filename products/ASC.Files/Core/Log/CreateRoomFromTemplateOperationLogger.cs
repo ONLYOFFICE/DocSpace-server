@@ -35,5 +35,8 @@ internal static partial class CreateRoomFromTemplateOperationLogger
     public static partial void WarningCanNotCopyFile(this ILogger<CreateRoomFromTemplateOperation> logger, Exception exception);
 
     [LoggerMessage(LogLevel.Warning, "CreateRoomFromTemplateOperation")]
+    public static partial void WarningCanNotCopyLogo(this ILogger<CreateRoomFromTemplateOperation> logger, Exception exception);
+
+    [LoggerMessage(LogLevel.Warning, "CreateRoomFromTemplateOperation")]
     public static partial void WarningCanNotCopyFolder(this ILogger<CreateRoomFromTemplateOperation> logger, Exception exception);
 }
