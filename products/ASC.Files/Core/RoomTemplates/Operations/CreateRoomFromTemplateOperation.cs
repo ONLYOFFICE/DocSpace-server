@@ -126,7 +126,7 @@ public class CreateRoomFromTemplateOperation : DistributedTaskProgress
                 }
                 catch(Exception ex)
                 {
-                    ogger.WarningCanNotCopyFile(ex);
+                    logger.WarningCanNotCopyLogo(ex);
                 }
             }
 
