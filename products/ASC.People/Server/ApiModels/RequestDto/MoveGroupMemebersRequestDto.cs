@@ -28,18 +28,18 @@ namespace ASC.People.ApiModels.RequestDto;
 
 
 /// <summary>
-/// 
+/// The request parameters for moving members from one group to another.
 /// </summary>
 public class MoveGroupMemebersRequestDto
 {
     /// <summary>
-    /// Group ID to move from
+    /// The group ID to move from.
     /// </summary>
     [FromRoute(Name = "fromId")]
     public required Guid FromId { get; set; }
 
     /// <summary>
-    /// Group ID to move to
+    /// The group ID to move to.
     /// </summary>
     [FromRoute(Name = "toId")]
     public required Guid ToId { get; set; }

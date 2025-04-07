@@ -26,6 +26,9 @@
 
 namespace ASC.Core;
 
+/// <summary>
+/// The user payment status.
+/// </summary>
 public enum Payments
 {
     [SwaggerEnum("Paid")]

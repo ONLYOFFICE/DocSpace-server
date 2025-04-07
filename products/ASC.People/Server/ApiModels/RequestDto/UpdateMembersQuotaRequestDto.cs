@@ -27,17 +27,17 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for updating user information
+/// The request parameters for updating a user quota.
 /// </summary>
 public class UpdateMembersQuotaRequestDto
 {
     /// <summary>
-    /// List of user IDs
+    /// The list of user IDs.
     /// </summary>
     public IEnumerable<Guid> UserIds { get; set; }
 
     /// <summary>
-    /// Quota
+    /// The quota in JSON format.
     /// </summary>
     public JsonElement Quota { get; set; }
 }

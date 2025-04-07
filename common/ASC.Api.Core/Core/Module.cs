@@ -27,7 +27,7 @@
 namespace ASC.Api.Core;
 
 /// <summary>
-/// The module parameters.
+/// The module information.
 /// </summary>
 public class Module(Product product)
 {
@@ -42,7 +42,7 @@ public class Module(Product product)
     public string AppName { get; set; } = product.ProductClassName;
 
     /// <summary>
-    /// The module title.
+    /// The module product class name.
     /// </summary>
     public string Title { get; set; } = product.Name;
 

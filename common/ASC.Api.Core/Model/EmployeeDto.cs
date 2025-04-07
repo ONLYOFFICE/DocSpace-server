@@ -29,7 +29,7 @@ using System.Collections.Concurrent;
 namespace ASC.Web.Api.Models;
 
 /// <summary>
-/// The user information.
+/// The user parameters.
 /// </summary>
 public class EmployeeDto
 {

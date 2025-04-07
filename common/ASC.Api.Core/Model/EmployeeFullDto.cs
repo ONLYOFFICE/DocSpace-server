@@ -27,7 +27,7 @@
 namespace ASC.Web.Api.Models;
 
 /// <summary>
-/// The portal user parameters.
+/// The full list of user parameters.
 /// </summary>
 public class EmployeeFullDto : EmployeeDto
 {
@@ -57,7 +57,7 @@ public class EmployeeFullDto : EmployeeDto
     public string Email { get; set; }
 
     /// <summary>
-    /// A list of the user contacts.
+    /// The list of user contacts.
     /// </summary>
     public List<Contact> Contacts { get; set; }
 
@@ -99,7 +99,7 @@ public class EmployeeFullDto : EmployeeDto
     public ApiDateTime WorkFrom { get; set; }
 
     /// <summary>
-    /// A list of the user groups.
+    /// The list of user groups.
     /// </summary>
     public List<GroupSummaryDto> Groups { get; set; }
 
@@ -133,7 +133,7 @@ public class EmployeeFullDto : EmployeeDto
     public bool IsLDAP { get; set; }
 
     /// <summary>
-    /// A list of the user administrator modules.
+    /// The list of the administrator modules.
     /// </summary>
     [SwaggerSchemaCustom(Example = "[\"projects\", \"crm\"]")]
     public List<string> ListAdminModules { get; set; }
@@ -165,7 +165,7 @@ public class EmployeeFullDto : EmployeeDto
     public string MobilePhone { get; set; }
 
     /// <summary>
-    /// The user mobile phone activation status.
+    /// The mobile phone activation status.
     /// </summary>
     public MobilePhoneActivationStatus MobilePhoneActivationStatus { get; set; }
 
@@ -186,7 +186,7 @@ public class EmployeeFullDto : EmployeeDto
     public long? QuotaLimit { get; set; }
 
     /// <summary>
-    /// The user portal used space.
+    /// The portal used space of the user.
     /// </summary>
     [SwaggerSchemaCustom(Example = 12345)]
     public double? UsedSpace { get; set; }
@@ -217,7 +217,7 @@ public class EmployeeFullDto : EmployeeDto
     public ApiDateTime RegistrationDate { get; set; }
 
     /// <summary>
-    /// Specifies if the user has a personal folder or not
+    /// Specifies if the user has a personal folder or not.
     /// </summary>
     public bool HasPersonalFolder { get; set; }
 }

@@ -46,7 +46,7 @@ public enum EmployeeActivationStatus
 }
 
 /// <summary>
-/// The mobile phone activation status.
+/// The user mobile phone activation status.
 /// </summary>
 [Flags]
 public enum MobilePhoneActivationStatus
