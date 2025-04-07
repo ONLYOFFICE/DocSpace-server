@@ -40,17 +40,17 @@ public class OrderRequestDto
 }
 
 /// <summary>
-/// Represents an item in the ordering request with its entry type and ID.
+/// An item in the ordering request with its entry type and ID.
 /// </summary>
 public class OrdersItemRequestDto<T>
 {
     /// <summary>
-    /// The unique identifier of the entry (file or folder).
+    /// The entry unique identifier (file or folder).
     /// </summary>
     public T EntryId { get; set; }
 
     /// <summary>
-    /// The type of the entry (file or folder).
+    /// The entry type (file or folder).
     /// </summary>
     public FileEntryType EntryType { get; set; }
 

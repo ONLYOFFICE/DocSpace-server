@@ -65,7 +65,7 @@ public class FileDto<T> : FileEntryDto<T>
     public FileStatus FileStatus { get; set; }
 
     /// <summary>
-    /// Specifiess if the file is muted or not.
+    /// Specifies if the file is muted or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool Mute { get; set; }

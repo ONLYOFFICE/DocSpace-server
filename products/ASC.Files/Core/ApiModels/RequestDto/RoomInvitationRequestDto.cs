@@ -53,7 +53,7 @@ public class RoomInvitationRequest
     public string Culture { get; set; }
 
     /// <summary>
-    /// Force
+    /// Specifies whether to forcibly delete a user with form roles from the room.
     /// </summary>
     public bool Force { get; set; }
 }

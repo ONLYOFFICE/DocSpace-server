@@ -42,11 +42,14 @@ public class RoomSecurityDto
     public string Warning { get; set; }
 
     /// <summary>
-    /// Error
+    /// The error type.
     /// </summary>
     public RoomSecurityError Error { get; set; }
 }
 
+/// <summary>
+/// The error type.
+/// </summary>
 public enum RoomSecurityError
 {
     None,
