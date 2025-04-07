@@ -115,11 +115,18 @@ public class CreateRoomFromTemplateOperation : DistributedTaskProgress
 
             if (_copyLogo)
             {
-                var template = await folderDao.GetFolderAsync(_templateId);
-                if (await roomLogoManager.CopyAsync(template, room))
+                try
                 {
-                    room.SettingsHasLogo = true;
-                    await folderDao.SaveFolderAsync(room);
+                    var template = await folderDao.GetFolderAsync(_templateId);
+                    if (await roomLogoManager.CopyAsync(template, room))
+                    {
+                        room.SettingsHasLogo = true;
+                        await folderDao.SaveFolderAsync(room);
+                    }
+                }
+                catch(Exception ex)
+                {
+                    ogger.WarningCanNotCopyFile(ex);
                 }
             }
 
