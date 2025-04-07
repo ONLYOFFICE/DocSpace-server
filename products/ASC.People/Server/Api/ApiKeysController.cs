@@ -64,7 +64,12 @@ public class ApiKeysController(
            
         if (!isAdmin && tenantDevToolsAccessSettings is { LimitedAccessForUsers: true })
         {
-            throw new UnauthorizedAccessException("This operation available only for owner/admins");
+            throw new UnauthorizedAccessException("This operation available only for portal owner/admins");
+        }
+
+        if (currentType == EmployeeType.Guest)
+        {
+            throw new UnauthorizedAccessException("This operation unavailable for user with guest role");
         }
         
         var expiresAt = apiKey.ExpiresInDays.HasValue ? TimeSpan.FromDays(apiKey.ExpiresInDays.Value) : (TimeSpan?)null;

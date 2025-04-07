@@ -45,7 +45,7 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
-    /// Creates a session to upload large files in multiple chunks to the folder with the ID specified in the request.
+    /// Creates the session to upload large files in multiple chunks to the folder with the ID specified in the request.
     /// </summary>
     /// <short>Chunked upload</short>
     /// <remarks>
@@ -55,9 +55,6 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// Each chunk must be sent in the exact order the chunks appear in the file.
     /// After receiving each chunk, the server will respond with the current information about the upload session if no errors occurred.
     /// When the number of bytes uploaded is equal to the number of bytes you sent in the initial request, the server responds with the <b>201 Created</b> status and sends you information about the uploaded file.
-    /// ]]>
-    /// </remarks>
-    /// <![CDATA[
     /// Information about created session which includes:
     /// <ul>
     /// <li><b>id:</b> unique ID of this upload session,</li>
@@ -68,6 +65,7 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// <li><b>bytes_total:</b> total number of bytes which will be uploaded.</li>
     /// </ul>
     /// ]]>
+    /// </remarks>
     /// <path>api/2.0/files/{folderId}/upload/create_session</path>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Information about created session", typeof(object))]
@@ -82,6 +80,7 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// Creates a session to edit the existing file with multiple chunks (needed for WebDAV).
     /// </summary>
     /// <short>Create the editing session</short>
+    /// <remarks>
     /// <![CDATA[
     /// Information about created session which includes:
     /// <ul>
@@ -93,6 +92,7 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// <li><b>bytes_total:</b> total number of bytes which will be uploaded.</li>
     /// </ul>
     /// ]]>
+    /// </remarks>
     /// <path>api/2.0/files/file/{fileId}/edit_session</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Information about created session", typeof(object))]
@@ -104,9 +104,11 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     }
 
     /// <summary>
-    /// Checks upload
+    /// Checks the file uploads to the folder with the ID specified in the request.
     /// </summary>
+    /// <short>Check file uploads</short>
     /// <path>api/2.0/files/{folderId}/upload/check</path>
+    /// <collection>list</collection>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Inserted file", typeof(List<string>))]
     [HttpPost("{folderId}/upload/check")]

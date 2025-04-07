@@ -26,16 +26,19 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// The group member security request generic parameters.
+/// </summary>
 public class GroupMemberSecurityRequestDto<T>
 {
     /// <summary>
-    /// Folder Id
+    /// The folder ID.
     /// </summary>
     [FromRoute(Name = "folderId")]
     public required T FolderId { get; set; }
 
     /// <summary>
-    /// Group Id
+    /// The group ID.
     /// </summary>
     [FromRoute(Name = "groupId")]
     public required Guid GroupId { get; set; }

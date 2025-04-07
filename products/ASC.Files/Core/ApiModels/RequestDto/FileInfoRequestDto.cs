@@ -26,16 +26,19 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// The file information request parameters.
+/// </summary>
 public class FileInfoRequestDto<T>
 {
     /// <summary>
-    /// File ID
+    /// The file ID.
     /// </summary>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
     /// <summary>
-    /// File version
+    /// The file version.
     /// </summary>
     [FromQuery(Name = "version")]
     public int Version { get; set; } = -1;

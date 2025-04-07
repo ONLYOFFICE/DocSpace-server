@@ -42,8 +42,8 @@ public class Module(Product product)
     public string AppName { get; set; } = product.ProductClassName;
 
     /// <summary>
-    /// The module title.
-    /// </summary>The module product class name.
+    /// The module product class name.
+    /// </summary>
     public string Title { get; set; } = product.Name;
 
     /// <summary>

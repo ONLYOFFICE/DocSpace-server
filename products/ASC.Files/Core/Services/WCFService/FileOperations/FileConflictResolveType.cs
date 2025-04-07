@@ -26,6 +26,9 @@
 
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
+/// <summary>
+/// The overwriting behavior of the file copying or moving.
+/// </summary>
 [JsonConverter(typeof(JsonStringEnumConverter<FileConflictResolveType>))]
 [EnumExtensions]
 public enum FileConflictResolveType

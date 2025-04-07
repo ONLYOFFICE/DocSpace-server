@@ -27,12 +27,12 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Settings request parameters
+/// The settings request parameters.
 /// </summary>
 public class DisplayRequestDto
 {
     /// <summary>
-    /// Specifies whether to set the specified settings or not
+    /// Specifies whether to set the specified settings or not.
     /// </summary>
     public bool Set { get; set; }
 }

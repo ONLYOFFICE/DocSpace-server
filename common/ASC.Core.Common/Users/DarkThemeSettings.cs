@@ -53,6 +53,9 @@ public class DarkThemeSettings : ISettings<DarkThemeSettings>
         };
     }
     
+    /// <summary>
+    /// The last modified date.
+    /// </summary>
     public DateTime LastModified { get; set; }
 }
 

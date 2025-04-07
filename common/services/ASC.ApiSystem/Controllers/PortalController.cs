@@ -753,7 +753,7 @@ public class PortalController(
                 option.LogDebug("PortalName = {0}; Elapsed ms. ValidateRecaptcha error: {1} {2}", model.PortalName, sw.ElapsedMilliseconds, data);
                 sw.Stop();
 
-                return new { error = "recaptchaInvalid", message = "Recaptcha is invalid" };
+                return new { error = "recaptchaInvalid", message = "Recaptcha is invalid", clientIP };
 
             }
 
