@@ -90,7 +90,7 @@ public class FallbackController extends AbstractErrorController {
     response.sendRedirect(
         String.format(
             "%s://%s/login?type=oauth2&client_id=%s",
-            request.getScheme(), httpUtils.getFirstRequestIP(request), clientId));
+            request.getScheme(), httpUtils.getFirstForwardedHost(request), clientId));
   }
 
   /**

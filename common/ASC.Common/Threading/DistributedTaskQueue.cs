@@ -38,14 +38,10 @@ public class DistributedTaskQueue<T>(
 {
     public const string QUEUE_DEFAULT_PREFIX = "asc_distributed_task_queue_v2_";
     public static readonly int INSTANCE_ID = Environment.ProcessId;
-
-    private readonly ConcurrentDictionary<string, CancellationTokenSource> _cancellations = new();
-    private bool _subscribed;
+    
     private int _maxThreadsCount = 1;
     private string _name;
     public string LockKey {get => $"{Name}_lock";}
-    
-
     public int TimeUntilUnregisterInSeconds { get; set; }
 
     public string Name
@@ -78,25 +74,9 @@ public class DistributedTaskQueue<T>(
         {
             distributedTask.LastModifiedOn = DateTime.UtcNow;
         }
+        
 
-        var cancellation = new CancellationTokenSource();
-        var token = cancellation.Token;
-        _cancellations[distributedTask.Id] = cancellation;
-
-        if (!_subscribed)
-        {
-            cancelTaskNotify.Subscribe(c =>
-            {
-                if (_cancellations.TryGetValue(c.Id, out var s))
-                {
-                    s.Cancel();
-                }
-            }, CacheNotifyAction.Remove);
-
-            _subscribed = true;
-        }
-
-        await channelWriter.WriteAsync(distributedTask, token);
+        await channelWriter.WriteAsync(distributedTask);
 
         distributedTask.Status = DistributedTaskStatus.Running;
 
@@ -201,13 +181,23 @@ public class DistributedTaskQueue<T>(
 public class DistributedTaskQueueService<T>(
     IServiceProvider serviceProvider,
     ChannelReader<T> channelReader,
-    IDistributedLockProvider distributedLockProvider
+    IDistributedLockProvider distributedLockProvider,
+    ICacheNotify<DistributedTaskCancelation> cancelTaskNotify
 ) : BackgroundService   where T : DistributedTask
 {
+    private readonly ConcurrentDictionary<string, CancellationTokenSource> _cancellations = new();
     private readonly PeriodicTimer _timer = new(TimeSpan.FromSeconds(10));
     
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        cancelTaskNotify.Subscribe(c =>
+        {
+            if (_cancellations.TryGetValue(c.Id, out var s))
+            {
+                s.Cancel();
+            }
+        }, CacheNotifyAction.Remove);
+        
         var scope = serviceProvider.CreateAsyncScope();
         var queueFactory = scope.ServiceProvider.GetRequiredService<IDistributedTaskQueueFactory>();
         var queue = queueFactory.CreateQueue<T>();
@@ -219,8 +209,12 @@ public class DistributedTaskQueueService<T>(
         {
             await foreach (var distributedTask in reader1.ReadAllAsync(stoppingToken))
             {        
-                var task = distributedTask.RunJob(stoppingToken);
-                await task.ContinueWith(async t => await OnCompleted(t, distributedTask), stoppingToken).ConfigureAwait(false);
+                var cancellation = new CancellationTokenSource();
+                var token = cancellation.Token;
+                _cancellations[distributedTask.Id] = cancellation;
+                
+                var task = distributedTask.RunJob(token);
+                await task.ContinueWith(async t => await OnCompleted(t, distributedTask)).ConfigureAwait(false);
             }
         }, stoppingToken)).ToList();
 

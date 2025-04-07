@@ -37,6 +37,8 @@ public class EntryProperties<T>
     /// </summary>
     public FormFillingProperties<T> FormFilling { get; set; }
 
+    public bool CopyToFillOut { get; set; }
+
     public static EntryProperties<T> Deserialize(string data, ILogger logger)
     {
         var options = new JsonSerializerOptions
@@ -79,6 +81,7 @@ public class FormFillingProperties<T>
     /// </summary>
     public bool StartFilling { get; set; }
 
+    public Guid StartedByUserId { get; set; }
     /// <summary>
     /// The form title.
     /// </summary>

@@ -164,10 +164,12 @@ public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory s
             logger.ErrorWithException(e);
         }
 
-        await dbWorker.UpdateWebhookJournal(entry.Id, status, delivery, requestPayload, requestHeaders, responsePayload, responseHeaders);
-        await dbWorker.UpdateWebhookConfig(entry.Config);
+        var configDisabled = !entry.Config.Enabled;
 
-        if (!entry.Config.Enabled)
+        await dbWorker.UpdateWebhookJournal(entry.Id, status, delivery, requestPayload, requestHeaders, responsePayload, responseHeaders);
+        await dbWorker.UpdateWebhookConfig(entry.Config, configDisabled);
+
+        if (configDisabled)
         {
             messageService.SendHeadersMessage(MessageAction.WebhookUpdated, MessageTarget.Create(entry.ConfigId), null, $"{entry.Config.Name} (more than {settings.TrustedDaysCount} days without success)");
         }

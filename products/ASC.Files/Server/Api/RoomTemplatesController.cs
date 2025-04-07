@@ -74,6 +74,7 @@ public class RoomTemplatesController(IEventBus eventBus,
             dto.Groups,
             dto.Cover,
             dto.Color,
+            dto.Quota,
             false);
 
         await eventBus.PublishAsync(new CreateRoomTemplateIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId())
@@ -87,7 +88,8 @@ public class RoomTemplatesController(IEventBus eventBus,
             TaskId = taskId,
             CopyLogo = dto.CopyLogo,
             Cover = dto.Cover,
-            Color = dto.Color
+            Color = dto.Color,
+            Quota = dto.Quota
         });
         return await GetTemplateCreatingStatus();
     }
@@ -147,7 +149,18 @@ public class RoomTemplatesController(IEventBus eventBus,
     [HttpPut("public")]
     public async Task SetPublic(SetPublicDto inDto)
     {
+        var shared = fileStorageService.GetPureSharesAsync(inDto.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "", 0, -1);
+
         var wrappers = new List<AceWrapper>() { new AceWrapper() { Id = Constants.GroupEveryone.ID, Access = inDto.Public ? FileShare.Read : FileShare.None, SubjectType = SubjectType.Group } };
+
+        await foreach (var share in shared)
+        {
+            if (share.Id != authContext.CurrentAccount.ID) 
+            {
+                wrappers.Add(new AceWrapper { Id = share.Id, Access = FileShare.None, SubjectType = share.SubjectType });
+            }
+        }
+
         var aceCollection = new AceCollection<int>
         {
             Files = Array.Empty<int>(),

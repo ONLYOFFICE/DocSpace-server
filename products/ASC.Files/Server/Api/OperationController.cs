@@ -77,7 +77,7 @@ public class OperationController(
     [HttpPut("copy")]
     public async IAsyncEnumerable<FileOperationDto> CopyBatchItems(BatchRequestDto inDto)
     {
-        await fileMoveCopyOperationsManager.Publish(inDto.FolderIds, inDto.FileIds, inDto.DestFolderId, true, inDto.ConflictResolveType, !inDto.DeleteAfter, inDto.Content);
+        await fileMoveCopyOperationsManager.Publish(inDto.FolderIds, inDto.FileIds, inDto.DestFolderId, true, inDto.ConflictResolveType, !inDto.DeleteAfter, inDto.ToFillOut, inDto.Content);
         
         foreach (var e in (await fileMoveCopyOperationsManager.GetOperationResults()).Where(r=> r.OperationType == FileOperationType.Copy))
         {
@@ -229,7 +229,7 @@ public class OperationController(
     [HttpPut("move")]
     public async IAsyncEnumerable<FileOperationDto> MoveBatchItems(BatchRequestDto inDto)
     {
-        await fileMoveCopyOperationsManager.Publish(inDto.FolderIds, inDto.FileIds, inDto.DestFolderId, false, inDto.ConflictResolveType, !inDto.DeleteAfter, inDto.Content);
+        await fileMoveCopyOperationsManager.Publish(inDto.FolderIds, inDto.FileIds, inDto.DestFolderId, false, inDto.ConflictResolveType, !inDto.DeleteAfter, inDto.ToFillOut, inDto.Content);
         
         foreach (var e in (await fileMoveCopyOperationsManager.GetOperationResults()).Where(r => r.OperationType == FileOperationType.Move))
         {

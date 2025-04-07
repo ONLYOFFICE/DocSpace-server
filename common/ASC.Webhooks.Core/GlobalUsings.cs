@@ -28,6 +28,7 @@ global using System.ComponentModel.DataAnnotations;
 
 global using ASC.Api.Core.Extensions;
 global using ASC.Common;
+global using ASC.Common.Caching;
 global using ASC.Core;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Model;
@@ -38,3 +39,5 @@ global using ASC.Webhooks.Core.EF.Model;
 global using ASC.Webhooks.Core.IntegrationEvents.Events;
 
 global using Microsoft.EntityFrameworkCore;
+
+global using ProtoBuf;

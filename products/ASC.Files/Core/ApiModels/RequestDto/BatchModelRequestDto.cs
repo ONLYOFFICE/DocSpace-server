@@ -199,6 +199,11 @@ public class BatchRequestDto
     ///  Specifies whether to copy or move the folder content or not.
     /// </summary>
     public bool Content { get; set; }
+
+    /// <summary>
+    /// Specifies whether the file is copied for filling out
+    /// </summary>
+    public bool ToFillOut { get; set; }
 }
 
 /// <summary>

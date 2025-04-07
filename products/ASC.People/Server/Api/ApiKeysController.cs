@@ -41,6 +41,7 @@ public class ApiKeysController(
     AuthContext authContext,
     UserManager userManager,
     MessageService messageService,
+    SettingsManager settingsManager,
     IMapper mapper) : ControllerBase
 {
     /// <summary>
@@ -57,6 +58,21 @@ public class ApiKeysController(
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task<ApiKeyResponseDto> CreateApiKey(CreateApiKeyRequestDto apiKey)
     {
+        var currentType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+        var isAdmin = currentType is EmployeeType.DocSpaceAdmin;
+
+        var tenantDevToolsAccessSettings  = await settingsManager.LoadAsync<TenantDevToolsAccessSettings>();
+           
+        if (!isAdmin && tenantDevToolsAccessSettings is { LimitedAccessForUsers: true })
+        {
+            throw new UnauthorizedAccessException("This operation available only for portal owner/admins");
+        }
+
+        if (currentType == EmployeeType.Guest)
+        {
+            throw new UnauthorizedAccessException("This operation unavailable for user with guest role");
+        }
+        
         var expiresAt = apiKey.ExpiresInDays.HasValue ? TimeSpan.FromDays(apiKey.ExpiresInDays.Value) : (TimeSpan?)null;
             
         if (!IsValidPermission(apiKey.Permissions))
@@ -67,10 +83,11 @@ public class ApiKeysController(
         var result = await apiKeyManager.CreateApiKeyAsync(apiKey.Name,
             apiKey.Permissions,
             expiresAt);
-
-        messageService.Send(MessageAction.ApiKeyCreated, MessageTarget.Create(result.keyData.Id));
-
+        
         var apiKeyResponseDto = mapper.Map<ApiKeyResponseDto>(result.keyData);
+
+        messageService.Send(MessageAction.ApiKeyCreated, MessageTarget.Create(apiKeyResponseDto.Id), apiKeyResponseDto.Key);
+
         apiKeyResponseDto.Key = result.apiKey;
 
         return apiKeyResponseDto;
@@ -117,6 +134,7 @@ public class ApiKeysController(
         }
         else
         {
+           
             result = apiKeyManager.GetApiKeysAsync(authContext.CurrentAccount.ID);
         }
 
@@ -140,10 +158,10 @@ public class ApiKeysController(
     {
         var currentType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
         var isAdmin = currentType is EmployeeType.DocSpaceAdmin;
+        var apiKey = await apiKeyManager.GetApiKeyAsync(requestDto.KeyId);
 
         if (!isAdmin)
         {
-            var apiKey = await apiKeyManager.GetApiKeyAsync(requestDto.KeyId);
 
             if (apiKey.CreateBy != authContext.CurrentAccount.ID)
             {
@@ -164,7 +182,7 @@ public class ApiKeysController(
 
         if (result)
         {
-            messageService.Send(MessageAction.ApiKeyUpdated, MessageTarget.Create(requestDto.KeyId));
+            messageService.Send(MessageAction.ApiKeyUpdated, MessageTarget.Create(apiKey.Id), apiKey.Key);
         }
 
         return result;
@@ -185,10 +203,10 @@ public class ApiKeysController(
     {
         var currentType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
         var isAdmin = currentType is EmployeeType.DocSpaceAdmin;
+        var apiKey = await apiKeyManager.GetApiKeyAsync(keyId);
 
         if (!isAdmin)
         {
-            var apiKey = await apiKeyManager.GetApiKeyAsync(keyId);
 
             if (apiKey.CreateBy != authContext.CurrentAccount.ID)
             {
@@ -198,7 +216,7 @@ public class ApiKeysController(
 
         var result = await apiKeyManager.DeleteApiKeyAsync(keyId);
 
-        messageService.Send(MessageAction.ApiKeyDeleted, MessageTarget.Create(keyId));
+        messageService.Send(MessageAction.ApiKeyDeleted, MessageTarget.Create(apiKey.Id), apiKey.Key);
 
         return result;
     }
