@@ -28,45 +28,48 @@ using ASC.Files.Core.Services.DocumentBuilderService;
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// The document builder task parameters.
+/// </summary>
 public class DocumentBuilderTaskDto
 {
     /// <summary>
-    /// Id
+    /// The document builder ID.
     /// </summary>
     public string Id { get; set; }
 
     /// <summary>
-    /// Error
+    /// The error message occured while the document building process.
     /// </summary>
     public string Error { get; set; }
 
     /// <summary>
-    /// Percentage
+    /// The percentage of the progress of the document building process.
     /// </summary>
     public int Percentage { get; set; }
 
     /// <summary>
-    /// Is completed
+    /// Specifies whether the document building process is completed or not.
     /// </summary>
     public bool IsCompleted { get; set; }
 
     /// <summary>
-    /// Status
+    /// The status of the document building process.
     /// </summary>
     public DistributedTaskStatus Status { get; set; }
 
     /// <summary>
-    /// Result file id
+    /// The result file ID.
     /// </summary>
     public object ResultFileId { get; set; }
 
     /// <summary>
-    /// Result file name
+    /// The result file name.
     /// </summary>
     public string ResultFileName { get; set; }
 
     /// <summary>
-    /// Result file url
+    /// The result file URL.
     /// </summary>
     public string ResultFileUrl { get; set; }
 

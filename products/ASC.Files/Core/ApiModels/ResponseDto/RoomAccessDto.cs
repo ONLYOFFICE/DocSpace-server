@@ -26,24 +26,30 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// The room security parameters.
+/// </summary>
 public class RoomSecurityDto
 {
     /// <summary>
-    /// List of room members
+    /// The list of room members.
     /// </summary>
     public IEnumerable<FileShareDto> Members { get; set; }
 
     /// <summary>
-    /// Warning
+    /// The warning message.
     /// </summary>
     public string Warning { get; set; }
 
     /// <summary>
-    /// Error
+    /// The error type.
     /// </summary>
     public RoomSecurityError Error { get; set; }
 }
 
+/// <summary>
+/// The error type.
+/// </summary>
 public enum RoomSecurityError
 {
     None,

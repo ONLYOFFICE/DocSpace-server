@@ -37,9 +37,9 @@ public class RoomTemplatesController(IEventBus eventBus,
 {
 
     /// <summary>
-    /// Start create room template
+    /// Starts creating the room template.
     /// </summary>
-    /// <short>Start create room template</short>
+    /// <short>Start creating room template</short>
     /// <path>api/2.0/files/roomtemplate</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Status", typeof(RoomTemplateStatusDto))]
@@ -95,9 +95,9 @@ public class RoomTemplatesController(IEventBus eventBus,
     }
 
     /// <summary>
-    /// Get progress creating room template
+    /// Returns the progress status of the room template creation process.
     /// </summary>
-    /// <short>Get progress creating room template</short>
+    /// <short>Get status of room template creation</short>
     /// <path>api/2.0/files/roomtemplate/status</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Status", typeof(RoomTemplateStatusDto))]
@@ -128,9 +128,9 @@ public class RoomTemplatesController(IEventBus eventBus,
 
 
     /// <summary>
-    /// Get public settings
+    /// Returns the public settings of the room template with the ID specified in the request.
     /// </summary>
-    /// <short>Get public</short>
+    /// <short>Get public settings</short>
     /// <path>api/2.0/files/roomtemplate/{id}/public</path>
     [Tags("Files / Rooms")]
     [HttpGet("{id}/public")]
@@ -141,9 +141,9 @@ public class RoomTemplatesController(IEventBus eventBus,
 
 
     /// <summary>
-    /// Set public settings
+    /// Sets the public settings for the room template with the ID specified in the request.
     /// </summary>
-    /// <short>Set public</short>
+    /// <short>Set public settings</short>
     /// <path>api/2.0/files/roomtemplate/public</path>
     [Tags("Files / Rooms")]
     [HttpPut("public")]

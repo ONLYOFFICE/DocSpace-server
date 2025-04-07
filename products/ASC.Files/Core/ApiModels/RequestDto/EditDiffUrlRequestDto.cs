@@ -26,16 +26,19 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// The parameters of the URL to the changes of a file version.
+/// </summary>
 public class EditDiffUrlRequestDto<T>
 {
     /// <summary>
-    /// File ID
+    /// The file ID.
     /// </summary>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
     /// <summary>
-    /// File version
+    /// The file version.
     /// </summary>
     [FromQuery(Name = "version")]
     public int Version { get; set; } = 0;

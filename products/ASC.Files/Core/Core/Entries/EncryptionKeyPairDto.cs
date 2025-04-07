@@ -27,19 +27,23 @@
 namespace ASC.Web.Files.Core.Entries;
 
 /// <summary>
+/// The encryption key pair parameters.
 /// </summary>
 public class EncryptionKeyPairDto
 {
-    /// <summary>Private key</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The private key.
+    /// </summary>
     public string PrivateKeyEnc { get; set; }
 
-    /// <summary>Public key</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The public key.
+    /// </summary>
     public string PublicKey { get; set; }
 
-    /// <summary>User ID</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The user ID of the encryption keys.
+    /// </summary>
     public Guid UserId { get; set; }
 }
 

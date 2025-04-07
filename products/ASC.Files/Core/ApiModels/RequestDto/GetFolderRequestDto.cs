@@ -26,167 +26,175 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// The folder request parameters.
+/// </summary>
 public class GetFolderRequestDto<T>
 {
     /// <summary>
-    /// Folder ID
+    /// The folder ID of the request.
     /// </summary>
     [FromRoute(Name = "folderId")]
     public required T FolderId { get; set; }
 
     /// <summary>
-    /// User or group ID
+    /// The user or group ID.
     /// </summary>
     [FromQuery(Name = "userIdOrGroupId")]
     public Guid? UserIdOrGroupId { get; set; }
 
     /// <summary>
-    /// Filter type
+    /// The filter type.
     /// </summary>
     [FromQuery(Name = "filterType")]
     public FilterType? FilterType { get; set; }
 
     /// <summary>
-    /// Room ID
+    /// The room ID.
     /// </summary>
     [FromQuery(Name = "roomId")]
     public T RoomId { get; set; }
-    
+
     /// <summary>
-    /// Specifies whether to exclude a subject or not
+    /// Specifies whether to exclude search by user or group ID.
     /// </summary>
     [FromQuery(Name = "excludeSubject")]
     public bool? ExcludeSubject { get; set; }
 
     /// <summary>
-    /// Specifies whether to return only files, only folders or all elements from the specified folder
+    /// Specifies whether to return only files, only folders or all elements from the specified folder.
     /// </summary>
     [FromQuery(Name = "applyFilterOption")]
     public ApplyFilterOption? ApplyFilterOption { get; set; }
 
     /// <summary>
-    /// Specifies whether to search for a specific file extension
+    /// Specifies whether to search for the specific file extension.
     /// </summary>
     [FromQuery(Name = "extension")]
     public string Extension { get; set; }
 
     /// <summary>
-    /// Search area
+    /// The search area.
     /// </summary>
     [FromQuery(Name = "searchArea")]
     public SearchArea SearchArea { get; set; }
 
-
+    /// <summary>
+    /// The forms item key.
+    /// </summary>
     [FromQuery(Name = "formsItemKey")]
     public string FormsItemKey { get; set; }
     
+    /// <summary>
+    /// The forms item type.
+    /// </summary>
     [FromQuery(Name = "formsItemType")]
     public string FormsItemType{ get; set; }
 }
 
 /// <summary>
-/// 
+/// The "Common" folder request parameters.
 /// </summary>
 public class GetCommonFolderRequestDto
 {
     /// <summary>
-    /// User or group ID
+    /// The user or group ID.
     /// </summary>
     [FromQuery(Name = "userIdOrGroupId")]
     public Guid? UserIdOrGroupId { get; set; }
 
     /// <summary>
-    /// Filter type
+    /// The filter type.
     /// </summary>
     [FromQuery(Name = "filterType")]
     public FilterType? FilterType { get; set; }
 }
 
 /// <summary>
-/// 
+/// The "My trash" folder request parameters.
 /// </summary>
 public class GetMyTrashFolderRequestDto
 {
     /// <summary>
-    /// User or group ID
+    /// The user or group ID.
     /// </summary>
     [FromQuery(Name = "userIdOrGroupId")]
     public Guid? UserIdOrGroupId { get; set; }
 
     /// <summary>
-    /// Filter type
+    /// The filter type.
     /// </summary>
     [FromQuery(Name = "filterType")]
     public FilterType? FilterType { get; set; }
-    
+
     /// <summary>
-    /// Specifies whether to return only files, only folders or all elements from the specified folder
+    /// Specifies whether to return only files, only folders or all elements.
     /// </summary>
     [FromQuery(Name = "applyFilterOption")]
     public ApplyFilterOption? ApplyFilterOption { get; set; }
 }
 
 /// <summary>
-/// 
+/// The root folder request parameters.
 /// </summary>
 public class GetRootFolderRequestDto
 {
     /// <summary>
-    /// User or group ID
+    /// The user or group ID.
     /// </summary>
     [FromQuery(Name = "userIdOrGroupId")]
     public Guid? UserIdOrGroupId { get; set; }
 
     /// <summary>
-    /// Filter type
+    /// The filter type.
     /// </summary>
     [FromQuery(Name = "filterType")]
     public FilterType? FilterType { get; set; }
     
     /// <summary>
-    /// Specifies whether to return the "Trash" section or not
+    /// Specifies whether to return the "Trash" section or not.
     /// </summary>
     [FromQuery(Name = "withoutTrash")]
     public bool? WithoutTrash { get; set; }
 }
 
 /// <summary>
-/// 
+/// The "Recent" folder request parameters.
 /// </summary>
 public class GetRecentFolderRequestDto
 {
     /// <summary>
-    /// User or group ID
+    /// The user or group ID.
     /// </summary>
     [FromQuery(Name = "userIdOrGroupId")]
     public Guid? UserIdOrGroupId { get; set; }
 
     /// <summary>
-    /// Filter type
+    /// The filter type.
     /// </summary>
     [FromQuery(Name = "filterType")]
     public FilterType? FilterType { get; set; }
 
     /// <summary>
-    /// Exclude a subject from the search
+    /// Specifies whether to exclude search by user or group ID.
     /// </summary>
     [FromQuery(Name = "excludeSubject")]
     public bool? ExcludeSubject { get; set; }
 
     /// <summary>
-    /// Scope of filters
+    /// Specifies whether to return only files, only folders or all elements.
     /// </summary>
     [FromQuery(Name = "applyFilterOption")]
     public ApplyFilterOption? ApplyFilterOption { get; set; }
 
     /// <summary>
-    /// Search area
+    /// The search area.
     /// </summary>
     [FromQuery(Name = "searchArea")]
     public SearchArea? SearchArea { get; set; }
 
     /// <summary>
-    /// Specifies whether to search for a specific file extension
+    /// Specifies whether to search for a specific file extension in the "Recent" folder.
     /// </summary>
     [FromQuery(Name = "extension")]
     public string[] Extension { get; set; }
