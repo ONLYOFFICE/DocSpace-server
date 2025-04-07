@@ -122,6 +122,39 @@ public static class OpenApiExtension
                 Description = "Authentication is determined by the 'Authorization' header"
             });
 
+            var authorizationUrl = configuration.GetValue<string>("openApi:oauth2:authorizationUrl");
+            var tokenUrl = configuration.GetValue<string>("openApi:oauth2:tokenUrl");
+            // OAuth2
+            c.AddSecurityDefinition("OAuth2", new OpenApiSecurityScheme
+            {
+                Type = SecuritySchemeType.OAuth2,
+                In = ParameterLocation.Header,
+                Flows = new OpenApiOAuthFlows
+                {
+                    AuthorizationCode = new OpenApiOAuthFlow
+                    {
+                        AuthorizationUrl = string.IsNullOrEmpty(authorizationUrl) ? null : new Uri(authorizationUrl),
+                        TokenUrl = string.IsNullOrEmpty(tokenUrl) ? null : new Uri(tokenUrl),
+                        Scopes = new Dictionary<string, string>
+                        {
+                            { "read", "Read access to protected resources" },
+                            { "write", "Write access to protected resources" }
+                        }
+                    }
+                },
+                Description = "OAuth2 flow with Authorization Code"
+            });
+
+            var openIdConnectUrl = configuration.GetValue<string>("openApi:openId:openIdConnectUrl");
+            // OpenId Connect
+            c.AddSecurityDefinition("OpenId", new OpenApiSecurityScheme
+            {
+                Type = SecuritySchemeType.OpenIdConnect,
+                In = ParameterLocation.Header,
+                OpenIdConnectUrl = string.IsNullOrEmpty(openIdConnectUrl) ? null : new Uri(openIdConnectUrl),
+                Description = "OpenID Connect authentication"
+            });
+
             var xmlPath = Path.Combine(AppContext.BaseDirectory, $"{assemblyName}.xml");
             if (File.Exists(xmlPath))
             {
@@ -241,6 +274,14 @@ public static class OpenApiExtension
                     {
                         new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Basic" } },
                         new List<string>()
+                    },
+                    {
+                        new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "OAuth2" } },
+                        new[] { "api.read", "api.write" }
+                    },
+                    {
+                        new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "OpenId" } },
+                        Array.Empty<string>()
                     }
                 });
 
