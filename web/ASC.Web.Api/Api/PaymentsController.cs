@@ -349,7 +349,11 @@ public class PaymentController(
     public async Task<string> PutOnDepositAsync(PutOnDepositRequestDto inDto)
     {
         var tenant = await CheckAccountingAndReturnTenantAsync();
-        return await tariffService.PutOnDepositAsync(tenant.Id, inDto.Amount, inDto.Currency);
+        var result = await tariffService.PutOnDepositAsync(tenant.Id, inDto.Amount, inDto.Currency);
+
+        messageService.Send(MessageAction.CustomerWalletToppedUp);
+
+        return result;
     }
 
     /// <summary>
@@ -400,6 +404,9 @@ public class PaymentController(
     {
         var tenant = await CheckAccountingAndReturnTenantAsync();
         var result = await tariffService.PerformCustomerOperationAsync(tenant.Id, inDto.ServiceAccount, inDto.SessionId, inDto.Quantity);
+
+        messageService.Send(MessageAction.CustomerOperationPerformed);
+
         return result;
     }
 
@@ -447,8 +454,7 @@ public class PaymentController(
 
         var result = await csvFileUploader.UploadFile(stream, reportName);
 
-        //TODO: add audit
-        //messageService.Send(MessageAction.CustomerOperationsReportDownloaded);
+        messageService.Send(MessageAction.CustomerOperationsReportDownloaded);
 
         return result;
     }
@@ -486,7 +492,7 @@ public class PaymentController(
         return result;
     }
 
-    // TODO: add tags [SwaggerResponse(403, "You don't have enough permission")]
+    // TODO: add attributes [SwaggerResponse(403, "You don't have enough permission")]
     private async Task<Tenant> CheckAccountingAndReturnTenantAsync()
     {
         if (!tariffService.IsAccountingClientConfigured(out var test))

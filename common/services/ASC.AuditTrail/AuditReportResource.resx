@@ -972,4 +972,13 @@
   <data name="ApiKeyDeleted" xml:space="preserve">
     <value>User Api Key Deleted: {0}</value>
   </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Customer operation performed</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Customer operations report downloaded</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Customer wallet topped up</value>
+  </data>
 </root>

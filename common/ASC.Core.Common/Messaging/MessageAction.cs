@@ -797,10 +797,15 @@ public enum MessageAction
 
     [SwaggerEnum("Start storage decryption")]
     StartStorageDecryption = 5053,
-    
- 
 
-  
+    [SwaggerEnum("Customer wallet topped up")]
+    CustomerWalletToppedUp = 6061,
+
+    [SwaggerEnum("Customer operation performed")]
+    CustomerOperationPerformed = 6062,
+
+    [SwaggerEnum("Customer operations report downloaded")]
+    CustomerOperationsReportDownloaded = 6063,
 
     #endregion
 
