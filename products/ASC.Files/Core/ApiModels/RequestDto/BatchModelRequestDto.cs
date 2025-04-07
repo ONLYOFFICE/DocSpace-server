@@ -190,6 +190,11 @@ public class BatchRequestDto
     public bool DeleteAfter { get; set; }
 
     /// <summary>
+    /// Specifies whether the file is copied for filling out
+    /// </summary>
+    public bool ToFillOut { get; set; }
+
+    /// <summary>
     /// Content
     /// </summary>
     public bool Content { get; set; }
