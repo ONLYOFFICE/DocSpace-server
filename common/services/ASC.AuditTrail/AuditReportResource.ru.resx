@@ -871,4 +871,46 @@
   <data name="ChangeClientActivation" xml:space="preserve">
     <value>Активация клиента {0} изменилась</value>
   </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>Изменены настройки доступа к инструментам разработчика</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>Файлы [{0}]. Удалена версия: {1}</value>
+  </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>Пользователи [{0}]. Форма заполнена полностью: {1}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>Пользователи [{0}]. Заполнена часть формы: {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>Пользователи [{0}]. Начато заполнение: {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>Пользователи [{0}]. Форма остановлена: {1}</value>
+  </data>
+  <data name="WebhookCreated" xml:space="preserve">
+    <value>Вебхук создан: {0}</value>
+  </data>
+  <data name="WebhookDeleted" xml:space="preserve">
+    <value>Вебхук удален: {0}</value>
+  </data>
+  <data name="WebhookUpdated" xml:space="preserve">
+    <value>Вебхук обновлен: {0}</value>
+  </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>Создан Api Key пользователя: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>Удален Api Key пользователя: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>Обновлен Api Key пользователя: {0}</value>
+  </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>Файл: {0}. Пользовательский фильтр отключен</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>Файл: {0}. Пользовательский фильтр включен</value>
+  </data>
 </root>

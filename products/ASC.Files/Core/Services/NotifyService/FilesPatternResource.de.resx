@@ -176,4 +176,60 @@ $OrangeButton</value>
   <data name="subject_FormSubmitted" xml:space="preserve">
     <value>DocSpace-Benachrichtigung. Das Formular ist ausgefüllt</value>
   </data>
+  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
+    <value>Ein neues Dokument "$DocumentTitle" wurde im Raum "$RoomTitle" erstellt</value>
+  </data>
+  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
+    <value>Neue Dateien wurden in den Raum "$RoomTitle" hochgeladen ($Count)</value>
+  </data>
+  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
+    <value>Eine neue Datei "$DocumentTitle" wurde in den Raum "$RoomTitle" hochgeladen</value>
+  </data>
+  <data name="pattern_EditorMentions_push" xml:space="preserve">
+    <value>$ToUserName hat Sie im Dokument $DocumentTitle erwähnt</value>
+  </data>
+  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
+    <value>Ein neuer Ordner "$FolderTitle" wurde für den Raum "$RoomTitle" erstellt</value>
+  </data>
+  <data name="pattern_FormStartedFilling" xml:space="preserve">
+    <value>
+    Aktivitätsbenachrichtigung. "$FromUserName":"$FromUserLink" hat den Formularausfüllvorgang gestartet:  "$DocumentTitle":"$DocumentURL" im Raum: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_FormSubmitted_push" xml:space="preserve">
+    <value>Formular "$DocumentTitle" wurde im Raum "$RoomTitle" ausgefüllt</value>
+  </data>
+  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
+    <value>
+      Aktivitätsbenachrichtigung. Das Formular "$DocumentTitle":"$DocumentURL" wurde im Raum komplett ausgefüllt: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
+    <value>$FromUserName hat den Raum "$RoomTitle" ins Archiv verschoben</value>
+  </data>
+  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
+    <value>Ihre Rolle im Raum "$RoomTitle" wurde in "$RoomRole" geändert</value>
+  </data>
+  <data name="pattern_StoppedFormFilling" xml:space="preserve">
+    <value>
+      Aktivitätsbenachrichtigung. "$FromUserName":"$FromUserLink" hat das Ausfüllen des Formulars eingestellt: "$DocumentTitle":"$DocumentURL" im Raum: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_YourTurnFormFilling" xml:space="preserve">
+    <value>
+      Aktivitätsbenachrichtigung. Sie sind dran! Das Ausfüllen des Formulars ist erforderlich: "$DocumentTitle":"$DocumentURL" im Raum: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="subject_FormStartedFilling" xml:space="preserve">
+    <value>DocSpace-Benachrichtigung.</value>
+  </data>
+  <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
+    <value>DocSpace-Benachrichtigung.</value>
+  </data>
+  <data name="subject_StoppedFormFilling" xml:space="preserve">
+    <value>DocSpace-Benachrichtigung.</value>
+  </data>
+  <data name="subject_YourTurnFormFilling" xml:space="preserve">
+    <value>DocSpace-Benachrichtigung.</value>
+  </data>
 </root>

@@ -930,4 +930,31 @@
   <data name="UpdateClient" xml:space="preserve">
     <value>Clientul {0} a fost actualizat</value>
   </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>Setări de acces la Instrumente pentru dezvoltatori s-au schimbat</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>Fișiere [{0}]. Versiunea a fost ștearsă: {1}</value>
+  </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>Utilizatori [{0}]. Formular completat în întregime: {1}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>Utilizatori [{0}]. Formularul este completat parțial: {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>Utilizatori [{0}]. Completarea s-a început: {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>Utilizatori [{0}]. Completarea formularului încetată: {1}</value>
+  </data>
+  <data name="WebhookCreated" xml:space="preserve">
+    <value>Webhook a fost creat: {0}</value>
+  </data>
+  <data name="WebhookDeleted" xml:space="preserve">
+    <value>Webhook a fost șters: {0}</value>
+  </data>
+  <data name="WebhookUpdated" xml:space="preserve">
+    <value>Webhook a fost actualizat {0}</value>
+  </data>
 </root>
