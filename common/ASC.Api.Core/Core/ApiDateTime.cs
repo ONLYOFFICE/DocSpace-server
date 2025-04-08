@@ -36,12 +36,12 @@ namespace ASC.Api.Core;
 public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
 {
     /// <summary>
-    /// The UtcTime.
+    /// The UTC time.
     /// </summary>
     public DateTime UtcTime { get; private set; }
 
     /// <summary>
-    /// The timeZoneOffset.
+    /// The time zone offset.
     /// </summary>
     [SwaggerSchemaCustom(Example = "00:00:00")]
     public TimeSpan TimeZoneOffset { get; private set; }
