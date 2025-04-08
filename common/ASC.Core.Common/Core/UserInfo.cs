@@ -52,7 +52,7 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
     public string UserName { get; set; }
 
     /// <summary>
-    /// Thje user birthday.
+    /// The user birthday.
     /// </summary>
     public DateTime? BirthDate { get; set; }
 
@@ -128,7 +128,7 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
     public bool Removed { get; set; }
 
     /// <summary>
-    /// The date when the user account was last modified.
+    /// The date and time when the user account was last modified.
     /// </summary>
     public DateTime LastModified { get; set; } = DateTime.UtcNow;
 
@@ -138,7 +138,7 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
     public int TenantId { get; set; }
 
     /// <summary>
-    /// Spceifies if the user is active or not.
+    /// Specifies if the user is active or not.
     /// </summary>
     public bool IsActive => ActivationStatus.HasFlag(EmployeeActivationStatus.Activated);
 
@@ -178,7 +178,7 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
     public string SsoSessionId { get; set; } // SSO SAML user session identificator
 
     /// <summary>
-    /// The date when the user account was created.
+    /// The date and time when the user account was created.
     /// </summary>
     public DateTime CreateDate { get; set; }
 

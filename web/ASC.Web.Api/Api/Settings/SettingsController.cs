@@ -264,7 +264,7 @@ public partial class SettingsController(MessageService messageService,
     }
 
     /// <summary>
-    /// Returns the space usage quota for the portal.
+    /// Returns the quota used space for the portal.
     /// </summary>
     /// <short>
     /// Get the space usage
@@ -339,8 +339,11 @@ public partial class SettingsController(MessageService messageService,
     }
 
     /// <summary>
-    /// Gets user quota
+    /// Returns the user quota settings.
     /// </summary>
+    /// <short>
+    /// Get the user quota settings
+    /// </short>
     /// <path>api/2.0/settings/userquotasettings</path>
     [Tags("Settings / Quota")]
     [SwaggerResponse(200, "Ok", typeof(TenantUserQuotaSettings))]
@@ -416,7 +419,7 @@ public partial class SettingsController(MessageService messageService,
     /// Saves the deep link configuration settings for the portal.
     /// </summary>
     /// <short>
-    /// Configure deep link settings
+    /// Configure the deep link settings
     /// </short>
     /// <path>api/2.0/settings/deeplink</path>
     [Tags("Settings / Common settings")]
@@ -440,8 +443,11 @@ public partial class SettingsController(MessageService messageService,
     }
 
     /// <summary>
-    /// Gets deeplink settings
+    /// Returns the deep link settings.
     /// </summary>
+    /// <short>
+    /// Get the deep link settings
+    /// </short>
     /// <path>api/2.0/settings/deeplink</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Ok", typeof(TenantDeepLinkSettings))]
@@ -591,10 +597,10 @@ public partial class SettingsController(MessageService messageService,
     }
 
     /// <summary>
-    /// Starts the process of quota recalculation.
+    /// Starts the process of the quota recalculation.
     /// </summary>
     /// <short>
-    /// Recalculate quota 
+    /// Recalculate the quota
     /// </short>
     /// <path>api/2.0/settings/recalculatequota</path>
     [ApiExplorerSettings(IgnoreApi = true)]
@@ -608,10 +614,10 @@ public partial class SettingsController(MessageService messageService,
     }
 
     /// <summary>
-    /// Checks the process of quota recalculation.
+    /// Checks the process of the quota recalculation.
     /// </summary>
     /// <short>
-    /// Check quota recalculation
+    /// Check the quota recalculation
     /// </short>
     /// <path>api/2.0/settings/checkrecalculatequota</path>
     [ApiExplorerSettings(IgnoreApi = true)]
@@ -810,9 +816,9 @@ public partial class SettingsController(MessageService messageService,
     }
 
     /// <summary>
-    /// Closes the admin helper notification.
+    /// Closes the administrator helper notification.
     /// </summary>
-    /// <short>Close the admin helper notification</short>
+    /// <short>Close the admin helper</short>
     /// <path>api/2.0/settings/closeadminhelper</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Ok")]
@@ -913,7 +919,7 @@ public partial class SettingsController(MessageService messageService,
     }
 
     /// <summary>
-    /// Returns the space usage statistics of the module with the ID specified in the request.
+    /// Returns the space usage statistics for the module with the ID specified in the request.
     /// </summary>
     /// <short>Get the space usage statistics</short>
     /// <path>api/2.0/settings/statistics/spaceusage/{id}</path>

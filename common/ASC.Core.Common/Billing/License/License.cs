@@ -27,67 +27,81 @@
 namespace ASC.Core.Billing;
 
 /// <summary>
+/// The license parameters.
 /// </summary>
 [DebuggerDisplay("{DueDate}")]
 public class License
 {
-    /// <summary>Original license</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The original license.
+    /// </summary>
     public string OriginalLicense { get; set; }
 
-    /// <summary>Specifies if the license supports branding or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the license supports branding or not.
+    /// </summary>
     public bool Branding { get; set; }
 
-    /// <summary>Specifies if the license is customizable or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the license is customizable or not.
+    /// </summary>
     public bool Customization { get; set; }
 
-    /// <summary>Specifies if the license is time limited or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the license is time limited or not.
+    /// </summary>
     public bool TimeLimited { get; set; }
 
-    /// <summary>License due date</summary>
-    /// <type>System.DateTime, System</type>
+    /// <summary>
+    /// The license due date.
+    /// </summary>
     [JsonPropertyName("end_date")]
     public DateTime DueDate { get; set; }
 
-    /// <summary>Specifies if the license is trial or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the license is trial or not.
+    /// </summary>
     public bool Trial { get; set; }
 
-    /// <summary>Customer ID</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The customer ID.
+    /// </summary>
     [JsonPropertyName("customer_id")]
     public string CustomerId { get; set; }
 
-    /// <summary>Resource Key</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The resource key.
+    /// </summary>
     [JsonPropertyName("resource_key")]
     public string ResourceKey { get; set; }
 
-    /// <summary>Number of document server users</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The number of ONLYOFFICCE Docs users.
+    /// </summary>
     [JsonPropertyName("users_count")]
     public int DSUsersCount { get; set; }
 
-    /// <summary>Number of users whose licenses have expired</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The number of users whose licenses have expired.
+    /// </summary>
     [JsonPropertyName("users_expire")]
     public int DSUsersExpire { get; set; }
 
-    /// <summary>Number of document server connections</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The number of ONLYOFFICCE Docs connections.
+    /// </summary>
     [JsonPropertyName("connections")]
     public int DSConnections { get; set; }
 
-    /// <summary>License signature</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The license signature.
+    /// </summary>
     [JsonPropertyName("signature")]
     public string Signature { get; set; }
 
-    /// <summary>Indicates whether the license is a developer license or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Indicates whether the license is Developer or not.
+    /// </summary>
     [JsonPropertyName("docspace_dev")] 
     public bool Developer { get; set; }
 

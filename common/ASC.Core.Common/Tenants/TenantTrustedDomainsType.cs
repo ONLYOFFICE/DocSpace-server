@@ -26,6 +26,9 @@
 
 namespace ASC.Core.Tenants;
 
+/// <summary>
+/// The type of the tenant trusted domains.
+/// </summary>
 public enum TenantTrustedDomainsType
 {
     [SwaggerEnum("None")]

@@ -26,55 +26,58 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
+/// <summary>
+/// The tariff parameters.
+/// </summary>
 public class TariffDto
 {
     /// <summary>
-    /// Open source
+    /// Specifies whether the tariff is Community or not.
     /// </summary>
     public bool? OpenSource { get; set; }
 
     /// <summary>
-    /// Enterprise
+    /// Specifies whether the tariff is Enterprise or not.
     /// </summary>
     public bool? Enterprise { get; set; }
 
     /// <summary>
-    /// Developer
+    /// Specifies whether the tariff is Developer or not.
     /// </summary>
     public bool? Developer { get; set; }
 
     /// <summary>
-    /// ID
+    /// The tariff ID.
     /// </summary>
     public int Id { get; set; }
 
     /// <summary>
-    /// Tariff state
+    /// The tariff state.
     /// </summary>
     public TariffState State { get; set; }
 
     /// <summary>
-    /// Due date
+    /// The tariff due date.
     /// </summary>
     public DateTime DueDate { get; set; }
 
     /// <summary>
-    /// Delay due date
+    /// The tariff delay due date.
     /// </summary>
     public DateTime DelayDueDate { get; set; }
 
     /// <summary>
-    /// License date
+    /// The tariff license date.
     /// </summary>
     public DateTime LicenseDate { get; set; }
 
     /// <summary>
-    /// Customer ID
+    /// The customer ID.
     /// </summary>
     public string CustomerId { get; set; }
 
     /// <summary>
-    /// List of quotas
+    /// The list of quotas.
     /// </summary>
     public List<Quota> Quotas { get; set; }
 }

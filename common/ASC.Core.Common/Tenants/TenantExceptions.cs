@@ -26,6 +26,9 @@
 
 namespace ASC.Core.Tenants;
 
+/// <summary>
+/// The tenant entity quota settings parameters.
+/// </summary>
 public class TenantTooShortException : Exception
 {
     public int MinLength { get; set; }

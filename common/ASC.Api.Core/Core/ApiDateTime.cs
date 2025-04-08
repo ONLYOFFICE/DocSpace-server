@@ -29,7 +29,7 @@ using System.ComponentModel;
 namespace ASC.Api.Core;
 
 /// <summary>
-/// The Api date and time.
+/// The API date and time parameters.
 /// </summary>
 [TypeConverter(typeof(ApiDateTimeTypeConverter))]
 [JsonConverter(typeof(ApiDateTimeConverter))]

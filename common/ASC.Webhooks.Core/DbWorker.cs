@@ -365,6 +365,9 @@ public class DbWebhooks
     public DbWebhooksConfig Config { get; init; }
 }
 
+/// <summary>
+/// The status of the webhook delivery group.
+/// </summary>
 [Flags]
 public enum WebhookGroupStatus
 {

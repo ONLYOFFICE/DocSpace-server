@@ -44,7 +44,7 @@ public class TipsController(ILoggerProvider option,
     private readonly ILogger _log = option.CreateLogger("ASC.Api");
 
     /// <summary>
-    /// Updates the tip settings with a parameter specified in the request.
+    /// Updates the user interface tip settings with the parameters specified in the request.
     /// </summary>
     /// <short>Update the tip settings</short>
     /// <path>api/2.0/settings/tips</path>

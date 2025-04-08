@@ -26,6 +26,9 @@
 
 namespace ASC.Core.Tenants;
 
+/// <summary>
+/// The tenant industry.
+/// </summary>
 public enum TenantIndustry
 {
     [SwaggerEnum("Other")]

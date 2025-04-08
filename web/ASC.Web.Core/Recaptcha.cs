@@ -26,6 +26,9 @@
 
 namespace ASC.Web.Core;
 
+/// <summary>
+/// The type of CAPTCHA validation used.
+/// </summary>
 public enum RecaptchaType
 {
     [SwaggerEnum("Default")]
