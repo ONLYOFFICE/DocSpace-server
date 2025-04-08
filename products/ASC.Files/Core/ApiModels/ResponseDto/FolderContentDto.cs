@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,49 +26,52 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+ /// <summary>
+/// The folder content information.
+/// </summary>
 public class FolderContentDto<T>
 {
     /// <summary>
-    /// List of files
+    /// The list of files in the folder.
     /// </summary>
     public List<FileEntryDto> Files { get; set; }
 
     /// <summary>
-    /// List of folders
+    /// The list of folders in the folder. 
     /// </summary>
     public List<FileEntryDto> Folders { get; set; }
 
     /// <summary>
-    /// Current folder information
+    /// The current folder information.
     /// </summary>
     public FolderDto<T> Current { get; set; }
 
     /// <summary>
-    /// Folder path
+    /// The folder path.
     /// </summary>
     [SwaggerSchemaCustom(Example = "{key = \"Key\", path = \"//path//to//folder\"}")]
     public object PathParts { get; set; }
 
     /// <summary>
-    /// Folder start index
+    /// The folder start index.
     /// </summary>
     [SwaggerSchemaCustom(Example = 0)]
     public int StartIndex { get; set; }
 
     /// <summary>
-    /// Number of folder elements
+    /// The number of folder elements.
     /// </summary>
     [SwaggerSchemaCustom(Example = 4)]
     public int Count { get; set; }
 
     /// <summary>
-    /// Total number of elements in the folder
+    /// The total number of elements in the folder.
     /// </summary>
     [SwaggerSchemaCustom(Example = 4)]
     public int Total { get; set; }
 
     /// <summary>
-    /// New element index
+    /// The new element index in the folder.
     /// </summary>
     public int New { get; set; }
 }

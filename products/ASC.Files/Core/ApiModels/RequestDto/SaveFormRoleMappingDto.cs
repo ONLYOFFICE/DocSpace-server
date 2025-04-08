@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,15 +26,18 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// The parameters for saving form role mapping.
+/// </summary>
 public class SaveFormRoleMappingDto<T>
 {
     /// <summary>
-    /// Form ID
+    /// The form ID.
     /// </summary>
     public T FormId { get; set; }
 
     /// <summary>
-    /// Form roles
+    /// The collection of roles.
     /// </summary>
     public IEnumerable<FormRole> Roles { get; set; }
 }

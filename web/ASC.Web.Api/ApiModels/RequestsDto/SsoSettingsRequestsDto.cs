@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,5 +34,5 @@ public class SsoSettingsRequestsDto
     /// <summary>
     /// The JSON-serialized SSO configuration settings.
     /// </summary>
-    public string SerializeSettings { get; set; }
+    public required string SerializeSettings { get; set; }
 }

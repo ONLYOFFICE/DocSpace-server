@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,12 +29,17 @@ namespace ASC.Web.Api.Models;
 /// <summary>
 /// The request parameters for the payment URL configuration with quantity information.
 /// </summary>
-public class PaymentUrlRequestsDto : QuantityRequestDto
+public class PaymentUrlRequestsDto
 {
     /// <summary>
     /// The URL where the user will be redirected after payment processing.
     /// </summary>
     public string BackUrl { get; set; }
+
+    /// <summary>
+    /// The quantity of payment
+    /// </summary>
+    public Dictionary<string, int> Quantity { get; set; }
 }
 
 /// <summary>

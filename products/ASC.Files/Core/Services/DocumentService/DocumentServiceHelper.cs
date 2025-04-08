@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -38,6 +38,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         TenantUtil tenantUtil,
         DocumentServiceConnector documentServiceConnector,
         LockerManager lockerManager,
+        CustomFilterManager customFilterManager,
         FileTrackerHelper fileTracker,
         EntryStatusManager entryStatusManager,
         IServiceProvider serviceProvider,
@@ -120,7 +121,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             editPossible = false;
         }
 
-        rightModifyFilter = rightModifyFilter && await fileSecurity.CanEditAsync(file);
+        rightModifyFilter = rightModifyFilter && await fileSecurity.CanEditAsync(file) && !await customFilterManager.CustomFilterEnabledForMeAsync(file);
         rightToRename = rightToRename && rightToEdit && await fileSecurity.CanRenameAsync(file);
 
         rightToReview = rightToReview && await fileSecurity.CanReviewAsync(file);
@@ -639,4 +640,40 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         return result;
     }
 
+    public async Task<FormOpenSetup<T>> GetFormOpenSetupForUserFolderAsync<T>(File<T> file, EditorType editorType, bool edit, bool fill)
+    {
+        var canEdit = await fileSecurity.CanEditAsync(file);
+        var canFill = await fileSecurity.CanFillFormsAsync(file);
+
+        FormOpenSetup<T> result = null;
+        if (file.CreateBy == securityContext.CurrentAccount.ID) 
+        {
+            result = new FormOpenSetup<T>
+            {
+                CanEdit = edit,
+                CanFill = fill,
+                CanStartFilling = true
+            };
+        }
+        else
+        {
+            result = new FormOpenSetup<T>
+            {
+                CanEdit = canEdit,
+                CanFill = canFill,
+                CanStartFilling = false
+            };
+        }
+
+        if (securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID) && result.CanFill)
+        {
+            result.IsSubmitOnly = canFill;
+        }
+
+        if (result.CanFill) 
+        {
+            result.EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
+        }
+        return result;
+    }
 }

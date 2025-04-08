@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -102,7 +102,7 @@ public class SettingsDto
     public bool DocSpace { get; set; }
 
     /// <summary>
-    /// Specifies if this portal is standalone or not.
+    /// Indicates whether the system is running in standalone mode.
     /// </summary>
     public bool Standalone { get; set; }
 

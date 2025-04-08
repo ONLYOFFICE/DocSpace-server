@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -52,7 +52,7 @@ public class WebPluginRequestsDto
     /// The web plugin name.
     /// </summary>
     [FromRoute(Name = "name")]
-    public string Name { get; set; }
+    public required string Name { get; set; }
 
     /// <summary>
     /// The configuration settings for the web plugin instance.
@@ -70,7 +70,7 @@ public class WebPluginNameRequestDto
     /// The web plugin name.
     /// </summary>
     [FromRoute(Name = "name")]
-    public string Name { get; set; }
+    public required string Name { get; set; }
 }
 
 /// <summary>

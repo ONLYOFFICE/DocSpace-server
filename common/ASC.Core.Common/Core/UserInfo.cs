@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -87,7 +87,7 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
     public DateTime? WorkFromDate { get; set; }
 
     /// <summary>
-    /// The user email.
+    /// The user email address.
     /// </summary>
     [EmailAddress]
     public string Email { get; set; }
@@ -128,7 +128,7 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
     public bool Removed { get; set; }
 
     /// <summary>
-    /// The date and time when the user was last modified.
+    /// The date and time when the user account was last modified.
     /// </summary>
     public DateTime LastModified { get; set; } = DateTime.UtcNow;
 
@@ -153,7 +153,7 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
     public string MobilePhone { get; set; }
 
     /// <summary>
-    /// The mobile phone activation status.
+    /// The user mobile phone activation status.
     /// </summary>
     public MobilePhoneActivationStatus MobilePhoneActivationStatus { get; set; }
 
@@ -178,12 +178,12 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
     public string SsoSessionId { get; set; } // SSO SAML user session identificator
 
     /// <summary>
-    /// The user creation date.
+    /// The date and time when the user account was created.
     /// </summary>
     public DateTime CreateDate { get; set; }
 
     /// <summary>
-    /// The ID of the user who created the current user.
+    /// The ID of the user who created the current user account.
     /// </summary>
     public Guid? CreatedBy { get; set; }
 

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,24 +27,24 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// 
+/// The file restore version specified in the request.
 /// </summary>
 public class RestoreVersionRequestDto<T>
 {
     /// <summary>
-    /// File ID
+    /// The file ID of the restore version.
     /// </summary>
     [FromRoute(Name = "fileId")]
-    public T FileId { get; set; }
+    public required T FileId { get; set; }
 
     /// <summary>
-    /// File version
+    /// The file version of the restore.
     /// </summary>
     [FromQuery(Name = "version")]
     public int Version { get; set; } = 0;
 
     /// <summary>
-    /// File version URL
+    /// The file version URL of the restore.
     /// </summary>
     [FromQuery(Name = "url")]
     public string Url { get; set; } = null;

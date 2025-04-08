@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,8 +26,18 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// The response containing the WordPress integration information and operation status.
+/// </summary>
 public class WordpressInfoResponse
 {
+    /// <summary>
+    /// Indicates whether the WordPress operation was successful.
+    /// </summary>
     public bool Success { get; set; }
+
+    /// <summary>
+    /// The WordPress-related data or information.
+    /// </summary>
     public string Data { get; set; }
 }

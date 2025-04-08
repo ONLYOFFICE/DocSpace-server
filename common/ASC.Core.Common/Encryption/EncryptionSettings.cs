@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -66,7 +66,7 @@ public class EncryptionSettings
 }
 
 [Scope]
-public class EncryptionSettingsHelper(CoreConfiguration coreConfiguration, AscCacheNotify ascCacheNotify, InstanceCrypto instanceCrypto)
+public class EncryptionSettingsHelper(CoreConfiguration coreConfiguration, InstanceCrypto instanceCrypto)
 {
     private const string Key = "EncryptionSettings";
 
@@ -74,7 +74,6 @@ public class EncryptionSettingsHelper(CoreConfiguration coreConfiguration, AscCa
     {
         var settings = await SerializeAsync(encryptionSettings);
         await coreConfiguration.SaveSettingAsync(Key, settings);
-        await ascCacheNotify.ClearCacheAsync();
     }
 
     public async Task<EncryptionSettings> LoadAsync()
@@ -82,13 +81,6 @@ public class EncryptionSettingsHelper(CoreConfiguration coreConfiguration, AscCa
         var settings = await coreConfiguration.GetSettingAsync(Key);
 
         return await DeserializeAsync(settings);
-    }
-
-    public EncryptionSettings Load()
-    {
-        var settings = coreConfiguration.GetSetting(Key);
-
-        return Deserialize(settings);
     }
 
     private async Task<string> SerializeAsync(EncryptionSettings encryptionSettings)

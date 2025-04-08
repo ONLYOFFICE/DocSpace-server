@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -37,12 +37,12 @@ public class ProductAdministratorDto
     public Guid ProductId { get; set; }
 
     /// <summary>
-    /// The user ID.
+    /// The user unique identifier.
     /// </summary>
     public Guid UserId { get; set; }
 
     /// <summary>
-    /// Specifies whether the user is a product administrator or not.
+    /// Indicates whether the user has administrator privileges for the product.
     /// </summary>
     public bool Administrator { get; set; }
 }

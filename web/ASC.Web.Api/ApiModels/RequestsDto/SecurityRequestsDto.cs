@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,12 +34,12 @@ public class SecurityRequestsDto
     /// <summary>
     /// The product ID for which permissions are being set.
     /// </summary>
-    public Guid ProductId { get; set; }
+    public required Guid ProductId { get; set; }
 
     /// <summary>
     /// The ID of the user whose permissions are being configured.
     /// </summary>
-    public Guid UserId { get; set; }
+    public required Guid UserId { get; set; }
 
     /// <summary>
     /// Specifies whether the user has administrative privileges.

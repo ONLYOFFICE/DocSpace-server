@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,13 +26,38 @@
 
 namespace ASC.Files.Core.Services.OFormService;
 
+/// <summary>
+/// The form settings.
+/// </summary>
 public class OFormSettings
 {
+    /// <summary>
+    /// The form domain.
+    /// </summary>
     public string Domain { get; set; }
+
+    /// <summary>
+    /// The form path.
+    /// </summary>
     public string Path { get; set; }
+
+    /// <summary>
+    /// The form dashboard.
+    /// </summary>
     public string Dashboard { get; set; }
+
+    /// <summary>
+    /// The form extension.
+    /// </summary>
     public string Ext { get; set; }
+
+    /// <summary>
+    /// The form signature.
+    /// </summary>
     public string Signature { get; set; }
 
+    /// <summary>
+    /// The form uploading settings.
+    /// </summary>
     public OFormSettings Upload { get; set; }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -191,7 +191,7 @@ public class InvitationValidator(
 
     private void SaveLinkVisitMessage(string email, string key)
     {
-        var headers = httpContextAccessor?.HttpContext?.Request.Headers;
+        var headers = ASC.MessagingSystem.MessageSettings.GetHttpHeaders(httpContextAccessor?.HttpContext?.Request);
         var target = MessageTarget.Create(email);
 
         messageService.SendHeadersMessage(MessageAction.RoomInviteLinkUsed, target, headers, key);

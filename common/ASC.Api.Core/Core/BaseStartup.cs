@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,7 +29,6 @@ using ASC.Api.Core.Cors;
 using ASC.Api.Core.Cors.Enums;
 using ASC.Api.Core.Cors.Middlewares;
 using ASC.Common.Mapping;
-using ASC.Core.Notify.Socket;
 using ASC.MessagingSystem;
 using Flurl.Util;
 using IPNetwork = Microsoft.AspNetCore.HttpOverrides.IPNetwork;
@@ -341,7 +340,8 @@ public abstract class BaseStartup
             .AddBaseDbContextPool<InstanceRegistrationContext>()
             .AddBaseDbContextPool<IntegrationEventLogContext>()
             .AddBaseDbContextPool<MessagesContext>()
-            .AddBaseDbContextPool<WebhooksDbContext>();
+            .AddBaseDbContextPool<WebhooksDbContext>()
+            .AddBaseDbContextPool<ApiKeysDbContext>();
 
         if (AddAndUseSession)
         {
@@ -438,7 +438,7 @@ public abstract class BaseStartup
             .AddScheme<AuthenticationSchemeOptions, CookieAuthHandler>(CookieAuthenticationDefaults.AuthenticationScheme, _ => { })
             .AddScheme<AuthenticationSchemeOptions, BasicAuthHandler>(BasicAuthScheme, _ => { })
             .AddScheme<AuthenticationSchemeOptions, ConfirmAuthHandler>("confirm", _ => { })
-            .AddPolicyScheme(MultiAuthSchemes, JwtBearerDefaults.AuthenticationScheme, options =>
+            .AddPolicyScheme(MultiAuthSchemes, MultiAuthSchemes, options =>
             {
                 options.ForwardDefaultSelector = context =>
                 {
@@ -463,13 +463,18 @@ public abstract class BaseStartup
                         {
                             return JwtBearerDefaults.AuthenticationScheme;
                         }
+                        else if (token.StartsWith("sk-"))
+                        {
+                            return ApiKeyBearerDefaults.AuthenticationScheme;
+                        }
                     }
 
                     return CookieAuthenticationDefaults.AuthenticationScheme;
                 };
             });
 
-        services.AddJwtBearerAuthentication();
+        services.AddApiKeyBearerAuthentication()
+                .AddJwtBearerAuthentication();
 
         services.AddAutoMapper(GetAutoMapperProfileAssemblies());
 
@@ -527,11 +532,6 @@ public abstract class BaseStartup
             await next(context);
         });
 
-        if (!string.IsNullOrEmpty(_corsOrigin))
-        {
-            app.UseDynamicCorsMiddleware(CorsPoliciesEnums.DynamicCorsPolicyName);
-        }
-
         if (AddAndUseSession)
         {
             app.UseSession();
@@ -540,6 +540,11 @@ public abstract class BaseStartup
         app.UseSynchronizationContextMiddleware();
 
         app.UseTenantMiddleware();
+        
+        if (!string.IsNullOrEmpty(_corsOrigin))
+        {
+            app.UseDynamicCorsMiddleware(CorsPoliciesEnums.DynamicCorsPolicyName);
+        }
         
         app.UseAuthentication();
 

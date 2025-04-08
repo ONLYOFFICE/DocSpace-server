@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,7 +34,7 @@ public class OwnerIdSettingsRequestDto
     /// <summary>
     /// The ID of the owner whose settings are being managed.
     /// </summary>
-    public Guid OwnerId { get; set; }
+    public required Guid OwnerId { get; set; }
 }
 
 /// <summary>
@@ -45,7 +45,7 @@ public class SettingsRequestsDto
     /// <summary>
     /// The version ID.
     /// </summary>
-    public int VersionId { get; set; }
+    public required int VersionId { get; set; }
 }
 
 /// <summary>
@@ -67,7 +67,7 @@ public class DefaultProductRequestDto
     /// <summary>
     /// The ID of the product to be set as default.
     /// </summary>
-    public Guid DefaultProductID { get; set; }
+    public required Guid DefaultProductID { get; set; }
 }
 
 /// <summary>
@@ -78,7 +78,7 @@ public class TimeZoneRequestDto
     /// <summary>
     /// The language code for the time zone localization.
     /// </summary>
-    public string Lng { get; set; }
+    public required string Lng { get; set; }
 
     /// <summary>
     /// The IANA time zone identifier.

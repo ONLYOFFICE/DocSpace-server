@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -98,7 +98,7 @@ public class CreateFileTest(
         var file = new CreateFile<JsonElement> { Title = "test.docx" };
         
         //Act
-        var response = await _filesClient.PostAsJsonAsync($"{Random.Shared.Next(10000, 20000)}/file", file, _filesFactory.JsonRequestSerializerOptions);
+        var response = await _filesClient.PostAsJsonAsync($"{Random.Shared.Next(10000, 20000)}/file", file, _filesFactory.JsonRequestSerializerOptions, cancellationToken: TestContext.Current.CancellationToken);
         
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
@@ -118,7 +118,7 @@ public class CreateFileTest(
     {
         await _filesClient.Authenticate(Initializer.Owner);
         
-        var response = await _filesClient.GetAsync("recent");
+        var response = await _filesClient.GetAsync("recent", TestContext.Current.CancellationToken);
         var recentFolder = await HttpClientHelper.ReadFromJson<FolderContentDto>(response);
         var createdFile = await CreateFile("test.docx", recentFolder.Current.Id);
 

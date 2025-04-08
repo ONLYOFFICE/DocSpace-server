@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -37,25 +37,25 @@ public class WebhookManager(
     public async Task<IEnumerable<DbWebhooksConfig>> GetWebhookConfigsAsync<T>(WebhookTrigger trigger, FileEntry<T> fileEntry)
     {
         var checker = serviceProvider.GetService<WebhookFileEntryAccessChecker<T>>();
-        var cleanFileEntry = await GetCleanFileEntry(fileEntry);
+        var pureFileEntry = await GetPureFileEntry(fileEntry);
 
-        return await webhookPublisher.GetWebhookConfigsAsync(trigger, checker, cleanFileEntry);
+        return await webhookPublisher.GetWebhookConfigsAsync(trigger, checker, pureFileEntry);
     }
 
     public async Task PublishAsync<T>(WebhookTrigger trigger, IEnumerable<DbWebhooksConfig> webhookConfigs, FileEntry<T> fileEntry)
     {
-        await webhookPublisher.PublishAsync(trigger, webhookConfigs, fileEntry);
+        await webhookPublisher.PublishAsync(trigger, webhookConfigs, fileEntry, fileEntry.Id);
     }
 
     public async Task PublishAsync<T>(WebhookTrigger trigger, FileEntry<T> fileEntry)
     {
         var checker = serviceProvider.GetService<WebhookFileEntryAccessChecker<T>>();
-        var cleanFileEntry = await GetCleanFileEntry(fileEntry);
+        var pureFileEntry = await GetPureFileEntry(fileEntry);
 
-        await webhookPublisher.PublishAsync(trigger, checker, cleanFileEntry);
+        await webhookPublisher.PublishAsync(trigger, checker, pureFileEntry, pureFileEntry.Id);
     }
 
-    private async Task<FileEntry<T>> GetCleanFileEntry<T>(FileEntry<T> fileEntry)
+    private async Task<FileEntry<T>> GetPureFileEntry<T>(FileEntry<T> fileEntry)
     {
         return fileEntry.FileEntryType == FileEntryType.File
             ? await daoFactory.GetFileDao<T>().GetFileAsync(fileEntry.Id)
@@ -67,6 +67,11 @@ public class WebhookManager(
 [Scope(GenericArguments = [typeof(string)])]
 public class WebhookFileEntryAccessChecker<T>(FileSecurity fileSecurity) : IWebhookAccessChecker<FileEntry<T>>
 {
+    public bool CheckIsTarget(FileEntry<T> fileEntry, string targetId)
+    {
+        return fileEntry.Id.ToString() == targetId;
+    }
+
     public async Task<bool> CheckAccessAsync(FileEntry<T> fileEntry, Guid userId)
     {
         return await fileSecurity.CanReadAsync(fileEntry, userId);

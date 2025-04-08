@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,6 +28,7 @@ global using System.ComponentModel.DataAnnotations;
 
 global using ASC.Api.Core.Extensions;
 global using ASC.Common;
+global using ASC.Common.Caching;
 global using ASC.Core;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Model;
@@ -38,3 +39,5 @@ global using ASC.Webhooks.Core.EF.Model;
 global using ASC.Webhooks.Core.IntegrationEvents.Events;
 
 global using Microsoft.EntityFrameworkCore;
+
+global using ProtoBuf;

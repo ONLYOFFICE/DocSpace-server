@@ -1,55 +1,52 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
-//
+﻿// (c) Copyright Ascensio System SIA 2009-2025
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-
-using NetEscapades.EnumGenerators;
 
 namespace ASC.Webhooks.Core;
 
 /// <summary>
 /// The webhook trigger type.
 /// </summary>
-[EnumExtensions]
 public enum WebhookTrigger
 {
-    [SwaggerEnum("All")]
+    [SwaggerEnum("*")]
     All = 0,
 
 
     #region User
 
-    [SwaggerEnum("User created")]
+    [SwaggerEnum("user.created")]
     UserCreated = 1,
 
-    [SwaggerEnum("User invited")]
+    [SwaggerEnum("user.invited")]
     UserInvited = 2,
 
-    [SwaggerEnum("User updated")]
+    [SwaggerEnum("user.updated")]
     UserUpdated = 4,
 
-    [SwaggerEnum("User deleted")]
+    [SwaggerEnum("user.deleted")]
     UserDeleted = 8,
 
     #endregion User
@@ -57,13 +54,13 @@ public enum WebhookTrigger
 
     #region Group
 
-    [SwaggerEnum("Group created")]
+    [SwaggerEnum("group.created")]
     GroupCreated = 16,
 
-    [SwaggerEnum("Group updated")]
+    [SwaggerEnum("group.updated")]
     GroupUpdated = 32,
 
-    [SwaggerEnum("Group deleted")]
+    [SwaggerEnum("group.deleted")]
     GroupDeleted = 64,
 
     #endregion
@@ -71,28 +68,28 @@ public enum WebhookTrigger
 
     #region File
 
-    [SwaggerEnum("File created")]
+    [SwaggerEnum("file.created")]
     FileCreated = 128,
 
-    [SwaggerEnum("File uploaded")]
+    [SwaggerEnum("file.uploaded")]
     FileUploaded = 256,
 
-    [SwaggerEnum("File updated")]
+    [SwaggerEnum("file.updated")]
     FileUpdated = 512,
 
-    [SwaggerEnum("File moved to trash")]
+    [SwaggerEnum("file.trashed")]
     FileTrashed = 1024,
 
-    [SwaggerEnum("File permanently deleted")]
+    [SwaggerEnum("file.deleted")]
     FileDeleted = 2048,
 
-    [SwaggerEnum("File restored from trash")]
+    [SwaggerEnum("file.restored")]
     FileRestored = 4096,
 
-    [SwaggerEnum("File copied")]
+    [SwaggerEnum("file.copied")]
     FileCopied = 8192,
 
-    [SwaggerEnum("File moved from one folder to another")]
+    [SwaggerEnum("file.moved")]
     FileMoved = 16384,
 
     #endregion
@@ -100,25 +97,25 @@ public enum WebhookTrigger
 
     #region Folder
 
-    [SwaggerEnum("Folder created")]
+    [SwaggerEnum("folder.created")]
     FolderCreated = 32768,
 
-    [SwaggerEnum("Folder updated")]
+    [SwaggerEnum("folder.updated")]
     FolderUpdated = 65536,
 
-    [SwaggerEnum("Folder moved to trash")]
+    [SwaggerEnum("folder.trashed")]
     FolderTrashed = 131072,
 
-    [SwaggerEnum("Folder permanently deleted")]
+    [SwaggerEnum("folder.deleted")]
     FolderDeleted = 262144,
 
-    [SwaggerEnum("Folder restored from trash")]
+    [SwaggerEnum("folder.restored")]
     FolderRestored = 524288,
 
-    [SwaggerEnum("Folder copied")]
+    [SwaggerEnum("folder.copied")]
     FolderCopied = 1048576,
 
-    [SwaggerEnum("Folder moved from one folder to another")]
+    [SwaggerEnum("folder.moved")]
     FolderMoved = 2097152,
 
     #endregion
@@ -126,25 +123,57 @@ public enum WebhookTrigger
 
     #region Room
 
-    [SwaggerEnum("Room created")]
+    [SwaggerEnum("room.created")]
     RoomCreated = 4194304,
 
-    [SwaggerEnum("Room updated")]
+    [SwaggerEnum("room.updated")]
     RoomUpdated = 8388608,
 
-    [SwaggerEnum("Room moved to archive")]
+    [SwaggerEnum("room.archived")]
     RoomArchived = 16777216,
 
-    [SwaggerEnum("Room permanently deleted")]
+    [SwaggerEnum("room.deleted")]
     RoomDeleted = 33554432,
 
-    [SwaggerEnum("Room restored from archive")]
+    [SwaggerEnum("room.restored")]
     RoomRestored = 67108864,
 
-    [SwaggerEnum("Room copied")]
+    [SwaggerEnum("room.copied")]
     RoomCopied = 134217728
 
     #endregion
 
     //remaining possible values: 268435456, 536870912, 1073741824
+}
+
+
+public static partial class WebhookTriggerExtensions
+{
+    private static readonly Dictionary<WebhookTrigger, string> _customStrings;
+
+    static WebhookTriggerExtensions()
+    {
+        _customStrings = [];
+
+        var type = typeof(WebhookTrigger);
+
+        foreach (var value in Enum.GetValues<WebhookTrigger>())
+        {
+            var field = type.GetField(value.ToString());
+
+            var attribute = (SwaggerEnumAttribute)Attribute.GetCustomAttribute(field, typeof(SwaggerEnumAttribute));
+
+            _customStrings.Add(value, attribute != null ? attribute.Description : field.Name);
+        }
+    }
+
+    public static string ToCustomString(this WebhookTrigger value)
+    {
+        return _customStrings[value];
+    }
+
+    public static string GetTargetType(this WebhookTrigger value)
+    {
+        return _customStrings[value].Split('.')[0];
+    }
 }

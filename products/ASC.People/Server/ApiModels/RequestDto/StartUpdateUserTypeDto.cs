@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,15 +26,23 @@
 
 namespace ASC.People.ApiModels.RequestDto;
 
-
 /// <summary>
-/// 
+/// The parameters for updating the type of the user or guest when reassigning rooms and shared files.
 /// </summary>
-public class ProgressRequestDto
+public class StartUpdateUserTypeDto
 {
     /// <summary>
-    /// User ID whose data is reassigned
+    /// The new user type.
     /// </summary>
-    [FromRoute(Name = "userid")]
+    public EmployeeType Type { get; set; }
+
+    /// <summary>
+    /// The user ID.
+    /// </summary>
     public Guid UserId { get; set; }
+
+    /// <summary>
+    /// The user ID to reassign.
+    /// </summary>
+    public Guid? ReassignUserId { get; set; }
 }

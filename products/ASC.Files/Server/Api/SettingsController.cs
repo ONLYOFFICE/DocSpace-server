@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -173,9 +173,9 @@ public class SettingsController(
     }
 
     /// <summary>
-    /// Changes the ability to force save a file.
+    /// Specifies if the file forcesaving is enabled or not.
     /// </summary>
-    /// <short>Change the forcasaving ability</short>
+    /// <short>Change the forcesaving ability</short>
     /// <path>api/2.0/files/forcesave</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
@@ -202,9 +202,9 @@ public class SettingsController(
     }
 
     /// <summary>
-    /// Returns the information about the Documents module.
+    /// Returns the information about the "Documents" module.
     /// </summary>
-    /// <short>Get the Documents information</short>
+    /// <short>Get the "Documents" information</short>
     /// <path>api/2.0/files/info</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Module information: ID, product class name, title, description, icon URL, large icon URL, start URL, primary or nor, help URL", typeof(Module))]
@@ -216,10 +216,10 @@ public class SettingsController(
     }
 
     /// <summary>
-    /// Hide confirmation dialog when canceling operation.
+    /// Hides the confirmation dialog when canceling operations.
     /// </summary>
-    /// <short>Hide confirmation dialog when canceling operation</short>
-    /// <path>api/2.0/files/hideconfirmroomlifetime</path>
+    /// <short>Hide confirmation dialog when canceling operations</short>
+    /// <path>api/2.0/files/hideconfirmcanceloperation</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
     [HttpPut("hideconfirmcanceloperation")]
@@ -242,7 +242,7 @@ public class SettingsController(
     }
 
     /// <summary>
-    /// Hide confirmation dialog when changing room lifetime settings.
+    /// Hides the confirmation dialog when changing the room lifetime settings.
     /// </summary>
     /// <short>Hide confirmation dialog when changing room lifetime settings</short>
     /// <path>api/2.0/files/hideconfirmroomlifetime</path>
@@ -255,9 +255,9 @@ public class SettingsController(
     }
 
     /// <summary>
-    /// Checks if the Private Room settings are available or not.
+    /// Checks if the "Private Room" settings are available or not.
     /// </summary>
-    /// <short>Check the Private Room availability</short>
+    /// <short>Check the "Private Room" availability</short>
     /// <path>api/2.0/files/@privacy/available</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the Private Room settings are available", typeof(bool))]
@@ -377,9 +377,9 @@ public class SettingsController(
     }
 
     /// <summary>
-    /// Change the ability to open in a document in the same browser tab
+    /// Changes the ability to open the document in the same browser tab.
     /// </summary>
-    /// <short>Open document in same browser tab</short>
+    /// <short>Open document in the same browser tab</short>
     /// <path>api/2.0/files/settings/openeditorinsametab</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]

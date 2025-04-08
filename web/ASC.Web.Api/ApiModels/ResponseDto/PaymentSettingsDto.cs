@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,22 +32,22 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 public class PaymentSettingsDto
 {
     /// <summary>
-    /// The sales email.
+    /// The email address for sales inquiries and support.
     /// </summary>
     public string SalesEmail { get; set; }
 
     /// <summary>
-    /// The feedback and support URL.
+    /// The URL for accessing the feedback and support resources.
     /// </summary>
     public string FeedbackAndSupportUrl { get; set; }
 
     /// <summary>
-    /// The link to pay for a portal.
+    /// The URL for purchasing or upgrading the product.
     /// </summary>
     public string BuyUrl { get; set; }
 
     /// <summary>
-    /// Specifies whether the portal is standalone or not.
+    /// Indicates whether the system is running in standalone mode.
     /// </summary>
     public bool Standalone { get; set; }
 
@@ -73,7 +73,7 @@ public class CurrentLicenseInfo
     public bool Trial { get; set; }
 
     /// <summary>
-    /// The due date of the current license.
+    /// The date when the license expires.
     /// </summary>
     public DateTime DueDate { get; set; }
 }

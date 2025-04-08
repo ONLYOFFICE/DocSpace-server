@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -201,6 +201,13 @@ public class FileTrackerHelper
         return tracker != null && await IsEditingAsync(fileId)
             ? tracker.EditingBy.Values.Select(i => i.UserId).Distinct().ToList()
             : [];
+    }
+
+    public string GetTrackerDocKey<T>(T fileId)
+    {
+        var tracker = GetTracker(fileId);
+
+        return tracker?.DocKey;
     }
 
     private FileTracker GetTracker<T>(T fileId)

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,12 +27,22 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for changing the file owner
+/// The request parameters for changing the file owner.
 /// </summary>
-public class ChangeOwnerRequestDto : BaseBatchRequestDto
+public class ChangeOwnerRequestDto
 {
     /// <summary>
-    /// New file owner ID
+    /// The list of folder IDs to change the owner.
     /// </summary>
-    public Guid UserId { get; set; }
+    public IEnumerable<JsonElement> FolderIds { get; set; } = new List<JsonElement>();
+
+    /// <summary>
+    /// The list of file IDs to change the owner.
+    /// </summary>
+    public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
+
+    /// <summary>
+    /// The new file owner ID.
+    /// </summary>
+    public required Guid UserId { get; set; }
 }

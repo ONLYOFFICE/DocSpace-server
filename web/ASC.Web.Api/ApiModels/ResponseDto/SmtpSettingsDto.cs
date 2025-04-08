@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,6 +35,7 @@ public class SmtpSettingsDto : IMapFrom<SmtpSettings>
     /// The SMTP host.
     /// </summary>
     [SwaggerSchemaCustom(Example = "mail.example.com")]
+    [StringLength(255)]
     public string Host { get; set; }
 
     /// <summary>
@@ -48,12 +49,14 @@ public class SmtpSettingsDto : IMapFrom<SmtpSettings>
     /// The sender address.
     /// </summary>
     [SwaggerSchemaCustom(Example = "notify@example.com")]
+    [StringLength(255)]
     public string SenderAddress { get; set; }
 
     /// <summary>
     /// The sender display name.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Postman")]
+    [StringLength(255)]
     public string SenderDisplayName { get; set; }
 
     /// <summary>

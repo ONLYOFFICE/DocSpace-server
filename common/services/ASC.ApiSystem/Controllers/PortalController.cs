@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -753,7 +753,7 @@ public class PortalController(
                 option.LogDebug("PortalName = {0}; Elapsed ms. ValidateRecaptcha error: {1} {2}", model.PortalName, sw.ElapsedMilliseconds, data);
                 sw.Stop();
 
-                return new { error = "recaptchaInvalid", message = "Recaptcha is invalid" };
+                return new { error = "recaptchaInvalid", message = "Recaptcha is invalid", clientIP };
 
             }
 

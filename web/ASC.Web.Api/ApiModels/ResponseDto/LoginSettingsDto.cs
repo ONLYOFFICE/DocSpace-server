@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -45,7 +45,10 @@ public class LoginSettingsDto : IMapFrom<LoginSettings>
     /// The maximum time (in seconds) allowed for server to process and respond to login requests.
     /// </summary>
     public int CheckPeriod { get; set; }
-    
+
+    /// <summary>
+    /// Specifies if these settings are default or not
+    /// </summary>
     /// <summary>
     /// Specifies whether the login settings are default or not.
     /// </summary>

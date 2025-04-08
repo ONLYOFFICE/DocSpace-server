@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,12 +27,12 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for hiding the confirmation dialog
+/// The request parameters for hiding the confirmation dialog when converting.
 /// </summary>
 public class HideConfirmConvertRequestDto
 {
     /// <summary>
-    /// Specifies whether to set the specified settings or not
+    /// Specifies whether to set the specified settings or not.
     /// </summary>
     public bool Save { get; set; }
 }

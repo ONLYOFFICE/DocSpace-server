@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,12 +34,12 @@ public class MailDomainSettingsRequestsDto
     /// <summary>
     /// Defines how trusted domains are handled and validated.
     /// </summary>
-    public TenantTrustedDomainsType Type { get; set; }
+    public required TenantTrustedDomainsType Type { get; set; }
 
     /// <summary>
     /// The list of authorized email domains that are considered trusted.
     /// </summary>
-    public List<string> Domains { get; set; }
+    public required List<string> Domains { get; set; }
 
     /// <summary>
     /// Specifies the default permission level for the invited users (visitors or not).
@@ -57,7 +57,7 @@ public class AdminMessageBaseSettingsRequestsDto
     /// </summary>
     [EmailAddress]
     [StringLength(255)]
-    public string Email { get; set; }
+    public required string Email { get; set; }
 
     /// <summary>
     /// The locale identifier for message localization.
@@ -68,13 +68,25 @@ public class AdminMessageBaseSettingsRequestsDto
 /// <summary>
 /// The request parameters for configuring the administrator message content.
 /// </summary>
-public class AdminMessageSettingsRequestsDto : AdminMessageBaseSettingsRequestsDto
+public class AdminMessageSettingsRequestsDto
 {
     /// <summary>
     /// The content of the administrator message to be sent.
     /// </summary>
     [StringLength(255)]
-    public string Message { get; set; }
+    public required string Message { get; set; }
+
+    /// <summary>
+    /// Email
+    /// </summary>
+    [EmailAddress]
+    [StringLength(255)]
+    public required string Email { get; set; }
+
+    /// <summary>
+    /// Culture
+    /// </summary>
+    public string Culture { get; set; }
 }
 
 /// <summary>

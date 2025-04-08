@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,12 +35,12 @@ public class TfaRequestsDto
     /// The two-factor authentication type.
     /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public TfaRequestsDtoType? Type { get; set; }
+    public TfaRequestsDtoType Type { get; set; }
 
     /// <summary>
     /// The ID of the user for whom the TFA settings are being configured.
     /// </summary>
-    public Guid? Id { get; set; }
+    public Guid Id { get; set; }
 
     /// <summary>
     /// The list of IP addresses that bypass TFA verification.
@@ -81,5 +81,5 @@ public class TfaValidateRequestsDto
     /// <summary>
     /// The verification code provided by the user.
     /// </summary>
-    public string Code { get; set; }
+    public required string Code { get; set; }
 }

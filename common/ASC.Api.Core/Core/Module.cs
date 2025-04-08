@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,7 +29,6 @@ namespace ASC.Api.Core;
 /// <summary>
 /// The module information.
 /// </summary>
-/// <param name="product"></param>
 public class Module(Product product)
 {
     /// <summary>
@@ -43,7 +42,7 @@ public class Module(Product product)
     public string AppName { get; set; } = product.ProductClassName;
 
     /// <summary>
-    /// The module title.
+    /// The module product class name.
     /// </summary>
     public string Title { get; set; } = product.Name;
 

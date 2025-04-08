@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -286,6 +286,16 @@ public class CommonMethods(
 
     public string GetClientIp()
     {
+        var request = httpContextAccessor.HttpContext?.Request;
+        if (request != null)
+        {
+            var header = request.Headers["X-Forwarded-For"].FirstOrDefault();
+            if (!string.IsNullOrEmpty(header))
+            {
+                return header;
+            }
+        }
+
         return httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
 
         //TODO: check old version

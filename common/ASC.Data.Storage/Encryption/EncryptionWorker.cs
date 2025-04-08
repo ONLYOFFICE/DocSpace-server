@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -68,8 +68,13 @@ public class EncryptionWorker(
 
     public async Task<double?> GetEncryptionProgress()
     {
-        var progress = (await _queue.GetAllTasks()).FirstOrDefault();
+        var item = (await _queue.GetAllTasks()).FirstOrDefault();
 
-        return progress?.Percentage;
+        if (item is { IsCompleted: true })
+        {
+            await _queue.DequeueTask(item.Id);
+        }
+
+        return item?.Percentage;
     }
 }

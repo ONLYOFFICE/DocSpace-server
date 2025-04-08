@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -190,11 +190,17 @@ public partial class FilesDbContext
     }
     
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid])]
-    public Task<int> ReassignFilesAsync(int tenantId, Guid oldOwnerId, Guid newOwnerId)
+    public Task<int> ReassignFilesByCreateByAsync(int tenantId, Guid oldOwnerId, Guid newOwnerId)
     {
-        return FileQueries.ReassignFilesAsync(this, tenantId, oldOwnerId, newOwnerId);
+        return FileQueries.ReassignFilesByCreateByAsync(this, tenantId, oldOwnerId, newOwnerId);
     }
-    
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, null])]
+    public Task<int> ReassignFilesAsync(int tenantId, Guid newOwnerId, IEnumerable<int> fileIds)
+    {
+        return FileQueries.ReassignFilesAsync(this, tenantId, newOwnerId, fileIds);
+    }
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid, null])]
     public Task<int> ReassignFilesPartiallyAsync(int tenantId, Guid oldOwnerId, Guid newOwnerId, IEnumerable<int> exceptFolderIds)
     {
@@ -302,7 +308,11 @@ public partial class FilesDbContext
     {
         return FileQueries.DbFormUserRolesQueryAsync(this, tenantId, formId, userId);
     }
-
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    public IAsyncEnumerable<FormRole> DbUserFormRolesInRoomQueryAsync(int tenantId, int roomId, Guid userId)
+    {
+        return FileQueries.DbUserFormRolesInRoomQueryAsync(this, tenantId, roomId, userId);
+    }
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<int> DbFormRoleCurrentStepAsync(int tenantId, int formId)
     {
@@ -701,13 +711,21 @@ static file class FileQueries
                     .Where(r => r.VersionGroup > versionGroup)
                     .ExecuteUpdate(f => f.SetProperty(p => p.VersionGroup, p => p.VersionGroup - 1)));
 
-    public static readonly Func<FilesDbContext, int, Guid, Guid, Task<int>> ReassignFilesAsync =
+    public static readonly Func<FilesDbContext, int, Guid, Guid, Task<int>> ReassignFilesByCreateByAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, Guid oldOwnerId, Guid newOwnerId) =>
                 ctx.Files
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.CreateBy == oldOwnerId)
                     .ExecuteUpdate(p => p.SetProperty(f => f.CreateBy, newOwnerId)));
+
+    public static readonly Func<FilesDbContext, int, Guid, IEnumerable<int>, Task<int>> ReassignFilesAsync =
+    Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+        (FilesDbContext ctx, int tenantId, Guid newOwnerId, IEnumerable<int> fileIds) =>
+            ctx.Files
+                .Where(r => r.TenantId == tenantId)
+                .Where(r => fileIds.Contains(r.Id))
+                .ExecuteUpdate(p => p.SetProperty(f => f.CreateBy, newOwnerId)));
 
     public static readonly Func<FilesDbContext, int, Guid, Guid, IEnumerable<int>, Task<int>> ReassignFilesPartiallyAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
@@ -916,6 +934,27 @@ static file class FileQueries
                     .Select(r => new FormRole
                     {
                         UserId = r.UserId,
+                        RoomId = r.RoomId,
+                        RoleName = r.RoleName,
+                        RoleColor = r.RoleColor,
+                        Sequence = r.Sequence,
+                        Submitted = r.Submitted,
+                        OpenedAt = r.OpenedAt,
+                        SubmissionDate = r.SubmissionDate
+                    })
+            );
+    public static readonly Func<FilesDbContext, int, int, Guid, IAsyncEnumerable<FormRole>> DbUserFormRolesInRoomQueryAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int roomId, Guid userId) =>
+                ctx.FilesFormRoleMapping
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => r.RoomId == roomId)
+                    .Where(r => r.UserId == userId)
+                    .OrderBy(r => r.Sequence)
+                    .Select(r => new FormRole
+                    {
+                        UserId = r.UserId,
+                        RoomId = r.RoomId,
                         RoleName = r.RoleName,
                         RoleColor = r.RoleColor,
                         Sequence = r.Sequence,
@@ -952,6 +991,7 @@ static file class FileQueries
                     .Select(r => new FormRole
                     {
                         UserId = r.UserId,
+                        RoomId = r.RoomId,
                         RoleName = r.RoleName,
                         RoleColor = r.RoleColor,
                         Sequence = r.Sequence,

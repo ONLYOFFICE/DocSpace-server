@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -39,5 +39,5 @@ public class QuotaSettingsRequestsDto
     /// <summary>
     /// The default storage quota value applied to new users.
     /// </summary>
-    public JsonElement DefaultQuota { get; set; }
+    public required JsonElement DefaultQuota { get; set; }
 }

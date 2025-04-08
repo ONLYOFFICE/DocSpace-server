@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,26 +35,22 @@ public class HttpClientHelper
         Converters = { new ApiDateTimeConverter(), new FileShareConverter() }
     };
     
-    public static async Task<T?> ReadFromJson<T>(HttpResponseMessage? response)
+    public static async Task<T> ReadFromJson<T>(HttpResponseMessage? response)
     {
-        if (response == null)
-        {
-            return default;
-        }
+        ArgumentNullException.ThrowIfNull(response);
         
         var data = await response.Content.ReadAsStringAsync();
         
         try
         {
             var successApiResponse = JsonSerializer.Deserialize<SuccessApiResponse>(data, JsonSerializerOptions.Web);
-            T? parsed = default!;
         
             if (successApiResponse is { Response: JsonElement jsonElement })
             {
-                parsed = jsonElement.Deserialize<T>(JsonResponseSerializerOptions);
+                return jsonElement.Deserialize<T>(JsonResponseSerializerOptions) ?? throw new InvalidOperationException();
             }
-        
-            return parsed;
+
+            throw new InvalidOperationException();
         }
         catch (Exception e)
         {

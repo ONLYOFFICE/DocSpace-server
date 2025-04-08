@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,7 +32,7 @@ public class UserFormatter : IComparer<UserInfo>
     private static readonly Dictionary<string, Dictionary<DisplayUserNameFormat, string>> _displayFormats = new()
     {
         { "ru", new Dictionary<DisplayUserNameFormat, string>{ { DisplayUserNameFormat.Default, "{1} {0}" }, { DisplayUserNameFormat.FirstLast, "{0} {1}" }, { DisplayUserNameFormat.LastFirst, "{1} {0}" } } },
-        { "zh-CN", new Dictionary<DisplayUserNameFormat, string>{ { DisplayUserNameFormat.Default, "{0}{1}" }, { DisplayUserNameFormat.FirstLast, "{0}{1}" }, { DisplayUserNameFormat.LastFirst, "{0}{1}" } } },
+        { "zh-CN", new Dictionary<DisplayUserNameFormat, string>{ { DisplayUserNameFormat.Default, "{1}{0}" }, { DisplayUserNameFormat.FirstLast, "{1}{0}" }, { DisplayUserNameFormat.LastFirst, "{1}{0}" } } },
         { "default", new Dictionary<DisplayUserNameFormat, string>{ {DisplayUserNameFormat.Default, "{0} {1}" }, { DisplayUserNameFormat.FirstLast, "{0} {1}" }, { DisplayUserNameFormat.LastFirst, "{1}, {0}" } } }
     };
     

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,7 +35,7 @@ public class QueueWorker<T>(
 {
     protected readonly IServiceProvider _serviceProvider = serviceProvider;
     private readonly DistributedTaskQueue<T> _queue = queueFactory.CreateQueue<T>();
-    protected readonly IDictionary<string, StringValues> _httpHeaders = httpContextAccessor.HttpContext?.Request.Headers;
+    protected readonly IDictionary<string, StringValues> _httpHeaders = ASC.MessagingSystem.MessageSettings.GetHttpHeaders(httpContextAccessor.HttpContext?.Request);
 
     public static string GetProgressItemId(int tenantId, Guid userId)
     {
@@ -96,6 +96,48 @@ public class QueueWorkerReassign(IHttpContextAccessor httpContextAccessor,
         result.Init(_httpHeaders, tenantId, fromUserId, toUserId, currentUserId, notify, deleteProfile);
 
         return await StartAsync(tenantId, fromUserId, result);
+    }
+}
+
+[Scope]
+public class QueueWorkerUpdateUserType(IHttpContextAccessor httpContextAccessor,
+        IServiceProvider serviceProvider,
+        IDistributedTaskQueueFactory queueFactory,
+        IDistributedLockProvider distributedLockProvider)
+    : QueueWorker<UpdateUserTypeProgressItem>(httpContextAccessor, serviceProvider, queueFactory, distributedLockProvider)
+{
+    public async Task<UpdateUserTypeProgressItem> StartAsync(int tenantId, Guid userId, Guid toUserId, Guid currentUserId, EmployeeType employeeType)
+    {
+        var result = _serviceProvider.GetService<UpdateUserTypeProgressItem>();
+
+        result.Init(tenantId, userId, toUserId, currentUserId, employeeType, _httpHeaders);
+
+        return await StartAsync(tenantId, userId, result);
+    }
+}
+
+[Scope]
+public class QueueDeletePersonalFolder(IHttpContextAccessor httpContextAccessor,
+        IServiceProvider serviceProvider,
+        IDistributedTaskQueueFactory queueFactory,
+        IDistributedLockProvider distributedLockProvider,
+        IDaoFactory daoFactory)
+    : QueueWorker<DeletePersonalFolderProgressItem>(httpContextAccessor, serviceProvider, queueFactory, distributedLockProvider)
+{
+    public async Task<DeletePersonalFolderProgressItem> StartAsync(int tenantId, Guid userId)
+    {
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var myId = await folderDao.GetFolderIDUserAsync(false, userId);
+        if (myId == 0)
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
+        var result = _serviceProvider.GetService<DeletePersonalFolderProgressItem>();
+
+        result.Init(userId, tenantId);
+
+        return await StartAsync(tenantId, userId, result);
     }
 }
 

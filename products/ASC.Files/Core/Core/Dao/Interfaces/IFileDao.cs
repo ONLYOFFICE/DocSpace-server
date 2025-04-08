@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -298,6 +298,14 @@ public interface IFileDao<T>
     /// <param name="userId"></param>
     /// <returns></returns>
     Task<(int, IAsyncEnumerable<FormRole>)> GetUserFormRoles(T formId, Guid userId);
+
+    /// <summary>
+    /// Get user form roles in room
+    /// </summary>
+    /// <param name="roomId"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    IAsyncEnumerable<FormRole> GetUserFormRolesInRoom(T roomId, Guid userId);
     /// <summary>
     /// Updates user role
     /// </summary>
@@ -334,6 +342,13 @@ public interface IFileDao<T>
     /// <param name="newOwnerId"></param>
     /// <param name="exceptFolderIds"></param>
     Task ReassignFilesAsync(Guid oldOwnerId, Guid newOwnerId, IEnumerable<T> exceptFolderIds);
+
+    /// <summary>
+    /// Set created by
+    /// </summary>
+    /// <param name="newOwnerId"></param>
+    /// <param name="fileIds"></param>
+    Task ReassignFilesAsync(Guid newOwnerId, IEnumerable<T> fileIds);
 
     /// <summary>
     /// Search files in SharedWithMe &amp; Projects

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -66,7 +66,9 @@ internal class FileDao(
     FileChecker fileChecker,
     EntryManager entryManager,
     FileSharing fileSharing,
-    FilesMessageService filesMessageService)
+    FilesMessageService filesMessageService,
+    QuotaSocketManager quotaSocketManager,
+    CustomQuota customQuota)
     : AbstractDao(dbContextManager,
               userManager,
               tenantManager,
@@ -321,20 +323,9 @@ internal class FileDao(
         }
         if (applyFormStepFilter)
         {
-            q = q.Where(f => f.Category != (int)FilterType.PdfForm ||
-                (f.Category == (int)FilterType.PdfForm &&
+            q = q.Where(f => f.Category == (int)FilterType.PdfForm &&
                     filesDbContext.FilesFormRoleMapping.Any(r =>
-                        r.TenantId == tenantId && r.FormId == f.Id && r.UserId == securityContext.CurrentAccount.ID) &&
-                    (!filesDbContext.FilesFormRoleMapping.Any(r => r.TenantId == tenantId && r.FormId == f.Id && !r.Submitted) || (
-                    filesDbContext.FilesFormRoleMapping
-                        .Where(r => r.TenantId == tenantId && r.FormId == f.Id && !r.Submitted)
-                        .Min(r => (int?)r.Sequence)
-                    >=
-                    filesDbContext.FilesFormRoleMapping
-                        .Where(r => r.TenantId == tenantId && r.FormId == f.Id && r.UserId == securityContext.CurrentAccount.ID)
-                        .Select(r => (int?)r.Sequence)
-                        .FirstOrDefault()))
-                )
+                        r.TenantId == tenantId && r.FormId == f.Id && r.UserId == securityContext.CurrentAccount.ID)
             );
         }
 
@@ -628,7 +619,7 @@ internal class FileDao(
                     if (roomId != -1 && checkFolder)
                     {
                         var currentRoom = await folderDao.GetFolderAsync(roomId);
-                        if (currentRoom.FolderType == FolderType.FillingFormsRoom)
+                        if (currentRoom.FolderType == FolderType.FillingFormsRoom && currentRoom.RootFolderType != FolderType.RoomTemplates)
                         {
                             var fileProp = await fileDao.GetProperties(file.Id);
                             var extension = FileUtility.GetFileExtension(file.Title);
@@ -1018,6 +1009,10 @@ internal class FileDao(
 
         var trashId = await globalFolder.GetFolderTrashAsync(daoFactory);
 
+        var toUser = await _userManager.GetUsersAsync(toFolder.RootCreateBy);
+        var fromUser = await _userManager.GetUsersAsync(fromFolder.RootCreateBy);
+
+
         if (toRoomId != -1 && fromRoomId != toRoomId)
         {
             var toRoom = DocSpaceHelper.IsRoom(toFolder.FolderType) ? toFolder : await folderDao.GetFolderAsync(toRoomId);
@@ -1051,6 +1046,28 @@ internal class FileDao(
                     if (userQuotaLimit - userUsedSpace < fileContentLength)
                     {
                         throw FileSizeComment.GetUserFreeSpaceException(userQuotaLimit);
+                    }
+                }
+            }
+        }
+        else
+        {
+            if (toUser != fromUser && toFolder.RootFolderType is FolderType.USER && fromFolder.RootFolderType is FolderType.USER) 
+            {
+                var quotaUserSettings = await _settingsManager.LoadAsync<TenantUserQuotaSettings>();
+                if (quotaUserSettings.EnableQuota)
+                {
+                    var toUserQuotaData = await _settingsManager.LoadAsync<UserQuotaSettings>(toUser);
+                    var toUserQuotaLimit = toUserQuotaData.UserQuota == toUserQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : toUserQuotaData.UserQuota;
+                    var toUserUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenantId, toUser.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
+                    if (toUserQuotaLimit != TenantEntityQuotaSettings.NoQuota)
+                    {
+                        if (toUserQuotaLimit - toUserUsedSpace < fileContentLength)
+                        {
+                            await _settingsManager.SaveAsync(new UserQuotaSettings { UserQuota = toUserQuotaLimit + fileContentLength }, toUser);
+
+                            _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(tenantId, customQuota.GetFeature<UserCustomQuotaFeature>().Name, quotaUserSettings.EnableQuota, toUserUsedSpace, toUserQuotaLimit + fileContentLength, [toUser.Id]);
+                        }
                     }
                 }
             }
@@ -1132,6 +1149,21 @@ internal class FileDao(
                         await tagDao.RemoveTagLinksAsync(fileId, FileEntryType.File, TagType.FromRoom);
                         await tagDao.RemoveTagLinksAsync(fileId, FileEntryType.File, TagType.Origin);
                     }
+                }
+
+                if (toUser != fromUser && toFolder.RootFolderType is FolderType.USER && fromFolder.RootFolderType is FolderType.USER)
+                {
+                    await storageFactory.QuotaUsedAddAsync(
+                        _tenantManager.GetCurrentTenantId(),
+                        FileConstant.ModuleId, "",
+                        WebItemManager.DocumentsProductID.ToString(),
+                        file.ContentLength, toUser.Id);
+
+                    await storageFactory.QuotaUsedDeleteAsync(
+                        _tenantManager.GetCurrentTenantId(),
+                        FileConstant.ModuleId, "",
+                        WebItemManager.DocumentsProductID.ToString(),
+                        file.ContentLength, fromUser.Id);
                 }
 
                 if (deleteLinks)
@@ -1397,6 +1429,7 @@ internal class FileDao(
                 TenantId = tenantId,
                 FormId = formId,
                 UserId = formRole.UserId,
+                RoomId = formRole.RoomId,
                 RoleName = formRole.RoleName,
                 RoleColor = formRole.RoleColor,
                 Sequence = sequence,
@@ -1423,6 +1456,17 @@ internal class FileDao(
         await foreach (var role in context.DbFormUserRolesQueryAsync(tenantId, formId, userId))
         {
             yield return role;
+        }
+    }
+    public async IAsyncEnumerable<FormRole> GetUserFormRolesInRoom(int roomId, Guid userId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await foreach (var r in filesDbContext.DbUserFormRolesInRoomQueryAsync(tenantId, roomId, userId))
+        {
+            yield return r;
         }
     }
     public async IAsyncEnumerable<FormRole> GetFormRoles(int formId)
@@ -1560,12 +1604,21 @@ internal class FileDao(
 
         if (exceptFolderIds == null || !exceptFolderIds.Any())
         {
-            await filesDbContext.ReassignFilesAsync(tenantId, oldOwnerId, newOwnerId);
+            await filesDbContext.ReassignFilesByCreateByAsync(tenantId, oldOwnerId, newOwnerId);
         }
         else
         {
             await filesDbContext.ReassignFilesPartiallyAsync(tenantId, oldOwnerId, newOwnerId, exceptFolderIds);
         }
+    }
+
+    public async Task ReassignFilesAsync(Guid newOwnerId, IEnumerable<int> fileIds)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await filesDbContext.ReassignFilesAsync(tenantId, newOwnerId, fileIds);
     }
 
     public IAsyncEnumerable<File<int>> GetFilesAsync(IEnumerable<int> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, bool searchInContent)
@@ -1664,13 +1717,9 @@ internal class FileDao(
             case FilterType.SpreadsheetsOnly:
             case FilterType.ArchiveOnly:
             case FilterType.MediaOnly:
-                q = q.Where(r => r.Category == (int)filterType);
-                break;
             case FilterType.PdfForm:
-                q = q.Where(r => (r.Category == (int)filterType || r.Category == (int)FilterType.None) && r.Title.ToLower().EndsWith(".pdf"));
-                break;
             case FilterType.Pdf:
-                q = q.Where(r => r.Category == (int)filterType || r.Title.ToLower().EndsWith(".pdf"));
+                q = q.Where(r => r.Category == (int)filterType);
                 break;
             case FilterType.ByExtension:
                 if (!string.IsNullOrEmpty(searchText))
@@ -2329,13 +2378,9 @@ internal class FileDao(
             case FilterType.SpreadsheetsOnly:
             case FilterType.ArchiveOnly:
             case FilterType.MediaOnly:
-                q = q.Where(r => r.Category == (int)filterType);
-                break;
             case FilterType.PdfForm:
-                q = q.Where(r => (r.Category == (int)filterType || r.Category == (int)FilterType.None) && r.Title.ToLower().EndsWith(".pdf"));
-                break;
             case FilterType.Pdf:
-                q = q.Where(r => r.Category == (int)filterType || r.Title.ToLower().EndsWith(".pdf"));
+                q = q.Where(r => r.Category == (int)filterType);
                 break;
             case FilterType.ByExtension:
                 if (!string.IsNullOrEmpty(searchText))
@@ -2440,13 +2485,9 @@ internal class FileDao(
             case FilterType.SpreadsheetsOnly:
             case FilterType.ArchiveOnly:
             case FilterType.MediaOnly:
-                q = q.Where(r => r.Entry.Category == (int)filterType);
-                break;
-            case FilterType.PdfForm:
-                q = q.Where(r => (r.Entry.Category == (int)filterType || r.Entry.Category == (int)FilterType.None) && r.Entry.Title.ToLower().EndsWith(".pdf"));
-                break;
             case FilterType.Pdf:
-                q = q.Where(r => r.Entry.Category == (int)filterType || r.Entry.Title.ToLower().EndsWith(".pdf"));
+            case FilterType.PdfForm:
+                q = q.Where(r => r.Entry.Category == (int)filterType);
                 break;
             case FilterType.ByExtension:
                 if (!string.IsNullOrEmpty(searchText))
