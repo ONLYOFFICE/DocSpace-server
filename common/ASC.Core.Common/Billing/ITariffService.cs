@@ -39,8 +39,8 @@ public interface ITariffService
     int GetPaymentDelay();
     Task<Tariff> GetBillingInfoAsync(int? tenant = null, int? id = null);
     bool IsConfigured();
-    Task<string> GetCustomerInfoAsync(int tenant);
-    Task<string> PutOnDepositAsync(int tenant, long amount, string currency);
+    Task<string> GetCustomerInfoAsync(int tenantId);
+    Task<string> PutOnDepositAsync(int tenantId, long amount, string currency);
 
     Task<Balance> GetCustomerBalanceAsync(int tenantId);
     Task<Session> OpenCustomerSessionAsync(int tenantId, int serviceAccount, string externalRef, int quantity);

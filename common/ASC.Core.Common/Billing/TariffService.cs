@@ -857,16 +857,20 @@ public class TariffService(
         return billingClient.Configured && accountingClient.Configured;
     }
 
-    public async Task<string> GetCustomerInfoAsync(int tenant)
+    public async Task<string> GetCustomerInfoAsync(int tenantId)
     {
-        var portalId = await coreSettings.GetKeyAsync(tenant);
+        var portalId = await coreSettings.GetKeyAsync(tenantId);
         return await billingClient.GetCustomerInfoAsync(portalId);
     }
 
-    public async Task<string> PutOnDepositAsync(int tenant, long amount, string currency)
+    public async Task<string> PutOnDepositAsync(int tenantId, long amount, string currency)
     {
-        var portalId = await coreSettings.GetKeyAsync(tenant);
-        return await billingClient.PutOnDepositAsync(portalId, amount, currency);
+        var portalId = await coreSettings.GetKeyAsync(tenantId);
+        var result = await billingClient.PutOnDepositAsync(portalId, amount, currency);
+
+        await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
+
+        return result;
     }
 
     #region Accounting
