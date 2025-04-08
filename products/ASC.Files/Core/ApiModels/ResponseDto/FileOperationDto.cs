@@ -26,55 +26,58 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// The file operation information.
+/// </summary>
 public class FileOperationDto
 {
     /// <summary>
-    /// Operation ID
+    /// The file operation ID.
     /// </summary>
     public string Id { get; set; }
 
     /// <summary>
-    /// Operation type
+    /// The file operation type.
     /// </summary>
     [JsonPropertyName("Operation")]
     public FileOperationType OperationType { get; init; }
 
     /// <summary>
-    /// Operation progress
+    /// The file operation progress in percentage.
     /// </summary>
     [SwaggerSchemaCustom(Example = 100)]
     public int Progress { get; set; }
 
     /// <summary>
-    /// Error
+    /// The file operation error message.
     /// </summary>
     [SwaggerSchemaCustom(Example = "")]
     public string Error { get; set; }
 
     /// <summary>
-    /// Processing status
+    /// The file operation processing status.
     /// </summary>
     [SwaggerSchemaCustom(Example = "1")]
     public string Processed { get; set; }
 
     /// <summary>
-    /// Specifies if the operation is finished or not
+    /// Specifies if the file operation is finished or not.
     /// </summary>
     public bool Finished { get; set; }
 
     /// <summary>
-    /// URL
+    /// The file operation URL.
     /// </summary>
     [Url]
     public string Url { get; set; }
 
     /// <summary>
-    /// List of files
+    /// The list of files of the file operation.
     /// </summary>
     public List<FileEntryDto> Files { get; set; }
 
     /// <summary>
-    /// List of folders
+    /// The list of folders of the file operation.
     /// </summary>
     public List<FileEntryDto> Folders { get; set; }
 }

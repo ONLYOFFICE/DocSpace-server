@@ -26,30 +26,83 @@
 
 namespace ASC.Files.Core;
 
+/// <summary>
+/// The data of the submitted forms.
+/// </summary>
 public class SubmitFormsData
 {
+    /// <summary>
+    /// The list of forms data.
+    /// </summary>
     [Nested]
     public IEnumerable<FormsItemData> FormsData { get; set; }
 }
 
+/// <summary>
+/// The data of the separate form item.
+/// </summary>
 public class FormsItemData
 {
+    /// <summary>
+    /// The form data key.
+    /// </summary>
     public string Key { get; set; }
+
+    /// <summary>
+    /// The form data tag.
+    /// </summary>
     public string Tag { get; set; }
+
+    /// <summary>
+    /// The form data value.
+    /// </summary>
     public string Value { get; set; }
+
+    /// <summary>
+    /// The form data type.
+    /// </summary>
     public string Type { get; set; }
 }
 
+/// <summary>
+/// The database of forms items data.
+/// </summary>
 [Transient]
 public class DbFormsItemDataSearch : SubmitFormsData, ISearchItem
 {
+    /// <summary>
+    /// The form ID.
+    /// </summary>
     public int Id { get; set; }
+
+    /// <summary>
+    /// The tenant ID.
+    /// </summary>
     public int TenantId { get; set; }
+
+    /// <summary>
+    /// The form parent ID.
+    /// </summary>
     public int ParentId { get; set; }
+
+    /// <summary>
+    /// The original form ID.
+    /// </summary>
     public int OriginalFormId { get; set; }
+
+    /// <summary>
+    /// The ID of the room where the form is located.
+    /// </summary>
     public int RoomId { get; set; }
+
+    /// <summary>
+    /// The date and time when the form was created.
+    /// </summary>
     public DateTime CreateOn { get; set; }
 
+    /// <summary>
+    /// The form index name.
+    /// </summary>
     [OpenSearch.Client.Ignore] 
     public string IndexName => "forms_data";
 

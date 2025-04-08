@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.Security;
 
+/// <summary>
+/// The filter type of the access rights.
+/// </summary>
 [Flags]
 public enum ShareFilterType
 {
@@ -52,6 +55,9 @@ public enum ShareFilterType
     Group = 32
 }
 
+/// <summary>
+/// The subject type of the access right.
+/// </summary>
 public enum SubjectType
 {
     [SwaggerEnum("User")]

@@ -27,34 +27,34 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Parameters for updating a file
+/// The parameters for updating a file.
 /// </summary>
 public class UpdateFile
 {
     /// <summary>
-    /// File title
+    /// The file title to update.
     /// </summary>
     public string Title { get; set; }
 
     /// <summary>
-    /// Number of the latest file version
+    /// The number of the latest file version.
     /// </summary>
     public int LastVersion { get; set; }
 }
 
 /// <summary>
-/// Request parameters for updating a file
+/// The request parameters for updating a file.
 /// </summary>
 public class UpdateFileRequestDto<T>
 {
     /// <summary>
-    /// File ID
+    /// The file ID to update.
     /// </summary>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
     /// <summary>
-    /// File
+    /// The parameters for updating a file.
     /// </summary>
     [FromBody]
     public UpdateFile File { get; set; }

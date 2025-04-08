@@ -26,6 +26,9 @@
 
 namespace ASC.Core.Users;
 
+/// <summary>
+/// The user type.
+/// </summary>
 [Flags]
 [JsonConverter(typeof(JsonStringEnumConverter<EmployeeType>))]
 [EnumExtensions]

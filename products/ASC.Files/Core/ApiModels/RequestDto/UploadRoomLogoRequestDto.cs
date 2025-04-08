@@ -27,12 +27,12 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Upload room logo request parameters
+/// The request parameters for uploading room logo.
 /// </summary>
 public class UploadRoomLogoRequestDto
 {
     /// <summary>
-    /// Image data
+    /// The image data.
     /// </summary>
     public IFormCollection FormCollection { get; set; }
 }

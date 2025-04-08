@@ -27,61 +27,61 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Link parameters
+/// The room link parameters.
 /// </summary>
 public class RoomLinkRequest
 {
     /// <summary>
-    /// Link ID
+    /// The room link ID.
     /// </summary>
     public Guid LinkId { get; set; }
 
     /// <summary>
-    /// Sharing rights
+    /// The link sharing rights.
     /// </summary>
     public FileShare Access { get; set; }
 
     /// <summary>
-    /// Link expiration date
+    /// The link expiration date.
     /// </summary>
     public ApiDateTime ExpirationDate { get; set; }
 
     /// <summary>
-    /// Link name
+    /// The link name.
     /// </summary>
     [StringLength(255)]
     public string Title { get; set; }
 
     /// <summary>
-    /// Link type
+    /// The link type.
     /// </summary>
     public LinkType LinkType { get; set; }
 
     /// <summary>
-    /// Link password
+    /// The link password.
     /// </summary>
     [StringLength(255)]
     public string Password { get; set; }
 
     /// <summary>
-    /// Specifies whether downloading a file from a link is disabled or not
+    /// Specifies if downloading the file from the link is disabled or not.
     /// </summary>
     public bool DenyDownload { get; set; }
 }
 
 /// <summary>
-/// Link request parameters
+/// The generic room link request parameters.
 /// </summary>
 public class RoomLinkRequestDto<T>
 {
     /// <summary>
-    /// Room ID
+    /// The room ID.
     /// </summary>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 
     /// <summary>
-    /// Room link
+    /// The room link parameters.
     /// </summary>
     [FromBody]
     public RoomLinkRequest RoomLink { get; set; }

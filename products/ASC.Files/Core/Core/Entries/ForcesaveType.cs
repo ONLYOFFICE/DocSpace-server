@@ -26,11 +26,23 @@
 
 namespace ASC.Files.Core;
 
+/// <summary>
+/// The forcesave type.
+/// </summary>
 public enum ForcesaveType
 {
+    [SwaggerEnum("None")]
     None = 0,
+
+    [SwaggerEnum("Command")]
     Command = 1,
+
+    [SwaggerEnum("User")]
     User = 2,
+
+    [SwaggerEnum("Timer")]
     Timer = 3,
+
+    [SwaggerEnum("User submit")]
     UserSubmit = 4
 }

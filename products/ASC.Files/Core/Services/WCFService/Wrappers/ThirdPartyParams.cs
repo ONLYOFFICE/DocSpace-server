@@ -26,38 +26,41 @@
 
 namespace ASC.Web.Files.Services.WCFService;
 
+/// <summary>
+/// The third-party account parameters.
+/// </summary>
 public class ThirdPartyParams
 {
     /// <summary>
-    /// Authentication data
+    /// The authentication data.
     /// </summary>
     [JsonPropertyName("auth_data")]
     public AuthData AuthData { get; init; }
 
     /// <summary>
-    /// Specifies if this is a corporate account or not
+    /// Specifies if this is a corporate account or not.
     /// </summary>
     public bool Corporate { get; init; }
 
     /// <summary>
-    /// Specifies if this is a room storage or not
+    /// Specifies if this is a room storage or not.
     /// </summary>
     public bool RoomsStorage { get; init; }
 
     /// <summary>
-    /// Customer title
+    /// The customer title.
     /// </summary>
     [JsonPropertyName("customer_title")]
     public string CustomerTitle { get; set; }
 
     /// <summary>
-    /// Provider ID
+    /// The provider ID.
     /// </summary>
     [JsonPropertyName("provider_id")]
     public int? ProviderId { get; init; }
 
     /// <summary>
-    /// Provider key
+    /// The provider key.
     /// </summary>
     [JsonPropertyName("provider_key")]
     public string ProviderKey { get; init; }

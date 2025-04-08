@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core;
 
+/// <summary>
+/// The period when the trash bin will be cleared.
+/// </summary>
 public enum DateToAutoCleanUp
 {
     [SwaggerEnum(Description = "One week")]
@@ -47,15 +50,18 @@ public enum DateToAutoCleanUp
     ThreeMonths
 }
 
+/// <summary>
+/// The auto-clearing setting parameters.
+/// </summary>
 public class AutoCleanUpData
 {
     /// <summary>
-    /// Specifies if the auto-clearing setting is enabled or not
+    /// Specifies whether to permanently delete files in the Trash folder.
     /// </summary>
     public bool IsAutoCleanUp { get; init; }
 
     /// <summary>
-    /// The period when the trash bin will be cleared
+    /// The period when the trash bin will be cleared.
     /// </summary>
     public DateToAutoCleanUp Gap { get; init; }
 

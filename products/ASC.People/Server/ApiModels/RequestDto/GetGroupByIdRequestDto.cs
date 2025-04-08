@@ -28,24 +28,24 @@ namespace ASC.People.ApiModels.RequestDto;
 
 
 /// <summary>
-/// 
+/// The request parameters for getting groups by the user ID.
 /// </summary>
 public class GetGroupByUserIdRequestDto
 {
     /// <summary>
-    /// User ID
+    /// The user ID.
     /// </summary>
     [FromRoute(Name = "userid")]
     public required Guid UserId { get; set; }
 }
 
 /// <summary>
-/// 
+/// The request parameters for getting a group by its ID.
 /// </summary>
 public class GetGroupByIdRequestDto
 {
     /// <summary>
-    /// Group ID
+    /// The group ID.
     /// </summary>
     [FromRoute(Name = "id")]
     public required Guid Id { get; set; }

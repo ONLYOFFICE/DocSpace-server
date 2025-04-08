@@ -26,41 +26,44 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// The parameters for creating a room from a template.
+/// </summary>
 public class CreateRoomFromTemplateDto
 {
     /// <summary>
-    /// Template id
+    /// The template ID from which the room to be created.
     /// </summary>
     public required int TemplateId { get; set; }
 
     /// <summary>
-    /// Title
+    /// The room title.
     /// </summary>
     public required string Title { get; set; }
 
     /// <summary>
-    /// Logo
+    /// The logo request parameters.
     /// </summary>
     public LogoRequest Logo { get; set; }
 
     /// <summary>
-    /// Copy logo
+    /// Specifies whether to copy a logo or not.
     /// </summary>
     public bool CopyLogo { get; set; }
 
     /// <summary>
-    /// Collection of tags
+    /// The collection of tags.
     /// </summary>
     public IEnumerable<string> Tags { get; set; }
 
     /// <summary>
-    /// Color
+    /// The color of the room to be created.
     /// </summary>
     [StringLength(6)]
     public string Color { get; set; }
 
     /// <summary>
-    /// Cover
+    /// The cover of the room to be created.
     /// </summary>
     [StringLength(50)]
     public string Cover { get; set; }

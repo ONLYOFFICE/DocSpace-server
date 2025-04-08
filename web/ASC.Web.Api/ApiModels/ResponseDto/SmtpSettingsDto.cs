@@ -35,6 +35,7 @@ public class SmtpSettingsDto : IMapFrom<SmtpSettings>
     /// Host
     /// </summary>
     [SwaggerSchemaCustom(Example = "mail.example.com")]
+    [StringLength(255)]
     public string Host { get; set; }
 
     /// <summary>
@@ -48,12 +49,14 @@ public class SmtpSettingsDto : IMapFrom<SmtpSettings>
     /// Sender address
     /// </summary>
     [SwaggerSchemaCustom(Example = "notify@example.com")]
+    [StringLength(255)]
     public string SenderAddress { get; set; }
 
     /// <summary>
     /// Sender display name
     /// </summary>
     [SwaggerSchemaCustom(Example = "Postman")]
+    [StringLength(255)]
     public string SenderDisplayName { get; set; }
 
     /// <summary>

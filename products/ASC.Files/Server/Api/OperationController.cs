@@ -68,7 +68,7 @@ public class OperationController(
     /// <summary>
     /// Copies all the selected files and folders to the folder with the ID specified in the request.
     /// </summary>
-    /// <short>Copy to a folder</short>
+    /// <short>Copy to the folder</short>
     /// <path>api/2.0/files/fileops/copy</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
@@ -104,7 +104,13 @@ public class OperationController(
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
     }
-    
+
+    /// <summary>
+    /// Deletes the file versions with the IDs specified in the request.
+    /// </summary>
+    /// <short>Delete file versions</short>
+    /// <path>api/2.0/files/fileops/deleteversion</path>
+    /// <collection>list</collection>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "List of file operations", typeof(FileOperationDto))]
     [HttpPut("deleteversion")]
@@ -140,9 +146,9 @@ public class OperationController(
     }
 
     /// <summary>
-    ///  Returns a list of all the active operations.
+    ///  Returns a list of all the active file operations.
     /// </summary>
-    /// <short>Get active operations</short>
+    /// <short>Get active file operations</short>
     /// <path>api/2.0/files/fileops</path>
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>
@@ -166,7 +172,7 @@ public class OperationController(
     /// <summary>
     /// Retrieves the statuses of operations filtered by the specified operation type.
     /// </summary>
-    /// <param name="inDto">The data transfer object containing the operation type for which statuses are retrieved.</param>
+    /// <short>Get file operation statuses</short>
     /// <path>api/2.0/files/fileops/{operationType}</path>
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>
@@ -212,9 +218,9 @@ public class OperationController(
     }
 
     /// <summary>
-    /// Moves all the selected files and folders to the folder with the ID specified in the request.
+    /// Moves or copies all the selected files and folders to the folder with the ID specified in the request.
     /// </summary>
-    /// <short>Move to a folder</short>
+    /// <short>Move or copy to a folder</short>
     /// <path>api/2.0/files/fileops/move</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
@@ -232,9 +238,11 @@ public class OperationController(
     }
 
     /// <summary>
-    /// Duplicates all the selected files and folders
+    /// Duplicates all the selected files and folders.
     /// </summary>
+    /// <short>Duplicate files and folders</short>
     /// <path>api/2.0/files/fileops/duplicate</path>
+    /// <collection>list</collection>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "List of file operations", typeof(IAsyncEnumerable<FileOperationDto>))]
     [SwaggerResponse(403, "You don't have enough permission to duplicate")]
@@ -248,10 +256,11 @@ public class OperationController(
             yield return await fileOperationDtoHelper.GetAsync(e);
         }
     }
-    
+
     /// <summary>
-    /// Moves or copies 
+    /// Checks if files can be moved or copied to the specified folder.
     /// </summary>
+    /// <short>Check for moving or copying to a folder</short>
     /// <path>api/2.0/files/fileops/checkdestfolder</path>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Result", typeof(CheckDestFolderDto))]
@@ -294,9 +303,9 @@ public class OperationController(
     }
 
     /// <summary>
-    /// Checks a batch of files and folders for conflicts when moving or copying them to the folder with the ID specified in the request.
+    /// Checks if files or folders can be moved or copied to the specified folder, moves or copies them, and returns their information.
     /// </summary>
-    /// <short>Check files and folders for conflicts</short>
+    /// <short>Check and move or copy to a folder</short>
     /// <path>api/2.0/files/fileops/move</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]

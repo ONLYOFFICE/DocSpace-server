@@ -26,18 +26,42 @@
 
 namespace ASC.Files.Core;
 
+/// <summary>
+/// The chunked upload session data.
+/// </summary>
 [DebuggerDisplay("{Id} into {FolderId}")]
 public class ChunkedUploadSession<T>(File<T> file, long bytesTotal) : CommonChunkedUploadSession(bytesTotal)
 {
+    /// <summary>
+    /// The chunked upload session folder ID.
+    /// </summary>
     public T FolderId { get; set; }
+
+    /// <summary>
+    /// The chunked upload session file.
+    /// </summary>
     public File<T> File { get; set; } = file;
+
+    /// <summary>
+    /// Specifies if the chunked upload session data is encrypted or not.
+    /// </summary>
     public bool Encrypted { get; set; }
+
+    /// <summary>
+    /// Specifies whether to keep the file version after the chunked upload session or not.
+    /// </summary>
     public bool KeepVersion { get; set; }
 
     //hack for Backup bug 48873
+    /// <summary>
+    /// Specifies whether to check quota of the chunked upload session data or not.
+    /// </summary>
     [NonSerialized]
     public bool CheckQuota = true;
 
+    /// <summary>
+    /// Clones the chunked upload session data.
+    /// </summary>
     public override object Clone()
     {
         var clone = (ChunkedUploadSession<T>)MemberwiseClone();

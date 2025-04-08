@@ -30,6 +30,9 @@ using UnknownImageFormatException = ASC.Web.Core.Users.UnknownImageFormatExcepti
 
 namespace ASC.People.Api;
 
+///<summary>
+/// Photo API.
+///</summary>
 public class PhotoController(
     UserManager userManager,
     PermissionContext permissionContext,
@@ -48,7 +51,7 @@ public class PhotoController(
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
 {
     /// <summary>
-    /// Creates photo thumbnails by coordinates of the original image specified in the request.
+    /// Creates the user photo thumbnails by coordinates of the original image specified in the request.
     /// </summary>
     /// <short>
     /// Create photo thumbnails
