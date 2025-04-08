@@ -457,54 +457,60 @@ public class BackupAjaxHandler(
         return Path.Combine(folder, $"{tenantId}-{BackupFileName}");
     }
 
+    /// <summary>
+    /// The backup schedule parameters.
+    /// </summary>
     public class Schedule
     {
         /// <summary>
-        /// Storage type
+        /// The backup storage type.
         /// </summary>
         public BackupStorageType StorageType { get; set; }
 
         /// <summary>
-        /// Storage parameters
+        /// The backup storage parameters.
         /// </summary>
         public Dictionary<string, string> StorageParams { get; set; }
 
         /// <summary>
-        /// Cron parameters
+        /// The backup cron parameters.
         /// </summary>
         public CronParams CronParams { get; init; }
 
         /// <summary>
-        /// Maximum number of the stored backup copies
+        /// The maximum number of the stored backup copies.
         /// </summary>
         public int? BackupsStored { get; init; }
 
         /// <summary>
-        /// Last backup creation time
+        /// The date and time when the last backup was reated.
         /// </summary>
         public DateTime LastBackupTime { get; set; }
 
         /// <summary>
-        /// Dump
+        /// Specifies if a dump will be created or not.
         /// </summary>
         [SwaggerSchemaCustom(Example = false)]
         public bool Dump { get; set; }
     }
 
+    /// <summary>
+    /// The backup cron parameters.
+    /// </summary>
     public class CronParams
     {
         /// <summary>
-        /// Period
+        /// The backup period type.
         /// </summary>
         public BackupPeriod Period { get; init; }
 
         /// <summary>
-        /// Hour
+        /// The time of the day to start the backup process.
         /// </summary>
         public int Hour { get; init; }
 
         /// <summary>
-        /// Day
+        /// The day of the week to start the backup process.
         /// </summary>
         public int Day { get; init; }
 
@@ -542,6 +548,9 @@ public class BackupAjaxHandler(
         }
     }
 
+    /// <summary>
+    /// The backup period type.
+    /// </summary>
     public enum BackupPeriod
     {
         [SwaggerEnum(Description = "Every day")]
