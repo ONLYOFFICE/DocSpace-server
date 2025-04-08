@@ -807,6 +807,9 @@ public enum MessageAction
     [SwaggerEnum("Customer operations report downloaded")]
     CustomerOperationsReportDownloaded = 6063,
 
+    [SwaggerEnum("Customer wallet top up settings updated")]
+    CustomerWalletTopUpSettingsUpdated = 6064,
+
     #endregion
 
     #region others

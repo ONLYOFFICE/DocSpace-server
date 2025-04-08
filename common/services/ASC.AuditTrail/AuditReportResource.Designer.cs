@@ -322,6 +322,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Customer wallet top up settings updated.
+        /// </summary>
+        public static string CustomerWalletTopUpSettingsUpdated {
+            get {
+                return ResourceManager.GetString("CustomerWalletTopUpSettingsUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Custom Navigation Settings Updated.
         /// </summary>
         public static string CustomNavigationSettingsUpdated {

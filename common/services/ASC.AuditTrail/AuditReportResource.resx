@@ -981,4 +981,7 @@
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Customer wallet topped up</value>
   </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Customer wallet top up settings updated</value>
+  </data>
 </root>

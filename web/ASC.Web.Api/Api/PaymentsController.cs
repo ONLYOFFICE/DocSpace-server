@@ -41,6 +41,7 @@ namespace ASC.Web.Api.Controllers;
 public class PaymentController(
     UserManager userManager,
     TenantManager tenantManager,
+    SettingsManager settingsManager,
     ITariffService tariffService,
     IQuotaService quotaService,
     SecurityContext securityContext,
@@ -618,6 +619,64 @@ public class PaymentController(
 
         var result = await tariffService.GetAllCurrenciesAsync();
         return result;
+    }
+
+    /// <summary>
+    /// Returns the wallet auto top up settings.
+    /// </summary>
+    /// <short>
+    /// Get wallet auto top up settings
+    /// </short>
+    /// <path>api/2.0/portal/payment/topupsettings</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The wallet auto top up settings", typeof(TenantWalletSettings))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpGet("topupsettings")]
+    public async Task<TenantWalletSettings> GetTenantWalletSettingsAsync()
+    {
+        var tenant = tenantManager.GetCurrentTenant();
+
+        await DemandPayerAsync(tenant);
+
+        var result = await settingsManager.LoadAsync<TenantWalletSettings>();
+        return result;
+    }
+
+    /// <summary>
+    /// Set the wallet auto top up settings.
+    /// </summary>
+    /// <short>
+    /// Set wallet auto top up settings
+    /// </short>
+    /// <path>api/2.0/portal/payment/topupsettings</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The wallet auto top up settings", typeof(TenantWalletSettings))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpPost("topupsettings")]
+    public async Task<TenantWalletSettings> SetTenantWalletSettingsAsync(TenantWalletSettingsWrapper inDto)
+    {
+        if (!tariffService.IsConfigured())
+        {
+            return null;
+        }
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var hasCustomer = await HasCustomer(tenant);
+        if (!hasCustomer)
+        {
+            return null;
+        }
+
+        await DemandPayerAsync(tenant);
+
+        var settings = inDto?.Settings ?? new TenantWalletSettings();
+
+        var result = await settingsManager.SaveAsync(settings);
+
+        messageService.Send(MessageAction.CustomerWalletTopUpSettingsUpdated);
+
+        return settings;
     }
 
     private async Task<bool> HasCustomer(Tenant tenant)
