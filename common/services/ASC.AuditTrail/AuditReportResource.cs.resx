@@ -871,4 +871,37 @@
   <data name="UpdateClient" xml:space="preserve">
     <value>Klient {0} aktualizován</value>
   </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>Změna nastavení přístupu k nástrojům pro vývojáře</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>Soubory [{0}]. Smazaná verze: {1}</value>
+  </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>Uživatelé [{0}]. Kompletně vyplněný formulář: {1}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>Uživatelé [{0}]. Vyplněná část formuláře: {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>Uživatelé [{0}]. Začal se plnit: {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>Uživatelé [{0}]. Formulář se zastavil: {1}</value>
+  </data>
+  <data name="WebhookCreated" xml:space="preserve">
+    <value>Webhook vytvořen: {0}</value>
+  </data>
+  <data name="WebhookDeleted" xml:space="preserve">
+    <value>Webhook odstraněn: {0}</value>
+  </data>
+  <data name="WebhookUpdated" xml:space="preserve">
+    <value>Webhook aktualizován: {0}</value>
+  </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>Soubor: {0}. Vlastní filtr zakázán</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>Soubor: {0}. Vlastní filtr povolen</value>
+  </data>
 </root>

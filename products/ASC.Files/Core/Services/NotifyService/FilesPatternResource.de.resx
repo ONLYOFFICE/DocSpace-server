@@ -193,7 +193,7 @@ $OrangeButton</value>
   </data>
   <data name="pattern_FormStartedFilling" xml:space="preserve">
     <value>
-    Aktivitätsbenachrichtigung. "$FromUserName":"$FromUserLink" hat den Formularausfüllvorgang gestartet:  "$DocumentTitle":"$DocumentURL" im Raum: "$RoomTitle":"$RoomURL" — $__DateTime.
+      Aktivitätsbenachrichtigung. "$FromUserName":"$FromUserLink" hat den Formularausfüllvorgang gestartet:  "$DocumentTitle":"$DocumentURL" im Raum: "$RoomTitle":"$RoomURL" — $__DateTime.
     </value>
   </data>
   <data name="pattern_FormSubmitted_push" xml:space="preserve">

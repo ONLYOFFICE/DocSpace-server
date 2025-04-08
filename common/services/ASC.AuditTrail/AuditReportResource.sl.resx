@@ -871,4 +871,37 @@
   <data name="UpdateClient" xml:space="preserve">
     <value>Odjemalec {0} posodobljen</value>
   </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>Nastavitve dostopa do orodij za razvijalce so spremenjene</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>Datoteke [{0}]. Izbrisana različica: {1}</value>
+  </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>Uporabniki [{0}]. V celoti izpolnjen obrazec: {1}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>Uporabniki [{0}]. Izpolnjen del obrazca: {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>Uporabniki [{0}]. Začeto izpolnjevanje: {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>Uporabniki [{0}]. Obrazec ustavljen: {1}</value>
+  </data>
+  <data name="WebhookCreated" xml:space="preserve">
+    <value>Webhook ustvarjen: {0}</value>
+  </data>
+  <data name="WebhookDeleted" xml:space="preserve">
+    <value>Webhook izbrisan: {0}</value>
+  </data>
+  <data name="WebhookUpdated" xml:space="preserve">
+    <value>Webhook posodobljen: {0}</value>
+  </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>Datoteka: {0}. Filter po meri onemogočen</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>Datoteka: {0}. Filter po meri je omogočen</value>
+  </data>
 </root>

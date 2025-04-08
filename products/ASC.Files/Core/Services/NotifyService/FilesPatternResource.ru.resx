@@ -201,7 +201,7 @@ $OrangeButton</value>
   </data>
   <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
     <value>
-      Уведомление об активности. В комнате: "$RoomTitle":"$RoomURL" — $__DateTime полностью заполнена форма "$DocumentTitle":"$DocumentURL"
+      Уведомление об активности. В комнате: "$RoomTitle":"$RoomURL" — $__DateTime полностью заполнена форма "$DocumentTitle":"$DocumentURL".
     </value>
   </data>
   <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
