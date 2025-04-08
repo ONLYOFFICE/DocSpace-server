@@ -68,24 +68,21 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/url</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The URL to the payment page", typeof(Uri))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("url")]
     public async Task<Uri> GetPaymentUrlAsync(PaymentUrlRequestsDto inDto)
     {
-        if (!await userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID))
-        {
-            throw new SecurityException();
-        }
+        await DemandAdminAsync();
 
-        var tenant = tenantManager.GetCurrentTenant();
-
-        var hasPayments = (await tariffService.GetPaymentsAsync(tenant.Id)).Any();
-        if (hasPayments)
+        if (!tariffService.IsConfigured())
         {
             return null;
         }
 
-        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
-        if (customerInfo != "\"null\"")
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var hasCustomer = await HasCustomer(tenant);
+        if (hasCustomer)
         {
             return null;
         }
@@ -122,18 +119,24 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/update</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("update")]
     public async Task<bool> PaymentUpdateAsync(QuantityRequestDto inDto)
     {
-        var tenant = tenantManager.GetCurrentTenant();
-        var payerId = (await tariffService.GetTariffAsync(tenant.Id)).CustomerId;
-        var payer = await userManager.GetUserByEmailAsync(payerId);
-
-        if (!(await tariffService.GetPaymentsAsync(tenant.Id)).Any() ||
-            securityContext.CurrentAccount.ID != payer.Id)
+        if (!tariffService.IsConfigured())
         {
             return false;
         }
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var hasCustomer = await HasCustomer(tenant);
+        if (!hasCustomer)
+        {
+            return false;
+        }
+
+        await DemandPayerAsync(tenant);
 
         var quota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
 
@@ -155,6 +158,7 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/account</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The URL to the payment account", typeof(string))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("account")]
     public async Task<string> GetPaymentAccountAsync(PaymentUrlRequestDto inDto)
     {
@@ -164,27 +168,14 @@ public class PaymentController(
         }
 
         var tenant = tenantManager.GetCurrentTenant();
-        var hasPayments = (await tariffService.GetPaymentsAsync(tenant.Id)).Any();
 
-        if (!hasPayments)
+        var hasCustomer = await HasCustomer(tenant);
+        if (!hasCustomer)
         {
             return null;
         }
 
-        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
-        if (customerInfo == "\"null\"")
-        {
-            return null;
-        }
-
-        var payerId = (await tariffService.GetTariffAsync(tenant.Id)).CustomerId;
-        var payer = await userManager.GetUserByEmailAsync(payerId);
-
-        if (securityContext.CurrentAccount.ID != payer.Id &&
-            securityContext.CurrentAccount.ID != tenant.OwnerId)
-        {
-            return null;
-        }
+        await DemandPayerOrOwnerAsync(tenant);
 
         var result = "payment.ashx";
         return !string.IsNullOrEmpty(inDto.BackUrl) ? $"{result}?backUrl={inDto.BackUrl}" : result;
@@ -318,23 +309,21 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/chechoutsetupurl</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The URL to the chechout setup page", typeof(Uri))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("chechoutsetupurl")]
     public async Task<Uri> GetChechoutSetupUrlAsync(ChechoutSetupUrlRequestsDto inDto)
     {
-        if (!await userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID))
-        {
-            throw new SecurityException();
-        }
+        await DemandAdminAsync();
 
-        var tenant = tenantManager.GetCurrentTenant();
-        var hasPayments = (await tariffService.GetPaymentsAsync(tenant.Id)).Any();
-        if (hasPayments)
+        if (!tariffService.IsConfigured())
         {
             return null;
         }
 
-        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
-        if (customerInfo != "\"null\"")
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var hasCustomer = await HasCustomer(tenant);
+        if (hasCustomer)
         {
             return null;
         }
@@ -363,11 +352,21 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/customerinfo</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The customer info", typeof(string))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("customerinfo")]
     public async Task<string> GetCustomerInfoAsync()
     {
-        var tenant = await CheckAccountingAndReturnTenantAsync();
-        return await tariffService.GetCustomerInfoAsync(tenant.Id);
+        await DemandAdminAsync();
+
+        if (!tariffService.IsConfigured())
+        {
+            return null;
+        }
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var result = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        return result;
     }
 
     /// <summary>
@@ -379,10 +378,25 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/deposit</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Success status", typeof(string))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("deposit")]
     public async Task<string> PutOnDepositAsync(PutOnDepositRequestDto inDto)
     {
-        var tenant = await CheckAccountingAndReturnTenantAsync();
+        if (!tariffService.IsConfigured())
+        {
+            return null;
+        }
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var hasCustomer = await HasCustomer(tenant);
+        if (!hasCustomer)
+        {
+            return null;
+        }
+
+        await DemandPayerAsync(tenant);
+
         var result = await tariffService.PutOnDepositAsync(tenant.Id, inDto.Amount, inDto.Currency);
 
         messageService.Send(MessageAction.CustomerWalletToppedUp);
@@ -399,10 +413,25 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/customer/balance</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The customer balance", typeof(Balance))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("customer/balance")]
     public async Task<Balance> GetCustomerBalanceAsync()
     {
-        var tenant = await CheckAccountingAndReturnTenantAsync();
+        await DemandAdminAsync();
+
+        if (!tariffService.IsConfigured())
+        {
+            return null;
+        }
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var hasCustomer = await HasCustomer(tenant);
+        if (!hasCustomer)
+        {
+            return null;
+        }
+
         var result = await tariffService.GetCustomerBalanceAsync(tenant.Id);
         return result;
     }
@@ -416,10 +445,25 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/customer/opensession</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The customer session", typeof(Session))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("customer/opensession")]
     public async Task<Session> OpenCustomerSessionAsync(OpenCustomerSessionRequestDto inDto)
     {
-        var tenant = await CheckAccountingAndReturnTenantAsync();
+        if (!tariffService.IsConfigured())
+        {
+            return null;
+        }
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var hasCustomer = await HasCustomer(tenant);
+        if (!hasCustomer)
+        {
+            return null;
+        }
+
+        await DemandPayerAsync(tenant);
+
         var result = await tariffService.OpenCustomerSessionAsync(tenant.Id, inDto.ServiceAccount, inDto.ExternalRef, inDto.Quantity);
         return result;
     }
@@ -433,10 +477,25 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/customer/performoperation</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Boolean value: true if the operation is succesfully provided", typeof(bool))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("customer/performoperation")]
     public async Task<bool> PerformCustomerOperationAsync(PerformCustomerOperationRequestDto inDto)
     {
-        var tenant = await CheckAccountingAndReturnTenantAsync();
+        if (!tariffService.IsConfigured())
+        {
+            return false;
+        }
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var hasCustomer = await HasCustomer(tenant);
+        if (!hasCustomer)
+        {
+            return false;
+        }
+
+        await DemandPayerAsync(tenant);
+
         var result = await tariffService.PerformCustomerOperationAsync(tenant.Id, inDto.ServiceAccount, inDto.SessionId, inDto.Quantity);
 
         messageService.Send(MessageAction.CustomerOperationPerformed);
@@ -453,10 +512,25 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/customer/operations</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The customer operations", typeof(Report))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("customer/operations")]
     public async Task<Report> GetCustomerOperationsAsync(CustomerOperationsRequestDto inDto)
     {
-        var tenant = await CheckAccountingAndReturnTenantAsync();
+        if (!tariffService.IsConfigured())
+        {
+            return null;
+        }
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var hasCustomer = await HasCustomer(tenant);
+        if (!hasCustomer)
+        {
+            return null;
+        }
+
+        await DemandPayerOrOwnerAsync(tenant);
+
         var utcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate);
         var utcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate);
         var result = await tariffService.GetCustomerOperationsAsync(tenant.Id, utcStartDate, utcEndDate, inDto.Credit, inDto.Withdrawal);
@@ -475,7 +549,20 @@ public class PaymentController(
     [HttpPost("customer/operationsreport")]
     public async Task<string> CreateCustomerOperationsReportAsync()
     {
-        var tenant = await CheckAccountingAndReturnTenantAsync();
+        if (!tariffService.IsConfigured())
+        {
+            return null;
+        }
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var hasCustomer = await HasCustomer(tenant);
+        if (!hasCustomer)
+        {
+            return null;
+        }
+
+        await DemandPayerOrOwnerAsync(tenant);
 
         var to = DateTime.UtcNow;
         var from = tenant.CreationDateTime;
@@ -518,30 +605,59 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/accounting/currencies</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The list of currencies", typeof(List<Currency>))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("accounting/currencies")]
     public async Task<List<Currency>> GetAllCurrenciesAsync()
     {
-        _ = await CheckAccountingAndReturnTenantAsync();
+        if (!tariffService.IsConfigured())
+        {
+            return null;
+        }
+
+        await DemandAdminAsync();
+
         var result = await tariffService.GetAllCurrenciesAsync();
         return result;
     }
 
-    // TODO: add attributes [SwaggerResponse(403, "You don't have enough permission")]
-    private async Task<Tenant> CheckAccountingAndReturnTenantAsync()
+    private async Task<bool> HasCustomer(Tenant tenant)
     {
-        if (!tariffService.IsAccountingClientConfigured(out var test))
+        var hasPayments = (await tariffService.GetPaymentsAsync(tenant.Id)).Any();
+        if (hasPayments)
         {
-            throw new AccountingNotConfiguredException();
+            return true;
         }
 
-        var tenant = tenantManager.GetCurrentTenant();
-        var hasPayments = test ? true : (await tariffService.GetPaymentsAsync(tenant.Id)).Any();
-
-        if (!hasPayments)
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo != "\"null\"")
         {
-            throw new BillingNotFoundException("No one payment found");
+            return true;
         }
 
+        return false;
+    }
+
+    private async Task DemandAdminAsync()
+    {
+        if (!await userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID))
+        {
+            throw new SecurityException();
+        }
+    }
+
+    private async Task DemandPayerAsync(Tenant tenant)
+    {
+        var payerId = (await tariffService.GetTariffAsync(tenant.Id)).CustomerId;
+        var payer = await userManager.GetUserByEmailAsync(payerId);
+
+        if (securityContext.CurrentAccount.ID != payer.Id)
+        {
+            throw new SecurityException();
+        }
+    }
+
+    private async Task DemandPayerOrOwnerAsync(Tenant tenant)
+    {
         var payerId = (await tariffService.GetTariffAsync(tenant.Id)).CustomerId;
         var payer = await userManager.GetUserByEmailAsync(payerId);
 
@@ -550,10 +666,7 @@ public class PaymentController(
         {
             throw new SecurityException();
         }
-
-        return tenant;
     }
-
 
     private async Task CheckCache(string baseKey)
     {

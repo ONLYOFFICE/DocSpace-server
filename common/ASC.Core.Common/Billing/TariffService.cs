@@ -854,7 +854,7 @@ public class TariffService(
 
     public bool IsConfigured()
     {
-        return billingClient.Configured;
+        return billingClient.Configured && accountingClient.Configured;
     }
 
     public async Task<string> GetCustomerInfoAsync(int tenant)
@@ -870,12 +870,6 @@ public class TariffService(
     }
 
     #region Accounting
-
-    public bool IsAccountingClientConfigured(out bool test)
-    {
-        test = accountingClient.Configured && accountingClient.Test;
-        return accountingClient.Configured;
-    }
 
     public async Task<Balance> GetCustomerBalanceAsync(int tenantId)
     {

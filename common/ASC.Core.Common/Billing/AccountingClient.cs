@@ -34,7 +34,6 @@ namespace ASC.Core.Billing;
 public class AccountingClient
 {
     public readonly bool Configured;
-    public readonly bool Test;
 
     private readonly AccountingConfiguration _configuration;
     private readonly IHttpClientFactory _httpClientFactory;
@@ -61,7 +60,6 @@ public class AccountingClient
         if (!string.IsNullOrEmpty(_configuration.Url))
         {
             Configured = true;
-            Test = _configuration.Test;
         }
     }
 

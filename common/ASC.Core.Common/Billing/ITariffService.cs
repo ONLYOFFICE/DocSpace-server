@@ -42,7 +42,6 @@ public interface ITariffService
     Task<string> GetCustomerInfoAsync(int tenant);
     Task<string> PutOnDepositAsync(int tenant, long amount, string currency);
 
-    bool IsAccountingClientConfigured(out bool test);
     Task<Balance> GetCustomerBalanceAsync(int tenantId);
     Task<Session> OpenCustomerSessionAsync(int tenantId, int serviceAccount, string externalRef, int quantity);
     Task<bool> PerformCustomerOperationAsync(int tenantId, int serviceAccount, int sessionId, int quantity);
