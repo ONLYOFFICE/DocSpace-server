@@ -73,14 +73,6 @@ public class UserManager(
     private Tenant Tenant => tenantManager.GetCurrentTenant();
 
 
-    public void ClearCache()
-    {
-        if (userService is ICachedService service)
-        {
-            service.InvalidateCache();
-        }
-    }
-
 
     #region Users
 
