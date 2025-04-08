@@ -71,10 +71,21 @@ public class PaymentController(
     [HttpPut("url")]
     public async Task<Uri> GetPaymentUrlAsync(PaymentUrlRequestsDto inDto)
     {
+        if (!await userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID))
+        {
+            throw new SecurityException();
+        }
+
         var tenant = tenantManager.GetCurrentTenant();
-        
-        if ((await tariffService.GetPaymentsAsync(tenant.Id)).Any() ||
-            !await userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID))
+
+        var hasPayments = (await tariffService.GetPaymentsAsync(tenant.Id)).Any();
+        if (hasPayments)
+        {
+            return null;
+        }
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo != "\"null\"")
         {
             return null;
         }
@@ -90,7 +101,7 @@ public class PaymentController(
         }
 
         var currency = await regionHelper.GetCurrencyFromRequestAsync();
-        
+
         return await tariffService.GetShoppingUriAsync(
             tenant.Id,
             tenant.AffiliateId,
@@ -156,6 +167,12 @@ public class PaymentController(
         var hasPayments = (await tariffService.GetPaymentsAsync(tenant.Id)).Any();
 
         if (!hasPayments)
+        {
+            return null;
+        }
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo == "\"null\"")
         {
             return null;
         }
@@ -304,7 +321,24 @@ public class PaymentController(
     [HttpGet("chechoutsetupurl")]
     public async Task<Uri> GetChechoutSetupUrlAsync(ChechoutSetupUrlRequestsDto inDto)
     {
-        var tenant = await CheckAccountingAndReturnTenantAsync();
+        if (!await userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID))
+        {
+            throw new SecurityException();
+        }
+
+        var tenant = tenantManager.GetCurrentTenant();
+        var hasPayments = (await tariffService.GetPaymentsAsync(tenant.Id)).Any();
+        if (hasPayments)
+        {
+            return null;
+        }
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo != "\"null\"")
+        {
+            return null;
+        }
+
         var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
         var currency = await regionHelper.GetCurrencyFromRequestAsync();
 
