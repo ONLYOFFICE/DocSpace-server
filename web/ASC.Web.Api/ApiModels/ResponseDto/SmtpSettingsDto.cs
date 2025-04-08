@@ -70,13 +70,13 @@ public class SmtpSettingsDto : IMapFrom<SmtpSettings>
     public string CredentialsUserPassword { get; set; }
 
     /// <summary>
-    /// The enables SSL or not.
+    /// Specifies whether the SSL is enabled or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool EnableSSL { get; set; }
 
     /// <summary>
-    /// The enables authentication or not.
+    /// Specifies whether the authentication is enabled or not.
     /// </summary>
     public bool EnableAuth { get; set; }
 

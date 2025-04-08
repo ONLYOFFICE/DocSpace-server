@@ -32,22 +32,22 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 public class PaymentSettingsDto
 {
     /// <summary>
-    /// The sales email of the payment setting.
+    /// The sales email.
     /// </summary>
     public string SalesEmail { get; set; }
 
     /// <summary>
-    /// The feedback and support URL of the payment setting.
+    /// The feedback and support URL.
     /// </summary>
     public string FeedbackAndSupportUrl { get; set; }
 
     /// <summary>
-    /// The buy URL of the payment setting.
+    /// The link to pay for a portal.
     /// </summary>
     public string BuyUrl { get; set; }
 
     /// <summary>
-    /// Specifies whether the payment setting is standalone or not.
+    /// Specifies whether the portal is standalone or not.
     /// </summary>
     public bool Standalone { get; set; }
 
@@ -57,18 +57,18 @@ public class PaymentSettingsDto
     public CurrentLicenseInfo CurrentLicense { get; set; }
 
     /// <summary>
-    /// The maximum payment setting.
+    /// The maximum quota quantity.
     /// </summary>
     public int Max { get; set; }
 }
 
 /// <summary>
-/// The current license information information.
+/// The current license information.
 /// </summary>
 public class CurrentLicenseInfo
 {
     /// <summary>
-    /// Specifies whether it is the trial license or not.
+    /// Specifies whether the license is trial or not.
     /// </summary>
     public bool Trial { get; set; }
 

@@ -62,7 +62,7 @@ public class QuotaDto
     public bool Trial { get; set; }
 
     /// <summary>
-    /// The list of quota features.
+    /// The list of tenant quota features.
     /// </summary>
     public IEnumerable<TenantQuotaFeatureDto> Features { get; set; }
 
@@ -88,37 +88,37 @@ public class QuotaDto
 public class TenantQuotaFeatureDto : IEquatable<TenantQuotaFeatureDto>
 {
     /// <summary>
-    /// The tenant quota feature ID.
+    /// The ID of the tenant quota feature.
     /// </summary>
     public string Id { get; set; }
 
     /// <summary>
-    /// The tenant quota feature title.
+    /// The title of the tenant quota feature.
     /// </summary>
     public string Title { get; set; }
 
     /// <summary>
-    /// The tenant quota feature image URL.
+    /// The image URL of the tenant quota feature.
     /// </summary>
     public string Image { get; set; }
 
     /// <summary>
-    /// The tenant quota feature value.
+    /// The value of the tenant quota feature.
     /// </summary>
     public object Value { get; set; }
 
     /// <summary>
-    /// The tenant quota feature type.
+    /// The type of the tenant quota feature.
     /// </summary>
     public string Type { get; set; }
 
     /// <summary>
-    /// The tenant quota used feature parameters.
+    /// The used space parameters of the tenant quota feature.
     /// </summary>
     public FeatureUsedDto Used { get; set; }
 
     /// <summary>
-    /// The tenant quota feature price title.
+    /// The price title of the tenant quota feature.
     /// </summary>
     public string PriceTitle { get; set; }
 
@@ -154,17 +154,17 @@ public class PriceDto
 }
 
 /// <summary>
-/// The used feature parameters.
+/// The used space parameters of the tenant quota feature.
 /// </summary>
 public class FeatureUsedDto
 {
     /// <summary>
-    /// The used feature value.
+    /// The used space value.
     /// </summary>
     public object Value { get; set; }
 
     /// <summary>
-    /// The used feature title.
+    /// The used space title.
     /// </summary>
     public string Title { get; set; }
 }

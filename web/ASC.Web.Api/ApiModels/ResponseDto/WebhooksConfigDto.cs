@@ -27,7 +27,7 @@
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
-/// The webhooks configuration parameters.
+/// The webhook configuration parameters.
 /// </summary>
 public class WebhooksConfigDto
 {
@@ -52,37 +52,37 @@ public class WebhooksConfigDto
     public bool Enabled { get; set; }
 
     /// <summary>
-    /// The webhook SSL verification.
+    /// The webhook SSL verification (enabled or not).
     /// </summary>
     public bool SSL { get; set; }
 
     /// <summary>
-    /// The webhook triggers.
+    /// The webhook trigger type.
     /// </summary>
     public WebhookTrigger Triggers { get; set; }
 
     /// <summary>
-    /// The webhook create by.
+    /// The user who created the webhook.
     /// </summary>
     public EmployeeDto CreatedBy { get; set; }
 
     /// <summary>
-    /// The webhook create on.
+    /// The date and time when the webhook was created.
     /// </summary>
     public DateTime? CreatedOn { get; set; }
 
     /// <summary>
-    /// The webhook modified by.
+    /// The user who modified the webhook.
     /// </summary>
     public EmployeeDto ModifiedBy { get; set; }
 
     /// <summary>
-    /// The webhook modified on.
+    /// The date and time when the webhook was modified.
     /// </summary>
     public DateTime? ModifiedOn { get; set; }
 
     /// <summary>
-    /// The webhook last failure on.
+    /// The date and time of the webhook last failure.
     /// </summary>
     public DateTime? LastFailureOn { get; set; }
 
@@ -92,23 +92,23 @@ public class WebhooksConfigDto
     public string LastFailureContent { get; set; }
 
     /// <summary>
-    /// The webhook last success on.
+    /// The date and time of the webhook last success.
     /// </summary>
     public DateTime? LastSuccessOn { get; set; }
 }
 
 /// <summary>
-/// The webhooks configuration with status parameters.
+/// The webhook configuration with its status.
 /// </summary>
 public class WebhooksConfigWithStatusDto
 {
     /// <summary>
-    /// The webhook configs.
+    /// The webhook configuration.
     /// </summary>
     public WebhooksConfigDto Configs { get; set; }
 
     /// <summary>
-    /// The webhooks status.
+    /// The webhook status.
     /// </summary>
     public int Status { get; set; }
 }

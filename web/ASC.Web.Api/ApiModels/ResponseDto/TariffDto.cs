@@ -32,17 +32,17 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 public class TariffDto : Tariff
 {
     /// <summary>
-    /// Specifies whether the tariff is open source or not.
+    /// Specifies whether the tariff is Community or not.
     /// </summary>
     public bool? OpenSource { get; set; }
 
     /// <summary>
-    /// Specifies whether the tariff is enterprise or not.
+    /// Specifies whether the tariff is Enterprise or not.
     /// </summary>
     public bool? Enterprise { get; set; }
 
     /// <summary>
-    /// Specifies whether the tariff is developer or not.
+    /// Specifies whether the tariff is Developer or not.
     /// </summary>
     public bool? Developer { get; set; }
 }

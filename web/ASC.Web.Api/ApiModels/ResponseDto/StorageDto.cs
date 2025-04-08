@@ -42,12 +42,12 @@ public class StorageDto
     public string Title { get; set; }
 
     /// <summary>
-    /// The list of authentication keys.
+    /// The list of storage authentication keys.
     /// </summary>
     public List<AuthKey> Properties { get; set; }
 
     /// <summary>
-    /// Specifies if this is the current storage or not.
+    /// Specifies if this is the current portal storage or not.
     /// </summary>
     public bool Current { get; set; }
 

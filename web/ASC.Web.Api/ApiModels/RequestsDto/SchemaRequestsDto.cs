@@ -27,18 +27,18 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// The parameters for team template identification.
+/// The request parameters for the team template identification.
 /// </summary>
 public class SchemaBaseRequestsDto
 {
     /// <summary>
-    /// The ID for the team template.
+    /// The team template ID.
     /// </summary>
     public string Id { get; init; }
 }
 
 /// <summary>
-/// The parameters for comprehensive team template configuration.
+/// The request parameters for the comprehensive team template configuration.
 /// </summary>
 public class SchemaRequestsDto : SchemaBaseRequestsDto
 {
@@ -48,47 +48,47 @@ public class SchemaRequestsDto : SchemaBaseRequestsDto
     public string Name { get; set; }
 
     /// <summary>
-    /// The label for single user references.
+    /// The label for the single user references.
     /// </summary>
     public string UserCaption { get; init; }
 
     /// <summary>
-    /// The label for multiple user references.
+    /// The label for the multiple user references.
     /// </summary>
     public string UsersCaption { get; init; }
 
     /// <summary>
-    /// The label for single group references.
+    /// The label for the single group references.
     /// </summary>
     public string GroupCaption { get; init; }
 
     /// <summary>
-    /// The labels for multiple group references.
+    /// The label for the multiple group references.
     /// </summary>
     public string GroupsCaption { get; init; }
 
     /// <summary>
-    /// The label for user position or status.
+    /// The label for the user position or status.
     /// </summary>
     public string UserPostCaption { get; init; }
 
     /// <summary>
-    /// The member registration date caption.
+    /// The label for the member registration date.
     /// </summary>
     public string RegDateCaption { get; init; }
 
     /// <summary>
-    /// The label for group leader position.
+    /// The label for the group leader position.
     /// </summary>
     public string GroupHeadCaption { get; init; }
 
     /// <summary>
-    /// The label for single guest/external user.
+    /// The label for the single guest/external user references.
     /// </summary>
     public string GuestCaption { get; init; }
 
     /// <summary>
-    /// The label for multiple guests/external users.
+    /// The label for the multiple guest/external user references.
     /// </summary>
     public string GuestsCaption { get; init; }
 }

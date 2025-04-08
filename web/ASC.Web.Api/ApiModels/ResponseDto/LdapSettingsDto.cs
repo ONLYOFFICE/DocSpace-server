@@ -32,27 +32,27 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 public class LdapSettingsDto : IMapFrom<LdapSettings>
 {
     /// <summary>
-    /// Specifies if the LDAP authentication is enabled or not.
+    /// Specifies whether the LDAP authentication is active in the system.
     /// </summary>
     public bool EnableLdapAuthentication { get; set; }
 
     /// <summary>
-    /// Specifies if the StartTLS is enabled or not.
+    /// Specifies whether the StartTLS (Transport Layer Security) protocol for secure LDAP communication is enabled or not.
     /// </summary>
     public bool StartTls { get; set; }
 
     /// <summary>
-    /// Specifies if the SSL is enabled or not.
+    /// Specifies whether the SSL (Secure Sockets Layer) encryption is enabled for the LDAP communication or not.
     /// </summary>
     public bool Ssl { get; set; }
 
     /// <summary>
-    /// Specifies if the welcome email is sent or not.
+    /// Specifies whether the automatic welcome email dispatch to the new LDAP users is enabled or not.
     /// </summary>
     public bool SendWelcomeEmail { get; set; }
 
     /// <summary>
-    /// The LDAP server URL address.
+    /// The LDAP server's hostname or IP address.
     /// </summary>
     public string Server { get; set; }
 
@@ -100,12 +100,12 @@ public class LdapSettingsDto : IMapFrom<LdapSettings>
     public string GroupDN { get; set; }
 
     /// <summary>
-    /// The attribute that determines whether this user is a member of the groups.
+    /// The attribute that determines whether the user is a member of the groups.
     /// </summary>
     public string UserAttribute { get; set; }
 
     /// <summary>
-    /// The group filter value to import the groups who correspond to the specified search criteria. The default filter value (objectClass=posixGroup) allows importing all users.
+    /// The group filter value to import the groups which correspond to the specified search criteria. The default filter value (objectClass=posixGroup) allows importing all groups.
     /// </summary>
     public string GroupFilter { get; set; }
 

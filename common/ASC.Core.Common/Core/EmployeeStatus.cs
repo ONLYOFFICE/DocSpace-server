@@ -26,6 +26,9 @@
 
 namespace ASC.Core.Users;
 
+/// <summary>
+/// The user status.
+/// </summary>
 [Flags]
 public enum EmployeeStatus
 {

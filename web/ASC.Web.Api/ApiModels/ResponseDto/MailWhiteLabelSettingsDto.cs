@@ -42,7 +42,7 @@ public class MailWhiteLabelSettingsDto : IMapFrom<MailWhiteLabelSettings>
     public bool FooterSocialEnabled { get; set; }
 
     ///<summary>
-    /// Specifies if these settings are default or not.
+    /// Specifies if the mail white label settings are default or not.
     ///</summary>
     public bool IsDefault { get; set; }
 

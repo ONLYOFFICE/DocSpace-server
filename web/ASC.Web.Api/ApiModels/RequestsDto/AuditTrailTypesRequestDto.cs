@@ -27,7 +27,7 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// Represents the parameters for filtering audit trail types.
+/// The parameters for filtering the audit trail types.
 /// </summary>
 public class AuditTrailTypesRequestDto
 {

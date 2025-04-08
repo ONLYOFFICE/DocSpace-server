@@ -26,6 +26,9 @@
 
 namespace ASC.Security.Cryptography;
 
+/// <summary>
+/// The confirmation result.
+/// </summary>
 [Scope]
 public class EmailValidationKeyProvider
 {
@@ -190,23 +193,23 @@ public class EmailValidationKeyModel
     public string Key { get; set; }
 
     /// <summary>
-    /// The email validation employee type.
+    /// The user type.
     /// </summary>
     public EmployeeType? EmplType { get; init; }
 
     /// <summary>
-    /// The email validation email.
+    /// The email address.
     /// </summary>
     [EmailAddress]
     public string Email { get; init; }
 
     /// <summary>
-    /// The email validation user ID.
+    /// The user ID.
     /// </summary>
     public Guid? UiD { get; init; }
 
     /// <summary>
-    /// The email validation confirmation email type.
+    /// The confirmation email type.
     /// </summary>
     public ConfirmType? Type { get; init; }
 
@@ -216,7 +219,7 @@ public class EmailValidationKeyModel
     public string First { get; init; }
 
     /// <summary>
-    /// The email validation room ID.
+    /// The room ID.
     /// </summary>
     public string RoomId { get; init; }
 

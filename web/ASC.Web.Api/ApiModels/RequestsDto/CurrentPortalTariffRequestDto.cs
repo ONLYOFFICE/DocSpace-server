@@ -27,7 +27,7 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The request parameters for handling current portal tariff request parameters.
+/// The request parameters for handling the current portal tariff.
 /// </summary>
 public class CurrentPortalTariffRequestDto
 {

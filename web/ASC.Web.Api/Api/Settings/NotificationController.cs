@@ -68,7 +68,7 @@ public class NotificationController(
     }
 
     /// <summary>
-    /// Returns a list of rooms with the disabled notifications
+    /// Returns a list of rooms with the disabled notifications.
     /// </summary>
     /// <short>Get room notification settings</short>
     /// <path>api/2.0/settings/notification/rooms</path>

@@ -27,7 +27,7 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// The request parameters for configuring storage module settings.
+/// The request parameters for configuring the storage module settings.
 /// </summary>
 public class StorageRequestsDto
 {

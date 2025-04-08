@@ -27,12 +27,12 @@
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
-/// Specifies if the default LDAP settings are used or not.
+/// The status parameters of the synchronization with LDAP server.
 /// </summary>
 public class LdapStatusDto : IMapFrom<LdapOperationStatus>
 {
     /// <summary>
-    /// Specifies if the LDAP operation is completed or not.
+    /// Specifies if the LDAP synchronization is completed or not.
     /// </summary>
     public bool Completed { get; set; }
 
@@ -52,12 +52,12 @@ public class LdapStatusDto : IMapFrom<LdapOperationStatus>
     public string Error { get; set; }
 
     /// <summary>
-    /// The LDAP warning.
+    /// The LDAP warning message.
     /// </summary>
     public string Warning { get; set; }
 
     /// <summary>
-    /// The LDAP percentage of completion.
+    /// The percentage of the LDAP operation completion.
     /// </summary>
     public int Percents { get; set; }
 

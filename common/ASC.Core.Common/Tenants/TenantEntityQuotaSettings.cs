@@ -27,12 +27,12 @@
 namespace ASC.Core.Tenants;
 
 /// <summary>
-/// The tenant entity quota settings parameters.
+/// The tenant entity quota settings.
 /// </summary>
 public abstract class TenantEntityQuotaSettings
 {
     /// <summary>
-    /// The tenant entity no quota.
+    /// The tenant entity without quota.
     /// </summary>
     public const int NoQuota = -1;
 
@@ -42,7 +42,7 @@ public abstract class TenantEntityQuotaSettings
     public const int DefaultQuotaValue = -2;
 
     /// <summary>
-    /// Specifies if the quota is enabled or not.
+    /// Specifies if the quota is enabled for the tenant entity or not.
     /// </summary>
     public bool EnableQuota { get; set; }
 

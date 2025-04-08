@@ -32,7 +32,7 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 public class LdapRequestsDto : IMapFrom<LdapSettings>
 {
     /// <summary>
-    /// Specifies whether LDAP authentication is active in the system.
+    /// Specifies whether the LDAP authentication is active in the system.
     /// </summary>
     public bool EnableLdapAuthentication { get; set; }
 
@@ -42,17 +42,17 @@ public class LdapRequestsDto : IMapFrom<LdapSettings>
     public bool StartTls { get; set; }
 
     /// <summary>
-    /// Specifies whether the SSL (Secure Sockets Layer) encryption for LDAP communication is enabled or not.
+    /// Specifies whether the SSL (Secure Sockets Layer) encryption is enabled for the LDAP communication or not.
     /// </summary>
     public bool Ssl { get; set; }
 
     /// <summary>
-    /// Specifies whether the automatic welcome email dispatch to new LDAP users is enabled or not.
+    /// Specifies whether the automatic welcome email dispatch to the new LDAP users is enabled or not.
     /// </summary>
     public bool SendWelcomeEmail { get; set; }
 
     /// <summary>
-    /// Specifies if email verification requirement for LDAP users is enabled or not.
+    /// Specifies if the email verification requirement is enabled for the LDAP users or not.
     /// </summary>
     public bool DisableEmailVerification { get; set; }
 
@@ -67,7 +67,7 @@ public class LdapRequestsDto : IMapFrom<LdapSettings>
     public string UserDN { get; set; }
 
     /// <summary>
-    /// The network port number for LDAP server connection.
+    /// The network port number for the LDAP server connection.
     /// </summary>
     public int PortNumber { get; set; }
 
@@ -104,12 +104,12 @@ public class LdapRequestsDto : IMapFrom<LdapSettings>
     public string GroupDN { get; set; }
 
     /// <summary>
-    /// The attribute that determines whether this user is a member of the groups.
+    /// The attribute that determines whether the user is a member of the groups.
     /// </summary>
     public string UserAttribute { get; set; }
 
     /// <summary>
-    /// The group filter value to import the groups who correspond to the specified search criteria. The default filter value (objectClass=posixGroup) allows importing all users.
+    /// The group filter value to import the groups who correspond to the specified search criteria. The default filter value (objectClass=posixGroup) allows importing all groups.
     /// </summary>
     public string GroupFilter { get; set; }
 
@@ -124,27 +124,27 @@ public class LdapRequestsDto : IMapFrom<LdapSettings>
     public string GroupNameAttribute { get; set; }
 
     /// <summary>
-    /// Specifies if the user has rights to read data from LDAP server or not.
+    /// Specifies if the user has rights to read data from the LDAP server or not.
     /// </summary>
     public bool Authentication { get; set; }
 
     /// <summary>
-    /// The username for LDAP server authentication.
+    /// The username for the LDAP server authentication.
     /// </summary>
     public string Login { get; set; }
 
     /// <summary>
-    /// The password for LDAP server authentication.
+    /// The password for the LDAP server authentication.
     /// </summary>
     public string Password { get; set; }
 
     /// <summary>
-    /// Specifies the SSL certificate validation behavior.
+    /// Specifies whether the SSL certificate is accepted or not.
     /// </summary>
     public bool AcceptCertificate { get; set; }
 
     /// <summary>
-    /// The default employee type assigned to imported LDAP users.
+    /// The default user type assigned to the imported LDAP users.
     /// </summary>
     public EmployeeType UsersType { get; set; }
 

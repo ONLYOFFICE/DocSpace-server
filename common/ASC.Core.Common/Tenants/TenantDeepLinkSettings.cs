@@ -26,15 +26,24 @@
 
 namespace ASC.Core.Tenants;
 
+/// <summary>
+/// The deep link settings.
+/// </summary>
 [Serializable]
 public class TenantDeepLinkSettings: ISettings<TenantDeepLinkSettings>
 {
+    /// <summary>
+    /// The tenant ID.
+    /// </summary>
     [JsonIgnore]
     public Guid ID
     {
         get { return new Guid("{926A6850-7C19-4744-B4AD-813DE3CD55B1}"); }
     }
 
+    /// <summary>
+    /// The deep link handling mode.
+    /// </summary>
     public DeepLinkHandlingMode HandlingMode { get; set; }
 
     public TenantDeepLinkSettings GetDefault()
@@ -43,6 +52,9 @@ public class TenantDeepLinkSettings: ISettings<TenantDeepLinkSettings>
     }
 }
 
+/// <summary>
+/// The deep link handling mode.
+/// </summary>
 public enum DeepLinkHandlingMode
 {
     ProvideChoice,

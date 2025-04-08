@@ -37,68 +37,68 @@ public class ActiveConnectionsDto
     public int LoginEvent { get; set; }
 
     /// <summary>
-    /// The active connections items.
+    /// The list of active connection items.
     /// </summary>
     public List<ActiveConnectionsItemDto> Items { get; set; }
 }
 
 /// <summary>
-/// The active connections item parameters.
+/// The active connection item parameters.
 /// </summary>
 public class ActiveConnectionsItemDto
 {
     /// <summary>
-    /// The active connections item ID.
+    /// The active connection ID.
     /// </summary>
     public int Id { get; set; }
 
     /// <summary>
-    /// The active connections item tenant ID.
+    /// The tenant ID.
     /// </summary>
     public int TenantId { get; set; }
 
     /// <summary>
-    /// The active connections item user ID.
+    /// The user ID.
     /// </summary>
     public Guid UserId { get; set; }
 
     /// <summary>
-    /// Specifies if the item has mobile or not.
+    /// Specifies if the active connection has a mobile phone or not.
     /// </summary>
     public bool Mobile {  get; set; }
 
     /// <summary>
-    /// The Ip address of the active connections item.
+    /// The IP address of the active connection.
     /// </summary>
     public string Ip { get; set; }
 
     /// <summary>
-    /// The country of the active connections item.
+    /// The active connection country.
     /// </summary>
     public string Country { get; set; }
 
     /// <summary>
-    /// The city of the active connections item.
+    /// The active connection city.
     /// </summary>
     public string City { get; set; }
 
     /// <summary>
-    /// The browser of the active connections item.
+    /// The active connection browser.
     /// </summary>
     public string Browser { get; set; }
 
     /// <summary>
-    /// The platform of the active connections item.
+    /// The active connection platform.
     /// </summary>
     public string Platform { get; set; }
 
     /// <summary>
-    /// The date of the active connections item.
+    /// The active connection date.
     /// </summary>
     public ApiDateTime Date { get; set; }
 
     /// <summary>
-    /// The page of the active connections item.
+    /// The active connection page.
     /// </summary>
     public string Page { get; set; }
 }

@@ -27,23 +27,28 @@
 namespace ASC.Common.Radicale;
 
 /// <summary>
+/// The CardDav address book response parameters.
 /// </summary>
 public class DavResponse
 {
-    /// <summary>Specifies if the operation is completed or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the operation of creating a CardDav address book is completed or not.
+    /// </summary>
     public bool Completed { get; set; }
 
-    /// <summary>Status code</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The status code of creating a CardDav address book.
+    /// </summary>
     public int StatusCode { get; init; }
 
-    /// <summary>Link to the CardDav address book</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The link to the CardDav address book.
+    /// </summary>
     public string Data { get; set; }
 
-    /// <summary>Error</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The error message of creating a CardDav address book.
+    /// </summary>
     public string Error { get; set; }
 
     public override string ToString()

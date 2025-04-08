@@ -27,7 +27,7 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The request parameters for configuring notification preferences.
+/// The request parameters for configuring notification settings.
 /// </summary>
 public class NotificationSettingsRequestsDto
 {
@@ -49,7 +49,7 @@ public class NotificationSettingsRequestsDto
 public class NotificationTypeRequestsDto
 {
     /// <summary>
-    /// The type of notification to query, specified in the route (Badges, RoomsActivity, DailyFeed, UsefullTips).
+    /// The type of notification to query, specified in the route.
     /// </summary>
     [FromRoute(Name = "type")]
     public NotificationType Type { get; set; }

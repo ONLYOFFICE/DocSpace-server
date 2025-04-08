@@ -92,7 +92,6 @@ public class CoreSettings(
     /// <summary>
     /// The core settings base domain.
     /// </summary>
-    /// <type>System.String, System</type>
     public string BaseDomain
     {
         get

@@ -42,12 +42,12 @@ public class AuditEventDto
     public ApiDateTime Date { get; set; }
 
     /// <summary>
-    /// The audit event user.
+    /// The name of the user who triggered the audit event.
     /// </summary>
     public string User { get; set; }
 
     /// <summary>
-    /// The audit event user ID.
+    /// The ID of the user who triggered the audit event.
     /// </summary>
     public Guid UserId { get; set; }
 
@@ -57,7 +57,7 @@ public class AuditEventDto
     public string Action { get; set; }
 
     /// <summary>
-    /// The audit event action ID.
+    /// The specific action that occurred within the audit event.
     /// </summary>
     public MessageAction ActionId { get; set; }
 
@@ -92,27 +92,27 @@ public class AuditEventDto
     public string Page { get; set; }
 
     /// <summary>
-    /// The audit event action type.
+    /// The type of action performed in the audit event (e.g., Create, Update, Delete).
     /// </summary>
     public ActionType ActionType { get; set; }
 
     /// <summary>
-    /// The audit event product type.
+    /// The type of product related to the audit event.
     /// </summary>
     public ProductType Product { get; set; }
 
     /// <summary>
-    /// The audit event module type.
+    /// The module within the product where the audit event occurred.
     /// </summary>
     public ModuleType Module { get; set; }
 
     /// <summary>
-    /// The audit event list of targets.
+    /// The list of target objects affected by the audit event (e.g., document ID, user account).
     /// </summary>
     public IEnumerable<string> Target { get; set; }
 
     /// <summary>
-    /// The audit event list of entry types.
+    /// The list of audit entry types (e.g., Folder, User, File).
     /// </summary>
     public IEnumerable<EntryType> Entries { get; set; }
 

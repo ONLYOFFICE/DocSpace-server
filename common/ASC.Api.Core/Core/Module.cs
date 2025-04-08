@@ -26,50 +26,54 @@
 
 namespace ASC.Api.Core;
 
+/// <summary>
+/// The module information.
+/// </summary>
+/// <param name="product"></param>
 public class Module(Product product)
 {
     /// <summary>
-    /// ID
+    /// The module ID.
     /// </summary>
     public Guid Id { get; set; } = product.ProductID;
 
     /// <summary>
-    /// Product class name
+    /// The module product class name.
     /// </summary>
     public string AppName { get; set; } = product.ProductClassName;
 
     /// <summary>
-    /// Title
+    /// The module title.
     /// </summary>
     public string Title { get; set; } = product.Name;
 
     /// <summary>
-    /// Start link
+    /// The URL to the module start page.
     /// </summary>
     public string Link { get; set; } = product.StartURL;
 
     /// <summary>
-    /// Icon URL
+    /// The module icon URL.
     /// </summary>
     public string IconUrl { get; set; } = product.Context.IconFileName;
 
     /// <summary>
-    /// Large image URL
+    /// The module large image URL.
     /// </summary>
     public string ImageUrl { get; set; } = product.Context.LargeIconFileName;
 
     /// <summary>
-    /// Help URL
+    /// The module help URL.
     /// </summary>
     public string HelpUrl { get; set; } = product.HelpURL;
 
     /// <summary>
-    /// Description
+    /// The module description.
     /// </summary>
     public string Description { get; set; } = product.Description;
 
     /// <summary>
-    /// Specifies if the module is primary or not
+    /// Specifies if the module is primary or not.
     /// </summary>
     public bool IsPrimary { get; set; } = product.IsPrimary;
 }

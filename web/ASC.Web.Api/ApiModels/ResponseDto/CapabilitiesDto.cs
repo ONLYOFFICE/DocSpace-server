@@ -38,7 +38,7 @@ public class CapabilitiesDto
     public bool LdapEnabled { get; set; }
 
     /// <summary>
-    /// The Ldap domain.
+    /// The LDAP domain.
     /// </summary>
     public string LdapDomain { get; set; }
 
@@ -66,7 +66,7 @@ public class CapabilitiesDto
     public string SsoUrl { get; set; }
     
     /// <summary>
-    /// Specifies if identity server is enabled or not.
+    /// Specifies if an identity server is enabled or not.
     /// </summary>
     public bool IdentityServerEnabled { get; set; }
 }

@@ -32,7 +32,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 public class CompanyWhiteLabelSettingsDto: IMapFrom<CompanyWhiteLabelSettings>
 {
     /// <summary>
-    /// The company white label name.
+    /// The company name.
     /// </summary>
     public string CompanyName { get; set; }
 
@@ -42,7 +42,7 @@ public class CompanyWhiteLabelSettingsDto: IMapFrom<CompanyWhiteLabelSettings>
     public string Site { get; set; }
 
     /// <summary>
-    /// The company email.
+    /// The company email address.
     /// </summary>
     [EmailAddress]
     public string Email { get; set; }
@@ -63,7 +63,7 @@ public class CompanyWhiteLabelSettingsDto: IMapFrom<CompanyWhiteLabelSettings>
     public bool IsLicensor { get; set; }
 
     /// <summary>
-    /// Specifies if these settings are default or not.
+    /// Specifies if company white label settings are default or not.
     /// </summary>
     public bool IsDefault { get; set; }
 

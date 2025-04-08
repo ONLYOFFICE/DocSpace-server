@@ -32,67 +32,67 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 public class LoginEventDto(LoginEvent loginEvent, ApiDateTimeHelper apiDateTimeHelper)
 {
     /// <summary>
-    /// The login ID.
+    /// The login event ID.
     /// </summary>
     public int Id { get; set; } = loginEvent.Id;
 
     /// <summary>
-    /// The login date.
+    /// The login event date.
     /// </summary>
     public ApiDateTime Date { get; set; } = apiDateTimeHelper.Get(loginEvent.Date);
 
     /// <summary>
-    /// The login user.
+    /// The user name of the login event.
     /// </summary>
     public string User { get; set; } = loginEvent.UserName;
 
     /// <summary>
-    /// The login user ID.
+    /// The user ID of the login event.
     /// </summary>
     public Guid UserId { get; set; } = loginEvent.UserId;
 
     /// <summary>
-    /// The login.
+    /// The user login of the login event.
     /// </summary>
     public string Login { get; set; } = loginEvent.Login;
 
     /// <summary>
-    /// The login action.
+    /// The login event action.
     /// </summary>
     public string Action { get; set; } = loginEvent.ActionText;
 
     /// <summary>
-    /// The action ID.
+    /// The login-related action to filter events by.
     /// </summary>
     public MessageAction ActionId { get; set; } = (MessageAction)loginEvent.Action;
 
     /// <summary>
-    /// The login IP.
+    /// The login event IP.
     /// </summary>
     public string IP { get; set; } = loginEvent.IP;
 
     /// <summary>
-    /// The login country.
+    /// The login event country.
     /// </summary>
     public string Country { get; set; } = loginEvent.Country;
 
     /// <summary>
-    /// The login city.
+    /// The login event city.
     /// </summary>
     public string City { get; set; } = loginEvent.City;
 
     /// <summary>
-    /// The login browser.
+    /// The login event browser.
     /// </summary>
     public string Browser { get; set; } = loginEvent.Browser;
 
     /// <summary>
-    /// The login platform.
+    /// The login event platform.
     /// </summary>
     public string Platform { get; set; } = loginEvent.Platform;
 
     /// <summary>
-    /// The login page.
+    /// The login event page.
     /// </summary>
     public string Page { get; set; } = loginEvent.Page;
 }

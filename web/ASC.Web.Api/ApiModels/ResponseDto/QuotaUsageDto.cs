@@ -67,32 +67,32 @@ public class QuotaUsageManager(
 public class QuotaUsageDto
 {
     /// <summary>
-    /// The quota storage size.
+    /// The storage size.
     /// </summary>
     public ulong StorageSize { get; init; }
 
     /// <summary>
-    /// The quota maximum file size.
+    /// The maximum file size.
     /// </summary>
     public ulong MaxFileSize { get; set; }
 
     /// <summary>
-    /// The quota used size.
+    /// The portal used space.
     /// </summary>
     public ulong UsedSize { get; init; }
 
     /// <summary>
-    /// The quota maximum number of room administrators.
+    /// The maximum number of room administrators.
     /// </summary>
     public int MaxRoomAdminsCount { get; init; }
 
     /// <summary>
-    /// The quota number of room administrators.
+    /// The number of room administrators.
     /// </summary>
     public int RoomAdminCount { get; init; }
 
     /// <summary>
-    /// The quota number available size.
+    /// The portal available space.
     /// </summary>
     public ulong AvailableSize
     {
@@ -101,7 +101,7 @@ public class QuotaUsageDto
     }
 
     /// <summary>
-    /// The quota available number of users.
+    /// The available number of users.
     /// </summary>
     public int AvailableUsersCount
     {
@@ -120,12 +120,12 @@ public class QuotaUsageDto
     public long UserStorageSize { get; set; }
 
     /// <summary>
-    /// The user used size.
+    /// The user used space.
     /// </summary>
     public long UserUsedSize { get; set; }
 
     /// <summary>
-    /// The user available size.
+    /// The user available space.
     /// </summary>
     public long UserAvailableSize
     {
@@ -144,6 +144,9 @@ public class QuotaUsageDto
     public long UsersCount { get; set; }
 }
 
+/// <summary>
+/// The quota storage usage.
+/// </summary>
 public class QuotaUsage
 {
     /// <summary>

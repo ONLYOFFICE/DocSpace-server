@@ -27,7 +27,7 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The login for querying user login events within a specified time range.
+/// The request parameters for querying user login events within the specified time range.
 /// </summary>
 public class LoginEventRequestDto
 {
@@ -44,13 +44,13 @@ public class LoginEventRequestDto
     public MessageAction Action { get; set; }
 
     /// <summary>
-    /// The login events query range.
+    /// The starting date and time for filtering login events.
     /// </summary>
     [FromQuery(Name = "from")]
     public ApiDateTime From { get; set; }
 
     /// <summary>
-    /// The date and time for the login events query range.
+    /// The ending date and time for filtering login events.
     /// </summary>
     [FromQuery(Name = "to")]
     public ApiDateTime To { get; set; }

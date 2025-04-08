@@ -27,7 +27,7 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// The request parameters for managing owner-specific settings.
+/// The request parameters for managing the owner-specific settings.
 /// </summary>
 public class OwnerIdSettingsRequestDto
 {
@@ -38,23 +38,23 @@ public class OwnerIdSettingsRequestDto
 }
 
 /// <summary>
-/// The request parameters for version-specific settings configuration.
+/// The request parameters for the version-specific settings configuration.
 /// </summary>
 public class SettingsRequestsDto
 {
     /// <summary>
-    /// The ID representing the settings version.
+    /// The version ID.
     /// </summary>
     public int VersionId { get; set; }
 }
 
 /// <summary>
-/// The request parameters for managing user interface tips visibility.
+/// The request parameters for managing the user interface tips visibility.
 /// </summary>
 public class TipsRequestDto
 {
     /// <summary>
-    /// Controls the visibility of user interface tips.
+    /// Controls the visibility of the user interface tips (displayed or hidden).
     /// </summary>
     public bool Show { get; set; } //tips
 }
@@ -71,12 +71,12 @@ public class DefaultProductRequestDto
 }
 
 /// <summary>
-/// The request parameters for configuring time zone preferences.
+/// The request parameters for configuring the time zone settings.
 /// </summary>
 public class TimeZoneRequestDto
 {
     /// <summary>
-    /// The language code for time zone localization.
+    /// The language code for the time zone localization.
     /// </summary>
     public string Lng { get; set; }
 
@@ -87,12 +87,12 @@ public class TimeZoneRequestDto
 }
 
 /// <summary>
-/// The request parameters for managing tenant-level developer tools access settings.
+/// The request parameters for managing the Developer Tools access settings for the current tenant.
 /// </summary>
 public class TenantDevToolsAccessSettingsDto
 {
     /// <summary>
-    /// Determines if users have restricted access to developer tools.
+    /// Determines if users have restricted access to the Developer Tools.
     /// </summary>
     public bool LimitedAccessForUsers { get; set; }
 }

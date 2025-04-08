@@ -27,7 +27,7 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// Represents the parameters for handling request parameters in the authorization service.
+/// The request parameters for handling the authorization service.
 /// </summary>
 public class AuthServiceRequestsDto
 {

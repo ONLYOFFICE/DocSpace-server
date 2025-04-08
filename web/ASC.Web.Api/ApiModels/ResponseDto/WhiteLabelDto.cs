@@ -39,12 +39,12 @@ public class WhiteLabelItemDto
     public string Name { get; set; }
 
     /// <summary>
-    /// The white label size.
+    /// The white label file size.
     /// </summary>
     public IMagickGeometry Size { get; set; }
 
     /// <summary>
-    /// The white label path.
+    /// The white label file path.
     /// </summary>
     public WhiteLabelItemPathDto Path { get; set; }
 }

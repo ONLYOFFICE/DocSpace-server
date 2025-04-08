@@ -32,7 +32,7 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 public class StorageEncryptionRequestsDto
 {
     /// <summary>
-    /// Specifies whether users receive notifications about storage encryption operations.
+    /// Specifies whether the users receive notifications about the storage encryption operations.
     /// </summary>
     public bool NotifyUsers { get; set; }
 }

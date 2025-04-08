@@ -42,13 +42,13 @@ public class MailDomainSettingsRequestsDto
     public List<string> Domains { get; set; }
 
     /// <summary>
-    /// Specifies the default permission level for invited users.
+    /// Specifies the default permission level for the invited users (visitors or not).
     /// </summary>
     public bool InviteUsersAsVisitors { get; set; }
 }
 
 /// <summary>
-/// The request parameters for administrator message configuration.
+/// The request parameters for the administrator message configuration.
 /// </summary>
 public class AdminMessageBaseSettingsRequestsDto
 {
@@ -66,7 +66,7 @@ public class AdminMessageBaseSettingsRequestsDto
 }
 
 /// <summary>
-/// The request parameters for configuring administrator message content.
+/// The request parameters for configuring the administrator message content.
 /// </summary>
 public class AdminMessageSettingsRequestsDto : AdminMessageBaseSettingsRequestsDto
 {
@@ -83,7 +83,7 @@ public class AdminMessageSettingsRequestsDto : AdminMessageBaseSettingsRequestsD
 public class TurnOnAdminMessageSettingsRequestDto
 {
     /// <summary>
-    /// The global switch for administrator messaging functionality.
+    /// The global switch for the administrator messaging functionality.
     /// </summary>
     public bool TurnOn { get; set; }
 }

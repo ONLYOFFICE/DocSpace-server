@@ -27,7 +27,7 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// The base parameters for managing IP restriction settings.
+/// The base parameters for managing the IP restriction settings.
 /// </summary>
 public class IpRestrictionsBaseRequestsDto
 {

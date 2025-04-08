@@ -27,12 +27,12 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// The request parameters for managing tenant storage quota settings in a multi-tenant system.
+/// The request parameters for managing the tenant storage quota settings in a multi-tenant system.
 /// </summary>
 public class TenantQuotaSettingsRequestsDto
 {
     /// <summary>
-    /// The ID for the tenant whose quota is being configured.
+    /// The ID of the tenant whose quota is being configured.
     /// </summary>
     public int TenantId { get; set; }
 

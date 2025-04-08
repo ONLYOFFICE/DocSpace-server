@@ -27,19 +27,19 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The request parameters for handling ID-based requests with a type parameter T.
+/// The request parameters for handling the ID-based requests.
 /// </summary>
 public class IdRequestDto<T>
 {
     /// <summary>
-    /// The ID of type T that is extracted from the route parameters.
+    /// The ID extracted from the route parameters.
     /// </summary>
     [FromRoute(Name = "id")]
     public T Id { get; set; }
 }
 
 /// <summary>
-/// The parameters for handling login event-related requests.
+/// The parameters for handling the login event-related requests.
 /// </summary>
 public class LoginEvenrIdRequestDto
 {
@@ -51,31 +51,31 @@ public class LoginEvenrIdRequestDto
 }
 
 /// <summary>
-/// The parameters for handling user-related requests using a GUID identifier.
+/// The parameters for handling the user-related requests using a GUID identifier.
 /// </summary>
 public class UserIdRequestDto
 {
     /// <summary>
-    /// The user ID, extracted from the route parameters.
+    /// The user ID extracted from the route parameters.
     /// </summary>
     [FromRoute(Name = "userId")]
     public Guid Id { get; set; }
 }
 
 /// <summary>
-/// The parameters for handling user-related requests.
+/// The parameters for handling the user-related requests using a GUID identifier.
 /// </summary>
 public class UserIDRequestDto
 {
     /// <summary>
-    /// The user extracted from the route parameters.
+    /// The user ID extracted from the route parameters.
     /// </summary>
     [FromRoute(Name = "userID")]
     public Guid Id { get; set; }
 }
 
 /// <summary>
-/// The requests for handling product-related requests.
+/// The requests for handling the product-related requests.
 /// </summary>
 public class ProductIdRequestDto
 {
@@ -105,12 +105,12 @@ public class UserProductIdsRequestDto
 }
 
 /// <summary>
-/// The request parameters for handling migrator-related requests using a string identifier.
+/// The request parameters for handling the migrator-related requests using a string identifier.
 /// </summary>
 public class MigratorNameRequestDto
 {
     /// <summary>
-    /// The migrator name from the route parameters..
+    /// The migrator name extracted from the route parameters.
     /// </summary>
     [FromRoute(Name = "migratorName")]
     public string MigratorName { get; set; }

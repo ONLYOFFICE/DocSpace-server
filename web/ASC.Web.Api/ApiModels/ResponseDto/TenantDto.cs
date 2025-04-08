@@ -77,12 +77,12 @@ public class TenantDto : IMapFrom<Tenant>
     public string Language { get; set; }
 
     /// <summary>
-    /// The last modified date.
+    /// The date and time when the tenant was last modified.
     /// </summary>
     public DateTime LastModified { get; set; }
 
     /// <summary>
-    /// The mapped domain.
+    /// The tenant mapped domain.
     /// </summary>
     public string MappedDomain { get; set; }
 
@@ -122,17 +122,17 @@ public class TenantDto : IMapFrom<Tenant>
     public string TimeZone { get; set; }
 
     /// <summary>
-    /// The tenant list of trusted domains.
+    /// The list of tenant trusted domains.
     /// </summary>
     public List<string> TrustedDomains { get; set; }
 
     /// <summary>
-    /// The trusted domains in the string format.
+    /// The tenant trusted domains in the string format.
     /// </summary>
     public string TrustedDomainsRaw { get; set; }
 
     /// <summary>
-    /// The tenant trusted domains type.
+    /// The type of the tenant trusted domains.
     /// </summary>
     public TenantTrustedDomainsType TrustedDomainsType { get; set; }
 
@@ -142,7 +142,7 @@ public class TenantDto : IMapFrom<Tenant>
     public int Version { get; set; }
 
     /// <summary>
-    /// The date and time when the tenant version was changed
+    /// The date and time when the tenant version was changed.
     /// </summary>
     public DateTime VersionChanged { get; set; }
 

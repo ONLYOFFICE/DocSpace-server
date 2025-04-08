@@ -27,28 +27,28 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// The request parameters for configuring Two-Factor Authentication (TFA) settings.
+/// The request parameters for configuring the Two-Factor Authentication (TFA) settings.
 /// </summary>
 public class TfaRequestsDto
 {
     /// <summary>
-    /// Specifies the type of two-factor authentication to be used.
+    /// The two-factor authentication type.
     /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public TfaRequestsDtoType? Type { get; set; }
 
     /// <summary>
-    /// The ID of the user for whom TFA settings are being configured.
+    /// The ID of the user for whom the TFA settings are being configured.
     /// </summary>
     public Guid? Id { get; set; }
 
     /// <summary>
-    /// The list of IP-addresses that bypass TFA verification.
+    /// The list of IP addresses that bypass TFA verification.
     /// </summary>
     public List<string> TrustedIps { get; set; }
 
     /// <summary>
-    /// The list user IDs for whom TFA is mandatory.
+    /// The list of user IDs for whom TFA is mandatory.
     /// </summary>
     public List<Guid> MandatoryUsers { get; set; }
 
@@ -58,6 +58,9 @@ public class TfaRequestsDto
     public List<Guid> MandatoryGroups { get; set; }
 }
 
+/// <summary>
+/// The two-factor authentication type.
+/// </summary>
 public enum TfaRequestsDtoType
 {
     [SwaggerEnum("None")]
@@ -71,7 +74,7 @@ public enum TfaRequestsDtoType
 }
 
 /// <summary>
-/// The request parameters for validating Two-Factor Authentication codes.
+/// The request parameters for validating the two-factor authentication codes.
 /// </summary>
 public class TfaValidateRequestsDto
 {

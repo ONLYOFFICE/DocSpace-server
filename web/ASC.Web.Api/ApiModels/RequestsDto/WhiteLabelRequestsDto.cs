@@ -27,7 +27,7 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// The request parameters for configuring white label branding settings.
+/// The request parameters for configuring the white label branding settings.
 /// </summary>
 public class WhiteLabelRequestsDto
 {
@@ -44,28 +44,28 @@ public class WhiteLabelRequestsDto
 }
 
 /// <summary>
-/// The request parameters for theme-specific logo configurations.
+/// The request parameters for the theme-specific logo configurations.
 /// </summary>
 public class LogoRequestsDto
 {
     /// <summary>
-    /// The URL or Base64-encoded image data for light theme logo.
+    /// The URL or base64-encoded image data for the light theme logo.
     /// </summary>
     public string Light { get; set; }
 
     /// <summary>
-    /// The URL or Base64-encoded image data for dark theme logo.
+    /// The URL or base64-encoded image data for the dark theme logo.
     /// </summary>
     public string Dark { get; set; }
 }
 
 /// <summary>
-/// The request parameters for querying white label configurations.
+/// The request parameters for querying the white label configurations.
 /// </summary>
 public class WhiteLabelQueryRequestsDto
 {
     /// <summary>
-    /// The optional filter for theme-specific logos.
+    /// Specifies if the white label logo is for the dark theme or not.
     /// </summary>
     public bool? IsDark { get; set; }
 

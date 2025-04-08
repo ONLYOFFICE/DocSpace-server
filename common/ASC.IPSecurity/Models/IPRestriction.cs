@@ -32,7 +32,7 @@ namespace ASC.IPSecurity;
 public class IPRestriction : IpRestrictionBase, IMapFrom<TenantIpRestrictions>
 {
     /// <summary>
-    /// The restiction ID.
+    /// The IP restiction ID.
     /// </summary>
     public int Id { get; set; }
 
@@ -53,7 +53,7 @@ public class IpRestrictionBase
     public string Ip { get; set; }
 
     /// <summary>
-    /// Specifies if this address is for administrator users only or not.
+    /// Specifies if the IP address is for administrator users only or not.
     /// </summary>
     public bool ForAdmin { get; set; }
 }

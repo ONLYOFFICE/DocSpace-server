@@ -32,7 +32,7 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 public class DeepLinkDto
 {
     /// <summary>
-    /// The android package name.
+    /// The Android package name.
     /// </summary>
     public string AndroidPackageName { get; set; }
 

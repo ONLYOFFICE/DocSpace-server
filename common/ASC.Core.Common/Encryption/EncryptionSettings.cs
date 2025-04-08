@@ -27,6 +27,7 @@
 namespace ASC.Core.Encryption;
 
 /// <summary>
+/// The encryption settings.
 /// </summary>
 [ProtoContract]
 public class EncryptionSettings
@@ -41,21 +42,24 @@ public class EncryptionSettings
         NotifyUsers = true;
     }
 
-    /// <summary>Password</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The encryption password.
+    /// </summary>
     public string Password
     {
         get => Pass;
         set => Pass = (value ?? string.Empty).Replace('#', '_');
     }
 
-    /// <summary>Status</summary>
-    /// <type>ASC.Core.Encryption.EncryprtionStatus, ASC.Core.Common</type>
+    /// <summary>
+    /// The encryption status.
+    /// </summary>
     [ProtoMember(2)]
     public EncryprtionStatus Status { get; set; }
 
-    /// <summary>Specifies if the users will be notified or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the users will be notified about the encryption operation or not.
+    /// </summary>
     [ProtoMember(3)]
     public bool NotifyUsers { get; set; }
 

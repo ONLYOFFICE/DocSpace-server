@@ -27,7 +27,7 @@
 namespace ASC.Web.Api.Models;
 
 /// <summary>
-/// The request parameters for payment URL configuration with quantity information.
+/// The request parameters for the payment URL configuration with quantity information.
 /// </summary>
 public class PaymentUrlRequestsDto : QuantityRequestDto
 {
@@ -38,12 +38,12 @@ public class PaymentUrlRequestsDto : QuantityRequestDto
 }
 
 /// <summary>
-/// The request parameters for payment quantity specifications.
+/// The request parameters for the payment quantity specifications.
 /// </summary>
 public class QuantityRequestDto
 {
     /// <summary>
-    /// Maps item identifiers to their respective quantities in the payment.
+    /// The mapping of item identifiers with their respective quantities in the payment.
     /// </summary>
     public Dictionary<string, int> Quantity { get; set; }
 }

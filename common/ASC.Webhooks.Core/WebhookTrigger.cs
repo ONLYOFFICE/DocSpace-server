@@ -28,6 +28,9 @@ using NetEscapades.EnumGenerators;
 
 namespace ASC.Webhooks.Core;
 
+/// <summary>
+/// The webhook trigger type.
+/// </summary>
 [EnumExtensions]
 public enum WebhookTrigger
 {

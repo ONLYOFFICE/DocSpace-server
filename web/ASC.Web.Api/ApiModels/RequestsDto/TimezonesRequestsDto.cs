@@ -27,7 +27,7 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// The request parameters for managing time zone configurations.
+/// The request parameters for managing the time zone configurations.
 /// </summary>
 public class TimezonesRequestsDto
 {

@@ -32,17 +32,17 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 public class PasswordSettingsDto
 {
     /// <summary>
-    /// The min length of the password.
+    /// The minimum number of characters required for valid passwords.
     /// </summary>
     public int MinLength { get; set; }
 
     /// <summary>
-    /// The upper case of the password.
+    /// Specifies whether the password should contain the uppercase letters or not.
     /// </summary>
     public bool UpperCase { get; set; }
 
     /// <summary>
-    /// Specifies whether the password should contain digits or not.
+    /// Specifies whether the password should contain the digits or not.
     /// </summary>
     public bool Digits { get; set; }
 
@@ -52,22 +52,22 @@ public class PasswordSettingsDto
     public bool SpecSymbols { get; set; }
 
     /// <summary>
-    /// The allowed characters regex string of the password.
+    /// The allowed password characters in the regex string format.
     /// </summary>
     public string AllowedCharactersRegexStr { get; set; }
 
     /// <summary>
-    /// The digits regex string of the password..
+    /// The password digits in the regex string format.
     /// </summary>
     public string DigitsRegexStr { get; set; }
 
     /// <summary>
-    /// The upper case regex string of the password..
+    /// The password uppercase letters in the regex string format.
     /// </summary>
     public string UpperCaseRegexStr { get; set; }
 
     /// <summary>
-    /// The special symbols regex string of the password..
+    /// The passaword special symbols in the regex string format.
     /// </summary>
     public string SpecSymbolsRegexStr { get; set; }
 }

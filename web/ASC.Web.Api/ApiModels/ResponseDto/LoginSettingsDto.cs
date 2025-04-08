@@ -32,22 +32,22 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 public class LoginSettingsDto : IMapFrom<LoginSettings>
 {
     /// <summary>
-    /// The maximum number of the user attempts to log in.
+    /// The maximum number of consecutive failed login attempts allowed before triggering account suspension.
     /// </summary>
     public int AttemptCount { get; set; }
 
     /// <summary>
-    /// The time for which the user will be blocked after unsuccessful login attempts.
+    /// The duration (in minutes) for which an account remains suspended after exceeding maximum login attempts.
     /// </summary>
     public int BlockTime { get; set; }
 
     /// <summary>
-    /// The time to wait for a response from the server.
+    /// The maximum time (in seconds) allowed for server to process and respond to login requests.
     /// </summary>
     public int CheckPeriod { get; set; }
     
     /// <summary>
-    /// Specifies whether the login settings is default or not.
+    /// Specifies whether the login settings are default or not.
     /// </summary>
     public bool IsDefault { get; set; }
 }

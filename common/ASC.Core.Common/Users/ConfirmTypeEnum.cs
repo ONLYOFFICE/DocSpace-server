@@ -27,6 +27,7 @@
 namespace ASC.Web.Studio.Utility;
 
 /// <summary>
+/// The confirmation email type.
 /// </summary>
 //  emp-invite - confirm ivite by email
 //  portal-suspend - confirm portal suspending - Tenant.SetStatus(TenantStatus.Suspended)

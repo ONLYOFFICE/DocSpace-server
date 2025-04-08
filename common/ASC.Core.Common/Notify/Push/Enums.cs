@@ -53,6 +53,9 @@ public enum PushModule
     Projects
 }
 
+/// <summary>
+/// The target mobile platform or application type.
+/// </summary>
 public enum MobileAppType
 {
     [SwaggerEnum("Ios projects")]

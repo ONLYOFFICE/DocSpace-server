@@ -29,7 +29,7 @@ using Profile = AutoMapper.Profile;
 namespace ASC.Core.Tenants;
 
 /// <summary>
-/// Returns the current tenant quota.
+/// The current tenant quota.
 /// </summary>
 [DebuggerDisplay("{TenantId} {Name}")]
 public class TenantQuota : IMapFrom<DbQuota>
@@ -99,7 +99,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly MaxFileSizeFeature _maxFileSizeFeature;
 
     /// <summary>
-    /// The maximum file size.
+    /// The tenant maximum file size.
     /// </summary>
     [SwaggerSchemaCustom(Example = 25 * 1024 * 1024)]
     public long MaxFileSize
@@ -111,7 +111,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly MaxTotalSizeFeature _maxTotalSizeFeature;
 
     /// <summary>
-    /// The maximum total size.
+    /// The tenant maximum total size.
     /// </summary>
     [SwaggerSchemaCustom(Example = long.MaxValue)]
     public long MaxTotalSize
@@ -222,7 +222,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly TenantQuotaFeatureFlag _docsEditionFeature;
 
     /// <summary>
-    /// Specifies if this tenant quota is Docs edition or not.
+    /// Specifies if ONLYOFFICE Docs is included in the tenant quota or not.
     /// </summary>
     public bool DocsEdition
     {
@@ -255,7 +255,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly TenantQuotaFeatureFlag _statisticFeature;
 
     /// <summary>
-    /// Specifies if the statistic settings are available or not.
+    /// Specifies if the statistics settings are available or not.
     /// </summary>
     public bool Statistic
     {
@@ -268,7 +268,6 @@ public class TenantQuota : IMapFrom<DbQuota>
     /// <summary>
     /// Specifies if the branding settings are available or not.
     /// </summary>
-    /// <type>System.Boolean, System</type>
     public bool Branding
     {
         get => _brandingFeature.Value;
@@ -289,9 +288,8 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly TenantQuotaFeatureFlag _lifetimeFeature;
 
     /// <summary>
-    /// Specifies if the license is lifetime or not.
+    /// Specifies if the license has the lifetime settings or not.
     /// </summary>
-    /// <type>System.Boolean, System</type>
     public bool Lifetime
     {
         get => _lifetimeFeature.Value;
@@ -312,7 +310,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly TenantQuotaFeatureFlag _autoBackupRestoreFeature;
 
     /// <summary>
-    /// Specifies if the automatic Backup&amp;Restore feature is available or not.
+    /// Specifies if the automatic backup option is enabled or not.
     /// </summary>
     public bool AutoBackupRestore
     {

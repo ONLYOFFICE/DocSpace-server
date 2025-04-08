@@ -26,12 +26,21 @@
 
 namespace ASC.Core.Tenants;
 
+/// <summary>
+/// The Developer Tools access settings.
+/// </summary>
 [Scope]
 [Serializable]
 public class TenantDevToolsAccessSettings : ISettings<TenantDevToolsAccessSettings>
 {
+    /// <summary>
+    /// Specifies if the Developer Tools access are limited for users or not.
+    /// </summary>
     public bool LimitedAccessForUsers { get; set; }
 
+    /// <summary>
+    /// The tenant ID.
+    /// </summary>
     [JsonIgnore]
     public Guid ID
     {

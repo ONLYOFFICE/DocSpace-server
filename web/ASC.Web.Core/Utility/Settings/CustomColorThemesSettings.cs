@@ -56,7 +56,7 @@ public class CustomColorThemesSettings : ISettings<CustomColorThemesSettings>
 }
 
 /// <summary>
-/// The custom color themes settings item parameters.
+/// The custom color theme settings.
 /// </summary>
 public class CustomColorThemesSettingsItem
 {
@@ -135,18 +135,18 @@ public class CustomColorThemesSettingsItem
 }
 
 /// <summary>
-/// The custom color themes settings color item parameters.
+/// The custom color theme color parameters.
 /// </summary>
 public class CustomColorThemesSettingsColorItem
 {
     /// <summary>
-    /// The custom color themes settings accent color.
+    /// The accent color.
     /// </summary>
     [SwaggerSchemaCustom(Example = "#4781D1")]
     public string Accent { get; init; }
     
     /// <summary>
-    /// The custom color themes settings button color.
+    /// The button color.
     /// </summary>
     [SwaggerSchemaCustom(Example = "#5299E0")]
     public string Buttons { get; init; }

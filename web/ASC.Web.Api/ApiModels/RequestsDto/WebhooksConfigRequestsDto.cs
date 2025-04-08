@@ -27,30 +27,30 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The request parameters for creating or updating webhook configurations.
+/// The request parameters for creating or updating the webhook configuration.
 /// </summary>
 public class WebhooksConfigRequestsDto
 {
     /// <summary>
-    /// The ID for the webhook configuration.
+    /// The webhook configuration ID.
     /// </summary>
     public int Id { get; set; }
 
     /// <summary>
-    /// The human-readable name for the webhook configuration.
+    /// The human-readable name of the webhook configuration.
     /// </summary>
     [StringLength(50)]
     [Required]
     public string Name { get; set; }
 
     /// <summary>
-    /// The destination URL where webhook events will be sent.
+    /// The destination URL where the webhook events will be sent.
     /// </summary>
     [Required]
     public string Uri { get; set; }
 
     /// <summary>
-    /// The webhook secret key used to sign webhook payloads for security verification.
+    /// The webhook secret key used to sign the webhook payloads for the security verification.
     /// </summary>
     [StringLength(50)]
     public string SecretKey { get; set; }
@@ -61,7 +61,7 @@ public class WebhooksConfigRequestsDto
     public bool Enabled { get; set; }
 
     /// <summary>
-    /// Specifies whether SSL certificate verification is required or not.
+    /// Specifies whether the SSL certificate verification is required or not.
     /// </summary>
     public bool SSL { get; set;}
 

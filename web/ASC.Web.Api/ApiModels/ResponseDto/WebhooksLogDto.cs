@@ -28,67 +28,67 @@
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
-/// The webhooks log parameters.
+/// The webhook log parameters.
 /// </summary>
 public class WebhooksLogDto : IMapFrom<DbWebhooksLog>
 {
     /// <summary>
-    /// The webhooks log ID.
+    /// The webhook log ID.
     /// </summary>
     public int Id { get; set; }
 
     /// <summary>
-    /// The webhooks config name.
+    /// The webhook configuration name.
     /// </summary>
     public string ConfigName { get; set; }
 
     /// <summary>
-    /// The webhooks trigger.
+    /// The webhook trigger type.
     /// </summary>
     public WebhookTrigger Trigger { get; set; }
 
     /// <summary>
-    /// The webhooks creation time.
+    /// The webhook creation time.
     /// </summary>
     public DateTime CreationTime { get; set; }
 
     /// <summary>
-    /// The webhooks method.
+    /// The webhook method.
     /// </summary>
     public string Method { get; set; }
 
     /// <summary>
-    /// The webhooks route.
+    /// The webhook route.
     /// </summary>
     public string Route { get; set; }
 
     /// <summary>
-    /// The webhooks request headers.
+    /// The webhook request headers.
     /// </summary>
     public string RequestHeaders { get; set; }
 
     /// <summary>
-    /// The webhooks request payload.
+    /// The webhook request payload.
     /// </summary>
     public string RequestPayload { get; set; }
 
     /// <summary>
-    /// The webhooks response headers.
+    /// The webhook response headers.
     /// </summary>
     public string ResponseHeaders { get; set; }
 
     /// <summary>
-    /// The webhooks response payload.
+    /// The webhook response payload.
     /// </summary>
     public string ResponsePayload { get; set; }
 
     /// <summary>
-    /// The webhooks status.
+    /// The webhook status.
     /// </summary>
     public int Status { get; set; }
 
     /// <summary>
-    /// The webhooks delivery time.
+    /// The webhook delivery time.
     /// </summary>
     public DateTime? Delivery { get; set; }
 

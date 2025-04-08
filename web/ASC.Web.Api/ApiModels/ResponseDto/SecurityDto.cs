@@ -32,7 +32,7 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 public class SecurityDto
 {
     /// <summary>
-    /// The module ID of the web item.
+    /// The module ID.
     /// </summary>
     [SwaggerSchemaCustom(Example = "{00000000-0000-0000-0000-000000000000}")]
     public string WebItemId { get; set; }
@@ -54,7 +54,7 @@ public class SecurityDto
     public bool Enabled { get; set; }
 
     /// <summary>
-    /// Specifies if this module is a subitem or not.
+    /// Specifies if the module is a subitem or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool IsSubItem { get; set; }

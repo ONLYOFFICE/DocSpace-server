@@ -70,7 +70,7 @@ public class Tariff
     public string CustomerId { get; set; }
 
     /// <summary>
-    /// The list of quotas.
+    /// The list of tariff quotas.
     /// </summary>
     [ProtoMember(7)]
     public List<Quota> Quotas { get; set; }

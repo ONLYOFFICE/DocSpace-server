@@ -27,7 +27,7 @@
 namespace ASC.Web.Api.Models;
 
 /// <summary>
-/// The request parameters for configuring password complexity requirements.
+/// The request parameters for configuring the password complexity requirements.
 /// </summary>
 public class PasswordSettingsRequestsDto
 {
@@ -37,17 +37,17 @@ public class PasswordSettingsRequestsDto
     public int MinLength { get; set; }
 
     /// <summary>
-    /// Controls uppercase letter requirement in passwords.
+    /// Specifies whether the password should contain the uppercase letters or not.
     /// </summary>
     public bool UpperCase { get; set; }
 
     /// <summary>
-    /// Controls numeric character requirement in passwords.
+    /// Specifies whether the password should contain the digits or not.
     /// </summary>
     public bool Digits { get; set; }
 
     /// <summary>
-    /// Controls special character requirement in passwords.
+    /// Specifies whether the password should contain the special symbols or not.
     /// </summary>
     public bool SpecSymbols { get; set; }
 }

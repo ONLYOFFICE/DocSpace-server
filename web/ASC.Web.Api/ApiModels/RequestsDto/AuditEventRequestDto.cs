@@ -27,7 +27,7 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// Represents the parameters for filtering and retrieving audit event records.
+/// The request parameters for filtering and retrieving audit event records.
 /// </summary>
 public class AuditEventRequestDto
 {

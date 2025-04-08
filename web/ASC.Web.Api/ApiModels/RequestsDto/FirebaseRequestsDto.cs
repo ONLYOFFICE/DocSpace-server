@@ -37,7 +37,7 @@ public class FirebaseRequestsDto
     public string FirebaseDeviceToken { get; set; }
 
     /// <summary>
-    /// Specifies the value indicating whether the user is subscribed to push notifications.
+    /// Specifies whether the user is subscribed to the push notifications or not.
     /// </summary>
     public bool IsSubscribed { get; set; }
 }

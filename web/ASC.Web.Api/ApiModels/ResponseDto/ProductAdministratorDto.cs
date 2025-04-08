@@ -42,7 +42,7 @@ public class ProductAdministratorDto
     public Guid UserId { get; set; }
 
     /// <summary>
-    /// Specifies whether it is administrator or not.
+    /// Specifies whether the user is a product administrator or not.
     /// </summary>
     public bool Administrator { get; set; }
 }

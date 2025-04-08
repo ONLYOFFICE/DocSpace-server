@@ -42,7 +42,7 @@ public class WebPluginDto: IMapFrom<WebPlugin>
     public string Version { get; set; }
 
     /// <summary>
-    /// The description of the web plugin.
+    /// The web plugin description.
     /// </summary>
     public string Description { get; set; }
 
@@ -57,12 +57,12 @@ public class WebPluginDto: IMapFrom<WebPlugin>
     public string Author { get; set; }
 
     /// <summary>
-    /// The web plugin home page.
+    /// The web plugin home page URL.
     /// </summary>
     public string HomePage { get; set; }
 
     /// <summary>
-    /// The web plugin name.
+    /// The name by which the web plugin is registered in the window object. 
     /// </summary>
     public string PluginName { get; set; }
 
@@ -77,22 +77,22 @@ public class WebPluginDto: IMapFrom<WebPlugin>
     public string Image { get; set; }
 
     /// <summary>
-    /// The web plugin create by.
+    /// The user who created the web plugin.
     /// </summary>
     public EmployeeDto CreateBy { get; set; }
 
     /// <summary>
-    /// The web plugin create on.
+    /// The date and time when the web plugin was created.
     /// </summary>
     public DateTime CreateOn { get; set; }
 
     /// <summary>
-    /// The web plugin enabled.
+    /// Specifies if the web plugin is enabled or not.
     /// </summary>
     public bool Enabled { get; set; }
 
     /// <summary>
-    /// The web plugin system.
+    /// Specifies if the web plugin is system or not.
     /// </summary>
     public bool System { get; set; }
 

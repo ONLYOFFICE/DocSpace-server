@@ -26,21 +26,24 @@
 
 namespace ASC.Security.Cryptography;
 
+/// <ssummary>
+/// The password hash parameters.
+/// </summary>
 [Singleton]
 public class PasswordHasher
 {
     /// <summary>
-    /// Size
+    /// The password hash size.
     /// </summary>
     public int Size { get; private set; }
 
     /// <summary>
-    /// Iterations
+    /// The number of iterations to generate the ppassword hash.
     /// </summary>
     public int Iterations { get; private set; }
 
     /// <summary>
-    /// Salt
+    /// The salt to generate the ppassword hash.
     /// </summary>
     public string Salt { get; private set; }
 

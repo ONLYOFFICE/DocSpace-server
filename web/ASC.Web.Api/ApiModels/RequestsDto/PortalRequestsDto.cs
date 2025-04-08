@@ -39,19 +39,19 @@ public class PortalExtraTenantRequestDto
 }
 
 /// <summary>
-/// The request parameters for portal path configuration.
+/// The request parameters for the portal path configuration.
 /// </summary>
 public class PortalPathRequestDto
 {
     /// <summary>
-    /// The virtual path for portal resource access.
+    /// The virtual path for the portal resource access.
     /// </summary>
     [FromQuery(Name = "virtualPath")]
     public string VirtualPath { get; set; }
 }
 
 /// <summary>
-/// The request parameters for managing portal thumbnail generation.
+/// The request parameters for managing the portal thumbnail generation.
 /// </summary>
 public class PortalThumbnailRequestDto
 {
@@ -63,24 +63,24 @@ public class PortalThumbnailRequestDto
 }
 
 /// <summary>
-/// The request parameters for mobile application configuration in the portal.
+/// The request parameters for the mobile application configuration of the portal.
 /// </summary>
 public class PortalMobileAppRequestDto
 {
     /// <summary>
-    /// Specifies the target mobile platform or application type (IosProjects, AndroidProjects, IosDocuments, AndroidDocuments, or DesktopEditor).
+    /// The target mobile platform or application type.
     /// </summary>
     [FromQuery(Name = "type")]
     public MobileAppType Type { get; set; }
 }
 
 /// <summary>
-/// The request parameters for portal security and configuration settings.
+/// The request parameters for the portal security and configuration settings.
 /// </summary>
 public class PortalSettingsrequestDto
 {
     /// <summary>
-    /// Specifies if the inclusion of password hashing configuration in response.
+    /// Specifies whether to include the password hashing configuration in the response.
     /// </summary>
     [FromQuery(Name = "withpassword")]
     public bool? WithPassword { get; set; }

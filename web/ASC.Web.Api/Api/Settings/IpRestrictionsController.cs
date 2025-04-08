@@ -54,9 +54,9 @@ public class IpRestrictionsController(ApiContext apiContext,
     }
 
     /// <summary>
-    /// Updates the IP restriction settings with a parameter specified in the request.
+    /// Updates the IP restrictions with the parameters specified in the request.
     /// </summary>
-    /// <short>Save the IP restriction settings</short>
+    /// <short>Update the IP restrictions</short>
     /// <path>api/2.0/settings/iprestrictions</path>
     [Tags("Settings / IP restrictions")]
     [SwaggerResponse(200, "Updated IP restriction settings", typeof(IpRestrictionsDto))]
@@ -113,9 +113,9 @@ public class IpRestrictionsController(ApiContext apiContext,
     }
 
     /// <summary>
-    /// Updates the IP restriction settings with a parameter specified in the request.
+    /// Updates the IP restriction settings with the parameters specified in the request.
     /// </summary>
-    /// <short>Save the IP restriction settings</short>
+    /// <short>Update the IP restriction settings</short>
     /// <path>api/2.0/settings/iprestrictions/settings</path>
     [Tags("Settings / IP restrictions")]
     [SwaggerResponse(200, "Updated IP restriction settings", typeof(IpRestrictionsDto))]

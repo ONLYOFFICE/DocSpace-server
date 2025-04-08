@@ -27,27 +27,27 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// The parameters representing Two-Factor Authentication (TFA) configuration settings.
+/// The parameters representing the Two-Factor Authentication (TFA) configuration settings.
 /// </summary>
 public class TfaSettingsDto
 {
     /// <summary>
-    /// The ID for the TFA configuration.
+    /// The ID of the TFA configuration.
     /// </summary>
     public string Id { get; set; }
 
     /// <summary>
-    /// The display name or description for the TFA configuration.
+    /// The display name or description of the TFA configuration.
     /// </summary>
     public string Title { get; set; }
 
     /// <summary>
-    /// Indicates whether this TFA configuration is currently active.
+    /// Indicates whether the TFA configuration is currently active.
     /// </summary>
     public bool Enabled { get; set; }
 
     /// <summary>
-    /// Indicates whether this TFA configuration can be used.
+    /// Indicates whether the TFA configuration can be used.
     /// </summary>
     public bool Avaliable { get; set; }
 

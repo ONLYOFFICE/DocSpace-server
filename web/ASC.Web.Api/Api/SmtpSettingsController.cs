@@ -180,10 +180,10 @@ public class SmtpSettingsController(
     }
 
     /// <summary>
-    /// Returns the SMTP test process status.
+    /// Returns the status of the SMTP testing process.
     /// </summary>
     /// <short>
-    /// Get the SMTP test process status
+    /// Get the SMTP testing process status
     /// </short>
     /// <path>api/2.0/smtpsettings/smtp/test/status</path>
     [Tags("Security / SMTP settings")]

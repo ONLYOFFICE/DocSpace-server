@@ -27,7 +27,7 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The request parameters for querying webhook delivery logs with various filter criteria.
+/// The request parameters for querying the webhook delivery logs with various filter criteria.
 /// </summary>
 public class WebhookLogsRequestDto
 {

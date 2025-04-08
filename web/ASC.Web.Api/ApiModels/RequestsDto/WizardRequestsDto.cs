@@ -27,7 +27,7 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// The request parameters for initial setup wizard configuration.
+/// The request parameters for initial configuration of the setup wizard.
 /// </summary>
 public class WizardRequestsDto
 {

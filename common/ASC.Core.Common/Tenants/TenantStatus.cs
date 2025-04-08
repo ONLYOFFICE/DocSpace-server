@@ -26,6 +26,9 @@
 
 namespace ASC.Core.Tenants;
 
+/// <summary>
+/// The tenant status.
+/// </summary>
 [EnumExtensions]
 public enum TenantStatus
 {

@@ -48,12 +48,12 @@ public class SecurityRequestsDto
 }
 
 /// <summary>
-/// The request parameters for retrieving security settings across multiple modules.
+/// The request parameters for retrieving the security settings across the multiple modules.
 /// </summary>
 public class SecuritySettingsRequestDto
 {
     /// <summary>
-    /// The list of module identifiers for which to retrieve security settings.
+    /// The list of module identifiers for which to retrieve the security settings.
     /// </summary>
     [FromQuery(Name = "ids")]
     public IEnumerable<string> Ids { get; set; }

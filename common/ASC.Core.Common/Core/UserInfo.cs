@@ -37,37 +37,37 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
     public Guid Id { get; set; }
 
     /// <summary>
-    /// The first name.
+    /// The user first name.
     /// </summary>
     public string FirstName { get; set; }
 
     /// <summary>
-    /// The last name.
+    /// The user last name.
     /// </summary>
     public string LastName { get; set; }
 
     /// <summary>
-    /// The username.
+    /// The user username.
     /// </summary>
     public string UserName { get; set; }
 
     /// <summary>
-    /// The birthday.
+    /// The user birthday.
     /// </summary>
     public DateTime? BirthDate { get; set; }
 
     /// <summary>
-    /// The sex (male or female).
+    /// The user sex (male or female).
     /// </summary>
     public bool? Sex { get; set; }
 
     /// <summary>
-    /// The employee status.
+    /// The user status.
     /// </summary>
     public EmployeeStatus Status { get; set; } = EmployeeStatus.Active;
 
     /// <summary>
-    /// The activation status.
+    /// The user activation status.
     /// </summary>
     public EmployeeActivationStatus ActivationStatus { get; set; } = EmployeeActivationStatus.NotActivated;
 
@@ -95,7 +95,7 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
     private string _contacts;
 
     /// <summary>
-    /// The list of contacts in the string format.
+    /// The list of user contacts in the string format.
     /// </summary>
     public string Contacts
     {
@@ -108,7 +108,7 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
     }
 
     /// <summary>
-    /// The user list of contacts.
+    /// The list of user contacts.
     /// </summary>
     public List<string> ContactsList { get; set; }
 
@@ -128,7 +128,7 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
     public bool Removed { get; set; }
 
     /// <summary>
-    /// The user last modified date.
+    /// The date and time when the user was last modified.
     /// </summary>
     public DateTime LastModified { get; set; } = DateTime.UtcNow;
 
@@ -143,7 +143,7 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
     public bool IsActive => ActivationStatus.HasFlag(EmployeeActivationStatus.Activated);
 
     /// <summary>
-    /// The user language.
+    /// The user culture code.
     /// </summary>
     public string CultureName { get; set; }
 
@@ -183,12 +183,12 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
     public DateTime CreateDate { get; set; }
 
     /// <summary>
-    /// The user created by date.
+    /// The ID of the user who created the current user.
     /// </summary>
     public Guid? CreatedBy { get; set; }
 
     /// <summary>
-    /// Specifies if the user is spam or not.
+    /// Specifies if tips, updates and offers are allowed to be sent to the user or not.
     /// </summary>
     public bool? Spam { get; set; }
 

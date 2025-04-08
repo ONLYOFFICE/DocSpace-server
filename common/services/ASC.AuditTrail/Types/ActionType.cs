@@ -25,6 +25,9 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 namespace ASC.AuditTrail.Types;
 
+/// <summary>
+/// The action type.
+/// </summary>
 [EnumExtensions]
 public enum ActionType
 {

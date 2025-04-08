@@ -27,7 +27,7 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// Represents the parameters required for user authentication requests.
+/// The parameters required for the user authentication requests.
 /// </summary>
 public class AuthRequestsDto
 {
@@ -98,7 +98,7 @@ public class AuthRequestsDto
 }
 
 /// <summary>
-/// Represents the parameters required for mobile phone verification.
+/// The parameters required for the mobile phone verification.
 /// </summary>
 public class MobileRequestsDto
 {
@@ -109,7 +109,7 @@ public class MobileRequestsDto
 }
 
 /// <summary>
-/// Represents additional confirmation data required during authentication.
+/// The additional confirmation data required for authentication.
 /// </summary>
 public class ConfirmData
 {

@@ -32,22 +32,22 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 public class TenantExtraDto
 {
     /// <summary>
-    /// Specifies if the extra tenant license is customizable or not.
+    /// Specifies if an extra tenant license is customizable or not.
     /// </summary>
     public bool CustomMode { get; set; }
 
     /// <summary>
-    /// Specifies if the extra tenant license is Opensource or not.
+    /// Specifies if an extra tenant license is Community or not.
     /// </summary>
     public bool Opensource { get; set; }
 
     /// <summary>
-    /// Specifies if the extra tenant license is Enterprise or not.
+    /// Specifies if an extra tenant license is Enterprise or not.
     /// </summary>
     public bool Enterprise { get; set; }
 
     /// <summary>
-    /// Specifies if the extra tenant license is Developer or not.
+    /// Specifies if an extra tenant license is Developer or not.
     /// </summary>
     public bool Developer { get; set; }
 
@@ -77,12 +77,12 @@ public class TenantExtraDto
     public bool EnableTariffPage { get; set; }
 
     /// <summary>
-    /// The document server user quotas.
+    /// The ONLYOFFICE Docs user quotas.
     /// </summary>
     public Dictionary<string, DateTime> DocServerUserQuota { get; set; }
 
     /// <summary>
-    /// The document server license.
+    /// The ONLYOFFICE Docs license.
     /// </summary>
     public License DocServerLicense { get; set; }
 }

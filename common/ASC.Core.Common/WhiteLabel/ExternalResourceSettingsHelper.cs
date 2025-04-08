@@ -143,8 +143,18 @@ public class ExternalResource(Dictionary<string, CultureSpecificExternalResource
     }
 }
 
+/// <summary>
+/// The external resource parameters.
+/// </summary>
 public class CultureSpecificExternalResource
 {
+    /// <summary>
+    /// The external resource domain.
+    /// </summary>
     public string Domain { get; set; }
+
+    /// <summary>
+    /// The external resource entries.
+    /// </summary>
     public Dictionary<string, string> Entries { get; set; }
 }

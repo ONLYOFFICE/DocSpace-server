@@ -27,7 +27,7 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// The request parameters for mobile application configuration requests.
+/// The request parameters for the mobile application configuration.
 /// </summary>
 public class MobileAppRequestsDto
 {

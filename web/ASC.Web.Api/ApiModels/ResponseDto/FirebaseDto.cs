@@ -27,47 +27,47 @@
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 /// <summary>
-/// The firebase parameters.
+/// The Firebase parameters.
 /// </summary>
 public class FirebaseDto
 {
     /// <summary>
-    /// The firebase API key.
+    /// The Firebase API key.
     /// </summary>
     public string ApiKey { get; set; }
 
     /// <summary>
-    /// The firebase authentication domain.
+    /// The Firebase authentication domain.
     /// </summary>
     public string AuthDomain { get; set; }
 
     /// <summary>
-    /// The firebase project ID.
+    /// The Firebase project ID.
     /// </summary>
     public string ProjectId { get; set; }
 
     /// <summary>
-    /// The firebase storage bucket.
+    /// The Firebase storage bucket.
     /// </summary>
     public string StorageBucket { get; set; }
 
     /// <summary>
-    /// The firebase message sender ID.
+    /// The Firebase messaging sender ID.
     /// </summary>
     public string MessagingSenderId { get; set; }
 
     /// <summary>
-    /// The firebase application ID.
+    /// The Firebase application ID.
     /// </summary>
     public string AppId { get; set; }
 
     /// <summary>
-    /// The firebase measurement ID.
+    /// The Firebase measurement ID.
     /// </summary>
     public string MeasurementId { get; set; }
 
     /// <summary>
-    /// The firebase database URL.
+    /// The Firebase database URL.
     /// </summary>
     public string DatabaseURL { get; set; }
 }

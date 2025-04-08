@@ -27,6 +27,7 @@
 namespace ASC.FederatedLogin.LoginProviders;
 
 /// <summary>
+/// The identity provider used for authentication.
 /// </summary>
 public enum LoginProvider
 {

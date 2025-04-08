@@ -27,7 +27,7 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// The configuration parameters for a web plugin instance.
+/// The configuration settings for the web plugin instance.
 /// </summary>
 public class WebPluginRequests
 {
@@ -37,7 +37,7 @@ public class WebPluginRequests
     public bool Enabled { get; set; }
 
     /// <summary>
-    /// The JSON-formatted configuration settings for the plugin.
+    /// The JSON-formatted configuration settings for the web plugin.
     /// </summary>
     [StringLength(255)]
     public string Settings { get; set; }
@@ -49,13 +49,13 @@ public class WebPluginRequests
 public class WebPluginRequestsDto
 {
     /// <summary>
-    /// The unique identifier for the plugin.
+    /// The web plugin name.
     /// </summary>
     [FromRoute(Name = "name")]
     public string Name { get; set; }
 
     /// <summary>
-    /// The configuration settings for the plugin instance.
+    /// The configuration settings for the web plugin instance.
     /// </summary>
     [FromBody]
     public WebPluginRequests WebPlugin { get; set; }
@@ -79,7 +79,7 @@ public class WebPluginNameRequestDto
 public class WebPluginFromFileRequestDto
 {
     /// <summary>
-    /// Specifies whether to load system-level plugins.
+    /// Specifies whether to load the system plugins or not.
     /// </summary>
     [FromQuery(Name = "system")]
     public bool System { get; set; }
@@ -87,12 +87,12 @@ public class WebPluginFromFileRequestDto
 
 
 /// <summary>
-/// The request parameters for querying installed plugins.
+/// The request parameters for querying the installed plugins.
 /// </summary>
 public class GetWebPluginsRequestDto
 {
     /// <summary>
-    /// The optional filter for plugin enabled state.
+    /// The optional filter for the plugin enabled state.
     /// </summary>
     [FromQuery(Name = "enabled")]
     public bool? Enabled { get; set; }

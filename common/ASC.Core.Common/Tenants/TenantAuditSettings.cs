@@ -59,12 +59,12 @@ public class TenantAuditSettings : ISettings<TenantAuditSettings>
 }
 
 /// <summary>
-/// The tenant audit settings parameters.
+/// The tenant audit settings wrapper.
 /// </summary>
 public class TenantAuditSettingsWrapper
 {
     /// <summary>
-    /// The tenant audit settings.
+    /// The tenant audit settings parameters.
     /// </summary>
     public TenantAuditSettings Settings { get; set; }
 }

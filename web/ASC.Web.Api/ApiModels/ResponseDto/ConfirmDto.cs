@@ -37,12 +37,12 @@ public class ConfirmDto : IMapFrom<Validation>
     public ValidationResult Result { get; set; }
 
     /// <summary>
-    /// The room ID of the confirmation.
+    /// The confirmation room ID.
     /// </summary>
     public string RoomId { get; set; }
 
     /// <summary>
-    /// The title of the confirmation.
+    /// The confirmation title.
     /// </summary>
     public string Title { get; set; }
 }

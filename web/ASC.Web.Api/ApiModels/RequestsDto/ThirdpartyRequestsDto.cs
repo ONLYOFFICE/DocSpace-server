@@ -43,7 +43,7 @@ public class ThirdpartyRequestsDto
 }
 
 /// <summary>
-/// The request parameters for handling OAuth confirmation responses.
+/// The request parameters for generating OAuth confirmation code.
 /// </summary>
 public class ConfirmationCodeRequestDto
 {
@@ -72,7 +72,7 @@ public class ConfirmationCodeRequestDto
 public class ConfirmationCodeUrlRequestDto
 {
     /// <summary>
-    /// The identity provider to use for authentication.
+    /// The identity provider used for authentication.
     /// </summary>
     [FromRoute(Name = "provider")]
     public LoginProvider Provider { get; set; }

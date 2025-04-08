@@ -111,25 +111,25 @@ public class MigrationApiInfo
     public bool ImportGroups { get; set; }
 
     /// <summary>
-    /// The migration number of successed users.
+    /// The number of successfully migrated users.
     /// </summary>
     [ProtoMember(14)]
     public int SuccessedUsers { get; set; }
 
     /// <summary>
-    /// The migration failed users.
+    /// The number of unsuccessfully migrated users.
     /// </summary>
     [ProtoMember(15)]
     public int FailedUsers { get; set; }
 
     /// <summary>
-    /// The migration list of files.
+    /// The list of migrated files.
     /// </summary>
     [ProtoMember(16)]
     public List<string> Files { get; set; }
 
     /// <summary>
-    /// The migration list of errors.
+    /// The list of migration errors.
     /// </summary>
     [ProtoMember(17)]
     public List<string> Errors { get; set; }
