@@ -28,6 +28,7 @@ using System.Threading.Channels;
 
 using ASC.Common.Threading;
 using ASC.MessagingSystem.Data;
+using ASC.Web.Studio.Wallet;
 
 namespace ASC.Web.Studio;
 
@@ -97,7 +98,9 @@ public class Startup : BaseStartup
         
         services.RegisterQueue<RemovePortalOperation>();
         services.RegisterQueue<MigrationOperation>(timeUntilUnregisterInSeconds: 60 * 60 * 24);
-        
+
+        services.AddActivePassiveHostedService<TopUpWalletService>(_configuration);
+
         var lifeTime = TimeSpan.FromMinutes(5);
 
         services.AddHttpClient(WebhookSender.WEBHOOK)
