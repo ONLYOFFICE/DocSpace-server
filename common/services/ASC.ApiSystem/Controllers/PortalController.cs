@@ -57,7 +57,7 @@ public class PortalController(
     #region For TEST api
 
     /// <summary>
-    /// Test api
+    /// Test API.
     /// </summary>
     /// <path>apisystem/portal/test</path>
     [ApiExplorerSettings(IgnoreApi = true)]
@@ -76,8 +76,11 @@ public class PortalController(
     #region API methods
 
     /// <summary>
-    /// Register
+    /// Registers a new portal with the parameters specified in the request.
     /// </summary>
+    /// <short>
+    /// Register a portal
+    /// </short>
     /// <path>apisystem/portal/register</path>
     [Tags("Portal")]
     [SwaggerResponse(200, "Ok", typeof(IActionResult))]
@@ -316,8 +319,11 @@ public class PortalController(
     }
 
     /// <summary>
-    /// Remove
+    /// Deletes a portal with a name specified in the request.
     /// </summary>
+    /// <short>
+    /// Remove a portal
+    /// </short>
     /// <path>apisystem/portal/remove</path>
     [Tags("Portal")]
     [SwaggerResponse(200, "Ok", typeof(IActionResult))]
@@ -400,8 +406,11 @@ public class PortalController(
     }
 
     /// <summary>
-    /// Status
+    /// Changes a portal activation status with a value specified in the request.
     /// </summary>
+    /// <short>
+    /// Change a portal status
+    /// </short>
     /// <path>apisystem/portal/status</path>
     [Tags("Portal")]
     [SwaggerResponse(200, "Ok", typeof(IActionResult))]
@@ -460,8 +469,11 @@ public class PortalController(
     }
 
     /// <summary>
-    /// Checks if portal exists
+    /// Checks if the specified name is available to create a portal.
     /// </summary>
+    /// <short>
+    /// Validate the portal name
+    /// </short>
     /// <path>apisystem/portal/validateportalname</path>
     [Tags("Portal")]
     [SwaggerResponse(200, "Ok", typeof(IActionResult))]
@@ -492,8 +504,11 @@ public class PortalController(
     }
 
     /// <summary>
-    /// Gets a list of portals
+    /// Returns a list of all the portals registered for the user with the email address specified in the request.
     /// </summary>
+    /// <short>
+    /// Get portals
+    /// </short>
     /// <path>apisystem/portal/get</path>
     [Tags("Portal")]
     [SwaggerResponse(200, "Ok", typeof(IActionResult))]
@@ -564,8 +579,11 @@ public class PortalController(
     }
 
     /// <summary>
-    /// Signs in to portal
+    /// Signs in to the portal with the parameters specified in the request.
     /// </summary>
+    /// <short>
+    /// Sign in to the portal
+    /// </short>
     /// <path>apisystem/portal/signin</path>
     [Tags("Portal")]
     [SwaggerResponse(200, "Ok", typeof(IActionResult))]
