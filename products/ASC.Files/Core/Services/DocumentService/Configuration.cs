@@ -1027,17 +1027,17 @@ public class EncryptionKeysConfig
 }
 
 /// <summary>
-/// The settings for the "Feedback & Support" menu button.
+/// The settings for the "Feedback &amp; Support" menu button.
 /// </summary>
 public class FeedbackConfig
 {
     /// <summary>
-    /// The absolute URL to the website address which will be opened when clicking the "Feedback & Support" menu button.
+    /// The absolute URL to the website address which will be opened when clicking the "Feedback &amp; Support" menu button.
     /// </summary>
     public string Url { get; set; }
 
     /// <summary>
-    /// Shows or hides the "Feedback & Support" menu button.
+    /// Shows or hides the "Feedback &amp; Support" menu button.
     /// </summary>
     public bool Visible { get => true; }
 }

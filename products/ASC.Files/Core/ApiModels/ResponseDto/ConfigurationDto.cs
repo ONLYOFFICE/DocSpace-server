@@ -252,7 +252,7 @@ public class CustomizationConfigDto
 public class SubmitForm
 {
     /// <summary>
-    /// Specifies whether the "Complete & Submit" button will be displayed or hidden on the top toolbar.
+    /// Specifies whether the "Complete  &amp; Submit" button will be displayed or hidden on the top toolbar.
     /// </summary>
     public bool Visible { get; set; }
     /// <summary>
