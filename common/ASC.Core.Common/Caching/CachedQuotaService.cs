@@ -126,7 +126,6 @@ class CachedQuotaService() : IQuotaService
             return ctx.Modified(result);
         }, opt => opt.SetDuration(_cacheExpiration).SetFailSafe(true));
 
-
         return result;
     }
 

@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ZiggyCreatures.Caching.Fusion;
+
 namespace ASC.Webhooks.Core;
 
 [Scope]
@@ -387,42 +389,29 @@ public enum WebhookGroupStatus
     Status5xx = 16
 }
 
-[ProtoContract]
-public record WebhookCacheItem
-{
-    [ProtoMember(1)]
-    public string Key { get; set; }
-}
-
 [Singleton]
 public class WebhookCache
 {
-    private readonly ICache _cache;
-    private readonly ICacheNotify<WebhookCacheItem> _notify;
+    private readonly IFusionCache _cache;
     private readonly TimeSpan _cacheExpiration = TimeSpan.FromHours(1);
 
-    public WebhookCache(ICacheNotify<WebhookCacheItem> notify, ICache cache)
+    public WebhookCache(IFusionCacheProvider cacheProvider)
     {
-        _cache = cache;
-        _notify = notify;
-
-        _notify.Subscribe(i => _cache.Remove(i.Key), CacheNotifyAction.Remove);
+        _cache = cacheProvider.GetMemoryCache();
     }
 
     public T Get<T>(string key) where T : class
     {
-        return _cache.Get<T>(key);
+        return _cache.GetOrDefault<T>(key);
     }
 
     public void Insert<T>(string key, T value) where T : class
     {
-        _cache.Insert(key, value, _cacheExpiration);
+        _cache.Set(key, value, _cacheExpiration);
     }
 
     public async Task ClearAsync(string key)
     {
-        _cache.Remove(key);
-
-        await _notify.PublishAsync(new WebhookCacheItem { Key = key }, CacheNotifyAction.Remove);
+        await _cache.RemoveAsync(key);
     }
 }

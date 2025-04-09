@@ -59,46 +59,6 @@ public class AzRecord : IMapFrom<Acl>
     {
     }
 
-    public static implicit operator AzRecord(AzRecordCache cache)
-    {
-        var result = new AzRecord
-        {
-            TenantId = cache.Tenant
-        };
-
-
-        if (Guid.TryParse(cache.SubjectId, out var subjectId))
-        {
-            result.Subject = subjectId;
-        }
-
-        if (Guid.TryParse(cache.ActionId, out var actionId))
-        {
-            result.Action = actionId;
-        }
-
-        result.Object = cache.ObjectId;
-
-        if (AceTypeExtensions.TryParse(cache.Reaction, out var reaction))
-        {
-            result.AceType = reaction;
-        }
-
-        return result;
-    }
-
-    public static implicit operator AzRecordCache(AzRecord cache)
-    {
-        return new AzRecordCache
-        {
-            SubjectId = cache.Subject.ToString(),
-            ActionId = cache.Action.ToString(),
-            ObjectId = cache.Object,
-            Reaction = cache.AceType.ToStringFast(),
-            Tenant = cache.TenantId
-        };
-    }
-
     public override bool Equals(object obj)
     {
         return obj is AzRecord r &&
