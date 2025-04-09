@@ -292,7 +292,7 @@ public class CommonMethods(
             var header = request.Headers["X-Forwarded-For"].FirstOrDefault();
             if (!string.IsNullOrEmpty(header))
             {
-                return header;
+                return header.Split(',').First();
             }
         }
 
