@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,17 +26,20 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// The group member security request generic parameters.
+/// </summary>
 public class GroupMemberSecurityRequestDto<T>
 {
     /// <summary>
-    /// Folder Id
+    /// The folder ID.
     /// </summary>
     [FromRoute(Name = "folderId")]
-    public T FolderId { get; set; }
+    public required T FolderId { get; set; }
 
     /// <summary>
-    /// Group Id
+    /// The group ID.
     /// </summary>
     [FromRoute(Name = "groupId")]
-    public Guid GroupId { get; set; }
+    public required Guid GroupId { get; set; }
 }

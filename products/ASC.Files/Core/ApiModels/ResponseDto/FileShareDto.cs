@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,74 +26,107 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// The file sharing information and access rights.
+/// </summary>
 public class FileShareDto
 {
     /// <summary>
-    /// Sharing rights
+    /// The access rights type.
     /// </summary>
     public FileShare Access { get; set; }
 
     /// <summary>
-    /// A user who has the access to the specified file
+    /// The user who has the access to the specified file.
     /// </summary>
     public object SharedTo { get; set; }
 
     /// <summary>
-    /// Specifies if the file is locked by this user or not
+    /// Specifies if the access right is locked or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool IsLocked { get; set; }
 
     /// <summary>
-    /// Specifies if this user is an owner of the specified file or not
+    /// Specifies if the user is an owner of the specified file or not.
     /// </summary>
     public bool IsOwner { get; set; }
 
     /// <summary>
-    /// Spceifies if this user can edit the access to the specified file or not
+    /// Specifies if the user can edit the access to the specified file or not.
     /// </summary>
     public bool CanEditAccess { get; set; }
 
     /// <summary>
-    /// Subject type
+    /// The subject type.
     /// </summary>
     public SubjectType SubjectType { get; set; }
 }
 
+/// <summary>
+/// A shareable link for a file with its configuration and status.
+/// </summary>
 public class FileShareLink
 {
     /// <summary>
-    /// Id
+    /// The unique identifier of the shared link.
     /// </summary>
     public Guid Id { get; set; }
 
     /// <summary>
-    /// Title
+    /// The title of the shared content.
     /// </summary>
     public string Title { get; set; }
 
     /// <summary>
-    /// Share link
+    /// The URL for accessing the shared content.
     /// </summary>
     public string ShareLink { get; set; }
 
     /// <summary>
-    /// Expiration date
+    /// The date when the shared link expires.
     /// </summary>
     public ApiDateTime ExpirationDate { get; set; }
 
     /// <summary>
-    /// link type
+    /// The sharing link type (e.g., Invitation).
     /// </summary>
     public LinkType LinkType { get; set; }
+
+    /// <summary>
+    /// The password protection for accessing the shared content.
+    /// </summary>
     public string Password { get; set; }
+
+    /// <summary>
+    /// Indicates whether downloading of the shared content is prohibited.
+    /// </summary>
     public bool? DenyDownload { get; set; }
+
+    /// <summary>
+    /// Indicates whether the shared link has expired.
+    /// </summary>
     public bool? IsExpired { get; set; }
+
+    /// <summary>
+    /// Indicates whether this is the primary shared link.
+    /// </summary>
     public bool Primary { get; set; }
+
+    /// <summary>
+    /// Indicates whether the link is for the internal sharing only.
+    /// </summary>
     public bool? Internal { get; set; }
+
+    /// <summary>
+    /// The token for validating access requests.
+    /// </summary>
     public string RequestToken { get; set; }
 }
 
+/// <summary>
+/// Defines the types of the sharing links.
+/// </summary>
 public enum LinkType
 {
     [SwaggerEnum(Description = "Invitation")]

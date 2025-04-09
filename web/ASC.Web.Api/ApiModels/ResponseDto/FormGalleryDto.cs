@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,40 +26,43 @@
 
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
+/// <summary>
+/// The form gallery parameters.
+/// </summary>
 public class FormGalleryDto : IMapFrom<OFormSettings>
 {
     /// <summary>
-    /// Path
+    /// The form gallery path.
     /// </summary>
     public string Path { get; set; }
 
     /// <summary>
-    /// Domain
+    /// The form gallery domain.
     /// </summary>
     public string Domain { get; set; }
 
     /// <summary>
-    /// Ext
+    /// The form gallery extension.
     /// </summary>
     public string Ext { get; set; }
 
     /// <summary>
-    /// Upload path
+    /// The form gallery upload path.
     /// </summary>
     public string UploadPath { get; set; }
 
     /// <summary>
-    /// Upload domain
+    /// The form gallery upload domain.
     /// </summary>
     public string UploadDomain { get; set; }
 
     /// <summary>
-    /// Upload ext
+    /// The form gallery upload extension.
     /// </summary>
     public string UploadExt { get; set; }
 
     /// <summary>
-    /// Upload dashboard
+    /// The form gallery upload dashboard.
     /// </summary>
     public string UploadDashboard { get; set; }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -87,7 +87,7 @@ public class LdapController(
     }
 
     /// <summary>
-    /// Returns the LDAP autosynchronous cron expression for the current portal if it exists.
+    /// Returns the LDAP asynchronous cron expression for the current portal if it exists.
     /// </summary>
     /// <short>
     /// Get the LDAP cron expression
@@ -112,7 +112,7 @@ public class LdapController(
     }
 
     /// <summary>
-    /// Sets the LDAP autosynchronous cron expression to the current portal.
+    /// Sets the LDAP asynchronous cron expression to the current portal.
     /// </summary>
     /// <short>
     /// Set the LDAP cron expression
@@ -263,7 +263,7 @@ public class LdapController(
     /// Returns the LDAP synchronization process status.
     /// </summary>
     /// <short>
-    /// Get the LDAP synchronization process status
+    /// Get the LDAP synchronization status
     /// </short>
     /// <path>api/2.0/settings/ldap/status</path>
     [ApiExplorerSettings(IgnoreApi = true)]
@@ -309,7 +309,7 @@ public class LdapController(
             && (!SetupInfo.IsVisibleSettings(ManagementType.LdapSettings.ToStringFast())
                 || !(await tenantManager.GetCurrentTenantQuotaAsync()).Ldap))
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption, "Ldap");
+            throw new BillingException(Resource.ErrorNotAllowedOption);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,6 +26,9 @@
 
 namespace ASC.People.Api;
 
+///<summary>
+/// User API.
+///</summary>
 public class UserController(
     CommonLinkUtility commonLinkUtility,
     ICache cache,
@@ -80,7 +83,7 @@ public class UserController(
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
 {
     /// <summary>
-    /// Gets claims
+    /// Returns the user claims.
     /// </summary>
     /// <path>api/2.0/people/tokendiagnostics</path>
     [Tags("People / Profiles")]
@@ -533,6 +536,7 @@ public class UserController(
     /// <path>api/2.0/people/{userid}</path>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Deleted user detailed information", typeof(EmployeeFullDto))]
+    [SwaggerResponse(400, "The user is not suspended")]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "User not found")]
     [HttpDelete("{userid}")]
@@ -639,10 +643,10 @@ public class UserController(
     }
 
     /// <summary>
-    /// Removes guests from the list and excludes them from rooms to which you have invited them
+    /// Deletes guests from the list and excludes them from rooms to which they were invited.
     /// </summary>
     /// <short>
-    /// Removes guests from the list and from rooms
+    /// Delete guests
     /// </short>
     /// <path>api/2.0/people/guests</path>
     [SwaggerResponse(200, "Request parameters for deleting guests")]
@@ -680,10 +684,10 @@ public class UserController(
     }
 
     /// <summary>
-    /// Returns an link for share guest with another user
+    /// Returns a link to share a guest with another user.
     /// </summary>
     /// <short>
-    /// Get a guest share link
+    /// Get a guest sharing link
     /// </short>
     /// <path>api/2.0/people/guests/{userid}/share</path>
     [Tags("Portal / Guests")]
@@ -722,10 +726,10 @@ public class UserController(
     }
 
     /// <summary>
-    /// Approve a guest share link and returns the detailed information about a guest.
+    /// Approves a guest sharing link and returns the detailed information about a guest.
     /// </summary>
     /// <short>
-    /// Approve a guest share link
+    /// Approve a guest sharing link
     /// </short>
     /// <path>api/2.0/people/guests/share/approve</path>
     [Tags("People / Guests")]
@@ -924,7 +928,7 @@ public class UserController(
     }
 
     /// <summary>
-    /// Returns a list of profiles filtered by user status.
+    /// Returns a list of profiles filtered by the user status.
     /// </summary>
     /// <short>
     /// Get profiles by status
@@ -959,7 +963,7 @@ public class UserController(
     /// Returns a list of users with full information about them matching the parameters specified in the request.
     /// </summary>
     /// <short>
-    /// Search users and their information by extended filter
+    /// Search users with detaailed information by extended filter
     /// </short>
     /// <path>api/2.0/people/filter</path>
     /// <collection>list</collection>
@@ -996,7 +1000,7 @@ public class UserController(
     }
 
     /// <summary>
-    /// Returns the information about the People module.
+    /// Returns the information about the "People" module.
     /// </summary>
     /// <short>Get the People information</short>
     /// <path>api/2.0/people/info</path>
@@ -1108,6 +1112,7 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(409, "Data reassign process is not complete")]
     [HttpPut("delete", Order = -1)]
     public async IAsyncEnumerable<EmployeeFullDto> RemoveUsers(UpdateMembersRequestDto inDto)
     {
@@ -1303,7 +1308,7 @@ public class UserController(
     /// Returns a theme which is set to the current portal.
     /// </summary>
     /// <short>
-    /// Get portal theme
+    /// Get the portal theme
     /// </short>
     /// <path>api/2.0/people/theme</path>
     [Tags("People / Theme")]
@@ -1318,7 +1323,7 @@ public class UserController(
     /// Changes the current portal theme.
     /// </summary>
     /// <short>
-    /// Change portal theme
+    /// Change the portal theme
     /// </short>
     /// <path>api/2.0/people/theme</path>
     [Tags("People / Theme")]
@@ -1566,10 +1571,10 @@ public class UserController(
     }
 
     /// <summary>
-    /// Updates the user language with the parameter specified in the request.
+    /// Updates the user culture code with the parameters specified in the request.
     /// </summary>
     /// <short>
-    /// Update user language
+    /// Update a user culture code
     /// </short>
     /// <path>api/2.0/people/{userid}/culture</path>
     [Tags("People / Profiles")]
@@ -1577,7 +1582,7 @@ public class UserController(
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "User not found")]
     [HttpPut("{userid}/culture")]
-    public async Task<EmployeeFullDto> UpdateMemberCulture(UpdateMemberByIdRequestDto inDto)
+    public async Task<EmployeeFullDto> UpdateMemberCulture(UpdateMemberCultureByIdRequestDto inDto)
     {
         var user = await GetUserInfoAsync(inDto.UserId);
 
@@ -1587,9 +1592,9 @@ public class UserController(
         }
 
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser);
-        await _userManager.ChangeUserCulture(user, inDto.UpdateMember.CultureName);
+        await _userManager.ChangeUserCulture(user, inDto.Culture.CultureName);
         messageService.Send(MessageAction.UserUpdatedLanguage, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
-
+        await webhookManager.PublishAsync(WebhookTrigger.UserUpdated, user);
         return await employeeFullDtoHelper.GetFullAsync(user);
     }
 
@@ -1764,7 +1769,7 @@ public class UserController(
     }
 
     /// <summary>
-    /// Changes a status for the users with the IDs specified in the request.
+    /// Changes a status of the users with the IDs specified in the request.
     /// </summary>
     /// <short>
     /// Change a user status
@@ -1876,7 +1881,7 @@ public class UserController(
     }
 
     /// <summary>
-    /// Changes a type for the users with the IDs specified in the request.
+    /// Changes a type of the users with the IDs specified in the request.
     /// </summary>
     /// <short>
     /// Change a user type
@@ -1925,9 +1930,9 @@ public class UserController(
     }
 
     /// <summary>
-    /// Starts update type to user or guest with reassign rooms and shared files.
+    /// Starts updating the type of the user or guest when reassigning rooms and shared files.
     /// </summary>
-    /// <short>Start update user type</short>
+    /// <short>Update user type</short>
     /// <path>api/2.0/people/type</path>
     [Tags("People / User type")]
     [SwaggerResponse(200, "Update type progress", typeof(TaskProgressResponseDto))]
@@ -1976,14 +1981,14 @@ public class UserController(
     }
 
     /// <summary>
-    /// Returns the progress of the started update user type.
+    /// Returns the progress of updating the user type.
     /// </summary>
-    /// <short>Get the update progress</short>
+    /// <short>Get the progress of updating user type</short>
     /// <path>api/2.0/people/type/progress/{userid}</path>
     [Tags("People / User type")]
     [SwaggerResponse(200, "Update type progress", typeof(TaskProgressResponseDto))]
     [HttpGet("type/progress/{userid:guid}")]
-    public async Task<TaskProgressResponseDto> GetReassignProgressAsync(UserIdRequestDto inDto)
+    public async Task<TaskProgressResponseDto> GetChangeTypeProgressAsync(UserIdRequestDto inDto)
     {
         await _permissionContext.DemandPermissionsAsync(Constants.Action_AddRemoveUser);
 
@@ -1994,14 +1999,14 @@ public class UserController(
     }
 
     /// <summary>
-    /// Terminates the update type to user or guest.
+    /// Terminates the process of updating the type of the user or guest.
     /// </summary>
     /// <short>Terminate update user type</short>
     /// <path>api/2.0/people/type/terminate</path>
     [Tags("People / User type")]
     [SwaggerResponse(200, "Update type progress", typeof(TaskProgressResponseDto))]
     [HttpPut("type/terminate")]
-    public async Task<TaskProgressResponseDto> TerminateReassignAsync(TerminateRequestDto inDto)
+    public async Task<TaskProgressResponseDto> TerminateChangeTypeAsync(TerminateRequestDto inDto)
     {
         await _permissionContext.DemandPermissionsAsync(Constants.Action_AddRemoveUser);
 
@@ -2020,10 +2025,10 @@ public class UserController(
     }
 
     ///<summary>
-    /// Starts the process of recalculating quota.
+    /// Starts the process of recalculating a quota.
     /// </summary>
     /// <short>
-    /// Recalculate quota 
+    /// Recalculate a quota 
     /// </short>
     /// <path>api/2.0/people/recalculatequota</path>
     [ApiExplorerSettings(IgnoreApi = true)]
@@ -2036,10 +2041,10 @@ public class UserController(
     }
 
     /// <summary>
-    /// Checks the process of recalculating quota.
+    /// Checks the process of recalculating a quota.
     /// </summary>
     /// <short>
-    /// Check quota recalculation
+    /// Check the quota recalculation
     /// </short>
     /// <path>api/2.0/people/checkrecalculatequota</path>
     [ApiExplorerSettings(IgnoreApi = true)]
@@ -2123,7 +2128,7 @@ public class UserController(
     }
 
     /// <summary>
-    /// Resets a user quota limit with the ID specified in the request from the portal.
+    /// Resets a quota limit of users with the IDs specified in the request.
     /// </summary>
     /// <short>
     /// Reset a user quota limit
@@ -2134,6 +2139,7 @@ public class UserController(
     [SwaggerResponse(200, "User detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [SwaggerResponse(403, "The invitation link is invalid or its validity has expired")]
+    [SwaggerResponse(409, "Conflict - system user quota cannot be reset")]
     [HttpPut("resetquota")]
     public async IAsyncEnumerable<EmployeeFullDto> ResetUsersQuota(UpdateMembersQuotaRequestDto inDto)
     {
@@ -2141,7 +2147,7 @@ public class UserController(
         if (!coreBaseSettings.Standalone
             && !(await tenantManager.GetCurrentTenantQuotaAsync()).Statistic)
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption, "Statistic");
+            throw new BillingException(Resource.ErrorNotAllowedOption);
         }
 
         var users = await inDto.UserIds.ToAsyncEnumerable()
@@ -2451,8 +2457,11 @@ public class UserControllerAdditional<T>(
     : ApiControllerBase 
 {
     /// <summary>
-    /// Gets users with shared in room ID specified in request
+    /// Returns the users with the sharing settings in a room with the ID specified in request.
     /// </summary>
+    /// <short>
+    /// Get users with room sharing settings
+    /// </short>
     /// <path>api/2.0/people/room/{id}</path>
     [Tags("People / Search")]
     [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<EmployeeFullDto>))]
@@ -2481,6 +2490,7 @@ public class UserControllerAdditional<T>(
             inDto.EmployeeStatus,
             inDto.ActivationStatus,
             inDto.ExcludeShared ?? false,
+            inDto.IncludeShared ?? false,
             filterSeparator,
             includeStrangers,
             inDto.Area,
@@ -2495,6 +2505,7 @@ public class UserControllerAdditional<T>(
                            inDto.EmployeeStatus,
                            inDto.ActivationStatus,
                            inDto.ExcludeShared ?? false,
+                           inDto.IncludeShared ?? false,
                            filterSeparator,
                            includeStrangers,
                            inDto.Area,

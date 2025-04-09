@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,12 +27,12 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// 
+/// The request parameters for handling the payment redirect URL.
 /// </summary>
 public class PaymentUrlRequestDto
 {
     /// <summary>
-    /// Back URL
+    /// The URL where the user will be redirected after payment processing.
     /// </summary>
     [FromQuery(Name = "backUrl")]
     public string BackUrl { get; set; }
@@ -40,12 +40,12 @@ public class PaymentUrlRequestDto
 
 
 /// <summary>
-/// 
+/// The request parameters for managing the payment information.
 /// </summary>
 public class PaymentInformationRequestDto
 {
     /// <summary>
-    /// Refresh
+    /// Specifies whether to refresh the payment information cache or not.
     /// </summary>
     [FromQuery(Name = "refresh")]
     public bool Refresh { get; set; }

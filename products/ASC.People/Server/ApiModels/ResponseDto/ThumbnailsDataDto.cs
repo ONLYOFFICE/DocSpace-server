@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,6 +26,9 @@
 
 namespace ASC.People.ApiModels.ResponseDto;
 
+///<summary>
+/// The thumbnails data parameters.
+///</summary>
 public class ThumbnailsDataDto
 {
     private ThumbnailsDataDto() { }
@@ -46,37 +49,37 @@ public class ThumbnailsDataDto
     }
 
     /// <summary>
-    /// Original photo
+    /// The thumbnail original photo.
     /// </summary>
     [SwaggerSchemaCustom(Example = "default_user_photo_size_1280-1280.png")]
     public string Original { get; set; }
 
     /// <summary>
-    /// Retina
+    /// The thumbnail retina.
     /// </summary>
     [SwaggerSchemaCustom(Example = "default_user_photo_size_360-360.png")]
     public string Retina { get; set; }
 
     /// <summary>
-    /// Maximum size
+    /// The thumbnail maximum size photo.
     /// </summary>
     [SwaggerSchemaCustom(Example = "default_user_photo_size_200-200.png")]
     public string Max { get; set; }
 
     /// <summary>
-    /// Big
+    /// The thumbnail big size photo.
     /// </summary>
     [SwaggerSchemaCustom(Example = "default_user_photo_size_82-82.png")]
     public string Big { get; set; }
 
     /// <summary>
-    /// Medium
+    /// The thumbnail medium size photo.
     /// </summary>
     [SwaggerSchemaCustom(Example = "default_user_photo_size_48-48.png")]
     public string Medium { get; set; }
 
     /// <summary>
-    /// Small
+    /// The thumbnail small size photo.
     /// </summary>
     [SwaggerSchemaCustom(Example = "default_user_photo_size_32-32.png")]
     public string Small { get; set; }

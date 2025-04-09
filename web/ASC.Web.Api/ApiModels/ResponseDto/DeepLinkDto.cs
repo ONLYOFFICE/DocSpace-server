@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,20 +26,23 @@
 
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
+/// <summary>
+/// The deep link parameters.
+/// </summary>
 public class DeepLinkDto
 {
     /// <summary>
-    /// Android package name
+    /// The Android package name.
     /// </summary>
     public string AndroidPackageName { get; set; }
 
     /// <summary>
-    /// Url
+    /// The deep link URL. 
     /// </summary>
     public string Url { get; set; }
 
     /// <summary>
-    /// Ios package id
+    /// The deep link IOS package ID.
     /// </summary>
     public string IosPackageId { get; set; }
 }

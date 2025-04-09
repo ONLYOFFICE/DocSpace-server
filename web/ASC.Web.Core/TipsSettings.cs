@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,11 +27,13 @@
 namespace ASC.Web.Studio.Core;
 
 /// <summary>
+/// The user interface tip settings.
 /// </summary>
 public class TipsSettings : ISettings<TipsSettings>
 {
-    /// <summary>Specifies if the tips will be shown or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the user interface tips will be shown or hidden.
+    /// </summary>
     [DataMember(Name = "Show")]
     public bool Show { get; set; }
 

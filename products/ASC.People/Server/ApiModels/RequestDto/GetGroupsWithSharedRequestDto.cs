@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,18 +28,18 @@ namespace ASC.People.ApiModels.RequestDto;
 
 
 /// <summary>
-/// 
+/// The request parameters for getting groups with their sharing settings.
 /// </summary>
 public class GetGroupsWithSharedRequestDto<T>
 {
     /// <summary>
-    /// ID
+    /// The group ID.
     /// </summary>
     [FromRoute(Name = "id")]
-    public T Id { get; set; }
+    public required T Id { get; set; }
 
     /// <summary>
-    /// Exclude shared
+    /// Specifies whether to exclude the group sharing settings from the response.
     /// </summary>
     [FromQuery(Name = "excludeShared")]
     public bool? ExcludeShared { get; set; }

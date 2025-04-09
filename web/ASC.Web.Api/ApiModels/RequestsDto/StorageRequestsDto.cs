@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,17 +27,17 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// Storage settings request parameters
+/// The request parameters for configuring the storage module settings.
 /// </summary>
 public class StorageRequestsDto
 {
     /// <summary>
-    /// Storage name
+    /// The name for the storage module to be configured.
     /// </summary>
-    public string Module { get; set; }
+    public required string Module { get; set; }
 
     /// <summary>
-    /// Storage properties
+    /// The list of configuration key-value pairs for the storage module.
     /// </summary>
     public IEnumerable<ItemKeyValuePair<string, string>> Props { get; set; }
 }

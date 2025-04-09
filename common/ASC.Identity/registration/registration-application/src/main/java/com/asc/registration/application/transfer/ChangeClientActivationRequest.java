@@ -28,14 +28,15 @@
 package com.asc.registration.application.transfer;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 import lombok.*;
 
 /**
- * ChangeTenantClientActivationCommandRequest is a data transfer object (DTO) used in the REST
- * layer. It represents a request to change the activation status of a tenant's client. This class
- * contains the necessary information to change the client's activation status. It implements {@link
+ * ChangeClientActivationRequest is a data transfer object (DTO) used in the REST layer. It
+ * represents a request to change the activation status of a tenant's client. This class contains
+ * the necessary information to change the client's activation status. It implements {@link
  * Serializable} to allow instances of this class to be serialized.
  *
  * <p>The class is annotated with Lombok annotations to generate boilerplate code:
@@ -51,7 +52,7 @@ import lombok.*;
  * Example usage:
  *
  * <pre>{@code
- * ChangeTenantClientActivationCommandRequest request = ChangeTenantClientActivationCommandRequest.builder()
+ * ChangeClientActivationRequest request = ChangeClientActivationRequest.builder()
  *     .enabled(true)
  *     .build();
  * }</pre>
@@ -63,9 +64,11 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChangeTenantClientActivationCommandRequest implements Serializable {
+@Schema(description = "Request to change the activation status of a tenant's client")
+public class ChangeClientActivationRequest implements Serializable {
   /** Indicates whether the client's activation status is enabled or disabled. */
-  @JsonProperty("status")
   @NotNull
+  @JsonProperty("status")
+  @Schema(description = "The activation status of the client", example = "true")
   private boolean enabled;
 }

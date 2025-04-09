@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,31 +24,20 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Notify.IntegrationEvents.EventHandling;
+namespace ASC.Files.Core.Log;
 
-[Scope]
-public class EncryptionDataStorageRequestedIntegrationEventHandler : IIntegrationEventHandler<EncryptionDataStorageRequestedIntegrationEvent>
+internal static partial class CreateRoomTemplateOperationLogger
 {
-    private readonly ILogger _logger;
-    private readonly EncryptionWorker _encryptionWorker;
-    
-    public EncryptionDataStorageRequestedIntegrationEventHandler(EncryptionWorker encryptionWorker,
-                                                                 ILogger<EncryptionDataStorageRequestedIntegrationEventHandler> logger)
-    {
-        _encryptionWorker = encryptionWorker ?? throw new ArgumentNullException(nameof(encryptionWorker));
-        _logger = logger;
-    }
+    [LoggerMessage(LogLevel.Error, "CreateRoomTemplateOperation")]
+    public static partial void ErrorCreateRoomTemplate(this ILogger<CreateRoomTemplateOperation> logger, Exception exception);
 
-    public async Task Handle(EncryptionDataStorageRequestedIntegrationEvent @event)
-    {
-        CustomSynchronizationContext.CreateContext();
-        using (_logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
-        {
-            _logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
+    [LoggerMessage(LogLevel.Warning, "CreateRoomTemplateOperation")]
+    public static partial void WarningCanNotCopyFile(this ILogger<CreateRoomTemplateOperation> logger, Exception exception);
 
-            _encryptionWorker.Start(@event.EncryptionSettings, @event.ServerRootPath);
+    [LoggerMessage(LogLevel.Warning, "CreateRoomTemplateOperation")]
+    public static partial void WarningCanNotCopyLogo(this ILogger<CreateRoomTemplateOperation> logger, Exception exception);
 
-            await Task.CompletedTask;
-        }
-    }
+    [LoggerMessage(LogLevel.Warning, "CreateRoomTemplateOperation")]
+    public static partial void WarningCanNotCopyFolder(this ILogger<CreateRoomTemplateOperation> logger, Exception exception);
 }
+

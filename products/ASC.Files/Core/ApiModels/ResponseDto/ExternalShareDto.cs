@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,42 +28,53 @@ using Status = ASC.Files.Core.Security.Status;
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// The external sharing information and validation data.
+/// </summary>
 public class ExternalShareDto : IMapFrom<ValidationInfo>
 {
     /// <summary>
-    /// External data status
+    /// The external data status.
     /// </summary>
     public Status Status { get; set; }
 
     /// <summary>
-    /// External data ID
+    /// The external data ID.
     /// </summary>
     public string Id { get; set; }
 
     /// <summary>
-    /// External data title
+    /// The external data title.
     /// </summary>
     public string Title { get; set; }
 
     /// <summary>
-    /// Tenant ID
+    /// The tenant ID.
     /// </summary>
     public int TenantId { get; set; }
 
+    /// <summary>
+    /// The unique identifier of the shared entity.
+    /// </summary>
     public string EntityId { get; set; }
    
+    /// <summary>
+    /// The title of the shared entry.
+    /// </summary>
     public string EntryTitle { get; set; }
 
     /// <summary>
-    /// Specifies whether to share the external data or not
+    /// Specifies whether to share the external data or not.
     /// </summary>
     public bool Shared { get; set; }
 
     /// <summary>
-    /// Link ID
+    /// The link ID of the external data.
     /// </summary>
     public Guid LinkId { get; set; }
     
-    /// <summary>Specifies whether the user is authenticated or not</summary>
+    /// <summary>
+    /// Specifies whether the user is authenticated or not.
+    /// </summary>
     public bool IsAuthenticated { get; set; }
 }

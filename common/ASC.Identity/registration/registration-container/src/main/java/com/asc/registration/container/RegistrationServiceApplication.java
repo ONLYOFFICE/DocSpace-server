@@ -62,27 +62,29 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @OpenAPIDefinition(
     info =
         @Info(
-            title = "Registered Clients API",
+            title = "ASC.Identity.Registration",
             version = "1.0.0",
-            description = "ASC.Identity Clients Registration API",
+            description = "API for managing oauth2 clients",
+            termsOfService = "",
             contact =
                 @Contact(
                     name = "ONLYOFFICE Support",
                     email = "support@onlyoffice.com",
                     url = "https://onlyoffice.com"),
-            license = @License(name = "Apache 2.0")),
-    servers = {@Server(description = "ASC.Identity Clients Registration API")})
+            license =
+                @License(
+                    name = "Apache 2.0",
+                    url = "https://www.apache.org/licenses/LICENSE-2.0.html")),
+    servers = {
+      @Server(
+          url = "http://localhost:8080",
+          description = "Local ASC.Identity.Registration API Server")
+    })
 @SecuritySchemes({
   @SecurityScheme(
-      name = "ascAuthAdmin",
+      name = "x-signature",
       paramName = "x-signature",
-      description = "ASC JWT Signature for Admin Authorization",
-      type = SecuritySchemeType.APIKEY,
-      in = SecuritySchemeIn.COOKIE),
-  @SecurityScheme(
-      name = "ascAuthUser",
-      paramName = "x-signature",
-      description = "ASC JWT Signature for User Authorization",
+      description = "ASC JWT Signature",
       type = SecuritySchemeType.APIKEY,
       in = SecuritySchemeIn.COOKIE)
 })

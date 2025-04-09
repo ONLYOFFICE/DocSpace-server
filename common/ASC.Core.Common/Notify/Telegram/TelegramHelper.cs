@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,6 +33,9 @@ public class TelegramHelper(ConsumerFactory consumerFactory,
     IHttpClientFactory httpClientFactory,
     ILogger<TelegramHelper> logger)
 {
+    /// <summary>
+    /// The registration Telegram status.
+    /// </summary>
     public enum RegStatus
     {
         NotRegistered,

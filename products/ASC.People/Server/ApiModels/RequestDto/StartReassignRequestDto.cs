@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,22 +27,22 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for starting the reassignment process
+/// The request parameters for starting the reassignment process.
 /// </summary>
 public class StartReassignRequestDto
 {
     /// <summary>
-    /// User ID whose data will be reassigned to another user
+    /// The user ID whose data will be reassigned to another user.
     /// </summary>
-    public Guid FromUserId { get; set; }
+    public required Guid FromUserId { get; set; }
 
     /// <summary>
-    /// User ID to whom all the data will be reassigned
+    /// The user ID to whom all the data will be reassigned.
     /// </summary>
-    public Guid ToUserId { get; set; }
+    public required Guid ToUserId { get; set; }
 
     /// <summary>
-    /// Specifies whether to delete a profile when the data reassignment will be finished or not
+    /// Specifies whether to delete a profile when the data reassignment will be finished or not.
     /// </summary>
     public bool DeleteProfile { get; set; }
 }

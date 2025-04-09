@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -670,7 +670,7 @@ internal abstract class SecurityBaseDao<T>(
     }
 
     public async IAsyncEnumerable<UserInfoWithShared> GetUsersWithSharedAsync(FileEntry<T> entry, string text, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus, 
-        bool excludeShared, string separator, bool includeStrangers, Area area, bool? invitedByMe, Guid? inviterId, IEnumerable<EmployeeType> employeeTypes, int offset = 0, int count = -1)
+        bool excludeShared, bool includeShared, string separator, bool includeStrangers, Area area, bool? invitedByMe, Guid? inviterId, IEnumerable<EmployeeType> employeeTypes, int offset = 0, int count = -1)
     {
         if (entry == null || count == 0)
         {
@@ -681,7 +681,7 @@ internal abstract class SecurityBaseDao<T>(
         var mappedId = await daoFactory.GetMapping<T>().MappingIdAsync(entry.Id);
         
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var q1 = GetUsersWithSharedQuery(tenantId, mappedId, entry, text, employeeStatus, activationStatus, excludeShared, filesDbContext, separator, 
+        var q1 = GetUsersWithSharedQuery(tenantId, mappedId, entry, text, employeeStatus, activationStatus, excludeShared, includeShared, filesDbContext, separator, 
             includeStrangers, area, invitedByMe, inviterId, employeeTypes);
 
         if (offset > 0)
@@ -701,7 +701,7 @@ internal abstract class SecurityBaseDao<T>(
     }
 
     public async Task<int> GetUsersWithSharedCountAsync(FileEntry<T> entry, string text, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus,
-        bool excludeShared, string separator, bool includeStrangers, Area area, bool? invitedByMe, Guid? inviterId, IEnumerable<EmployeeType> employeeTypes)
+        bool excludeShared, bool includeShared, string separator, bool includeStrangers, Area area, bool? invitedByMe, Guid? inviterId, IEnumerable<EmployeeType> employeeTypes)
     {
         if (entry == null)
         {
@@ -712,7 +712,7 @@ internal abstract class SecurityBaseDao<T>(
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var mappedId = await daoFactory.GetMapping<T>().MappingIdAsync(entry.Id);
         
-        var q1 = GetUsersWithSharedQuery(tenantId, mappedId, entry, text, employeeStatus, activationStatus, excludeShared, filesDbContext, separator, includeStrangers, area, invitedByMe, inviterId, employeeTypes);
+        var q1 = GetUsersWithSharedQuery(tenantId, mappedId, entry, text, employeeStatus, activationStatus, excludeShared, includeShared, filesDbContext, separator, includeStrangers, area, invitedByMe, inviterId, employeeTypes);
 
         return await q1.CountAsync();
     }
@@ -725,6 +725,7 @@ internal abstract class SecurityBaseDao<T>(
         EmployeeStatus? employeeStatus,
         EmployeeActivationStatus? activationStatus,
         bool excludeShared,
+        bool includeShared,
         FilesDbContext filesDbContext,
         string separator,
         bool includeStrangers,
@@ -851,6 +852,15 @@ internal abstract class SecurityBaseDao<T>(
                         s.Subject == u.Id) && 
                     u.Id != entry.CreateBy)
                 .Select(u => new UserWithShared { User = u, Shared = false })
+            : includeShared
+            ? q.Where(u =>
+                    filesDbContext.Security.Any(s =>
+                        s.TenantId == tenantId &&
+                        s.EntryId == entryId &&
+                        s.EntryType == entry.FileEntryType &&
+                        s.Subject == u.Id) ||
+                    u.Id == entry.CreateBy)
+                .Select(u => new UserWithShared { User = u, Shared = true })
             : q.GroupJoin(
                     filesDbContext.Security, 
                     user => new

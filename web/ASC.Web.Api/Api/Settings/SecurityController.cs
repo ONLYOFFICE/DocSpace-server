@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -238,10 +238,10 @@ public class SecurityController(
     }
 
     /// <summary>
-    /// Sets the access settings to the products with the IDs specified in the request.
+    /// Sets the security settings to the modules with the IDs specified in the request.
     /// </summary>
     /// <short>
-    /// Set the access settings to products
+    /// Set the security settings to modules
     /// </short>
     /// <path>api/2.0/settings/security/access</path>
     /// <collection>list</collection>
@@ -295,7 +295,7 @@ public class SecurityController(
     }
 
     /// <summary>
-    /// Returns a list of all the product administrators with the ID specified in the request.
+    /// Returns a list of all the administrators of a product with the ID specified in the request.
     /// </summary>
     /// <short>
     /// Get the product administrators
@@ -316,7 +316,7 @@ public class SecurityController(
     }
 
     /// <summary>
-    /// Checks if the selected user is a product administrator with the ID specified in the request.
+    /// Checks if the selected user is an administrator of a product with the ID specified in the request.
     /// </summary>
     /// <short>
     /// Check a product administrator
@@ -332,7 +332,7 @@ public class SecurityController(
     }
 
     /// <summary>
-    /// Sets the selected user as a product administrator with the ID specified in the request.
+    /// Sets the selected user as an administrator of a product with the ID specified in the request.
     /// </summary>
     /// <short>
     /// Set a product administrator
@@ -350,7 +350,7 @@ public class SecurityController(
                         (await tenantManager.GetCurrentTenantQuotaAsync()).Free;
         if (isStartup)
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption, "Administrator");
+            throw new BillingException(Resource.ErrorNotAllowedOption);
         }
 
         await webItemSecurity.SetProductAdministrator(inDto.ProductId, inDto.UserId, inDto.Administrator);
@@ -381,7 +381,7 @@ public class SecurityController(
     /// Updates the login settings with the parameters specified in the request.
     /// </summary>
     /// <short>
-    /// Update login settings
+    /// Update the login settings
     /// </short>
     /// <path>api/2.0/settings/security/loginsettings</path>
     [Tags("Settings / Login settings")]
@@ -407,7 +407,7 @@ public class SecurityController(
     /// Returns the portal login settings.
     /// </summary>
     /// <short>
-    /// Get login settings
+    /// Get the login settings
     /// </short>
     /// <path>api/2.0/settings/security/loginsettings</path>
     [Tags("Settings / Login settings")]
@@ -423,8 +423,11 @@ public class SecurityController(
     }
 
     /// <summary>
-    ///  Returns the portal login settings.
+    /// Resets the portal login settings to default.
     /// </summary>
+    /// <short>
+    /// Reset the login settings
+    /// </short>
     /// <path>api/2.0/settings/security/loginsettings</path>
     [Tags("Settings / Login settings")]
     [SwaggerResponse(200, "Login settings", typeof(LoginSettingsDto))]

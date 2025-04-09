@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,6 +26,9 @@
 
 namespace ASC.Security.Cryptography;
 
+/// <summary>
+/// The confirmation result.
+/// </summary>
 [Scope]
 public class EmailValidationKeyProvider
 {
@@ -180,43 +183,43 @@ public class EmailValidationKeyProvider
 }
 
 /// <summary>
-/// Confirmation email parameters
+/// The confirmation email parameters.
 /// </summary>
 public class EmailValidationKeyModel
 {
     /// <summary>
-    /// Key
+    /// The email validation key. 
     /// </summary>
     public string Key { get; set; }
 
     /// <summary>
-    /// Employee type
+    /// The user type.
     /// </summary>
     public EmployeeType? EmplType { get; init; }
 
     /// <summary>
-    /// Email
+    /// The email address.
     /// </summary>
     [EmailAddress]
     public string Email { get; init; }
 
     /// <summary>
-    /// User ID
+    /// The user ID.
     /// </summary>
     public Guid? UiD { get; init; }
 
     /// <summary>
-    /// Confirmation email type
+    /// The confirmation email type.
     /// </summary>
     public ConfirmType? Type { get; init; }
 
     /// <summary>
-    /// Access an account for the first time or not
+    /// Specifies whether it is the first time account access or not.
     /// </summary>
     public string First { get; init; }
 
     /// <summary>
-    /// Room ID
+    /// The room ID.
     /// </summary>
     public string RoomId { get; init; }
 

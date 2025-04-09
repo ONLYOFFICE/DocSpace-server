@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,7 +26,13 @@
 
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
+/// <summary>
+/// The request parameters for managing the deep link configuration.
+/// </summary>
 public class DeepLinkConfigurationRequestsDto
 {
+    /// <summary>
+    /// The deep link settings for the specified tenant.
+    /// </summary>
     public TenantDeepLinkSettings DeepLinkSettings { get; set; }
 }

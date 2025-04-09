@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -67,6 +67,11 @@ public class WebhookManager(
 [Scope(GenericArguments = [typeof(string)])]
 public class WebhookFileEntryAccessChecker<T>(FileSecurity fileSecurity) : IWebhookAccessChecker<FileEntry<T>>
 {
+    public bool CheckIsTarget(FileEntry<T> fileEntry, string targetId)
+    {
+        return fileEntry.Id.ToString() == targetId;
+    }
+
     public async Task<bool> CheckAccessAsync(FileEntry<T> fileEntry, Guid userId)
     {
         return await fileSecurity.CanReadAsync(fileEntry, userId);

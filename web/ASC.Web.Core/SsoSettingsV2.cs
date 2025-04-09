@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,6 +26,9 @@
 
 namespace ASC.Web.Studio.UserControls.Management.SingleSignOnSettings;
 
+/// <summary>
+/// The SSO portal settings.
+/// </summary>
 public class SsoSettingsV2 : ISettings<SsoSettingsV2>
 {
     [JsonIgnore]
@@ -94,91 +97,96 @@ public class SsoSettingsV2 : ISettings<SsoSettingsV2>
     public DateTime LastModified { get; set; }
 
     /// <summary>
-    /// Specifies if SSO is enabled or not
+    /// Specifies if the SSO settings are enabled or not.
     /// </summary>
     public bool? EnableSso { get; set; }
 
     /// <summary>
-    /// IDP settings
+    /// The SSO IdP settings.
     /// </summary>
     public SsoIdpSettings IdpSettings { get; set; }
 
     /// <summary>
-    /// List of IDP certificates
+    /// The list of the IdP certificates.
     /// </summary>
     public List<SsoCertificate> IdpCertificates { get; set; }
 
     /// <summary>
-    /// IDP advanced certificate
+    /// The IdP advanced certificate.
     /// </summary>
     public SsoIdpCertificateAdvanced IdpCertificateAdvanced { get; set; }
 
     /// <summary>
-    /// SP login label
+    /// The SP login label.
     /// </summary>
     public string SpLoginLabel { get; set; }
 
     /// <summary>
-    /// List of SP certificates
+    /// The list of the SP certificates.
     /// </summary>
     public List<SsoCertificate> SpCertificates { get; set; }
 
     /// <summary>
-    /// SP advanced certificate
+    /// The SP advanced certificate.
     /// </summary>
     public SsoSpCertificateAdvanced SpCertificateAdvanced { get; set; }
 
     /// <summary>
-    /// Field mapping
+    /// The SSO field mapping.
     /// </summary>
     public SsoFieldMapping FieldMapping { get; set; }
 
     /// <summary>
-    /// Specifies if the authentication page will be hidden or not
+    /// Specifies if the authentication page will be hidden or not.
     /// </summary>
     public bool HideAuthPage { get; set; }
 
-    /// <summary>Users type</summary>
-    /// <type>ASC.Core.Users.EmployeeType, ASC.Core.Common</type>
+    /// <summary>
+    /// The user type.
+    /// </summary>
     public int UsersType { get; set; }
 
-    /// <summary>Specifies if the email verification is disabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the email verification is disabled or not.
+    /// </summary>
     public bool DisableEmailVerification { get; set; }
 }
 
 
 #region SpSettings
 
+/// <summary>
+/// The SSO IdP settings.
+/// </summary>
 public class SsoIdpSettings
 {
     /// <summary>
-    /// Entity ID
+    /// The entity ID.
     /// </summary>
     public string EntityId { get; init; }
 
     /// <summary>
-    /// SSO URL
+    /// The SSO URL.
     /// </summary>
     public string SsoUrl { get; init; }
 
     /// <summary>
-    /// SSO binding
+    /// The SSO binding.
     /// </summary>
     public string SsoBinding { get; init; }
 
     /// <summary>
-    /// SLO URL
+    /// The SLO URL.
     /// </summary>
     public string SloUrl { get; init; }
 
     /// <summary>
-    /// SLO binding
+    /// The SLO binding.
     /// </summary>
     public string SloBinding { get; init; }
 
     /// <summary>
-    /// Name ID format
+    /// The name ID format.
     /// </summary>
     public string NameIdFormat { get; set; }
 }
@@ -188,36 +196,39 @@ public class SsoIdpSettings
 
 #region FieldsMapping
 
+/// <summary>
+/// The SSO field mapping.
+/// </summary>
 public class SsoFieldMapping
 {
     /// <summary>
-    /// First name
+    /// The first name.
     /// </summary>
     public string FirstName { get; init; }
 
     /// <summary>
-    /// Last name
+    /// The last name.
     /// </summary>
     public string LastName { get; init; }
 
     /// <summary>
-    /// Email
+    /// The email address.
     /// </summary>
     [EmailAddress]
     public string Email { get; init; }
 
     /// <summary>
-    /// Title
+    /// The title.
     /// </summary>
     public string Title { get; set; }
 
     /// <summary>
-    /// Location
+    /// The location.
     /// </summary>
     public string Location { get; set; }
 
     /// <summary>
-    /// Phone
+    /// The phone number.
     /// </summary>
     public string Phone { get; set; }
 }
@@ -227,111 +238,121 @@ public class SsoFieldMapping
 
 #region Certificates
 
+
+/// <summary>
+/// The SSO certificate parameters.
+/// </summary>
 public class SsoCertificate
 {
     /// <summary>
-    /// Specifies if a certificate is self-signed or not
+    /// Specifies if a certificate is self-signed or not.
     /// </summary>
     public bool SelfSigned { get; set; }
 
     /// <summary>
-    /// Certificate
+    /// The CRT certificate file.
     /// </summary>
     public string Crt { get; set; }
 
     /// <summary>
-    /// Key
+    /// The certificate key.
     /// </summary>
     public string Key { get; set; }
 
     /// <summary>
-    /// Action
+    /// The certificate action.
     /// </summary>
     public string Action { get; set; }
 
     /// <summary>
-    /// Domain name
+    /// The certificate domain name.
     /// </summary>
     public string DomainName { get; set; }
 
     /// <summary>
-    /// Start date
+    /// The certificate start date.
     /// </summary>
     public DateTime StartDate { get; set; }
 
     /// <summary>
-    /// Expiration date
+    /// The certificate expiration date.
     /// </summary>
     public DateTime ExpiredDate { get; set; }
 }
 
+/// <summary>
+/// The IdP advanced certificate parameters.
+/// </summary>
 public class SsoIdpCertificateAdvanced
 {
     /// <summary>
-    /// Verification algorithm
+    /// The certificate verification algorithm.
     /// </summary>
     public string VerifyAlgorithm { get; set; }
 
     /// <summary>
-    /// Specifies if the signatures of the SAML authentication responses sent to SP will be verified or not
+    /// Specifies if the signatures of the SAML authentication responses sent to SP will be verified or not.
     /// </summary>
     public bool VerifyAuthResponsesSign { get; set; }
 
     /// <summary>
-    /// Specifies if the signatures of the SAML logout requests sent to SP will be verified or not
+    /// Specifies if the signatures of the SAML logout requests sent to SP will be verified or not.
     /// </summary>
     public bool VerifyLogoutRequestsSign { get; set; }
 
     /// <summary>
-    /// Specifies if the signatures of the SAML logout responses sent to SP will be verified or not
+    /// Specifies if the signatures of the SAML logout responses sent to SP will be verified or not.
     /// </summary>
     public bool VerifyLogoutResponsesSign { get; set; }
 
     /// <summary>
-    /// Decryption algorithm
+    /// The certificate decryption algorithm.
     /// </summary>
     public string DecryptAlgorithm { get; set; }
 
     /// <summary>
-    /// Specifies if the assertions will be decrypted or not
+    /// Specifies if the assertions will be decrypted or not.
     /// </summary>
     public bool DecryptAssertions { get; set; }
 }
 
+/// <summary>
+/// The SP advanced certificate parameters.
+/// </summary>
 public class SsoSpCertificateAdvanced
 {
     /// <summary>
-    /// Signing algorithm
+    /// The certificate signing algorithm.
     /// </summary>
     public string SigningAlgorithm { get; set; }
 
     /// <summary>
-    /// Specifies if SP will sign the SAML authentication requests sent to IdP or not
+    /// Specifies if SP will sign the SAML authentication requests sent to IdP or not.
     /// </summary>
     public bool SignAuthRequests { get; set; }
 
     /// <summary>
-    /// Specifies if SP will sign the SAML logout requests sent to IdP or not
+    /// Specifies if SP will sign the SAML logout requests sent to IdP or not.
     /// </summary>
     public bool SignLogoutRequests { get; set; }
 
     /// <summary>
-    /// Specifies if sign the SAML logout responses sent to IdP or not
+    /// Specifies if SP will sign the SAML logout responses sent to IdP or not.
     /// </summary>
     public bool SignLogoutResponses { get; set; }
 
     /// <summary>
-    /// Encryption algorithm
+    /// The certificate encryption algorithm.
     /// </summary>
     public string EncryptAlgorithm { get; set; }
 
     /// <summary>
-    /// Decryption algorithm
+    /// The certificate decryption algorithm.
     /// </summary>
     public string DecryptAlgorithm { get; set; }
    
     /// <summary>
-    /// Specifies if the assertions will be encrypted or not
+    /// Specifies if the assertions will be encrypted or not.
     /// </summary>
     public bool EncryptAssertions { get; set; }
 }

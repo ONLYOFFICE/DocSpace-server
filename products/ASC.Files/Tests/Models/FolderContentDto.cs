@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,21 +26,48 @@
 
 namespace ASC.Files.Tests.Models;
 
+/// <summary>
+/// The folder content parameters.
+/// </summary>
 public class FolderContentDto
 {
+    /// <summary>
+    /// The list of files from the folder.
+    /// </summary>
     public List<FileDto<int>> Files { get; set; }
     
+    /// <summary>
+    /// The list of folders from the folder.
+    /// </summary>
     public List<FolderDto<int>> Folders { get; set; }
     
+    /// <summary>
+    /// The current folder parameters.
+    /// </summary>
     public FolderDto<int> Current { get; set; }
-    
+
+    /// <summary>
+    /// The directory / file names that form part of a folder path.
+    /// </summary>
     public object PathParts { get; set; }
     
+    /// <summary>
+    /// The folder start index.
+    /// </summary>
     public int StartIndex { get; set; }
     
+    /// <summary>
+    /// The number of items in the folder.
+    /// </summary>
     public int Count { get; set; }
     
+    /// <summary>
+    /// The total number of items in the folder.
+    /// </summary>
     public int Total { get; set; }
     
+    /// <summary>
+    /// The number of folder items that the user has not seen yet.
+    /// </summary>
     public int New { get; set; }
 }

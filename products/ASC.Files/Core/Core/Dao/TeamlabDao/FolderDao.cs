@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -256,7 +256,7 @@ internal class FolderDao(
     }
 
     public async IAsyncEnumerable<Folder<int>> GetFoldersAsync(int parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool withSubfolders = false,
-        bool excludeSubject = false, int offset = 0, int count = -1, int roomId = 0, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT)
+        bool excludeSubject = false, int offset = 0, int count = -1, int roomId = 0, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, bool containingForms = false)
     {
         if (CheckInvalidFilter(filterType) || count == 0)
         {
@@ -266,13 +266,12 @@ internal class FolderDao(
         var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var q = await GetFoldersQueryWithFilters(parentId, orderBy, subjectGroup, subjectID, searchText, withSubfolders, excludeSubject, roomId, filesDbContext);
-
+        var tenantId = _tenantManager.GetCurrentTenantId();
         if (containingMyFiles)
         {
             switch (parentType)
             {
                 case FolderType.FillingFormsRoom:
-                    var tenantId = _tenantManager.GetCurrentTenantId();
 
                     var foldersContainingMyFiles = filesDbContext.Folders
                        .Join(filesDbContext.Files, r => r.Id, b => b.ParentId, (folder, file) => new { folder, file })
@@ -297,6 +296,28 @@ internal class FolderDao(
                     break;
 
             }
+        }
+        if (containingForms && parentType is FolderType.VirtualDataRoom)
+        {
+            q = q.Where(r =>
+                filesDbContext.Files.Any(f =>
+                    f.ParentId == r.Id &&
+                    f.Category == (int)FilterType.PdfForm &&
+                    f.TenantId == r.TenantId &&
+                    filesDbContext.FilesFormRoleMapping.Any(r =>
+                            r.TenantId == tenantId && r.FormId == f.Id && r.UserId == _authContext.CurrentAccount.ID)
+                ) ||
+                filesDbContext.Tree.Any(fft =>
+                    fft.ParentId == r.Id &&
+                    filesDbContext.Files.Any(ff =>
+                        ff.ParentId == fft.FolderId &&
+                        ff.Category == (int)FilterType.PdfForm &&
+                        ff.TenantId == r.TenantId &&
+                        filesDbContext.FilesFormRoleMapping.Any(r =>
+                            r.TenantId == tenantId && r.FormId == ff.Id && r.UserId == _authContext.CurrentAccount.ID)
+                    )
+                )
+            );
         }
         q = q.Skip(offset);
 
@@ -351,6 +372,12 @@ internal class FolderDao(
             }
         }
         return result;
+    }
+    public async Task<bool> ContainsFormsInFolder(Folder<int> folder)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        return await filesDbContext.ContainsFormsInFolder(tenantId, folder.Id);
     }
     public async IAsyncEnumerable<Folder<int>> GetFoldersAsync(IEnumerable<int> folderIds, FilterType filterType = FilterType.None, bool subjectGroup = false, Guid? subjectID = null, string searchText = "", bool searchSubfolders = false, bool checkShare = true, bool excludeSubject = false)
     {

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -38,7 +38,7 @@ public class VersionController(PermissionContext permissionContext,
     : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
-    /// Returns the current build version.
+    /// Returns the current portal build version.
     /// </summary>
     /// <short>Get the current build version</short>
     /// <path>api/2.0/settings/version/build</path>

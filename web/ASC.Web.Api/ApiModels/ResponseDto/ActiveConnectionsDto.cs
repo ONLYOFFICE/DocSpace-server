@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,73 +26,79 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
+/// <summary>
+/// The active connections parameters.
+/// </summary>
 public class ActiveConnectionsDto
 {
     /// <summary>
-    /// Login event
+    /// The login event.
     /// </summary>
     public int LoginEvent { get; set; }
 
     /// <summary>
-    /// Items
+    /// The list of active connection items.
     /// </summary>
     public List<ActiveConnectionsItemDto> Items { get; set; }
 }
 
+/// <summary>
+/// The active connection item parameters.
+/// </summary>
 public class ActiveConnectionsItemDto
 {
     /// <summary>
-    /// Id
+    /// The active connection ID.
     /// </summary>
     public int Id { get; set; }
 
     /// <summary>
-    /// Tenant id
+    /// The tenant ID.
     /// </summary>
     public int TenantId { get; set; }
 
     /// <summary>
-    /// User id
+    /// The user ID.
     /// </summary>
     public Guid UserId { get; set; }
 
     /// <summary>
-    /// Mobile
+    /// Specifies if the active connection has a mobile phone or not.
     /// </summary>
     public bool Mobile {  get; set; }
 
     /// <summary>
-    /// Ip
+    /// The IP address of the active connection.
     /// </summary>
     public string Ip { get; set; }
 
     /// <summary>
-    /// Country
+    /// The active connection country.
     /// </summary>
     public string Country { get; set; }
 
     /// <summary>
-    /// City
+    /// The active connection city.
     /// </summary>
     public string City { get; set; }
 
     /// <summary>
-    /// Browser
+    /// The active connection browser.
     /// </summary>
     public string Browser { get; set; }
 
     /// <summary>
-    /// Platform
+    /// The active connection platform.
     /// </summary>
     public string Platform { get; set; }
 
     /// <summary>
-    /// Date
+    /// The active connection date.
     /// </summary>
     public ApiDateTime Date { get; set; }
 
     /// <summary>
-    /// Page
+    /// The active connection page.
     /// </summary>
     public string Page { get; set; }
 }

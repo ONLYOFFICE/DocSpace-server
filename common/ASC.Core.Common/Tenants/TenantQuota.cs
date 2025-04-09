@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,6 +28,9 @@ using Profile = AutoMapper.Profile;
 
 namespace ASC.Core.Tenants;
 
+/// <summary>
+/// The current tenant quota.
+/// </summary>
 [DebuggerDisplay("{TenantId} {Name}")]
 public class TenantQuota : IMapFrom<DbQuota>
 {
@@ -42,34 +45,34 @@ public class TenantQuota : IMapFrom<DbQuota>
     };
 
     /// <summary>
-    /// Tenant ID
+    /// The tenant ID.
     /// </summary>
     public int TenantId { get; set; }
 
     /// <summary>
-    /// Name
+    /// The tenant name.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Default")]
     public string Name { get; set; }
 
     /// <summary>
-    /// Price
+    /// The tenant price.
     /// </summary>
     [SwaggerSchemaCustom(Example = 10.0)]
     public decimal Price { get; set; }
 
     /// <summary>
-    /// Price currency symbol
+    /// The tenant price currency symbol.
     /// </summary>
     public string PriceCurrencySymbol { get; set; }
 
     /// <summary>
-    /// Product ID
+    /// The tenant product ID.
     /// </summary>
     public string ProductId { get; set; }
 
     /// <summary>
-    /// Specifies if the tenant quota is visible or not
+    /// Specifies if the tenant quota is visible or not.
     /// </summary>
     public bool Visible { get; set; }
 
@@ -79,7 +82,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private List<string> _featuresList;
 
     /// <summary>
-    /// Tenant quota features
+    /// The tenant quota features.
     /// </summary>
     public string Features
     {
@@ -96,7 +99,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly MaxFileSizeFeature _maxFileSizeFeature;
 
     /// <summary>
-    /// Maximum file size
+    /// The tenant maximum file size.
     /// </summary>
     [SwaggerSchemaCustom(Example = 25 * 1024 * 1024)]
     public long MaxFileSize
@@ -108,7 +111,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly MaxTotalSizeFeature _maxTotalSizeFeature;
 
     /// <summary>
-    /// Maximum total size
+    /// The tenant maximum total size.
     /// </summary>
     [SwaggerSchemaCustom(Example = long.MaxValue)]
     public long MaxTotalSize
@@ -120,7 +123,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly CountUserFeature _countUserFeature;
 
     /// <summary>
-    /// Number of portal users
+    /// The number of portal users.
     /// </summary>
     public int CountUser
     {
@@ -131,7 +134,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly CountPaidUserFeature _countPaidUserFeature;
 
     /// <summary>
-    /// Number of portal room administrators
+    /// The number of portal room administrators.
     /// </summary>
     public int CountRoomAdmin
     {
@@ -142,7 +145,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly UsersInRoomFeature _usersInRoomFeature;
 
     /// <summary>
-    /// Number of room users
+    /// The number of room users.
     /// </summary>
     public int UsersInRoom
     {
@@ -153,7 +156,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly CountRoomFeature _countRoomFeature;
 
     /// <summary>
-    /// Number of rooms
+    /// The number of rooms.
     /// </summary>
     public int CountRoom
     {
@@ -164,7 +167,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly TenantQuotaFeatureFlag _nonProfitFeature;
 
     /// <summary>
-    /// Specifies if the tenant quota is nonprofit or not
+    /// Specifies if the tenant quota is nonprofit or not.
     /// </summary>
     public bool NonProfit
     {
@@ -175,7 +178,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly TenantQuotaFeatureFlag _trialFeature;
 
     /// <summary>
-    /// Specifies if the tenant quota is trial or not
+    /// Specifies if the tenant quota is trial or not.
     /// </summary>
     public bool Trial
     {
@@ -186,7 +189,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly FreeFeature _freeFeature;
 
     /// <summary>
-    /// Specifies if the tenant quota is free or not
+    /// Specifies if the tenant quota is free or not.
     /// </summary>
     public bool Free
     {
@@ -197,7 +200,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly TenantQuotaFeatureFlag _updateFeature;
 
     /// <summary>
-    /// Specifies if the tenant quota is updated or not
+    /// Specifies if the tenant quota is updated or not.
     /// </summary>
     public bool Update
     {
@@ -208,7 +211,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly TenantQuotaFeatureFlag _auditFeature;
 
     /// <summary>
-    /// Specifies if the audit trail is available or not
+    /// Specifies if the audit trail is available or not.
     /// </summary>
     public bool Audit
     {
@@ -219,7 +222,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly TenantQuotaFeatureFlag _docsEditionFeature;
 
     /// <summary>
-    /// Specifies if this tenant quota is Docs edition or not
+    /// Specifies if ONLYOFFICE Docs is included in the tenant quota or not.
     /// </summary>
     public bool DocsEdition
     {
@@ -230,7 +233,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly TenantQuotaFeatureFlag _ldapFeature;
 
     /// <summary>
-    /// Specifies if the LDAP settings are available or not
+    /// Specifies if the LDAP settings are available or not.
     /// </summary>
     public bool Ldap
     {
@@ -241,7 +244,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly TenantQuotaFeatureFlag _ssoFeature;
 
     /// <summary>
-    /// Specifies if the SSO settings are available or not
+    /// Specifies if the SSO settings are available or not.
     /// </summary>
     public bool Sso
     {
@@ -252,7 +255,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly TenantQuotaFeatureFlag _statisticFeature;
 
     /// <summary>
-    /// Specifies if the statistic settings are available or not
+    /// Specifies if the statistics settings are available or not.
     /// </summary>
     public bool Statistic
     {
@@ -262,8 +265,9 @@ public class TenantQuota : IMapFrom<DbQuota>
 
     private readonly TenantQuotaFeatureFlag _brandingFeature;
 
-    /// <summary>Specifies if the branding settings are available or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the branding settings are available or not.
+    /// </summary>
     public bool Branding
     {
         get => _brandingFeature.Value;
@@ -273,7 +277,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly TenantQuotaFeatureFlag _customizationFeature;
 
     /// <summary>
-    /// Specifies if the customization settings are available or not
+    /// Specifies if the customization settings are available or not.
     /// </summary>
     public bool Customization
     {
@@ -283,8 +287,9 @@ public class TenantQuota : IMapFrom<DbQuota>
 
     private readonly TenantQuotaFeatureFlag _lifetimeFeature;
 
-    /// <summary>Specifies if the license is lifetime or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the license has the lifetime settings or not.
+    /// </summary>
     public bool Lifetime
     {
         get => _lifetimeFeature.Value;
@@ -294,7 +299,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly TenantQuotaFeatureFlag _customFeature;
 
     /// <summary>
-    /// Specifies if the custom domain URL is available or not
+    /// Specifies if the custom domain URL is available or not.
     /// </summary>
     public bool Custom
     {
@@ -305,7 +310,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly TenantQuotaFeatureFlag _autoBackupRestoreFeature;
 
     /// <summary>
-    /// Specifies if the automatic Backup&amp;Restore feature is available or not
+    /// Specifies if the automatic backup option is enabled or not.
     /// </summary>
     public bool AutoBackupRestore
     {
@@ -316,7 +321,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly TenantQuotaFeatureFlag _oauthFeature;
 
     /// <summary>
-    /// Specifies if Oauth is available or not
+    /// Specifies if Oauth is available or not.
     /// </summary>
     public bool Oauth
     {
@@ -327,7 +332,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly TenantQuotaFeatureFlag _contentSearchFeature;
 
     /// <summary>
-    /// Specifies if the content search is available or not
+    /// Specifies if the content search is available or not.
     /// </summary>
     public bool ContentSearch
     {
@@ -338,7 +343,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly TenantQuotaFeatureFlag _thirdPartyFeature;
 
     /// <summary>
-    /// Specifies if the third-party accounts linking is available or not
+    /// Specifies if the third-party accounts linking is available or not.
     /// </summary>
     public bool ThirdParty
     {
@@ -349,7 +354,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly TenantQuotaFeatureFlag _yearFeature;
 
     /// <summary>
-    /// Specifies if the tenant quota is yearly subscription or not
+    /// Specifies if the tenant quota is yearly subscription or not.
     /// </summary>
     public bool Year
     {

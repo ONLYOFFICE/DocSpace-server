@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,6 +26,9 @@
 
 namespace ASC.MessagingSystem.Core;
 
+/// <summary>
+/// The event action ID.
+/// </summary>
 [EnumExtensions]
 public enum MessageAction
 {
@@ -329,6 +332,12 @@ public enum MessageAction
     [SwaggerEnum("File index changed")]
     FileIndexChanged = 5111,
 
+    [SwaggerEnum("File custom filter enabled")]
+    FileCustomFilterEnabled = 5120,
+
+    [SwaggerEnum("File custom filter disabled")]
+    FileCustomFilterDisabled = 5121,
+
     [SwaggerEnum("Folder created")]
     FolderCreated = 5019,
 
@@ -569,6 +578,18 @@ public enum MessageAction
     [SwaggerEnum("Room index export saved")]
     RoomIndexExportSaved = 5106,
 
+    [SwaggerEnum("Form started to fill")]
+    FormStartedToFill = 5150,
+
+    [SwaggerEnum("Form partially filled")]
+    FormPartiallyFilled = 5151,
+
+    [SwaggerEnum("Form completely filled")]
+    FormCompletelyFilled = 5152,
+
+    [SwaggerEnum("Form stopped")]
+    FormStopped = 5153,
+
     #endregion
 
     #region Settings
@@ -728,6 +749,27 @@ public enum MessageAction
 
     [SwaggerEnum("Custom quota per user disabled")]
     CustomQuotaPerUserDisabled = 6053,
+    
+    [SwaggerEnum("DevTools access settings changed")]
+    DevToolsAccessSettingsChanged = 6054,
+
+    [SwaggerEnum("Webhook created")]
+    WebhookCreated = 6055,
+
+    [SwaggerEnum("Webhook updated")]
+    WebhookUpdated = 6056,
+
+    [SwaggerEnum("Webhook deleted")]
+    WebhookDeleted = 6057,
+    
+    [SwaggerEnum("Created api key")]
+    ApiKeyCreated = 6058,
+
+    [SwaggerEnum("Update api key")]
+    ApiKeyUpdated = 6059,
+
+    [SwaggerEnum("Deleted User api key")]
+    ApiKeyDeleted = 6060,
 
     [SwaggerEnum("Document service location setting")]
     DocumentServiceLocationSetting = 5037,
@@ -758,18 +800,10 @@ public enum MessageAction
 
     [SwaggerEnum("Start storage decryption")]
     StartStorageDecryption = 5053,
+    
+ 
 
-    [SwaggerEnum("DevTools access settings changed")]
-    DevToolsAccessSettingsChanged = 6054,
-
-    [SwaggerEnum("Webhook created")]
-    WebhookCreated = 6055,
-
-    [SwaggerEnum("Webhook updated")]
-    WebhookUpdated = 6056,
-
-    [SwaggerEnum("Webhook deleted")]
-    WebhookDeleted = 6057,
+  
 
     #endregion
 

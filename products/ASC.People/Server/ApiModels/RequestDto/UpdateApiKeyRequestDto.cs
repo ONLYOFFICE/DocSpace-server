@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,13 +24,43 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.ApiModels.RequestDto;
+namespace ASC.People.ApiModels.RequestDto;
 
-public class GetFillResulteRequestDto
+
+/// <summary>
+/// The request parameters for updating an existing API key.
+/// </summary>
+public class UpdateApiKeyRequest
 {
     /// <summary>
-    /// Filling session id
+    /// The new name for the API key.
     /// </summary>
-    [FromQuery(Name = "fillingSessionId")]
-    public string FillingSessionId { get; set; }
+    [StringLength(30, ErrorMessage = "Incorrect name. Length must be less than 30")]
+    public String Name { get; set; }
+
+    /// <summary>
+    /// The new list of permissions for the API key.
+    /// </summary>
+    public List<String> Permissions { get; set; }
+
+    /// <summary>
+    /// Indicates whether the API key should be active or not.
+    /// </summary>
+    public bool? IsActive { get; set; }
+}
+
+/// <summary>
+/// The request parameters for updating an existing API key.
+/// </summary>
+public class UpdateApiKeyRequestDto
+{
+    /// <summary>
+    /// The unique identifier of the API key to update.
+    /// </summary>
+    [FromRoute(Name = "keyId")] public Guid KeyId { get; set; }
+
+    /// <summary>
+    /// The request parameters for updating an existing API key.
+    /// </summary>
+    [FromBody] public UpdateApiKeyRequest Changed { get; set; }
 }

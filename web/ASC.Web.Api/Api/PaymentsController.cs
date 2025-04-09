@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -98,7 +98,7 @@ public class PaymentController(
     }
 
     /// <summary>
-    /// Updates the quantity of payment.
+    /// Updates the payment quantity with the parameters specified in the request.
     /// </summary>
     /// <short>
     /// Update the payment quantity
@@ -257,7 +257,7 @@ public class PaymentController(
     }
 
     /// <summary>
-    /// Sends a request for portal payment.
+    /// Sends a request for the portal payment.
     /// </summary>
     /// <short>
     /// Send a payment request

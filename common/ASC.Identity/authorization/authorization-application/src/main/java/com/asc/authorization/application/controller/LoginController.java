@@ -62,7 +62,7 @@ public class LoginController {
           "redirect:%s",
           UriComponentsBuilder.fromUriString(
                   String.format(
-                      "%s://%s", request.getScheme(), httpUtils.getFirstRequestIP(request)))
+                      "%s://%s", request.getScheme(), httpUtils.getFirstForwardedHost(request)))
               .path("login")
               .queryParam("client_id", clientId)
               .queryParam("type", "oauth2")

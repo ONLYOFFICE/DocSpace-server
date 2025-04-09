@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -68,7 +68,7 @@ public class NotificationController(
     }
 
     /// <summary>
-    /// Returns a list of rooms with the disabled notifications
+    /// Returns a list of rooms with the disabled notifications.
     /// </summary>
     /// <short>Get room notification settings</short>
     /// <path>api/2.0/settings/notification/rooms</path>

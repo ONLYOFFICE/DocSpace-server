@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -128,7 +128,8 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
         { "Settings / TFA settings", "Operations for working with TFA settings." },
         { "Settings / Tips", "Operations for working with tip settings." },
         { "Settings / Webhooks", "Operations for working with webhook settings." },
-        { "Settings / Webplugins", "Operations for working with webplugin settings." }
+        { "Settings / Webplugins", "Operations for working with webplugin settings." },
+        { "Api keys", "Operations for working with api keys." }
     };
 
     public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)

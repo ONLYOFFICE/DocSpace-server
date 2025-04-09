@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -85,22 +85,25 @@ public static class ConsumerExtension
     }
 }
 
+/// <summary>
+/// The authentication key parameters.
+/// </summary>
 [DebuggerDisplay("({Name},{Value})")]
 public class AuthKey
 {
     /// <summary>
-    /// Name
+    /// The authentication key name.
     /// </summary>
     public string Name { get; init; }
 
     /// <summary>
-    /// Value
+    /// The authentication key value.
     /// </summary>
     [StringLength(255)]
     public string Value { get; init; }
 
     /// <summary>
-    /// Title
+    /// The authentication key title.
     /// </summary>
     public string Title { get; set; }
 }

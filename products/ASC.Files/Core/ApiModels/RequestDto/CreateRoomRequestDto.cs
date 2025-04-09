@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,6 +27,9 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 
+/// <summary>
+/// The room type.
+/// </summary>
 public enum RoomType
 {
     [SwaggerEnum(Description = "Form filling room")]
@@ -67,22 +70,75 @@ public static class RoomTypeExtensions
 }
 
 /// <summary>
-/// Request parameters for creating a room
+/// The request parameters for creating a room.
 /// </summary>
-public class CreateRoomRequestDto : UpdateRoomRequest
+public class CreateRoomRequestDto
 {
     /// <summary>
-    /// Room type
+    /// The room name.
     /// </summary>
-    public RoomType RoomType { get; set; }
+    [StringLength(170)]
+    public required string Title { get; set; }
 
     /// <summary>
-    /// Private
+    /// The room quota.
+    /// </summary>
+    public long? Quota { get; set; }
+
+    /// <summary>
+    /// Specifies whether to create a room with indexing.
+    /// </summary>
+    public bool? Indexing { get; set; }
+
+    /// <summary>
+    /// Specifies whether to deny downloads from the room.
+    /// </summary>
+    public bool? DenyDownload { get; set; }
+
+    /// <summary>
+    /// The room data lifetime information.
+    /// </summary>
+    public RoomDataLifetimeDto Lifetime { get; set; }
+
+    /// <summary>
+    /// The watermark settings.
+    /// </summary>
+    public WatermarkRequestDto Watermark { get; set; }
+
+    /// <summary>
+    /// The room logo.
+    /// </summary>
+    public LogoRequest Logo { get; set; }
+
+    /// <summary>
+    /// The list of tags.
+    /// </summary>
+    public IEnumerable<string> Tags { get; set; }
+
+    /// <summary>
+    /// The room color.
+    /// </summary>
+    [StringLength(6)]
+    public string Color { get; set; }
+
+    /// <summary>
+    /// The room cover.
+    /// </summary>
+    [StringLength(50)]
+    public string Cover { get; set; }
+
+    /// <summary>
+    /// The room type.
+    /// </summary>
+    public required RoomType RoomType { get; set; }
+
+    /// <summary>
+    /// Specifies whether the room to be created is private or not.
     /// </summary>
     public bool Private { get; set; }
 
     /// <summary>
-    /// Collection of sharing parameters
+    /// The collection of sharing parameters.
     /// </summary>
     public IEnumerable<FileShareParams> Share { get; set; }
 }
