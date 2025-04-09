@@ -79,6 +79,8 @@ public class DocumentServiceLicense(ICache cache,
 
         while (attempt <= 3)
         {
+            await Task.Delay((int)(Math.Pow(2, attempt) * 1000));
+
             var commandResponse = await GetDocumentServiceLicenseAsync(false);
 
             if (commandResponse == null)
@@ -106,7 +108,6 @@ public class DocumentServiceLicense(ICache cache,
             }
             else
             {
-                await Task.Delay((int)(Math.Pow(2, attempt) * 1000));
                 attempt += 1;
             }
         }
