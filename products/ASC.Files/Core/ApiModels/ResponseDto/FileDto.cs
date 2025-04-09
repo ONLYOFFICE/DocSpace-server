@@ -260,7 +260,7 @@ public class FileDtoHelper(
 
         var fileDao = _daoFactory.GetFileDao<T>();
 
-        if (file.IsForm)
+        if (fileType == FileType.Pdf)
         {
             var folderDao = _daoFactory.GetCacheFolderDao<T>();
 
@@ -321,6 +321,23 @@ public class FileDtoHelper(
 
             result.HasDraft = result.IsForm == true ? !Equals(linkedId, default(T)) : null;
 
+            var formFilling = properties?.FormFilling;
+            if (formFilling != null)
+            {
+                result.StartFilling = formFilling.StartFilling;
+                if (!Equals(linkedId, default(T)))
+                {
+                    var draftLocation = new DraftLocation<T> { FolderId = formFilling.ToFolderId, FolderTitle = formFilling.Title, FileId = linkedId };
+                    var draft = await fileDao.GetFileAsync(linkedId);
+                    if (draft != null)
+                    {
+                        draftLocation.FileTitle = draft.Title;
+                    }
+
+                    result.DraftLocation = draftLocation;
+                }
+            }
+
             if (currentRoom is { FolderType: FolderType.VirtualDataRoom })
             {
                 var (currentStep, roles) = await fileDao.GetUserFormRoles(file.Id, authContext.CurrentAccount.ID);
@@ -359,23 +376,6 @@ public class FileDtoHelper(
                                 break;
                         }
                     }
-                }
-            }
-
-            var formFilling = properties?.FormFilling;
-            if (formFilling != null)
-            {
-                result.StartFilling = formFilling.StartFilling;
-                if (!Equals(linkedId, default(T)))
-                {
-                    var draftLocation = new DraftLocation<T> { FolderId = formFilling.ToFolderId, FolderTitle = formFilling.Title, FileId = linkedId };
-                    var draft = await fileDao.GetFileAsync(linkedId);
-                    if (draft != null)
-                    {
-                        draftLocation.FileTitle = draft.Title;
-                    }
-
-                    result.DraftLocation = draftLocation;
                 }
             }
         }
