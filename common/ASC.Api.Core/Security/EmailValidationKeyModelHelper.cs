@@ -295,7 +295,7 @@ public class EmailValidationKeyModelHelper(
 
         foreach (var pair in enumerable)
         {
-            accumulator.Append(pair.EncodedName.ToString(), pair.EncodedValue.ToString());
+            accumulator.Append(pair.EncodedName.ToString(), pair.DecodeValue().ToString());
         }
 
         if (!accumulator.HasValues)
