@@ -27,17 +27,17 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Auto-clearing request parameters
+/// The auto-clearing request parameters.
 /// </summary>
 public class AutoCleanupRequestDto
 {
     /// <summary>
-    /// Enables the auto-clearing or not
+    /// Specifies whether to enable the auto-clearing or not.
     /// </summary>
     public bool Set { get; set; }
 
     /// <summary>
-    /// A time interval when the auto-clearing will be performed
+    /// The time interval when the auto-clearing will be performed.
     /// </summary>
     public DateToAutoCleanUp Gap { get; set; }
 }

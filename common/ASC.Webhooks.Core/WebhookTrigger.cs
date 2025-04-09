@@ -26,6 +26,9 @@
 
 namespace ASC.Webhooks.Core;
 
+/// <summary>
+/// The webhook trigger type.
+/// </summary>
 public enum WebhookTrigger
 {
     [SwaggerEnum("*")]

@@ -26,60 +26,63 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
+/// <summary>
+/// The tenant extra parameters.
+/// </summary>
 public class TenantExtraDto
 {
     /// <summary>
-    /// Specifies if the extra tenant license is customizable or not
+    /// Specifies if an extra tenant license is customizable or not.
     /// </summary>
     public bool CustomMode { get; set; }
 
     /// <summary>
-    /// Specifies if the extra tenant license is Opensource or not
+    /// Specifies if an extra tenant license is Community or not.
     /// </summary>
     public bool Opensource { get; set; }
 
     /// <summary>
-    /// Specifies if the extra tenant license is Enterprise or not
+    /// Specifies if an extra tenant license is Enterprise or not.
     /// </summary>
     public bool Enterprise { get; set; }
 
     /// <summary>
-    /// Specifies if the extra tenant license is Developer or not
+    /// Specifies if an extra tenant license is Developer or not.
     /// </summary>
     public bool Developer { get; set; }
 
     /// <summary>
-    /// License tariff
+    /// The license tariff.
     /// </summary>
     public Tariff Tariff { get; set; }
 
     /// <summary>
-    /// License quota
+    /// The license quota.
     /// </summary>
     public QuotaDto Quota { get; set; }
 
     /// <summary>
-    /// Specifies if the license is paid or not
+    /// Specifies if the license is paid or not.
     /// </summary>
     public bool NotPaid { get; set; }
 
     /// <summary>
-    /// The time when the license was accepted
+    /// The time when the license was accepted.
     /// </summary>
     public string LicenseAccept { get; set; }
 
     /// <summary>
-    /// Specifies if the tariff page is enabled or not
+    /// Specifies if the tariff page is enabled or not.
     /// </summary>
     public bool EnableTariffPage { get; set; }
 
     /// <summary>
-    /// Document server user quotas
+    /// The ONLYOFFICE Docs user quotas.
     /// </summary>
     public Dictionary<string, DateTime> DocServerUserQuota { get; set; }
 
     /// <summary>
-    /// Document server license
+    /// The ONLYOFFICE Docs license.
     /// </summary>
     public License DocServerLicense { get; set; }
 }

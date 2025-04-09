@@ -50,6 +50,7 @@ public class Startup : BaseWorkerStartup
         await base.ConfigureServices(builder);
         services.AddHttpClient();
 
+        
         if (!Enum.TryParse<ElasticLaunchType>(Configuration["elastic:mode"], true, out var elasticLaunchType))
         {
             elasticLaunchType = ElasticLaunchType.Inclusive;
@@ -71,6 +72,7 @@ public class Startup : BaseWorkerStartup
             services.AddHostedService<ThumbnailBuilderService>();
             services.AddActivePassiveHostedService<AutoCleanTrashService>(Configuration);
             services.AddActivePassiveHostedService<AutoDeletePersonalFolderService>(Configuration);
+            services.AddActivePassiveHostedService<AutoDeactivateExpiredApiKeysService>(Configuration);
             services.AddActivePassiveHostedService<DeleteExpiredService>(Configuration);
             services.AddActivePassiveHostedService<CleanupLifetimeExpiredService>(Configuration);
 

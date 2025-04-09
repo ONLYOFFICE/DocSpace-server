@@ -28,6 +28,9 @@ using NetEscapades.EnumGenerators;
 
 namespace ASC.Web.Core.Files;
 
+/// <summary>
+/// The file type.
+/// </summary>
 [EnumExtensions]
 public enum FileType
 {

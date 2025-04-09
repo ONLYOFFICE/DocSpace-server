@@ -27,38 +27,38 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// Wizard settings request parameters
+/// The request parameters for initial configuration of the setup wizard.
 /// </summary>
 public class WizardRequestsDto
 {
     /// <summary>
-    /// Email address
+    /// The user's email address for authentication and communication.
     /// </summary>
     [EmailAddress]
     public required string Email { get; set; }
 
     /// <summary>
-    /// Password hash
+    /// The hashed representation of the user's password.
     /// </summary>
     public required string PasswordHash { get; set; }
 
     /// <summary>
-    /// Language code
+    /// The user's preferred interface language code.
     /// </summary>
     public string Lng { get; set; }
 
     /// <summary>
-    /// Time zone
+    /// The user's time zone identifier.
     /// </summary>
     public string TimeZone { get; set; }
 
     /// <summary>
-    /// AMI ID
+    /// The Amazon Machine Image (AMI) identifier.
     /// </summary>
     public string AmiId { get; set; }
 
     /// <summary>
-    /// Subscribed from the site or not
+    /// Specifies whether the user opted in for site communications.
     /// </summary>
     public bool SubscribeFromSite { get; set; }
 

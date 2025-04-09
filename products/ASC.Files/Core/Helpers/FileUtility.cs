@@ -67,6 +67,9 @@ public class LogoColor
     public byte B { get; set; }
 }
 
+/// <summary>
+/// The file accessibility.
+/// </summary>
 public enum Accessibility
 {
     [SwaggerEnum("Image view")]

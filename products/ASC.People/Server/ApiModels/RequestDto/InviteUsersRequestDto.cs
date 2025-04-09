@@ -27,32 +27,35 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for inviting users
+/// The request parameters for inviting users.
 /// </summary>
 public class InviteUsersRequestDto
 {
     /// <summary>
-    /// List of user invitations
+    /// The list of user invitations.
     /// </summary>
     [MaxEmailInvitations]
     [Required]
     public IEnumerable<UserInvitationRequestDto> Invitations { get; set; }
 
     /// <summary>
-    /// Culture
+    /// The culture code of invitations.
     /// </summary>
     public string Culture { get; set; }
 }
 
+/// <summary>
+/// The user invitation parameters.
+/// </summary>
 public class UserInvitationRequestDto
 {
     /// <summary>
-    /// Employee type
+    /// The user type.
     /// </summary>
     public EmployeeType Type { get; set; }
 
     /// <summary>
-    /// Email address
+    /// The user email address.
     /// </summary>
     [EmailAddress]
     public string Email { get; set; }

@@ -26,15 +26,18 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
+///<summary>
+/// The notification settings parameters.
+///</summary>
 public class NotificationSettingsDto : IMapFrom<NotificationSettingsRequestsDto>
 {
     /// <summary>
-    /// Notification type
+    /// The notification type.
     /// </summary>
     public NotificationType Type { get; set; }
 
     /// <summary>
-    /// Specifies if the notification type is enabled or not
+    /// Specifies if the notification type is enabled or not.
     /// </summary>
     public bool IsEnabled { get; set; }
 }

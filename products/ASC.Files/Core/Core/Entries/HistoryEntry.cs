@@ -28,12 +28,34 @@ using LinkData = ASC.Files.Core.Core.History.LinkData;
 
 namespace ASC.Files.Core.Core.Entries;
 
+/// <summary>
+/// The file history parameters.
+/// </summary>
 public record HistoryEntry
 {
+    /// <summary>
+    /// The action performed on the file.
+    /// </summary>
     public HistoryAction Action { get; init; }
+    
+    /// <summary>
+    /// The ID of the action initiator.
+    /// </summary>
     public Guid InitiatorId { get; init; }
+
+    /// <summary>
+    /// The name of the action initiator.
+    /// </summary>
     public string InitiatorName { get; init; }
+    
+    /// <summary>
+    /// The date and time when the action was performed.
+    /// </summary>
     public DateTime Date { get; init; }
+    
+    /// <summary>
+    /// The history data.
+    /// </summary>
     public HistoryData Data { get; init; }
     
     private static readonly HashSet<MessageAction> _gropedActions = 
@@ -82,6 +104,9 @@ public record HistoryEntry
     }
 }
 
+/// <summary>
+/// The history data.
+/// </summary>
 [JsonDerivedType(typeof(EntryData))]
 [JsonDerivedType(typeof(EntryOperationData))]
 [JsonDerivedType(typeof(GroupHistoryData))]
@@ -99,8 +124,18 @@ public record HistoryEntry
 [JsonDerivedType(typeof(FileVersionRemovedData))]
 public abstract record HistoryData
 {
+    /// <summary>
+    /// The history data ID.
+    /// </summary>
     public virtual int GetId() => 0;
+
+    /// <summary>
+    /// The name of the action initiator.
+    /// </summary>
     public virtual string InitiatorName => null;
 }
 
+/// <summary>
+/// The action performed on the file.
+/// </summary>
 public record HistoryAction(MessageAction Id, string Key);

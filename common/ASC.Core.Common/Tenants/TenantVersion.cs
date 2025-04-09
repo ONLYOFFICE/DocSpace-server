@@ -27,15 +27,18 @@
 namespace ASC.Core;
 
 /// <summary>
+/// The tenant version.
 /// </summary>
 public class TenantVersion
 {
-    /// <summary>ID</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The tenant version ID.
+    /// </summary>
     public int Id { get; private set; }
 
-    /// <summary>Name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The tenant version name.
+    /// </summary>
     public string Name { get; private set; }
 
     public TenantVersion() { }

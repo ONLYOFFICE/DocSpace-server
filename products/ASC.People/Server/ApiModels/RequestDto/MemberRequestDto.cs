@@ -27,12 +27,12 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// Member request parameters
+/// The request parameters for the user email.
 /// </summary>
 public class EmailMemberRequestDto
 {
     /// <summary>
-    /// Email
+    /// The user email address.
     /// </summary>
     [Required]
     [EmailAddress]
@@ -41,22 +41,22 @@ public class EmailMemberRequestDto
 }
 
 /// <summary>
-/// Request parameters for setting new password
+/// The request parameters for the user generic information.
 /// </summary>
 public class MemberBaseRequestDto
 {
     /// <summary>
-    /// Password
+    /// The user password.
     /// </summary>
     public string Password { get; set; }
 
     /// <summary>
-    /// Password hash
+    /// The user password hash.
     /// </summary>
     public string PasswordHash { get; set; }
 
     /// <summary>
-    /// Email
+    /// The user email address.
     /// </summary>
     [EmailAddress]
     [StringLength(255)]
@@ -64,268 +64,280 @@ public class MemberBaseRequestDto
 }
 
 /// <summary>
-/// Request parameters for setting new password
+/// The request parameters for getting the generic user information by their ID.
 /// </summary>
 public class MemberBaseByIdRequestDto
 {
     /// <summary>
-    /// User ID
+    /// The user ID.
     /// </summary>
     [FromRoute(Name = "userid")]
     public required Guid UserId { get; set; }
 
     /// <summary>
-    /// Member base
+    /// The request parameters for the user generic information.
     /// </summary>
     [FromBody]
     public MemberBaseRequestDto MemberBase { get; set; }
 }
 
 /// <summary>
-/// Member request parameters
+/// The user request parameters.
 /// </summary>
 public class MemberRequestDto
 {
     /// <summary>
-    /// Password
+    /// The user password.
     /// </summary>
     public string Password { get; set; }
 
     /// <summary>
-    /// Password hash
+    /// The user password hash.
     /// </summary>
     public string PasswordHash { get; set; }
 
     /// <summary>
-    /// Email
+    /// The user email address.
     /// </summary>
     [EmailAddress]
     [StringLength(255)]
     public string Email { get; set; }
 
     /// <summary>
-    /// Employee type
+    /// The user type.
     /// </summary>
     public EmployeeType Type { get; set; }
 
     /// <summary>
-    /// Specifies if this is a guest or a user
+    /// Specifies if this is a guest or a user.
     /// </summary>
     public bool? IsUser { get; set; }
 
     /// <summary>
-    /// First name
+    /// The user first name.
     /// </summary>
     [StringLength(255)]
     public string FirstName { get; set; }
 
     /// <summary>
-    /// Last name
+    /// The user last name.
     /// </summary>
     [StringLength(255)]
     public string LastName { get; set; }
 
     /// <summary>
-    /// List of user departments
+    /// The list of the user departments IDs.
     /// </summary>
     public Guid[] Department { get; set; }
 
     /// <summary>
-    /// Title
+    /// The user title.
     /// </summary>
     [StringLength(255)]
     public string Title { get; set; }
 
     /// <summary>
-    /// Location
+    /// The user location.
     /// </summary>
     public string Location { get; set; }
 
     /// <summary>
-    /// Sex (male or female)
+    /// The user sex (male or female).
     /// </summary>
     public SexEnum? Sex { get; set; }
 
     /// <summary>
-    /// Birthday
+    /// The user birthday.
     /// </summary>
     public ApiDateTime Birthday { get; set; }
 
     /// <summary>
-    /// Registration date (if it is not specified, then the current date will be set)
+    /// The user registration date (if it is not specified, then the current date will be set).
     /// </summary>
     public ApiDateTime Worksfrom { get; set; }
 
     /// <summary>
-    /// Comment
+    /// The user comment.
     /// </summary>
     public string Comment { get; set; }
 
     /// <summary>
-    /// List of user contacts
+    /// The list of the user contacts.
     /// </summary>
     public IEnumerable<Contact> Contacts { get; set; }
 
     /// <summary>
-    /// Avatar photo URL
+    /// The avatar photo URL.
     /// </summary>
     public string Files { get; set; }
 
     /// <summary>
-    /// Specifies if the user is added via the invitation link or not
+    /// Specifies if the user is added via the invitation link or not.
     /// </summary>
     public bool FromInviteLink { get; set; }
 
     /// <summary>
-    /// Key
+    /// The user key.
     /// </summary>
     public string Key { get; set; }
 
     /// <summary>
-    /// Language
+    /// The user culture code.
     /// </summary>
     public string CultureName { get; set; }
 
     /// <summary>
-    /// Target
+    /// The user target ID.
     /// </summary>
     public Guid Target { get; set; }
 
-    /// <summary>Spam</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if tips, updates and offers are allowed to be sent to the user or not.
+    /// </summary>
     public bool? Spam { get; set; }
 }
 
 /// <summary>
-/// Request parameters for updating user information
+/// The request parameters for updating the user information.
 /// </summary>
 public class UpdateMemberRequestDto
 {
     /// <summary>
-    /// User ID
+    /// The user ID.
     /// </summary>
     public string UserId { get; set; }
 
     /// <summary>
-    /// Specifies whether to disable a user or not
+    /// Specifies whether to disable a user or not.
     /// </summary>
     public bool? Disable { get; set; }
 
     /// <summary>
-    /// Email
+    /// The user email address.
     /// </summary>
     [EmailAddress]
     [StringLength(255)]
     public string Email { get; set; }
 
     /// <summary>
-    /// Specifies if this is a guest or a user
+    /// Specifies if this is a guest or a user.
     /// </summary>
     public bool? IsUser { get; set; }
 
     /// <summary>
-    /// First name
+    /// The user first name.
     /// </summary>
     [StringLength(255)]
     public string FirstName { get; set; }
 
     /// <summary>
-    /// Last name
+    /// The user last name.
     /// </summary>
     [StringLength(255)]
     public string LastName { get; set; }
 
     /// <summary>
-    /// List of user departments
+    /// The list of the user departments.
     /// </summary>
     public Guid[] Department { get; set; }
 
     /// <summary>
-    /// Title
+    /// The user title.
     /// </summary>
     [StringLength(255)]
     public string Title { get; set; }
 
     /// <summary>
-    /// Location
+    /// The user location.
     /// </summary>
     public string Location { get; set; }
 
     /// <summary>
-    /// Sex (male or female)
+    /// The user sex (male or female).
     /// </summary>
     public SexEnum? Sex { get; set; }
 
     /// <summary>
-    /// Birthday
+    /// The user birthday.
     /// </summary>
     public ApiDateTime Birthday { get; set; }
 
     /// <summary>
-    /// Registration date (if it is not specified, then the current date will be set)
+    /// The user registration date (if it is not specified, then the current date will be set).
     /// </summary>
     public ApiDateTime Worksfrom { get; set; }
 
     /// <summary>
-    /// Comment
+    /// The user comment.
     /// </summary>
     public string Comment { get; set; }
 
     /// <summary>
-    /// List of user contacts
+    /// The list of the user contacts.
     /// </summary>
     public IEnumerable<Contact> Contacts { get; set; }
 
     /// <summary>
-    /// Avatar photo URL
+    /// The user avatar photo URL.
     /// </summary>
     public string Files { get; set; }
 
     /// <summary>
-    /// Spam
+    /// Specifies if tips, updates and offers are allowed to be sent to the user or not.
     /// </summary>
     public bool? Spam { get; set; }
 }
 
 /// <summary>
-/// 
+/// The request parameters for updating the user information by ID.
 /// </summary>
 public class UpdateMemberByIdRequestDto
 {
     /// <summary>
-    /// User ID
+    /// The user ID.
     /// </summary>
     [FromRoute(Name = "userid")]
     public required string UserId { get; set; }
 
     /// <summary>
-    /// Update member
+    /// The request parameters for updating the user information.
     /// </summary>
     [FromBody]
     public UpdateMemberRequestDto UpdateMember { get; set; }
 }
+
+/// <summary>
+/// The request parameters for updating the user culture code by ID.
+/// </summary>
 public class UpdateMemberCultureByIdRequestDto
 {
     /// <summary>
-    /// User ID
+    /// The user ID.
     /// </summary>
     [FromRoute(Name = "userid")]
     public required string UserId { get; set; }
 
     /// <summary>
-    /// Culture parameters
+    /// The culture code parameters.
     /// </summary>
     [FromBody]
     public Culture Culture { get; set; }
 }
 
+/// <summary>
+/// The culture code parameters.
+/// </summary>
 public class Culture
 {
     /// <summary>
-    /// Language
+    /// The user language.
     /// </summary>
     public string CultureName { get; set; }
 }
+
+/// <summary>
+/// The user sex.
+/// </summary>
 public enum SexEnum
 {
     [SwaggerEnum("Female")]
@@ -336,29 +348,29 @@ public enum SexEnum
 }
 
 /// <summary>
-/// Request parameters for updating user photo
+/// The request parameters for updating a photo.
 /// </summary>
 public class UpdatePhotoMemberRequest
 {
     /// <summary>
-    /// Avatar photo URL
+    /// The avatar photo URL.
     /// </summary>
     public string Files { get; set; }
 }
 
 /// <summary>
-/// Request parameters for updating user photo
+/// The request parameters for updating a user photo.
 /// </summary>
 public class UpdatePhotoMemberRequestDto
 {
     /// <summary>
-    /// User ID
+    /// The user ID.
     /// </summary>
     [FromRoute(Name = "userid")]
     public required string UserId { get; set; }
 
     /// <summary>
-    /// Update photo
+    /// The request parameters for updating a photo.
     /// </summary>
     [FromBody]
     public UpdatePhotoMemberRequest UpdatePhoto { get; set; }
@@ -366,24 +378,24 @@ public class UpdatePhotoMemberRequestDto
 
 
 /// <summary>
-/// 
+/// The request parameters for getting a user by their ID.
 /// </summary>
 public class GetMemberByIdRequestDto
 {
     /// <summary>
-    /// User ID
+    /// The user ID.
     /// </summary>
     [FromRoute(Name = "userid")]
     public required string UserId { get; set; }
 }
 
 /// <summary>
-/// 
+/// The request parameters for getting a user by the email address.
 /// </summary>
 public class GetMemberByEmailRequestDto
 {
     /// <summary>
-    /// User email address
+    /// The user email address.
     /// </summary>
     [FromQuery(Name = "email")]
     [EmailAddress]
@@ -392,77 +404,76 @@ public class GetMemberByEmailRequestDto
 }
 
 /// <summary>
-/// 
+/// The request parameters for getting a user by the search query.
 /// </summary>
 public class GetMemberByQueryRequestDto
 {
     /// <summary>
-    /// Search query
+    /// The search query.
     /// </summary>
     [FromRoute(Name = "query")]
     public required string Query { get; set; }
 }
 
 /// <summary>
-/// 
+/// The request parameters for getting people by the search query.
 /// </summary>
 public class GetPeopleByQueryRequestDto
 {
     /// <summary>
-    /// Search query
+    /// The search query.
     /// </summary>
     [FromQuery(Name = "query")]
     public string Query { get; set; }
 }
 
 /// <summary>
-/// Request parameters for updating user contacts
+/// The request parameters for updating user contacts.
 /// </summary>
 public class UpdateMemberSimpleRequestDto
 {
     /// <summary>
-    /// User ID
+    /// The user ID.
     /// </summary>
     public string UserId { get; set; }
 }
 
 /// <summary>
-/// Parameters for updating user contacts
+/// The contacts request.
 /// </summary>
 public class ContactsRequest
 {
     /// <summary>
-    /// List of user contacts
+    /// The list of user contacts.
     /// </summary>
     public IEnumerable<Contact> Contacts { get; set; }
 }
 
-
 /// <summary>
-/// Request parameters for updating user contacts
+/// The request parameters for updating user contacts.
 /// </summary>
 public class ContactsRequestDto
 {
     /// <summary>
-    /// User ID
+    /// The user ID.
     /// </summary>
     [FromRoute(Name = "userid")]
     public required string UserId { get; set; }
 
     /// <summary>
-    /// Contacts
+    /// The contacts request.
     /// </summary>
     [FromBody]
     public ContactsRequest Contacts { get; set; }
 }
 
 /// <summary>
-/// 
+/// The request parameters for sharing a guest with another user.
 /// </summary>
 public class GuestShareRequestDto
 {
     /// <summary>
-    /// User ID
+    /// The user ID.
     /// </summary>
     [FromRoute(Name = "userid")]
     public Guid UserId { get; set; }

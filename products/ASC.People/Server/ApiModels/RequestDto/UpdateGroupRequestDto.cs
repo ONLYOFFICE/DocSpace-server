@@ -27,45 +27,45 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// Group request parameters
+/// The request for updating a group.
 /// </summary>
 public class UpdateGroupRequest
 {
     /// <summary>
-    /// List of user IDs to add to the group
+    /// The list of user IDs to add to the group.
     /// </summary>
     public IEnumerable<Guid> MembersToAdd { get; set; }
 
     /// <summary>
-    /// List of user IDs to remove from the group
+    /// The list of user IDs to remove from the group.
     /// </summary>
     public IEnumerable<Guid> MembersToRemove { get; set; }
 
     /// <summary>
-    /// Group manager ID
+    /// The group manager ID.
     /// </summary>
     public Guid GroupManager { get; set; }
 
     /// <summary>
-    /// Group name
+    /// The group name.
     /// </summary>
     [StringLength(128)]
     public string GroupName { get; set; }
 }
 
 /// <summary>
-/// Group request parameters
+/// The request parameters for updating a group.
 /// </summary>
 public class UpdateGroupRequestDto
 {
     /// <summary>
-    /// Group ID
+    /// The group ID.
     /// </summary>
     [FromRoute(Name = "id")]
     public required Guid Id { get; set; }
 
     /// <summary>
-    /// Update group parameters
+    /// The request for updating a group.
     /// </summary>
     [FromBody]
     public UpdateGroupRequest Update {  get; set; }

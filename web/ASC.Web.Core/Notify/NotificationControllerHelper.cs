@@ -75,6 +75,9 @@ public class NotificationControllerHelper(
     }
 }
 
+/// <summary>
+/// The notification type.
+/// </summary>
 public enum NotificationType
 {
     [SwaggerEnum("Badges")]

@@ -26,76 +26,79 @@
 
 namespace ASC.Web.Files.Services.WCFService;
 
+/// <summary>
+/// The mention message parameters.
+/// </summary>
 public class MentionWrapper
 {
     internal MentionWrapper() { }
 
     /// <summary>
-    /// User information
+    /// The user information.
     /// </summary>
     public UserInfo User { get; internal set; }
 
     /// <summary>
-    /// User email
+    /// The email address of the user.
     /// </summary>
     [EmailAddress]
     public string Email { get; internal set; }
 
     /// <summary>
-    /// User ID
+    /// The identification of the user.
     /// </summary>
     public string Id { get; internal set; }
 
     /// <summary>
-    /// User image
+    /// The path to the user's avatar.
     /// </summary>
     public string Image { get; internal set; }
 
     /// <summary>
-    /// Specifies if the user has the access to the file or not
+    /// Specifies if the user has the access to the file or not.
     /// </summary>
     public bool HasAccess { get; internal set; }
 
     /// <summary>
-    /// User display name
+    /// The full name of the user.
     /// </summary>
     public string Name { get; internal set; }
 }
 
 /// <summary>
-/// Mention message parameters
+/// The mention message parameters.
 /// </summary>
 public class MentionMessageWrapper
 {
     /// <summary>
-    /// The config parameter which contains the information about the comment in the document that will be scrolled to
+    /// The config parameter which contains the information about the action in the document that will be scrolled to.
     /// </summary>
     public ActionLinkConfig ActionLink { get; set; }
 
     /// <summary>
-    /// A list of emails which will receive the mention message
+    /// A list of emails which will receive the mention message.
     /// </summary>
     public List<string> Emails { get; set; }
 
     /// <summary>
-    /// The comment message
+    /// The comment message.
     /// </summary>
     public string Message { get; set; }
 }
 
 /// <summary>
-/// Mention message request parameters
+/// The mention message request parameters.
 /// </summary>
 public class MentionMessageWrapperRequestDto<T>
 {
     /// <summary>
-    /// File ID
+    /// The file ID of the mention message.
     /// </summary>
     [FromRoute(Name = "fileId")]
     public T FileId { get; set; }
 
     /// <summary>
-    /// Mention message
+    /// The mention message.
     /// </summary>
     [FromBody]
     public MentionMessageWrapper MentionMessage {  get; set; }

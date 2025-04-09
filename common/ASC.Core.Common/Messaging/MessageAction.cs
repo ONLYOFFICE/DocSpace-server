@@ -26,6 +26,9 @@
 
 namespace ASC.MessagingSystem.Core;
 
+/// <summary>
+/// The event action ID.
+/// </summary>
 [EnumExtensions]
 public enum MessageAction
 {

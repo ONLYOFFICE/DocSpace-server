@@ -52,7 +52,7 @@ public class CustomNavigationController(MessageService messageService,
     }
 
     /// <summary>
-    /// Returns a custom navigation item sample.
+    /// Returns a sample of the custom navigation item.
     /// </summary>
     /// <short>Get a custom navigation item sample</short>
     /// <path>api/2.0/settings/customnavigation/getsample</path>

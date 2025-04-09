@@ -26,10 +26,13 @@
 
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
+/// <summary>
+/// The parameters for terminating a process or operation.
+/// </summary>
 public class FinishDto
 {
     /// <summary>
-    /// Is send welcome email
+    /// Specifies whether to send a welcome email or not.
     /// </summary>
     public bool IsSendWelcomeEmail { get; set; }
 }

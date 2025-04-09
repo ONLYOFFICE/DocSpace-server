@@ -2834,6 +2834,9 @@ public class FileSecurity(IDaoFactory daoFactory,
         }
     }
 
+    /// <summary>
+    /// The actions that can be performed with the file.
+    /// </summary>
     public enum FilesSecurityActions
     {
         [SwaggerEnum("Read")]
@@ -2929,7 +2932,8 @@ public class FileSecurity(IDaoFactory daoFactory,
         [SwaggerEnum("Embed")]
         Embed,
 
-        [SwaggerEnum("Change owner")]        ChangeOwner,
+        [SwaggerEnum("Change owner")]        
+        ChangeOwner,
 
         [SwaggerEnum("Index export")]
         IndexExport,

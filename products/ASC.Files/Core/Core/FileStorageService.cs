@@ -4760,6 +4760,7 @@ public class FileStorageService //: IFileStorageService
         else
         {
             properties.FormFilling.StartFilling = true;
+            properties.FormFilling.StartedByUserId = authContext.CurrentAccount.ID;
             await fileDao.SaveProperties(formId, properties);
             var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
             await filesMessageService.SendAsync(MessageAction.FormStartedToFill, form, MessageInitiator.DocsService, user?.DisplayUserName(false, displayUserSettingsHelper), form.Title);

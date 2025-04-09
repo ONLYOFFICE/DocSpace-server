@@ -31,12 +31,21 @@ using Polly.Timeout;
 
 namespace ASC.Files.Core.Helpers;
 
+/// <summary>
+/// The document service parameters.
+/// </summary>
 public static class DocumentService
 {
     private const int Timeout = 120000;
 
+    /// <summary>
+    /// The custom SSL verification client.
+    /// </summary>
     public const string CustomSslVerificationClient = "CustomSSLVerificationClient";
 
+    /// <summary>
+    /// Gets the HTTP client name.
+    /// </summary>
     public static string GetHttpClientName(bool sslVerification) => nameof(DocumentService) + (sslVerification ? string.Empty : CustomSslVerificationClient);
 
     private static readonly JsonSerializerOptions _bodySettings = new()
@@ -69,7 +78,7 @@ public static class DocumentService
     }
 
     /// <summary>
-    /// The method is to convert the file to the required format
+    /// The method converts the file to the required format.
     /// </summary>
     /// <param name="documentConverterUrl">Url to the service of conversion</param>
     /// <param name="documentUri">Uri for the document to convert</param>
@@ -214,7 +223,7 @@ public static class DocumentService
     }
 
     /// <summary>
-    /// Request to Document Server with command
+    /// Inintiates the request to the document Server with command.
     /// </summary>
     /// <param name="documentTrackerUrl">Url to the command service</param>
     /// <param name="method">Name of method</param>
@@ -325,6 +334,9 @@ public static class DocumentService
         }
     }
 
+    /// <summary>
+    /// Inintiates the the document builder request.
+    /// </summary>
     public static Task<(string DocBuilderKey, Dictionary<string, string> Urls)> DocbuilderRequestAsync(
         string docbuilderUrl,
         string requestKey,
@@ -447,6 +459,9 @@ public static class DocumentService
         return dataResponse.Equals("true", StringComparison.InvariantCultureIgnoreCase);
     }
 
+    /// <summary>
+    /// The command method.
+    /// </summary>
     [EnumExtensions]
     public enum CommandMethod
     {
@@ -459,23 +474,50 @@ public static class DocumentService
         License
     }
 
+    /// <summary>
+    /// The command response parameters.
+    /// </summary>
     [DebuggerDisplay("{Key}")]
     public class CommandResponse
     {
+        /// <summary>
+        /// The command response error type.
+        /// </summary>
         public ErrorTypes Error { get; set; }
 
+        /// <summary>
+        /// The command response error message.
+        /// </summary>
         public string ErrorString { get; set; }
 
+        /// <summary>
+        /// The document identifier used to unambiguously identify the document file.
+        /// </summary>
         public string Key { get; set; }
 
+        /// <summary>
+        /// The document license information.
+        /// </summary>
         public License License { get; set; }
 
+        /// <summary>
+        /// The server characteristics.
+        /// </summary>
         public ServerInfo Server { get; set; }
 
+        /// <summary>
+        /// The user quota value.
+        /// </summary>
         public QuotaInfo Quota { get; set; }
 
+        /// <summary>
+        /// The ONLYOFFICE Docs version.
+        /// </summary>
         public string Version { get; set; }
 
+        /// <summary>
+        /// The command response error type.
+        /// </summary>
         public enum ErrorTypes
         {
             NoError = 0,
@@ -488,20 +530,45 @@ public static class DocumentService
             TokenExpire = 7
         }
 
+        /// <summary>
+        /// The server characteristics.
+        /// </summary>
         [DebuggerDisplay("{BuildVersion}")]
         public class ServerInfo
         {
+            /// <summary>
+            /// The server build date.
+            /// </summary>
             public DateTime BuildDate { get; set; }
 
+            /// <summary>
+            /// The server build number.
+            /// </summary>
             public int BuildNumber { get; set; }
+
+            /// <summary>
+            /// The server build version.
+            /// </summary>
             public string BuildVersion { get; set; }
 
+            /// <summary>
+            /// The server product version.
+            /// </summary>
             public PackageTypes PackageType { get; set; }
 
+            /// <summary>
+            /// The license status.
+            /// </summary>
             public ResultTypes ResultType { get; set; }
 
+            /// <summary>
+            /// The number of server workers.
+            /// </summary>
             public int WorkersCount { get; set; }
 
+            /// <summary>
+            /// The server product version.
+            /// </summary>
             public enum PackageTypes
             {
                 OpenSource = 0,
@@ -509,6 +576,9 @@ public static class DocumentService
                 DeveloperEdition = 2
             }
 
+            /// <summary>
+            /// The license status.
+            /// </summary>
             public enum ResultTypes
             {
                 Error = 1,
@@ -525,143 +595,353 @@ public static class DocumentService
             }
         }
 
+        /// <summary>
+        /// The user quota value.
+        /// </summary>
         public class QuotaInfo
         {
+            /// <summary>
+            /// The list of user quotas for the user license.
+            /// </summary>
             public List<User> Users { get; set; }
 
+            /// <summary>
+            /// The user quota information.
+            /// </summary>
             [DebuggerDisplay("{UserId} ({Expire})")]
             public class User
             {
+                /// <summary>
+                /// The ID of the user who opened the editor.
+                /// </summary>
                 [JsonPropertyName("userid")]
                 public string UserId { get; set; }
 
+                /// <summary>
+                /// The date of license expiration for this user.
+                /// </summary>
                 public DateTime Expire { get; set; }
             }
         }
     }
 
+    /// <summary>
+    /// The command body.
+    /// </summary>
     [DebuggerDisplay("{Command} ({Key})")]
     private class CommandBody
     {
+        /// <summary>
+        /// The command method.
+        /// </summary>
         [JsonIgnore]
         public CommandMethod Command { get; init; }
 
+        /// <summary>
+        /// The command type.
+        /// </summary>
         public string C
         {
             get { return Command.ToString().ToLower(CultureInfo.InvariantCulture); }
         }
 
+        /// <summary>
+        /// The command callback.
+        /// </summary>
         public string Callback { get; set; }
 
+        /// <summary>
+        /// The document identifier used to unambiguously identify the document file.
+        /// </summary>
         public string Key { get; init; }
+
+        /// <summary>
+        /// The new meta information of the document.
+        /// </summary>
         public MetaData Meta { get; set; }
 
+        /// <summary>
+        /// The list of the user identifiers.
+        /// </summary>
         public string[] Users { get; set; }
 
+        /// <summary>
+        /// The encrypted signature added to the config in the form of a token.
+        /// </summary>
         public string Token { get; set; }
 
         //not used
+        /// <summary>
+        /// Some custom identifier which will help distinguish the specific request in case there were more than one.
+        /// </summary>
         [JsonPropertyName("userdata")]
         public string UserData { get; set; }
     }
 
+    /// <summary>
+    /// The PDF data.
+    /// </summary>
     public class PdfData
     {
+        /// <summary>
+        /// Specifies if the PDF document is a PDF form or not.
+        /// </summary>
         public bool Form { get; set; }
     }
 
+    /// <summary>
+    /// The new meta information of the document.
+    /// </summary>
     [DebuggerDisplay("{Title}")]
     public class MetaData
     {
+        /// <summary>
+        /// The new document name.
+        /// </summary>
         public string Title { get; set; }
     }
 
+    /// <summary>
+    /// The thumbnail data.
+    /// </summary>
     [DebuggerDisplay("{Height}x{Width}")]
     public class ThumbnailData
     {
+        /// <summary>
+        /// The mode to fit the image to the height and width specified:
+        /// 0 - stretch file to fit height and width;
+        /// 1 - keep the aspect for the image;
+        /// 2 - in this case, the width and height settings are not used.
+        /// </summary>
         public int Aspect { get; set; }
+
+        /// <summary>
+        /// Specifies if the thumbnails should be generated for the first page only or for all the document pages.
+        /// </summary>
         public bool First { get; set; }
+
+        /// <summary>
+        /// The thumbnail height in pixels.
+        /// </summary>
         public int Height { get; set; }
+
+        /// <summary>
+        /// The thumbnail width in pixels.
+        /// </summary>
         public int Width { get; set; }
     }
 
+    /// <summary>
+    /// The settings for converting the spreadsheet to pdf.
+    /// </summary>
     [DebuggerDisplay("SpreadsheetLayout {IgnorePrintArea} {Orientation} {FitToHeight} {FitToWidth} {Headings} {GridLines}")]
     public class SpreadsheetLayout
     {
+        /// <summary>
+        /// Specifies whether to ignore the print area chosen for the spreadsheet file or not.
+        /// </summary>
         public bool IgnorePrintArea { get; set; }
+
+        /// <summary>
+        /// The orientation of the output PDF file.
+        /// </summary>
         public string Orientation { get; set; }
+
+        /// <summary>
+        /// The height of the converted area, measured in the number of pages.
+        /// </summary>
         public int FitToHeight { get; set; }
+
+        /// <summary>
+        /// The width of the converted area, measured in the number of pages.
+        /// </summary>
         public int FitToWidth { get; set; }
+
+        /// <summary>
+        /// Specifies whether to include the headings to the output PDF file or not.
+        /// </summary>
         public bool Headings { get; set; }
+
+        /// <summary>
+        /// Specifies whether to include grid lines to the output PDF file or not.
+        /// </summary>
         public bool GridLines { get; set; }
+
+        /// <summary>
+        /// The margins of the output PDF file.
+        /// </summary>
         public LayoutMargins Margins { get; set; }
+
+        /// <summary>
+        /// The page size of the output PDF file.
+        /// </summary>
         public LayoutPageSize PageSize { get; set; }
 
-
+        /// <summary>
+        /// The margins of the output PDF file.
+        /// </summary>
         [DebuggerDisplay("Margins {Top} {Right} {Bottom} {Left}")]
         public class LayoutMargins
         {
+            /// <summary>
+            /// The left margin of the output PDF file.
+            /// </summary>
             public string Left { get; set; }
+
+            /// <summary>
+            /// The right margin of the output PDF file.
+            /// </summary>
             public string Right { get; set; }
+
+            /// <summary>
+            /// The top margin of the output PDF file.
+            /// </summary>
             public string Top { get; set; }
+
+            /// <summary>
+            /// The bottom margin of the output PDF file.
+            /// </summary>
             public string Bottom { get; set; }
         }
 
+        /// <summary>
+        /// The page size of the output PDF file.
+        /// </summary>
         [DebuggerDisplay("PageSize {Width} {Height}")]
         public class LayoutPageSize
         {
+            /// <summary>
+            /// The page height of the output PDF file.
+            /// </summary>
             public string Height { get; set; }
+
+            /// <summary>
+            /// The page width of the output PDF file.
+            /// </summary>
             public string Width { get; set; }
         }
     }
 
+    /// <summary>
+    /// The conversion  body.
+    /// </summary>
     [DebuggerDisplay("{Title} from {FileType} to {OutputType} ({Key})")]
     private sealed class ConvertionBody
     {
+        /// <summary>
+        /// Specifies whether the conversion is asynchronous or not.
+        /// </summary>
         public bool Async { get; set; }
 
+        /// <summary>
+        /// The type of the document file to be converted.
+        /// </summary>
         [JsonPropertyName("filetype")]
         public required string FileType { get; init; }
+
+        /// <summary>
+        /// The document identifier used to unambiguously identify the document file..
+        /// </summary>
         public required string Key { get; init; }
 
+        /// <summary>
+        /// The resulting converted document type.
+        /// </summary>
         [JsonPropertyName("outputtype")]
         public required string OutputType { get; init; }
+
+        /// <summary>
+        /// The password for the document file if it is protected with a password.
+        /// </summary>
         public string Password { get; set; }
+
+        /// <summary>
+        /// The converted file name.
+        /// </summary>
         public string Title { get; init; }
+
+        /// <summary>
+        /// The thunmbnail settings.
+        /// </summary>
         public ThumbnailData Thumbnail { get; set; }
+
+        /// <summary>
+        /// The settings for converting the spreadsheet to pdf.
+        /// </summary>
         public SpreadsheetLayout SpreadsheetLayout { get; set; }
+
+        /// <summary>
+        /// The the absolute URL to the document to be converted.
+        /// </summary>
         public required string Url { get; set; }
+
+        /// <summary>
+        /// The default display format for currency and date and time when converting from spreadsheet format to PDF.
+        /// </summary>
         public required string Region { get; set; }
-        public WatermarkOnDraw Watermark { get; set; }        
+
+        /// <summary>
+        /// The properties of a watermark which is inserted into the PDF and image files during conversion.
+        /// </summary>
+        public WatermarkOnDraw Watermark { get; set; }
+
+        /// <summary>
+        /// The encrypted signature added to the ONLYOFFICE Docs config in the form of a token.
+        /// </summary>        
         public string Token { get; set; }
+
+        /// <summary>
+        /// The settings for converting document files to PDF.
+        /// </summary>
         public PdfData Pdf { get; set; }
 
     }
 
+    /// <summary>
+    /// The Document Builder request body.
+    /// </summary>
     [DebuggerDisplay("{Key}")]
     private sealed class BuilderBody
     {
+        /// <summary>
+        /// Specifies if the request to the document builder service is asynchronous or not.
+        /// </summary>
         public bool Async { get; set; }
+
+        /// <summary>
+        /// The request identifier used to unambiguously identify the request.
+        /// </summary>
         public required string Key { get; init; }
+
+        /// <summary>
+        /// The absolute URL to the .docbuilder file.
+        /// </summary>
         public required string Url { get; set; }
+
+        /// <summary>
+        /// The encrypted signature added to the config in the form of a token.
+        /// </summary>
         public string Token { get; set; }
     }
 
+    /// <summary>
+    /// The file link properties.
+    /// </summary>
     public class FileLink
     {
         /// <summary>
-        /// File type
+        /// The type of the file for the source viewed or edited document.
         /// </summary>
         [JsonPropertyName("filetype")]
         public string FileType { get; set; }
 
         /// <summary>
-        /// Token
+        /// The encrypted signature added to the config in the form of a token.
         /// </summary>
         public string Token { get; set; }
 
         /// <summary>
-        /// Url
+        /// The absolute URL where the source viewed or edited document is stored.
         /// </summary>
         [Url]
         public string Url { get; set; }
@@ -710,7 +990,7 @@ public static class DocumentService
     }
 
     /// <summary>
-    /// Processing document received from the editing service
+    /// Processing the document received from the editing service.
     /// </summary>
     /// <param name="jsonDocumentResponse">The resulting json from editing service</param>
     /// <returns>The percentage of completion of conversion and Uri to the converted document</returns>

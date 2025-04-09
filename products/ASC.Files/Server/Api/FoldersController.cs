@@ -51,7 +51,7 @@ public class FoldersControllerInternal(
         fileShareDtoHelper)
 {
     /// <summary>
-    /// Get the activity history of a folder with a specified identifier
+    /// Returns the activity history of a folder with a specified identifier.
     /// </summary>
     /// <short>
     /// Get folder history
@@ -69,10 +69,12 @@ public class FoldersControllerInternal(
     }
 
     /// <summary>
-    /// Get form filter of a folder with id specified in request
+    /// Returns the form filter of a folder with the ID specified in the request.
     /// </summary>
     /// <short>Get folder form filter</short>
     /// <path>api/2.0/files/{folderId}/formfilter</path>
+    /// <requiresAuthorization>false</requiresAuthorization>
+    /// <collection>list</collection>
     [Tags("Files / Folders")]
     [AllowAnonymous]
     [SwaggerResponse(200, "Ok", typeof(IEnumerable<FormsItemDto>))]
@@ -80,7 +82,7 @@ public class FoldersControllerInternal(
     public async Task<IEnumerable<FormsItemDto>> GetFolderAsync(FolderIdRequestDto<int> inDto)
     {
         return (await formFillingReportCreator.GetFormsFields(inDto.FolderId)).Select(r => new FormsItemDto(r.Key, r.Type));
-}
+    }
 }
 
 public class FoldersControllerThirdparty(
@@ -150,8 +152,11 @@ public abstract class FoldersController<T>(
     }
 
     /// <summary>
-    /// Sets file order in the folder with ID specified in the request
+    /// Sets the file order in the folder with ID specified in the request.
     /// </summary>
+    /// <short>
+    /// Set file order
+    /// </short>
     /// <path>api/2.0/files/folder/{folderId}/order</path>
     [Tags("Files / Folders")]
     [HttpPut("folder/{folderId}/order")]
@@ -302,6 +307,7 @@ public abstract class FoldersController<T>(
     /// </summary>
     /// <short>Get primary external link</short>
     /// <path>api/2.0/files/folder/{id}/link</path>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Folder security information", typeof(FileShareDto))]
     [SwaggerResponse(404, "Not Found")]

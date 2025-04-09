@@ -27,12 +27,12 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for adding files to the template list
+/// The request parameters for adding files to the template list.
 /// </summary>
 public class TemplatesRequestDto
 {
     /// <summary>
-    /// List of file IDs
+    /// The list of file IDs.
     /// </summary>
     public IEnumerable<int> FileIds { get; set; }
 }
