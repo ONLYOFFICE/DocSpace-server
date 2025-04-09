@@ -1118,7 +1118,11 @@ public class FileSecurity(IDaoFactory daoFactory,
                 break;
 
             case FolderType.RoomTemplates:
-                if (action == FilesSecurityActions.FillForms)
+                if (action is FilesSecurityActions.FillForms 
+                    or FilesSecurityActions.EditHistory 
+                    or FilesSecurityActions.ReadHistory
+                    or FilesSecurityActions.SubmitToFormGallery
+                    or FilesSecurityActions.Lock)
                 {
                     return false;
                 }
