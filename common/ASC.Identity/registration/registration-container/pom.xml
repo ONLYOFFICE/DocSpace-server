@@ -204,8 +204,8 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <apiDocsUrl>http://localhost:8080/docs.yaml</apiDocsUrl>
-                    <outputFileName>openapi.yaml</outputFileName>
+                    <apiDocsUrl>http://localhost:8080/docs</apiDocsUrl>
+                    <outputFileName>identity-registration-openapi.json</outputFileName>
                     <outputDir>${build.directory}</outputDir>
                     <skip>false</skip>
                 </configuration>
