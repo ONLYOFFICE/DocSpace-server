@@ -116,10 +116,10 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
         { (int)MessageAction.RoomInviteResend, new RoomInviteResendInterpreter() }
     }.ToFrozenDictionary();
     
-    public ValueTask<HistoryEntry> ToHistoryAsync(DbAuditEvent @event, FileEntry<int> entry)
+    public ValueTask<HistoryEntry> ToHistoryAsync(DbAuditEvent @event, DbFilesAuditReference reference)
     {
         return !_interpreters.TryGetValue(@event.Action ?? -1, out var interpreter) 
             ? ValueTask.FromResult<HistoryEntry>(null) 
-            : interpreter.InterpretAsync(@event, entry, serviceProvider);
+            : interpreter.InterpretAsync(@event, reference, serviceProvider);
     }
 }
