@@ -133,8 +133,8 @@ public static class OpenApiExtension
                 {
                     AuthorizationCode = new OpenApiOAuthFlow
                     {
-                        AuthorizationUrl = string.IsNullOrEmpty(authorizationUrl) ? null : new Uri(authorizationUrl),
-                        TokenUrl = string.IsNullOrEmpty(tokenUrl) ? null : new Uri(tokenUrl),
+                        AuthorizationUrl = string.IsNullOrEmpty(authorizationUrl) ? new Uri(string.Empty, UriKind.RelativeOrAbsolute) : new Uri(authorizationUrl),
+                        TokenUrl = string.IsNullOrEmpty(tokenUrl) ? new Uri(string.Empty, UriKind.RelativeOrAbsolute) : new Uri(tokenUrl),
                         Scopes = new Dictionary<string, string>
                         {
                             { "read", "Read access to protected resources" },
@@ -151,7 +151,7 @@ public static class OpenApiExtension
             {
                 Type = SecuritySchemeType.OpenIdConnect,
                 In = ParameterLocation.Header,
-                OpenIdConnectUrl = string.IsNullOrEmpty(openIdConnectUrl) ? null : new Uri(openIdConnectUrl),
+                OpenIdConnectUrl = string.IsNullOrEmpty(openIdConnectUrl) ? new Uri(string.Empty, UriKind.RelativeOrAbsolute) : new Uri(openIdConnectUrl),
                 Description = "OpenID Connect authentication"
             });
 
