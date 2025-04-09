@@ -74,7 +74,7 @@ public class SecurityConfiguration {
                     .requestMatchers(checkManagementPort())
                     .permitAll()
                     .requestMatchers(
-                        String.format("%s/clients/*/public/info", webApi), "/docs", "/health/**")
+                        String.format("%s/clients/*/public/info", webApi), "/docs**", "/health/**")
                     .permitAll()
                     .anyRequest()
                     .authenticated())

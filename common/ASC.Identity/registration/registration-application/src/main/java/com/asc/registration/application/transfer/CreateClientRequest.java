@@ -30,6 +30,7 @@ package com.asc.registration.application.transfer;
 import com.asc.common.utilities.validation.LogoSize;
 import com.asc.common.utilities.validation.URLCollection;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -42,10 +43,10 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * CreateTenantClientCommandRequest is a data transfer object (DTO) used in the REST layer. It
- * represents a request to create a new tenant client. This class contains the necessary information
- * to create a new client for a tenant. It implements {@link Serializable} to allow instances of
- * this class to be serialized.
+ * CreateClientRequest is a data transfer object (DTO) used in the REST layer. It represents a
+ * request to create a new tenant client. This class contains the necessary information to create a
+ * new client for a tenant. It implements {@link Serializable} to allow instances of this class to
+ * be serialized.
  *
  * <p>The class is annotated with Lombok annotations to generate boilerplate code:
  *
@@ -68,7 +69,7 @@ import lombok.Setter;
  * Example usage:
  *
  * <pre>{@code
- * CreateTenantClientCommandRequest request = CreateTenantClientCommandRequest.builder()
+ * CreateClientRequest request = CreateClientRequest.builder()
  *     .name("Example Client")
  *     .description("Description of the client")
  *     .logo("data:image/png;base64,...")
@@ -89,7 +90,8 @@ import lombok.Setter;
 @Setter
 @Builder
 @AllArgsConstructor
-public class CreateTenantClientCommandRequest implements Serializable {
+@Schema(description = "Request to create a new tenant client")
+public class CreateClientRequest implements Serializable {
   /**
    * The name of the client. The client name length is expected to be between 3 and 256 characters.
    */
@@ -98,10 +100,19 @@ public class CreateTenantClientCommandRequest implements Serializable {
       min = 3,
       max = 256,
       message = "client name length is expected to be between 3 and 256 characters")
+  @Schema(
+      description = "The name of the client",
+      example = "Example Client",
+      minLength = 3,
+      maxLength = 256)
   private String name;
 
   /** The description of the client. */
   @Size(max = 255, message = "client description length is expected to be less than 256 characters")
+  @Schema(
+      description = "The description of the client",
+      example = "Description of the client",
+      maxLength = 255)
   private String description;
 
   /**
@@ -112,14 +123,19 @@ public class CreateTenantClientCommandRequest implements Serializable {
       regexp = "^data:image\\/(?:png|jpeg|jpg|svg\\+xml);base64,.*.{1,}",
       message = "client logo is expected to be passed as base64")
   @LogoSize(maxBytes = 256000, maxLength = 2000000)
+  @Schema(
+      description = "The logo of the client in base64 format",
+      example = "data:image/png;base64,...")
   private String logo;
 
   /** Indicates whether PKCE is allowed for the client. */
   @JsonProperty("allow_pkce")
+  @Schema(description = "Indicates whether PKCE is allowed for the client", example = "true")
   private boolean allowPkce;
 
   /** Indicates if the client is public. */
   @JsonProperty("is_public")
+  @Schema(description = "Indicates if the client is public", example = "false")
   private boolean isPublic;
 
   /** The website URL of the client. The website URL is expected to be passed as a URL. */
@@ -129,6 +145,7 @@ public class CreateTenantClientCommandRequest implements Serializable {
       regexp =
           "https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)",
       message = "website url is expected to be passed as url")
+  @Schema(description = "The website URL of the client", example = "http://example.com")
   private String websiteUrl;
 
   /** The terms URL of the client. The terms URL is expected to be passed as a URL. */
@@ -138,6 +155,7 @@ public class CreateTenantClientCommandRequest implements Serializable {
       regexp =
           "https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)",
       message = "terms url is expected to be passed as url")
+  @Schema(description = "The terms URL of the client", example = "http://example.com/terms")
   private String termsUrl;
 
   /** The policy URL of the client. The policy URL is expected to be passed as a URL. */
@@ -147,18 +165,23 @@ public class CreateTenantClientCommandRequest implements Serializable {
       regexp =
           "https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)",
       message = "policy url is expected to be passed as url")
+  @Schema(description = "The policy URL of the client", example = "http://example.com/policy")
   private String policyUrl;
 
   /** The redirect URIs for the client. */
   @JsonProperty("redirect_uris")
   @NotNull
   @URLCollection
+  @Schema(
+      description = "The redirect URIs for the client",
+      example = "[\"http://example.com/redirect\"]")
   private Set<String> redirectUris;
 
   /** The allowed origins for the client. */
   @JsonProperty("allowed_origins")
   @NotNull
   @URLCollection
+  @Schema(description = "The allowed origins for the client", example = "[\"http://example.com\"]")
   private Set<String> allowedOrigins;
 
   /**
@@ -171,9 +194,13 @@ public class CreateTenantClientCommandRequest implements Serializable {
       regexp =
           "https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)",
       message = "logout redirect uri is expected to be passed as url")
+  @Schema(
+      description = "The logout redirect URI for the client",
+      example = "http://example.com/logout")
   private String logoutRedirectUri;
 
   /** The scopes for the client. This field cannot be empty. */
   @NotEmpty(message = "scopes field can not be empty")
+  @Schema(description = "The scopes for the client", example = "[\"read\", \"write\"]")
   private Set<String> scopes;
 }
