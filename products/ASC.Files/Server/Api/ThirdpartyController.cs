@@ -42,7 +42,7 @@ public class ThirdpartyController(
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
-    /// Returns a list of the available providers.
+    /// Returns the list of the available providers.
     /// </summary>
     /// <short>Get providers</short>
     /// <remarks>Available provider keys: DropboxV2, Box, WebDav, Yandex, OneDrive, SharePoint, GoogleDrive, kDrive.</remarks>
@@ -130,7 +130,7 @@ public class ThirdpartyController(
     /// <summary>
     /// Returns a list of the third-party services connected to the "Common" section.
     /// </summary>
-    /// <short>Get common third-party services</short>
+    /// <short>Get the common third-party services</short>
     /// <path>api/2.0/files/thirdparty/common</path>
     /// <collection>list</collection>
     [Tags("Files / Third-party integration")]
@@ -150,7 +150,7 @@ public class ThirdpartyController(
     /// <summary>
     /// Returns a list of all the connected third-party accounts.
     /// </summary>
-    /// <short>Get third-party accounts</short>
+    /// <short>Get the third-party accounts</short>
     /// <path>api/2.0/files/thirdparty</path>
     /// <collection>list</collection>
     [Tags("Files / Third-party integration")]
@@ -162,7 +162,7 @@ public class ThirdpartyController(
     }
 
     /// <summary>
-    /// Return a backup of the connected third-party account.
+    /// Returns a backup of the connected third-party account.
     /// </summary>
     /// <short>Get a third-party account backup</short>
     /// <path>api/2.0/files/thirdparty/backup</path>
@@ -239,7 +239,7 @@ public class ThirdpartyController(
     /// Saves a backup of the connected third-party account.
     /// </summary>
     /// <short>Save a third-party account backup</short>
-    /// <remarks>List of provider key: DropboxV2, Box, WebDav, Yandex, OneDrive, SharePoint, GoogleDrive, kDrive</remarks>
+    /// <remarks>List of provider keys: DropboxV2, Box, WebDav, Yandex, OneDrive, SharePoint, GoogleDrive, kDrive.</remarks>
     /// <path>api/2.0/files/thirdparty/backup</path>
     /// <exception cref="ArgumentException"></exception>
     [Tags("Files / Third-party integration")]
@@ -305,10 +305,10 @@ public class ThirdpartyController(
     }
 
     /// <summary>
-    /// Returns a list of the all providers.
+    /// Returns a list of all providers.
     /// </summary>
     /// <short>Get all providers</short>
-    /// <remarks>Available provider keys: Dropbox, Box, WebDav, OneDrive, GoogleDrive, kDrive, ownCloud, Nextcloud</remarks>
+    /// <remarks>Available provider keys: Dropbox, Box, WebDav, OneDrive, GoogleDrive, kDrive, ownCloud, Nextcloud.</remarks>
     /// <path>api/2.0/files/thirdparty/providers</path>
     /// <collection>list</collection>
     [Tags("Files / Third-party integration")]

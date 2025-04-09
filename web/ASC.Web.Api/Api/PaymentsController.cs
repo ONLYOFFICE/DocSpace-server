@@ -98,7 +98,7 @@ public class PaymentController(
     }
 
     /// <summary>
-    /// Updates the quantity of payment.
+    /// Updates the payment quantity with the parameters specified in the request.
     /// </summary>
     /// <short>
     /// Update the payment quantity
@@ -257,7 +257,7 @@ public class PaymentController(
     }
 
     /// <summary>
-    /// Sends a request for portal payment.
+    /// Sends a request for the portal payment.
     /// </summary>
     /// <short>
     /// Send a payment request

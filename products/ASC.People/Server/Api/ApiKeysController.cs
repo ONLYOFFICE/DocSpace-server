@@ -41,21 +41,37 @@ public class ApiKeysController(
     AuthContext authContext,
     UserManager userManager,
     MessageService messageService,
+    SettingsManager settingsManager,
     IMapper mapper) : ControllerBase
 {
     /// <summary>
-    ///  Create a user api key
+    ///  Creates a user API key with the parameters specified in the request.
     /// </summary>  
     /// <short>
-    ///  Create a user api key
+    ///  Create a user API key
     /// </short>
-    /// <param name="apiKey">User api key params</param>
     /// <path>api/2.0/keys</path>
     [Tags("Api keys")]
     [SwaggerResponse(200, "Create a user api key", typeof(ApiKeyResponseDto))]
     [HttpPost]
+    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task<ApiKeyResponseDto> CreateApiKey(CreateApiKeyRequestDto apiKey)
     {
+        var currentType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+        var isAdmin = currentType is EmployeeType.DocSpaceAdmin;
+
+        var tenantDevToolsAccessSettings  = await settingsManager.LoadAsync<TenantDevToolsAccessSettings>();
+           
+        if (!isAdmin && tenantDevToolsAccessSettings is { LimitedAccessForUsers: true })
+        {
+            throw new UnauthorizedAccessException("This operation available only for portal owner/admins");
+        }
+
+        if (currentType == EmployeeType.Guest)
+        {
+            throw new UnauthorizedAccessException("This operation unavailable for user with guest role");
+        }
+        
         var expiresAt = apiKey.ExpiresInDays.HasValue ? TimeSpan.FromDays(apiKey.ExpiresInDays.Value) : (TimeSpan?)null;
             
         if (!IsValidPermission(apiKey.Permissions))
@@ -66,22 +82,24 @@ public class ApiKeysController(
         var result = await apiKeyManager.CreateApiKeyAsync(apiKey.Name,
             apiKey.Permissions,
             expiresAt);
-
-        messageService.Send(MessageAction.ApiKeyCreated, MessageTarget.Create(result.keyData.Id));
-
+        
         var apiKeyResponseDto = mapper.Map<ApiKeyResponseDto>(result.keyData);
+
+        messageService.Send(MessageAction.ApiKeyCreated, MessageTarget.Create(apiKeyResponseDto.Id), apiKeyResponseDto.Key);
+
         apiKeyResponseDto.Key = result.apiKey;
 
         return apiKeyResponseDto;
     }
 
     /// <summary>
-    ///  List of all available permissions for key
+    ///  Returns a list of all available permissions for the API key.
     /// </summary>  
     /// <short>
-    ///  List of all available permissions for key
+    /// Get API key permissions
     /// </short>
     /// <path>api/2.0/keys/permissions</path>
+    /// <collection>list</collection>
     [Tags("Api keys")]
     [SwaggerResponse(200, "List of all available permissions for key", typeof(IEnumerable<string>))]
     [HttpGet("permissions")]
@@ -94,12 +112,13 @@ public class ApiKeysController(
 
 
     /// <summary>
-    ///  Get list api keys for user
+    ///  Returns a list of all API keys for the current user.
     /// </summary>  
     /// <short>
-    ///  Get list api keys for user
+    ///  Get user API keys
     /// </short>
     /// <path>api/2.0/keys</path>
+    /// <collection>list</collection>
     [Tags("Api keys")]
     [SwaggerResponse(200, "List of api keys for user", typeof(IAsyncEnumerable<ApiKeyResponseDto>))]
     [HttpGet]
@@ -116,6 +135,7 @@ public class ApiKeysController(
         }
         else
         {
+           
             result = apiKeyManager.GetApiKeysAsync(authContext.CurrentAccount.ID);
         }
 
@@ -126,10 +146,10 @@ public class ApiKeysController(
     }
 
     /// <summary>
-    ///  Updates the existing api key changing the name, permissions and status
+    ///  Updates an existing API key changing its name, permissions and status.
     /// </summary>  
     /// <short>
-    ///  Update optional params for user api keys
+    ///  Update an API key
     /// </short>
     /// <path>api/2.0/keys/{keyId}</path>
     [Tags("Api keys")]
@@ -139,10 +159,10 @@ public class ApiKeysController(
     {
         var currentType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
         var isAdmin = currentType is EmployeeType.DocSpaceAdmin;
+        var apiKey = await apiKeyManager.GetApiKeyAsync(requestDto.KeyId);
 
         if (!isAdmin)
         {
-            var apiKey = await apiKeyManager.GetApiKeyAsync(requestDto.KeyId);
 
             if (apiKey.CreateBy != authContext.CurrentAccount.ID)
             {
@@ -163,19 +183,19 @@ public class ApiKeysController(
 
         if (result)
         {
-            messageService.Send(MessageAction.ApiKeyChangedStatus, MessageTarget.Create(requestDto.KeyId));
+            messageService.Send(MessageAction.ApiKeyUpdated, MessageTarget.Create(apiKey.Id), apiKey.Key);
         }
 
         return result;
     }
 
     /// <summary>
-    ///  Delete a user api key by key id
+    ///  Delete a user API key by its ID.
     /// </summary>  
     /// <short>
-    ///  Delete a user api key by key id
+    ///  Delete a user API key
     /// </short>
-    /// <param name="keyId">Api key id</param>
+    /// <param name="keyId">The API key ID.</param>
     /// <path>api/2.0/keys/{keyId}</path>
     [Tags("Api keys")]
     [SwaggerResponse(200, "Delete a user api key", typeof(bool))]
@@ -184,10 +204,10 @@ public class ApiKeysController(
     {
         var currentType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
         var isAdmin = currentType is EmployeeType.DocSpaceAdmin;
+        var apiKey = await apiKeyManager.GetApiKeyAsync(keyId);
 
         if (!isAdmin)
         {
-            var apiKey = await apiKeyManager.GetApiKeyAsync(keyId);
 
             if (apiKey.CreateBy != authContext.CurrentAccount.ID)
             {
@@ -197,7 +217,7 @@ public class ApiKeysController(
 
         var result = await apiKeyManager.DeleteApiKeyAsync(keyId);
 
-        messageService.Send(MessageAction.ApiKeyDeleted, MessageTarget.Create(keyId));
+        messageService.Send(MessageAction.ApiKeyDeleted, MessageTarget.Create(apiKey.Id), apiKey.Key);
 
         return result;
     }

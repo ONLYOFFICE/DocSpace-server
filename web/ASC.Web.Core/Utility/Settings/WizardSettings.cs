@@ -26,6 +26,9 @@
 
 namespace ASC.Web.Core.Utility.Settings;
 
+/// <summary>
+/// The Wizard settings.
+/// </summary>
 public class WizardSettings : ISettings<WizardSettings>
 {
     /// <summary>
@@ -33,6 +36,9 @@ public class WizardSettings : ISettings<WizardSettings>
     /// </summary>
     public bool Completed { get; set; }
 
+    /// <summary>
+    /// The tenant ID.
+    /// </summary>
     [JsonIgnore]
     public Guid ID
     {

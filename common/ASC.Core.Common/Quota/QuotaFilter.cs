@@ -26,6 +26,9 @@
 
 namespace ASC.Core;
 
+/// <summary>
+/// The quota filter (All - 0, Default - 1, Custom - 2).
+/// </summary>
 public enum QuotaFilter
 {
     [SwaggerEnum("All")]

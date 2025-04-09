@@ -1118,6 +1118,14 @@ public class FileSecurity(IDaoFactory daoFactory,
                 break;
 
             case FolderType.RoomTemplates:
+                if (action is FilesSecurityActions.FillForms 
+                    or FilesSecurityActions.EditHistory 
+                    or FilesSecurityActions.ReadHistory
+                    or FilesSecurityActions.SubmitToFormGallery
+                    or FilesSecurityActions.Lock)
+                {
+                    return false;
+                }
                 if (await HasFullAccessAsync(e, userId, isGuest, isRoom, isUser))
                 {
                     return true;
@@ -1512,11 +1520,20 @@ public class FileSecurity(IDaoFactory daoFactory,
 
                         break;
                     default:
-                        if (e.Access is FileShare.RoomManager or FileShare.ContentCreator || (e.Access is FileShare.Editing && !MustConvert(e)))
+                        if (isRoom)
                         {
-                            return true;
+                            if (e.Access is FileShare.RoomManager)
+                            {
+                                return true;
+                            }
                         }
-
+                        else
+                        {
+                            if (e.Access is FileShare.RoomManager or FileShare.ContentCreator || (e.Access is FileShare.Editing && !MustConvert(e)))
+                            {
+                                return true;
+                            }
+                        }
                         break;
                 }
 
@@ -1778,6 +1795,11 @@ public class FileSecurity(IDaoFactory daoFactory,
                 }
 
                 if (e.RootFolderType == FolderType.USER || (e.Access != FileShare.Read && e.Access != FileShare.None))
+                {
+                    return true;
+                }
+                
+                if(e.RootFolderType == FolderType.RoomTemplates)
                 {
                     return true;
                 }
@@ -2266,6 +2288,14 @@ public class FileSecurity(IDaoFactory daoFactory,
             {
                 case SearchArea.Archive when entry.RootFolderType == FolderType.Archive:
                 case SearchArea.Templates when entry.RootFolderType == FolderType.RoomTemplates:
+                    {
+                        if (entry.CreateBy != authContext.CurrentAccount.ID) 
+                        {
+                            entry.ShareRecord = record;
+                            entry.Access = record?.Share ?? FileShare.None;
+                        }
+                        return true;
+                    }
                 case SearchArea.Active when entry.RootFolderType == FolderType.VirtualRooms:
                 case SearchArea.Any when entry.RootFolderType is FolderType.VirtualRooms or FolderType.Archive:
                     {
@@ -2602,22 +2632,30 @@ public class FileSecurity(IDaoFactory daoFactory,
 
     public static void CorrectSecurityByLockedStatus<T>(FileEntry<T> entry)
     {
-        if (entry is not File<T> file || file.Security == null || file.LockedBy == null)
+        if (entry is not File<T> file || file.Security == null)
         {
             return;
         }
 
-        foreach (var action in _securityEntries[FileEntryType.File])
+        if (file.LockedBy != null)
         {
-            if (action != FilesSecurityActions.Read &&
-                action != FilesSecurityActions.ReadHistory &&
-                action != FilesSecurityActions.Copy &&
-                action != FilesSecurityActions.Duplicate &&
-                action != FilesSecurityActions.Lock &&
-                action != FilesSecurityActions.Download)
+            foreach (var action in _securityEntries[FileEntryType.File])
             {
-                file.Security[action] = false;
+                if (action != FilesSecurityActions.Read &&
+                    action != FilesSecurityActions.ReadHistory &&
+                    action != FilesSecurityActions.Copy &&
+                    action != FilesSecurityActions.Duplicate &&
+                    action != FilesSecurityActions.Lock &&
+                    action != FilesSecurityActions.Download)
+                {
+                    file.Security[action] = false;
+                }
             }
+        }
+
+        if (file.CustomFilterEnabledBy != null)
+        {
+            file.Security[FilesSecurityActions.Edit] = false;
         }
     }
 
@@ -2800,6 +2838,9 @@ public class FileSecurity(IDaoFactory daoFactory,
         }
     }
 
+    /// <summary>
+    /// The actions that can be performed with the file.
+    /// </summary>
     public enum FilesSecurityActions
     {
         [SwaggerEnum("Read")]
@@ -2895,7 +2936,8 @@ public class FileSecurity(IDaoFactory daoFactory,
         [SwaggerEnum("Embed")]
         Embed,
 
-        [SwaggerEnum("Change owner")]        ChangeOwner,
+        [SwaggerEnum("Change owner")]        
+        ChangeOwner,
 
         [SwaggerEnum("Index export")]
         IndexExport,

@@ -26,6 +26,9 @@
 
 namespace ASC.Core;
 
+/// <summary>
+/// The core base settings parameters.
+/// </summary>
 [Singleton]
 public class CoreBaseSettings(IConfiguration configuration)
 {
@@ -35,19 +38,37 @@ public class CoreBaseSettings(IConfiguration configuration)
     private string _serverRoot;
     private List<CultureInfo> _enabledCultures;
 
+    /// <summary>
+    /// The core base domain.
+    /// </summary>
     public string Basedomain => _basedomain ??= configuration["core:base-domain"] ?? string.Empty;
 
+    /// <summary>
+    /// The core base server root.
+    /// </summary>
     public string ServerRoot => _serverRoot ??= configuration["core:server-root"] ?? string.Empty;
 
+    /// <summary>
+    /// Specifies if it is the standalone .
+    /// </summary>
     public bool Standalone => _standalone ??= Basedomain == "localhost";
 
+    /// <summary>
+    /// Specifies if it is the custom mode.
+    /// </summary>
     public bool CustomMode => _customMode ??= string.Equals(configuration["core:custom-mode"], "true", StringComparison.OrdinalIgnoreCase);
 
+    /// <summary>
+    /// Specifies if it is the custom mode.
+    /// </summary>
     public List<CultureInfo> EnabledCultures => _enabledCultures ??= (configuration.GetSection("web:cultures").Get<string[]>() ?? ["en-US"])
         .Distinct()
         .Select(l => CultureInfo.GetCultureInfo(l.Trim()))
         .ToList();
-    
+
+    /// <summary>
+    /// Gets the right culture name.
+    /// </summary>    
     public string GetRightCultureName(CultureInfo cultureInfo)
     {
         return EnabledCultures.Contains(cultureInfo)
@@ -59,6 +80,7 @@ public class CoreBaseSettings(IConfiguration configuration)
 }
 
 /// <summary>
+/// The core settings parameters.
 /// </summary>
 [Scope]
 public class CoreSettings(
@@ -67,8 +89,9 @@ public class CoreSettings(
     IConfiguration configuration,
     IDistributedLockProvider distributedLockProvider)
 {
-    /// <summary>Base domain</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The core settings base domain.
+    /// </summary>
     public string BaseDomain
     {
         get
@@ -173,6 +196,9 @@ public class CoreSettings(
     }
 }
 
+/// <summary>
+/// The core configuration parameters.
+/// </summary>
 [Scope]
 public class CoreConfiguration(CoreSettings coreSettings, TenantManager tenantManager)
 {

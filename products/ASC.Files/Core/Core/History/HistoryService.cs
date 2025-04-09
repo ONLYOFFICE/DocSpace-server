@@ -52,6 +52,8 @@ public class HistoryService(
         MessageAction.FileIndexChanged,
         MessageAction.FileLocked,
         MessageAction.FileUnlocked,
+        MessageAction.FileCustomFilterEnabled,
+        MessageAction.FileCustomFilterDisabled,
         MessageAction.FolderCreated,
         MessageAction.FolderRenamed,
         MessageAction.FolderMoved,

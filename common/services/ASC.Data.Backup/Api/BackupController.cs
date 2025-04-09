@@ -269,7 +269,7 @@ public class BackupController(
     }
 
     /// <summary>
-    /// Deletes the backup history of the current portal.
+    /// Deletes the backup history from the current portal.
     /// </summary>
     /// <short>Delete the backup history</short>
     /// <path>api/2.0/backup/deletebackuphistory</path>

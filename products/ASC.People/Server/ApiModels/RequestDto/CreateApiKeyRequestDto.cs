@@ -27,22 +27,25 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for creating a new API key
+/// The request parameters for creating a new API key.
 /// </summary>
 public class CreateApiKeyRequestDto
 {
     /// <summary>
-    /// Name of the API key
+    /// The API key name.
     /// </summary>
+    [StringLength(30, ErrorMessage = "Incorrect name. Length must be less than 30")]
+    [Required]
     public required string Name { get; set; }
 
     /// <summary>
-    /// List of permissions granted to the API key
+    /// The list of permissions granted to the API key.
     /// </summary>
     public List<string> Permissions { get; set; }
 
     /// <summary>
-    /// Number of days until the API key expires (null for no expiration)
+    /// The number of days until the API key expires (null for no expiration).
     /// </summary>
+    [Range(1, 365, ErrorMessage = "Incorrect number of days. Value must be between 1 and 365")]
     public int? ExpiresInDays { get; set; }
 }

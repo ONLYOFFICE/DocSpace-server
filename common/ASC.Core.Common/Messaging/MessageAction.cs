@@ -26,6 +26,9 @@
 
 namespace ASC.MessagingSystem.Core;
 
+/// <summary>
+/// The event action ID.
+/// </summary>
 [EnumExtensions]
 public enum MessageAction
 {
@@ -328,6 +331,12 @@ public enum MessageAction
 
     [SwaggerEnum("File index changed")]
     FileIndexChanged = 5111,
+
+    [SwaggerEnum("File custom filter enabled")]
+    FileCustomFilterEnabled = 5120,
+
+    [SwaggerEnum("File custom filter disabled")]
+    FileCustomFilterDisabled = 5121,
 
     [SwaggerEnum("Folder created")]
     FolderCreated = 5019,
@@ -756,8 +765,8 @@ public enum MessageAction
     [SwaggerEnum("Created api key")]
     ApiKeyCreated = 6058,
 
-    [SwaggerEnum("Revoked api key")]
-    ApiKeyChangedStatus = 6059,
+    [SwaggerEnum("Update api key")]
+    ApiKeyUpdated = 6059,
 
     [SwaggerEnum("Deleted User api key")]
     ApiKeyDeleted = 6060,

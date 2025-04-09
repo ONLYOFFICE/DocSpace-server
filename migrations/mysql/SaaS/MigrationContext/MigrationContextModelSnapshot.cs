@@ -1415,8 +1415,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasKey("Id")
                         .HasName("PRIMARY");
 
-                    b.HasIndex("IsActive")
-                        .HasDatabaseName("is_active");
+                    b.HasIndex("ExpiresAt")
+                        .HasDatabaseName("expires_at");
 
                     b.HasIndex("TenantId", "HashedKey")
                         .HasDatabaseName("hashed_key");

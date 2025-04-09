@@ -31,6 +31,7 @@ public class FirstTimeTenantSettings(
     ILogger<FirstTimeTenantSettings> logger,
     TenantManager tenantManager,
     TenantExtra tenantExtra,
+    TenantLogoManager tenantLogoManager,
     SettingsManager settingsManager,
     UserManager userManager,
     SetupInfo setupInfo,
@@ -136,6 +137,11 @@ public class FirstTimeTenantSettings(
         catch (BillingNotConfiguredException)
         {
             throw new Exception(UserControlsCommonResource.LicenseKeyNotCorrect);
+        }
+        catch (BillingLicenseTypeException)
+        {
+            var logoText = await tenantLogoManager.GetLogoTextAsync();
+            throw new Exception(string.Format(UserControlsCommonResource.LicenseTypeNotCorrect, logoText));
         }
         catch (BillingException)
         {

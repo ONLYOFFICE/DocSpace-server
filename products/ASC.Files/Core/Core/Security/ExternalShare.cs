@@ -331,54 +331,75 @@ public class ExternalShare(Global global,
     }
 }
 
+/// <summary>
+/// The external link data.
+/// </summary>
 public class LinkData
 {
+    /// <summary>
+    /// The link URL address.
+    /// </summary>
     public string Url { get; init; }
+
+    /// <summary>
+    /// The link token.
+    /// </summary>
     public string Token { get; init; }
 }
 
 /// <summary>
+/// The validation parameters of the external data.
 /// </summary>
 public class ValidationInfo
 {
-    /// <summary>External data status</summary>
-    /// <type>ASC.Files.Core.Security.Status, ASC.Files.Core</type>
+    /// <summary>
+    /// The external data status.
+    /// </summary>
     public Status Status { get; set; }
    
-    /// <summary>External data ID</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The external data ID.
+    /// </summary>
     public string Id { get; set; }
    
-    /// <summary>External data title</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The external data title.
+    /// </summary>
     public string Title { get; set; }
 
-    /// <summary>Entity ID</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The entity ID of the external data.
+    /// </summary>
     public string EntityId { get; set; }
-   
-    /// <summary>Entity title</summary>
-    /// <type>System.String, System</type>
+
+    /// <summary>
+    /// The entry title of the external data.
+    /// </summary>
     public string EntryTitle { get; set; }
-    
-    /// <summary>Sharing rights</summary>
-    /// <type>ASC.Files.Core.Security.FileShare, ASC.Files.Core</type>
+
+    /// <summary>
+    /// The access rights type of the external data.
+    /// </summary>
     public FileShare Access { get; set; }
-    
-    /// <summary>Tenant ID</summary>
-    /// <type>System.Int32, System</type>
+
+    /// <summary>
+    /// The tenant ID of the external data.
+    /// </summary>
     public int TenantId { get; set; }
 
-    /// <summary>Specifies whether to share the external data or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether to share the external data or not.
+    /// </summary>
     public bool Shared { get; set; }
-    
-    /// <summary>Link ID</summary>
-    /// <type>System.Guid, System</type>
+
+    /// <summary>
+    /// The link ID of the external data.
+    /// </summary>
     public Guid LinkId { get; set; }
     
-    /// <summary>Specifies whether the user is authenticated or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether the user is authenticated or not.
+    /// </summary>
     public bool IsAuthenticated { get; set; }
 }
 
@@ -413,6 +434,9 @@ public class ExternalSessionSnapshot
     public string PasswordKey { get; init; }
 }
 
+/// <summary>
+/// The external data status.
+/// </summary>
 public enum Status
 {
     [SwaggerEnum(Description = "Ok")]

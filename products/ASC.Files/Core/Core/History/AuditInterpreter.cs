@@ -44,7 +44,8 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
     private static readonly FileLockInterpreter _fileLockInterpreter = new();
     private static readonly RoomDenyDownloadInterpreter _roomDenyDownloadInterpreter = new();
     private static readonly UserFileUpdatedInterpreter _userFileUpdatedInterpreter = new();
-    
+    private static readonly FileCustomFilterInterpreter _fileCustomFilterInterpreter = new();
+
     private static readonly FrozenDictionary<int, ActionInterpreter> _interpreters = new Dictionary<int, ActionInterpreter>
     {
         { (int)MessageAction.FileCreated, new FileCreateInterpreter() },
@@ -98,6 +99,8 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
         { (int)MessageAction.RoomLifeTimeDisabled, new RoomLifeTimeDisabledInterpreter() },
         { (int)MessageAction.FolderIndexChanged, new FolderIndexChangedInterpreter() },
         { (int)MessageAction.FileIndexChanged, new FileIndexChangedInterpreter() },
+        { (int)MessageAction.FileCustomFilterEnabled, _fileCustomFilterInterpreter },
+        { (int)MessageAction.FileCustomFilterDisabled, _fileCustomFilterInterpreter },
         { (int)MessageAction.FolderIndexReordered, new FolderIndexReorderedInterpreter() },
         { (int)MessageAction.RoomArchived, _roomArchivingInterpreter },
         { (int)MessageAction.RoomUnarchived, _roomArchivingInterpreter },

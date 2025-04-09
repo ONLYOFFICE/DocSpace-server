@@ -26,28 +26,34 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// The new item parameters.
+/// </summary>
 public class NewItemsDto<TItem>
 {
     /// <summary>
-    /// Date
+    /// The date and time when the new item was created.
     /// </summary>
     public ApiDateTime Date { get; init; }
 
     /// <summary>
-    /// Items
+    /// The list of items.
     /// </summary>
     public IEnumerable<TItem> Items { get; init; }
 }
 
+/// <summary>
+/// The room new items information.
+/// </summary>
 public class RoomNewItemsDto
 {
     /// <summary>
-    /// Room
+    /// The room file entry.
     /// </summary>
     public FileEntryDto Room { get; init; }
 
     /// <summary>
-    /// Items
+    /// The list of file entry items.
     /// </summary>
     public IEnumerable<FileEntryDto> Items { get; init; }
 }

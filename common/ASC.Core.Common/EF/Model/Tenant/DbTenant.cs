@@ -28,21 +28,24 @@ using Profile = AutoMapper.Profile;
 
 namespace ASC.Core.Common.EF.Model;
 
+/// <summary>
+/// The database tenant parameters.
+/// </summary>
 public class DbTenant : IMapFrom<Tenant>
 {
     /// <summary>
-    /// Id
+    /// The tenant ID.
     /// </summary>
     public int Id { get; set; }
 
     /// <summary>
-    /// Name
+    /// The tenant name.
     /// </summary>
     [MaxLength(255)]
     public string Name { get; set; }
 
     /// <summary>
-    /// Alias
+    /// The tenant alias.
     /// </summary>
     [MaxLength(100)]
     public string Alias { get; set; }
@@ -54,17 +57,17 @@ public class DbTenant : IMapFrom<Tenant>
     public string MappedDomain { get; set; }
 
     /// <summary>
-    /// Version
+    /// The tenant version.
     /// </summary>
     public int Version { get; set; }
 
     /// <summary>
-    /// Version_changed
+    /// The Version_changed field.
     /// </summary>
     public DateTime? Version_Changed { get; set; }
 
     /// <summary>
-    /// Version changed
+    /// The date and time when the version was changed.
     /// </summary>
     public DateTime VersionChanged
     {
@@ -73,41 +76,41 @@ public class DbTenant : IMapFrom<Tenant>
     }
 
     /// <summary>
-    /// Language
+    /// The tenant language.
     /// </summary>
     [MaxLength(10)]
     public string Language { get; set; }
 
     /// <summary>
-    /// Time zone
+    /// The tenant time zone.
     /// </summary>
     [MaxLength(50)]
     public string TimeZone { get; set; }
 
     /// <summary>
-    /// Trusted domains raw
+    /// The tenant trusted domains raw.
     /// </summary>
     [MaxLength(1024)]
     public string TrustedDomainsRaw { get; set; }
 
     /// <summary>
-    /// Trusted domains enabled
+    /// The type of the tenant trusted domains.
     /// </summary>
     public TenantTrustedDomainsType TrustedDomainsEnabled { get; set; }
 
     /// <summary>
-    /// Status
+    /// The tenant status.
     /// </summary>
     public TenantStatus Status { get; set; }
 
     /// <summary>
-    /// Status changed
+    /// The date and time when the tenant status was changed.
     /// </summary>
     public DateTime? StatusChanged { get; set; }
     //hack for DateTime?
 
     /// <summary>
-    /// Status changed hack
+    /// The hacked date and time when the tenant status was changed.
     /// </summary>
     public DateTime StatusChangedHack
     {
@@ -116,38 +119,38 @@ public class DbTenant : IMapFrom<Tenant>
     }
 
     /// <summary>
-    /// Creation date time
+    /// The tenant creation date.
     /// </summary>
     public DateTime CreationDateTime { get; set; }
 
     /// <summary>
-    /// Owner id
+    /// The tenant owner ID.
     /// </summary>
     public Guid? OwnerId { get; set; }
 
     /// <summary>
-    /// Payment id
+    /// The tenant payment ID.
     /// </summary>
     [MaxLength(38)]
     public string PaymentId { get; set; }
 
     /// <summary>
-    /// Industry
+    /// The tenant industry.
     /// </summary>
     public TenantIndustry Industry { get; set; }
 
     /// <summary>
-    /// Last modified
+    /// The date and time when the tenant was last modified.
     /// </summary>
     public DateTime LastModified { get; set; }
 
     /// <summary>
-    /// Calls
+    /// Specifies if the calls are available for the current tenant or not.
     /// </summary>
     public bool Calls { get; set; }
 
     /// <summary>
-    /// Partner
+    /// The database tenant partner parameters.
     /// </summary>
     public DbTenantPartner Partner { get; set; }
 

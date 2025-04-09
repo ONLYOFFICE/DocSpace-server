@@ -1941,8 +1941,7 @@ public class FileStorageService //: IFileStorageService
             var usersDrop = (await fileTracker.GetEditingByAsync(file.Id)).Where(uid => uid != authContext.CurrentAccount.ID).Select(u => u.ToString()).ToArray();
             if (usersDrop.Length > 0)
             {
-                var fileStable = file.Forcesave == ForcesaveType.None ? file : await fileDao.GetFileStableAsync(file.Id, file.Version);
-                var docKey = await documentServiceHelper.GetDocKeyAsync(fileStable);
+                var docKey = fileTracker.GetTrackerDocKey(file.Id);
                 await documentServiceHelper.DropUserAsync(docKey, usersDrop, file.Id);
             }
 
@@ -1978,6 +1977,64 @@ public class FileStorageService //: IFileStorageService
         await socketManager.UpdateFileAsync(file);
 
         await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
+
+        return file;
+    }
+
+    public async Task<File<T>> SetCustomFilterTagAsync<T>(T fileId, bool enabled)
+    {
+        var fileDao = daoFactory.GetFileDao<T>();
+        var file = await fileDao.GetFileAsync(fileId);
+
+        file.NotFoundIfNull();
+
+        if (file.RootFolderType != FolderType.VirtualRooms || !fileUtility.CanWebCustomFilterEditing(file.Title))
+        {
+            throw new ArgumentException();
+        }
+
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var room = await DocSpaceHelper.GetParentRoom(file, folderDao);
+
+        if (room == null || !await fileSecurity.CanEditAsync(room))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        var tagDao = daoFactory.GetTagDao<T>();
+        var tagCustomFilter = await tagDao.GetTagsAsync(file.Id, FileEntryType.File, TagType.CustomFilter).FirstOrDefaultAsync();
+
+        if (enabled)
+        {
+            if (tagCustomFilter == null)
+            {
+                tagCustomFilter = new Tag("customfilter", TagType.CustomFilter, authContext.CurrentAccount.ID).AddEntry(file);
+
+                await tagDao.SaveTagsAsync(tagCustomFilter);
+
+                var usersDrop = (await fileTracker.GetEditingByAsync(file.Id)).Where(uid => uid != authContext.CurrentAccount.ID).Select(u => u.ToString()).ToArray();
+                if (usersDrop.Length > 0)
+                {
+                    var docKey = fileTracker.GetTrackerDocKey(file.Id);
+                    await documentServiceHelper.DropUserAsync(docKey, usersDrop, file.Id);
+                }
+            }
+
+            await filesMessageService.SendAsync(MessageAction.FileCustomFilterEnabled, file, file.Title);
+        }
+        else
+        {
+            if (tagCustomFilter != null)
+            {
+                await tagDao.RemoveTagsAsync(tagCustomFilter);
+            }
+
+            await filesMessageService.SendAsync(MessageAction.FileCustomFilterDisabled, file, file.Title);
+        }
+
+        await entryStatusManager.SetFileStatusAsync(file);
+
+        await socketManager.UpdateFileAsync(file);
 
         return file;
     }
@@ -4703,6 +4760,7 @@ public class FileStorageService //: IFileStorageService
         else
         {
             properties.FormFilling.StartFilling = true;
+            properties.FormFilling.StartedByUserId = authContext.CurrentAccount.ID;
             await fileDao.SaveProperties(formId, properties);
             var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
             await filesMessageService.SendAsync(MessageAction.FormStartedToFill, form, MessageInitiator.DocsService, user?.DisplayUserName(false, displayUserSettingsHelper), form.Title);

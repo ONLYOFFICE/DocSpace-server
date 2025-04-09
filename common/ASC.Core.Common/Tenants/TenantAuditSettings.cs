@@ -26,17 +26,20 @@
 
 namespace ASC.Core.Tenants;
 
+/// <summary>
+/// The tenant audit settings parameters.
+/// </summary>
 public class TenantAuditSettings : ISettings<TenantAuditSettings>
 {
     public const int MaxLifeTime = 180;
 
     /// <summary>
-    /// Login history lifetime
+    /// The login history lifetime.
     /// </summary>
     public int LoginHistoryLifeTime { get; init; }
 
     /// <summary>
-    /// Audit trail lifetime
+    /// The audit trail lifetime.
     /// </summary>
     public int AuditTrailLifeTime { get; init; }
 
@@ -58,12 +61,12 @@ public class TenantAuditSettings : ISettings<TenantAuditSettings>
 }
 
 /// <summary>
-/// Audit trail settings
+/// The tenant audit settings wrapper.
 /// </summary>
 public class TenantAuditSettingsWrapper
 {
     /// <summary>
-    /// Audit trail settingse
+    /// The tenant audit settings parameters.
     /// </summary>
     public TenantAuditSettings Settings { get; set; }
 }

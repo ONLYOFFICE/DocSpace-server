@@ -161,13 +161,7 @@ public class Startup
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
         app.UseExceptionHandler();
-
         app.UseRouting();
-
-        if (!string.IsNullOrEmpty(_corsOrigin))
-        { 
-            app.UseCors(CustomCorsPolicyName);
-        }
 
         if (_configuration.GetValue<bool>("openApi:enable"))
         {
@@ -176,6 +170,11 @@ public class Startup
         app.UseSynchronizationContextMiddleware();
 
         app.UseTenantMiddleware();
+        
+        if (!string.IsNullOrEmpty(_corsOrigin))
+        { 
+            app.UseCors(CustomCorsPolicyName);
+        }
         
         app.UseAuthentication();
 

@@ -26,6 +26,9 @@
 
 namespace ASC.People.Api;
 
+///<summary>
+/// Reassign API.
+///</summary>
 [DefaultRoute("reassign")]
 public class ReassignController(
     PermissionContext permissionContext,
@@ -126,9 +129,9 @@ public class ReassignController(
     }
 
     /// <summary>
-    /// Returns is necessary reassign rooms and share files.
+    /// Checks if the reassignment of rooms and shared files is necessary or not.
     /// </summary>
-    /// <short>Returns is necessary reassign</short>
+    /// <short>Check the data reassignment need</short>
     /// <path>api/2.0/people/reassign/necessary</path>
     [Tags("People / User data")]
     [SwaggerResponse(200, "Boolean value: true if neccessary reassign", typeof(bool))]

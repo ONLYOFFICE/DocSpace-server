@@ -71,7 +71,7 @@ class FileDuplicateOperation<T>(IServiceProvider serviceProvider, FileOperationD
     {
         var fileDao = scope.ServiceProvider.GetService<IFileDao<T>>();
         var file = await fileDao.GetFilesAsync([id]).FirstOrDefaultAsync(cancellationToken: _cancellationToken);
-        var copyOperationData = new FileMoveCopyOperationData<T>([], [id], CurrentTenantId, CurrentUserId, JsonSerializer.SerializeToElement(file.ParentId), true, FileConflictResolveType.Duplicate, true, _headers, SessionSnapshot);
+        var copyOperationData = new FileMoveCopyOperationData<T>([], [id], CurrentTenantId, CurrentUserId, JsonSerializer.SerializeToElement(file.ParentId), true, FileConflictResolveType.Duplicate, false, true, _headers, SessionSnapshot);
         var copyOperation = new FileMoveCopyOperation<T>(scope.ServiceProvider, copyOperationData) 
         { 
             Publication = FileMoveCopyOperationPublishChanges
@@ -83,7 +83,7 @@ class FileDuplicateOperation<T>(IServiceProvider serviceProvider, FileOperationD
     {             
         var folderDao = scope.ServiceProvider.GetService<IFolderDao<T>>();   
         var folder = await folderDao.GetFolderAsync(id);
-        var copyOperationData = new FileMoveCopyOperationData<T>([id], [], CurrentTenantId, CurrentUserId, JsonSerializer.SerializeToElement(folder.ParentId), true, FileConflictResolveType.Duplicate, true, _headers, SessionSnapshot);
+        var copyOperationData = new FileMoveCopyOperationData<T>([id], [], CurrentTenantId, CurrentUserId, JsonSerializer.SerializeToElement(folder.ParentId), true, FileConflictResolveType.Duplicate, false, true, _headers, SessionSnapshot);
         var copyOperation = new FileMoveCopyOperation<T>(scope.ServiceProvider, copyOperationData)        
         { 
             Publication = FileMoveCopyOperationPublishChanges
