@@ -206,6 +206,15 @@ public class AccountingClient
 }
 
 
+public enum PaymentMethodStatus
+{
+    None,
+    Set,
+    Expired
+}
+
+public record CustomerInfo(string PortalId, PaymentMethodStatus PaymentMethodStatus, string Email);
+
 public record Balance(int AccountNumber, List<SubAccount> SubAccounts);
 
 public record SubAccount(string Currency, decimal Amount);

@@ -352,10 +352,10 @@ public class PaymentController(
     /// </short>
     /// <path>api/2.0/portal/payment/customerinfo</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The customer info", typeof(string))]
+    [SwaggerResponse(200, "The customer info", typeof(CustomerInfo))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("customerinfo")]
-    public async Task<string> GetCustomerInfoAsync()
+    public async Task<CustomerInfo> GetCustomerInfoAsync()
     {
         await DemandAdminAsync();
 
@@ -688,12 +688,8 @@ public class PaymentController(
         }
 
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
-        if (customerInfo != "\"null\"")
-        {
-            return true;
-        }
 
-        return false;
+        return customerInfo != null && customerInfo.PaymentMethodStatus != PaymentMethodStatus.None;
     }
 
     private async Task DemandAdminAsync()

@@ -128,10 +128,12 @@ public class BillingClient
         return paymentUrl;
     }
 
-
-    public async Task<string> GetCustomerInfoAsync(string portalId)
+    public async Task<CustomerInfo> GetCustomerInfoAsync(string portalId)
     {
-        return await RequestAsync("GetCustomerInfo", portalId);
+        var result = await RequestAsync("GetCustomerInfo", portalId);
+        var customerInfo = JsonSerializer.Deserialize<CustomerInfo>(result);
+
+        return customerInfo;
     }
 
     public async Task<string> PutOnDepositAsync(string portalId, long amount, string currency)

@@ -857,10 +857,18 @@ public class TariffService(
         return billingClient.Configured && accountingClient.Configured;
     }
 
-    public async Task<string> GetCustomerInfoAsync(int tenantId)
+    public async Task<CustomerInfo> GetCustomerInfoAsync(int tenantId)
     {
-        var portalId = await coreSettings.GetKeyAsync(tenantId);
-        return await billingClient.GetCustomerInfoAsync(portalId);
+        try
+        {
+            var portalId = await coreSettings.GetKeyAsync(tenantId);
+            return await billingClient.GetCustomerInfoAsync(portalId);
+        }
+        catch (Exception error)
+        {
+            LogError(error, tenantId.ToString());
+            return null;
+        }
     }
 
     public async Task<string> PutOnDepositAsync(int tenantId, long amount, string currency)
