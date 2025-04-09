@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Microsoft.Extensions.Hosting;
+
 using MySqlConnector;
 
 using Projects;
@@ -44,7 +46,7 @@ var mySql = builder
     .AddDatabase("docspace");
 
 MySqlConnectionStringBuilder? mySqlConnectionStringBuilder = null;
-builder.Eventing.Subscribe(mySql.Resource, (Func<ConnectionStringAvailableEvent, CancellationToken, Task>) (async (_, ct) =>
+builder.Eventing.Subscribe(mySql.Resource, (Func<ConnectionStringAvailableEvent, CancellationToken, Task>)(async (_, ct) =>
 {
     var connectionString = await mySql.Resource.ConnectionStringExpression.GetValueAsync(ct).ConfigureAwait(false);
     if (connectionString != null && mySqlConnectionStringBuilder == null)
@@ -61,7 +63,7 @@ var rabbitMq = builder
     .WithManagementPlugin();
 
 Uri? rabbitMqUri = null;
-builder.Eventing.Subscribe(rabbitMq.Resource, (Func<ConnectionStringAvailableEvent, CancellationToken, Task>) (async (_, ct) =>
+builder.Eventing.Subscribe(rabbitMq.Resource, (Func<ConnectionStringAvailableEvent, CancellationToken, Task>)(async (_, ct) =>
 {
     var connectionString = await rabbitMq.Resource.ConnectionStringExpression.GetValueAsync(ct).ConfigureAwait(false);
     if (connectionString != null && rabbitMqUri == null && Uri.IsWellFormedUriString(connectionString, UriKind.Absolute))
@@ -73,11 +75,11 @@ builder.Eventing.Subscribe(rabbitMq.Resource, (Func<ConnectionStringAvailableEve
 var redis = builder
     .AddRedis("cache")
     .WithLifetime(ContainerLifetime.Persistent);
-    //.WithRedisInsight();
+//.WithRedisInsight();
 
 string? redisHost = null;
 string? redisPort = null;
-builder.Eventing.Subscribe(redis.Resource, (Func<ConnectionStringAvailableEvent, CancellationToken, Task>) (async (_, ct) =>
+builder.Eventing.Subscribe(redis.Resource, (Func<ConnectionStringAvailableEvent, CancellationToken, Task>)(async (_, ct) =>
 {
     var connectionString = await redis.Resource.ConnectionStringExpression.GetValueAsync(ct).ConfigureAwait(false);
     if (connectionString != null)
@@ -98,7 +100,7 @@ var editors = builder
     .WithEnvironment("JWT_HEADER", "AuthorizationJwt");
 
 var migrate = builder
-    .AddExecutable("migrate",path, Path.GetDirectoryName(path) ?? "")
+    .AddExecutable("migrate", path, Path.GetDirectoryName(path) ?? "")
     .WithReference(mySql)
     .WaitFor(mySql);
 
@@ -118,7 +120,7 @@ if (String.Compare(builder.Configuration["Docker"], "true", StringComparison.Ord
     AddProjectDocker<ASC_Files_Service>(5009);
     AddProjectDocker<ASC_Studio_Notify>(5006);
     AddProjectDocker<ASC_Web_Studio>(5003);
-    
+
     var socketIoResourceBuilder = builder
         .AddDockerfile(ascSocketio, "../ASC.Socket.IO/")
         .WithImageTag("dev")
@@ -126,9 +128,9 @@ if (String.Compare(builder.Configuration["Docker"], "true", StringComparison.Ord
         .WithReference(redis, "redis")
         .WithHttpEndpoint(socketIoPort, socketIoPort, isProxied: false)
         .WithHttpHealthCheck("/health");
-    
+
     AddBaseBind(socketIoResourceBuilder);
-    
+
     var ssoAuthResourceBuilder = builder
         .AddDockerfile("asc-ssoAuth", "../ASC.SSoAuth/")
         .WithImageTag("dev")
@@ -136,16 +138,16 @@ if (String.Compare(builder.Configuration["Docker"], "true", StringComparison.Ord
         .WithEnvironment("app:appsettings", "/buildtools/config")
         .WithHttpEndpoint(ssoAuthPort, ssoAuthPort, isProxied: false)
         .WithHttpHealthCheck("/health");
-    
+
     AddBaseBind(ssoAuthResourceBuilder);
-    
+
     var webDavResourceBuilder = builder
         .AddDockerfile("asc-webDav", "../ASC.WebDav/")
         .WithImageTag("dev")
         .WithEnvironment("log:name", "webDav")
         .WithHttpEndpoint(webDavPort, webDavPort, isProxied: false)
         .WithHttpHealthCheck("/health");
-    
+
     AddBaseBind(webDavResourceBuilder);
 }
 else
@@ -161,7 +163,7 @@ else
     AddProjectWithDefaultConfiguration<ASC_Files_Service>();
     AddProjectWithDefaultConfiguration<ASC_Studio_Notify>();
     AddProjectWithDefaultConfiguration<ASC_Web_Studio>();
-    
+
     builder.AddNpmApp(ascSocketio, "../ASC.Socket.IO/", "start:build").WithReference(redis, "redis").WithHttpEndpoint(targetPort: socketIoPort).WithHttpHealthCheck("/health");
     builder.AddNpmApp("asc-ssoAuth", "../ASC.SSoAuth/", "start:build").WithHttpEndpoint(targetPort: 9834).WithHttpHealthCheck("/health");
     builder.AddNpmApp("asc-webDav", "../ASC.WebDav/", "start:build").WithHttpEndpoint(targetPort: 1900).WithHttpHealthCheck("/health");
@@ -229,7 +231,7 @@ void AddProjectDocker<TProject>(int projectPort, bool includeHealthCheck = true)
 {
     var projectMetadata = new TProject();
     var projectBasePath = Path.GetDirectoryName(projectMetadata.ProjectPath) ?? basePath;
-    
+
     var name = typeof(TProject).Name;
     var resourceBuilder = builder.AddDockerfile(name.ToLower().Replace('_', '-'), projectBasePath, stage: "base");
     AddBaseConfig(resourceBuilder, includeHealthCheck);
@@ -250,13 +252,26 @@ void AddProjectDocker<TProject>(int projectPort, bool includeHealthCheck = true)
         .WithEntrypoint("dotnet");
 
     AddBaseBind(resourceBuilder);
-    
+
     if (projectPort != 0)
     {
         resourceBuilder
             .WithEnvironment("ASPNETCORE_HTTP_PORTS", projectPort.ToString())
             .WithHttpEndpoint(projectPort, projectPort);
     }
+
+
+    resourceBuilder.WithEnvironment("OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES", "true");
+    resourceBuilder.WithEnvironment("OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES", "true");
+    resourceBuilder.WithEnvironment("OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY", "in_memory");
+    
+    if (resourceBuilder.ApplicationBuilder.ExecutionContext.IsRunMode && resourceBuilder.ApplicationBuilder.Environment.IsDevelopment())
+    {
+        resourceBuilder.WithEnvironment("OTEL_DOTNET_EXPERIMENTAL_ASPNETCORE_DISABLE_URL_QUERY_REDACTION", "true");
+        resourceBuilder.WithEnvironment("OTEL_DOTNET_EXPERIMENTAL_HTTPCLIENT_DISABLE_URL_QUERY_REDACTION", "true");
+    }
+
+    resourceBuilder.WithOtlpExporter();
 }
 
 void AddBaseConfig<T>(IResourceBuilder<T> resourceBuilder, bool includeHealthCheck = true) where T : IResourceWithEnvironment, IResourceWithWaitSupport, IResourceWithEndpoints
@@ -267,6 +282,7 @@ void AddBaseConfig<T>(IResourceBuilder<T> resourceBuilder, bool includeHealthChe
     }
 
     resourceBuilder
+        .WithEnvironment("openTelemetry:enable", "true")
         .WithEnvironment("files:docservice:url:portal", $"http://host.docker.internal:{restyPort.ToString()}")
         .WithEnvironment("files:docservice:url:public", $"http://localhost:{editorPort.ToString()}")
         .WithReference(mySql, "default:connectionString")
@@ -282,14 +298,17 @@ void AddWaitFor<T>(IResourceBuilder<T> resourceBuilder, bool includeMigrate = tr
     {
         resourceBuilder.WaitFor(migrate);
     }
+
     if (includeRabbitMq)
     {
         resourceBuilder.WaitFor(rabbitMq);
     }
+
     if (includeRedis)
     {
         resourceBuilder.WaitFor(redis);
     }
+
     if (includeEditors)
     {
         resourceBuilder.WaitFor(editors);
@@ -303,15 +322,15 @@ void AddIdentityEnv<T>(IResourceBuilder<T> resourceBuilder) where T : ContainerR
         .WithEnvironment("JDBC_DATABASE", () => mySqlConnectionStringBuilder != null ? $"{mySqlConnectionStringBuilder.Database}" : string.Empty)
         .WithEnvironment("JDBC_USER_NAME", () => mySqlConnectionStringBuilder != null ? $"{mySqlConnectionStringBuilder.UserID}" : string.Empty)
         .WithEnvironment("JDBC_PASSWORD", () => mySqlConnectionStringBuilder != null ? $"{mySqlConnectionStringBuilder.Password}" : string.Empty);
-    
+
     resourceBuilder
         .WithEnvironment("RABBIT_HOST", () => rabbitMqUri != null ? $"{rabbitMqUri.Host.Replace("localhost", "host.docker.internal")}" : string.Empty)
         .WithEnvironment("RABBIT_URI", () => rabbitMqUri != null ? rabbitMqUri.ToString().Replace("localhost", "host.docker.internal") : string.Empty);
-    
+
     resourceBuilder
         .WithEnvironment("REDIS_HOST", () => redisHost?.Replace("localhost", "host.docker.internal") ?? string.Empty)
         .WithEnvironment("REDIS_PORT", () => redisPort ?? string.Empty);
-    
+
     AddWaitFor(resourceBuilder, includeEditors: false);
 }
 
