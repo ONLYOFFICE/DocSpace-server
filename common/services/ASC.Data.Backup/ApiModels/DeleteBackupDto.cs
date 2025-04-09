@@ -27,12 +27,12 @@
 namespace ASC.Data.Backup.ApiModels;
 
 /// <summary>
-/// Delete backup parameters
+/// The parameters to delete the backup.
 /// </summary>
 public class DeleteBackupDto
 {
     /// <summary>
-    /// Backup Id
+    /// The backup ID.
     /// </summary>
     [FromRoute(Name = "id")]
     public required Guid BackupId { get; set; }

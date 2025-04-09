@@ -323,20 +323,9 @@ internal class FileDao(
         }
         if (applyFormStepFilter)
         {
-            q = q.Where(f => f.Category != (int)FilterType.PdfForm ||
-                (f.Category == (int)FilterType.PdfForm &&
+            q = q.Where(f => f.Category == (int)FilterType.PdfForm &&
                     filesDbContext.FilesFormRoleMapping.Any(r =>
-                        r.TenantId == tenantId && r.FormId == f.Id && r.UserId == securityContext.CurrentAccount.ID) &&
-                    (!filesDbContext.FilesFormRoleMapping.Any(r => r.TenantId == tenantId && r.FormId == f.Id && !r.Submitted) || (
-                    filesDbContext.FilesFormRoleMapping
-                        .Where(r => r.TenantId == tenantId && r.FormId == f.Id && !r.Submitted)
-                        .Min(r => (int?)r.Sequence)
-                    >=
-                    filesDbContext.FilesFormRoleMapping
-                        .Where(r => r.TenantId == tenantId && r.FormId == f.Id && r.UserId == securityContext.CurrentAccount.ID)
-                        .Select(r => (int?)r.Sequence)
-                        .FirstOrDefault()))
-                )
+                        r.TenantId == tenantId && r.FormId == f.Id && r.UserId == securityContext.CurrentAccount.ID)
             );
         }
 
@@ -630,7 +619,7 @@ internal class FileDao(
                     if (roomId != -1 && checkFolder)
                     {
                         var currentRoom = await folderDao.GetFolderAsync(roomId);
-                        if (currentRoom.FolderType == FolderType.FillingFormsRoom)
+                        if (currentRoom.FolderType == FolderType.FillingFormsRoom && currentRoom.RootFolderType != FolderType.RoomTemplates)
                         {
                             var fileProp = await fileDao.GetProperties(file.Id);
                             var extension = FileUtility.GetFileExtension(file.Title);
@@ -1099,17 +1088,14 @@ internal class FileDao(
             {
                 var oldParentId = (await q.FirstOrDefaultAsync())?.ParentId;
 
+                await q.ExecuteUpdateAsync(f => f.SetProperty(p => p.ParentId, toFolderId));
+                
                 if (trashId.Equals(toFolderId))
                 {
-                    await q.ExecuteUpdateAsync(f => f
-                    .SetProperty(p => p.ParentId, toFolderId)
-                    .SetProperty(p => p.ModifiedBy, _authContext.CurrentAccount.ID)
-                    .SetProperty(p => p.ModifiedOn, DateTime.UtcNow));
                     await DeleteCustomOrder(filesDbContext, fileId);
                 }
                 else
                 {
-                    await q.ExecuteUpdateAsync(f => f.SetProperty(p => p.ParentId, toFolderId));
                     await SetCustomOrder(filesDbContext, fileId, toFolderId);
                 }
 
@@ -1440,6 +1426,7 @@ internal class FileDao(
                 TenantId = tenantId,
                 FormId = formId,
                 UserId = formRole.UserId,
+                RoomId = formRole.RoomId,
                 RoleName = formRole.RoleName,
                 RoleColor = formRole.RoleColor,
                 Sequence = sequence,
@@ -1466,6 +1453,17 @@ internal class FileDao(
         await foreach (var role in context.DbFormUserRolesQueryAsync(tenantId, formId, userId))
         {
             yield return role;
+        }
+    }
+    public async IAsyncEnumerable<FormRole> GetUserFormRolesInRoom(int roomId, Guid userId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await foreach (var r in filesDbContext.DbUserFormRolesInRoomQueryAsync(tenantId, roomId, userId))
+        {
+            yield return r;
         }
     }
     public async IAsyncEnumerable<FormRole> GetFormRoles(int formId)
@@ -1716,13 +1714,9 @@ internal class FileDao(
             case FilterType.SpreadsheetsOnly:
             case FilterType.ArchiveOnly:
             case FilterType.MediaOnly:
-                q = q.Where(r => r.Category == (int)filterType);
-                break;
             case FilterType.PdfForm:
-                q = q.Where(r => (r.Category == (int)filterType || r.Category == (int)FilterType.None) && r.Title.ToLower().EndsWith(".pdf"));
-                break;
             case FilterType.Pdf:
-                q = q.Where(r => r.Category == (int)filterType || r.Title.ToLower().EndsWith(".pdf"));
+                q = q.Where(r => r.Category == (int)filterType);
                 break;
             case FilterType.ByExtension:
                 if (!string.IsNullOrEmpty(searchText))
@@ -2381,13 +2375,9 @@ internal class FileDao(
             case FilterType.SpreadsheetsOnly:
             case FilterType.ArchiveOnly:
             case FilterType.MediaOnly:
-                q = q.Where(r => r.Category == (int)filterType);
-                break;
             case FilterType.PdfForm:
-                q = q.Where(r => (r.Category == (int)filterType || r.Category == (int)FilterType.None) && r.Title.ToLower().EndsWith(".pdf"));
-                break;
             case FilterType.Pdf:
-                q = q.Where(r => r.Category == (int)filterType || r.Title.ToLower().EndsWith(".pdf"));
+                q = q.Where(r => r.Category == (int)filterType);
                 break;
             case FilterType.ByExtension:
                 if (!string.IsNullOrEmpty(searchText))
@@ -2492,13 +2482,9 @@ internal class FileDao(
             case FilterType.SpreadsheetsOnly:
             case FilterType.ArchiveOnly:
             case FilterType.MediaOnly:
-                q = q.Where(r => r.Entry.Category == (int)filterType);
-                break;
-            case FilterType.PdfForm:
-                q = q.Where(r => (r.Entry.Category == (int)filterType || r.Entry.Category == (int)FilterType.None) && r.Entry.Title.ToLower().EndsWith(".pdf"));
-                break;
             case FilterType.Pdf:
-                q = q.Where(r => r.Entry.Category == (int)filterType || r.Entry.Title.ToLower().EndsWith(".pdf"));
+            case FilterType.PdfForm:
+                q = q.Where(r => r.Entry.Category == (int)filterType);
                 break;
             case FilterType.ByExtension:
                 if (!string.IsNullOrEmpty(searchText))

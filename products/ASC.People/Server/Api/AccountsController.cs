@@ -61,9 +61,11 @@ public class AccountsController<T>(
     UserManager userManager) : ControllerBase
 {
     /// <summary>
-    /// Gets accounts entries with shared
+    /// Returns the account entries with their sharing settings.
     /// </summary>
+    /// <short>Get account entries</short>
     /// <path>api/2.0/accounts/room/{id}/search</path>
+    /// <collection>list</collection>
     [Tags("People / Search")]
     [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<object>))]
     [SwaggerResponse(403, "No permissions to perform this action")]
@@ -98,6 +100,7 @@ public class AccountsController<T>(
             inDto.EmployeeStatus,
             inDto.ActivationStatus,
             inDto.ExcludeShared ?? false,
+            inDto.IncludeShared ?? false,
             separator,
             includeStrangers,
             inDto.Area,
@@ -125,6 +128,7 @@ public class AccountsController<T>(
                            inDto.EmployeeStatus,
                            inDto.ActivationStatus,
                            inDto.ExcludeShared ?? false,
+                           inDto.IncludeShared ?? false,
                            separator,
                            includeStrangers,
                            inDto.Area,

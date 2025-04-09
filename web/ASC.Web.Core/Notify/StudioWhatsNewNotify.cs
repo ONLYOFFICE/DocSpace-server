@@ -62,7 +62,11 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
         MessageAction.UserFileUpdated,
         MessageAction.RoomCreateUser,
         MessageAction.RoomUpdateAccessForUser,
-        MessageAction.UsersUpdatedType
+        MessageAction.UsersUpdatedType,
+        MessageAction.FormStartedToFill,
+        MessageAction.FormPartiallyFilled,
+        MessageAction.FormCompletelyFilled,
+        MessageAction.FormStopped
     ];
 
     public async Task SendMsgWhatsNewAsync(DateTime scheduleDate, WhatsNewType whatsNewType)

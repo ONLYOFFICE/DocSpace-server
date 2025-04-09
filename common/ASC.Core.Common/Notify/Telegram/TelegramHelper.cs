@@ -33,6 +33,9 @@ public class TelegramHelper(ConsumerFactory consumerFactory,
     IHttpClientFactory httpClientFactory,
     ILogger<TelegramHelper> logger)
 {
+    /// <summary>
+    /// The registration Telegram status.
+    /// </summary>
     public enum RegStatus
     {
         NotRegistered,

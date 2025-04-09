@@ -26,6 +26,9 @@
 
 namespace ASC.People.Api;
 
+///<summary>
+/// Remove user data API.
+///</summary>
 public class RemoveUserDataController(PermissionContext permissionContext,
         UserManager userManager,
         QueueWorkerRemove queueWorkerRemove,
@@ -56,7 +59,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     }
 
     /// <summary>
-    /// Sends instructions for deleting a user profile.
+    /// Sends the instructions for deleting a user profile.
     /// </summary>
     /// <short>
     /// Send the deletion instructions
@@ -146,9 +149,9 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     }
 
     /// <summary>
-    /// Start delete personal folder.
+    /// Starts deleting the personal folder.
     /// </summary>
-    /// <short>Start the data deletion</short>
+    /// <short>Delete the personal folder</short>
     /// <path>api/2.0/people/delete/personal/start</path>
     [Tags("People / User data")]
     [SwaggerResponse(200, "delete personal progress", typeof(TaskProgressResponseDto))]
@@ -172,9 +175,9 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     }
 
     /// <summary>
-    /// Returns the progress of the delete personal folder.
+    /// Returns the progress of deleting the personal folder.
     /// </summary>
-    /// <short>Get the deletion progress</short>
+    /// <short>Get the progress of deleting the personal folder</short>
     /// <path>api/2.0/people/delete/personal/progress</path>
     [Tags("People / User data")]
     [SwaggerResponse(200, "Deletion progress", typeof(TaskProgressResponseDto))]

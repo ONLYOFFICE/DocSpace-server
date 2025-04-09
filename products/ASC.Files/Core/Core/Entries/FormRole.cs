@@ -26,13 +26,48 @@
 
 namespace ASC.Files.Core.Core.Entries;
 
+/// <summary>
+/// The form role.
+/// </summary>
 public class FormRole
 {
+    /// <summary>
+    /// The room ID.
+    /// </summary>
+    public int RoomId { get; set; }
+    
+    /// <summary>
+    /// The role name.
+    /// </summary>
     public string RoleName { get; set; }
+
+    /// <summary>
+    /// The role color.
+    /// </summary>
     public string RoleColor { get; set; }
+
+    /// <summary>
+    /// The user ID.
+    /// </summary>
     public Guid UserId { get; set; }
+
+    /// <summary>
+    /// The role sequence.
+    /// </summary>
     public int Sequence { get; set; }
+
+    /// <summary>
+    /// Specifies if the role was submitted or not.
+    /// </summary>
     public bool Submitted { get; set; }
+
+    /// <summary>
+    /// The date and time when the role was opened.
+    /// </summary>
     public DateTime OpenedAt { get; set; }
+
+    /// <summary>
+    /// The date and time when the role was submitted.
+    /// </summary>
     public DateTime SubmissionDate { get; set; }
 }

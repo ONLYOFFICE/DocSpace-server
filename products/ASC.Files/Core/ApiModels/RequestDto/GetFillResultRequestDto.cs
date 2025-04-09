@@ -26,10 +26,13 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
-public class GetFillResulteRequestDto
+/// <summary>
+/// The parameters of the form-filling session result.
+/// </summary>
+public class GetFillResultRequestDto
 {
     /// <summary>
-    /// Filling session id
+    /// The form-filling session ID.
     /// </summary>
     [FromQuery(Name = "fillingSessionId")]
     public string FillingSessionId { get; set; }

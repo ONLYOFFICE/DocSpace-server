@@ -52,6 +52,8 @@ public class HistoryService(
         MessageAction.FileIndexChanged,
         MessageAction.FileLocked,
         MessageAction.FileUnlocked,
+        MessageAction.FileCustomFilterEnabled,
+        MessageAction.FileCustomFilterDisabled,
         MessageAction.FolderCreated,
         MessageAction.FolderRenamed,
         MessageAction.FolderMoved,
@@ -94,7 +96,11 @@ public class HistoryService(
         MessageAction.RoomColorChanged,
         MessageAction.RoomCoverChanged,
         MessageAction.RoomIndexExportSaved,
-        MessageAction.RoomInviteResend
+        MessageAction.RoomInviteResend,
+        MessageAction.FormStartedToFill,
+        MessageAction.FormPartiallyFilled,
+        MessageAction.FormCompletelyFilled,
+        MessageAction.FormStopped
     ];
 
     private static HashSet<int> FilterFolderActions => [
@@ -110,7 +116,11 @@ public class HistoryService(
         (int)MessageAction.FileMoved,
         (int)MessageAction.FileRenamed,
         (int)MessageAction.FormSubmit,
-        (int)MessageAction.FormOpenedForFilling
+        (int)MessageAction.FormOpenedForFilling,
+        (int)MessageAction.FormStartedToFill,
+        (int)MessageAction.FormPartiallyFilled,
+        (int)MessageAction.FormCompletelyFilled,
+        (int)MessageAction.FormStopped
     ];
     
     public async IAsyncEnumerable<HistoryEntry> GetHistoryAsync(

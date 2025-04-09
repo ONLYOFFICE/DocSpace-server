@@ -26,6 +26,9 @@
 
 namespace ASC.Data.Backup.Contracts;
 
+/// <summary>
+/// The backup progress type
+/// </summary>
 public enum BackupProgressEnum
 {
     [SwaggerEnum(Description = "Backup")]
@@ -38,40 +41,43 @@ public enum BackupProgressEnum
     Transfer
 }
 
+/// <summary>
+/// The backup progress parameters.
+/// </summary>
 public record BackupProgress
 {
     /// <summary>
-    /// Completed or not
+    /// Specifies if the backup is completed or not.
     /// </summary>
     public bool IsCompleted { get; set; }
 
     /// <summary>
-    /// Progress
+    /// The backup progress in percentage.
     /// </summary>
     public int Progress { get; set; }
 
     /// <summary>
-    /// Error
+    /// The backup error message.
     /// </summary>
     public string Error { get; set; }
 
     /// <summary>
-    /// Link
+    /// The backup link.
     /// </summary>
     public string Link { get; set; }
 
     /// <summary>
-    /// Tenant id
+    /// The tenant ID.
     /// </summary>
     public int TenantId { get; set; }
 
     /// <summary>
-    /// Backup progress type
+    /// The backup progress type.
     /// </summary>
     public BackupProgressEnum BackupProgressEnum { get; set;}
 
     /// <summary>
-    /// Task id
+    /// The task ID.
     /// </summary>
     public string TaskId { get; set; }
 }

@@ -27,102 +27,105 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// Authentication request parameters
+/// The parameters required for the user authentication requests.
 /// </summary>
 public class AuthRequestsDto
 {
     /// <summary>
-    /// Username / email
+    /// The username or email used for authentication.
     /// </summary>
     public string UserName { get; set; }
 
     /// <summary>
-    /// Password
+    /// The password in plain text for user authentication.
     /// </summary>
     public string Password { get; set; }
 
     /// <summary>
-    /// Password hash
+    /// The hashed password for secure verification.
     /// </summary>
     public string PasswordHash { get; set; }
 
     /// <summary>
-    /// Provider type
+    /// The type of authentication provider (e.g., internal, Google, Azure).
     /// </summary>
     public string Provider { get; set; }
 
     /// <summary>
-    /// Provider access token
+    /// The access token used for authentication with external providers.
     /// </summary>
     public string AccessToken { get; set; }
 
     /// <summary>
-    /// Serialized user profile
+    /// The serialized user profile data, if applicable.
     /// </summary>
     public string SerializedProfile { get; set; }
 
     /// <summary>
-    /// Two-factor authentication code
+    /// The code for two-factor authentication.
     /// </summary>
     public string Code { get; set; }
 
     /// <summary>
-    /// Code for getting a token
+    /// The authorization code used for obtaining OAuth tokens.
     /// </summary>
     public string CodeOAuth { get; set; }
 
     /// <summary>
-    /// Session based authentication or not
+    /// Specifies whether the authentication is session-based.
     /// </summary>
     public bool Session { get; set; }
 
     /// <summary>
-    /// Confirmation data
+    /// The additional confirmation data required for authentication.
     /// </summary>
     public ConfirmData ConfirmData { get; set; }
 
     /// <summary>
-    /// Type of captcha
+    /// The type of CAPTCHA validation used.
     /// </summary>
     public RecaptchaType RecaptchaType { get; set; }
 
     /// <summary>
-    /// reCAPTCHA response
+    /// The user's response to the CAPTCHA challenge.
     /// </summary>
     public string RecaptchaResponse { get; set; }
 
     /// <summary>
-    /// Culture
+    /// The culture code for localization during authentication.
     /// </summary>
     public string Culture { get; set; }
 }
 
 /// <summary>
-/// Mobile phone request parameters
+/// The parameters required for the mobile phone verification.
 /// </summary>
 public class MobileRequestsDto
 {
     /// <summary>
-    /// Mobile phone
+    /// The user's mobile phone number.
     /// </summary>
     public string MobilePhone { get; set; }
 }
 
+/// <summary>
+/// The additional confirmation data required for authentication.
+/// </summary>
 public class ConfirmData
 {
     /// <summary>
-    /// Email address
+    /// The email address to confirm the user's identity.
     /// </summary>
     [EmailAddress]
     public string Email { get; set; }
 
     /// <summary>
-    /// Access an account for the first time or not
+    /// Specifies whether this is the first access to the user's account.
     /// </summary>
     public bool? First { get; set; }
 
     /// <summary>
-    /// Key
+    /// The unique confirmation key for validating user identity.
     /// </summary>
     public string Key { get; set; }
 }

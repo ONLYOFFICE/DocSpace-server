@@ -1415,8 +1415,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasKey("Id")
                         .HasName("PRIMARY");
 
-                    b.HasIndex("IsActive")
-                        .HasDatabaseName("is_active");
+                    b.HasIndex("ExpiresAt")
+                        .HasDatabaseName("expires_at");
 
                     b.HasIndex("TenantId", "HashedKey")
                         .HasDatabaseName("hashed_key");
@@ -6002,6 +6002,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("role_color")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<int>("RoomId")
+                        .HasColumnType("int")
+                        .HasColumnName("room_id");
 
                     b.Property<int>("Sequence")
                         .HasColumnType("int")

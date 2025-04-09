@@ -26,14 +26,29 @@
 
 namespace ASC.Web.Core.Utility.Settings;
 
+/// <summary>
+/// The login settings parameters.
+/// </summary>
 public class LoginSettings : ISettings<LoginSettings>
 {
+    /// <summary>
+    /// The login attempt count.
+    /// </summary>
     public int AttemptCount { get; init; }
 
+    /// <summary>
+    /// The login block time.
+    /// </summary>
     public int BlockTime { get; init; }
 
+    /// <summary>
+    /// The login check period.
+    /// </summary>
     public int CheckPeriod { get; init; }
 
+    /// <summary>
+    /// The login ID.
+    /// </summary>
     public Guid ID => new("{588C7E01-8D41-4FCE-9779-D4126E019765}");
 
     public LoginSettings GetDefault()

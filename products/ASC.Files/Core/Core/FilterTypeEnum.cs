@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core;
 
+/// <summary>
+/// The file filter type.
+/// </summary>
 public enum FilterType
 {
     [SwaggerEnum("None")]

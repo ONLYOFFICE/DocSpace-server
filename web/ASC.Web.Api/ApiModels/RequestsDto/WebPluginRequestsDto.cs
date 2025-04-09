@@ -27,59 +27,59 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// Parameters for web plugin operations
+/// The configuration settings for the web plugin instance.
 /// </summary>
 public class WebPluginRequests
 {
     /// <summary>
-    /// Enabled
+    /// Controls whether the web plugin is active and operational.
     /// </summary>
     public bool Enabled { get; set; }
 
     /// <summary>
-    /// Settings
+    /// The JSON-formatted configuration settings for the web plugin.
     /// </summary>
     [StringLength(255)]
     public string Settings { get; set; }
 }
 
 /// <summary>
-/// Request parameters for web plugin operations
+/// The request parameters for creating or updating a web plugin.
 /// </summary>
 public class WebPluginRequestsDto
 {
     /// <summary>
-    /// Name
+    /// The web plugin name.
     /// </summary>
     [FromRoute(Name = "name")]
     public required string Name { get; set; }
 
     /// <summary>
-    /// Web plugin
+    /// The configuration settings for the web plugin instance.
     /// </summary>
     [FromBody]
     public WebPluginRequests WebPlugin { get; set; }
 }
 
 /// <summary>
-/// Request parameters for web plugin name operations
+/// The request parameters for operations that require only a plugin name.
 /// </summary>
 public class WebPluginNameRequestDto
 {
     /// <summary>
-    /// Name
+    /// The web plugin name.
     /// </summary>
     [FromRoute(Name = "name")]
     public required string Name { get; set; }
 }
 
 /// <summary>
-/// Request parameters for web plugin file operations
+/// The request parameters for loading plugins from file system.
 /// </summary>
 public class WebPluginFromFileRequestDto
 {
     /// <summary>
-    /// System
+    /// Specifies whether to load the system plugins or not.
     /// </summary>
     [FromQuery(Name = "system")]
     public bool System { get; set; }
@@ -87,12 +87,12 @@ public class WebPluginFromFileRequestDto
 
 
 /// <summary>
-/// Request parameters for getting web plugins
+/// The request parameters for querying the installed plugins.
 /// </summary>
 public class GetWebPluginsRequestDto
 {
     /// <summary>
-    /// Enabled
+    /// The optional filter for the plugin enabled state.
     /// </summary>
     [FromQuery(Name = "enabled")]
     public bool? Enabled { get; set; }

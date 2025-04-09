@@ -26,20 +26,23 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
+/// <summary>
+/// The product administrator parameters.
+/// </summary>
 public class ProductAdministratorDto
 {
     /// <summary>
-    /// Unique identifier of the product
+    /// The product ID.
     /// </summary>
     public Guid ProductId { get; set; }
 
     /// <summary>
-    /// Unique identifier of the user
+    /// The user unique identifier.
     /// </summary>
     public Guid UserId { get; set; }
 
     /// <summary>
-    /// Indicates whether the user has administrator privileges for the product
+    /// Indicates whether the user has administrator privileges for the product.
     /// </summary>
     public bool Administrator { get; set; }
 }

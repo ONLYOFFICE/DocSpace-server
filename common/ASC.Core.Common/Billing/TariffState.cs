@@ -26,6 +26,9 @@
 
 namespace ASC.Core.Billing;
 
+/// <summary>
+/// The tariff state.
+/// </summary>
 public enum TariffState
 {
     [SwaggerEnum("Trial")]

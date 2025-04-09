@@ -286,6 +286,16 @@ public class CommonMethods(
 
     public string GetClientIp()
     {
+        var request = httpContextAccessor.HttpContext?.Request;
+        if (request != null)
+        {
+            var header = request.Headers["X-Forwarded-For"].FirstOrDefault();
+            if (!string.IsNullOrEmpty(header))
+            {
+                return header.Split(',').First();
+            }
+        }
+
         return httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
 
         //TODO: check old version

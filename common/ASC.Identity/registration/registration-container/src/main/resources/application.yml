@@ -8,6 +8,7 @@ server:
 springdoc:
   api-docs:
     path: /docs
+    version: OPENAPI_3_0
   use-management-port: false
 spring:
   main:

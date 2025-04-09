@@ -27,6 +27,9 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 
+/// <summary>
+/// The room type.
+/// </summary>
 public enum RoomType
 {
     [SwaggerEnum(Description = "Form filling room")]
@@ -71,75 +74,75 @@ public static class RoomTypeExtensions
 }
 
 /// <summary>
-/// Request parameters for creating a room
+/// The request parameters for creating a room.
 /// </summary>
 public class CreateRoomRequestDto
 {
     /// <summary>
-    /// Room name
+    /// The room name.
     /// </summary>
     [StringLength(170)]
     public required string Title { get; set; }
 
     /// <summary>
-    /// Room quota
+    /// The room quota.
     /// </summary>
     public long? Quota { get; set; }
 
     /// <summary>
-    /// Indexing
+    /// Specifies whether to create a room with indexing.
     /// </summary>
     public bool? Indexing { get; set; }
 
     /// <summary>
-    /// Room quota
+    /// Specifies whether to deny downloads from the room.
     /// </summary>
     public bool? DenyDownload { get; set; }
 
     /// <summary>
-    /// Lifetime
+    /// The room data lifetime information.
     /// </summary>
     public RoomDataLifetimeDto Lifetime { get; set; }
 
     /// <summary>
-    /// Watermark settings
+    /// The watermark settings.
     /// </summary>
     public WatermarkRequestDto Watermark { get; set; }
 
     /// <summary>
-    /// Logo
+    /// The room logo.
     /// </summary>
     public LogoRequest Logo { get; set; }
 
     /// <summary>
-    /// List of tags
+    /// The list of tags.
     /// </summary>
     public IEnumerable<string> Tags { get; set; }
 
     /// <summary>
-    /// Color
+    /// The room color.
     /// </summary>
     [StringLength(6)]
     public string Color { get; set; }
 
     /// <summary>
-    /// Cover
+    /// The room cover.
     /// </summary>
     [StringLength(50)]
     public string Cover { get; set; }
 
     /// <summary>
-    /// Room type
+    /// The room type.
     /// </summary>
     public required RoomType RoomType { get; set; }
 
     /// <summary>
-    /// Private
+    /// Specifies whether the room to be created is private or not.
     /// </summary>
     public bool Private { get; set; }
 
     /// <summary>
-    /// Collection of sharing parameters
+    /// The collection of sharing parameters.
     /// </summary>
     public IEnumerable<FileShareParams> Share { get; set; }
 }

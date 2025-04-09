@@ -50,9 +50,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 columns: new[] { "tenant_id", "hashed_key" });
 
             migrationBuilder.CreateIndex(
-                name: "is_active",
+                name: "expires_at",
                 table: "core_user_api_key",
-                column: "IsActive");
+                column: "expires_at");
         }
 
         /// <inheritdoc />

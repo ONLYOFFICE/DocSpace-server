@@ -26,8 +26,18 @@
 
 namespace ASC.Files.Core;
 
+/// <summary>
+/// The generic file options parameters.
+/// </summary>
 public class FileOptions<T>
 {
+    /// <summary>
+    /// Specifies if the file was renamed or not.
+    /// </summary>
     public bool Renamed { get; init; }
+
+    /// <summary>
+    /// The generic file.
+    /// </summary>
     public File<T> File { get; init; }
 }

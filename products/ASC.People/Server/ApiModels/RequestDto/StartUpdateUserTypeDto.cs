@@ -26,20 +26,23 @@
 
 namespace ASC.People.ApiModels.RequestDto;
 
+/// <summary>
+/// The parameters for updating the type of the user or guest when reassigning rooms and shared files.
+/// </summary>
 public class StartUpdateUserTypeDto
 {
     /// <summary>
-    /// New user type
+    /// The new user type.
     /// </summary>
     public EmployeeType Type { get; set; }
 
     /// <summary>
-    /// User Id
+    /// The user ID.
     /// </summary>
     public Guid UserId { get; set; }
 
     /// <summary>
-    /// Reassign User Id
+    /// The user ID to reassign.
     /// </summary>
     public Guid? ReassignUserId { get; set; }
 }

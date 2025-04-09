@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core;
 
+/// <summary>
+/// The file entry type.
+/// </summary>
 [Flags]
 public enum FileEntryType
 {

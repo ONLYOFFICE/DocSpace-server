@@ -26,50 +26,53 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
+/// <summary>
+/// The status parameters of the synchronization with LDAP server.
+/// </summary>
 public class LdapStatusDto : IMapFrom<LdapOperationStatus>
 {
     /// <summary>
-    /// Specifies if the LDAP operation is completed or not
+    /// Specifies if the LDAP synchronization is completed or not.
     /// </summary>
     public bool Completed { get; set; }
 
     /// <summary>
-    /// ID
+    /// The LDAP ID.
     /// </summary>
     public string Id { get; set; }
 
     /// <summary>
-    /// Status
+    /// The LDAP status.
     /// </summary>
     public string Status { get; set; }
 
     /// <summary>
-    /// Error
+    /// The LDAP error message.
     /// </summary>
     public string Error { get; set; }
 
     /// <summary>
-    /// Warning
+    /// The LDAP warning message.
     /// </summary>
     public string Warning { get; set; }
 
     /// <summary>
-    /// Percentage of completion
+    /// The percentage of the LDAP operation completion.
     /// </summary>
     public int Percents { get; set; }
 
     /// <summary>
-    /// Certificate confirmation request
+    /// The LDAP certificate confirmation request.
     /// </summary>
     public string CertificateConfirmRequest { get; set; }
 
     /// <summary>
-    /// Source
+    /// The LDAP source.
     /// </summary>
     public string Source { get; set; }
 
     /// <summary>
-    /// Operation type
+    /// The LDAP operation type.
     /// </summary>
     public string OperationType { get; set; }
 

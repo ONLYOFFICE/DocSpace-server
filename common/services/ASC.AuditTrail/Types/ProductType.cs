@@ -26,6 +26,9 @@
 
 namespace ASC.AuditTrail.Types;
 
+/// <summary>
+/// The product type.
+/// </summary>
 [EnumExtensions]
 public enum ProductType
 {

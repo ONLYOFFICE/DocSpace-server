@@ -25,58 +25,66 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
+
+/// <summary>
+/// The room template parameters.
+/// </summary>
 public class RoomTemplateDto
 {
     /// <summary>
-    /// Room id
+    /// The room template ID.
     /// </summary>
     public required int RoomId { get; set; }
 
     /// <summary>
-    /// Title
+    /// The room template title.
     /// </summary>
     public string Title { get; set; }
 
     /// <summary>
-    /// Logo
+    /// The room template logo.
     /// </summary>
     public LogoRequest Logo { get; set; }
 
     /// <summary>
-    ///  Copy room logo
+    /// Specifies whether to copy room logo or not.
     /// </summary>
     public bool CopyLogo { get; set; }
 
     /// <summary>
-    /// Collection of share user emails
+    /// The collection of email addresses of users with whom to share a room.
     /// </summary>
     public IEnumerable<string> Share { get; set; }
 
     /// <summary>
-    ///  Collection of share groups
+    /// The collection of groups with whom to share a room.
     /// </summary>
     public List<Guid> Groups { get; set; }
 
     /// <summary>
-    ///  Public 
+    /// Specifies whether the room template is public or not.
     /// </summary>
     public bool Public { get; set; }
 
     /// <summary>
-    ///  Collection of tags
+    /// The collection of tags.
     /// </summary>
     public IEnumerable<string> Tags { get; set; }
 
-
     /// <summary>
-    /// Color
+    /// The color of the room template.
     /// </summary>
     [StringLength(6)]
     public string Color { get; set; }
 
     /// <summary>
-    /// Cover
+    /// The cover of the room template.
     /// </summary>
     [StringLength(50)]
     public string Cover { get; set; }
+
+    /// <summary>
+    /// Room quota
+    /// </summary>
+    public long? Quota { get; set; }
 }

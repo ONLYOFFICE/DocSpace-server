@@ -32,57 +32,57 @@ using AutoMapper;
 namespace ASC.People.ApiModels.ResponseDto;
 
 /// <summary>
-/// Response data for API key operations
+/// The response data for the API key operations.
 /// </summary>
 public class ApiKeyResponseDto : IMapFrom<ApiKey>
 {
     /// <summary>
-    /// Unique identifier of the API key
+    /// The unique identifier of the API key.
     /// </summary>
     public Guid Id { get; set; }
 
     /// <summary>
-    /// Name of the API key
+    /// The API key name.
     /// </summary>
     public string Name { get; set; }
 
     /// <summary>
-    /// Full API key value (only returned when creating a new key)
+    /// The full API key value (only returned when creating a new key).
     /// </summary>
     public string Key { get; set; }
 
     /// <summary>
-    /// Postfix of the API key (used for identification)
+    /// The API key postfix (used for identification).
     /// </summary>
     public string KeyPostfix { get; set; }
 
     /// <summary>
-    /// List of permissions granted to the API key
+    /// The list of permissions granted to the API key.
     /// </summary>
     public List<string> Permissions { get; set; }
 
     /// <summary>
-    /// Date and time when the API key was last used
+    /// The date and time when the API key was last used.
     /// </summary>
     public ApiDateTime LastUsed { get; set; }
 
     /// <summary>
-    /// Date and time when the API key was created
+    /// The date and time when the API key was created.
     /// </summary>
     public ApiDateTime CreateOn { get; set; }
 
     /// <summary>
-    /// Identifier of the user who created the API key
+    /// The identifier of the user who created the API key.
     /// </summary>
     public EmployeeDto CreateBy { get; set; }
 
     /// <summary>
-    /// Date and time when the API key expires
+    /// The date and time when the API key expires.
     /// </summary>
     public ApiDateTime ExpiresAt { get; set; }
 
     /// <summary>
-    /// Indicates whether the API key is active
+    /// Indicates whether the API key is active or not.
     /// </summary>
     public bool IsActive { get; set; } = true;
     
@@ -105,7 +105,7 @@ public class ApiKeyConverter(ApiDateTimeHelper apiDateTimeHelper,
         {
             Id = source.Id,
             Name = source.Name,
-            Key = $"sk-***{source.KeyPostfix}",
+            Key = source.Key,
             KeyPostfix = source.KeyPostfix,
             Permissions = source.Permissions,
             LastUsed = source.LastUsed.HasValue ? apiDateTimeHelper.Get(source.LastUsed.Value) : null,

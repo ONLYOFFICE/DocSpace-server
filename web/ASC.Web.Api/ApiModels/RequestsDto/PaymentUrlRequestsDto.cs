@@ -27,12 +27,12 @@
 namespace ASC.Web.Api.Models;
 
 /// <summary>
-/// Payment URL request parameters
+/// The request parameters for the payment URL configuration with quantity information.
 /// </summary>
 public class PaymentUrlRequestsDto
 {
     /// <summary>
-    /// Back URL
+    /// The URL where the user will be redirected after payment processing.
     /// </summary>
     public string BackUrl { get; set; }
 
@@ -43,12 +43,12 @@ public class PaymentUrlRequestsDto
 }
 
 /// <summary>
-/// Payment URL request parameters
+/// The request parameters for the payment quantity specifications.
 /// </summary>
 public class QuantityRequestDto
 {
     /// <summary>
-    /// The quantity of payment
+    /// The mapping of item identifiers with their respective quantities in the payment.
     /// </summary>
     public Dictionary<string, int> Quantity { get; set; }
 }

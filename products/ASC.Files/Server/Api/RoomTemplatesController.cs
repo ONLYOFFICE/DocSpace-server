@@ -37,9 +37,9 @@ public class RoomTemplatesController(IEventBus eventBus,
 {
 
     /// <summary>
-    /// Start create room template
+    /// Starts creating the room template.
     /// </summary>
-    /// <short>Start create room template</short>
+    /// <short>Start creating room template</short>
     /// <path>api/2.0/files/roomtemplate</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Status", typeof(RoomTemplateStatusDto))]
@@ -74,6 +74,7 @@ public class RoomTemplatesController(IEventBus eventBus,
             dto.Groups,
             dto.Cover,
             dto.Color,
+            dto.Quota,
             false);
 
         await eventBus.PublishAsync(new CreateRoomTemplateIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId())
@@ -87,15 +88,16 @@ public class RoomTemplatesController(IEventBus eventBus,
             TaskId = taskId,
             CopyLogo = dto.CopyLogo,
             Cover = dto.Cover,
-            Color = dto.Color
+            Color = dto.Color,
+            Quota = dto.Quota
         });
         return await GetTemplateCreatingStatus();
     }
 
     /// <summary>
-    /// Get progress creating room template
+    /// Returns the progress status of the room template creation process.
     /// </summary>
-    /// <short>Get progress creating room template</short>
+    /// <short>Get status of room template creation</short>
     /// <path>api/2.0/files/roomtemplate/status</path>
     [Tags("Files / Rooms")]
     [SwaggerResponse(200, "Status", typeof(RoomTemplateStatusDto))]
@@ -126,9 +128,9 @@ public class RoomTemplatesController(IEventBus eventBus,
 
 
     /// <summary>
-    /// Get public settings
+    /// Returns the public settings of the room template with the ID specified in the request.
     /// </summary>
-    /// <short>Get public</short>
+    /// <short>Get public settings</short>
     /// <path>api/2.0/files/roomtemplate/{id}/public</path>
     [Tags("Files / Rooms")]
     [HttpGet("{id}/public")]
@@ -139,15 +141,26 @@ public class RoomTemplatesController(IEventBus eventBus,
 
 
     /// <summary>
-    /// Set public settings
+    /// Sets the public settings for the room template with the ID specified in the request.
     /// </summary>
-    /// <short>Set public</short>
+    /// <short>Set public settings</short>
     /// <path>api/2.0/files/roomtemplate/public</path>
     [Tags("Files / Rooms")]
     [HttpPut("public")]
     public async Task SetPublic(SetPublicDto inDto)
     {
+        var shared = fileStorageService.GetPureSharesAsync(inDto.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "", 0, -1);
+
         var wrappers = new List<AceWrapper>() { new AceWrapper() { Id = Constants.GroupEveryone.ID, Access = inDto.Public ? FileShare.Read : FileShare.None, SubjectType = SubjectType.Group } };
+
+        await foreach (var share in shared)
+        {
+            if (share.Id != authContext.CurrentAccount.ID) 
+            {
+                wrappers.Add(new AceWrapper { Id = share.Id, Access = FileShare.None, SubjectType = share.SubjectType });
+            }
+        }
+
         var aceCollection = new AceCollection<int>
         {
             Files = Array.Empty<int>(),

@@ -28,6 +28,9 @@ using Constants = ASC.Core.Configuration.Constants;
 
 namespace ASC.People.Api;
 
+///<summary>
+/// Third-party API.
+///</summary>
 [DefaultRoute("thirdparty")]
 public class ThirdpartyController(
     AccountLinker accountLinker,
@@ -190,55 +193,73 @@ public class ThirdpartyController(
         }
 
         var employeeType = linkData.EmployeeType;
-        bool quotaLimit;
+        var quotaLimit = false;
 
-        Guid userId;
-        try
+        UserInfo user;
+        if(!string.IsNullOrEmpty(thirdPartyProfile.EMail) && !string.IsNullOrEmpty(thirdPartyProfile.HashId))
         {
-            await securityContext.AuthenticateMeWithoutCookieAsync(Constants.CoreSystem);
-
-            var invitedByEmail = linkData.LinkType == InvitationLinkType.Individual;
-
-            (var newUser, quotaLimit) = await CreateNewUser(
-                GetFirstName(inDto, thirdPartyProfile), 
-                GetLastName(inDto, thirdPartyProfile), 
-                GetEmailAddress(inDto, thirdPartyProfile), 
-                passwordHash, 
-                employeeType, 
-                false, 
-                invitedByEmail,
-                inDto.Culture,
-                model?.UiD);
-            
-            var messageAction = employeeType == EmployeeType.RoomAdmin ? MessageAction.UserCreatedViaInvite : MessageAction.GuestCreatedViaInvite;
-            messageService.Send(MessageInitiator.System, messageAction, MessageTarget.Create(newUser.Id), description: newUser.DisplayUserName(false, displayUserSettingsHelper));
-            userId = newUser.Id;
-            if (!string.IsNullOrEmpty(thirdPartyProfile.Avatar))
+            user = await userManager.GetUserByEmailAsync(thirdPartyProfile.EMail);
+            if (user.Id != ASC.Core.Users.Constants.LostUser.Id)
             {
-                await SaveContactImage(userId, thirdPartyProfile.Avatar);
+                if (!(await accountLinker.GetLinkedProfilesAsync(user.Id.ToString(), thirdPartyProfile.Provider)).Any())
+                {
+                    await accountLinker.AddLinkAsync(user.Id, thirdPartyProfile);
+                }
+
+                await cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id);
+            }
+        }
+        else
+        {
+            Guid userId;
+            
+            try
+            {
+                await securityContext.AuthenticateMeWithoutCookieAsync(Constants.CoreSystem);
+
+                var invitedByEmail = linkData.LinkType == InvitationLinkType.Individual;
+
+                (var newUser, quotaLimit) = await CreateNewUser(
+                    GetFirstName(inDto, thirdPartyProfile),
+                    GetLastName(inDto, thirdPartyProfile),
+                    GetEmailAddress(inDto, thirdPartyProfile),
+                    passwordHash,
+                    employeeType,
+                    false,
+                    invitedByEmail,
+                    inDto.Culture,
+                    model?.UiD);
+
+                var messageAction = employeeType == EmployeeType.RoomAdmin ? MessageAction.UserCreatedViaInvite : MessageAction.GuestCreatedViaInvite;
+                messageService.Send(MessageInitiator.System, messageAction, MessageTarget.Create(newUser.Id), description: newUser.DisplayUserName(false, displayUserSettingsHelper));
+                userId = newUser.Id;
+                if (!string.IsNullOrEmpty(thirdPartyProfile.Avatar))
+                {
+                    await SaveContactImage(userId, thirdPartyProfile.Avatar);
+                }
+
+                await accountLinker.AddLinkAsync(userId, thirdPartyProfile);
+
+                await webhookManager.PublishAsync(WebhookTrigger.UserCreated, newUser);
+            }
+            finally
+            {
+                securityContext.Logout();
             }
 
-            await accountLinker.AddLinkAsync(userId, thirdPartyProfile);
+            user = await userManager.GetUsersAsync(userId);
 
-            await webhookManager.PublishAsync(WebhookTrigger.UserCreated, newUser);
+            await cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id);
+
+            await studioNotifyService.UserHasJoinAsync();
+
+            if (mustChangePassword)
+            {
+                await studioNotifyService.UserPasswordChangeAsync(user, true);
+            }
+
+            await userHelpTourHelper.SetIsNewUser(true);
         }
-        finally
-        {
-            securityContext.Logout();
-        }
-
-        var user = await userManager.GetUsersAsync(userId);
-
-        await cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id);
-
-        await studioNotifyService.UserHasJoinAsync();
-
-        if (mustChangePassword)
-        {
-            await studioNotifyService.UserPasswordChangeAsync(user, true);
-        }
-
-        await userHelpTourHelper.SetIsNewUser(true);
 
         if (linkData is { LinkType: InvitationLinkType.CommonToRoom })
         {

@@ -28,38 +28,39 @@ namespace ASC.People.ApiModels.RequestDto;
 
 
 /// <summary>
-/// Request parameters for updating an existing API key
+/// The request parameters for updating an existing API key.
 /// </summary>
 public class UpdateApiKeyRequest
 {
     /// <summary>
-    /// New name for the API key
+    /// The new name for the API key.
     /// </summary>
+    [StringLength(30, ErrorMessage = "Incorrect name. Length must be less than 30")]
     public String Name { get; set; }
 
     /// <summary>
-    /// Updated list of permissions for the API key
+    /// The new list of permissions for the API key.
     /// </summary>
     public List<String> Permissions { get; set; }
 
     /// <summary>
-    /// Indicates whether the API key should be active
+    /// Indicates whether the API key should be active or not.
     /// </summary>
     public bool? IsActive { get; set; }
 }
 
 /// <summary>
-/// Request parameters for updating an existing API key
+/// The request parameters for updating an existing API key.
 /// </summary>
 public class UpdateApiKeyRequestDto
 {
     /// <summary>
-    /// Unique identifier of the API key to update
+    /// The unique identifier of the API key to update.
     /// </summary>
     [FromRoute(Name = "keyId")] public Guid KeyId { get; set; }
 
     /// <summary>
-    ///  Request parameters for updating an existing API key
+    /// The request parameters for updating an existing API key.
     /// </summary>
     [FromBody] public UpdateApiKeyRequest Changed { get; set; }
 }

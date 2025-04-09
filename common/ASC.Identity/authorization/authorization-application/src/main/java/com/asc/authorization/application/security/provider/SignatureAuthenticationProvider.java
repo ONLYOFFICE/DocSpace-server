@@ -120,15 +120,17 @@ public class SignatureAuthenticationProvider implements AuthenticationProvider {
         Arrays.stream(Optional.ofNullable(request.getCookies()).orElse(new Cookie[0]))
             .filter(c -> c.getName().equalsIgnoreCase(configurationProperties.getSignatureCookie()))
             .findFirst()
-            .orElse(null);
-    if (token == null || token.getValue().isBlank())
+            .map(Cookie::getValue)
+            .orElseGet(() -> request.getHeader(configurationProperties.getSignatureCookie()));
+
+    if (token == null || token.isBlank())
       throw new AuthenticationProcessingException(
           AuthenticationError.MISSING_ASC_SIGNATURE,
           "Authentication failed due to missing asc signature");
 
     try (var ignored = MDC.putCloseable("client_id", clientId)) {
       var clientFuture = requestClient(clientId);
-      var signature = signatureService.validate(token.getValue(), BasicSignature.class);
+      var signature = signatureService.validate(token, BasicSignature.class);
       var client = clientFuture.get();
 
       validateClient(client);
@@ -220,12 +222,7 @@ public class SignatureAuthenticationProvider implements AuthenticationProvider {
       HttpServletRequest request, BasicSignature signature, ClientResponse client) {
     auditMessagePublisher.publish(
         AuditMessage.builder()
-            .ip(
-                httpUtils
-                    .getRequestClientAddress(request)
-                    .map(httpUtils::extractHostFromUrl)
-                    .orElseGet(
-                        () -> httpUtils.extractHostFromUrl(httpUtils.getFirstRequestIP(request))))
+            .ip(httpUtils.extractHostFromUrl(httpUtils.getFirstRequestIP(request)))
             .initiator(serviceName)
             .target(client.getClientId())
             .browser(httpUtils.getClientBrowser(request))

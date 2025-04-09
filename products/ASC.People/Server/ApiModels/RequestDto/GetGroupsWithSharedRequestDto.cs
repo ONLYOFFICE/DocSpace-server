@@ -28,18 +28,18 @@ namespace ASC.People.ApiModels.RequestDto;
 
 
 /// <summary>
-/// 
+/// The request parameters for getting groups with their sharing settings.
 /// </summary>
 public class GetGroupsWithSharedRequestDto<T>
 {
     /// <summary>
-    /// ID
+    /// The group ID.
     /// </summary>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 
     /// <summary>
-    /// Exclude shared
+    /// Specifies whether to exclude the group sharing settings from the response.
     /// </summary>
     [FromQuery(Name = "excludeShared")]
     public bool? ExcludeShared { get; set; }

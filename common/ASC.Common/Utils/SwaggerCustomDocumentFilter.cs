@@ -128,7 +128,8 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
         { "Settings / TFA settings", "Operations for working with TFA settings." },
         { "Settings / Tips", "Operations for working with tip settings." },
         { "Settings / Webhooks", "Operations for working with webhook settings." },
-        { "Settings / Webplugins", "Operations for working with webplugin settings." }
+        { "Settings / Webplugins", "Operations for working with webplugin settings." },
+        { "Api keys", "Operations for working with api keys." }
     };
 
     public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)

@@ -133,8 +133,7 @@ static file class Queries
                         .SetProperty(p => p.UserName, login)
                         .SetProperty(p => p.Password, password)
                         .SetProperty(p => p.Token, token)
-                        .SetProperty(p => p.Url, url)
-                        .SetProperty(p => p.ModifiedOn, DateTime.UtcNow)));
+                        .SetProperty(p => p.Url, url)));
 
     public static readonly Func<FilesDbContext, int, int, Task<DbFilesThirdpartyAccount>> ThirdPartyAccountByLinkIdAsync = 
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

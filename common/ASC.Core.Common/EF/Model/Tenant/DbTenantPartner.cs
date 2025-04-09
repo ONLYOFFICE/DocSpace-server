@@ -28,31 +28,37 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace ASC.Core.Common.EF.Model;
 
+/// <summary>
+/// The database tenant partner parameters.
+/// </summary>
 public class DbTenantPartner : BaseEntity
 {
     /// <summary>
-    /// Tenant id
+    /// The tenant ID.
     /// </summary>
     public int TenantId { get; set; }
 
     /// <summary>
-    /// Partner id
+    /// The partner ID.
     /// </summary>
     [MaxLength(36)]
     public string PartnerId { get; set; }
 
     /// <summary>
-    /// Affiliate id
+    /// The affiliate ID.
     /// </summary>
     [MaxLength(50)]
     public string AffiliateId { get; set; }
 
     /// <summary>
-    /// Campaign
+    /// The tenant partner campaign.
     /// </summary>
     [MaxLength(50)]
     public string Campaign { get; set; }
 
+    /// <summary>
+    /// The database tenant parameters.
+    /// </summary>
     [SwaggerIgnore]
     public DbTenant Tenant { get; set; }
 
