@@ -904,4 +904,13 @@
   <data name="FileCustomFilterEnabled" xml:space="preserve">
     <value>Файл: {0}. Користувацький фільтр увімкнуто</value>
   </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>Створено ключ API користувача: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>Ключ API користувача видалено: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>Оновлено ключ API користувача: {0}</value>
+  </data>
 </root>

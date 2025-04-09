@@ -963,4 +963,13 @@
   <data name="FileCustomFilterEnabled" xml:space="preserve">
     <value>Ficheiro: {0}. Filtro personalizado ativado</value>
   </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>Chave API do utilizador criada: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>Chave API do utilizador eliminada: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>Chave API do utilizador atualizada: {0}</value>
+  </data>
 </root>

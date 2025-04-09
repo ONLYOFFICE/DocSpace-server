@@ -904,4 +904,13 @@
   <data name="FileCustomFilterEnabled" xml:space="preserve">
     <value>Datoteka: {0}. Filter po meri je omogočen</value>
   </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>Ustvarjen uporabniški ključ API: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>Izbrisan uporabniški ključ API: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>Uporabniški ključ API posodobljen: {0}</value>
+  </data>
 </root>

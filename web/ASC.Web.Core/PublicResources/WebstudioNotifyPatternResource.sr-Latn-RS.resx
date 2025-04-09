@@ -1957,4 +1957,44 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Vaš ${LetterLogoText} DocSpace će biti &lt;span style="color: #FF6F3D;"&gt;obrisan&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Vaš ${LetterLogoText} DocSpace &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; je bio neaktivan duže od godinu dana.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Pošto ste odlučili da ga više ne koristite, vaš ${LetterLogoText} DocSpace i svi podaci će biti obrisani u skladu sa našom &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Politikom privatnosti&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;Bilo bi nam drago da čujemo vaše mišljenje. Zašto ste odlučili da prestanete da koristite ${LetterLogoText} DocSpace?&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Ako želite da nastavite sa korišćenjem vašeg ${LetterLogoText} DocSpace-a, jednostavno ga otvorite i izvršite bilo koju radnju.&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_type_changed" xml:space="preserve">
+    <value>Zdravo!
+
+Dodeljen vam je novi tip korisnika u DocSpace-u "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
+
+Više o tipovima korisnika i dozvolama možete saznati u "Centru za pomoć":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_role_changed" xml:space="preserve">
+    <value>Zdravo!
+
+Dodeljena vam je nova uloga u prostoriji DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+
+Više o ulogama i dozvolama u prostorijama možete saznati u "Centru za pomoć":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>Vaš ${LetterLogoText} DocSpace će biti izbrisan</value>
+  </data>
+  <data name="subject_user_role_changed" xml:space="preserve">
+    <value>Vaša uloga u prostoriji DocSpace je promenjena</value>
+  </data>
+  <data name="subject_user_type_changed" xml:space="preserve">
+    <value>Vaš tip korisnika u DocSpace-u je promenjen</value>
+  </data>
 </root>

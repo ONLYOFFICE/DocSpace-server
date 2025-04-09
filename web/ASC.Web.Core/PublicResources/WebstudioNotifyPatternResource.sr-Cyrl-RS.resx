@@ -507,7 +507,8 @@ $OrangeButton
 
 Направљена је резервна датотека која садржи податке са вашег "${__VirtualRootPath}":"${__VirtualRootPath}" портала.
 
-Да бисте сазнали више о процедури прављења резервних копија, погледајте наш кориснички водич "Резервна копија података":"${URL1}.
+Да бисте сазнали више о процедури прављења резервних копија, погледајте наш кориснички водич "Резервна копија података ":"$URL1".
+
 
 Ако имате било каквих питања или вам је потребна помоц́, слободно нас контактирајте на "${__SupportLink}":"${__SupportLink}"
 
@@ -1950,5 +1951,45 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 26px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Ако вам је потребна помоц́, прегледајте наш &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL1"&gt;Центар за помоц́&lt;/a&gt; или питајте наш &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="${__SupportLink}"&gt;тим за подршку &lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
+  </data>
+  <data name="pattern_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Ваш ${LetterLogoText} DocSpace ће бити &lt;span style="color: #FF6F3D;"&gt;обрисан&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Ваш ${LetterLogoText} DocSpace &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; је био неактиван дуже од годину дана.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Пошто сте одлучили да га више не користите, ваш ${LetterLogoText} DocSpace и сви подаци ће бити обрисани у складу са нашом &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Политиком приватности&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;Било би нам драго да чујемо ваше мишљење. Зашто сте одлучили да престанете да користите ${LetterLogoText} DocSpace?&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Ако желите да наставите са коришћењем вашег ${LetterLogoText} DocSpace-а, једноставно га отворите и извршите било коју радњу.&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_type_changed" xml:space="preserve">
+    <value>Здраво!
+
+Додељен вам је нови тип корисника у DocSpace-у "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
+
+Више о типовима корисника и дозволама можете сазнати у "Центру за помоћ":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_role_changed" xml:space="preserve">
+    <value>Здраво!
+
+Додељена вам је нова улога у просторији DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+
+Више о улогама и дозволама у просторијама можете сазнати у "Центру за помоћ":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>Ваш ${LetterLogoText} DocSpace ц́е бити избрисан</value>
+  </data>
+  <data name="subject_user_role_changed" xml:space="preserve">
+    <value>Ваша улога у просторији DocSpace је промењена</value>
+  </data>
+  <data name="subject_user_type_changed" xml:space="preserve">
+    <value>Ваш тип корисника у DocSpace -у је промењен</value>
   </data>
 </root>

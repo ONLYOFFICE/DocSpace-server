@@ -904,4 +904,13 @@
   <data name="FileCustomFilterEnabled" xml:space="preserve">
     <value>Soubor: {0}. Vlastní filtr povolen</value>
   </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>Uživatelský klíč API byl aktualizován: {0}</value>
+  </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>Uživatelský klíč API vytvořen: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>Uživatelský klíč API smazán: {0}</value>
+  </data>
 </root>
