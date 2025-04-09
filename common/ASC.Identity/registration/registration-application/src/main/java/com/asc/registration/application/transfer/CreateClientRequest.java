@@ -143,7 +143,7 @@ public class CreateClientRequest implements Serializable {
   @NotEmpty
   @Pattern(
       regexp =
-          "https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)",
+          "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
       message = "website url is expected to be passed as url")
   @Schema(description = "The website URL of the client", example = "http://example.com")
   private String websiteUrl;
@@ -153,7 +153,7 @@ public class CreateClientRequest implements Serializable {
   @NotEmpty
   @Pattern(
       regexp =
-          "https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)",
+          "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
       message = "terms url is expected to be passed as url")
   @Schema(description = "The terms URL of the client", example = "http://example.com/terms")
   private String termsUrl;
@@ -163,7 +163,7 @@ public class CreateClientRequest implements Serializable {
   @NotEmpty
   @Pattern(
       regexp =
-          "https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)",
+          "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
       message = "policy url is expected to be passed as url")
   @Schema(description = "The policy URL of the client", example = "http://example.com/policy")
   private String policyUrl;
@@ -192,7 +192,7 @@ public class CreateClientRequest implements Serializable {
   @NotEmpty
   @Pattern(
       regexp =
-          "https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)",
+          "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
       message = "logout redirect uri is expected to be passed as url")
   @Schema(
       description = "The logout redirect URI for the client",
