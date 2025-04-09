@@ -647,7 +647,7 @@ $TrulyYours</value>
     <value>h1.Voici ce qu'il y a de nouveau dans votre DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" le $Date
 
 #foreach($activity in $Activities)
-$activité
+$activity
 
 #end</value>
   </data>
