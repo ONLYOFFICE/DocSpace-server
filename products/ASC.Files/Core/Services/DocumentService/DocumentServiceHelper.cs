@@ -526,6 +526,12 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
                 return room;
             }
         }
+
+        if(folder.RootFolderType == FolderType.USER)
+        {
+            return await folderDao.GetRootFolderAsync(folder.Id);
+        }
+
         return folder;
     }
 
