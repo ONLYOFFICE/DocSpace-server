@@ -323,7 +323,7 @@ internal class FileDao(
         }
         if (applyFormStepFilter)
         {
-            q = q.Where(f => f.Category == (int)FilterType.PdfForm &&
+            q = q.Where(f => (f.Category == (int)FilterType.PdfForm || f.Category == (int)FilterType.Pdf) &&
                     filesDbContext.FilesFormRoleMapping.Any(r =>
                         r.TenantId == tenantId && r.FormId == f.Id && r.UserId == securityContext.CurrentAccount.ID)
             );
