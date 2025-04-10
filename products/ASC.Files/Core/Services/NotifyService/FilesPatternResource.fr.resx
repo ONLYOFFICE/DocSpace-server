@@ -176,4 +176,63 @@ $OrangeButton</value>
   <data name="subject_FormSubmitted" xml:space="preserve">
     <value>Notification DocSpace. Le formulaire est rempli</value>
   </data>
+  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
+    <value>Un nouveau document "$DocumentTitle" a été créé dans la salle "$RoomTitle"</value>
+  </data>
+  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
+    <value>De nouveaux fichiers ont été téléchargés dans la salle "$RoomTitle" ($Count)</value>
+  </data>
+  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
+    <value>Un nouveau fichier "$DocumentTitle" a été téléchargé dans la salle "$RoomTitle"</value>
+  </data>
+  <data name="pattern_EditorMentions_push" xml:space="preserve">
+    <value>$ToUserName vous a mentionné dans le document $DocumentTitle</value>
+  </data>
+  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
+    <value>Un nouveau dossier "$FolderTitle" a été créé dans la salle "$RoomTitle"</value>
+  </data>
+  <data name="pattern_FormStartedFilling" xml:space="preserve">
+    <value>
+     Notification d'activité. "$FromUserName":"$FromUserLink" a commencé le processus de remplissage du formulaire : "$DocumentTitle":"$DocumentURL" dans la salle : "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_FormSubmitted_push" xml:space="preserve">
+    <value>Le formulaire "$DocumentTitle" a été rempli dans la salle "$RoomTitle"</value>
+  </data>
+  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
+    <value>
+      Notification d'activité. Le formulaire "$DocumentTitle":"$DocumentURL" a été entièrement rempli dans la salle : "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
+    <value>Vous avez été invité dans la salle "$RoomTitle"</value>
+  </data>
+  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
+    <value>$FromUserName a déplacé la salle "$RoomTitle" dans l'archive</value>
+  </data>
+  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
+    <value>Votre rôle dans la salle "$RoomTitle"a été modifié en "$RoomRole"</value>
+  </data>
+  <data name="pattern_StoppedFormFilling" xml:space="preserve">
+    <value>
+      Notification d'activité. "$FromUserName":"$FromUserLink" a arrêté le remplissage du formulaire : "$DocumentTitle":"$DocumentURL" dans la salle : "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_YourTurnFormFilling" xml:space="preserve">
+    <value>
+      Notification d'activité. C'est votre tour ! Le formulaire doit être rempli :  "$DocumentTitle":"$DocumentURL" dans la salle : "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="subject_FormStartedFilling" xml:space="preserve">
+    <value>Notification de DocSpace.</value>
+  </data>
+  <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
+    <value>Notification de DocSpace.</value>
+  </data>
+  <data name="subject_StoppedFormFilling" xml:space="preserve">
+    <value>Notification de DocSpace.</value>
+  </data>
+  <data name="subject_YourTurnFormFilling" xml:space="preserve">
+    <value>Notification de DocSpace.</value>
+  </data>
 </root>
