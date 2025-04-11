@@ -867,20 +867,20 @@ public class TariffService(
     {
         var cacheKey = GetBillingCustomerCacheKey(tenantId);
 
-        var ñustomerInfo = refresh ? null : await GetFromCache<CustomerInfo>(cacheKey);
+        var customerInfo = refresh ? null : await GetFromCache<CustomerInfo>(cacheKey);
 
-        if (ñustomerInfo != null)
+        if (customerInfo != null)
         {
-            return ñustomerInfo;
+            return customerInfo;
         }
 
         await using (await distributedLockProvider.TryAcquireLockAsync($"{cacheKey}_lock"))
         {
-            ñustomerInfo = refresh ? null : await GetFromCache<CustomerInfo>(cacheKey);
+            customerInfo = refresh ? null : await GetFromCache<CustomerInfo>(cacheKey);
 
-            if (ñustomerInfo != null)
+            if (customerInfo != null)
             {
-                return ñustomerInfo;
+                return customerInfo;
             }
 
             if (billingClient.Configured)
@@ -888,19 +888,19 @@ public class TariffService(
                 try
                 {
                     var portalId = await coreSettings.GetKeyAsync(tenantId);
-                    ñustomerInfo = await billingClient.GetCustomerInfoAsync(portalId);
+                    customerInfo = await billingClient.GetCustomerInfoAsync(portalId);
                 }
                 catch (Exception error)
                 {
-                    ñustomerInfo = new CustomerInfo(null, PaymentMethodStatus.None, null);
+                    customerInfo = new CustomerInfo(null, PaymentMethodStatus.None, null);
                     LogError(error, tenantId.ToString());
                 }
 
-                await hybridCache.SetAsync(cacheKey, ñustomerInfo, TimeSpan.FromMinutes(10));
+                await hybridCache.SetAsync(cacheKey, customerInfo, TimeSpan.FromMinutes(10));
             }
         }
 
-        return ñustomerInfo;
+        return customerInfo;
     }
 
     public async Task<string> PutOnDepositAsync(int tenantId, long amount, string currency)
