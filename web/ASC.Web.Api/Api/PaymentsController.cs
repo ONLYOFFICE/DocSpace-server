@@ -636,7 +636,15 @@ public class PaymentController(
     {
         var tenant = tenantManager.GetCurrentTenant();
 
-        await DemandPayerAsync(tenant);
+        var hasCustomer = await HasCustomer(tenant);
+        if (hasCustomer)
+        {
+            await DemandPayerAsync(tenant);
+        }
+        else
+        {
+            await DemandAdminAsync();
+        }
 
         var result = await settingsManager.LoadAsync<TenantWalletSettings>();
         return result;
@@ -703,6 +711,12 @@ public class PaymentController(
     private async Task DemandPayerAsync(Tenant tenant)
     {
         var payerId = (await tariffService.GetTariffAsync(tenant.Id)).CustomerId;
+
+        if (string.IsNullOrEmpty(payerId))
+        {
+            payerId = (await tariffService.GetCustomerInfoAsync(tenant.Id)).Email;
+        }
+
         var payer = await userManager.GetUserByEmailAsync(payerId);
 
         if (securityContext.CurrentAccount.ID != payer.Id)
@@ -714,6 +728,12 @@ public class PaymentController(
     private async Task DemandPayerOrOwnerAsync(Tenant tenant)
     {
         var payerId = (await tariffService.GetTariffAsync(tenant.Id)).CustomerId;
+
+        if (string.IsNullOrEmpty(payerId))
+        {
+            payerId = (await tariffService.GetCustomerInfoAsync(tenant.Id)).Email;
+        }
+
         var payer = await userManager.GetUserByEmailAsync(payerId);
 
         if (securityContext.CurrentAccount.ID != payer.Id &&
