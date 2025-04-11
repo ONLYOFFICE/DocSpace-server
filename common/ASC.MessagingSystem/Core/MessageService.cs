@@ -73,6 +73,11 @@ public class MessageService(
         SendRequestMessage(action, loginName: loginName);
     }
 
+    public void Send(string loginName, MessageAction action, string d1)
+    {
+        SendRequestMessage(action, loginName: loginName, description: d1);
+    }
+
     #endregion
 
     #region HttpRequest & Target

@@ -111,6 +111,12 @@ namespace ASC.AuditTrail {
             }
         }
         
+        public static string AuthLinkActivated {
+            get {
+                return ResourceManager.GetString("AuthLinkActivated", resourceCulture);
+            }
+        }
+        
         public static string AuthorizationKeysSetting {
             get {
                 return ResourceManager.GetString("AuthorizationKeysSetting", resourceCulture);

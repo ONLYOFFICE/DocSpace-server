@@ -438,6 +438,8 @@ public class AuthenticationController(
                                    ? await userManager.GetUserByEmailAsync(email)
                                    : await userManager.GetUsersAsync(new Guid(email));
 
+                    messageService.Send(email, MessageAction.AuthLinkActivated, inDto.ConfirmData.Key);
+
                     if (securityContext.IsAuthenticated && securityContext.CurrentAccount.ID != user.Id)
                     {
                         securityContext.Logout();
