@@ -68,12 +68,12 @@ public class MessageService(
         SendRequestMessage(action, description: [d1, string.Join(", ", d2)]);
     }
 
-    public void Send(string loginName, MessageAction action)
+    public void SendLoginMessage(MessageAction action, string loginName)
     {
         SendRequestMessage(action, loginName: loginName);
     }
 
-    public void Send(string loginName, MessageAction action, string d1)
+    public void SendLoginMessage(MessageAction action, string loginName, string d1)
     {
         SendRequestMessage(action, loginName: loginName, description: d1);
     }
@@ -136,7 +136,7 @@ public class MessageService(
         }
     }
 
-    public void Send(string loginName, MessageAction action, MessageTarget target)
+    public void SendLoginMessage(MessageAction action, string loginName, MessageTarget target)
     {
         SendRequestMessage(action, target, loginName);
     }
