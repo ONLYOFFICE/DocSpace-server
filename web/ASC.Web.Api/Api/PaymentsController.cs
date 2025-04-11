@@ -713,7 +713,7 @@ public class PaymentController(
 
         if (securityContext.CurrentAccount.ID != payer.Id)
         {
-            throw new SecurityException();
+            throw new SecurityException($"payerEmail {payerId}, payerId {payer.Id}, currentId {securityContext.CurrentAccount.ID}");
         }
     }
 
