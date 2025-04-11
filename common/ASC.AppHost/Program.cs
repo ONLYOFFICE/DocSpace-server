@@ -37,6 +37,13 @@ const int ssoAuthPort = 9834;
 const int webDavPort = 1900;
 const int identityRegistrationPort = 9090;
 const int identityAuthorizationPort = 8080;
+const int peoplePort = 5004;
+const int filesPort = 5007;
+const int webApiPort = 5000;
+const int apiSystemPort = 5010;
+const int backupPort = 5012;
+const int webstudioPort = 5003;
+const string hostDockerInternal = "host.docker.internal";
 
 var builder = DistributedApplication.CreateBuilder(args);
 
@@ -92,8 +99,11 @@ builder.Eventing.Subscribe(redis.Resource, (Func<ConnectionStringAvailableEvent,
         }
     }
 }));
+
+
+var editorsContainer = "asc-editors";
 var editors = builder
-    .AddContainer("asc-editors", "onlyoffice/documentserver", "latest")
+    .AddContainer(editorsContainer, "onlyoffice/documentserver", "latest")
     .WithHttpEndpoint(editorPort, 80)
     .WithEnvironment("JWT_ENABLED", "true")
     .WithEnvironment("JWT_SECRET", "secret")
@@ -107,19 +117,21 @@ var migrate = builder
 var basePath = Path.GetFullPath(Path.Combine("..", "..", ".."));
 
 var ascSocketio = "asc-socketIO";
-if (String.Compare(builder.Configuration["Docker"], "true", StringComparison.OrdinalIgnoreCase) == 0)
+var isDocker = String.Compare(builder.Configuration["Docker"], "true", StringComparison.OrdinalIgnoreCase) == 0;
+
+if (isDocker)
 {
-    AddProjectDocker<ASC_Files>(5007);
-    AddProjectDocker<ASC_People>(5004);
-    AddProjectDocker<ASC_Web_Api>(5000);
-    AddProjectDocker<ASC_ApiSystem>(5010);
+    AddProjectDocker<ASC_Files>(filesPort);
+    AddProjectDocker<ASC_People>(peoplePort);
+    AddProjectDocker<ASC_Web_Api>(webApiPort);
+    AddProjectDocker<ASC_ApiSystem>(apiSystemPort);
     AddProjectDocker<ASC_ClearEvents>(5027);
-    AddProjectDocker<ASC_Data_Backup>(5012);
+    AddProjectDocker<ASC_Data_Backup>(backupPort);
     AddProjectDocker<ASC_Data_Backup_BackgroundTasks>(5032);
     AddProjectDocker<ASC_Notify>(0, false);
     AddProjectDocker<ASC_Files_Service>(5009);
     AddProjectDocker<ASC_Studio_Notify>(5006);
-    AddProjectDocker<ASC_Web_Studio>(5003);
+    AddProjectDocker<ASC_Web_Studio>(webstudioPort);
 
     var socketIoResourceBuilder = builder
         .AddDockerfile(ascSocketio, "../ASC.Socket.IO/")
@@ -207,9 +219,10 @@ var startPackages = builder.AddExecutable("asc-start-packages", "yarn", clientBa
 installPackages.WithRelationship(buildPackages.Resource, "Parent");
 buildPackages.WithRelationship(startPackages.Resource, "Parent");
 
-builder.AddContainer("asc-openresty", "openresty/openresty", "latest")
+var openResty = builder.AddContainer("asc-openresty", "openresty/openresty", "latest")
     .WithBindMount(Path.Combine(basePath, "buildtools", "config", "nginx"), "/etc/nginx/conf.d/")
     .WithBindMount(Path.Combine(basePath, "buildtools", "config", "nginx", "includes"), "/etc/nginx/includes/")
+    .WithBindMount(Path.Combine(basePath, "buildtools", "install", "docker", "config", "nginx", "templates"), "/etc/nginx/templates/")
     .WithBindMount(Path.Combine(clientBasePath, "public"), "/var/www/public")
     .WithBindMount(Path.Combine(clientBasePath, "packages", "client"), "/var/www/client")
     .WithBindMount(Path.Combine(clientBasePath, "packages", "login"), "/var/www/login")
@@ -217,15 +230,52 @@ builder.AddContainer("asc-openresty", "openresty/openresty", "latest")
     .WithHttpEndpoint(restyPort, restyPort)
     .WaitFor(startPackages);
 
+if (isDocker)
+{
+    var dict = new Dictionary<string, string>
+    {
+        {"client_service_env", $"http://{hostDockerInternal}:5001"},
+        {"doceditor_service_env", $"http://{hostDockerInternal}:5013"},
+        {"management_service_env", $"http://{hostDockerInternal}:5015"},
+        {"people_service_env", $"http://{GetProjectName<ASC_People>()}:{peoplePort}"},
+        {"files_service_env", $"http://{GetProjectName<ASC_Files>()}:{filesPort}"},
+        {"webapi_service_env", $"http://{GetProjectName<ASC_Web_Api>()}:{webApiPort}"},
+        {"api_system_env", $"http://{GetProjectName<ASC_ApiSystem>()}:{apiSystemPort}"},
+        {"backup_service_env", $"http://{GetProjectName<ASC_Data_Backup>()}:{backupPort}"},
+        {"webstudio_service_env", $"http://{GetProjectName<ASC_Web_Studio>()}:{webstudioPort}"},
+        {"sockjs_node_env", $"http://{hostDockerInternal}:5001"},
+        {"plugins_service_env", $"http://{hostDockerInternal}:5014"},
+        {"clients_service_env", $"http://{ascIdentityRegistration}:{identityRegistrationPort}"},
+        {"oauth2_service_env", $"http://{ascIdentityAuthorization}:{identityAuthorizationPort}"},
+        {"sso_service_env", $"http://{hostDockerInternal}:9834"},
+        {"socket_io_env", $"http://{hostDockerInternal}:9899"},
+        {"api_cache_env", $"http://{hostDockerInternal}:5100"},
+        {"health_checks_env", $"http://{hostDockerInternal}:5033"},
+        {"login_service_env", $"http://{hostDockerInternal}:5011"},
+        {"migration_service_env", $"http://{hostDockerInternal}:5034"}
+    };
+    
+    foreach (var d in dict)
+    {
+        openResty.WithEnvironment(d.Key, d.Value);
+    }
+
+    openResty
+        .WithArgs("/bin/sh", "-c", $"envsubst '{string.Join(',', dict.Select(r=> $"${r.Key}"))}' < /etc/nginx/templates/upstream-aspire.conf.template > /etc/nginx/includes/onlyoffice-upstream.conf && /usr/local/openresty/bin/openresty -g 'daemon off;'");
+}
+
+
 await builder.Build().RunAsync();
 
 return;
 
 void AddProjectWithDefaultConfiguration<TProject>(bool includeHealthCheck = true) where TProject : IProjectMetadata, new()
 {
-    var project = builder.AddProject<TProject>(typeof(TProject).Name.ToLower().Replace('_', '-'));
+    var project = builder.AddProject<TProject>(GetProjectName<TProject>());
     AddBaseConfig(project, includeHealthCheck);
 }
+
+string GetProjectName<TProject>() where TProject : IProjectMetadata, new() => typeof(TProject).Name.ToLower().Replace('_', '-');
 
 void AddProjectDocker<TProject>(int projectPort, bool includeHealthCheck = true) where TProject : IProjectMetadata, new()
 {
@@ -233,7 +283,7 @@ void AddProjectDocker<TProject>(int projectPort, bool includeHealthCheck = true)
     var projectBasePath = Path.GetDirectoryName(projectMetadata.ProjectPath) ?? basePath;
 
     var name = typeof(TProject).Name;
-    var resourceBuilder = builder.AddDockerfile(name.ToLower().Replace('_', '-'), projectBasePath, stage: "base");
+    var resourceBuilder = builder.AddDockerfile(GetProjectName<TProject>(), projectBasePath, stage: "base");
     AddBaseConfig(resourceBuilder, includeHealthCheck);
 
     var dllPath = "/app/bin/Debug/";
