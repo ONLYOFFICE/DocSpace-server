@@ -981,4 +981,7 @@
   <data name="ApiKeyDeleted" xml:space="preserve">
     <value>User Api Key Deleted: {0}</value>
   </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>The authorization link has been activated</value>
+  </data>
 </root>
