@@ -930,4 +930,31 @@
   <data name="UpdateClient" xml:space="preserve">
     <value>Հաճախորդը {0} թարմացվել է</value>
   </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>Ծրագրավորողի գործիքների մուտքի կարգավորումները փոփոխվել են</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>Ֆայլեր [{0}]. Տարբերակը ջնջված է: {1}</value>
+  </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>Օգտատերեր [{0}]. Completely filled out form՝ {1}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>Օգտատերեր [{0}]. Մասնակի լրացված ձևաթուղթ՝ {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>Օգտատերեր [{0}]. Սկսել են լրացնել ձևաթուղթը՝ {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>Օգտատերեր [{0}]. Կիսատ թողած ձևաթուղթ՝ {1}</value>
+  </data>
+  <data name="WebhookCreated" xml:space="preserve">
+    <value>Վեբհուկը ստեղծվել է՝ {0}</value>
+  </data>
+  <data name="WebhookDeleted" xml:space="preserve">
+    <value>Վեբհուկը ջնջվել է՝ {0}</value>
+  </data>
+  <data name="WebhookUpdated" xml:space="preserve">
+    <value>Վեբհուկը թարմացվել է՝ {0}</value>
+  </data>
 </root>

@@ -82,4 +82,7 @@
   <data name="UnknownLastName" xml:space="preserve">
     <value>Sobrenome</value>
   </data>
+  <data name="LicenseTypeNotCorrect" xml:space="preserve">
+    <value>Conflito de licença. Verifique se você instalou a edição correta do {0} DocSpace (Enterprise ou Developer). Se tiver alguma dúvida, entre em contato com o seu gerente de vendas.</value>
+  </data>
 </root>
