@@ -32,17 +32,11 @@ namespace ASC.Web.Core;
 [Singleton]
 public class WebItemSecurityCache
 {
-    private readonly ICache _cache;
-    private readonly ICacheNotify<WebItemSecurityNotifier> _cacheNotify;
+    private readonly IFusionCache _cache;
 
-    public WebItemSecurityCache(ICacheNotify<WebItemSecurityNotifier> cacheNotify, ICache cache)
+    public WebItemSecurityCache(IFusionCacheProvider cacheProvider)
     {
-        _cache = cache;
-        _cacheNotify = cacheNotify;
-        _cacheNotify.Subscribe(r =>
-        {
-            ClearCache(r.Tenant);
-        }, CacheNotifyAction.Any);
+        _cache = cacheProvider.GetMemoryCache();
     }
 
     public void ClearCache(int tenantId)
@@ -55,14 +49,14 @@ public class WebItemSecurityCache
         return $"{tenantId}:webitemsecurity";
     }
 
-    public async Task PublishAsync(int tenantId)
+    public async Task ClearCacheAsync(int tenantId)
     {
-        await _cacheNotify.PublishAsync(new WebItemSecurityNotifier { Tenant = tenantId }, CacheNotifyAction.Any);
+        await _cache.RemoveByTagAsync(CacheExtention.GetWebItemSecurityTag(tenantId));
     }
 
     public Dictionary<string, bool> Get(int tenantId)
     {
-        return _cache.Get<Dictionary<string, bool>>(GetCacheKey(tenantId));
+        return _cache.GetOrDefault<Dictionary<string, bool>>(GetCacheKey(tenantId));
     }
 
     public Dictionary<string, bool> GetOrInsert(int tenantId)
@@ -72,7 +66,7 @@ public class WebItemSecurityCache
         if (dic == null)
         {
             dic = new Dictionary<string, bool>();
-            _cache.Insert(GetCacheKey(tenantId), dic, DateTime.UtcNow.Add(TimeSpan.FromMinutes(1)));
+            _cache.Set(GetCacheKey(tenantId), dic, opt=> opt.SetDuration(TimeSpan.FromMinutes(1)).SetFailSafe(true),[CacheExtention.GetWebItemSecurityTag(tenantId)]);
         }
 
         return dic;
@@ -192,7 +186,7 @@ public class WebItemSecurity(UserManager userManager,
             await authorizationManager.AddAceAsync(a);
         }
 
-        await webItemSecurityCache.PublishAsync(tenantManager.GetCurrentTenantId());
+        await webItemSecurityCache.ClearCacheAsync(tenantManager.GetCurrentTenantId());
     }
 
     public async Task<WebItemSecurityInfo> GetSecurityInfoAsync(string id)
@@ -295,7 +289,7 @@ public class WebItemSecurity(UserManager userManager,
             await userManager.RemoveUserFromGroupAsync(userid, productId);
         }
 
-        await webItemSecurityCache.PublishAsync(tenantManager.GetCurrentTenantId());
+        await webItemSecurityCache.ClearCacheAsync(tenantManager.GetCurrentTenantId());
     }
 
     public async Task<bool> IsProductAdministratorAsync(Guid productId, Guid userid)

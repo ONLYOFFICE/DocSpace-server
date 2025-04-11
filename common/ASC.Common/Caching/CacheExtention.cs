@@ -107,4 +107,9 @@ public static class CacheExtention
     {
         return $"provider-{selector}-{id}";
     }
+
+    public static string GetWebItemSecurityTag(int tenant)
+    {
+        return $"webItem-{tenant}";
+    }
 }
