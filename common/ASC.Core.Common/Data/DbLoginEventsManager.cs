@@ -29,42 +29,31 @@ namespace ASC.Core.Data;
 [Singleton]
 public class LoginEventsCache
 {
-    private readonly ICache _cache;
-    private readonly ICacheNotify<LoginEventCacheItem> _cacheNotify;
+    private readonly IFusionCache _cache;
     private readonly TimeSpan _expiration = TimeSpan.FromMinutes(10);
     private const string GuidLoginEvent = "F4D8BBF6-EB63-4781-B55E-5885EAB3D759";
 
-    public LoginEventsCache(ICache cache, ICacheNotify<LoginEventCacheItem> cacheNotify)
+    public LoginEventsCache(IFusionCacheProvider cacheProvider)
     {
-        _cache = cache;
-        _cacheNotify = cacheNotify;
-
-        _cacheNotify.Subscribe(loginEventCacheItem =>
-        {
-            if (loginEventCacheItem?.Ids == null)
-            {
-                return;
-            }
-            foreach (var id in loginEventCacheItem.Ids)
-            {
-                _cache.Remove(BuildKey(id));
-            }
-        }, CacheNotifyAction.Remove);
+        _cache = cacheProvider.GetMemoryCache();
     }
 
     public void Insert(DbLoginEvent loginEvent)
     {
-        _cache.Insert(BuildKey(loginEvent.Id), loginEvent, _expiration);
+        _cache.Set(BuildKey(loginEvent.Id), loginEvent, opt=> opt.SetDuration(_expiration).SetFailSafe(true));
     }
 
     public DbLoginEvent Get(int id)
     {
-        return _cache.Get<DbLoginEvent>(BuildKey(id));
+        return _cache.GetOrDefault<DbLoginEvent>(BuildKey(id));
     }
 
     public async Task RemoveAsync(IEnumerable<int> ids)
     {
-        await _cacheNotify.PublishAsync(new LoginEventCacheItem { Ids = ids?.ToList() }, CacheNotifyAction.Remove);
+        foreach (var id in ids)
+        {
+            await _cache.RemoveAsync(BuildKey(id));
+        }
     }
 
     private static string BuildKey(int id)
