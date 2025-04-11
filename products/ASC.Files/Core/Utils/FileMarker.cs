@@ -29,35 +29,27 @@ namespace ASC.Web.Files.Utils;
 [Singleton]
 public class FileMarkerCache
 {
-    private readonly ICache _cache;
-    private readonly ICacheNotify<FileMarkerCacheItem> _notify;
+    private readonly IFusionCache _cache;
     private readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(10);
 
-    public FileMarkerCache(ICacheNotify<FileMarkerCacheItem> notify, ICache cache)
+    public FileMarkerCache(IFusionCacheProvider cacheProvider)
     {
-        _cache = cache;
-        _notify = notify;
-
-        _notify.Subscribe(i => _cache.Remove(i.Key), CacheNotifyAction.Remove);
+        _cache = cacheProvider.GetMemoryCache();
     }
 
     public T Get<T>(string key) where T : class
     {
-        return _cache.Get<T>(key);
+        return _cache.GetOrDefault<T>(key);
     }
 
     public async Task InsertAsync(string key, object value)
     {
-        await _notify.PublishAsync(new FileMarkerCacheItem { Key = key }, CacheNotifyAction.Remove);
-
-        _cache.Insert(key, value, _cacheExpiration);
+        await _cache.SetAsync(key, value, opt=> opt.SetDuration(_cacheExpiration).SetFailSafe(true));
     }
 
     public async Task RemoveAsync(string key)
     {
-        await _notify.PublishAsync(new FileMarkerCacheItem { Key = key }, CacheNotifyAction.Remove);
-
-        _cache.Remove(key);
+        await _cache.RemoveAsync(key);
     }
 }
 
