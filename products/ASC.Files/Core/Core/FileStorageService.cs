@@ -3129,7 +3129,7 @@ public class FileStorageService //: IFileStorageService
         if (shared.Count > 0)
         {
             await securityContext.AuthenticateMeWithoutCookieAsync(toUser);
-            var userInfo = await userManager.GetUsersAsync(user);
+            var userInfo = await userManager.GetUsersAsync(user, false);
             var folder = await CreateFolderAsync(await globalFolderHelper.FolderMyAsync, $"Documents of user {userInfo.FirstName} {userInfo.LastName}");
             foreach (var file in shared)
             {
