@@ -355,7 +355,7 @@ public class PaymentController(
     [SwaggerResponse(200, "The customer info", typeof(CustomerInfo))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("customerinfo")]
-    public async Task<CustomerInfo> GetCustomerInfoAsync()
+    public async Task<CustomerInfo> GetCustomerInfoAsync(PaymentInformationRequestDto inDto)
     {
         await DemandAdminAsync();
 
@@ -366,7 +366,7 @@ public class PaymentController(
 
         var tenant = tenantManager.GetCurrentTenant();
 
-        var result = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        var result = await tariffService.GetCustomerInfoAsync(tenant.Id, inDto.Refresh);
         return result;
     }
 
@@ -416,7 +416,7 @@ public class PaymentController(
     [SwaggerResponse(200, "The customer balance", typeof(Balance))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("customer/balance")]
-    public async Task<Balance> GetCustomerBalanceAsync()
+    public async Task<Balance> GetCustomerBalanceAsync(PaymentInformationRequestDto inDto)
     {
         await DemandAdminAsync();
 
@@ -433,7 +433,7 @@ public class PaymentController(
             return null;
         }
 
-        var result = await tariffService.GetCustomerBalanceAsync(tenant.Id);
+        var result = await tariffService.GetCustomerBalanceAsync(tenant.Id, inDto.Refresh);
         return result;
     }
 
