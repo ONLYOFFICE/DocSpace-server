@@ -49,13 +49,13 @@ public class TenantWalletSettings : ISettings<TenantWalletSettings>
     /// <summary>
     /// Minimun balance
     /// </summary>
-    [Range(5, 100)]
+    [Range(5, 1000)]
     public int MinBalance { get; set; }
 
     /// <summary>
     /// Up to balance
     /// </summary>
-    [Range(10, 500)]
+    [Range(6, 5000)]
     public int UpToBalance { get; set; }
 
     /// <summary>
