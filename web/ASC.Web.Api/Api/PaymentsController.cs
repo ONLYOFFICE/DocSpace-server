@@ -636,15 +636,7 @@ public class PaymentController(
     {
         var tenant = tenantManager.GetCurrentTenant();
 
-        var hasCustomer = await HasCustomer(tenant);
-        if (hasCustomer)
-        {
-            await DemandPayerAsync(tenant);
-        }
-        else
-        {
-            await DemandAdminAsync();
-        }
+        await DemandAdminAsync();
 
         var result = await settingsManager.LoadAsync<TenantWalletSettings>();
         return result;
