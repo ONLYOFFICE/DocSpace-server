@@ -86,5 +86,25 @@ public static class CacheExtention
     public static string GetWebPluginsTag(int tenant)
     {
         return $"ref-{tenant}";
+    } 
+    
+    public static string GetProviderFileTag(string selector, int id, string fileId)
+    {
+        return $"provider-file-{selector}-{id}-{fileId}";
+    }
+
+    public static string GetProviderFolderTag(string selector, int id, string folderId)
+    {
+        return $"provider-folder-{selector}-{id}-{folderId}";
+    }
+
+    public static string GetProviderFolderItemsTag(string selector, int id, string folderId)
+    {
+        return $"provider-folder-items-{selector}-{id}-{folderId}";
+    }
+
+    public static string GetProviderTag(string selector, int id)
+    {
+        return $"provider-{selector}-{id}";
     }
 }

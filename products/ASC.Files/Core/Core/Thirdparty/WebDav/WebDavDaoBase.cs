@@ -59,6 +59,12 @@ internal class WebDavDaoBase(
         return item.Id;
     }
 
+    public bool IsFile(WebDavEntry item)
+    {
+        return !item.IsCollection;
+    }
+
+
     public bool IsRoot(WebDavEntry folder)
     {
         return IsRoot(folder.Id);
@@ -248,7 +254,7 @@ internal class WebDavDaoBase(
     public async Task<List<WebDavEntry>> GetItemsAsync(string parentId, bool? folder = null)
     {
         var id = MakeThirdId(parentId);
-        var items = await _providerInfo.GetItemsAsync(id);
+        var items = await _providerInfo.GetItemsAsync(id, GetId, IsFile);
 
         if (!folder.HasValue)
         {
