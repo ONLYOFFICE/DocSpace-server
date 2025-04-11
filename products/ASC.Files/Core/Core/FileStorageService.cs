@@ -3952,13 +3952,13 @@ public class FileStorageService //: IFileStorageService
         return InternalSharedUsersAsync(fileId);
     }
 
-    public async Task<FileReference> GetReferenceDataAsync<T>(T fileId, string portalName, T sourceFileId, string path, string link)
+    public async Task<FileReference> GetReferenceDataAsync<T>(string fileId, string portalName, T sourceFileId, string path, string link)
     {
         File<T> file = null;
         var fileDao = daoFactory.GetFileDao<T>();
-        if (portalName == (tenantManager.GetCurrentTenantId()).ToString())
+        if (portalName == tenantManager.GetCurrentTenantId().ToString())
         {
-            file = await fileDao.GetFileAsync(fileId);
+            file = await fileDao.GetFileAsync((T)Convert.ChangeType(fileId, typeof(T)));
         }
 
         if (file == null && !string.IsNullOrEmpty(path) && string.IsNullOrEmpty(link))
@@ -4023,6 +4023,11 @@ public class FileStorageService //: IFileStorageService
                     }
                 }
             }
+        }
+
+        if (file == null)
+        {
+            return new FileReference { Error = FilesCommonResource.ErrorMessage_FileNotFound };
         }
 
         if (!await fileSecurity.CanReadAsync(file))
