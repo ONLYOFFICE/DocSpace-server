@@ -142,14 +142,13 @@ $OrangeButton
 Este enlace es válido sólo por 7 días. Por favor, complete la activación dentro de este periodo.</value>
   </data>
   <data name="pattern_backup_created" xml:space="preserve">
-    <value>h1.Copia de seguridad del portal "${__VirtualRootPath}":"${__VirtualRootPath}"creada
+    <value>h1.Copia de seguridad del portal "${__VirtualRootPath}":"${__VirtualRootPath}"
 
 Buenos días $OwnerName,
 
-Un archivo de copia de seguridad con los datos de su portal ${LetterLogoText} "${__VirtualRootPath}":"${__VirtualRootPath}" ha sido creado.
+Un archivo de copia de seguridad con los datos de su portal "${__VirtualRootPath}":"${__VirtualRootPath}" ha sido creado.
 
-Para obtener más información sobre procedimiento de creación de copia de seguridad/restauración por favor consulte nuestra guía de usuario "¿Cómo crear y restaurar la copia de seguridad de portal ${LetterLogoText}":"$URL1".
-
+Para obtener más información sobre procedimiento de creación de copia de seguridad/restauración por favor consulte nuestra guía de usuario "¿Cómo crear y restaurar la copia de seguridad de portal":"$URL1".
 
 Si hay algunas preguntas o necesita ayuda no dude en ponerse en contacto con nosotros vía "${__SupportLink}":"${__SupportLink}"
 
@@ -1895,5 +1894,45 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 26px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Si necesita ayuda, consulte nuestro &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL1"&gt;Centro de Ayuda&lt;/a&gt; o pregunte a nuestro &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="${__SupportLink}"&gt;equipo de soporte&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
+  </data>
+  <data name="pattern_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Su ${LetterLogoText} DocSpace se &lt;span style="color: #FF6F3D;"&gt;eliminará&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Su ${LetterLogoText} DocSpace ${__VirtualRootPath} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; ha estado inactivo durante más de un año.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Como ha decidido no utilizarlo más, su ${LetterLogoText} DocSpace y todos los datos se eliminarán de acuerdo con nuestra &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Política de privacidad&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;Le agradeceríamos que nos enviara sus comentarios. ¿Por qué ha decidido dejar de utilizar ${LetterLogoText} DocSpace?&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Si desea seguir utilizando su ${LetterLogoText} DocSpace, simplemente entre en él y realice cualquier acción.&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_role_changed" xml:space="preserve">
+    <value>¡Hola!
+
+Se le ha asignado un nuevo rol en la sala de DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+
+Obtenga más información sobre los roles y permisos de sala en el "Centro de ayuda":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_type_changed" xml:space="preserve">
+    <value>¡Hola!
+
+Se le ha asignado un nuevo tipo de usuario en DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
+
+Obtenga más información sobre tipos de usuario y permisos en el "Centro de ayuda":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_user_role_changed" xml:space="preserve">
+    <value>Su rol en una sala de DocSpace ha cambiado</value>
+  </data>
+  <data name="subject_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>Su ${LetterLogoText} DocSpace se eliminará</value>
+  </data>
+  <data name="subject_user_type_changed" xml:space="preserve">
+    <value>Su tipo de usuario de DocSpace ha cambiado</value>
   </data>
 </root>

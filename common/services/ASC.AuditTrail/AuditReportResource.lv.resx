@@ -871,4 +871,46 @@
   <data name="UpdateClient" xml:space="preserve">
     <value>Klients {0} ir atjaunināts</value>
   </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>Izstrādātāja rīku piekļuves iestatījumi mainīti</value>
+  </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>Failu: {0}. Atslēgts pielāgotais filtrs</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>Failu: {0}. Ieslēgts pielāgotais filtrs</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>Faili [{0}]. Versija dzēsta: {1}</value>
+  </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>Izveidota lietotāja Api atslēga: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>Lietotāja Api atslēga Izdzēsta: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>Lietotāja Api atslēga Atjaunināts: {0}</value>
+  </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>Lietotāji [{0}]. Pilnībā aizpildīta veidlapa: {1}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>Lietotāji [{0}]. Veidlapas aizpildītā daļa: {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>Lietotāji [{0}]. Veidlapa apturēta: {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>Lietotāji [{0}]. Sāka aizpildīšanu: {1}</value>
+  </data>
+  <data name="WebhookCreated" xml:space="preserve">
+    <value>Tīmekļa aizķere izveidota: {0}</value>
+  </data>
+  <data name="WebhookDeleted" xml:space="preserve">
+    <value>Tīmekļa aizķere dzēsta: {0}</value>
+  </data>
+  <data name="WebhookUpdated" xml:space="preserve">
+    <value>Tīmekļa aizķere atjaunināta: {0}</value>
+  </data>
 </root>

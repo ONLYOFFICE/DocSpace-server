@@ -503,4 +503,13 @@
   <data name="OpenForm" xml:space="preserve">
     <value>Отвори файл</value>
   </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Настоящата версия на файла не може да се изтрие</value>
+  </data>
+  <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
+    <value>Сподели за попълване</value>
+  </data>
+  <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
+    <value>Започни попълване</value>
+  </data>
 </root>

@@ -103,4 +103,7 @@
   <data name="ReadyFormFolder" xml:space="preserve">
     <value>완료</value>
   </data>
+  <data name="RoomTemplates" xml:space="preserve">
+    <value>템플릿</value>
+  </data>
 </root>

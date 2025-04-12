@@ -503,4 +503,13 @@
   <data name="OpenForm" xml:space="preserve">
     <value>Άνοιγμα αρχείου</value>
   </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Δεν είναι δυνατή η διαγραφή της τρέχουσας έκδοσης του αρχείου</value>
+  </data>
+  <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
+    <value>Κοινοποιήστε για συμπλήρωση</value>
+  </data>
+  <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
+    <value>Έναρξη συμπλήρωσης</value>
+  </data>
 </root>
