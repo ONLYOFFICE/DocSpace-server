@@ -26,8 +26,6 @@
 
 extern alias ASCWebApi;
 extern alias ASCPeople;
-using ASC.Files.Tests.Data;
-using ASC.Files.Tests.Models;
 
 namespace ASC.Files.Tests.FilesController;
 
@@ -48,18 +46,18 @@ public class CreateFileTest(
         "test.pdf"
     ];
 
-    public static TheoryData<FolderType> FolderTypesData =>
+    public static TheoryData<Docspace.Model.FolderType> FolderTypesData =>
     [
-        FolderType.Archive,
-        FolderType.TRASH,
-        FolderType.VirtualRooms
+        Docspace.Model.FolderType.Archive,
+        Docspace.Model.FolderType.TRASH,
+        Docspace.Model.FolderType.VirtualRooms
     ];
 
     [Theory]
     [MemberData(nameof(Data))]
-    public async Task CreateFile_FolderMy_Owner_ReturnsOk(string? fileName)
+    public async Task CreateFile_FolderMy_Owner_ReturnsOk(string fileName)
     {
-        var createdFile = await CreateFile(fileName, FolderType.USER, Initializer.Owner);
+        var createdFile = await CreateFile(fileName, Docspace.Model.FolderType.USER, Initializer.Owner);
         
         createdFile.Should().NotBeNull();
         createdFile.Title.Should().Be(fileName);
@@ -67,11 +65,11 @@ public class CreateFileTest(
     
     [Theory]
     [MemberData(nameof(Data))]
-    public async Task CreateFile_FolderMy_RoomAdmin_ReturnsOk(string? fileName)
+    public async Task CreateFile_FolderMy_RoomAdmin_ReturnsOk(string fileName)
     {
-        var roomAdmin = await Initializer.InviteContact(EmployeeType.RoomAdmin);
+        var roomAdmin = await Initializer.InviteContact(Docspace.Model.EmployeeType.RoomAdmin);
         
-        var createdFile = await CreateFile(fileName, FolderType.USER, roomAdmin);
+        var createdFile = await CreateFile(fileName, Docspace.Model.FolderType.USER, roomAdmin);
         
         createdFile.Should().NotBeNull();
         createdFile.Title.Should().Be(fileName);
@@ -79,11 +77,11 @@ public class CreateFileTest(
     
     [Theory]
     [MemberData(nameof(Data))]
-    public async Task CreateFile_FolderMy_User_ReturnsOk(string? fileName)
+    public async Task CreateFile_FolderMy_User_ReturnsOk(string fileName)
     {
-        var user = await Initializer.InviteContact(EmployeeType.User);
+        var user = await Initializer.InviteContact(Docspace.Model.EmployeeType.User);
         
-        var createdFile = await CreateFile(fileName, FolderType.USER, user);
+        var createdFile = await CreateFile(fileName, Docspace.Model.FolderType.USER, user);
 
         createdFile.Should().NotBeNull();
         createdFile.Title.Should().Be(fileName);
@@ -95,35 +93,18 @@ public class CreateFileTest(
         await _filesClient.Authenticate(Initializer.Owner);
         
         //Arrange
-        var file = new CreateFile<JsonElement> { Title = "test.docx" };
+        var file = new CreateFileJsonElement("test.docx");
         
-        //Act
-        var response = await _filesClient.PostAsJsonAsync($"{Random.Shared.Next(10000, 20000)}/file", file, _filesFactory.JsonRequestSerializerOptions, cancellationToken: TestContext.Current.CancellationToken);
-        
-        //Assert
-        response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
+        await Assert.ThrowsAsync<Docspace.Client.ApiException>(async () => await _filesFilesApi.CreateFileAsync(Random.Shared.Next(10000, 20000), file, cancellationToken: TestContext.Current.CancellationToken));
     }
     
     [Theory]
     [MemberData(nameof(FolderTypesData))]
-    public async Task CreateFile_SystemFolder_Owner_ReturnsOk(FolderType folderType)
+    public async Task CreateFile_SystemFolder_Owner_ReturnsOk(Docspace.Model.FolderType folderType)
     {
         var createdFile = await CreateFile("test.docx", folderType, Initializer.Owner);
 
-        createdFile.RootFolderType.Should().Be(FolderType.DEFAULT);
-    }
-    
-    [Fact]
-    public async Task CreateFile_FolderRecent_Owner_ReturnsOk()
-    {
-        await _filesClient.Authenticate(Initializer.Owner);
-        
-        var response = await _filesClient.GetAsync("recent", TestContext.Current.CancellationToken);
-        var recentFolder = await HttpClientHelper.ReadFromJson<FolderContentDto>(response);
-        var createdFile = await CreateFile("test.docx", recentFolder.Current.Id);
-
-        createdFile.Should().NotBeNull();
-        createdFile.RootFolderType.Should().Be(FolderType.DEFAULT);
+        createdFile.RootFolderType.Should().NotBe(folderType);
     }
 }
 

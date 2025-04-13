@@ -24,9 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Tests.Data;
-using ASC.Web.Files.Services.WCFService.FileOperations;
-
 namespace ASC.Files.Tests.FilesController;
 
 [Collection("Test Collection")]
@@ -40,17 +37,10 @@ public class DeleteFileTest(
     [Fact]
     public async Task DeleteFile_FolderMy_Owner_ReturnsOk()
     {
-        var createdFile = await CreateFile("test.docx", FolderType.USER, Initializer.Owner);
-        var jsonData = JsonSerializer.Serialize(new Delete { Immediately = true}, JsonSerializerOptions.Web);
+        var createdFile = await CreateFile("test.docx", Docspace.Model.FolderType.USER, Initializer.Owner);
         
-        var responseMessage = await _filesClient.SendAsync(new HttpRequestMessage
-        {
-            RequestUri = new Uri($"{_filesClient.BaseAddress}file/{createdFile.Id}"),
-            Method = HttpMethod.Delete,
-            Content = new StringContent(jsonData, Encoding.UTF8, "application/json")
-        }, TestContext.Current.CancellationToken);
+        var results = (await _filesFilesApi.DeleteFileAsync(createdFile.Id, new Docspace.Model.Delete(){ Immediately = true}, TestContext.Current.CancellationToken)).Response;
         
-        var results = await HttpClientHelper.ReadFromJson<List<FileOperationResult>>(responseMessage);
         if (results.Any(r => !r.Finished))
         {
             results = await WaitLongOperation();
