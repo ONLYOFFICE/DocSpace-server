@@ -1222,7 +1222,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                                 hasFullAccessToForm && formFilling?.StartFilling == true && !IsFillingStoped && currentStep > 0,
 
                             FilesSecurityActions.StartFilling =>
-                                hasFullAccessToForm && formFilling?.StartFilling == false || formFilling?.StartFilling == null,
+                                hasFullAccessToForm && (formFilling?.StartFilling == false || formFilling?.StartFilling == null),
 
                             FilesSecurityActions.FillForms =>
                                 !IsFillingStoped && myRoles.Any(),

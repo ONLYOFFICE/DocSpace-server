@@ -2260,6 +2260,8 @@ public class EntryManager(IDaoFactory daoFactory,
                 }
             }
         }
+        await fileTracker.RemoveAsync(pdfFile.Id);
+        await socketManager.StopEditAsync(pdfFile.Id);
 
         var records = fileSecurity.GetPureSharesAsync(result, ShareFilterType.Link, null, null);
 
