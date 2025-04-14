@@ -548,7 +548,7 @@ public class PaymentController(
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "URL to the csv report file", typeof(string))]
     [HttpPost("customer/operationsreport")]
-    public async Task<string> CreateCustomerOperationsReportAsync()
+    public async Task<string> CreateCustomerOperationsReportAsync(CustomerOperationsReportDto inDto)
     {
         if (!tariffService.IsConfigured())
         {
@@ -565,12 +565,16 @@ public class PaymentController(
 
         await DemandPayerOrOwnerAsync(tenant);
 
-        var to = DateTime.UtcNow;
-        var from = tenant.CreationDateTime;
+        inDto = inDto ?? new CustomerOperationsReportDto();
 
-        var reportName = string.Format(Resource.AccountingCustomerOperationsReportName + ".csv", from.ToString("MM.dd.yyyy", CultureInfo.InvariantCulture), to.ToString("MM.dd.yyyy", CultureInfo.InvariantCulture));
+        var utcStartDate = inDto.StartDate != null ? tenantUtil.DateTimeToUtc(inDto.StartDate.Value) : tenant.CreationDateTime;
+        var utcEndDate = inDto.EndDate != null ? tenantUtil.DateTimeToUtc(inDto.EndDate.Value) : DateTime.UtcNow;
 
-        var report = await tariffService.GetCustomerOperationsAsync(tenant.Id, from, to, true, true);
+        var reportName = string.Format(Resource.AccountingCustomerOperationsReportName + ".csv",
+            utcStartDate.ToString("MM.dd.yyyy", CultureInfo.InvariantCulture),
+            utcEndDate.ToString("MM.dd.yyyy", CultureInfo.InvariantCulture));
+
+        var report = await tariffService.GetCustomerOperationsAsync(tenant.Id, utcStartDate, utcEndDate, inDto.Credit, inDto.Withdrawal);
 
         await using var stream = csvFileHelper.CreateFile(report.Collection, new OperationMap());
 

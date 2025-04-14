@@ -97,3 +97,29 @@ public class CustomerOperationsRequestDto
     [FromQuery(Name = "withdrawal")]
     public bool? Withdrawal { get; set; }
 }
+
+/// <summary>
+/// Parameters of the request for generating the report on client operations
+/// </summary>
+public class CustomerOperationsReportDto
+{
+    /// <summary>
+    /// Start date
+    /// </summary>
+    public DateTime? StartDate { get; set; }
+
+    /// <summary>
+    /// End date
+    /// </summary>
+    public DateTime? EndDate { get; set; }
+
+    /// <summary>
+    /// Include credit operations
+    /// </summary>
+    public bool? Credit { get; set; }
+
+    /// <summary>
+    /// Include withdrawal operations
+    /// </summary>
+    public bool? Withdrawal { get; set; }
+}
