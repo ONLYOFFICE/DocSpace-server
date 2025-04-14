@@ -885,7 +885,10 @@ public class FileSecurity(IDaoFactory daoFactory,
         {
             return false;
         }
-
+        if (file != null && action == FilesSecurityActions.Edit && file.Category == (int)FilterType.Pdf && file.IsCompletedForm)
+        {
+            return false;
+        }
         var room = parentFolders.FirstOrDefault(r => DocSpaceHelper.IsRoom(r.FolderType));
         if (file != null && room != null && room.FolderType == FolderType.VirtualDataRoom && !file.IsForm)
         {
@@ -1194,8 +1197,8 @@ public class FileSecurity(IDaoFactory daoFactory,
                 }
 
 
-
-                if (file != null && file.IsForm && (action is
+                var fileDao = daoFactory.GetFileDao<T>();
+                if (file != null && await DocSpaceHelper.IsFormOrCompletedForm(file, fileDao) && (action is
                     FilesSecurityActions.FillForms or
                     FilesSecurityActions.Edit or
                     FilesSecurityActions.StartFilling or
@@ -1215,7 +1218,6 @@ public class FileSecurity(IDaoFactory daoFactory,
 
                     if (fileFolder != null && fileFolder.FolderType == FolderType.VirtualDataRoom)
                     {
-                        var fileDao = daoFactory.GetFileDao<T>();
                         var (currentStep, roles) = await fileDao.GetUserFormRoles(file.Id, userId);
                         var myRoles = await roles.ToListAsync();
                         var role = myRoles.Where(r => !r.Submitted).FirstOrDefault();

@@ -578,6 +578,7 @@ internal class FileDao(
                         ConvertedType = file.ConvertedType,
                         Comment = file.Comment,
                         Encrypted = file.Encrypted,
+                        FileStatus = (int)file.FileStatus,
                         Forcesave = file.Forcesave,
                         ThumbnailStatus = file.ThumbnailStatus,
                         TenantId = tenantId

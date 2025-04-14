@@ -173,8 +173,8 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
 
         var docParams = await documentServiceHelper.GetParamsAsync(
             formOpenSetup != null && formOpenSetup.Draft != null ? formOpenSetup.Draft : file, 
-            lastVersion, 
-            formOpenSetup == null || formOpenSetup.CanEdit, 
+            lastVersion,
+            !file.IsCompletedForm && (formOpenSetup?.CanEdit != false), 
             !inDto.View, 
             true, formOpenSetup == null || formOpenSetup.CanFill,
             formOpenSetup != null ? formOpenSetup.EditorType : inDto.EditorType,

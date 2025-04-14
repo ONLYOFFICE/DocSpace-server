@@ -2237,6 +2237,7 @@ public class EntryManager(IDaoFactory daoFactory,
     {
         pdfFile.Category = (int)FilterType.Pdf;
         pdfFile.Forcesave = ForcesaveType.None;
+        pdfFile.IsCompletedForm = true;
 
         File<T> result;
         if (stream.CanSeek)
@@ -2319,6 +2320,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 {
                     form.Category = (int)FilterType.Pdf;
                     form.Forcesave = ForcesaveType.None;
+                    form.IsCompletedForm = true;
 
                     File<T> result;
                     if (stream.CanSeek)
