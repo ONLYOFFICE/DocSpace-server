@@ -45,7 +45,7 @@ public abstract class MasterFormController<T>(FileStorageService fileStorageServ
     /// <summary>
     /// Checks if the current file is a form draft which can be filled out.
     /// </summary>
-    /// <short>Check the form draft</short>
+    /// <short>Check the form draft filling</short>
     /// <path>api/2.0/files/masterform/{fileId}/checkfillformdraft</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]

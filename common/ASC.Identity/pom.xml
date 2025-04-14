@@ -69,7 +69,7 @@
         <spring.cloud.loadbalancer.version>4.1.2</spring.cloud.loadbalancer.version>
         <spring.cloud.openfeign.version>4.2.0</spring.cloud.openfeign.version>
         <spring.oauth2.server.version>1.4.1</spring.oauth2.server.version>
-        <springdoc.version>2.2.0</springdoc.version>
+        <springdoc.version>2.8.6</springdoc.version>
         <os.maven.plugin.version>1.7.1</os.maven.plugin.version>
         <protobuf.maven.plugin.version>0.6.1</protobuf.maven.plugin.version>
         <winsw.maven.plugin.version>0.1.10</winsw.maven.plugin.version>
@@ -80,6 +80,7 @@
 
         <!-- Maven and Java Versions -->
         <maven.compiler.plugin.vesrion>3.13.0</maven.compiler.plugin.vesrion>
+        <maven.documentation.plugin.version>1.4</maven.documentation.plugin.version>
         <maven.formatter.plugin.version>2.24</maven.formatter.plugin.version>
         <maven.surefire.plugin.version>3.2.5</maven.surefire.plugin.version>
     </properties>
@@ -192,6 +193,13 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-logging</artifactId>
+        </dependency>
+
+        <!-- OpenAPI Documentation -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
+            <version>${springdoc.version}</version>
         </dependency>
 
         <!-- Testing Dependencies -->

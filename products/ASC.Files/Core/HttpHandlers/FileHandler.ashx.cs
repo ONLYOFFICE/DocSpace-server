@@ -1262,6 +1262,11 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
 
         if (isForm && file.IsForm)
         {
+            var fileDao = daoFactory.GetFileDao<T>();
+            var properties = await fileDao.GetProperties(file.Id) ?? new EntryProperties<T> { FormFilling = new FormFillingProperties<T>() };
+            properties.CopyToFillOut = true;
+            await fileDao.SaveProperties(file.Id, properties);
+
             if (responseMessage)
             {
                 await FormWriteOk(context, folder, file);

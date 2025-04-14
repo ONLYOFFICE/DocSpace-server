@@ -26,48 +26,54 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
+/// <summary>
+/// The payment settings parameters.
+/// </summary>
 public class PaymentSettingsDto
 {
     /// <summary>
-    /// Email address for sales inquiries and support
+    /// The email address for sales inquiries and support.
     /// </summary>
     public string SalesEmail { get; set; }
 
     /// <summary>
-    /// URL for accessing feedback and support resources
+    /// The URL for accessing the feedback and support resources.
     /// </summary>
     public string FeedbackAndSupportUrl { get; set; }
 
     /// <summary>
-    /// URL for purchasing or upgrading the product
+    /// The URL for purchasing or upgrading the product.
     /// </summary>
     public string BuyUrl { get; set; }
 
     /// <summary>
-    /// Indicates whether the system is running in standalone mode
+    /// Indicates whether the system is running in standalone mode.
     /// </summary>
     public bool Standalone { get; set; }
 
     /// <summary>
-    /// Information about the current license
+    /// The current license information.
     /// </summary>
     public CurrentLicenseInfo CurrentLicense { get; set; }
 
     /// <summary>
-    /// Maximum value for a specific setting
+    /// The maximum quota quantity.
     /// </summary>
     public int Max { get; set; }
 }
 
+/// <summary>
+/// The current license information.
+/// </summary>
 public class CurrentLicenseInfo
 {
     /// <summary>
-    /// Indicates whether the license is a trial version
+    /// Specifies whether the license is trial or not.
     /// </summary>
     public bool Trial { get; set; }
 
     /// <summary>
-    /// Date when the license expires
+    /// The date when the license expires.
     /// </summary>
     public DateTime DueDate { get; set; }
 }

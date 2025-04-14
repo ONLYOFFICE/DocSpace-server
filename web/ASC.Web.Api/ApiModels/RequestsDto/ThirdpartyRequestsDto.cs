@@ -27,52 +27,52 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// Request parameters for third-party operations
+/// The request parameters for handling third-party OAuth authentication requests.
 /// </summary>
 public class ThirdpartyRequestsDto
 {
     /// <summary>
-    /// Code
+    /// The authorization code received from the third-party OAuth provider.
     /// </summary>
     public string Code { get; set; }
 
     /// <summary>
-    /// Redirect
+    /// The callback URL where the user should be redirected after authentication.
     /// </summary>
     public string Redirect { get; set; }
 }
 
 /// <summary>
-/// Request parameters for confirmation code operations
+/// The request parameters for generating OAuth confirmation code.
 /// </summary>
 public class ConfirmationCodeRequestDto
 {
     /// <summary>
-    /// URL where the user will be redirected to after they have granted the application access
+    /// The callback URL for redirecting the user after successful authentication.
     /// </summary>
     [FromQuery(Name = "redirect")]
     public string Redirect { get; set; }
 
     /// <summary>
-    /// Confirmation code that can be exchanged for an OAuth token
+    /// The OAuth authorization code received from the identity provider.
     /// </summary>
     [FromQuery(Name = "code")]
     public string Code { get; set; }
 
     /// <summary>
-    /// Error
+    /// The error message or code returned by the OAuth provider if authentication fails.
     /// </summary>
     [FromQuery(Name = "error")]
     public string Error { get; set; }
 }
 
 /// <summary>
-/// Request parameters for confirmation code URL operations
+/// The request parameters for generating OAuth confirmation URLs.
 /// </summary>
 public class ConfirmationCodeUrlRequestDto
 {
     /// <summary>
-    /// Provider
+    /// The identity provider used for authentication.
     /// </summary>
     [FromRoute(Name = "provider")]
     public required LoginProvider Provider { get; set; }

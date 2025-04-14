@@ -26,60 +26,66 @@
 
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
+/// <summary>
+/// The parameters of the usage space statistics item.
+/// </summary>
 public class UsageSpaceStatItemDto
 {
     /// <summary>
-    /// Name
+    /// The item name.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Item name")]
     public string Name { get; set; }
 
     /// <summary>
-    /// Icon
+    /// The item icon path.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Item icon path")]
     public string Icon { get; set; }
 
     /// <summary>
-    /// Specifies if the module space is disabled or not
+    /// Specifies if the item is disabled or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool Disabled { get; set; }
 
     /// <summary>
-    /// Size
+    /// The item used space.
     /// </summary>
     [SwaggerSchemaCustom(Example = "0 Byte")]
     public string Size { get; set; }
 
     /// <summary>
-    /// URL
+    /// The item URL.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Item url")]
     public string Url { get; set; }
 }
 
+/// <summary>
+/// The chart point parameters.
+/// </summary>
 public class ChartPointDto
 {
     /// <summary>
-    /// Display date
+    /// The display date.
     /// </summary>
     [SwaggerSchemaCustom(Example = "6/1/2024")]
     public string DisplayDate { get; set; }
 
     /// <summary>
-    /// Date
+    /// The chart point date.
     /// </summary>
     public DateTime Date { get; init; }
 
     /// <summary>
-    /// Hosts
+    /// The number of hosts.
     /// </summary>
     [SwaggerSchemaCustom(Example = 0)]
     public int Hosts { get; set; }
 
     /// <summary>
-    /// Hits
+    /// The number of hits.
     /// </summary>
     [SwaggerSchemaCustom(Example = 0)]
     public int Hits { get; set; }

@@ -27,89 +27,93 @@
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
+/// The webhook configuration parameters.
 /// </summary>
 public class WebhooksConfigDto
 {
     /// <summary>
-    /// ID
+    /// The webhook ID.
     /// </summary>
     public int Id { get; set; }
 
     /// <summary>
-    /// Name
+    /// The webhook name.
     /// </summary>
     public string Name { get; set; }
 
     /// <summary>
-    /// URI
+    /// The webhook URI.
     /// </summary>
     public string Uri { get; set; }
 
     /// <summary>
-    /// Specifies if the webhooks are enabled or not
+    /// Specifies if the webhooks are enabled or not.
     /// </summary>
     public bool Enabled { get; set; }
 
     /// <summary>
-    /// SSL Verification
+    /// The webhook SSL verification (enabled or not).
     /// </summary>
     public bool SSL { get; set; }
 
     /// <summary>
-    /// Triggers
+    /// The webhook trigger type.
     /// </summary>
     public WebhookTrigger Triggers { get; set; }
 
     /// <summary>
-    /// Target ID
+    /// The webhook target ID.
     /// </summary>
     public string TargetId { get; set; }
 
     /// <summary>
-    /// Create by
+    /// The user who created the webhook.
     /// </summary>
     public EmployeeDto CreatedBy { get; set; }
 
     /// <summary>
-    /// Create on
+    /// The date and time when the webhook was created.
     /// </summary>
     public DateTime? CreatedOn { get; set; }
 
     /// <summary>
-    /// Modified by
+    /// The user who modified the webhook.
     /// </summary>
     public EmployeeDto ModifiedBy { get; set; }
 
     /// <summary>
-    /// Modified on
+    /// The date and time when the webhook was modified.
     /// </summary>
     public DateTime? ModifiedOn { get; set; }
 
     /// <summary>
-    /// Last failure on
+    /// The date and time of the webhook last failure.
     /// </summary>
     public DateTime? LastFailureOn { get; set; }
 
     /// <summary>
-    /// Last failure content
+    /// The webhook last failure content.
     /// </summary>
     public string LastFailureContent { get; set; }
 
     /// <summary>
-    /// Last success on
+    /// The date and time of the webhook last success.
     /// </summary>
     public DateTime? LastSuccessOn { get; set; }
 }
 
+/// <summary>
+/// The webhook configuration with its status.
+/// </summary>
 public class WebhooksConfigWithStatusDto
 {
     /// <summary>
-    /// Configs
+    /// The webhook configuration.
     /// </summary>
     public WebhooksConfigDto Configs { get; set; }
 
     /// <summary>
-    /// Status
+    /// The webhook status.
     /// </summary>
     public int Status { get; set; }
 }

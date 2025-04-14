@@ -26,7 +26,9 @@
 
 namespace ASC.Data.Backup.Contracts;
 
-
+/// <summary>
+/// The backup storage type.
+/// </summary>
 public enum BackupStorageType
 {
     [SwaggerEnum(Description = "Documents")]
@@ -59,30 +61,33 @@ public class StartBackupRequest
     public bool Dump { get; init; }
 }
 
+/// <summary>
+/// The backup history parameters.
+/// </summary>
 public class BackupHistoryRecord
 {
     /// <summary>
-    /// Backup ID
+    /// The backup ID.
     /// </summary>
     public Guid Id { get; set; }
 
     /// <summary>
-    /// File name
+    /// The backup file name.
     /// </summary>
     public string FileName { get; set; }
 
     /// <summary>
-    /// Storage type
+    /// The backup storage type.
     /// </summary>
     public BackupStorageType StorageType { get; set; }
 
     /// <summary>
-    /// Creation date
+    /// The backup creation date.
     /// </summary>
     public DateTime CreatedOn { get; set; }
 
     /// <summary>
-    /// Expiration date
+    /// The backup expiration date.
     /// </summary>
     public DateTime ExpiresOn { get; set; }
 }

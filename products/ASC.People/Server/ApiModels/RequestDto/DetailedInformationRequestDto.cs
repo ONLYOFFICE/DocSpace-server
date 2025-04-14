@@ -26,20 +26,19 @@
 
 namespace ASC.People.ApiModels.RequestDto;
 
-
 /// <summary>
-/// 
+/// The detailed information request parameters.
 /// </summary>
 public class DetailedInformationRequestDto
 {
     /// <summary>
-    /// Group ID
+    /// The group ID.
     /// </summary>
     [FromRoute(Name = "id")]
     public required Guid Id { get; set; }
 
     /// <summary>
-    /// Include members
+    /// Specifies whether to include the group members or not.
     /// </summary>
     [FromQuery(Name = "includeMembers")]
     public bool IncludeMembers { get; set; } = true;

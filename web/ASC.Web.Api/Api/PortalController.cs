@@ -75,7 +75,7 @@ public class PortalController(
     : ControllerBase
 {
     /// <summary>
-    /// Returns the current portal.
+    /// Returns the current portal information.
     /// </summary>
     /// <short>
     /// Get a portal
@@ -191,7 +191,7 @@ public class PortalController(
     /// Returns the used space of the current portal.
     /// </summary>
     /// <short>
-    /// Get the used portal space
+    /// Get the portal used space
     /// </short>
     /// <path>api/2.0/portal/usedspace</path>
     [Tags("Portal / Quota")]
@@ -336,10 +336,10 @@ public class PortalController(
     }
 
     /// <summary>
-    /// Returns a thumbnail of the bookmark URL specified in the request.
+    /// Returns a thumbnail for the URL specified in the request.
     /// </summary>
     /// <short>
-    /// Get a bookmark thumbnail
+    /// Get a portal thumbnail
     /// </short>
     /// <path>api/2.0/portal/thumb</path>
     [ApiExplorerSettings(IgnoreApi = true)]
@@ -393,7 +393,7 @@ public class PortalController(
     }
 
     /// <summary>
-    /// Registers the mobile app installation.
+    /// Registers the mobile application installation.
     /// </summary>
     /// <short>
     /// Register the mobile app installation
@@ -409,10 +409,10 @@ public class PortalController(
     }
 
     /// <summary>
-    /// Registers the mobile app installation by mobile app type.
+    /// Registers the mobile application installation by its type.
     /// </summary>
     /// <short>
-    /// Register the mobile app installation by mobile app type
+    /// Register the mobile app installation by its type
     /// </short>
     /// <path>api/2.0/portal/mobile/registration</path>
     [ApiExplorerSettings(IgnoreApi = true)]
@@ -684,7 +684,7 @@ public class PortalController(
     }
 
     /// <summary>
-    /// Sends congratulations to the user after registering the portal.
+    /// Sends congratulations to the user after registering a portal.
     /// </summary>
     /// <short>Send congratulations</short>
     /// <path>api/2.0/portal/sendcongratulations</path>
@@ -725,9 +725,9 @@ public class PortalController(
     }
 
     /// <summary>
-    /// Sends the instructions to remove the current portal.
+    /// Sends the instructions to remove a portal of a user with the ID specified in the request.
     /// </summary>
-    /// <short>Send removal instructions</short>
+    /// <short>Send removal instructions to the user</short>
     /// <path>api/2.0/portal/sendremoveinstructions</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Users")]

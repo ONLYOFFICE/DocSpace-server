@@ -86,7 +86,11 @@ public class FileMarker(
     internal async Task ExecMarkFileAsNewAsync<T>(AsyncTaskData<T> obj, SocketManager socketManager)
     {
         await tenantManager.SetCurrentTenantAsync(obj.TenantId);
-        await authContext.AuthenticateMeWithoutCookieAsync(obj.CurrentAccountId);
+
+        if (obj.CurrentAccountId != ASC.Core.Configuration.Constants.Guest.ID)
+        {
+            await authContext.AuthenticateMeWithoutCookieAsync(obj.CurrentAccountId);
+        }
         
         FileEntry<T> fileEntry;
 

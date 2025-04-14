@@ -555,6 +555,36 @@ namespace ASC.AuditTrail {
             }
         }
         
+        /// <summary>
+        ///   Looks up a localized string similar to LDAP authentication disabled.
+        /// </summary>
+        public static string LdapDisabled {
+            get {
+                return ResourceManager.GetString("LdapDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to LDAP authentication enabled.
+        /// </summary>
+        public static string LdapEnabled {
+            get {
+                return ResourceManager.GetString("LdapEnabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to LDAP synchronization completed.
+        /// </summary>
+        public static string LdapSync {
+            get {
+                return ResourceManager.GetString("LdapSync", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to License key uploaded.
+        /// </summary>
         public static string LicenseKeyUploaded {
             get {
                 return ResourceManager.GetString("LicenseKeyUploaded", resourceCulture);

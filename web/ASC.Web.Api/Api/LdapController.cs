@@ -42,7 +42,7 @@ namespace ASC.Api.Settings
     public partial class SettingsApi
     {
         /// <summary>
-        /// Returns current portal LDAP settings
+        /// Returns current portal LDAP settings.
         /// </summary>
         /// <short>
         /// Get LDAP settings
@@ -75,7 +75,7 @@ namespace ASC.Api.Settings
         }
 
         /// <summary>
-        /// Returns current portal LDAP AutoSync cron expression if any
+        /// Returns current portal LDAP AutoSync cron expression if any.
         /// </summary>
         /// <short>
         /// Get LDAP AutoSync Cron expression
@@ -98,7 +98,7 @@ namespace ASC.Api.Settings
         }
 
         /// <summary>
-        /// Sets current portal LDAP AutoSync cron expression
+        /// Sets current portal LDAP AutoSync cron expression.
         /// </summary>
         /// <short>
         /// Sets LDAP AutoSync Cron expression
@@ -139,7 +139,7 @@ namespace ASC.Api.Settings
         }
 
         /// <summary>
-        /// Start sync users and groups process by LDAP
+        /// Starts sync users and groups process by LDAP.
         /// </summary>
         /// <short>
         /// Sync LDAP
@@ -183,7 +183,7 @@ namespace ASC.Api.Settings
         }
 
         /// <summary>
-        /// Starts the process of collecting preliminary changes on the portal according to the selected LDAP settings
+        /// Starts the process of collecting preliminary changes on the portal according to the selected LDAP settings.
         /// </summary>
         /// <short>
         /// Sync LDAP
@@ -227,7 +227,7 @@ namespace ASC.Api.Settings
         }
 
         /// <summary>
-        /// Save LDAP settings and start import/sync users and groups process by LDAP
+        /// Save LDAP settings and start import/sync users and groups process by LDAP.
         /// </summary>
         /// <short>
         /// Save LDAP settings
@@ -269,7 +269,7 @@ namespace ASC.Api.Settings
         }
 
         /// <summary>
-        /// Starts the process of collecting preliminary changes on the portal according to the LDAP settings
+        /// Starts the process of collecting preliminary changes on the portal according to the LDAP settings.
         /// </summary>
         /// <short>
         /// Save LDAP settings
@@ -315,7 +315,7 @@ namespace ASC.Api.Settings
         }
 
         /// <summary>
-        /// Returns LDAP sync process status
+        /// Returns LDAP sync process status.
         /// </summary>
         /// <short>
         /// Get LDAP sync process status
@@ -330,7 +330,7 @@ namespace ASC.Api.Settings
         }
 
         /// <summary>
-        /// Returns LDAP default settings
+        /// Returns LDAP default settings.
         /// </summary>
         /// <short>
         /// Get LDAP default settings

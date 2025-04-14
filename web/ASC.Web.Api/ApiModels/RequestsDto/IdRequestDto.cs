@@ -26,71 +26,91 @@
 
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
+/// <summary>
+/// The request parameters for handling the ID-based requests.
+/// </summary>
 public class IdRequestDto<T>
 {
     /// <summary>
-    /// Id
+    /// The ID extracted from the route parameters.
     /// </summary>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 }
 
+/// <summary>
+/// The parameters for handling the login event-related requests.
+/// </summary>
 public class LoginEvenrIdRequestDto
 {
     /// <summary>
-    /// Login event ID
+    /// The ID of the specific login event.
     /// </summary>
     [FromRoute(Name = "loginEventId")]
     public required int Id { get; set; }
 }
 
+/// <summary>
+/// The parameters for handling the user-related requests using a GUID identifier.
+/// </summary>
 public class UserIdRequestDto
 {
     /// <summary>
-    /// User ID
+    /// The user ID extracted from the route parameters.
     /// </summary>
     [FromRoute(Name = "userId")]
     public required Guid Id { get; set; }
 }
 
+/// <summary>
+/// The parameters for handling the user-related requests using a GUID identifier.
+/// </summary>
 public class UserIDRequestDto
 {
     /// <summary>
-    /// User ID
+    /// The user ID extracted from the route parameters.
     /// </summary>
     [FromRoute(Name = "userID")]
     public required Guid Id { get; set; }
 }
 
+/// <summary>
+/// The requests for handling the product-related requests.
+/// </summary>
 public class ProductIdRequestDto
 {
     /// <summary>
-    /// Product ID
+    /// The ID of the product extracted from the route parameters.
     /// </summary>
     [FromRoute(Name = "productid")]
     public required Guid ProductId { get; set; }
 }
 
+/// <summary>
+/// The parameters for handling requests that require both user and product identifiers.
+/// </summary>
 public class UserProductIdsRequestDto
 {
     /// <summary>
-    /// Product ID
+    /// The ID of the product extracted from the query parameters.
     /// </summary>
     [FromQuery(Name = "productid")]
     public Guid ProductId { get; set; }
 
     /// <summary>
-    /// User ID
+    /// The user ID extracted from the query parameters.
     /// </summary>
     [FromQuery(Name = "userid")]
     public Guid UserId { get; set; }
 }
 
-
+/// <summary>
+/// The request parameters for handling the migrator-related requests using a string identifier.
+/// </summary>
 public class MigratorNameRequestDto
 {
     /// <summary>
-    /// Migrator name
+    /// The migrator name extracted from the route parameters.
     /// </summary>
     [FromRoute(Name = "migratorName")]
     public required string MigratorName { get; set; }

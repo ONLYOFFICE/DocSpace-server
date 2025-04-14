@@ -26,9 +26,15 @@
 
 namespace ASC.Core.Tenants;
 
+/// <summary>
+/// The room quota settings.
+/// </summary>
 [Serializable]
 public class TenantRoomQuotaSettings : TenantEntityQuotaSettings, ISettings<TenantRoomQuotaSettings>
 {
+    /// <summary>
+    /// The tenant ID.
+    /// </summary>
     [JsonIgnore]
     public Guid ID
     {

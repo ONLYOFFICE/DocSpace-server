@@ -28,17 +28,20 @@ using System.ComponentModel;
 
 namespace ASC.Api.Core;
 
+/// <summary>
+/// The API date and time parameters.
+/// </summary>
 [TypeConverter(typeof(ApiDateTimeTypeConverter))]
 [JsonConverter(typeof(ApiDateTimeConverter))]
 public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
 {
     /// <summary>
-    /// UtcTime
+    /// The time in UTC format.
     /// </summary>
     public DateTime UtcTime { get; private set; }
 
     /// <summary>
-    /// TimeZoneOffset
+    /// The time zone offset.
     /// </summary>
     [SwaggerSchemaCustom(Example = "00:00:00")]
     public TimeSpan TimeZoneOffset { get; private set; }

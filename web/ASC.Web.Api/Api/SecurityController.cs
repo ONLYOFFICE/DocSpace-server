@@ -85,7 +85,7 @@ public class SecurityController(PermissionContext permissionContext,
     }
 
     /// <summary>
-    /// Returns a list of the latest changes (creation, modification, deletion, etc.) made by users to the entities (tasks, opportunities, files, etc.) on the portal.
+    /// Returns a list of the latest changes (creation, modification, deletion, etc.) made by users to the entities on the portal.
     /// </summary>
     /// <short>
     /// Get audit trail data
@@ -354,10 +354,13 @@ public class SecurityController(PermissionContext permissionContext,
 
         return inDto.Settings;
     }
-    
+
     /// <summary>
-    /// Csp
+    /// Configures the CSP (Content Security Policy) settings for the current portal.
     /// </summary>
+    /// <short>
+    /// Configure CSP settings
+    /// </short>
     /// <path>api/2.0/security/csp</path>
     [Tags("Security / CSP")]
     [SwaggerResponse(200, "Ok", typeof(CspDto))]
@@ -399,8 +402,11 @@ public class SecurityController(PermissionContext permissionContext,
     }
 
     /// <summary>
-    /// Gets csp
+    /// Returns the CSP (Content Security Policy) settings for the current portal.
     /// </summary>
+    /// <short>
+    /// Get CSP settings
+    /// </short>
     /// <path>api/2.0/security/csp</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Security / CSP")]
@@ -427,8 +433,11 @@ public class SecurityController(PermissionContext permissionContext,
     }
 
     /// <summary>
-    /// Generate Jwt Token for communication between login (client) and identity services 
+    /// Generates a JWT token for communication between login (client) and identity services.
     /// </summary>
+    /// <short>
+    /// Generate JWT token
+    /// </short>
     /// <path>api/2.0/security/oauth2/token</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [HttpGet("oauth2/token")]

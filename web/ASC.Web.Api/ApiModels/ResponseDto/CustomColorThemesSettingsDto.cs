@@ -26,20 +26,23 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
+/// <summary>
+/// The custom color themes settings.
+/// </summary>
 public class CustomColorThemesSettingsDto
 {
     /// <summary>
-    /// Themes
+    /// The list of the custom color themes.
     /// </summary>
     public IEnumerable<CustomColorThemesSettingsItem> Themes { get; set; }
 
     /// <summary>
-    /// Selected
+    /// Specifies whether the custom color theme is selected.
     /// </summary>
     public int Selected { get; set; }
 
     /// <summary>
-    /// Limit
+    /// The maximum number of the custom color themes.
     /// </summary>
     public int Limit { get; set; }
 

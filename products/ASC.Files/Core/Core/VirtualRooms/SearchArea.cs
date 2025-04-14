@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.VirtualRooms;
 
+/// <summary>
+/// The search area.
+/// </summary>
 public enum SearchArea
 {
     [SwaggerEnum("Active")]

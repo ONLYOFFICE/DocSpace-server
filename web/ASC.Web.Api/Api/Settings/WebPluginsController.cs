@@ -40,8 +40,11 @@ public class WebPluginsController(
     : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
-    /// Adds web plugins from file
+    /// Adds a web plugin from a file to the current portal.
     /// </summary>
+    /// <short>
+    /// Add a web plugin
+    /// </short>
     /// <path>api/2.0/settings/webplugins</path>
     /// <exception cref="CustomHttpException"></exception>
     [Tags("Settings / Webplugins")]
@@ -77,9 +80,13 @@ public class WebPluginsController(
     }
 
     /// <summary>
-    /// Gets web plugins
+    /// Returns the portal web plugins.
     /// </summary>
+    /// <short>
+    /// Get web plugins
+    /// </short>
     /// <path>api/2.0/settings/webplugins</path>
+    /// <collection>list</collection>
     [Tags("Settings / Webplugins")]
     [SwaggerResponse(200, "Web plugin", typeof(IEnumerable<WebPluginDto>))]
     [SwaggerResponse(403, "Plugins disabled")]
@@ -101,8 +108,11 @@ public class WebPluginsController(
     }
 
     /// <summary>
-    /// Gets web plugins by name specified in request
+    /// Returns a web plugin by the name specified in the request.
     /// </summary>
+    /// <short>
+    /// Get a web plugin by name
+    /// </short>
     /// <path>api/2.0/settings/webplugins/{name}</path>
     [Tags("Settings / Webplugins")]
     [SwaggerResponse(200, "Web plugin", typeof(WebPluginDto))]
@@ -120,8 +130,11 @@ public class WebPluginsController(
     }
 
     /// <summary>
-    /// Updates web plugins
+    /// Updates a web plugin with the parameters specified in the request.
     /// </summary>
+    /// <short>
+    /// Update a web plugin
+    /// </short>
     /// <path>api/2.0/settings/webplugins/{name}</path>
     [Tags("Settings / Webplugins")]
     [SwaggerResponse(200, "Ok")]
@@ -139,8 +152,11 @@ public class WebPluginsController(
     }
 
     /// <summary>
-    /// Deletes web plugins by name specified in request
+    /// Deletes a web plugin by the name specified in the request.
     /// </summary>
+    /// <short>
+    /// Delete a web plugin
+    /// </short>
     /// <path>api/2.0/settings/webplugins/{name}</path>
     [Tags("Settings / Webplugins")]
     [SwaggerResponse(200, "Ok")]

@@ -26,8 +26,14 @@
 
 namespace ASC.Data.Backup.ApiModels;
 
+/// <summary>
+/// The backup restoring parameters.
+/// </summary>
 public class RestoreDto
 {
+    /// <summary>
+    /// Specifies if a dump will be created or not.
+    /// </summary>
     [FromQuery]
     public bool? Dump { get; set; }
 }

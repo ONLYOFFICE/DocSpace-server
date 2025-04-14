@@ -26,15 +26,18 @@
 
 namespace ASC.People.ApiModels.RequestDto;
 
+/// <summary>
+/// The parameters for checking the need for data reassignment.
+/// </summary>
 public class NecessaryReassignDto
 {
     /// <summary>
-    /// User ID 
+    /// The user ID.
     /// </summary>
     public Guid UserId { get; set; }
 
     /// <summary>
-    /// Expected user type
+    /// The expected user type.
     /// </summary>
     public EmployeeType Type { get; set; }
 }

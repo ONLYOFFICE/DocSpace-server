@@ -1088,17 +1088,14 @@ internal class FileDao(
             {
                 var oldParentId = (await q.FirstOrDefaultAsync())?.ParentId;
 
+                await q.ExecuteUpdateAsync(f => f.SetProperty(p => p.ParentId, toFolderId));
+                
                 if (trashId.Equals(toFolderId))
                 {
-                    await q.ExecuteUpdateAsync(f => f
-                    .SetProperty(p => p.ParentId, toFolderId)
-                    .SetProperty(p => p.ModifiedBy, _authContext.CurrentAccount.ID)
-                    .SetProperty(p => p.ModifiedOn, DateTime.UtcNow));
                     await DeleteCustomOrder(filesDbContext, fileId);
                 }
                 else
                 {
-                    await q.ExecuteUpdateAsync(f => f.SetProperty(p => p.ParentId, toFolderId));
                     await SetCustomOrder(filesDbContext, fileId, toFolderId);
                 }
 

@@ -26,6 +26,9 @@
 
 namespace ASC.MessagingSystem.Core;
 
+/// <summary>
+/// The event action ID.
+/// </summary>
 [EnumExtensions]
 public enum MessageAction
 {
@@ -851,5 +854,18 @@ public enum MessageAction
     [SwaggerEnum("Generate personal access token")]
     GeneratePersonalAccessToken = 9909,
     
+    #endregion
+
+    #region Ldap
+
+    [SwaggerEnum("Ldap enabled")]
+    LdapEnabled = 5501,
+
+    [SwaggerEnum("Ldap disabled")]
+    LdapDisabled = 5502,
+
+    [SwaggerEnum("LDAP synchronization completed")]
+    LdapSync = 5503
+
     #endregion
 }

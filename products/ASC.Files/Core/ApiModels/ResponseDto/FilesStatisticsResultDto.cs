@@ -26,38 +26,44 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// The file statistics result parameters.
+/// </summary>
 public class FilesStatisticsResultDto
 {
     /// <summary>
-    /// Used space of files in the \"My Documents\" section
+    /// The used space of files in the \"My Documents\" section.
     /// </summary>
     public FilesStatisticsFolder MyDocumentsUsedSpace { get; set; }
 
     /// <summary>
-    /// Used space of files in the \"Trash\" section
+    /// The used space of files in the \"Trash\" section.
     /// </summary>
     public FilesStatisticsFolder TrashUsedSpace { get; set; }
 
     /// <summary>
-    /// Used space of files in the \"Archive\" section
+    /// The used space of files in the \"Archive\" section.
     /// </summary>
     public FilesStatisticsFolder ArchiveUsedSpace { get; set; }
 
     /// <summary>
-    /// Used space of files in the \"Rooms\" section
+    /// The used space of files in the \"Rooms\" section.
     /// </summary>
     public FilesStatisticsFolder RoomsUsedSpace { get; set; }
 }
 
+/// <summary>
+/// The file statictics folder parameters.
+/// </summary>
 public class FilesStatisticsFolder
 {
     /// <summary>
-    /// Folder title
+    /// The folder title.
     /// </summary>
     public string Title { get; set; }
 
     /// <summary>
-    /// Used space
+    /// The used space in the folder.
     /// </summary>
     public long UsedSpace { get; set; }
 }

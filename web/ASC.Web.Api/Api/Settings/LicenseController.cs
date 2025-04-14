@@ -49,7 +49,7 @@ public class LicenseController(ILoggerProvider option,
     private readonly ILogger _log = option.CreateLogger("ASC.Api");
 
     /// <summary>
-    /// Refreshes the license.
+    /// Refreshes the portal license.
     /// </summary>
     /// <short>Refresh the license</short>
     /// <path>api/2.0/settings/license/refresh</path>

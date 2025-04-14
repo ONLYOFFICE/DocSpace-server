@@ -27,41 +27,42 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters to open file
+/// The request parameters to open the file.
 /// </summary>
 public class OpenEditRequestDto<T>
 {
     /// <summary>
-    /// File ID
+    /// The file ID to open.
     /// </summary>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
+
     /// <summary>
-    /// File version
+    /// The file version to open.
     /// </summary>
     [FromQuery(Name = "version")]
     public int Version { get; set; }
 
     /// <summary>
-    /// Specifies if a document will be opened for viewing only or not
+    /// Specifies if the document will be opened for viewing only or not.
     /// </summary>
     [FromQuery(Name = "view")]
     public bool View { get; set; }
 
     /// <summary>
-    /// Editor type
+    /// The editor type to open the file.
     /// </summary>
     [FromQuery(Name = "editorType")]
     public EditorType EditorType { get; set; }
 
     /// <summary>
-    /// Edit
+    /// Specifies if the document is opened in the editing mode or not.
     /// </summary>
     [FromQuery(Name = "edit")]
     public bool Edit { get; set; }
 
     /// <summary>
-    /// Fill
+    /// Specifies if the document is opened in the form-filling mode or not.
     /// </summary>
     [FromQuery(Name = "fill")]
     public bool Fill { get; set; }

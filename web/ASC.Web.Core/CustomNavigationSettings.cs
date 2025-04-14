@@ -45,46 +45,46 @@ public class CustomNavigationSettings : ISettings<CustomNavigationSettings>
 }
 
 /// <summary>
-/// Custom navigation parameters
+/// The custom navigation item parameters.
 /// </summary>
 public class CustomNavigationItem
 {
     /// <summary>
-    /// Id
+    /// The ID of the custom navigation item.
     /// </summary>
     public Guid Id { get; set; }
 
     /// <summary>
-    /// Label
+    /// The label of the custom navigation item.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Label")]
     public string Label { get; set; }
 
     /// <summary>
-    /// URL
+    /// The URL of the custom navigation item.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Url")]
     public string Url { get; set; }
 
     /// <summary>
-    /// Big image
+    /// The big image of the custom navigation item.
     /// </summary>
     [SwaggerSchemaCustom(Example = "data:image\\/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkAgMAAAANjH3HAAAADFBMVEUAAADJycnJycnJycmiuNtHAAAAA3RSTlMAf4C\\/aSLHAAAAyElEQVR4Xu3NsQ3CMBSE4YubFB4ilHQegdGSjWACvEpGoEyBYiL05AdnXUGHolx10lf82MmOpfLeo5UoJUhBlpKkRCnhUy7b9XCWkqQMUkYlXVHSf8kTvkHKqKQrSnopg5SRxTMklLmS1MwaSWpmCSQ1MyOzWGZCYrEMEFksA4QqlAFuJJYBcCKxjM3FMySeIfEMC2dMOONCGZZgmdr1ly3TSrJMK9EyJBaaGrHQikYstAiJZRYSyiQEdyg5S8Evckih\\/YPscsdej0H6dc0TYw4AAAAASUVORK5CYII=")]
     public string BigImg { get; set; }
 
     /// <summary>
-    /// Small image
+    /// The small image of the custom navigation item.
     /// </summary>
     [SwaggerSchemaCustom(Example = "data:image\\/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8\\/9hAAAAUUlEQVR4AWMY\\/KC5o\\/cAEP9HxxgKcSpCGELYADyu2E6mAQjNxBlAWPNxkHdwGkBIM3KYYDUAr2ZCAE+oH8eujrAXDsA0k2EAAtDXAGLx4MpsADUgvkRKUlqfAAAAAElFTkSuQmCC")]
     public string SmallImg { get; set; }
 
     /// <summary>
-    /// Show in menu or not
+    /// Specifies whether to show the custom navigation item in menu or not.
     /// </summary>
     public bool ShowInMenu { get; set; }
-    
+
     /// <summary>
-    /// Show on home page or not
+    /// Specifies whether to show the custom navigation item on home page or not.
     /// </summary>
     public bool ShowOnHomePage { get; set; }
 
