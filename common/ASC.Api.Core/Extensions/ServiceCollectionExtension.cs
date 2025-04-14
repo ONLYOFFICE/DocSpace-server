@@ -39,7 +39,7 @@ public static class ServiceCollectionExtension
         var kafkaConfiguration = configuration.GetSection("kafka").Get<KafkaSettings>();
         var rabbitMqConfiguration = configuration.GetSection("RabbitMQ").Get<RabbitMQSettings>();
 
-        if (redisConfiguration != null || !string.IsNullOrEmpty(configuration.GetConnectionString("redis")))
+        if (redisConfiguration != null)
         {
             services.AddStackExchangeRedisExtensions<RedisProtobufSerializer>(serviceProvider => new List<RedisConfiguration> { serviceProvider.GetRequiredService<RedisConfiguration>() });
 
@@ -105,7 +105,7 @@ public static class ServiceCollectionExtension
     {
         var redisConfiguration = configuration.GetSection("Redis").Get<RedisConfiguration>();
 
-        if (redisConfiguration != null || !string.IsNullOrEmpty(configuration.GetConnectionString("redis")))
+        if (redisConfiguration != null)
         {            
             services.AddSingleton<Medallion.Threading.IDistributedLockProvider>(sp =>
             {
@@ -366,11 +366,6 @@ public static class ServiceCollectionExtension
     public static async Task<IConnectionMultiplexer> GetRedisConnectionMultiplexerAsync(this IServiceCollection services, IConfiguration configuration, string clientName)
     {
         var redisConfiguration = configuration.GetSection("Redis").Get<RedisConfiguration>();
-        var redisConnectionString = configuration.GetConnectionString("redis");
-        if (!string.IsNullOrEmpty(redisConnectionString))
-        {
-            redisConfiguration = new RedisConfiguration { ConnectionString = redisConnectionString };
-        }
         
         if (redisConfiguration == null)
         {

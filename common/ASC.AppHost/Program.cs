@@ -230,39 +230,37 @@ var openResty = builder.AddContainer("asc-openresty", "openresty/openresty", "la
     .WithHttpEndpoint(restyPort, restyPort)
     .WaitFor(startPackages);
 
-if (isDocker)
+var dict = new Dictionary<string, string>
 {
-    var dict = new Dictionary<string, string>
-    {
-        {"client_service_env", $"http://{hostDockerInternal}:5001"},
-        {"doceditor_service_env", $"http://{hostDockerInternal}:5013"},
-        {"management_service_env", $"http://{hostDockerInternal}:5015"},
-        {"people_service_env", $"http://{GetProjectName<ASC_People>()}:{peoplePort}"},
-        {"files_service_env", $"http://{GetProjectName<ASC_Files>()}:{filesPort}"},
-        {"webapi_service_env", $"http://{GetProjectName<ASC_Web_Api>()}:{webApiPort}"},
-        {"api_system_env", $"http://{GetProjectName<ASC_ApiSystem>()}:{apiSystemPort}"},
-        {"backup_service_env", $"http://{GetProjectName<ASC_Data_Backup>()}:{backupPort}"},
-        {"webstudio_service_env", $"http://{GetProjectName<ASC_Web_Studio>()}:{webstudioPort}"},
-        {"sockjs_node_env", $"http://{hostDockerInternal}:5001"},
-        {"plugins_service_env", $"http://{hostDockerInternal}:5014"},
-        {"clients_service_env", $"http://{ascIdentityRegistration}:{identityRegistrationPort}"},
-        {"oauth2_service_env", $"http://{ascIdentityAuthorization}:{identityAuthorizationPort}"},
-        {"sso_service_env", $"http://{hostDockerInternal}:9834"},
-        {"socket_io_env", $"http://{hostDockerInternal}:9899"},
-        {"api_cache_env", $"http://{hostDockerInternal}:5100"},
-        {"health_checks_env", $"http://{hostDockerInternal}:5033"},
-        {"login_service_env", $"http://{hostDockerInternal}:5011"},
-        {"migration_service_env", $"http://{hostDockerInternal}:5034"}
-    };
-    
-    foreach (var d in dict)
-    {
-        openResty.WithEnvironment(d.Key, d.Value);
-    }
+    {"client_service_env", $"http://{hostDockerInternal}:5001"},
+    {"doceditor_service_env", $"http://{hostDockerInternal}:5013"},
+    {"management_service_env", $"http://{hostDockerInternal}:5015"},
+    {"people_service_env", isDocker ? $"http://{GetProjectName<ASC_People>()}:{peoplePort}" : $"http://{hostDockerInternal}:{peoplePort}"},
+    {"files_service_env", isDocker ? $"http://{GetProjectName<ASC_Files>()}:{filesPort}" : $"http://{hostDockerInternal}:{filesPort}"},
+    {"webapi_service_env", isDocker ? $"http://{GetProjectName<ASC_Web_Api>()}:{webApiPort}" : $"http://{hostDockerInternal}:{webApiPort}"},
+    {"api_system_env", isDocker ? $"http://{GetProjectName<ASC_ApiSystem>()}:{apiSystemPort}" : $"http://{hostDockerInternal}:{apiSystemPort}"},
+    {"backup_service_env", isDocker ? $"http://{GetProjectName<ASC_Data_Backup>()}:{backupPort}" : $"http://{hostDockerInternal}:{backupPort}"},
+    {"webstudio_service_env", isDocker ? $"http://{GetProjectName<ASC_Web_Studio>()}:{webstudioPort}" : $"http://{hostDockerInternal}:{webstudioPort}"},
+    {"sockjs_node_env", $"http://{hostDockerInternal}:5001"},
+    {"plugins_service_env", $"http://{hostDockerInternal}:5014"},
+    {"clients_service_env", $"http://{ascIdentityRegistration}:{identityRegistrationPort}"},
+    {"oauth2_service_env", $"http://{ascIdentityAuthorization}:{identityAuthorizationPort}"},
+    {"sso_service_env", $"http://{hostDockerInternal}:9834"},
+    {"socket_io_env", $"http://{hostDockerInternal}:9899"},
+    {"api_cache_env", $"http://{hostDockerInternal}:5100"},
+    {"health_checks_env", $"http://{hostDockerInternal}:5033"},
+    {"login_service_env", $"http://{hostDockerInternal}:5011"},
+    {"migration_service_env", $"http://{hostDockerInternal}:5034"}
+};
 
-    openResty
-        .WithArgs("/bin/sh", "-c", $"envsubst '{string.Join(',', dict.Select(r=> $"${r.Key}"))}' < /etc/nginx/templates/upstream-aspire.conf.template > /etc/nginx/includes/onlyoffice-upstream.conf && /usr/local/openresty/bin/openresty -g 'daemon off;'");
+foreach (var d in dict)
+{
+    openResty.WithEnvironment(d.Key, d.Value);
 }
+
+openResty
+    .WithArgs("/bin/sh", "-c", $"envsubst '{string.Join(',', dict.Select(r=> $"${r.Key}"))}' < /etc/nginx/templates/upstream-aspire.conf.template > /etc/nginx/includes/onlyoffice-upstream.conf && /usr/local/openresty/bin/openresty -g 'daemon off;'");
+
 
 
 await builder.Build().RunAsync();
@@ -335,8 +333,7 @@ void AddBaseConfig<T>(IResourceBuilder<T> resourceBuilder, bool includeHealthChe
         .WithEnvironment("openTelemetry:enable", "true")
         .WithEnvironment("files:docservice:url:portal", $"http://host.docker.internal:{restyPort.ToString()}")
         .WithEnvironment("files:docservice:url:public", $"http://localhost:{editorPort.ToString()}")
-        .WithReference(mySql, "default:connectionString")
-        .WithReference(redis, "redis");
+        .WithReference(mySql, "default:connectionString");
     
     resourceBuilder
         .WithEnvironment("RabbitMQ:Hostname", () => rabbitMqUri != null ? isDocker ? $"{SubstituteLocalhost(rabbitMqUri.Host)}" : rabbitMqUri.Host : "")
@@ -344,6 +341,10 @@ void AddBaseConfig<T>(IResourceBuilder<T> resourceBuilder, bool includeHealthChe
         .WithEnvironment("RabbitMQ:UserName", () => rabbitMqUri != null ? $"{rabbitMqUri.UserInfo.Split(':')[0]}" : "")
         .WithEnvironment("RabbitMQ:Password", () => rabbitMqUri != null ? $"{rabbitMqUri.UserInfo.Split(':')[1]}" : "")
         .WithEnvironment("RabbitMQ:VirtualHost", () => rabbitMqUri != null ? $"{rabbitMqUri.PathAndQuery}" : "");
+    
+    resourceBuilder
+        .WithEnvironment("Redis:Hosts:0:Host", () => (isDocker ? SubstituteLocalhost(redisHost) : redisHost) ?? string.Empty)
+        .WithEnvironment("Redis:Hosts:0:Port", () => redisPort ?? string.Empty);
     
     AddWaitFor(resourceBuilder);
 }
