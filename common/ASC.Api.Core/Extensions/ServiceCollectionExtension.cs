@@ -45,7 +45,7 @@ public static class ServiceCollectionExtension
 
             services.AddSingleton(typeof(ICacheNotify<>), typeof(RedisCacheNotify<>));
         }
-        else if (rabbitMqConfiguration != null || !string.IsNullOrEmpty(configuration.GetConnectionString("rabbitMQ")))
+        else if (rabbitMqConfiguration != null)
         {
             services.AddSingleton(typeof(ICacheNotify<>), typeof(RabbitMQCache<>));
         }
@@ -206,11 +206,6 @@ public static class ServiceCollectionExtension
 
         var rabbitMqConfiguration = configuration.GetSection("RabbitMQ").Get<RabbitMQSettings>();
         var activeMqConfiguration = configuration.GetSection("ActiveMQ").Get<ActiveMQSettings>();
-        var rabbitMqConnectionString = configuration.GetConnectionString("rabbitMQ");
-        if (rabbitMqConnectionString != null)
-        {
-            rabbitMqConfiguration = new RabbitMQSettings(rabbitMqConnectionString);
-        }
         
         if (rabbitMqConfiguration != null)
         {

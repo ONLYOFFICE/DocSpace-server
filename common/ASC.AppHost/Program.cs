@@ -336,9 +336,15 @@ void AddBaseConfig<T>(IResourceBuilder<T> resourceBuilder, bool includeHealthChe
         .WithEnvironment("files:docservice:url:portal", $"http://host.docker.internal:{restyPort.ToString()}")
         .WithEnvironment("files:docservice:url:public", $"http://localhost:{editorPort.ToString()}")
         .WithReference(mySql, "default:connectionString")
-        .WithReference(rabbitMq, "rabbitMQ")
         .WithReference(redis, "redis");
-
+    
+    resourceBuilder
+        .WithEnvironment("RabbitMQ:Hostname", () => rabbitMqUri != null ? isDocker ? $"{SubstituteLocalhost(rabbitMqUri.Host)}" : rabbitMqUri.Host : "")
+        .WithEnvironment("RabbitMQ:Port", () => rabbitMqUri != null ? $"{rabbitMqUri.Port}" : "")
+        .WithEnvironment("RabbitMQ:UserName", () => rabbitMqUri != null ? $"{rabbitMqUri.UserInfo.Split(':')[0]}" : "")
+        .WithEnvironment("RabbitMQ:Password", () => rabbitMqUri != null ? $"{rabbitMqUri.UserInfo.Split(':')[1]}" : "")
+        .WithEnvironment("RabbitMQ:VirtualHost", () => rabbitMqUri != null ? $"{rabbitMqUri.PathAndQuery}" : "");
+    
     AddWaitFor(resourceBuilder);
 }
 
@@ -368,17 +374,17 @@ void AddWaitFor<T>(IResourceBuilder<T> resourceBuilder, bool includeMigrate = tr
 void AddIdentityEnv<T>(IResourceBuilder<T> resourceBuilder) where T : ContainerResource
 {
     resourceBuilder
-        .WithEnvironment("JDBC_URL", () => mySqlConnectionStringBuilder != null ? $"{mySqlConnectionStringBuilder.Server.Replace("localhost", "host.docker.internal")}:{mySqlConnectionStringBuilder.Port}" : string.Empty)
+        .WithEnvironment("JDBC_URL", () => mySqlConnectionStringBuilder != null ? $"{SubstituteLocalhost(mySqlConnectionStringBuilder.Server)}:{mySqlConnectionStringBuilder.Port}" : string.Empty)
         .WithEnvironment("JDBC_DATABASE", () => mySqlConnectionStringBuilder != null ? $"{mySqlConnectionStringBuilder.Database}" : string.Empty)
         .WithEnvironment("JDBC_USER_NAME", () => mySqlConnectionStringBuilder != null ? $"{mySqlConnectionStringBuilder.UserID}" : string.Empty)
         .WithEnvironment("JDBC_PASSWORD", () => mySqlConnectionStringBuilder != null ? $"{mySqlConnectionStringBuilder.Password}" : string.Empty);
 
     resourceBuilder
-        .WithEnvironment("RABBIT_HOST", () => rabbitMqUri != null ? $"{rabbitMqUri.Host.Replace("localhost", "host.docker.internal")}" : string.Empty)
-        .WithEnvironment("RABBIT_URI", () => rabbitMqUri != null ? rabbitMqUri.ToString().Replace("localhost", "host.docker.internal") : string.Empty);
+        .WithEnvironment("RABBIT_HOST", () => rabbitMqUri != null ? $"{SubstituteLocalhost(rabbitMqUri.Host)}" : string.Empty)
+        .WithEnvironment("RABBIT_URI", () => rabbitMqUri != null ? $"{SubstituteLocalhost(rabbitMqUri.ToString())}" : string.Empty);
 
     resourceBuilder
-        .WithEnvironment("REDIS_HOST", () => redisHost?.Replace("localhost", "host.docker.internal") ?? string.Empty)
+        .WithEnvironment("REDIS_HOST", () => SubstituteLocalhost(redisHost) ?? string.Empty)
         .WithEnvironment("REDIS_PORT", () => redisPort ?? string.Empty);
 
     AddWaitFor(resourceBuilder, includeEditors: false);
@@ -391,4 +397,9 @@ void AddBaseBind<T>(IResourceBuilder<T> resourceBuilder) where T : ContainerReso
         .WithBindMount(Path.Combine(basePath, "Data"), "/data")
         .WithBindMount(Path.Combine(basePath, "Logs"), "/logs")
         .WithEnvironment("log:dir", "/logs");
+}
+
+string? SubstituteLocalhost(string? host)
+{
+    return host?.Replace("localhost", hostDockerInternal);
 }

@@ -94,7 +94,7 @@ public static class CustomHealthCheck
     {
         var rabbitMQConfiguration = configuration.GetSection("RabbitMQ").Get<RabbitMQSettings>();
 
-        if (rabbitMQConfiguration != null || !string.IsNullOrEmpty(configuration.GetConnectionString("rabbitMQ")))
+        if (rabbitMQConfiguration != null)
         {
             hcBuilder.AddRabbitMQ(async sp => {
                                         var rabbitMqPersistentConnection = sp.GetRequiredService<IRabbitMQPersistentConnection>();
