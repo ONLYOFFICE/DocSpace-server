@@ -104,7 +104,6 @@ builder.Eventing.Subscribe(redis.Resource, (Func<ConnectionStringAvailableEvent,
 var editorsContainer = "asc-editors";
 var editors = builder
     .AddContainer(editorsContainer, "onlyoffice/documentserver", "latest")
-    .WithHttpEndpoint(editorPort, 80)
     .WithEnvironment("JWT_ENABLED", "true")
     .WithEnvironment("JWT_SECRET", "secret")
     .WithEnvironment("JWT_HEADER", "AuthorizationJwt");
@@ -234,6 +233,7 @@ var dict = new Dictionary<string, string>
 {
     {"client_service_env", $"http://{hostDockerInternal}:5001"},
     {"doceditor_service_env", $"http://{hostDockerInternal}:5013"},
+    {"doceditor_env", $"http://{editorsContainer}"},
     {"management_service_env", $"http://{hostDockerInternal}:5015"},
     {"people_service_env", isDocker ? $"http://{GetProjectName<ASC_People>()}:{peoplePort}" : $"http://{hostDockerInternal}:{peoplePort}"},
     {"files_service_env", isDocker ? $"http://{GetProjectName<ASC_Files>()}:{filesPort}" : $"http://{hostDockerInternal}:{filesPort}"},
@@ -332,8 +332,14 @@ void AddBaseConfig<T>(IResourceBuilder<T> resourceBuilder, bool includeHealthChe
     resourceBuilder
         .WithEnvironment("openTelemetry:enable", "true")
         .WithEnvironment("files:docservice:url:portal", $"http://host.docker.internal:{restyPort.ToString()}")
-        .WithEnvironment("files:docservice:url:public", $"http://localhost:{editorPort.ToString()}")
+        .WithEnvironment("files:docservice:url:public", $"http://localhost:{restyPort.ToString()}/ds-vpath")
         .WithReference(mySql, "default:connectionString");
+
+    if (isDocker)
+    {
+        resourceBuilder
+            .WithEnvironment("files:docservice:url:internal", $"http://{editorsContainer}");
+    }
     
     resourceBuilder
         .WithEnvironment("RabbitMQ:Hostname", () => rabbitMqUri != null ? isDocker ? $"{SubstituteLocalhost(rabbitMqUri.Host)}" : rabbitMqUri.Host : "")
