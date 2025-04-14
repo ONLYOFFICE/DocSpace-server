@@ -237,6 +237,7 @@ public class ProviderInfoHelper
             var tags = new List<string>
             {
                 CacheExtention.GetProviderTag(selector, id),
+                CacheExtention.GetProviderFolderTag(selector, id, folderId),
                 CacheExtention.GetProviderFolderItemsTag(selector, id, folderId),
             };
 
