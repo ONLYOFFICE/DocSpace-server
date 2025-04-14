@@ -30,7 +30,6 @@ using MySqlConnector;
 
 using Projects;
 
-var editorPort = Random.Shared.Next(8086, 8090);
 const int restyPort = 8092;
 const int socketIoPort = 9899;
 const int ssoAuthPort = 9834;
@@ -44,6 +43,7 @@ const int apiSystemPort = 5010;
 const int backupPort = 5012;
 const int webstudioPort = 5003;
 const string hostDockerInternal = "host.docker.internal";
+const string openRestyContainer = "asc-openresty";
 
 var builder = DistributedApplication.CreateBuilder(args);
 
@@ -135,7 +135,8 @@ if (isDocker)
     var socketIoResourceBuilder = builder
         .AddDockerfile(ascSocketio, "../ASC.Socket.IO/")
         .WithImageTag("dev")
-        .WithEnvironment("log:name", "socketIO")
+        .WithEnvironment("log:name", "socketIO")   
+        .WithEnvironment("basePath", $"http://{openRestyContainer}:{restyPort.ToString()}")
         .WithReference(redis, "redis")
         .WithHttpEndpoint(socketIoPort, socketIoPort, isProxied: false)
         .WithHttpHealthCheck("/health");
@@ -175,9 +176,18 @@ else
     AddProjectWithDefaultConfiguration<ASC_Studio_Notify>();
     AddProjectWithDefaultConfiguration<ASC_Web_Studio>();
 
-    builder.AddNpmApp(ascSocketio, "../ASC.Socket.IO/", "start:build").WithReference(redis, "redis").WithHttpEndpoint(targetPort: socketIoPort).WithHttpHealthCheck("/health");
-    builder.AddNpmApp("asc-ssoAuth", "../ASC.SSoAuth/", "start:build").WithHttpEndpoint(targetPort: 9834).WithHttpHealthCheck("/health");
-    builder.AddNpmApp("asc-webDav", "../ASC.WebDav/", "start:build").WithHttpEndpoint(targetPort: 1900).WithHttpHealthCheck("/health");
+    builder.AddNpmApp(ascSocketio, "../ASC.Socket.IO/", "start:build")
+        .WithReference(redis, "redis")
+        .WithHttpEndpoint(targetPort: socketIoPort)
+        .WithHttpHealthCheck("/health");
+    
+    builder.AddNpmApp("asc-ssoAuth", "../ASC.SSoAuth/", "start:build")
+        .WithHttpEndpoint(targetPort: 9834)
+        .WithHttpHealthCheck("/health");
+    
+    builder.AddNpmApp("asc-webDav", "../ASC.WebDav/", "start:build")
+        .WithHttpEndpoint(targetPort: 1900)
+        .WithHttpHealthCheck("/health");
 }
 
 var ascIdentityRegistration = "asc-identity-registration";
@@ -218,7 +228,7 @@ var startPackages = builder.AddExecutable("asc-start-packages", "yarn", clientBa
 installPackages.WithRelationship(buildPackages.Resource, "Parent");
 buildPackages.WithRelationship(startPackages.Resource, "Parent");
 
-var openResty = builder.AddContainer("asc-openresty", "openresty/openresty", "latest")
+var openResty = builder.AddContainer(openRestyContainer, "openresty/openresty", "latest")
     .WithBindMount(Path.Combine(basePath, "buildtools", "config", "nginx"), "/etc/nginx/conf.d/")
     .WithBindMount(Path.Combine(basePath, "buildtools", "config", "nginx", "includes"), "/etc/nginx/includes/")
     .WithBindMount(Path.Combine(basePath, "buildtools", "install", "docker", "config", "nginx", "templates"), "/etc/nginx/templates/")
