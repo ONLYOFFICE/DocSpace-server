@@ -872,7 +872,7 @@
     <value>Ponownie wysłane zaproszenie: {0}</value>
   </data>
   <data name="ApiKeyCreated" xml:space="preserve">
-    <value>Utworzono klucz api użytkownika: {0}</value>
+    <value>Utworzono klucz API użytkownika: {0}</value>
   </data>
   <data name="ApiKeyDeleted" xml:space="preserve">
     <value>Usunięto klucz API użytkownika: {0}</value>

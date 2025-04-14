@@ -235,4 +235,62 @@ $OrangeButton</value>
   <data name="subject_FormSubmitted" xml:space="preserve">
     <value>إشعار DocSpace. تم تعبئة النموذج</value>
   </data>
+  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
+    <value>تم إنشاء مستند جديد "$DocumentTitle" في الغرفة "$RoomTitle"</value>
+  </data>
+  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
+    <value>تم رفع ملفات جديدة إلى الغرفة "$RoomTitle" ($Count)</value>
+  </data>
+  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
+    <value>تم رفع ملف جديد "$DocumentTitle" إلى الغرفة "$RoomTitle"</value>
+  </data>
+  <data name="pattern_EditorMentions_push" xml:space="preserve">
+    <value>$ToUserName أشار إليكم في المستند $DocumentTitle</value>
+  </data>
+  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
+    <value>تم إنشاء مجلد جديد "$FolderTitle" في الغرفة "$RoomTitle"</value>
+  </data>
+  <data name="pattern_FormStartedFilling" xml:space="preserve">
+    <value>
+      إشعار نشاط. "$FromUserName":"$FromUserLink" بدأ تعبئة النموذج: "$DocumentTitle":"$DocumentURL" في الغرفة: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_FormSubmitted_push" xml:space="preserve">
+    <value>تمت تعبئة النموذج "$DocumentTitle" في الغرفة "$RoomTitle"</value>
+  </data>
+  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
+    <value>
+      إشعار نشاط. تم إكمال تعبئة النموذج "$DocumentTitle":"$DocumentURL" في الغرفة: "$RoomTitle":"$RoomURL" — $__DateTime
+    </value>
+  </data>
+  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
+    <value>لقد تمت دعوتك إلى الغرفة "$RoomTitle"</value>
+  </data>
+  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
+    <value>$FromUserName نقل الغرفة "$RoomTitle" إلى الأرشيف</value>
+  </data>
+  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
+    <value>تم تغيير دوركم في الغرفة "$RoomTitle" إلى "$RoomRole"</value>
+  </data>
+  <data name="pattern_StoppedFormFilling" xml:space="preserve">
+    <value>
+      إشعار نشاط. "$FromUserName":"$FromUserLink" توقف عن تعبئة النموذج: "$DocumentTitle":"$DocumentURL" في الغرفة: "$RoomTitle":"$RoomURL" — $__DateTime
+    </value>
+  </data>
+  <data name="pattern_YourTurnFormFilling" xml:space="preserve">
+    <value>
+      إشعار نشاط. دوركم الآن! يجب تعبئة النموذج: "$DocumentTitle":"$DocumentURL" في الغرفة: "$RoomTitle":"$RoomURL" — $__DateTime</value>
+  </data>
+  <data name="subject_FormStartedFilling" xml:space="preserve">
+    <value>إشعار "DocSpace".</value>
+  </data>
+  <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
+    <value>إشعار "DocSpace".</value>
+  </data>
+  <data name="subject_StoppedFormFilling" xml:space="preserve">
+    <value>إشعار "DocSpace".</value>
+  </data>
+  <data name="subject_YourTurnFormFilling" xml:space="preserve">
+    <value>إشعار "DocSpace".</value>
+  </data>
 </root>

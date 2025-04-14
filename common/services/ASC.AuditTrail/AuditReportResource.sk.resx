@@ -872,13 +872,13 @@
     <value>Klient {0} aktualizovaný</value>
   </data>
   <data name="ApiKeyCreated" xml:space="preserve">
-    <value>Vytvorený kľúč používateľa Api: {0}</value>
+    <value>Vytvorený kľúč používateľa API: {0}</value>
   </data>
   <data name="ApiKeyDeleted" xml:space="preserve">
-    <value>Odstránený kľúč používateľa Api: {0}</value>
+    <value>Odstránený kľúč používateľa API: {0}</value>
   </data>
   <data name="ApiKeyUpdated" xml:space="preserve">
-    <value>Kľúč používateľa Api aktualizovaný: {0}</value>
+    <value>Kľúč používateľa API aktualizovaný: {0}</value>
   </data>
   <data name="FormCompletelyFilled" xml:space="preserve">
     <value>Používatelia [{0}]. Vyplnený formulár: {1}</value>

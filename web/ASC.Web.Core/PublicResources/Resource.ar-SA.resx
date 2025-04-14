@@ -1137,4 +1137,7 @@
   <data name="Tariffs_nonprofit" xml:space="preserve">
     <value>غير ربحية</value>
   </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>تعذّر الوصول إلى رابط "Webhook" لأن طلب "HEAD" لم يُرجِع رمز الحالة 200.</value>
+  </data>
 </root>

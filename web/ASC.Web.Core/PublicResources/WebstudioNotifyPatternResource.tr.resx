@@ -1469,7 +1469,7 @@ Bağlantı yalnızca 7 gün boyunca geçerlidir.</value>
     <value>${LetterLogoText}. Şifreleme işlemi tamamlandı</value>
   </data>
   <data name="subject_user_ldap_activation" xml:space="preserve">
-    <value>Davetlisiniz:  ${__VirtualRootHost}</value>
+    <value>Davetlisiniz: ${__VirtualRootHost}</value>
   </data>
   <data name="subject_saas_video_guides_v1" xml:space="preserve">
     <value>Video kılavuzlarıyla ${LetterLogoText} DocSpace'de ustalaşın</value>

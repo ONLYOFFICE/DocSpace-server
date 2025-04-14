@@ -142,7 +142,7 @@ $OrangeButton
 Este enlace es válido sólo por 7 días. Por favor, complete la activación dentro de este periodo.</value>
   </data>
   <data name="pattern_backup_created" xml:space="preserve">
-    <value>h1.Copia de seguridad del portal "${__VirtualRootPath}":"${__VirtualRootPath}"
+    <value>h1.Copia de seguridad del portal "${__VirtualRootPath}":"${__VirtualRootPath}" creada
 
 Buenos días $OwnerName,
 

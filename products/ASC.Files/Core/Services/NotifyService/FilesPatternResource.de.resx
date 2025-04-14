@@ -232,4 +232,7 @@ $OrangeButton</value>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
     <value>DocSpace-Benachrichtigung.</value>
   </data>
+  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
+    <value>Sie wurden in den Raum "$RoomTitle" eingeladen</value>
+  </data>
 </root>
