@@ -2471,7 +2471,7 @@ public class UserControllerAdditional<T>(
     {
         var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(inDto.Id)).NotFoundIfNull();
 
-        if (!await fileSecurity.CanEditAccessAsync(room))
+        if (!await fileSecurity.CanReadAsync(room))
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }

@@ -4898,7 +4898,7 @@ public class FileStorageService //: IFileStorageService
         {
             throw new InvalidOperationException();
         }
-        if (!await fileSecurity.CanEditRoomAsync(form))
+        if (!await fileSecurity.CanStartFillingAsync(form, authContext.CurrentAccount.ID))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
@@ -4909,10 +4909,6 @@ public class FileStorageService //: IFileStorageService
         if (currentRoom == null)
         {
             throw new InvalidOperationException();
-        }
-        if (!await fileSecurity.CanEditRoomAsync(currentRoom))
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
         }
     }
     private Exception GenerateException(Exception error, bool warning = false)

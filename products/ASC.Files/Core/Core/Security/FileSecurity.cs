@@ -302,6 +302,10 @@ public class FileSecurity(IDaoFactory daoFactory,
     {
         return await CanAsync(entry, userId, FilesSecurityActions.FillForms);
     }
+    public async Task<bool> CanStartFillingAsync<T>(FileEntry<T> entry, Guid userId)
+    {
+        return await CanAsync(entry, userId, FilesSecurityActions.StartFilling);
+    }
 
     public async Task<bool> CanFillFormsAsync<T>(FileEntry<T> entry)
     {
@@ -1211,7 +1215,9 @@ public class FileSecurity(IDaoFactory daoFactory,
                         var formFilling = properties?.FormFilling;
 
                         var userHasFullAccess = await HasFullAccessAsync(e, userId, isGuest, isRoom, isUser);
-                        var hasFullAccessToForm = userHasFullAccess || e.Access is FileShare.RoomManager or FileShare.ContentCreator;
+
+                        var shareRecord = await GetPureSharesAsync(room, new List<Guid> { userId }).FirstOrDefaultAsync();
+                        var hasFullAccessToForm = userHasFullAccess || (shareRecord != null && shareRecord.Share is FileShare.RoomManager or FileShare.ContentCreator);
                         var IsFillingStoped = formFilling?.FillingStopedDate != null && !DateTime.MinValue.Equals(formFilling?.FillingStopedDate);
                         return action switch
                         {
@@ -1222,7 +1228,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                                 hasFullAccessToForm && formFilling?.StartFilling == true && !IsFillingStoped && currentStep > 0,
 
                             FilesSecurityActions.StartFilling =>
-                                hasFullAccessToForm && (formFilling?.StartFilling == false || formFilling?.StartFilling == null),
+                                hasFullAccessToForm && (formFilling == null || formFilling?.StartFilling == false || formFilling?.StartFilling == null),
 
                             FilesSecurityActions.FillForms =>
                                 !IsFillingStoped && myRoles.Any(),
