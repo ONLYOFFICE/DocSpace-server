@@ -33,16 +33,13 @@ class TenantServiceCache
     private readonly TimeSpan _cacheExpiration;
     internal readonly ICache Cache;
     internal readonly ICacheNotify<TenantCacheItem> CacheNotifyItem;
-    internal readonly ICacheNotify<TenantSetting> CacheNotifySettings;
 
     public TenantServiceCache(
         CoreBaseSettings coreBaseSettings,
         ICacheNotify<TenantCacheItem> cacheNotifyItem,
-        ICacheNotify<TenantSetting> cacheNotifySettings,
         ICache cache)
     {
         CacheNotifyItem = cacheNotifyItem;
-        CacheNotifySettings = cacheNotifySettings;
         Cache = cache;
         _cacheExpiration = TimeSpan.FromMinutes(2);
 
@@ -52,11 +49,6 @@ class TenantServiceCache
             tenants.Remove(t.TenantId);
             tenants.Clear(coreBaseSettings);
         }, CacheNotifyAction.InsertOrUpdate);
-
-        cacheNotifySettings.Subscribe(s =>
-        {
-            Cache.Remove(s.Key);
-        }, CacheNotifyAction.Remove);
     }
 
     internal TenantStore GetTenantStore()
@@ -165,19 +157,19 @@ class TenantServiceCache
 class CachedTenantService() : ITenantService
 {
     private readonly DbTenantService _service;
-    private readonly ICacheNotify<TenantSetting> _cacheNotifySettings;
     private readonly ICacheNotify<TenantCacheItem> _cacheNotifyItem;
     private readonly TenantServiceCache _tenantServiceCache;
     private static readonly TimeSpan _settingsExpiration = TimeSpan.FromMinutes(2);
     private readonly ICache _cache;
+    private readonly IFusionCache _fusionCache;
 
-    public CachedTenantService(DbTenantService service, TenantServiceCache tenantServiceCache, ICache cache) : this()
+    public CachedTenantService(DbTenantService service, TenantServiceCache tenantServiceCache, ICache cache, IFusionCacheProvider cacheProvider) : this()
     {
         _cache = cache;
+        _fusionCache = cacheProvider.GetMemoryCache();
         _service = service ?? throw new ArgumentNullException(nameof(service));
         _tenantServiceCache = tenantServiceCache;
         _cacheNotifyItem = tenantServiceCache.CacheNotifyItem;
-        _cacheNotifySettings = tenantServiceCache.CacheNotifySettings;
     }
 
     public async Task ValidateDomainAsync(string domain)
@@ -321,13 +313,13 @@ class CachedTenantService() : ITenantService
     public async Task<byte[]> GetTenantSettingsAsync(int tenant, string key)
     {
         var cacheKey = GetCacheKey(tenant, key);
-        var data = _cache.Get<byte[]>(cacheKey);
-        if (data == null)
-        {
-            data = await _service.GetTenantSettingsAsync(tenant, key);
 
-            _cache.Insert(cacheKey, data ?? [], DateTime.UtcNow + _settingsExpiration);
-        }
+        var data = await _fusionCache.GetOrSetAsync<byte[]>(cacheKey, async (ctx, token) =>
+        {
+            var data = await _service.GetTenantSettingsAsync(tenant, key);
+
+            return ctx.Modified(data);
+        }, opt => opt.SetDuration(_settingsExpiration).SetFailSafe(true), [CacheExtention.GetTenantSettingsTag(tenant, key)]);
 
         return data == null ? null : data.Length == 0 ? null : data;
     }
@@ -335,13 +327,12 @@ class CachedTenantService() : ITenantService
     public byte[] GetTenantSettings(int tenant, string key)
     {
         var cacheKey = GetCacheKey(tenant, key);
-        var data = _cache.Get<byte[]>(cacheKey);
-        if (data == null)
+        var data = _fusionCache.GetOrSet<byte[]>(cacheKey, (ctx, token) =>
         {
-            data = _service.GetTenantSettings(tenant, key);
+            var data = _service.GetTenantSettings(tenant, key);
 
-            _cache.Insert(cacheKey, data ?? [], DateTime.UtcNow + _settingsExpiration);
-        }
+            return ctx.Modified(data);
+        }, opt => opt.SetDuration(_settingsExpiration).SetFailSafe(true), [CacheExtention.GetTenantSettingsTag(tenant, key)]);
 
         return data == null ? null : data.Length == 0 ? null : data;
     }
@@ -349,9 +340,8 @@ class CachedTenantService() : ITenantService
     public async Task SetTenantSettingsAsync(int tenant, string key, byte[] data)
     {
         await _service.SetTenantSettingsAsync(tenant, key, data);
-        var cacheKey = GetCacheKey(tenant, key);
-
-        await _cacheNotifySettings.PublishAsync(new TenantSetting { Key = cacheKey }, CacheNotifyAction.Remove);
+        var tag = CacheExtention.GetTenantSettingsTag(tenant, key);
+        _fusionCache.RemoveByTagAsync(tag);
     }
 
     private string GetCacheKey(int tenant, string key)

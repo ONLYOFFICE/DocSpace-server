@@ -112,4 +112,9 @@ public static class CacheExtention
     {
         return $"webItem-{tenant}";
     }
+
+    public static string GetTenantSettingsTag(int tenant, string key)
+    {
+        return $"settings-{tenant}-{key}";
+    }
 }
