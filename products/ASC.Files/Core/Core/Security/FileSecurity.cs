@@ -878,7 +878,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         var file = e as File<T>;
         var folder = e as Folder<T>;
         var isRoom = folder != null && DocSpaceHelper.IsRoom(folder.FolderType);
-
+        var fileDao = daoFactory.GetFileDao<T>();
         if (file != null &&
             action == FilesSecurityActions.FillForms &&
             !file.IsForm)
@@ -1082,7 +1082,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 }
             }
         }
-        if (file == null || (file != null && !file.IsForm) || (file != null && file.IsForm && e.RootFolderType != FolderType.VirtualRooms))
+        if (file == null || (file != null && !await DocSpaceHelper.IsFormOrCompletedForm(file, fileDao)) || (file != null && file.IsForm && e.RootFolderType != FolderType.VirtualRooms))
         {
             switch (action)
             {
@@ -1196,8 +1196,6 @@ public class FileSecurity(IDaoFactory daoFactory,
                     }
                 }
 
-
-                var fileDao = daoFactory.GetFileDao<T>();
                 if (file != null && await DocSpaceHelper.IsFormOrCompletedForm(file, fileDao) && (action is
                     FilesSecurityActions.FillForms or
                     FilesSecurityActions.Edit or

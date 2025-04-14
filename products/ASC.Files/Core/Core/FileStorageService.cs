@@ -4820,7 +4820,7 @@ public class FileStorageService //: IFileStorageService
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
-        if (!form.IsForm)
+        if (!await DocSpaceHelper.IsFormOrCompletedForm(form, fileDao))
         {
             throw new InvalidOperationException();
         }
