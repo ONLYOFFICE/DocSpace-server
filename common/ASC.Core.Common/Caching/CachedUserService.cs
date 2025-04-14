@@ -118,11 +118,6 @@ public class CachedUserService : IUserService
         var key = GetUserCacheKey(tenant, id);
         var user = _cache.GetOrSet<UserInfo>(key, (ctx, token) =>
         {
-            if (ctx is { HasStaleValue: true, HasLastModified: true })
-            {
-                return ctx.NotModified();
-            }
-
             var user = _service.GetUser(tenant, id);
 
             return ctx.Modified(user, lastModified: DateTime.UtcNow);
@@ -296,11 +291,6 @@ public class CachedUserService : IUserService
 
         var groupRef = await _cache.GetOrSetAsync<UserGroupRef>(key, async (ctx, token) =>
         {
-            if (ctx is { HasStaleValue: true, HasLastModified: true })
-            {
-                return ctx.NotModified();
-            }
-
             var groupRef = await _service.GetUserGroupRefAsync(tenant, groupId, refType);
 
             ctx.Tags = [CacheExtention.GetGroupRefTag(tenant, groupId, groupRef.UserId), CacheExtention.GetGroupTag(tenant, groupId)];
