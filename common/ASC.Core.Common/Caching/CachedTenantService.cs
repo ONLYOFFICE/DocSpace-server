@@ -341,7 +341,7 @@ class CachedTenantService() : ITenantService
     {
         await _service.SetTenantSettingsAsync(tenant, key, data);
         var tag = CacheExtention.GetTenantSettingsTag(tenant, key);
-        _fusionCache.RemoveByTagAsync(tag);
+        await _fusionCache.RemoveByTagAsync(tag);
     }
 
     private string GetCacheKey(int tenant, string key)
