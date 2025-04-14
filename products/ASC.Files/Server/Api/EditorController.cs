@@ -218,7 +218,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
 
             if (formOpenSetup.RootFolder.FolderType is FolderType.VirtualDataRoom)
             {
-                result.StartFilling = result.Document.Permissions.Rename;
+                result.StartFilling = file.Security[FileSecurity.FilesSecurityActions.StartFilling];
                 result.StartFillingMode = StartFillingMode.StartFilling;
                 result.Document.ReferenceData.RoomId = formOpenSetup.RootFolder.Id.ToString();
 
