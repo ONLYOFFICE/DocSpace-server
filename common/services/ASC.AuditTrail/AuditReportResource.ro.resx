@@ -957,4 +957,19 @@
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Webhook a fost actualizat {0}</value>
   </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>Cheie API pentru utilizator a fost creată: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>Cheie API pentru utilizator a fost eliminată: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>Cheie API pentru utilizator a fost actualizată: {0}</value>
+  </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>Fișierul: {0}. Filtrul personalizat a fost dezactivat</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>Fișierul: {0}. Filtrul personalizat a fost activat</value>
+  </data>
 </root>

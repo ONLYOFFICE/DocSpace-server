@@ -264,7 +264,7 @@ $OrangeButton</value>
     </value>
   </data>
   <data name="pattern_InvitedToRoom_push" xml:space="preserve">
-    <value>Դուք հրավիրվել եք "$RoomTitle" սենյակ</value>
+    <value>Դուք հրավիրվել եք "$RoomTitle" սենյակ։</value>
   </data>
   <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
     <value>$FromUserName տեղափոխել է "$RoomTitle" արխիվ</value>

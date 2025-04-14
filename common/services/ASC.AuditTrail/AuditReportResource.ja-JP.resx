@@ -898,4 +898,19 @@
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Webhookが更新されました：{0}</value>
   </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>ユーザーAPIキーが作成されました：{0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>ユーザーAPIキーが削除されました：{0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>ユーザーAPIキーが更新されました：{0}</value>
+  </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>ファイル：{0}。カスタムフィルタは無効です</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>ファイル：{0}。カスタムフィルタは有効です</value>
+  </data>
 </root>

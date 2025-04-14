@@ -878,7 +878,7 @@
     <value>Arquivo: {0}. Filtro personalizado desativado</value>
   </data>
   <data name="FileCustomFilterEnabled" xml:space="preserve">
-    <value>Arquivo: {0}. Filtro personalizado ativado</value>
+    <value>Arquivo: {0}. Filtro personalizado habilitado</value>
   </data>
   <data name="ApiKeyCreated" xml:space="preserve">
     <value>Chave de API do usuário criada: {0}</value>

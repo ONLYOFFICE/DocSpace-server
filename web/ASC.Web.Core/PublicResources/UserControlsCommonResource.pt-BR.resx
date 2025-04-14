@@ -83,6 +83,6 @@
     <value>Sobrenome</value>
   </data>
   <data name="LicenseTypeNotCorrect" xml:space="preserve">
-    <value>Conflito de licença. Verifique se você instalou a edição correta do {0} DocSpace (Enterprise ou Developer). Se tiver alguma dúvida, entre em contato com o seu gerente de vendas.</value>
+    <value>Conflito de Licença. Certifique-se de ter instalado a edição correta do DocSpace {0} (Enterprise ou Developer). Em caso de dúvidas, entre em contato com seu gerente de vendas.</value>
   </data>
 </root>
