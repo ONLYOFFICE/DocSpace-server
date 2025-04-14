@@ -680,6 +680,10 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         {
             result.EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
         }
+        else
+        {
+            result.EditorType = editorType;
+        }
         return result;
     }
 }
