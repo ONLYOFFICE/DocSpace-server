@@ -4755,6 +4755,12 @@ public class FileStorageService //: IFileStorageService
 
         await ValidateChangeRolesPermission(form);
 
+        if ((roles?.Any() == false && !await fileSecurity.CanResetFillingAsync(form, authContext.CurrentAccount.ID)) ||
+            (roles?.Any() == true && !await fileSecurity.CanStartFillingAsync(form, authContext.CurrentAccount.ID)))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
+        }
+
         await fileDao.SaveFormRoleMapping(formId, roles);
 
         var properties = await fileDao.GetProperties(formId) ?? new EntryProperties<T> { FormFilling = new FormFillingProperties<T>() };
@@ -4858,6 +4864,10 @@ public class FileStorageService //: IFileStorageService
         switch (action)
         {
             case FormFillingManageAction.Stop:
+                if (!await fileSecurity.CanStopFillingAsync(form, authContext.CurrentAccount.ID))
+                {
+                    throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
+                }
                 var role = await fileDao.GetFormRoles(formId).Where(r => r.Submitted == false).FirstOrDefaultAsync();
                 properties.FormFilling.FillingStopedDate = DateTime.UtcNow;
                 properties.FormFilling.FormFillingInterruption =
@@ -4898,10 +4908,7 @@ public class FileStorageService //: IFileStorageService
         {
             throw new InvalidOperationException();
         }
-        if (!await fileSecurity.CanStartFillingAsync(form, authContext.CurrentAccount.ID))
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
-        }
+
 
         var folderDao = daoFactory.GetFolderDao<T>();
         var currentRoom = await DocSpaceHelper.GetParentRoom(form, folderDao);

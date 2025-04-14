@@ -306,6 +306,14 @@ public class FileSecurity(IDaoFactory daoFactory,
     {
         return await CanAsync(entry, userId, FilesSecurityActions.StartFilling);
     }
+    public async Task<bool> CanStopFillingAsync<T>(FileEntry<T> entry, Guid userId)
+    {
+        return await CanAsync(entry, userId, FilesSecurityActions.StopFilling);
+    }
+    public async Task<bool> CanResetFillingAsync<T>(FileEntry<T> entry, Guid userId)
+    {
+        return await CanAsync(entry, userId, FilesSecurityActions.ResetFilling);
+    }
 
     public async Task<bool> CanFillFormsAsync<T>(FileEntry<T> entry)
     {
@@ -1217,15 +1225,16 @@ public class FileSecurity(IDaoFactory daoFactory,
                         var userHasFullAccess = await HasFullAccessAsync(e, userId, isGuest, isRoom, isUser);
 
                         var shareRecord = await GetPureSharesAsync(room, new List<Guid> { userId }).FirstOrDefaultAsync();
-                        var hasFullAccessToForm = userHasFullAccess || (shareRecord != null && shareRecord.Share is FileShare.RoomManager or FileShare.ContentCreator);
+                        var hasFullAccessToForm = userHasFullAccess || (shareRecord is { Share: FileShare.ContentCreator or FileShare.RoomManager});
+
                         var IsFillingStoped = formFilling?.FillingStopedDate != null && !DateTime.MinValue.Equals(formFilling?.FillingStopedDate);
                         return action switch
                         {
                             FilesSecurityActions.ResetFilling =>
-                                hasFullAccessToForm && formFilling?.StartFilling == true && IsFillingStoped,
+                                (userHasFullAccess || shareRecord is { Share: FileShare.RoomManager } || (shareRecord is { Share: FileShare.ContentCreator }) && file.CreateBy.Equals(userId)) && formFilling?.StartFilling == true && IsFillingStoped,
 
                             FilesSecurityActions.StopFilling =>
-                                hasFullAccessToForm && formFilling?.StartFilling == true && !IsFillingStoped && currentStep > 0,
+                                (userHasFullAccess || shareRecord is { Share: FileShare.RoomManager } || (shareRecord is { Share: FileShare.ContentCreator }) && file.CreateBy.Equals(userId)) && formFilling?.StartFilling == true && !IsFillingStoped && currentStep > 0,
 
                             FilesSecurityActions.StartFilling =>
                                 hasFullAccessToForm && (formFilling == null || formFilling?.StartFilling == false || formFilling?.StartFilling == null),
