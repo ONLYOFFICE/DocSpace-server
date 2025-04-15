@@ -80,6 +80,11 @@ public class QuotaDto
     /// The tenant custom quota.
     /// </summary>
     public TenantQuotaSettings TenantCustomQuota { get; set; }
+
+    /// <summary>
+    /// The due date.
+    /// </summary>
+    public DateTime? DueDate { get; set; }
 }
 
 /// <summary>

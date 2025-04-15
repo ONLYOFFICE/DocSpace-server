@@ -63,7 +63,7 @@ static file class Queries
             (CoreDbContext ctx, int tenantId, int id) =>
                 ctx.TariffRows
                     .Where(r => r.TariffId == id && r.TenantId == tenantId)
-                    .Select(r => new Billing.Quota(r.Quota, r.Quantity)));
+                    .Select(r => new Billing.Quota(r.Quota, r.Quantity, r.DueDate)));
 
     public static readonly Func<CoreDbContext, int, Task<int>> DeleteTariffs =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((CoreDbContext ctx, int tenantId) => 

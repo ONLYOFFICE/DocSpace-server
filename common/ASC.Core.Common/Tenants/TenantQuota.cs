@@ -76,6 +76,11 @@ public class TenantQuota : IMapFrom<DbQuota>
     /// </summary>
     public bool Visible { get; set; }
 
+    /// <summary>
+    /// The quota due date.
+    /// </summary>
+    public DateTime? DueDate { get; set; }
+
     [JsonIgnore]
     public IReadOnlyList<TenantQuotaFeature> TenantQuotaFeatures { get; private set; }
 
@@ -434,6 +439,7 @@ public class TenantQuota : IMapFrom<DbQuota>
         Visible = quota.Visible;
         MaxFileSize = quota.MaxFileSize;
         Features = quota.Features;
+        DueDate = quota.DueDate;
     }
 
     public override int GetHashCode()
@@ -475,10 +481,22 @@ public class TenantQuota : IMapFrom<DbQuota>
             return quota;
         }
 
+        if (quota.DueDate.HasValue && quota.DueDate.Value < DateTime.UtcNow)
+        {
+            return old;
+        }
+
         var newQuota = new TenantQuota(old);
-        newQuota.Price += quota.Price;
+        newQuota.Price += quota.Price; // TODO: increase Price for non-subscription quota ?
         newQuota.Visible &= quota.Visible;
         newQuota.ProductId = "";
+
+        if (quota.DueDate.HasValue)
+        {
+            newQuota.DueDate = newQuota.DueDate.HasValue
+                ? DateTime.Compare(newQuota.DueDate.Value, quota.DueDate.Value) < 0 ? newQuota.DueDate.Value : quota.DueDate.Value
+                : quota.DueDate.Value;
+        }
 
         foreach (var f in newQuota.TenantQuotaFeatures)
         {

@@ -176,7 +176,7 @@ public class LicenseController(ILoggerProvider option,
 
         var tariff = new Tariff
         {
-            Quotas = [new Quota(quota.TenantId, 1)],
+            Quotas = [new Quota(quota.TenantId, 1, null)],
             DueDate = DateTime.Today.AddDays(DEFAULT_TRIAL_PERIOD)
         };
 

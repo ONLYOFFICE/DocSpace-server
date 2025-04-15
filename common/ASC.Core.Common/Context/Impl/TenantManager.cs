@@ -309,11 +309,11 @@ public class TenantManager(
             TenantQuota currentQuota = null;
             foreach (var tariffRow in tariff.Quotas)
             {
-                var qty = tariffRow.Quantity;
-
                 var quota = await quotaService.GetTenantQuotaAsync(tariffRow.Id);
 
-                quota *= qty;
+                quota.DueDate = tariffRow.DueDate;
+                quota *= tariffRow.Quantity;
+
                 currentQuota += quota;
             }
 

@@ -74,7 +74,8 @@ public class QuotaHelper(
                 CurrencySymbol = quota.PriceCurrencySymbol
             },
 
-            Features = features
+            Features = features,
+            DueDate = quota.DueDate
         };
 
         if (coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Statistic)

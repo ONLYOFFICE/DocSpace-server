@@ -160,6 +160,16 @@ public static class DbQuotaExtension
                     Price = 200,
                     ProductId = "1009",
                     Visible = true
+                },
+                new DbQuota
+                {
+                    TenantId = -11,
+                    Name = "storage",
+                    Description = null,
+                    Features = "total_size:107374182400",
+                    Price = 30,
+                    ProductId = "1011",
+                    Visible = false
                 }
                 );
         return modelBuilder;

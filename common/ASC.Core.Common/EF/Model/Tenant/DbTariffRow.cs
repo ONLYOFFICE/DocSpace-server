@@ -32,6 +32,7 @@ public class DbTariffRow : BaseEntity
     public int Quota { get; set; }
     public int Quantity { get; set; }
     public int TenantId { get; set; }
+    public DateTime? DueDate { get; set; }
 
     public DbTenant Tenant { get; set; }
 
@@ -77,6 +78,10 @@ public static class DbTariffRowExtension
             entity.Property(e => e.TenantId)
                 .HasColumnName("tenant")
                 .HasColumnType("int");
+
+            entity.Property(e => e.DueDate)
+                .HasColumnName("due_date")
+                .HasColumnType("datetime");
         });
     }
 
@@ -104,6 +109,10 @@ public static class DbTariffRowExtension
             entity.Property(e => e.TenantId)
                 .HasColumnName("tenant")
                 .HasColumnType("integer");
+
+            entity.Property(e => e.DueDate)
+                .HasColumnName("due_date")
+                .HasColumnType("timestamptz");
         });
     }
 }
