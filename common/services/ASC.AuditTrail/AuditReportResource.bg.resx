@@ -871,4 +871,46 @@
   <data name="UpdateClient" xml:space="preserve">
     <value>Клиент {0} е актуализиран</value>
   </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>Настройката за достъп до Програмните инструменти е променена</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>Файлове [{0}]. Изтрита версия: {1}</value>
+  </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>Потребители [{0}]. Напълно попълнили формуляр: {1}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>Потребители [{0}]. Попълнили част от формуляр: {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>Потребители [{0}]. Започнали да попълват: {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>Потребители [{0}]. Спрян формуляр: {1}</value>
+  </data>
+  <data name="WebhookCreated" xml:space="preserve">
+    <value>Уеб кукичка създадена: {0}</value>
+  </data>
+  <data name="WebhookDeleted" xml:space="preserve">
+    <value>Уеб кукичка изтрита: {0}</value>
+  </data>
+  <data name="WebhookUpdated" xml:space="preserve">
+    <value>Уеб кукичка актуализирана: {0}</value>
+  </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>Създаден е потребителски Api ключ: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>Изтрит потребителски ключ Api: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>Потребителски Api ключ актуализиран: {0}</value>
+  </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>Файл: {0}. Потребителският филтър е изключен</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>Файл: {0}. Потребителският филтър е разрешен</value>
+  </data>
 </root>

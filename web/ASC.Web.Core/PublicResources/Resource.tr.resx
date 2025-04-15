@@ -1078,4 +1078,7 @@
   <data name="ErrorIpRestriction" xml:space="preserve">
     <value>En az 1 izin verilen IP adresi ekleyin.</value>
   </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>Webhook URL’si uygun değil. HEAD isteği, bir 200 HTTP yanıtı durumu değil.</value>
+  </data>
 </root>

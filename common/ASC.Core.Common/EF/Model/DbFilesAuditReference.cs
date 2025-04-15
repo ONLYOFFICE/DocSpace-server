@@ -31,6 +31,7 @@ public class DbFilesAuditReference : BaseEntity
     public int EntryId { get; set; }
     public byte EntryType { get; set; }
     public int AuditEventId { get; set; }
+    public bool Corrupted { get; set; }
     public DbAuditEvent AuditEvent { get; set; }
     
     public override object[] GetKeys()
@@ -69,6 +70,9 @@ public static class FilesAuditReferenceExtension
 
             entity.Property(e => e.AuditEventId)
                 .HasColumnName("audit_event_id");
+            
+            entity.Property(e => e.Corrupted)
+                .HasColumnName("corrupted");
         });
     }
 
@@ -89,6 +93,9 @@ public static class FilesAuditReferenceExtension
 
             entity.Property(e => e.AuditEventId)
                 .HasColumnName("audit_event_id");
+            
+            entity.Property(e => e.Corrupted)
+                .HasColumnName("corrupted");
         });
     }
 }

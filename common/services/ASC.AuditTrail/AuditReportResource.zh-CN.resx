@@ -871,4 +871,31 @@
   <data name="UpdateClient" xml:space="preserve">
     <value>客户端 {0} 已更新</value>
   </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>已更改开发者工具访问权限设置</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>文件[{0}]的版本{1}已删除</value>
+  </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>用户[{0}]已全部完成表单填写：{1}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>用户[{0}]已部分完成表单填写：{1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>用户[{0}]已开始填写：{1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>用户[{0}]已停止表单：{1}</value>
+  </data>
+  <data name="WebhookCreated" xml:space="preserve">
+    <value>Webhook 已创建：{0}</value>
+  </data>
+  <data name="WebhookDeleted" xml:space="preserve">
+    <value>Webhook 已删除：{0}</value>
+  </data>
+  <data name="WebhookUpdated" xml:space="preserve">
+    <value>Webhook 已更新：{0}</value>
+  </data>
 </root>

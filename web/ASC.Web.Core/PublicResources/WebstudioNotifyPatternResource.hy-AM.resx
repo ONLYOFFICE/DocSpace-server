@@ -1955,4 +1955,44 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
+  <data name="subject_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>Ձեր ${LetterLogoText} DocSpace-ը կջնջվի</value>
+  </data>
+  <data name="subject_user_role_changed" xml:space="preserve">
+    <value>Ձեր դերը DocSpace սենյակում փոխվել է</value>
+  </data>
+  <data name="subject_user_type_changed" xml:space="preserve">
+    <value>Ձեր օգտատիրոջ տեսակը DocSpace-ում փոխվել է</value>
+  </data>
+  <data name="pattern_user_role_changed" xml:space="preserve">
+    <value>Բարև!
+
+Դուք նշանակվել եք նոր դեր "${RoomTitle}":"${RoomUrl}" Դոկսպեյս սենյակում՝ ${UserRole}:
+
+Կարդացեք սենյակի դերերի և թույլտվությունների մասին "Օգնության կենտրոն":"${HelpCenterUrl}"-ում՝
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_type_changed" xml:space="preserve">
+    <value>Բարև!
+
+Դուք նշանակվել եք նոր օգտատիրոջ տեսակ "${__VirtualRootPath}":"${__VirtualRootPath}" DocSpace-ում՝ ${UserType}:
+
+Կարդացեք օգտատիրոջ տեսակների և թույլտվությունների մասին "Օգնության կենտրոն":"${HelpCenterUrl}"-ում՝
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Ձեր ${LetterLogoText} DocSpace-ը&lt;span style="color: #FF6F3D;"&gt;կջնջվի&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Ձեր ${LetterLogoText} DocSpace ${__VirtualRootPath}-ը&lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; չի գործածվել ավելի քան մեկ տարի։&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Քանի որ դուք որոշել եք այլևս չօգտագործել այն, ձեր ${LetterLogoText} DocSpace-ը և բոլոր տվյալները կջնջվեն մեր &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Գաղտնիության քաղաքականության&lt;/a&gt; համաձայն։&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;Մենք կգնահատենք ձեր կարծիքը։ Ինչու՞ եք որոշել դադարեցնել ${LetterLogoText} DocSpace օգտագործումը։&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Եթե ցանկանում եք շարունակել օգտագործել ձեր ${LetterLogoText} DocSpace-ը, պարզապես մուտք գործեք այն և կատարեք ցանկացած գործողություն։&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
 </root>

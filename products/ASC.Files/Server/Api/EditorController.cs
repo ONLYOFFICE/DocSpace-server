@@ -173,8 +173,8 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
 
         var docParams = await documentServiceHelper.GetParamsAsync(
             formOpenSetup != null && formOpenSetup.Draft != null ? formOpenSetup.Draft : file, 
-            lastVersion, 
-            formOpenSetup == null || formOpenSetup.CanEdit, 
+            lastVersion,
+            !file.IsCompletedForm && (formOpenSetup?.CanEdit != false), 
             !inDto.View, 
             true, formOpenSetup == null || formOpenSetup.CanFill,
             formOpenSetup != null ? formOpenSetup.EditorType : inDto.EditorType,
@@ -218,7 +218,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
 
             if (formOpenSetup.RootFolder.FolderType is FolderType.VirtualDataRoom)
             {
-                result.StartFilling = result.Document.Permissions.Rename;
+                result.StartFilling = file.Security[FileSecurity.FilesSecurityActions.StartFilling];
                 result.StartFillingMode = StartFillingMode.StartFilling;
                 result.Document.ReferenceData.RoomId = formOpenSetup.RootFolder.Id.ToString();
 
@@ -237,7 +237,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                     result.StartFillingMode = StartFillingMode.ShareToFillOut;
                     result.EditorConfig.Customization.StartFillingForm = new StartFillingForm { Text = FilesCommonResource.StartFillingModeEnum_ShareToFillOut };
                 }
-                if (formOpenSetup.CanFill && file.CreateBy != securityContext.CurrentAccount.ID)
+                if (formOpenSetup.CanFill)
                 {
                     result.EditorConfig.Customization.SubmitForm.Visible = true;
                 }

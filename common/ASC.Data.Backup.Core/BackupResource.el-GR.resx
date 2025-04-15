@@ -67,4 +67,13 @@
   <data name="LargeBackup" xml:space="preserve">
     <value>Το αντίγραφο ασφαλείας είναι μεγαλύτερο από το συνολικό μέγεθος της πύλης</value>
   </data>
+  <data name="BackupException" xml:space="preserve">
+    <value>Κάτι πήγε στραβά κατά τη δημιουργία του αντιγράφου ασφαλείας. Προσπαθήστε να το δημιουργήσετε ξανά ή επικοινωνήστε με την υποστήριξη.</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>Κάτι πήγε στραβά κατά την επαναφορά του αντιγράφου ασφαλείας. Δοκιμάστε να το επαναφέρετε ξανά ή επικοινωνήστε με την υποστήριξη.</value>
+  </data>
+  <data name="BackupInvalid" xml:space="preserve">
+    <value>Το αρχείο αντιγράφου ασφαλείας δεν είναι έγκυρο.</value>
+  </data>
 </root>

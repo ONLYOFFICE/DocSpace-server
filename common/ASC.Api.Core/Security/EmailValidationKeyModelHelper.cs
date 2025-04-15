@@ -211,12 +211,19 @@ public class EmailValidationKeyModelHelper(
                 checkKeyResult = provider.ValidateEmailKey(email + type + first, key, provider.ValidAuthKeyInterval);
                 break;
             case ConfirmType.Auth:
+                var validInterval = DateTime.UtcNow.Add(-provider.ValidAuthKeyInterval);
+                var authLinkActivatedEvent = (await loginEventsRepository.GetByFilterAsync(action: MessageAction.AuthLinkActivated, fromDate: validInterval))
+                    .FirstOrDefault(x=> x.Description.Contains(key));
+                if (authLinkActivatedEvent != null)
+                {
+                    return ValidationResult.Invalid;
+                }
+
                 checkKeyResult = provider.ValidateEmailKey(email + type + first, key, provider.ValidAuthKeyInterval);
                 if (checkKeyResult == ValidationResult.Invalid)
                 {
                     userInfo = await userManager.GetUserByEmailAsync(email);
                     var portalRenameEvent = (await auditEventsRepository.GetByFilterAsync(action: MessageAction.PortalRenamed, target: MessageTarget.Create(tenantManager.GetCurrentTenantId()).ToString(), limit: 1)).FirstOrDefault();
-                    var validInterval = DateTime.UtcNow.Add(-provider.ValidAuthKeyInterval);
                     if (portalRenameEvent != null)
                     {                    
                         var portalRenameEventDate = tenantUtil.DateTimeToUtc(portalRenameEvent.Date);
@@ -295,7 +302,7 @@ public class EmailValidationKeyModelHelper(
 
         foreach (var pair in enumerable)
         {
-            accumulator.Append(pair.EncodedName.ToString(), pair.EncodedValue.ToString());
+            accumulator.Append(pair.EncodedName.ToString(), pair.DecodeValue().ToString());
         }
 
         if (!accumulator.HasValues)

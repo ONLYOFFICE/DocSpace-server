@@ -1078,4 +1078,7 @@
   <data name="Tariffs_nonprofit" xml:space="preserve">
     <value>Sin ánimo de lucro</value>
   </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>La URL del webhook no está disponible. La solicitud HEAD no responde al estado 200 http.</value>
+  </data>
 </root>

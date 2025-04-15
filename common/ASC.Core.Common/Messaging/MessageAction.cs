@@ -106,7 +106,7 @@ public enum MessageAction
     LoginFailBruteForce = 1023,
 
     [SwaggerEnum("Login fail recaptcha")]
-    LoginFailRecaptcha = 1026,  // last login
+    LoginFailRecaptcha = 1026,
 
     [SwaggerEnum("Logout")]
     Logout = 1006,
@@ -116,6 +116,9 @@ public enum MessageAction
 
     [SwaggerEnum("Session completed")]
     SessionCompleted = 1017,
+
+    [SwaggerEnum("Authorization link activated")]
+    AuthLinkActivated = 1027,  // last login
 
     #endregion
 
@@ -862,5 +865,18 @@ public enum MessageAction
     [SwaggerEnum("Generate personal access token")]
     GeneratePersonalAccessToken = 9909,
     
+    #endregion
+
+    #region Ldap
+
+    [SwaggerEnum("Ldap enabled")]
+    LdapEnabled = 5501,
+
+    [SwaggerEnum("Ldap disabled")]
+    LdapDisabled = 5502,
+
+    [SwaggerEnum("LDAP synchronization completed")]
+    LdapSync = 5503
+
     #endregion
 }

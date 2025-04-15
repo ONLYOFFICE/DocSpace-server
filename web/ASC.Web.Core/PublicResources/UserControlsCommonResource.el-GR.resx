@@ -82,4 +82,7 @@
   <data name="UnknownLastName" xml:space="preserve">
     <value>Επώνυμο</value>
   </data>
+  <data name="LicenseTypeNotCorrect" xml:space="preserve">
+    <value>Σύγκρουση αδειών. Βεβαιωθείτε ότι έχετε εγκαταστήσει τη σωστή έκδοση του {0} DocSpace (Enterprise ή Developer). Εάν έχετε οποιεσδήποτε ερωτήσεις, μη διστάσετε να επικοινωνήσετε με τον υπεύθυνο πωλήσεων.</value>
+  </data>
 </root>

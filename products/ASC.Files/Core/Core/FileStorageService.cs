@@ -3129,7 +3129,7 @@ public class FileStorageService //: IFileStorageService
         if (shared.Count > 0)
         {
             await securityContext.AuthenticateMeWithoutCookieAsync(toUser);
-            var userInfo = await userManager.GetUsersAsync(user);
+            var userInfo = await userManager.GetUsersAsync(user, false);
             var folder = await CreateFolderAsync(await globalFolderHelper.FolderMyAsync, $"Documents of user {userInfo.FirstName} {userInfo.LastName}");
             foreach (var file in shared)
             {
@@ -3952,13 +3952,13 @@ public class FileStorageService //: IFileStorageService
         return InternalSharedUsersAsync(fileId);
     }
 
-    public async Task<FileReference> GetReferenceDataAsync<T>(T fileId, string portalName, T sourceFileId, string path, string link)
+    public async Task<FileReference> GetReferenceDataAsync<T>(string fileId, string portalName, T sourceFileId, string path, string link)
     {
         File<T> file = null;
         var fileDao = daoFactory.GetFileDao<T>();
-        if (portalName == (tenantManager.GetCurrentTenantId()).ToString())
+        if (portalName == tenantManager.GetCurrentTenantId().ToString())
         {
-            file = await fileDao.GetFileAsync(fileId);
+            file = await fileDao.GetFileAsync((T)Convert.ChangeType(fileId, typeof(T)));
         }
 
         if (file == null && !string.IsNullOrEmpty(path) && string.IsNullOrEmpty(link))
@@ -4023,6 +4023,11 @@ public class FileStorageService //: IFileStorageService
                     }
                 }
             }
+        }
+
+        if (file == null)
+        {
+            return new FileReference { Error = FilesCommonResource.ErrorMessage_FileNotFound };
         }
 
         if (!await fileSecurity.CanReadAsync(file))
@@ -4750,6 +4755,12 @@ public class FileStorageService //: IFileStorageService
 
         await ValidateChangeRolesPermission(form);
 
+        if ((roles?.Any() == false && !await fileSecurity.CanResetFillingAsync(form, authContext.CurrentAccount.ID)) ||
+            (roles?.Any() == true && !await fileSecurity.CanStartFillingAsync(form, authContext.CurrentAccount.ID)))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
+        }
+
         await fileDao.SaveFormRoleMapping(formId, roles);
 
         var properties = await fileDao.GetProperties(formId) ?? new EntryProperties<T> { FormFilling = new FormFillingProperties<T>() };
@@ -4809,7 +4820,7 @@ public class FileStorageService //: IFileStorageService
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
-        if (!form.IsForm)
+        if (!await DocSpaceHelper.IsFormOrCompletedForm(form, fileDao))
         {
             throw new InvalidOperationException();
         }
@@ -4853,6 +4864,10 @@ public class FileStorageService //: IFileStorageService
         switch (action)
         {
             case FormFillingManageAction.Stop:
+                if (!await fileSecurity.CanStopFillingAsync(form, authContext.CurrentAccount.ID))
+                {
+                    throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
+                }
                 var role = await fileDao.GetFormRoles(formId).Where(r => r.Submitted == false).FirstOrDefaultAsync();
                 properties.FormFilling.FillingStopedDate = DateTime.UtcNow;
                 properties.FormFilling.FormFillingInterruption =
@@ -4893,10 +4908,7 @@ public class FileStorageService //: IFileStorageService
         {
             throw new InvalidOperationException();
         }
-        if (!await fileSecurity.CanEditRoomAsync(form))
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
-        }
+
 
         var folderDao = daoFactory.GetFolderDao<T>();
         var currentRoom = await DocSpaceHelper.GetParentRoom(form, folderDao);
@@ -4904,10 +4916,6 @@ public class FileStorageService //: IFileStorageService
         if (currentRoom == null)
         {
             throw new InvalidOperationException();
-        }
-        if (!await fileSecurity.CanEditRoomAsync(currentRoom))
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
         }
     }
     private Exception GenerateException(Exception error, bool warning = false)

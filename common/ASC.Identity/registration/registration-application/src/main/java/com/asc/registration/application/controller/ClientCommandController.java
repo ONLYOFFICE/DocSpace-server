@@ -36,10 +36,10 @@ import com.asc.common.service.transfer.message.AuditMessage;
 import com.asc.common.service.transfer.response.ClientResponse;
 import com.asc.common.utilities.HttpUtils;
 import com.asc.registration.application.security.authentication.BasicSignatureTokenPrincipal;
-import com.asc.registration.application.transfer.ChangeTenantClientActivationCommandRequest;
-import com.asc.registration.application.transfer.CreateTenantClientCommandRequest;
+import com.asc.registration.application.transfer.ChangeClientActivationRequest;
+import com.asc.registration.application.transfer.CreateClientRequest;
 import com.asc.registration.application.transfer.ErrorResponse;
-import com.asc.registration.application.transfer.UpdateTenantClientCommandRequest;
+import com.asc.registration.application.transfer.UpdateClientRequest;
 import com.asc.registration.service.ports.input.service.ClientApplicationService;
 import com.asc.registration.service.ports.input.service.ScopeApplicationService;
 import com.asc.registration.service.transfer.request.create.CreateTenantClientCommand;
@@ -52,7 +52,9 @@ import com.asc.registration.service.transfer.response.ScopeResponse;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.grpc.StatusRuntimeException;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -80,7 +82,10 @@ import org.springframework.web.bind.annotation.*;
  * update, deletion, activation, and consent revocation. It uses rate limiting to control access and
  * integrates with various services to perform these operations securely.
  */
-@Tag(name = "Client Command Controller", description = "Command REST API to Manipulate Clients")
+@Tag(
+    name = "Client Management",
+    description =
+        "APIs for managing OAuth2 clients including creation, updates, deletion and activation")
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -130,28 +135,99 @@ public class ClientCommandController {
   @RateLimiter(name = "globalRateLimiter")
   @PostMapping
   @Operation(
-      summary = "Creates a new client",
-      tags = {"ClientCommandController"},
-      security = @SecurityRequirement(name = "ascAuthAdmin"),
+      summary = "Create a new OAuth2 client",
+      description =
+          "Creates a new OAuth2 client with the specified configuration. "
+              + "The client will be created with the provided scopes, redirect URIs, and other settings. "
+              + "Returns the created client details including the generated client ID.",
+      tags = {"Client Management"},
+      security = @SecurityRequirement(name = "x-signature"),
       responses = {
-        @ApiResponse(responseCode = "201", description = "Successfully created"),
+        @ApiResponse(
+            responseCode = "201",
+            description = "Client successfully created",
+            content =
+                @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ClientResponse.class),
+                    examples =
+                        @ExampleObject(
+                            value =
+                                """
+                    {
+                      "name": "Example Name",
+                      "description": "Example Description",
+                      "tenant": 1,
+                      "scopes": ["files:read", "files:write"],
+                      "enabled": true,
+                      "client_id": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                      "client_secret": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                      "website_url": "http://example.com",
+                      "terms_url": "http://example.com",
+                      "policy_url": "http://example.com",
+                      "logo": "data:image/png;base64,ivBOR",
+                      "authentication_methods": ["client_secret_post"],
+                      "redirect_uris": ["https://example.com"],
+                      "allowed_origins": ["https://example.com"],
+                      "logout_redirect_uris": ["https://example.com"],
+                      "created_on": "2024-04-04T12:00:00Z",
+                      "created_by": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                      "modified_on": "2024-04-04T12:00:00Z",
+                      "modified_by": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                      "is_public": true
+                    }
+                    """))),
         @ApiResponse(
             responseCode = "400",
-            description = "Bad request",
-            content = {@Content}),
+            description = "Invalid request - missing required fields or validation failed",
+            content =
+                @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Insufficient permissions to create client",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
         @ApiResponse(
             responseCode = "429",
-            description = "Too many requests",
+            description = "Too many requests - rate limit exceeded",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
         @ApiResponse(
             responseCode = "500",
-            description = "Internal server error",
-            content = @Content)
+            description = "Internal server error occurred",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
       })
   public ResponseEntity<ClientResponse> createClient(
       HttpServletRequest request,
       @AuthenticationPrincipal BasicSignatureTokenPrincipal principal,
-      @RequestBody @Valid CreateTenantClientCommandRequest command) {
+      @RequestBody
+          @Valid
+          @Parameter(
+              description = "Client creation request containing client details",
+              required = true,
+              content =
+                  @Content(
+                      mediaType = MediaType.APPLICATION_JSON_VALUE,
+                      schema = @Schema(implementation = CreateClientRequest.class),
+                      examples =
+                          @ExampleObject(
+                              value =
+                                  """
+                  {
+                    "name": "Example Name",
+                    "logo": "data:image/png;base64,iVBOR",
+                    "website_url": "https://example.com",
+                    "description": "Example Description",
+                    "redirect_uris": ["https://example.com"],
+                    "allowed_origins": ["https://example.com"],
+                    "logout_redirect_uri": "https://example.com",
+                    "terms_url": "https://example.com",
+                    "policy_url": "https://example.com",
+                    "allow_pkce": false,
+                    "scopes": ["files:read", "files:write"]
+                  }
+                  """)))
+          CreateClientRequest command) {
     try {
       setLoggingParameters(principal);
       if (!scopeApplicationService.getScopes().stream()
@@ -196,32 +272,69 @@ public class ClientCommandController {
   @RateLimiter(name = "globalRateLimiter")
   @PutMapping("/{clientId}")
   @Operation(
-      summary = "Updated an existing client",
-      tags = {"ClientCommandController"},
-      security = @SecurityRequirement(name = "ascAuthAdmin"),
+      summary = "Update an existing OAuth2 client",
+      description =
+          "Updates the configuration of an existing OAuth2 client. "
+              + "Allows modification of client name, description, redirect URIs, and other settings. "
+              + "The client ID cannot be modified.",
+      tags = {"Client Management"},
+      security = @SecurityRequirement(name = "x-signature"),
       responses = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Successfully updated",
-            content = @Content),
+        @ApiResponse(responseCode = "200", description = "Client successfully updated"),
         @ApiResponse(
             responseCode = "400",
-            description = "Bad request",
+            description = "Invalid request - missing required fields or validation failed",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Insufficient permissions to update client",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Client not found",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
         @ApiResponse(
             responseCode = "429",
-            description = "Too many requests",
+            description = "Too many requests - rate limit exceeded",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
         @ApiResponse(
             responseCode = "500",
-            description = "Internal server error",
-            content = @Content)
+            description = "Internal server error occurred",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
       })
   public ResponseEntity<?> updateClient(
       HttpServletRequest request,
       @AuthenticationPrincipal BasicSignatureTokenPrincipal principal,
-      @PathVariable @NotBlank String clientId,
-      @RequestBody @Valid UpdateTenantClientCommandRequest command) {
+      @Parameter(
+              description = "ID of the client to update",
+              required = true,
+              example = "6c7cf17b-1bd3-47d5-94c6-be2d3570e168")
+          @PathVariable
+          @NotBlank
+          String clientId,
+      @RequestBody
+          @Valid
+          @Parameter(
+              description = "Client update request containing modified client details",
+              required = true,
+              content =
+                  @Content(
+                      mediaType = MediaType.APPLICATION_JSON_VALUE,
+                      schema = @Schema(implementation = UpdateClientRequest.class),
+                      examples =
+                          @ExampleObject(
+                              value =
+                                  """
+                  {
+                    "name": "Example Name",
+                    "description": "Example Description",
+                    "logo": "data:image/png;base64,iVBOR",
+                    "allow_pkce": false,
+                    "is_public": true,
+                    "allowed_origins": ["https://example.com"]
+                  }
+                  """)))
+          UpdateClientRequest command) {
     try {
       setLoggingParameters(principal);
       clientApplicationService.updateClient(
@@ -254,28 +367,60 @@ public class ClientCommandController {
   @RateLimiter(name = "globalRateLimiter")
   @PatchMapping("/{clientId}/regenerate")
   @Operation(
-      summary = "Regenerates the secret for a specific client",
-      tags = {"ClientCommandController"},
-      security = @SecurityRequirement(name = "ascAuthAdmin"),
+      summary = "Regenerate client secret",
+      description =
+          "Generates a new client secret for the specified OAuth2 client. "
+              + "The old secret will be immediately invalidated. "
+              + "This operation should be used with caution as it requires updating the secret in all client applications.",
+      tags = {"Client Management"},
+      security = @SecurityRequirement(name = "x-signature"),
       responses = {
-        @ApiResponse(responseCode = "200", description = "Successfully regenerated"),
+        @ApiResponse(
+            responseCode = "200",
+            description = "Client secret successfully regenerated",
+            content =
+                @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ClientSecretResponse.class),
+                    examples =
+                        @ExampleObject(
+                            value =
+                                """
+                    {
+                      "client_secret": "2c53294c-57fa-4d5b-b9db-e49ebb97f25f"
+                    }
+                    """))),
         @ApiResponse(
             responseCode = "400",
-            description = "Bad request",
+            description = "Invalid client ID format",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Insufficient permissions to regenerate client secret",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Client not found",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
         @ApiResponse(
             responseCode = "429",
-            description = "Too many requests",
+            description = "Too many requests - rate limit exceeded",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
         @ApiResponse(
             responseCode = "500",
-            description = "Internal server error",
-            content = @Content)
+            description = "Internal server error occurred",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
       })
   public ResponseEntity<ClientSecretResponse> regenerateSecret(
       HttpServletRequest request,
       @AuthenticationPrincipal BasicSignatureTokenPrincipal principal,
-      @PathVariable @NotBlank String clientId) {
+      @Parameter(
+              description = "ID of the client to regenerate secret for",
+              required = true,
+              example = "6c7cf17b-1bd3-47d5-94c6-be2d3570e168")
+          @PathVariable
+          @NotBlank
+          String clientId) {
     try {
       setLoggingParameters(principal);
       return ResponseEntity.ok(
@@ -302,33 +447,51 @@ public class ClientCommandController {
   @RateLimiter(name = "globalRateLimiter")
   @DeleteMapping("/{clientId}/revoke")
   @Operation(
-      summary = "Revokes the consent for a specific client",
-      tags = {"ClientCommandController"},
-      security = @SecurityRequirement(name = "ascAuthUser"),
+      summary = "Revoke client consent",
+      description =
+          "Revokes all user consents for the specified OAuth2 client. "
+              + "This will invalidate all access tokens and refresh tokens issued to this client for the current user. "
+              + "The user will need to re-authorize the client to access their resources.",
+      tags = {"Client Management"},
+      security = @SecurityRequirement(name = "x-signature"),
       responses = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Successfully revoked",
-            content = @Content),
+        @ApiResponse(responseCode = "200", description = "Client consent successfully revoked"),
         @ApiResponse(
             responseCode = "400",
-            description = "Bad request",
+            description = "Invalid client ID format",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Insufficient permissions to revoke consent",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Client not found",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
         @ApiResponse(
             responseCode = "429",
-            description = "Too many requests",
+            description = "Too many requests - rate limit exceeded",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-        @ApiResponse(responseCode = "503", description = "Service unavailable", content = @Content),
+        @ApiResponse(
+            responseCode = "503",
+            description = "Authorization service unavailable",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
         @ApiResponse(
             responseCode = "500",
-            description = "Internal server error",
-            content = @Content)
+            description = "Internal server error occurred",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
       })
   @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'GUEST')")
   public ResponseEntity<?> revokeUserClient(
       HttpServletRequest request,
       @AuthenticationPrincipal BasicSignatureTokenPrincipal principal,
-      @PathVariable @NotBlank String clientId) {
+      @Parameter(
+              description = "ID of the client to revoke consent for",
+              required = true,
+              example = "6c7cf17b-1bd3-47d5-94c6-be2d3570e168")
+          @PathVariable
+          @NotBlank
+          String clientId) {
     try {
       setLoggingParameters(principal);
       var response =
@@ -373,31 +536,46 @@ public class ClientCommandController {
   @RateLimiter(name = "globalRateLimiter")
   @DeleteMapping("/{clientId}")
   @Operation(
-      summary = "Deletes a specific client",
-      tags = {"ClientCommandController"},
-      security = @SecurityRequirement(name = "ascAuthAdmin"),
+      summary = "Delete an OAuth2 client",
+      description =
+          "Permanently deletes an OAuth2 client and all associated data. "
+              + "This will invalidate all access tokens and refresh tokens issued to this client. "
+              + "This operation cannot be undone.",
+      tags = {"Client Management"},
+      security = @SecurityRequirement(name = "x-signature"),
       responses = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Successfully deleted",
-            content = @Content),
+        @ApiResponse(responseCode = "200", description = "Client successfully deleted"),
         @ApiResponse(
             responseCode = "400",
-            description = "Bad request",
+            description = "Invalid client ID format",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Insufficient permissions to delete client",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Client not found",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
         @ApiResponse(
             responseCode = "429",
-            description = "Too many requests",
+            description = "Too many requests - rate limit exceeded",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
         @ApiResponse(
             responseCode = "500",
-            description = "Internal server error",
-            content = @Content)
+            description = "Internal server error occurred",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
       })
   public ResponseEntity<?> deleteClient(
       HttpServletRequest request,
       @AuthenticationPrincipal BasicSignatureTokenPrincipal principal,
-      @PathVariable @NotEmpty String clientId) {
+      @Parameter(
+              description = "ID of the client to delete",
+              required = true,
+              example = "6c7cf17b-1bd3-47d5-94c6-be2d3570e168")
+          @PathVariable
+          @NotEmpty
+          String clientId) {
     try {
       setLoggingParameters(principal);
       // Note: we are ok with publishing the event and then removing the client
@@ -429,32 +607,66 @@ public class ClientCommandController {
   @RateLimiter(name = "globalRateLimiter")
   @PatchMapping("/{clientId}/activation")
   @Operation(
-      summary = "Changes the activation status of a specific client",
-      tags = {"ClientCommandController"},
-      security = @SecurityRequirement(name = "ascAuthAdmin"),
+      summary = "Change client activation status",
+      description =
+          "Activates or deactivates an OAuth2 client. "
+              + "When deactivated, the client cannot request new access tokens, "
+              + "but existing tokens will remain valid until they expire.",
+      tags = {"Client Management"},
+      security = @SecurityRequirement(name = "x-signature"),
       responses = {
         @ApiResponse(
             responseCode = "200",
-            description = "Successfully changed activation",
-            content = @Content),
+            description = "Client activation status successfully changed"),
         @ApiResponse(
             responseCode = "400",
-            description = "Bad request",
+            description = "Invalid client ID format or activation status",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Insufficient permissions to change client activation",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Client not found",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
         @ApiResponse(
             responseCode = "429",
-            description = "Too many requests",
+            description = "Too many requests - rate limit exceeded",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
         @ApiResponse(
             responseCode = "500",
-            description = "Internal server error",
-            content = @Content)
+            description = "Internal server error occurred",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
       })
   public ResponseEntity<?> changeActivation(
       HttpServletRequest request,
       @AuthenticationPrincipal BasicSignatureTokenPrincipal principal,
-      @PathVariable @NotBlank String clientId,
-      @RequestBody @Valid ChangeTenantClientActivationCommandRequest command) {
+      @Parameter(
+              description = "ID of the client to change activation for",
+              required = true,
+              example = "6c7cf17b-1bd3-47d5-94c6-be2d3570e168")
+          @PathVariable
+          @NotBlank
+          String clientId,
+      @RequestBody
+          @Valid
+          @Parameter(
+              description = "Client activation change request",
+              required = true,
+              content =
+                  @Content(
+                      mediaType = MediaType.APPLICATION_JSON_VALUE,
+                      schema = @Schema(implementation = ChangeClientActivationRequest.class),
+                      examples =
+                          @ExampleObject(
+                              value =
+                                  """
+                  {
+                    "status": false
+                  }
+                  """)))
+          ChangeClientActivationRequest command) {
     try {
       setLoggingParameters(principal);
       clientApplicationService.changeActivation(

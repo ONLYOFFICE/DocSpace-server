@@ -97,8 +97,9 @@ public class LicenseController(ILoggerProvider option,
         {
             return UserControlsCommonResource.LicenseKeyNotFound;
         }
-        catch (BillingNotConfiguredException)
+        catch (BillingNotConfiguredException ex)
         {
+            _log.ErrorWithException(ex);
             return UserControlsCommonResource.LicenseKeyNotCorrect;
         }
         catch (BillingLicenseTypeException)
