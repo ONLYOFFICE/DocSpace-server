@@ -890,7 +890,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             return false;
         }
         var room = parentFolders.FirstOrDefault(r => DocSpaceHelper.IsRoom(r.FolderType));
-        if (file != null && room != null && room.FolderType == FolderType.VirtualDataRoom && !file.IsForm)
+        if (file != null && room != null && room.FolderType == FolderType.VirtualDataRoom && !await DocSpaceHelper.IsFormOrCompletedForm(file, fileDao))
         {
             var shareRecord = await GetPureSharesAsync(room, new List<Guid> { userId }).FirstOrDefaultAsync();
             if(shareRecord != null && shareRecord.Share is FileShare.FillForms)
