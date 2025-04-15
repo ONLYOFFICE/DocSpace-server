@@ -193,7 +193,7 @@ $OrangeButton</value>
   </data>
   <data name="pattern_FormStartedFilling" xml:space="preserve">
     <value>
-      活动通知。"$FromUserName":"$FromUserLink"已启动表单填写进程："$DocumentTitle":"$DocumentURL"，位于房间："$RoomTitle":"$RoomURL" — $__DateTime。
+      活动通知。"$FromUserName":"$FromUserLink" 已启动表单填写进程："$DocumentTitle":"$DocumentURL"，位于房间："$RoomTitle":"$RoomURL" — $__DateTime。
 </value>
   </data>
   <data name="pattern_FormSubmitted_push" xml:space="preserve">
@@ -201,7 +201,7 @@ $OrangeButton</value>
   </data>
   <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
     <value>
-      活动通知。表单"$DocumentTitle":"$DocumentURL"已在房间"$RoomTitle":"$RoomURL" — $__DateTime中完成填写。
+      活动通知。表单 "$DocumentTitle":"$DocumentURL" 已在房间  "$RoomTitle":"$RoomURL" — $__DateTime中完成填写。
 </value>
   </data>
   <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
@@ -212,12 +212,12 @@ $OrangeButton</value>
   </data>
   <data name="pattern_StoppedFormFilling" xml:space="preserve">
     <value>
-      活动通知。"$FromUserName":"$FromUserLink"已停止房间"$RoomTitle":"$RoomURL" — $__DateTime中的表单填写："$DocumentTitle":"$DocumentURL"。
+      活动通知。"$FromUserName":"$FromUserLink" 已停止房间  "$RoomTitle":"$RoomURL" — $__DateTime中的表单填写："$DocumentTitle":"$DocumentURL"。
     </value>
   </data>
   <data name="pattern_YourTurnFormFilling" xml:space="preserve">
     <value>
-      活动通知。轮到您填写房间"$RoomTitle":"$RoomURL" — $__DateTime中的表单："$DocumentTitle":"$DocumentURL"。
+      活动通知。轮到您填写房间 "$RoomTitle":"$RoomURL" — $__DateTime 中的表单："$DocumentTitle":"$DocumentURL"。
 </value>
   </data>
   <data name="subject_FormStartedFilling" xml:space="preserve">

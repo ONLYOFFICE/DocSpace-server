@@ -217,12 +217,12 @@ $OrangeButton</value>
   </data>
   <data name="pattern_FormStartedFilling" xml:space="preserve">
     <value>
-      활동 알림. "$FromUserName":"$FromUserLink"님이 "$RoomTitle":"$RoomURL" 룸에서 "$DocumentTitle":"$DocumentURL" 양식 작성을 시작하였습니다 — $__DateTime.
+      활동 알림. "$FromUserName":"$FromUserLink" 님이 "$RoomTitle":"$RoomURL" 룸에서 "$DocumentTitle":"$DocumentURL" 양식 작성을 시작하였습니다 — $__DateTime.
     </value>
   </data>
   <data name="pattern_StoppedFormFilling" xml:space="preserve">
     <value>
-      활동 알림. "$FromUserName":"$FromUserLink"님이 "$RoomTitle":"$RoomURL" 룸에서 "$DocumentTitle":"$DocumentURL" 양식 작성을 중지하였습니다 — $__DateTime.
+      활동 알림. "$FromUserName":"$FromUserLink" 님이 "$RoomTitle":"$RoomURL" 룸에서 "$DocumentTitle":"$DocumentURL" 양식 작성을 중지하였습니다 — $__DateTime.
     </value>
   </data>
   <data name="pattern_YourTurnFormFilling" xml:space="preserve">

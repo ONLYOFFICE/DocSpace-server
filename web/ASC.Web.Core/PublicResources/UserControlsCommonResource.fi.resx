@@ -83,6 +83,6 @@
     <value>Sukunimi</value>
   </data>
   <data name="LicenseTypeNotCorrect" xml:space="preserve">
-    <value>Lisenssiristiriita. Varmista, että olet asentanut oikean DocSpace-version (Enterprise tai Developer). Jos sinulla on kysyttävää, ota rohkeasti yhteyttä myyntipäällikköösi.</value>
+    <value>Lisenssiristiriita. Varmista, että olet asentanut oikean {0} DocSpace-version (Enterprise tai Developer). Jos sinulla on kysyttävää, ota rohkeasti yhteyttä myyntipäällikköösi.</value>
   </data>
 </root>

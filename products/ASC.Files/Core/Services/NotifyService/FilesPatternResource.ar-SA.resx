@@ -282,15 +282,15 @@ $OrangeButton</value>
       إشعار نشاط. دوركم الآن! يجب تعبئة النموذج: "$DocumentTitle":"$DocumentURL" في الغرفة: "$RoomTitle":"$RoomURL" — $__DateTime</value>
   </data>
   <data name="subject_FormStartedFilling" xml:space="preserve">
-    <value>إشعار "DocSpace".</value>
+    <value>إشعار DocSpace.</value>
   </data>
   <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
-    <value>إشعار "DocSpace".</value>
+    <value>إشعار DocSpace.</value>
   </data>
   <data name="subject_StoppedFormFilling" xml:space="preserve">
-    <value>إشعار "DocSpace".</value>
+    <value>إشعار DocSpace.</value>
   </data>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
-    <value>إشعار "DocSpace".</value>
+    <value>إشعار DocSpace.</value>
   </data>
 </root>

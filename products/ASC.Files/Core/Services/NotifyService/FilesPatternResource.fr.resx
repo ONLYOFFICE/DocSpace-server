@@ -211,7 +211,7 @@ $OrangeButton</value>
     <value>$FromUserName a déplacé la salle "$RoomTitle" dans l'archive</value>
   </data>
   <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
-    <value>Votre rôle dans la salle "$RoomTitle"a été modifié en "$RoomRole"</value>
+    <value>Votre rôle dans la salle "$RoomTitle" a été modifié en "$RoomRole"</value>
   </data>
   <data name="pattern_StoppedFormFilling" xml:space="preserve">
     <value>

@@ -236,7 +236,7 @@ $OrangeButton</value>
     <value>DocSpace ծանուցում՝ Ձևաթուղթը լրացված է</value>
   </data>
   <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
-    <value>Նոր փաստաթուղթ "$DocumentTitle"ը ստեղծվել է "$RoomTitle" սենյակում</value>
+    <value>Նոր փաստաթուղթ "$DocumentTitle"-ը ստեղծվել է "$RoomTitle" սենյակում</value>
   </data>
   <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
     <value>Նոր ֆայլ է ավելացվել սենյակում "$RoomTitle" ($Count)</value>

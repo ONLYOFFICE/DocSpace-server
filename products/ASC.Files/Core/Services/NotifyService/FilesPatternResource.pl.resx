@@ -217,17 +217,17 @@ $OrangeButton</value>
   </data>
   <data name="pattern_FormStartedFilling" xml:space="preserve">
     <value>
-      Powiadomienie o aktywności. Użytkownik "$FromUserName":"$FromUserLink” rozpoczął wypełnianie formularza:  "$DocumentTitle":"$DocumentURL"w pokoju: "$RoomTitle":"$RoomURL" — $__DateTime.
+      Powiadomienie o aktywności. Użytkownik "$FromUserName":"$FromUserLink” rozpoczął wypełnianie formularza:  "$DocumentTitle":"$DocumentURL"-w pokoju: "$RoomTitle":"$RoomURL" — $__DateTime.
     </value>
   </data>
   <data name="pattern_StoppedFormFilling" xml:space="preserve">
     <value>
-      Powiadomienie o aktywności. Użytkownik "$FromUserName":"$FromUserLink” zatrzymał wypełnianie formularza: "$DocumentTitle":"$DocumentURL"w pokoju: "$RoomTitle":"$RoomURL" — $__DateTime.
+      Powiadomienie o aktywności. Użytkownik "$FromUserName":"$FromUserLink” zatrzymał wypełnianie formularza: "$DocumentTitle":"$DocumentURL"-w pokoju: "$RoomTitle":"$RoomURL" — $__DateTime.
     </value>
   </data>
   <data name="pattern_YourTurnFormFilling" xml:space="preserve">
     <value>
-      Powiadomienie o aktywności. Twoja kolej! Wymagane jest wypełnienie formularza: "$DocumentTitle":"$DocumentURL"w pokoju: "$RoomTitle":"$RoomURL" — $__DateTime.
+      Powiadomienie o aktywności. Twoja kolej! Wymagane jest wypełnienie formularza: "$DocumentTitle":"$DocumentURL"-w pokoju: "$RoomTitle":"$RoomURL" — $__DateTime.
     </value>
   </data>
   <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">

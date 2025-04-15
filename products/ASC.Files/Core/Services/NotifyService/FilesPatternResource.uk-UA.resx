@@ -227,7 +227,7 @@ $OrangeButton</value>
     <value>$FromUserName перемсітив(ла) кімнату "$RoomTitle" до архіву</value>
   </data>
   <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
-    <value>Вашу роль в кімнаті "$RoomTitle"» змінено на "$RoomRole"</value>
+    <value>Вашу роль в кімнаті "$RoomTitle" змінено на "$RoomRole"</value>
   </data>
   <data name="pattern_FormSubmitted_push" xml:space="preserve">
     <value>Форму "$DocumentTitle" заповнено в кімнаті "$RoomTitle"</value>

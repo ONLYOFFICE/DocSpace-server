@@ -193,7 +193,7 @@ $OrangeButton</value>
   </data>
   <data name="pattern_FormStartedFilling" xml:space="preserve">
     <value>
-      Notificare de activitate. "$FromUserName":"$FromUserLink" a început completarea formularului:  "$DocumentTitle":"$DocumentURL" în sala: "$RoomTitle":"$RoomURL" — $__DateTime.
+      Notificare de activitate. "$FromUserName":"$FromUserLink" a început completarea formularului: "$DocumentTitle":"$DocumentURL" în sala: "$RoomTitle":"$RoomURL" — $__DateTime.
     </value>
   </data>
   <data name="pattern_FormSubmitted_push" xml:space="preserve">

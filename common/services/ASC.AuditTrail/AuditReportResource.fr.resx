@@ -899,18 +899,18 @@
     <value>Webhook mis à jour : {0}</value>
   </data>
   <data name="ApiKeyCreated" xml:space="preserve">
-    <value>Clé API utilisateur créée : {0}</value>
+    <value>Clé API utilisateur créée : {0}</value>
   </data>
   <data name="ApiKeyDeleted" xml:space="preserve">
-    <value>Clé API utilisateur supprimée : {0}</value>
+    <value>Clé API utilisateur supprimée : {0}</value>
   </data>
   <data name="ApiKeyUpdated" xml:space="preserve">
-    <value>Clé API utilisateur mise à jour : {0}</value>
+    <value>Clé API utilisateur mise à jour : {0}</value>
   </data>
   <data name="FileCustomFilterDisabled" xml:space="preserve">
-    <value>Fichier : {0}. Filtre personnalisé désactivé</value>
+    <value>Fichier : {0}. Filtre personnalisé désactivé</value>
   </data>
   <data name="FileCustomFilterEnabled" xml:space="preserve">
-    <value>Fichier : {0}. Filtre personnalisé activé</value>
+    <value>Fichier : {0}. Filtre personnalisé activé</value>
   </data>
 </root>

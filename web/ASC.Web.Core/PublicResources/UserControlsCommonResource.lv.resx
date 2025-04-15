@@ -83,6 +83,6 @@
     <value>Uzvārds</value>
   </data>
   <data name="LicenseTypeNotCorrect" xml:space="preserve">
-    <value>Licences konflikts. Lūdzu, pārliecinieties, ka esat instalējis pareizo DocSpace versiju (Enterprise vai Developer). Ja jums ir kādi jautājumi, sazinieties ar savu pārdošanas menedžeri.</value>
+    <value>Licences konflikts. Lūdzu, pārliecinieties, ka esat instalējis pareizo {0} DocSpace versiju (Enterprise vai Developer). Ja jums ir kādi jautājumi, sazinieties ar savu pārdošanas menedžeri.</value>
   </data>
 </root>

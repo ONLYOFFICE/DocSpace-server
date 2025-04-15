@@ -1958,7 +1958,7 @@ $TrulyYours</value>
   <data name="pattern_user_role_changed" xml:space="preserve">
     <value>Bună!
 
-Vi s-a atribuit un nou rol în sala DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+Vi s-a atribuit un nou rol în sala DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
 
 Aflați mai multe despre roluri și permisiuni în "Centru de ajutor":"${HelpCenterUrl}".
 

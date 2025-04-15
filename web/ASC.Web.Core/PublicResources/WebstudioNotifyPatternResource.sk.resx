@@ -1917,7 +1917,7 @@ $TrulyYours</value>
   <data name="pattern_user_type_changed" xml:space="preserve">
     <value>Dobrý deň!
 
-V DocSpace "${__VirtualRootPath}" máte pridelený nový typ používateľa: "${__VirtualRootPath}": ${UserType}.
+V DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" máte pridelený nový typ používateľa: ${UserType}.
 
 Viac informácií o typoch používateľov a oprávneniach sa dozviete v "Centre pomoci":"${HelpCenterUrl}".
 

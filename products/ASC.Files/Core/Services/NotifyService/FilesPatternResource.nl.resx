@@ -207,7 +207,7 @@ $OrangeButton</value>
     <value>$ToUserName noemde u in het document $DocumentTitle</value>
   </data>
   <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
-    <value>$FromUserName heeft de kamer “$RoomTitle” naar het archief verplaatst</value>
+    <value>$FromUserName heeft de kamer "$RoomTitle" naar het archief verplaatst</value>
   </data>
   <data name="pattern_FormStartedFilling" xml:space="preserve">
     <value>

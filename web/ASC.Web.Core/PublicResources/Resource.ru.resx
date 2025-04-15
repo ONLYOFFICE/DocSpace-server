@@ -1079,6 +1079,6 @@
     <value>Некоммерческий</value>
   </data>
   <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
-    <value>URL-адрес вебхука недоступен. HEAD-запрос не является статусом ответа 200 http.</value>
+    <value>URL-адрес вебхука недоступен. Не приходит статус 200 в ответ на http-запрос с методом HEAD.</value>
   </data>
 </root>
