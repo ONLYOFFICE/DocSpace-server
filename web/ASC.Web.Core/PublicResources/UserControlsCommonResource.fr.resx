@@ -82,4 +82,7 @@
   <data name="UnknownLastName" xml:space="preserve">
     <value>Nom</value>
   </data>
+  <data name="LicenseTypeNotCorrect" xml:space="preserve">
+    <value>Conflit de licence. Veuillez vous assurer d'avoir installé la bonne édition de {0} DocSpace (Enterprise ou Developer). Pour toute question, n'hésitez pas à contacter votre responsable commercial.</value>
+  </data>
 </root>

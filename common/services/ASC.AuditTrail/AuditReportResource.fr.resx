@@ -871,4 +871,46 @@
   <data name="UpdateClient" xml:space="preserve">
     <value>Client {0} mis à jour</value>
   </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>Paramètres d'accès aux outils du développement modifiés</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>Fichiers [{0}]. Version supprimée : {1}</value>
+  </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>Utilisateurs [{0}]. Formulaire entièrement rempli : {1}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>Utilisateurs [{0}]. A rempli une partie du formulaire : {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>Utilisateurs [{0}]. A commencé à remplir : {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>Utilisateurs [{0}]. Formulaire arrêté : {1}</value>
+  </data>
+  <data name="WebhookCreated" xml:space="preserve">
+    <value>Webhook créé : {0}</value>
+  </data>
+  <data name="WebhookDeleted" xml:space="preserve">
+    <value>Webhook supprimé : {0}</value>
+  </data>
+  <data name="WebhookUpdated" xml:space="preserve">
+    <value>Webhook mis à jour : {0}</value>
+  </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>Clé API utilisateur créée : {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>Clé API utilisateur supprimée : {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>Clé API utilisateur mise à jour : {0}</value>
+  </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>Fichier : {0}. Filtre personnalisé désactivé</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>Fichier : {0}. Filtre personnalisé activé</value>
+  </data>
 </root>

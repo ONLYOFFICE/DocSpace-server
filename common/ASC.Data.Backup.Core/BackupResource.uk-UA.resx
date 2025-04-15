@@ -126,4 +126,13 @@
   <data name="LargeBackup" xml:space="preserve">
     <value>Резервна копія перевищує загальний розмір порталу</value>
   </data>
+  <data name="BackupException" xml:space="preserve">
+    <value>Під час створення резервної копії сталася помилка. Спробуйте створити її ще раз або зверніться до служби підтримки.</value>
+  </data>
+  <data name="BackupInvalid" xml:space="preserve">
+    <value>Файл резервної копії недійсний.</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>Під час відновлення резервної копії сталася помилка. Спробуйте відновити її ще раз або зверніться до служби підтримки.</value>
+  </data>
 </root>

@@ -141,4 +141,7 @@
   <data name="UnknownLastName" xml:space="preserve">
     <value>Презиме</value>
   </data>
+  <data name="LicenseTypeNotCorrect" xml:space="preserve">
+    <value>Сукоб лиценци. Уверите се да сте инсталирали исправно издање {0} DocSpace-а (Enterprise или Developer). Ако имате питања, слободно контактирајте свог менаџера продаје.</value>
+  </data>
 </root>

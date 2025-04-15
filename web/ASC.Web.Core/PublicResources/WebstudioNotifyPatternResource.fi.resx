@@ -1657,9 +1657,9 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Hei, $UserName!
 
-ONLY OFFICE DocSpace Developer-lisenssi päättyy 7 päivän päästä.
+${LetterLogoText} DocSpace Developer-lisenssi päättyy 7 päivän päästä.
 
-Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia "${__SalesEmail}":"mailto:${__SalesEmail}.
+Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia "${__SalesEmail}":"mailto:${__SalesEmail}".
 
 Maksuihin liittyvissä kysymyksissä, ota yhteyttä "${__SalesEmail}":"mailto:${__SalesEmail}". Teknisiin ongelmiin liittyvissä kysymyksissä ole yhteydessä "${__SupportLink}":"${__SupportLink}".
 
@@ -1668,9 +1668,9 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
     <value>Hei, $UserName!
 
-ONLY OFFICE DocSpace Developer-lisenssin lisäaika päättyy 7 päivän päästä.Se tarkoittaa sitä, että DocSpace ei ole enää käytettävissä.
+${LetterLogoText} DocSpace Developer-lisenssin lisäaika päättyy 7 päivän päästä.Se tarkoittaa sitä, että DocSpace ei ole enää käytettävissä.
 
-Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia "${__SalesEmail}":"mailto:${__SalesEmail}.
+Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia "${__SalesEmail}":"mailto:${__SalesEmail}".
 
 Maksuihin liittyvissä kysymyksissä, ota yhteyttä "${__SalesEmail}":"mailto:${__SalesEmail}". Teknisiin ongelmiin liittyvissä kysymyksissä ole yhteydessä "${__SupportLink}":"${__SupportLink}".
 
@@ -1679,9 +1679,9 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
     <value>Hei, $UserName!
 
-ONLY OFFICE DocSpace Developer-lisenssin lisäaika päättyy tänään. Se tarkoittaa sitä, että DocSpace ei ole enää käytettävissä.
+${LetterLogoText} DocSpace Developer-lisenssin lisäaika päättyy tänään. Se tarkoittaa sitä, että DocSpace ei ole enää käytettävissä.
 
-Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia "${__SalesEmail}":"mailto:${__SalesEmail}.
+Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia "${__SalesEmail}":"mailto:${__SalesEmail}".
 
 Maksuihin liittyvissä kysymyksissä, ota yhteyttä "${__SalesEmail}":"mailto:${__SalesEmail}". Teknisiin ongelmiin liittyvissä kysymyksissä ole yhteydessä "${__SupportLink}":"${__SupportLink}".
 
@@ -1892,5 +1892,48 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 26px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Jos tarvitset apua, selaa &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL1"&gt;Help Centeriä&lt;/a&gt; tai kysy &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="${__SupportLink}"&gt;tuki tiimiltä&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
+  </data>
+  <data name="pattern_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Sinun ${LetterLogoText} DocSpace &lt;span style="color: #FF6F3D;"&gt;poistetaan&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Sinun ${LetterLogoText} DocSpace ${__VirtualRootPath} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; ei ole ollut aktiivinen yli vuoteen.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Koska olet päättänyt olla käyttämättä sitä, sinun ${LetterLogoText} DocSpace ja kaikki tiedot poistetaan &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Tietosuojakäytäntömme &lt;/a&gt; mukaisesti.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;Arvostamme palautettasi. Miksi olet lopettanut ${LetterLogoText} DocSpacen käyttämisen?&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Jos haluat jatkaa sinun ${LetterLogoText} DocSpacen käyttöä, kirjoita se ja tee mitä tahansa.&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_role_changed" xml:space="preserve">
+    <value>Hei!
+
+Sinulle on osoitettu uusi rooli DocSpacen huoneessa "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+
+Lue lisää huoneen rooleista ja oikeuksista "Help Centerissä":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_type_changed" xml:space="preserve">
+    <value>Hei!
+
+Sinulle on annettu uusi käyttäjätyyppi DocSpacessa "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
+
+Lue lisää käyttäjätyypeistä ja oikeuksista "Help Centerissä":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_rooms_activity" xml:space="preserve">
+    <value>Uutta portaalissasi ${__VirtualRootHost} viimeisen tunnin ajalta</value>
+  </data>
+  <data name="subject_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>${LetterLogoText} DocSpacesi poistetaan</value>
+  </data>
+  <data name="subject_user_type_changed" xml:space="preserve">
+    <value>DocSpace käyttäjätyyppisi on muuttunut</value>
+  </data>
+  <data name="subject_user_role_changed" xml:space="preserve">
+    <value>Roolisi Docspace-huoneessa on muuttunut</value>
   </data>
 </root>

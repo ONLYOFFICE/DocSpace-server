@@ -1918,4 +1918,31 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
+  <data name="subject_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>您的 ${LetterLogoText} 协作空间将被删除</value>
+  </data>
+  <data name="subject_user_role_changed" xml:space="preserve">
+    <value>您在协作空间房间中的权限已更改</value>
+  </data>
+  <data name="subject_user_type_changed" xml:space="preserve">
+    <value>您的协作空间用户类型已更改</value>
+  </data>
+  <data name="pattern_user_role_changed" xml:space="preserve">
+    <value>您好！
+
+您在协作空间房间 "${RoomTitle}":"${RoomUrl}" 中被分配了一个新权限：${UserRole}。
+
+了解更多关于房间中角色和权限的信息，请访问 "帮助中心":"${HelpCenterUrl}"。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_type_changed" xml:space="preserve">
+    <value>您好！
+
+您在协作空间中被分配了一个新的用户类型："${__VirtualRootPath}":"${__VirtualRootPath}"：${UserType}。
+
+在 "帮助中心":"${HelpCenterUrl}" 中了解更多关于用户类型和权限的信息。
+
+$TrulyYours</value>
+  </data>
 </root>

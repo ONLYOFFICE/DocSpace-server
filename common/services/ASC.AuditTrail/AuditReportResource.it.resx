@@ -871,4 +871,19 @@
   <data name="UpdateClient" xml:space="preserve">
     <value>Cliente {0} aggiornato</value>
   </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>Chiave API utente creata: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>Chiave API utente eliminata: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>Chiave API utente aggiornata: {0}</value>
+  </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>File: {0}. Filtro personalizzato disattivato</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>File: {0}. Filtro personalizzato attivato</value>
+  </data>
 </root>

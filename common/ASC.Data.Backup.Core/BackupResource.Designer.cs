@@ -70,7 +70,7 @@ namespace ASC.Data.Backup.Core {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The backup file is invalid. .
+        ///   Looks up a localized string similar to The backup file is invalid..
         /// </summary>
         internal static string BackupInvalid {
             get {

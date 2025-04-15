@@ -126,4 +126,13 @@
   <data name="LargeBackup" xml:space="preserve">
     <value>Rezervna kopija je veća nego celokupna veličina portala</value>
   </data>
+  <data name="BackupException" xml:space="preserve">
+    <value>Došlo je do greške prilikom kreiranja rezervne kopije. Pokušajte ponovo ili kontaktirajte podršku.</value>
+  </data>
+  <data name="BackupInvalid" xml:space="preserve">
+    <value>Fajl rezervne kopije nije važeći.</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>Došlo je do greške prilikom vraćanja rezervne kopije. Pokušajte ponovo ili kontaktirajte podršku.</value>
+  </data>
 </root>

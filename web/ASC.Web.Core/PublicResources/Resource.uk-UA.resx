@@ -1078,4 +1078,7 @@
   <data name="ErrorIpRestriction" xml:space="preserve">
     <value>Додайте мінімум 1 дозволену IP-адресу.</value>
   </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>URL-адреса вебхуку недоступна. Запит HEAD не повертає статус 200 http.</value>
+  </data>
 </root>

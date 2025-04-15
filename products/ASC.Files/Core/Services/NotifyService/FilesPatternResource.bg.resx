@@ -176,4 +176,63 @@ $OrangeButton</value>
   <data name="subject_FormSubmitted" xml:space="preserve">
     <value>DocSpace известие. Формулярът е попълнен</value>
   </data>
+  <data name="pattern_FormSubmitted_push" xml:space="preserve">
+    <value>Формуляр "$DocumentTitle" беше попълнен в стая "$RoomTitle"</value>
+  </data>
+  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
+    <value>$FromUserName премести стая "$RoomTitle" в архива</value>
+  </data>
+  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
+    <value>Бяхте поканени в стая "$RoomTitle"</value>
+  </data>
+  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
+    <value>Ролята ви в стая "$RoomTitle" беше променена на "$RoomRole"</value>
+  </data>
+  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
+    <value>Нов документ "$DocumentTitle" беше създаден в стаята "$RoomTitle"</value>
+  </data>
+  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
+    <value>Нов файл "$DocumentTitle" беше качен в стая "$RoomTitle"</value>
+  </data>
+  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
+    <value>Нови файлове бяха качени в стая "$RoomTitle" ($Count)</value>
+  </data>
+  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
+    <value>Нова папка "$FolderTitle" беше създадена в стая "$RoomTitle"</value>
+  </data>
+  <data name="pattern_EditorMentions_push" xml:space="preserve">
+    <value>$ToUserName ви спомена в документ $DocumentTitle</value>
+  </data>
+  <data name="subject_FormStartedFilling" xml:space="preserve">
+    <value>DocSpace известие.</value>
+  </data>
+  <data name="subject_YourTurnFormFilling" xml:space="preserve">
+    <value>DocSpace известие.</value>
+  </data>
+  <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
+    <value>DocSpace известие.</value>
+  </data>
+  <data name="subject_StoppedFormFilling" xml:space="preserve">
+    <value>DocSpace известие.</value>
+  </data>
+  <data name="pattern_FormStartedFilling" xml:space="preserve">
+    <value>
+      Известие за дейност. "$FromUserName":"$FromUserLink" започна процеса по попълване на формуляр:  "$DocumentTitle":"$DocumentURL" в стаята: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_YourTurnFormFilling" xml:space="preserve">
+    <value>
+      Известие за дейност. Ваш ред е! Изисква се попълване на формуляр: "$DocumentTitle":"$DocumentURL" в стаята: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
+    <value>
+      Известие за дейност. Формулярът "$DocumentTitle":"$DocumentURL" беше изцяло попълнен в стаята: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_StoppedFormFilling" xml:space="preserve">
+    <value>
+      Известие за дейност. "$FromUserName":"$FromUserLink" спря попълването на формуляра: "$DocumentTitle":"$DocumentURL" в стаята: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
 </root>

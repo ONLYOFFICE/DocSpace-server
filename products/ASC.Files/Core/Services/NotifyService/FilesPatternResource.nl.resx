@@ -176,4 +176,63 @@ $OrangeButton</value>
   <data name="subject_FormSubmitted" xml:space="preserve">
     <value>DocSpace melding. Het formulier is ingevuld</value>
   </data>
+  <data name="pattern_FormSubmitted_push" xml:space="preserve">
+    <value>Formulier "$DocumentTitel" is ingevuld in de kamer "$RoomTitel"</value>
+  </data>
+  <data name="subject_YourTurnFormFilling" xml:space="preserve">
+    <value>DocSpace melding.</value>
+  </data>
+  <data name="subject_StoppedFormFilling" xml:space="preserve">
+    <value>DocSpace melding.</value>
+  </data>
+  <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
+    <value>DocSpace melding.</value>
+  </data>
+  <data name="subject_FormStartedFilling" xml:space="preserve">
+    <value>DocSpace melding.</value>
+  </data>
+  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
+    <value>Er is een nieuwe map "$FolderTitle" aangemaakt in de kamer "$RoomTitle"</value>
+  </data>
+  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
+    <value>Er zijn nieuwe bestanden geüpload naar de kamer "$RoomTitle" ($Count)</value>
+  </data>
+  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
+    <value>Een nieuw bestand "$DocumentTitle" is geüpload naar de kamer "$RoomTitle"</value>
+  </data>
+  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
+    <value>Er is een nieuw document "$DocumentTitle" aangemaakt in de kamer "$RoomTitle"</value>
+  </data>
+  <data name="pattern_EditorMentions_push" xml:space="preserve">
+    <value>$ToUserName noemde u in het document $DocumentTitle</value>
+  </data>
+  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
+    <value>$FromUserName heeft de kamer "$RoomTitle" naar het archief verplaatst</value>
+  </data>
+  <data name="pattern_FormStartedFilling" xml:space="preserve">
+    <value>
+      Activiteitsmelding. "$FromUserName":"$FromUserLink" is begonnen met het invullen van het formulier: "$DocumentTitle":"$DocumentURL" in de kamer: "$RoomTitle":"$RoomURL" - $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_StoppedFormFilling" xml:space="preserve">
+    <value>
+      Activiteitsmelding. "$FromUserName":"$FromUserLink" gestopt met invullen van formulier: "$DocumentTitle":"$DocumentURL" in de kamer: "$RoomTitle":"$RoomURL" - $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_YourTurnFormFilling" xml:space="preserve">
+    <value>
+      Activiteitsmelding. Het is uw beurt! U moet een formulier invullen: "$DocumentTitle":"$DocumentURL" in de kamer: "$RoomTitle":"$RoomURL" - $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
+    <value>
+      Activiteitsmelding. Het formulier "$DocumentTitle":"$DocumentURL" is volledig ingevuld in de kamer: "$RoomTitle":"$RoomURL" - $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
+    <value>Je bent uitgenodigd in de kamer "$RoomTitle"</value>
+  </data>
+  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
+    <value>Uw rol in de kamer "$RoomTitle" is gewijzigd in "$RoomRole"</value>
+  </data>
 </root>

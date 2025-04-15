@@ -82,4 +82,7 @@
   <data name="UnknownLastName" xml:space="preserve">
     <value>Soyad</value>
   </data>
+  <data name="LicenseTypeNotCorrect" xml:space="preserve">
+    <value>Lisenziya Münaqişəsi. {0} DocSpace (Enterprise və ya Developer) düzgün buraxılışını quraşdırdığınızdan əmin olun. Hər hansı bir sualınız varsa, satış menecerinizlə əlaqə saxlayın.</value>
+  </data>
 </root>
