@@ -236,7 +236,7 @@ var openResty = builder.AddContainer(openRestyContainer, "openresty/openresty", 
     .WithBindMount(Path.Combine(clientBasePath, "packages", "client"), "/var/www/client")
     .WithBindMount(Path.Combine(clientBasePath, "packages", "login"), "/var/www/login")
     .WithBindMount(Path.Combine(clientBasePath, "packages", "management"), "/var/www/management")
-    .WithHttpEndpoint(restyPort, restyPort)
+    .WithHttpEndpoint(80, restyPort)
     .WaitFor(startPackages);
 
 var dict = new Dictionary<string, string>
@@ -341,8 +341,8 @@ void AddBaseConfig<T>(IResourceBuilder<T> resourceBuilder, bool includeHealthChe
 
     resourceBuilder
         .WithEnvironment("openTelemetry:enable", "true")
-        .WithEnvironment("files:docservice:url:portal", $"http://host.docker.internal:{restyPort.ToString()}")
-        .WithEnvironment("files:docservice:url:public", $"http://localhost:{restyPort.ToString()}/ds-vpath")
+        .WithEnvironment("files:docservice:url:portal", $"http://host.docker.internal")
+        .WithEnvironment("files:docservice:url:public", $"http://localhost/ds-vpath")
         .WithReference(mySql, "default:connectionString");
 
     if (isDocker)
