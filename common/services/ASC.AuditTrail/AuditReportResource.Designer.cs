@@ -195,6 +195,9 @@ namespace ASC.AuditTrail {
             }
         }
         
+        /// <summary>
+        ///   Looks up a localized string similar to The authorization link has been activated.
+        /// </summary>
         public static string AuthLinkActivated {
             get {
                 return ResourceManager.GetString("AuthLinkActivated", resourceCulture);
