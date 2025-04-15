@@ -27,51 +27,51 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// Request parameters for mail domain settings
+/// The request parameters for configuring trusted mail domains and visitor invitation settings.
 /// </summary>
 public class MailDomainSettingsRequestsDto
 {
     /// <summary>
-    /// Trusted domain type
+    /// Defines how trusted domains are handled and validated.
     /// </summary>
     public required TenantTrustedDomainsType Type { get; set; }
 
     /// <summary>
-    /// List of trusted domains
+    /// The list of authorized email domains that are considered trusted.
     /// </summary>
     public required List<string> Domains { get; set; }
 
     /// <summary>
-    /// Invites as a user or not
+    /// Specifies the default permission level for the invited users (visitors or not).
     /// </summary>
     public bool InviteUsersAsVisitors { get; set; }
 }
 
 /// <summary>
-/// Request parameters for administrator message settings
+/// The request parameters for the administrator message configuration.
 /// </summary>
 public class AdminMessageBaseSettingsRequestsDto
 {
     /// <summary>
-    /// Email
+    /// The email address used for sending administrator messages.
     /// </summary>
     [EmailAddress]
     [StringLength(255)]
     public required string Email { get; set; }
 
     /// <summary>
-    /// Culture
+    /// The locale identifier for message localization.
     /// </summary>
     public string Culture { get; set; }
 }
 
 /// <summary>
-/// Request parameters for administrator message settings
+/// The request parameters for configuring the administrator message content.
 /// </summary>
 public class AdminMessageSettingsRequestsDto
 {
     /// <summary>
-    /// Message
+    /// The content of the administrator message to be sent.
     /// </summary>
     [StringLength(255)]
     public required string Message { get; set; }
@@ -90,12 +90,12 @@ public class AdminMessageSettingsRequestsDto
 }
 
 /// <summary>
-/// Request parameters for administrator message settings
+/// The request parameters for enabling or disabling administrator messaging system.
 /// </summary>
 public class TurnOnAdminMessageSettingsRequestDto
 {
     /// <summary>
-    /// Specifies if the administrator messages are enabled or not
+    /// The global switch for the administrator messaging functionality.
     /// </summary>
     public bool TurnOn { get; set; }
 }

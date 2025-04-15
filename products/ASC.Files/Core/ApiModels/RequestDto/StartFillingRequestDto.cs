@@ -27,12 +27,12 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters to start filling a file
+/// The request parameters to start filling a file.
 /// </summary>
 public class StartFillingRequestDto<T>
 {
     /// <summary>
-    /// File ID
+    /// The file ID to start filling.
     /// </summary>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }

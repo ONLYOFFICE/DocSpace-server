@@ -26,45 +26,48 @@
 
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
+/// <summary>
+/// The authentication token parameters.
+/// </summary>
 public class AuthenticationTokenDto
 {
     /// <summary>
-    /// Authentication token
+    /// The authentication token.
     /// </summary>
     [SwaggerSchemaCustom(Example = "abcde12345")]
     public string Token { get; set; }
 
     /// <summary>
-    /// Token expiration time
+    /// The token expiration time.
     /// </summary>
     public DateTime Expires { get; set; }
 
     /// <summary>
-    /// Specifies if the authentication code is sent by SMS or not
+    /// Specifies if the authentication code is sent by SMS or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool Sms { get; set; }
 
     /// <summary>
-    /// Phone number
+    /// The phone number.
     /// </summary>
     [SwaggerSchemaCustom(Example = "")]
     public string PhoneNoise { get; set; }
 
     /// <summary>
-    /// Specifies if the two-factor application is used or not
+    /// Specifies if the two-factor application is used or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool Tfa { get; set; }
 
     /// <summary>
-    /// Two-factor authentication key
+    /// The two-factor authentication key.
     /// </summary>
     [SwaggerSchemaCustom(Example = "")]
     public string TfaKey { get; set; }
 
     /// <summary>
-    /// Confirmation email URL
+    /// The confirmation email URL.
     /// </summary>
     [Url]
     public string ConfirmUrl { get; set; }

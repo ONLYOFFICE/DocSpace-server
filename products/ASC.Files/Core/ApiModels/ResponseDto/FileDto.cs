@@ -26,174 +26,184 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// The file parameters.
+/// </summary>
 public class FileDto<T> : FileEntryDto<T>
 {
     /// <summary>
-    /// Folder ID
+    /// The folder ID where the file is located.
     /// </summary>
     public T FolderId { get; set; }
 
     /// <summary>
-    /// Version
+    /// The file version.
     /// </summary>
     [SwaggerSchemaCustom(Example = 3)]
     public int Version { get; set; }
 
     /// <summary>
-    /// Version group
+    /// The version group of the file.
     /// </summary>
     [SwaggerSchemaCustom(Example = 1)]
     public int VersionGroup { get; set; }
 
     /// <summary>
-    /// Content length
+    /// The content length of the file.
     /// </summary>
     [SwaggerSchemaCustom(Example = "12345")]
     public string ContentLength { get; set; }
 
     /// <summary>
-    /// Pure content length
+    /// The pure content length of the file.
     /// </summary>
     public long? PureContentLength { get; set; }
 
     /// <summary>
-    /// File status
+    /// The current status of the file.
     /// </summary>
     public FileStatus FileStatus { get; set; }
 
     /// <summary>
-    /// Muted or not
+    /// Specifies if the file is muted or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool Mute { get; set; }
 
     /// <summary>
-    /// URL to view a file
+    /// The URL link to view the file.
     /// </summary>
     [SwaggerSchemaCustom(Example = "https://www.onlyoffice.com/viewfile?fileid=2221")]
     [Url]
     public string ViewUrl { get; set; }
 
     /// <summary>
-    /// Web URL
+    /// The Web URL link to the file.
     /// </summary>
     [Url]
     public string WebUrl { get; set; }
 
     /// <summary>
-    /// Short Web URL
+    /// The short Web URL.
     /// </summary>
     [Url]
     public string ShortWebUrl { get; set; }
 
     /// <summary>
-    /// File type
+    /// The file type.
     /// </summary>
     public FileType FileType { get; set; }
 
     /// <summary>
-    /// File extension
+    /// The file extension.
     /// </summary>
     [SwaggerSchemaCustom(Example = ".txt")]
     public string FileExst { get; set; }
 
     /// <summary>
-    /// Comment
+    /// The comment to the file.
     /// </summary>
     public string Comment { get; set; }
 
     /// <summary>
-    /// Encrypted or not
+    /// Specifies if the file is encrypted or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool? Encrypted { get; set; }
 
     /// <summary>
-    /// Thumbnail URL
+    /// The thumbnail URL of the file.
     /// </summary>
     [Url]
     public string ThumbnailUrl { get; set; }
 
     /// <summary>
-    /// Thumbnail status
+    /// The current thumbnail status of the file.
     /// </summary>
     public Thumbnail ThumbnailStatus { get; set; }
 
     /// <summary>
-    /// Locked or not
+    /// Specifies if the file is locked or not.
     /// </summary>
     public bool? Locked { get; set; }
 
     /// <summary>
-    /// User name who locked a file
+    /// The user ID of the person who locked the file.
     /// </summary>
     public string LockedBy { get; set; }
 
     /// <summary>
-    /// Is there a draft or not
+    /// Specifies if the file has a draft or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool? HasDraft { get; set; }
 
     /// <summary>
-    /// Status of the form filling process
+    /// The status of the form filling process.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public FormFillingStatus FormFillingStatus { get; set; } = FormFillingStatus.None;
 
     /// <summary>
-    /// Is there a form or not
+    /// Specifies if the file is a form or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool? IsForm { get; set; }
 
     /// <summary>
-    /// Is Custom Filter editing mode enabled for a file or not
+    /// Specifies if the Custom Filter editing mode is enabled for a file or not.
     /// </summary>
     public bool? CustomFilterEnabled { get; set; }
 
     /// <summary>
-    /// User name who enabled a Custom Filter editing mode for a file
+    /// The name of the user who enabled a Custom Filter editing mode for a file.
     /// </summary>
     public string CustomFilterEnabledBy { get; set; }
 
     /// <summary>
-    /// Specifies if the filling has started or not
+    /// Specifies if the filling has started or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool? StartFilling { get; set; }
 
     /// <summary>
-    /// InProcess folder ID
+    /// The InProcess folder ID of the file.
     /// </summary>
     public int? InProcessFolderId { get; set; }
 
     /// <summary>
-    /// InProcess folder title
+    /// The InProcess folder title of the file.
     /// </summary>
     public string InProcessFolderTitle { get; set; }
 
     /// <summary>
-    /// Draft info
+    /// The file draft information with its location.
     /// </summary>
     public DraftLocation<T> DraftLocation { get; set; }
 
     /// <summary>
-    /// File accessibility
+    /// The file accessibility.
     /// </summary>
     public IDictionary<Accessibility, bool> ViewAccessibility { get; set; }
 
     /// <summary>
-    /// Available external rights
+    /// The available external rights of the file.
     /// </summary>
     public IDictionary<string, bool> AvailableExternalRights { get; set; }
 
     /// <summary>
-    /// Last opened
+    /// The time when the file was last opened.
     /// </summary>
     public ApiDateTime LastOpened { get; set; }
+
+    /// <summary>
+    /// The date when the file will be expired.
+    /// </summary>
     public ApiDateTime Expired { get; set; }
-    
+
+    /// <summary>
+    /// The file entry type.
+    /// </summary>
     public override FileEntryType FileEntryType { get => FileEntryType.File; }
 }
 
@@ -250,7 +260,7 @@ public class FileDtoHelper(
 
         var fileDao = _daoFactory.GetFileDao<T>();
 
-        if (file.IsForm)
+        if (await DocSpaceHelper.IsFormOrCompletedForm(file, fileDao))
         {
             var folderDao = _daoFactory.GetCacheFolderDao<T>();
 
@@ -311,6 +321,23 @@ public class FileDtoHelper(
 
             result.HasDraft = result.IsForm == true ? !Equals(linkedId, default(T)) : null;
 
+            var formFilling = properties?.FormFilling;
+            if (formFilling != null)
+            {
+                result.StartFilling = formFilling.StartFilling;
+                if (!Equals(linkedId, default(T)))
+                {
+                    var draftLocation = new DraftLocation<T> { FolderId = formFilling.ToFolderId, FolderTitle = formFilling.Title, FileId = linkedId };
+                    var draft = await fileDao.GetFileAsync(linkedId);
+                    if (draft != null)
+                    {
+                        draftLocation.FileTitle = draft.Title;
+                    }
+
+                    result.DraftLocation = draftLocation;
+                }
+            }
+
             if (currentRoom is { FolderType: FolderType.VirtualDataRoom })
             {
                 var (currentStep, roles) = await fileDao.GetUserFormRoles(file.Id, authContext.CurrentAccount.ID);
@@ -349,23 +376,6 @@ public class FileDtoHelper(
                                 break;
                         }
                     }
-                }
-            }
-
-            var formFilling = properties?.FormFilling;
-            if (formFilling != null)
-            {
-                result.StartFilling = formFilling.StartFilling;
-                if (!Equals(linkedId, default(T)))
-                {
-                    var draftLocation = new DraftLocation<T> { FolderId = formFilling.ToFolderId, FolderTitle = formFilling.Title, FileId = linkedId };
-                    var draft = await fileDao.GetFileAsync(linkedId);
-                    if (draft != null)
-                    {
-                        draftLocation.FileTitle = draft.Title;
-                    }
-
-                    result.DraftLocation = draftLocation;
                 }
             }
         }
@@ -451,25 +461,28 @@ public class FileDtoHelper(
     }
 }
 
+/// <summary>
+/// The file draft parameters.
+/// </summary>
 public class DraftLocation<T>
 {
     /// <summary>
-    /// InProcess folder ID
+    /// The InProcess folder ID of the draft.
     /// </summary> 
     public T FolderId { get; set; }
 
     /// <summary>
-    /// InProcess folder title
+    /// The InProcess folder title of the draft.
     /// </summary>
     public string FolderTitle { get; set; }
 
     /// <summary>
-    /// Draft ID
+    /// The draft ID.
     /// </summary>
     public T FileId { get; set; }
 
     /// <summary>
-    /// Draft title
+    /// The draft title.
     /// </summary>
     public string FileTitle { get; set; }
 }

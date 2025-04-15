@@ -26,6 +26,9 @@
 
 namespace ASC.Core;
 
+/// <summary>
+/// The account login type.
+/// </summary>
 public enum AccountLoginType
 {
     [SwaggerEnum("SSO")]

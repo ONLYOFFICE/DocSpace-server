@@ -27,12 +27,12 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// Storage encryption request parameters
+/// The request parameters for managing storage encryption operations and notifications.
 /// </summary>
 public class StorageEncryptionRequestsDto
 {
     /// <summary>
-    /// Specifies if the users will be notified about the encryption process or note
+    /// Specifies whether the users receive notifications about the storage encryption operations.
     /// </summary>
     public bool NotifyUsers { get; set; }
 }

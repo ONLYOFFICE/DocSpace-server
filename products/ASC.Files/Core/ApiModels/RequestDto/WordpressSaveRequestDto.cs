@@ -27,12 +27,12 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for saving WordPress information
+/// The request parameters for saving WordPress information.
 /// </summary>
 public class WordpressSaveRequestDto
 {
     /// <summary>
-    /// Authorization code
+    /// The authorization code for saving WordPress information.
     /// </summary>
     public string Code { get; set; }
 }

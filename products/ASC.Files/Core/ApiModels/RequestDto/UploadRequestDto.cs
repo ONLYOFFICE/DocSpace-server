@@ -27,42 +27,42 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for uploading a file
+/// The request parameters for uploading a file.
 /// </summary>
 public class UploadRequestDto : IModelWithFile, IDisposable
 {
     /// <summary>
-    /// File
+    /// The file to be uploaded.
     /// </summary>
     public IFormFile File { get; set; }
 
     /// <summary>
-    /// Content-Type header
+    /// The content-type header.
     /// </summary>
     public ContentType ContentType { get; set; }
 
     /// <summary>
-    /// Content-Disposition header
+    /// The content-disposition header.
     /// </summary>
     public ContentDisposition ContentDisposition { get; set; }
 
     /// <summary>
-    /// List of files when specified as multipart/form-data
+    /// The list of files when specified as multipart/form-data.
     /// </summary>
     public IEnumerable<IFormFile> Files { get; set; }
 
     /// <summary>
-    /// Specifies whether to create a new file if it already exists or not
+    /// Specifies whether to create the new file if it already exists or not.
     /// </summary>
     public bool CreateNewIfExist { get; set; }
 
     /// <summary>
-    /// Specifies whether to upload documents in the original formats as well or not
+    /// Specifies whether to upload documents in the original formats as well or not.
     /// </summary>
     public bool? StoreOriginalFileFlag { get; set; }
 
     /// <summary>
-    /// Specifies whether to keep the file converting status or not
+    /// Specifies whether to keep the file converting status or not.
     /// </summary>
     public bool KeepConvertStatus { get; set; }
 
@@ -70,7 +70,7 @@ public class UploadRequestDto : IModelWithFile, IDisposable
     private bool _disposedValue;
 
     /// <summary>
-    /// Request input stream
+    /// The request input stream.
     /// </summary>
     public Stream Stream
     {
@@ -106,18 +106,18 @@ public class UploadRequestDto : IModelWithFile, IDisposable
 }
 
 /// <summary>
-/// Request parameters for uploading a file to a specific folder
+/// The request parameters for uploading a file to a specific folder.
 /// </summary>
 public class UploadWithFolderRequestDto<T>
 {
     /// <summary>
-    /// Folder ID
+    /// The folder ID to upload a file.
     /// </summary>
     [FromRoute(Name = "folderId")]
     public required T FolderId { get; set; }
 
     /// <summary>
-    /// Upload data
+    /// The request parameters for uploading a file.
     /// </summary>
     [FromBody]
     [ModelBinder(BinderType = typeof(UploadModelBinder))]

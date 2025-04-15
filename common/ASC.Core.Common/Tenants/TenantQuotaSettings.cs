@@ -26,9 +26,15 @@
 
 namespace ASC.Core.Tenants;
 
+/// <summary>
+/// The tenant quota settings.
+/// </summary>
 [Serializable]
 public class TenantQuotaSettings : ISettings<TenantQuotaSettings>
 {
+    /// <summary>
+    /// The tenant ID.
+    /// </summary>
     [JsonIgnore]
     public Guid ID
     {
@@ -36,17 +42,17 @@ public class TenantQuotaSettings : ISettings<TenantQuotaSettings>
     }
 
     /// <summary>
-    /// Specifies if the quota is enabled or not
+    /// Specifies if the tenant quota is enabled or not.
     /// </summary>
     public bool EnableQuota { get; set; }
 
     /// <summary>
-    /// Quota
+    /// The tenant quota.
     /// </summary>
     public long Quota { get; set; }
 
     /// <summary>
-    /// Date of the last quota recalculation
+    /// The date of the last tenant quota recalculation.
     /// </summary>
     public DateTime? LastRecalculateDate { get; set; }
 

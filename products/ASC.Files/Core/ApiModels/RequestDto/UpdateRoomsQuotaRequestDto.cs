@@ -27,29 +27,29 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for updating room
+/// The request parameters for updating the room quota.
 /// </summary>
 public class UpdateRoomsQuotaRequestDto<T>
 {
     /// <summary>
-    /// List of room IDs
+    /// The list of room IDs.
     /// </summary>
     public IEnumerable<JsonElement> RoomIds { get; set; } = new List<JsonElement>();
 
     /// <summary>
-    /// Room quota
+    /// The room quota.
     /// </summary>
     public long Quota { get; set; }
 
 }
 
 /// <summary>
-/// Request parameters for updating room
+/// The request parameters for updating the room.
 /// </summary>
 public class UpdateRoomsRoomIdsRequestDto<T>
 {
     /// <summary>
-    /// List of room IDs
+    /// The list of room IDs.
     /// </summary>
     public IEnumerable<JsonElement> RoomIds { get; set; } = new List<JsonElement>();
 }

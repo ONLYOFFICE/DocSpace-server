@@ -81,12 +81,14 @@ public class CreateRoomFromTemplateOperation : DistributedTaskProgress
 
     protected override async Task DoJob()
     {
-        var tenantManager = _serviceProvider.GetService<TenantManager>();
-        var securityContext = _serviceProvider.GetService<SecurityContext>();
-        var fileStorageService = _serviceProvider.GetService<FileStorageService>();
-        var roomLogoManager = _serviceProvider.GetService<RoomLogoManager>();
-        var logger = _serviceProvider.GetService<ILogger<CreateRoomFromTemplateOperation>>();
-        var daoFactory = _serviceProvider.GetService<IDaoFactory>();
+
+        await using var scope = _serviceProvider.CreateAsyncScope();
+        var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
+        var securityContext = scope.ServiceProvider.GetService<SecurityContext>();
+        var fileStorageService = scope.ServiceProvider.GetService<FileStorageService>();
+        var roomLogoManager = scope.ServiceProvider.GetService<RoomLogoManager>();
+        var logger = scope.ServiceProvider.GetService<ILogger<CreateRoomFromTemplateOperation>>();
+        var daoFactory = scope.ServiceProvider.GetService<IDaoFactory>();
         var folderDao = daoFactory.GetFolderDao<int>();
 
         try

@@ -27,17 +27,17 @@
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// Response containing WordPress integration information and operation status
+/// The response containing the WordPress integration information and operation status.
 /// </summary>
 public class WordpressInfoResponse
 {
     /// <summary>
-    /// Indicates whether the WordPress operation was successful
+    /// Indicates whether the WordPress operation was successful.
     /// </summary>
     public bool Success { get; set; }
 
     /// <summary>
-    /// The WordPress-related data or information
+    /// The WordPress-related data or information.
     /// </summary>
     public string Data { get; set; }
 }

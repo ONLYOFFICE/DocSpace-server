@@ -27,73 +27,73 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// Team template parameters
+/// The request parameters for the team template identification.
 /// </summary>
 public class SchemaBaseRequestsDto
 {
     /// <summary>
-    /// Team template ID
+    /// The team template ID.
     /// </summary>
     public string Id { get; init; }
 }
 
 /// <summary>
-/// Team template parameters
+/// The request parameters for the comprehensive team template configuration.
 /// </summary>
 public class SchemaRequestsDto
 {
     /// <summary>
-    /// Team template ID
+    /// The team template ID.
     /// </summary>
     public string Id { get; init; }
 
     /// <summary>
-    /// Team template name
+    /// The display name for the team template.
     /// </summary>
     public string Name { get; set; }
 
     /// <summary>
-    /// User caption
+    /// The label for the single user references.
     /// </summary>
     public string UserCaption { get; init; }
 
     /// <summary>
-    /// Users caption
+    /// The label for the multiple user references.
     /// </summary>
     public string UsersCaption { get; init; }
 
     /// <summary>
-    /// Group caption
+    /// The label for the single group references.
     /// </summary>
     public string GroupCaption { get; init; }
 
     /// <summary>
-    /// Groups caption
+    /// The label for the multiple group references.
     /// </summary>
     public string GroupsCaption { get; init; }
 
     /// <summary>
-    /// User status caption
+    /// The label for the user position or status.
     /// </summary>
     public string UserPostCaption { get; init; }
 
     /// <summary>
-    /// Registration date caption
+    /// The label for the member registration date.
     /// </summary>
     public string RegDateCaption { get; init; }
 
     /// <summary>
-    /// Group lead caption
+    /// The label for the group leader position.
     /// </summary>
     public string GroupHeadCaption { get; init; }
 
     /// <summary>
-    /// Guest caption
+    /// The label for the single guest/external user references.
     /// </summary>
     public string GuestCaption { get; init; }
 
     /// <summary>
-    /// Guests caption
+    /// The label for the multiple guest/external user references.
     /// </summary>
     public string GuestsCaption { get; init; }
 }

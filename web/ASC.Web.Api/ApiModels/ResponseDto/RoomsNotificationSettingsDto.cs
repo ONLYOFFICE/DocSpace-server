@@ -26,10 +26,13 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
+/// <summary>
+/// The rooms notification settings.
+/// </summary>
 public class RoomsNotificationSettingsDto : IMapFrom<RoomsNotificationSettings>
 {
     /// <summary>
-    /// List of rooms with the disabled notifications
+    /// The list of rooms with the disabled notifications.
     /// </summary>
     public List<object> DisabledRooms { get; set; }
 }

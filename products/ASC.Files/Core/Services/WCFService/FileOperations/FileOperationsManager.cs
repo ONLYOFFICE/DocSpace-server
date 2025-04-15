@@ -394,8 +394,8 @@ public class FileMoveCopyOperationsManager(
         op.Init(holdResult, copy);
         var taskId = await _fileOperationsManagerHolder.Publish(op);
         
-        var data = new FileMoveCopyOperationData<int>(folderIntIds, fileIntIds, tenantId, userId, destFolderId, copy, resolveType, holdResult, toFillOut, GetHttpHeaders(), sessionSnapshot); 
-        var thirdPartyData = new FileMoveCopyOperationData<string>(folderStringIds, fileStringIds, tenantId, userId, destFolderId, copy, resolveType, holdResult, toFillOut, GetHttpHeaders(), sessionSnapshot);
+        var data = new FileMoveCopyOperationData<int>(folderIntIds, fileIntIds, tenantId, userId, destFolderId, copy, resolveType, toFillOut, holdResult, GetHttpHeaders(), sessionSnapshot); 
+        var thirdPartyData = new FileMoveCopyOperationData<string>(folderStringIds, fileStringIds, tenantId, userId, destFolderId, copy, resolveType, toFillOut, holdResult, GetHttpHeaders(), sessionSnapshot);
         
         await _eventBus.PublishAsync(new MoveOrCopyIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
         {

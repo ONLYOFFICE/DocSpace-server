@@ -26,52 +26,55 @@
 
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
+/// <summary>
+/// The request parameters for querying the webhook delivery logs with various filter criteria.
+/// </summary>
 public class WebhookLogsRequestDto
 {
     /// <summary>
-    /// Delivey start time
+    /// The delivery start time for filtering webhook logs.
     /// </summary>
     [FromQuery(Name = "deliveryFrom")]
     public DateTime? DeliveryFrom { get; set; }
 
     /// <summary>
-    /// Delivey end time
+    /// The delivery end time for filtering webhook logs.
     /// </summary>
     [FromQuery(Name = "deliveryTo")]
     public DateTime? DeliveryTo {  get; set; }
 
     /// <summary>
-    /// Hook URI
+    /// The destination URL where webhooks are delivered.
     /// </summary>
     [FromQuery(Name = "hookUri")]
     public string HookUri { get; set; }
 
     /// <summary>
-    /// Config ID
+    /// The webhook configuration identifier.
     /// </summary>
     [FromQuery(Name = "configId")]
     public int? ConfigId {  get; set; }
 
     /// <summary>
-    /// Event ID
+    /// The unique identifier of the event that triggered the webhook.
     /// </summary>
     [FromQuery(Name = "eventId")]
     public int? EventId { get; set; }
 
     /// <summary>
-    /// Webhook group status
+    /// The status of the webhook delivery group.
     /// </summary>
     [FromQuery(Name = "groupStatus")]
     public WebhookGroupStatus? GroupStatus { get; set; }
 
     /// <summary>
-    /// User ID
+    /// The identifier of the user associated with the webhook event.
     /// </summary>
     [FromQuery(Name = "userId")]
     public Guid? UserId { get; set; }
 
     /// <summary>
-    /// Trigger
+    /// The type of event that triggered the webhook.
     /// </summary>
     [FromQuery(Name = "trigger")]
     public WebhookTrigger? Trigger { get; set; }

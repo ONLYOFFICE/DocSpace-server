@@ -27,6 +27,7 @@
 
 package com.asc.registration.application.transfer;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 /**
@@ -38,6 +39,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Error response containing a human-readable explanation of the error")
 public class ErrorResponse {
   /** The reason for the error. */
   private String reason;

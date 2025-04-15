@@ -323,7 +323,7 @@ internal class FileDao(
         }
         if (applyFormStepFilter)
         {
-            q = q.Where(f => f.Category == (int)FilterType.PdfForm &&
+            q = q.Where(f => (f.Category == (int)FilterType.PdfForm || f.Category == (int)FilterType.Pdf) &&
                     filesDbContext.FilesFormRoleMapping.Any(r =>
                         r.TenantId == tenantId && r.FormId == f.Id && r.UserId == securityContext.CurrentAccount.ID)
             );
@@ -578,6 +578,7 @@ internal class FileDao(
                         ConvertedType = file.ConvertedType,
                         Comment = file.Comment,
                         Encrypted = file.Encrypted,
+                        FileStatus = (int)file.FileStatus,
                         Forcesave = file.Forcesave,
                         ThumbnailStatus = file.ThumbnailStatus,
                         TenantId = tenantId
@@ -939,6 +940,8 @@ internal class FileDao(
 
             await DeleteCustomOrder(filesDbContext, fileId);
 
+            var entryEventsIds = await context.GetAuditEventsIdsAsync(fileId, FileEntryType.File).ToListAsync();
+            await context.MarkAuditReferencesAsCorruptedAsync(entryEventsIds);
             await context.DeleteAuditReferencesAsync(fileId, FileEntryType.File);
 
             await context.SaveChangesAsync();
@@ -1088,17 +1091,14 @@ internal class FileDao(
             {
                 var oldParentId = (await q.FirstOrDefaultAsync())?.ParentId;
 
+                await q.ExecuteUpdateAsync(f => f.SetProperty(p => p.ParentId, toFolderId));
+                
                 if (trashId.Equals(toFolderId))
                 {
-                    await q.ExecuteUpdateAsync(f => f
-                    .SetProperty(p => p.ParentId, toFolderId)
-                    .SetProperty(p => p.ModifiedBy, _authContext.CurrentAccount.ID)
-                    .SetProperty(p => p.ModifiedOn, DateTime.UtcNow));
                     await DeleteCustomOrder(filesDbContext, fileId);
                 }
                 else
                 {
-                    await q.ExecuteUpdateAsync(f => f.SetProperty(p => p.ParentId, toFolderId));
                     await SetCustomOrder(filesDbContext, fileId, toFolderId);
                 }
 

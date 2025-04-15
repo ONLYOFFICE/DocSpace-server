@@ -526,6 +526,12 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
                 return room;
             }
         }
+
+        if(folder.RootFolderType == FolderType.USER)
+        {
+            return await folderDao.GetRootFolderAsync(folder.Id);
+        }
+
         return folder;
     }
 
@@ -673,6 +679,10 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         if (result.CanFill) 
         {
             result.EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
+        }
+        else
+        {
+            result.EditorType = editorType;
         }
         return result;
     }

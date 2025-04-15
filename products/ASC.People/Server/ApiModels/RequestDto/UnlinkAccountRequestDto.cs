@@ -26,14 +26,13 @@
 
 namespace ASC.People.ApiModels.RequestDto;
 
-
 /// <summary>
-/// 
+/// The request parameters for unlinking a third-party account.
 /// </summary>
 public class UnlinkAccountRequestDto
 {
     /// <summary>
-    /// Provider name
+    /// The provider name.
     /// </summary>
     [FromQuery(Name = "provider")]
     public string Provider { get; set; }

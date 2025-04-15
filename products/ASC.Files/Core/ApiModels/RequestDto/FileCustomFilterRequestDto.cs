@@ -27,29 +27,29 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Parameters for setting Custom Filter editing mode
+/// The parameters for setting the Custom Filter editing mode.
 /// </summary>
 public class CustomFilterParameters
 {
     /// <summary>
-    /// Specifies Custom Filter editing mode enabled or not
+    /// Specifies whether the Custom Filter editing mode is enabled or not.
     /// </summary>
     public bool Enabled { get; set; }
 }
 
 /// <summary>
-/// Request parameters for setting Custom Filter editing mode for a file
+/// The request parameters for setting the Custom Filter editing mode for a file.
 /// </summary>
 public class FileCustomFilterRequestDto<T>
 {
     /// <summary>
-    /// File ID
+    /// The file ID.
     /// </summary>
     [FromRoute(Name = "fileId")]
     public T FileId { get; set; }
 
     /// <summary>
-    /// Parameters for setting Custom Filter editing mode
+    /// The parameters for setting the Custom Filter editing mode.
     /// </summary>
     [FromBody]
     public CustomFilterParameters Parameters { get; set; }

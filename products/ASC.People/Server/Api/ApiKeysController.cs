@@ -45,12 +45,11 @@ public class ApiKeysController(
     IMapper mapper) : ControllerBase
 {
     /// <summary>
-    ///  Create a user api key
+    ///  Creates a user API key with the parameters specified in the request.
     /// </summary>  
     /// <short>
-    ///  Create a user api key
+    ///  Create a user API key
     /// </short>
-    /// <param name="apiKey">User api key params</param>
     /// <path>api/2.0/keys</path>
     [Tags("Api keys")]
     [SwaggerResponse(200, "Create a user api key", typeof(ApiKeyResponseDto))]
@@ -94,12 +93,13 @@ public class ApiKeysController(
     }
 
     /// <summary>
-    ///  List of all available permissions for key
+    ///  Returns a list of all available permissions for the API key.
     /// </summary>  
     /// <short>
-    ///  List of all available permissions for key
+    /// Get API key permissions
     /// </short>
     /// <path>api/2.0/keys/permissions</path>
+    /// <collection>list</collection>
     [Tags("Api keys")]
     [SwaggerResponse(200, "List of all available permissions for key", typeof(IEnumerable<string>))]
     [HttpGet("permissions")]
@@ -112,12 +112,13 @@ public class ApiKeysController(
 
 
     /// <summary>
-    ///  Get list api keys for user
+    ///  Returns a list of all API keys for the current user.
     /// </summary>  
     /// <short>
-    ///  Get list api keys for user
+    ///  Get user API keys
     /// </short>
     /// <path>api/2.0/keys</path>
+    /// <collection>list</collection>
     [Tags("Api keys")]
     [SwaggerResponse(200, "List of api keys for user", typeof(IAsyncEnumerable<ApiKeyResponseDto>))]
     [HttpGet]
@@ -145,10 +146,10 @@ public class ApiKeysController(
     }
 
     /// <summary>
-    ///  Updates the existing api key changing the name, permissions and status
+    ///  Updates an existing API key changing its name, permissions and status.
     /// </summary>  
     /// <short>
-    ///  Update optional params for user api keys
+    ///  Update an API key
     /// </short>
     /// <path>api/2.0/keys/{keyId}</path>
     [Tags("Api keys")]
@@ -189,12 +190,12 @@ public class ApiKeysController(
     }
 
     /// <summary>
-    ///  Delete a user api key by key id
+    ///  Delete a user API key by its ID.
     /// </summary>  
     /// <short>
-    ///  Delete a user api key by key id
+    ///  Delete a user API key
     /// </short>
-    /// <param name="keyId">Api key id</param>
+    /// <param name="keyId">The API key ID.</param>
     /// <path>api/2.0/keys/{keyId}</path>
     [Tags("Api keys")]
     [SwaggerResponse(200, "Delete a user api key", typeof(bool))]

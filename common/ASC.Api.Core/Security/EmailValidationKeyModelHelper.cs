@@ -48,7 +48,7 @@ public class EmailValidationKeyModelHelper(
 {
     public EmailValidationKeyModel GetModel()
     {
-        var request = QueryHelpers.ParseQuery(httpContextAccessor.HttpContext.Request.Headers["confirm"]);
+        var request = ParseQuery(httpContextAccessor.HttpContext.Request.Headers["confirm"]);
 
         var type = request.TryGetValue("type", out var value) ? (string)value : null;
 
@@ -211,12 +211,19 @@ public class EmailValidationKeyModelHelper(
                 checkKeyResult = provider.ValidateEmailKey(email + type + first, key, provider.ValidAuthKeyInterval);
                 break;
             case ConfirmType.Auth:
+                var validInterval = DateTime.UtcNow.Add(-provider.ValidAuthKeyInterval);
+                var authLinkActivatedEvent = (await loginEventsRepository.GetByFilterAsync(action: MessageAction.AuthLinkActivated, fromDate: validInterval))
+                    .FirstOrDefault(x=> x.Description.Contains(key));
+                if (authLinkActivatedEvent != null)
+                {
+                    return ValidationResult.Invalid;
+                }
+
                 checkKeyResult = provider.ValidateEmailKey(email + type + first, key, provider.ValidAuthKeyInterval);
                 if (checkKeyResult == ValidationResult.Invalid)
                 {
                     userInfo = await userManager.GetUserByEmailAsync(email);
                     var portalRenameEvent = (await auditEventsRepository.GetByFilterAsync(action: MessageAction.PortalRenamed, target: MessageTarget.Create(tenantManager.GetCurrentTenantId()).ToString(), limit: 1)).FirstOrDefault();
-                    var validInterval = DateTime.UtcNow.Add(-provider.ValidAuthKeyInterval);
                     if (portalRenameEvent != null)
                     {                    
                         var portalRenameEventDate = tenantUtil.DateTimeToUtc(portalRenameEvent.Date);
@@ -269,5 +276,40 @@ public class EmailValidationKeyModelHelper(
             var user = await userManager.GetUserByEmailAsync(email);
             return ownerId.Equals(user.Id);
         }
+    }
+    
+    private static Dictionary<string, StringValues> ParseQuery(string queryString)
+    {
+        var result = ParseNullableQuery(queryString);
+
+        if (result == null)
+        {
+            return new Dictionary<string, StringValues>();
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Parse a query string into its component key and value parts.
+    /// </summary>
+    /// <param name="queryString">The raw query string value, with or without the leading '?'.</param>
+    /// <returns>A collection of parsed keys and values, null if there are no entries.</returns>
+    private static Dictionary<string, StringValues> ParseNullableQuery(string queryString)
+    {
+        var accumulator = new KeyValueAccumulator();
+        var enumerable = new QueryStringEnumerable(queryString);
+
+        foreach (var pair in enumerable)
+        {
+            accumulator.Append(pair.EncodedName.ToString(), pair.DecodeValue().ToString());
+        }
+
+        if (!accumulator.HasValues)
+        {
+            return null;
+        }
+
+        return accumulator.GetResults();
     }
 }

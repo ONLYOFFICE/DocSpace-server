@@ -93,7 +93,7 @@ public class WebhooksController(ApiContext context,
     }
 
     /// <summary>
-    /// Updates the tenant webhook with the parameters specified in the request.
+    /// Updates a tenant webhook with the parameters specified in the request.
     /// </summary>
     /// <short>
     /// Update a webhook
@@ -141,7 +141,7 @@ public class WebhooksController(ApiContext context,
     }
 
     /// <summary>
-    /// Enable or disable webhook with the parameters specified in the request.
+    /// Enables or disables a tenant webhook with the parameters specified in the request.
     /// </summary>
     /// <short>
     /// Enable a webhook
@@ -182,7 +182,7 @@ public class WebhooksController(ApiContext context,
     }
 
     /// <summary>
-    /// Removes the tenant webhook with the ID specified in the request.
+    /// Removes a tenant webhook with the ID specified in the request.
     /// </summary>
     /// <short>
     /// Remove a webhook
@@ -325,7 +325,7 @@ public class WebhooksController(ApiContext context,
     /// Returns a list of triggers for a webhook.
     /// </summary>
     /// <short>
-    /// Get triggers for a webhook
+    /// Get webhook triggers
     /// </short>
     /// <path>api/2.0/settings/webhook/triggers</path>
     /// <collection>list</collection>

@@ -302,7 +302,7 @@ internal class FolderDao(
             q = q.Where(r =>
                 filesDbContext.Files.Any(f =>
                     f.ParentId == r.Id &&
-                    f.Category == (int)FilterType.PdfForm &&
+                    (f.Category == (int)FilterType.PdfForm || f.Category == (int)FilterType.Pdf) &&
                     f.TenantId == r.TenantId &&
                     filesDbContext.FilesFormRoleMapping.Any(r =>
                             r.TenantId == tenantId && r.FormId == f.Id && r.UserId == _authContext.CurrentAccount.ID)
@@ -311,7 +311,7 @@ internal class FolderDao(
                     fft.ParentId == r.Id &&
                     filesDbContext.Files.Any(ff =>
                         ff.ParentId == fft.FolderId &&
-                        ff.Category == (int)FilterType.PdfForm &&
+                        (ff.Category == (int)FilterType.PdfForm || ff.Category == (int)FilterType.Pdf) &&
                         ff.TenantId == r.TenantId &&
                         filesDbContext.FilesFormRoleMapping.Any(r =>
                             r.TenantId == tenantId && r.FormId == ff.Id && r.UserId == _authContext.CurrentAccount.ID)

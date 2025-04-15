@@ -105,6 +105,18 @@ public partial class FilesDbContext
     {
         return AbstractQueries.DeleteLinksAsync(this, tenantId, entryId, entryType);
     }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, FileEntryType.File])]
+    public IAsyncEnumerable<int> GetAuditEventsIdsAsync(int entryId, FileEntryType entryType)
+    {
+        return AbstractQueries.GetAuditEventsIdsAsync(this, entryId, entryType);
+    }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, FileEntryType.File])]
+    public Task<int> MarkAuditReferencesAsCorruptedAsync(IEnumerable<int> eventsIds)
+    {
+        return AbstractQueries.MarkAuditReferencesAsCorruptedAsync(this, eventsIds);
+    }
 }
 
 static file class AbstractQueries
@@ -224,4 +236,20 @@ static file class AbstractQueries
                     .Where(x => x.EntryType == entryType)
                     .Where(x => x.SubjectType == SubjectType.PrimaryExternalLink || x.SubjectType == SubjectType.ExternalLink)
                     .ExecuteDelete());
+
+    public static readonly Func<FilesDbContext, int, FileEntryType, IAsyncEnumerable<int>> GetAuditEventsIdsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int entryId, FileEntryType entryType) =>
+                ctx.FilesAuditReference
+                    .Where(r => r.EntryId == entryId)
+                    .Where(r => r.EntryType == (byte)entryType)
+                    .Select(r => r.AuditEventId));
+
+    public static readonly Func<FilesDbContext, IEnumerable<int>, Task<int>> MarkAuditReferencesAsCorruptedAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, IEnumerable<int> eventsIds) =>
+                ctx.FilesAuditReference.Where(x => eventsIds.Contains(x.AuditEventId))
+                    .ExecuteUpdate(x => 
+                        x.SetProperty(y => y.Corrupted, a => true))
+        );
 }

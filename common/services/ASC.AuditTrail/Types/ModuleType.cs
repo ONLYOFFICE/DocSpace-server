@@ -26,6 +26,9 @@
 
 namespace ASC.AuditTrail.Types;
 
+/// <summary>
+/// The module type.
+/// </summary>
 [EnumExtensions]
 public enum ModuleType
 {

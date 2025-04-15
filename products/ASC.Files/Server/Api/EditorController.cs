@@ -91,6 +91,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// </summary>
     /// <short>Start file editing</short>
     /// <path>api/2.0/files/file/{fileId}/startedit</path>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File key for Document Service", typeof(string))]
     [SwaggerResponse(403, "You don't have enough permission to view the file")]
@@ -104,7 +105,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <summary>
     /// Starts filling a file with the ID specified in the request.
     /// </summary>
-    /// <short>Starts filling</short>
+    /// <short>Start file filling</short>
     /// <path>api/2.0/files/file/{fileId}/startfilling</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File information", typeof(FileDto<int>))]
@@ -122,6 +123,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// </summary>
     /// <short>Track file editing</short>
     /// <path>api/2.0/files/file/{fileId}/trackeditfile</path>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File changes", typeof(KeyValuePair<bool, string>))]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
@@ -135,7 +137,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <summary>
     /// Returns the initialization configuration of a file to open it in the editor.
     /// </summary>
-    /// <short>Open a file</short>
+    /// <short>Open a file configuration</short>
     /// <path>api/2.0/files/file/{fileId}/openedit</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
@@ -171,8 +173,8 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
 
         var docParams = await documentServiceHelper.GetParamsAsync(
             formOpenSetup != null && formOpenSetup.Draft != null ? formOpenSetup.Draft : file, 
-            lastVersion, 
-            formOpenSetup == null || formOpenSetup.CanEdit, 
+            lastVersion,
+            !file.IsCompletedForm && (formOpenSetup?.CanEdit != false), 
             !inDto.View, 
             true, formOpenSetup == null || formOpenSetup.CanFill,
             formOpenSetup != null ? formOpenSetup.EditorType : inDto.EditorType,
@@ -216,7 +218,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
 
             if (formOpenSetup.RootFolder.FolderType is FolderType.VirtualDataRoom)
             {
-                result.StartFilling = result.Document.Permissions.Rename;
+                result.StartFilling = file.Security[FileSecurity.FilesSecurityActions.StartFilling];
                 result.StartFillingMode = StartFillingMode.StartFilling;
                 result.Document.ReferenceData.RoomId = formOpenSetup.RootFolder.Id.ToString();
 
@@ -235,7 +237,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                     result.StartFillingMode = StartFillingMode.ShareToFillOut;
                     result.EditorConfig.Customization.StartFillingForm = new StartFillingForm { Text = FilesCommonResource.StartFillingModeEnum_ShareToFillOut };
                 }
-                if (formOpenSetup.CanFill && file.CreateBy != securityContext.CurrentAccount.ID)
+                if (formOpenSetup.CanFill)
                 {
                     result.EditorConfig.Customization.SubmitForm.Visible = true;
                 }
@@ -287,7 +289,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <summary>
     /// Returns a list of users with their access rights to the file with the ID specified in the request.
     /// </summary>
-    /// <short>Get shared users</short>
+    /// <short>Get user access rights by file ID</short>
     /// <path>api/2.0/files/file/{fileId}/sharedusers</path>
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
@@ -300,10 +302,11 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     }
 
     /// <summary>
-    /// Return list of users with their access rights to the file
+    /// Returns a list of users with their access rights to the file.
     /// </summary>
-    /// <short>Return list of users with their access rights to the file</short>
+    /// <short>Get user access rights</short>
     /// <path>api/2.0/files/infousers</path>
+    /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "List of users with their access rights to the file", typeof(List<MentionWrapper>))]
@@ -329,7 +332,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <summary>
     /// Returns a list of users with their access rights to the protected file with the ID specified in the request.
     /// </summary>
-    /// <short>Get users with the access to the protected file</short>
+    /// <short>Get users access rights to the protected file</short>
     /// <path>api/2.0/files/file/{fileId}/protectusers</path>
     /// <collection>list</collection>
     [Tags("Files / Files")]
@@ -352,11 +355,10 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
-    /// Checks the document service location.
+    /// Checks the document service location URL.
     /// </summary>
     /// <short>Check the document service URL</short>
     /// <path>api/2.0/files/docservice</path>
-    /// <collection>list</collection>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Document service information: the Document Server address, the Document Server address in the local private network, the Community Server address", typeof(DocServiceUrlDto))]
     [SwaggerResponse(400, "Invalid input urls/Mixed Active Content is not allowed. HTTPS address for Document Server is required")]
@@ -443,7 +445,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     }
 
     /// <summary>
-    /// Returns the address of the connected editors.
+    /// Returns the URL address of the connected editors.
     /// </summary>
     /// <short>Get the document service URL</short>
     /// <path>api/2.0/files/docservice</path>

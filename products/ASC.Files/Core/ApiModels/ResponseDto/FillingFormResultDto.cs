@@ -26,35 +26,38 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// The parameters of the form filling result.
+/// </summary>
 public class FillingFormResultDto<T>
 {
     /// <summary>
-    /// Form number
+    /// The filling form number.
     /// </summary>
     public int FormNumber { get; set; }
 
     /// <summary>
-    /// Completed form
+    /// The file with the completed forms.
     /// </summary>
     public FileDto<T> CompletedForm { get; set; }
 
     /// <summary>
-    /// Original form
+    /// The file with the original forms.
     /// </summary>
     public FileDto<T> OriginalForm { get; set; }
 
     /// <summary>
-    /// Manager
+    /// The manager who is filling the form.
     /// </summary>
     public EmployeeFullDto Manager { get; set; }
 
     /// <summary>
-    /// Room Id
+    /// The room ID where filling the form.
     /// </summary>
     public T RoomId { get; set; }
 
     /// <summary>
-    /// Is room member
+    /// Specifies if the manager who fills the form is a room member or not.
     /// </summary>
     public bool IsRoomMember { get; set; }
 

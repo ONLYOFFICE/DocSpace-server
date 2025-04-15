@@ -686,8 +686,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
                                     newFolder = await folderDao.GetFolderAsync(newFolderId);
                                     var parentFolder = await parentFolderTask;
-
-                                    await fileStorageService.ReOrderAsync(newFolderId, true, true);
+                                    
                                     await filesMessageService.SendMoveMessageAsync(newFolder, parentFolder, toFolder, toFolderParents, true, _headers, [newFolder.Title, toFolder.Title, toFolder.Id.ToString()]);
                                     await webhookManager.PublishAsync(parentFolder.FolderType == FolderType.TRASH ? WebhookTrigger.FolderRestored : WebhookTrigger.FolderMoved, newFolder);
 
@@ -755,7 +754,6 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                             await socketManager.DeleteFolder(folder, action: async () =>
                                             {
                                                 newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
-                                                await fileStorageService.ReOrderAsync(newFolderId, true, true);
                                             });
 
                                             var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountRoomFeature, int>();
@@ -777,7 +775,6 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     else
                                     {
                                         newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
-                                        await fileStorageService.ReOrderAsync(newFolderId, true, true);
                                     }
                                 }
                                 finally
@@ -877,7 +874,6 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var webhookManager = scope.ServiceProvider.GetService<WebhookManager>();
         var globalStorage = scope.ServiceProvider.GetService<GlobalStore>();
         var fileStorageService = scope.ServiceProvider.GetService<FileStorageService>();
-        var fileChecker = scope.ServiceProvider.GetService<FileChecker>();
         var securityContext = scope.ServiceProvider.GetService<SecurityContext>();
         var cachedFolderDao = scope.ServiceProvider.GetService<ICacheFolderDao<T>>();
 
@@ -944,7 +940,6 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                         || file.RootFolderType == FolderType.Privacy || file.Encrypted
                                        ? null
                                        : await fileDao.GetFileAsync(toFolderId, file.Title);
-                    var fileType = FileUtility.GetFileTypeByFileName(file.Title);
 
                     if (conflict == null)
                     {

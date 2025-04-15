@@ -195,6 +195,12 @@ namespace ASC.AuditTrail {
             }
         }
         
+        public static string AuthLinkActivated {
+            get {
+                return ResourceManager.GetString("AuthLinkActivated", resourceCulture);
+            }
+        }
+        
         /// <summary>
         ///   Looks up a localized string similar to Third-party authorization keys updated.
         /// </summary>
@@ -1137,6 +1143,33 @@ namespace ASC.AuditTrail {
         public static string LanguageSettingsUpdated {
             get {
                 return ResourceManager.GetString("LanguageSettingsUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to LDAP authentication disabled.
+        /// </summary>
+        public static string LdapDisabled {
+            get {
+                return ResourceManager.GetString("LdapDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to LDAP authentication enabled.
+        /// </summary>
+        public static string LdapEnabled {
+            get {
+                return ResourceManager.GetString("LdapEnabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to LDAP synchronization completed.
+        /// </summary>
+        public static string LdapSync {
+            get {
+                return ResourceManager.GetString("LdapSync", resourceCulture);
             }
         }
         

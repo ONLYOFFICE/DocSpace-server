@@ -945,6 +945,15 @@
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Webhook updated: {0}</value>
   </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>LDAP authentication enabled</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>LDAP authentication disabled</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>LDAP synchronization completed</value>
+  </data>
   <data name="FormStartedToFill" xml:space="preserve">
     <value>Users [{0}]. Started to fill: {1}</value>
   </data>
@@ -971,5 +980,8 @@
   </data>
   <data name="ApiKeyDeleted" xml:space="preserve">
     <value>User Api Key Deleted: {0}</value>
+  </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>The authorization link has been activated</value>
   </data>
 </root>

@@ -27,12 +27,12 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// Shortened link request parameters
+/// The request parameters for URL shortening operations.
 /// </summary>
 public class ShortenLinkRequestsDto
 {
     /// <summary>
-    /// Link
+    /// The shortened URL.
     /// </summary>
     public string Link { get; set; }
 }

@@ -26,8 +26,14 @@
 
 namespace ASC.Data.Backup.ApiModels;
 
+/// <summary>
+/// The dump parameters.
+/// </summary>
 public class DumpDto
 {
+    /// <summary>
+    /// Specifies if a dump will be created or not.
+    /// </summary>
     [FromQuery]
     public bool Dump { get; set; }
 }
