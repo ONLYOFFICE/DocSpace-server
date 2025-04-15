@@ -886,4 +886,31 @@
   <data name="FileCustomFilterEnabled" xml:space="preserve">
     <value>File: {0}. Filtro personalizzato attivato</value>
   </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>Impostazioni di accesso agli Strumenti per sviluppatori modificate</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>File [{0}]. Versione eliminata: {1}</value>
+  </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>Utenti [{0}]. Modulo compilato completamente: {1}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>Utenti [{0}]. Modulo compilato parzialmente: {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>Utenti [{0}]. Inizio compilazione: {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>Utenti [{0}]. Compilazione interrotta: {1}</value>
+  </data>
+  <data name="WebhookCreated" xml:space="preserve">
+    <value>Webhook creato: {0}</value>
+  </data>
+  <data name="WebhookDeleted" xml:space="preserve">
+    <value>Webhook eliminato: {0}</value>
+  </data>
+  <data name="WebhookUpdated" xml:space="preserve">
+    <value>Webhook aggiornato: {0}</value>
+  </data>
 </root>

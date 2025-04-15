@@ -503,4 +503,13 @@ Massima compatibilità con docx, xlsx, pptx.</value>
   <data name="ExternalUser" xml:space="preserve">
     <value>Utente esterno</value>
   </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Impossibile eliminare la versione corrente del file</value>
+  </data>
+  <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
+    <value>Condividi per la compilazione</value>
+  </data>
+  <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
+    <value>Inizia a compilare</value>
+  </data>
 </root>
