@@ -46,18 +46,18 @@ public class CreateFileTest(
         "test.pdf"
     ];
 
-    public static TheoryData<Docspace.Model.FolderType> FolderTypesData =>
+    public static TheoryData<FolderType> FolderTypesData =>
     [
-        Docspace.Model.FolderType.Archive,
-        Docspace.Model.FolderType.TRASH,
-        Docspace.Model.FolderType.VirtualRooms
+        FolderType.Archive,
+        FolderType.TRASH,
+        FolderType.VirtualRooms
     ];
 
     [Theory]
     [MemberData(nameof(Data))]
     public async Task CreateFile_FolderMy_Owner_ReturnsOk(string fileName)
     {
-        var createdFile = await CreateFile(fileName, Docspace.Model.FolderType.USER, Initializer.Owner);
+        var createdFile = await CreateFile(fileName, FolderType.USER, Initializer.Owner);
         
         createdFile.Should().NotBeNull();
         createdFile.Title.Should().Be(fileName);
@@ -67,9 +67,9 @@ public class CreateFileTest(
     [MemberData(nameof(Data))]
     public async Task CreateFile_FolderMy_RoomAdmin_ReturnsOk(string fileName)
     {
-        var roomAdmin = await Initializer.InviteContact(Docspace.Model.EmployeeType.RoomAdmin);
+        var roomAdmin = await Initializer.InviteContact(EmployeeType.RoomAdmin);
         
-        var createdFile = await CreateFile(fileName, Docspace.Model.FolderType.USER, roomAdmin);
+        var createdFile = await CreateFile(fileName, FolderType.USER, roomAdmin);
         
         createdFile.Should().NotBeNull();
         createdFile.Title.Should().Be(fileName);
@@ -79,9 +79,9 @@ public class CreateFileTest(
     [MemberData(nameof(Data))]
     public async Task CreateFile_FolderMy_User_ReturnsOk(string fileName)
     {
-        var user = await Initializer.InviteContact(Docspace.Model.EmployeeType.User);
+        var user = await Initializer.InviteContact(EmployeeType.User);
         
-        var createdFile = await CreateFile(fileName, Docspace.Model.FolderType.USER, user);
+        var createdFile = await CreateFile(fileName, FolderType.USER, user);
 
         createdFile.Should().NotBeNull();
         createdFile.Title.Should().Be(fileName);
@@ -100,7 +100,7 @@ public class CreateFileTest(
     
     [Theory]
     [MemberData(nameof(FolderTypesData))]
-    public async Task CreateFile_SystemFolder_Owner_ReturnsOk(Docspace.Model.FolderType folderType)
+    public async Task CreateFile_SystemFolder_Owner_ReturnsOk(FolderType folderType)
     {
         var createdFile = await CreateFile("test.docx", folderType, Initializer.Owner);
 

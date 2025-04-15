@@ -162,7 +162,7 @@ public static class Initializer
         }
     }
     
-    internal static async Task<User> InviteContact(Docspace.Model.EmployeeType employeeType)
+    internal static async Task<User> InviteContact(EmployeeType employeeType)
     {
         await _apiClient.Authenticate(Owner);
 
@@ -179,9 +179,9 @@ public static class Initializer
         _peopleClient.DefaultRequestHeaders.TryAddWithoutValidation("confirm", confirmHeader);
         
         var parsedQuery = HttpUtility.ParseQueryString(confirmHeader);
-        if(!Enum.TryParse(parsedQuery["emplType"], out Docspace.Model.EmployeeType parsedEmployeeType))
+        if(!Enum.TryParse(parsedQuery["emplType"], out EmployeeType parsedEmployeeType))
         {
-            parsedEmployeeType = Docspace.Model.EmployeeType.Guest;
+            parsedEmployeeType = EmployeeType.Guest;
         }
         
         var fakeMember = _fakerMember.Generate();
