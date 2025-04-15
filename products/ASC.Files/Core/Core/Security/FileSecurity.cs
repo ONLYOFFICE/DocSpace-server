@@ -1240,7 +1240,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                                 hasFullAccessToForm && (formFilling == null || formFilling?.StartFilling == false || formFilling?.StartFilling == null),
 
                             FilesSecurityActions.FillForms =>
-                                !IsFillingStoped && myRoles.Any(),
+                                !IsFillingStoped && myRoles.Any() && (role != null && role.Sequence == currentStep),
 
                             FilesSecurityActions.Edit =>
                                 currentStep == -1 && (hasFullAccessToForm || e.Access is FileShare.Editing),
@@ -1249,7 +1249,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                                 formFilling?.StartFilling == true,
 
                             FilesSecurityActions.OpenForm =>
-                                (formFilling?.StartFilling == true && role == null) || currentStep == 0 || IsFillingStoped,
+                                (formFilling?.StartFilling == true && role == null) || currentStep == 0 || IsFillingStoped || (role != null && role.Sequence != currentStep),
 
                             _ => false
                         };
