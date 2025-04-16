@@ -126,4 +126,13 @@
   <data name="LargeBackup" xml:space="preserve">
     <value>النسخ الاحتياطي أكبر من الحجم الفعلي للبوابة</value>
   </data>
+  <data name="BackupException" xml:space="preserve">
+    <value>حدث خطأ أثناء إنشاء النسخة الاحتياطية. يرجى المحاولة مرة أخرى أو التواصل مع الدعم.</value>
+  </data>
+  <data name="BackupInvalid" xml:space="preserve">
+    <value>ملف النسخة الاحتياطية غير صالح.</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>حدث خطأ أثناء استعادة النسخة الاحتياطية. يرجى المحاولة مرة أخرى أو التواصل مع الدعم.</value>
+  </data>
 </root>

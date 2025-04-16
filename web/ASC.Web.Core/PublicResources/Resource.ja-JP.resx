@@ -1072,4 +1072,13 @@
   <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
     <value>管理者の数が制限を超えています：{0}/{1}。</value>
   </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>少なくとも1つの許可されたIPアドレスを追加してください。</value>
+  </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>WebhookのURLは利用できません。HEADリクエストは200 HTTPステータスではありません。</value>
+  </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>非営利</value>
+  </data>
 </root>

@@ -103,4 +103,7 @@
   <data name="ReadyFormFolder" xml:space="preserve">
     <value>Remplis</value>
   </data>
+  <data name="RoomTemplates" xml:space="preserve">
+    <value>Modèles</value>
+  </data>
 </root>

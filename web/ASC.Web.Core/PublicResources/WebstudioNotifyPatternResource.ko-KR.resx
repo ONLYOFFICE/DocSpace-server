@@ -1955,4 +1955,44 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace&lt;span style="color: #FF6F3D;"&gt;가 삭제될 예정됩니다&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;고객님의 ${LetterLogoText} DocSpace ${__VirtualRootPath}&lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;가 1년 이상 비활성 상태였습니다.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;더 이상 사용하지 않기로 결정했으므로 ${LetterLogoText} DocSpace 및 모든 데이터가 당사의 &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;개인 정보 보호 정책&lt;/a&gt;에 따라 삭제됩니다.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;피드백을 주시면 정말 감사하겠습니다. ${LetterLogoText} DocSpace 사용을 중단하기로 결정한 이유는 무엇인가요?&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;${LetterLogoText} DocSpace를 계속 사용하려는 경우 입장하여 아무 작업이나 수행하시면 됩니다.&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_role_changed" xml:space="preserve">
+    <value>안녕하세요!
+
+DocSpace 룸에서 새 역할이 할당되었습니다: "${RoomTitle}":"${RoomUrl}": ${UserRole}
+
+"Help Center":"${HelpCenterUrl}"에서 룸 역할 및 권한에 대해 자세히 확인하세요.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_type_changed" xml:space="preserve">
+    <value>안녕하세요!
+
+DocSpace에서 새로운 사용자 유형이 할당되었습니다: "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}
+
+"Help Center":"${HelpCenterUrl}"에서 사용자 유형 및 권한에 대해 자세히 확인하세요.
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>고객님의 ${LetterLogoText} DocSpace가 삭제될 예정입니다</value>
+  </data>
+  <data name="subject_user_type_changed" xml:space="preserve">
+    <value>고객님의 DocSpace 사용자 유형이 변경되었습니다</value>
+  </data>
+  <data name="subject_user_role_changed" xml:space="preserve">
+    <value>DocSpace 룸에서 고객님의 역할이 변경되었습니다</value>
+  </data>
 </root>

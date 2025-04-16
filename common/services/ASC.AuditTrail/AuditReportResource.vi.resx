@@ -871,4 +871,46 @@
   <data name="UpdateClient" xml:space="preserve">
     <value>Đã cập nhật máy khách {0}</value>
   </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>Đã thay đổi cài đặt quyền truy cập Công Cụ Dành Cho Nhà Phát Triển</value>
+  </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>File: {0}. Bộ lọc tùy chỉnh đã bị vô hiệu hóa</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>File: {0}. Bộ lọc tùy chỉnh được bật</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>Tập tin [{0}]. Đã xóa Phiên bản: {1}</value>
+  </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>Khóa API của người dùng đã được tạo: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>Khóa API của người dùng đã bị xóa: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>Khóa API của người dùng đã cập nhật: {0}</value>
+  </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>Người dùng [{0}]. Đã điền đầy đủ thông tin vào biểu mẫu: {1}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>Người dùng [{0}]. Đã điền vào một phần của biểu mẫu: {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>Người dùng [{0}]. Biểu mẫu đã dừng: {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>Người dùng [{0}]. Bắt đầu điền: {1}</value>
+  </data>
+  <data name="WebhookCreated" xml:space="preserve">
+    <value>Webhook đã được tạo: {0}</value>
+  </data>
+  <data name="WebhookDeleted" xml:space="preserve">
+    <value>Webhook đã bị xóa: {0}</value>
+  </data>
+  <data name="WebhookUpdated" xml:space="preserve">
+    <value>Webhook đã được cập nhật: {0}</value>
+  </data>
 </root>

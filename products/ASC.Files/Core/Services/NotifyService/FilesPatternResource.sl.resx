@@ -176,4 +176,63 @@ $OrangeButton</value>
   <data name="subject_FormSubmitted" xml:space="preserve">
     <value>DocSpace obvestilo. Obrazec je izpolnjen</value>
   </data>
+  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
+    <value>Nov dokument "$DocumentTitle" je bil ustvarjen v sobi "$RoomTitle"</value>
+  </data>
+  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
+    <value>Nove datoteke so bile naložene v sobo "$RoomTitle" ($Count)</value>
+  </data>
+  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
+    <value>Nova datoteka "$DocumentTitle" je bila naložena v sobo "$RoomTitle"</value>
+  </data>
+  <data name="pattern_EditorMentions_push" xml:space="preserve">
+    <value>$ToUserName vas je omenil v dokumentu $DocumentTitle</value>
+  </data>
+  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
+    <value>Nova mapa "$FolderTitle" je bila ustvarjena v sobi "$RoomTitle"</value>
+  </data>
+  <data name="pattern_FormStartedFilling" xml:space="preserve">
+    <value>
+      Obvestilo o dejavnosti. "$FromUserName":"$FromUserLink" je začel s postopkom izpolnjevanja obrazca:  "$DocumentTitle":"$DocumentURL" v sobi: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_FormSubmitted_push" xml:space="preserve">
+    <value>Obrazec "$DocumentTitle" je bil izpolnjen v sobi "$RoomTitle"</value>
+  </data>
+  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
+    <value>
+      Obvestilo o dejavnosti. Obrazec "$DocumentTitle":"$DocumentURL" je bil popolnoma izpolnjen v sobi: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
+    <value>$FromUserName je premaknil sobo "$RoomTitle" v arhiv</value>
+  </data>
+  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
+    <value>Vaša vloga v sobi "$RoomTitle" je bila spremenjena v "$RoomRole"</value>
+  </data>
+  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
+    <value>Povabljeni ste bili v sobo "$RoomTitle"</value>
+  </data>
+  <data name="pattern_StoppedFormFilling" xml:space="preserve">
+    <value>
+      Obvestilo o dejavnosti. "$FromUserName":"$FromUserLink" je ustavil izpolnjevanje obrazca: "$DocumentTitle":"$DocumentURL" v sobi: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_YourTurnFormFilling" xml:space="preserve">
+    <value>
+      Obvestilo o dejavnosti. Vi ste na vrsti! Izpolnitev obrazca je obvezna: "$DocumentTitle":"$DocumentURL" v sobi: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="subject_FormStartedFilling" xml:space="preserve">
+    <value>DocSpace obvestilo.</value>
+  </data>
+  <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
+    <value>DocSpace obvestilo.</value>
+  </data>
+  <data name="subject_StoppedFormFilling" xml:space="preserve">
+    <value>DocSpace obvestilo.</value>
+  </data>
+  <data name="subject_YourTurnFormFilling" xml:space="preserve">
+    <value>DocSpace obvestilo.</value>
+  </data>
 </root>

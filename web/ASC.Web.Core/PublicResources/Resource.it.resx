@@ -1078,4 +1078,7 @@
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
     <value>Impossibile impostare la quota per utente. Il valore inserito è superiore allo spazio di archiviazione totale di DocSpace.</value>
   </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>L'URL del webhook non è disponibile. La richiesta HEAD non ha restituito lo stato HTTP 200.</value>
+  </data>
 </root>

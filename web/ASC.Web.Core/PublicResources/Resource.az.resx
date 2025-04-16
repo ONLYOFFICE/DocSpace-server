@@ -1078,4 +1078,7 @@
   <data name="Tariffs_nonprofit" xml:space="preserve">
     <value>Qeyri-kommersiya</value>
   </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>Webhook URL-i mövcud deyil. HEAD sorğusu 200 http statusuna cavab vermir.</value>
+  </data>
 </root>

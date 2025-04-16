@@ -578,6 +578,7 @@ internal class FileDao(
                         ConvertedType = file.ConvertedType,
                         Comment = file.Comment,
                         Encrypted = file.Encrypted,
+                        FileStatus = (int)file.FileStatus,
                         Forcesave = file.Forcesave,
                         ThumbnailStatus = file.ThumbnailStatus,
                         TenantId = tenantId
@@ -624,7 +625,7 @@ internal class FileDao(
                             var fileProp = await fileDao.GetProperties(file.Id);
                             var extension = FileUtility.GetFileExtension(file.Title);
 
-                            if (file.IsForm || (extension == ".csv" && fileProp != null && Equals(fileProp.FormFilling.ResultsFolderId, file.ParentId)))
+                            if (file.IsForm || ((extension == ".csv" || extension == ".xlsx") && fileProp != null && Equals(fileProp.FormFilling.ResultsFolderId, file.ParentId)))
                             {
                                 var properties = fileProp ?? new EntryProperties<int> { FormFilling = new FormFillingProperties<int>() };
                                 if (!properties.FormFilling.StartFilling)

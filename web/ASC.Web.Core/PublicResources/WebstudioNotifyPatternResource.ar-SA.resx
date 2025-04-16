@@ -424,7 +424,7 @@
     <value>تكوين مساحة دوك سبيس الخاصة ب ${LetterLogoText}</value>
   </data>
   <data name="subject_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
-    <value>سيتم حذف مساحة DocSpace الخاصة بك</value>
+    <value>سيتم حذف مساحة ${LetterLogoText} DocSpace الخاصة بك</value>
   </data>
   <data name="subject_saas_guest_activation_v115" xml:space="preserve">
     <value>انضم إلى ${__VirtualRootHost}</value>
@@ -1807,7 +1807,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
     <value>مرحبًا، $UserName!
 
-ستَنتهي فترة السماح لترخيص"${LetterLogoText} DocSpace Developer" الخاص بك خلال 7 أيام، مما يعني أن "DocSpace" سيصبح غير متاح.
+ستَنتهي فترة السماح لترخيص"${LetterLogoText} DocSpace Developer" الخاص بك خلال 7 أيام، مما يعني أن DocSpace سيصبح غير متاح.
 
 لتحديث الترخيص، يُرجى التواصل مباشرةً مع مدير المبيعات المخصص لك أو التواصل معنا عبر "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -1818,7 +1818,7 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
     <value>مرحبًا، $UserName!
 
-تنتهي اليوم فترة السماح لترخيص "${LetterLogoText} DocSpace Developer" الخاص بك، مما يعني أن "DocSpace" لن يكون متاحًا بعد الآن.
+تنتهي اليوم فترة السماح لترخيص "${LetterLogoText} DocSpace Developer" الخاص بك، مما يعني أن DocSpace لن يكون متاحًا بعد الآن.
 
 لتحديث الترخيص، يُرجى التواصل مباشرةً مع مدير المبيعات المخصص لك أو التواصل معنا عبر "${__SalesEmail}":"mailto:${__SalesEmail}".
 
@@ -1831,7 +1831,7 @@ $TrulyYours</value>
 
 ينتهي ترخيص "${LetterLogoText} DocSpace Enterprise" الخاص بك اليوم.
 
-لقد قمنا بتفعيل *فترة سماح لمدة $PaymentDelay يومًا* لك. خلال هذه الفترة، سيكون الوصول إلى "DocSpace" متاحًا لثلاثة مستخدمين معينين فقط* (لن يتم تقديم الدعم والتحديثات بعد الآن).
+لقد قمنا بتفعيل *فترة سماح لمدة $PaymentDelay يومًا* لك. خلال هذه الفترة، سيكون الوصول إلى DocSpace متاحًا لثلاثة مستخدمين معينين فقط* (لن يتم تقديم الدعم والتحديثات بعد الآن).
 
 للاستفادة من جميع الميزات المتاحة عند الشراء *لمدة غير محدودة*، نوصي بالحصول على ترخيص *مدى الحياة* لـ "${LetterLogoText} DocSpace Enterprise" (يتضمن دعمًا وتحديثات لمدة 3 سنوات):
 
@@ -1865,7 +1865,7 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
     <value>مرحبًا، $UserName!
 
-ستنتهي فترة السماح لترخيص "${LetterLogoText} DocSpace Enterprise" الخاص بك خلال 7 أيام، مما يعني أن "DocSpace" سيصبح غير متاح.
+ستنتهي فترة السماح لترخيص "${LetterLogoText} DocSpace Enterprise" الخاص بك خلال 7 أيام، مما يعني أن DocSpace سيصبح غير متاح.
 
 للاستفادة من جميع الميزات المتاحة عند الشراء *لمدة غير محدودة*، نوصي بالحصول على *ترخيص مدى الحياة* لـ "${LetterLogoText} DocSpace Enterprise" (يتضمن دعمًا وتحديثات لمدة 3 سنوات):
 
@@ -1880,7 +1880,7 @@ $TrulyYours</value>
   <data name="pattern_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
     <value>مرحبًا، $UserName!
 
-تنتهي فترة السماح لترخيص "${LetterLogoText} DocSpace Enterprise" الخاص بك اليوم، مما يعني أن "DocSpace" لن يكون متاحًا بعد الآن.
+تنتهي فترة السماح لترخيص "${LetterLogoText} DocSpace Enterprise" الخاص بك اليوم، مما يعني أن DocSpace لن يكون متاحًا بعد الآن.
 
 للاستفادة من جميع الميزات المتاحة عند الشراء *لمدة غير محدودة*، نوصي بالحصول على *ترخيص مدى الحياة* لـ "${LetterLogoText} DocSpace Enterprise" (يتضمن دعمًا وتحديثات لمدة 3 سنوات):
 
@@ -1957,7 +1957,7 @@ $TrulyYours</value>
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 32px; padding-left: 40px; padding-right: 40px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 64px; Margin:0; padding-left: 148px; padding-right: 32px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG1" alt="${LetterLogoText}" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 32px; Margin:0; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px; vertical-align: top; width: 32px;"&gt;&lt;img width="32" src="$IMG2" alt="connecting to" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 64px; Margin:0; padding-left: 32px; padding-right: 148px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG6" alt="Drupal" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0px 40px 24px; text-align: center;"&gt;${LetterLogoText} DocSpace &amp; Drupal&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 16px; text-align: center;"&gt; اجعل مستندات Office يمكن الوصول إليها بسهولة إلى زوار موقع الويب الخاص بك وإدارة الملفات عبر DocSpace.&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;&lt;a href="$URL4" style="color: #FF6F3D; text-decoration: underline;" target="_blank"&gt;لمعرفة المزيد&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton4&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 32px; padding-left: 40px; padding-right: 40px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 64px; Margin:0; padding-left: 148px; padding-right: 32px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG1" alt="${LetterLogoText}" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 32px; Margin:0; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px; vertical-align: top; width: 32px;"&gt;&lt;img width="32" src="$IMG2" alt="connecting to" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 64px; Margin:0; padding-left: 32px; padding-right: 148px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG7" alt="Pipedrive" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0px 40px 24px; text-align: center;"&gt;${LetterLogoText} DocSpace &amp; Pipedrive&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 16px; text-align: center;"&gt;العمل مع ملفات المكتب المتعلقة بصفقات "Pipedrive" في غرف "DocSpace".&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 64px; padding-top: 0; text-align: center;"&gt;$OrangeButton5&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="Margin: 0; padding-bottom: 24px; padding-top: 32px; padding-left: 40px; padding-right: 40px; text-align: left;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="display:block; height: 64px; Margin:0; padding-left: 148px; padding-right: 32px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG1" alt="${LetterLogoText}" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 32px; Margin:0; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px; vertical-align: top; width: 32px;"&gt;&lt;img width="32" src="$IMG2" alt="connecting to" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;td style="height: 64px; Margin:0; padding-left: 32px; padding-right: 148px; vertical-align: top; width: 64px;"&gt;&lt;img width="64" src="$IMG7" alt="Pipedrive" style="color: #333333; font-size: 10px; text-align: center;"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 0px 40px 24px; text-align: center;"&gt;${LetterLogoText} DocSpace &amp; Pipedrive&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="color: #333333; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 16px; text-align: center;"&gt;العمل مع ملفات المكتب المتعلقة بصفقات "Pipedrive" في غرف DocSpace.&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 64px; padding-top: 0; text-align: center;"&gt;$OrangeButton5&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
   </data>
@@ -2038,6 +2038,33 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 26px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;إذا كنت بحاجة إلى مساعدة، فتصفح &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL1"&gt;مركز المساعدة&lt;/a&gt; أو اسأل &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="${__SupportLink}"&gt;فريق الدعم&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>سيتم حذف مساحة ${LetterLogoText} DocSpace الخاصة بك</value>
+  </data>
+  <data name="subject_user_role_changed" xml:space="preserve">
+    <value>تم تغيير دوركم في إحدى غرف DocSpace</value>
+  </data>
+  <data name="subject_user_type_changed" xml:space="preserve">
+    <value>تم تغيير نوع المستخدم الخاص بكم في DocSpace</value>
+  </data>
+  <data name="pattern_user_role_changed" xml:space="preserve">
+    <value>مرحبًا!
+
+تم تعيين دور جديد لكم في غرفة "DocSpace "${RoomTitle}":"${RoomUrl}، والدور هو: ${UserRole}.
+
+يمكنكم معرفة المزيد حول الأدوار والصلاحيات في الغرف من خلال "مركز المساعدة":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_type_changed" xml:space="preserve">
+    <value>مرحبًا!
+
+تم تعيين نوع مستخدم جديد لكم في "DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}، والنوع هو: ${UserType}.
+
+يمكنكم معرفة المزيد حول أنواع المستخدمين والصلاحيات من خلال "مركز المساعدة":"${HelpCenterUrl}".
 
 $TrulyYours</value>
   </data>

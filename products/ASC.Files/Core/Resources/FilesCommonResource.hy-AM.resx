@@ -562,4 +562,13 @@
   <data name="OpenForm" xml:space="preserve">
     <value>Բացել ֆայլը</value>
   </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Այլի ընթացիկ տարբերակը հնարավոր չէ ջնջել</value>
+  </data>
+  <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
+    <value>Կիսվել՝ լրացման համար</value>
+  </data>
+  <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
+    <value>Սկսել լրացնելը</value>
+  </data>
 </root>
