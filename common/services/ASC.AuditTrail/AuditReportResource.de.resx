@@ -913,4 +913,16 @@
   <data name="FileCustomFilterEnabled" xml:space="preserve">
     <value>Datei: {0}. Benutzerdefinierter Filter aktiviert</value>
   </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>Der Autorisierungslink wurde aktiviert</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>LDAP-Authentifizierung deaktiviert</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>LDAP-Authentifizierung aktiviert</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>LDAP-Synchronisierung abgeschlossen</value>
+  </data>
 </root>

@@ -913,4 +913,16 @@
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Webhook aggiornato: {0}</value>
   </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>Il link di autorizzazione è stato attivato</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>Autenticazione LDAP disabilitata</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>Autenticazione LDAP abilitata</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>Sincronizzazione LDAP completata</value>
+  </data>
 </root>

@@ -913,4 +913,16 @@
   <data name="FileCustomFilterEnabled" xml:space="preserve">
     <value>文件：{0}。自定义过滤器已启用</value>
   </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>授权链接已激活</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>LDAP 认证已禁用</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>LDAP 认证已启用</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>LDAP 同步已完成</value>
+  </data>
 </root>
