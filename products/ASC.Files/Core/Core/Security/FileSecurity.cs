@@ -1208,8 +1208,8 @@ public class FileSecurity(IDaoFactory daoFactory,
                     FilesSecurityActions.OpenForm))
                 {
                     var fileFolder = parentFolders.FirstOrDefault(r => DocSpaceHelper.IsRoom(r.FolderType));
-
-                    if (action == FilesSecurityActions.FillForms && (fileFolder != null && ((fileFolder.FolderType == FolderType.FormFillingFolderInProgress && file.CreateBy != userId) || fileFolder.FolderType == FolderType.FormFillingFolderDone)))
+                    var fileParentFolder = parentFolders.LastOrDefault();
+                    if (action == FilesSecurityActions.FillForms && (fileParentFolder != null && ((fileParentFolder.FolderType == FolderType.FormFillingFolderInProgress && file.CreateBy != userId) || fileParentFolder.FolderType == FolderType.FormFillingFolderDone)))
                     {
                         return false;
                     }
