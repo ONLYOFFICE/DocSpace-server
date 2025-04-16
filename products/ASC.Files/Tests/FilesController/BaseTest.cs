@@ -54,40 +54,44 @@ public class BaseTest(
     protected async Task<FileDtoInteger> GetFile(int fileId)
     {
         return (await _filesFilesApi.GetFileInfoAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        
     }
-    protected async Task<FileDtoInteger> CreateFile(string fileName, FolderType folderType, User user)
+    
+    protected async Task<int> GetFolderIdAsync(FolderType folderType, User user)
     {
         await _filesClient.Authenticate(user);
         
         var rootFolder = (await _filesFoldersApi.GetRootFoldersAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
         var folderId = rootFolder.FirstOrDefault(r => r.Current.RootFolderType.HasValue && r.Current.RootFolderType.Value == folderType)!.Current.Id;
+        
+        return folderId;
+    }
+    
+    protected async Task<FileDtoInteger> CreateFile(string fileName, FolderType folderType, User user)
+    {
+        await _filesClient.Authenticate(user);
+        
+        var folderId = await GetFolderIdAsync(folderType, user);
         
         return await CreateFile(fileName, folderId);
     }
     
     protected async Task<FileDtoInteger> CreateFile(string fileName, int folderId)
     {
-        var createdFile = (await _filesFilesApi.CreateFileAsync(folderId, new CreateFileJsonElement(fileName))).Response;
-        
-        return createdFile;
+        return (await _filesFilesApi.CreateFileAsync(folderId, new CreateFileJsonElement(fileName))).Response;
     }
     
     protected async Task<FolderDtoInteger> CreateFolder(string folderName, FolderType folderType, User user)
     {
         await _filesClient.Authenticate(user);
         
-        var rootFolder = (await _filesFoldersApi.GetRootFoldersAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var folderId = rootFolder.FirstOrDefault(r => r.Current.RootFolderType.HasValue && r.Current.RootFolderType.Value == folderType)!.Current.Id;
+        var folderId = await GetFolderIdAsync(folderType, user);
         
         return await CreateFolder(folderName, folderId);
     }
     
     protected async Task<FolderDtoInteger> CreateFolder(string folderName, int folderId)
     {
-        var createFolder = (await _filesFoldersApi.CreateFolderAsync(folderId, new CreateFolder(folderName))).Response;
-        
-        return createFolder;
+        return (await _filesFoldersApi.CreateFolderAsync(folderId, new CreateFolder(folderName))).Response;
     }
     
     protected async Task<List<FileOperationDto>?> WaitLongOperation()

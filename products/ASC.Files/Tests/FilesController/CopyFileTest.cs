@@ -72,8 +72,7 @@ public class CopyFileTest(
         var newFileName = "renamed_copy.docx";
         
         // Get root folders to find a target folder
-        var rootFolders = (await _filesFoldersApi.GetRootFoldersAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var targetFolderId = rootFolders.FirstOrDefault(r => r.Current.RootFolderType is FolderType.USER)!.Current.Id;
+        var targetFolderId = await GetFolderIdAsync(FolderType.USER, Initializer.Owner);
         
         // Act
         var copyParams = new CopyAsJsonElement(

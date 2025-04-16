@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -106,5 +106,23 @@ public class CreateFileTest(
 
         createdFile.RootFolderType.Should().NotBe(folderType);
     }
+    
+    [Fact]
+    public async Task CreateFile_NameLongerThan165Chars_Returns400()
+    {
+        await _filesClient.Authenticate(Initializer.Owner);
+        
+        // Arrange
+        var longFileName = new string('a', 166) + ".docx"; // 166 characters + 5 for extension = 171 characters
+        var file = new CreateFileJsonElement(longFileName);
+        
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<Docspace.Client.ApiException>(
+            async () => await _filesFilesApi.CreateFileAsync(
+                await GetFolderIdAsync(FolderType.USER, Initializer.Owner), 
+                file, 
+                cancellationToken: TestContext.Current.CancellationToken));
+        
+        exception.ErrorCode.Should().Be(400);
+    }
 }
-
