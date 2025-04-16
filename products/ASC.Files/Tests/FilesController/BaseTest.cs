@@ -35,9 +35,9 @@ public class BaseTest(
     ) : IAsyncLifetime
 {
     protected readonly HttpClient _filesClient = filesFactory.HttpClient;
-    protected readonly FilesFoldersApi _filesFoldersApi = new(filesFactory.HttpClient);
-    protected readonly FilesFilesApi _filesFilesApi = new(filesFactory.HttpClient);
-    protected readonly FilesOperationsApi _filesOperationsApi = new(filesFactory.HttpClient);
+    protected readonly FilesFoldersApi _filesFoldersApi = filesFactory.FilesFoldersApi;
+    protected readonly FilesFilesApi _filesFilesApi = filesFactory.FilesFilesApi;
+    protected readonly FilesOperationsApi _filesOperationsApi = filesFactory.FilesOperationsApi;
     private readonly Func<Task> _resetDatabase = filesFactory.ResetDatabaseAsync;
     protected readonly FilesApiFactory _filesFactory = filesFactory;
 
@@ -50,7 +50,12 @@ public class BaseTest(
     {
         await _resetDatabase();
     }
-    
+
+    protected async Task<FileDtoInteger> GetFile(int fileId)
+    {
+        return (await _filesFilesApi.GetFileInfoAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        
+    }
     protected async Task<FileDtoInteger> CreateFile(string fileName, FolderType folderType, User user)
     {
         await _filesClient.Authenticate(user);
@@ -66,6 +71,23 @@ public class BaseTest(
         var createdFile = (await _filesFilesApi.CreateFileAsync(folderId, new CreateFileJsonElement(fileName))).Response;
         
         return createdFile;
+    }
+    
+    protected async Task<FolderDtoInteger> CreateFolder(string folderName, FolderType folderType, User user)
+    {
+        await _filesClient.Authenticate(user);
+        
+        var rootFolder = (await _filesFoldersApi.GetRootFoldersAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var folderId = rootFolder.FirstOrDefault(r => r.Current.RootFolderType.HasValue && r.Current.RootFolderType.Value == folderType)!.Current.Id;
+        
+        return await CreateFolder(folderName, folderId);
+    }
+    
+    protected async Task<FolderDtoInteger> CreateFolder(string folderName, int folderId)
+    {
+        var createFolder = (await _filesFoldersApi.CreateFolderAsync(folderId, new CreateFolder(folderName))).Response;
+        
+        return createFolder;
     }
     
     protected async Task<List<FileOperationDto>?> WaitLongOperation()

@@ -26,6 +26,8 @@
 
 extern alias ASCWebApi;
 extern alias ASCPeople;
+using Docspace.Client;
+
 using MemberRequestDto = ASCPeople::ASC.People.ApiModels.RequestDto.MemberRequestDto;
 using PasswordHasher = ASC.Security.Cryptography.PasswordHasher;
 using WizardRequestsDto = Docspace.Model.WizardRequestsDto;
@@ -105,17 +107,15 @@ public static class Initializer
             var apiClientStartTask = Task.Run(() =>
             {
                 _apiClient = apiFactory.WithWebHostBuilder(Build).CreateClient();
-                _apiClient.BaseAddress = new Uri(_apiClient.BaseAddress, "api/2.0/");
-                _authenticationApi = new AuthenticationApi(_apiClient);
-                _commonSettingsApi = new SettingsCommonSettingsApi(_apiClient);
-                _portalUsersApi = new PortalUsersApi(_apiClient);
+                _authenticationApi = new AuthenticationApi(_apiClient, new Configuration { BasePath = _apiClient.BaseAddress!.ToString().TrimEnd('/') });
+                _commonSettingsApi = new SettingsCommonSettingsApi(_apiClient, new Configuration { BasePath = _apiClient.BaseAddress!.ToString().TrimEnd('/') });
+                _portalUsersApi = new PortalUsersApi(_apiClient, new Configuration { BasePath = _apiClient.BaseAddress!.ToString().TrimEnd('/') });
             });
 
             var peopleClientStartTask = Task.Run(() =>
             {
                 _peopleClient = peopleFactory.WithWebHostBuilder(Build).CreateClient();
-                _peopleClient.BaseAddress = new Uri(_peopleClient.BaseAddress, "api/2.0/");
-                _peopleProfilesApi = new PeopleProfilesApi(_peopleClient);
+                _peopleProfilesApi = new PeopleProfilesApi(_peopleClient, new Configuration { BasePath = _peopleClient.BaseAddress!.ToString().TrimEnd('/') });
             });
 
             var filesServiceStartTask = Task.Run(() =>
@@ -124,26 +124,21 @@ public static class Initializer
             });
             
             await Task.WhenAll(apiClientStartTask, peopleClientStartTask, filesServiceStartTask);
-            
-            var settings = (await _commonSettingsApi.GetSettingsAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+            var settings  = (await _commonSettingsApi.GetSettingsAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
             
             if (!string.IsNullOrEmpty(settings.WizardToken))
             {
                 _apiClient.DefaultRequestHeaders.TryAddWithoutValidation("confirm", settings.WizardToken);
 
-                await _commonSettingsApi.CompleteWizardAsync(new WizardRequestsDto
-                {
-                    Email = Owner.Email, 
-                    PasswordHash = _passwordHasher.GetClientPassword(Owner.Password)
-                }, TestContext.Current.CancellationToken);
+                await _commonSettingsApi.CompleteWizardAsync(new WizardRequestsDto(Owner.Email, _passwordHasher.GetClientPassword(Owner.Password)), TestContext.Current.CancellationToken);
                 
                 _apiClient.DefaultRequestHeaders.Remove("confirm");
             }
         }
         
         await filesFactory.HttpClient.Authenticate(Owner);
-        
-        _ = await filesFactory.HttpClient.GetAsync("@root");
+        _ = await filesFactory.FilesFoldersApi.GetRootFoldersAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         if (!_initialized)
         {
