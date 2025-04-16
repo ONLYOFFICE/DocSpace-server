@@ -972,4 +972,16 @@
   <data name="FileCustomFilterEnabled" xml:space="preserve">
     <value>Fișierul: {0}. Filtrul personalizat a fost activat</value>
   </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>Link-ul de autorizare a fost activat</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>Autentificarea LDAP a fost dezactivată</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>Autentificarea LDAP a fost activată</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>Sincronizarea LDAP s-a încheiat</value>
+  </data>
 </root>
