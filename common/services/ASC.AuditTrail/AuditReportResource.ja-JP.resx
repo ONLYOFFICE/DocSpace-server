@@ -913,4 +913,16 @@
   <data name="FileCustomFilterEnabled" xml:space="preserve">
     <value>ファイル：{0}。カスタムフィルタは有効です</value>
   </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>LDAP認証が有効です</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>LDAP認証が無効です</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>LDAP同期が完了しました</value>
+  </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>認証リンクが有効化されました</value>
+  </data>
 </root>
