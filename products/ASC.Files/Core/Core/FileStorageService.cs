@@ -572,7 +572,6 @@ public class FileStorageService //: IFileStorageService
         {
             await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetRoomsCountCheckKey(tenantId)))
             {
-                await countRoomChecker.CheckAppend();
                 return await InternalCreateFolderAsync(parentId, title, room.FolderType, room.SettingsPrivate, room.SettingsIndexing, room.SettingsQuota, room.SettingsLifetime, room.SettingsDenyDownload, watermarkRequestDto, color, cover, tags, logo);
             }
         }, room.SettingsPrivate, share);
