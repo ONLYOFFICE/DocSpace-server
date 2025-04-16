@@ -260,7 +260,7 @@ public class FileDtoHelper(
 
         var fileDao = _daoFactory.GetFileDao<T>();
 
-        if (await DocSpaceHelper.IsFormOrCompletedForm(file, fileDao))
+        if (fileType == FileType.Pdf)
         {
             var folderDao = _daoFactory.GetCacheFolderDao<T>();
 

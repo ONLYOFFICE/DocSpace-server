@@ -1567,9 +1567,6 @@ public class EntryManager(IDaoFactory daoFactory,
                 else if (rootFolder.FolderType == FolderType.VirtualDataRoom)
                 {
                     return await SubmitVDRFormAsync(rootFolder, file, fileDao, tmpStream);
-                }else if (rootFolder.FolderType == FolderType.USER)
-                {
-                    return await SubmitUserFormAsync(file, fileDao, tmpStream);
                 }
             }
             file.ContentLength = tmpStream.Length;

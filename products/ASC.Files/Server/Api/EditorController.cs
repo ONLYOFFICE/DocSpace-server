@@ -152,7 +152,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         FormOpenSetup<T> formOpenSetup = null;
 
         var rootFolder = await documentServiceHelper.GetRootFolderAsync(file);
-        if (file.IsForm && rootFolder.RootFolderType != FolderType.RoomTemplates)
+        if (file.IsForm && rootFolder.RootFolderType != FolderType.RoomTemplates && rootFolder.RootFolderType != FolderType.USER)
         {
 
             formOpenSetup = rootFolder.FolderType switch
@@ -161,7 +161,6 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                 FolderType.FormFillingFolderInProgress => documentServiceHelper.GetFormOpenSetupForFolderInProgress(file, inDto.EditorType),
                 FolderType.FormFillingFolderDone => documentServiceHelper.GetFormOpenSetupForFolderDone<T>(inDto.EditorType),
                 FolderType.VirtualDataRoom => await documentServiceHelper.GetFormOpenSetupForVirtualDataRoomAsync(file, inDto.EditorType),
-                FolderType.USER => await documentServiceHelper.GetFormOpenSetupForUserFolderAsync(file, inDto.EditorType, inDto.Edit, inDto.Fill),
                 _ => new FormOpenSetup<T>
                 {
                     CanEdit = !inDto.Fill,
@@ -174,7 +173,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         var docParams = await documentServiceHelper.GetParamsAsync(
             formOpenSetup != null && formOpenSetup.Draft != null ? formOpenSetup.Draft : file, 
             lastVersion,
-            !file.IsCompletedForm && (formOpenSetup?.CanEdit != false), 
+            file.IsCompletedForm ? false : formOpenSetup == null ? inDto.Edit : formOpenSetup.CanEdit,
             !inDto.View, 
             true, formOpenSetup == null || formOpenSetup.CanFill,
             formOpenSetup != null ? formOpenSetup.EditorType : inDto.EditorType,
