@@ -466,7 +466,7 @@ public class GroupControllerAdditional<T>(
 
         await foreach (var item in securityDao.GetGroupsWithSharedAsync(room, text, inDto.ExcludeShared ?? false, offset, count))
         {
-            yield return await groupFullDtoHelper.Get(item.GroupInfo, false, item.Shared);
+            yield return await groupFullDtoHelper.Get(item.GroupInfo, false, shared: item.Shared);
         }
     }
 }

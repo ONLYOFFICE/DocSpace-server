@@ -110,7 +110,7 @@ public class ApiKeyConverter(ApiDateTimeHelper apiDateTimeHelper,
             Permissions = source.Permissions,
             LastUsed = source.LastUsed.HasValue ? apiDateTimeHelper.Get(source.LastUsed.Value) : null,
             CreateOn = apiDateTimeHelper.Get(source.CreateOn),
-            CreateBy =  employeeWrapperHelper.GetAsync(source.CreateBy).GetAwaiter().GetResult(),
+            CreateBy =  employeeWrapperHelper.GetAsync(source.CreateBy, null).GetAwaiter().GetResult(),
             ExpiresAt = source.ExpiresAt.HasValue ? apiDateTimeHelper.Get(source.ExpiresAt.Value) : null,
             IsActive = source.IsActive,
         };

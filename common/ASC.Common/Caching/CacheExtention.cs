@@ -33,6 +33,8 @@ public static class CacheExtention
         return cacheProvider.GetCache("memory");
     }
 
+    public static TimeSpan OutputDuration = TimeSpan.FromMinutes(5);
+
     public static string GetUserTag(int tenant, Guid userId)
     {
         return $"user-{tenant}-{userId}";
@@ -78,9 +80,9 @@ public static class CacheExtention
         return $"group-{tenant}-{id}";
     }
 
-    public static string GetGroupRefTag(int tenant, Guid groupId, Guid userId)
+    public static string GetGroupRefTag(int tenant, Guid groupId)
     {
-        return $"ref-{tenant}-{groupId}-{userId}";
+        return $"ref-{tenant}-{groupId}";
     }
 
     public static string GetWebPluginsTag(int tenant)
@@ -116,5 +118,20 @@ public static class CacheExtention
     public static string GetTenantSettingsTag(int tenant, string key)
     {
         return $"settings-{tenant}-{key}";
+    }
+    
+    public static string GetFolderTag<T>(int tenant, T id)
+    {
+        return $"folder-{tenant}-{id}";
+    }
+
+    public static string GetHistoriesFolderTag<T>(int tenant, T id)
+    {
+        return $"histories-folder-{tenant}-{id}";
+    }
+
+    public static string GetHistoriesFileTag<T>(int tenant, T id)
+    {
+        return $"histories-file-{tenant}-{id}";
     }
 }

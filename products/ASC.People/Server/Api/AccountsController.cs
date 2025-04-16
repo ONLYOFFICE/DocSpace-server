@@ -117,7 +117,7 @@ public class AccountsController<T>(
         await foreach (var item in securityDao.GetGroupsWithSharedAsync(room, text, inDto.ExcludeShared ?? false, offset, count))
         {
             groupsCount++;
-            yield return await groupFullDtoHelper.Get(item.GroupInfo, false, item.Shared);
+            yield return await groupFullDtoHelper.Get(item.GroupInfo, false, shared: item.Shared);
         }
         
         var usersCount = count - groupsCount;
@@ -138,7 +138,7 @@ public class AccountsController<T>(
                            usersOffset,
                            usersCount))
         {
-            yield return await employeeFullDtoHelper.GetFullAsync(item.UserInfo, item.Shared);
+            yield return await employeeFullDtoHelper.GetFullAsync(item.UserInfo, shared: item.Shared);
         }
     }
 }

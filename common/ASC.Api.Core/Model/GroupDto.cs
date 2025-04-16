@@ -80,10 +80,14 @@ public class GroupDto
 }
 
 [Scope]
-public class GroupFullDtoHelper(UserManager userManager, EmployeeFullDtoHelper employeeFullDtoHelper)
+public class GroupFullDtoHelper(UserManager userManager, EmployeeFullDtoHelper employeeFullDtoHelper, TenantManager tenantManager)
 {
-    public async Task<GroupDto> Get(GroupInfo group, bool includeMembers, bool? shared = null)
+    public async Task<GroupDto> Get(GroupInfo group, bool includeMembers, List<string> tags = null, bool? shared = null)
     {
+        tags = tags ?? new List<string>();
+        var tenant = tenantManager.GetCurrentTenantId();
+        tags.Add(CacheExtention.GetGroupTag(tenant, group.ID));
+
         var result = new GroupDto
         {
             Id = group.ID,
@@ -95,23 +99,31 @@ public class GroupFullDtoHelper(UserManager userManager, EmployeeFullDtoHelper e
         };
         
         var manager = await userManager.GetUsersAsync(await userManager.GetDepartmentManagerAsync(group.ID));
+
         if (manager != null && !manager.Equals(Constants.LostUser))
         {
-            result.Manager = await employeeFullDtoHelper.GetFullAsync(manager);
+            tags.Add(CacheExtention.GetGroupRefTag(tenant, group.ID));
+            result.Manager = await employeeFullDtoHelper.GetFullAsync(manager, tags);
         }
 
         var members = await userManager.GetUsersByGroupAsync(group.ID);
+
         result.MembersCount = members.Length;
 
         if (!includeMembers)
         {
+            foreach (var m in members)
+            {
+                tags.Add(CacheExtention.GetGroupRefTag(tenant, group.ID));
+            }
             return result;
         }
 
         result.Members = [];
         foreach (var m in members)
-        { 
-            result.Members.Add(await employeeFullDtoHelper.GetFullAsync(m));
+        {
+            tags.Add(CacheExtention.GetGroupRefTag(tenant, group.ID));
+            result.Members.Add(await employeeFullDtoHelper.GetFullAsync(m, tags));
         }
 
         return result;

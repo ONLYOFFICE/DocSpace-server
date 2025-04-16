@@ -33,7 +33,8 @@ public class SettingsManager(
     AuthContext authContext,
     TenantManager tenantManager,
     IDbContextFactory<WebstudioDbContext> dbContextFactory,
-    IFusionCache fusionCache)
+    IFusionCache fusionCache,
+    IFusionCacheProvider cacheProvider)
 {
     private static readonly TimeSpan _expirationTimeout = TimeSpan.FromMinutes(5);
     private static readonly JsonSerializerOptions  _options = new()
@@ -199,7 +200,16 @@ public class SettingsManager(
             }
 
             await context.SaveChangesAsync();
-            
+
+            var cache = cacheProvider.GetMemoryCache();
+            if (userId == Guid.Empty)
+            {
+                await cache.RemoveByTagAsync(CacheExtention.GetSettingsTag(tenantId, nameof(T)));
+            }
+            else
+            {
+                await cache.RemoveByTagAsync(CacheExtention.GetSettingsTag(tenantId, userId, nameof(T)));
+            }
             await fusionCache.RemoveAsync(key);
 
             return true;

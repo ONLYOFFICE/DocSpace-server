@@ -24,6 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Globalization;
+
+using ZiggyCreatures.Caching.Fusion;
+
 namespace ASC.People.Api;
 
 ///<summary>
@@ -79,7 +83,8 @@ public class UserController(
     CountPaidUserStatistic countPaidUserStatistic,
     UserSocketManager socketManager,
     GlobalFolderHelper globalFolderHelper,
-    UserWebhookManager webhookManager)
+    UserWebhookManager webhookManager,
+    IFusionCacheProvider cacheProvider)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
 {
     /// <summary>
@@ -431,11 +436,12 @@ public class UserController(
 
         var users = (await _userManager.GetUsersAsync()).Where(u => u.ActivationStatus == EmployeeActivationStatus.Pending);
 
+        var tags = new List<string>();
         foreach (var user in users)
         {
             if (await _userManager.CanUserViewAnotherUserAsync(currentUser, user))
             {
-                result.Add(await employeeDtoHelper.GetAsync(user));
+                result.Add(await employeeDtoHelper.GetAsync(user, tags));
             }
         }
 
@@ -1095,7 +1101,6 @@ public class UserController(
         };
         
         var users = GetByFilterAsync(filter);
-
         await foreach (var user in users)
         {
             yield return await employeeDtoHelper.GetAsync(user);
@@ -1354,11 +1359,21 @@ public class UserController(
     [HttpGet("@self")]
     public async Task<EmployeeFullDto> SelfAsync()
     {
+        var cache = cacheProvider.GetMemoryCache();
+        var key = $"{HttpContext.Request.Path}-{securityContext.CurrentAccount.ID}";
+        var entry = await cache.GetOrDefaultAsync<CacheEntry>(key);
+        if (entry != null && HttpContext.TryGetFromCache(entry.LastModified))
+        {
+            return null;
+        }
+        var tags = new List<string>();
+
         var user = await _userManager.GetUserAsync(securityContext.CurrentAccount.ID, EmployeeFullDtoHelper.GetExpression(_apiContext));
 
-        var result = await employeeFullDtoHelper.GetFullAsync(user);
+        var result = await employeeFullDtoHelper.GetFullAsync(user, tags: tags);
 
         result.Theme = (await settingsManager.LoadForCurrentUserAsync<DarkThemeSettings>()).Theme;
+        tags.Add(CacheExtention.GetSettingsTag(tenantManager.GetCurrentTenantId(), nameof(DarkThemeSettings)));
 
         result.LoginEventId = cookieStorage.GetLoginEventIdFromCookie(cookiesManager.GetCookies(CookiesType.AuthKey));
 
@@ -1371,6 +1386,13 @@ public class UserController(
         {
             result.HasPersonalFolder = true;
         }
+
+        var lastModified = DateTime.Now;
+        HttpContext.Response.Headers.LastModified = lastModified.ToString(CultureInfo.InvariantCulture);
+        cache.Set(key,
+            new CacheEntry() { LastModified = lastModified },
+            opt => opt.SetDuration(TimeSpan.FromMinutes(5)).SetFailSafe(true), 
+            tags.ToArray());
 
         return result;
     }
@@ -2515,7 +2537,7 @@ public class UserControllerAdditional<T>(
                            offset,
                            count))
         {
-            yield return await employeeFullDtoHelper.GetFullAsync(u.UserInfo, u.Shared);
+            yield return await employeeFullDtoHelper.GetFullAsync(u.UserInfo, shared: u.Shared);
         }
     }
 }

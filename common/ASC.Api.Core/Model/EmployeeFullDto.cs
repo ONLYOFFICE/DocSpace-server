@@ -238,7 +238,7 @@ public class EmployeeFullDtoHelper(
         CoreBaseSettings coreBaseSettings,
         GroupSummaryDtoHelper groupSummaryDtoHelper,
         ILogger<EmployeeDtoHelper> logger)
-    : EmployeeDtoHelper(httpContext, displayUserSettingsHelper, userPhotoManager, commonLinkUtility, userManager, authContext, logger)
+    : EmployeeDtoHelper(httpContext, displayUserSettingsHelper, userPhotoManager, commonLinkUtility, userManager, authContext, logger, tenantManager)
 {
     public static Expression<Func<User, UserInfo>> GetExpression(ApiContext apiContext)
     {
@@ -286,7 +286,7 @@ public class EmployeeFullDtoHelper(
 
         if (withGroups)
         {
-            await FillGroupsAsync(result, userInfo);
+            await FillGroupsAsync(result, userInfo, new List<string>());
         }
 
         var photoData = await _userPhotoManager.GetUserPhotoData(userInfo.Id, UserPhotoManager.BigFotoSize);
@@ -308,10 +308,15 @@ public class EmployeeFullDtoHelper(
         return result;
     }
 
-    public async Task<EmployeeFullDto> GetFullAsync(UserInfo userInfo, bool? shared = null)
+    public async Task<EmployeeFullDto> GetFullAsync(UserInfo userInfo, List<string> tags = null, bool? shared = null)
     {
-        var currentType = await _userManager.GetUserTypeAsync(userInfo.Id);
+        tags = tags ?? new List<string>();
         var tenant = tenantManager.GetCurrentTenant();
+
+        var currentType = await _userManager.GetUserTypeAsync(userInfo.Id);
+        tags.Add(CacheExtention.GetGroupRefTag(tenant.Id, Constants.GroupAdmin.ID));
+        tags.Add(CacheExtention.GetGroupRefTag(tenant.Id, Constants.GroupRoomAdmin.ID));
+        tags.Add(CacheExtention.GetGroupRefTag(tenant.Id, Constants.GroupGuest.ID));
 
         var result = new EmployeeFullDto
         {
@@ -324,7 +329,7 @@ public class EmployeeFullDtoHelper(
             Terminated = apiDateTimeHelper.Get(userInfo.TerminatedDate),
             WorkFrom = apiDateTimeHelper.Get(userInfo.WorkFromDate),
             Email = userInfo.Email,
-            IsVisitor = await _userManager.IsGuestAsync(userInfo),
+            IsVisitor = currentType is EmployeeType.Guest,
             IsAdmin = currentType is EmployeeType.DocSpaceAdmin,
             IsRoomAdmin = currentType is EmployeeType.RoomAdmin,
             IsOwner = userInfo.IsOwner(tenant),
@@ -334,17 +339,29 @@ public class EmployeeFullDtoHelper(
             Shared = shared
         };
 
-        await InitAsync(result, userInfo);
+        tags.Add(CacheExtention.GetUserTag(tenant.Id, userInfo.Id));
 
-        var isDocSpaceAdmin = await _userManager.IsDocSpaceAdminAsync(_authContext.CurrentAccount.ID);
+        await InitAsync(result, userInfo, tags);
+
+        var isDocSpaceAdmin = currentType is EmployeeType.DocSpaceAdmin;
 
         if ((coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Statistic) && (isDocSpaceAdmin || userInfo.Id == _authContext.CurrentAccount.ID))
         {
             var quotaSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
-            result.UsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenant.Id, userInfo.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
+            tags.Add(CacheExtention.GetSettingsTag(tenant.Id, nameof(TenantUserQuotaSettings)));
+
+            var rows = (await quotaService.FindUserQuotaRowsAsync(tenant.Id, userInfo.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString()));
+
+            foreach(var row in rows)
+            {
+                tags.Add(CacheExtention.GetTenantQuotaRowTag(tenant.Id, row.Path, userInfo.Id));
+            }
+            result.UsedSpace = Math.Max(0, rows.Sum(r => r.Counter));
+
             if (quotaSettings.EnableQuota)
             {
                 var userQuotaSettings = await settingsManager.LoadAsync<UserQuotaSettings>(userInfo);
+                tags.Add(CacheExtention.GetSettingsTag(tenant.Id, nameof(UserQuotaSettings)));
 
                 result.IsCustomQuota = userQuotaSettings != null && userQuotaSettings.UserQuota != userQuotaSettings.GetDefault().UserQuota;
 
@@ -381,8 +398,8 @@ public class EmployeeFullDtoHelper(
             result.CultureName = coreBaseSettings.GetRightCultureName(userInfo.GetCulture());
         }
 
-        FillConacts(result, userInfo);
-        await FillGroupsAsync(result, userInfo);
+        FillContacts(result, userInfo);
+        await FillGroupsAsync(result, userInfo, tags);
 
         var cacheKey = Math.Abs(userInfo.LastModified.GetHashCode());
 
@@ -422,7 +439,7 @@ public class EmployeeFullDtoHelper(
 
         if (userInfo.CreatedBy.HasValue)
         {
-            result.CreatedBy = await GetAsync(await _userManager.GetUsersAsync(userInfo.CreatedBy.Value));
+            result.CreatedBy = await GetAsync(await _userManager.GetUsersAsync(userInfo.CreatedBy.Value), tags);
         }
             
         result.RegistrationDate = apiDateTimeHelper.Get(userInfo.CreateDate);
@@ -430,7 +447,7 @@ public class EmployeeFullDtoHelper(
         return result;
     }
 
-    private async Task FillGroupsAsync(EmployeeFullDto result, UserInfo userInfo)
+    private async Task FillGroupsAsync(EmployeeFullDto result, UserInfo userInfo, List<string> tags)
     {
         if (!_httpContext.Check("groups") && !_httpContext.Check("department"))
         {
@@ -443,6 +460,8 @@ public class EmployeeFullDtoHelper(
         foreach (var g in groupsFromDb)
         {
             groups.Add(await groupSummaryDtoHelper.GetAsync(g));
+            tags.Add(CacheExtention.GetGroupTag(_tenantManager.GetCurrentTenantId(), g.ID));
+            tags.Add(CacheExtention.GetGroupRefTag(_tenantManager.GetCurrentTenantId(), g.ID));
         }
         
 
@@ -457,7 +476,7 @@ public class EmployeeFullDtoHelper(
         }
     }
 
-    private void FillConacts(EmployeeFullDto employeeWraperFull, UserInfo userInfo)
+    private void FillContacts(EmployeeFullDto employeeWraperFull, UserInfo userInfo)
     {
         if (userInfo.ContactsList == null)
         {

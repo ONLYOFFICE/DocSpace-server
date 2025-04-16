@@ -101,29 +101,34 @@ public class EmployeeDtoHelper(
     CommonLinkUtility commonLinkUtility,
     UserManager userManager,
     AuthContext authContext,
-    ILogger<EmployeeDtoHelper> logger)
+    ILogger<EmployeeDtoHelper> logger,
+    TenantManager tenantManager)
 {
     private readonly ConcurrentDictionary<Guid, EmployeeDto> _dictionary = new();
     protected readonly ApiContext _httpContext = httpContext;
     protected readonly UserPhotoManager _userPhotoManager = userPhotoManager;
     protected readonly UserManager _userManager = userManager;
+    protected readonly TenantManager _tenantManager = tenantManager;
     protected readonly AuthContext _authContext = authContext;
     protected readonly DisplayUserSettingsHelper _displayUserSettingsHelper = displayUserSettingsHelper;
 
-    public async Task<EmployeeDto> GetAsync(UserInfo userInfo)
+    public async Task<EmployeeDto> GetAsync(UserInfo userInfo, List<string> tags = null)
     {
         if (!_dictionary.TryGetValue(userInfo.Id, out var employee))
         {
-            employee = await InitAsync(new EmployeeDto(), userInfo);
+            employee = await InitAsync(new EmployeeDto(), userInfo, tags);
 
             _dictionary.AddOrUpdate(userInfo.Id, _ => employee, (_, _) => employee);
-
+        }
+        else
+        {
+            tags?.Add(CacheExtention.GetUserPhotoTag(_tenantManager.GetCurrentTenantId(), userInfo.Id));
         }
         
         return employee;
     }
 
-    public async Task<EmployeeDto> GetAsync(Guid userId)
+    public async Task<EmployeeDto> GetAsync(Guid userId, List<string> tags = null)
     {
         try
         {
@@ -132,16 +137,16 @@ public class EmployeeDtoHelper(
                 return employee;
             }
             
-            return await GetAsync(await _userManager.GetUsersAsync(userId));
+            return await GetAsync(await _userManager.GetUsersAsync(userId), tags);
         }
         catch (Exception e)
         {
             logger.ErrorWithException(e);
-            return await GetAsync(Constants.LostUser);
+            return await GetAsync(Constants.LostUser, tags);
         }
     }
 
-    protected async Task<EmployeeDto> InitAsync(EmployeeDto result, UserInfo userInfo)
+    protected async Task<EmployeeDto> InitAsync(EmployeeDto result, UserInfo userInfo, List<string> tags)
     {
         result.Id = userInfo.Id;
         result.DisplayName = _displayUserSettingsHelper.GetFullUserName(userInfo);
@@ -185,6 +190,8 @@ public class EmployeeDtoHelper(
             var profileUrl = await commonLinkUtility.GetUserProfileAsync(userInfo.Id);
             result.ProfileUrl = commonLinkUtility.GetFullAbsolutePath(profileUrl);
         }
+
+        tags.Add(CacheExtention.GetUserPhotoTag(_tenantManager.GetCurrentTenantId(), userInfo.Id));
 
         return result;
     }

@@ -274,9 +274,9 @@ public class CachedUserService : IUserService
             var tags = new List<string>();
             foreach (var r in refs)
             {
-                tags.Add(CacheExtention.GetGroupRefTag(tenant, r.Value.GroupId, r.Value.UserId));
-                tags.Add(CacheExtention.GetGroupTag(tenant, r.Value.GroupId));
+                tags.Add(CacheExtention.GetGroupRefTag(tenant, r.Value.GroupId));
             }
+
             ctx.Tags = tags.ToArray();
 
             return ctx.Modified(new UserGroupRefStore(refs));
@@ -293,7 +293,7 @@ public class CachedUserService : IUserService
         {
             var groupRef = await _service.GetUserGroupRefAsync(tenant, groupId, refType);
 
-            ctx.Tags = [CacheExtention.GetGroupRefTag(tenant, groupId, groupRef.UserId), CacheExtention.GetGroupTag(tenant, groupId)];
+            ctx.Tags = [CacheExtention.GetGroupRefTag(tenant, groupId)];
 
             return ctx.Modified(groupRef, lastModified: DateTime.UtcNow);
         }, opt => opt.SetDuration(_cacheExpiration).SetFailSafe(true));
@@ -305,7 +305,7 @@ public class CachedUserService : IUserService
     {
         r = await _service.SaveUserGroupRefAsync(tenant, r);
 
-        var tag = CacheExtention.GetGroupRefTag(tenant, r.GroupId, r.UserId);
+        var tag = CacheExtention.GetGroupRefTag(tenant, r.GroupId);
         await _cache.RemoveByTagAsync(tag);
 
         return r;
@@ -317,7 +317,7 @@ public class CachedUserService : IUserService
 
         var r = new UserGroupRef(userId, groupId, refType) { TenantId = tenant, Removed = true };
 
-        var tag = CacheExtention.GetGroupRefTag(tenant, groupId, userId);
+        var tag = CacheExtention.GetGroupRefTag(tenant, groupId);
         await _cache.RemoveByTagAsync(tag);
     }
 
