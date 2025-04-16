@@ -74,8 +74,6 @@ public class TariffService(
     
     private const int DefaultTrialPeriod = 30;
 
-    private static readonly int[] _additionalQuotas = [1004, 1005, 1011]; // disk, admin1, storage
-
     //private readonly int _activeUsersMin;
     //private readonly int _activeUsersMax;
 
@@ -133,15 +131,21 @@ public class TariffService(
                                 throw new InvalidOperationException($"Quota with id {currentPayment.ProductId} not found for portal {await coreSettings.GetKeyAsync(tenantId)}.");
                             }
 
-                            var subscription = !_additionalQuotas.Contains(currentPayment.ProductId);
-
                             asynctariff.Id = currentPayment.PaymentId;
 
-                            var paymentEndDate = 9999 <= currentPayment.EndDate.Year ? DateTime.MaxValue : currentPayment.EndDate;
-                            asynctariff.DueDate = DateTime.Compare(asynctariff.DueDate, paymentEndDate) < 0 ? asynctariff.DueDate : paymentEndDate;
+                            DateTime? quotaDueDate = null;
+                            if (quota.Wallet)
+                            {
+                                quotaDueDate = currentPayment.EndDate;
+                            }
+                            else
+                            {
+                                var paymentEndDate = 9999 <= currentPayment.EndDate.Year ? DateTime.MaxValue : currentPayment.EndDate;
+                                asynctariff.DueDate = DateTime.Compare(asynctariff.DueDate, paymentEndDate) < 0 ? asynctariff.DueDate : paymentEndDate;
+                            }
 
                             asynctariff.Quotas = asynctariff.Quotas.Where(r => r.Id != quota.TenantId).ToList();
-                            asynctariff.Quotas.Add(new Quota(quota.TenantId, currentPayment.Quantity, subscription ? null : currentPayment.EndDate));
+                            asynctariff.Quotas.Add(new Quota(quota.TenantId, currentPayment.Quantity, quota.Wallet, quotaDueDate));
                             email = currentPayment.PaymentEmail;
                         }
 
@@ -151,6 +155,7 @@ public class TariffService(
                         {
                             var tenantQuota = tenantQuotas.SingleOrDefault(q => q.TenantId == quota.Id);
 
+                            tenantQuota.Wallet = quota.Wallet;
                             tenantQuota.DueDate = quota.DueDate;
                             tenantQuota *= quota.Quantity;
 
@@ -222,7 +227,7 @@ public class TariffService(
 
                     await quotaService.SaveTenantQuotaAsync(quota);
 
-                    tariff = new Tariff { Quotas = [new Quota(quota.TenantId, 1, null)], DueDate = DateTime.UtcNow.AddDays(DefaultTrialPeriod) };
+                    tariff = new Tariff { Quotas = [new Quota(quota.TenantId, 1)], DueDate = DateTime.UtcNow.AddDays(DefaultTrialPeriod) };
 
                     await SetTariffAsync(Tenant.DefaultTenant, tariff, [quota]);
                     await InsertToCache(tenantId, tariff);
@@ -265,6 +270,7 @@ public class TariffService(
                 qty = quantity[mustUpdateQuota.Name];
             }
 
+            quota.Wallet = tariffRow.Wallet;
             quota.DueDate = tariffRow.DueDate;
             quota *= qty;
 
@@ -279,6 +285,7 @@ public class TariffService(
 
             var quota = addedQuota;
 
+            quota.Wallet = false;
             quota.DueDate = null;
             quota *= qty;
 
@@ -414,6 +421,7 @@ public class TariffService(
 
                 var quota = addedQuota;
 
+                quota.Wallet = false;
                 quota.DueDate = null;
                 quota *= qty;
 
@@ -759,7 +767,7 @@ public class TariffService(
 
         if (toAdd != null)
         {
-            tariff.Quotas.Add(new Quota(toAdd.TenantId, 1, null));
+            tariff.Quotas.Add(new Quota(toAdd.TenantId, 1));
         }
     }
 
@@ -828,6 +836,7 @@ public class TariffService(
         {
             var quota = await quotaService.GetTenantQuotaAsync(tariffRow.Id);
 
+            quota.Wallet = tariffRow.Wallet;
             quota.DueDate = tariffRow.DueDate;
             quota *= tariffRow.Quantity;
 

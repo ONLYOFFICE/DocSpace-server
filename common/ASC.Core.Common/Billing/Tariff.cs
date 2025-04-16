@@ -114,25 +114,37 @@ public class Quota : IEquatable<Quota>
     public int Quantity { get; set; }
 
     /// <summary>
-    /// The quota due date.
+    /// The quota applies to the wallet or not
     /// </summary>
     [ProtoMember(3)]
+    public bool Wallet { get; set; }
+
+    /// <summary>
+    /// The quota due date.
+    /// </summary>
+    [ProtoMember(4)]
     public DateTime? DueDate { get; set; }
 
     public Quota()
     {
-        
     }
 
-    public Quota(int id, int quantity, DateTime? dueDate)
+    public Quota(int id, int quantity)
     {
         Id = id;
         Quantity = quantity;
+    }
+
+    public Quota(int id, int quantity, bool wallet, DateTime? dueDate)
+    {
+        Id = id;
+        Quantity = quantity;
+        Wallet = wallet;
         DueDate = dueDate;
     }
 
     public bool Equals(Quota other)
     {
-        return other != null && other.Id == Id && other.Quantity == Quantity && other.DueDate == DueDate;
+        return other != null && other.Id == Id && other.Quantity == Quantity && other.Wallet == Wallet && other.DueDate == DueDate;
     }
 }

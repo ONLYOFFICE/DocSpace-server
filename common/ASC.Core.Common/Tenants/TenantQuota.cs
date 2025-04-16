@@ -77,6 +77,11 @@ public class TenantQuota : IMapFrom<DbQuota>
     public bool Visible { get; set; }
 
     /// <summary>
+    /// Specifies if the tenant quota applies to the wallet or not
+    /// </summary>
+    public bool Wallet { get; set; }
+
+    /// <summary>
     /// The quota due date.
     /// </summary>
     public DateTime? DueDate { get; set; }
@@ -481,21 +486,27 @@ public class TenantQuota : IMapFrom<DbQuota>
             return quota;
         }
 
-        if (quota.DueDate.HasValue && quota.DueDate.Value < DateTime.UtcNow)
+        if (quota.Wallet && quota.DueDate.HasValue && quota.DueDate.Value < DateTime.UtcNow)
         {
             return old;
         }
 
         var newQuota = new TenantQuota(old);
-        newQuota.Price += quota.Price; // TODO: increase Price for non-subscription quota ?
-        newQuota.Visible &= quota.Visible;
         newQuota.ProductId = "";
 
-        if (quota.DueDate.HasValue)
+        if (quota.Wallet)
         {
-            newQuota.DueDate = newQuota.DueDate.HasValue
-                ? DateTime.Compare(newQuota.DueDate.Value, quota.DueDate.Value) < 0 ? newQuota.DueDate.Value : quota.DueDate.Value
-                : quota.DueDate.Value;
+            if (quota.DueDate.HasValue)
+            {
+                newQuota.DueDate = newQuota.DueDate.HasValue
+                    ? DateTime.Compare(newQuota.DueDate.Value, quota.DueDate.Value) < 0 ? newQuota.DueDate.Value : quota.DueDate.Value
+                    : quota.DueDate.Value;
+            }
+        }
+        else
+        {
+            newQuota.Price += quota.Price;
+            newQuota.Visible &= quota.Visible;
         }
 
         foreach (var f in newQuota.TenantQuotaFeatures)

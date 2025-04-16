@@ -311,6 +311,7 @@ public class TenantManager(
             {
                 var quota = await quotaService.GetTenantQuotaAsync(tariffRow.Id);
 
+                quota.Wallet = tariffRow.Wallet;
                 quota.DueDate = tariffRow.DueDate;
                 quota *= tariffRow.Quantity;
 

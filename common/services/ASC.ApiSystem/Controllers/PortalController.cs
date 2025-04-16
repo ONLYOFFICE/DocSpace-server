@@ -269,7 +269,7 @@ public class PortalController(
 
                 var tariff = new Tariff
                 {
-                    Quotas = [new Quota(trialQuotaId, 1, null)],
+                    Quotas = [new Quota(trialQuotaId, 1)],
                     DueDate = dueDate
                 };
                 await hostedSolution.SetTariffAsync(t.Id, tariff);

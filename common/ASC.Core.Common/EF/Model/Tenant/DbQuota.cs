@@ -40,7 +40,7 @@ public class DbQuota : BaseEntity, IMapFrom<TenantQuota>
     [MaxLength(128)]
     public string ProductId { get; set; }
     public bool Visible { get; set; }
-
+    public bool Wallet { get; set; }
     public override object[] GetKeys()
     {
         return [TenantId];
@@ -169,7 +169,8 @@ public static class DbQuotaExtension
                     Features = "total_size:107374182400",
                     Price = 30,
                     ProductId = "1011",
-                    Visible = false
+                    Visible = false,
+                    Wallet = true
                 }
                 );
         return modelBuilder;
@@ -220,6 +221,11 @@ public static class DbQuotaExtension
                 .HasColumnName("visible")
                 .HasColumnType("tinyint(1)")
                 .HasDefaultValueSql("'0'");
+
+            entity.Property(e => e.Wallet)
+                .HasColumnName("wallet")
+                .HasColumnType("tinyint(1)")
+                .HasDefaultValueSql("'0'");
         });
     }
     public static void PgSqlAddDbQuota(this ModelBuilder modelBuilder)
@@ -257,6 +263,11 @@ public static class DbQuotaExtension
 
             entity.Property(e => e.Visible)
                 .HasColumnName("visible")
+                .HasColumnType("boolean")
+                .HasDefaultValue(false);
+
+            entity.Property(e => e.Wallet)
+                .HasColumnName("wallet")
                 .HasColumnType("boolean")
                 .HasDefaultValue(false);
         });
