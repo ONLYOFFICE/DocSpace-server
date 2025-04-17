@@ -517,6 +517,8 @@ public class PaymentController(
     [HttpGet("customer/operations")]
     public async Task<Report> GetCustomerOperationsAsync(CustomerOperationsRequestDto inDto)
     {
+        await DemandAdminAsync();
+
         if (!tariffService.IsConfigured())
         {
             return null;
@@ -529,8 +531,6 @@ public class PaymentController(
         {
             return null;
         }
-
-        await DemandPayerOrOwnerAsync(tenant);
 
         var utcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate);
         var utcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate);
