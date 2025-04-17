@@ -45,4 +45,6 @@ public class TenantUserInvitationSettings : ISettings<TenantUserInvitationSettin
             AllowInvitingGuests = true
         };
     }
+
+    public DateTime LastModified { get; set; }
 }
