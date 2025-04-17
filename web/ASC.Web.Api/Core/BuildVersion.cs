@@ -52,14 +52,14 @@ public class BuildVersion
     private readonly DocumentServiceConnector _documentServiceConnector;
 
     [JsonIgnore]
-    private readonly ICache _cache;
+    private readonly IFusionCache _cache;
 
-    public BuildVersion(IConfiguration configuration, FilesLinkUtility filesLinkUtility, DocumentServiceConnector documentServiceConnector, ICache cache)
+    public BuildVersion(IConfiguration configuration, FilesLinkUtility filesLinkUtility, DocumentServiceConnector documentServiceConnector, IFusionCacheProvider cacheProvider)
     {
         _configuration = configuration;
         _filesLinkUtility = filesLinkUtility;
         _documentServiceConnector = documentServiceConnector;
-        _cache = cache;
+        _cache = cacheProvider.GetMemoryCache();
     }
 
     public async Task<BuildVersion> GetCurrentBuildVersionAsync()
@@ -84,14 +84,11 @@ public class BuildVersion
 
         var cacheKey = "DocumentServiceVersion";
 
-        var version = _cache.Get<string>(cacheKey);
-
-        if (string.IsNullOrEmpty(version))
+        var version = await _cache.GetOrSetAsync<string>(cacheKey, async (ctx, token) =>
         {
-            version = await _documentServiceConnector.GetVersionAsync();
-
-            _cache.Insert(cacheKey, version, DateTime.UtcNow.Add(TimeSpan.FromMinutes(15)));
-        }
+            var version = await _documentServiceConnector.GetVersionAsync();
+            return ctx.Modified(version);
+        }, opt => opt.SetDuration(TimeSpan.FromMinutes(15)).SetFailSafe(true), [CacheExtention.GetDocumentServiceTag()]);
 
         return version;
     }

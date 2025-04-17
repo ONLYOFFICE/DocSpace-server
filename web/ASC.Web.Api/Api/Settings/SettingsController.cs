@@ -236,7 +236,7 @@ public partial class SettingsController(MessageService messageService,
             settings.PasswordHash = passwordHasher;
         }
 
-        HttpContext.SetOutputCache(_cache, key, tags);
+        await HttpContext.SetOutputCacheAsync(_cache, key, tags);
 
         return settings;
     }

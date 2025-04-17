@@ -34,9 +34,13 @@ public class VersionController(PermissionContext permissionContext,
         WebItemManager webItemManager,
         BuildVersion buildVersion,
         IFusionCache fusionCache,
-        IHttpContextAccessor httpContextAccessor)
+        IFusionCacheProvider cacheProvider,
+        IHttpContextAccessor httpContextAccessor,
+        AuthContext authContext)
     : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
+    private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
+
     /// <summary>
     /// Returns the current portal build version.
     /// </summary>
@@ -51,7 +55,21 @@ public class VersionController(PermissionContext permissionContext,
     [HttpGet("build")]
     public async Task<BuildVersion> GetBuildVersionsAsync()
     {
-        return await buildVersion.GetCurrentBuildVersionAsync();
+        var key = $"{HttpContext.Request.Path}{HttpContext.Request.QueryString}-{HttpContext.Connection.RemoteIpAddress}-{authContext.CurrentAccount.ID}";
+        var entry = await _cache.GetOrDefaultAsync<CacheEntry>(key);
+        if (entry != null && HttpContext.TryGetFromCache(entry.LastModified))
+        {
+            return null;
+        }
+        var tags = new List<string>();
+        var tenant = tenantManager.GetCurrentTenant();
+
+        tags.Add(CacheExtention.GetDocumentServiceTag());
+
+        var result = await buildVersion.GetCurrentBuildVersionAsync();
+
+        await HttpContext.SetOutputCacheAsync(_cache, key, tags);
+        return result;
     }
 
     /// <summary>

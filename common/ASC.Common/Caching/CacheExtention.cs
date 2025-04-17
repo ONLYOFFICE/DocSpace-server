@@ -138,5 +138,10 @@ public static class CacheExtention
     public static string GetHistoriesFileTag<T>(int tenant, T id)
     {
         return $"histories-file-{tenant}-{id}";
+    } 
+    
+    public static string GetDocumentServiceTag()
+    {
+        return $"DocumentServiceVersion";
     }
 }

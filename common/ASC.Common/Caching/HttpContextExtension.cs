@@ -66,7 +66,17 @@ public static class HttpContextExtension
             opt => opt.SetDuration(CacheExtention.OutputDuration).SetFailSafe(true),
             tags.ToArray());
     }
-    
+
+    public static async Task SetOutputCacheAsync(this HttpContext httpContext, IFusionCache cache, string key, List<string> tags)
+    {
+        var lastModified = DateTime.Now;
+        httpContext.Response.Headers.LastModified = lastModified.ToString(CultureInfo.InvariantCulture);
+        await cache.SetAsync(key,
+            new CacheEntry() { LastModified = lastModified },
+            opt => opt.SetDuration(CacheExtention.OutputDuration).SetFailSafe(true),
+            tags.ToArray());
+    }
+
     public static bool TryGetFromCache(this HttpContext httpContext, string etag)
     {
         var etagFromRequest = httpContext.Request.Headers.IfNoneMatch;

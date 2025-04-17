@@ -1388,7 +1388,7 @@ public class UserController(
             result.HasPersonalFolder = true;
         }
 
-        HttpContext.SetOutputCache(_fusionCache, key, tags);
+        await HttpContext.SetOutputCacheAsync(_fusionCache, key, tags);
 
         return result;
     }
