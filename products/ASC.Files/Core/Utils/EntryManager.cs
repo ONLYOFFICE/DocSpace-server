@@ -1567,9 +1567,6 @@ public class EntryManager(IDaoFactory daoFactory,
                 else if (rootFolder.FolderType == FolderType.VirtualDataRoom)
                 {
                     return await SubmitVDRFormAsync(rootFolder, file, fileDao, tmpStream);
-                }else if (rootFolder.FolderType == FolderType.USER)
-                {
-                    return await SubmitUserFormAsync(file, fileDao, tmpStream);
                 }
             }
             file.ContentLength = tmpStream.Length;
@@ -2118,7 +2115,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
             var resultFolder = await folderDao.GetFolderAsync(origProperties.FormFilling.ResultsFolderId);
             var resultFile = await fileDao.GetFileAsync(origProperties.FormFilling.ResultsFileID);
-
+            var resultFileExtension = resultFile != null ? FileUtility.GetFileExtension(resultFile.Title) : "";
             if (resultFolder is not { FolderType: FolderType.FormFillingFolderDone })
             {
                 logger.LogDebug("Result folder: {Folder} not found.", origProperties.FormFilling.ResultsFolderId);
@@ -2132,7 +2129,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
                 await fileDao.SaveProperties(originalForm.Id, origProperties);
             }
-            else if (resultFile == null || !resultFile.ParentId.Equals(resultFolder.Id))
+            else if (resultFile == null || !resultFile.ParentId.Equals(resultFolder.Id) || resultFileExtension == ".csv")
             {
                 origProperties.FormFilling.ResultsFileID = await CreateFillResultsFile(resultFolder.Id, originalForm.CreateBy, Path.GetFileNameWithoutExtension(originalForm.Title), fileDao);
                 await fileDao.SaveProperties(originalForm.Id, origProperties);
