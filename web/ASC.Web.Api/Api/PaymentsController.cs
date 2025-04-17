@@ -550,6 +550,8 @@ public class PaymentController(
     [HttpPost("customer/operationsreport")]
     public async Task<string> CreateCustomerOperationsReportAsync(CustomerOperationsReportDto inDto)
     {
+        await DemandAdminAsync();
+
         if (!tariffService.IsConfigured())
         {
             return null;
@@ -562,8 +564,6 @@ public class PaymentController(
         {
             return null;
         }
-
-        await DemandPayerOrOwnerAsync(tenant);
 
         inDto = inDto ?? new CustomerOperationsReportDto();
 
