@@ -444,6 +444,7 @@ public class TenantQuota : IMapFrom<DbQuota>
         Visible = quota.Visible;
         MaxFileSize = quota.MaxFileSize;
         Features = quota.Features;
+        Wallet = quota.Wallet;
         DueDate = quota.DueDate;
     }
 
