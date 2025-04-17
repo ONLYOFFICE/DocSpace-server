@@ -361,7 +361,7 @@ public class EmployeeFullDtoHelper(
             if (quotaSettings.EnableQuota)
             {
                 var userQuotaSettings = await settingsManager.LoadAsync<UserQuotaSettings>(userInfo);
-                tags.Add(CacheExtention.GetSettingsTag(tenant.Id, nameof(UserQuotaSettings)));
+                tags.Add(CacheExtention.GetSettingsTag(tenant.Id, userInfo.Id, nameof(UserQuotaSettings)));
 
                 result.IsCustomQuota = userQuotaSettings != null && userQuotaSettings.UserQuota != userQuotaSettings.GetDefault().UserQuota;
 
