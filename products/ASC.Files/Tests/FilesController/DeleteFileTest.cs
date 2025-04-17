@@ -39,7 +39,7 @@ public class DeleteFileTest(
     {
         var createdFile = await CreateFile("test.docx", FolderType.USER, Initializer.Owner);
         
-        var results = (await _filesFilesApi.DeleteFileAsync(createdFile.Id, new Delete { Immediately = true}, TestContext.Current.CancellationToken)).Response;
+        var results = (await _filesFilesApi.DeleteFileAsync(createdFile.Id, new Delete { Immediately = true }, TestContext.Current.CancellationToken)).Response;
         
         if (results.Any(r => !r.Finished))
         {

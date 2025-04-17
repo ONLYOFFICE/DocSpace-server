@@ -27,7 +27,7 @@
 namespace ASC.Files.Tests.FilesController;
 
 [Collection("Test Collection")]
-public class CopyFileTest(
+public class MoveFolderTest(
     FilesApiFactory filesFactory, 
     WebApplicationFactory<WebApiProgram> apiFactory, 
     WebApplicationFactory<PeopleProgram> peopleFactory,
@@ -35,68 +35,58 @@ public class CopyFileTest(
     : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
 {
     [Fact]
-    public async Task CopyFile_BetweenUserFolders_ReturnsValidFile()
+    public async Task CopyFolder_BetweenUserFolders_ReturnsValidFolder()
     {
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         
-        // Create a source file
-        var sourceFile = await CreateFile("source_document.docx", FolderType.USER, Initializer.Owner);
+        // Create a source folder with a test file inside
+        var sourceFolder = await CreateFolder("source_folder", FolderType.USER, Initializer.Owner);
+        await CreateFile("test_file.docx", sourceFolder.Id);
         
         // Create a target folder
-        var targetFolderId = await CreateFolder("target_folder", FolderType.USER, Initializer.Owner);
-        
-        // Act
-        var copyParams = new CopyAsJsonElement(
-            destTitle: sourceFile.Title,
-            destFolderId: new CopyAsJsonElementDestFolderId(targetFolderId.Id)
-        );
-        
-        var copiedFile = (await _filesFilesApi.CopyFileAsAsync(sourceFile.Id, copyParams, TestContext.Current.CancellationToken)).Response;
-        
-        // Assert
-        copiedFile.Should().NotBeNull();
-        // copiedFile.Id.Should().NotBe(sourceFile.Id);
-        // copiedFile.Title.Should().Be(sourceFile.Title);
-        // copiedFile.FolderId.Should().Be(targetFolderId);
-    }
-    
-    [Fact]
-    public async Task CopyFile_WithRename_ReturnsRenamedFile()
-    {
-        // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        
-        // Create a source file
-        var sourceFile = await CreateFile("rename_source.docx", FolderType.USER, Initializer.Owner);
-        var newFileName = "renamed_copy.docx";
-        
-        // Get root folders to find a target folder
         var targetFolderId = await GetFolderIdAsync(FolderType.USER, Initializer.Owner);
         
         // Act
-        var copyParams = new CopyAsJsonElement(
-            destTitle: newFileName,
-            destFolderId: new CopyAsJsonElementDestFolderId(targetFolderId)
-        );
+        var copyParams = new BatchRequestDto
+        {
+            DestFolderId = new BatchRequestDtoDestFolderId(targetFolderId),
+            ConflictResolveType = FileConflictResolveType.Skip,
+            FileIds = [],
+            FolderIds = [new(sourceFolder.Id)]
+        };
         
-        var copiedFile = (await _filesFilesApi.CopyFileAsAsync(sourceFile.Id, copyParams, TestContext.Current.CancellationToken)).Response;
+        var results = (await _filesOperationsApi.CopyBatchItemsAsync(copyParams, TestContext.Current.CancellationToken)).Response;
+        
+        if (results.Any(r => !r.Finished))
+        {
+            results = await WaitLongOperation();
+        }
         
         // Assert
-        copiedFile.Should().NotBeNull();
-        // copiedFile.Id.Should().NotBe(sourceFile.Id);
-        // copiedFile.Title.Should().Be(newFileName);
-        // copiedFile.FolderId.Should().Be(targetFolderId);
+        results.Should().NotContain(x => !string.IsNullOrEmpty(x.Error));
+        
+        // Verify both folders exist
+        var sourceFolderInfo = (await _filesFoldersApi.GetFolderInfoAsync(sourceFolder.Id, TestContext.Current.CancellationToken)).Response;
+        sourceFolderInfo.Should().NotBeNull();
+        
+        // Find the copied folder in the target directory
+        var targetFolderContent = (await _filesFoldersApi.GetFolderByFolderIdAsync(targetFolderId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var copiedFolder = targetFolderContent.Folders.FirstOrDefault(f => f.Title == sourceFolder.Title);
+        
+        copiedFolder.Should().NotBeNull();
+        copiedFolder!.Title.Should().Be(sourceFolder.Title);
+        //copiedFolder.Id.Should().NotBe(sourceFolder.Id);
     }
     
     [Fact]
-    public async Task MoveFile_ToAnotherFolder_ReturnsSuccess()
+    public async Task MoveFolder_ToAnotherFolder_ReturnsSuccess()
     {
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         
-        // Create a source file
-        var sourceFile = await CreateFile("file_to_move.docx", FolderType.USER, Initializer.Owner);
+        // Create a source folder
+        var sourceFolder = await CreateFolder("folder_to_move", FolderType.USER, Initializer.Owner);
         
         // Create a target folder
         var targetFolder = await CreateFolder("target_folder", FolderType.USER, Initializer.Owner);
@@ -106,8 +96,8 @@ public class CopyFileTest(
         {
             DestFolderId = new BatchRequestDtoDestFolderId(targetFolder.Id),
             ConflictResolveType = FileConflictResolveType.Skip,
-            FileIds = [new(sourceFile.Id)],
-            FolderIds = []
+            FileIds = [],
+            FolderIds = [new(sourceFolder.Id)]
         };
         
         var results = (await _filesOperationsApi.MoveBatchItemsAsync(moveParams, TestContext.Current.CancellationToken)).Response;
@@ -120,8 +110,9 @@ public class CopyFileTest(
         // Assert
         results.Should().NotContain(x => !string.IsNullOrEmpty(x.Error));
         
-        // Verify file is moved
-        var fileInfo = await GetFile(sourceFile.Id);
-        fileInfo.FolderId.Should().Be(targetFolder.Id);
+        // Verify folder was moved
+        var movedFolder = (await _filesFoldersApi.GetFolderInfoAsync(sourceFolder.Id, TestContext.Current.CancellationToken)).Response;
+        movedFolder.Should().NotBeNull();
+        movedFolder.ParentId.Should().Be(targetFolder.Id);
     }
 }
