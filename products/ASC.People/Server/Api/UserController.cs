@@ -87,6 +87,8 @@ public class UserController(
     IFusionCacheProvider cacheProvider)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
 {
+    private readonly IFusionCache _fusionCache = cacheProvider.GetMemoryCache();
+
     /// <summary>
     /// Returns the user claims.
     /// </summary>
@@ -1359,9 +1361,8 @@ public class UserController(
     [HttpGet("@self")]
     public async Task<EmployeeFullDto> SelfAsync()
     {
-        var cache = cacheProvider.GetMemoryCache();
-        var key = $"{HttpContext.Request.Path}{HttpContext.Request.QueryString}-{securityContext.CurrentAccount.ID}";
-        var entry = await cache.GetOrDefaultAsync<CacheEntry>(key);
+        var key = $"{HttpContext.Request.Path}{HttpContext.Request.QueryString}-{HttpContext.Connection.RemoteIpAddress}-{securityContext.CurrentAccount.ID}";
+        var entry = await _fusionCache.GetOrDefaultAsync<CacheEntry>(key);
         if (entry != null && HttpContext.TryGetFromCache(entry.LastModified))
         {
             return null;
@@ -1387,12 +1388,7 @@ public class UserController(
             result.HasPersonalFolder = true;
         }
 
-        var lastModified = DateTime.Now;
-        HttpContext.Response.Headers.LastModified = lastModified.ToString(CultureInfo.InvariantCulture);
-        cache.Set(key,
-            new CacheEntry() { LastModified = lastModified },
-            opt => opt.SetDuration(TimeSpan.FromMinutes(5)).SetFailSafe(true), 
-            tags.ToArray());
+        HttpContext.SetOutputCache(_fusionCache, key, tags);
 
         return result;
     }

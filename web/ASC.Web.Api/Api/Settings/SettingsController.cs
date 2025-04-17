@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Security.Cryptography;
-
 namespace ASC.Web.Api.Controllers.Settings;
 
 public partial class SettingsController(MessageService messageService,
@@ -68,11 +66,14 @@ public partial class SettingsController(MessageService messageService,
         IDistributedLockProvider distributedLockProvider,
         UsersQuotaSyncOperation usersQuotaSyncOperation,
         CustomQuota customQuota,
-        QuotaSocketManager quotaSocketManager)
+        QuotaSocketManager quotaSocketManager,
+        IFusionCacheProvider cacheProvider)
     : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     [GeneratedRegex("^[a-z0-9]([a-z0-9-.]){1,253}[a-z0-9]$")]
     private static partial Regex EmailDomainRegex();
+
+    private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
 
     /// <summary>
     /// Returns a list of all the available portal settings with the current values for each parameter.
@@ -88,11 +89,24 @@ public partial class SettingsController(MessageService messageService,
     [AllowNotPayment, AllowSuspended, AllowAnonymous]
     public async Task<SettingsDto> GetSettingsAsync(PortalSettingsrequestDto inDto)
     {
-        var studioAdminMessageSettings = await settingsManager.LoadAsync<StudioAdminMessageSettings>();
-        var tenantCookieSettings = await settingsManager.LoadAsync<TenantCookieSettings>();
-        var additionalWhiteLabelSettings = await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>();
-
+        var key = $"{HttpContext.Request.Path}{HttpContext.Request.QueryString}-{HttpContext.Connection.RemoteIpAddress}-{authContext.CurrentAccount.ID}";
+        var entry = await _cache.GetOrDefaultAsync<CacheEntry>(key);
+        if (entry != null && HttpContext.TryGetFromCache(entry.LastModified))
+        {
+            return null;
+        }
+        var tags = new List<string>();
         var tenant = tenantManager.GetCurrentTenant();
+
+
+        var studioAdminMessageSettings = await settingsManager.LoadAsync<StudioAdminMessageSettings>();
+        tags.Add(CacheExtention.GetSettingsTag(tenant.Id, nameof(StudioAdminMessageSettings)));
+
+        var tenantCookieSettings = await settingsManager.LoadAsync<TenantCookieSettings>();
+        tags.Add(CacheExtention.GetSettingsTag(tenant.Id, nameof(TenantCookieSettings)));
+
+        var additionalWhiteLabelSettings = await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>();
+        tags.Add(CacheExtention.GetSettingsTag(Tenant.DefaultTenant, nameof(AdditionalWhiteLabelSettings)));
 
         var settings = new SettingsDto
         {
@@ -119,6 +133,10 @@ public partial class SettingsController(MessageService messageService,
             ExternalResources = externalResourceSettings.GetCultureSpecificExternalResources(whiteLabelSettings: additionalWhiteLabelSettings)
         };
 
+        tags.Add(CacheExtention.GetSettingsTag(tenant.Id, nameof(TenantWhiteLabelSettings)));
+        tags.Add(CacheExtention.GetTenantQuotaTag(tenant.Id));
+        tags.Add(CacheExtention.GetTenantTag(tenant.Id));
+
         if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() != Guid.Empty)
         {
             settings.SocketUrl = configuration["web:hub:url"] ?? "";
@@ -140,6 +158,9 @@ public partial class SettingsController(MessageService messageService,
             settings.SocketUrl = configuration["web:hub:url"] ?? "";
             settings.LimitedAccessSpace = (await settingsManager.LoadAsync<TenantAccessSpaceSettings>()).LimitedAccessSpace;
             settings.LimitedAccessDevToolsForUsers = (await settingsManager.LoadAsync<TenantDevToolsAccessSettings>()).LimitedAccessForUsers;
+
+            tags.Add(CacheExtention.GetSettingsTag(tenant.Id, nameof(TenantAccessSpaceSettings)));
+            tags.Add(CacheExtention.GetSettingsTag(tenant.Id, nameof(TenantDevToolsAccessSettings)));
 
             settings.Firebase = new FirebaseDto
             {
@@ -188,6 +209,8 @@ public partial class SettingsController(MessageService messageService,
                 settings.WizardToken = commonLinkUtility.GetToken(tenant.Id, "", ConfirmType.Wizard, userId: tenant.OwnerId);
             }
 
+            tags.Add(CacheExtention.GetSettingsTag(tenant.Id, nameof(WizardSettings)));
+
             settings.EnabledJoin =
                 (tenant.TrustedDomainsType == TenantTrustedDomainsType.Custom &&
                 tenant.TrustedDomains.Count > 0) ||
@@ -212,6 +235,8 @@ public partial class SettingsController(MessageService messageService,
         {
             settings.PasswordHash = passwordHasher;
         }
+
+        HttpContext.SetOutputCache(_cache, key, tags);
 
         return settings;
     }

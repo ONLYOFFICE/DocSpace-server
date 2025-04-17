@@ -119,7 +119,12 @@ public static class CacheExtention
     {
         return $"settings-{tenant}-{key}";
     }
-    
+
+    public static string GetTenantTag(int tenant)
+    {
+        return $"tenant-{tenant}";
+    }
+
     public static string GetFolderTag<T>(int tenant, T id)
     {
         return $"folder-{tenant}-{id}";

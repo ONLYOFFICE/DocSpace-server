@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using org.apache.zookeeper.data;
+
 namespace ASC.Core.Caching;
 
 [Singleton]
@@ -160,13 +162,11 @@ class CachedTenantService() : ITenantService
     private readonly ICacheNotify<TenantCacheItem> _cacheNotifyItem;
     private readonly TenantServiceCache _tenantServiceCache;
     private static readonly TimeSpan _settingsExpiration = TimeSpan.FromMinutes(2);
-    private readonly ICache _cache;
-    private readonly IFusionCache _fusionCache;
+    private readonly IFusionCache _cache;
 
-    public CachedTenantService(DbTenantService service, TenantServiceCache tenantServiceCache, ICache cache, IFusionCacheProvider cacheProvider) : this()
+    public CachedTenantService(DbTenantService service, TenantServiceCache tenantServiceCache, IFusionCacheProvider cacheProvider) : this()
     {
-        _cache = cache;
-        _fusionCache = cacheProvider.GetMemoryCache();
+        _cache = cacheProvider.GetMemoryCache();
         _service = service ?? throw new ArgumentNullException(nameof(service));
         _tenantServiceCache = tenantServiceCache;
         _cacheNotifyItem = tenantServiceCache.CacheNotifyItem;
@@ -289,7 +289,7 @@ class CachedTenantService() : ITenantService
     {
         tenant = await _service.SaveTenantAsync(coreSettings, tenant);
         await _cacheNotifyItem.PublishAsync(new TenantCacheItem { TenantId = tenant.Id }, CacheNotifyAction.InsertOrUpdate);
-
+        await _cache.RemoveByTagAsync(CacheExtention.GetTenantTag(tenant.Id));
         return tenant;
     }
 
@@ -297,12 +297,14 @@ class CachedTenantService() : ITenantService
     {
         await _service.RemoveTenantAsync(id, auto);
         await _cacheNotifyItem.PublishAsync(new TenantCacheItem { TenantId = id }, CacheNotifyAction.InsertOrUpdate);
+        await _cache.RemoveByTagAsync(CacheExtention.GetTenantTag(id));
     }
 
     public async Task PermanentlyRemoveTenantAsync(int id)
     {
         await _service.PermanentlyRemoveTenantAsync(id);
         await _cacheNotifyItem.PublishAsync(new TenantCacheItem { TenantId = id }, CacheNotifyAction.Remove);
+        await _cache.RemoveByTagAsync(CacheExtention.GetTenantTag(id));
     }
 
     public async Task<IEnumerable<TenantVersion>> GetTenantVersionsAsync()
@@ -314,7 +316,7 @@ class CachedTenantService() : ITenantService
     {
         var cacheKey = GetCacheKey(tenant, key);
 
-        var data = await _fusionCache.GetOrSetAsync<byte[]>(cacheKey, async (ctx, token) =>
+        var data = await _cache.GetOrSetAsync<byte[]>(cacheKey, async (ctx, token) =>
         {
             var data = await _service.GetTenantSettingsAsync(tenant, key);
 
@@ -327,7 +329,7 @@ class CachedTenantService() : ITenantService
     public byte[] GetTenantSettings(int tenant, string key)
     {
         var cacheKey = GetCacheKey(tenant, key);
-        var data = _fusionCache.GetOrSet<byte[]>(cacheKey, (ctx, token) =>
+        var data = _cache.GetOrSet<byte[]>(cacheKey, (ctx, token) =>
         {
             var data = _service.GetTenantSettings(tenant, key);
 
@@ -341,7 +343,7 @@ class CachedTenantService() : ITenantService
     {
         await _service.SetTenantSettingsAsync(tenant, key, data);
         var tag = CacheExtention.GetTenantSettingsTag(tenant, key);
-        await _fusionCache.RemoveByTagAsync(tag);
+        await _cache.RemoveByTagAsync(tag);
     }
 
     private string GetCacheKey(int tenant, string key)
