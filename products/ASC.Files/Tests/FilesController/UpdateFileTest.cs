@@ -53,6 +53,26 @@ public class UpdateFileTest(
         updatedFile.Title.Should().Be(updateParams.Title);
         updatedFile.Title.Should().Be(newTitle);
     }
+        
+    [Fact]
+    public async Task RenameFile_NameLongerThan165Chars_Returns400()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        
+        var createdFile = await CreateFile("file_to_rename.docx", FolderType.USER, Initializer.Owner);
+        var longFileName = new string('a', 166) + ".docx"; // 166 characters + 5 for extension = 171 characters
+        var updateParams = new UpdateFile { Title = longFileName };
+        
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<Docspace.Client.ApiException>(
+            async () => await _filesFilesApi.UpdateFileAsync(
+                createdFile.Id, 
+                updateParams, 
+                cancellationToken: TestContext.Current.CancellationToken));
+        
+        exception.ErrorCode.Should().Be(400);
+    }
     
     [Fact]
     public async Task LockFile_AsOwner_ReturnsSuccess()
@@ -69,7 +89,7 @@ public class UpdateFileTest(
         result.Should().NotBeNull();
         result.Id.Should().Be(createdFile.Id);
         
-        // Verify file is locked
+        // Verify the file is locked
         var fileInfo = await GetFile(createdFile.Id);
         fileInfo.Locked.Should().BeTrue();
     }

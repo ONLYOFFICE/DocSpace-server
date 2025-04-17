@@ -55,6 +55,26 @@ public class UpdateFolderTest(
     }
     
     [Fact]
+    public async Task RenameFolder_NameLongerThan165Chars_Returns400()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        
+        var createdFolder = await CreateFolder("folder_to_rename", FolderType.USER, Initializer.Owner);
+        var longFolderName = new string('a', 166);
+        var updateParams = new CreateFolder(longFolderName);
+        
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<Docspace.Client.ApiException>(
+            async () => await _filesFoldersApi.RenameFolderAsync(
+                createdFolder.Id, 
+                updateParams, 
+                cancellationToken: TestContext.Current.CancellationToken));
+        
+        exception.ErrorCode.Should().Be(400);
+    }
+    
+    [Fact]
     public async Task DeleteFolder_RemovesFolderAndContents_ReturnsSuccess()
     {
         // Arrange
