@@ -1360,7 +1360,7 @@ public class UserController(
     public async Task<EmployeeFullDto> SelfAsync()
     {
         var cache = cacheProvider.GetMemoryCache();
-        var key = $"{HttpContext.Request.Path}-{securityContext.CurrentAccount.ID}";
+        var key = $"{HttpContext.Request.Path}{HttpContext.Request.QueryString}-{securityContext.CurrentAccount.ID}";
         var entry = await cache.GetOrDefaultAsync<CacheEntry>(key);
         if (entry != null && HttpContext.TryGetFromCache(entry.LastModified))
         {
