@@ -148,6 +148,7 @@ public class EmployeeDtoHelper(
 
     protected async Task<EmployeeDto> InitAsync(EmployeeDto result, UserInfo userInfo, List<string> tags)
     {
+        tags = tags ?? new List<string>();
         result.Id = userInfo.Id;
         result.DisplayName = _displayUserSettingsHelper.GetFullUserName(userInfo);
         result.HasAvatar = await _userPhotoManager.UserHasAvatar(userInfo.Id);
