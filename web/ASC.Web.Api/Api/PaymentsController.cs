@@ -142,7 +142,7 @@ public class PaymentController(
         var quota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
 
         // TODO: Temporary restriction. Only changing the quota for the current tariff is available
-        if (inDto.Quantity.Count != 1 || quota.Name != inDto.Quantity.First().Key)
+        if (inDto.Quantity.Count != 1 || (quota.Price > 0 && quota.Name != inDto.Quantity.First().Key))
         {
             return false;
         }
