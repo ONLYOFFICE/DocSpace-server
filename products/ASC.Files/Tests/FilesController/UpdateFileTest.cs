@@ -75,12 +75,28 @@ public class UpdateFileTest(
     }
     
     [Fact]
-    public async Task LockFile_AsOwner_ReturnsSuccess()
+    public async Task LockFile_InMy_ReturnsError()
     {
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         
         var createdFile = await CreateFile("file_to_lock.docx", FolderType.USER, Initializer.Owner);
+        
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<Docspace.Client.ApiException>(
+            async () => await _filesFilesApi.LockFileAsync(createdFile.Id, new LockFileParameters(true), TestContext.Current.CancellationToken));
+        
+        exception.ErrorCode.Should().Be(403);
+    }
+    
+    [Fact]
+    public async Task LockFile_AsOwner_ReturnsSuccess()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        
+        var createdRoom = await CreateVirtualRoom("room_to_lock", Initializer.Owner);
+        var createdFile = await CreateFile("file_to_lock.docx", createdRoom.Id);
         
         // Act
         var result = (await _filesFilesApi.LockFileAsync(createdFile.Id, new LockFileParameters(true), TestContext.Current.CancellationToken)).Response;
@@ -100,7 +116,8 @@ public class UpdateFileTest(
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         
-        var createdFile = await CreateFile("file_to_unlock.docx", FolderType.USER, Initializer.Owner);
+        var createdRoom = await CreateVirtualRoom("room_to_lock", Initializer.Owner);
+        var createdFile = await CreateFile("file_to_unlock.docx", createdRoom.Id);
         
         // Lock the file first
         await _filesFilesApi.LockFileAsync(createdFile.Id, new LockFileParameters(true), TestContext.Current.CancellationToken);
@@ -112,8 +129,30 @@ public class UpdateFileTest(
         result.Should().NotBeNull();
         result.Id.Should().Be(createdFile.Id);
         
-        // Verify file is unlocked
+        // Verify the file is unlocked
         var fileInfo = await GetFile(createdFile.Id);
         fileInfo.Locked.Should().BeNull();
+    }
+    
+    [Fact]
+    public async Task UpdateComment_ValidComment_ReturnsUpdatedComment()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        
+        var file = await CreateFile("file_with_comment.docx", FolderType.USER, Initializer.Owner);
+        var newComment = "This is a test comment";
+        
+        // Act
+        var commentParams = new UpdateComment(1, newComment);
+        var result = (await _filesOperationsApi.UpdateCommentAsync(file.Id, commentParams, TestContext.Current.CancellationToken)).Response;
+        
+        // Assert
+        result.Should().NotBeNull();
+        result.Should().Be(newComment);
+        
+        // Verify comment was updated
+        var updatedFile = await GetFile(file.Id);
+        updatedFile.Comment.Should().Be(newComment);
     }
 }

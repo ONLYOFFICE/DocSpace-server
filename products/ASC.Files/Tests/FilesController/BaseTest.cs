@@ -38,12 +38,12 @@ public class BaseTest(
     protected readonly FilesFoldersApi _filesFoldersApi = filesFactory.FilesFoldersApi;
     protected readonly FilesFilesApi _filesFilesApi = filesFactory.FilesFilesApi;
     protected readonly FilesOperationsApi _filesOperationsApi = filesFactory.FilesOperationsApi;
+    protected readonly FilesRoomsApi _filesRoomsApi = filesFactory.FilesRoomsApi;
     private readonly Func<Task> _resetDatabase = filesFactory.ResetDatabaseAsync;
-    protected readonly FilesApiFactory _filesFactory = filesFactory;
 
     public async ValueTask InitializeAsync()
     {
-        await Initializer.InitializeAsync(_filesFactory, apiFactory, peopleFactory, filesServiceProgram);
+        await Initializer.InitializeAsync(filesFactory, apiFactory, peopleFactory, filesServiceProgram);
     }
 
     public async ValueTask DisposeAsync()
@@ -64,6 +64,11 @@ public class BaseTest(
         var folderId = rootFolder.FirstOrDefault(r => r.Current.RootFolderType.HasValue && r.Current.RootFolderType.Value == folderType)!.Current.Id;
         
         return folderId;
+    }
+    
+    protected async Task<int> GetUserFolderIdAsync(User user)
+    {
+        return await GetFolderIdAsync(FolderType.USER, user);
     }
     
     protected async Task<FileDtoInteger> CreateFile(string fileName, FolderType folderType, User user)
@@ -91,9 +96,15 @@ public class BaseTest(
     
     protected async Task<FolderDtoInteger> CreateFolder(string folderName, int folderId)
     {
-        return (await _filesFoldersApi.CreateFolderAsync(folderId, new CreateFolder(folderName))).Response;
+        return (await _filesFoldersApi.CreateFolderAsync(folderId, new CreateFolder(folderName), TestContext.Current.CancellationToken)).Response;
     }
     
+    protected async Task<FolderDtoInteger> CreateVirtualRoom(string roomTitle, User user)
+    {
+        await _filesClient.Authenticate(user);
+        
+        return (await _filesRoomsApi.CreateRoomAsync(new CreateRoomRequestDto(roomTitle, indexing: true, roomType: RoomType.VirtualDataRoom), TestContext.Current.CancellationToken)).Response;
+    }
     protected async Task<List<FileOperationDto>?> WaitLongOperation()
     {
         List<FileOperationDto>? statuses;

@@ -61,6 +61,11 @@ public class CreateFileTest(
         
         createdFile.Should().NotBeNull();
         createdFile.Title.Should().Be(fileName);
+        
+        // Verify the file was created
+        var file = await GetFile(createdFile.Id);
+        file.Should().NotBeNull();
+        file.Title.Should().Be(fileName);
     }
     
     [Theory]
@@ -73,6 +78,11 @@ public class CreateFileTest(
         
         createdFile.Should().NotBeNull();
         createdFile.Title.Should().Be(fileName);
+        
+        // Verify the file was created
+        var file = await GetFile(createdFile.Id);
+        file.Should().NotBeNull();
+        file.Title.Should().Be(fileName);
     }
     
     [Theory]
@@ -85,6 +95,11 @@ public class CreateFileTest(
 
         createdFile.Should().NotBeNull();
         createdFile.Title.Should().Be(fileName);
+        
+        // Verify the file was created
+        var file = await GetFile(createdFile.Id);
+        file.Should().NotBeNull();
+        file.Title.Should().Be(fileName);
     }
     
     [Fact]
@@ -124,5 +139,59 @@ public class CreateFileTest(
                 cancellationToken: TestContext.Current.CancellationToken));
         
         exception.ErrorCode.Should().Be(400);
+    }
+    
+    [Fact]
+    public async Task CreateTextFile_ValidContent_ReturnsNewTextFile()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+
+        var userFolderId = await GetUserFolderIdAsync(Initializer.Owner);
+        var fileName = "new_text_file";
+        var content = "This is the content of my text file.";
+        
+        // Act
+        var createParams = new CreateTextOrHtmlFile(
+            title: fileName,
+            content: content,
+            createNewIfExist: true
+        );
+        
+        var result = (await _filesFilesApi.CreateTextFileAsync(userFolderId, createParams, TestContext.Current.CancellationToken)).Response;
+        
+        // Assert
+        result.Should().NotBeNull();
+        result.Title.Should().Be(fileName + ".txt");
+        result.FolderId.Should().Be(userFolderId);
+        result.FileExst.Should().Be(".txt");
+        
+        // We cannot directly verify content in this test without downloading the file
+    }
+    
+    [Fact]
+    public async Task CreateHtmlFile_ValidContent_ReturnsNewHtmlFile()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        
+        var userFolderId = await GetUserFolderIdAsync(Initializer.Owner);
+        var fileName = "new_html_file";
+        var content = "<html><body><h1>Test HTML</h1><p>This is a test HTML file.</p></body></html>";
+        
+        // Act
+        var createParams = new CreateTextOrHtmlFile(
+            title: fileName,
+            content: content,
+            createNewIfExist: true
+        );
+        
+        var result = (await _filesFilesApi.CreateHtmlFileAsync(userFolderId, createParams, TestContext.Current.CancellationToken)).Response;
+        
+        // Assert
+        result.Should().NotBeNull();
+        result.Title.Should().Be(fileName + ".html");
+        result.FolderId.Should().Be(userFolderId);
+        result.FileExst.Should().Be(".html");
     }
 }

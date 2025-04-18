@@ -44,12 +44,12 @@ public class CopyFileTest(
         var sourceFile = await CreateFile("source_document.docx", FolderType.USER, Initializer.Owner);
         
         // Create a target folder
-        var targetFolderId = await CreateFolder("target_folder", FolderType.USER, Initializer.Owner);
+        var targetFolder = await CreateFolder("target_folder", FolderType.USER, Initializer.Owner);
         
         // Act
         var copyParams = new CopyAsJsonElement(
             destTitle: sourceFile.Title,
-            destFolderId: new CopyAsJsonElementDestFolderId(targetFolderId.Id)
+            destFolderId: new CopyAsJsonElementDestFolderId(targetFolder.Id)
         );
         
         var copiedFile = (await _filesFilesApi.CopyFileAsAsync(sourceFile.Id, copyParams, TestContext.Current.CancellationToken)).Response;
@@ -59,6 +59,10 @@ public class CopyFileTest(
         // copiedFile.Id.Should().NotBe(sourceFile.Id);
         // copiedFile.Title.Should().Be(sourceFile.Title);
         // copiedFile.FolderId.Should().Be(targetFolderId);
+        
+        // Verify the copied file exists in the destination folder
+        var folderContent = (await _filesFoldersApi.GetFolderByFolderIdAsync(targetFolder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        folderContent.Files.Should().Contain(f => f.Title == sourceFile.Title);
     }
     
     [Fact]
