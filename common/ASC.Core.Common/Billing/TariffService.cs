@@ -967,10 +967,18 @@ public class TariffService(
         return true;
     }
 
-    public async Task<Report> GetCustomerOperationsAsync(int tenantId, DateTime utcStartDate, DateTime utcEndDate, bool? credit, bool? withdrawal)
+    public async Task<Report> GetCustomerOperationsAsync(int tenantId, DateTime utcStartDate, DateTime utcEndDate, bool? credit, bool? withdrawal, int? offset, int? limit)
     {
-        var portalId = await coreSettings.GetKeyAsync(tenantId);
-        return await accountingClient.GetCustomerOperationsAsync(portalId, utcStartDate, utcEndDate, credit, withdrawal);
+        try
+        {
+            var portalId = await coreSettings.GetKeyAsync(tenantId);
+            return await accountingClient.GetCustomerOperationsAsync(portalId, utcStartDate, utcEndDate, credit, withdrawal, offset, limit);
+        }
+        catch (Exception error)
+        {
+            LogError(error, tenantId.ToString());
+            return null;
+        }
     }
 
     public async Task<List<Currency>> GetAllCurrenciesAsync()

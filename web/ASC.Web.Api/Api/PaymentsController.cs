@@ -534,7 +534,7 @@ public class PaymentController(
 
         var utcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate);
         var utcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate);
-        var result = await tariffService.GetCustomerOperationsAsync(tenant.Id, utcStartDate, utcEndDate, inDto.Credit, inDto.Withdrawal);
+        var result = await tariffService.GetCustomerOperationsAsync(tenant.Id, utcStartDate, utcEndDate, inDto.Credit, inDto.Withdrawal, inDto.Offset, inDto.Limit);
         return result;
     }
 
@@ -574,7 +574,7 @@ public class PaymentController(
             utcStartDate.ToString("MM.dd.yyyy", CultureInfo.InvariantCulture),
             utcEndDate.ToString("MM.dd.yyyy", CultureInfo.InvariantCulture));
 
-        var report = await tariffService.GetCustomerOperationsAsync(tenant.Id, utcStartDate, utcEndDate, inDto.Credit, inDto.Withdrawal);
+        var report = await tariffService.GetCustomerOperationsAsync(tenant.Id, utcStartDate, utcEndDate, inDto.Credit, inDto.Withdrawal, null, null);
 
         await using var stream = csvFileHelper.CreateFile(report.Collection, new OperationMap());
 

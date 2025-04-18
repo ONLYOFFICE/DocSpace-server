@@ -95,7 +95,7 @@ public class AccountingClient
         _ = await RequestAsync<string>(HttpMethod.Post, "/operation/provided", data: data);
     }
 
-    public async Task<Report> GetCustomerOperationsAsync(string portalId, DateTime utcStartDate, DateTime utcEndDate, bool? credit, bool? withdrawal)
+    public async Task<Report> GetCustomerOperationsAsync(string portalId, DateTime utcStartDate, DateTime utcEndDate, bool? credit, bool? withdrawal, int? offset, int? limit)
     {
         var queryParams = new NameValueCollection
         {
@@ -111,6 +111,16 @@ public class AccountingClient
         if (withdrawal.HasValue)
         {
             queryParams.Add("withdrawal", withdrawal.Value.ToString().ToLowerInvariant());
+        }
+
+        if (offset.HasValue)
+        {
+            queryParams.Add("offset", offset.Value.ToString());
+        }
+
+        if (limit.HasValue)
+        {
+            queryParams.Add("limit", limit.Value.ToString());
         }
 
         return await RequestAsync<Report>(HttpMethod.Get, $"/customer/operations/{portalId}", queryParams);

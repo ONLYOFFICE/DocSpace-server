@@ -86,16 +86,29 @@ public class CustomerOperationsRequestDto
     public DateTime EndDate { get; set; }
 
     /// <summary>
-    /// Include credit operations
+    /// Include credit operations (true by default)
     /// </summary>
     [FromQuery(Name = "credit")]
     public bool? Credit { get; set; }
 
     /// <summary>
-    /// Include withdrawal operations
+    /// Include withdrawal operations (true by default)
     /// </summary>
     [FromQuery(Name = "withdrawal")]
     public bool? Withdrawal { get; set; }
+
+    /// <summary>
+    /// Offset (0 by default)
+    /// </summary>
+    [FromQuery(Name = "offset")]
+    public int? Offset { get; set; }
+
+    /// <summary>
+    /// Limit (25 by default)
+    /// </summary>
+    [FromQuery(Name = "limit")] 
+    public int? Limit { get; set; }
+
 }
 
 /// <summary>
