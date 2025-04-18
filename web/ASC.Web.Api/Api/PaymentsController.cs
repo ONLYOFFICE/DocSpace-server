@@ -591,7 +591,7 @@ public class PaymentController(
     private async IAsyncEnumerable<List<Operation>> GetCustomerOperationsReportDataAsync(int tenantId, DateTime utcStartDate, DateTime utcEndDate, bool? credit, bool? withdrawal)
     {
         var offset = 0;
-        var limit = 10;
+        var limit = 1000;
 
         while (true)
         {
