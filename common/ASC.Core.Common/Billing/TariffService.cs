@@ -903,10 +903,36 @@ public class TariffService(
         return customerInfo;
     }
 
-    public async Task<string> PutOnDepositAsync(int tenantId, long amount, string currency)
+    public async Task<string> TopUpDepositAsync(int tenantId, long amount, string currency, bool waitForChanges = false)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
-        var result = await billingClient.PutOnDepositAsync(portalId, amount, currency);
+
+        decimal? oldBalanceAmount = 0;
+
+        if (waitForChanges)
+        {
+            var oldBalance = await GetCustomerBalanceAsync(tenantId);
+            oldBalanceAmount = oldBalance?.SubAccounts?.FirstOrDefault(x => x.Currency == currency)?.Amount;
+        }
+
+        var result = await billingClient.TopUpDepositAsync(portalId, amount, currency);
+
+        var attempt = 0;
+
+        while (waitForChanges && attempt < 3)
+        {
+            await Task.Delay((int)(Math.Pow(2, attempt) * 1000));
+
+            var newBalance = await GetCustomerBalanceAsync(tenantId, true);
+            var newBalanceAmount = newBalance?.SubAccounts?.FirstOrDefault(x => x.Currency == currency)?.Amount;
+
+            if (oldBalanceAmount != newBalanceAmount)
+            {
+                return result;
+            }
+
+            attempt += 1;
+        }
 
         await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
 

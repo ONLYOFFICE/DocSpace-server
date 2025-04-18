@@ -107,7 +107,7 @@ public class TopUpWalletService(
             }
 
             var amount = (long)(settings.UpToBalance - subAccount.Amount);
-            await tariffService.PutOnDepositAsync(data.TenantId, amount, settings.Currency);
+            await tariffService.TopUpDepositAsync(data.TenantId, amount, settings.Currency, false);
 
             var messageService = scope.ServiceProvider.GetRequiredService<MessageService>();
             var description = $"{amount} {settings.Currency}";

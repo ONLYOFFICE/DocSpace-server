@@ -382,7 +382,7 @@ public class PaymentController(
     [SwaggerResponse(200, "Success status", typeof(string))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("deposit")]
-    public async Task<string> PutOnDepositAsync(PutOnDepositRequestDto inDto)
+    public async Task<string> TopUpDepositAsync(PutOnDepositRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
         {
@@ -399,7 +399,7 @@ public class PaymentController(
 
         await DemandPayerAsync(tenant);
 
-        var result = await tariffService.PutOnDepositAsync(tenant.Id, inDto.Amount, inDto.Currency);
+        var result = await tariffService.TopUpDepositAsync(tenant.Id, inDto.Amount, inDto.Currency, true);
 
         messageService.Send(MessageAction.CustomerWalletToppedUp);
 

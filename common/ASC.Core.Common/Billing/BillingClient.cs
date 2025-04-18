@@ -136,7 +136,7 @@ public class BillingClient
         return customerInfo;
     }
 
-    public async Task<string> PutOnDepositAsync(string portalId, long amount, string currency)
+    public async Task<string> TopUpDepositAsync(string portalId, long amount, string currency)
     {
         return await RequestAsync("Deposit", portalId, [Tuple.Create("Amount", amount.ToString()), Tuple.Create("Currency", currency)]);
     }
