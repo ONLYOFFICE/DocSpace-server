@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,52 +27,54 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Session parameters
+/// The session request parameters.
 /// </summary>
 public class SessionRequest
 {
     /// <summary>
-    /// File name
+    /// The file name.
     /// </summary>
-    public string FileName { get; set; }
+    public required string FileName { get; set; }
 
     /// <summary>
-    /// File length in bytes
+    /// The file size.
     /// </summary>
     public long FileSize { get; set; }
 
     /// <summary>
-    /// Relative path to the folder
+    /// The relative path to the file.
     /// </summary>
     public string RelativePath { get; set; }
 
     /// <summary>
-    /// Creation time
+    /// The date and time when the file was created.
     /// </summary>
     public ApiDateTime CreateOn { get; set; }
 
     /// <summary>
-    /// Specifies whether to encrypt a file or not
+    /// Specifies whether the file is encrypted or not.
     /// </summary>
     public bool Encrypted { get; set; }
 
     /// <summary>
-    /// Create new if exists
+    /// Specifies whether to create a new file if it already exists.
     /// </summary>
     public bool CreateNewIfExist { get; set; }
 }
 
-
+/// <summary>
+/// The generic session request parameters.
+/// </summary>
 public class SessionRequestDto<T>
 {
     /// <summary>
-    /// Folder ID
+    /// The folder ID of the session.
     /// </summary>
     [FromRoute(Name = "folderId")]
-    public T FolderId { get; set; }
+    public required T FolderId { get; set; }
 
     /// <summary>
-    /// Session
+    /// The session parameters.
     /// </summary>
     [FromBody]
     public SessionRequest Session {  get; set; }

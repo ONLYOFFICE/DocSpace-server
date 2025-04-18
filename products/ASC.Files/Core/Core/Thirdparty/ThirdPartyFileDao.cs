@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -805,6 +805,10 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         throw new NotImplementedException();
     }
     public Task<(int, IAsyncEnumerable<FormRole>)> GetUserFormRoles(string formId, Guid userId)
+    {
+        throw new NotImplementedException();
+    }
+    public IAsyncEnumerable<FormRole> GetUserFormRolesInRoom(string roomId, Guid userId)
     {
         throw new NotImplementedException();
     }

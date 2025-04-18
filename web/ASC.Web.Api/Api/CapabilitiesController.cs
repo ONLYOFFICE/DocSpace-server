@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -46,13 +46,12 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
 
 
     ///<summary>
-    ///Returns the information about portal capabilities.
+    /// Returns the information about portal capabilities.
     ///</summary>
     ///<short>
-    ///Get portal capabilities
+    /// Get portal capabilities
     ///</short>
     ///<path>api/2.0/capabilities</path>
-    ///<requiresAuthorization>false</requiresAuthorization>
     [Tags("Capabilities")]
     [SwaggerResponse(200, "Portal capabilities", typeof(CapabilitiesDto))]
     [HttpGet] //NOTE: this method doesn't requires auth!!!  //NOTE: this method doesn't check payment!!!

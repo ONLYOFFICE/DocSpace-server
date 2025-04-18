@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,9 +35,9 @@ public static class Initializer
     public static readonly User Owner = new("test@example.com", "11111111");
     
     private static bool _initialized;
-    private static HttpClient? _apiClient;
-    private static HttpClient? _peopleClient;
-    private static PasswordHasher? _passwordHasher;
+    private static HttpClient _apiClient = null!;
+    private static HttpClient _peopleClient = null!;
+    private static PasswordHasher _passwordHasher = null!;
     
     private static readonly List<KeyValuePair<string, string?>> _settings =
     [
@@ -215,7 +215,7 @@ public static class Initializer
             {
                 UserName = user.Email, 
                 PasswordHash = _passwordHasher.GetClientPassword(user.Password)
-            }, JsonRequestSerializerOptions);
+            }, JsonRequestSerializerOptions, TestContext.Current.CancellationToken);
             var authenticationTokenDto = await HttpClientHelper.ReadFromJson<AuthenticationTokenDto>(authenticationResponse);
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authenticationTokenDto?.Token);
         }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.VirtualRooms;
 
+/// <summary>
+/// The watermark additions.
+/// </summary>
 [Flags]
 public enum WatermarkAdditions
 {
@@ -44,14 +47,45 @@ public enum WatermarkAdditions
     [SwaggerEnum("Room name")]
     RoomName = 16
 }
+
+/// <summary>
+/// The watermark settings information.
+/// </summary>
 public class WatermarkSettings : IMapFrom<DbRoomWatermark>, IMapFrom<WatermarkRequestDto>
 {
+    /// <summary>
+    /// The watermark text.
+    /// </summary>
     public string Text { get; set; }
+
+    /// <summary>
+    /// The watermark additions.
+    /// </summary>
     public WatermarkAdditions Additions { get; set; }
+
+    /// <summary>
+    /// The watermark rotate angle.
+    /// </summary>
     public int Rotate { get; set; }
+
+    /// <summary>
+    /// The watermark image width.
+    /// </summary>
     public double ImageWidth { get; set; }
+
+    /// <summary>
+    /// The watermark image height.
+    /// </summary>
     public double ImageHeight { get; set; }
+
+    /// <summary>
+    /// The watermark image URL.
+    /// </summary>
     public string ImageUrl { get; set; }
+
+    /// <summary>
+    /// The watermark image scale.
+    /// </summary>
     public int ImageScale { get; set; }
 }
 

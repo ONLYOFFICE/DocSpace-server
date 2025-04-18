@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -123,11 +123,6 @@ public class AccountLinker(
 
         await accountLinkerStorage.RemoveFromCacheAsync(obj.ToString());
         await accountLinkerStorage.RemoveFromCacheAsync(CacheKey(tenant));
-    }
-
-    public async Task AddLinkAsync(Guid obj, string id, string provider)
-    {
-        await AddLinkAsync(obj, new LoginProfile { Id = id, Provider = provider });
     }
 
     public async Task RemoveProviderAsync(string obj, string provider = null, string hashId = null)

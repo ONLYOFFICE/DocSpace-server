@@ -71,6 +71,15 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 type: "int",
                 nullable: false,
                 defaultValue: 0);
+
+            migrationBuilder.AddColumn<string>(
+                name: "target_id",
+                table: "webhooks_config",
+                type: "varchar(36)",
+                maxLength: 36,
+                nullable: true,
+                collation: "utf8_general_ci")
+                .Annotation("MySql:CharSet", "utf8");
         }
 
         /// <inheritdoc />
@@ -110,6 +119,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
             migrationBuilder.DropColumn(
                 name: "triggers",
+                table: "webhooks_config");
+
+            migrationBuilder.DropColumn(
+                name: "target_id",
                 table: "webhooks_config");
         }
     }

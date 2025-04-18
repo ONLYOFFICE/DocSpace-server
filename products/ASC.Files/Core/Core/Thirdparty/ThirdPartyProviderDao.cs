@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -224,6 +224,11 @@ internal abstract class ThirdPartyProviderDao
     {
         throw new NotImplementedException();
     }
+    public Task<bool> ContainsFormsInFolder(Folder<string> folder)
+    {
+        throw new NotImplementedException();
+    }
+
     public Task<int> GetFilesCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, bool withSubfolders = false,
         bool excludeSubject = false, string roomId = null, FormsItemDto formsItemDto = null)
     {

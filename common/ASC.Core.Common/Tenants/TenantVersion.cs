@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,15 +27,18 @@
 namespace ASC.Core;
 
 /// <summary>
+/// The tenant version.
 /// </summary>
 public class TenantVersion
 {
-    /// <summary>ID</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The tenant version ID.
+    /// </summary>
     public int Id { get; private set; }
 
-    /// <summary>Name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The tenant version name.
+    /// </summary>
     public string Name { get; private set; }
 
     public TenantVersion() { }

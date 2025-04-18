@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -60,6 +60,7 @@ public class LdapOperationJob : DistributedTaskProgress
     private DisplayUserSettingsHelper _displayUserSettingsHelper;
     private NovellLdapSettingsChecker _novellLdapSettingsChecker;
     private ILogger<LdapOperationJob> _logger;
+    private MessageService _messageService;
 
     private UserInfo _currentUser;
     private TenantManager _tenantManager;
@@ -130,6 +131,8 @@ public class LdapOperationJob : DistributedTaskProgress
         _displayUserSettingsHelper = scope.ServiceProvider.GetRequiredService<DisplayUserSettingsHelper>();
         _novellLdapSettingsChecker = scope.ServiceProvider.GetRequiredService<NovellLdapSettingsChecker>();
         _logger = scope.ServiceProvider.GetRequiredService<ILogger<LdapOperationJob>>();
+
+        _messageService = scope.ServiceProvider.GetRequiredService<MessageService>();
 
         _tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
         _serviceScopeFactory = scope.ServiceProvider.GetRequiredService<IServiceScopeFactory>();
@@ -237,6 +240,22 @@ public class LdapOperationJob : DistributedTaskProgress
             {
                 Finished = true;
                 await PublishChanges();
+                switch (OperationType)
+                {
+                    case LdapOperationType.Save:
+                        if (_ldapSettings.EnableLdapAuthentication)
+                        {
+                            _messageService.Send(MessageInitiator.System, MessageAction.LdapEnabled);
+                        }
+                        else
+                        {
+                            _messageService.Send(MessageInitiator.System, MessageAction.LdapDisabled);
+                        }
+                        break;
+                    case LdapOperationType.Sync:
+                        _messageService.Send(MessageInitiator.System, MessageAction.LdapSync);
+                        break;
+                }
                 _securityContext.Logout();
             }
             catch (Exception ex)

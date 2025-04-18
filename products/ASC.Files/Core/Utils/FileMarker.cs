@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -86,8 +86,7 @@ public class FileMarker(
     RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
     FileMarkerCache fileMarkerCache,
     IDistributedLockProvider distributedLockProvider,
-    EntryStatusManager entryStatusManager,
-    FileSharing fileSharing)
+    EntryStatusManager entryStatusManager)
 {
     private const string CacheKeyFormat = "MarkedAsNew/{0}/folder_{1}";
     private const string LockKey = "file_marker";
@@ -95,7 +94,11 @@ public class FileMarker(
     internal async Task ExecMarkFileAsNewAsync<T>(AsyncTaskData<T> obj, SocketManager socketManager)
     {
         await tenantManager.SetCurrentTenantAsync(obj.TenantId);
-        await authContext.AuthenticateMeWithoutCookieAsync(obj.CurrentAccountId);
+
+        if (obj.CurrentAccountId != ASC.Core.Configuration.Constants.Guest.ID)
+        {
+            await authContext.AuthenticateMeWithoutCookieAsync(obj.CurrentAccountId);
+        }
         
         FileEntry<T> fileEntry;
 
@@ -514,17 +517,10 @@ public class FileMarker(
 
             if (file.IsForm && room.FolderType == FolderType.VirtualDataRoom)
             {
-                var allRoles = await fileDao.GetFormRoles(file.Id).ToListAsync();
-
-                var aces = await fileSharing.GetPureSharesAsync(room, allRoles.Select(role => role.UserId)).ToListAsync();
-
-                var filteredUserIDs = aces
-                    .Where(ace => ace is not { Access: FileShare.FillForms })
-                    .Select(ace => ace.Id).ToList();
-
-                if (filteredUserIDs.Any())
+                var allRoleUserIds = await fileDao.GetFormRoles(file.Id).Where(r => r.UserId != authContext.CurrentAccount.ID).Select(r => r.UserId).ToListAsync();
+                if (allRoleUserIds.Any())
                 {
-                    taskData.UserIDs = filteredUserIDs;
+                    taskData.UserIDs = allRoleUserIds;
                     var markerHelper = serviceProvider.GetService<FileMarkerHelper<T>>();
                     await markerHelper.Add(taskData);
                 }

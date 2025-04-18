@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,48 +27,61 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Link parameters
+/// The room link parameters.
 /// </summary>
-public class RoomLinkRequest : LinkRequestDtoBase
+public class RoomLinkRequest
 {
     /// <summary>
-    /// Link name
+    /// The room link ID.
+    /// </summary>
+    public Guid LinkId { get; set; }
+
+    /// <summary>
+    /// The link sharing rights.
+    /// </summary>
+    public FileShare Access { get; set; }
+
+    /// <summary>
+    /// The link expiration date.
+    /// </summary>
+    public ApiDateTime ExpirationDate { get; set; }
+
+    /// <summary>
+    /// The link name.
     /// </summary>
     [StringLength(255)]
     public string Title { get; set; }
 
     /// <summary>
-    /// Link type
+    /// The link type.
     /// </summary>
     public LinkType LinkType { get; set; }
 
     /// <summary>
-    /// Link password
+    /// The link password.
     /// </summary>
     [StringLength(255)]
     public string Password { get; set; }
 
     /// <summary>
-    /// Specifies whether downloading a file from a link is disabled or not
+    /// Specifies if downloading the file from the link is disabled or not.
     /// </summary>
     public bool DenyDownload { get; set; }
 }
 
-
-
 /// <summary>
-/// Link request parameters
+/// The generic room link request parameters.
 /// </summary>
 public class RoomLinkRequestDto<T>
 {
     /// <summary>
-    /// Room ID
+    /// The room ID.
     /// </summary>
     [FromRoute(Name = "id")]
-    public T Id { get; set; }
+    public required T Id { get; set; }
 
     /// <summary>
-    /// Room link
+    /// The room link parameters.
     /// </summary>
     [FromBody]
     public RoomLinkRequest RoomLink { get; set; }

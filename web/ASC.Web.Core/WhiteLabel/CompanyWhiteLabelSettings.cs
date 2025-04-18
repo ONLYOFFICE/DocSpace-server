@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,55 +27,61 @@
 namespace ASC.Web.Core.WhiteLabel;
 
 /// <summary>
-/// Company white label settings
+/// The company white label settings wrapper.
 /// </summary>
 public class CompanyWhiteLabelSettingsWrapper
 {
     /// <summary>
-    /// Company white label settings
+    /// The company white label settings.
     /// </summary>
     public CompanyWhiteLabelSettings Settings { get; set; }
 }
 
+/// <summary>
+/// The company white label settings.
+/// </summary>
 public class CompanyWhiteLabelSettings : ISettings<CompanyWhiteLabelSettings>
 {
+    /// <summary>
+    /// The core settings.
+    /// </summary>
     public CoreSettings CoreSettings;
 
     /// <summary>
-    /// Company name
+    /// The company name.
     /// </summary>
     [StringLength(255)]
     public string CompanyName { get; set; }
 
     /// <summary>
-    /// Site
+    /// The company site.
     /// </summary>
     [Url]
     [StringLength(255)]
     public string Site { get; set; }
 
     /// <summary>
-    /// Email address
+    /// The company email address.
     /// </summary>
     [EmailAddress]
     [StringLength(255)]
     public string Email { get; set; }
 
     /// <summary>
-    /// Address
+    /// The company address.
     /// </summary>
     [StringLength(255)]
     public string Address { get; set; }
 
     /// <summary>
-    /// Phone
+    /// The company phone number.
     /// </summary>
     [Phone]
     [StringLength(255)]
     public string Phone { get; set; }
 
     /// <summary>
-    /// Specifies if a company is a licensor or not
+    /// Specifies if a company is a licensor or not.
     /// </summary>
     [JsonPropertyName("IsLicensor")]
     public bool IsLicensor { get; set; }

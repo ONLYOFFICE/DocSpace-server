@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,32 +28,93 @@ using Profile = AutoMapper.Profile;
 
 namespace ASC.Files.Core;
 
+/// <summary>
+/// The tag type.
+/// </summary>
 [Flags]
 public enum TagType
 {
+    [SwaggerEnum("New")]
     New = 1,
+
+    [SwaggerEnum("Favorite")]
     Favorite = 2,
+
+    [SwaggerEnum("System")]
     System = 4,
+
+    [SwaggerEnum("Locked")]
     Locked = 8,
+
+    [SwaggerEnum("Recent")]
     Recent = 16,
+
+    [SwaggerEnum("Template")]
     Template = 32,
+
+    [SwaggerEnum("Custom")]
     Custom = 64,
+
+    [SwaggerEnum("Pin")]
     Pin = 128,
+
+    [SwaggerEnum("Origin")]
     Origin = 256,
+
+    [SwaggerEnum("Recent by link")]
     RecentByLink = 512,
-    FromRoom = 1024
+
+    [SwaggerEnum("From room")]
+    FromRoom = 1024,
+
+    [SwaggerEnum("Custom filter")]
+    CustomFilter = 2048
 }
 
+/// <summary>
+/// The tag information.
+/// </summary>
 [DebuggerDisplay("{Name} ({Id}) entry {EntryType} ({EntryId})")]
 public sealed class Tag : IMapFrom<DbFilesTag>
 {
+    /// <summary>
+    /// The tag name.
+    /// </summary>
     public string Name { get; set; }
+
+    /// <summary>
+    /// The tag type.
+    /// </summary>
     public TagType Type { get; set; }
+
+    /// <summary>
+    /// The tag owner ID.
+    /// </summary>
     public Guid Owner { get; set; }
+
+    /// <summary>
+    /// The tag entry ID.
+    /// </summary>
     public object EntryId { get; set; }
+
+    /// <summary>
+    /// The file entry type for which the tag has been created.
+    /// </summary>
     public FileEntryType EntryType { get; set; }
+
+    /// <summary>
+    /// The tag ID.
+    /// </summary>
     public int Id { get; set; }
+
+    /// <summary>
+    /// The number of tags.
+    /// </summary>
     public int Count { get; set; }
+
+    /// <summary>
+    /// The date and time when the tag was created.
+    /// </summary>
     public DateTime? CreateOn { get; set; }
 
     public Tag() { }

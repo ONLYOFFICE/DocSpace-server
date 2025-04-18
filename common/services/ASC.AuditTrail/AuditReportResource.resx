@@ -945,4 +945,40 @@
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Webhook updated: {0}</value>
   </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>LDAP authentication enabled</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>LDAP authentication disabled</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>LDAP synchronization completed</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>Users [{0}]. Started to fill: {1}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>Users [{0}]. Filled out part of form: {1}</value>
+  </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>Users [{0}]. Completely filled out form: {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>Users [{0}]. Form stopped: {1}</value>
+  </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>File: {0}. Custom filter disabled</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>File: {0}. Custom filter enabled</value>
+  </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>User Api Key Created: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>User Api Key Updated: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>User Api Key Deleted: {0}</value>
+  </data>
 </root>

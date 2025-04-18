@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,45 +26,48 @@
 
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
+/// <summary>
+/// The Firebase parameters.
+/// </summary>
 public class FirebaseDto
 {
     /// <summary>
-    /// API key
+    /// The Firebase API key.
     /// </summary>
     public string ApiKey { get; set; }
 
     /// <summary>
-    /// Authentication domain
+    /// The Firebase authentication domain.
     /// </summary>
     public string AuthDomain { get; set; }
 
     /// <summary>
-    /// Project ID
+    /// The Firebase project ID.
     /// </summary>
     public string ProjectId { get; set; }
 
     /// <summary>
-    /// Storage bucket
+    /// The Firebase storage bucket.
     /// </summary>
     public string StorageBucket { get; set; }
 
     /// <summary>
-    /// Message sender ID
+    /// The Firebase messaging sender ID.
     /// </summary>
     public string MessagingSenderId { get; set; }
 
     /// <summary>
-    /// Application ID
+    /// The Firebase application ID.
     /// </summary>
     public string AppId { get; set; }
 
     /// <summary>
-    /// Measurement ID
+    /// The Firebase measurement ID.
     /// </summary>
     public string MeasurementId { get; set; }
 
     /// <summary>
-    /// Database URL
+    /// The Firebase database URL.
     /// </summary>
     public string DatabaseURL { get; set; }
 }

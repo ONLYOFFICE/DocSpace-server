@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,128 +27,183 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Base batch request parameters
+/// The base batch request parameters.
 /// </summary>
 public class BaseBatchRequestDto
 {
     /// <summary>
-    /// List of folder IDs
+    /// The list of folder IDs of the base batch request.
     /// </summary>
     public IEnumerable<JsonElement> FolderIds { get; set; } = new List<JsonElement>();
 
     /// <summary>
-    /// List of file IDs
+    /// The list of file IDs of the base batch request.
     /// </summary>
     public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
 }
 
 /// <summary>
-/// Request parameters for downloading files
+/// The request parameters for downloading files.
 /// </summary>
-public class DownloadRequestDto : BaseBatchRequestDto
+public class DownloadRequestDto
 {
     /// <summary>
-    /// List of file IDs which will be converted
+    /// The list of folder IDs to be downloaded.
+    /// </summary>
+    public IEnumerable<JsonElement> FolderIds { get; set; } = new List<JsonElement>();
+
+    /// <summary>
+    /// The list of file IDs to be downloaded.
+    /// </summary>
+    public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
+
+    /// <summary>
+    /// The list of file IDs which will be converted.
     /// </summary>
     public IEnumerable<DownloadRequestItemDto> FileConvertIds { get; set; } = new List<DownloadRequestItemDto>();
 }
 
+/// <summary>
+/// The download request item with conversion parameters and security settings.
+/// </summary>
 public class DownloadRequestItemDto
 {
-    public JsonElement Key { get; init; }
-    public string Value { get; init; }
+    /// <summary>
+    /// The unique identifier or reference key for the file to be downloaded.
+    /// </summary>
+    public required JsonElement Key { get; init; }
+
+    /// <summary>
+    /// The target format or conversion type for the file download.
+    /// </summary>
+    public required string Value { get; init; }
+
+    /// <summary>
+    /// The optional password for accessing protected files.
+    /// </summary>
     public string Password { get; init; }
 }
 
 /// <summary>
-/// Request parameters for deleting files
+/// The request parameters for deleting files.
 /// </summary>
-public class DeleteBatchRequestDto : BaseBatchRequestDto
+public class DeleteBatchRequestDto
 {
+    /// <summary>
+    /// The list of folder IDs to be deleted.
+    /// </summary>
+    public IEnumerable<JsonElement> FolderIds { get; set; } = new List<JsonElement>();
+
+    /// <summary>
+    /// The list of file IDs to be deleted.
+    /// </summary>
+    public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
+
     /// <summary>
     /// Specifies whether to delete a file after the editing session is finished or not
     /// </summary>
     public bool DeleteAfter { get; set; }
 
     /// <summary>
-    /// Specifies whether to move a file to the \"Trash\" folder or delete it immediately
+    /// Specifies whether to move a file to the \"Trash\" folder or delete it immediately.
     /// </summary>
     public bool Immediately { get; set; }
 }
 
 /// <summary>
-/// Request parameters for deleting file's version
+/// The request parameters for deleting file versions.
 /// </summary>
 public class DeleteVersionBatchRequestDto
 {
     /// <summary>
-    /// Specifies whether to delete a file after the editing session is finished or not
+    /// Specifies whether to delete a file after the editing session is finished or not.
     /// </summary>
     public bool DeleteAfter { get; set; }
+
+    /// <summary>
+    /// The file ID to delete.
+    /// </summary>
+    public required int FileId { get; set; }
     
-    public int FileId { get; set; }
-    
-    public IEnumerable<int> Versions { get; set; } = new List<int>();
+    /// <summary>
+    /// The collection of file versions to be deleted.
+    /// </summary>
+    public required IEnumerable<int> Versions { get; set; } = new List<int>();
 }
 
 /// <summary>
-/// Parameters for deleting a file
+/// The parameters for deleting a file.
 /// </summary>
 public class Delete
 {
     /// <summary>
-    /// Specifies whether to delete a file after the editing session is finished or not
+    /// Specifies whether to delete a file after the editing session is finished or not.
     /// </summary>
     public bool DeleteAfter { get; set; }
 
     /// <summary>
-    /// Specifies whether to move a file to the \"Trash\" folder or delete it immediately
+    /// Specifies whether to move a file to the \"Trash\" folder or delete it immediately.
     /// </summary>
     public bool Immediately { get; set; }
 }
 
 /// <summary>
-/// Request parameters for deleting a file
+/// The request parameters for deleting a file.
 /// </summary>
 public class DeleteRequestDto<T>
 {
     /// <summary>
-    /// File ID
+    /// The file ID to delete.
     /// </summary>
     [FromRoute(Name = "fileId")]
-    public T FileId { get; set; }
+    public required T FileId { get; set; }
 
     /// <summary>
-    /// File
+    /// The parameters for deleting a file.
     /// </summary>
     [FromBody]
-    public Delete File {  get; set; }
+    public required Delete File {  get; set; }
 }
 
 /// <summary>
-/// Request parameters for copying/moving files
+/// The request parameters for copying/moving files.
 /// </summary>
-public class BatchRequestDto : BaseBatchRequestDto
+public class BatchRequestDto
 {
     /// <summary>
-    /// Destination folder ID
+    /// The list of folder IDs to be copied/moved.
+    /// </summary>
+    public IEnumerable<JsonElement> FolderIds { get; set; } = new List<JsonElement>();
+
+    /// <summary>
+    /// The list of file IDs to be copied/moved.
+    /// </summary>
+    public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
+
+    /// <summary>
+    /// The destination folder ID.
     /// </summary>
     public JsonElement DestFolderId { get; set; }
 
     /// <summary>
-    /// Overwriting behavior
+    /// The overwriting behavior of the file copying or moving.
     /// </summary>
     public FileConflictResolveType ConflictResolveType { get; set; }
 
     /// <summary>
-    /// Specifies whether to delete a folder after the editing session is finished or not
+    /// Specifies whether to delete the source files/folders after they are moved or copied to the destination folder.
     /// </summary>
     public bool DeleteAfter { get; set; }
 
     /// <summary>
-    /// Content
+    ///  Specifies whether to copy or move the folder content or not.
     /// </summary>
     public bool Content { get; set; }
+
+    /// <summary>
+    /// Specifies whether the file is copied for filling out
+    /// </summary>
+    public bool ToFillOut { get; set; }
 }
 
 /// <summary>
@@ -160,5 +215,5 @@ public class FileOperationResultRequestDto
     /// Specifies the type of file operation to be retrieved.
     /// </summary>
     [FromRoute(Name = "operationType")]
-    public FileOperationType OperationType { get; set; }
+    public required FileOperationType OperationType { get; set; }
 }

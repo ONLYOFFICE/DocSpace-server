@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,13 +27,13 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// 
+/// The request parameters for getting a user photo.
 /// </summary>
 public class GetUserPhotoRequestDto
 {
     /// <summary>
-    /// User ID
+    /// The user ID.
     /// </summary>
     [FromRoute(Name = "userid")]
-    public string UserId { get; set; }
+    public required string UserId { get; set; }
 }

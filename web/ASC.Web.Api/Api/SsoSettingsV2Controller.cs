@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -41,7 +41,7 @@ namespace ASC.Api.Settings
     public partial class SettingsApi
     {
         /// <summary>
-        /// Returns current portal SSO settings
+        /// Returns the current portal SSO settings.
         /// </summary>
         /// <short>
         /// Get SSO settings
@@ -61,7 +61,7 @@ namespace ASC.Api.Settings
         }
 
         /// <summary>
-        /// Returns default portal SSO settings
+        /// Returns the default portal SSO settings.
         /// </summary>
         /// <short>
         /// Get default SSO settings
@@ -76,7 +76,7 @@ namespace ASC.Api.Settings
         }
 
         /// <summary>
-        /// Returns SSO settings constants
+        /// Returns the SSO settings constants.
         /// </summary>
         /// <short>
         /// Get SSO settings constants
@@ -97,7 +97,7 @@ namespace ASC.Api.Settings
         }
 
         /// <summary>
-        /// Save SSO settings for current portal
+        /// Save the SSO settings for current portal.
         /// </summary>
         /// <short>
         /// Save SSO settings
@@ -156,7 +156,7 @@ namespace ASC.Api.Settings
         }
 
         /// <summary>
-        /// Reset SSO settings for current portal
+        /// Reset the SSO settings for current portal.
         /// </summary>
         /// <short>
         /// Reset SSO settings

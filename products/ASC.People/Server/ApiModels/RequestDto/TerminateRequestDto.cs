@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,12 +27,12 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for terminating the reassignment process
+/// The request parameters for terminating the reassignment/deletion process.
 /// </summary>
 public class TerminateRequestDto
 {
     /// <summary>
-    /// User ID whose data is reassigned/removed
+    /// The user ID whose data is reassigned/removed.
     /// </summary>
-    public Guid UserId { get; set; }
+    public required Guid UserId { get; set; }
 }

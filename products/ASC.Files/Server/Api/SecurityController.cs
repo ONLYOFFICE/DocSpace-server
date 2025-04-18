@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -161,8 +161,9 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     }
 
     /// <summary>
-    /// Gets groups memebers with folder security
+    /// Returns the group memebers with their folder security information.
     /// </summary>
+    /// <short>Get group members with security information</short>
     /// <path>api/2.0/files/folder/{folderId}/group/{groupId}/share</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]

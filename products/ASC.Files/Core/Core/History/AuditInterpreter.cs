@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -44,7 +44,8 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
     private static readonly FileLockInterpreter _fileLockInterpreter = new();
     private static readonly RoomDenyDownloadInterpreter _roomDenyDownloadInterpreter = new();
     private static readonly UserFileUpdatedInterpreter _userFileUpdatedInterpreter = new();
-    
+    private static readonly FileCustomFilterInterpreter _fileCustomFilterInterpreter = new();
+
     private static readonly FrozenDictionary<int, ActionInterpreter> _interpreters = new Dictionary<int, ActionInterpreter>
     {
         { (int)MessageAction.FileCreated, new FileCreateInterpreter() },
@@ -87,13 +88,19 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
         { (int)MessageAction.RoomExternalLinkDeleted, new RoomExternalLinkDeletedInterpreter() },
         { (int)MessageAction.RoomExternalLinkRevoked, new RoomExternalLinkRevokedInterpreter() },
         { (int)MessageAction.FormSubmit, _userFileUpdatedInterpreter },
+        { (int)MessageAction.FormStartedToFill, _userFileUpdatedInterpreter },
         { (int)MessageAction.FormOpenedForFilling, _userFileUpdatedInterpreter },
+        { (int)MessageAction.FormPartiallyFilled, _userFileUpdatedInterpreter },
+        { (int)MessageAction.FormCompletelyFilled, _userFileUpdatedInterpreter },
+        { (int)MessageAction.FormStopped, _userFileUpdatedInterpreter },
         { (int)MessageAction.RoomIndexingEnabled, _roomIndexingInterpreter },
         { (int)MessageAction.RoomIndexingDisabled, _roomIndexingInterpreter },
         { (int)MessageAction.RoomLifeTimeSet, new RoomLifeTimeSetInterpreter() },
         { (int)MessageAction.RoomLifeTimeDisabled, new RoomLifeTimeDisabledInterpreter() },
         { (int)MessageAction.FolderIndexChanged, new FolderIndexChangedInterpreter() },
         { (int)MessageAction.FileIndexChanged, new FileIndexChangedInterpreter() },
+        { (int)MessageAction.FileCustomFilterEnabled, _fileCustomFilterInterpreter },
+        { (int)MessageAction.FileCustomFilterDisabled, _fileCustomFilterInterpreter },
         { (int)MessageAction.FolderIndexReordered, new FolderIndexReorderedInterpreter() },
         { (int)MessageAction.RoomArchived, _roomArchivingInterpreter },
         { (int)MessageAction.RoomUnarchived, _roomArchivingInterpreter },

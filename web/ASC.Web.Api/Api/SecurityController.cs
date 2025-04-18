@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -85,7 +85,7 @@ public class SecurityController(PermissionContext permissionContext,
     }
 
     /// <summary>
-    /// Returns a list of the latest changes (creation, modification, deletion, etc.) made by users to the entities (tasks, opportunities, files, etc.) on the portal.
+    /// Returns a list of the latest changes (creation, modification, deletion, etc.) made by users to the entities on the portal.
     /// </summary>
     /// <short>
     /// Get audit trail data
@@ -354,10 +354,13 @@ public class SecurityController(PermissionContext permissionContext,
 
         return inDto.Settings;
     }
-    
+
     /// <summary>
-    /// Csp
+    /// Configures the CSP (Content Security Policy) settings for the current portal.
     /// </summary>
+    /// <short>
+    /// Configure CSP settings
+    /// </short>
     /// <path>api/2.0/security/csp</path>
     [Tags("Security / CSP")]
     [SwaggerResponse(200, "Ok", typeof(CspDto))]
@@ -399,8 +402,11 @@ public class SecurityController(PermissionContext permissionContext,
     }
 
     /// <summary>
-    /// Gets csp
+    /// Returns the CSP (Content Security Policy) settings for the current portal.
     /// </summary>
+    /// <short>
+    /// Get CSP settings
+    /// </short>
     /// <path>api/2.0/security/csp</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Security / CSP")]
@@ -427,8 +433,11 @@ public class SecurityController(PermissionContext permissionContext,
     }
 
     /// <summary>
-    /// Generate Jwt Token for communication between login (client) and identity services 
+    /// Generates a JWT token for communication between login (client) and identity services.
     /// </summary>
+    /// <short>
+    /// Generate JWT token
+    /// </short>
     /// <path>api/2.0/security/oauth2/token</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [HttpGet("oauth2/token")]
@@ -443,22 +452,30 @@ public class SecurityController(PermissionContext permissionContext,
         var isAdmin = await userManager.GetUserTypeAsync(userInfo.Id) is EmployeeType.DocSpaceAdmin;
         var isGuest = await userManager.IsGuestAsync(userId);
         var serverRootPath = baseCommonLinkUtility.ServerRootPath;
-       
+        var isPublic = true;
+
+        var tenantDevToolsAccessSettings = await settingsManager.LoadAsync<TenantDevToolsAccessSettings>();
+
+        if (tenantDevToolsAccessSettings != null)
+        {
+            isPublic = !tenantDevToolsAccessSettings.LimitedAccessForUsers;
+        }
+        
         var token = new JwtSecurityToken(
             issuer: serverRootPath,
             audience: serverRootPath,
             claims: new List<Claim>() {
-                new Claim("sub", securityContext.CurrentAccount.ID.ToString()), 
-                new Claim("user_id", securityContext.CurrentAccount.ID.ToString()), 
-                new Claim("user_name", userFormatter.GetUserName(userInfo)),
-                new Claim("user_email", userInfo.Email),
-                new Claim("tenant_id", tenant.Id.ToString()),
-                new Claim("tenant_url", serverRootPath),
-                new Claim("is_admin", isAdmin.ToString().ToLower()),
-                new Claim("is_guest", isGuest.ToString().ToLower()),
-                new Claim("is_public", "true") // TODO: check OAuth enable for non-admin users
+                new("sub", securityContext.CurrentAccount.ID.ToString()), 
+                new("user_id", securityContext.CurrentAccount.ID.ToString()), 
+                new("user_name", userFormatter.GetUserName(userInfo)),
+                new("user_email", userInfo.Email),
+                new("tenant_id", tenant.Id.ToString()),
+                new("tenant_url", serverRootPath),
+                new("is_admin", isAdmin.ToString().ToLower()),
+                new("is_guest", isGuest.ToString().ToLower()),
+                new("is_public", isPublic.ToString().ToLower()) // TODO: check OAuth enable for non-admin users
             },
-            expires: DateTime.Now.AddDays(1),
+            expires: DateTime.Now.AddMinutes(15),
             signingCredentials: creds);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
@@ -471,7 +488,7 @@ public class SecurityController(PermissionContext permissionContext,
             && (!SetupInfo.IsVisibleSettings(ManagementType.LoginHistory.ToStringFast())
                 || !(await tenantManager.GetCurrentTenantQuotaAsync()).Audit))
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption, "Audit");
+            throw new BillingException(Resource.ErrorNotAllowedOption);
         }
     }
 
@@ -480,7 +497,7 @@ public class SecurityController(PermissionContext permissionContext,
         if (!coreBaseSettings.Standalone
             && !SetupInfo.IsVisibleSettings(ManagementType.LoginHistory.ToStringFast()))
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption, "Audit");
+            throw new BillingException(Resource.ErrorNotAllowedOption);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,48 +27,48 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for file history
+/// The request parameters for file history.
 /// </summary>
 public class HistoryRequestDto
 {
     /// <summary>
-    /// File ID
+    /// The file ID of the history request.
     /// </summary>
     [FromRoute(Name = "fileId")]
-    public int FileId { get; set; }
+    public required int FileId { get; set; }
 
     /// <summary>
-    /// Start date
+    /// The start date of the history.
     /// </summary>
     [FromQuery(Name = "fromDate")]
     public ApiDateTime FromDate {  get; set; }
 
     /// <summary>
-    /// End date
+    /// The end date of the history.
     /// </summary>
     [FromQuery(Name = "toDate")]
     public ApiDateTime ToDate { get; set; }
 }
 
 /// <summary>
-/// Request parameters for folder history
+/// The request parameters for the folder history.
 /// </summary>
 public class HistoryFolderRequestDto
 {
     /// <summary>
-    /// File ID
+    /// The folder ID of the history request.
     /// </summary>
     [FromRoute(Name = "folderId")]
-    public int FolderId { get; set; }
+    public required int FolderId { get; set; }
 
     /// <summary>
-    /// Start date
+    /// The start date of the history request.
     /// </summary>
     [FromQuery(Name = "fromDate")]
     public ApiDateTime FromDate { get; set; }
 
     /// <summary>
-    /// End date
+    /// The end date of the history request.
     /// </summary>
     [FromQuery(Name = "toDate")]
     public ApiDateTime ToDate { get; set; }

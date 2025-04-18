@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,26 +27,33 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// Congratulations request parameters
+/// The parameters for sending congratulatory email notifications.
 /// </summary>
 public class SendCongratulationsDto
 {
     /// <summary>
-    /// User ID
+    /// The user ID to receive the congratulatory message.
     /// </summary>
     public Guid Userid { get; set; }
 
     /// <summary>
-    /// Email key
+    /// The template identifier or email configuration key.
     /// </summary>
     public string Key { get; set; }
 }
 
+///<summary>
+/// The instructions parameters for sending account removal or deactivation instructions.
+///</summary>
 public class SendRemoveInstructionsDto
 {
-    /// <summary>Uer ID</summary>
+    ///<summary>
+    /// The ID of the user requesting account removal.
+    ///</summary>
     public Guid Userid { get; set; }
 
-    /// <summary>Email key</summary>
+    ///<summary>
+    /// The email configuration key.
+    ///</summary>
     public string Key { get; set; }
 }

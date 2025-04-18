@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,47 +27,53 @@
 namespace ASC.Web.Core.WhiteLabel;
 
 /// <summary>
-/// Additional white label settings
+/// The additional white label settings wrapper.
 /// </summary>
 public class AdditionalWhiteLabelSettingsWrapper
 {
     /// <summary>
-    /// Additional white label settings
+    /// The additional white label settings.
     /// </summary>
     public AdditionalWhiteLabelSettings Settings { get; set; }
 }
 
+/// <summary>
+/// The additional white label settings.
+/// </summary>
 public class AdditionalWhiteLabelSettings : ISettings<AdditionalWhiteLabelSettings>
 {
+    /// <summary>
+    /// The external resource settings helper.
+    /// </summary>
     public ExternalResourceSettingsHelper ExternalResourceSettingsHelper;
 
     /// <summary>
-    /// Specifies if the start document is enabled or not
+    /// Specifies if the sample documents are displayed or hidden.
     /// </summary>
     public bool StartDocsEnabled { get; init; }
 
     /// <summary>
-    /// Specifies if the help center is enabled or not
+    /// Specifies if the Help Center link is available or not.
     /// </summary>
     public bool HelpCenterEnabled { get; init; }
 
     /// <summary>
-    /// Specifies if feedback and support are available or not
+    /// Specifies if the "Feedback & Support" link is available or not.
     /// </summary>
     public bool FeedbackAndSupportEnabled { get; init; }
 
     /// <summary>
-    /// Specifies if the user forum is enabled or not
+    /// Specifies if the user forum is available or not.
     /// </summary>
     public bool UserForumEnabled { get; init; }
 
     /// <summary>
-    /// Specifies if the video guides are enabled or not
+    /// Specifies if the Video Guides link is available or not.
     /// </summary>
     public bool VideoGuidesEnabled { get; init; }
 
     /// <summary>
-    /// Specifies if the license agreements are enabled or not
+    /// Specifies if the License Agreements link is available or not.
     /// </summary>
     public bool LicenseAgreementsEnabled { get; init; }
 

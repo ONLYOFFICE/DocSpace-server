@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,133 +26,136 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// The folder parameters.
+/// </summary>
 public class FolderDto<T> : FileEntryDto<T>
 {
     /// <summary>
-    /// Parent folder ID
+    /// The parent folder ID of the folder.
     /// </summary>
     [SwaggerSchemaCustom(Example = 10)]
     public T ParentId { get; set; }
 
     /// <summary>
-    /// Number of files
+    /// The number of files that the folder contains.
     /// </summary>
     [SwaggerSchemaCustom(Example = 5)]
     public int FilesCount { get; set; }
 
     /// <summary>
-    /// Number of folders
+    /// The number of folders that the folder contains.
     /// </summary>
     [SwaggerSchemaCustom(Example = 7)]
     public int FoldersCount { get; set; }
 
     /// <summary>
-    /// Specifies if a folder is shareable or not
+    /// Specifies if the folder can be shared or not.
     /// </summary>
     public bool? IsShareable { get; set; }
 
     /// <summary>
-    /// Specifies if a folder is favorite or not
+    /// Specifies if the folder is favorite or not.
     /// </summary>
     public bool? IsFavorite { get; set; }
 
     /// <summary>
-    /// Number for a new folder
+    /// The new element index in the folder.
     /// </summary>
     public int New { get; set; }
 
     /// <summary>
-    /// Specifies if a folder is muted or not
+    /// Specifies if the folder notifications are enabled or not.
     /// </summary>
     public bool Mute { get; set; }
 
     /// <summary>
-    /// List of tags
+    /// The list of tags of the folder.
     /// </summary>
     public IEnumerable<string> Tags { get; set; }
 
     /// <summary>
-    /// Logo
+    /// The folder logo.
     /// </summary>
     public Logo Logo { get; set; }
 
     /// <summary>
-    /// Specifies if a folder is pinned or not
+    /// Specifies if the folder is pinned or not.
     /// </summary>
     public bool Pinned { get; set; }
 
     /// <summary>
-    /// Room type
+    /// The room type of the folder.
     /// </summary>
     public RoomType? RoomType { get; set; }
 
     /// <summary>
-    /// Specifies if a folder is private or not
+    /// Specifies if the folder is private or not.
     /// </summary>
     public bool Private { get; set; }
 
     /// <summary>
-    /// Indexing
+    /// Specifies if the folder is indexed or not.
     /// </summary>
     public bool Indexing { get; set; }
 
     /// <summary>
-    /// Deny download
+    /// Specifies if the folder can be downloaded or not.
     /// </summary>
     public bool DenyDownload { get; set; }
 
     /// <summary>
-    /// Room data lifetime settings
+    /// The room data lifetime settings of the folder.
     /// </summary>
     public RoomDataLifetimeDto Lifetime { get; set; }
 
     /// <summary>
-    /// Watermark settings
+    /// The watermark settings of the folder.
     /// </summary>
     public WatermarkDto Watermark { get; set; }
 
     /// <summary>
-    /// Folder type
+    /// The folder type.
     /// </summary>
     public FolderType? Type { get; set; }
 
     /// <summary>
-    /// InRoom
+    /// Specifies if the folder is placed in the room or not.
     /// </summary>
     public bool? InRoom { get; set; }
 
     /// <summary>
-    /// Quota
+    /// The folder quota limit.
     /// </summary>
     public long? QuotaLimit { get; set; }
 
     /// <summary>
-    /// Specifies if the room has a custom quota or not
+    /// Specifies if the folder room has a custom quota or not.
     /// </summary>
     public bool? IsCustomQuota { get; set; }
 
     /// <summary>
-    /// Counter
+    /// How much folder space is used (counter).
     /// </summary>
     public long? UsedSpace { get; set; }
 
     /// <summary>
-    /// Specifies if the link external
+    /// Specifies if the folder can be accessed via an external link or not.
     /// </summary>
     public bool? External { get; set; }
 
     /// <summary>
-    /// Specifies if the password protected
+    /// Specifies if the folder is password protected or not.
     /// </summary>
     public bool? PasswordProtected { get; set; }
 
     /// <summary>
-    /// Expired
+    /// Specifies if an external link to the folder is expired or not.
     /// </summary>
     public bool? Expired { get; set; }
 
     /// <summary>
-    /// File entry type
+    /// The file entry type of the folder.
     /// </summary>
     public override FileEntryType FileEntryType { get => FileEntryType.Folder; }
 }

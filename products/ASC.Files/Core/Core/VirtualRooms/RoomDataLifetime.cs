@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,14 +26,39 @@
 
 namespace ASC.Files.Core.VirtualRooms;
 
+/// <summary>
+/// The room data lifetime information.
+/// </summary>
 public class RoomDataLifetime : IMapFrom<DbRoomDataLifetime>, IMapFrom<RoomDataLifetimeDto>
 {
+    /// <summary>
+    /// Specifies whether to delete the room data lifetime permanently or not.
+    /// </summary>
     public bool DeletePermanently { get; set; }
+
+    /// <summary>
+    /// The room data lifetime period.
+    /// </summary>
     public RoomDataLifetimePeriod Period { get; set; }
+
+    /// <summary>
+    /// The room data lifetime value.
+    /// </summary>
     public int? Value { get; set; }
+
+    /// <summary>
+    /// The room data lifetime start date and time.
+    /// </summary>
     public DateTime? StartDate { get; set; }
+
+    /// <summary>
+    /// Specifies whether the room data lifetime is enabled or not.
+    /// </summary>
     public bool? Enabled { get; set; }
 
+    /// <summary>
+    /// Get the expiration of the room data lifetime in UTC format.
+    /// </summary>
     public DateTime GetExpirationUtc()
     {
         var expiration = DateTime.UtcNow;
@@ -77,6 +102,9 @@ public class RoomDataLifetime : IMapFrom<DbRoomDataLifetime>, IMapFrom<RoomDataL
     }
 }
 
+/// <summary>
+/// The room data lifetime period.
+/// </summary>
 [EnumExtensions]
 public enum RoomDataLifetimePeriod
 {

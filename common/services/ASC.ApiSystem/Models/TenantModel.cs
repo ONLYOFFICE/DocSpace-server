@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,147 +27,147 @@
 namespace ASC.ApiSystem.Models;
 
 /// <summary>
-/// Request parameters for portal
+/// The request parameters for managing a portal.
 /// </summary>
 public class TenantModel : IModel
 {
     /// <summary>
-    /// Portal name
+    /// The portal name.
     /// </summary>
     public string PortalName { get; set; }
 
     /// <summary>
-    /// Tenant id
+    /// The tenant ID.
     /// </summary>
     public int? TenantId { get; set; }
 
     /// <summary>
-    /// Affiliate id
+    /// The affiliate ID.
     /// </summary>
     [StringLength(255)]
     public string AffiliateId { get; set; }
 
     /// <summary>
-    /// Partner id
+    /// The partner ID.
     /// </summary>
     [StringLength(255)]
     public string PartnerId { get; set; }
 
     /// <summary>
-    /// Campaign
+    /// The portal campaign.
     /// </summary>
     public string Campaign { get; set; }
 
     /// <summary>
-    /// First name
+    /// The first name of the portal owner.
     /// </summary>
     [StringLength(255)]
     public string FirstName { get; set; }
 
     /// <summary>
-    /// Email
+    /// The email address of the portal owner.
     /// </summary>
     [EmailAddress]
     [StringLength(255)]
     public string Email { get; set; }
 
     /// <summary>
-    /// Industry
+    /// The tenant industry.
     /// </summary>
     public int Industry { get; set; }
 
     /// <summary>
-    /// Language
+    /// The portal language.
     /// </summary>
     [StringLength(7)]
     public string Language { get; set; }
 
 
     /// <summary>
-    /// Last name
+    /// The last name of the portal owner.
     /// </summary>
     [StringLength(255)]
     public string LastName { get; set; }
 
     /// <summary>
-    /// Module
+    /// The name for the storage module to be configured.
     /// </summary>
     [StringLength(38)]
     public string Module { get; set; }
 
     /// <summary>
-    /// Password
+    /// The password of the portal owner.
     /// </summary>
     //todo: delete after www update
     [StringLength(PasswordSettingsManager.MaxLength)]
     public string Password { get; set; }
 
     /// <summary>
-    /// Password hash
+    /// The password hash.
     /// </summary>
     public string PasswordHash { get; set; }
 
     /// <summary>
-    /// Phone
+    /// The phone numberr of the portal owner.
     /// </summary>
     [StringLength(32)]
     public string Phone { get; set; }
 
     /// <summary>
-    /// Recaptcha response
+    /// The user's response to the CAPTCHA challenge.
     /// </summary>
     public string RecaptchaResponse { get; set; }
 
     /// <summary>
-    /// Recaptcha type
+    /// The type of CAPTCHA validation used.
     /// </summary>
     public RecaptchaType RecaptchaType { get; set; }
 
     /// <summary>
-    /// Region
+    /// The portal region.
     /// </summary>
     [StringLength(20)]
     public string Region { get; set; }
 
     /// <summary>
-    /// AWS region
+    /// The portal AWS region.
     /// </summary>
     [JsonPropertyName("awsRegion")]
     public string AWSRegion { get; set; }
 
     /// <summary>
-    /// Status
+    /// The tenant status.
     /// </summary>
     public TenantStatus Status { get; set; }
 
     /// <summary>
-    /// Skip welcome
+    /// Specifies whether to send the welcome email to the user or not.
     /// </summary>
     public bool SkipWelcome { get; set; }
 
     /// <summary>
-    /// TimeZone name
+    /// The portal time zone name.
     /// </summary>
     [StringLength(255)]
     public string TimeZoneName { get; set; }
 
     /// <summary>
-    /// Spam
+    /// Specifies if the ONLYOFFICE newsletter is allowed or not.
     /// </summary>
     public bool Spam { get; set; }
 
     /// <summary>
-    /// Calls
+    /// Specifies if the calls are available for the current tenant or not.
     /// </summary>
     public bool Calls { get; set; }
 
     /// <summary>
-    /// App key
+    /// The application key.
     /// </summary>
     public string AppKey { get; set; }
 
     /// <summary>
-    /// Limited access space
+    /// Specifies whether the access to the space management is limited or not.
     /// </summary>
     public bool LimitedAccessSpace { get; set; }
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,27 +27,29 @@
 namespace ASC.Web.Core.WhiteLabel;
 
 /// <summary>
-/// Mail white label settings
+/// The mail white label settings wrapper.
 /// </summary>
 public class MailWhiteLabelSettingsWrapper
 {
     /// <summary>
-    /// Mail white label settings
+    /// The mail white label settings.
     /// </summary>
     public MailWhiteLabelSettings Settings { get; set; }
 }
 
 /// <summary>
-/// Mail white label settings
+/// The mail white label settings.
 /// </summary>
 public class MailWhiteLabelSettings : ISettings<MailWhiteLabelSettings>
 {
-    /// <summary>Specifies if the mail footer is enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the mail footer is enabled or not.
+    /// </summary>
     public bool FooterEnabled { get; set; }
 
-    /// <summary>Specifies if the footer with social media contacts is enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the footer with social media contacts is enabled or not.
+    /// </summary>
     public bool FooterSocialEnabled { get; set; }
 
 

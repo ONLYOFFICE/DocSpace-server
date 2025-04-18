@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,29 +26,38 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// The file ID request parameters.
+/// </summary>
 public class FileIdRequestDto<T>
 {
     /// <summary>
-    /// File ID
+    /// The file ID of the request.
     /// </summary>
     [FromRoute(Name = "fileId")]
-    public T FileId { get; set; }
+    public required T FileId { get; set; }
 }
 
+/// <summary>
+/// The file ID request parameters.
+/// </summary>
 public class FilePrimaryIdRequestDto<T>
 {
     /// <summary>
-    /// File ID
+    /// The file ID of the request.
     /// </summary>
     [FromRoute(Name = "id")]
-    public T Id { get; set; }
+    public required T Id { get; set; }
 }
 
+/// <summary>
+/// The operation ID request parameters.
+/// </summary>
 public class OperationIdRequestDto
 {
     /// <summary>
-    /// Operation ID
+    /// The operation ID of the request.
     /// </summary>
     [FromRoute(Name = "id")]
-    public string Id { get; set; } = null;
+    public required string Id { get; set; } = null;
 }

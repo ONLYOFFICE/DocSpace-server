@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,6 +31,7 @@ public class FirstTimeTenantSettings(
     ILogger<FirstTimeTenantSettings> logger,
     TenantManager tenantManager,
     TenantExtra tenantExtra,
+    TenantLogoManager tenantLogoManager,
     SettingsManager settingsManager,
     UserManager userManager,
     SetupInfo setupInfo,
@@ -136,6 +137,11 @@ public class FirstTimeTenantSettings(
         catch (BillingNotConfiguredException)
         {
             throw new Exception(UserControlsCommonResource.LicenseKeyNotCorrect);
+        }
+        catch (BillingLicenseTypeException)
+        {
+            var logoText = await tenantLogoManager.GetLogoTextAsync();
+            throw new Exception(string.Format(UserControlsCommonResource.LicenseTypeNotCorrect, logoText));
         }
         catch (BillingException)
         {

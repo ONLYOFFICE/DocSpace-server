@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -48,7 +48,7 @@ public class EmailValidationKeyModelHelper(
 {
     public EmailValidationKeyModel GetModel()
     {
-        var request = QueryHelpers.ParseQuery(httpContextAccessor.HttpContext.Request.Headers["confirm"]);
+        var request = ParseQuery(httpContextAccessor.HttpContext.Request.Headers["confirm"]);
 
         var type = request.TryGetValue("type", out var value) ? (string)value : null;
 
@@ -269,5 +269,40 @@ public class EmailValidationKeyModelHelper(
             var user = await userManager.GetUserByEmailAsync(email);
             return ownerId.Equals(user.Id);
         }
+    }
+    
+    private static Dictionary<string, StringValues> ParseQuery(string queryString)
+    {
+        var result = ParseNullableQuery(queryString);
+
+        if (result == null)
+        {
+            return new Dictionary<string, StringValues>();
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Parse a query string into its component key and value parts.
+    /// </summary>
+    /// <param name="queryString">The raw query string value, with or without the leading '?'.</param>
+    /// <returns>A collection of parsed keys and values, null if there are no entries.</returns>
+    private static Dictionary<string, StringValues> ParseNullableQuery(string queryString)
+    {
+        var accumulator = new KeyValueAccumulator();
+        var enumerable = new QueryStringEnumerable(queryString);
+
+        foreach (var pair in enumerable)
+        {
+            accumulator.Append(pair.EncodedName.ToString(), pair.DecodeValue().ToString());
+        }
+
+        if (!accumulator.HasValues)
+        {
+            return null;
+        }
+
+        return accumulator.GetResults();
     }
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -57,27 +57,30 @@ public class CustomColorThemesSettings : ISettings<CustomColorThemesSettings>
     }
 }
 
+/// <summary>
+/// The custom color theme settings.
+/// </summary>
 public class CustomColorThemesSettingsItem
 {
     /// <summary>
-    /// Theme ID
+    /// The custom color theme ID.
     /// </summary>
     [SwaggerSchemaCustom(Example = 1)]
     public int Id { get; set; }
 
     /// <summary>
-    /// Theme name
+    /// The custom color theme name.
     /// </summary>
     [SwaggerSchemaCustom(Example = "blue")]
     public string Name { get; set; }
 
     /// <summary>
-    /// Main colors
+    /// The custom color theme main colors.
     /// </summary>
     public CustomColorThemesSettingsColorItem Main { get; set; }
 
     /// <summary>
-    /// Text colors
+    /// The custom color theme text colors.
     /// </summary>
     public CustomColorThemesSettingsColorItem Text { get; set; }
 
@@ -133,16 +136,19 @@ public class CustomColorThemesSettingsItem
     ];
 }
 
+/// <summary>
+/// The custom color theme color parameters.
+/// </summary>
 public class CustomColorThemesSettingsColorItem
 {
     /// <summary>
-    /// Accent color
+    /// The accent color.
     /// </summary>
     [SwaggerSchemaCustom(Example = "#4781D1")]
     public string Accent { get; init; }
     
     /// <summary>
-    /// Button color
+    /// The button color.
     /// </summary>
     [SwaggerSchemaCustom(Example = "#5299E0")]
     public string Buttons { get; init; }

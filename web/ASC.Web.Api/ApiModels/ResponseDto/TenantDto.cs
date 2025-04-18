@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,125 +26,128 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
+/// <summary>
+/// The tenant parameters.
+/// </summary>
 public class TenantDto : IMapFrom<Tenant>
 {
     /// <summary>
-    /// Affiliate ID
+    /// The affiliate ID.
     /// </summary>
     public string AffiliateId { get; set; }
 
     /// <summary>
-    /// Tenant alias
+    /// The tenant alias.
     /// </summary>
     public string TenantAlias { get; set; }
 
     /// <summary>
-    /// Specifies if the calls are available for this tenant or not
+    /// Specifies if the calls are available for this tenant or not.
     /// </summary>
     public bool Calls { get; set; }
 
     /// <summary>
-    /// Campaign
+    /// The tenant campaign.
     /// </summary>
     public string Campaign { get; set; }
 
     /// <summary>
-    /// Creation date and time
+    /// The tenant creation date and time.
     /// </summary>
     public DateTime CreationDateTime { get; internal set; }
 
     /// <summary>
-    /// Hosted region
+    /// The hosted region.
     /// </summary>
     public string HostedRegion { get; set; }
 
     /// <summary>
-    /// Tenant ID
+    /// The tenant ID.
     /// </summary>
     public int TenantId { get; internal set; }
 
     /// <summary>
-    /// Tenant industry
+    /// The tenant industry.
     /// </summary>
     public TenantIndustry Industry { get; set; }
 
     /// <summary>
-    /// Language
+    /// The tenant language.
     /// </summary>
     public string Language { get; set; }
 
     /// <summary>
-    /// Last modified date
+    /// The date and time when the tenant was last modified.
     /// </summary>
     public DateTime LastModified { get; set; }
 
     /// <summary>
-    /// Mapped domain
+    /// The tenant mapped domain.
     /// </summary>
     public string MappedDomain { get; set; }
 
     /// <summary>
-    /// Name
+    /// The tenant name.
     /// </summary>
     public string Name { get; set; }
 
     /// <summary>
-    /// Owner ID
+    /// The tenant owner ID.
     /// </summary>
     public Guid OwnerId { get; set; }
 
     /// <summary>
-    /// Payment ID
+    /// The tenant payment ID.
     /// </summary>
     public string PaymentId { get; set; }
 
     /// <summary>
-    /// Specifies if the ONLYOFFICE newsletter is allowed or not
+    /// Specifies if the ONLYOFFICE newsletter is allowed or not.
     /// </summary>
     public bool Spam { get; set; }
 
     /// <summary>
-    /// Tenant status
+    /// The tenant status.
     /// </summary>
     public TenantStatus Status { get; internal set; }
 
     /// <summary>
-    /// The date and time when the tenant status was changed
+    /// The date and time when the tenant status was changed.
     /// </summary>
     public DateTime StatusChangeDate { get; internal set; }
 
     /// <summary>
-    /// Time zone
+    /// The tenant time zone.
     /// </summary>
     public string TimeZone { get; set; }
 
     /// <summary>
-    /// List of trusted domains
+    /// The list of tenant trusted domains.
     /// </summary>
     public List<string> TrustedDomains { get; set; }
 
     /// <summary>
-    /// Trusted domains in the string format
+    /// The tenant trusted domains in the string format.
     /// </summary>
     public string TrustedDomainsRaw { get; set; }
 
     /// <summary>
-    /// Trusted domains type
+    /// The type of the tenant trusted domains.
     /// </summary>
     public TenantTrustedDomainsType TrustedDomainsType { get; set; }
 
     /// <summary>
-    /// Version
+    /// The tenant version 
     /// </summary>
     public int Version { get; set; }
 
     /// <summary>
-    /// The date and time when the tenant version was changed
+    /// The date and time when the tenant version was changed.
     /// </summary>
     public DateTime VersionChanged { get; set; }
 
     /// <summary>
-    /// AWS region
+    /// The tenant AWS region.
     /// </summary>
     public string Region { get; set; }
 

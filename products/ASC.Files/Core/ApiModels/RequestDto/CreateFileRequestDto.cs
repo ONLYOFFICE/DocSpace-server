@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,45 +27,45 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Parameters for creating a file
+/// The parameters for creating a file.
 /// </summary>
 public class CreateFile<T>
 {
     /// <summary>
-    /// File title
+    /// The file title for creation.
     /// </summary>
     [StringLength(165)]
-    public string Title { get; set; }
+    public required string Title { get; set; }
 
     /// <summary>
-    /// Template file ID
+    /// The template file ID for creation.
     /// </summary>
     public T TemplateId { get; set; }
 
     /// <summary>
-    /// Specifies whether to allow the creation of external extension files or not
+    /// Specifies whether to allow creating a file of an external extension or not.
     /// </summary>
     public bool EnableExternalExt { get; set; }
 
     /// <summary>
-    /// Form ID
+    /// The form ID for creation.
     /// </summary>
     public int FormId { get; set; }
 }
 
 /// <summary>
-/// Request parameters for creating a file
+/// The request parameters for creating a file.
 /// </summary>
 public class CreateFileRequestDto<T>
 {
     /// <summary>
-    /// Folder ID
+    /// The folder ID for the file creation.
     /// </summary>
     [FromRoute(Name = "folderId")]
-    public T FolderId { get; set; }
+    public required T FolderId { get; set; }
 
     /// <summary>
-    /// File
+    /// The parameters for creating a file.
     /// </summary>
     [FromBody]
     public CreateFile<JsonElement> File { get; set; }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,15 +26,24 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
+/// <summary>
+/// The mail white label settings parameters.
+/// </summary>
 public class MailWhiteLabelSettingsDto : IMapFrom<MailWhiteLabelSettings>
 {
-    /// <summary>Specifies if the mail footer is enabled or not</summary>
+    ///<summary>
+    /// Specifies if the mail footer is enabled or not.
+    ///</summary>
     public bool FooterEnabled { get; set; }
 
-    /// <summary>Specifies if the footer with social media contacts is enabled or not</summary>
+    ///<summary>
+    /// Specifies if the footer with social media contacts is enabled or not.
+    ///</summary>
     public bool FooterSocialEnabled { get; set; }
 
-    /// <summary>Specifies if these settings are default or not</summary>
+    ///<summary>
+    /// Specifies if the mail white label settings are default or not.
+    ///</summary>
     public bool IsDefault { get; set; }
 
     public void Mapping(Profile profile)

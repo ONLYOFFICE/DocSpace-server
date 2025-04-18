@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,6 +23,8 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace ASC.Web.Api.Controllers.Settings;
 
@@ -83,7 +85,7 @@ public class WebhooksController(ApiContext context,
 
         await CheckWebhook(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.SSL, true);
 
-        var webhook = await dbWorker.AddWebhookConfig(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.Enabled, inDto.SSL, inDto.Triggers);
+        var webhook = await dbWorker.AddWebhookConfig(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.Enabled, inDto.SSL, inDto.Triggers, inDto.TargetId);
 
         messageService.Send(MessageAction.WebhookCreated, MessageTarget.Create(webhook.Id), webhook.Name);
 
@@ -91,7 +93,7 @@ public class WebhooksController(ApiContext context,
     }
 
     /// <summary>
-    /// Updates the tenant webhook with the parameters specified in the request.
+    /// Updates a tenant webhook with the parameters specified in the request.
     /// </summary>
     /// <short>
     /// Update a webhook
@@ -124,13 +126,14 @@ public class WebhooksController(ApiContext context,
         existingWebhook.Enabled = inDto.Enabled;
         existingWebhook.SSL = inDto.SSL;
         existingWebhook.Triggers = inDto.Triggers;
+        existingWebhook.TargetId = inDto.TargetId;
 
         if (!string.IsNullOrEmpty(inDto.SecretKey))
         {
             existingWebhook.SecretKey = inDto.SecretKey;
         }
 
-        var webhook = await dbWorker.UpdateWebhookConfig(existingWebhook);
+        var webhook = await dbWorker.UpdateWebhookConfig(existingWebhook, true);
 
         messageService.Send(MessageAction.WebhookUpdated, MessageTarget.Create(webhook.Id), webhook.Name);
 
@@ -138,7 +141,7 @@ public class WebhooksController(ApiContext context,
     }
 
     /// <summary>
-    /// Enable or disable webhook with the parameters specified in the request.
+    /// Enables or disables a tenant webhook with the parameters specified in the request.
     /// </summary>
     /// <short>
     /// Enable a webhook
@@ -164,9 +167,14 @@ public class WebhooksController(ApiContext context,
             }
         }
 
+        if (inDto.Enabled)
+        {
+            await CheckWebhook(existingWebhook.Name, existingWebhook.Uri, existingWebhook.SecretKey, existingWebhook.SSL, false);
+        }
+
         existingWebhook.Enabled = inDto.Enabled;
 
-        var webhook = await dbWorker.UpdateWebhookConfig(existingWebhook);
+        var webhook = await dbWorker.UpdateWebhookConfig(existingWebhook, true);
 
         messageService.Send(MessageAction.WebhookUpdated, MessageTarget.Create(webhook.Id), webhook.Name);
 
@@ -174,7 +182,7 @@ public class WebhooksController(ApiContext context,
     }
 
     /// <summary>
-    /// Removes the tenant webhook with the ID specified in the request.
+    /// Removes a tenant webhook with the ID specified in the request.
     /// </summary>
     /// <short>
     /// Remove a webhook
@@ -249,6 +257,7 @@ public class WebhooksController(ApiContext context,
     [SwaggerResponse(400, "Id incorrect")]
     [SwaggerResponse(404, "Item not found")]
     [HttpPut("webhook/{id:int}/retry")]
+    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task<WebhooksLogDto> RetryWebhook(IdRequestDto<int> inDto)
     {
         if (inDto.Id == 0)
@@ -287,6 +296,7 @@ public class WebhooksController(ApiContext context,
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "Logs of the webhook activities", typeof(IAsyncEnumerable<WebhooksLogDto>))]
     [HttpPut("webhook/retry")]
+    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async IAsyncEnumerable<WebhooksLogDto> RetryWebhooks(WebhookRetryRequestsDto inDto)
     {
         var isAdmin = await CheckAdminPermissionsAsync();
@@ -315,7 +325,7 @@ public class WebhooksController(ApiContext context,
     /// Returns a list of triggers for a webhook.
     /// </summary>
     /// <short>
-    /// Get triggers for a webhook
+    /// Get webhook triggers
     /// </short>
     /// <path>api/2.0/settings/webhook/triggers</path>
     /// <collection>list</collection>
@@ -385,7 +395,7 @@ public class WebhooksController(ApiContext context,
         using var request = new HttpRequestMessage(HttpMethod.Head, uri);
         using var response = await httpClient.SendAsync(request);
 
-        if (response.StatusCode != HttpStatusCode.OK)
+        if (!response.IsSuccessStatusCode)
         {
             throw new ArgumentException(Resource.ErrorWebhookUrlNotAvaliable);
         }

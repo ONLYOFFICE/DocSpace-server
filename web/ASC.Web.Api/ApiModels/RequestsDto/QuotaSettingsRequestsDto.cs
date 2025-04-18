@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,17 +27,17 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// Request parameters for the user quota settings
+/// The request parameters for managing the user storage quota configurations.
 /// </summary>
 public class QuotaSettingsRequestsDto
 {
     /// <summary>
-    /// Specifies if the quota settings are enabled or not
+    /// Specifies whether the storage quota restrictions are enabled.
     /// </summary>
     public bool EnableQuota { get; set; }
 
     /// <summary>
-    /// Default quota value
+    /// The default storage quota value applied to new users.
     /// </summary>
-    public JsonElement DefaultQuota { get; set; }
+    public required JsonElement DefaultQuota { get; set; }
 }

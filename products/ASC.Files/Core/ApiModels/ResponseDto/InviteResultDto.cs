@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,20 +26,23 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// The information about the invitation process.
+/// </summary>
 public class InviteResultDto
 {
     /// <summary>
-    /// Email
+    /// The email address that is used to send an invitation.
     /// </summary>
     public string Email { get; set; }
 
     /// <summary>
-    /// Success
+    /// Specifies if the invitation process is successfully or not.
     /// </summary>
     public bool Success { get; set; }
 
     /// <summary>
-    /// Message
+    /// The message sent after the successful invitation process.
     /// </summary>
     public string Message { get; set; }
 }
