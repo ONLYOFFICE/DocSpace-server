@@ -155,9 +155,9 @@ public class TariffService(
                         {
                             var tenantQuota = tenantQuotas.SingleOrDefault(q => q.TenantId == quota.Id);
 
-                            tenantQuota.Wallet = quota.Wallet;
-                            tenantQuota.DueDate = quota.DueDate;
                             tenantQuota *= quota.Quantity;
+
+                            tenantQuota.DueDate = quota.DueDate;
 
                             updatedQuota += tenantQuota;
                         }
@@ -270,9 +270,9 @@ public class TariffService(
                 qty = quantity[mustUpdateQuota.Name];
             }
 
-            quota.Wallet = tariffRow.Wallet;
-            quota.DueDate = tariffRow.DueDate;
             quota *= qty;
+
+            quota.DueDate = tariffRow.DueDate;
 
             updatedQuota += quota;
         }
@@ -285,8 +285,6 @@ public class TariffService(
 
             var quota = addedQuota;
 
-            quota.Wallet = false;
-            quota.DueDate = null;
             quota *= qty;
 
             updatedQuota += quota;
@@ -421,8 +419,6 @@ public class TariffService(
 
                 var quota = addedQuota;
 
-                quota.Wallet = false;
-                quota.DueDate = null;
                 quota *= qty;
 
                 updatedQuota += quota;
@@ -836,9 +832,9 @@ public class TariffService(
         {
             var quota = await quotaService.GetTenantQuotaAsync(tariffRow.Id);
 
-            quota.Wallet = tariffRow.Wallet;
-            quota.DueDate = tariffRow.DueDate;
             quota *= tariffRow.Quantity;
+
+            quota.DueDate = tariffRow.DueDate;
 
             result += quota;
         }
