@@ -545,7 +545,7 @@ internal abstract class BaseTagDao<T>(
 
         if (id != 0)
         {
-            var entryId = (tag.EntryId is int fid ? fid : await MappingIdAsync(filesDbContext, tenantId, tag.EntryId)).ToString();
+            var entryId = (tag.EntryId is int fid ? fid : await MappingIdAsync(filesDbContext, tenantId, tag.EntryId))?.ToString();
 
             await filesDbContext.DeleteTagLinksByTagIdAsync(tenantId, id, entryId, tag.EntryType);
 
