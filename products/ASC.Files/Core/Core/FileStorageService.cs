@@ -3865,14 +3865,20 @@ public class FileStorageService //: IFileStorageService
             var fileDao = daoFactory.GetFileDao<T>();
             var folderDao = daoFactory.GetFolderDao<T>();
 
-            var folder = await folderDao.GetFolderAsync(folderId);
-            folder.NotFoundIfNull();
-            if (!await fileSecurity.CanEditAsync(folder))
+            var file = await fileDao.GetFileAsync(fileId);
+            file.NotFoundIfNull();
+            if (!await fileSecurity.CanReadAsync(file))
             {
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
             }
 
-            var file = await fileDao.GetFileAsync(fileId);
+            var folder = await folderDao.GetFolderAsync(folderId);
+            folder.NotFoundIfNull();
+            if (!await fileSecurity.CanCreateAsync(folder))
+            {
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+            }
+
             var fileUri = pathProvider.GetFileStreamUrl(file);
             var fileExtension = file.ConvertedExtension;
             var docKey = await documentServiceHelper.GetDocKeyAsync(file);
