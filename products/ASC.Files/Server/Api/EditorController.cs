@@ -174,7 +174,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         var docParams = await documentServiceHelper.GetParamsAsync(
             formOpenSetup != null && formOpenSetup.Draft != null ? formOpenSetup.Draft : file, 
             lastVersion,
-            !file.IsCompletedForm && (formOpenSetup?.CanEdit != false), 
+            formOpenSetup != null ? formOpenSetup.CanEdit : !file.IsCompletedForm,
             !inDto.View, 
             true, formOpenSetup == null || formOpenSetup.CanFill,
             formOpenSetup != null ? formOpenSetup.EditorType : inDto.EditorType,
@@ -227,19 +227,6 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                 {
                     result.EditorConfig.User.Roles = new List<string> { formOpenSetup.RoleName };
                     result.FillingStatus = true;
-                }
-            }
-            else if (formOpenSetup.RootFolder.FolderType is FolderType.USER)
-            {
-                if (formOpenSetup.CanStartFilling)
-                {
-                    result.StartFilling = true;
-                    result.StartFillingMode = StartFillingMode.ShareToFillOut;
-                    result.EditorConfig.Customization.StartFillingForm = new StartFillingForm { Text = FilesCommonResource.StartFillingModeEnum_ShareToFillOut };
-                }
-                if (formOpenSetup.CanFill)
-                {
-                    result.EditorConfig.Customization.SubmitForm.Visible = true;
                 }
             }
             else
