@@ -60,6 +60,46 @@ public class CsvFileHelper(ILogger<CsvFileHelper> logger)
         }
     }
 
+    public async Task CreateLargeFileAsync<T>(
+        Stream tempStream,
+        IAsyncEnumerable<IEnumerable<T>> partialRecords,
+        ClassMap<T> mapper,
+        CsvConfiguration config = null,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            config ??= new CsvConfiguration(CultureInfo.CurrentCulture)
+            {
+                HasHeaderRecord = true
+            };
+
+            var writer = new StreamWriter(tempStream);
+            var csv = new CsvWriter(writer, config);
+
+            if (mapper != null)
+            {
+                csv.Context.RegisterClassMap(mapper);
+            }
+
+            csv.WriteHeader<T>();
+
+            await csv.NextRecordAsync();
+
+            await foreach (var records in partialRecords.WithCancellation(cancellationToken))
+            {
+                await csv.WriteRecordsAsync(records, cancellationToken);
+            }
+
+            writer.Flush();
+        }
+        catch (Exception ex)
+        {
+            logger.ErrorWhileCreating(ex);
+            throw;
+        }
+    }
+
     public class CsvDateTimeConverter : DateTimeConverter
     {
         public override string ConvertToString(object value, IWriterRow row, MemberMapData memberMapData)

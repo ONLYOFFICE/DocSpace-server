@@ -53,6 +53,7 @@ public class PaymentController(
     StudioNotifyService studioNotifyService,
     PermissionContext permissionContext,
     TenantUtil tenantUtil,
+    TempStream tempStream,
     CsvFileHelper csvFileHelper,
     CsvFileUploader csvFileUploader)
     : ControllerBase
@@ -574,15 +575,37 @@ public class PaymentController(
             utcStartDate.ToString("MM.dd.yyyy", CultureInfo.InvariantCulture),
             utcEndDate.ToString("MM.dd.yyyy", CultureInfo.InvariantCulture));
 
-        var report = await tariffService.GetCustomerOperationsAsync(tenant.Id, utcStartDate, utcEndDate, inDto.Credit, inDto.Withdrawal, null, null);
+        await using var stream = tempStream.Create();
 
-        await using var stream = csvFileHelper.CreateFile(report.Collection, new OperationMap());
+        var partialRecords = GetCustomerOperationsReportDataAsync(tenant.Id, utcStartDate, utcEndDate, inDto.Credit, inDto.Withdrawal);
+
+        await csvFileHelper.CreateLargeFileAsync(stream, partialRecords, new OperationMap());
 
         var result = await csvFileUploader.UploadFile(stream, reportName);
 
         messageService.Send(MessageAction.CustomerOperationsReportDownloaded);
 
         return result;
+    }
+
+    private async IAsyncEnumerable<List<Operation>> GetCustomerOperationsReportDataAsync(int tenantId, DateTime utcStartDate, DateTime utcEndDate, bool? credit, bool? withdrawal)
+    {
+        var offset = 0;
+        var limit = 10;
+
+        while (true)
+        {
+            var report = await tariffService.GetCustomerOperationsAsync(tenantId, utcStartDate, utcEndDate, credit, withdrawal, offset, limit);
+
+            yield return report.Collection;
+
+            if (report.CurrentPage == report.TotalPage)
+            {
+                break;
+            }
+
+            offset += limit;
+        }
     }
 
     internal class OperationMap : ClassMap<Operation>
