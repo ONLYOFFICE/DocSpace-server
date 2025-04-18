@@ -168,12 +168,12 @@ public class AccountingClient
         {
             using var response = await httpClient.SendAsync(request);
 
+            var responseString = await response.Content.ReadAsStringAsync();
+
             if (!response.IsSuccessStatusCode)
             {
-                throw new Exception($"Accounting request failed with status code {response.StatusCode}");
+                throw new Exception($"Accounting request failed with status code {response.StatusCode} {responseString}");
             }
-
-            var responseString = await response.Content.ReadAsStringAsync();
 
             if (typeof(T) == typeof(string))
             {
