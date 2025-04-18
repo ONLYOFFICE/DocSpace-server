@@ -1201,14 +1201,9 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "portal user invitation settings", typeof(TenantUserInvitationSettingsDto))]
     [HttpGet("invitationsettings")]
+    [AllowAnonymous]
     public async Task<TenantUserInvitationSettingsDto> GetTenantUserInvitationSettingsAsync()
     {
-        var currentUserType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
-        if (currentUserType is EmployeeType.User or EmployeeType.Guest)
-        {
-            throw new SecurityException(Resource.ErrorAccessDenied);
-        }
-
         var settings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
 
         return mapper.Map<TenantUserInvitationSettings, TenantUserInvitationSettingsDto>(settings);
