@@ -670,7 +670,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
                 CanStartFilling = false
             };
         }
-
+        result.EditorType = editorType;
         return result;
     }
 }
