@@ -919,7 +919,7 @@ public class TariffService(
 
         var attempt = 0;
 
-        while (waitForChanges && attempt < 3)
+        while (waitForChanges && attempt <= 3)
         {
             await Task.Delay((int)(Math.Pow(2, attempt) * 1000));
 
