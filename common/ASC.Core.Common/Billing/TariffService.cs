@@ -604,6 +604,7 @@ public class TariffService(
                         TariffId = efTariff.Id,
                         Quota = q.Id,
                         Quantity = q.Quantity,
+                        DueDate = q.DueDate,
                         TenantId = tenant
                     });
                 }
