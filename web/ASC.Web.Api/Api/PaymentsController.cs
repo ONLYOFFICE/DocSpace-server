@@ -67,7 +67,7 @@ public class PaymentController(
     public async Task<Uri> GetPaymentUrlAsync(PaymentUrlRequestsDto inDto)
     {
         var tenant = tenantManager.GetCurrentTenant();
-        
+
         if ((await tariffService.GetPaymentsAsync(tenant.Id)).Any() ||
             !await userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID))
         {
@@ -78,14 +78,16 @@ public class PaymentController(
             .Where(q => !string.IsNullOrEmpty(q.ProductId) && q.Visible && !q.Year)
             .ToList();
 
-        // TODO: Temporary restriction. Only monthly tariff available for purchase
+        // TODO: Temporary restriction.
+        // Possibility to buy only one product per transaction.
+        // Only monthly tariff available for purchase.
         if (inDto.Quantity.Count != 1 || !monthQuotas.Any(q => q.Name == inDto.Quantity.First().Key))
         {
             return null;
         }
 
         var currency = await regionHelper.GetCurrencyFromRequestAsync();
-        
+
         return await tariffService.GetShoppingUriAsync(
             tenant.Id,
             tenant.AffiliateId,
@@ -119,12 +121,32 @@ public class PaymentController(
             return false;
         }
 
-        var quota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
-
-        // TODO: Temporary restriction. Only changing the quota for the current tariff is available
-        if (inDto.Quantity.Count != 1 || (quota.Price > 0 && quota.Name != inDto.Quantity.First().Key))
+        // TODO: Temporary restriction.
+        // Possibility to buy only one product per transaction.
+        // Wallet tariffs are always available for purchase.
+        // For the current paid tariff only quota change is available.
+        if (inDto.Quantity.Count != 1)
         {
             return false;
+        }
+
+        var quotaName = inDto.Quantity.First().Key;
+        var quota = (await quotaService.GetTenantQuotasAsync())
+            .FirstOrDefault(q => !string.IsNullOrEmpty(q.ProductId) && q.Name == quotaName);
+
+        if (quota == null)
+        {
+            return false;
+        }
+
+        if (!quota.Wallet)
+        {
+            var currentQuota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
+
+            if (currentQuota.Price > 0 && currentQuota.Name != quotaName)
+            {
+                return false;
+            }
         }
 
         return await tariffService.PaymentChangeAsync(tenant.Id, inDto.Quantity);

@@ -311,6 +311,8 @@ public class TariffService(
         catch (Exception error)
         {
             logger.ErrorWithException(error);
+
+            return false;
         }
 
         return true;
