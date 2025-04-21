@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Web.Core.Utility.Settings;
+
 namespace ASC.Web.Api.Controllers.Settings;
 
 public class WhitelabelController(
@@ -636,7 +638,7 @@ public class WhitelabelController(
     {
         var settings = await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>();
 
-        return mapper.Map<AdditionalWhiteLabelSettings, AdditionalWhiteLabelSettingsDto>(settings);
+        return HttpContext.TryGetFromCache(settings.LastModified) ? null : mapper.Map<AdditionalWhiteLabelSettings, AdditionalWhiteLabelSettingsDto>(settings);
     }
 
     /// <summary>
