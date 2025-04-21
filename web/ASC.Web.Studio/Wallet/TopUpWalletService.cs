@@ -99,7 +99,12 @@ public class TopUpWalletService(
             }
 
             var tariffService = scope.ServiceProvider.GetRequiredService<ITariffService>();
-            var balance = await tariffService.GetCustomerBalanceAsync(data.TenantId);
+            var balance = await tariffService.GetCustomerBalanceAsync(data.TenantId, true);
+            if (balance == null)
+            {
+                return;
+            }
+
             var subAccount = balance.SubAccounts.FirstOrDefault(x => x.Currency == settings.Currency);
             if (subAccount == null || subAccount.Amount >= settings.MinBalance)
             {
@@ -107,7 +112,7 @@ public class TopUpWalletService(
             }
 
             var amount = (long)(settings.UpToBalance - subAccount.Amount);
-            await tariffService.TopUpDepositAsync(data.TenantId, amount, settings.Currency, false);
+            await tariffService.TopUpDepositAsync(data.TenantId, amount, settings.Currency, true);
 
             var messageService = scope.ServiceProvider.GetRequiredService<MessageService>();
             var description = $"{amount} {settings.Currency}";
