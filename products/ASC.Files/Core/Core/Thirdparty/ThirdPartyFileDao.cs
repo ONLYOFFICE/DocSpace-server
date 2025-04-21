@@ -383,6 +383,11 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         return item.Exists(i => Dao.GetName(i).Equals(title, StringComparison.InvariantCultureIgnoreCase));
     }
 
+    public async Task<bool> IsExistAsync(string title, int category, string folderId)
+    {
+        return await IsExistAsync(title, folderId);
+    }
+
     public Task<File<string>> ReplaceFileVersionAsync(File<string> file, Stream fileStream)
     {
         return SaveFileAsync(file, fileStream);

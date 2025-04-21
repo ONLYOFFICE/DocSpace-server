@@ -2798,7 +2798,7 @@ public class FileStorageService //: IFileStorageService
         {
             var file = await fileDao.GetFileAsync(id);
             if (file is { Encrypted: false }
-                && await destFileDao.IsExistAsync(file.Title, toFolder.Id))
+                && await destFileDao.IsExistAsync(file.Title, file.Category, toFolder.Id))
             {
                 checkedFiles.Add(id);
             }

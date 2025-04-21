@@ -971,7 +971,14 @@ internal class FileDao(
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        return await filesDbContext.DbFilesAnyAsync(tenantId, title, folderId);
+        return await filesDbContext.DbFilesAnyAsync(tenantId, title, (int)FilterType.None, folderId);
+    }
+
+    public async Task<bool> IsExistAsync(string title, int category, int folderId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        return await filesDbContext.DbFilesAnyAsync(tenantId, title, category, folderId);
     }
 
     public async Task<TTo> MoveFileAsync<TTo>(int fileId, TTo toFolderId, bool deleteLinks = false)
