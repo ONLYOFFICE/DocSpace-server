@@ -251,7 +251,7 @@ public class Consumer() : IDictionary<string, string>
                          ? Tenant.DefaultTenant
                          : TenantManager.GetCurrentTenantId();
 
-        await _fusionCache.RemoveByTagAsync(CacheExtention.GetTenantSettingsTag(tenant, Name));
+        await _fusionCache.RemoveByTagAsync(CacheExtention.GetConsumerTag(tenant, Name));
         await CoreSettings.SaveSettingAsync(GetSettingsKey(name), value, tenant);
     }
 

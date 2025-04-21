@@ -127,7 +127,7 @@ public static class CacheExtention
 
     public static string GetConsumerTag(int tenant, string consumer)
     {
-        return $"settings-{tenant}-{consumer}";
+        return $"consumer-{tenant}-{consumer}";
     }
 
     public static string GetTenantTag(int tenant)

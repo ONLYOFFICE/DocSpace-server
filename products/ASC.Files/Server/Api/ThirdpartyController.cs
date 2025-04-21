@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Common.Caching;
+
 namespace ASC.Files.Api;
 
 public class ThirdpartyController(
@@ -38,9 +40,13 @@ public class ThirdpartyController(
         RequestHelper requestHelper,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
-        FileSecurityCommon fileSecurityCommon)
+        FileSecurityCommon fileSecurityCommon,
+        IFusionCacheProvider cacheProvider,
+        TenantManager tenantManager)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
+    private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
+
     /// <summary>
     /// Returns the list of the available providers.
     /// </summary>
@@ -58,7 +64,20 @@ public class ThirdpartyController(
             return [];
         }
 
-        return thirdPartyConfiguration.GetProviders();
+        var key = $"{HttpContext.Request.Path}{HttpContext.Request.QueryString}-{HttpContext.Connection.RemoteIpAddress}-{securityContext.CurrentAccount.ID}";
+        var entry = await _cache.GetOrDefaultAsync<CacheEntry>(key);
+        if (entry != null && HttpContext.TryGetFromCache(entry.LastModified))
+        {
+            return null;
+        }
+        var tags = new List<string>();
+        var tenant = tenantManager.GetCurrentTenantId();
+
+        var result = thirdPartyConfiguration.GetProviders(tags, tenant);
+
+        await HttpContext.SetOutputCacheAsync(_cache, key, tags);
+
+        return result;
     }
 
     /// <summary>

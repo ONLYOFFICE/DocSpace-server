@@ -157,7 +157,7 @@ public class ThirdpartyConfiguration(ThirdpartyConfigurationData configuration, 
         return providers;
     }
     
-    public List<List<string>> GetProviders()
+    public List<List<string>> GetProviders(List<string> tags, int tenant)
     {
         var result = new List<List<string>>();
 
@@ -165,41 +165,49 @@ public class ThirdpartyConfiguration(ThirdpartyConfigurationData configuration, 
         {
             result.Add(["Box", BoxLoginProvider.ClientID, _boxLoginProvider.RedirectUri]);
         }
+        tags.Add(CacheExtention.GetConsumerTag(tenant, BoxKey));
 
         if (SupportDropboxInclusion)
         {
             result.Add(["DropboxV2", DropboxLoginProvider.ClientID, DropboxLoginProvider.RedirectUri]);
         }
+        tags.Add(CacheExtention.GetConsumerTag(tenant, DropboxKey));
 
         if (SupportGoogleDriveInclusion)
         {
             result.Add(["GoogleDrive", GoogleLoginProvider.ClientID, GoogleLoginProvider.RedirectUri]);
         }
+        tags.Add(CacheExtention.GetConsumerTag(tenant, GoogleDriveKey));
 
         if (SupportOneDriveInclusion)
         {
             result.Add(["OneDrive", OneDriveLoginProvider.ClientID, OneDriveLoginProvider.RedirectUri]);
         }
+        tags.Add(CacheExtention.GetConsumerTag(tenant, OneDriveKey));
 
         if (SupportSharePointInclusion)
         {
             result.Add(["SharePoint"]);
         }
+        tags.Add(CacheExtention.GetConsumerTag(tenant, SharePointKey));
 
         if (SupportkDriveInclusion)
         {
             result.Add(["kDrive"]);
         }
+        tags.Add(CacheExtention.GetConsumerTag(tenant, KDriveKey));
 
         if (SupportYandexInclusion)
         {
             result.Add(["Yandex"]);
         }
+        tags.Add(CacheExtention.GetConsumerTag(tenant, YandexKey));
 
         if (SupportWebDavInclusion)
         {
             result.Add(["WebDav"]);
         }
+        tags.Add(CacheExtention.GetConsumerTag(tenant, WebDavKey));
 
         //Obsolete BoxNet, DropBox, Google, SkyDrive,
 
