@@ -890,7 +890,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             return false;
         }
         var room = parentFolders.FirstOrDefault(r => DocSpaceHelper.IsRoom(r.FolderType));
-        if (file != null && room != null && room.FolderType == FolderType.VirtualDataRoom && !await DocSpaceHelper.IsFormOrCompletedForm(file, fileDao))
+        if (file != null && room != null && room.FolderType == FolderType.VirtualDataRoom && !await DocSpaceHelper.IsFormOrCompletedForm(file, daoFactory))
         {
             var shareRecord = await GetPureSharesAsync(room, new List<Guid> { userId }).FirstOrDefaultAsync();
             if(shareRecord != null && shareRecord.Share is FileShare.FillForms)
@@ -1082,7 +1082,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 }
             }
         }
-        if (file == null || (file != null && !await DocSpaceHelper.IsFormOrCompletedForm(file, fileDao)) || (file != null && file.IsForm && e.RootFolderType != FolderType.VirtualRooms))
+        if (file == null || (file != null && !await DocSpaceHelper.IsFormOrCompletedForm(file, daoFactory)) || (file != null && file.IsForm && e.RootFolderType != FolderType.VirtualRooms))
         {
             switch (action)
             {
@@ -1196,7 +1196,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                     }
                 }
 
-                if (file != null && await DocSpaceHelper.IsFormOrCompletedForm(file, fileDao) && (action is
+                if (file != null && (action is
                     FilesSecurityActions.FillForms or
                     FilesSecurityActions.Edit or
                     FilesSecurityActions.StartFilling or
@@ -1205,7 +1205,8 @@ public class FileSecurity(IDaoFactory daoFactory,
                     FilesSecurityActions.StopFilling or
                     FilesSecurityActions.SubmitToFormGallery or
                     FilesSecurityActions.CopyLink or
-                    FilesSecurityActions.OpenForm))
+                    FilesSecurityActions.OpenForm)
+                    && await DocSpaceHelper.IsFormOrCompletedForm(file, daoFactory))
                 {
                     var fileFolder = parentFolders.FirstOrDefault(r => DocSpaceHelper.IsRoom(r.FolderType));
                     var fileParentFolder = parentFolders.LastOrDefault();

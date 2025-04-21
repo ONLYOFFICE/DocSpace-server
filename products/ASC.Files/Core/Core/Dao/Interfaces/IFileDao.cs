@@ -417,3 +417,4 @@ public interface IFileDao<T>
 
     #endregion
 }
+public interface ICacheFileDao<T> : IFileDao<T>;
