@@ -2986,6 +2986,24 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Additional disk storage.
+        /// </summary>
+        public static string TariffsFeature_total_size_wallet {
+            get {
+                return ResourceManager.GetString("TariffsFeature_total_size_wallet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Adjust the storage to the exact amount you require..
+        /// </summary>
+        public static string TariffsFeature_total_size_wallet_price_count {
+            get {
+                return ResourceManager.GetString("TariffsFeature_total_size_wallet_price_count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Admins added:.
         /// </summary>
         public static string TariffsFeature_used_manager {
@@ -3009,6 +3027,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string TariffsFeature_used_total_size {
             get {
                 return ResourceManager.GetString("TariffsFeature_used_total_size", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Storage space used:.
+        /// </summary>
+        public static string TariffsFeature_used_total_size_wallet {
+            get {
+                return ResourceManager.GetString("TariffsFeature_used_total_size_wallet", resourceCulture);
             }
         }
         

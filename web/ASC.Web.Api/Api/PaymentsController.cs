@@ -244,17 +244,20 @@ public class PaymentController(
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "List of available portal quotas", typeof(IEnumerable<QuotaDto>))]
     [HttpGet("quotas")]
-    public async Task<IEnumerable<QuotaDto>> GetQuotasAsync()
+    public async Task<IEnumerable<QuotaDto>> GetQuotasAsync(QuotasRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var currentQuota = await tariffHelper.GetCurrentQuotaAsync(false, false);
-        if (currentQuota.NonProfit)
+        if (!inDto.Wallet)
         {
-            return [currentQuota];
+            var currentQuota = await tariffHelper.GetCurrentQuotaAsync(false, false);
+            if (currentQuota.NonProfit)
+            {
+                return [currentQuota];
+            }
         }
 
-        return await tariffHelper.GetQuotasAsync().ToListAsync();
+        return await tariffHelper.GetQuotasAsync(inDto.Wallet).ToListAsync();
     }
 
     /// <summary>

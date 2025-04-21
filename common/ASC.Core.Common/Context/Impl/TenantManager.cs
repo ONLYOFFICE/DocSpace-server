@@ -286,12 +286,12 @@ public class TenantManager(
 
     public async Task<IEnumerable<TenantQuota>> GetTenantQuotasAsync()
     {
-        return await GetTenantQuotasAsync(false);
+        return await GetTenantQuotasAsync(false, false);
     }
 
-    public async Task<IEnumerable<TenantQuota>> GetTenantQuotasAsync(bool all)
+    public async Task<IEnumerable<TenantQuota>> GetTenantQuotasAsync(bool all, bool wallet)
     {
-        return (await quotaService.GetTenantQuotasAsync()).Where(q => q.TenantId < 0 && (all || q.Visible)).OrderByDescending(q => q.TenantId).ToList();
+        return (await quotaService.GetTenantQuotasAsync()).Where(q => q.TenantId < 0 && (all || q.Visible) && q.Wallet == wallet).OrderByDescending(q => q.TenantId).ToList();
     }
 
     public async Task<TenantQuota> GetCurrentTenantQuotaAsync(bool refresh = false)
@@ -326,7 +326,7 @@ public class TenantManager(
 
     public async Task<IDictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync()
     {
-        var quotas = await GetTenantQuotasAsync(false);
+        var quotas = await GetTenantQuotasAsync(false, false);
         var productIds = quotas
             .Select(p => p.ProductId)
             .Where(id => !string.IsNullOrEmpty(id))

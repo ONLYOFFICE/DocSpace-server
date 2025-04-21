@@ -1140,4 +1140,13 @@
   <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
     <value>Webhook URL is not avaliable. HEAD request is not responce 200 http status.</value>
   </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>Additional disk storage</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>Adjust the storage to the exact amount you require.</value>
+  </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
+    <value>Storage space used:</value>
+  </data>
 </root>
