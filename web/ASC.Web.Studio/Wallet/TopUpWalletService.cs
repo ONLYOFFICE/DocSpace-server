@@ -90,9 +90,9 @@ public class TopUpWalletService(
         {
             await using var scope = _scopeFactory.CreateAsyncScope();
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
-            await tenantManager.SetCurrentTenantAsync(data.TenantId);
+            _ = await tenantManager.SetCurrentTenantAsync(data.TenantId);
 
-            var settings = JsonSerializer.Deserialize< TenantWalletSettings>(data.Setting, _options);
+            var settings = JsonSerializer.Deserialize<TenantWalletSettings>(data.Setting, _options);
             if (!settings.Enabled)
             {
                 return;
@@ -112,7 +112,7 @@ public class TopUpWalletService(
             }
 
             var amount = (long)(settings.UpToBalance - subAccount.Amount);
-            await tariffService.TopUpDepositAsync(data.TenantId, amount, settings.Currency, true);
+            _ = await tariffService.TopUpDepositAsync(data.TenantId, amount, settings.Currency, true);
 
             var messageService = scope.ServiceProvider.GetRequiredService<MessageService>();
             var description = $"{amount} {settings.Currency}";
@@ -122,6 +122,7 @@ public class TopUpWalletService(
         }
         catch (Exception ex)
         {
+            logger.ErrorTopUpWalletServiceFail(data.TenantId);
             logger.ErrorWithException(ex);
         }
     }

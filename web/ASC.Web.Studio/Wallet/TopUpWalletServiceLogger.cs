@@ -28,9 +28,12 @@ namespace ASC.Web.Studio.Wallet;
 
 internal static partial class TopUpWalletServiceLogger
 {
-    [LoggerMessage(LogLevel.Information, "Found {count} active portals")]
+    [LoggerMessage(LogLevel.Information, "Found {count} active portals with TenantWalletSettings")]
     public static partial void InfoTopUpWalletServiceFound(this ILogger<TopUpWalletService> logger, int count);
 
     [LoggerMessage(LogLevel.Information, "Wallet topped up: tenant {tenantId}, {description}")]
     public static partial void InfoTopUpWalletServiceDone(this ILogger<TopUpWalletService> logger, int tenantId, string description);
+
+    [LoggerMessage(LogLevel.Error, "Wallet top up failed: tenant {tenantId}")]
+    public static partial void ErrorTopUpWalletServiceFail(this ILogger<TopUpWalletService> logger, int tenantId);
 }
