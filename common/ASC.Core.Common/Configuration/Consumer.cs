@@ -57,6 +57,7 @@ public class Consumer() : IDictionary<string, string>
     }
 
     private readonly bool _onlyDefault;
+    private readonly IFusionCache _fusionCache;
 
     protected internal readonly TenantManager TenantManager;
     protected internal readonly CoreBaseSettings CoreBaseSettings;
@@ -64,6 +65,7 @@ public class Consumer() : IDictionary<string, string>
     protected internal readonly ConsumerFactory ConsumerFactory;
     protected internal readonly IConfiguration Configuration;
     protected internal readonly ICacheNotify<ConsumerCacheItem> Cache;
+    protected internal readonly IFusionCacheProvider CacheProvider;
 
     public async Task<bool> GetIsSetAsync()
     {
@@ -89,6 +91,7 @@ public class Consumer() : IDictionary<string, string>
         CoreSettings coreSettings,
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
+        IFusionCacheProvider cacheProvider,
         ConsumerFactory consumerFactory) : this()
     {
         TenantManager = tenantManager;
@@ -96,10 +99,12 @@ public class Consumer() : IDictionary<string, string>
         CoreSettings = coreSettings;
         Configuration = configuration;
         Cache = cache;
+        CacheProvider = cacheProvider;
         ConsumerFactory = consumerFactory;
         _onlyDefault = configuration["core:default-consumers"] == "true";
         Name = "";
         Order = int.MaxValue;
+        _fusionCache = cacheProvider.GetMemoryCache();
     }
 
     public Consumer(
@@ -108,9 +113,10 @@ public class Consumer() : IDictionary<string, string>
         CoreSettings coreSettings,
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
+        IFusionCacheProvider cacheProvider,
         ConsumerFactory consumerFactory,
         string name, int order, Dictionary<string, string> additional)
-        : this(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory)
+        : this(tenantManager, coreBaseSettings, coreSettings, configuration, cache, cacheProvider, consumerFactory)
     {
         Name = name;
         Order = order;
@@ -124,9 +130,10 @@ public class Consumer() : IDictionary<string, string>
         CoreSettings coreSettings,
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
+        IFusionCacheProvider cacheProvider,
         ConsumerFactory consumerFactory,
         string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-        : this(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory)
+        : this(tenantManager, coreBaseSettings, coreSettings, configuration, cache, cacheProvider, consumerFactory)
     {
         Name = name;
         Order = order;
@@ -243,6 +250,8 @@ public class Consumer() : IDictionary<string, string>
         var tenant = CoreBaseSettings.Standalone
                          ? Tenant.DefaultTenant
                          : TenantManager.GetCurrentTenantId();
+
+        await _fusionCache.RemoveByTagAsync(CacheExtention.GetTenantSettingsTag(tenant, Name));
         await CoreSettings.SaveSettingAsync(GetSettingsKey(name), value, tenant);
     }
 
@@ -274,8 +283,9 @@ public class DataStoreConsumer : Consumer, ICloneable
         CoreSettings coreSettings,
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
+        IFusionCacheProvider cacheProvider,
         ConsumerFactory consumerFactory)
-        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory)
+        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, cacheProvider, consumerFactory)
     {
 
     }
@@ -286,9 +296,10 @@ public class DataStoreConsumer : Consumer, ICloneable
         CoreSettings coreSettings,
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
+        IFusionCacheProvider cacheProvider,
         ConsumerFactory consumerFactory,
         string name, int order, Dictionary<string, string> additional)
-        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, additional)
+        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, cacheProvider, consumerFactory, name, order, additional)
     {
         InitAsync(additional).Wait();
     }
@@ -299,9 +310,10 @@ public class DataStoreConsumer : Consumer, ICloneable
         CoreSettings coreSettings,
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
+        IFusionCacheProvider cacheProvider,
         ConsumerFactory consumerFactory,
         string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional)
-        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
+        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, cacheProvider, consumerFactory, name, order, props, additional)
     {
         InitAsync(additional).Wait();
     }
@@ -349,12 +361,12 @@ public class DataStoreConsumer : Consumer, ICloneable
         }
         additional.Add(HandlerTypeKey, HandlerType.AssemblyQualifiedName);
 
-        return new DataStoreConsumer(fromConfig.TenantManager, fromConfig.CoreBaseSettings, fromConfig.CoreSettings, fromConfig.Configuration, fromConfig.Cache, fromConfig.ConsumerFactory, fromConfig.Name, fromConfig.Order, props, additional);
+        return new DataStoreConsumer(fromConfig.TenantManager, fromConfig.CoreBaseSettings, fromConfig.CoreSettings, fromConfig.Configuration, fromConfig.Cache, fromConfig.CacheProvider, fromConfig.ConsumerFactory, fromConfig.Name, fromConfig.Order, props, additional);
     }
 
     public object Clone()
     {
-        return new DataStoreConsumer(TenantManager, CoreBaseSettings, CoreSettings, Configuration, Cache, ConsumerFactory, Name, Order, _props.ToDictionary(r => r.Key, r => r.Value), _additional.ToDictionary(r => r.Key, r => r.Value));
+        return new DataStoreConsumer(TenantManager, CoreBaseSettings, CoreSettings, Configuration, Cache, CacheProvider, ConsumerFactory, Name, Order, _props.ToDictionary(r => r.Key, r => r.Value), _additional.ToDictionary(r => r.Key, r => r.Value));
     }
 }
 

@@ -58,9 +58,10 @@ public class FireBase : Consumer
         CoreSettings coreSettings,
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
+        IFusionCacheProvider cacheProvider,
         ConsumerFactory consumerFactory,
         string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
+        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, cacheProvider, consumerFactory, name, order, props, additional)
     {
     }
 }

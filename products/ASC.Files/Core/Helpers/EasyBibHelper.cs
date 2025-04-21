@@ -55,13 +55,14 @@ public class EasyBibHelper : Consumer
         CoreSettings coreSettings,
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
+        IFusionCacheProvider cacheProvider,
         ConsumerFactory factory,
         RequestHelper requestHelper,
         string name,
         int order,
         Dictionary<string, string> props,
         Dictionary<string, string> additional = null)
-        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, factory, name, order, props, additional)
+        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, cacheProvider, factory, name, order, props, additional)
     {
         Logger = logger;
         _requestHelper = requestHelper;

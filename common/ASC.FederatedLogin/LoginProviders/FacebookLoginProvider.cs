@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ZiggyCreatures.Caching.Fusion;
+
 namespace ASC.FederatedLogin.LoginProviders;
 
 [Scope]
@@ -48,10 +50,11 @@ public class FacebookLoginProvider : BaseLoginProvider<FacebookLoginProvider>
         CoreSettings coreSettings,
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
+        IFusionCacheProvider cacheProvider,
         ConsumerFactory consumerFactory,
         RequestHelper requestHelper,
         string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-            : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
+            : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, cacheProvider, consumerFactory, name, order, props, additional)
     {
         _requestHelper = requestHelper;
     }

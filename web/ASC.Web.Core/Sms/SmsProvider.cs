@@ -108,12 +108,13 @@ public abstract class SmsProvider : Consumer
         CoreSettings coreSettings,
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
+        IFusionCacheProvider cacheProvider,
         ConsumerFactory consumerFactory,
         ILogger<SmsProvider> logger,
         IHttpClientFactory clientFactory,
         ICache memCache,
         string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
+        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, cacheProvider, consumerFactory, name, order, props, additional)
     {
         MemoryCache = memCache;
         Log = logger;
@@ -174,12 +175,13 @@ public class SmscProvider : SmsProvider, IValidateKeysProvider
         CoreSettings coreSettings,
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
+        IFusionCacheProvider fusionCache,
         ConsumerFactory consumerFactory,
         ILogger<SmsProvider> options,
         IHttpClientFactory clientFactory,
         ICache memCache,
         string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, options, clientFactory, memCache, name, order, props, additional)
+        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, fusionCache, consumerFactory, options, clientFactory, memCache, name, order, props, additional)
     {
     }
 
@@ -311,12 +313,13 @@ public class ClickatellProvider : SmsProvider
         CoreSettings coreSettings,
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
+        IFusionCacheProvider fusionCache,
         ConsumerFactory consumerFactory,
         ILogger<ClickatellProvider> options,
         IHttpClientFactory clientFactory,
         ICache memCache,
         string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, options, clientFactory, memCache, name, order, props, additional)
+        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, fusionCache, consumerFactory, options, clientFactory, memCache, name, order, props, additional)
     {
     }
 }
@@ -333,12 +336,13 @@ public class ClickatellUSAProvider : ClickatellProvider
         CoreSettings coreSettings,
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
+        IFusionCacheProvider fusionCache,
         ConsumerFactory consumerFactory,
         ILogger<ClickatellUSAProvider> options,
         IHttpClientFactory clientFactory,
         ICache memCache,
         string name, int order, Dictionary<string, string> additional = null)
-        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, options, clientFactory, memCache, name, order, null, additional)
+        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, fusionCache, consumerFactory, options, clientFactory, memCache, name, order, null, additional)
     {
     }
 }

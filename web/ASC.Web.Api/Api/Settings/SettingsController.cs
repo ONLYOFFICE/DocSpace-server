@@ -98,7 +98,6 @@ public partial class SettingsController(MessageService messageService,
         var tags = new List<string>();
         var tenant = tenantManager.GetCurrentTenant();
 
-
         var studioAdminMessageSettings = await settingsManager.LoadAsync<StudioAdminMessageSettings>();
         tags.Add(CacheExtention.GetSettingsTag(tenant.Id, nameof(StudioAdminMessageSettings)));
 

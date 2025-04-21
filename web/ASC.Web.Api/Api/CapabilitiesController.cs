@@ -39,10 +39,13 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
         ProviderManager providerManager,
         SettingsManager settingsManager,
         ILogger<CapabilitiesController> logger,
-        CommonLinkUtility commonLinkUtility)
+        CommonLinkUtility commonLinkUtility,
+        IFusionCacheProvider cacheProvider,
+        SecurityContext securityContext)
     : ControllerBase
 {
     private readonly ILogger _log = logger;
+    private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
 
 
     ///<summary>
@@ -58,7 +61,18 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
     [AllowNotPayment]
     public async Task<CapabilitiesDto> GetPortalCapabilitiesAsync()
     {
-        var quota = await tenantManager.GetTenantQuotaAsync(tenantManager.GetCurrentTenantId());
+        var key = $"{HttpContext.Request.Path}{HttpContext.Request.QueryString}-{HttpContext.Connection.RemoteIpAddress}-{securityContext.CurrentAccount.ID}";
+        var entry = await _cache.GetOrDefaultAsync<CacheEntry>(key);
+        if (entry != null && HttpContext.TryGetFromCache(entry.LastModified))
+        {
+            return null;
+        }
+        var tags = new List<string>();
+        var tenant = tenantManager.GetCurrentTenantId();
+
+        var quota = await tenantManager.GetTenantQuotaAsync(tenant);
+        tags.Add(CacheExtention.GetTenantQuotaTag(tenant));
+
         var result = new CapabilitiesDto
         {
             LdapEnabled = false,
@@ -76,7 +90,11 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
                         && quota.Ldap)
             {
                 var settings = await settingsManager.LoadAsync<LdapSettings>();
+                tags.Add(CacheExtention.GetSettingsTag(tenant, nameof(LdapSettings)));
+
                 var currentDomainSettings = await settingsManager.LoadAsync<LdapCurrentDomain>();
+                tags.Add(CacheExtention.GetSettingsTag(tenant, nameof(LdapCurrentDomain)));
+
                 result.LdapEnabled = settings.EnableLdapAuthentication;
                 result.LdapDomain = currentDomainSettings.CurrentDomain;
             }
@@ -98,6 +116,7 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
                         return false;
                     }
                     var provider = providerManager.GetLoginProvider(loginProvider);
+                    tags.Add(CacheExtention.GetConsumerTag(tenant, loginProvider));
                     return provider is { IsEnabled: true };
                 })
                 .ToList();
@@ -115,6 +134,7 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
                         && quota.Sso)
             {
                 var settings = await settingsManager.LoadAsync<SsoSettingsV2>();
+                tags.Add(CacheExtention.GetSettingsTag(tenant, nameof(SsoSettingsV2)));
 
                 if (settings.EnableSso.GetValueOrDefault())
                 {
@@ -133,6 +153,8 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
             result.IdentityServerEnabled = true;
         }
 
+
+        await HttpContext.SetOutputCacheAsync(_cache, key, tags);
         return result;
     }
 }

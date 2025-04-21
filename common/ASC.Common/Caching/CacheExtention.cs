@@ -50,6 +50,11 @@ public static class CacheExtention
         return $"settings-{tenant}-{settingName}";
     }
 
+    public static string GetCoreSettingsTag(int tenant, string settingName)
+    {
+        return $"core-settings-{tenant}-{settingName}";
+    }
+
     public static string GetSettingsTag(int tenant, Guid userId, string settingName)
     {
         return $"settings-{tenant}-{userId}-{settingName}";
@@ -118,6 +123,11 @@ public static class CacheExtention
     public static string GetTenantSettingsTag(int tenant, string key)
     {
         return $"settings-{tenant}-{key}";
+    }
+
+    public static string GetConsumerTag(int tenant, string consumer)
+    {
+        return $"settings-{tenant}-{consumer}";
     }
 
     public static string GetTenantTag(int tenant)

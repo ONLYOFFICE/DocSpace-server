@@ -30,6 +30,8 @@ using Tweetinvi;
 using Tweetinvi.Auth;
 using Tweetinvi.Parameters;
 
+using ZiggyCreatures.Caching.Fusion;
+
 namespace ASC.FederatedLogin.LoginProviders;
 
 public class TwitterLoginProvider : BaseLoginProvider<TwitterLoginProvider>
@@ -59,9 +61,10 @@ public class TwitterLoginProvider : BaseLoginProvider<TwitterLoginProvider>
         CoreSettings coreSettings,
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
+        IFusionCacheProvider cacheProvider,
         ConsumerFactory consumerFactory,
         string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-            : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
+            : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, cacheProvider, consumerFactory, name, order, props, additional)
     {
     }
 

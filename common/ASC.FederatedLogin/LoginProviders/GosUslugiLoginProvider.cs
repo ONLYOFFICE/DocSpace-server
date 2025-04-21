@@ -26,6 +26,8 @@
 
 using System.Globalization;
 
+using ZiggyCreatures.Caching.Fusion;
+
 namespace ASC.FederatedLogin.LoginProviders;
 
 [Scope]
@@ -50,10 +52,11 @@ public class GosUslugiLoginProvider : BaseLoginProvider<GosUslugiLoginProvider>
         CoreSettings coreSettings,
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
+        IFusionCacheProvider cacheProvider,
         ConsumerFactory consumerFactory,
         RequestHelper requestHelper,
         string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-        : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
+        : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, cacheProvider, consumerFactory, name, order, props, additional)
     {
         _requestHelper = requestHelper;
     }
