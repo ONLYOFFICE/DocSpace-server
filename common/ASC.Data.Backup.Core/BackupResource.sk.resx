@@ -126,4 +126,13 @@
   <data name="LargeBackup" xml:space="preserve">
     <value>Záloha je väčšia ako celková veľkosť portálu</value>
   </data>
+  <data name="BackupException" xml:space="preserve">
+    <value>Pri zálohovaní sa niečo pokazilo. Skúste to prosím zopakovať alebo sa obráťte na zákaznícku podporu.</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>Pri obnovovaní zálohy sa niečo pokazilo. Skúste ju obnoviť znova alebo sa obráťte na zákaznícku podporu.</value>
+  </data>
+  <data name="BackupInvalid" xml:space="preserve">
+    <value>Záložný súbor je neplatný.</value>
+  </data>
 </root>

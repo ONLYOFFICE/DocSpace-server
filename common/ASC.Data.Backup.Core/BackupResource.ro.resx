@@ -126,4 +126,13 @@
   <data name="BackupNotFound" xml:space="preserve">
     <value>Fișierul de rezervă nevalid. Vă rugăm să utilizați un fișier creat în același portal.</value>
   </data>
+  <data name="BackupException" xml:space="preserve">
+    <value>Ceva nu a mers bine la crearea backup-ului Încercați să-l creați din nou sau contactați serviciul de asistenţă.</value>
+  </data>
+  <data name="BackupInvalid" xml:space="preserve">
+    <value>Fișierul de rezervă nevalid.</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>Ceva nu a mers bine la restaurarea backup-ului. Încercați să-l restaurați din nou sau contactați serviciul de asistenţă.</value>
+  </data>
 </root>

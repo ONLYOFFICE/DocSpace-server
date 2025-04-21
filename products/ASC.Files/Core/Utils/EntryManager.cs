@@ -1566,10 +1566,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 }
                 else if (rootFolder.FolderType == FolderType.VirtualDataRoom)
                 {
-                    return await SubmitVDRFormAsync(rootFolder, file, fileDao);
-                }else if (rootFolder.FolderType == FolderType.USER)
-                {
-                    return await SubmitUserFormAsync(file, fileDao, tmpStream);
+                    return await SubmitVDRFormAsync(rootFolder, file, fileDao, tmpStream);
                 }
             }
             file.ContentLength = tmpStream.Length;
@@ -2118,7 +2115,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
             var resultFolder = await folderDao.GetFolderAsync(origProperties.FormFilling.ResultsFolderId);
             var resultFile = await fileDao.GetFileAsync(origProperties.FormFilling.ResultsFileID);
-
+            var resultFileExtension = resultFile != null ? FileUtility.GetFileExtension(resultFile.Title) : "";
             if (resultFolder is not { FolderType: FolderType.FormFillingFolderDone })
             {
                 logger.LogDebug("Result folder: {Folder} not found.", origProperties.FormFilling.ResultsFolderId);
@@ -2132,7 +2129,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
                 await fileDao.SaveProperties(originalForm.Id, origProperties);
             }
-            else if (resultFile == null || !resultFile.ParentId.Equals(resultFolder.Id))
+            else if (resultFile == null || !resultFile.ParentId.Equals(resultFolder.Id) || resultFileExtension == ".csv")
             {
                 origProperties.FormFilling.ResultsFileID = await CreateFillResultsFile(resultFolder.Id, originalForm.CreateBy, Path.GetFileNameWithoutExtension(originalForm.Title), fileDao);
                 await fileDao.SaveProperties(originalForm.Id, origProperties);
@@ -2237,6 +2234,7 @@ public class EntryManager(IDaoFactory daoFactory,
     {
         pdfFile.Category = (int)FilterType.Pdf;
         pdfFile.Forcesave = ForcesaveType.None;
+        pdfFile.IsCompletedForm = true;
 
         File<T> result;
         if (stream.CanSeek)
@@ -2260,6 +2258,8 @@ public class EntryManager(IDaoFactory daoFactory,
                 }
             }
         }
+        await fileTracker.RemoveAsync(pdfFile.Id);
+        await socketManager.StopEditAsync(pdfFile.Id);
 
         var records = fileSecurity.GetPureSharesAsync(result, ShareFilterType.Link, null, null);
 
@@ -2294,7 +2294,7 @@ public class EntryManager(IDaoFactory daoFactory,
         return result;
     }
 
-    private async Task<File<T>> SubmitVDRFormAsync<T>(Folder<T> room, File<T> form, IFileDao<T> fileDao)
+    private async Task<File<T>> SubmitVDRFormAsync<T>(Folder<T> room, File<T> form, IFileDao<T> fileDao, Stream stream)
     {
         var allRoles = await fileDao.GetFormRoles(form.Id).ToListAsync();
 
@@ -2315,6 +2315,34 @@ public class EntryManager(IDaoFactory daoFactory,
                 var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
                 if (nextRoleSequence == 0)
                 {
+                    form.Category = (int)FilterType.Pdf;
+                    form.Forcesave = ForcesaveType.None;
+                    form.IsCompletedForm = true;
+
+                    File<T> result;
+                    if (stream.CanSeek)
+                    {
+                        form.ContentLength = stream.Length;
+                        result = await fileDao.SaveFileAsync(form, stream, false);
+                    }
+                    else
+                    {
+                        var (buffered, isNew) = await tempStream.TryGetBufferedAsync(stream);
+                        try
+                        {
+                            form.ContentLength = buffered.Length;
+                            result = await fileDao.SaveFileAsync(form, buffered, false);
+                        }
+                        finally
+                        {
+                            if (isNew)
+                            {
+                                await buffered.DisposeAsync();
+                            }
+                        }
+                    }
+                    await fileTracker.RemoveAsync(form.Id);
+                    await socketManager.StopEditAsync(form.Id);
                     await filesMessageService.SendAsync(MessageAction.FormCompletelyFilled, form, MessageInitiator.DocsService, user?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
                     await notifyClient.SendFormFillingEvent(room, form, allRoles.Select(role => role.UserId), NotifyConstants.EventFormWasCompletelyFilled);
                 }

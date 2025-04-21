@@ -323,7 +323,7 @@ internal class FileDao(
         }
         if (applyFormStepFilter)
         {
-            q = q.Where(f => f.Category == (int)FilterType.PdfForm &&
+            q = q.Where(f => (f.Category == (int)FilterType.PdfForm || f.Category == (int)FilterType.Pdf) &&
                     filesDbContext.FilesFormRoleMapping.Any(r =>
                         r.TenantId == tenantId && r.FormId == f.Id && r.UserId == securityContext.CurrentAccount.ID)
             );
@@ -578,6 +578,7 @@ internal class FileDao(
                         ConvertedType = file.ConvertedType,
                         Comment = file.Comment,
                         Encrypted = file.Encrypted,
+                        FileStatus = (int)file.FileStatus,
                         Forcesave = file.Forcesave,
                         ThumbnailStatus = file.ThumbnailStatus,
                         TenantId = tenantId
@@ -624,7 +625,7 @@ internal class FileDao(
                             var fileProp = await fileDao.GetProperties(file.Id);
                             var extension = FileUtility.GetFileExtension(file.Title);
 
-                            if (file.IsForm || (extension == ".csv" && fileProp != null && Equals(fileProp.FormFilling.ResultsFolderId, file.ParentId)))
+                            if (file.IsForm || ((extension == ".csv" || extension == ".xlsx") && fileProp != null && Equals(fileProp.FormFilling.ResultsFolderId, file.ParentId)))
                             {
                                 var properties = fileProp ?? new EntryProperties<int> { FormFilling = new FormFillingProperties<int>() };
                                 if (!properties.FormFilling.StartFilling)
@@ -939,6 +940,8 @@ internal class FileDao(
 
             await DeleteCustomOrder(filesDbContext, fileId);
 
+            var entryEventsIds = await context.GetAuditEventsIdsAsync(fileId, FileEntryType.File).ToListAsync();
+            await context.MarkAuditReferencesAsCorruptedAsync(entryEventsIds);
             await context.DeleteAuditReferencesAsync(fileId, FileEntryType.File);
 
             await context.SaveChangesAsync();
@@ -2275,17 +2278,17 @@ internal class FileDao(
         {
             extension = [""];
         }
-
+        
+        if (withSubfolders && (searchByExtension || filterType != FilterType.None || subjectID != Guid.Empty))
+        {
+            q = GetFileQuery(filesDbContext, r => r.CurrentVersion)
+                .Join(filesDbContext.Tree, r => r.ParentId, a => a.FolderId, (file, tree) => new { file, tree })
+                .Where(r => r.tree.ParentId == parentId)
+                .Select(r => r.file);
+        }
+        
         if (searchByText || searchByExtension)
         {
-            if (searchByText && withSubfolders)
-            {
-                q = GetFileQuery(filesDbContext, r => r.CurrentVersion)
-                    .Join(filesDbContext.Tree, r => r.ParentId, a => a.FolderId, (file, tree) => new { file, tree })
-                    .Where(r => r.tree.ParentId == parentId)
-                    .Select(r => r.file);
-            }
-            
             var searchIds = new List<int>();
             var success = false;
             
@@ -2354,7 +2357,6 @@ internal class FileDao(
 
         if (subjectID != Guid.Empty)
         {
-
             if (subjectGroup)
             {
                 var users = (await _userManager.GetUsersByGroupAsync(subjectID)).Select(u => u.Id).ToArray();
@@ -2368,7 +2370,6 @@ internal class FileDao(
 
         switch (filterType)
         {
-
             case FilterType.DocumentsOnly:
             case FilterType.ImagesOnly:
             case FilterType.PresentationsOnly:
@@ -2384,7 +2385,6 @@ internal class FileDao(
                 {
                     q = BuildSearch(q, searchText, SearchType.End);
                 }
-
                 break;
         }
 

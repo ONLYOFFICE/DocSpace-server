@@ -134,8 +134,9 @@ public class FirstTimeTenantSettings(
         {
             throw new Exception(UserControlsCommonResource.LicenseKeyNotFound);
         }
-        catch (BillingNotConfiguredException)
+        catch (BillingNotConfiguredException ex)
         {
+            logger.ErrorWithException(ex);
             throw new Exception(UserControlsCommonResource.LicenseKeyNotCorrect);
         }
         catch (BillingLicenseTypeException)

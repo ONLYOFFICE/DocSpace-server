@@ -1078,4 +1078,7 @@
   <data name="ErrorIpRestriction" xml:space="preserve">
     <value>Pridajte aspoň 1 povolenú IP adresu.</value>
   </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>Webhook URL nie je dostupná. HEAD požiadavka nevrátila HTTP status 200.</value>
+  </data>
 </root>

@@ -176,4 +176,63 @@ $OrangeButton</value>
   <data name="subject_FormSubmitted" xml:space="preserve">
     <value>Уведомление DocSpace. Форма заполнена</value>
   </data>
+  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
+    <value>В комнате "$RoomTitle" создан новый документ "$DocumentTitle"</value>
+  </data>
+  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
+    <value>В комнату "$RoomTitle" ($Count) загружены новые файлы</value>
+  </data>
+  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
+    <value>В комнату "$RoomTitle" загружен новый файл "$DocumentTitle"</value>
+  </data>
+  <data name="pattern_EditorMentions_push" xml:space="preserve">
+    <value>$ToUserName упомянул вас в документе $DocumentTitle</value>
+  </data>
+  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
+    <value>В комнате "$RoomTitle" создана новая папка "$FolderTitle"</value>
+  </data>
+  <data name="pattern_FormStartedFilling" xml:space="preserve">
+    <value>
+      Уведомление об активности. "$FromUserName":"$FromUserLink" начал процесс заполнения формы: "$DocumentTitle":"$DocumentURL" в комнате: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_FormSubmitted_push" xml:space="preserve">
+    <value>В комнате "$RoomTitle" заполнена форма "$DocumentTitle"</value>
+  </data>
+  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
+    <value>
+      Уведомление об активности. В комнате: "$RoomTitle":"$RoomURL" — $__DateTime полностью заполнена форма "$DocumentTitle":"$DocumentURL".
+    </value>
+  </data>
+  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
+    <value>$FromUserName переместил комнату "$RoomTitle" в архив</value>
+  </data>
+  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
+    <value>Ваша роль в комнате "$RoomTitle" изменена на "$RoomRole"</value>
+  </data>
+  <data name="pattern_StoppedFormFilling" xml:space="preserve">
+    <value>
+      Уведомление об активности. "$FromUserName":"$FromUserLink" остановил заполнение формы: "$DocumentTitle":"$DocumentURL" в комнате: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_YourTurnFormFilling" xml:space="preserve">
+    <value>
+      Уведомление об активности. Ваша очередь! Требуется заполнение формы: "$DocumentTitle":"$DocumentURL" в комнате: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="subject_FormStartedFilling" xml:space="preserve">
+    <value>Уведомление DocSpace.</value>
+  </data>
+  <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
+    <value>Уведомление DocSpace.</value>
+  </data>
+  <data name="subject_StoppedFormFilling" xml:space="preserve">
+    <value>Уведомление DocSpace.</value>
+  </data>
+  <data name="subject_YourTurnFormFilling" xml:space="preserve">
+    <value>Уведомление DocSpace.</value>
+  </data>
+  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
+    <value>Вы приглашены в комнату "$RoomTitle"</value>
+  </data>
 </root>

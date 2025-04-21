@@ -526,6 +526,12 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
                 return room;
             }
         }
+
+        if(folder.RootFolderType == FolderType.USER)
+        {
+            return await folderDao.GetRootFolderAsync(folder.Id);
+        }
+
         return folder;
     }
 
@@ -651,7 +657,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             result = new FormOpenSetup<T>
             {
                 CanEdit = edit,
-                CanFill = fill,
+                CanFill = fill || canFill,
                 CanStartFilling = true
             };
         }
@@ -664,16 +670,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
                 CanStartFilling = false
             };
         }
-
-        if (securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID) && result.CanFill)
-        {
-            result.IsSubmitOnly = canFill;
-        }
-
-        if (result.CanFill) 
-        {
-            result.EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
-        }
+        result.EditorType = editorType;
         return result;
     }
 }

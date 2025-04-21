@@ -82,4 +82,7 @@
   <data name="UnknownLastName" xml:space="preserve">
     <value>姓</value>
   </data>
+  <data name="LicenseTypeNotCorrect" xml:space="preserve">
+    <value>ライセンス問題。{0} DocSpace（EnterpriseまたはDeveloper）の正しいエディションがインストールされていることをご確認ください。ご質問がある場合は、担当営業までお問い合わせください。</value>
+  </data>
 </root>
