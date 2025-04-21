@@ -1498,7 +1498,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         {
             var receiveStream = context.Request.Body;
             using var readStream = new StreamReader(receiveStream);
-            var body = await readStream.ReadToEndAsync();
+            var body = await readStream.ReadToEndAsync(context.RequestAborted);
 
             logger.DebugDocServiceTrackBody(body);
             if (string.IsNullOrEmpty(body))
