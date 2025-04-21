@@ -148,7 +148,14 @@ public class PaymentController(
             return false;
         }
 
-        return await tariffService.PaymentChangeAsync(tenant.Id, inDto.Quantity);
+        var result = await tariffService.PaymentChangeAsync(tenant.Id, inDto.Quantity);
+
+        if (result)
+        {
+            messageService.Send(MessageAction.CustomerSubscriptionUpdated, $"{inDto.Quantity.First().Key} {inDto.Quantity.First().Value}");
+        }
+
+        return result;
     }
 
     /// <summary>

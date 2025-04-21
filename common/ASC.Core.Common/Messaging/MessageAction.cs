@@ -816,6 +816,9 @@ public enum MessageAction
     [SwaggerEnum("Customer wallet top up settings updated")]
     CustomerWalletTopUpSettingsUpdated = 6064,
 
+    [SwaggerEnum("Customer subscription updated")]
+    CustomerSubscriptionUpdated = 6065,
+
     #endregion
 
     #region others

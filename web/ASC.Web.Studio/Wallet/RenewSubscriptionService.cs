@@ -29,6 +29,7 @@ using System.Globalization;
 using ASC.Core;
 using ASC.Core.Billing;
 using ASC.Core.Common.Hosting;
+using ASC.MessagingSystem.Core;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -50,13 +51,15 @@ public class RenewSubscriptionService(
 
     protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
+        return;
+
         try
         {
             if (_expiredWalletQuotas != null && _expiredWalletQuotas.Count > 0)
             {
-                //await Parallel.ForEachAsync(_expiredWalletQuotas,
-                //    new ParallelOptions { MaxDegreeOfParallelism = 3, CancellationToken = stoppingToken }, //System.Environment.ProcessorCount
-                //    RenewSubscriptionAsync);
+                await Parallel.ForEachAsync(_expiredWalletQuotas,
+                    new ParallelOptions { MaxDegreeOfParallelism = 3, CancellationToken = stoppingToken }, //System.Environment.ProcessorCount
+                    RenewSubscriptionAsync);
             }
 
             var to = DateTime.UtcNow;
@@ -104,8 +107,8 @@ public class RenewSubscriptionService(
             if (result)
             {
                 var description = $"{data.QuotaName} {data.Quantity}";
-                //var messageService = scope.ServiceProvider.GetRequiredService<MessageService>();
-                //messageService.Send(MessageInitiator.System, MessageAction.CustomerSubscriptionRenewed, description);
+                var messageService = scope.ServiceProvider.GetRequiredService<MessageService>();
+                messageService.Send(MessageInitiator.System, MessageAction.CustomerSubscriptionUpdated, description);
 
                 logger.InfoRenewSubscriptionServiceDone(data.TenantId, description);
             }

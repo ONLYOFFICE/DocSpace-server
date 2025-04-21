@@ -94,7 +94,7 @@ internal class ProductsActionMapper : IModuleActionMapper
                     MessageAction.DevToolsAccessSettingsChanged,
                     MessageAction.WebhookUpdated,
                     MessageAction.ApiKeyUpdated,
-                    MessageAction.CustomerWalletToppedUp, MessageAction.CustomerWalletTopUpSettingsUpdated
+                    MessageAction.CustomerWalletToppedUp, MessageAction.CustomerWalletTopUpSettingsUpdated, MessageAction.CustomerSubscriptionUpdated
                 ]
             },
             {
