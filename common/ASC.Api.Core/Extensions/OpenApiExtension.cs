@@ -260,23 +260,38 @@ public static class OpenApiExtension
                             Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = CookiesManager.AuthCookiesName }
                         },
                         ["read", "write"]
-                    },
+                    }
+                });
+                operation.Security.Add(new OpenApiSecurityRequirement
+                {
                     {
                         new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" } },
                         new List<string>()
-                    },
+                    }
+                });
+                operation.Security.Add(new OpenApiSecurityRequirement
+                {
                     {
                         new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "ApiKeyBearer" } },
                         new[] { "read", "write" }
-                    },
+                    }
+                });
+                operation.Security.Add(new OpenApiSecurityRequirement
+                {
                     {
                         new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Basic" } },
                         new List<string>()
-                    },
+                    }
+                });
+                operation.Security.Add(new OpenApiSecurityRequirement
+                {
                     {
                         new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "OAuth2" } },
                         new[] { "read", "write" }
-                    },
+                    }
+                });
+                operation.Security.Add(new OpenApiSecurityRequirement
+                {
                     {
                         new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "OpenId" } },
                         Array.Empty<string>()
