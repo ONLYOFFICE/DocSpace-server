@@ -100,6 +100,7 @@ public class Startup : BaseStartup
         services.RegisterQueue<MigrationOperation>(timeUntilUnregisterInSeconds: 60 * 60 * 24);
 
         services.AddActivePassiveHostedService<TopUpWalletService>(_configuration);
+        //services.AddActivePassiveHostedService<RenewSubscriptionService>(_configuration);
 
         var lifeTime = TimeSpan.FromMinutes(5);
 
