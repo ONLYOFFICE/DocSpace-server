@@ -2285,17 +2285,17 @@ internal class FileDao(
         {
             extension = [""];
         }
-
+        
+        if (withSubfolders && (searchByExtension || filterType != FilterType.None || subjectID != Guid.Empty))
+        {
+            q = GetFileQuery(filesDbContext, r => r.CurrentVersion)
+                .Join(filesDbContext.Tree, r => r.ParentId, a => a.FolderId, (file, tree) => new { file, tree })
+                .Where(r => r.tree.ParentId == parentId)
+                .Select(r => r.file);
+        }
+        
         if (searchByText || searchByExtension)
         {
-            if (searchByText && withSubfolders)
-            {
-                q = GetFileQuery(filesDbContext, r => r.CurrentVersion)
-                    .Join(filesDbContext.Tree, r => r.ParentId, a => a.FolderId, (file, tree) => new { file, tree })
-                    .Where(r => r.tree.ParentId == parentId)
-                    .Select(r => r.file);
-            }
-            
             var searchIds = new List<int>();
             var success = false;
             
@@ -2364,7 +2364,6 @@ internal class FileDao(
 
         if (subjectID != Guid.Empty)
         {
-
             if (subjectGroup)
             {
                 var users = (await _userManager.GetUsersByGroupAsync(subjectID)).Select(u => u.Id).ToArray();
@@ -2378,7 +2377,6 @@ internal class FileDao(
 
         switch (filterType)
         {
-
             case FilterType.DocumentsOnly:
             case FilterType.ImagesOnly:
             case FilterType.PresentationsOnly:
@@ -2394,7 +2392,6 @@ internal class FileDao(
                 {
                     q = BuildSearch(q, searchText, SearchType.End);
                 }
-
                 break;
         }
 
