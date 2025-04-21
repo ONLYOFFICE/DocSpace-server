@@ -695,6 +695,13 @@ public class PaymentController(
             return null;
         }
 
+        //TODO: need to check balance ?
+        //var balance = await tariffService.GetCustomerBalanceAsync(tenant.Id, false);
+        //if (balance == null)
+        //{
+        //    return null;
+        //}
+
         await DemandPayerAsync(tenant);
 
         var settings = inDto?.Settings ?? new TenantWalletSettings();
