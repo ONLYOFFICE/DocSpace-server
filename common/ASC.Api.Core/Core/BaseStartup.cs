@@ -479,6 +479,7 @@ public abstract class BaseStartup
         services.AddAutoMapper(GetAutoMapperProfileAssemblies());
 
         services.AddBillingHttpClient();
+        services.AddAccountingHttpClient();
 
         services.AddSingleton(Channel.CreateUnbounded<NotifyRequest>());
         services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Reader);

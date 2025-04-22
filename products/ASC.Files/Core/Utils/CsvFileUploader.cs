@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,9 +24,30 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.Log;
-internal static partial class AuditReportUploaderLogger
+namespace ASC.Files.Core.Utils;
+
+[Scope]
+public class CsvFileUploader(GlobalFolderHelper globalFolderHelper,
+    ILogger<CsvFileUploader> logger,
+    FileUploader fileUploader,
+    FilesLinkUtility filesLinkUtility,
+    CommonLinkUtility commonLinkUtility)
 {
-    [LoggerMessage(LogLevel.Error, "Error while uploading login report:")]
-    public static partial void ErrorWhileUploading(this ILogger<AuditReportUploader> logger, Exception exception);
+    public async Task<string> UploadFile(Stream stream, string fileName)
+    {
+        try
+        {
+            var file = await fileUploader.ExecAsync(await globalFolderHelper.FolderMyAsync, fileName, stream.Length, stream, true);
+            var fileUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebEditorUrl(file.Id));
+
+            fileUrl += $"&options={{\"codePage\":{Encoding.UTF8.CodePage}}}";
+
+            return fileUrl;
+        }
+        catch (Exception ex)
+        {
+            logger.ErrorWhileUploading(ex);
+            throw;
+        }
+    }
 }

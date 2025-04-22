@@ -64,6 +64,7 @@ public class TariffService(
     IDistributedLockProvider distributedLockProvider,
     ILogger<TariffService> logger,
     BillingClient billingClient,
+    AccountingClient accountingClient,
     IServiceProvider serviceProvider,
     TenantExtraConfig tenantExtraConfig)
     : ITariffService
@@ -354,11 +355,23 @@ public class TariffService(
         return $"{tenantId}:billing:payments";
     }
 
+    internal static string GetBillingCustomerCacheKey(int tenantId)
+    {
+        return $"{tenantId}:billing:customer";
+    }
+
+    internal static string GetAccountingBalanceCacheKey(int tenantId)
+    {
+        return $"{tenantId}:accounting:balance";
+    }
+
 
     private async Task ClearCacheAsync(int tenantId)
     {
         await hybridCache.RemoveAsync(GetTariffCacheKey(tenantId));
         await hybridCache.RemoveAsync(GetBillingPaymentCacheKey(tenantId));
+        await hybridCache.RemoveAsync(GetBillingCustomerCacheKey(tenantId));
+        await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
     }
 
     public async Task<IEnumerable<PaymentInfo>> GetPaymentsAsync(int tenantId)
@@ -405,7 +418,7 @@ public class TariffService(
         return payments;
     }
 
-    public async Task<Uri> GetShoppingUriAsync(int tenant, string affiliateId, string partnerId, string currency = null, string language = null, string customerEmail = null, Dictionary<string, int> quantity = null, string backUrl = null)
+    public async Task<Uri> GetShoppingUriAsync(int tenant, string affiliateId, string partnerId, string currency = null, string language = null, string customerEmail = null, Dictionary<string, int> quantity = null, string backUrl = null, bool checkoutSetup = false)
     {
         List<TenantQuota> newQuotas = [];
 
@@ -451,7 +464,7 @@ public class TariffService(
             url = string.Empty;
             if (billingClient.Configured)
             {
-                var productIds = newQuotas.Select(q => q.ProductId);
+                var productIds = checkoutSetup ? [] : newQuotas.Select(q => q.ProductId);
 
                 try
                 {
@@ -544,7 +557,7 @@ public class TariffService(
         
         return !string.IsNullOrEmpty(url) ? new Uri(url) : null;
     }
-    
+
     public async Task<Tariff> GetBillingInfoAsync(int? tenant = null, int? id = null)
     {
         await using var coreDbContext = await coreDbContextManager.CreateDbContextAsync();
@@ -867,9 +880,161 @@ public class TariffService(
 
     public bool IsConfigured()
     {
-        return billingClient.Configured;
+        return billingClient.Configured && accountingClient.Configured;
     }
-    
+
+    public async Task<CustomerInfo> GetCustomerInfoAsync(int tenantId, bool refresh = false)
+    {
+        var cacheKey = GetBillingCustomerCacheKey(tenantId);
+
+        var customerInfo = refresh ? null : await GetFromCache<CustomerInfo>(cacheKey);
+
+        if (customerInfo != null)
+        {
+            return customerInfo;
+        }
+
+        await using (await distributedLockProvider.TryAcquireLockAsync($"{cacheKey}_lock"))
+        {
+            customerInfo = refresh ? null : await GetFromCache<CustomerInfo>(cacheKey);
+
+            if (customerInfo != null)
+            {
+                return customerInfo;
+            }
+
+            if (billingClient.Configured)
+            {
+                try
+                {
+                    var portalId = await coreSettings.GetKeyAsync(tenantId);
+                    customerInfo = await billingClient.GetCustomerInfoAsync(portalId);
+                }
+                catch (Exception error)
+                {
+                    customerInfo = new CustomerInfo(null, PaymentMethodStatus.None, null);
+                    LogError(error, tenantId.ToString());
+                }
+
+                await hybridCache.SetAsync(cacheKey, customerInfo, TimeSpan.FromMinutes(10));
+            }
+        }
+
+        return customerInfo;
+    }
+
+    public async Task<string> TopUpDepositAsync(int tenantId, long amount, string currency, bool waitForChanges = false)
+    {
+        var portalId = await coreSettings.GetKeyAsync(tenantId);
+
+        decimal? oldBalanceAmount = 0;
+
+        if (waitForChanges)
+        {
+            var oldBalance = await GetCustomerBalanceAsync(tenantId);
+            oldBalanceAmount = oldBalance?.SubAccounts?.FirstOrDefault(x => x.Currency == currency)?.Amount;
+        }
+
+        var result = await billingClient.TopUpDepositAsync(portalId, amount, currency);
+
+        var attempt = 0;
+
+        while (waitForChanges && attempt <= 3)
+        {
+            await Task.Delay((int)(Math.Pow(2, attempt) * 1000));
+
+            var newBalance = await GetCustomerBalanceAsync(tenantId, true);
+            var newBalanceAmount = newBalance?.SubAccounts?.FirstOrDefault(x => x.Currency == currency)?.Amount;
+
+            if (oldBalanceAmount != newBalanceAmount)
+            {
+                return result;
+            }
+
+            attempt += 1;
+        }
+
+        await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
+
+        return result;
+    }
+
+    #region Accounting
+
+    public async Task<Balance> GetCustomerBalanceAsync(int tenantId, bool refresh = false)
+    {
+        var cacheKey = GetAccountingBalanceCacheKey(tenantId);
+
+        var balance = refresh ? null : await GetFromCache<Balance>(cacheKey);
+
+        if (balance != null)
+        {
+            return balance;
+        }
+
+        await using (await distributedLockProvider.TryAcquireLockAsync($"{cacheKey}_lock"))
+        {
+            balance = refresh ? null : await GetFromCache<Balance>(cacheKey);
+
+            if (balance != null)
+            {
+                return balance;
+            }
+
+            if (accountingClient.Configured)
+            {
+                try
+                {
+                    var portalId = await coreSettings.GetKeyAsync(tenantId);
+                    balance = await accountingClient.GetCustomerBalanceAsync(portalId, true);
+                    await hybridCache.SetAsync(cacheKey, balance, TimeSpan.FromMinutes(10));
+                }
+                catch (Exception error)
+                {
+                    LogError(error, tenantId.ToString());
+                }
+            }
+        }
+
+        return balance;
+    }
+
+    public async Task<Session> OpenCustomerSessionAsync(int tenantId, int serviceAccount, string externalRef, int quantity)
+    {
+        var portalId = await coreSettings.GetKeyAsync(tenantId);
+        return await accountingClient.OpenCustomerSessionAsync(portalId, serviceAccount, externalRef, quantity);
+    }
+
+    public async Task<bool> PerformCustomerOperationAsync(int tenantId, int serviceAccount, int sessionId, int quantity)
+    {
+        var portalId = await coreSettings.GetKeyAsync(tenantId);
+        await accountingClient.PerformCustomerOperationAsync(portalId, serviceAccount, sessionId, quantity);
+        await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
+        return true;
+    }
+
+    public async Task<Report> GetCustomerOperationsAsync(int tenantId, DateTime utcStartDate, DateTime utcEndDate, bool? credit, bool? withdrawal, int? offset, int? limit)
+    {
+        try
+        {
+            var portalId = await coreSettings.GetKeyAsync(tenantId);
+            return await accountingClient.GetCustomerOperationsAsync(portalId, utcStartDate, utcEndDate, credit, withdrawal, offset, limit);
+        }
+        catch (Exception error)
+        {
+            LogError(error, tenantId.ToString());
+            return null;
+        }
+    }
+
+    public async Task<List<Currency>> GetAllCurrenciesAsync()
+    {
+        return await accountingClient.GetAllCurrenciesAsync();
+    }
+
+    #endregion
+
+
     private TimeSpan GetCacheExpiration()
     {
         if (coreBaseSettings.Standalone && _cacheExpiration < _standaloneCacheExpiration)
@@ -888,7 +1053,7 @@ public class TariffService(
     {
         return await hybridCache.GetOrDefaultAsync<T>(key);
     }
-    
+
     private void ResetCacheExpiration()
     {
         if (coreBaseSettings.Standalone)

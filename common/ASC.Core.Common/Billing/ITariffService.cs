@@ -31,7 +31,7 @@ public interface ITariffService
     Task<IDictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, params string[] productIds);
     Task<IEnumerable<PaymentInfo>> GetPaymentsAsync(int tenantId);
     Task<Tariff> GetTariffAsync(int tenantId, bool withRequestToPaymentSystem = true, bool refresh = false);
-    Task<Uri> GetShoppingUriAsync(int tenant, string affiliateId, string partnerId, string currency = null, string language = null, string customerEmail = null, Dictionary<string, int> quantity = null, string backUrl = null);
+    Task<Uri> GetShoppingUriAsync(int tenant, string affiliateId, string partnerId, string currency = null, string language = null, string customerEmail = null, Dictionary<string, int> quantity = null, string backUrl = null, bool checkoutSetup = false);
     Task DeleteDefaultBillingInfoAsync();
     Task SetTariffAsync(int tenantId, Tariff tariff, List<TenantQuota> quotas = null);
     Task<Uri> GetAccountLinkAsync(int tenant, string backUrl);
@@ -39,4 +39,12 @@ public interface ITariffService
     int GetPaymentDelay();
     Task<Tariff> GetBillingInfoAsync(int? tenant = null, int? id = null);
     bool IsConfigured();
+    Task<CustomerInfo> GetCustomerInfoAsync(int tenantId, bool refresh = false);
+    Task<string> TopUpDepositAsync(int tenantId, long amount, string currency, bool waitForChanges = false);
+
+    Task<Balance> GetCustomerBalanceAsync(int tenantId, bool refresh = false);
+    Task<Session> OpenCustomerSessionAsync(int tenantId, int serviceAccount, string externalRef, int quantity);
+    Task<bool> PerformCustomerOperationAsync(int tenantId, int serviceAccount, int sessionId, int quantity);
+    Task<Report> GetCustomerOperationsAsync(int tenantId, DateTime utcStartDate, DateTime utcEndDate, bool? credit, bool? withdrawal, int? offset, int? limit);
+    Task<List<Currency>> GetAllCurrenciesAsync();
 }

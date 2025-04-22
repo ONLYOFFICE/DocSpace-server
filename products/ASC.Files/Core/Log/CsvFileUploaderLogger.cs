@@ -24,29 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Reflection;
+using ASC.Files.Core.Utils;
 
-namespace ASC.AuditTrail.Models.Mappings;
-
-public class BaseEventMap<T> : ClassMap<T> where T : BaseEvent
+namespace ASC.Files.Core.Log;
+internal static partial class CsvFileUploaderLogger
 {
-    public BaseEventMap()
-    {
-        var eventType = typeof(T);
-        var eventProps = eventType
-            .GetProperties()
-            .Where(r => r.GetCustomAttribute<EventAttribute>() != null)
-            .OrderBy(r => r.GetCustomAttribute<EventAttribute>().Order);
-
-        foreach (var prop in eventProps)
-        {
-            var attr = prop.GetCustomAttribute<EventAttribute>().Resource;
-            Map(eventType, prop).Name(AuditReportResource.ResourceManager.GetString(attr));
-
-            if (prop.PropertyType == typeof(DateTime))
-            {
-                Map(eventType, prop).TypeConverter<CsvFileHelper.CsvDateTimeConverter>();
-            }
-        }
-    }
+    [LoggerMessage(LogLevel.Error, "Error while uploading csv file:")]
+    public static partial void ErrorWhileUploading(this ILogger<CsvFileUploader> logger, Exception exception);
 }

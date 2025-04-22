@@ -24,29 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Reflection;
+namespace ASC.Web.Studio.Wallet;
 
-namespace ASC.AuditTrail.Models.Mappings;
-
-public class BaseEventMap<T> : ClassMap<T> where T : BaseEvent
+internal static partial class TopUpWalletServiceLogger
 {
-    public BaseEventMap()
-    {
-        var eventType = typeof(T);
-        var eventProps = eventType
-            .GetProperties()
-            .Where(r => r.GetCustomAttribute<EventAttribute>() != null)
-            .OrderBy(r => r.GetCustomAttribute<EventAttribute>().Order);
+    [LoggerMessage(LogLevel.Information, "Found {count} active portals with TenantWalletSettings")]
+    public static partial void InfoTopUpWalletServiceFound(this ILogger<TopUpWalletService> logger, int count);
 
-        foreach (var prop in eventProps)
-        {
-            var attr = prop.GetCustomAttribute<EventAttribute>().Resource;
-            Map(eventType, prop).Name(AuditReportResource.ResourceManager.GetString(attr));
+    [LoggerMessage(LogLevel.Information, "Wallet topped up: tenant {tenantId}, {description}")]
+    public static partial void InfoTopUpWalletServiceDone(this ILogger<TopUpWalletService> logger, int tenantId, string description);
 
-            if (prop.PropertyType == typeof(DateTime))
-            {
-                Map(eventType, prop).TypeConverter<CsvFileHelper.CsvDateTimeConverter>();
-            }
-        }
-    }
+    [LoggerMessage(LogLevel.Error, "Wallet top up failed: tenant {tenantId}")]
+    public static partial void ErrorTopUpWalletServiceFail(this ILogger<TopUpWalletService> logger, int tenantId);
 }

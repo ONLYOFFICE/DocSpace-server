@@ -52,3 +52,31 @@ public class QuantityRequestDto
     /// </summary>
     public Dictionary<string, int> Quantity { get; set; }
 }
+
+/// <summary>
+/// Chechout setup URL request parameters
+/// </summary>
+public class ChechoutSetupUrlRequestsDto
+{
+    /// <summary>
+    /// Back URL
+    /// </summary>
+    [FromQuery]
+    public string BackUrl { get; set; }
+}
+
+/// <summary>
+/// Put money on deposit request parameters
+/// </summary>
+public class PutOnDepositRequestDto
+{
+    /// <summary>
+    /// Amount
+    /// </summary>
+    public long Amount { get; set; }
+
+    /// <summary>
+    /// Currency
+    /// </summary>
+    public string Currency { get; set; }
+}

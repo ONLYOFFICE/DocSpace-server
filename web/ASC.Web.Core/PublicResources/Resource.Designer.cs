@@ -61,6 +61,78 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Credit.
+        /// </summary>
+        public static string AccountingCustomerOperationCredit {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationCredit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Currency.
+        /// </summary>
+        public static string AccountingCustomerOperationCurrency {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationCurrency", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Date and time.
+        /// </summary>
+        public static string AccountingCustomerOperationDate {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationDate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Quantity.
+        /// </summary>
+        public static string AccountingCustomerOperationQuantity {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationQuantity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Service name.
+        /// </summary>
+        public static string AccountingCustomerOperationService {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationService", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unit of Measurement.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceUnit {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceUnit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Customer operations report ({0}-{1}).
+        /// </summary>
+        public static string AccountingCustomerOperationsReportName {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationsReportName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Withdrawal.
+        /// </summary>
+        public static string AccountingCustomerOperationWithdrawal {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationWithdrawal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Validation code field cannot be empty.
         /// </summary>
         public static string ActivateMobilePhoneEmptyCode {

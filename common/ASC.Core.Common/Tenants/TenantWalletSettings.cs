@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,29 +24,56 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Reflection;
+namespace ASC.Core.Tenants;
 
-namespace ASC.AuditTrail.Models.Mappings;
-
-public class BaseEventMap<T> : ClassMap<T> where T : BaseEvent
+/// <summary>
+/// Tenant wallet settings
+/// </summary>
+public class TenantWalletSettingsWrapper
 {
-    public BaseEventMap()
+    /// <summary>
+    /// Tenant wallet settings
+    /// </summary>
+    public TenantWalletSettings Settings { get; set; }
+}
+
+[Scope]
+[Serializable]
+public class TenantWalletSettings : ISettings<TenantWalletSettings>
+{
+    /// <summary>
+    /// Enabled
+    /// </summary>
+    public bool Enabled { get; set; }
+
+    /// <summary>
+    /// Minimun balance
+    /// </summary>
+    [Range(5, 1000)]
+    public int MinBalance { get; set; }
+
+    /// <summary>
+    /// Up to balance
+    /// </summary>
+    [Range(6, 5000)]
+    public int UpToBalance { get; set; }
+
+    /// <summary>
+    /// Currency
+    /// </summary>
+    public string Currency { get; set; }
+
+
+    [JsonIgnore]
+    public Guid ID
     {
-        var eventType = typeof(T);
-        var eventProps = eventType
-            .GetProperties()
-            .Where(r => r.GetCustomAttribute<EventAttribute>() != null)
-            .OrderBy(r => r.GetCustomAttribute<EventAttribute>().Order);
-
-        foreach (var prop in eventProps)
-        {
-            var attr = prop.GetCustomAttribute<EventAttribute>().Resource;
-            Map(eventType, prop).Name(AuditReportResource.ResourceManager.GetString(attr));
-
-            if (prop.PropertyType == typeof(DateTime))
-            {
-                Map(eventType, prop).TypeConverter<CsvFileHelper.CsvDateTimeConverter>();
-            }
-        }
+        get { return new Guid("{40069709-492A-4F41-988C-F1A053A8A560}"); }
     }
+
+    public TenantWalletSettings GetDefault()
+    {
+        return new TenantWalletSettings();
+    }
+
+    public DateTime LastModified { get; set; }
 }

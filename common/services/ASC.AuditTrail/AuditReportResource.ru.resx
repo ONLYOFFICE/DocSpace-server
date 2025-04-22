@@ -913,4 +913,16 @@
   <data name="FileCustomFilterEnabled" xml:space="preserve">
     <value>Файл: {0}. Пользовательский фильтр включен</value>
   </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>Ссылка авторизации активирована</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>Аутентификация LDAP отключена</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>Аутентификация LDAP включена</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>Синхронизация LDAP выполнена</value>
+  </data>
 </root>

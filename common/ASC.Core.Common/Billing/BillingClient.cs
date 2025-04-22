@@ -128,6 +128,20 @@ public class BillingClient
         return paymentUrl;
     }
 
+    public async Task<CustomerInfo> GetCustomerInfoAsync(string portalId)
+    {
+        var result = await RequestAsync("GetCustomerInfo", portalId);
+        var customerInfo = JsonSerializer.Deserialize<CustomerInfo>(result);
+
+        return customerInfo;
+    }
+
+    public async Task<string> TopUpDepositAsync(string portalId, long amount, string currency)
+    {
+        return await RequestAsync("Deposit", portalId, [Tuple.Create("Amount", amount.ToString()), Tuple.Create("Currency", currency)]);
+    }
+
+
     public async Task<bool> ChangePaymentAsync(string portalId, IEnumerable<string> products, IEnumerable<int> quantity)
     {
         var parameters = products.Select(p => Tuple.Create("ProductId", p))

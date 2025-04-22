@@ -24,37 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Globalization;
-using System.Text;
-
-using CsvHelper;
-
-namespace ASC.AuditTrail;
-
-[Scope]
-public class AuditReportCreator(ILogger<AuditReportCreator> logger)
+namespace ASC.Core.Common.Log;
+internal static partial class CsvFileHelperLogger
 {
-    public Stream CreateCsvReport<TEvent>(IEnumerable<TEvent> events) where TEvent : BaseEvent
-    {
-        try
-        {
-            var stream = new MemoryStream();
-            var writer = new StreamWriter(stream, Encoding.UTF8);
-            var csv = new CsvWriter(writer, CultureInfo.CurrentCulture);
-
-            csv.Context.RegisterClassMap(new BaseEventMap<TEvent>());
-
-            csv.WriteHeader<TEvent>();
-            csv.NextRecord();
-            csv.WriteRecords(events);
-            writer.Flush();
-
-            return stream;
-        }
-        catch (Exception ex)
-        {
-            logger.ErrorWhileCreating(ex);
-            throw;
-        }
-    }
+    [LoggerMessage(LogLevel.Error, "Error while creating csv file:")]
+    public static partial void ErrorWhileCreating(this ILogger<CsvFileHelper> logger, Exception exception);
 }

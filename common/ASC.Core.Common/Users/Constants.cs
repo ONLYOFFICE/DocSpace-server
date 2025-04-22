@@ -31,19 +31,6 @@ namespace ASC.Core.Users;
 [Singleton]
 public sealed class Constants(IConfiguration configuration)
 {
-    public int MaxEveryoneCount
-    {
-        get
-        {
-            if (!int.TryParse(configuration["core:users"], out var count))
-            {
-                count = 10000;
-            }
-
-            return count;
-        }
-    }
-
     #region system group and category groups
 
     public static readonly Guid SysGroupCategoryId = new("{7717039D-FBE9-45ad-81C1-68A1AA10CE1F}");

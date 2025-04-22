@@ -24,9 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AuditTrail.Log;
-internal static partial class AuditReportCreatorLogger
+namespace ASC.Core.Billing;
+
+internal class AccountingConfiguration
 {
-    [LoggerMessage(LogLevel.Error, "Error while creating login report:")]
-    public static partial void ErrorWhileCreating(this ILogger<AuditReportCreator> logger, Exception exception);
+    public string Url { get; set; }
+    public string Key { get; set; }
+    public string Secret { get; set; }
 }
