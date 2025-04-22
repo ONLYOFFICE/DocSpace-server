@@ -658,7 +658,8 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             {
                 CanEdit = edit,
                 CanFill = fill || canFill,
-                CanStartFilling = true
+                CanStartFilling = true,
+                EditorType = editorType
             };
         }
         else
@@ -667,10 +668,12 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             {
                 CanEdit = canEdit,
                 CanFill = canFill,
-                CanStartFilling = false
+                CanStartFilling = false,
+                EditorType = !edit && (fill || canFill) && editorType != EditorType.Mobile
+                            ? EditorType.Embedded
+                            : editorType
             };
         }
-        result.EditorType = editorType;
         return result;
     }
 }
