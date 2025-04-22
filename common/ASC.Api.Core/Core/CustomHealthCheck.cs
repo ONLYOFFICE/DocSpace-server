@@ -42,8 +42,8 @@ public static class CustomHealthCheck
         hcBuilder.AddCheck("self", () => Running ? HealthCheckResult.Healthy()
                                     : HealthCheckResult.Unhealthy())
                  .AddDatabase(configuration)
-                 .AddDistibutedCache(configuration)
-                 .AddMessageQueue(configuration);
+                 .AddDistibutedCache(configuration);
+                 //.AddMessageQueue(configuration);
 
         return services;
     }
