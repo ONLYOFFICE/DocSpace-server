@@ -135,7 +135,7 @@ static file class Queries
             (WebstudioDbContext ctx, Guid id) =>
                 ctx.WebstudioSettings
                    .Join(ctx.Tenants, x => x.TenantId, y => y.Id, (settings, tenants) => new { settings, tenants })
-                   .Where(x => x.tenants.Status == TenantStatus.Active && x.settings.Id == id)
+                   .Where(x => x.tenants.Status == TenantStatus.Active && x.settings.Id == id && x.settings.Data.Contains("\"Enabled\":true"))
                    .Select(r => new TenantWalletSettingsData(r.tenants.Id, r.settings.Data)));
 }
 
