@@ -51,8 +51,6 @@ public class RenewSubscriptionService(
 
     protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
-        return;
-
         try
         {
             if (_expiredWalletQuotas != null && _expiredWalletQuotas.Count > 0)
@@ -65,22 +63,16 @@ public class RenewSubscriptionService(
             var to = DateTime.UtcNow;
             var from = to.Subtract(ExecuteTaskPeriod);
 
-            List<TenantWalletQuotaData> walletQuotasCloseToExpiration;
-
             await using (var scope = _scopeFactory.CreateAsyncScope())
             {
                 await using var coreDbContext = await scope.ServiceProvider.GetRequiredService<IDbContextFactory<CoreDbContext>>().CreateDbContextAsync(stoppingToken);
-                walletQuotasCloseToExpiration = await Queries.GetWalletQuotasAsync(coreDbContext, from, to).ToListAsync(stoppingToken);
+                _expiredWalletQuotas = await Queries.GetWalletQuotasCloseToExpirationAsync(coreDbContext, from, to).ToListAsync(stoppingToken);
             }
 
-            if (walletQuotasCloseToExpiration.Count == 0)
+            if (_expiredWalletQuotas.Count > 0)
             {
-                return;
+                logger.InfoRenewSubscriptionServiceFound(_expiredWalletQuotas.Count);
             }
-
-            logger.InfoRenewSubscriptionServiceFound(walletQuotasCloseToExpiration.Count);
-
-            _expiredWalletQuotas = walletQuotasCloseToExpiration;
         }
         catch (Exception e)
         {
@@ -128,13 +120,13 @@ public class RenewSubscriptionService(
 static file class Queries
 {
     public static readonly Func<CoreDbContext, DateTime, DateTime, IAsyncEnumerable<TenantWalletQuotaData>>
-        GetWalletQuotasAsync = EF.CompileAsyncQuery(
+        GetWalletQuotasCloseToExpirationAsync = EF.CompileAsyncQuery(
             (CoreDbContext ctx, DateTime from, DateTime to) =>
                 ctx.TariffRows
                     .Join(ctx.Quotas, x => x.Quota, y => y.TenantId, (tariffRow, quota) => new { tariffRow, quota })
-                    //.Where(r => r.quota.Wallet)
-                    //.Where(r => r.tariffRow.DueDate.HasValue && r.tariffRow.DueDate >= from && r.tariffRow.DueDate <= to)
-                    .Select(r => new TenantWalletQuotaData(r.tariffRow.TenantId, r.tariffRow.Quota, r.quota.Name, r.tariffRow.Quantity, null))); //null <-> r.tariffRow.DueDate
+                    .Where(r => r.quota.Wallet)
+                    .Where(r => r.tariffRow.DueDate.HasValue && r.tariffRow.DueDate >= from && r.tariffRow.DueDate <= to)
+                    .Select(r => new TenantWalletQuotaData(r.tariffRow.TenantId, r.tariffRow.Quota, r.quota.Name, r.tariffRow.Quantity, r.tariffRow.DueDate)));
 }
 
 public record TenantWalletQuotaData(int TenantId, int QuotaId, string QuotaName, int Quantity, DateTime? DueDate);
