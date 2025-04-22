@@ -69,7 +69,32 @@ public class CreateRoomFromTemplateDto
     public string Cover { get; set; }
 
     /// <summary>
-    /// Room quota
+    /// The room quota.
     /// </summary>
     public long? Quota { get; set; }
+
+    /// <summary>
+    /// Specifies whether to create a room with indexing.
+    /// </summary>
+    public bool? Indexing { get; set; }
+
+    /// <summary>
+    /// Specifies whether to deny downloads from the room.
+    /// </summary>
+    public bool? DenyDownload { get; set; }
+
+    /// <summary>
+    /// The room data lifetime information.
+    /// </summary>
+    public RoomDataLifetimeDto Lifetime { get; set; }
+
+    /// <summary>
+    /// The watermark settings.
+    /// </summary>
+    public WatermarkRequestDto Watermark { get; set; }
+
+    /// <summary>
+    /// Specifies whether the room to be created is private or not.
+    /// </summary>
+    public bool? Private { get; set; }
 }

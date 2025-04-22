@@ -577,7 +577,17 @@ public class FileStorageService //: IFileStorageService
         }, room.SettingsPrivate, share);
     }
 
-    public async Task<Folder<int>> CreateRoomFromTemplateAsync(int templateId, string title, IEnumerable<string> tags, LogoRequest logo, string cover, string color)
+    public async Task<Folder<int>> CreateRoomFromTemplateAsync(int templateId, 
+        string title,
+        IEnumerable<string> tags,
+        LogoRequest logo,
+        string cover,
+        string color,
+        bool? indexing,
+        bool? denyDownload,
+        RoomDataLifetimeDto lifetime,
+        WatermarkRequestDto watermark,
+        bool? @private)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
         var parentId = await globalFolderHelper.FolderVirtualRoomsAsync;
@@ -589,10 +599,9 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
         }
 
-        WatermarkRequestDto watermarkRequestDto = null;
-        if (template.SettingsWatermark != null)
+        if (template.SettingsWatermark != null && watermark == null)
         {
-            watermarkRequestDto = new WatermarkRequestDto
+            watermark = new WatermarkRequestDto
             {
                 Text = template.SettingsWatermark.Text,
                 Additions = template.SettingsWatermark.Additions,
@@ -604,12 +613,33 @@ public class FileStorageService //: IFileStorageService
             };
         }
 
+        RoomDataLifetime lifeTimeSetting = null;
+        if (lifetime == null)
+        {
+            lifeTimeSetting = template.SettingsLifetime;
+        }
+        else
+        {
+            lifeTimeSetting = new RoomDataLifetime
+            {
+                DeletePermanently = lifetime.DeletePermanently,
+                Enabled = lifetime.Enabled,
+                Period = lifetime.Period,
+                Value = lifetime.Value,
+                StartDate = DateTime.UtcNow
+            };
+        }
+
+        var settingIndex = indexing.HasValue ? indexing : template.SettingsIndexing;
+        var SettingDenyDownload = denyDownload.HasValue ? denyDownload : template.SettingsDenyDownload;
+        var settingPrivate = @private.HasValue ? @private.Value : template.SettingsPrivate;
+
         return await CreateRoomAsync(async () =>
         {
             await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetRoomsCountCheckKey(tenantId)))
             {
                 await countRoomChecker.CheckAppend();
-                return await InternalCreateFolderAsync(parentId, title, template.FolderType, template.SettingsPrivate, template.SettingsIndexing, template.SettingsQuota, template.SettingsLifetime, template.SettingsDenyDownload, watermarkRequestDto, color, cover, tags, logo);
+                return await InternalCreateFolderAsync(parentId, title, template.FolderType, settingPrivate, settingIndex, template.SettingsQuota, lifeTimeSetting, SettingDenyDownload, watermark, color, cover, tags, logo);
             }
         }, template.SettingsPrivate, []);
     }

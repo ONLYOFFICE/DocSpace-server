@@ -56,6 +56,21 @@ public record CreateRoomFromTemplateIntegrationEvent : IntegrationEvent
     [ProtoMember(14)]
     public long? Quota { get; set; }
 
+    [ProtoMember(15)]
+    public bool? Indexing { get; set; }
+
+    [ProtoMember(16)]
+    public bool? DenyDownload { get; set; }
+
+    [ProtoMember(17)]
+    public RoomDataLifetimeDto Lifetime { get; set; }
+    
+    [ProtoMember(18)]
+    public WatermarkRequestDto Watermark { get; set; }
+    
+    [ProtoMember(18)]
+    public bool? Private { get; set; }
+
     public CreateRoomFromTemplateIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId)
     {
     }

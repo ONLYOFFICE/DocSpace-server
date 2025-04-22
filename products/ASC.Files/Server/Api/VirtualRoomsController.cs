@@ -118,6 +118,11 @@ public class VirtualRoomsInternalController(
           dto.Cover,
           dto.Color,
           dto.Quota,
+          dto.Indexing,
+          dto.DenyDownload,
+          dto.Lifetime,
+          dto.Watermark,
+          dto.Private,
           false);
 
         await eventBus.PublishAsync(new CreateRoomFromTemplateIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId())
@@ -130,6 +135,11 @@ public class VirtualRoomsInternalController(
             Cover = dto.Cover,
             Color = dto.Color,
             Quota = dto.Quota,
+            Indexing = dto.Indexing,
+            DenyDownload = dto.DenyDownload,
+            Lifetime = dto.Lifetime,
+            Watermark = dto.Watermark,
+            Private = dto.Private,
             TaskId = taskId
         });
         return await GetRoomCreatingStatus();
