@@ -600,20 +600,7 @@ public class FileStorageService //: IFileStorageService
         }
 
         WatermarkRequestDto watermarkDto = null;
-        if (watermark == null)
-        {
-            watermarkDto = new WatermarkRequestDto
-            {
-                Text = template.SettingsWatermark.Text,
-                Additions = template.SettingsWatermark.Additions,
-                Rotate = template.SettingsWatermark.Rotate,
-                ImageUrl = template.SettingsWatermark.ImageUrl,
-                ImageScale = template.SettingsWatermark.ImageScale,
-                ImageHeight = template.SettingsWatermark.ImageHeight,
-                ImageWidth = template.SettingsWatermark.ImageWidth
-            };
-        }
-        else
+        if (watermark != null)
         {
             watermarkDto = new WatermarkRequestDto
             {
@@ -628,11 +615,7 @@ public class FileStorageService //: IFileStorageService
         }
 
         RoomDataLifetime lifeTimeSetting = null;
-        if (lifetime == null)
-        {
-            lifeTimeSetting = template.SettingsLifetime;
-        }
-        else
+        if (lifetime != null)
         {
             lifeTimeSetting = new RoomDataLifetime
             {
