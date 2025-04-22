@@ -224,6 +224,15 @@ public interface IFileDao<T>
     Task<bool> IsExistAsync(string title, T folderId);
 
     /// <summary>
+    ///     Checks whether or not file
+    /// </summary>
+    /// <param name="title">file name</param>
+    /// <param name="category">file category</param>
+    /// <param name="folderId">folder id</param>
+    /// <returns>Returns true if the file exists, otherwise false</returns>
+    Task<bool> IsExistAsync(string title, int category, T folderId);
+
+    /// <summary>
     ///   Moves a file or set of files in a folder
     /// </summary>
     /// <param name="fileId">file id</param>

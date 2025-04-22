@@ -360,6 +360,11 @@ internal class ProviderFileDao(
         return await fileDao.IsExistAsync(title, selector.ConvertId(folderId));
     }
 
+    public async Task<bool> IsExistAsync(string title, int category, string folderId)
+    {
+        return await IsExistAsync(title, folderId);
+    }
+
     public async Task<TTo> MoveFileAsync<TTo>(string fileId, TTo toFolderId, bool deleteLinks = false)
     {
         if (toFolderId is int tId)
