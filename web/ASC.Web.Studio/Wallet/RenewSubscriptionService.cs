@@ -29,6 +29,7 @@ using System.Globalization;
 using ASC.Core;
 using ASC.Core.Billing;
 using ASC.Core.Common.Hosting;
+using ASC.Core.Tenants;
 using ASC.MessagingSystem.Core;
 
 using Microsoft.EntityFrameworkCore;
@@ -123,7 +124,9 @@ static file class Queries
         GetWalletQuotasCloseToExpirationAsync = EF.CompileAsyncQuery(
             (CoreDbContext ctx, DateTime from, DateTime to) =>
                 ctx.TariffRows
-                    .Join(ctx.Quotas, x => x.Quota, y => y.TenantId, (tariffRow, quota) => new { tariffRow, quota })
+                    .Join(ctx.Tenants, x => x.TenantId, y => y.Id, (tariffRow, tenant) => new { tariffRow, tenant })
+                    .Where(x => x.tenant.Status == TenantStatus.Active)
+                    .Join(ctx.Quotas, x => x.tariffRow.Quota, y => y.TenantId, (tariffRowAndTenant, quota) => new { tariffRowAndTenant.tariffRow, quota })
                     .Where(r => r.quota.Wallet)
                     .Where(r => r.tariffRow.DueDate.HasValue && r.tariffRow.DueDate >= from && r.tariffRow.DueDate <= to)
                     .Select(r => new TenantWalletQuotaData(r.tariffRow.TenantId, r.tariffRow.Quota, r.quota.Name, r.tariffRow.Quantity, r.tariffRow.DueDate)));
