@@ -98,8 +98,8 @@ public class RoomTemplatesWorker(
         long? quota,
         bool? indexing,
         bool? denyDownload,
-        RoomDataLifetimeDto lifetime,
-        WatermarkRequestDto watermark,
+        RoomLifetime lifetime,
+        WatermarkRequest watermark,
         bool? @private,
         bool enqueueTask = true,
         string taskId = null)

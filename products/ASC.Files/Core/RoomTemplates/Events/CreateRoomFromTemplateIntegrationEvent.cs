@@ -63,12 +63,12 @@ public record CreateRoomFromTemplateIntegrationEvent : IntegrationEvent
     public bool? DenyDownload { get; set; }
 
     [ProtoMember(17)]
-    public RoomDataLifetimeDto Lifetime { get; set; }
+    public RoomLifetime Lifetime { get; set; }
     
     [ProtoMember(18)]
-    public WatermarkRequestDto Watermark { get; set; }
+    public WatermarkRequest Watermark { get; set; }
     
-    [ProtoMember(18)]
+    [ProtoMember(19)]
     public bool? Private { get; set; }
 
     public CreateRoomFromTemplateIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId)
@@ -78,4 +78,48 @@ public record CreateRoomFromTemplateIntegrationEvent : IntegrationEvent
     protected CreateRoomFromTemplateIntegrationEvent()
     {
     }
+}
+
+[ProtoContract]
+public record RoomLifetime
+{
+    [ProtoMember(1)]
+    public bool DeletePermanently { get; set; }
+
+    [ProtoMember(2)]
+    public RoomDataLifetimePeriod Period { get; set; }
+
+    [ProtoMember(3)]
+    public int? Value { get; set; }
+
+    [ProtoMember(4)]
+    public bool? Enabled { get; set; }
+}
+
+[ProtoContract]
+public record WatermarkRequest
+{
+    [ProtoMember(1)]
+    public bool? Enabled { get; set; }
+
+    [ProtoMember(2)]
+    public WatermarkAdditions Additions { get; set; }
+
+    [ProtoMember(3)]
+    public string Text { get; set; }
+
+    [ProtoMember(4)]
+    public int Rotate { get; set; }
+
+    [ProtoMember(5)]
+    public int ImageScale { get; set; }
+
+    [ProtoMember(6)]
+    public string ImageUrl { get; set; }
+
+    [ProtoMember(7)]
+    public double ImageHeight { get; set; }
+
+    [ProtoMember(8)]
+    public double ImageWidth { get; set; }
 }

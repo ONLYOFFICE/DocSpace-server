@@ -109,6 +109,34 @@ public class VirtualRoomsInternalController(
             };
         }
 
+        RoomLifetime lifetime = null;
+        if (dto.Lifetime != null)
+        {
+            lifetime = new RoomLifetime
+            {
+                DeletePermanently = dto.Lifetime.DeletePermanently,
+                Enabled = dto.Lifetime.Enabled,
+                Period = dto.Lifetime.Period,
+                Value = dto.Lifetime.Value
+            };
+        }
+
+        WatermarkRequest watermark = null;
+        if (dto.Watermark != null)
+        {
+            watermark = new WatermarkRequest()
+            {
+                Additions = dto.Watermark.Additions,
+                Enabled = dto.Watermark.Enabled,
+                ImageHeight = dto.Watermark.ImageHeight,
+                ImageWidth = dto.Watermark.ImageWidth,
+                ImageScale = dto.Watermark.ImageScale,
+                ImageUrl = dto.Watermark.ImageUrl,
+                Rotate = dto.Watermark.Rotate,
+                Text = dto.Watermark.Text
+            };
+        }
+
         var taskId = await roomTemplatesWorker.StartCreateRoomAsync(tenantManager.GetCurrentTenantId(), authContext.CurrentAccount.ID,
           dto.TemplateId,
           dto.Title,
@@ -120,8 +148,8 @@ public class VirtualRoomsInternalController(
           dto.Quota,
           dto.Indexing,
           dto.DenyDownload,
-          dto.Lifetime,
-          dto.Watermark,
+          lifetime,
+          watermark,
           dto.Private,
           false);
 
@@ -137,8 +165,8 @@ public class VirtualRoomsInternalController(
             Quota = dto.Quota,
             Indexing = dto.Indexing,
             DenyDownload = dto.DenyDownload,
-            Lifetime = dto.Lifetime,
-            Watermark = dto.Watermark,
+            Lifetime = lifetime,
+            Watermark = watermark,
             Private = dto.Private,
             TaskId = taskId
         });

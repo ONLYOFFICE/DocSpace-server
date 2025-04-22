@@ -37,8 +37,8 @@ public class CreateRoomFromTemplateOperation : DistributedTaskProgress
     private bool? _indexing;
     private bool? _denyDownload;
     private bool? _private;
-    private RoomDataLifetimeDto _lifetime;
-    private WatermarkRequestDto _watermark;
+    private RoomLifetime _lifetime;
+    private WatermarkRequest _watermark;
     private LogoSettings _logo;
     private bool _copyLogo;
     private IEnumerable<string> _tags;
@@ -72,8 +72,8 @@ public class CreateRoomFromTemplateOperation : DistributedTaskProgress
         long? quota,
         bool? indexing,
         bool? denyDownload,
-        RoomDataLifetimeDto lifetime,
-        WatermarkRequestDto watermark,
+        RoomLifetime lifetime,
+        WatermarkRequest watermark,
         bool? @private)
     {
         TenantId = tenantId;

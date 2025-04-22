@@ -585,8 +585,8 @@ public class FileStorageService //: IFileStorageService
         string color,
         bool? indexing,
         bool? denyDownload,
-        RoomDataLifetimeDto lifetime,
-        WatermarkRequestDto watermark,
+        RoomLifetime lifetime,
+        WatermarkRequest watermark,
         bool? @private)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
@@ -599,9 +599,10 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
         }
 
-        if (template.SettingsWatermark != null && watermark == null)
+        WatermarkRequestDto watermarkDto = null;
+        if (watermark == null)
         {
-            watermark = new WatermarkRequestDto
+            watermarkDto = new WatermarkRequestDto
             {
                 Text = template.SettingsWatermark.Text,
                 Additions = template.SettingsWatermark.Additions,
@@ -610,6 +611,19 @@ public class FileStorageService //: IFileStorageService
                 ImageScale = template.SettingsWatermark.ImageScale,
                 ImageHeight = template.SettingsWatermark.ImageHeight,
                 ImageWidth = template.SettingsWatermark.ImageWidth
+            };
+        }
+        else
+        {
+            watermarkDto = new WatermarkRequestDto
+            {
+                Text = watermark.Text,
+                Additions = watermark.Additions,
+                Rotate = watermark.Rotate,
+                ImageUrl = watermark.ImageUrl,
+                ImageScale = watermark.ImageScale,
+                ImageHeight = watermark.ImageHeight,
+                ImageWidth = watermark.ImageWidth
             };
         }
 
@@ -639,7 +653,7 @@ public class FileStorageService //: IFileStorageService
             await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetRoomsCountCheckKey(tenantId)))
             {
                 await countRoomChecker.CheckAppend();
-                return await InternalCreateFolderAsync(parentId, title, template.FolderType, settingPrivate, settingIndex, template.SettingsQuota, lifeTimeSetting, SettingDenyDownload, watermark, color, cover, tags, logo);
+                return await InternalCreateFolderAsync(parentId, title, template.FolderType, settingPrivate, settingIndex, template.SettingsQuota, lifeTimeSetting, SettingDenyDownload, watermarkDto, color, cover, tags, logo);
             }
         }, template.SettingsPrivate, []);
     }
