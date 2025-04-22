@@ -1469,7 +1469,7 @@ internal class FileDao(
             yield return r;
         }
     }
-    public async IAsyncEnumerable<FormRole> GetFormRoles(int formId)
+    public virtual async IAsyncEnumerable<FormRole> GetFormRoles(int formId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
 
@@ -2603,4 +2603,102 @@ public record FileReassignInfo
 {
     public int FileId { get; init; }
     public Guid RoomOwnerId { get; init; }
+}
+
+[Scope(typeof(ICacheFileDao<int>))]
+internal class CacheFileDao(ILogger<FileDao> logger,
+        FactoryIndexerFile factoryIndexer,
+        FactoryIndexerForm factoryIndexerFormData,
+        UserManager userManager,
+        FileUtility fileUtility,
+        IDbContextFactory<FilesDbContext> dbContextManager,
+        TenantManager tenantManager,
+        TenantLogoManager tenantLogoManager,
+        TenantUtil tenantUtil,
+        SetupInfo setupInfo,
+        MaxTotalSizeStatistic maxTotalSizeStatistic,
+        SettingsManager settingsManager,
+        AuthContext authContext,
+        IServiceProvider serviceProvider,
+        GlobalStore globalStore,
+        GlobalFolder globalFolder,
+        Global global,
+        IDaoFactory daoFactory,
+        ChunkedUploadSessionHolder chunkedUploadSessionHolder,
+        SelectorFactory selectorFactory,
+        CrossDao crossDao,
+        Settings settings,
+        IMapper mapper,
+        ThumbnailSettings thumbnailSettings,
+        IQuotaService quotaService,
+        EmailValidationKeyProvider emailValidationKeyProvider,
+        StorageFactory storageFactory,
+    TenantQuotaController tenantQuotaController,
+    IDistributedLockProvider distributedLockProvider,
+    FileStorageService fileStorageService,
+    SocketManager socketManager,
+    SecurityContext securityContext,
+    TempStream tempStream,
+    FileChecker fileChecker,
+    EntryManager entryManager,
+    FileSharing fileSharing,
+    FilesMessageService filesMessageService,
+    QuotaSocketManager quotaSocketManager,
+    CustomQuota customQuota)
+    : FileDao(
+        logger,
+    factoryIndexer,
+    factoryIndexerFormData,
+    userManager,
+    fileUtility,
+    dbContextManager,
+    tenantManager,
+    tenantLogoManager,
+    tenantUtil,
+    setupInfo,
+    maxTotalSizeStatistic,
+    settingsManager,
+    authContext,
+    serviceProvider,
+    globalStore,
+    globalFolder,
+    global,
+    daoFactory,
+    chunkedUploadSessionHolder,
+    selectorFactory,
+    crossDao,
+    settings,
+    mapper,
+    thumbnailSettings,
+    quotaService,
+    emailValidationKeyProvider,
+    storageFactory,
+    tenantQuotaController,
+    distributedLockProvider,
+    fileStorageService,
+    socketManager,
+    securityContext,
+    tempStream,
+    fileChecker,
+    entryManager,
+    fileSharing,
+    filesMessageService,
+    quotaSocketManager,
+    customQuota), ICacheFileDao<int>
+{
+
+    private readonly ConcurrentDictionary<int, IEnumerable<FormRole>> _cache = new();
+    public override async IAsyncEnumerable<FormRole> GetFormRoles(int formId)
+    {
+        if (!_cache.TryGetValue(formId, out var result))
+        {
+            result = await base.GetFormRoles(formId).ToListAsync();
+            _cache.TryAdd(formId, result);
+        }
+
+        foreach (var folder in result)
+        {
+            yield return folder;
+        }
+    }
 }
