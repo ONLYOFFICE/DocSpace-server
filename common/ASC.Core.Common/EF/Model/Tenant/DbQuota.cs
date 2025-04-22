@@ -169,7 +169,7 @@ public static class DbQuotaExtension
                     Features = "total_size:107374182400",
                     Price = 30,
                     ProductId = "1011",
-                    Visible = false,
+                    Visible = true,
                     Wallet = true
                 }
                 );
