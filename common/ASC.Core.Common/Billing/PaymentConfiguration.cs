@@ -34,4 +34,5 @@ internal class PaymentConfiguration
     public string Secret { get; set; }
     public int Delay { get; set; }
     public bool TrialEnabled { get; set; }
+    public int? DefaultQuota { get; set; }
 }
