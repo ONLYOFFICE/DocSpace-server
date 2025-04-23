@@ -150,6 +150,11 @@ public class TariffService(
                             email = currentPayment.PaymentEmail;
                         }
 
+                        if (asynctariff.Quotas.All(q => q.Wallet))
+                        {
+                            await AddDefaultQuotaAsync(asynctariff);
+                        }
+
                         TenantQuota updatedQuota = null;
 
                         foreach (var quota in asynctariff.Quotas)
@@ -575,6 +580,11 @@ public class TariffService(
         tariff.CustomerId = r.CustomerId;
         tariff.Quotas = await coreDbContext.QuotasAsync(r.TenantId, r.Id).ToListAsync();
 
+        if (tariff.Quotas.All(q => q.Wallet))
+        {
+            await AddDefaultQuotaAsync(tariff);
+        }
+
         return tariff;
     }
 
@@ -772,15 +782,33 @@ public class TariffService(
 
     private async Task AddDefaultQuotaAsync(Tariff tariff)
     {
-        var allQuotas = await quotaService.GetTenantQuotasAsync();
-        var toAdd = TrialEnabled ? 
-            allQuotas.FirstOrDefault(r => r.Trial && !r.Custom) : 
-            allQuotas.FirstOrDefault(r => coreBaseSettings.Standalone || r.Free && !r.Custom);
+        var toAdd = await GetDefaultQuotaAsync();
 
         if (toAdd != null)
         {
-            tariff.Quotas.Add(new Quota(toAdd.TenantId, 1));
+            tariff.Quotas.Insert(0, new Quota(toAdd.TenantId, 1));
         }
+    }
+
+    private async Task<TenantQuota> GetDefaultQuotaAsync()
+    {
+        TenantQuota defaultQuota;
+        var allQuotas = await quotaService.GetTenantQuotasAsync();
+
+        if (PaymentConfiguration.DefaultQuota.HasValue)
+        {
+            defaultQuota = allQuotas.FirstOrDefault(r => r.TenantId == PaymentConfiguration.DefaultQuota.Value);
+            if (defaultQuota != null)
+            {
+                return defaultQuota;
+            }
+        }
+
+        defaultQuota = TrialEnabled ?
+            allQuotas.FirstOrDefault(r => r.Trial && !r.Custom) :
+            allQuotas.FirstOrDefault(r => coreBaseSettings.Standalone || r.Free && !r.Custom);
+
+        return defaultQuota;
     }
 
     private void LogError(Exception error, string tenantId = null)
