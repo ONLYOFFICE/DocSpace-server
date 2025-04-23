@@ -1897,6 +1897,11 @@ public class FileSecurity(IDaoFactory daoFactory,
 
     public async Task<FileShareRecord<T>> GetCurrentShareAsync<T>(FileEntry<T> entry, Guid userId, bool isDocSpaceAdmin, IEnumerable<FileShareRecord<T>> shares = null)
     {
+        if (entry is Folder<T> { FolderType: FolderType.VirtualRooms or FolderType.Archive })
+        {
+            return null;
+        }
+        
         FileShareRecord<T> ace;
         var subjects = new List<Guid>();
         if (shares == null)
