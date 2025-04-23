@@ -45,7 +45,7 @@ public class RenewSubscriptionService(
 {
     private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
 
-    private List<TenantWalletQuotaData> _expiredWalletQuotas;
+    private List<TenantWalletQuotaData> _closeToExpirationWalletQuotas;
 
     protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.Parse(configuration["core:accounting:renewperiod"] ?? "0:1:0", CultureInfo.InvariantCulture);
 
@@ -54,25 +54,28 @@ public class RenewSubscriptionService(
     {
         try
         {
-            if (_expiredWalletQuotas != null && _expiredWalletQuotas.Count > 0)
+            if (_closeToExpirationWalletQuotas != null && _closeToExpirationWalletQuotas.Count > 0)
             {
-                await Parallel.ForEachAsync(_expiredWalletQuotas,
+                var expiredWalletQuotas = _closeToExpirationWalletQuotas.Where(x => x.DueDate < DateTime.UtcNow).ToList();
+
+                await Parallel.ForEachAsync(expiredWalletQuotas,
                     new ParallelOptions { MaxDegreeOfParallelism = 3, CancellationToken = stoppingToken }, //System.Environment.ProcessorCount
                     RenewSubscriptionAsync);
             }
 
-            var to = DateTime.UtcNow;
-            var from = to.Subtract(ExecuteTaskPeriod);
+            var now = DateTime.UtcNow;
+            var from = now.Subtract(ExecuteTaskPeriod * 3);
+            var to = now.Add(ExecuteTaskPeriod * 3);
 
             await using (var scope = _scopeFactory.CreateAsyncScope())
             {
                 await using var coreDbContext = await scope.ServiceProvider.GetRequiredService<IDbContextFactory<CoreDbContext>>().CreateDbContextAsync(stoppingToken);
-                _expiredWalletQuotas = await Queries.GetWalletQuotasCloseToExpirationAsync(coreDbContext, from, to).ToListAsync(stoppingToken);
+                _closeToExpirationWalletQuotas = await Queries.GetWalletQuotasCloseToExpirationAsync(coreDbContext, from, to).ToListAsync(stoppingToken);
             }
 
-            if (_expiredWalletQuotas.Count > 0)
+            if (_closeToExpirationWalletQuotas.Count > 0)
             {
-                logger.InfoRenewSubscriptionServiceFound(_expiredWalletQuotas.Count);
+                logger.InfoRenewSubscriptionServiceFound(_closeToExpirationWalletQuotas.Count);
             }
         }
         catch (Exception e)
@@ -87,7 +90,12 @@ public class RenewSubscriptionService(
         {
             await using var scope = _scopeFactory.CreateAsyncScope();
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
-            _ = await tenantManager.SetCurrentTenantAsync(data.TenantId);
+            var tenant = await tenantManager.SetCurrentTenantAsync(data.TenantId);
+
+            if (tenant.Status != TenantStatus.Active)
+            {
+                return;
+            }
 
             var tariffService = scope.ServiceProvider.GetRequiredService<ITariffService>();
 
