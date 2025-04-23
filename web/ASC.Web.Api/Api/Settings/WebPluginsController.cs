@@ -36,9 +36,13 @@ public class WebPluginsController(
     WebPluginManager webPluginManager,
     TenantManager tenantManager,
     CspSettingsHelper cspSettingsHelper,
-    IMapper mapper)
+    IMapper mapper,
+    IFusionCacheProvider cacheProvider,
+    SecurityContext securityContext)
     : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
+    private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
+
     /// <summary>
     /// Adds a web plugin from a file to the current portal.
     /// </summary>
@@ -76,6 +80,8 @@ public class WebPluginsController(
 
         var outDto = mapper.Map<WebPlugin, WebPluginDto>(webPlugin);
 
+        await _cache.RemoveByTagAsync(CacheExtention.GetPluginsTag(tenant.Id));
+
         return outDto;
     }
 
@@ -93,6 +99,13 @@ public class WebPluginsController(
     [HttpGet("")]
     public async Task<IEnumerable<WebPluginDto>> GetWebPluginsAsync(GetWebPluginsRequestDto inDto)
     {
+        var key = $"{HttpContext.Request.Path}{HttpContext.Request.QueryString}-{HttpContext.Connection.RemoteIpAddress}-{securityContext.CurrentAccount.ID}";
+        var entry = await _cache.GetOrDefaultAsync<CacheEntry>(key);
+        if (entry != null && HttpContext.TryGetFromCache(entry.LastModified))
+        {
+            return null;
+        }
+        var tags = new List<string>();
         var tenant = tenantManager.GetCurrentTenant();
 
         var webPlugins = await webPluginManager.GetWebPluginsAsync(tenant.Id);
@@ -103,6 +116,10 @@ public class WebPluginsController(
         {
             outDto = outDto.Where(i => i.Enabled == inDto.Enabled).ToList();
         }
+
+        tags.Add(CacheExtention.GetPluginsTag(tenant.Id));
+
+        await HttpContext.SetOutputCacheAsync(_cache, key, tags);
 
         return outDto;
     }
@@ -120,11 +137,22 @@ public class WebPluginsController(
     [HttpGet("{name}")]
     public async Task<WebPluginDto> GetWebPluginAsync(WebPluginNameRequestDto inDto)
     {
+        var key = $"{HttpContext.Request.Path}{HttpContext.Request.QueryString}-{HttpContext.Connection.RemoteIpAddress}-{securityContext.CurrentAccount.ID}";
+        var entry = await _cache.GetOrDefaultAsync<CacheEntry>(key);
+        if (entry != null && HttpContext.TryGetFromCache(entry.LastModified))
+        {
+            return null;
+        }
+        var tags = new List<string>();
         var tenant = tenantManager.GetCurrentTenant();
 
         var webPlugin = await webPluginManager.GetWebPluginByNameAsync(tenant.Id, inDto.Name);
 
         var outDto = mapper.Map<WebPlugin, WebPluginDto>(webPlugin);
+
+        tags.Add(CacheExtention.GetPluginsTag(tenant.Id));
+
+        await HttpContext.SetOutputCacheAsync(_cache, key, tags);
 
         return outDto;
     }
@@ -149,6 +177,7 @@ public class WebPluginsController(
         var webPlugin = await webPluginManager.UpdateWebPluginAsync(tenant.Id, inDto.Name, inDto.WebPlugin.Enabled, inDto.WebPlugin.Settings);
 
         await ChangeCspSettings(webPlugin, inDto.WebPlugin.Enabled);
+        await _cache.RemoveByTagAsync(CacheExtention.GetPluginsTag(tenant.Id));
     }
 
     /// <summary>
@@ -171,6 +200,7 @@ public class WebPluginsController(
         var webPlugin = await webPluginManager.DeleteWebPluginAsync(tenant.Id, inDto.Name);
 
         await ChangeCspSettings(webPlugin, false);
+        await _cache.RemoveByTagAsync(CacheExtention.GetPluginsTag(tenant.Id));
     }
 
     private async Task ChangeCspSettings(WebPlugin plugin, bool enabled)

@@ -174,4 +174,9 @@ public static class CacheExtention
     {
         return $"payment-{tenant}";
     }
+
+    public static string GetPluginsTag(int tenant)
+    {
+        return $"plugins-{tenant}";
+    }
 }
