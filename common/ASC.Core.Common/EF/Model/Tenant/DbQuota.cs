@@ -166,8 +166,8 @@ public static class DbQuotaExtension
                     TenantId = -11,
                     Name = "storage",
                     Description = null,
-                    Features = "total_size:107374182400",
-                    Price = 30,
+                    Features = "total_size:1073741824",
+                    Price = 0.0322m,
                     ProductId = "1011",
                     Visible = true,
                     Wallet = true
@@ -215,7 +215,7 @@ public static class DbQuotaExtension
             entity.Property(e => e.Price)
                 .HasColumnName("price")
                 .HasDefaultValueSql("'0.00'")
-                .HasColumnType("decimal(10,2)");
+                .HasColumnType("decimal(10,4)");
 
             entity.Property(e => e.Visible)
                 .HasColumnName("visible")
@@ -259,7 +259,7 @@ public static class DbQuotaExtension
             entity.Property(e => e.Price)
                 .HasColumnName("price")
                 .HasDefaultValue(0.00m)
-                .HasColumnType("decimal(10,2)");
+                .HasColumnType("decimal(10,4)");
 
             entity.Property(e => e.Visible)
                 .HasColumnName("visible")
