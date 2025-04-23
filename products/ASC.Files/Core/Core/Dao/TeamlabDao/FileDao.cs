@@ -1442,7 +1442,7 @@ internal class FileDao(
         await filesDbContext.SaveChangesAsync();
     }
 
-    public virtual async Task<(int, IEnumerable<FormRole>)> GetUserFormRoles(int formId, Guid userId)
+    public virtual async Task<(int, List<FormRole>)> GetUserFormRoles(int formId, Guid userId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
 
@@ -2706,8 +2706,8 @@ internal class CacheFileDao(ILogger<FileDao> logger,
             yield return folder;
         }
     }
-    private readonly ConcurrentDictionary<(int, Guid), (int, IEnumerable<FormRole>)> _cacheUserRoles = new();
-    public override async Task<(int, IEnumerable<FormRole>)> GetUserFormRoles(int formId, Guid userId)
+    private readonly ConcurrentDictionary<(int, Guid), (int, List<FormRole>)> _cacheUserRoles = new();
+    public override async Task<(int, List<FormRole>)> GetUserFormRoles(int formId, Guid userId)
     {
         if (!_cacheUserRoles.TryGetValue((formId, userId), out var result))
         {

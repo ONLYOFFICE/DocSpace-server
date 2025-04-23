@@ -542,9 +542,9 @@ internal class SharePointFileDao(
     {
         return AsyncEnumerable.Empty<FormRole>();
     }
-    public Task<(int, IEnumerable<FormRole>)> GetUserFormRoles(string formId, Guid userId)
+    public Task<(int, List<FormRole>)> GetUserFormRoles(string formId, Guid userId)
     {
-        return Task.FromResult((-1, Enumerable.Empty<FormRole>()));
+        return Task.FromResult((-1, new List<FormRole>()));
     }
     public IAsyncEnumerable<FormRole> GetUserFormRolesInRoom(string roomId, Guid userId)
     {
