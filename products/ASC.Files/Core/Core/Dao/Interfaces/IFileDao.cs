@@ -297,7 +297,7 @@ public interface IFileDao<T>
     /// <param name="formId"></param>
     /// <param name="userId"></param>
     /// <returns></returns>
-    Task<(int, IAsyncEnumerable<FormRole>)> GetUserFormRoles(T formId, Guid userId);
+    Task<(int, IEnumerable<FormRole>)> GetUserFormRoles(T formId, Guid userId);
 
     /// <summary>
     /// Get user form roles in room

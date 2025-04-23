@@ -490,9 +490,9 @@ internal class ProviderFileDao(
     {
         return AsyncEnumerable.Empty<FormRole>();
     }
-    public Task<(int, IAsyncEnumerable<FormRole>)> GetUserFormRoles(string formId, Guid userId)
+    public Task<(int, IEnumerable<FormRole>)> GetUserFormRoles(string formId, Guid userId)
     {
-        return Task.FromResult((-1, AsyncEnumerable.Empty<FormRole>()));
+        return Task.FromResult((-1, Enumerable.Empty<FormRole>()));
     }
     public IAsyncEnumerable<FormRole> GetUserFormRolesInRoom(string roomId, Guid userId)
     {

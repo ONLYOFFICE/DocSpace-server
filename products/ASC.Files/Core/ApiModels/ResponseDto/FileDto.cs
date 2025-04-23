@@ -340,9 +340,7 @@ public class FileDtoHelper(
 
             if (currentRoom is { FolderType: FolderType.VirtualDataRoom })
             {
-                var (currentStep, roles) = await fileDao.GetUserFormRoles(file.Id, authContext.CurrentAccount.ID);
-                var roleList = await roles.ToListAsync();
-
+                var (currentStep, roleList) = await fileDao.GetUserFormRoles(file.Id, authContext.CurrentAccount.ID);
                 if (currentStep == -1 && result.Security[FileSecurity.FilesSecurityActions.Edit] && properties != null && properties.CopyToFillOut)
                 {
                     result.FormFillingStatus = FormFillingStatus.Draft;
@@ -369,7 +367,7 @@ public class FileDtoHelper(
                                     : FormFillingStatus.InProgress;
                                 break;
                             default:
-                                if (roleList.Count > 0 || properties.FormFilling.StartedByUserId.Equals(authContext.CurrentAccount.ID))
+                                if (roleList.Any() || properties.FormFilling.StartedByUserId.Equals(authContext.CurrentAccount.ID))
                                 {
                                     result.FormFillingStatus = FormFillingStatus.InProgress;
                                 }
