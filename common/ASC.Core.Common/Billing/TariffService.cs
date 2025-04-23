@@ -132,7 +132,7 @@ public class TariffService(
                                 throw new InvalidOperationException($"Quota with id {currentPayment.ProductId} not found for portal {await coreSettings.GetKeyAsync(tenantId)}.");
                             }
 
-                            asynctariff.Id = currentPayment.PaymentId;
+                            asynctariff.Id = Math.Max(asynctariff.Id, currentPayment.PaymentId);
 
                             DateTime? quotaDueDate = null;
                             if (quota.Wallet)
