@@ -71,9 +71,12 @@ public class PortalController(
     IHttpContextAccessor httpContextAccessor,
     QuotaHelper quotaHelper,
     IEventBus eventBus,
-    CspSettingsHelper cspSettingsHelper)
+    CspSettingsHelper cspSettingsHelper,
+    IFusionCacheProvider cacheProvider)
     : ControllerBase
 {
+    private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
+
     /// <summary>
     /// Returns the current portal information.
     /// </summary>
@@ -162,8 +165,19 @@ public class PortalController(
     public async Task<TenantExtraDto> GetTenantExtra(PortalExtraTenantRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        var quota = await quotaHelper.GetCurrentQuotaAsync(inDto.Refresh);
+
+        var key = $"{HttpContext.Request.Path}{HttpContext.Request.QueryString}-{HttpContext.Connection.RemoteIpAddress}-{securityContext.CurrentAccount.ID}";
+        var entry = await _cache.GetOrDefaultAsync<CacheEntry>(key);
+        if (entry != null && HttpContext.TryGetFromCache(entry.LastModified))
+        {
+            return null;
+        }
+        var tags = new List<string>();
+
+        var quota = await quotaHelper.GetCurrentQuotaAsync(tags,inDto.Refresh);
+
         var docServiceQuota = await documentServiceLicense.GetLicenseQuotaAsync();
+        tags.Add(CacheExtention.GetDocumentServiceLicenseTag());
         
         var result = new TenantExtraDto
         {
@@ -183,6 +197,7 @@ public class PortalController(
             DocServerLicense = docServiceQuota.Item2
         };
 
+        await HttpContext.SetOutputCacheAsync(_cache, key, tags);
         return result;
     }
 

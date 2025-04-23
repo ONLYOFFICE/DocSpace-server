@@ -28,7 +28,7 @@ namespace ASC.Core.Common.Quota;
 
 public interface ITenantQuotaFeatureStat<T>
 {
-    Task<T> GetValueAsync();
+    Task<T> GetValueAsync(List<string> tags = null);
 }
 
 public interface ITenantQuotaFeatureStat<T, T1> : ITenantQuotaFeatureStat<T1> where T : TenantQuotaFeature<T1>;

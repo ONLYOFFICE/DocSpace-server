@@ -72,6 +72,7 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
 
         var quota = await tenantManager.GetTenantQuotaAsync(tenant);
         tags.Add(CacheExtention.GetTenantQuotaTag(tenant));
+        tags.Add(CacheExtention.GetTenantQuotaTag(quota.TenantId));
 
         var result = new CapabilitiesDto
         {

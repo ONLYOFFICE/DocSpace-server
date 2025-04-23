@@ -27,13 +27,13 @@
 namespace ASC.Files.Core.Helpers;
 
 [Scope]
-public class DocumentServiceLicense(ICache cache,
+public class DocumentServiceLicense(IFusionCacheProvider cacheProvider,
     CoreBaseSettings coreBaseSettings,
     FilesLinkUtility filesLinkUtility,
     IHttpClientFactory clientFactory)
 {
     private static readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(15);
-
+    private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
 
     private async Task<CommandResponse> GetDocumentServiceLicenseAsync(bool useCache)
     {
@@ -48,7 +48,7 @@ public class DocumentServiceLicense(ICache cache,
         }
 
         var cacheKey = "DocumentServiceLicense";
-        var commandResponse = useCache ? cache.Get<CommandResponse>(cacheKey) : null;
+        var commandResponse = useCache ? await _cache.GetOrDefaultAsync<CommandResponse>(cacheKey) : null;
         if (commandResponse == null)
         {
             commandResponse = await CommandRequestAsync(
@@ -66,7 +66,9 @@ public class DocumentServiceLicense(ICache cache,
 
             if (useCache)
             {
-                cache.Insert(cacheKey, commandResponse, DateTime.UtcNow.Add(_cacheExpiration));
+                await _cache.SetAsync(cacheKey, commandResponse, 
+                    opt=> opt.SetDuration(_cacheExpiration).SetFailSafe(true),
+                    [CacheExtention.GetDocumentServiceLicenseTag()]);
             }
         }
 

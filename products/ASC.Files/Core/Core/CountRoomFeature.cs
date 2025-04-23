@@ -53,11 +53,12 @@ public class CountRoomChecker(
 [Scope]
 public class CountRoomCheckerStatistic(IServiceProvider serviceProvider) : ITenantQuotaFeatureStat<CountRoomFeature, int>
 {
-    public async Task<int> GetValueAsync()
+    public async Task<int> GetValueAsync(List<string> tags = null)
     {
         var daoFactory = serviceProvider.GetService<IDaoFactory>();
         var folderDao = serviceProvider.GetService<IFolderDao<int>>();
         var globalFolder = serviceProvider.GetService<GlobalFolder>();
+        var tenantManager = serviceProvider.GetService<TenantManager>();
 
         var parentId = await globalFolder.GetFolderVirtualRoomsAsync(daoFactory, false);
 
@@ -66,7 +67,15 @@ public class CountRoomCheckerStatistic(IServiceProvider serviceProvider) : ITena
             return 0;
         }
         
-        return await folderDao.GetFoldersCountAsync(parentId, FilterType.None, false, Guid.Empty, string.Empty);
+        var result = await folderDao.GetFoldersCountAsync(parentId, FilterType.None, false, Guid.Empty, string.Empty);
+
+        var tenant = tenantManager.GetCurrentTenantId();
+        if (tags != null) 
+        {
+            tags.Add(CacheExtention.GetFoldersTag(tenant, parentId));
+        }
+
+        return result;
     }
 }
 

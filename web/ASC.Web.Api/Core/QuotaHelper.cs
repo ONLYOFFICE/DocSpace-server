@@ -37,27 +37,37 @@ public class QuotaHelper(
     UserManager userManager, 
     AuthContext authContext)
 {
-    public async IAsyncEnumerable<QuotaDto> GetQuotasAsync()
+    public async IAsyncEnumerable<QuotaDto> GetQuotasAsync(List<string> tags)
     {
         var quotaList = await tenantManager.GetTenantQuotasAsync(false);
         var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
-        
+
+        tags.Add(CacheExtention.GetTenantQuotaTag(tenantManager.GetCurrentTenantId()));
         foreach (var quota in quotaList)
         {
-            yield return await ToQuotaDto(quota, userType);
+            tags.Add(CacheExtention.GetTenantQuotaTag(quota.TenantId));
+            yield return await ToQuotaDto(quota, userType, tags);
         }
     }
 
-    public async Task<QuotaDto> GetCurrentQuotaAsync(bool refresh = false, bool getUsed = true)
+    public async Task<QuotaDto> GetCurrentQuotaAsync(List<string> tags, bool refresh = false, bool getUsed = true)
     {
+        var tenant = tenantManager.GetCurrentTenantId();
+
         var quota = await tenantManager.GetCurrentTenantQuotaAsync(refresh);
+
         var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
-        return await ToQuotaDto(quota, userType, getUsed);
+        tags.Add(CacheExtention.GetGroupRefTag(tenant, ASC.Core.Users.Constants.GroupAdmin.ID));
+        tags.Add(CacheExtention.GetGroupRefTag(tenant, ASC.Core.Users.Constants.GroupRoomAdmin.ID));
+        tags.Add(CacheExtention.GetGroupRefTag(tenant, ASC.Core.Users.Constants.GroupGuest.ID));
+
+        return await ToQuotaDto(quota, userType, tags, getUsed);
     }
 
-    private async Task<QuotaDto> ToQuotaDto(TenantQuota quota, EmployeeType employeeType, bool getUsed = false)
+    private async Task<QuotaDto> ToQuotaDto(TenantQuota quota, EmployeeType employeeType, List<string> tags, bool getUsed = false)
     {
-        var features = await GetFeatures(quota, employeeType, getUsed).ToListAsync();
+        var tenant = tenantManager.GetCurrentTenantId();
+        var features = await GetFeatures(quota, employeeType, getUsed, tags).ToListAsync();
 
         var result =  new QuotaDto
         {
@@ -80,8 +90,13 @@ public class QuotaHelper(
         if (coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Statistic)
         {
             var tenantUserQuotaSettingsTask = settingsManager.LoadAsync<TenantUserQuotaSettings>();
+            tags.Add(CacheExtention.GetSettingsTag(tenant, nameof(TenantUserQuotaSettings)));
+
             var tenantRoomQuotaSettingsTask = settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+            tags.Add(CacheExtention.GetSettingsTag(tenant, nameof(TenantRoomQuotaSettings)));
+
             var tenantQuotaSettingsTask = settingsManager.LoadAsync<TenantQuotaSettings>();
+            tags.Add(CacheExtention.GetSettingsTag(tenant, nameof(TenantQuotaSettings)));
 
             await Task.WhenAll(tenantUserQuotaSettingsTask, tenantRoomQuotaSettingsTask, tenantQuotaSettingsTask);
 
@@ -93,7 +108,7 @@ public class QuotaHelper(
         return result;
     }
 
-    private async IAsyncEnumerable<TenantQuotaFeatureDto> GetFeatures(TenantQuota quota, EmployeeType employeeType, bool getUsed)
+    private async IAsyncEnumerable<TenantQuotaFeatureDto> GetFeatures(TenantQuota quota, EmployeeType employeeType, bool getUsed, List<string> tags)
     {
         var assembly = GetType().Assembly;
 
@@ -193,7 +208,7 @@ public class QuotaHelper(
 
                 if (statisticProvider != null)
                 {
-                    used = await statisticProvider.GetValueAsync();
+                    used = await statisticProvider.GetValueAsync(tags);
                 }
             }
         }

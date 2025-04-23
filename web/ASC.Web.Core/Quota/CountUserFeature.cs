@@ -54,9 +54,19 @@ public class CountUserChecker(
 [Scope]
 public class CountUserStatistic(IServiceProvider serviceProvider) : ITenantQuotaFeatureStat<CountUserFeature, int>
 {
-    public async Task<int> GetValueAsync()
+    public async Task<int> GetValueAsync(List<string> tags = null)
     {
         var userManager = serviceProvider.GetService<UserManager>();
-        return (await userManager.GetUsersByGroupAsync(Constants.GroupGuest.ID)).Length;
+        var tenantManager = serviceProvider.GetService<TenantManager>();
+
+        var result = (await userManager.GetUsersByGroupAsync(Constants.GroupGuest.ID)).Length;
+
+        var tenant = tenantManager.GetCurrentTenantId();
+        if (tags != null)
+        {
+            tags.Add(CacheExtention.GetGroupRefTag(tenant, Constants.GroupGuest.ID));
+        }
+
+        return result;
     }
 }

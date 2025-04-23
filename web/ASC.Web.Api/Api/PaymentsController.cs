@@ -48,9 +48,11 @@ public class PaymentController(
     IHttpContextAccessor httpContextAccessor,
     MessageService messageService,
     StudioNotifyService studioNotifyService,
-    PermissionContext permissionContext)
+    PermissionContext permissionContext,
+    IFusionCacheProvider cacheProvider)
     : ControllerBase
 {
+    private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
     private readonly int _maxCount = 10;
     private readonly int _expirationMinutes = 2;
 
@@ -226,13 +228,26 @@ public class PaymentController(
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var currentQuota = await tariffHelper.GetCurrentQuotaAsync(false, false);
+        var key = $"{HttpContext.Request.Path}{HttpContext.Request.QueryString}-{HttpContext.Connection.RemoteIpAddress}-{securityContext.CurrentAccount.ID}";
+        var entry = await _cache.GetOrDefaultAsync<CacheEntry>(key);
+        if (entry != null && HttpContext.TryGetFromCache(entry.LastModified))
+        {
+            return null;
+        }
+        var tags = new List<string>();
+
+        var currentQuota = await tariffHelper.GetCurrentQuotaAsync(tags, false, false);
         if (currentQuota.NonProfit)
         {
+            await HttpContext.SetOutputCacheAsync(_cache, key, tags);
             return [currentQuota];
         }
 
-        return await tariffHelper.GetQuotasAsync().ToListAsync();
+        var result = await tariffHelper.GetQuotasAsync(tags).ToListAsync();
+
+        await HttpContext.SetOutputCacheAsync(_cache, key, tags);
+
+        return result;
     }
 
     /// <summary>
@@ -252,8 +267,20 @@ public class PaymentController(
         {
             throw new SecurityException();
         }
-        
-        return await tariffHelper.GetCurrentQuotaAsync(inDto.Refresh);
+
+        var key = $"{HttpContext.Request.Path}{HttpContext.Request.QueryString}-{HttpContext.Connection.RemoteIpAddress}-{securityContext.CurrentAccount.ID}";
+        var entry = await _cache.GetOrDefaultAsync<CacheEntry>(key);
+        if (entry != null && HttpContext.TryGetFromCache(entry.LastModified))
+        {
+            return null;
+        }
+        var tags = new List<string>();
+
+        var result = await tariffHelper.GetCurrentQuotaAsync(tags, inDto.Refresh);
+
+        await HttpContext.SetOutputCacheAsync(_cache, key, tags);
+
+        return result;
     }
 
     /// <summary>

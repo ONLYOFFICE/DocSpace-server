@@ -153,5 +153,15 @@ public static class CacheExtention
     public static string GetDocumentServiceTag()
     {
         return $"DocumentServiceVersion";
+    } 
+    
+    public static string GetDocumentServiceLicenseTag()
+    {
+        return $"DocumentServiceLicense";
+    }
+
+    public static string GetFoldersTag(int tenant, int parent)
+    {
+        return $"folders-{tenant}-{parent}";
     }
 }

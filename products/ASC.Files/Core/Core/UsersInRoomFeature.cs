@@ -41,7 +41,7 @@ public class UsersInRoomChecker(
 [Scope]
 public class UsersInRoomStatistic(IServiceProvider serviceProvider) : ITenantQuotaFeatureStat<UsersInRoomFeature, int>
 {
-    public Task<int> GetValueAsync()
+    public Task<int> GetValueAsync(List<string> tags = null)
     {
         return Task.FromResult(0);
     }

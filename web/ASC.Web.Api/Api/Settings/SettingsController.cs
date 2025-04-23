@@ -107,6 +107,10 @@ public partial class SettingsController(MessageService messageService,
         var additionalWhiteLabelSettings = await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>();
         tags.Add(CacheExtention.GetSettingsTag(Tenant.DefaultTenant, nameof(AdditionalWhiteLabelSettings)));
 
+        var quota = await tenantManager.GetCurrentTenantQuotaAsync();
+        tags.Add(CacheExtention.GetTenantQuotaTag(tenant.Id));
+        tags.Add(CacheExtention.GetTenantQuotaTag(quota.TenantId));
+
         var settings = new SettingsDto
         {
             Culture = coreBaseSettings.GetRightCultureName(tenant.GetCulture()),
@@ -121,7 +125,7 @@ public partial class SettingsController(MessageService messageService,
             EnableAdmMess = studioAdminMessageSettings.Enable || await tenantExtra.IsNotPaidAsync(),
             CookieSettingsEnabled = tenantCookieSettings.Enabled,
             UserNameRegex = userFormatter.UserNameRegex.ToString(),
-            DisplayAbout = (!coreBaseSettings.Standalone && !coreBaseSettings.CustomMode) || !(await tenantManager.GetCurrentTenantQuotaAsync()).Branding,
+            DisplayAbout = (!coreBaseSettings.Standalone && !coreBaseSettings.CustomMode) || !quota.Branding,
             DeepLink = new DeepLinkDto
             {
                 AndroidPackageName = configuration["deeplink:androidpackagename"] ?? "",
@@ -133,7 +137,6 @@ public partial class SettingsController(MessageService messageService,
         };
 
         tags.Add(CacheExtention.GetSettingsTag(tenant.Id, nameof(TenantWhiteLabelSettings)));
-        tags.Add(CacheExtention.GetTenantQuotaTag(tenant.Id));
         tags.Add(CacheExtention.GetTenantTag(tenant.Id));
 
         if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() != Guid.Empty)

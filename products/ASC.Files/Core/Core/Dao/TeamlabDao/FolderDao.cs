@@ -45,7 +45,8 @@ internal class FolderDao(
         GlobalStore globalStore,
     GlobalFolder globalFolder,
     IDistributedLockProvider distributedLockProvider,
-    StorageFactory storageFactory)
+    StorageFactory storageFactory,
+    IFusionCacheProvider cacheProvider)
     : AbstractDao(dbContextManager,
               userManager,
               tenantManager,
@@ -70,6 +71,7 @@ internal class FolderDao(
     private const string RoomTemplates = "roomtemplates";
     private const string Archive = "archive";
 
+    private readonly IFusionCache _fusionCache = cacheProvider.GetMemoryCache();
     public virtual async Task<Folder<int>> GetFolderAsync(int folderId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
@@ -470,6 +472,8 @@ internal class FolderDao(
             folderId = await InternalSaveFolderToDbAsync(dbContext, folder);
         }
 
+        await _fusionCache.RemoveByTagAsync(CacheExtention.GetFoldersTag(tenantManager.GetCurrentTenantId(), folder.ParentId));
+
         //FactoryIndexer.IndexAsync(FoldersWrapper.GetFolderWrapper(ServiceProvider, folder));
         return folderId;
     }
@@ -710,6 +714,7 @@ internal class FolderDao(
             await context.SaveChangesAsync();
             await tx.CommitAsync();
             await RecalculateFoldersCountAsync(parent, tenantId);
+            await _fusionCache.RemoveByTagAsync(CacheExtention.GetFoldersTag(tenantId, parent));
         });
 
         //FactoryIndexer.DeleteAsync(new FoldersWrapper { Id = id });
@@ -835,6 +840,7 @@ internal class FolderDao(
             await foreach (var f in filesDbContext.FoldersAsync(tenantId, recalculateFolders))
             {
                 f.FilesCount = await filesDbContext.FilesCountAsync(f.TenantId, f.Id);
+                await _fusionCache.RemoveByTagAsync(CacheExtention.GetFoldersTag(tenantId, f.Id));
             }
 
             await filesDbContext.SaveChangesAsync();
@@ -1982,7 +1988,8 @@ internal class CacheFolderDao(
     GlobalStore globalStore,
     GlobalFolder globalFolder,
     IDistributedLockProvider distributedLockProvider,
-    StorageFactory storageFactory)
+    StorageFactory storageFactory,
+    IFusionCacheProvider cacheProvider)
     : FolderDao(
         factoryIndexer,
         userManager,
@@ -2001,8 +2008,10 @@ internal class CacheFolderDao(
         globalStore,
         globalFolder,
         distributedLockProvider,
-        storageFactory), ICacheFolderDao<int>
+        storageFactory,
+        cacheProvider), ICacheFolderDao<int>
 {
+    private readonly IFusionCache _fusionCache = cacheProvider.GetMemoryCache();
     private readonly ConcurrentDictionary<int, Folder<int>> _cache = new();
     public override async Task<Folder<int>> GetFolderAsync(int folderId)
                         {

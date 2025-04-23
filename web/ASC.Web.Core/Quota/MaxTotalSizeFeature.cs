@@ -39,13 +39,29 @@ public class MaxTotalSizeChecker(ITenantQuotaFeatureStat<MaxTotalSizeFeature, lo
 [Scope]
 public class MaxTotalSizeStatistic(IServiceProvider serviceProvider) : ITenantQuotaFeatureStat<MaxTotalSizeFeature, long>
 {
-    public async Task<long> GetValueAsync()
+    public async Task<long> GetValueAsync(List<string> tags = null)
     {
         var tenantManager = serviceProvider.GetService<TenantManager>();
         var tenant = (tenantManager.GetCurrentTenant()).Id;
 
-        return (await tenantManager.FindTenantQuotaRowsAsync(tenant))
-            .Where(r => !string.IsNullOrEmpty(r.Tag) && new Guid(r.Tag) != Guid.Empty)
-            .Sum(r => r.Counter);
+        var rows = (await tenantManager.FindTenantQuotaRowsAsync(tenant))
+            .Where(r => !string.IsNullOrEmpty(r.Tag) && new Guid(r.Tag) != Guid.Empty);
+
+        if (tags != null)
+        {
+            foreach (var row in rows)
+            {
+                if (row.UserId == Guid.Empty)
+                {
+                    tags.Add(CacheExtention.GetTenantQuotaRowTag(tenant, row.Path));
+                }
+                else
+                {
+                    tags.Add(CacheExtention.GetTenantQuotaRowTag(tenant, row.Path, row.UserId));
+                }
+            }
+        }
+
+        return rows.Sum(r => r.Counter);
     }
 }

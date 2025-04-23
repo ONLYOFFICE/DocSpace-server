@@ -55,10 +55,18 @@ public class CountPaidUserChecker(
 [Scope]
 public class CountPaidUserStatistic(IServiceProvider serviceProvider) : ITenantQuotaFeatureStat<CountPaidUserFeature, int>
 {
-    public async Task<int> GetValueAsync()
+    public async Task<int> GetValueAsync(List<string> tags = null)
     {
         var userManager = serviceProvider.GetService<UserManager>();
+        var tenantManager = serviceProvider.GetService<TenantManager>();
+
         var adminsCount = (await userManager.GetUsersByGroupAsync(Constants.GroupRoomAdmin.ID)).Length;
+
+        var tenant = tenantManager.GetCurrentTenantId();
+        if (tags != null)
+        {
+            tags.Add(CacheExtention.GetGroupRefTag(tenant, Constants.GroupAdmin.ID));
+        }
 
         return adminsCount;
     }
