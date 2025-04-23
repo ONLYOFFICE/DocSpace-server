@@ -28,6 +28,7 @@ using System.Globalization;
 
 using ASC.Core;
 using ASC.Core.Billing;
+using ASC.Core.Common.EF;
 using ASC.Core.Common.Hosting;
 using ASC.Core.Tenants;
 using ASC.MessagingSystem.Core;
@@ -45,7 +46,8 @@ public class RenewSubscriptionService(
 {
     private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
 
-    private List<TenantWalletQuotaData> _closeToExpirationWalletQuotas;
+    private Dictionary<int, string> _walletQuotas;
+    private List<DbTariffRow> _closeToExpirationWalletQuotas;
 
     protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.Parse(configuration["core:accounting:renewperiod"] ?? "0:1:0", CultureInfo.InvariantCulture);
 
@@ -70,7 +72,13 @@ public class RenewSubscriptionService(
             await using (var scope = _scopeFactory.CreateAsyncScope())
             {
                 await using var coreDbContext = await scope.ServiceProvider.GetRequiredService<IDbContextFactory<CoreDbContext>>().CreateDbContextAsync(stoppingToken);
-                _closeToExpirationWalletQuotas = await Queries.GetWalletQuotasCloseToExpirationAsync(coreDbContext, from, to).ToListAsync(stoppingToken);
+
+                if (_walletQuotas == null)
+                {
+                    _walletQuotas = await Queries.GetWalletQuotasAsync(coreDbContext).ToDictionaryAsync(x => x.Key, x => x.Value, stoppingToken);
+                }
+
+                _closeToExpirationWalletQuotas = await Queries.GetWalletQuotasCloseToExpirationAsync(coreDbContext, _walletQuotas.Keys.ToArray(), from, to).ToListAsync(stoppingToken);
             }
 
             if (_closeToExpirationWalletQuotas.Count > 0)
@@ -84,7 +92,7 @@ public class RenewSubscriptionService(
         }
     }
 
-    private async ValueTask RenewSubscriptionAsync(TenantWalletQuotaData data, CancellationToken cancellationToken)
+    private async ValueTask RenewSubscriptionAsync(DbTariffRow data, CancellationToken cancellationToken)
     {
         try
         {
@@ -99,15 +107,17 @@ public class RenewSubscriptionService(
 
             var tariffService = scope.ServiceProvider.GetRequiredService<ITariffService>();
 
+            var quotaName = _walletQuotas[data.Quota];
+
             var quantity = new Dictionary<string, int>
             {
-                { data.QuotaName, data.Quantity }
+                { quotaName, data.Quantity }
             };
 
             var result = await tariffService.PaymentChangeAsync(data.TenantId, quantity);
             if (result)
             {
-                var description = $"{data.QuotaName} {data.Quantity}";
+                var description = $"{quotaName} {data.Quantity}";
                 var messageService = scope.ServiceProvider.GetRequiredService<MessageService>();
                 messageService.Send(MessageInitiator.System, MessageAction.CustomerSubscriptionUpdated, description);
 
@@ -128,16 +138,34 @@ public class RenewSubscriptionService(
 
 static file class Queries
 {
-    public static readonly Func<CoreDbContext, DateTime, DateTime, IAsyncEnumerable<TenantWalletQuotaData>>
+    public static readonly Func<CoreDbContext, int[], DateTime, DateTime, IAsyncEnumerable<DbTariffRow>>
         GetWalletQuotasCloseToExpirationAsync = EF.CompileAsyncQuery(
-            (CoreDbContext ctx, DateTime from, DateTime to) =>
+            (CoreDbContext ctx, int[] quotas, DateTime from, DateTime to) =>
                 ctx.TariffRows
-                    .Join(ctx.Tenants, x => x.TenantId, y => y.Id, (tariffRow, tenant) => new { tariffRow, tenant })
-                    .Where(x => x.tenant.Status == TenantStatus.Active)
-                    .Join(ctx.Quotas, x => x.tariffRow.Quota, y => y.TenantId, (tariffRowAndTenant, quota) => new { tariffRowAndTenant.tariffRow, quota })
-                    .Where(r => r.quota.Wallet)
-                    .Where(r => r.tariffRow.DueDate.HasValue && r.tariffRow.DueDate >= from && r.tariffRow.DueDate <= to)
-                    .Select(r => new TenantWalletQuotaData(r.tariffRow.TenantId, r.tariffRow.Quota, r.quota.Name, r.tariffRow.Quantity, r.tariffRow.DueDate)));
-}
+                    .Join(
+                        ctx.Tenants.Where(t => t.Status == TenantStatus.Active),
+                        tariffRow => tariffRow.TenantId,
+                        tenant => tenant.Id,
+                        (tariffRow, tenant) => tariffRow
+                    )
+                    .GroupBy(tariffRow => tariffRow.TenantId)
+                    .Select(group => new {
+                        TenantId = group.Key,
+                        MaxTariffId = group.Max(tariffRow => tariffRow.TariffId)
+                    })
+                    .Join(
+                        ctx.TariffRows,
+                        x => new { TenantId = x.TenantId, MaxTariffId = x.MaxTariffId },
+                        tariffRow => new { TenantId = tariffRow.TenantId, MaxTariffId = tariffRow.TariffId },
+                        (x, tariffRow) => tariffRow
+                    )
+                    .Where(r => quotas.Contains(r.Quota) && r.DueDate.HasValue && r.DueDate > from && r.DueDate < to)
+            );
 
-public record TenantWalletQuotaData(int TenantId, int QuotaId, string QuotaName, int Quantity, DateTime? DueDate);
+    public static readonly Func<CoreDbContext, IAsyncEnumerable<KeyValuePair<int, string>>>
+        GetWalletQuotasAsync = EF.CompileAsyncQuery(
+            (CoreDbContext ctx) =>
+                ctx.Quotas
+                    .Where(r => r.Wallet)
+                    .Select(r => new KeyValuePair<int, string>(r.TenantId, r.Name)));
+}
