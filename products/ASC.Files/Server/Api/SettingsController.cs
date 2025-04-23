@@ -216,10 +216,11 @@ public class SettingsController(
 
         var result = await settingsDtoConverter.Get();
         tags.Add(CacheExtention.GetSettingsTag(tenant, securityContext.CurrentAccount.ID, nameof(FilesSettings)));
-        tags.Add(CacheExtention.GetTenantQuotaTag(tenant));
 
         var quota = await tenantManager.GetTenantQuotaAsync(tenant);
-        tags.Add(CacheExtention.GetTenantQuotaTag(quota.TenantId));
+        tags.Add(CacheExtention.GetTenantQuotaTag(quota.TenantId)); 
+        tags.Add(CacheExtention.GetTariffTag(tenant));
+        tags.Add(CacheExtention.GetPaymentTag(tenant));
 
         await HttpContext.SetOutputCacheAsync(_cache, key, tags);
 

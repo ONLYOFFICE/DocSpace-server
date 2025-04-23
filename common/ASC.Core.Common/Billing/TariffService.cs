@@ -65,9 +65,11 @@ public class TariffService(
     ILogger<TariffService> logger,
     BillingClient billingClient,
     IServiceProvider serviceProvider,
-    TenantExtraConfig tenantExtraConfig)
+    TenantExtraConfig tenantExtraConfig,
+    IFusionCacheProvider cacheProvider)
     : ITariffService
 {
+    private readonly IFusionCache _fusionCache = cacheProvider.GetMemoryCache();
     private static readonly TimeSpan _defaultCacheExpiration = TimeSpan.FromMinutes(5);
     private static readonly TimeSpan _standaloneCacheExpiration = TimeSpan.FromMinutes(15);
     private TimeSpan _cacheExpiration = _defaultCacheExpiration;
@@ -340,6 +342,8 @@ public class TariffService(
 
     private async Task ClearCacheAsync(int tenantId)
     {
+        await _fusionCache.RemoveByTagAsync(CacheExtention.GetTariffTag(tenantId));
+        await _fusionCache.RemoveByTagAsync(CacheExtention.GetPaymentTag(tenantId));
         await hybridCache.RemoveAsync(GetTariffCacheKey(tenantId));
         await hybridCache.RemoveAsync(GetBillingPaymentCacheKey(tenantId));
     }
@@ -380,7 +384,8 @@ public class TariffService(
                         LogError(error, tenantId.ToString());
                     }
                 }
-                
+
+                await _fusionCache.RemoveByTagAsync(CacheExtention.GetPaymentTag(tenantId));
                 await hybridCache.SetAsync(key, payments, TimeSpan.FromMinutes(10));
             }
         }
@@ -615,7 +620,6 @@ public class TariffService(
             }
 
             await ClearCacheAsync(tenant);
-
             await NotifyWebSocketAsync(currentTariff, tariffInfo);
         }
 
@@ -860,7 +864,8 @@ public class TariffService(
     }
 
     private async Task InsertToCache(int tenantId, Tariff tariff)
-    { 
+    {
+        await _fusionCache.RemoveByTagAsync(CacheExtention.GetTariffTag(tenantId));
         await hybridCache.SetAsync(GetTariffCacheKey(tenantId), tariff, GetCacheExpiration());
     }
 

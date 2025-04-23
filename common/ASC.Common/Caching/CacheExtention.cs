@@ -164,4 +164,14 @@ public static class CacheExtention
     {
         return $"folders-{tenant}-{parent}";
     }
+
+    public static string GetTariffTag(int tenant)
+    {
+        return $"tariff-{tenant}";
+    }
+
+    public static string GetPaymentTag(int tenant)
+    {
+        return $"payment-{tenant}";
+    }
 }

@@ -42,7 +42,10 @@ public class QuotaHelper(
         var quotaList = await tenantManager.GetTenantQuotasAsync(false);
         var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
 
-        tags.Add(CacheExtention.GetTenantQuotaTag(tenantManager.GetCurrentTenantId()));
+        var tenant = tenantManager.GetCurrentTenantId();
+        tags.Add(CacheExtention.GetTariffTag(tenant));
+        tags.Add(CacheExtention.GetPaymentTag(tenant));
+
         foreach (var quota in quotaList)
         {
             tags.Add(CacheExtention.GetTenantQuotaTag(quota.TenantId));

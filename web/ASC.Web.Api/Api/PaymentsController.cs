@@ -270,7 +270,7 @@ public class PaymentController(
 
         var key = $"{HttpContext.Request.Path}{HttpContext.Request.QueryString}-{HttpContext.Connection.RemoteIpAddress}-{securityContext.CurrentAccount.ID}";
         var entry = await _cache.GetOrDefaultAsync<CacheEntry>(key);
-        if (entry != null && HttpContext.TryGetFromCache(entry.LastModified))
+        if (!inDto.Refresh && entry != null && HttpContext.TryGetFromCache(entry.LastModified))
         {
             return null;
         }
@@ -278,7 +278,10 @@ public class PaymentController(
 
         var result = await tariffHelper.GetCurrentQuotaAsync(tags, inDto.Refresh);
 
-        await HttpContext.SetOutputCacheAsync(_cache, key, tags);
+        if (!inDto.Refresh)
+        {
+            await HttpContext.SetOutputCacheAsync(_cache, key, tags);
+        }
 
         return result;
     }

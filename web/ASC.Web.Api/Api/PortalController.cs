@@ -252,8 +252,18 @@ public class PortalController(
     [HttpGet("tariff")]
     public async Task<TariffDto> GetTariffAsync(CurrentPortalTariffRequestDto inDto)
     {
+        var key = $"{HttpContext.Request.Path}{HttpContext.Request.QueryString}-{HttpContext.Connection.RemoteIpAddress}-{securityContext.CurrentAccount.ID}";
+        var entry = await _cache.GetOrDefaultAsync<CacheEntry>(key);
+        if (!inDto.Refresh && entry != null && HttpContext.TryGetFromCache(entry.LastModified))
+        {
+            return null;
+        }
+        var tags = new List<string>();
         var tenant = tenantManager.GetCurrentTenant();
+
         var source = await tariffService.GetTariffAsync(tenant.Id, refresh: inDto.Refresh);
+        tags.Add(CacheExtention.GetTariffTag(tenant.Id));
+        tags.Add(CacheExtention.GetPaymentTag(tenant.Id));
 
         var result = new TariffDto
         {
@@ -261,6 +271,9 @@ public class PortalController(
         };
 
         var currentUserType = await userManager.GetUserTypeAsync(securityContext.CurrentAccount.ID);
+        tags.Add(CacheExtention.GetGroupRefTag(tenant.Id, Constants.GroupAdmin.ID));
+        tags.Add(CacheExtention.GetGroupRefTag(tenant.Id, Constants.GroupRoomAdmin.ID));
+        tags.Add(CacheExtention.GetGroupRefTag(tenant.Id, Constants.GroupGuest.ID));
 
         if (currentUserType is EmployeeType.RoomAdmin or EmployeeType.DocSpaceAdmin)
         {
@@ -278,7 +291,12 @@ public class PortalController(
             result.LicenseDate = source.LicenseDate;
             result.Quotas = source.Quotas;
         }
-        
+
+        if (!inDto.Refresh) 
+        {
+            await HttpContext.SetOutputCacheAsync(_cache, key, tags);
+        }
+
         return result;
     }
 

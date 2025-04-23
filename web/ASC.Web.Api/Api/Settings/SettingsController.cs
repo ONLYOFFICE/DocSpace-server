@@ -108,8 +108,9 @@ public partial class SettingsController(MessageService messageService,
         tags.Add(CacheExtention.GetSettingsTag(Tenant.DefaultTenant, nameof(AdditionalWhiteLabelSettings)));
 
         var quota = await tenantManager.GetCurrentTenantQuotaAsync();
-        tags.Add(CacheExtention.GetTenantQuotaTag(tenant.Id));
         tags.Add(CacheExtention.GetTenantQuotaTag(quota.TenantId));
+        tags.Add(CacheExtention.GetTariffTag(tenant.Id));
+        tags.Add(CacheExtention.GetPaymentTag(tenant.Id));
 
         var settings = new SettingsDto
         {
