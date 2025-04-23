@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Common.Caching;
+
 using Module = ASC.Api.Core.Module;
 
 namespace ASC.Files.Api;
@@ -34,9 +36,14 @@ public class SettingsController(
     FilesSettingsDtoConverter settingsDtoConverter,
     CompressToArchive compressToArchive,
     FolderDtoHelper folderDtoHelper,
-    FileDtoHelper fileDtoHelper)
+    FileDtoHelper fileDtoHelper,
+    TenantManager tenantManager,
+    IFusionCacheProvider cacheProvider,
+    SecurityContext securityContext)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
+    private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
+
     /// <summary>
     /// Changes the access to the third-party settings.
     /// </summary>
@@ -198,7 +205,25 @@ public class SettingsController(
     [HttpGet("settings")]
     public async Task<FilesSettingsDto> GetFilesSettings()
     {
-        return await settingsDtoConverter.Get();
+        var key = $"{HttpContext.Request.Path}{HttpContext.Request.QueryString}-{HttpContext.Connection.RemoteIpAddress}-{securityContext.CurrentAccount.ID}";
+        var entry = await _cache.GetOrDefaultAsync<CacheEntry>(key);
+        if (entry != null && HttpContext.TryGetFromCache(entry.LastModified))
+        {
+            return null;
+        }
+        var tags = new List<string>();
+        var tenant = tenantManager.GetCurrentTenantId();
+
+        var result = await settingsDtoConverter.Get();
+        tags.Add(CacheExtention.GetSettingsTag(tenant, securityContext.CurrentAccount.ID, nameof(FilesSettings)));
+        tags.Add(CacheExtention.GetTenantQuotaTag(tenant));
+
+        var quota = await tenantManager.GetTenantQuotaAsync(tenant);
+        tags.Add(CacheExtention.GetTenantQuotaTag(quota.TenantId));
+
+        await HttpContext.SetOutputCacheAsync(_cache, key, tags);
+
+        return result;
     }
 
     /// <summary>
