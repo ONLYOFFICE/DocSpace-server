@@ -703,7 +703,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.Property<decimal>("Price")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("decimal(10,2)")
+                        .HasColumnType("decimal(10,4)")
                         .HasColumnName("price")
                         .HasDefaultValueSql("'0.00'");
 
@@ -720,6 +720,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("visible")
                         .HasDefaultValueSql("'0'");
 
+                    b.Property<bool>("Wallet")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("wallet")
+                        .HasDefaultValueSql("'0'");
+
                     b.HasKey("TenantId")
                         .HasName("PRIMARY");
 
@@ -734,7 +740,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Features = "trial,audit,ldap,sso,customization,thirdparty,restore,oauth,total_size:107374182400,file_size:100,manager:1,statistic",
                             Name = "trial",
                             Price = 0m,
-                            Visible = false
+                            Visible = false,
+                            Wallet = false
                         },
                         new
                         {
@@ -744,7 +751,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Name = "admin",
                             Price = 15m,
                             ProductId = "1002",
-                            Visible = false
+                            Visible = false,
+                            Wallet = false
                         },
                         new
                         {
@@ -752,7 +760,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Features = "free,oauth,total_size:2147483648,manager:3,room:12",
                             Name = "startup",
                             Price = 0m,
-                            Visible = false
+                            Visible = false,
+                            Wallet = false
                         },
                         new
                         {
@@ -761,7 +770,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Name = "disk",
                             Price = 0m,
                             ProductId = "1004",
-                            Visible = false
+                            Visible = false,
+                            Wallet = false
                         },
                         new
                         {
@@ -770,7 +780,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Name = "admin1",
                             Price = 0m,
                             ProductId = "1005",
-                            Visible = false
+                            Visible = false,
+                            Wallet = false
                         },
                         new
                         {
@@ -779,7 +790,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Name = "subscription",
                             Price = 0m,
                             ProductId = "1001",
-                            Visible = false
+                            Visible = false,
+                            Wallet = false
                         },
                         new
                         {
@@ -788,7 +800,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Name = "nonprofit",
                             Price = 0m,
                             ProductId = "1007",
-                            Visible = false
+                            Visible = false,
+                            Wallet = false
                         },
                         new
                         {
@@ -796,7 +809,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Features = "free,oauth,total_size:107374182400,manager:100,room:100",
                             Name = "zoom",
                             Price = 0m,
-                            Visible = false
+                            Visible = false,
+                            Wallet = false
                         },
                         new
                         {
@@ -806,7 +820,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Name = "admin",
                             Price = 20m,
                             ProductId = "1006",
-                            Visible = true
+                            Visible = true,
+                            Wallet = false
                         },
                         new
                         {
@@ -816,7 +831,18 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Name = "adminyear",
                             Price = 200m,
                             ProductId = "1009",
-                            Visible = true
+                            Visible = true,
+                            Wallet = false
+                        },
+                        new
+                        {
+                            TenantId = -11,
+                            Features = "total_size:1073741824",
+                            Name = "storage",
+                            Price = 0.0322m,
+                            ProductId = "1011",
+                            Visible = true,
+                            Wallet = true
                         });
                 });
 
@@ -1226,6 +1252,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Property<int>("Quota")
                         .HasColumnType("int")
                         .HasColumnName("quota");
+
+                    b.Property<DateTime?>("DueDate")
+                        .HasColumnType("datetime")
+                        .HasColumnName("due_date");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int")
