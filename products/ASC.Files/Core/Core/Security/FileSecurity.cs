@@ -878,7 +878,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         var file = e as File<T>;
         var folder = e as Folder<T>;
         var isRoom = folder != null && DocSpaceHelper.IsRoom(folder.FolderType);
-        var fileDao = daoFactory.GetFileDao<T>();
+        var cacheFileDao = daoFactory.GetCacheFileDao<T>();
         if (file != null &&
             action == FilesSecurityActions.FillForms &&
             !file.IsForm)
@@ -1217,15 +1217,25 @@ public class FileSecurity(IDaoFactory daoFactory,
 
                     if (fileFolder != null && fileFolder.FolderType == FolderType.VirtualDataRoom)
                     {
-                        var (currentStep, roles) = await fileDao.GetUserFormRoles(file.Id, userId);
-                        var myRoles = await roles.ToListAsync();
+                        var (currentStep, myRoles) = await cacheFileDao.GetUserFormRoles(file.Id, userId);
                         var role = myRoles.Where(r => !r.Submitted).FirstOrDefault();
-                        var properties = await fileDao.GetProperties(file.Id);
+                        var properties = await cacheFileDao.GetProperties(file.Id);
                         var formFilling = properties?.FormFilling;
 
                         var userHasFullAccess = await HasFullAccessAsync(e, userId, isGuest, isRoom, isUser);
 
-                        var shareRecord = await GetPureSharesAsync(room, new List<Guid> { userId }).FirstOrDefaultAsync();
+                        FileShareRecord<T> shareRecord;
+                        var cachedRecords = GetCachedRecords<T>();
+                        if(cachedRecords.TryGetValue(GetCacheKey(room.Id, userId), out var value))
+                        {
+                            shareRecord = value;
+                        }
+                        else 
+                        {
+                            shareRecord = await GetPureSharesAsync(room, new List<Guid> { userId }).FirstOrDefaultAsync();
+                            cachedRecords.TryAdd(GetCacheKey(room.Id, userId), shareRecord);
+                        }
+
                         var hasFullAccessToForm = userHasFullAccess || (shareRecord is { Share: FileShare.ContentCreator or FileShare.RoomManager});
 
                         var IsFillingStoped = formFilling?.FillingStopedDate != null && !DateTime.MinValue.Equals(formFilling?.FillingStopedDate);

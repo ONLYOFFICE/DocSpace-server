@@ -1442,22 +1442,27 @@ internal class FileDao(
         await filesDbContext.SaveChangesAsync();
     }
 
-    public async Task<(int, IAsyncEnumerable<FormRole>)> GetUserFormRoles(int formId, Guid userId)
+    public virtual async Task<(int, List<FormRole>)> GetUserFormRoles(int formId, Guid userId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var currentStep = await filesDbContext.DbFormRoleExistsAsync(tenantId, formId) ? await filesDbContext.DbFormRoleCurrentStepAsync(tenantId, formId) : -1;
-        return (currentStep, IterateRoles(tenantId, formId, userId));
+        var roles = await GetFormUserRoles(formId, userId).ToListAsync();
+        return (currentStep, roles);
     }
-    private async IAsyncEnumerable<FormRole> IterateRoles(int tenantId, int formId, Guid userId)
+    public virtual async IAsyncEnumerable<FormRole> GetFormUserRoles(int formId, Guid userId)
     {
-        await using var context = await _dbContextFactory.CreateDbContextAsync();
-        await foreach (var role in context.DbFormUserRolesQueryAsync(tenantId, formId, userId))
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await foreach (var r in filesDbContext.DbFormUserRolesQueryAsync(tenantId, formId, userId))
         {
-            yield return role;
+            yield return r;
         }
     }
+
     public async IAsyncEnumerable<FormRole> GetUserFormRolesInRoom(int roomId, Guid userId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
@@ -1942,7 +1947,7 @@ internal class FileDao(
         return $"{ThumbnailTitle}.{width}x{height}.{global.ThumbnailExtension}";
     }
 
-    public async Task<EntryProperties<int>> GetProperties(int fileId)
+    public virtual async Task<EntryProperties<int>> GetProperties(int fileId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
@@ -2701,4 +2706,43 @@ internal class CacheFileDao(ILogger<FileDao> logger,
             yield return folder;
         }
     }
+    private readonly ConcurrentDictionary<(int, Guid), (int, List<FormRole>)> _cacheUserRoles = new();
+    public override async Task<(int, List<FormRole>)> GetUserFormRoles(int formId, Guid userId)
+    {
+        if (!_cacheUserRoles.TryGetValue((formId, userId), out var result))
+        {
+            result = await base.GetUserFormRoles(formId, userId);
+            _cacheUserRoles.TryAdd((formId, userId), result);
+        }
+
+        return result;
+    }
+
+    private readonly ConcurrentDictionary<(int, Guid), IEnumerable<FormRole>> _cacheFormUserRoles = new();
+    public override async IAsyncEnumerable<FormRole> GetFormUserRoles(int formId, Guid userId)
+    {
+        if (!_cacheFormUserRoles.TryGetValue((formId, userId), out var result))
+        {
+            result = await base.GetFormUserRoles(formId, userId).ToListAsync();
+            _cacheFormUserRoles.TryAdd((formId, userId), result);
+        }
+
+        foreach (var role in result)
+        {
+            yield return role;
+        }
+    }
+
+    private readonly ConcurrentDictionary<int, EntryProperties<int>> _cacheFileProperties = new();
+    public override async Task<EntryProperties<int>> GetProperties(int fileId)
+    {
+        if (!_cacheFileProperties.TryGetValue(fileId, out var result))
+        {
+            result = await base.GetProperties(fileId);
+            _cacheFileProperties.TryAdd(fileId, result);
+        }
+
+        return result;
+    }
+   
 }
