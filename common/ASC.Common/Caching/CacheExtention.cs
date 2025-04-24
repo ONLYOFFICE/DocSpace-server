@@ -160,7 +160,7 @@ public static class CacheExtention
         return $"DocumentServiceLicense";
     }
 
-    public static string GetFoldersTag(int tenant, int parent)
+    public static string GetFoldersTag<T>(int tenant, T parent)
     {
         return $"folders-{tenant}-{parent}";
     }
@@ -185,7 +185,7 @@ public static class CacheExtention
         return $"thirdparty-{tenant}";
     }
 
-    public static string GetFilesTag(int tenant, int parent)
+    public static string GetFilesTag<T>(int tenant, T parent)
     {
         return $"files-{tenant}-{parent}";
     }

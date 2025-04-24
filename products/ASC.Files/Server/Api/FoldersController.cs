@@ -40,7 +40,10 @@ public class FoldersControllerInternal(
     PermissionContext permissionContext,
     FileShareDtoHelper fileShareDtoHelper,
     HistoryApiHelper historyApiHelper,
-    FormFillingReportCreator formFillingReportCreator)
+    FormFillingReportCreator formFillingReportCreator,
+    IFusionCacheProvider cacheProvider,
+    TenantManager tenantManager,
+    SecurityContext securityContext)
     : FoldersController<int>(
         breadCrumbsManager,
         folderContentDtoHelper,
@@ -50,7 +53,10 @@ public class FoldersControllerInternal(
         folderDtoHelper,
         fileDtoHelper,
         permissionContext,
-        fileShareDtoHelper)
+        fileShareDtoHelper,
+        cacheProvider,
+        tenantManager,
+        securityContext)
 {
     /// <summary>
     /// Returns the activity history of a folder with a specified identifier.
@@ -96,7 +102,10 @@ public class FoldersControllerThirdparty(
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     PermissionContext permissionContext,
-    FileShareDtoHelper fileShareDtoHelper)
+    FileShareDtoHelper fileShareDtoHelper,
+    IFusionCacheProvider cacheProvider,
+    TenantManager tenantManager,
+    SecurityContext securityContext)
     : FoldersController<string>(breadCrumbsManager,
         folderContentDtoHelper,
         fileStorageService,
@@ -105,7 +114,10 @@ public class FoldersControllerThirdparty(
         folderDtoHelper,
         fileDtoHelper,
         permissionContext,
-        fileShareDtoHelper);
+        fileShareDtoHelper,
+        cacheProvider,
+        tenantManager,
+        securityContext);
 
 public abstract class FoldersController<T>(
     BreadCrumbsManager breadCrumbsManager,
@@ -116,10 +128,14 @@ public abstract class FoldersController<T>(
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     PermissionContext permissionContext,
-    FileShareDtoHelper fileShareDtoHelper)
+    FileShareDtoHelper fileShareDtoHelper,
+    IFusionCacheProvider cacheProvider,
+    TenantManager tenantManager,
+    SecurityContext securityContext)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
-
+    private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
+ 
     /// <summary>
     /// Creates a new folder with the title specified in the request. The parent folder ID can be also specified.
     /// </summary>
@@ -186,6 +202,14 @@ public abstract class FoldersController<T>(
     [HttpGet("{folderId}")]
     public async Task<FolderContentDto<T>> GetFolderByFolderIdAsync(GetFolderRequestDto<T> inDto)
     {
+        var key = $"{HttpContext.Request.Path}{HttpContext.Request.QueryString}-{HttpContext.Connection.RemoteIpAddress}-{securityContext.CurrentAccount.ID}";
+        var entry = await _cache.GetOrDefaultAsync<CacheEntry>(key);
+        if (entry != null && HttpContext.TryGetFromCache(entry.LastModified))
+        {
+            return null;
+        }
+        var tags = new List<string>();
+        var tenant = tenantManager.GetCurrentTenantId();
 
         var split = inDto.Extension == null ? [] : inDto.Extension.Split(",");
         FormsItemDto formsItemDto = null;
@@ -195,7 +219,13 @@ public abstract class FoldersController<T>(
         }
 
         var folder = await folderContentDtoHelper.GetAsync(inDto.FolderId, inDto.UserIdOrGroupId, inDto.FilterType, inDto.RoomId, true, true, inDto.ExcludeSubject, inDto.ApplyFilterOption, inDto.SearchArea, split, formsItemDto);
-        return folder.NotFoundIfNull();
+        var result =  folder.NotFoundIfNull();
+
+        tags.Add(CacheExtention.GetFoldersTag(tenant, folder.Current.Id));
+        tags.Add(CacheExtention.GetFilesTag(tenant, folder.Current.Id));
+        await HttpContext.SetOutputCacheAsync(_cache, key, tags);
+
+        return result;
     }
 
     /// <summary>
