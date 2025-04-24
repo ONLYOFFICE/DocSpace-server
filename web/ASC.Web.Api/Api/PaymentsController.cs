@@ -149,20 +149,55 @@ public class PaymentController(
             return false;
         }
 
-        var quotaName = inDto.Quantity.First().Key;
+        var product = inDto.Quantity.First();
+        var productName = product.Key;
+        var productQty = product.Value;
         var quota = (await quotaService.GetTenantQuotasAsync())
-            .FirstOrDefault(q => !string.IsNullOrEmpty(q.ProductId) && q.Name == quotaName);
+            .FirstOrDefault(q => !string.IsNullOrEmpty(q.ProductId) && q.Name == productName);
 
         if (quota == null)
         {
             return false;
         }
 
-        if (!quota.Wallet)
+        if (inDto.ProductQuantityType == BillingClient.ProductQuantityType.Set)
+        {
+            var tariff = await tariffService.GetTariffAsync(tenant.Id);
+
+            if (tariff.Quotas.Any(q => q.Id == quota.TenantId && q.Quantity == productQty))
+            {
+                return false;
+            }
+        }
+
+        if (quota.Wallet)
+        {
+            if (inDto.ProductQuantityType == BillingClient.ProductQuantityType.Add)
+            {
+                var balance = await tariffService.GetCustomerBalanceAsync(tenant.Id);
+                if (balance == null)
+                {
+                    return false;
+                }
+
+                //TODO: support other currencies
+                var subAccount = balance.SubAccounts.FirstOrDefault(x => x.Currency == "USD");
+                if (subAccount == null)
+                {
+                    return false;
+                }
+
+                if (subAccount.Amount < productQty * quota.Price)
+                {
+                    return false;
+                }
+            }
+        }
+        else
         {
             var currentQuota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
 
-            if (currentQuota.Price > 0 && currentQuota.Name != quotaName)
+            if (currentQuota.Price > 0 && currentQuota.Name != productName)
             {
                 return false;
             }
@@ -172,7 +207,7 @@ public class PaymentController(
 
         if (result)
         {
-            messageService.Send(MessageAction.CustomerSubscriptionUpdated, $"{inDto.Quantity.First().Key} {inDto.Quantity.First().Value}");
+            messageService.Send(MessageAction.CustomerSubscriptionUpdated, $"{productName} {productQty}");
         }
 
         return result;
