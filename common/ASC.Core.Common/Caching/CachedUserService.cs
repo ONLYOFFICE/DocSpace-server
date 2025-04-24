@@ -108,7 +108,7 @@ public class CachedUserService : IUserService
             var user = await _service.GetUserAsync(tenant, id);
 
             return ctx.Modified(user);
-        }, opt => opt.SetDuration(_cacheExpiration).SetFailSafe(true), [CacheExtention.GetUserTag(tenant, id)]);
+        }, opt => opt.SetDuration(_cacheExpiration).SetFailSafe(true), [CacheExtention.GetUserTag(tenant, id), CacheExtention.GetUsersTag(tenant)]);
 
         return user;
     }
@@ -121,7 +121,7 @@ public class CachedUserService : IUserService
             var user = _service.GetUser(tenant, id);
 
             return ctx.Modified(user, lastModified: DateTime.UtcNow);
-        }, opt => opt.SetDuration(_cacheExpiration).SetFailSafe(true), [CacheExtention.GetUserTag(tenant, id)]);
+        }, opt => opt.SetDuration(_cacheExpiration).SetFailSafe(true), [CacheExtention.GetUserTag(tenant, id), CacheExtention.GetUsersTag(tenant)]);
 
         return user;
     }
@@ -149,8 +149,8 @@ public class CachedUserService : IUserService
     {
         user = await _service.SaveUserAsync(tenant, user);
 
-        var tag = CacheExtention.GetUserTag(tenant, user.Id);
-        await _cache.RemoveByTagAsync(tag);
+        await _cache.RemoveByTagAsync(CacheExtention.GetUserTag(tenant, user.Id));
+        await _cache.RemoveByTagAsync(CacheExtention.GetUsersTag(tenant));
 
         return user;
     }
@@ -159,8 +159,8 @@ public class CachedUserService : IUserService
     {
         await _service.RemoveUserAsync(tenant, id, immediate);
 
-        var tag = CacheExtention.GetUserTag(tenant, id);
-        await _cache.RemoveByTagAsync(tag);
+        await _cache.RemoveByTagAsync(CacheExtention.GetUserTag(tenant, id));
+        await _cache.RemoveByTagAsync(CacheExtention.GetUsersTag(tenant));
     }
 
     public async Task<byte[]> GetUserPhotoAsync(int tenant, Guid id)
@@ -330,7 +330,9 @@ public class CachedUserService : IUserService
         {
             var users = await _service.GetUsersAsync(tenant);
 
-            ctx.Tags = users.Select(u => CacheExtention.GetUserTag(tenant, u.Id)).ToArray();
+            var tags = users.Select(u => CacheExtention.GetUserTag(tenant, u.Id)).ToList();
+            tags.Add(CacheExtention.GetUsersTag(tenant));
+            ctx.Tags = tags.ToArray();
 
             return ctx.Modified(users);
         }, opt => opt.SetDuration(_cacheExpiration).SetFailSafe(true));

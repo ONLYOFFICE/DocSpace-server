@@ -40,6 +40,11 @@ public static class CacheExtention
         return $"user-{tenant}-{userId}";
     }
 
+    public static string GetUsersTag(int tenant)
+    {
+        return $"users-{tenant}";
+    }
+
     public static string GetUserPhotoTag(int tenant, Guid userId)
     {
         return $"userphoto-{tenant}-{userId}";

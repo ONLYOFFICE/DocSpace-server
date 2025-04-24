@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Globalization;
-
 using ZiggyCreatures.Caching.Fusion;
 
 namespace ASC.People.Api;
@@ -981,6 +979,15 @@ public class UserController(
     [HttpGet("filter")]
     public async IAsyncEnumerable<EmployeeFullDto> GetFullByFilter(SimpleByFilterRequestDto inDto)
     {
+        var key = $"{HttpContext.Request.Path}{HttpContext.Request.QueryString}-{HttpContext.Connection.RemoteIpAddress}-{securityContext.CurrentAccount.ID}";
+        var entry = await _fusionCache.GetOrDefaultAsync<CacheEntry>(key);
+        if (entry != null && HttpContext.TryGetFromCache(entry.LastModified))
+        {
+            yield break;
+        }
+        var tags = new List<string>();
+        var tenant = tenantManager.GetCurrentTenantId();
+
         var filter = new UserFilter
         {
             EmployeeStatus = inDto.EmployeeStatus,
@@ -1000,6 +1007,9 @@ public class UserController(
         };
         
         var users = GetByFilterAsync(filter);
+
+        tags.Add(CacheExtention.GetUsersTag(tenant));
+        await HttpContext.SetOutputCacheAsync(_fusionCache, key, tags);
 
         await foreach (var user in users)
         {
