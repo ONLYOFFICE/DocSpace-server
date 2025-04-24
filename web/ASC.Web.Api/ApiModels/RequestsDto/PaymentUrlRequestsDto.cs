@@ -75,12 +75,12 @@ public class ChechoutSetupUrlRequestsDto
 /// <summary>
 /// Put money on deposit request parameters
 /// </summary>
-public class PutOnDepositRequestDto
+public class TopUpDepositRequestDto
 {
     /// <summary>
     /// Amount
     /// </summary>
-    public long Amount { get; set; }
+    public decimal Amount { get; set; }
 
     /// <summary>
     /// Currency

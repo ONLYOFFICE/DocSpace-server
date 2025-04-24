@@ -42,7 +42,7 @@ public interface ITariffService
     Task<Tariff> GetBillingInfoAsync(int? tenant = null, int? id = null);
     bool IsConfigured();
     Task<CustomerInfo> GetCustomerInfoAsync(int tenantId, bool refresh = false);
-    Task<string> TopUpDepositAsync(int tenantId, long amount, string currency, bool waitForChanges = false);
+    Task<string> TopUpDepositAsync(int tenantId, decimal amount, string currency, bool waitForChanges = false);
 
     Task<Balance> GetCustomerBalanceAsync(int tenantId, bool refresh = false);
     Task<Session> OpenCustomerSessionAsync(int tenantId, int serviceAccount, string externalRef, int quantity);

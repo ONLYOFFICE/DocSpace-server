@@ -447,7 +447,7 @@ public class PaymentController(
     [SwaggerResponse(200, "Success status", typeof(string))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("deposit")]
-    public async Task<string> TopUpDepositAsync(PutOnDepositRequestDto inDto)
+    public async Task<string> TopUpDepositAsync(TopUpDepositRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
         {
