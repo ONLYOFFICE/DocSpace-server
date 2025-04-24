@@ -152,7 +152,7 @@ public class TariffService(
 
                         if (asynctariff.Quotas.All(q => q.Wallet))
                         {
-                            await AddDefaultQuotaAsync(asynctariff);
+                            await AddInitialQuotaAsync(asynctariff, tenantId);
                         }
 
                         TenantQuota updatedQuota = null;
@@ -582,7 +582,7 @@ public class TariffService(
 
         if (tariff.Quotas.All(q => q.Wallet))
         {
-            await AddDefaultQuotaAsync(tariff);
+            await AddInitialQuotaAsync(tariff, tenant.Value);
         }
 
         return tariff;
@@ -778,6 +778,22 @@ public class TariffService(
         }
 
         return result;
+    }
+
+    private async Task AddInitialQuotaAsync(Tariff tariff, int tenantId)
+    {
+        await using var coreDbContext = await coreDbContextManager.CreateDbContextAsync();
+
+        var toAdd = await coreDbContext.QuotasAsync(tenantId, -tenantId).FirstOrDefaultAsync();
+
+        if (toAdd != null)
+        {
+            tariff.Quotas.Insert(0, toAdd);
+        }
+        else
+        {
+            await AddDefaultQuotaAsync(tariff);
+        }
     }
 
     private async Task AddDefaultQuotaAsync(Tariff tariff)
