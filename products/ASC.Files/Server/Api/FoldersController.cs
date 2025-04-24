@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Common.Caching;
+
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
@@ -117,6 +119,7 @@ public abstract class FoldersController<T>(
     FileShareDtoHelper fileShareDtoHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
+
     /// <summary>
     /// Creates a new folder with the title specified in the request. The parent folder ID can be also specified.
     /// </summary>
@@ -327,9 +330,13 @@ public class FoldersControllerCommon(
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     UserManager userManager,
-    SecurityContext securityContext)
+    SecurityContext securityContext,
+    IFusionCacheProvider cacheProvider,
+    TenantManager tenantManager)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
+    private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
+
     /// <summary>
     /// Returns the detailed list of files and folders located in the "Common" section.
     /// </summary>
@@ -442,9 +449,25 @@ public class FoldersControllerCommon(
     [HttpGet("@root")]
     public async IAsyncEnumerable<FolderContentDto<int>> GetRootFoldersAsync(GetRootFolderRequestDto inDto)
     {
+        var key = $"{HttpContext.Request.Path}{HttpContext.Request.QueryString}-{HttpContext.Connection.RemoteIpAddress}-{securityContext.CurrentAccount.ID}";
+        var entry = await _cache.GetOrDefaultAsync<CacheEntry>(key);
+        if (entry != null && HttpContext.TryGetFromCache(entry.LastModified))
+        {
+            yield break;
+        }
+        var tags = new List<string>();
+        var tenant = tenantManager.GetCurrentTenantId();
+
         var foldersIds = GetRootFoldersIdsAsync(inDto.WithoutTrash ?? false);
 
         await foreach (var folder in foldersIds)
+        {
+            tags.Add(CacheExtention.GetFoldersTag(tenant, folder));
+            tags.Add(CacheExtention.GetFilesTag(tenant, folder));
+        }
+        await HttpContext.SetOutputCacheAsync(_cache, key, tags);
+
+        await foreach(var folder in foldersIds)
         {
             yield return await folderContentDtoHelper.GetAsync(folder, inDto.UserIdOrGroupId, inDto.FilterType, 0, true, false, false, ApplyFilterOption.All, null);
         }

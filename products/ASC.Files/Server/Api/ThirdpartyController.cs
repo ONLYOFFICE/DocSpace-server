@@ -189,11 +189,12 @@ public class ThirdpartyController(
         var result = fileStorageService.GetThirdPartyAsync();
         tags.Add(CacheExtention.GetThirdpartiesTag(tenant));
 
+        await HttpContext.SetOutputCacheAsync(_cache, key, tags);
+
         await foreach (var r in result)
         {
             yield return r;
         }
-        await HttpContext.SetOutputCacheAsync(_cache, key, tags);
     }
 
     /// <summary>

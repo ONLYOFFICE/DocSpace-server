@@ -68,7 +68,8 @@ internal class FileDao(
     FileSharing fileSharing,
     FilesMessageService filesMessageService,
     QuotaSocketManager quotaSocketManager,
-    CustomQuota customQuota)
+    CustomQuota customQuota,
+    IFusionCacheProvider cacheProvider)
     : AbstractDao(dbContextManager,
               userManager,
               tenantManager,
@@ -87,6 +88,8 @@ internal class FileDao(
     private const string FileIdGroupName = "id";
 
     private static readonly Regex _pattern = new($"{FilePathPart}(?'id'\\d+)", RegexOptions.Singleline | RegexOptions.Compiled);
+
+    private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
 
     public Task InvalidateCacheAsync(int fileId)
     {
@@ -715,6 +718,7 @@ internal class FileDao(
         }
 
         _ = factoryIndexer.IndexAsync(await InitDocumentAsync(toInsert));
+        await _cache.RemoveByTagAsync(CacheExtention.GetFilesTag(tenantId, toInsert.ParentId));
 
         return await GetFileAsync(file.Id);
     }
@@ -836,6 +840,7 @@ internal class FileDao(
         }
 
         _ = factoryIndexer.IndexAsync(await InitDocumentAsync(toUpdate));
+        await _cache.RemoveByTagAsync(CacheExtention.GetFilesTag(tenantId, toUpdate.ParentId));
 
         return await GetFileAsync(file.Id);
     }
@@ -930,6 +935,7 @@ internal class FileDao(
             {
                 await factoryIndexer.DeleteAsync(d);
             }
+            await _cache.RemoveByTagAsync(CacheExtention.GetFilesTag(tenantId, fromFolders.FirstOrDefault()));
 
             context.RemoveRange(toDeleteFiles);
 
@@ -1199,6 +1205,7 @@ internal class FileDao(
                 toUpdateFile.Folders = await context.DbFolderTreesAsync(toFolderId).ToListAsync();
 
                 _ = factoryIndexer.UpdateAsync(toUpdateFile, UpdateAction.Replace, w => w.Folders);
+                await _cache.RemoveByTagAsync(CacheExtention.GetFilesTag(tenantId, toUpdateFile.ParentId));
             }
         });
 
@@ -1304,6 +1311,7 @@ internal class FileDao(
         await filesDbContext.SaveChangesAsync();
 
         await factoryIndexer.UpdateAsync(toUpdate, true, r => r.Title, r => r.ModifiedBy, r => r.ModifiedOn);
+        await _cache.RemoveByTagAsync(CacheExtention.GetFilesTag(tenantId, toUpdate.ParentId));
 
         if (!Path.HasExtension(file.Title))
         {
