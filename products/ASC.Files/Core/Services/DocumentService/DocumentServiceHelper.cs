@@ -431,7 +431,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
     static string FixBase64String(string input)
     {
         // Convert from URL-safe Base64 to standard Base64
-        var fixedInput = input.Replace('-', '+').Replace('_', '/');
+        var fixedInput = input.Replace('-', '+').TrimEnd('_');
     
         // Add padding if necessary
         switch (fixedInput.Length % 4)
