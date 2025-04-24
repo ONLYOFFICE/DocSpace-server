@@ -412,7 +412,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
     public string GetDocSubmitKeyAsync(string key)
     {
         var rnd = Guid.NewGuid();
-        return Convert.ToBase64String(Encoding.UTF8.GetBytes($"submit_{rnd}_{key}"));
+        return Convert.ToBase64String(Encoding.UTF8.GetBytes($"submit_{rnd}_{key}")).TrimEnd('=');
     }
 
     public bool IsDocSubmitKey(string docKey, string key)
@@ -431,7 +431,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
     static string FixBase64String(string input)
     {
         // Convert from URL-safe Base64 to standard Base64
-        var fixedInput = input.Replace('-', '+').TrimEnd('_');
+        var fixedInput = input.Replace('-', '+').Replace('_', '/');
     
         // Add padding if necessary
         switch (fixedInput.Length % 4)
