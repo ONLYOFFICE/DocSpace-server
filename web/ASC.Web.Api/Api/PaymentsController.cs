@@ -168,7 +168,7 @@ public class PaymentController(
             }
         }
 
-        var result = await tariffService.PaymentChangeAsync(tenant.Id, inDto.Quantity);
+        var result = await tariffService.PaymentChangeAsync(tenant.Id, inDto.Quantity, inDto.ProductQuantityType);
 
         if (result)
         {

@@ -114,7 +114,7 @@ public class RenewSubscriptionService(
                 { quotaName, data.Quantity }
             };
 
-            var result = await tariffService.PaymentChangeAsync(data.TenantId, quantity);
+            var result = await tariffService.PaymentChangeAsync(data.TenantId, quantity, BillingClient.ProductQuantityType.Set);
             if (result)
             {
                 var description = $"{quotaName} {data.Quantity}";
