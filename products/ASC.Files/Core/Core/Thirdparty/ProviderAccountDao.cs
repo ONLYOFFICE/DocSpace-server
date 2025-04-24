@@ -50,9 +50,12 @@ internal class ProviderAccountDao(
     AuthContext authContext,
     IDbContextFactory<FilesDbContext> dbContextFactory,
     OAuth20TokenHelper oAuth20TokenHelper,
-    ILogger<ProviderAccountDao> logger)
+    ILogger<ProviderAccountDao> logger,
+    IFusionCacheProvider cacheProvider)
     : IProviderDao
 {
+    private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
+
     public virtual Task<IProviderInfo> GetProviderInfoAsync(int linkId)
     {
         var providersInfo = GetProvidersInfoInternalAsync(linkId);
@@ -156,6 +159,7 @@ internal class ProviderAccountDao(
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         var res = await filesDbContext.AddOrUpdateAsync(r => r.ThirdpartyAccount, dbFilesThirdPartyAccount);
         await filesDbContext.SaveChangesAsync();
+        await _cache.RemoveByTagAsync(CacheExtention.GetThirdpartiesTag(tenantId));
 
         return res.Id;
     }
@@ -237,7 +241,8 @@ internal class ProviderAccountDao(
         
         filesDbContext.Update(forUpdate);
         await filesDbContext.SaveChangesAsync();
-        
+        await _cache.RemoveByTagAsync(CacheExtention.GetThirdpartiesTag(tenantId));
+
         return ToProviderInfo(forUpdate);
     }
 
@@ -339,6 +344,7 @@ internal class ProviderAccountDao(
         }
 
         await filesDbContext.SaveChangesAsync();
+        await _cache.RemoveByTagAsync(CacheExtention.GetThirdpartiesTag(tenantId));
 
         return toUpdateCount == 1 ? linkId : 0;
     }

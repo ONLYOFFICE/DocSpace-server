@@ -175,9 +175,25 @@ public class ThirdpartyController(
     [Tags("Files / Third-party integration")]
     [SwaggerResponse(200, "List of connected providers information", typeof(IAsyncEnumerable<ThirdPartyParams>))]
     [HttpGet("thirdparty")]
-    public IAsyncEnumerable<ThirdPartyParams> GetThirdPartyAccountsAsync()
+    public async IAsyncEnumerable<ThirdPartyParams> GetThirdPartyAccountsAsync()
     {
-        return fileStorageService.GetThirdPartyAsync();
+        var key = $"{HttpContext.Request.Path}{HttpContext.Request.QueryString}-{HttpContext.Connection.RemoteIpAddress}-{securityContext.CurrentAccount.ID}";
+        var entry = await _cache.GetOrDefaultAsync<CacheEntry>(key);
+        if (entry != null && HttpContext.TryGetFromCache(entry.LastModified))
+        {
+            yield break;
+        }
+        var tags = new List<string>();
+        var tenant = tenantManager.GetCurrentTenantId();
+
+        var result = fileStorageService.GetThirdPartyAsync();
+        tags.Add(CacheExtention.GetThirdpartiesTag(tenant));
+
+        await foreach (var r in result)
+        {
+            yield return r;
+        }
+        await HttpContext.SetOutputCacheAsync(_cache, key, tags);
     }
 
     /// <summary>

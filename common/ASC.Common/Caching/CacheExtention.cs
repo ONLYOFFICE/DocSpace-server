@@ -179,4 +179,9 @@ public static class CacheExtention
     {
         return $"plugins-{tenant}";
     }
+
+    public static string GetThirdpartiesTag(int tenant)
+    {
+        return $"thirdparty-{tenant}";
+    }
 }
