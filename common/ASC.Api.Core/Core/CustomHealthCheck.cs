@@ -42,8 +42,8 @@ public static class CustomHealthCheck
         hcBuilder.AddCheck("self", () => Running ? HealthCheckResult.Healthy()
                                     : HealthCheckResult.Unhealthy())
                  .AddDatabase(configuration)
-                 .AddDistibutedCache(configuration)
-                 .AddMessageQueue(configuration);
+                 .AddDistibutedCache(configuration);
+                 //.AddMessageQueue(configuration);
 
         return services;
     }
@@ -74,9 +74,10 @@ public static class CustomHealthCheck
         if (string.Equals(connectionString.ProviderName, "MySql.Data.MySqlClient"))
         {
             hcBuilder.AddMySql(connectionString.ConnectionString,
-                               name: "mysqldb",
-                               tags: ["mysqldb", "services"],
-                               timeout: new TimeSpan(0, 0, 30));
+                healthQuery: "SELECT 1;",
+                name: "mysqldb", 
+                tags: ["mysqldb", "services"], 
+                timeout: new TimeSpan(0, 0, 30));
         }
         else if (string.Equals(connectionString.ProviderName, "Npgsql"))
         {

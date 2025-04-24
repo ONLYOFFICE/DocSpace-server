@@ -605,8 +605,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
     public async Task<FormOpenSetup<T>> GetFormOpenSetupForVirtualDataRoomAsync<T>(File<T> file, EditorType editorType)
     {
         var fileDao = daoFactory.GetFileDao<T>();
-        var (currentStep, roles) = await fileDao.GetUserFormRoles(file.Id, securityContext.CurrentAccount.ID);
-        var myRoles = await roles.ToListAsync();
+        var (currentStep, myRoles) = await fileDao.GetUserFormRoles(file.Id, securityContext.CurrentAccount.ID);
 
         var result = new FormOpenSetup<T>
         {
