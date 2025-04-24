@@ -67,6 +67,11 @@ public class TenantQuota : IMapFrom<DbQuota>
     public string PriceCurrencySymbol { get; set; }
 
     /// <summary>
+    /// The tenant price three-character ISO 4217 currency symbol.
+    /// </summary>
+    public string PriceISOCurrencySymbol { get; set; }
+
+    /// <summary>
     /// The tenant product ID.
     /// </summary>
     public string ProductId { get; set; }

@@ -71,7 +71,8 @@ public class QuotaHelper(
             Price = new PriceDto
             {
                 Value = quota.Price,
-                CurrencySymbol = quota.PriceCurrencySymbol
+                CurrencySymbol = quota.PriceCurrencySymbol,
+                ISOCurrencySymbol = quota.PriceISOCurrencySymbol
             },
 
             Features = features,
