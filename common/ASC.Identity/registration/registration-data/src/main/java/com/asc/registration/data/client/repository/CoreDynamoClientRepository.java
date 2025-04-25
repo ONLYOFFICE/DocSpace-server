@@ -29,11 +29,13 @@ package com.asc.registration.data.client.repository;
 
 import com.asc.registration.core.domain.exception.ClientNotFoundException;
 import com.asc.registration.data.client.entity.ClientDynamoEntity;
+import com.asc.registration.service.exception.ExceededClientsPerResourceException;
 import java.time.ZonedDateTime;
 import java.util.*;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Repository;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
@@ -52,9 +54,11 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 @Repository
 @Profile(value = "saas")
 public class CoreDynamoClientRepository implements DynamoClientRepository {
+  private final int CLIENTS_PER_TENANT_LIMIT = 150;
+  private final int CLIENTS_PER_USER_LIMIT = 15;
+
   private static final TableSchema<ClientDynamoEntity> CLIENT_SCHEMA =
       TableSchema.fromBean(ClientDynamoEntity.class);
-
   private final DynamoDbEnhancedClient dynamoDbEnhancedClient;
   private final DynamoDbTable<ClientDynamoEntity> clientTable;
 
@@ -78,12 +82,67 @@ public class CoreDynamoClientRepository implements DynamoClientRepository {
   }
 
   /**
+   * Retrieves counters for the total number of clients and those created by a specific user for a
+   * tenant.
+   *
+   * <p>This helper method queries the "tenant-created-index" to count the total number of clients
+   * associated with a tenant and how many of those were created by a specific user. The method
+   * enforces the client limit per tenant.
+   *
+   * @param tenantId the tenant identifier
+   * @param userId the user identifier
+   * @return a {@link Pair} containing the total client count (first) and user-created client count
+   *     (second)
+   */
+  private Pair<Integer, Integer> getClientCounters(long tenantId, String userId) {
+    var index = clientTable.index("tenant-created-index");
+    var queryConditional = QueryConditional.keyEqualTo(k -> k.partitionValue(tenantId));
+
+    var requestBuilder =
+        QueryEnhancedRequest.builder()
+            .queryConditional(queryConditional)
+            .addAttributeToProject("created_by")
+            .limit(CLIENTS_PER_TENANT_LIMIT);
+
+    int total = 0;
+    int userTotal = 0;
+    Map<String, AttributeValue> lastEvaluatedKey = null;
+
+    do {
+      if (total == CLIENTS_PER_TENANT_LIMIT) return Pair.of(total, userTotal);
+      if (lastEvaluatedKey != null) requestBuilder.exclusiveStartKey(lastEvaluatedKey);
+
+      var request = requestBuilder.build();
+      var response = index.query(request);
+      for (var page : response) {
+        for (var entity : page.items()) {
+          total += 1;
+          if (entity.getCreatedBy().equals(userId)) userTotal += 1;
+        }
+        lastEvaluatedKey = page.lastEvaluatedKey();
+      }
+    } while (lastEvaluatedKey != null && !lastEvaluatedKey.isEmpty());
+
+    return Pair.of(total, userTotal);
+  }
+
+  /**
    * Persists a new client entity into DynamoDB.
    *
    * @param entity the {@link ClientDynamoEntity} to be saved
    */
   public void save(ClientDynamoEntity entity) {
-    clientTable.putItem(entity);
+    if (entity.getCreatedBy() != null) {
+      var counters = getClientCounters(entity.getTenantId(), entity.getCreatedBy());
+      if (counters.getFirst() > CLIENTS_PER_TENANT_LIMIT)
+        throw new ExceededClientsPerResourceException(
+            "Tenant has reached the maximum allowed number of clients");
+      if (counters.getSecond() > CLIENTS_PER_USER_LIMIT)
+        throw new ExceededClientsPerResourceException(
+                "User has reached the maximum allowed number of clients");
+
+      clientTable.putItem(entity);
+    }
   }
 
   /**
@@ -259,6 +318,89 @@ public class CoreDynamoClientRepository implements DynamoClientRepository {
     keyEntity.setClientId(clientId);
     keyEntity.setTenantId(tenantId);
     return clientTable.deleteItem(keyEntity);
+  }
+
+  /**
+   * Batch deletes client entities based on an index query and a delete condition.
+   *
+   * <p>This helper method performs a query on the specified index and deletes matching entities in
+   * batches. It supports pagination for large result sets and processes deletions in smaller
+   * batches to optimize performance.
+   *
+   * @param indexName the name of the DynamoDB index to query
+   * @param queryConditional the query condition to identify matching entities
+   * @param deleteCondition a predicate that determines whether an entity should be deleted
+   */
+  private void batchDeleteByIndex(
+      String indexName,
+      QueryConditional queryConditional,
+      java.util.function.Predicate<ClientDynamoEntity> deleteCondition) {
+    final int queryLimit = 1000;
+    final int batchSize = 25;
+
+    Map<String, AttributeValue> lastEvaluatedKey = null;
+
+    do {
+      var requestBuilder =
+          QueryEnhancedRequest.builder().queryConditional(queryConditional).limit(queryLimit);
+
+      if (lastEvaluatedKey != null) requestBuilder.exclusiveStartKey(lastEvaluatedKey);
+
+      var queryRequest = requestBuilder.build();
+      Page<ClientDynamoEntity> page =
+          clientTable.index(indexName).query(queryRequest).iterator().next();
+
+      var items = page.items();
+
+      for (int i = 0; i < items.size(); i += batchSize) {
+        var end = Math.min(i + batchSize, items.size());
+        var batch = items.subList(i, end);
+
+        var writeBatch =
+            WriteBatch.builder(ClientDynamoEntity.class).mappedTableResource(clientTable);
+
+        for (var entity : batch) {
+          if (deleteCondition.test(entity))
+            writeBatch.addDeleteItem(Key.builder().partitionValue(entity.getClientId()).build());
+        }
+
+        dynamoDbEnhancedClient.batchWriteItem(
+            BatchWriteItemEnhancedRequest.builder().writeBatches(writeBatch.build()).build());
+      }
+
+      lastEvaluatedKey = page.lastEvaluatedKey();
+    } while (lastEvaluatedKey != null);
+  }
+
+  /**
+   * Deletes all client entities with a specified creator ID for a specific tenant.
+   *
+   * <p>This method uses the "creator-created-index" to query and batch delete client entities
+   * created by a specific user within a tenant.
+   *
+   * @param tenantId the tenant identifier
+   * @param userId the creator identifier
+   */
+  public void deleteAllByTenantIdAndCreatedBy(long tenantId, String userId) {
+    batchDeleteByIndex(
+        "creator-created-index",
+        QueryConditional.keyEqualTo(k -> k.partitionValue(userId)),
+        entity -> entity.getCreatedBy() != null && entity.getCreatedBy().equals(userId));
+  }
+
+  /**
+   * Deletes all client entities associated with a specific tenant.
+   *
+   * <p>This method uses the "tenant-created-index" to query and batch delete all client entities
+   * belonging to the specified tenant.
+   *
+   * @param tenantId the tenant identifier
+   */
+  public void deleteAllByTenantId(long tenantId) {
+    batchDeleteByIndex(
+        "tenant-created-index",
+        QueryConditional.keyEqualTo(k -> k.partitionValue(tenantId)),
+        entity -> true);
   }
 
   /**

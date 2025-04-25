@@ -30,6 +30,7 @@ package com.asc.registration.data.client.adapter;
 import com.asc.common.core.domain.event.DomainEventPublisher;
 import com.asc.common.core.domain.value.ClientId;
 import com.asc.common.core.domain.value.TenantId;
+import com.asc.common.core.domain.value.UserId;
 import com.asc.common.service.ports.output.message.publisher.AuthorizationMessagePublisher;
 import com.asc.common.service.transfer.message.ClientRemovedEvent;
 import com.asc.registration.core.domain.entity.Client;
@@ -72,6 +73,8 @@ public class ClientCommandRepositoryDynamoDomainAdapter implements ClientCommand
    */
   @Transactional(readOnly = true)
   public Client saveClient(ClientEvent event, Client client) {
+    log.debug("Persisting a new client");
+
     dynamoClientRepository.save(clientDataAccessMapper.toDynamoEntity(client));
     messagePublisher.publish(event);
     return client;
@@ -86,6 +89,8 @@ public class ClientCommandRepositoryDynamoDomainAdapter implements ClientCommand
    */
   @Transactional(readOnly = true)
   public Client updateClient(ClientEvent event, Client client) {
+    log.debug("Updating an existing client");
+
     var result = dynamoClientRepository.update(clientDataAccessMapper.toDynamoEntity(client));
     messagePublisher.publish(event);
     return clientDataAccessMapper.toDomain(result);
@@ -103,7 +108,12 @@ public class ClientCommandRepositoryDynamoDomainAdapter implements ClientCommand
   @Transactional(readOnly = true)
   public String regenerateClientSecretByTenantIdAndClientId(
       ClientEvent event, TenantId tenantId, ClientId clientId) {
+    log.debug("Regenerating and persisting a new secret");
+
     var secret = UUID.randomUUID().toString();
+
+    log.debug("Newly generated secret: {}", secret);
+
     dynamoClientRepository.updateClientSecret(
         clientId.getValue().toString(),
         tenantId.getValue(),
@@ -125,6 +135,8 @@ public class ClientCommandRepositoryDynamoDomainAdapter implements ClientCommand
   @Transactional(readOnly = true)
   public void changeVisibilityByTenantIdAndClientId(
       ClientEvent event, TenantId tenantId, ClientId clientId, boolean visible) {
+    log.debug("Persisting client visibility changes");
+
     dynamoClientRepository.updateVisibility(
         clientId.getValue().toString(),
         tenantId.getValue(),
@@ -145,6 +157,8 @@ public class ClientCommandRepositoryDynamoDomainAdapter implements ClientCommand
   @Transactional(readOnly = true)
   public void changeActivationByTenantIdAndClientId(
       ClientEvent event, TenantId tenantId, ClientId clientId, boolean enabled) {
+    log.debug("Persisting activation changes");
+
     dynamoClientRepository.updateActivation(
         clientId.getValue().toString(),
         tenantId.getValue(),
@@ -164,6 +178,7 @@ public class ClientCommandRepositoryDynamoDomainAdapter implements ClientCommand
    */
   @Transactional(readOnly = true)
   public int deleteByTenantIdAndClientId(ClientEvent event, TenantId tenantId, ClientId clientId) {
+    log.debug("Persisting invalidated marker");
 
     authorizationMessagePublisher.publish(
         ClientRemovedEvent.builder().clientId(clientId.getValue().toString()).build());
@@ -173,5 +188,24 @@ public class ClientCommandRepositoryDynamoDomainAdapter implements ClientCommand
             != null
         ? 1
         : 0;
+  }
+
+  @Transactional(readOnly = true)
+  public int deleteAllByTenantIdAndCreatedBy(TenantId tenantId, UserId userId) {
+    log.debug(
+        "Deleting all clients for current user {} and tenant {}",
+        userId.getValue(),
+        tenantId.getValue());
+
+    dynamoClientRepository.deleteAllByTenantIdAndCreatedBy(tenantId.getValue(), userId.getValue());
+    return 1;
+  }
+
+  @Transactional(readOnly = true)
+  public int deleteAllByTenantId(TenantId tenantId) {
+    log.debug("Deleting all clients for current tenant {}", tenantId.getValue());
+
+    dynamoClientRepository.deleteAllByTenantId(tenantId.getValue());
+    return 1;
   }
 }
