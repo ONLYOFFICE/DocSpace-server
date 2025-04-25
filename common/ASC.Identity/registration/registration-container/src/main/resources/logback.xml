@@ -96,7 +96,22 @@
             </else>
         </if>
     </springProfile>
-    <springProfile name="production,prod,p,testing,test,t">
+    <springProfile name="staging,stage,s">
+        <if condition='isDefined("LOG_FILE_PATH")'>
+            <then>
+                <root level="INFO">
+                    <appender-ref ref="JSON_CONSOLE_ASYNC"/>
+                    <appender-ref ref="JSON_FILE"/>
+                </root>
+            </then>
+            <else>
+                <root level="INFO">
+                    <appender-ref ref="JSON_CONSOLE_ASYNC"/>
+                </root>
+            </else>
+        </if>
+    </springProfile>
+    <springProfile name="production,prod,p">
         <if condition='isDefined("LOG_FILE_PATH")'>
             <then>
                 <root level="ERROR">
