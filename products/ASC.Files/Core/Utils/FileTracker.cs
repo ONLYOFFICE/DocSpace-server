@@ -149,7 +149,8 @@ public class FileTrackerHelper
         {
             var now = DateTime.UtcNow;
             var listForRemove = tracker.EditingBy.Where(e =>
-                !e.Value.NewScheme && (now - e.Value.TrackTime).Duration() > _trackTimeout);
+                !e.Value.NewScheme && (now - e.Value.TrackTime).Duration() > _trackTimeout)
+                .ToList();
 
             foreach (var editTab in listForRemove)
             {
