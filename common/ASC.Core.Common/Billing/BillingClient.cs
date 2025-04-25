@@ -145,7 +145,8 @@ public class BillingClient
     {
         Set = 0,
         Add = 1,
-        Sub = 2
+        Sub = 2,
+        Renew = 3
     }
 
     public async Task<bool> ChangePaymentAsync(string portalId, IEnumerable<string> products, IEnumerable<int> quantity, ProductQuantityType productQuantityType)
