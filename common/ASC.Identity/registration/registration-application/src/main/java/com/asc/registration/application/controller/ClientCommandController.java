@@ -117,7 +117,6 @@ public class ClientCommandController {
    */
   private void setLoggingParameters(BasicSignatureTokenPrincipal principal) {
     MDC.put("tenant_id", String.valueOf(principal.getTenantId()));
-    MDC.put("tenant_name", principal.getUserName());
     MDC.put("tenant_url", principal.getTenantUrl());
     MDC.put("user_id", principal.getUserId());
     MDC.put("user_name", principal.getUserName());
