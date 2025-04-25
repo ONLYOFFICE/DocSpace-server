@@ -148,20 +148,23 @@ public class FileTrackerHelper
         if (tracker != null)
         {
             var now = DateTime.UtcNow;
-            var listForRemove = tracker.EditingBy.Where(e =>
-                !e.Value.NewScheme && (now - e.Value.TrackTime).Duration() > _trackTimeout)
-                .ToList();
 
-            foreach (var editTab in listForRemove)
+            if (tracker.EditingBy != null)
             {
-                tracker.EditingBy.TryRemove(editTab.Key, out _);
-            }
+                var listForRemove = tracker.EditingBy.Where(e => !e.Value.NewScheme && (now - e.Value.TrackTime).Duration() > _trackTimeout)
+                    .ToList();
 
-            if (tracker.EditingBy.IsEmpty)
-            {
-                await RemoveTrackerAsync(fileId);
+                foreach (var editTab in listForRemove)
+                {
+                    tracker.EditingBy.TryRemove(editTab.Key, out _);
+                }
 
-                return false;
+                if (tracker.EditingBy.IsEmpty)
+                {
+                    await RemoveTrackerAsync(fileId);
+
+                    return false;
+                }
             }
 
             await SetTrackerAsync(fileId, tracker);
