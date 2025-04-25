@@ -191,4 +191,24 @@ public class CoreClientApplicationService implements ClientApplicationService {
   public int deleteClient(Audit audit, Role role, DeleteTenantClientCommand command) {
     return clientUpdateCommandHandler.deleteClient(audit, role, command);
   }
+
+  /**
+   * Deletes all clients created by a specific user within a tenant.
+   *
+   * @param command The command containing the tenant ID and user ID.
+   * @return The number of clients deleted.
+   */
+  public int deleteUserClients(DeleteUserClientsCommand command) {
+    return clientUpdateCommandHandler.deleteUserClients(command);
+  }
+
+  /**
+   * Deletes all clients associated with a specific tenant.
+   *
+   * @param command The command containing the tenant ID.
+   * @return The number of clients deleted.
+   */
+  public int deleteTenantClients(DeleteTenantClientsCommand command) {
+    return clientUpdateCommandHandler.deleteTenantClients(command.getTenantId());
+  }
 }

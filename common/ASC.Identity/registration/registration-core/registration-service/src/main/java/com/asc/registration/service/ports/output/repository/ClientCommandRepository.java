@@ -29,6 +29,7 @@ package com.asc.registration.service.ports.output.repository;
 
 import com.asc.common.core.domain.value.ClientId;
 import com.asc.common.core.domain.value.TenantId;
+import com.asc.common.core.domain.value.UserId;
 import com.asc.registration.core.domain.entity.Client;
 import com.asc.registration.core.domain.event.ClientEvent;
 
@@ -97,4 +98,27 @@ public interface ClientCommandRepository {
    * @return The number of clients deleted (typically 0 or 1).
    */
   int deleteByTenantIdAndClientId(ClientEvent event, TenantId tenantId, ClientId clientId);
+
+  /**
+   * Deletes all clients created by a specific user within a tenant from the repository.
+   *
+   * <p>This method is typically used during user cleanup or deprovisioning operations to remove all
+   * client entities associated with a particular user within a tenant.
+   *
+   * @param tenantId The tenant ID to filter clients by.
+   * @param userId The ID of the user who created the clients to be deleted.
+   * @return The number of clients deleted.
+   */
+  int deleteAllByTenantIdAndCreatedBy(TenantId tenantId, UserId userId);
+
+  /**
+   * Deletes all clients belonging to a specific tenant from the repository.
+   *
+   * <p>This method is typically used during tenant cleanup or deprovisioning operations to remove
+   * all client entities associated with a particular tenant.
+   *
+   * @param tenantId The tenant ID of the clients to be deleted.
+   * @return The number of clients deleted.
+   */
+  int deleteAllByTenantId(TenantId tenantId);
 }
