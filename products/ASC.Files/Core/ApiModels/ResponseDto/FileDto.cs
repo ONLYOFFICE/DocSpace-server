@@ -305,9 +305,9 @@ public class FileDtoHelper(
                 _ = await _fileSecurity.SetSecurity(new[] { currentRoom }.ToAsyncEnumerable()).ToListAsync();
             }
 
-            if (!file.IsForm && (FilterType)file.Category == FilterType.None)
+            if (FileUtility.GetFileTypeByExtention(FileUtility.GetFileExtension(file.Title)) == FileType.Pdf && !file.IsForm && (FilterType)file.Category == FilterType.None)
             {
-                result.IsForm = await fileChecker.CheckExtendedPDF(file);
+                result.IsForm = await fileChecker.IsFormPDFFile(file);
             }
             else
             {
