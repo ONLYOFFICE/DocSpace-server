@@ -69,19 +69,12 @@ public static class HttpContextExtension
 
     public static async Task SetOutputCacheAsync(this HttpContext httpContext, IFusionCache cache, string key, List<string> tags)
     {
-        try
-        {
-            var lastModified = DateTime.Now;
-            httpContext.Response.Headers.LastModified = lastModified.ToString(CultureInfo.InvariantCulture);
-            await cache.SetAsync(key,
-                new CacheEntry() { LastModified = lastModified },
-                opt => opt.SetDuration(CacheExtention.OutputDuration).SetFailSafe(true),
-                tags.ToArray());
-        }
-        catch(Exception ex)
-        {
-            throw;
-        }
+        var lastModified = DateTime.Now;
+        httpContext.Response.Headers.LastModified = lastModified.ToString(CultureInfo.InvariantCulture);
+        await cache.SetAsync(key,
+            new CacheEntry() { LastModified = lastModified },
+            opt => opt.SetDuration(CacheExtention.OutputDuration).SetFailSafe(true),
+            tags.ToArray());
     }
 
     public static bool TryGetFromCache(this HttpContext httpContext, string etag)
