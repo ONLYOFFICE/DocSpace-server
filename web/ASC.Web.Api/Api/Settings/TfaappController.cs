@@ -49,9 +49,12 @@ public class TfaappController(
     Signature signature,
     SecurityContext securityContext,
     IHttpContextAccessor httpContextAccessor,
-    TenantManager tenantManager)
+    TenantManager tenantManager,
+    IFusionCacheProvider cacheProvider)
     : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
+    private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
+
     /// <summary>
     /// Returns the current two-factor authentication settings.
     /// </summary>
@@ -63,14 +66,32 @@ public class TfaappController(
     [HttpGet("tfaapp")]
     public async Task<IEnumerable<TfaSettingsDto>> GetTfaSettingsAsync()
     {
+        var key = $"{HttpContext.Request.Path}{HttpContext.Request.QueryString}-{HttpContext.Connection.RemoteIpAddress}-{securityContext.CurrentAccount.ID}";
+        var entry = await _cache.GetOrDefaultAsync<CacheEntry>(key);
+        if (entry != null && HttpContext.TryGetFromCache(entry.LastModified))
+        {
+            return null;
+        }
+        var tags = new List<string>();
+        var tenant = tenantManager.GetCurrentTenantId();
+
         var result = new List<TfaSettingsDto>();
 
         var SmsVisible = studioSmsNotificationSettingsHelper.IsVisibleSettings;
         var SmsEnable = SmsVisible && smsProviderManager.Enabled();
+        tags.Add(CacheExtention.GetConsumerTag(tenant, smsProviderManager.SmscProvider.Name));
+        tags.Add(CacheExtention.GetConsumerTag(tenant, smsProviderManager.ClickatellProvider.Name));
+        tags.Add(CacheExtention.GetConsumerTag(tenant, smsProviderManager.TwilioProvider.Name));
+        tags.Add(CacheExtention.GetConsumerTag(tenant, smsProviderManager.ClickatellUSAProvider.Name));
+        tags.Add(CacheExtention.GetConsumerTag(tenant, smsProviderManager.TwilioSaaSProvider.Name));
+
         var TfaVisible = tfaAppAuthSettingsHelper.IsVisibleSettings;
 
         var tfaAppSettings = await settingsManager.LoadAsync<TfaAppAuthSettings>();
+        tags.Add(CacheExtention.GetSettingsTag(tenant, nameof(TfaAppAuthSettings)));
+
         var tfaSmsSettings = await settingsManager.LoadAsync<StudioSmsNotificationSettings>();
+        tags.Add(CacheExtention.GetSettingsTag(tenant, nameof(StudioSmsNotificationSettings)));
 
         if (SmsVisible)
         {
@@ -99,6 +120,8 @@ public class TfaappController(
                 TrustedIps = tfaAppSettings.TrustedIps
             });
         }
+
+        await HttpContext.SetOutputCacheAsync(_cache, key, tags);
 
         return result;
     }

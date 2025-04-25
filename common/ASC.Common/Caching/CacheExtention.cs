@@ -187,7 +187,7 @@ public static class CacheExtention
 
     public static string GetThirdpartiesTag(int tenant)
     {
-        return $"thirdparty-{tenant}";
+        return $"thirdparties-{tenant}";
     }
 
     public static string GetFilesTag<T>(int tenant, T parent)
