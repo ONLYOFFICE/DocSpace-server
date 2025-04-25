@@ -76,8 +76,8 @@ public static class ServiceCollectionExtension
                 DefaultEntryOptions = new FusionCacheEntryOptions
                 {
                     Duration = TimeSpan.MaxValue,
-                    LockTimeout = TimeSpan.FromMinutes(30),
-                    FactoryHardTimeout = TimeSpan.FromSeconds(30)
+                    LockTimeout = TimeSpan.FromSeconds(5),
+                    FactoryHardTimeout = TimeSpan.FromSeconds(5)
                 }
             })
             .WithMemoryCache(new MemoryCache(new MemoryCacheOptions()))
