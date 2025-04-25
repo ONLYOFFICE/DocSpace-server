@@ -139,7 +139,7 @@ public class CoreDynamoClientRepository implements DynamoClientRepository {
             "Tenant has reached the maximum allowed number of clients");
       if (counters.getSecond() > CLIENTS_PER_USER_LIMIT)
         throw new ExceededClientsPerResourceException(
-                "User has reached the maximum allowed number of clients");
+            "User has reached the maximum allowed number of clients");
 
       clientTable.putItem(entity);
     }
