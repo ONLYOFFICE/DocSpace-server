@@ -30,6 +30,7 @@ package com.asc.registration.application.exception.handler;
 import com.asc.common.core.domain.exception.DomainNotFoundException;
 import com.asc.registration.application.transfer.ErrorResponse;
 import com.asc.registration.core.domain.exception.ClientDomainException;
+import com.asc.registration.service.exception.ExceededClientsPerResourceException;
 import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import io.grpc.StatusRuntimeException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -276,6 +277,25 @@ public class GlobalExceptionHandler {
             .reason(isUnavailable ? "service unavailable" : "something went wrong")
             .build(),
         isUnavailable ? HttpStatus.SERVICE_UNAVAILABLE : HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
+  /**
+   * Handles {@link ExceededClientsPerResourceException} exceptions thrown when a tenant exceeds
+   * their client allocation limit.
+   *
+   * <p>This method returns an error response with an HTTP status of {@code 400 Bad Request} that
+   * includes the exception's message explaining the resource limit violation.
+   *
+   * @param e the {@link ExceededClientsPerResourceException} that was raised.
+   * @param request the {@link HttpServletRequest} associated with the current request.
+   * @return a {@link ResponseEntity} containing an {@link ErrorResponse} with the exception's
+   *     message about exceeding the client limit.
+   */
+  @ExceptionHandler(value = ExceededClientsPerResourceException.class)
+  public ResponseEntity<ErrorResponse> handleExceededClientsPerResourceException(
+      ExceededClientsPerResourceException e, HttpServletRequest request) {
+    return new ResponseEntity<>(
+        ErrorResponse.builder().reason(e.getMessage()).build(), HttpStatus.BAD_REQUEST);
   }
 
   /**
