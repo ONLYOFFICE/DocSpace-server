@@ -80,7 +80,7 @@ public class ClientDynamoEntity {
    * @return the tenant ID.
    */
   @DynamoDbAttribute("tenant_id")
-  @DynamoDbSecondaryPartitionKey(indexNames = {"tenant-created-index", "tenant-creator-index"})
+  @DynamoDbSecondaryPartitionKey(indexNames = {"tenant-created-index"})
   public long getTenantId() {
     return tenantId;
   }
@@ -252,7 +252,6 @@ public class ClientDynamoEntity {
    */
   @DynamoDbAttribute("created_by")
   @DynamoDbSecondaryPartitionKey(indexNames = "creator-created-index")
-  @DynamoDbSecondarySortKey(indexNames = "tenant-creator-index")
   public String getCreatedBy() {
     return createdBy;
   }
