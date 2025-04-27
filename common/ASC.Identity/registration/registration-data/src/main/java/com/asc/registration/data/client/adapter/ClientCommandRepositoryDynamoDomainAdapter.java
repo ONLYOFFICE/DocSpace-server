@@ -31,8 +31,6 @@ import com.asc.common.core.domain.event.DomainEventPublisher;
 import com.asc.common.core.domain.value.ClientId;
 import com.asc.common.core.domain.value.TenantId;
 import com.asc.common.core.domain.value.UserId;
-import com.asc.common.service.ports.output.message.publisher.AuthorizationMessagePublisher;
-import com.asc.common.service.transfer.message.ClientRemovedEvent;
 import com.asc.registration.core.domain.entity.Client;
 import com.asc.registration.core.domain.event.ClientEvent;
 import com.asc.registration.data.client.mapper.ClientDataAccessMapper;
@@ -61,7 +59,6 @@ public class ClientCommandRepositoryDynamoDomainAdapter implements ClientCommand
 
   private final DynamoClientRepository dynamoClientRepository;
   private final ClientDataAccessMapper clientDataAccessMapper;
-  private final AuthorizationMessagePublisher<ClientRemovedEvent> authorizationMessagePublisher;
   private final DomainEventPublisher<ClientEvent> messagePublisher;
 
   /**
@@ -180,8 +177,6 @@ public class ClientCommandRepositoryDynamoDomainAdapter implements ClientCommand
   public int deleteByTenantIdAndClientId(ClientEvent event, TenantId tenantId, ClientId clientId) {
     log.debug("Persisting invalidated marker");
 
-    authorizationMessagePublisher.publish(
-        ClientRemovedEvent.builder().clientId(clientId.getValue().toString()).build());
     messagePublisher.publish(event);
     return dynamoClientRepository.deleteByIdAndTenantId(
                 clientId.getValue().toString(), tenantId.getValue())

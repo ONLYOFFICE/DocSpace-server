@@ -33,6 +33,8 @@ import com.asc.common.core.domain.value.Role;
 import com.asc.common.core.domain.value.TenantId;
 import com.asc.common.core.domain.value.UserId;
 import com.asc.common.core.domain.value.enums.AuthenticationMethod;
+import com.asc.common.service.ports.output.message.publisher.AuthorizationMessagePublisher;
+import com.asc.common.service.transfer.message.ClientRemovedEvent;
 import com.asc.common.service.transfer.response.ClientResponse;
 import com.asc.common.utilities.crypto.EncryptionService;
 import com.asc.registration.core.domain.ClientDomainService;
@@ -65,6 +67,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class ClientUpdateCommandHandler {
+  private final AuthorizationMessagePublisher<ClientRemovedEvent> clientMessagePublisher;
   private final ClientCommandRepository clientCommandRepository;
   private final ClientDataMapper clientDataMapper;
   private final ClientDomainService clientDomainService;
@@ -376,6 +379,9 @@ public class ClientUpdateCommandHandler {
 
     var client = getClient(audit, role, command.getClientId(), command.getTenantId());
     var event = clientDomainService.deleteClient(audit, client);
+    // TODO: Move it later to core application service. Now we depend on getClient check
+    clientMessagePublisher.publish(
+        ClientRemovedEvent.builder().clientId(command.getClientId()).build());
     return clientCommandRepository.deleteByTenantIdAndClientId(
         event, client.getClientTenantInfo().tenantId(), client.getId());
   }

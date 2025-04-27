@@ -34,8 +34,6 @@ import static org.mockito.Mockito.*;
 import com.asc.common.core.domain.event.DomainEventPublisher;
 import com.asc.common.core.domain.value.ClientId;
 import com.asc.common.core.domain.value.TenantId;
-import com.asc.common.service.ports.output.message.publisher.AuthorizationMessagePublisher;
-import com.asc.common.service.transfer.message.ClientRemovedEvent;
 import com.asc.registration.core.domain.entity.Client;
 import com.asc.registration.core.domain.event.ClientEvent;
 import com.asc.registration.data.client.entity.ClientEntity;
@@ -54,7 +52,6 @@ class ClientCommandRepositoryDomainAdapterTest {
   @InjectMocks private ClientCommandRepositoryDomainAdapter clientCommandRepositoryDomainAdapter;
   @Mock private JpaClientRepository jpaClientRepository;
   @Mock private ClientDataAccessMapper clientDataAccessMapper;
-  @Mock private AuthorizationMessagePublisher<ClientRemovedEvent> authorizationMessagePublisher;
   @Mock private DomainEventPublisher<ClientEvent> messagePublisher;
 
   private Client client;
@@ -75,7 +72,6 @@ class ClientCommandRepositoryDomainAdapterTest {
 
     // Stub publish methods
     doNothing().when(messagePublisher).publish(any(ClientEvent.class));
-    doNothing().when(authorizationMessagePublisher).publish(any(ClientRemovedEvent.class));
   }
 
   @Test
@@ -152,7 +148,6 @@ class ClientCommandRepositoryDomainAdapterTest {
     verify(jpaClientRepository)
         .deleteByClientIdAndTenantId(eq(clientId.getValue().toString()), eq(tenantId.getValue()));
     verify(messagePublisher).publish(any(ClientEvent.class));
-    verify(authorizationMessagePublisher).publish(any(ClientRemovedEvent.class));
 
     assertEquals(0, result);
   }
