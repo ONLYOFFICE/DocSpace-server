@@ -39,7 +39,8 @@ public class FileTrackerHelper
     private static readonly TimeSpan _cacheTimeout = TimeSpan.FromSeconds(60);
     private static readonly TimeSpan _checkRightTimeout = TimeSpan.FromMinutes(1);
     private readonly Action<object, object, EvictionReason, object> _callbackAction;
-
+    private readonly Guid _instanceId = Guid.NewGuid();
+    
     public FileTrackerHelper(ICacheNotify<FileTrackerNotify> cacheNotify, ICache cache, IServiceProvider serviceProvider, ILogger<FileTrackerHelper> logger)
     {
         _cacheNotify = cacheNotify;
@@ -55,7 +56,7 @@ public class FileTrackerHelper
         {
             try
             {
-                _cache.Insert(GetCacheKey(a.FileId), a.FileTracker, _cacheTimeout, _callbackAction);
+                _cache.Insert(GetCacheKey(a.FileId), a.FileTracker, _cacheTimeout, _instanceId == a.InstanceId ? _callbackAction : null);
             }
             catch (ObjectDisposedException)
             {
@@ -142,7 +143,7 @@ public class FileTrackerHelper
         await RemoveTrackerAsync(fileId);
     }
 
-    public async Task<bool> IsEditingAsync<T>(T fileId)
+    public async Task<bool> IsEditingAsync<T>(T fileId, bool setTracker = true)
     {
         var tracker = GetTracker(fileId);
         if (tracker != null)
@@ -167,7 +168,10 @@ public class FileTrackerHelper
                 }
             }
 
-            await SetTrackerAsync(fileId, tracker);
+            if (setTracker)
+            {
+                await SetTrackerAsync(fileId, tracker);
+            }
 
             return true;
         }
@@ -228,7 +232,7 @@ public class FileTrackerHelper
     {
         if (!EqualityComparer<T>.Default.Equals(fileId, default) && tracker != null)
         {
-            await _cacheNotify.PublishAsync(new FileTrackerNotify { FileId = fileId.ToString(), FileTracker = tracker }, CacheNotifyAction.Insert);
+            await _cacheNotify.PublishAsync(new FileTrackerNotify { FileId = fileId.ToString(), FileTracker = tracker, InstanceId = _instanceId }, CacheNotifyAction.Insert);
         }
     }
     
@@ -236,7 +240,7 @@ public class FileTrackerHelper
     {
         if (!EqualityComparer<T>.Default.Equals(fileId, default))
         {
-            await _cacheNotify.PublishAsync(new FileTrackerNotify { FileId = fileId.ToString(), FileTracker = new FileTracker() }, CacheNotifyAction.Remove);
+            await _cacheNotify.PublishAsync(new FileTrackerNotify { FileId = fileId.ToString(), FileTracker = new FileTracker(), InstanceId = _instanceId }, CacheNotifyAction.Remove);
         }
     }
 
@@ -313,6 +317,9 @@ public record FileTrackerNotify
     
     [ProtoMember(2)]
     public FileTracker FileTracker { get; set; }
+    
+    [ProtoMember(3)]
+    public Guid InstanceId { get; set; }
 }
 
 [ProtoContract]
