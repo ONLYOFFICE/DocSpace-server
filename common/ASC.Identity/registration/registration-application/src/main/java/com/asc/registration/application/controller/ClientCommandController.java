@@ -43,10 +43,7 @@ import com.asc.registration.application.transfer.UpdateClientRequest;
 import com.asc.registration.service.ports.input.service.ClientApplicationService;
 import com.asc.registration.service.ports.input.service.ScopeApplicationService;
 import com.asc.registration.service.transfer.request.create.CreateTenantClientCommand;
-import com.asc.registration.service.transfer.request.update.ChangeTenantClientActivationCommand;
-import com.asc.registration.service.transfer.request.update.DeleteTenantClientCommand;
-import com.asc.registration.service.transfer.request.update.RegenerateTenantClientSecretCommand;
-import com.asc.registration.service.transfer.request.update.UpdateTenantClientCommand;
+import com.asc.registration.service.transfer.request.update.*;
 import com.asc.registration.service.transfer.response.ClientSecretResponse;
 import com.asc.registration.service.transfer.response.ScopeResponse;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
@@ -588,6 +585,100 @@ public class ClientCommandController {
                   .tenantId(principal.getTenantId())
                   .build())
           == 1) return ResponseEntity.status(HttpStatus.OK).build();
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+    } finally {
+      MDC.clear();
+    }
+  }
+
+  /**
+   * Deletes all user clients.
+   *
+   * @param request the HTTP request.
+   * @param principal the authenticated principal.
+   * @return a {@link ResponseEntity} indicating the status of the deletion.
+   */
+  @RateLimiter(name = "globalRateLimiter")
+  @DeleteMapping
+  @Operation(
+      summary = "Delete all user OAuth2 clients",
+      description =
+          "Permanently deletes user OAuth2 clients and all associated data. "
+              + "This will invalidate all access tokens and refresh tokens issued to this client. "
+              + "This operation cannot be undone.",
+      tags = {"Client Management"},
+      security = @SecurityRequirement(name = "x-signature"),
+      responses = {
+        @ApiResponse(responseCode = "200", description = "Client successfully deleted"),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Insufficient permissions to delete user clients",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "429",
+            description = "Too many requests - rate limit exceeded",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Internal server error occurred",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+      })
+  public ResponseEntity<?> deleteUserClients(
+      HttpServletRequest request, @AuthenticationPrincipal BasicSignatureTokenPrincipal principal) {
+    try {
+      setLoggingParameters(principal);
+      if (clientApplicationService.deleteUserClients(
+              DeleteUserClientsCommand.builder()
+                  .tenantId(principal.getTenantId())
+                  .userId(principal.getUserId())
+                  .build())
+          > 0) return ResponseEntity.status(HttpStatus.OK).build();
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+    } finally {
+      MDC.clear();
+    }
+  }
+
+  /**
+   * Deletes all tenant clients.
+   *
+   * @param request the HTTP request.
+   * @param principal the authenticated principal.
+   * @return a {@link ResponseEntity} indicating the status of the deletion.
+   */
+  @RateLimiter(name = "globalRateLimiter")
+  @DeleteMapping("/tenant")
+  @Operation(
+      summary = "Delete all tenant OAuth2 clients",
+      description =
+          "Permanently deletes tenant OAuth2 clients and all associated data. "
+              + "This will invalidate all access tokens and refresh tokens issued to this client. "
+              + "This operation cannot be undone.",
+      tags = {"Client Management"},
+      security = @SecurityRequirement(name = "x-signature"),
+      responses = {
+        @ApiResponse(responseCode = "200", description = "Client successfully deleted"),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Insufficient permissions to delete tenant clients",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "429",
+            description = "Too many requests - rate limit exceeded",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Internal server error occurred",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+      })
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<?> deleteTenantClients(
+      HttpServletRequest request, @AuthenticationPrincipal BasicSignatureTokenPrincipal principal) {
+    try {
+      setLoggingParameters(principal);
+      if (clientApplicationService.deleteTenantClients(
+              DeleteTenantClientsCommand.builder().tenantId(principal.getTenantId()).build())
+          > 0) return ResponseEntity.status(HttpStatus.OK).build();
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     } finally {
       MDC.clear();

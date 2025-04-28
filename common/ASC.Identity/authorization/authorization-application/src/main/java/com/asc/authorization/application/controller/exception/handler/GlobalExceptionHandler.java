@@ -34,6 +34,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.ErrorResponse;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -48,42 +49,6 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 @Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
-  /**
-   * Handles {@link DataAccessException} and returns a response with HTTP status 500.
-   *
-   * <p>This method logs the exception and returns a {@link ResponseEntity} with HTTP status {@link
-   * HttpStatus#INTERNAL_SERVER_ERROR}.
-   *
-   * @param ex the {@link DataAccessException} thrown during a database operation
-   * @param request the {@link HttpServletRequest} in which the exception was raised
-   * @return a {@link ResponseEntity} with HTTP status 500 (Internal Server Error)
-   */
-  @ExceptionHandler(DataAccessException.class)
-  public ResponseEntity<?> handleDataAccessException(
-      DataAccessException ex, HttpServletRequest request) {
-    log.error("Could not perform a database operation", ex);
-    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-  }
-
-  /**
-   * Handles {@link MissingServletRequestParameterException} and returns a response with HTTP status
-   * 400.
-   *
-   * <p>This method logs a warning and returns a {@link ResponseEntity} with HTTP status {@link
-   * HttpStatus#BAD_REQUEST}.
-   *
-   * @param ex the {@link MissingServletRequestParameterException} thrown when a required request
-   *     parameter is missing
-   * @param request the {@link HttpServletRequest} in which the exception was raised
-   * @return a {@link ResponseEntity} with HTTP status 400 (Bad Request)
-   */
-  @ExceptionHandler(MissingServletRequestParameterException.class)
-  public ResponseEntity<?> handleMissingParameterException(
-      MissingServletRequestParameterException ex, HttpServletRequest request) {
-    log.warn("Request parameter is missing", ex);
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-  }
-
   /**
    * Handles the {@link NoResourceFoundException} and returns an error response with HTTP 404
    * status.
@@ -103,6 +68,59 @@ public class GlobalExceptionHandler {
   }
 
   /**
+   * Handles {@link HttpRequestMethodNotSupportedException} and returns a response with HTTP status
+   * 405.
+   *
+   * <p>This method logs a warning and returns a {@link ResponseEntity} with HTTP status {@link
+   * HttpStatus#METHOD_NOT_ALLOWED}.
+   *
+   * @param ex the {@link HttpRequestMethodNotSupportedException} thrown when an unsupported HTTP
+   *     method is used
+   * @param request the {@link HttpServletRequest} in which the exception was raised
+   * @return a {@link ResponseEntity} with HTTP status 405 (Method Not Allowed)
+   */
+  @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+  public ResponseEntity<?> handleMethodNotSupportedException(
+      HttpRequestMethodNotSupportedException ex, HttpServletRequest request) {
+    return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
+  }
+
+  /**
+   * Handles {@link MissingServletRequestParameterException} and returns a response with HTTP status
+   * 400.
+   *
+   * <p>This method logs a warning and returns a {@link ResponseEntity} with HTTP status {@link
+   * HttpStatus#BAD_REQUEST}.
+   *
+   * @param ex the {@link MissingServletRequestParameterException} thrown when a required request
+   *     parameter is missing
+   * @param request the {@link HttpServletRequest} in which the exception was raised
+   * @return a {@link ResponseEntity} with HTTP status 400 (Bad Request)
+   */
+  @ExceptionHandler(MissingServletRequestParameterException.class)
+  public ResponseEntity<?> handleMissingParameterException(
+      MissingServletRequestParameterException ex, HttpServletRequest request) {
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+  }
+
+  /**
+   * Handles {@link DataAccessException} and returns a response with HTTP status 500.
+   *
+   * <p>This method logs the exception and returns a {@link ResponseEntity} with HTTP status {@link
+   * HttpStatus#INTERNAL_SERVER_ERROR}.
+   *
+   * @param ex the {@link DataAccessException} thrown during a database operation
+   * @param request the {@link HttpServletRequest} in which the exception was raised
+   * @return a {@link ResponseEntity} with HTTP status 500 (Internal Server Error)
+   */
+  @ExceptionHandler(DataAccessException.class)
+  public ResponseEntity<?> handleDataAccessException(
+      DataAccessException ex, HttpServletRequest request) {
+    log.error("Could not perform a database operation", ex);
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+  }
+
+  /**
    * Handles {@link RequestNotPermitted} exceptions, which are thrown when a request is not
    * permitted by the rate limiter.
    *
@@ -112,7 +130,6 @@ public class GlobalExceptionHandler {
    */
   @ExceptionHandler(value = {RequestNotPermitted.class})
   public ResponseEntity<?> handleRequestNotPermitted(Throwable ex, HttpServletRequest request) {
-    log.warn("Request not permitted by a rate-limiter", ex);
     return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
   }
 

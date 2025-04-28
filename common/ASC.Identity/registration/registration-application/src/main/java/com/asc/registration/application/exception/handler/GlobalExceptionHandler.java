@@ -44,7 +44,9 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -59,24 +61,6 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 @Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
-  /**
-   * Handles {@link RequestNotPermitted} exceptions thrown when the rate limiter blocks a request.
-   *
-   * <p>This method returns a response with an HTTP status of {@code 429 Too Many Requests} and an
-   * error message indicating that too many requests have been made.
-   *
-   * @param ex the {@link RequestNotPermitted} exception that was raised.
-   * @param request the {@link HttpServletRequest} associated with the current request.
-   * @return a {@link ResponseEntity} containing an {@link ErrorResponse} with a "too many requests"
-   *     message.
-   */
-  @ExceptionHandler(value = RequestNotPermitted.class)
-  public ResponseEntity<ErrorResponse> handleRequestNotPermitted(
-      RequestNotPermitted ex, HttpServletRequest request) {
-    return new ResponseEntity<>(
-        ErrorResponse.builder().reason("too many requests").build(), HttpStatus.TOO_MANY_REQUESTS);
-  }
-
   /**
    * Handles {@link NoResourceFoundException} exceptions thrown when a request targets a
    * non-existing API endpoint.
@@ -93,6 +77,44 @@ public class GlobalExceptionHandler {
   public org.springframework.web.ErrorResponse handleNoResourceFoundException(
       NoResourceFoundException ex) {
     return org.springframework.web.ErrorResponse.create(ex, HttpStatus.NOT_FOUND, ex.getMessage());
+  }
+
+  /**
+   * Handles {@link HttpRequestMethodNotSupportedException} and returns a response with HTTP status
+   * 405.
+   *
+   * <p>This method logs a warning and returns a {@link ResponseEntity} with HTTP status {@link
+   * HttpStatus#METHOD_NOT_ALLOWED}.
+   *
+   * @param ex the {@link HttpRequestMethodNotSupportedException} thrown when an unsupported HTTP
+   *     method is used
+   * @param request the {@link HttpServletRequest} in which the exception was raised
+   * @return a {@link ResponseEntity} with HTTP status 405 (Method Not Allowed)
+   */
+  @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+  public ResponseEntity<ErrorResponse> handleMethodNotSupportedException(
+      HttpRequestMethodNotSupportedException ex, HttpServletRequest request) {
+    return new ResponseEntity<>(
+        ErrorResponse.builder().reason(ex.getMessage()).build(), HttpStatus.METHOD_NOT_ALLOWED);
+  }
+
+  /**
+   * Handles {@link MissingServletRequestParameterException} and returns a response with HTTP status
+   * 400.
+   *
+   * <p>This method logs a warning and returns a {@link ResponseEntity} with HTTP status {@link
+   * HttpStatus#BAD_REQUEST}.
+   *
+   * @param ex the {@link MissingServletRequestParameterException} thrown when a required request
+   *     parameter is missing
+   * @param request the {@link HttpServletRequest} in which the exception was raised
+   * @return a {@link ResponseEntity} with HTTP status 400 (Bad Request)
+   */
+  @ExceptionHandler(MissingServletRequestParameterException.class)
+  public ResponseEntity<ErrorResponse> handleMissingParameterException(
+      MissingServletRequestParameterException ex, HttpServletRequest request) {
+    return new ResponseEntity<>(
+        ErrorResponse.builder().reason(ex.getMessage()).build(), HttpStatus.BAD_REQUEST);
   }
 
   /**
@@ -157,6 +179,44 @@ public class GlobalExceptionHandler {
   }
 
   /**
+   * Handles {@link AuthorizationDeniedException} exceptions that occur when access to a resource is
+   * denied.
+   *
+   * <p>This method returns an error response with an HTTP status of {@code 403 Forbidden} and a
+   * message indicating access denial.
+   *
+   * @param e the {@link AuthorizationDeniedException} that was raised.
+   * @param request the {@link HttpServletRequest} associated with the current request.
+   * @return a {@link ResponseEntity} containing an {@link ErrorResponse} with an "access denied"
+   *     message.
+   */
+  @ExceptionHandler(value = AuthorizationDeniedException.class)
+  public ResponseEntity<ErrorResponse> handleAccessDeniedException(
+      AuthorizationDeniedException e, HttpServletRequest request) {
+    return new ResponseEntity<>(
+        ErrorResponse.builder().reason("access denied").build(), HttpStatus.FORBIDDEN);
+  }
+
+  /**
+   * Handles {@link ExceededClientsPerResourceException} exceptions thrown when a tenant exceeds
+   * their client allocation limit.
+   *
+   * <p>This method returns an error response with an HTTP status of {@code 400 Bad Request} that
+   * includes the exception's message explaining the resource limit violation.
+   *
+   * @param e the {@link ExceededClientsPerResourceException} that was raised.
+   * @param request the {@link HttpServletRequest} associated with the current request.
+   * @return a {@link ResponseEntity} containing an {@link ErrorResponse} with the exception's
+   *     message about exceeding the client limit.
+   */
+  @ExceptionHandler(value = ExceededClientsPerResourceException.class)
+  public ResponseEntity<ErrorResponse> handleExceededClientsPerResourceException(
+      ExceededClientsPerResourceException e, HttpServletRequest request) {
+    return new ResponseEntity<>(
+        ErrorResponse.builder().reason(e.getMessage()).build(), HttpStatus.BAD_REQUEST);
+  }
+
+  /**
    * Handles {@link ClientDomainException} exceptions indicating issues on the client-side domain
    * logic.
    *
@@ -171,9 +231,27 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(ClientDomainException.class)
   public ResponseEntity<ErrorResponse> handleClientDomainException(
       ClientDomainException ex, HttpServletRequest request) {
-    log.warn("Client domain exception has been raised", ex);
     return new ResponseEntity<>(
         ErrorResponse.builder().reason(ex.getMessage()).build(), HttpStatus.BAD_REQUEST);
+  }
+
+  /**
+   * Handles {@link DomainNotFoundException} exceptions thrown when a requested domain entity is not
+   * found.
+   *
+   * <p>This method logs a warning and returns an error response with an HTTP status of {@code 404
+   * Not Found}.
+   *
+   * @param ex the {@link DomainNotFoundException} that was raised.
+   * @param request the {@link HttpServletRequest} associated with the current request.
+   * @return a {@link ResponseEntity} containing an {@link ErrorResponse} with a message indicating
+   *     the domain was not found.
+   */
+  @ExceptionHandler(DomainNotFoundException.class)
+  public ResponseEntity<ErrorResponse> handleDomainNotFound(
+      DomainNotFoundException ex, HttpServletRequest request) {
+    return new ResponseEntity<>(
+        ErrorResponse.builder().reason(ex.getMessage()).build(), HttpStatus.NOT_FOUND);
   }
 
   /**
@@ -194,26 +272,6 @@ public class GlobalExceptionHandler {
   }
 
   /**
-   * Handles {@link DomainNotFoundException} exceptions thrown when a requested domain entity is not
-   * found.
-   *
-   * <p>This method logs a warning and returns an error response with an HTTP status of {@code 404
-   * Not Found}.
-   *
-   * @param ex the {@link DomainNotFoundException} that was raised.
-   * @param request the {@link HttpServletRequest} associated with the current request.
-   * @return a {@link ResponseEntity} containing an {@link ErrorResponse} with a message indicating
-   *     the domain was not found.
-   */
-  @ExceptionHandler(DomainNotFoundException.class)
-  public ResponseEntity<ErrorResponse> handleDomainNotFound(
-      DomainNotFoundException ex, HttpServletRequest request) {
-    log.warn("Could not find a domain", ex);
-    return new ResponseEntity<>(
-        ErrorResponse.builder().reason(ex.getMessage()).build(), HttpStatus.NOT_FOUND);
-  }
-
-  /**
    * Handles exceptions of type {@link ExecutionException} and {@link UnsupportedOperationException}
    * which may occur during asynchronous execution or unsupported operations.
    *
@@ -228,29 +286,10 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(value = {ExecutionException.class, UnsupportedOperationException.class})
   public ResponseEntity<ErrorResponse> handleExecutionException(
       Throwable ex, HttpServletRequest request) {
-    log.error("Could not perform an operation", ex);
+    log.warn("Could not perform an operation", ex);
     return new ResponseEntity<>(
         ErrorResponse.builder().reason("could not perform operation").build(),
         HttpStatus.BAD_REQUEST);
-  }
-
-  /**
-   * Handles {@link AuthorizationDeniedException} exceptions that occur when access to a resource is
-   * denied.
-   *
-   * <p>This method returns an error response with an HTTP status of {@code 403 Forbidden} and a
-   * message indicating access denial.
-   *
-   * @param e the {@link AuthorizationDeniedException} that was raised.
-   * @param request the {@link HttpServletRequest} associated with the current request.
-   * @return a {@link ResponseEntity} containing an {@link ErrorResponse} with an "access denied"
-   *     message.
-   */
-  @ExceptionHandler(value = AuthorizationDeniedException.class)
-  public ResponseEntity<ErrorResponse> handleAccessDeniedException(
-      AuthorizationDeniedException e, HttpServletRequest request) {
-    return new ResponseEntity<>(
-        ErrorResponse.builder().reason("access denied").build(), HttpStatus.FORBIDDEN);
   }
 
   /**
@@ -280,22 +319,21 @@ public class GlobalExceptionHandler {
   }
 
   /**
-   * Handles {@link ExceededClientsPerResourceException} exceptions thrown when a tenant exceeds
-   * their client allocation limit.
+   * Handles {@link RequestNotPermitted} exceptions thrown when the rate limiter blocks a request.
    *
-   * <p>This method returns an error response with an HTTP status of {@code 400 Bad Request} that
-   * includes the exception's message explaining the resource limit violation.
+   * <p>This method returns a response with an HTTP status of {@code 429 Too Many Requests} and an
+   * error message indicating that too many requests have been made.
    *
-   * @param e the {@link ExceededClientsPerResourceException} that was raised.
+   * @param ex the {@link RequestNotPermitted} exception that was raised.
    * @param request the {@link HttpServletRequest} associated with the current request.
-   * @return a {@link ResponseEntity} containing an {@link ErrorResponse} with the exception's
-   *     message about exceeding the client limit.
+   * @return a {@link ResponseEntity} containing an {@link ErrorResponse} with a "too many requests"
+   *     message.
    */
-  @ExceptionHandler(value = ExceededClientsPerResourceException.class)
-  public ResponseEntity<ErrorResponse> handleExceededClientsPerResourceException(
-      ExceededClientsPerResourceException e, HttpServletRequest request) {
+  @ExceptionHandler(value = RequestNotPermitted.class)
+  public ResponseEntity<ErrorResponse> handleRequestNotPermitted(
+      RequestNotPermitted ex, HttpServletRequest request) {
     return new ResponseEntity<>(
-        ErrorResponse.builder().reason(e.getMessage()).build(), HttpStatus.BAD_REQUEST);
+        ErrorResponse.builder().reason("too many requests").build(), HttpStatus.TOO_MANY_REQUESTS);
   }
 
   /**
