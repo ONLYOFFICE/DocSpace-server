@@ -392,7 +392,7 @@ public class GetMemberByIdRequestDto
 /// <summary>
 /// The request parameters for getting a user by the email address.
 /// </summary>
-public class GetMemberByEmailRequestDto: CultureRequestDto
+public class GetMemberByEmailRequestDto
 {
     /// <summary>
     /// The user email address.
@@ -401,6 +401,12 @@ public class GetMemberByEmailRequestDto: CultureRequestDto
     [EmailAddress]
     [StringLength(255)]
     public string Email { get; set; }
+
+    /// <summary>
+    /// Culture
+    /// </summary>
+    [FromQuery(Name = "culture")]
+    public string Culture { get; set; }
 }
 
 /// <summary>
@@ -477,13 +483,4 @@ public class GuestShareRequestDto
     /// </summary>
     [FromRoute(Name = "userid")]
     public Guid UserId { get; set; }
-}
-
-public class CultureRequestDto
-{
-    /// <summary>
-    /// Culture
-    /// </summary>
-    [FromQuery(Name = "culture")]
-    public string Culture { get; set; }
 }
