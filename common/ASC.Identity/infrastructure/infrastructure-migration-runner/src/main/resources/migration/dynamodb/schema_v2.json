@@ -1,0 +1,35 @@
+{
+  "TableName": "RegisteredClient",
+  "KeySchema": [
+    { "AttributeName": "client_id", "KeyType": "HASH" }
+  ],
+  "AttributeDefinitions": [
+    { "AttributeName": "client_id", "AttributeType": "S" },
+    { "AttributeName": "tenant_id", "AttributeType": "N" },
+    { "AttributeName": "created_by", "AttributeType": "S" },
+    { "AttributeName": "created_on", "AttributeType": "S" }
+  ],
+  "BillingMode": "PAY_PER_REQUEST",
+  "GlobalSecondaryIndexes": [
+    {
+      "IndexName": "tenant-created-index",
+      "KeySchema": [
+        { "AttributeName": "tenant_id", "KeyType": "HASH" },
+        { "AttributeName": "created_on", "KeyType": "RANGE" }
+      ],
+      "Projection": {
+        "ProjectionType": "ALL"
+      }
+    },
+    {
+      "IndexName": "creator-created-index",
+      "KeySchema": [
+        { "AttributeName": "created_by", "KeyType": "HASH" },
+        { "AttributeName": "created_on", "KeyType": "RANGE" }
+      ],
+      "Projection": {
+        "ProjectionType": "ALL"
+      }
+    }
+  ]
+}

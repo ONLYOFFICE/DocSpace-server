@@ -87,3 +87,19 @@ spring:
   output:
     ansi:
       enabled: always
+---
+logging:
+  level:
+    root: INFO
+spring:
+  application:
+    encryption:
+      secret: ${SPRING_APPLICATION_ENCRYPTION_SECRET:secret}
+    signature:
+      secret: ${SPRING_APPLICATION_SIGNATURE_SECRET:1123askdasjklasbnd}
+  config:
+    activate:
+      on-profile:
+        - staging
+        - stage
+        - s

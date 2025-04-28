@@ -39,6 +39,8 @@ import com.asc.common.core.domain.value.TenantId;
 import com.asc.common.core.domain.value.UserId;
 import com.asc.common.core.domain.value.enums.AuditCode;
 import com.asc.common.core.domain.value.enums.AuthenticationMethod;
+import com.asc.common.service.ports.output.message.publisher.AuthorizationMessagePublisher;
+import com.asc.common.service.transfer.message.ClientRemovedEvent;
 import com.asc.common.service.transfer.response.ClientResponse;
 import com.asc.common.utilities.crypto.EncryptionService;
 import com.asc.registration.core.domain.ClientDomainService;
@@ -71,6 +73,7 @@ public class ClientUpdateCommandHandlerTest {
   private final UserId CREATOR_ID = new UserId("creator");
 
   @InjectMocks private ClientUpdateCommandHandler clientUpdateCommandHandler;
+  @Mock private AuthorizationMessagePublisher<ClientRemovedEvent> authorizationMessagePublisher;
   @Mock private ClientDomainService clientDomainService;
   @Mock private EncryptionService encryptionService;
   @Mock private ClientQueryRepository clientQueryRepository;
@@ -267,6 +270,7 @@ public class ClientUpdateCommandHandlerTest {
     verify(clientCommandRepository, times(1))
         .deleteByTenantIdAndClientId(
             any(ClientEvent.class), any(TenantId.class), any(ClientId.class));
+    verify(authorizationMessagePublisher).publish(any(ClientRemovedEvent.class));
   }
 
   @Test

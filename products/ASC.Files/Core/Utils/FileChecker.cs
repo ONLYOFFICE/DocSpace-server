@@ -28,7 +28,8 @@ namespace ASC.Web.Files.Utils;
 [Transient]
 public class FileChecker(
     IDaoFactory daoFactory,
-    IConfiguration configuration)
+    IConfiguration configuration,
+    IFusionCache cache)
 {
     public async Task<bool> CheckExtendedPDF<T>(File<T> file)
     {
@@ -46,6 +47,21 @@ public class FileChecker(
         var config = configuration.GetSection("files:oform").Get<OFormSettings>();
 
         return IsExtendedPDFFile(message, config.Signature);
+    }
+    public async Task<bool> IsFormPDFFile<T>(File<T> file)
+    {
+        var isFormCache = await cache.TryGetAsync<bool>(FileConstant.IsFormKeyPrefix + file.Id);
+
+        if (isFormCache.HasValue)
+        {
+            return isFormCache.Value;
+        }
+        else
+        {
+            var isForm = await CheckExtendedPDF(file);
+            await cache.SetAsync(FileConstant.IsFormKeyPrefix + file.Id, isForm);
+            return isForm;
+        }
     }
     private static bool IsExtendedPDFFile(string text, string signature)
     {

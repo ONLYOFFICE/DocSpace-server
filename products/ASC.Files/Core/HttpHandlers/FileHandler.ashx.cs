@@ -1601,11 +1601,11 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         catch (Exception e)
         {
             logger.ErrorDocServiceTrack(e);
-            throw new HttpException((int)HttpStatusCode.BadRequest, e.Message);
+            throw new HttpException((int)HttpStatusCode.BadRequest, e.Message, e);
         }
         result ??= new TrackResponse();
 
-        await context.Response.WriteAsync(TrackResponse.Serialize(result));
+        await context.Response.WriteAsync(TrackResponse.Serialize(result), cancellationToken: requestAborted);
     }
 }
 
