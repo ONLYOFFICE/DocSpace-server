@@ -1663,7 +1663,12 @@ internal class FolderDao(
     {
         return AsyncEnumerable.Empty<Folder<int>>();
     }
-    
+
+    public Task<int> GetProviderBasedRoomsCountAsync(SearchArea searchArea)
+    {
+        return Task.FromResult(0);
+    }
+
     public async Task<Folder<int>> GetFirstParentTypeFromFileEntryAsync(FileEntry<int> entry)
     {
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
