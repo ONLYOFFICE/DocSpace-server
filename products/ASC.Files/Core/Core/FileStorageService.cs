@@ -1609,7 +1609,7 @@ public class FileStorageService //: IFileStorageService
     {
         try
         {
-            if (!forceSave && fileTracker.IsEditingAlone(fileId))
+            if (!forceSave && await fileTracker.IsEditingAloneAsync(fileId))
             {
                 await fileTracker.RemoveAsync(fileId);
                 await socketManager.StopEditAsync(fileId);
@@ -1941,7 +1941,7 @@ public class FileStorageService //: IFileStorageService
             var usersDrop = (await fileTracker.GetEditingByAsync(file.Id)).Where(uid => uid != authContext.CurrentAccount.ID).Select(u => u.ToString()).ToArray();
             if (usersDrop.Length > 0)
             {
-                var docKey = fileTracker.GetTrackerDocKey(file.Id);
+                var docKey = await fileTracker.GetTrackerDocKey(file.Id);
                 await documentServiceHelper.DropUserAsync(docKey, usersDrop, file.Id);
             }
 
@@ -2015,7 +2015,7 @@ public class FileStorageService //: IFileStorageService
                 var usersDrop = (await fileTracker.GetEditingByAsync(file.Id)).Where(uid => uid != authContext.CurrentAccount.ID).Select(u => u.ToString()).ToArray();
                 if (usersDrop.Length > 0)
                 {
-                    var docKey = fileTracker.GetTrackerDocKey(file.Id);
+                    var docKey = await fileTracker.GetTrackerDocKey(file.Id);
                     await documentServiceHelper.DropUserAsync(docKey, usersDrop, file.Id);
                 }
             }
