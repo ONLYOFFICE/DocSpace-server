@@ -106,7 +106,7 @@ public enum MessageAction
     LoginFailBruteForce = 1023,
 
     [SwaggerEnum("Login fail recaptcha")]
-    LoginFailRecaptcha = 1026,  // last login
+    LoginFailRecaptcha = 1026,
 
     [SwaggerEnum("Logout")]
     Logout = 1006,
@@ -116,6 +116,9 @@ public enum MessageAction
 
     [SwaggerEnum("Session completed")]
     SessionCompleted = 1017,
+
+    [SwaggerEnum("Authorization link activated")]
+    AuthLinkActivated = 1027,  // last login
 
     #endregion
 

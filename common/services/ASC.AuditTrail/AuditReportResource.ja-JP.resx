@@ -835,4 +835,94 @@
   <data name="RevokeUserClient" xml:space="preserve">
     <value>クライアント{0}のアクセスが取り消されました</value>
   </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>開発者ツールのアクセス設定が変更されました</value>
+  </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>ファイル：{0}. インデックスが {1} から {2} に変更されました</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>ファイル [{0}]。バージョン削除：{1}</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>フォルダー：{0}. インデックスが {1} から {2} に変更されました</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>フォルダー：{0}. インデックスが再配置されました</value>
+  </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>ユーザー [{0}]。完全に記入されたフォーム：{1}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>ユーザー [{0}]。フォームの一部に記入しました：{1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>ユーザー [{0}]。入力を開始しました：{1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>ユーザー [{0}]。フォームが停止しました：{1}</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>ルーム：{0}. ダウンロードの拒否が無効になっています</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>ルーム：{0}. ダウンロード拒否が有効です</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>ルームのインデックス作成が無効になっています</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>ルームのインデックス作成が有効になりました</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>ライフタイムが無効になりました</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>ライフタイムが設定されています。 値：{0}。 期間：{1}。永久に削除：{2}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>ルーム：{0}。ウォーターマーク無効</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>ルーム：{0}。ウォーターマークが有効です</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>クライアント {0} が更新されました</value>
+  </data>
+  <data name="WebhookCreated" xml:space="preserve">
+    <value>Webhookが作成されました：{0}</value>
+  </data>
+  <data name="WebhookDeleted" xml:space="preserve">
+    <value>Webhookが削除されました：{0}</value>
+  </data>
+  <data name="WebhookUpdated" xml:space="preserve">
+    <value>Webhookが更新されました：{0}</value>
+  </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>ユーザーAPIキーが作成されました：{0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>ユーザーAPIキーが削除されました：{0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>ユーザーAPIキーが更新されました：{0}</value>
+  </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>ファイル：{0}。カスタムフィルタは無効です</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>ファイル：{0}。カスタムフィルタは有効です</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>LDAP認証が有効です</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>LDAP認証が無効です</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>LDAP同期が完了しました</value>
+  </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>認証リンクが有効化されました</value>
+  </data>
 </root>

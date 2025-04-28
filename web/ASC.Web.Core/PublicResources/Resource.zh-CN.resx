@@ -1078,4 +1078,7 @@
   <data name="Tariffs_nonprofit" xml:space="preserve">
     <value>非营利性</value>
   </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>Webhook URL 不可用。HEAD 请求未响应，HTTP 状态码为 200。</value>
+  </data>
 </root>

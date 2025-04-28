@@ -57,7 +57,10 @@ public enum FileStatus
     IsTemplate = 0x40,
 
     [SwaggerEnum(Description = "Is fill form draft")]
-    IsFillFormDraft = 0x80
+    IsFillFormDraft = 0x80,
+
+    [SwaggerEnum(Description = "Is completed form")]
+    IsCompletedForm = 0x100
 }
 
 /// <summary>
@@ -86,6 +89,11 @@ public class File<T> : FileEntry<T>
         FileEntryType = FileEntryType.File;
     }
 
+    public FileStatus FileStatus
+    {
+        get { return _status; }
+        set { _status = value; }
+    }
     /// <summary>
     /// The file version.
     /// </summary>
@@ -254,6 +262,26 @@ public class File<T> : FileEntry<T>
             else
             {
                 _status &= ~FileStatus.IsFavorite;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Specifies whether the form filling is completed.
+    /// </summary>
+    [JsonIgnore]
+    public bool IsCompletedForm
+    {
+        get => (_status & FileStatus.IsCompletedForm) == FileStatus.IsCompletedForm;
+        set
+        {
+            if (value)
+            {
+                _status |= FileStatus.IsCompletedForm;
+            }
+            else
+            {
+                _status &= ~FileStatus.IsCompletedForm;
             }
         }
     }

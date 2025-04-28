@@ -871,4 +871,46 @@
   <data name="UpdateClient" xml:space="preserve">
     <value>İstemci {0} güncellendi</value>
   </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>Geliştirici Araçları erişim ayarları değiştirildi</value>
+  </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>Dosya: {0}. Özel filtre devre dışı</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>Dosya: {0}. Özel filtre etkinleştirildi</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>Dosyalar [{0}]. Sürüm silindi: {1}</value>
+  </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>Kullanıcı Api Anahtarı Oluşturuldu: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>Kullanıcı Api Anahtarı Silindi: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>Kullanıcı Api Anahtarı Güncellendi: {0}</value>
+  </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>Kullanıcılar [{0}]. Form tamamen dolduruldu: {1}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>Kullanıcılar [{0}]. Formun bir kısmı dolduruldu: {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>Kullanıcılar [{0}]. Form durduruldu: {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>Kullanıcılar [{0}]. Form doldurulmaya başlandı: {1}</value>
+  </data>
+  <data name="WebhookCreated" xml:space="preserve">
+    <value>Webhook oluşturuldu: {0}</value>
+  </data>
+  <data name="WebhookDeleted" xml:space="preserve">
+    <value>Webhook silindi: {0}</value>
+  </data>
+  <data name="WebhookUpdated" xml:space="preserve">
+    <value>Webhook güncellendi: {0}</value>
+  </data>
 </root>

@@ -526,6 +526,12 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
                 return room;
             }
         }
+
+        if(folder.RootFolderType == FolderType.USER)
+        {
+            return await folderDao.GetRootFolderAsync(folder.Id);
+        }
+
         return folder;
     }
 
@@ -599,8 +605,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
     public async Task<FormOpenSetup<T>> GetFormOpenSetupForVirtualDataRoomAsync<T>(File<T> file, EditorType editorType)
     {
         var fileDao = daoFactory.GetFileDao<T>();
-        var (currentStep, roles) = await fileDao.GetUserFormRoles(file.Id, securityContext.CurrentAccount.ID);
-        var myRoles = await roles.ToListAsync();
+        var (currentStep, myRoles) = await fileDao.GetUserFormRoles(file.Id, securityContext.CurrentAccount.ID);
 
         var result = new FormOpenSetup<T>
         {
@@ -651,8 +656,9 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             result = new FormOpenSetup<T>
             {
                 CanEdit = edit,
-                CanFill = fill,
-                CanStartFilling = true
+                CanFill = fill || canFill,
+                CanStartFilling = true,
+                EditorType = editorType
             };
         }
         else
@@ -661,18 +667,11 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             {
                 CanEdit = canEdit,
                 CanFill = canFill,
-                CanStartFilling = false
+                CanStartFilling = false,
+                EditorType = !edit && (fill || canFill) && editorType != EditorType.Mobile
+                            ? EditorType.Embedded
+                            : editorType
             };
-        }
-
-        if (securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID) && result.CanFill)
-        {
-            result.IsSubmitOnly = canFill;
-        }
-
-        if (result.CanFill) 
-        {
-            result.EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
         }
         return result;
     }

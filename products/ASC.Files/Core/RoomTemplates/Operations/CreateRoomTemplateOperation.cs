@@ -88,14 +88,16 @@ public class CreateRoomTemplateOperation : DistributedTaskProgress
 
     protected override async Task DoJob()
     {
-        var tenantManager = _serviceProvider.GetService<TenantManager>();
-        var securityContext = _serviceProvider.GetService<SecurityContext>();
-        var globalHelper = _serviceProvider.GetService<GlobalFolderHelper>();
-        var fileStorageService = _serviceProvider.GetService<FileStorageService>();
-        var roomLogoManager = _serviceProvider.GetService<RoomLogoManager>();
-        var dbFactory = _serviceProvider.GetService<IDbContextFactory<FilesDbContext>>();
-        var daoFactory = _serviceProvider.GetService<IDaoFactory>();
-        var logger = _serviceProvider.GetService<ILogger<CreateRoomTemplateOperation>>();
+
+        await using var scope = _serviceProvider.CreateAsyncScope();
+        var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
+        var securityContext = scope.ServiceProvider.GetService<SecurityContext>();
+        var globalHelper = scope.ServiceProvider.GetService<GlobalFolderHelper>();
+        var fileStorageService = scope.ServiceProvider.GetService<FileStorageService>();
+        var roomLogoManager = scope.ServiceProvider.GetService<RoomLogoManager>();
+        var dbFactory = scope.ServiceProvider.GetService<IDbContextFactory<FilesDbContext>>();
+        var daoFactory = scope.ServiceProvider.GetService<IDaoFactory>();
+        var logger = scope.ServiceProvider.GetService<ILogger<CreateRoomTemplateOperation>>();
         var fileDao = daoFactory.GetFileDao<int>();
         var folderDao = daoFactory.GetFolderDao<int>();
 

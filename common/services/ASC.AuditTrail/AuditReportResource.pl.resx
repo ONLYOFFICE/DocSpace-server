@@ -871,4 +871,46 @@
   <data name="RoomInviteResend" xml:space="preserve">
     <value>Ponownie wysłane zaproszenie: {0}</value>
   </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>Utworzono klucz API użytkownika: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>Usunięto klucz API użytkownika: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>Zaktualizowano klucz API użytkownika: {0}</value>
+  </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>Użytkownicy [{0}]. Całkowicie wypełnili formularz: {1}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>Użytkownicy [{0}]. Częściowo wypełnili formularz: {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>Użytkownicy [{0}]. Formularz został zatrzymany: {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>Użytkownicy [{0}]. Rozpoczęli wypełnianie: {1}</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>Pliki [{0}]. Usunięta wersja: {1}</value>
+  </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>Ustawienia dostępu do narzędzi dla programistów zostały zmienione</value>
+  </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>Plik: {0}. Filtr niestandardowy wyłączony</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>Plik: {0}. Filtr niestandardowy włączony</value>
+  </data>
+  <data name="WebhookCreated" xml:space="preserve">
+    <value>Webhook został utworzony: {0}</value>
+  </data>
+  <data name="WebhookDeleted" xml:space="preserve">
+    <value>Webhook został usunięty: {0}</value>
+  </data>
+  <data name="WebhookUpdated" xml:space="preserve">
+    <value>Webhook został zaktualizowany: {0}</value>
+  </data>
 </root>

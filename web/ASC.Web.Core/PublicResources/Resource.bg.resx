@@ -1072,4 +1072,13 @@
   <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
     <value>Броят на администраторите надвишава ограничението: {0}/{1}.</value>
   </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>С нестопанска цел</value>
+  </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Добавете поне е1 позволен IP адрес.</value>
+  </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>URL адресът на Webhook не е наличен. Заявката HEAD не е отговор 200 http състояние.</value>
+  </data>
 </root>

@@ -141,4 +141,7 @@
   <data name="UnknownLastName" xml:space="preserve">
     <value>Ազգանուն</value>
   </data>
+  <data name="LicenseTypeNotCorrect" xml:space="preserve">
+    <value>Լիցենզիայի Կոնֆլիկտ՝ խնդրում ենք համոզվել, որ տեղադրել եք {0} DocSpace-ի ճիշտ տարբերակը (Enterprise կամ Developer)։ Եթե ​​ունեք հարցեր, խնդրում ենք կապվել ձեր վաճառքի մենեջերի հետ:</value>
+  </data>
 </root>

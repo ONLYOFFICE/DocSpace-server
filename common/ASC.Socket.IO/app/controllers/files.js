@@ -159,7 +159,7 @@ module.exports = (files) => {
 
   router.post("/delete-guest", (req, res) => {
     files.deleteGuest(req.body);
-
+    res.end();
   });
 
   router.post("/backup-progress", (req, res) => {
