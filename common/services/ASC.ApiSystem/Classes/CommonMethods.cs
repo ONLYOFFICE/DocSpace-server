@@ -89,7 +89,7 @@ public class CommonMethods(
 
     private async Task<string> CallSendMethod(string requestUriScheme, string apiMethod, HttpMethod httpMethod, Tenant tenant, ConfirmType confirmType, bool skipAndReturnUrl)
     {
-        var validationKey = emailValidationKeyProvider.GetEmailKey(tenant.Id, tenant.OwnerId.ToString() + confirmType);
+        var validationKey = emailValidationKeyProvider.GetEmailKey(tenant.OwnerId.ToString() + confirmType, tenant.Id);
 
         var url = string.Format("{0}{1}{2}{3}{4}?userid={5}&key={6}",
                             requestUriScheme,

@@ -255,7 +255,7 @@ public class FileTrackerHelper(IFusionCache cache, IServiceProvider serviceProvi
                 
                 using (logger.BeginScope(new[] { new KeyValuePair<string, object>("DocumentServiceConnector", $"{fileId}") }))
                 {
-                    if (await tracker.StartTrackAsync(fileId.ToString(), fileTracker.DocKey, token))
+                    if (await tracker.StartTrackAsync(fileId.ToString(), fileTracker.DocKey, token, fileTracker.Tenant.Id))
                     {
                         await SetTrackerAsync(fileId, fileTracker);
                     }
