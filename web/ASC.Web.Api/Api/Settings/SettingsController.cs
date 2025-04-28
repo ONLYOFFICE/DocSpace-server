@@ -1204,9 +1204,11 @@ public partial class SettingsController(MessageService messageService,
     [AllowAnonymous]
     public async Task<TenantUserInvitationSettingsDto> GetTenantUserInvitationSettingsAsync()
     {
-        var settings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
+        var settings = await settingsManager.LoadAsync<TenantUserInvitationSettings>(HttpContext.GetIfModifiedSince());
 
-        return mapper.Map<TenantUserInvitationSettings, TenantUserInvitationSettingsDto>(settings);
+        return HttpContext.TryGetFromCache(settings.LastModified)
+            ? null
+            : mapper.Map<TenantUserInvitationSettings, TenantUserInvitationSettingsDto>(settings);
     }
 
 
