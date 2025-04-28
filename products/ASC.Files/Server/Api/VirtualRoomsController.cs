@@ -459,6 +459,15 @@ public abstract class VirtualRoomsController<T>(
             return result;
         }
 
+        if (inDto.RoomInvitation.Invitations.Any(i => !string.IsNullOrEmpty(i.Email)))
+        {
+            var invitationSettings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
+            if (!invitationSettings.AllowInvitingGuests)
+            {
+                throw new SecurityException(Resource.ErrorAccessDenied);
+            }
+        }
+
         var room = await _fileStorageService.GetFolderAsync(inDto.Id).NotFoundIfNull("Folder not found");
 
         if (room.RootId is int root && root == await globalFolderHelper.FolderRoomTemplatesAsync 

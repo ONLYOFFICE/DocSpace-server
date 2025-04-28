@@ -1140,4 +1140,7 @@
   <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
     <value>Webhook URL is not avaliable. HEAD request is not responce 200 http status.</value>
   </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>The group could not be found</value>
+  </data>
 </root>
