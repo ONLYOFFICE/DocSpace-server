@@ -103,6 +103,11 @@ public class RenewSubscriptionService(
     {
         try
         {
+            if (data.NextQuantity.HasValue && data.NextQuantity.Value <= 0)
+            {
+                return;
+            }
+
             await using var scope = _scopeFactory.CreateAsyncScope();
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
             var tenant = await tenantManager.SetCurrentTenantAsync(data.TenantId);
@@ -118,7 +123,7 @@ public class RenewSubscriptionService(
 
             var quantity = new Dictionary<string, int>
             {
-                { quotaName, data.Quantity }
+                { quotaName, data.NextQuantity ?? data.Quantity }
             };
 
             var result = await tariffService.PaymentChangeAsync(data.TenantId, quantity, BillingClient.ProductQuantityType.Renew);

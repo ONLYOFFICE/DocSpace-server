@@ -132,6 +132,11 @@ public class PaymentController(
             return false;
         }
 
+        if (inDto.ProductQuantityType is BillingClient.ProductQuantityType.Renew or BillingClient.ProductQuantityType.Sub)
+        {
+            return false;
+        }
+
         var tenant = tenantManager.GetCurrentTenant();
 
         var hasCustomer = await HasCustomer(tenant);
@@ -160,10 +165,10 @@ public class PaymentController(
             return false;
         }
 
+        var tariff = await tariffService.GetTariffAsync(tenant.Id);
+
         if (inDto.ProductQuantityType == BillingClient.ProductQuantityType.Set)
         {
-            var tariff = await tariffService.GetTariffAsync(tenant.Id);
-
             if (tariff.Quotas.Any(q => q.Id == quota.TenantId && q.Quantity == productQty))
             {
                 return false;
@@ -172,7 +177,7 @@ public class PaymentController(
 
         if (quota.Wallet)
         {
-            if (inDto.ProductQuantityType == BillingClient.ProductQuantityType.Add)
+            if (inDto.ProductQuantityType is BillingClient.ProductQuantityType.Add)
             {
                 var balance = await tariffService.GetCustomerBalanceAsync(tenant.Id);
                 if (balance == null)
@@ -192,9 +197,25 @@ public class PaymentController(
                     return false;
                 }
             }
+            else if (inDto.ProductQuantityType is BillingClient.ProductQuantityType.Set)
+            {
+                var updated = await tariffService.UpdateNextQuantityAsync(tenant.Id, tariff, quota.TenantId, productQty);
+
+                if (updated)
+                {
+                    messageService.Send(MessageAction.CustomerSubscriptionUpdated, $"{productName} {productQty}");
+                }
+
+                return updated;
+            }
         }
         else
         {
+            if (inDto.ProductQuantityType is BillingClient.ProductQuantityType.Add)
+            {
+                return false;
+            }
+
             var currentQuota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
 
             if (currentQuota.Price > 0 && currentQuota.Name != productName)

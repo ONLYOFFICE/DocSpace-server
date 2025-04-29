@@ -137,9 +137,15 @@ public class TariffService(
                             asynctariff.Id = Math.Max(asynctariff.Id, currentPayment.PaymentId);
 
                             DateTime? quotaDueDate = null;
+                            int? nextQuantity = null;
                             if (quota.Wallet)
                             {
                                 quotaDueDate = currentPayment.EndDate;
+                                var existingQuota = tariff.Quotas.FirstOrDefault(x => x.Id == quota.TenantId);
+                                if (existingQuota != null && existingQuota.DueDate == currentPayment.EndDate && existingQuota.Quantity == currentPayment.Quantity)
+                                {
+                                    nextQuantity = existingQuota.NextQuantity;
+                                }
                             }
                             else
                             {
@@ -148,7 +154,7 @@ public class TariffService(
                             }
 
                             asynctariff.Quotas = asynctariff.Quotas.Where(r => r.Id != quota.TenantId).ToList();
-                            asynctariff.Quotas.Add(new Quota(quota.TenantId, currentPayment.Quantity, quota.Wallet, quotaDueDate));
+                            asynctariff.Quotas.Add(new Quota(quota.TenantId, currentPayment.Quantity, quota.Wallet, quotaDueDate, nextQuantity));
                             email = currentPayment.PaymentEmail;
                         }
 
@@ -632,6 +638,7 @@ public class TariffService(
                         Quota = q.Id,
                         Quantity = q.Quantity,
                         DueDate = q.DueDate,
+                        NextQuantity = q.NextQuantity,
                         TenantId = tenant
                     });
                 }
@@ -664,6 +671,46 @@ public class TariffService(
         }
 
         return inserted;
+    }
+
+    public async Task<bool> UpdateNextQuantityAsync(int tenant, Tariff tariffInfo, int quotaId, int nextQuantity)
+    {
+        try
+        {
+            var currentTariff = await GetBillingInfoAsync(tenant);
+
+            await using var dbContext = await coreDbContextManager.CreateDbContextAsync();
+
+            foreach (var q in tariffInfo.Quotas)
+            {
+                if (q.Id == quotaId)
+                {
+                    q.NextQuantity = nextQuantity;
+
+                    await dbContext.AddOrUpdateAsync(quota => quota.TariffRows, new DbTariffRow
+                    {
+                        TariffId = tariffInfo.Id,
+                        Quota = q.Id,
+                        Quantity = q.Quantity,
+                        DueDate = q.DueDate,
+                        NextQuantity = nextQuantity,
+                        TenantId = tenant
+                    });
+                }
+            }
+
+            await dbContext.SaveChangesAsync();
+
+            await ClearCacheAsync(tenant);
+
+            await NotifyWebSocketAsync(currentTariff, tariffInfo);
+
+            return true;
+        }
+        catch (DbUpdateException)
+        {
+            return false;
+        }
     }
 
     public async Task DeleteDefaultBillingInfoAsync()

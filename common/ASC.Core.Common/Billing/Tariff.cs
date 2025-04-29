@@ -125,6 +125,12 @@ public class Quota : IEquatable<Quota>
     [ProtoMember(4)]
     public DateTime? DueDate { get; set; }
 
+    /// <summary>
+    /// The quota next quantity.
+    /// </summary>
+    [ProtoMember(5)]
+    public int? NextQuantity { get; set; }
+
     public Quota()
     {
     }
@@ -135,16 +141,17 @@ public class Quota : IEquatable<Quota>
         Quantity = quantity;
     }
 
-    public Quota(int id, int quantity, bool wallet, DateTime? dueDate)
+    public Quota(int id, int quantity, bool wallet, DateTime? dueDate, int? nextQuantity)
     {
         Id = id;
         Quantity = quantity;
         Wallet = wallet;
         DueDate = dueDate;
+        NextQuantity = nextQuantity;
     }
 
     public bool Equals(Quota other)
     {
-        return other != null && other.Id == Id && other.Quantity == Quantity && other.Wallet == Wallet && other.DueDate == DueDate;
+        return other != null && other.Id == Id && other.Quantity == Quantity && other.Wallet == Wallet && other.DueDate == DueDate && other.NextQuantity == NextQuantity;
     }
 }
