@@ -28,12 +28,13 @@ using System.Globalization;
 
 using ASC.Core;
 using ASC.Core.Billing;
-using ASC.Core.Common.EF;
 using ASC.Core.Common.Hosting;
 using ASC.Core.Tenants;
 using ASC.MessagingSystem.Core;
 
 using Microsoft.EntityFrameworkCore;
+
+using ZiggyCreatures.Caching.Fusion;
 
 namespace ASC.Web.Studio.Wallet;
 
@@ -41,10 +42,13 @@ namespace ASC.Web.Studio.Wallet;
 public class RenewSubscriptionService(
         IServiceScopeFactory scopeFactory,
         ILogger<RenewSubscriptionService> logger,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IFusionCache hybridCache)
     : ActivePassiveBackgroundService<RenewSubscriptionService>(logger, scopeFactory)
 {
     private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
+
+    private const string CacheKey = "renewsubscriptionservice_lastrun";
 
     private Dictionary<int, string> _walletQuotas;
     private List<DbTariffRow> _closeToExpirationWalletQuotas;
@@ -60,13 +64,14 @@ public class RenewSubscriptionService(
             {
                 var expiredWalletQuotas = _closeToExpirationWalletQuotas.Where(x => x.DueDate < DateTime.UtcNow).ToList();
 
-                await Parallel.ForEachAsync(expiredWalletQuotas,
-                    new ParallelOptions { MaxDegreeOfParallelism = 3, CancellationToken = stoppingToken }, //System.Environment.ProcessorCount
-                    RenewSubscriptionAsync);
+                foreach (var expiredWalletQuota in expiredWalletQuotas)
+                {
+                    await RenewSubscriptionAsync(expiredWalletQuota);
+                }
             }
 
             var now = DateTime.UtcNow;
-            var from = now.Subtract(ExecuteTaskPeriod * 3);
+            var from = await hybridCache.GetOrDefaultAsync(CacheKey, now, token: stoppingToken);
             var to = now.Add(ExecuteTaskPeriod * 3);
 
             await using (var scope = _scopeFactory.CreateAsyncScope())
@@ -85,6 +90,8 @@ public class RenewSubscriptionService(
             {
                 logger.InfoRenewSubscriptionServiceFound(_closeToExpirationWalletQuotas.Count);
             }
+
+            await hybridCache.SetAsync(CacheKey, now, token: stoppingToken);
         }
         catch (Exception e)
         {
@@ -92,7 +99,7 @@ public class RenewSubscriptionService(
         }
     }
 
-    private async ValueTask RenewSubscriptionAsync(DbTariffRow data, CancellationToken cancellationToken)
+    private async ValueTask RenewSubscriptionAsync(DbTariffRow data)
     {
         try
         {
@@ -117,6 +124,8 @@ public class RenewSubscriptionService(
             var result = await tariffService.PaymentChangeAsync(data.TenantId, quantity, BillingClient.ProductQuantityType.Renew);
             if (result)
             {
+                var newTariff = await tariffService.GetTariffAsync(data.TenantId, refresh: true);
+
                 var description = $"{quotaName} {data.Quantity}";
                 var messageService = scope.ServiceProvider.GetRequiredService<MessageService>();
                 messageService.Send(MessageInitiator.System, MessageAction.CustomerSubscriptionUpdated, description);
