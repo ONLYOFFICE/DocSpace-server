@@ -95,41 +95,48 @@ public class IdentityClient(MachinePseudoKeys machinePseudoKeys,
 
     public async Task DeleteClientsAsync(Guid userId)
     {
-        var jwt = await GenerateJwtTokenAsync(true, userId);
-        var httpClient = httpClientFactory.CreateClient();
-
-        var request = new HttpRequestMessage
+        if (!string.IsNullOrEmpty(Url))
         {
-            RequestUri = new Uri(Url + "/api/2.0/clients"),
-            Method = HttpMethod.Delete
-        };
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
 
-        var response = await httpClient.SendAsync(request);
+            var jwt = await GenerateJwtTokenAsync(true, userId);
+            var httpClient = httpClientFactory.CreateClient();
 
-        if (!response.IsSuccessStatusCode)
-        {
-            throw new InvalidOperationException(response.ReasonPhrase);
+            var request = new HttpRequestMessage
+            {
+                RequestUri = new Uri(Url + "/api/2.0/clients"),
+                Method = HttpMethod.Delete
+            };
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
+
+            var response = await httpClient.SendAsync(request);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new InvalidOperationException(response.ReasonPhrase);
+            }
         }
     }
 
     public async Task DeleteTenantClientsAsync()
     {
-        var jwt = await GenerateJwtTokenAsync(true, Guid.Empty);
-        var httpClient = httpClientFactory.CreateClient();
-
-        var request = new HttpRequestMessage
+        if (!string.IsNullOrEmpty(Url))
         {
-            RequestUri = new Uri(Url + "/api/2.0/clients/tenant"),
-            Method = HttpMethod.Delete
-        };
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
+            var jwt = await GenerateJwtTokenAsync(true, Guid.Empty);
+            var httpClient = httpClientFactory.CreateClient();
 
-        var response = await httpClient.SendAsync(request);
+            var request = new HttpRequestMessage
+            {
+                RequestUri = new Uri(Url + "/api/2.0/clients/tenant"),
+                Method = HttpMethod.Delete
+            };
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
 
-        if (!response.IsSuccessStatusCode)
-        {
-            throw new InvalidOperationException(response.ReasonPhrase);
+            var response = await httpClient.SendAsync(request);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new InvalidOperationException(response.ReasonPhrase);
+            }
         }
     }
 }
