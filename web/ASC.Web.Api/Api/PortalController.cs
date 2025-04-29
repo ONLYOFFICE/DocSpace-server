@@ -396,22 +396,6 @@ public class PortalController(
     }
 
     /// <summary>
-    /// Registers the mobile application installation.
-    /// </summary>
-    /// <short>
-    /// Register the mobile app installation
-    /// </short>
-    /// <path>api/2.0/portal/mobile/registration</path>
-    [ApiExplorerSettings(IgnoreApi = true)]
-    [Tags("Portal / Settings")]
-    [HttpPost("mobile/registration")]
-    public async Task RegisterMobileAppInstallAsync(MobileAppRequestsDto inDto)
-    {
-        var currentUser = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
-        await mobileAppInstallRegistrator.RegisterInstallAsync(currentUser.Email, inDto.Type);
-    }
-
-    /// <summary>
     /// Registers the mobile application installation by its type.
     /// </summary>
     /// <short>
