@@ -93,7 +93,7 @@ public class IdentityClient(MachinePseudoKeys machinePseudoKeys,
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    public async Task DeleteClientsAsync(Guid userId, string url)
+    public async Task DeleteClientsAsync(Guid userId)
     {
         var jwt = await GenerateJwtTokenAsync(true, userId);
         var httpClient = httpClientFactory.CreateClient();
