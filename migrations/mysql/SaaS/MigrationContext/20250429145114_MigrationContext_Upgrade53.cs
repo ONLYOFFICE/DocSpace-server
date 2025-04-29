@@ -15,7 +15,15 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 name: "due_date",
                 table: "tenants_tariffrow",
                 type: "datetime",
-                nullable: true);
+                nullable: true,
+                defaultValueSql: "NULL");
+
+            migrationBuilder.AddColumn<int>(
+                name: "next_quantity",
+                table: "tenants_tariffrow",
+                type: "int",
+                nullable: true,
+                defaultValueSql: "NULL");
 
             migrationBuilder.AlterColumn<decimal>(
                 name: "price",
@@ -50,6 +58,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
             migrationBuilder.DropColumn(
                 name: "due_date",
+                table: "tenants_tariffrow");
+
+            migrationBuilder.DropColumn(
+                name: "next_quantity",
                 table: "tenants_tariffrow");
 
             migrationBuilder.DropColumn(

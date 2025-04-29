@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    [Migration("20250423080959_MigrationContext_Upgrade53")]
+    [Migration("20250429145114_MigrationContext_Upgrade53")]
     partial class MigrationContext_Upgrade53
     {
         /// <inheritdoc />
@@ -1257,8 +1257,16 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("quota");
 
                     b.Property<DateTime?>("DueDate")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("datetime")
-                        .HasColumnName("due_date");
+                        .HasColumnName("due_date")
+                        .HasDefaultValueSql("NULL");
+
+                    b.Property<int?>("NextQuantity")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("next_quantity")
+                        .HasDefaultValueSql("NULL");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int")
