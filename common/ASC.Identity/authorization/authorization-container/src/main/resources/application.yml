@@ -81,11 +81,8 @@ spring:
     activate:
       on-profile:
         - development
-        - staging
         - dev
-        - stage
         - d
-        - s
   output:
     ansi:
       enabled: always
