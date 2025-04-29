@@ -252,10 +252,15 @@ public class FileTrackerHelper(IFusionCache cache, IServiceProvider serviceProvi
                 commonLinkUtility.ServerUri = fileTracker.BaseUri;
                 
                 var tracker = scope.ServiceProvider.GetRequiredService<DocumentServiceTrackerHelper>();
+                var tenantId = fileTracker.Tenant.Id;
                 
-                using (logger.BeginScope(new[] { new KeyValuePair<string, object>("DocumentServiceConnector", $"{fileId}") }))
+                using (logger.BeginScope(new[]
+                       {
+                           new KeyValuePair<string, object>("DocumentServiceConnector", $"{fileId}"), 
+                           new KeyValuePair<string, object>("TenantId", $"{tenantId}") 
+                       }))
                 {
-                    if (await tracker.StartTrackAsync(fileId.ToString(), fileTracker.DocKey, token, fileTracker.Tenant.Id))
+                    if (await tracker.StartTrackAsync(fileId.ToString(), fileTracker.DocKey, token, tenantId))
                     {
                         await SetTrackerAsync(fileId, fileTracker);
                     }
