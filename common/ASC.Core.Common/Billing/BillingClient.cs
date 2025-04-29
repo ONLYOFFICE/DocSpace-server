@@ -33,6 +33,7 @@ public class BillingClient
     private readonly PaymentConfiguration _configuration;
     private readonly IHttpClientFactory _httpClientFactory;
     private const int StripePaymentSystemId = 9;
+    private const int AccountingPaymentSystemId = 11;
 
     internal const string HttpClientOption = "billing";
     public const string GetCurrentPaymentsUri = "GetActiveResources";
@@ -162,12 +163,13 @@ public class BillingClient
         return changed;
     }
 
-    public async Task<IDictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, params string[] productIds)
+    public async Task<IDictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, bool wallet, string[] productIds)
     {
         ArgumentNullException.ThrowIfNull(productIds);
 
         var parameters = productIds.Select(pid => Tuple.Create("ProductId", pid)).ToList();
-        parameters.Add(Tuple.Create("PaymentSystemId", StripePaymentSystemId.ToString()));
+        var paymentSystemId = wallet ? AccountingPaymentSystemId : StripePaymentSystemId;
+        parameters.Add(Tuple.Create("PaymentSystemId", paymentSystemId.ToString()));
 
         if (!string.IsNullOrEmpty(partnerId))
         {
@@ -177,7 +179,7 @@ public class BillingClient
         var result = await RequestAsync("GetProductsPrices", null, parameters.ToArray());
         var prices = JsonSerializer.Deserialize<Dictionary<int, Dictionary<string, Dictionary<string, decimal>>>>(result);
 
-        if (prices.TryGetValue(StripePaymentSystemId, out var pricesPaymentSystem))
+        if (prices.TryGetValue(paymentSystemId, out var pricesPaymentSystem))
         {
             return productIds.Select(productId =>
             {

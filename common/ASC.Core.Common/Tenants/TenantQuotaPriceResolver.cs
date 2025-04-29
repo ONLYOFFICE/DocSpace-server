@@ -31,7 +31,7 @@ internal class TenantQuotaPriceResolver(TenantManager tenantManager, RegionHelpe
 {
     public decimal Resolve(DbQuota source, TenantQuota destination, decimal destMember, ResolutionContext context)
     {
-        var priceInfo = tenantManager.GetProductPriceInfo(source.ProductId);
+        var priceInfo = tenantManager.GetProductPriceInfo(source.ProductId, source.Wallet);
 
         if (priceInfo != null)
         {

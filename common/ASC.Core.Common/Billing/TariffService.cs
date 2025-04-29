@@ -514,7 +514,7 @@ public class TariffService(
         return result;
     }
 
-    public async Task<IDictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, params string[] productIds)
+    public async Task<IDictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, bool wallet, string[] productIds)
     {
         ArgumentNullException.ThrowIfNull(productIds);
 
@@ -530,7 +530,7 @@ public class TariffService(
                 var result = cache.Get<IDictionary<string, Dictionary<string, decimal>>>(key);
                 if (result == null)
                 {
-                    result = await billingClient.GetProductPriceInfoAsync(partnerId, productIds);
+                    result = await billingClient.GetProductPriceInfoAsync(partnerId, wallet, productIds);
                     cache.Insert(key, result, DateTime.Now.AddHours(1));
                 }
 
