@@ -577,7 +577,17 @@ public class FileStorageService //: IFileStorageService
         }, room.SettingsPrivate, share);
     }
 
-    public async Task<Folder<int>> CreateRoomFromTemplateAsync(int templateId, string title, IEnumerable<string> tags, LogoRequest logo, string cover, string color)
+    public async Task<Folder<int>> CreateRoomFromTemplateAsync(int templateId, 
+        string title,
+        IEnumerable<string> tags,
+        LogoRequest logo,
+        string cover,
+        string color,
+        bool? indexing,
+        bool? denyDownload,
+        RoomLifetime lifetime,
+        WatermarkRequest watermark,
+        bool? @private)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
         var parentId = await globalFolderHelper.FolderVirtualRoomsAsync;
@@ -589,27 +599,44 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
         }
 
-        WatermarkRequestDto watermarkRequestDto = null;
-        if (template.SettingsWatermark != null)
+        WatermarkRequestDto watermarkDto = null;
+        if (watermark != null)
         {
-            watermarkRequestDto = new WatermarkRequestDto
+            watermarkDto = new WatermarkRequestDto
             {
-                Text = template.SettingsWatermark.Text,
-                Additions = template.SettingsWatermark.Additions,
-                Rotate = template.SettingsWatermark.Rotate,
-                ImageUrl = template.SettingsWatermark.ImageUrl,
-                ImageScale = template.SettingsWatermark.ImageScale,
-                ImageHeight = template.SettingsWatermark.ImageHeight,
-                ImageWidth = template.SettingsWatermark.ImageWidth
+                Text = watermark.Text,
+                Additions = watermark.Additions,
+                Rotate = watermark.Rotate,
+                ImageUrl = watermark.ImageUrl,
+                ImageScale = watermark.ImageScale,
+                ImageHeight = watermark.ImageHeight,
+                ImageWidth = watermark.ImageWidth
             };
         }
+
+        RoomDataLifetime lifeTimeSetting = null;
+        if (lifetime != null)
+        {
+            lifeTimeSetting = new RoomDataLifetime
+            {
+                DeletePermanently = lifetime.DeletePermanently,
+                Enabled = lifetime.Enabled,
+                Period = lifetime.Period,
+                Value = lifetime.Value,
+                StartDate = DateTime.UtcNow
+            };
+        }
+
+        var settingIndex = indexing.HasValue ? indexing : template.SettingsIndexing;
+        var SettingDenyDownload = denyDownload.HasValue ? denyDownload : template.SettingsDenyDownload;
+        var settingPrivate = @private.HasValue ? @private.Value : template.SettingsPrivate;
 
         return await CreateRoomAsync(async () =>
         {
             await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetRoomsCountCheckKey(tenantId)))
             {
                 await countRoomChecker.CheckAppend();
-                return await InternalCreateFolderAsync(parentId, title, template.FolderType, template.SettingsPrivate, template.SettingsIndexing, template.SettingsQuota, template.SettingsLifetime, template.SettingsDenyDownload, watermarkRequestDto, color, cover, tags, logo);
+                return await InternalCreateFolderAsync(parentId, title, template.FolderType, settingPrivate, settingIndex, template.SettingsQuota, lifeTimeSetting, SettingDenyDownload, watermarkDto, color, cover, tags, logo);
             }
         }, template.SettingsPrivate, []);
     }
@@ -2798,7 +2825,7 @@ public class FileStorageService //: IFileStorageService
         {
             var file = await fileDao.GetFileAsync(id);
             if (file is { Encrypted: false }
-                && await destFileDao.IsExistAsync(file.Title, toFolder.Id))
+                && await destFileDao.IsExistAsync(file.Title, file.Category, toFolder.Id))
             {
                 checkedFiles.Add(id);
             }
@@ -4825,7 +4852,7 @@ public class FileStorageService //: IFileStorageService
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
-        if (!await DocSpaceHelper.IsFormOrCompletedForm(form, fileDao))
+        if (!await DocSpaceHelper.IsFormOrCompletedForm(form, daoFactory))
         {
             throw new InvalidOperationException();
         }

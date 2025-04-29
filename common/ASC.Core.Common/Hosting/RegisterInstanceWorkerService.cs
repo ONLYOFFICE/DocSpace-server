@@ -43,11 +43,10 @@ public class RegisterInstanceWorkerService<T>(
 
             return;
         }
-
-        await using var scope = serviceProvider.CreateAsyncScope();
-
+        
         while (!stoppingToken.IsCancellationRequested)
-        {
+        {        
+            await using var scope = serviceProvider.CreateAsyncScope();
             var registerInstanceService = scope.ServiceProvider.GetService<IRegisterInstanceManager<T>>();
 
             try

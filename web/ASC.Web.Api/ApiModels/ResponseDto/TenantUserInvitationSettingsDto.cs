@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,23 +24,20 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-var options = new WebApplicationOptions
+namespace ASC.Web.Api.ApiModels.ResponseDto;
+
+/// <summary>
+/// User invitation settings
+/// </summary>
+public class TenantUserInvitationSettingsDto : IMapFrom<TenantUserInvitationSettings>
 {
-    Args = args,
-    ContentRootPath = AppContext.BaseDirectory
-};
+    /// <summary>
+    /// Allow invite new DocSpace members through the Contacts section.
+    /// </summary>
+    public bool AllowInvitingMembers { get; init; }
 
-var builder = WebApplication.CreateBuilder(options);
-
-builder.Host.UseWindowsService();
-builder.Host.UseSystemd();
-
-var startup = new Startup();
-
-startup.ConfigureServices(builder.Services);
-
-var app = builder.Build();
-
-startup.Configure(app, app.Environment);
-
-await app.RunWithTasksAsync();
+    /// <summary>
+    /// Allow all DocSpace members to invite external guests to rooms.
+    /// </summary>
+    public bool AllowInvitingGuests { get; init; }
+}

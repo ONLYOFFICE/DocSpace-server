@@ -75,7 +75,9 @@ public static class ServiceCollectionExtension
                 DistributedCacheKeyModifierMode = CacheKeyModifierMode.None,
                 DefaultEntryOptions = new FusionCacheEntryOptions
                 {
-                    Duration = TimeSpan.MaxValue
+                    Duration = TimeSpan.MaxValue,
+                    LockTimeout = TimeSpan.FromSeconds(5),
+                    FactoryHardTimeout = TimeSpan.FromSeconds(5)
                 }
             })
             .WithMemoryCache(new MemoryCache(new MemoryCacheOptions()))

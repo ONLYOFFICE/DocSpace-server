@@ -224,6 +224,15 @@ public interface IFileDao<T>
     Task<bool> IsExistAsync(string title, T folderId);
 
     /// <summary>
+    ///     Checks whether or not file
+    /// </summary>
+    /// <param name="title">file name</param>
+    /// <param name="category">file category</param>
+    /// <param name="folderId">folder id</param>
+    /// <returns>Returns true if the file exists, otherwise false</returns>
+    Task<bool> IsExistAsync(string title, int category, T folderId);
+
+    /// <summary>
     ///   Moves a file or set of files in a folder
     /// </summary>
     /// <param name="fileId">file id</param>
@@ -297,7 +306,7 @@ public interface IFileDao<T>
     /// <param name="formId"></param>
     /// <param name="userId"></param>
     /// <returns></returns>
-    Task<(int, IAsyncEnumerable<FormRole>)> GetUserFormRoles(T formId, Guid userId);
+    Task<(int, List<FormRole>)> GetUserFormRoles(T formId, Guid userId);
 
     /// <summary>
     /// Get user form roles in room
@@ -417,3 +426,4 @@ public interface IFileDao<T>
 
     #endregion
 }
+public interface ICacheFileDao<T> : IFileDao<T>;

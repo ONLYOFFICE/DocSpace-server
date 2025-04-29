@@ -263,7 +263,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         }
         catch (FileNotFoundException e)
         {
-            throw new ItemNotFoundException("File not found", e);
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound, e);
         }
     }
 
@@ -277,7 +277,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         }
         catch (FileNotFoundException e)
         {
-            throw new ItemNotFoundException("File not found", e);
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound, e);
         }
     }
 

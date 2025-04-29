@@ -305,9 +305,9 @@ public class FileDtoHelper(
                 _ = await _fileSecurity.SetSecurity(new[] { currentRoom }.ToAsyncEnumerable()).ToListAsync();
             }
 
-            if (!file.IsForm && (FilterType)file.Category == FilterType.None)
+            if (FileUtility.GetFileTypeByExtention(FileUtility.GetFileExtension(file.Title)) == FileType.Pdf && !file.IsForm && (FilterType)file.Category == FilterType.None)
             {
-                result.IsForm = await fileChecker.CheckExtendedPDF(file);
+                result.IsForm = await fileChecker.IsFormPDFFile(file);
             }
             else
             {
@@ -340,9 +340,7 @@ public class FileDtoHelper(
 
             if (currentRoom is { FolderType: FolderType.VirtualDataRoom })
             {
-                var (currentStep, roles) = await fileDao.GetUserFormRoles(file.Id, authContext.CurrentAccount.ID);
-                var roleList = await roles.ToListAsync();
-
+                var (currentStep, roleList) = await fileDao.GetUserFormRoles(file.Id, authContext.CurrentAccount.ID);
                 if (currentStep == -1 && result.Security[FileSecurity.FilesSecurityActions.Edit] && properties != null && properties.CopyToFillOut)
                 {
                     result.FormFillingStatus = FormFillingStatus.Draft;

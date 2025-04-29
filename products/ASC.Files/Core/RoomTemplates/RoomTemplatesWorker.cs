@@ -96,6 +96,11 @@ public class RoomTemplatesWorker(
         string cover,
         string color,
         long? quota,
+        bool? indexing,
+        bool? denyDownload,
+        RoomLifetime lifetime,
+        WatermarkRequest watermark,
+        bool? @private,
         bool enqueueTask = true,
         string taskId = null)
     {
@@ -112,7 +117,7 @@ public class RoomTemplatesWorker(
             {
                 item = serviceProvider.GetService<CreateRoomFromTemplateOperation>();
 
-                item.Init(tenantId, userId, templateId, title, logo, copyLogo, tags, cover, color, quota);
+                item.Init(tenantId, userId, templateId, title, logo, copyLogo, tags, cover, color, quota, indexing, denyDownload, lifetime, watermark, @private);
 
                 if (!string.IsNullOrEmpty(taskId))
                 {
