@@ -166,13 +166,13 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
     IHttpContextAccessor httpContextAccessor,
     WebhookManager webhookManager)
 {
-    public string GetCallbackUrl<T>(T fileId)
+    public string GetCallbackUrl<T>(T fileId, int? tenantId = null)
     {
         var queryParams = HttpUtility.ParseQueryString(String.Empty);
 
         queryParams[FilesLinkUtility.Action] = "track";
         queryParams[FilesLinkUtility.FileId] = fileId.ToString();
-        queryParams[FilesLinkUtility.AuthKey] = emailValidationKeyProvider.GetEmailKey(fileId.ToString());
+        queryParams[FilesLinkUtility.AuthKey] = emailValidationKeyProvider.GetEmailKey(fileId.ToString(), tenantId);
 
         if (httpContextAccessor?.HttpContext != null)
         {
@@ -191,9 +191,9 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
         return callbackUrl;
     }
 
-    public async Task<bool> StartTrackAsync<T>(T fileId, string docKeyForTrack, string token = null)
+    public async Task<bool> StartTrackAsync<T>(T fileId, string docKeyForTrack, string token = null, int? tenantId = null)
     {
-        var callbackUrl = GetCallbackUrl(fileId);
+        var callbackUrl = GetCallbackUrl(fileId, tenantId);
 
         if (!string.IsNullOrEmpty(token))
         {
