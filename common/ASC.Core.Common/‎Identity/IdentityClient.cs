@@ -100,7 +100,7 @@ public class IdentityClient(MachinePseudoKeys machinePseudoKeys,
 
         var request = new HttpRequestMessage
         {
-            RequestUri = new Uri(baseCommonLinkUtility.GetFullAbsolutePath(Url + "/api/2.0/clients")),
+            RequestUri = new Uri(Url + "/api/2.0/clients"),
             Method = HttpMethod.Delete
         };
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
@@ -120,7 +120,7 @@ public class IdentityClient(MachinePseudoKeys machinePseudoKeys,
 
         var request = new HttpRequestMessage
         {
-            RequestUri = new Uri(baseCommonLinkUtility.GetFullAbsolutePath(Url + "/api/2.0/clients/tenant")),
+            RequestUri = new Uri(Url + "/api/2.0/clients/tenant"),
             Method = HttpMethod.Delete
         };
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", jwt);

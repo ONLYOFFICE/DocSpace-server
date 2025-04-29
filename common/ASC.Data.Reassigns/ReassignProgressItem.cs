@@ -132,7 +132,7 @@ public class ReassignProgressItem : DistributedTaskProgress
 
             if (_deleteProfile)
             {
-                await client.DeleteClientsAsync(FromUser, _httpHeaders["Origin"]);
+                await client.DeleteClientsAsync(FromUser);
                 await DeleteUserProfile(userManager, userPhotoManager, messageService, displayUserSettingsHelper, socketManager, webhookManager);
             }
 
