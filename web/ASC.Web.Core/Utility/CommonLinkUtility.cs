@@ -205,7 +205,7 @@ public class CommonLinkUtility(
         var url = GetFullAbsolutePath($"confirm/{confirmType}?{GetTokenWithoutKey(email, confirmType, userId)}");
 
         var tenantId = _tenantManager.GetCurrentTenantId();
-        var key = emailValidationKeyProvider.GetEmailKey(tenantId, email + confirmType + (postfix ?? ""));
+        var key = emailValidationKeyProvider.GetEmailKey(email + confirmType + (postfix ?? ""), tenantId);
         return (url, key);
     }
 
@@ -253,7 +253,7 @@ public class CommonLinkUtility(
 
     public string GetToken(int tenantId, string email, ConfirmType confirmType, object postfix = null, Guid userId = default)
     {
-        var validationKey = emailValidationKeyProvider.GetEmailKey(tenantId, email + confirmType + (postfix ?? ""));
+        var validationKey = emailValidationKeyProvider.GetEmailKey(email + confirmType + (postfix ?? ""), tenantId);
 
         var link = $"type={confirmType}&key={validationKey}";
 

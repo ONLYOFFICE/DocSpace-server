@@ -627,13 +627,12 @@ public class ClientCommandController {
       HttpServletRequest request, @AuthenticationPrincipal BasicSignatureTokenPrincipal principal) {
     try {
       setLoggingParameters(principal);
-      if (clientApplicationService.deleteUserClients(
-              DeleteUserClientsCommand.builder()
-                  .tenantId(principal.getTenantId())
-                  .userId(principal.getUserId())
-                  .build())
-          > 0) return ResponseEntity.status(HttpStatus.OK).build();
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+      clientApplicationService.deleteUserClients(
+          DeleteUserClientsCommand.builder()
+              .tenantId(principal.getTenantId())
+              .userId(principal.getUserId())
+              .build());
+      return ResponseEntity.status(HttpStatus.OK).build();
     } finally {
       MDC.clear();
     }
@@ -676,10 +675,9 @@ public class ClientCommandController {
       HttpServletRequest request, @AuthenticationPrincipal BasicSignatureTokenPrincipal principal) {
     try {
       setLoggingParameters(principal);
-      if (clientApplicationService.deleteTenantClients(
-              DeleteTenantClientsCommand.builder().tenantId(principal.getTenantId()).build())
-          > 0) return ResponseEntity.status(HttpStatus.OK).build();
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+      clientApplicationService.deleteTenantClients(
+          DeleteTenantClientsCommand.builder().tenantId(principal.getTenantId()).build());
+      return ResponseEntity.status(HttpStatus.OK).build();
     } finally {
       MDC.clear();
     }
