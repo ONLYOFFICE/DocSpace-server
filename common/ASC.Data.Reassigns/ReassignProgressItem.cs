@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Api.Core.Webhook;
+using ASC.Core.Common.Identity;
 using ASC.Webhooks.Core;
 
 using SecurityContext = ASC.Core.SecurityContext;
@@ -83,7 +84,7 @@ public class ReassignProgressItem : DistributedTaskProgress
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var scopeClass = scope.ServiceProvider.GetService<ReassignProgressItemScope>();
-        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, displayUserSettingsHelper, options, socketManager, webhookManager) = scopeClass;
+        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, displayUserSettingsHelper, options, socketManager, webhookManager, client) = scopeClass;
         var logger = options.CreateLogger("ASC.Web");
         await tenantManager.SetCurrentTenantAsync(_tenantId);
 
@@ -131,6 +132,7 @@ public class ReassignProgressItem : DistributedTaskProgress
 
             if (_deleteProfile)
             {
+                await client.DeleteClientsAsync(FromUser, _httpHeaders["Origin"]);
                 await DeleteUserProfile(userManager, userPhotoManager, messageService, displayUserSettingsHelper, socketManager, webhookManager);
             }
 
@@ -248,4 +250,5 @@ public record ReassignProgressItemScope(
     DisplayUserSettingsHelper DisplayUserSettingsHelper,
     ILoggerProvider Options,
     UserSocketManager SocketManager,
-    UserWebhookManager WebhookManager);
+    UserWebhookManager WebhookManager,
+    IdentityClient Client);
