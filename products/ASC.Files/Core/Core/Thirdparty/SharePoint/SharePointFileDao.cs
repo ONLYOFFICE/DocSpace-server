@@ -536,26 +536,26 @@ internal class SharePointFileDao(
 
     public Task SaveFormRoleMapping(string formId, IEnumerable<FormRole> formRoles)
     {
-        throw new NotImplementedException();
+        return Task.CompletedTask;
     }
     public IAsyncEnumerable<FormRole> GetFormRoles(string formId)
     {
-        throw new NotImplementedException();
+        return AsyncEnumerable.Empty<FormRole>();
     }
-    public Task<(int, IAsyncEnumerable<FormRole>)> GetUserFormRoles(string formId, Guid userId)
+    public Task<(int, List<FormRole>)> GetUserFormRoles(string formId, Guid userId)
     {
-        throw new NotImplementedException();
+        return Task.FromResult((-1, new List<FormRole>()));
     }
     public IAsyncEnumerable<FormRole> GetUserFormRolesInRoom(string roomId, Guid userId)
     {
-        throw new NotImplementedException();
+        return AsyncEnumerable.Empty<FormRole>();
     }
     public Task<FormRole> ChangeUserFormRoleAsync(string formId, FormRole formRole)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<FormRole>(null);
     }
     public Task DeleteFormRolesAsync(string formId)
     {
-        throw new NotImplementedException();
+        return Task.CompletedTask;
     }
 }

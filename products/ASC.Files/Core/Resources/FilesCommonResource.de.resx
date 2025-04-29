@@ -503,4 +503,13 @@ Sicherheit durch garantierte 100%ige Kompatibilität mit docx, xslx und pptx For
   <data name="OpenForm" xml:space="preserve">
     <value>Datei öffnen</value>
   </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Die aktuelle Dateiversion kann nicht gelöscht werden</value>
+  </data>
+  <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
+    <value>Zum Ausfüllen freigeben</value>
+  </data>
+  <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
+    <value>Ausfüllen beginnen</value>
+  </data>
 </root>

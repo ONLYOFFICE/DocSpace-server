@@ -24,9 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Linq;
+
 using Bogus;
 
 using Microsoft.OpenApi.Any;
+using Microsoft.OpenApi.Interfaces;
 using Microsoft.OpenApi.Models;
 
 using Swashbuckle.AspNetCore.Annotations;
@@ -203,6 +206,8 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
         {
             var enumDataString = new List<IOpenApiAny>();
             var enumDescriptionString = new List<string>();
+            var enumDescriptionDataString = new OpenApiArray();
+            var enumVarNames = new OpenApiArray();
             var enumDataInt = new List<IOpenApiAny>();
             var enumDescriptionInt = new List<string>();
 
@@ -213,6 +218,8 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                 if (enumAttribute is { Ignore: false })
                 {
                     enumDataString.Add(new OpenApiString(enumValue.ToString()));
+                    enumVarNames.Add(new OpenApiString(enumValue.ToString()));
+                    enumDescriptionDataString.Add(new OpenApiString(enumAttribute.Description.ToString()));
                     enumDataInt.Add(new OpenApiInteger(Convert.ToInt32(enumValue)));
                     enumDescriptionString.Add($"{enumValue} - {enumAttribute.Description}");
                     enumDescriptionInt.Add($"{Convert.ToInt32(enumValue)} - {enumAttribute.Description}");
@@ -235,7 +242,12 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                         Enum = enumDataInt,
                         Type = "integer",
                         Description = $"[{string.Join(", ", enumDescriptionInt)}]",
-                        Example = enumDataInt[0]
+                        Example = enumDataInt[0],
+                        Extensions = new Dictionary<string, IOpenApiExtension>
+                        {
+                            ["x-enum-varnames"] = new OpenApiArray(enumVarNames),
+                            ["x-enum-descriptions"] = new OpenApiArray(enumDescriptionDataString)
+                        }
                     }
                 };
                 result.Enum = null;

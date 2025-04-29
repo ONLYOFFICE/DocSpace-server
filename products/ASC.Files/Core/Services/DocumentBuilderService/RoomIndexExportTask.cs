@@ -57,6 +57,7 @@ public class RoomIndexExportTask : DocumentBuilderTask<int, RoomIndexExportTaskD
 
         file.ParentId = await daoFactory.GetFolderDao<int>().GetFolderIDUserAsync(false, _userId);
         file.Title = inputData.OutputFileName;
+        file.CreateBy = _userId;
 
         using var request = new HttpRequestMessage();
         request.RequestUri = fileUri;

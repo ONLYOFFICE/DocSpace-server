@@ -503,4 +503,13 @@ Alta compatibilidade com docx, xlsx, pptx.</value>
   <data name="OpenForm" xml:space="preserve">
     <value>Abrir ficheiro</value>
   </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Não é possível eliminar a versão atual do ficheiro</value>
+  </data>
+  <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
+    <value>Partilhe para preencher</value>
+  </data>
+  <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
+    <value>Iniciar o preenchimento</value>
+  </data>
 </root>

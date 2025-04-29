@@ -126,4 +126,13 @@
   <data name="LargeBackup" xml:space="preserve">
     <value>Il backup è maggiore rispetto alla dimensione totale del portale</value>
   </data>
+  <data name="BackupException" xml:space="preserve">
+    <value>Si è verificato un errore durante la creazione del backup. Riprova o contatta il supporto.</value>
+  </data>
+  <data name="BackupInvalid" xml:space="preserve">
+    <value>Il file di backup non è valido.</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>Si è verificato un errore durante il ripristino del backup. Riprova o contatta il supporto.</value>
+  </data>
 </root>

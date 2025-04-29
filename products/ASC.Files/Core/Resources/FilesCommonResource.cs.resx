@@ -503,4 +503,13 @@ Je garantována 100% kompatibilita s MS Office formáty.</value>
   <data name="OpenForm" xml:space="preserve">
     <value>Otevřít soubor</value>
   </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Nelze odstranit aktuální verzi souboru</value>
+  </data>
+  <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
+    <value>Sdílet k vyplnění</value>
+  </data>
+  <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
+    <value>Začněte plnit</value>
+  </data>
 </root>

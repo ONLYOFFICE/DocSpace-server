@@ -8,9 +8,9 @@ spring:
         enabled: false
   datasource:
     driver-class-name: ${JDBC_DRIVER:com.mysql.cj.jdbc.Driver}
-    password: ${JDBC_PASSWORD:my-secret-pw}
+    password: ${JDBC_PASSWORD:dev}
     url: jdbc:mysql://${JDBC_URL:localhost:3306}/${JDBC_DATABASE:docspace}?${JDBC_PARAMETERS:}
-    username: ${JDBC_USER_NAME:root}
+    username: ${JDBC_USER_NAME:dev}
   jpa:
     properties:
       hibernate:

@@ -503,4 +503,13 @@ Paras yhteensopivuus docx:n, xlsx:n, pptx:n kanssa.</value>
   <data name="OpenForm" xml:space="preserve">
     <value>Avaa tiedosto</value>
   </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Nykyistä tiedoston versiota ei voi poistaa</value>
+  </data>
+  <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
+    <value>Jaa täyttääksesi</value>
+  </data>
+  <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
+    <value>Aloita täyttäminen</value>
+  </data>
 </root>

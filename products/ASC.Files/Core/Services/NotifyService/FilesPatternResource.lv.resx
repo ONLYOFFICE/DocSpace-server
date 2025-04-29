@@ -176,4 +176,63 @@ $OrangeButton</value>
   <data name="subject_FormSubmitted" xml:space="preserve">
     <value>DocSpace paziņojums. Veidlapa ir aizpildīta</value>
   </data>
+  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
+    <value>Jūs esat uzaicināts uz istabu "$RoomTitle"</value>
+  </data>
+  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
+    <value>Jūsu loma telpā "$RoomTitle" ir mainīta uz "$RoomRole"</value>
+  </data>
+  <data name="pattern_FormSubmitted_push" xml:space="preserve">
+    <value>Veidlapa "$DocumentTitle" ir aizpildīta telpā "$RoomTitle"</value>
+  </data>
+  <data name="subject_FormStartedFilling" xml:space="preserve">
+    <value>DocSpace paziņojums.</value>
+  </data>
+  <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
+    <value>DocSpace paziņojums.</value>
+  </data>
+  <data name="subject_StoppedFormFilling" xml:space="preserve">
+    <value>DocSpace paziņojums.</value>
+  </data>
+  <data name="subject_YourTurnFormFilling" xml:space="preserve">
+    <value>DocSpace paziņojums.</value>
+  </data>
+  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
+    <value>Telpā "$RoomTitle" ir izveidota jauna mape "$FolderTitle"</value>
+  </data>
+  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
+    <value>Telpā "$RoomTitle" ir augšupielādēti jauni faili ($Count)</value>
+  </data>
+  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
+    <value>Telpā "$RoomTitle" ir augšupielādēts jauns fails "$DocumentTitle"</value>
+  </data>
+  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
+    <value>Telpā "$RoomTitle" ir izveidots jauns dokuments "$DocumentTitle"</value>
+  </data>
+  <data name="pattern_EditorMentions_push" xml:space="preserve">
+    <value>$ToUserName pieminēja jūs dokumentā $DocumentTitle</value>
+  </data>
+  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
+    <value>$FromUserName pārvietoja telpu "$RoomTitle" uz arhīvu</value>
+  </data>
+  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
+    <value>
+      Paziņojums par aktivitāti. Veidlapa "$DocumentTitle":"$DocumentURL" tika pilnībā aizpildīta telpā: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_YourTurnFormFilling" xml:space="preserve">
+    <value>
+      Paziņojums par aktivitāti. Jūsu kārta! Nepieciešams aizpildīt veidlapu: "$DocumentTitle":"$DocumentURL" telpā: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_StoppedFormFilling" xml:space="preserve">
+    <value>
+      Paziņojums par aktivitāti. "$FromUserName":"$FromUserLink" pārtrauca veidlapas aizpildīšanu: "$DocumentTitle":"$DocumentURL" telpā: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_FormStartedFilling" xml:space="preserve">
+    <value>
+      Paziņojums par aktivitāti. "$FromUserName":"$FromUserLink" sāka veidlapas aizpildīšanas procesu:  "$DocumentTitle":"$DocumentURL" telpā: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
 </root>

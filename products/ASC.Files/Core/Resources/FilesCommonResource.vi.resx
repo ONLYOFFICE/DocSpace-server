@@ -503,4 +503,13 @@ Khả năng tương thích cao nhất với docx, xlsx, pptx.</value>
   <data name="OpenForm" xml:space="preserve">
     <value>Mở tập tin</value>
   </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Không thể xóa phiên bản hiện tại của tập tin</value>
+  </data>
+  <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
+    <value>Chia sẻ để điền</value>
+  </data>
+  <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
+    <value>Bắt đầu điền</value>
+  </data>
 </root>

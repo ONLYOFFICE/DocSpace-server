@@ -500,4 +500,16 @@ docx, xlsx, pptx ile en yüksek uyumluluk.</value>
   <data name="ExternalUser" xml:space="preserve">
     <value>Harici kullanıcı</value>
   </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Dosyanın mevcut sürümü silinemiyor</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Dosyayı açın</value>
+  </data>
+  <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
+    <value>Doldurulması için paylaş</value>
+  </data>
+  <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
+    <value>Doldurmaya başla</value>
+  </data>
 </root>

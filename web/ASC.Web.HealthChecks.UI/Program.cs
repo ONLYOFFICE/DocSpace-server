@@ -27,7 +27,7 @@
 var options = new WebApplicationOptions
 {
     Args = args,
-    ContentRootPath = WindowsServiceHelpers.IsWindowsService() ? AppContext.BaseDirectory : null
+    ContentRootPath = AppContext.BaseDirectory
 };
 
 var builder = WebApplication.CreateBuilder(options);

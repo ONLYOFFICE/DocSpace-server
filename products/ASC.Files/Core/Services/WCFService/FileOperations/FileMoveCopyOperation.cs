@@ -686,8 +686,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
                                     newFolder = await folderDao.GetFolderAsync(newFolderId);
                                     var parentFolder = await parentFolderTask;
-
-                                    await fileStorageService.ReOrderAsync(newFolderId, true, true);
+                                    
                                     await filesMessageService.SendMoveMessageAsync(newFolder, parentFolder, toFolder, toFolderParents, true, _headers, [newFolder.Title, toFolder.Title, toFolder.Id.ToString()]);
                                     await webhookManager.PublishAsync(parentFolder.FolderType == FolderType.TRASH ? WebhookTrigger.FolderRestored : WebhookTrigger.FolderMoved, newFolder);
 
@@ -755,7 +754,6 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                             await socketManager.DeleteFolder(folder, action: async () =>
                                             {
                                                 newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
-                                                await fileStorageService.ReOrderAsync(newFolderId, true, true);
                                             });
 
                                             var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountRoomFeature, int>();
@@ -777,7 +775,6 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     else
                                     {
                                         newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
-                                        await fileStorageService.ReOrderAsync(newFolderId, true, true);
                                     }
                                 }
                                 finally
@@ -1100,7 +1097,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                             {
                                 Err = FilesCommonResource.ErrorMessage_LockedFile;
                             }
-                            else if (await fileTracker.IsEditingAsync(conflict.Id))
+                            else if (await fileTracker.IsEditingAsync(conflict.Id, false))
                             {
                                 Err = FilesCommonResource.ErrorMessage_SecurityException_UpdateEditingFile;
                             }
@@ -1241,7 +1238,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             {
                 return (true, FilesCommonResource.ErrorMessage_LockedFile);
             }
-            if (await fileTracker.IsEditingAsync(file.Id))
+            if (await fileTracker.IsEditingAsync(file.Id, false))
             {
                 return (true, FilesCommonResource.ErrorMessage_SecurityException_UpdateEditingFile);
             }

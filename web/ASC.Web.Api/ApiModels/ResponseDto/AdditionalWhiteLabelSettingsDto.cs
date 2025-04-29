@@ -42,7 +42,7 @@ public class AdditionalWhiteLabelSettingsDto: IMapFrom<AdditionalWhiteLabelSetti
     public bool HelpCenterEnabled { get; set; }
 
     /// <summary>
-    /// Specifies if the "Feedback & Support" link is available or not.
+    /// Specifies if the "Feedback &amp; Support" link is available or not.
     /// </summary>
     public bool FeedbackAndSupportEnabled { get; set; }
 

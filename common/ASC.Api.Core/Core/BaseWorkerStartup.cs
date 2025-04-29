@@ -44,6 +44,10 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
         var services = builder.Services;
         services.AddHttpContextAccessor();
         services.AddCustomHealthCheck(Configuration);
+        
+        services.AddExceptionHandler<CustomExceptionHandler>();
+        services.AddProblemDetails();
+        
         if (OpenTelemetryEnabled)
         {
             builder.ConfigureOpenTelemetry();
@@ -108,6 +112,7 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
 
     public virtual void Configure(IApplicationBuilder app)
     {
+        app.UseExceptionHandler();
         app.UseRouting();
 
         app.UseEndpoints(endpoints =>

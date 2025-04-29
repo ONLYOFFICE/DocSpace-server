@@ -500,4 +500,16 @@
   <data name="ExternalUser" xml:space="preserve">
     <value>Externý používateľ</value>
   </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Nemožno odstrániť aktuálnu verziu súboru</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Otvoriť súbor</value>
+  </data>
+  <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
+    <value>Zdieľať na vyplnenie</value>
+  </data>
+  <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
+    <value>Začať vyplňovanie</value>
+  </data>
 </root>

@@ -503,4 +503,13 @@
   <data name="OpenForm" xml:space="preserve">
     <value>打开文件</value>
   </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>无法删除文件的当前版本</value>
+  </data>
+  <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
+    <value>共享给他人填写</value>
+  </data>
+  <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
+    <value>开始填写</value>
+  </data>
 </root>

@@ -1137,4 +1137,7 @@
   <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
     <value>Numărul de administratori depășește limita permisă: {0}/{1}.</value>
   </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>Adresa URL a Webhook-ului nu este disponibilă. Lipsește codul 200 de răspuns de stare HTTP la solicitarea HEAD.</value>
+  </data>
 </root>

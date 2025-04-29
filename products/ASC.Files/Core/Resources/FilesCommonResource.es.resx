@@ -503,4 +503,13 @@
   <data name="OpenForm" xml:space="preserve">
     <value>Abrir archivo</value>
   </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>No se puede eliminar la versión actual del archivo</value>
+  </data>
+  <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
+    <value>Compartir para rellenar</value>
+  </data>
+  <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
+    <value>Empezar a rellenar</value>
+  </data>
 </root>
