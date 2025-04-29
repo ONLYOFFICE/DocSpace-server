@@ -60,6 +60,7 @@ public class IdentityClient(MachinePseudoKeys machinePseudoKeys,
         var type = userId == Guid.Empty ? await userManager.GetUserTypeAsync(currentUserId) : await userManager.GetUserTypeAsync(userId);
         var isAdmin = type is EmployeeType.DocSpaceAdmin;
         var isGuest = type is EmployeeType.Guest;
+        userId = userId == Guid.Empty ? currentUserId : userId;
 
         var serverRootPath = baseCommonLinkUtility.ServerRootPath;
 
@@ -77,8 +78,8 @@ public class IdentityClient(MachinePseudoKeys machinePseudoKeys,
         issuer: serverRootPath,
             audience: serverRootPath,
         claims: new List<Claim>() {
-                new("sub", securityContext.CurrentAccount.ID.ToString()),
-                new("user_id", securityContext.CurrentAccount.ID.ToString()),
+                new("sub", userId.ToString()),
+                new("user_id", userId.ToString()),
                 new("user_name", userFormatter.GetUserName(userInfo)),
                 new("user_email", userInfo.Email),
                 new("tenant_id", tenant.Id.ToString()),
@@ -103,11 +104,10 @@ public class IdentityClient(MachinePseudoKeys machinePseudoKeys,
 
             var request = new HttpRequestMessage
             {
-                RequestUri = new Uri(Url + "/api/2.0/clients"),
+                RequestUri = new Uri(Url + "api/2.0/clients"),
                 Method = HttpMethod.Delete
             };
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
-
+            request.Headers.Add("x-signature", jwt);
             var response = await httpClient.SendAsync(request);
 
             if (!response.IsSuccessStatusCode)
@@ -126,11 +126,10 @@ public class IdentityClient(MachinePseudoKeys machinePseudoKeys,
 
             var request = new HttpRequestMessage
             {
-                RequestUri = new Uri(Url + "/api/2.0/clients/tenant"),
+                RequestUri = new Uri(Url + "api/2.0/clients/tenant"),
                 Method = HttpMethod.Delete
             };
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
-
+            request.Headers.Add("x-signature", jwt);
             var response = await httpClient.SendAsync(request);
 
             if (!response.IsSuccessStatusCode)
