@@ -43,9 +43,9 @@
 	<PackageReference Include="Swashbuckle.AspNetCore" Version="8.0.0" />
 
 	<PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="8.0.0" />
-	<PackageReference Include="ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis" Version="2.1.0" />
-	<PackageReference Include="ZiggyCreatures.FusionCache.OpenTelemetry" Version="2.1.0" />
-	<PackageReference Include="ZiggyCreatures.FusionCache.Serialization.SystemTextJson" Version="2.1.0" />
+	<PackageReference Include="ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis" Version="2.2.0" />
+	<PackageReference Include="ZiggyCreatures.FusionCache.OpenTelemetry" Version="2.2.0" />
+	<PackageReference Include="ZiggyCreatures.FusionCache.Serialization.SystemTextJson" Version="2.2.0" />
   </ItemGroup>
 
   <ItemGroup>
