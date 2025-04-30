@@ -305,9 +305,9 @@ public class FileDtoHelper(
                 _ = await _fileSecurity.SetSecurity(new[] { currentRoom }.ToAsyncEnumerable()).ToListAsync();
             }
 
-            if (!file.IsForm && (FilterType)file.Category == FilterType.None)
+            if (FileUtility.GetFileTypeByExtention(FileUtility.GetFileExtension(file.Title)) == FileType.Pdf && !file.IsForm && (FilterType)file.Category == FilterType.None)
             {
-                result.IsForm = await fileChecker.CheckExtendedPDF(file);
+                result.IsForm = await fileChecker.IsFormPDFFile(file);
             }
             else
             {
@@ -373,6 +373,13 @@ public class FileDtoHelper(
                                 }
                                 break;
                         }
+                    }
+                    try
+                    {
+                        result.ShortWebUrl = await urlShortener.GetShortenLinkAsync(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebEditorUrl(file.Id)));
+                    }
+                    catch (Exception)
+                    {
                     }
                 }
             }
@@ -440,7 +447,6 @@ public class FileDtoHelper(
             result.ViewUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl), result.RequestToken);
 
             result.WebUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version, externalMediaAccess)), result.RequestToken);
-            result.ShortWebUrl = await urlShortener.GetShortenLinkAsync(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebEditorUrl(file.Id)));
             result.ThumbnailStatus = file.ThumbnailStatus;
 
             var cacheKey = Math.Abs(result.Updated.GetHashCode());

@@ -25,38 +25,34 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-package com.asc.authorization.application.controller.exception.handler;
+package com.asc.registration.service.transfer.request.update;
 
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import lombok.*;
 
 /**
- * Global exception handler for handling any unhandled exceptions.
+ * Command object for deleting all clients created by a specific user within a tenant.
  *
- * <p>This class handles all types of {@link Exception} thrown by any controller and returns a
- * standard HTTP response with an appropriate status code.
+ * <p>This command contains the tenant identifier and user identifier used to locate and remove all
+ * client records created by that user. It is typically used during user deprovisioning or account
+ * cleanup operations.
  */
-@Slf4j
-@ControllerAdvice
-public class UnhandledExceptionHandler {
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class DeleteUserClientsCommand {
 
-  /**
-   * Handles any {@link Exception} and returns a response with HTTP status 500.
-   *
-   * <p>This method logs the exception and returns a {@link ResponseEntity} with HTTP status {@link
-   * HttpStatus#INTERNAL_SERVER_ERROR}.
-   *
-   * @param ex the {@link Exception} thrown during an operation
-   * @param request the {@link HttpServletRequest} in which the exception was raised
-   * @return a {@link ResponseEntity} with HTTP status 500 (Internal Server Error)
-   */
-  @ExceptionHandler(Exception.class)
-  public final ResponseEntity<?> handleAllExceptions(Exception ex, HttpServletRequest request) {
-    log.error("Could not perform an action. Unknown exception", ex);
-    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-  }
+  /** The ID of the tenant. Must be greater than or equal to 1. */
+  @Min(value = 1, message = "tenant id must be greater than or equal to 1")
+  @JsonProperty("tenant_id")
+  private long tenantId;
+
+  /** The ID of the user whose clients should be deleted. Must not be blank. */
+  @NotBlank(message = "user id must not be blank")
+  @JsonProperty("user_id")
+  private String userId;
 }

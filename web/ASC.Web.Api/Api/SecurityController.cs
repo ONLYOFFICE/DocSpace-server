@@ -475,7 +475,7 @@ public class SecurityController(PermissionContext permissionContext,
                 new("is_guest", isGuest.ToString().ToLower()),
                 new("is_public", isPublic.ToString().ToLower()) // TODO: check OAuth enable for non-admin users
             },
-            expires: DateTime.Now.AddMinutes(15),
+            expires: DateTime.Now.AddMinutes(5),
             signingCredentials: creds);
 
         return new JwtSecurityTokenHandler().WriteToken(token);

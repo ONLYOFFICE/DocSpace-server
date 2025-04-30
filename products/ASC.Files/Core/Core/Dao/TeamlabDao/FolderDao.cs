@@ -236,7 +236,7 @@ internal class FolderDao(
     }
 
     public async Task<int> GetFoldersCountAsync(int parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText,
-        bool withSubfolders = false, bool excludeSubject = false, int roomId = 0)
+        bool withSubfolders = false, bool excludeSubject = false, int roomId = 0, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All)
     {
         if (CheckInvalidFilter(filterType))
         {
@@ -251,6 +251,11 @@ internal class FolderDao(
         }
 
         var q = await GetFoldersQueryWithFilters(parentId, null, subjectGroup, subjectId, searchText, withSubfolders, excludeSubject, roomId, filesDbContext);
+
+        if (additionalFilterOption != AdditionalFilterOption.All)
+        {
+            q = ApplyAdditionalFolderFilters(q, filesDbContext, parentId, parentType, additionalFilterOption);
+        }
 
         return await q.CountAsync();
     }
@@ -269,55 +274,11 @@ internal class FolderDao(
         var tenantId = _tenantManager.GetCurrentTenantId();
         if (containingMyFiles)
         {
-            switch (parentType)
-            {
-                case FolderType.FillingFormsRoom:
-
-                    var foldersContainingMyFiles = filesDbContext.Folders
-                       .Join(filesDbContext.Files, r => r.Id, b => b.ParentId, (folder, file) => new { folder, file })
-                       .Join(filesDbContext.Tree, r => r.folder.Id, b => b.FolderId, (folder_file, tree) => new { folder_file, tree })
-                       .Where(r => r.folder_file.folder.TenantId == tenantId)
-                       .Where(r => r.tree.ParentId == parentId)
-                       .Where(r => r.folder_file.file.CreateBy == _authContext.CurrentAccount.ID)
-                       .Select(r => r.folder_file.folder.Id);
-
-                    var parentFolderIds = filesDbContext.Folders
-                        .Join(filesDbContext.Tree, r => r.Id, b => b.ParentId, (folder, tree) => new { folder, tree })
-                        .Where(r => r.folder.TenantId == tenantId)
-                        .Where(r => foldersContainingMyFiles.Contains(r.tree.FolderId))
-                        .Select(r => r.folder.Id);
-
-                    q = q.Where(r => parentFolderIds.Contains(r.Id) || r.FolderType == FolderType.DEFAULT);
-                    break;
-                default:
-                    q = q.Join(filesDbContext.Files, r => r.Id, b => b.ParentId, (folder, file) => new { folder, file })
-                       .Where(r => r.file.CreateBy == _authContext.CurrentAccount.ID)
-                       .Select(r => r.folder);
-                    break;
-
-            }
+            q = ApplyAdditionalFolderFilters(q, filesDbContext, parentId, parentType, AdditionalFilterOption.MyFilesAndFolders);
         }
         if (containingForms && parentType is FolderType.VirtualDataRoom)
         {
-            q = q.Where(r =>
-                filesDbContext.Files.Any(f =>
-                    f.ParentId == r.Id &&
-                    (f.Category == (int)FilterType.PdfForm || f.Category == (int)FilterType.Pdf) &&
-                    f.TenantId == r.TenantId &&
-                    filesDbContext.FilesFormRoleMapping.Any(r =>
-                            r.TenantId == tenantId && r.FormId == f.Id && r.UserId == _authContext.CurrentAccount.ID)
-                ) ||
-                filesDbContext.Tree.Any(fft =>
-                    fft.ParentId == r.Id &&
-                    filesDbContext.Files.Any(ff =>
-                        ff.ParentId == fft.FolderId &&
-                        (ff.Category == (int)FilterType.PdfForm || ff.Category == (int)FilterType.Pdf) &&
-                        ff.TenantId == r.TenantId &&
-                        filesDbContext.FilesFormRoleMapping.Any(r =>
-                            r.TenantId == tenantId && r.FormId == ff.Id && r.UserId == _authContext.CurrentAccount.ID)
-                    )
-                )
-            );
+            q = ApplyAdditionalFolderFilters(q, filesDbContext, parentId, parentType, AdditionalFilterOption.FormsWithFillingRole);
         }
         q = q.Skip(offset);
 
@@ -1912,6 +1873,79 @@ internal class FolderDao(
                     .Select(f => f.Id)
                     .FirstOrDefault() == roomId)
                 .Select(r => r.folder);
+        }
+
+        return q;
+    }
+    private IQueryable<DbFolder> ApplyAdditionalFolderFilters(
+            IQueryable<DbFolder> q,
+            FilesDbContext filesDbContext,
+            int parentId,
+            FolderType parentType,
+            AdditionalFilterOption additionalFilterOption)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        var currentUserId = _authContext.CurrentAccount.ID;
+        var guestUserId = ASC.Core.Configuration.Constants.Guest.ID;
+        var pdfCategories = new[] { (int)FilterType.PdfForm, (int)FilterType.Pdf };
+
+        switch (additionalFilterOption)
+        {
+            case AdditionalFilterOption.MyFilesAndFolders:
+                switch (parentType)
+                {
+                    case FolderType.FillingFormsRoom:
+                        var foldersContainingMyFiles = filesDbContext.Folders
+                            .Join(filesDbContext.Files, f => f.Id, file => file.ParentId, (folder, file) => new { folder, file })
+                            .Join(filesDbContext.Tree, ff => ff.folder.Id, tree => tree.FolderId, (ff, tree) => new { ff.folder, ff.file, tree })
+                            .Where(x => x.folder.TenantId == tenantId &&
+                                        x.tree.ParentId == parentId &&
+                                        x.file.CreateBy == currentUserId &&
+                                        x.file.CreateBy != guestUserId)
+                            .Select(x => x.folder.Id);
+
+                        var parentFolderIds = filesDbContext.Folders
+                            .Join(filesDbContext.Tree, f => f.Id, tree => tree.ParentId, (folder, tree) => new { folder, tree })
+                            .Where(x => x.folder.TenantId == tenantId &&
+                                        foldersContainingMyFiles.Contains(x.tree.FolderId))
+                            .Select(x => x.folder.Id);
+
+                        q = q.Where(f => parentFolderIds.Contains(f.Id) || f.FolderType == FolderType.DEFAULT);
+                        break;
+
+                    default:
+                        q = q.Join(filesDbContext.Files, folder => folder.Id, file => file.ParentId, (folder, file) => new { folder, file })
+                             .Where(x => x.file.CreateBy == currentUserId)
+                             .Select(x => x.folder);
+                        break;
+                }
+                break;
+
+            case AdditionalFilterOption.FormsWithFillingRole:
+                q = q.Where(r =>
+                    filesDbContext.Files.Any(f =>
+                        f.ParentId == r.Id &&
+                        pdfCategories.Contains(f.Category) &&
+                        f.TenantId == r.TenantId &&
+                        filesDbContext.FilesFormRoleMapping.Any(m =>
+                            m.TenantId == tenantId &&
+                            m.FormId == f.Id &&
+                            m.UserId == currentUserId)
+                    ) ||
+                    filesDbContext.Tree.Any(t =>
+                        t.ParentId == r.Id &&
+                        filesDbContext.Files.Any(f =>
+                            f.ParentId == t.FolderId &&
+                            pdfCategories.Contains(f.Category) &&
+                            f.TenantId == r.TenantId &&
+                            filesDbContext.FilesFormRoleMapping.Any(m =>
+                                m.TenantId == tenantId &&
+                                m.FormId == f.Id &&
+                                m.UserId == currentUserId)
+                        )
+                    )
+                );
+                break;
         }
 
         return q;

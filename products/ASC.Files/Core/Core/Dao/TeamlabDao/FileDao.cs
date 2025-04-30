@@ -286,47 +286,11 @@ internal class FileDao(
         var tenantId = _tenantManager.GetCurrentTenantId();
         if (containingMyFiles)
         {
-            switch (parentType)
-            {
-                case FolderType.FillingFormsRoom:
-                case FolderType.InProcessFormFolder:
-                case FolderType.ReadyFormFolder:
-
-                    var folderIds = filesDbContext.Folders
-                        .Join(filesDbContext.Tree, r => r.Id, b => b.FolderId, (folder, tree) => new { folder, tree })
-                        .Where(r => r.folder.TenantId == tenantId)
-                        .Where(r => r.tree.ParentId == parentId)
-                        .Select(r => new
-                        {
-                            r.folder.Id,
-                            IsSystemFolder = DocSpaceHelper.FormsFillingSystemFolders.Contains(r.folder.FolderType)
-                        });
-
-                    var roomSystemFolderIds = folderIds
-                        .Where(r => r.IsSystemFolder)
-                        .Select(r => r.Id);
-
-                    var roomDefaultFolderIds = folderIds
-                        .Where(r => !r.IsSystemFolder)
-                        .Select(r => r.Id);
-
-                    q = q.Where(r =>
-                        (roomSystemFolderIds.Contains(r.ParentId) &&
-                         r.CreateBy == securityContext.CurrentAccount.ID &&
-                         r.CreateBy != ASC.Core.Configuration.Constants.Guest.ID) ||
-                        roomDefaultFolderIds.Contains(r.ParentId));
-                    break;
-                default:
-                    q = q.Where(r => r.CreateBy == securityContext.CurrentAccount.ID);
-                    break;
-            }
+            q = ApplyAdditionalFileFilters(q, filesDbContext, parentId, parentType, AdditionalFilterOption.MyFilesAndFolders);
         }
         if (applyFormStepFilter)
         {
-            q = q.Where(f => (f.Category == (int)FilterType.PdfForm || f.Category == (int)FilterType.Pdf) &&
-                    filesDbContext.FilesFormRoleMapping.Any(r =>
-                        r.TenantId == tenantId && r.FormId == f.Id && r.UserId == securityContext.CurrentAccount.ID)
-            );
+            q = ApplyAdditionalFileFilters(q, filesDbContext, parentId, parentType, AdditionalFilterOption.FormsWithFillingRole);
         }
 
         q = q.Skip(offset);
@@ -722,7 +686,7 @@ internal class FileDao(
     }
 
     public async Task<int> GetFilesCountAsync(int parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, 
-        bool withSubfolders = false, bool excludeSubject = false, int roomId = 0, FormsItemDto formsItemDto = null)
+        bool withSubfolders = false, bool excludeSubject = false, int roomId = 0, FormsItemDto formsItemDto = null, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All)
     {
         if (filterType == FilterType.FoldersOnly)
         {
@@ -731,8 +695,13 @@ internal class FileDao(
 
         var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        return await (await GetFilesQueryWithFilters(parentId, null, filterType, subjectGroup, subjectId, searchText, searchInContent, withSubfolders, excludeSubject, roomId, extension, filesDbContext, formsItemDto))
-            .CountAsync();
+        var q = await GetFilesQueryWithFilters(parentId, null, filterType, subjectGroup, subjectId, searchText, searchInContent, withSubfolders, excludeSubject, roomId, extension, filesDbContext, formsItemDto);
+        if (additionalFilterOption != AdditionalFilterOption.All)
+        {
+            q = ApplyAdditionalFileFilters(q, filesDbContext, parentId, parentType, additionalFilterOption);
+        }
+
+        return await q.CountAsync();
     }
 
     public async Task<File<int>> ReplaceFileVersionAsync(File<int> file, Stream fileStream)
@@ -971,7 +940,14 @@ internal class FileDao(
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        return await filesDbContext.DbFilesAnyAsync(tenantId, title, folderId);
+        return await filesDbContext.DbFilesAnyAsync(tenantId, title, (int)FilterType.None, folderId);
+    }
+
+    public async Task<bool> IsExistAsync(string title, int category, int folderId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        return await filesDbContext.DbFilesAnyAsync(tenantId, title, category, folderId);
     }
 
     public async Task<TTo> MoveFileAsync<TTo>(int fileId, TTo toFolderId, bool deleteLinks = false)
@@ -2115,6 +2091,71 @@ internal class FileDao(
         };
     }
 
+    private IQueryable<DbFile> ApplyAdditionalFileFilters(
+        IQueryable<DbFile> q,
+        FilesDbContext filesDbContext,
+        int parentId,
+        FolderType parentType,
+        AdditionalFilterOption additionalFilterOption)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        var currentUserId = securityContext.CurrentAccount.ID;
+        var guestUserId = ASC.Core.Configuration.Constants.Guest.ID;
+
+        switch (additionalFilterOption)
+        {
+            case AdditionalFilterOption.MyFilesAndFolders:
+                switch (parentType)
+                {
+                    case FolderType.FillingFormsRoom:
+                    case FolderType.InProcessFormFolder:
+                    case FolderType.ReadyFormFolder:
+                        var folderQuery = filesDbContext.Folders
+                            .Join(filesDbContext.Tree, f => f.Id, t => t.FolderId, (folder, tree) => new { folder, tree })
+                            .Where(x => x.folder.TenantId == tenantId && x.tree.ParentId == parentId)
+                            .Select(x => new
+                            {
+                                x.folder.Id,
+                                IsSystemFolder = DocSpaceHelper.FormsFillingSystemFolders.Contains(x.folder.FolderType)
+                            });
+
+                        var systemFolderIds = folderQuery
+                            .Where(x => x.IsSystemFolder)
+                            .Select(x => x.Id);
+
+                        var defaultFolderIds = folderQuery
+                            .Where(x => !x.IsSystemFolder)
+                            .Select(x => x.Id);
+
+                        q = q.Where(file =>
+                            (systemFolderIds.Contains(file.ParentId) &&
+                             file.CreateBy == currentUserId &&
+                             file.CreateBy != guestUserId) ||
+                            defaultFolderIds.Contains(file.ParentId));
+                        break;
+
+                    default:
+                        q = q.Where(file => file.CreateBy == currentUserId);
+                        break;
+                }
+                break;
+
+            case AdditionalFilterOption.FormsWithFillingRole:
+                var pdfCategories = new[] { (int)FilterType.PdfForm, (int)FilterType.Pdf };
+
+                q = q.Where(file =>
+                    pdfCategories.Contains(file.Category) &&
+                    filesDbContext.FilesFormRoleMapping.Any(m =>
+                        m.TenantId == tenantId &&
+                        m.FormId == file.Id &&
+                        m.UserId == currentUserId)
+                );
+                break;
+        }
+
+        return q;
+    }
+
     private IQueryable<DbFileQuery> FromQuery(FilesDbContext filesDbContext, IQueryable<DbFile> dbFiles)
     {
         return dbFiles
@@ -2283,17 +2324,17 @@ internal class FileDao(
         {
             extension = [""];
         }
-
+        
+        if (withSubfolders && (searchByExtension || filterType != FilterType.None || subjectID != Guid.Empty))
+        {
+            q = GetFileQuery(filesDbContext, r => r.CurrentVersion)
+                .Join(filesDbContext.Tree, r => r.ParentId, a => a.FolderId, (file, tree) => new { file, tree })
+                .Where(r => r.tree.ParentId == parentId)
+                .Select(r => r.file);
+        }
+        
         if (searchByText || searchByExtension)
         {
-            if (searchByText && withSubfolders)
-            {
-                q = GetFileQuery(filesDbContext, r => r.CurrentVersion)
-                    .Join(filesDbContext.Tree, r => r.ParentId, a => a.FolderId, (file, tree) => new { file, tree })
-                    .Where(r => r.tree.ParentId == parentId)
-                    .Select(r => r.file);
-            }
-            
             var searchIds = new List<int>();
             var success = false;
             
@@ -2362,7 +2403,6 @@ internal class FileDao(
 
         if (subjectID != Guid.Empty)
         {
-
             if (subjectGroup)
             {
                 var users = (await _userManager.GetUsersByGroupAsync(subjectID)).Select(u => u.Id).ToArray();
@@ -2376,7 +2416,6 @@ internal class FileDao(
 
         switch (filterType)
         {
-
             case FilterType.DocumentsOnly:
             case FilterType.ImagesOnly:
             case FilterType.PresentationsOnly:
@@ -2392,7 +2431,6 @@ internal class FileDao(
                 {
                     q = BuildSearch(q, searchText, SearchType.End);
                 }
-
                 break;
         }
 

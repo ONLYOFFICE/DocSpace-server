@@ -224,6 +224,15 @@ public interface IFileDao<T>
     Task<bool> IsExistAsync(string title, T folderId);
 
     /// <summary>
+    ///     Checks whether or not file
+    /// </summary>
+    /// <param name="title">file name</param>
+    /// <param name="category">file category</param>
+    /// <param name="folderId">folder id</param>
+    /// <returns>Returns true if the file exists, otherwise false</returns>
+    Task<bool> IsExistAsync(string title, int category, T folderId);
+
+    /// <summary>
     ///   Moves a file or set of files in a folder
     /// </summary>
     /// <param name="fileId">file id</param>
@@ -403,7 +412,7 @@ public interface IFileDao<T>
 
     Task<int> GetFilesCountAsync(T parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, 
         bool withSubfolders = false, bool excludeSubject = false, T roomId = default,
-        FormsItemDto formsItemDto = null);
+        FormsItemDto formsItemDto = null, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All);
 
     Task<int> SetCustomOrder(T fileId, T parentFolderId, int order);
 
