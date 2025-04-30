@@ -2,6 +2,23 @@
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
     <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
 
+    <!-- General Spring Properties -->
+    <springProperty scope="context" name="applicationContext" source="spring.application.name"/>
+    <timestamp key="startupTime" datePattern="yyyy/MM/dd'T'HH.mm.ss"/>
+    <define name="randomString" class="com.asc.common.autoconfigurations.cloudwatch.CloudWatchAppenderRandomPropertyDefiner"/>
+
+    <!-- Spring Properties for CloudWatch -->
+    <springProperty scope="context" name="cwEnabled" source="logging.cloudwatch.enabled"/>
+    <springProperty scope="context" name="cwUseLocalstack" source="logging.cloudwatch.use-localstack"/>
+    <springProperty scope="context" name="cwUseInstanceProfileProvider" source="logging.cloudwatch.use-instance-profile-provider"/>
+    <springProperty scope="context" name="cwLogGroupName" source="logging.cloudwatch.log-group-name"/>
+    <springProperty scope="context" name="cwLogStreamName" source="logging.cloudwatch.log-stream-name"/>
+    <springProperty scope="context" name="cwEndpoint" source="logging.cloudwatch.endpoint"/>
+    <springProperty scope="context" name="cwRegion" source="logging.cloudwatch.region"/>
+    <springProperty scope="context" name="cwAccessKey" source="logging.cloudwatch.access-key"/>
+    <springProperty scope="context" name="cwSecretKey" source="logging.cloudwatch.secret-key"/>
+    <springProperty scope="context" name="cwBatchSize" source="logging.cloudwatch.batch-size"/>
+
     <!-- ### Appenders ### -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
@@ -12,7 +29,7 @@
     <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
             <includeContext>false</includeContext>
-            <customFields>{"applicationContext":"ASC.Identity.Authorization.API", "instanceId":"${HOSTNAME}"}</customFields>
+            <customFields>{"applicationContext":"${applicationContext}", "instanceId":"${HOSTNAME}"}</customFields>
             <fieldNames>
                 <level>level</level>
                 <logger>sourceContext</logger>
@@ -43,7 +60,7 @@
         </rollingPolicy>
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
             <includeContext>false</includeContext>
-            <customFields>{"applicationContext":"ASC.Identity.Authorization.API", "instanceId":"${HOSTNAME}"}</customFields>
+            <customFields>{"applicationContext":"${applicationContext}", "instanceId":"${HOSTNAME}"}</customFields>
             <fieldNames>
                 <level>level</level>
                 <logger>sourceContext</logger>
@@ -64,11 +81,45 @@
             </throwableConverter>
         </encoder>
     </appender>
-    <appender name="GELF" class="de.siegmar.logbackgelf.GelfUdpAppender">
-        <graylogHost>${GELF_HOST:-localhost}</graylogHost>
-        <graylogPort>${GELF_PORT:-12201}</graylogPort>
+    <appender name="CLOUDWATCH" class="com.asc.common.autoconfigurations.cloudwatch.CloudWatchAppender">
+        <enabled>${cwEnabled:-false}</enabled>
+        <useLocalstack>${cwUseLocalstack:-false}</useLocalstack>
+        <useInstanceProfileProvider>${cwUseInstanceProfileProvider:-false}</useInstanceProfileProvider>
+        <logGroupName>${cwLogGroupName}</logGroupName>
+        <logStreamName>${HOSTNAME} - ${applicationContext} - ${startupTime} - ${randomString}</logStreamName>
+        <endpoint>${cwEndpoint}</endpoint>
+        <region>${cwRegion}</region>
+        <accessKey>${cwAccessKey}</accessKey>
+        <secretKey>${cwSecretKey}</secretKey>
+        <batchSize>${cwBatchSize}</batchSize>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <includeContext>false</includeContext>
+            <jsonGeneratorDecorator class="net.logstash.logback.decorate.PrettyPrintingJsonGeneratorDecorator"/>
+            <customFields>{"applicationContext":"${applicationContext}", "instanceId":"${HOSTNAME}"}</customFields>
+            <fieldNames>
+                <level>level</level>
+                <logger>sourceContext</logger>
+                <timestamp>date</timestamp>
+                <thread>threadId</thread>
+                <levelValue>[ignore]</levelValue>
+                <protocol>[ignore]</protocol>
+                <status_code>[ignore]</status_code>
+                <requested_url>[ignore]</requested_url>
+                <remote_host>[ignore]</remote_host>
+                <remote_user>[ignore]</remote_user>
+                <content_length>[ignore]</content_length>
+            </fieldNames>
+            <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                <rootCauseFirst>true</rootCauseFirst>
+                <maxDepthPerThrowable>4</maxDepthPerThrowable>
+                <shortenedClassNameLength>25</shortenedClassNameLength>
+            </throwableConverter>
+        </encoder>
     </appender>
 
+    <appender name="CLOUDWATCH_ASYNC" class="net.logstash.logback.appender.LoggingEventAsyncDisruptorAppender">
+        <appender-ref ref="CLOUDWATCH" />
+    </appender>
     <appender name="CONSOLE_ASYNC" class="net.logstash.logback.appender.LoggingEventAsyncDisruptorAppender">
         <appender-ref ref="CONSOLE" />
     </appender>
@@ -111,6 +162,7 @@
             <else>
                 <root level="INFO">
                     <appender-ref ref="JSON_CONSOLE_ASYNC"/>
+                    <appender-ref ref="CLOUDWATCH_ASYNC"/>
                 </root>
             </else>
         </if>
@@ -126,6 +178,7 @@
             <else>
                 <root level="ERROR">
                     <appender-ref ref="JSON_CONSOLE_ASYNC"/>
+                    <appender-ref ref="CLOUDWATCH_ASYNC"/>
                 </root>
             </else>
         </if>
