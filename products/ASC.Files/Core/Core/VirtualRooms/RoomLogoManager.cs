@@ -363,11 +363,6 @@ public class RoomLogoManager(
             throw new ItemNotFoundException();
         }
 
-        if (room.RootId is int root && root == await globalFolderHelper.FolderRoomTemplatesAsync)
-        {
-            throw new ItemNotFoundException();
-        }
-
         if (room.RootFolderType == FolderType.Archive || !await fileSecurity.CanEditRoomAsync(room))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);

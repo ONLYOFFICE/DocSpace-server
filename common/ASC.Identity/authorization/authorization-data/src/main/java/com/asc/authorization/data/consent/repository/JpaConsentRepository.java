@@ -70,6 +70,33 @@ public interface JpaConsentRepository
   void deleteAllConsentsByClientId(@Param("registeredClientId") String registeredClientId);
 
   /**
+   * Deletes all consents associated with a specific principal (user).
+   *
+   * @param principalId The unique identifier of the principal (user) for which the consents are to
+   *     be deleted.
+   */
+  @Modifying
+  @Query(
+      value = "DELETE FROM identity_consents WHERE principal_id = :principalId",
+      nativeQuery = true)
+  void deleteAllConsentsByPrincipalId(@Param("principalId") String principalId);
+
+  /**
+   * Deletes all consents associated with a specific tenant. This method removes consents that are
+   * linked to authorizations belonging to the specified tenant.
+   *
+   * @param tenantId The unique identifier of the tenant for which the consents are to be deleted.
+   */
+  @Modifying
+  @Query(
+      value =
+          "DELETE FROM identity_consents WHERE (registered_client_id, principal_id) IN ("
+              + "SELECT registered_client_id, principal_id FROM identity_authorizations "
+              + "WHERE tenant_id = :tenantId)",
+      nativeQuery = true)
+  void deleteAllConsentsByTenantId(@Param("tenantId") long tenantId);
+
+  /**
    * Deletes all authorizations associated with a specific client.
    *
    * @param registeredClientId The unique identifier of the registered client for which the

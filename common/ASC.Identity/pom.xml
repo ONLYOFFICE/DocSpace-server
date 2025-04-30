@@ -45,7 +45,8 @@
 
     <properties>
         <annotations.version>6.0.53</annotations.version>
-        <aws.version>3.2.1</aws.version>
+        <aws.version>3.3.0</aws.version>
+        <aws.cloudwatch.version>2.31.30</aws.cloudwatch.version>
         <bucket4j.lettuce.version>8.12.1</bucket4j.lettuce.version>
         <bucket4j.version>8.10.1</bucket4j.version>
         <buildnumber.maven.plugin.version>3.1.0</buildnumber.maven.plugin.version>

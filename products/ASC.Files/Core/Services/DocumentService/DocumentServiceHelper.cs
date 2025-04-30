@@ -224,7 +224,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             bool canCoAuthoring;
             if ((editPossible || reviewPossible || fillFormsPossible || commentPossible)
                 && tryCoAuthoring
-                && (!(canCoAuthoring = fileUtility.CanCoAuthoring(file.Title)) || fileTracker.IsEditingAlone(file.Id)))
+                && (!(canCoAuthoring = fileUtility.CanCoAuthoring(file.Title)) || await fileTracker.IsEditingAloneAsync(file.Id)))
             {
                 if (tryEdit)
                 {
@@ -412,12 +412,12 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
     public string GetDocSubmitKeyAsync(string key)
     {
         var rnd = Guid.NewGuid();
-        return Convert.ToBase64String(Encoding.UTF8.GetBytes($"submit_{rnd}_{key}"));
+        return Convert.ToBase64String(Encoding.UTF8.GetBytes($"submit_{rnd}_{key}")).TrimEnd('=');
     }
 
     public bool IsDocSubmitKey(string docKey, string key)
     {
-        var submitKey = Encoding.UTF8.GetString(Convert.FromBase64String(ReplaceLastUnderscoresWithEquals(key)));
+        var submitKey = Encoding.UTF8.GetString(Convert.FromBase64String(FixBase64String(key)));
 
         var keySplit = submitKey.Split(Convert.ToChar("_"), 3);
 
@@ -427,20 +427,20 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         }
         return false;
     }
-    private string ReplaceLastUnderscoresWithEquals(string inputString)
+    
+    static string FixBase64String(string input)
     {
-        var charToReplace = '_';
-        var replaceWith = '=';
-
-        var lastCharIndex = inputString.LastIndexOf(charToReplace);
-
-        while (lastCharIndex != -1)
+        // Convert from URL-safe Base64 to standard Base64
+        var fixedInput = input.Replace('-', '+').Replace('_', '/');
+    
+        // Add padding if necessary
+        switch (fixedInput.Length % 4)
         {
-            inputString = inputString.Substring(0, lastCharIndex) + replaceWith + inputString.Substring(lastCharIndex + 1);
-            lastCharIndex = inputString.LastIndexOf(charToReplace);
+            case 2: fixedInput += "=="; break;
+            case 3: fixedInput += "="; break;
         }
-
-        return inputString;
+    
+        return fixedInput;
     }
 
     public async Task CheckUsersForDropAsync<T>(File<T> file)
@@ -605,8 +605,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
     public async Task<FormOpenSetup<T>> GetFormOpenSetupForVirtualDataRoomAsync<T>(File<T> file, EditorType editorType)
     {
         var fileDao = daoFactory.GetFileDao<T>();
-        var (currentStep, roles) = await fileDao.GetUserFormRoles(file.Id, securityContext.CurrentAccount.ID);
-        var myRoles = await roles.ToListAsync();
+        var (currentStep, myRoles) = await fileDao.GetUserFormRoles(file.Id, securityContext.CurrentAccount.ID);
 
         var result = new FormOpenSetup<T>
         {
@@ -657,8 +656,9 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             result = new FormOpenSetup<T>
             {
                 CanEdit = edit,
-                CanFill = fill,
-                CanStartFilling = true
+                CanFill = fill || canFill,
+                CanStartFilling = true,
+                EditorType = editorType
             };
         }
         else
@@ -667,22 +667,11 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             {
                 CanEdit = canEdit,
                 CanFill = canFill,
-                CanStartFilling = false
+                CanStartFilling = false,
+                EditorType = !edit && (fill || canFill) && editorType != EditorType.Mobile
+                            ? EditorType.Embedded
+                            : editorType
             };
-        }
-
-        if (securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID) && result.CanFill)
-        {
-            result.IsSubmitOnly = canFill;
-        }
-
-        if (result.CanFill) 
-        {
-            result.EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
-        }
-        else
-        {
-            result.EditorType = editorType;
         }
         return result;
     }

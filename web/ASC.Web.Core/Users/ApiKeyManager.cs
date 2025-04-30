@@ -99,6 +99,16 @@ public class ApiKeyManager(
 
         return await context.GetApiKeyAsync(tenantId, keyId);
     }
+    
+    public async Task<ApiKey> GetApiKeyAsync(string apiKey)
+    {
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var hashedKey = HashApiKey(apiKey);
+        
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        return await context.GetApiKeyAsync(tenantId, hashedKey);
+    }
 
     public async Task<ApiKey> ValidateApiKeyAsync(string apiKey)
     {

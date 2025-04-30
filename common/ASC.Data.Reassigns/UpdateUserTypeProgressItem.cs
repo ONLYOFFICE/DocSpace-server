@@ -188,6 +188,13 @@ public class UpdateUserTypeProgressItem: DistributedTaskProgress
                 {
                     webItemSecurityCache.ClearCache(_tenantId);
 
+                    var groups = await userManager.GetUserGroupsAsync(User);
+
+                    foreach (var group in groups)
+                    {
+                        await userManager.RemoveUserFromGroupAsync(User, group.ID);
+                    }
+
                     var folderDao = daoFactory.GetFolderDao<int>();
                     var myId = await folderDao.GetFolderIDUserAsync(false, User);
                     var hasPersonalFolder = myId != 0;

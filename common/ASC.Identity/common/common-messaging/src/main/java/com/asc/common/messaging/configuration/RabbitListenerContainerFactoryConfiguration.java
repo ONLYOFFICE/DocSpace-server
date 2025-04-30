@@ -28,6 +28,9 @@
 package com.asc.common.messaging.configuration;
 
 import com.asc.common.service.transfer.message.AuditMessage;
+import com.asc.common.service.transfer.message.ClientRemovedEvent;
+import com.asc.common.service.transfer.message.TenantClientsRemovedEvent;
+import com.asc.common.service.transfer.message.UserClientsRemovedEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import lombok.Getter;
@@ -78,7 +81,12 @@ public class RabbitListenerContainerFactoryConfiguration {
     var messageConverter = new Jackson2JsonMessageConverter(mapper);
     var classMapper = new DefaultJackson2JavaTypeMapper();
     classMapper.setTrustedPackages("*");
-    classMapper.setIdClassMapping(Map.of("audit", AuditMessage.class));
+    classMapper.setIdClassMapping(
+        Map.of(
+            "audit", AuditMessage.class,
+            "clientRemoved", ClientRemovedEvent.class,
+            "tenantClientsRemoved", TenantClientsRemovedEvent.class,
+            "userClientsRemoved", UserClientsRemovedEvent.class));
     messageConverter.setClassMapper(classMapper);
     messageConverter.setTypePrecedence(Jackson2JavaTypeMapper.TypePrecedence.TYPE_ID);
     return messageConverter;
@@ -143,10 +151,13 @@ public class RabbitListenerContainerFactoryConfiguration {
    */
   @Bean("rabbitSingleManualContainerFactory")
   public SimpleRabbitListenerContainerFactory rabbitSingleManualContainerFactory(
-      ConnectionFactory connectionFactory) {
+      ConnectionFactory connectionFactory, MessageConverter messageConverter) {
     SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
     factory.setConnectionFactory(connectionFactory);
+    factory.setMessageConverter(messageConverter);
     factory.setAcknowledgeMode(AcknowledgeMode.MANUAL);
+    factory.setConcurrentConsumers(4);
+    factory.setMaxConcurrentConsumers(10);
     factory.setPrefetchCount(1);
     return factory;
   }

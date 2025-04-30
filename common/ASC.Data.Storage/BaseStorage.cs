@@ -118,7 +118,7 @@ public abstract class BaseStorage(TempStream tempStream,
                 currentTenantId = 0;
             }
 
-            var auth = emailValidationKeyProvider.GetEmailKey(currentTenantId, path.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar) + "." + headerAttr + "." + expireString);
+            var auth = emailValidationKeyProvider.GetEmailKey(path.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar) + "." + headerAttr + "." + expireString, currentTenantId);
             query = $"{(path.Contains('?') ? "&" : "?")}{Constants.QueryExpire}={expireString}&{Constants.QueryAuth}={auth}";
         }
 

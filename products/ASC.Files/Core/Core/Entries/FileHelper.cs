@@ -48,7 +48,7 @@ public class FileHelper(FileTrackerHelper fileTracker,
                 currentStatus |= FileStatus.IsEditing;
             }
 
-            if (fileTracker.IsEditingAlone(file.Id))
+            if (await fileTracker.IsEditingAloneAsync(file.Id))
             {
                 currentStatus |= FileStatus.IsEditingAlone;
             }

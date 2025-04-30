@@ -29,8 +29,10 @@ package com.asc.authorization.application.security.oauth.service;
 
 import com.asc.authorization.data.key.entity.KeyPair;
 import com.asc.authorization.data.key.repository.JpaKeyPairRepository;
+import com.asc.common.utilities.crypto.DecryptionException;
 import com.asc.common.utilities.crypto.EncryptionService;
 import java.time.ZonedDateTime;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -63,6 +65,7 @@ public class KeyPairService {
   public Set<KeyPair> findActiveKeyPairs(ZonedDateTime cutoff) {
     return jpaKeyPairRepository.findActiveKeyPairs(cutoff).stream()
         .map(this::decryptPrivateKey)
+        .filter(Objects::nonNull)
         .collect(Collectors.toSet());
   }
 
@@ -108,7 +111,11 @@ public class KeyPairService {
    * @return the {@link KeyPair} with its private key decrypted.
    */
   private KeyPair decryptPrivateKey(KeyPair pair) {
-    pair.setPrivateKey(encryptionService.decrypt(pair.getPrivateKey()));
-    return pair;
+    try {
+      pair.setPrivateKey(encryptionService.decrypt(pair.getPrivateKey()));
+      return pair;
+    } catch (DecryptionException e) {
+      return null;
+    }
   }
 }
