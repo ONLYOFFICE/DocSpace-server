@@ -339,10 +339,16 @@ void AddBaseConfig<T>(IResourceBuilder<T> resourceBuilder, bool includeHealthChe
         resourceBuilder.WithHttpHealthCheck("/health");
     }
 
+    var publicUrl = "http://localhost";
+    if (isDocker)
+    {
+        publicUrl = SubstituteLocalhost(publicUrl);
+    }
+    
     resourceBuilder
         .WithEnvironment("openTelemetry:enable", "true")
-        .WithEnvironment("files:docservice:url:portal", $"http://host.docker.internal")
-        .WithEnvironment("files:docservice:url:public", $"http://localhost/ds-vpath")
+        .WithEnvironment("files:docservice:url:portal", publicUrl)
+        .WithEnvironment("files:docservice:url:public", "http://localhost/ds-vpath")
         .WithReference(mySql, "default:connectionString");
 
     if (isDocker)
