@@ -208,16 +208,13 @@ public static class Initializer
 
     public static async Task Authenticate(this HttpClient client, User user)
     {        
-        if (_authenticationApi != null)
+        var authMe = await _authenticationApi.AuthenticateMeAsync(new Docspace.Model.AuthRequestsDto
         {
-            var authMe = await _authenticationApi.AuthenticateMeAsync(new Docspace.Model.AuthRequestsDto
-            {
-                UserName = user.Email,
-                PasswordHash = _passwordHasher.GetClientPassword(user.Password)
-            }, TestContext.Current.CancellationToken);
-            
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authMe.Response.Token);
-        }
+            UserName = user.Email,
+            PasswordHash = _passwordHasher.GetClientPassword(user.Password)
+        }, TestContext.Current.CancellationToken);
+        
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authMe.Response.Token);
     }
     
     internal static string Password(

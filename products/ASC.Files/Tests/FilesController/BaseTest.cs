@@ -39,6 +39,7 @@ public class BaseTest(
     protected readonly FilesFilesApi _filesFilesApi = filesFactory.FilesFilesApi;
     protected readonly FilesOperationsApi _filesOperationsApi = filesFactory.FilesOperationsApi;
     protected readonly FilesRoomsApi _filesRoomsApi = filesFactory.FilesRoomsApi;
+    protected readonly FilesSettingsApi _filesSettingsApi = filesFactory.FilesSettingsApi;
     private readonly Func<Task> _resetDatabase = filesFactory.ResetDatabaseAsync;
 
     public async ValueTask InitializeAsync()
