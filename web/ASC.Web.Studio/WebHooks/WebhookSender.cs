@@ -56,7 +56,7 @@ public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory s
 
             await tenantManager.SetCurrentTenantAsync(webhookRequest.TenantId);
 
-            var entry = await dbWorker.ReadJournal(webhookRequest.WebhookLogId);
+            var entry = await dbWorker.ReadJournal(webhookRequest.TenantId, webhookRequest.WebhookLogId);
 
             if (entry == null)
             {
@@ -180,7 +180,7 @@ public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory s
 
             var configDisabled = !entry.Config.Enabled;
 
-            await dbWorker.UpdateWebhookJournal(entry.Id, status, delivery, requestPayload, requestHeaders, responsePayload, responseHeaders);
+            await dbWorker.UpdateWebhookJournal(entry.Id, entry.TenantId, status, delivery, requestPayload, requestHeaders, responsePayload, responseHeaders);
             await dbWorker.UpdateWebhookConfig(entry.Config, configDisabled);
 
             if (configDisabled)
