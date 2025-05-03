@@ -487,6 +487,8 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<Folder<string>> CreateThirdPartyRoomAsync(string title, RoomType roomType, string parentId, bool privacy, bool? indexing, bool createAsNewFolder, bool? denyDownload, string color, string cover, IEnumerable<string> tags, LogoRequest logo)
     {
+        var tenantId = tenantManager.GetCurrentTenantId();
+
         var folderDao = daoFactory.GetFolderDao<string>();
         var providerDao = daoFactory.ProviderDao;
 
@@ -507,35 +509,40 @@ public class FileStorageService //: IFileStorageService
 
         var room = await CreateRoomAsync(async () =>
         {
-            var folder = parent;
-
-            if (createAsNewFolder)
+            await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetRoomsCountCheckKey(tenantId)))
             {
-                try
+                await countRoomChecker.CheckAppend();
+
+                var folder = parent;
+
+                if (createAsNewFolder)
                 {
-                    folder = await InternalCreateFolderAsync(parentId, title, folderType, false, indexing, denyDownload: denyDownload, color: color, cover: cover, names: tags, logo: logo);
+                    try
+                    {
+                        folder = await InternalCreateFolderAsync(parentId, title, folderType, false, indexing, denyDownload: denyDownload, color: color, cover: cover, names: tags, logo: logo);
+                    }
+                    catch
+                    {
+                        throw new InvalidOperationException(FilesCommonResource.ErrorMessage_InvalidThirdPartyFolder);
+                    }
                 }
-                catch
+
+                await providerDao.UpdateRoomProviderInfoAsync(new ProviderData
                 {
-                    throw new InvalidOperationException(FilesCommonResource.ErrorMessage_InvalidThirdPartyFolder);
-                }
+                    Id = providerInfo.ProviderId,
+                    Title = title,
+                    FolderId = folder.Id,
+                    FolderType = folderType,
+                    Private = privacy
+                });
+
+                folder.FolderType = folderType;
+                folder.Shared = folderType == FolderType.PublicRoom;
+                folder.RootFolderType = FolderType.VirtualRooms;
+                folder.FolderIdDisplay = IdConverter.Convert<string>(await globalFolderHelper.FolderVirtualRoomsAsync);
+
+                return folder;
             }
-
-            await providerDao.UpdateRoomProviderInfoAsync(new ProviderData
-            {
-                Id = providerInfo.ProviderId,
-                Title = title,
-                FolderId = folder.Id,
-                FolderType = folderType,
-                Private = privacy
-            });
-
-            folder.FolderType = folderType;
-            folder.Shared = folderType == FolderType.PublicRoom;
-            folder.RootFolderType = FolderType.VirtualRooms;
-            folder.FolderIdDisplay = IdConverter.Convert<string>(await globalFolderHelper.FolderVirtualRoomsAsync);
-
-            return folder;
         }, false, null);
 
         return room;
@@ -860,11 +867,6 @@ public class FileStorageService //: IFileStorageService
             if (folder.Id.Equals(folder.RootId))
             {
                 return null;
-            }
-
-            if (folder.ProviderEntry)
-            {
-                return folder;
             }
 
             var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountRoomFeature, int>();
