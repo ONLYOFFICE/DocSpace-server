@@ -67,9 +67,9 @@ public class WebhooksDbContext(DbContextOptions<WebhooksDbContext> options) : Ba
     }
     
     [PreCompileQuery([PreCompileQuery.DefaultInt])]
-    public Task<DbWebhooks> WebhooksLogAsync(int id)
+    public Task<DbWebhooks> WebhooksLogAsync(int tenantId, int id)
     {
-        return Queries.WebhooksLogAsync(this, id);
+        return Queries.WebhooksLogAsync(this, tenantId, id);
     }
 }
 
@@ -101,11 +101,11 @@ static file class Queries
             (WebhooksDbContext ctx, int tenantId, int id) =>
                 ctx.WebhooksConfigs.FirstOrDefault(it => it.TenantId == tenantId && it.Id == id));
 
-    public static readonly Func<WebhooksDbContext, int, Task<DbWebhooks>> WebhooksLogAsync =
+    public static readonly Func<WebhooksDbContext, int, int, Task<DbWebhooks>> WebhooksLogAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (WebhooksDbContext ctx, int id) =>
+            (WebhooksDbContext ctx, int tenantId, int id) =>
                 ctx.WebhooksLogs
-                    .Where(it => it.Id == id)
+                    .Where(it => it.TenantId == tenantId && it.Id == id)
                     .Join(ctx.WebhooksConfigs, r => r.ConfigId, r => r.Id, (log, config) => new DbWebhooks { Log = log, Config = config })
                     .FirstOrDefault());
 }
