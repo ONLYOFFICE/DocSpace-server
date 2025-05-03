@@ -58,15 +58,15 @@ public class FileHandlerControllerInternal(
         pathProvider, filesMessageService, fileConverter, fFmpegService, externalLinkHelper, externalShare, entryManager, handlerControllerHelper, documentServiceTrackerHelper, userManager)
 {
     [HttpGet("thumb/{fileId}")]
-    public async Task ThumbnailFile(int fileId, int version, string size, bool view)
+    public async Task ThumbnailFile(ThumbnailInternalFileRequestDto dto)
     {
-        await ThumbnailOrPreviewFile(fileId, version, size, view);
+        await ThumbnailOrPreviewFile(dto.FileId, dto.Version, dto.Size, dto.View);
     }
     
     [HttpGet("preview/{fileId}")]
-    public async Task PreviewFile(int fileId, int version, string size, bool view)
+    public async Task PreviewFile(ThumbnailInternalFileRequestDto dto)
     {
-        await ThumbnailOrPreviewFile(fileId, version, size, view, true);
+        await ThumbnailOrPreviewFile(dto.FileId,dto.Version, dto.Size, dto.View, true);
     }
     
     private async Task ThumbnailOrPreviewFile(int id, int version, string size, bool view, bool force = false)
@@ -201,15 +201,15 @@ public class FileHandlerControllerThirdparty(
          pathProvider, filesMessageService, fileConverter, fFmpegService,  externalLinkHelper, externalShare, entryManager, handlerControllerHelper, documentServiceTrackerHelper, userManager)
 {
     [HttpGet("thumb/{fileId}")]
-    public async Task ThumbnailFile(string fileId, string size, bool view)
+    public async Task ThumbnailFile(ThumbnailFileRequestDto<string> request)
     {
-        await ThumbnailFileFromThirdParty(fileId, size, view);
+        await ThumbnailFileFromThirdParty(request.FileId, request.Size, request.View);
     }
     
     [HttpGet("preview/{fileId}")]
-    public async Task PreviewFile(string fileId, string size, bool view)
+    public async Task PreviewFile(ThumbnailFileRequestDto<string> request)
     {
-        await ThumbnailFileFromThirdParty(fileId, size, view);
+        await ThumbnailFileFromThirdParty(request.FileId, request.Size, request.View);
     }
     
     public async Task ThumbnailFileFromThirdParty(string id, string size, bool view)
@@ -312,40 +312,40 @@ public abstract class FileHandlerController<T>(
     protected readonly Global _global = global;
 
     [HttpGet("download/{fileId}")]
-    public async Task DownloadFile(T fileId, int version, string outputtype, bool convpreview)
+    public async Task DownloadFile(DownloadOrViewFileRequestDto<T> requestDto)
     {
-        await DownloadOrViewFile(fileId, version, outputtype, convpreview);
+        await DownloadOrViewFile(requestDto.FileId, requestDto.Version, requestDto.OutputType, requestDto.ConvPreview);
     }
-
+    
     [HttpGet("view/{fileId}")]
-    public async Task ViewFile(T fileId, int version, string outputtype, bool convpreview)
+    public async Task ViewFile(DownloadOrViewFileRequestDto<T> requestDto)
     {
-        await DownloadOrViewFile(fileId, version, outputtype, convpreview, true);
+        await DownloadOrViewFile(requestDto.FileId, requestDto.Version, requestDto.OutputType, requestDto.ConvPreview, true);
     }
 
     [HttpGet("stream/{fileId}")]
-    public async Task StreamFile(T fileId, int version, string stream_auth)
+    public async Task StreamFile(StreamFileRequestDto<T> requestDto)
     {
         var context = _httpContextAccessor.HttpContext!;
-
+    
         var fileDao = _daoFactory.GetFileDao<T>();
-
-        await fileDao.InvalidateCacheAsync(fileId);
-
-        var (linkRight, file) = await CheckLinkAsync(fileId, version, fileDao);
-
+    
+        await fileDao.InvalidateCacheAsync(requestDto.FileId);
+    
+        var (linkRight, file) = await CheckLinkAsync(requestDto.FileId, requestDto.Version, fileDao);
+    
         if (linkRight == FileShare.Restrict && !securityContext.IsAuthenticated)
         {
-            var validateResult = emailValidationKeyProvider.ValidateEmailKey(fileId.ToString() + version, stream_auth ?? "", _global.StreamUrlExpire);
+            var validateResult = emailValidationKeyProvider.ValidateEmailKey(requestDto.FileId.ToString() + requestDto.Version, requestDto.Stream_Auth ?? "", _global.StreamUrlExpire);
             if (validateResult != EmailValidationKeyProvider.ValidationResult.Ok)
             {
                 var exc = new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMessage_SecurityException);
-
+    
                 _logger.Error(FilesLinkUtility.AuthKey, validateResult, context.Request.Url(), exc);
-
+    
                 throw new SecurityException();
             }
-
+    
             var signatureSecret = filesLinkUtility.DocServiceSignatureSecret;
             if (!string.IsNullOrEmpty(signatureSecret))
             {
@@ -356,37 +356,37 @@ public abstract class FileHandlerController<T>(
                     if (string.IsNullOrEmpty(header) || !header.StartsWith("Bearer "))
                     {
                         var requestHeaderTrace = new StringBuilder();
-
+    
                         foreach (var requestHeader in context.Request.Headers)
                         {
                             requestHeaderTrace.Append($"{requestHeader.Key}={requestHeader.Value}" + Environment.NewLine);
                         }
-
+    
                         var exceptionMessage = $"Invalid signature header {signatureHeader} with value {header}." +
                                                $"Trace headers: {requestHeaderTrace}  ";
-
-
+    
+    
                         throw new Exception(exceptionMessage);
                     }
-
+    
                     header = header["Bearer ".Length..];
-
+    
                     var stringPayload = JsonWebToken.Decode(header, signatureSecret);
-
+    
                     _logger.DebugDocServiceStreamFilePayload(stringPayload);
                     //var data = JObject.Parse(stringPayload);
                     //if (data == null)
                     //{
                     //    throw new ArgumentException("DocService StreamFile header is incorrect");
                     //}
-
+    
                     //var signedStringUrl = data["url"] ?? (data["payload"] != null ? data["payload"]["url"] : null);
                     //if (signedStringUrl == null)
                     //{
                     //    throw new ArgumentException("DocService StreamFile header url is incorrect");
                     //}
                     //var signedUrl = new Uri(signedStringUrl.ToString());
-
+    
                     //var signedQuery = signedUrl.Query;
                     //if (!context.Request.Url.Query.Equals(signedQuery))
                     //{
@@ -400,12 +400,12 @@ public abstract class FileHandlerController<T>(
                 }
             }
         }
-
-        if (file == null || version > 0 && file.Version != version)
+    
+        if (file == null || requestDto.Version > 0 && file.Version != requestDto.Version)
         {
-            file = version > 0
-                ? await fileDao.GetFileAsync(fileId, version)
-                : await fileDao.GetFileAsync(fileId);
+            file = requestDto.Version > 0
+                ? await fileDao.GetFileAsync(requestDto.FileId, requestDto.Version)
+                : await fileDao.GetFileAsync(requestDto.FileId);
         }
 
         if (file == null)
@@ -444,39 +444,39 @@ public abstract class FileHandlerController<T>(
     }
 
     [HttpGet("create/{folderid}")]
-    public async Task CreateFile(T folderId, string response, string fileUri, string title, string docType, bool openfolder)
+    public async Task CreateFile(CreateFileInEditorRequestDto<T> requestDto)
     {
-        await handlerControllerHelper.CreateFile(folderId, response, fileUri, title, docType, openfolder);
+        await handlerControllerHelper.CreateFile(requestDto.FolderId, requestDto.Response, requestDto.FileUri, requestDto.Title, requestDto.DocType, requestDto.OpenFolder);
     }
 
     [HttpGet("createform/{folderid}")]
-    public async Task CreateForm(T folderId, string response, string fileUri, string title, string docType, bool openfolder)
+    public async Task CreateForm(CreateFileInEditorRequestDto<T> requestDto)
     {
-        await handlerControllerHelper.CreateFile(folderId, response, fileUri, title, docType, openfolder, true);
+        await handlerControllerHelper.CreateFile(requestDto.FolderId, requestDto.Response, requestDto.FileUri, requestDto.Title, requestDto.DocType, requestDto.OpenFolder, true);
     }
 
     [HttpGet("redirect")]
-    public async Task RedirectAsync(T folderId, T fileId)
+    public async Task RedirectAsync(RedirectRequestDto<T> requestDto)
     {
         var context = _httpContextAccessor.HttpContext!;
-
+    
         var urlRedirect = string.Empty;
-        if (folderId != null)
+        if (requestDto.FolderId != null)
         {
             try
             {
-                urlRedirect = await pathProvider.GetFolderUrlByIdAsync(folderId);
+                urlRedirect = await pathProvider.GetFolderUrlByIdAsync(requestDto.FolderId);
             }
             catch (ArgumentNullException e)
             {
                 throw new HttpException((int)HttpStatusCode.BadRequest, e.Message);
             }
         }
-
-        if (fileId != null)
+    
+        if (requestDto.FileId != null)
         {
             var fileDao = _daoFactory.GetFileDao<T>();
-            var file = await fileDao.GetFileAsync(fileId);
+            var file = await fileDao.GetFileAsync(requestDto.FileId);
             if (file == null)
             {
                 throw new ItemNotFoundException();
@@ -494,88 +494,88 @@ public abstract class FileHandlerController<T>(
     }
 
     [HttpGet("diff/{fileid}")]
-    public async Task DifferenceFile(T fileid, int version, string stream_auth)
+    public async Task DifferenceFile(DifferenceFileRequestDto<T> requestDto)
     {
         var context = _httpContextAccessor.HttpContext!;
-
-            var fileDao = _daoFactory.GetFileDao<T>();
-            var (linkRight, file) = await CheckLinkAsync(fileid, version, fileDao);
-            if (linkRight == FileShare.Restrict && !securityContext.IsAuthenticated)
+    
+        var fileDao = _daoFactory.GetFileDao<T>();
+        var (linkRight, file) = await CheckLinkAsync(requestDto.FileId, requestDto.Version, fileDao);
+        if (linkRight == FileShare.Restrict && !securityContext.IsAuthenticated)
+        {
+            var validateResult = emailValidationKeyProvider.ValidateEmailKey(requestDto.FileId.ToString() + requestDto.Version, requestDto.Stream_Auth ?? "", _global.StreamUrlExpire);
+            if (validateResult != EmailValidationKeyProvider.ValidationResult.Ok)
             {
-                var validateResult = emailValidationKeyProvider.ValidateEmailKey(fileid.ToString() + version, stream_auth ?? "", _global.StreamUrlExpire);
-                if (validateResult != EmailValidationKeyProvider.ValidationResult.Ok)
-                {
-                    var exc = new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMessage_SecurityException);
-
-                    _logger.Error(FilesLinkUtility.AuthKey, validateResult, context.Request.Url(), exc);
-
+                var exc = new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMessage_SecurityException);
+    
+                _logger.Error(FilesLinkUtility.AuthKey, validateResult, context.Request.Url(), exc);
+    
                 throw new SecurityException();
-                }
             }
-
-            await fileDao.InvalidateCacheAsync(fileid);
-
-            if (file == null
-                || version > 0 && file.Version != version)
-            {
-                file = version > 0
-                    ? await fileDao.GetFileAsync(fileid, version)
-                    : await fileDao.GetFileAsync(fileid);
-            }
-
-            if (file == null)
-            {
-            throw new ItemNotFoundException();
-            }
-
-            if (linkRight == FileShare.Restrict && securityContext.IsAuthenticated && !await fileSecurity.CanReadAsync(file))
-            {
-            throw new SecurityException();
-            }
-
-            if (!string.IsNullOrEmpty(file.Error))
-            {
-            throw new Exception(file.Error);
-            }
-
-            context.Response.Headers.Append("Content-Disposition", ContentDispositionUtil.GetHeaderValue(".zip"));
-            context.Response.ContentType = MimeMapping.GetMimeMapping(".zip");
-
-            await using var stream = await fileDao.GetDifferenceStreamAsync(file);
-            context.Response.Headers.Append("Content-Length", stream.Length.ToString(CultureInfo.InvariantCulture));
-            await stream.CopyToAsync(context.Response.Body);
         }
+    
+        await fileDao.InvalidateCacheAsync(requestDto.FileId);
+    
+        if (file == null
+            || requestDto.Version > 0 && file.Version != requestDto.Version)
+        {
+            file = requestDto.Version > 0
+                ? await fileDao.GetFileAsync(requestDto.FileId, requestDto.Version)
+                : await fileDao.GetFileAsync(requestDto.FileId);
+        }
+
+        if (file == null)
+        {
+            throw new ItemNotFoundException();
+        }
+
+        if (linkRight == FileShare.Restrict && securityContext.IsAuthenticated && !await fileSecurity.CanReadAsync(file))
+        {
+            throw new SecurityException();
+        }
+
+        if (!string.IsNullOrEmpty(file.Error))
+        {
+            throw new Exception(file.Error);
+        }
+
+        context.Response.Headers.Append("Content-Disposition", ContentDispositionUtil.GetHeaderValue(".zip"));
+        context.Response.ContentType = MimeMapping.GetMimeMapping(".zip");
+
+        await using var stream = await fileDao.GetDifferenceStreamAsync(file);
+        context.Response.Headers.Append("Content-Length", stream.Length.ToString(CultureInfo.InvariantCulture));
+        await stream.CopyToAsync(context.Response.Body);
+    }
 
     [HttpPost("track/{fileid}")]
-    public async Task TrackFile(T fileId, string stream_auth)
+    public async Task TrackFile(TrackFileRequestDto<T> requestDto)
     {
         var context = _httpContextAccessor.HttpContext!;
-        _logger.DebugDocServiceTrackFileid(fileId.ToString());
-
+        _logger.DebugDocServiceTrackFileid(requestDto.FileId.ToString());
+    
         var callbackSpan = TimeSpan.FromDays(128);
-        var validateResult = emailValidationKeyProvider.ValidateEmailKey(fileId.ToString(), stream_auth ?? "", callbackSpan);
+        var validateResult = emailValidationKeyProvider.ValidateEmailKey(requestDto.FileId.ToString(), requestDto.Stream_Auth ?? "", callbackSpan);
         if (validateResult != EmailValidationKeyProvider.ValidationResult.Ok)
         {
-            _logger.ErrorDocServiceTrackAuth(validateResult, FilesLinkUtility.AuthKey, stream_auth);
+            _logger.ErrorDocServiceTrackAuth(validateResult, FilesLinkUtility.AuthKey, requestDto.Stream_Auth);
             throw new SecurityException();
         }
-
+    
         DocumentServiceTracker.TrackerData fileData;
-
+    
         var requestAborted = context.RequestAborted;
-
+    
         try
         {
             var receiveStream = context.Request.Body;
             using var readStream = new StreamReader(receiveStream);
             var body = await readStream.ReadToEndAsync(requestAborted);
-
+    
             _logger.DebugDocServiceTrackBody(body);
             if (string.IsNullOrEmpty(body))
             {
                 throw new ArgumentException("DocService request body is incorrect");
             }
-
+    
             var options = new JsonSerializerOptions { AllowTrailingCommas = true, PropertyNameCaseInsensitive = true };
             fileData = JsonSerializer.Deserialize<DocumentServiceTracker.TrackerData>(body, options);
         }
@@ -594,14 +594,14 @@ public abstract class FileHandlerController<T>(
             _logger.ErrorDocServiceTrackReadBody(e);
             throw new ArgumentException(e.Message);
         }
-
+    
         var lastfileDataAction = fileData.Actions?.LastOrDefault();
         var fillingSessionId = lastfileDataAction != null
             ? (lastfileDataAction.UserId.StartsWith(FileConstant.AnonFillingSession)
                 ? lastfileDataAction.UserId
-                : $"{fileId}_{lastfileDataAction.UserId}")
+                : $"{requestDto.FileId}_{lastfileDataAction.UserId}")
             : string.Empty;
-
+    
         var signatureSecret = filesLinkUtility.DocServiceSignatureSecret;
         if (!string.IsNullOrEmpty(signatureSecret))
         {
@@ -610,13 +610,13 @@ public abstract class FileHandlerController<T>(
                 try
                 {
                     var dataString = JsonWebToken.Decode(fileData.Token, signatureSecret);
-
+    
                     var data = JObject.Parse(dataString);
                     if (data == null)
                     {
                         throw new ArgumentException("DocService request token is incorrect");
                     }
-
+    
                     fileData = data.ToObject<DocumentServiceTracker.TrackerData>();
                 }
                 catch (SignatureVerificationException ex)
@@ -634,13 +634,13 @@ public abstract class FileHandlerController<T>(
                     _logger.ErrorDocServiceTrackHeaderIsNull();
                     throw new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMessage_SecurityException);
                 }
-
+    
                 header = header["Bearer ".Length..];
-
+    
                 try
                 {
                     var stringPayload = JsonWebToken.Decode(header, signatureSecret);
-
+    
                     _logger.DebugDocServiceTrackPayload(stringPayload);
                     var jsonPayload = JObject.Parse(stringPayload);
                     var data = jsonPayload["payload"];
@@ -648,7 +648,7 @@ public abstract class FileHandlerController<T>(
                     {
                         throw new ArgumentException("DocService request header is incorrect");
                     }
-
+    
                     fileData = data.ToObject<DocumentServiceTracker.TrackerData>();
                 }
                 catch (SignatureVerificationException ex)
@@ -658,11 +658,11 @@ public abstract class FileHandlerController<T>(
                 }
             }
         }
-
+    
         DocumentServiceTracker.TrackResponse result;
         try
         {
-            result = await documentServiceTrackerHelper.ProcessDataAsync(fileId, fileData, fillingSessionId);
+            result = await documentServiceTrackerHelper.ProcessDataAsync(requestDto.FileId, fileData, fillingSessionId);
         }
         catch (Exception e)
         {
@@ -673,7 +673,7 @@ public abstract class FileHandlerController<T>(
         result ??= new DocumentServiceTracker.TrackResponse();
 
         await context.Response.WriteAsync(DocumentServiceTracker.TrackResponse.Serialize(result), cancellationToken: requestAborted);
-        await context.Response.Body.FlushAsync();
+        await context.Response.Body.FlushAsync(requestAborted);
         await context.Response.CompleteAsync();
     }
 
@@ -946,13 +946,17 @@ public abstract class FileHandlerControllerCommon(
 {
     [AllowAnonymous]
     [HttpGet("bulk")]
-    public async Task BulkFile(string filename, string session, string ext)
+    public async Task BulkFile([FromQuery] BulkFileRequestDto requestDto)
     {        
         var context = httpContextAccessor.HttpContext!;
-        if (!securityContext.IsAuthenticated && string.IsNullOrEmpty(session))
+        if (!securityContext.IsAuthenticated && string.IsNullOrEmpty(requestDto.Session))
         {
             throw new SecurityException();
         }
+    
+        string filename = requestDto.Filename;
+        string session = requestDto.Session;
+        string ext = requestDto.Ext;
 
         if (String.IsNullOrEmpty(filename))
         {
@@ -1023,9 +1027,10 @@ public abstract class FileHandlerControllerCommon(
     }
 
     [HttpGet("empty")]
-    public async Task EmptyFile(string title)
+    public async Task EmptyFile([FromQuery] EmptyFileRequestDto requestDto)
     {
         var context = httpContextAccessor.HttpContext!;
+        string title = requestDto.Title;
 
         var signatureSecret = filesLinkUtility.DocServiceSignatureSecret;
         if (!string.IsNullOrEmpty(signatureSecret))
@@ -1093,9 +1098,11 @@ public abstract class FileHandlerControllerCommon(
     }
 
     [HttpGet("temp")]
-    public async Task TempFile(string title, string stream_auth)
+    public async Task TempFile([FromQuery] TempFileRequestDto requestDto)
     {        
         var context = httpContextAccessor.HttpContext!;
+        string title = requestDto.Title;
+        string stream_auth = requestDto.Stream_Auth;
 
         var validateResult = emailValidationKeyProvider.ValidateEmailKey(title, stream_auth ?? "", global.StreamUrlExpire);
         if (validateResult != EmailValidationKeyProvider.ValidationResult.Ok)
@@ -1130,9 +1137,9 @@ public abstract class FileHandlerControllerCommon(
     }
 
     [HttpGet("create")]
-    public async Task CreateFile(string response, string fileUri, string title, string docType, bool openfolder)
+    public async Task CreateFile(CreateFileInEditorRequestDto requestDto)
     {
-        await handlerControllerHelper.CreateFile(await globalFolderHelper.FolderMyAsync, response, fileUri, title, docType, openfolder);
+        await handlerControllerHelper.CreateFile(await globalFolderHelper.FolderMyAsync, requestDto.Response, requestDto.FileUri, requestDto.Title, requestDto.DocType, requestDto.OpenFolder);
     }
 }
 
