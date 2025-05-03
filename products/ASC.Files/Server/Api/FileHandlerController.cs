@@ -24,21 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Diagnostics;
-using System.Text.Json.Serialization;
-using System.Web;
-
-using ASC.Common.Utils;
-using ASC.Data.Storage;
-using ASC.Files.Core.Log;
-using ASC.Files.ThumbnailBuilder;
-using ASC.Security.Cryptography;
-using ASC.Web.Files.Services.FFmpegService;
-
-using ImageMagick;
-
-using JWT.Exceptions;
-
 namespace ASC.Files.Api;
 
 [AllowAnonymous]
