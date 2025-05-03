@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,13 +27,14 @@
 
 package com.asc.registration.application.controller;
 
-import com.asc.registration.application.security.authentication.AscAuthenticationTokenPrincipal;
+import com.asc.registration.application.security.authentication.BasicSignatureTokenPrincipal;
 import com.asc.registration.application.transfer.ErrorResponse;
 import com.asc.registration.service.ports.input.service.ScopeApplicationService;
 import com.asc.registration.service.transfer.response.ScopeResponse;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -50,50 +51,82 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/** Controller class for managing scopes. */
-@Tag(name = "Scope Query Controller", description = "Query REST API to Retrieve Scopes")
+/** Controller class for managing OAuth2 scopes. */
+@Tag(
+    name = "Scope Management",
+    description = "APIs for retrieving OAuth2 scopes and their permissions")
 @Slf4j
 @RestController
 @RequestMapping(
-    value = "${web.api}/scopes",
+    value = "${spring.application.web.api}/scopes",
     produces = {MediaType.APPLICATION_JSON_VALUE})
 @RequiredArgsConstructor
 public class ScopeQueryController {
 
-  /** The service for managing scopes. */
+  /** The service for managing OAuth2 scopes. */
   private final ScopeApplicationService scopeApplicationService;
 
   /**
-   * Retrieves a list of scopes for the specified tenant.
+   * Retrieves a list of available OAuth2 scopes for the specified tenant.
    *
    * @param principal the authenticated principal containing tenant information
-   * @return a response entity containing an iterable of scope responses
+   * @return a response entity containing an ordered list of scope responses
    */
   @GetMapping
   @RateLimiter(name = "globalRateLimiter")
   @Operation(
-      summary = "Retrieves a list of scopes for the specified tenant",
-      tags = {"ScopeQueryController"},
-      security = @SecurityRequirement(name = "ascAuth"),
+      summary = "List available OAuth2 scopes",
+      description =
+          "Retrieves a list of all available OAuth2 scopes for the specified tenant. "
+              + "The scopes define the permissions that can be requested by OAuth2 clients. "
+              + "The list is ordered alphabetically, with the 'openid' scope always appearing first.",
+      tags = {"Scope Management"},
+      security = @SecurityRequirement(name = "x-signature"),
       responses = {
-        @ApiResponse(responseCode = "200", description = "Successfully retrieved scopes"),
+        @ApiResponse(
+            responseCode = "200",
+            description = "Scopes successfully retrieved",
+            content =
+                @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema =
+                        @Schema(
+                            implementation = ScopeResponse.class,
+                            type = "array",
+                            description = "List of OAuth2 scopes"),
+                    examples =
+                        @ExampleObject(
+                            value =
+                                """
+                    [
+                      {
+                        "name": "scope_name",
+                        "type": "scope_type",
+                        "group": "scope_group"
+                      }
+                    ]
+                    """))),
         @ApiResponse(
             responseCode = "400",
-            description = "Bad request",
-            content = {@Content}),
+            description = "Invalid request parameters",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Insufficient permissions to list scopes",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
         @ApiResponse(
             responseCode = "429",
-            description = "Too many requests",
+            description = "Too many requests - rate limit exceeded",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
         @ApiResponse(
             responseCode = "500",
-            description = "Internal server error",
-            content = @Content)
+            description = "Internal server error occurred",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
       })
   public ResponseEntity<Iterable<ScopeResponse>> getScopes(
-      @AuthenticationPrincipal AscAuthenticationTokenPrincipal principal) {
-    MDC.put("tenant_id", String.valueOf(principal.tenant().getTenantId()));
-    MDC.put("tenant_alias", principal.tenant().getTenantAlias());
+      @AuthenticationPrincipal BasicSignatureTokenPrincipal principal) {
+    MDC.put("tenant_id", String.valueOf(principal.getTenantId()));
+    MDC.put("tenant_url", principal.getTenantUrl());
     log.info("Received a request to list scopes");
 
     var scopes =

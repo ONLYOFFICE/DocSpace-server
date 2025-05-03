@@ -118,12 +118,21 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="BackupNotFound" xml:space="preserve">
-    <value>Záložní soubor je neplatný. Použijte prosím soubor vytvořený v aplikaci ONLYOFFICE v11.5 nebo novější.</value>
+    <value>Záložní soubor je neplatný. Použijte prosím soubor vytvořený na stejném portálu.</value>
   </data>
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Nastavit heslo</value>
   </data>
   <data name="LargeBackup" xml:space="preserve">
     <value>Záloha je větší než celková velikost portálu</value>
+  </data>
+  <data name="BackupInvalid" xml:space="preserve">
+    <value>Záložní soubor je neplatný.</value>
+  </data>
+  <data name="BackupException" xml:space="preserve">
+    <value>Při vytváření zálohy se něco pokazilo. Zkuste ji vytvořit znovu nebo kontaktujte podporu.</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>Při obnovování zálohy se něco pokazilo. Zkuste ji obnovit znovu nebo kontaktujte  podporu.</value>
   </data>
 </root>

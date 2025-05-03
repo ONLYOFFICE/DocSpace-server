@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -109,7 +109,7 @@ public class SmsManager(UserManager userManager,
 
         if (await smsSender.SendSMSAsync(mobilePhone, string.Format(Resource.SmsAuthenticationMessageToUser, key)))
         {
-            await tenantManager.SetTenantQuotaRowAsync(new TenantQuotaRow { TenantId = await tenantManager.GetCurrentTenantIdAsync(), Path = "/sms", Counter = 1, LastModified = DateTime.UtcNow }, true);
+            await tenantManager.SetTenantQuotaRowAsync(new TenantQuotaRow { TenantId = tenantManager.GetCurrentTenantId(), Path = "/sms", Counter = 1, LastModified = DateTime.UtcNow }, true);
         }
     }
 

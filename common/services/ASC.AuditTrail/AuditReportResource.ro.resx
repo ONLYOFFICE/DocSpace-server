@@ -861,4 +861,127 @@
   <data name="SendJoinInvite" xml:space="preserve">
     <value>Utilizatorul {0} a trimis invitația de asociere la DocSpace către {1}</value>
   </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>Fișierul: {0}. Indexul s-a schimbat din {1} în {2}</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Folderul: {0}. Indexul s-a schimbat din {1} în {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Folderul: {0}. Indexuri au fost înregistrate</value>
+  </data>
+  <data name="OAuthModule" xml:space="preserve">
+    <value>OAuth</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Sală: {0}. Interzicerea încărcării a fost dezactivată</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Sală: {0}. Interzicerea încărcării a fost activată</value>
+  </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Exportul indexelor de săli din secțiunea Documente</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Indexarea sălilor a fost dezactivată</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Indexarea sălilor a fost activată</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>Durată de viaţă este dezactivată</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>Durată de viaţă este definită. Valoarea: {0}. Perioadă: {1}. Ștergerea definitivă {2}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Sală: {0}. Inscripționare a fost dezactivată</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Sală: {0}. Inscripționare a fost activată</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Invitația a trimis din nou: {0}</value>
+  </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>Activarea Clientului {0} s-a schimbat</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>Vizibilitatea Clientului {0} s-a schimbat</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Clientul a fost creat</value>
+  </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Clientul {0} a fost șters</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>Codul de autorizare a fost generat pentru clientul {0}</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>Token-ul de acces personal a fost generat pentru clientul {0}</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>Cheia secretă a clientului {0} a fost regenerată</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Accesul clientului {0} a fost revocat</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>Clientul {0} a fost actualizat</value>
+  </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>Setări de acces la Instrumente pentru dezvoltatori s-au schimbat</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>Fișiere [{0}]. Versiunea a fost ștearsă: {1}</value>
+  </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>Utilizatori [{0}]. Formular completat în întregime: {1}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>Utilizatori [{0}]. Formularul este completat parțial: {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>Utilizatori [{0}]. Completarea s-a început: {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>Utilizatori [{0}]. Completarea formularului încetată: {1}</value>
+  </data>
+  <data name="WebhookCreated" xml:space="preserve">
+    <value>Webhook a fost creat: {0}</value>
+  </data>
+  <data name="WebhookDeleted" xml:space="preserve">
+    <value>Webhook a fost șters: {0}</value>
+  </data>
+  <data name="WebhookUpdated" xml:space="preserve">
+    <value>Webhook a fost actualizat {0}</value>
+  </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>Cheie API pentru utilizator a fost creată: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>Cheie API pentru utilizator a fost eliminată: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>Cheie API pentru utilizator a fost actualizată: {0}</value>
+  </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>Fișierul: {0}. Filtrul personalizat a fost dezactivat</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>Fișierul: {0}. Filtrul personalizat a fost activat</value>
+  </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>Link-ul de autorizare a fost activat</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>Autentificarea LDAP a fost dezactivată</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>Autentificarea LDAP a fost activată</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>Sincronizarea LDAP s-a încheiat</value>
+  </data>
 </root>

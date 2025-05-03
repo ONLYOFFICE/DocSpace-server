@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,52 +24,65 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.ComponentModel.DataAnnotations;
-
 namespace ASC.Web.Core.WhiteLabel;
 
 /// <summary>
+/// The company white label settings wrapper.
 /// </summary>
 public class CompanyWhiteLabelSettingsWrapper
 {
-    /// <summary>Company white label settings</summary>
-    /// <type>ASC.Web.Core.WhiteLabel.CompanyWhiteLabelSettings, ASC.Web.Core</type>
+    /// <summary>
+    /// The company white label settings.
+    /// </summary>
     public CompanyWhiteLabelSettings Settings { get; set; }
 }
 
 /// <summary>
+/// The company white label settings.
 /// </summary>
 public class CompanyWhiteLabelSettings : ISettings<CompanyWhiteLabelSettings>
 {
-    /// <summary>Core settings</summary>
-    /// <type>ASC.Core.CoreSettings, ASC.Core.Common</type>
+    /// <summary>
+    /// The core settings.
+    /// </summary>
     public CoreSettings CoreSettings;
 
-    /// <summary>Company name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The company name.
+    /// </summary>
+    [StringLength(255)]
     public string CompanyName { get; set; }
 
-    /// <summary>Site</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The company site.
+    /// </summary>
     [Url]
+    [StringLength(255)]
     public string Site { get; set; }
 
-    /// <summary>Email address</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The company email address.
+    /// </summary>
     [EmailAddress]
+    [StringLength(255)]
     public string Email { get; set; }
 
-    /// <summary>Address</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The company address.
+    /// </summary>
+    [StringLength(255)]
     public string Address { get; set; }
 
-    /// <summary>Phone</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The company phone number.
+    /// </summary>
     [Phone]
+    [StringLength(255)]
     public string Phone { get; set; }
 
-    /// <summary>Specifies if a company is a licensor or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if a company is a licensor or not.
+    /// </summary>
     [JsonPropertyName("IsLicensor")]
     public bool IsLicensor { get; set; }
 
@@ -102,6 +115,8 @@ public class CompanyWhiteLabelSettings : ISettings<CompanyWhiteLabelSettings>
 
         return result;
     }
+    
+    public DateTime LastModified { get; set; }
 
     #endregion
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -76,6 +76,8 @@ public sealed class PasswordSettings : ISettings<PasswordSettings>
 
         return def;
     }
+    
+    public DateTime LastModified { get; set; }
 }
 
 [Singleton]
@@ -157,7 +159,7 @@ public sealed class PasswordSettingsManager(IConfiguration configuration)
     {
         if (!int.TryParse(configuration["web:password:min"], out var defaultMinLength))
         {
-            defaultMinLength = 0;
+            defaultMinLength = 8;
         }
 
         return length >= defaultMinLength && length <= MaxLength;
@@ -192,7 +194,7 @@ public sealed class PasswordSettingsManager(IConfiguration configuration)
         var text = new StringBuilder();
 
         text.Append($"{Resource.ErrorPasswordMessage} ");
-        text.AppendFormat(Resource.ErrorPasswordLength, passwordSettings.MinLength, PasswordSettingsManager.MaxLength);
+        text.AppendFormat(Resource.ErrorPasswordLength, passwordSettings.MinLength, MaxLength);
         text.Append($", {Resource.ErrorPasswordOnlyLatinLetters}");
         text.Append($", {Resource.ErrorPasswordNoSpaces}");
 

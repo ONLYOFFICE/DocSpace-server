@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,75 +27,73 @@
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 /// <summary>
+/// The SMTP settings parameters.
 /// </summary>
 public class SmtpSettingsDto : IMapFrom<SmtpSettings>
 {
-    /// <summary>Host</summary>
-    /// <type>System.String, System</type>
-    /// <example>mail.example.com</example>
+    /// <summary>
+    /// The SMTP host.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "mail.example.com")]
+    [StringLength(255)]
     public string Host { get; set; }
 
-    /// <summary>Port</summary>
-    /// <type>System.Nullable{System.Int32}, System</type>
-    /// <example>25</example>
+    /// <summary>
+    /// The SMTP port.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 25)]
     [Range(1, 65535)]
     public int? Port { get; set; }
 
-    /// <summary>Sender address</summary>
-    /// <type>System.String, System</type>
-    /// <example>notify@example.com</example>
+    /// <summary>
+    /// The sender address.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "notify@example.com")]
+    [StringLength(255)]
     public string SenderAddress { get; set; }
 
-    /// <summary>Sender display name</summary>
-    /// <type>System.String, System</type>
-    /// <example>Postman</example>
+    /// <summary>
+    /// The sender display name.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "Postman")]
+    [StringLength(255)]
     public string SenderDisplayName { get; set; }
 
-    /// <summary>Credentials username</summary>
-    /// <type>System.String, System</type>
-    /// <example>notify@example.com</example>
+    /// <summary>
+    /// The credentials username.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "notify@example.com")]
     [StringLength(255)]
     public string CredentialsUserName { get; set; }
 
-    /// <summary>Credentials user password</summary>
-    /// <type>System.String, System</type>
-    /// <example>{password}</example>
+    /// <summary>
+    /// The credentials user password.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "{password}")]
     public string CredentialsUserPassword { get; set; }
 
-    /// <summary>Enables SSL or not</summary>
-    /// <type>System.Boolean, System</type>
-    /// <example>true</example>
+    /// <summary>
+    /// Specifies whether the SSL is enabled or not.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
     public bool EnableSSL { get; set; }
 
-    /// <summary>Enables authentication or not</summary>
-    /// <type>System.Boolean, System</type>
-    /// <example>false</example>
+    /// <summary>
+    /// Specifies whether the authentication is enabled or not.
+    /// </summary>
     public bool EnableAuth { get; set; }
 
-    /// <summary>Specifies whether to use NTLM or not</summary>
-    /// <type>System.Boolean, System</type>
-    /// <example>false</example>
+    /// <summary>
+    /// Specifies whether to use NTLM or not.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
     public bool UseNtlm { get; set; }
 
-    /// <summary>Specifies if the current settings are default or not</summary>
-    /// <type>System.Boolean, System</type>
-    /// <example>false</example>
+    /// <summary>
+    /// Specifies if the current settings are default or not.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
     public bool IsDefaultSettings { get; set; }
-
-    public static SmtpSettingsDto GetSample()
-    {
-        return new SmtpSettingsDto
-        {
-            Host = "mail.example.com",
-            Port = 25,
-            CredentialsUserName = "notify@example.com",
-            CredentialsUserPassword = "{password}",
-            EnableAuth = true,
-            EnableSSL = false,
-            SenderAddress = "notify@example.com",
-            SenderDisplayName = "Postman"
-        };
-    }
 
     public void Mapping(Profile profile)
     {

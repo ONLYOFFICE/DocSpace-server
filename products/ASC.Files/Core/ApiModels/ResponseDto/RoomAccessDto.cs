@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,14 +27,31 @@
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
+/// The room security parameters.
 /// </summary>
 public class RoomSecurityDto
 {
-    /// <summary>List of room members</summary>
-    /// <type>System.Collections.Generic.IEnumerable{ASC.Files.Core.ApiModels.ResponseDto.FileShareDto}, System.Collections.Generic</type>
+    /// <summary>
+    /// The list of room members.
+    /// </summary>
     public IEnumerable<FileShareDto> Members { get; set; }
 
-    /// <summary>Warning</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The warning message.
+    /// </summary>
     public string Warning { get; set; }
+
+    /// <summary>
+    /// The error type.
+    /// </summary>
+    public RoomSecurityError Error { get; set; }
+}
+
+/// <summary>
+/// The error type.
+/// </summary>
+public enum RoomSecurityError
+{
+    None,
+    FormRoleBlockingDeletion
 }

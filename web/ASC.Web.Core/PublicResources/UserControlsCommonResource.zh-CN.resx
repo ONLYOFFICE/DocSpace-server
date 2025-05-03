@@ -73,10 +73,16 @@
   <data name="TariffPerMonth" xml:space="preserve">
     <value>月</value>
   </data>
+  <data name="TariffPerYear" xml:space="preserve">
+    <value>年</value>
+  </data>
   <data name="UnknownFirstName" xml:space="preserve">
     <value>名</value>
   </data>
   <data name="UnknownLastName" xml:space="preserve">
     <value>姓</value>
+  </data>
+  <data name="LicenseTypeNotCorrect" xml:space="preserve">
+    <value>许可证冲突。请确保已安装正确版本的{0}协作空间（企业版或开发者版）。如有任何疑问，请随时联系您的销售经理。</value>
   </data>
 </root>

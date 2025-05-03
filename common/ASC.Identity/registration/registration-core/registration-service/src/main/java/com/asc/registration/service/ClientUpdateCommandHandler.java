@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,14 +28,17 @@
 package com.asc.registration.service;
 
 import com.asc.common.core.domain.entity.Audit;
-import com.asc.common.core.domain.event.DomainEventPublisher;
 import com.asc.common.core.domain.value.ClientId;
+import com.asc.common.core.domain.value.Role;
 import com.asc.common.core.domain.value.TenantId;
+import com.asc.common.core.domain.value.UserId;
 import com.asc.common.core.domain.value.enums.AuthenticationMethod;
+import com.asc.common.service.ports.output.message.publisher.AuthorizationMessagePublisher;
+import com.asc.common.service.transfer.message.ClientRemovedEvent;
 import com.asc.common.service.transfer.response.ClientResponse;
 import com.asc.common.utilities.crypto.EncryptionService;
 import com.asc.registration.core.domain.ClientDomainService;
-import com.asc.registration.core.domain.event.ClientEvent;
+import com.asc.registration.core.domain.entity.Client;
 import com.asc.registration.core.domain.exception.ClientDomainException;
 import com.asc.registration.core.domain.exception.ClientNotFoundException;
 import com.asc.registration.core.domain.value.ClientInfo;
@@ -54,7 +57,6 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * ClientUpdateCommandHandler handles the updates of the existing clients. This component
@@ -65,42 +67,30 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @RequiredArgsConstructor
 public class ClientUpdateCommandHandler {
+  private final AuthorizationMessagePublisher<ClientRemovedEvent> clientMessagePublisher;
   private final ClientCommandRepository clientCommandRepository;
   private final ClientDataMapper clientDataMapper;
   private final ClientDomainService clientDomainService;
   private final ClientQueryRepository clientQueryRepository;
-  private final DomainEventPublisher<ClientEvent> messagePublisher;
   private final EncryptionService encryptionService;
 
   /**
-   * Regenerates the client secret.
+   * Regenerates and encrypts the client secret.
    *
-   * @param audit the audit information
+   * @param audit the audit details
+   * @param role the role of the requester
    * @param command the command containing client and tenant information
-   * @return the client secret response
+   * @return the updated client secret response
    */
   @Retryable(
       retryFor = {OptimisticLockingFailureException.class},
+      notRecoverable = {ClientNotFoundException.class},
       backoff = @Backoff(value = 500, multiplier = 1.65))
-  @Transactional(
-      timeout = 3,
-      rollbackFor = {Exception.class})
   public ClientSecretResponse regenerateSecret(
-      Audit audit, RegenerateTenantClientSecretCommand command) {
-    log.info("Trying to regenerate client secret");
+      Audit audit, Role role, RegenerateTenantClientSecretCommand command) {
+    log.info("Regenerating client secret");
 
-    var client =
-        clientQueryRepository
-            .findByClientIdAndTenantId(
-                new ClientId(UUID.fromString(command.getClientId())),
-                new TenantId(command.getTenantId()))
-            .orElseThrow(
-                () ->
-                    new ClientNotFoundException(
-                        String.format(
-                            "Client with id %s for tenant %d was not found",
-                            command.getClientId(), command.getTenantId())));
-
+    var client = getClient(audit, role, command.getClientId(), command.getTenantId());
     var event = clientDomainService.regenerateClientSecret(audit, client);
     var clientSecret = client.getSecret().value();
     client.encryptSecret(encryptionService::encrypt);
@@ -109,189 +99,201 @@ public class ClientUpdateCommandHandler {
     log.debug("Generated a new secret");
     MDC.remove("client_secret");
 
-    messagePublisher.publish(event);
-
-    var response = clientDataMapper.toClientSecret(clientCommandRepository.updateClient(client));
+    var response =
+        clientDataMapper.toClientSecret(clientCommandRepository.updateClient(event, client));
     response.setClientSecret(clientSecret);
-
     return response;
   }
 
   /**
-   * Fallback method to handle recovery when the client secret regeneration fails due to an
-   * optimistic locking exception.
+   * Fallback for secret regeneration on optimistic locking failure.
    *
-   * @param e the exception that triggered the recovery
-   * @param audit the audit information for tracking the operation
-   * @param command the command with client and tenant information for secret regeneration
-   * @throws ClientDomainException thrown if the operation cannot recover
+   * @param e the optimistic locking exception
+   * @param audit the audit details
+   * @param role the role of the requester
+   * @param command the command containing client and tenant information
+   * @return never returns normally
+   * @throws ClientDomainException always thrown due to concurrent access issues
    */
   @Recover
   public ClientSecretResponse recoverRegenerateSecret(
       OptimisticLockingFailureException e,
       Audit audit,
+      Role role,
       RegenerateTenantClientSecretCommand command) {
     throw new ClientDomainException(
         String.format(
-            "Could not regenerate client %s secret due to concurrent access",
+            "Could not regenerate secret for client %s due to concurrent access",
             command.getClientId()));
   }
 
   /**
-   * Changes the visibility of a client to either public or private based on the command. If the
-   * operation encounters an optimistic locking exception, it retries based on the specified retry
-   * policy.
+   * Generic fallback for secret regeneration failures.
    *
-   * @param audit the audit information for tracking the operation
-   * @param command the command containing client and tenant information along with the desired
-   *     visibility status
+   * @param e the triggering exception
+   * @param audit the audit details
+   * @param role the role of the requester
+   * @param command the command containing client and tenant information
+   * @return never returns normally
+   * @throws Exception always rethrows the original exception
+   */
+  @Recover
+  public ClientSecretResponse recoverRegenerateSecret(
+      Exception e, Audit audit, Role role, RegenerateTenantClientSecretCommand command)
+      throws Exception {
+    throw e;
+  }
+
+  /**
+   * Changes the visibility of a client.
+   *
+   * @param audit the audit details
+   * @param role the role of the requester
+   * @param command the command containing client, tenant, and desired visibility status
    */
   @Retryable(
       retryFor = {OptimisticLockingFailureException.class},
+      notRecoverable = {ClientNotFoundException.class},
       backoff = @Backoff(value = 500, multiplier = 1.65))
-  @Transactional(
-      timeout = 3,
-      rollbackFor = {Exception.class})
-  public void changeVisibility(Audit audit, ChangeTenantClientVisibilityCommand command) {
+  public void changeVisibility(
+      Audit audit, Role role, ChangeTenantClientVisibilityCommand command) {
     log.info("Trying to change client visibility");
 
-    var client =
-        clientQueryRepository
-            .findByClientIdAndTenantId(
-                new ClientId(UUID.fromString(command.getClientId())),
-                new TenantId(command.getTenantId()))
-            .orElseThrow(
-                () ->
-                    new ClientNotFoundException(
-                        String.format(
-                            "Client with id %s for tenant %d was not found",
-                            command.getClientId(), command.getTenantId())));
-
+    var client = getClient(audit, role, command.getClientId(), command.getTenantId());
     if (command.isPublic()) {
       log.info("Changing client visibility to public");
       var event = clientDomainService.makeClientPublic(audit, client);
-      clientCommandRepository.updateClient(client);
-      messagePublisher.publish(event);
+      clientCommandRepository.changeVisibilityByTenantIdAndClientId(
+          event, client.getClientTenantInfo().tenantId(), client.getId(), command.isPublic());
       return;
     }
 
     log.info("Changing client visibility to private");
     var event = clientDomainService.makeClientPrivate(audit, client);
-    clientCommandRepository.updateClient(client);
-    messagePublisher.publish(event);
+    clientCommandRepository.changeVisibilityByTenantIdAndClientId(
+        event, client.getClientTenantInfo().tenantId(), client.getId(), command.isPublic());
   }
 
   /**
-   * Fallback method to handle recovery when the visibility change operation fails due to an
-   * optimistic locking exception.
+   * Fallback for visibility change on optimistic locking failure.
    *
-   * @param e the exception that triggered the recovery
-   * @param audit the audit information for tracking the operation
-   * @param command the command with client and tenant information for visibility change
-   * @throws ClientDomainException thrown if the operation cannot recover
+   * @param e the optimistic locking exception
+   * @param audit the audit details
+   * @param role the role of the requester
+   * @param command the command with client and tenant details
+   * @throws ClientDomainException always thrown due to concurrent access issues
    */
   @Recover
   public void recoverChangeVisibility(
       OptimisticLockingFailureException e,
       Audit audit,
+      Role role,
       ChangeTenantClientVisibilityCommand command) {
     throw new ClientDomainException(
         String.format(
-            "Could not change client %s visibility due to concurrent access",
+            "Could not change visibility for client %s due to concurrent access",
             command.getClientId()));
+  }
+
+  /**
+   * Generic fallback for visibility change failures.
+   *
+   * @param e the triggering exception
+   * @param audit the audit details
+   * @param role the role of the requester
+   * @param command the command with client and tenant details
+   * @throws Exception always rethrows the original exception
+   */
+  @Recover
+  public void recoverChangeVisibility(
+      Exception e, Audit audit, Role role, ChangeTenantClientVisibilityCommand command)
+      throws Exception {
+    throw e;
   }
 
   /**
    * Changes the activation status of a client.
    *
-   * @param audit the audit information
-   * @param command the command containing client, tenant information, and the desired activation
-   *     status
+   * @param audit the audit details
+   * @param role the role of the requester
+   * @param command the command containing client, tenant, and desired activation status
    */
   @Retryable(
       retryFor = {OptimisticLockingFailureException.class},
+      notRecoverable = {ClientNotFoundException.class},
       backoff = @Backoff(value = 500, multiplier = 1.65))
-  @Transactional(
-      timeout = 3,
-      rollbackFor = {Exception.class})
-  public void changeActivation(Audit audit, ChangeTenantClientActivationCommand command) {
+  public void changeActivation(
+      Audit audit, Role role, ChangeTenantClientActivationCommand command) {
     log.info("Trying to change client activation");
 
-    var client =
-        clientQueryRepository
-            .findByClientIdAndTenantId(
-                new ClientId(UUID.fromString(command.getClientId())),
-                new TenantId(command.getTenantId()))
-            .orElseThrow(
-                () ->
-                    new ClientNotFoundException(
-                        String.format(
-                            "Client with id %s for tenant %d was not found",
-                            command.getClientId(), command.getTenantId())));
-
+    var client = getClient(audit, role, command.getClientId(), command.getTenantId());
     if (command.isEnabled()) {
       log.info("Changing client activation to enabled");
       var event = clientDomainService.enableClient(audit, client);
-      clientCommandRepository.updateClient(client);
-      messagePublisher.publish(event);
+      clientCommandRepository.changeActivationByTenantIdAndClientId(
+          event, client.getClientTenantInfo().tenantId(), client.getId(), command.isEnabled());
       return;
     }
 
     log.info("Changing client activation to disabled");
     var event = clientDomainService.disableClient(audit, client);
-    clientCommandRepository.updateClient(client);
-    messagePublisher.publish(event);
+    clientCommandRepository.changeActivationByTenantIdAndClientId(
+        event, client.getClientTenantInfo().tenantId(), client.getId(), command.isEnabled());
   }
 
   /**
-   * Fallback method to handle recovery when the activation change fails due to an optimistic
-   * locking exception.
+   * Fallback for activation change on optimistic locking failure.
    *
-   * @param e the exception that triggered the recovery
-   * @param audit the audit information for tracking the operation
-   * @param command the command containing tenant and client information for activation change
-   * @throws ClientDomainException thrown if the operation cannot recover
+   * @param e the optimistic locking exception
+   * @param audit the audit details
+   * @param role the role of the requester
+   * @param command the command with client and tenant details
+   * @throws ClientDomainException always thrown due to concurrent access issues
    */
   @Recover
   public void recoverChangeActivation(
       OptimisticLockingFailureException e,
       Audit audit,
+      Role role,
       ChangeTenantClientActivationCommand command) {
     throw new ClientDomainException(
         String.format(
-            "Could not change client %s activation due to concurrent access",
+            "Could not change activation for client %s due to concurrent access",
             command.getClientId()));
   }
 
   /**
-   * Updates the client information.
+   * Generic fallback for activation change failures.
    *
-   * @param audit the audit information
-   * @param command the command containing client and tenant information along with updated client
-   *     details
+   * @param e the triggering exception
+   * @param audit the audit details
+   * @param role the role of the requester
+   * @param command the command with client and tenant details
+   * @throws Exception always rethrows the original exception
+   */
+  @Recover
+  public void recoverChangeActivation(
+      Exception e, Audit audit, Role role, ChangeTenantClientActivationCommand command)
+      throws Exception {
+    throw e;
+  }
+
+  /**
+   * Updates client information.
+   *
+   * @param audit the audit details
+   * @param role the role of the requester
+   * @param command the command containing updated client information
    * @return the updated client response
    */
   @Retryable(
       retryFor = {OptimisticLockingFailureException.class},
+      notRecoverable = {ClientNotFoundException.class},
       backoff = @Backoff(value = 500, multiplier = 1.65))
-  @Transactional(
-      timeout = 3,
-      rollbackFor = {Exception.class})
-  public ClientResponse updateClient(Audit audit, UpdateTenantClientCommand command) {
-    log.info("Trying to update client info");
+  public ClientResponse updateClient(Audit audit, Role role, UpdateTenantClientCommand command) {
+    log.info("Updating client information");
 
-    var client =
-        clientQueryRepository
-            .findByClientIdAndTenantId(
-                new ClientId(UUID.fromString(command.getClientId())),
-                new TenantId(command.getTenantId()))
-            .orElseThrow(
-                () ->
-                    new ClientNotFoundException(
-                        String.format(
-                            "Client with id %s for tenant %d was not found",
-                            command.getClientId(), command.getTenantId())));
-
+    var client = getClient(audit, role, command.getClientId(), command.getTenantId());
     clientDomainService.updateClientInfo(
         audit,
         client,
@@ -320,74 +322,209 @@ public class ClientUpdateCommandHandler {
 
     if (command.isPublic()) clientDomainService.makeClientPublic(audit, client);
     else clientDomainService.makeClientPrivate(audit, client);
-    messagePublisher.publish(event);
-    return clientDataMapper.toClientResponse(clientCommandRepository.updateClient(client));
+    return clientDataMapper.toClientResponse(clientCommandRepository.updateClient(event, client));
   }
 
   /**
-   * Fallback method to handle recovery when the client update operation fails due to an optimistic
-   * locking exception.
+   * Fallback for client update on optimistic locking failure.
    *
-   * @param e the exception that triggered the recovery
-   * @param audit the audit information for tracking the operation
-   * @param command the command containing tenant and client information along with updated client
-   *     details
-   * @throws ClientDomainException thrown if the operation cannot recover
+   * @param e the optimistic locking exception
+   * @param audit the audit details
+   * @param role the role of the requester
+   * @param command the command containing updated client information
+   * @return never returns normally
+   * @throws ClientDomainException always thrown due to concurrent access issues
    */
   @Recover
   public ClientResponse recoverUpdateClient(
-      OptimisticLockingFailureException e, Audit audit, UpdateTenantClientCommand command) {
+      OptimisticLockingFailureException e,
+      Audit audit,
+      Role role,
+      UpdateTenantClientCommand command) {
     throw new ClientDomainException(
         String.format(
-            "Could not update client with id %s due to concurrent access", command.getClientId()));
+            "Could not update client %s due to concurrent access", command.getClientId()));
+  }
+
+  /**
+   * Generic fallback for client update failures.
+   *
+   * @param e the triggering exception
+   * @param audit the audit details
+   * @param role the role of the requester
+   * @param command the command containing updated client information
+   * @return never returns normally
+   * @throws Exception always rethrows the original exception
+   */
+  @Recover
+  public ClientResponse recoverUpdateClient(
+      Exception e, Audit audit, Role role, UpdateTenantClientCommand command) throws Exception {
+    throw e;
   }
 
   /**
    * Deletes a client.
    *
-   * @param audit the audit information
+   * @param audit the audit details
+   * @param role the role of the requester
    * @param command the command containing client and tenant information
+   * @return the result of the delete operation, the number of rows affected.
    */
   @Retryable(
       retryFor = {OptimisticLockingFailureException.class},
+      notRecoverable = {ClientNotFoundException.class},
       backoff = @Backoff(value = 500, multiplier = 1.65))
-  @Transactional(
-      timeout = 3,
-      rollbackFor = {Exception.class})
-  public void deleteClient(Audit audit, DeleteTenantClientCommand command) {
+  public int deleteClient(Audit audit, Role role, DeleteTenantClientCommand command) {
     log.info("Trying to remove client");
 
-    var client =
-        clientQueryRepository
-            .findByClientIdAndTenantId(
-                new ClientId(UUID.fromString(command.getClientId())),
-                new TenantId(command.getTenantId()))
+    var client = getClient(audit, role, command.getClientId(), command.getTenantId());
+    var event = clientDomainService.deleteClient(audit, client);
+    // TODO: Move it later to core application service. Now we depend on getClient check
+    clientMessagePublisher.publish(
+        ClientRemovedEvent.builder().clientId(command.getClientId()).build());
+    return clientCommandRepository.deleteByTenantIdAndClientId(
+        event, client.getClientTenantInfo().tenantId(), client.getId());
+  }
+
+  /**
+   * Fallback for client deletion on optimistic locking failure.
+   *
+   * @param e the optimistic locking exception
+   * @param audit the audit details
+   * @param role the role of the requester
+   * @param command the command containing client and tenant information
+   * @throws ClientDomainException always thrown due to concurrent access issues
+   */
+  @Recover
+  public void recoverDeleteClient(
+      OptimisticLockingFailureException e,
+      Audit audit,
+      Role role,
+      DeleteTenantClientCommand command) {
+    throw new ClientDomainException(
+        String.format(
+            "Could not delete client %s due to concurrent access", command.getClientId()));
+  }
+
+  /**
+   * Deletes all clients associated with a specific user and tenant.
+   *
+   * <p>This method removes all client entities created by the specified user within the given
+   * tenant. It employs retry logic with exponential backoff for handling optimistic locking
+   * failures.
+   *
+   * @param command the command containing user and tenant information
+   * @return the number of clients deleted
+   */
+  @Retryable(
+      retryFor = {OptimisticLockingFailureException.class},
+      notRecoverable = {ClientNotFoundException.class},
+      backoff = @Backoff(value = 500, multiplier = 1.65))
+  public int deleteUserClients(DeleteUserClientsCommand command) {
+    log.info("Trying to remove user clients");
+    return clientCommandRepository.deleteAllByTenantIdAndCreatedBy(
+        new TenantId(command.getTenantId()), new UserId(command.getUserId()));
+  }
+
+  /**
+   * Fallback for user clients deletion on optimistic locking failure.
+   *
+   * @param e the optimistic locking exception
+   * @param command the command containing user and tenant information
+   * @throws ClientDomainException always thrown due to concurrent access issues
+   */
+  @Recover
+  public void recoverDeleteUserClients(
+      OptimisticLockingFailureException e, DeleteUserClientsCommand command) {
+    throw new ClientDomainException(
+        String.format(
+            "Could not delete user %s clients due to concurrent access", command.getUserId()));
+  }
+
+  /**
+   * Deletes all clients associated with a specific tenant.
+   *
+   * <p>This method removes all client entities belonging to the specified tenant. It employs retry
+   * logic with exponential backoff for handling optimistic locking failures.
+   *
+   * @param tenantId the tenant identifier
+   * @return the number of clients deleted
+   */
+  @Retryable(
+      retryFor = {OptimisticLockingFailureException.class},
+      notRecoverable = {ClientNotFoundException.class},
+      backoff = @Backoff(value = 500, multiplier = 1.65))
+  public int deleteTenantClients(long tenantId) {
+    log.info("Trying to remove tenant clients");
+    return clientCommandRepository.deleteAllByTenantId(new TenantId(tenantId));
+  }
+
+  /**
+   * Fallback for tenant clients deletion on optimistic locking failure.
+   *
+   * @param e the optimistic locking exception
+   * @param tenantId the tenant identifier
+   * @throws ClientDomainException always thrown due to concurrent access issues
+   */
+  @Recover
+  public void recoverDeleteTenantClients(OptimisticLockingFailureException e, long tenantId) {
+    throw new ClientDomainException(
+        String.format("Could not delete tenant %d clients due to concurrent access", tenantId));
+  }
+
+  /**
+   * Generic fallback for client deletion failures.
+   *
+   * @param e the triggering exception
+   * @param audit the audit details
+   * @param role the role of the requester
+   * @param command the command containing client and tenant information
+   * @throws Exception always rethrows the original exception
+   */
+  @Recover
+  public void recoverDeleteClient(
+      Exception e, Audit audit, Role role, DeleteTenantClientCommand command) throws Exception {
+    throw e;
+  }
+
+  /**
+   * Retrieves a client based on audit, role, client ID, and tenant ID.
+   *
+   * @param audit the audit details
+   * @param role the role of the requester
+   * @param clientId the client ID (UUID string)
+   * @param tenantId the tenant identifier
+   * @return the found client
+   * @throws ClientNotFoundException if no client is found
+   */
+  private Client getClient(Audit audit, Role role, String clientId, long tenantId) {
+    try {
+      var cid = new ClientId(UUID.fromString(clientId));
+      var tid = new TenantId(tenantId);
+      if (role.equals(Role.ROLE_ADMIN))
+        return clientQueryRepository
+            .findByClientIdAndTenantId(cid, tid)
             .orElseThrow(
                 () ->
                     new ClientNotFoundException(
                         String.format(
-                            "Client with id %s for tenant %d was not found",
-                            command.getClientId(), command.getTenantId())));
-
-    var event = clientDomainService.invalidateClient(audit, client);
-    messagePublisher.publish(event);
-    clientCommandRepository.updateClient(client);
-  }
-
-  /**
-   * Fallback method to handle recovery when the client deletion fails due to an optimistic locking
-   * exception.
-   *
-   * @param e the exception that triggered the recovery
-   * @param audit the audit information for tracking the operation
-   * @param command the command containing tenant and client information for deletion
-   * @throws ClientDomainException thrown if the operation cannot recover
-   */
-  @Recover
-  public void recoverDeleteClient(
-      OptimisticLockingFailureException e, Audit audit, DeleteTenantClientCommand command) {
-    throw new ClientDomainException(
-        String.format(
-            "Could not delete client with id %s due to concurrent access", command.getClientId()));
+                            "Client with id %s for tenant %d was not found", clientId, tenantId)));
+      else if (role.equals(Role.ROLE_USER))
+        return clientQueryRepository
+            .findByClientIdAndTenantIdAndCreatorId(cid, tid, new UserId(audit.getUserId()))
+            .orElseThrow(
+                () ->
+                    new ClientNotFoundException(
+                        String.format(
+                            "Client with id %s for tenant %d and user %s was not found",
+                            clientId, tenantId, audit.getUserEmail())));
+      throw new ClientNotFoundException(
+          String.format(
+              "Client with id %s for tenant %d and user %s was not found",
+              clientId, tenantId, audit.getUserId()));
+    } catch (IllegalArgumentException e) {
+      throw new ClientNotFoundException(
+          String.format("Client with id %s was not found. Invalid client id format", clientId));
+    }
   }
 }

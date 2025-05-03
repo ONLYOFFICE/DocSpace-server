@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,84 +27,105 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
+/// The parameters required for the user authentication requests.
 /// </summary>
 public class AuthRequestsDto
 {
-    /// <summary>Username / email</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The username or email used for authentication.
+    /// </summary>
     public string UserName { get; set; }
 
-    /// <summary>Password</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The password in plain text for user authentication.
+    /// </summary>
     public string Password { get; set; }
 
-    /// <summary>Password hash</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The hashed password for secure verification.
+    /// </summary>
     public string PasswordHash { get; set; }
 
-    /// <summary>Provider type</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The type of authentication provider (e.g., internal, Google, Azure).
+    /// </summary>
     public string Provider { get; set; }
 
-    /// <summary>Provider access token</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The access token used for authentication with external providers.
+    /// </summary>
     public string AccessToken { get; set; }
 
-    /// <summary>Serialized user profile</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The serialized user profile data, if applicable.
+    /// </summary>
     public string SerializedProfile { get; set; }
 
-    /// <summary>Two-factor authentication code</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The code for two-factor authentication.
+    /// </summary>
     public string Code { get; set; }
 
-    /// <summary>Code for getting a token</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The authorization code used for obtaining OAuth tokens.
+    /// </summary>
     public string CodeOAuth { get; set; }
 
-    /// <summary>Session based authentication or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether the authentication is session-based.
+    /// </summary>
     public bool Session { get; set; }
 
-    /// <summary>Confirmation data</summary>
-    /// <type>ASC.Web.Api.ApiModel.RequestsDto.ConfirmData, ASC.Web.Api</type>
+    /// <summary>
+    /// The additional confirmation data required for authentication.
+    /// </summary>
     public ConfirmData ConfirmData { get; set; }
 
-    /// <summary>Type of captcha</summary>
-    /// <type>ASC.Web.Core.RecaptchaType, ASC.Web.Core</type>
+    /// <summary>
+    /// The type of CAPTCHA validation used.
+    /// </summary>
     public RecaptchaType RecaptchaType { get; set; }
 
-    /// <summary>reCAPTCHA response</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The user's response to the CAPTCHA challenge.
+    /// </summary>
     public string RecaptchaResponse { get; set; }
-    
-    /// <summary>Culture</summary>
-    /// <type>System.String, System</type>
+
+    /// <summary>
+    /// The culture code for localization during authentication.
+    /// </summary>
     public string Culture { get; set; }
 }
 
 /// <summary>
+/// The parameters required for the mobile phone verification.
 /// </summary>
 public class MobileRequestsDto
 {
-    /// <summary>Mobile phone</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The user's mobile phone number.
+    /// </summary>
     public string MobilePhone { get; set; }
 }
 
 /// <summary>
+/// The additional confirmation data required for authentication.
 /// </summary>
 public class ConfirmData
 {
-    /// <summary>Email address</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The email address to confirm the user's identity.
+    /// </summary>
+    [EmailAddress]
     public string Email { get; set; }
 
-    /// <summary>Access an account for the first time or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    /// <summary>
+    /// Specifies whether this is the first access to the user's account.
+    /// </summary>
     public bool? First { get; set; }
 
-    /// <summary>Key</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The unique confirmation key for validating user identity.
+    /// </summary>
     public string Key { get; set; }
 }

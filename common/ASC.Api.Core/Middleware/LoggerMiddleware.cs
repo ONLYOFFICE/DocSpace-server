@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -46,8 +46,8 @@ public class LoggerMiddleware(RequestDelegate next)
 
         var state = new Dictionary<string, object>
         {
-            new("tenantId", tenant.Id),
-            new("tenantAlias", tenant.GetTenantDomain(coreSettings, false))
+            new KeyValuePair<string, object>("tenantId", tenant.Id),
+            new KeyValuePair<string, object>("tenantAlias", tenant.GetTenantDomain(coreSettings, false))
         };
 
         if (tenant.MappedDomain != null)

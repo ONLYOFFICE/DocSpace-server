@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,43 +27,53 @@
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
+/// The status parameters of the synchronization with LDAP server.
 /// </summary>
 public class LdapStatusDto : IMapFrom<LdapOperationStatus>
 {
-    /// <summary>Specifies if the LDAP operation is completed or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the LDAP synchronization is completed or not.
+    /// </summary>
     public bool Completed { get; set; }
 
-    /// <summary>ID</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The LDAP ID.
+    /// </summary>
     public string Id { get; set; }
 
-    /// <summary>Status</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The LDAP status.
+    /// </summary>
     public string Status { get; set; }
 
-    /// <summary>Error</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The LDAP error message.
+    /// </summary>
     public string Error { get; set; }
 
-    /// <summary>Warning</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The LDAP warning message.
+    /// </summary>
     public string Warning { get; set; }
 
-    /// <summary>Percentage of completion</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The percentage of the LDAP operation completion.
+    /// </summary>
     public int Percents { get; set; }
 
-    /// <summary>Certificate confirmation request</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The LDAP certificate confirmation request.
+    /// </summary>
     public string CertificateConfirmRequest { get; set; }
 
-    /// <summary>Source</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The LDAP source.
+    /// </summary>
     public string Source { get; set; }
 
-    /// <summary>Operation type</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The LDAP operation type.
+    /// </summary>
     public string OperationType { get; set; }
 
     public void Mapping(Profile profile)

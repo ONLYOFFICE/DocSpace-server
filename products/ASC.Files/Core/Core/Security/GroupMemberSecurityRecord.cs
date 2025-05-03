@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,9 +26,23 @@
 
 namespace ASC.Files.Core.Security;
 
+/// <summary>
+/// The group member security record parameters.
+/// </summary>
 public class GroupMemberSecurityRecord
 {
+    /// <summary>
+    /// The user ID of the group member.
+    /// </summary>
     public Guid UserId { get; init; }
+
+    /// <summary>
+    /// The user access rights of the group member.
+    /// </summary>
     public FileShare? UserShare { get; init; }
+
+    /// <summary>
+    /// The group access rights of the group member.
+    /// </summary>
     public FileShare GroupShare { get; init; }
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -37,25 +37,29 @@ public record FileMarkAsReadOperationData<T> : FileOperationData<T>
     public FileMarkAsReadOperationData(IEnumerable<T> Folders,
         IEnumerable<T> Files,
         int TenantId,
+        Guid UserId,
         IDictionary<string, string> Headers,
         ExternalSessionSnapshot SessionSnapshot,
-        bool HoldResult = true) : base(Folders, Files, TenantId, Headers, SessionSnapshot, HoldResult)
+        bool HoldResult = true) : base(Folders, Files, TenantId, UserId, Headers, SessionSnapshot, HoldResult)
     {
     }
 }
 
 [Transient]
-public class FileMarkAsReadOperation(IServiceProvider serviceProvider) : 
-    ComposeFileOperation<FileMarkAsReadOperationData<string>, FileMarkAsReadOperationData<int>>(serviceProvider)
+public class FileMarkAsReadOperation : ComposeFileOperation<FileMarkAsReadOperationData<string>, FileMarkAsReadOperationData<int>>
 {
-    protected override FileOperationType FileOperationType { get => FileOperationType.MarkAsRead; }
+    public override FileOperationType FileOperationType { get; set; } = FileOperationType.MarkAsRead;
     
-    public override Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
+    public FileMarkAsReadOperation() { }
+    
+    public FileMarkAsReadOperation(IServiceProvider serviceProvider) : base(serviceProvider) { }
+    
+    public override Task RunJob(CancellationToken cancellationToken)
     {
         DaoOperation = new FileMarkAsReadOperation<int>(_serviceProvider, Data);
         ThirdPartyOperation = new FileMarkAsReadOperation<string>(_serviceProvider, ThirdPartyData);
 
-        return base.RunJob(distributedTask, cancellationToken);
+        return base.RunJob(cancellationToken);
 
     }
 }
@@ -63,12 +67,12 @@ public class FileMarkAsReadOperation(IServiceProvider serviceProvider) :
 class FileMarkAsReadOperation<T> : FileOperation<FileMarkAsReadOperationData<T>, T>
 {
     private readonly IDictionary<string, StringValues> _headers;
-
+    public override FileOperationType FileOperationType { get; set; } = FileOperationType.MarkAsRead;
+    
     public FileMarkAsReadOperation(IServiceProvider serviceProvider, FileMarkAsReadOperationData<T> fileOperationData)
         : base(serviceProvider, fileOperationData)
     {
         _headers = fileOperationData.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value));
-        this[OpType] = (int)FileOperationType.MarkAsRead;
     }
 
     protected override int InitTotalProgressSteps()
@@ -76,7 +80,7 @@ class FileMarkAsReadOperation<T> : FileOperation<FileMarkAsReadOperationData<T>,
         return Files.Count + Folders.Count;
     }
 
-    protected override async Task DoJob(IServiceScope serviceScope)
+    protected override async Task DoJob(AsyncServiceScope serviceScope)
     {
         var scopeClass = serviceScope.ServiceProvider.GetService<FileMarkAsReadOperationScope>();
         var filesMessageService = serviceScope.ServiceProvider.GetRequiredService<FilesMessageService>();
@@ -96,7 +100,7 @@ class FileMarkAsReadOperation<T> : FileOperation<FileMarkAsReadOperationData<T>,
         {
             CancellationToken.ThrowIfCancellationRequested();
 
-            await fileMarker.RemoveMarkAsNewAsync(entry, ((IAccount)(_principal ?? CustomSynchronizationContext.CurrentContext.CurrentPrincipal).Identity).ID);
+            await fileMarker.RemoveMarkAsNewAsync(entry, CurrentUserId);
 
             if (entry.FileEntryType == FileEntryType.File)
             {
@@ -135,7 +139,7 @@ class FileMarkAsReadOperation<T> : FileOperation<FileMarkAsReadOperationData<T>,
             newrootfolder.Add($"new_{{\"key\"? \"{item.Key}\", \"value\"? \"{item.Value}\"}}");
         }
 
-        this[Res] += string.Join(SplitChar, newrootfolder.ToArray());
+        Result += string.Join(SplitChar, newrootfolder.ToArray());
     }
 }
 

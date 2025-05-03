@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,22 +27,33 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// The request parameters for setting encryption keys for the privacy room.
 /// </summary>
 public class PrivacyRoomRequestDto
 {
-    /// <summary>Public key</summary>
-    /// <type>System.String, System</type>
-    public string PublicKey { get; set; }
+    /// <summary>
+    /// The public key of the privacy room.
+    /// </summary>
+    public required string PublicKey { get; set; }
 
-    /// <summary>Private key</summary>
-    /// <type>System.String, System</type>
-    public string PrivateKeyEnc { get; set; }
+    /// <summary>
+    /// The private key of the privacy room.
+    /// </summary>
+    public required string PrivateKeyEnc { get; set; }
 
-    /// <summary>Specifies whether to enable the Private Room settings or not</summary>
-    /// <type>System.Boolean, System</type>
-    public bool Enable { get; set; }
-
-    /// <summary>Encryption keys need to be updated or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the encryption keys need to be updated or not.
+    /// </summary>
     public bool Update { get; set; }
+}
+
+/// <summary>
+/// The request parameters for setting encryption keys.
+/// </summary>
+public class PrivacyRoomEnableRequestDto
+{
+    /// <summary>
+    /// Specifies whether to enable the Private Room settings or not.
+    /// </summary>
+    public bool Enable { get; set; }
 }

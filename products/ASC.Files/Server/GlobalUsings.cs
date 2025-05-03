@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,12 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+global using System.Net;
 global using System.Globalization;
 global using System.Security;
 global using System.Text;
 global using System.Text.Json;
 global using System.Text.RegularExpressions;
-global using System.Web;
 
 global using ASC.Api.Core;
 global using ASC.Api.Core.Convention;
@@ -42,9 +42,9 @@ global using ASC.Common.Threading;
 global using ASC.Common.Web;
 global using ASC.Core;
 global using ASC.Core.Billing;
-global using ASC.Core.Tenants;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.Settings;
+global using ASC.Core.Tenants;
 global using ASC.Core.Users;
 global using ASC.EventBus.Abstractions;
 global using ASC.FederatedLogin.Helpers;
@@ -54,10 +54,13 @@ global using ASC.Files.Core.ApiModels;
 global using ASC.Files.Core.ApiModels.RequestDto;
 global using ASC.Files.Core.ApiModels.ResponseDto;
 global using ASC.Files.Core.Core;
+global using ASC.Files.Core.Core.Entries;
 global using ASC.Files.Core.EF;
 global using ASC.Files.Core.Helpers;
 global using ASC.Files.Core.IntegrationEvents.Events;
 global using ASC.Files.Core.Resources;
+global using ASC.Files.Core.RoomTemplates;
+global using ASC.Files.Core.RoomTemplates.Events;
 global using ASC.Files.Core.Security;
 global using ASC.Files.Core.Services.DocumentBuilderService;
 global using ASC.Files.Core.VirtualRooms;
@@ -86,6 +89,7 @@ global using ASC.Web.Files.Utils;
 global using ASC.Web.Studio.Core;
 global using ASC.Web.Studio.Core.Notify;
 global using ASC.Web.Studio.Utility;
+global using ASC.Webhooks.Core;
 
 global using Autofac;
 
@@ -94,11 +98,14 @@ global using AutoMapper;
 global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.RateLimiting;
-global using Microsoft.Extensions.Caching.Distributed;
 global using Microsoft.Extensions.DependencyInjection.Extensions;
 global using Microsoft.Extensions.Hosting.WindowsServices;
 
 global using Newtonsoft.Json.Linq;
 
-global using SecurityContext = ASC.Core.SecurityContext;
+global using Swashbuckle.AspNetCore.Annotations;
+
+global using ZiggyCreatures.Caching.Fusion;
+
 global using FileShare = ASC.Files.Core.Security.FileShare;
+global using SecurityContext = ASC.Core.SecurityContext;

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,12 +26,10 @@
 
 using Microsoft.AspNetCore.Http.Extensions;
 
-using Serializer = ProtoBuf.Serializer;
-
 namespace ASC.Web.Files.Utils;
 
 [Singleton]
-public class FileConverterQueue(IDistributedCache distributedCache, IDistributedLockProvider distributedLockProvider)
+public class FileConverterQueue(IFusionCache hybridCache, IDistributedLockProvider distributedLockProvider)
 {
     private const string Cache_key_prefix = "asc_file_converter_queue_";
 
@@ -212,19 +210,12 @@ public class FileConverterQueue(IDistributedCache distributedCache, IDistributed
     {
         if (!queueTasks.Any())
         {
-            await distributedCache.RemoveAsync(cacheKey);
+            await hybridCache.RemoveAsync(cacheKey);
 
             return;
         }
 
-        using var ms = new MemoryStream();
-
-        Serializer.Serialize(ms, queueTasks);
-
-        await distributedCache.SetAsync(cacheKey, ms.ToArray(), new DistributedCacheEntryOptions
-        {
-            SlidingExpiration = TimeSpan.FromMinutes(15)
-        });
+        await hybridCache.SetAsync(cacheKey, queueTasks, TimeSpan.FromMinutes(15));
     }
 
     internal static string GetCacheKey<T>()
@@ -234,16 +225,7 @@ public class FileConverterQueue(IDistributedCache distributedCache, IDistributed
 
     private async Task<List<FileConverterOperationResult>> LoadFromCacheAsync(string cacheKey)
     {
-        var serializedObject = await distributedCache.GetAsync(cacheKey);
-
-        if (serializedObject == null)
-        {
-            return [];
-        }
-
-        using var ms = new MemoryStream(serializedObject);
-
-        return Serializer.Deserialize<List<FileConverterOperationResult>>(ms);
+        return await hybridCache.GetOrDefaultAsync<List<FileConverterOperationResult>>(cacheKey) ?? [];
     }
 }
 
@@ -304,7 +286,7 @@ public class FileConverter(
             .ToDictionary(x => x.Key, x => x.Value.ToString());
     }
 
-    public async Task<bool> EnableConvertAsync<T>(File<T> file, string toExtension)
+    public async Task<bool> EnableConvertAsync<T>(File<T> file, string toExtension, bool watermarkEnabled)
     {
         if (file == null || string.IsNullOrEmpty(toExtension))
         {
@@ -319,7 +301,7 @@ public class FileConverter(
         var fileExtension = file.ConvertedExtension;
         if (fileExtension.Trim('.').Equals(toExtension.Trim('.'), StringComparison.OrdinalIgnoreCase))
         {
-            return FileUtility.WatermarkedDocumentExt.Equals(fileExtension, StringComparison.OrdinalIgnoreCase);
+            return watermarkEnabled && FileUtility.WatermarkedDocumentExt.Equals(fileExtension, StringComparison.OrdinalIgnoreCase);
         }
 
         fileExtension = FileUtility.GetFileExtension(file.Title);
@@ -339,22 +321,22 @@ public class FileConverter(
 
     public async Task<Stream> ExecAsync<T>(File<T> file, string toExtension, string password = null, bool toForm = false)
     {
-        if (!await EnableConvertAsync(file, toExtension))
-        {
-            var fileDao = daoFactory.GetFileDao<T>();
-            return await fileDao.GetFileStreamAsync(file);
-        }
-
-        var fileUri = await pathProvider.GetFileStreamUrlAsync(file);
-        fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(fileUri);
-
         Options options = null;
-        if (file.RootFolderType == FolderType.VirtualRooms)
+        if (file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
         {
             var folderDao = daoFactory.GetFolderDao<T>();
             var room = await DocSpaceHelper.GetParentRoom(file, folderDao);
             options = documentServiceHelper.GetOptions(room);
         }
+
+        if (!await EnableConvertAsync(file, toExtension, options?.WatermarkOnDraw != null))
+        {
+            var fileDao = daoFactory.GetFileDao<T>();
+            return await fileDao.GetFileStreamAsync(file);
+        }
+
+        var fileUri = pathProvider.GetFileStreamUrl(file);
+        fileUri = documentServiceConnector.ReplaceCommunityAddress(fileUri);
 
         var docKey = await documentServiceHelper.GetDocKeyAsync(file, options?.GetMD5Hash());
 
@@ -368,6 +350,11 @@ public class FileConverter(
         var httpClient = clientFactory.CreateClient(nameof(DocumentService));
         var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
 
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new Exception($"{FilesCommonResource.ErrorMessage_DocServiceException} {response.StatusCode}");
+        }
+
         return await ResponseStream.FromMessageAsync(response);
     }
 
@@ -379,19 +366,19 @@ public class FileConverter(
             {
                 throw new ArgumentNullException(nameof(file), FilesCommonResource.ErrorMessage_FileNotFound);
             }
-            }
+        }
 
-        var fileUri = await pathProvider.GetFileStreamUrlAsync(file);
+        var fileUri = pathProvider.GetFileStreamUrl(file);
         var fileExtension = file.ConvertedExtension;
         var toExtension = fileUtility.GetInternalExtension(file.Title);
-        if (!string.IsNullOrEmpty(outputType)  && await EnableConvertAsync(file, outputType))
+        if (!string.IsNullOrEmpty(outputType)  && await EnableConvertAsync(file, outputType, false))
         {
             toExtension = outputType;
         }
         
         var docKey = await documentServiceHelper.GetDocKeyAsync(file);
 
-        fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(fileUri);
+        fileUri = documentServiceConnector.ReplaceCommunityAddress(fileUri);
 
         var (_, convertUri, convertType) = await documentServiceConnector.GetConvertedUriAsync(fileUri, fileExtension, toExtension, docKey, null, CultureInfo.CurrentUICulture.Name, null, null, null, false, false);
 
@@ -404,7 +391,7 @@ public class FileConverter(
             Result = string.Empty,
             Processed = "",
             Id = string.Empty,
-            TenantId = await tenantManager.GetCurrentTenantIdAsync(),
+            TenantId = tenantManager.GetCurrentTenantId(),
             Account = authContext.CurrentAccount.ID,
             Delete = false,
             StartDateTime = DateTime.UtcNow,
@@ -455,7 +442,7 @@ public class FileConverter(
             file, 
             password, 
             outputType,
-            (await tenantManager.GetCurrentTenantAsync()).Id, 
+            (tenantManager.GetCurrentTenant()).Id, 
             authContext.CurrentAccount, 
             deleteAfter, 
             httpContextAccessor?.HttpContext?.Request.GetDisplayUrl(),
@@ -556,6 +543,12 @@ public class FileConverter(
         try
         {
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"{FilesCommonResource.ErrorMessage_DocServiceException} {response.StatusCode}");
+            }
+
             await using var convertedFileStream = await ResponseStream.FromMessageAsync(response);
             newFile.ContentLength = convertedFileStream.Length;
             newFile = await fileDao.SaveFileAsync(newFile, convertedFileStream);

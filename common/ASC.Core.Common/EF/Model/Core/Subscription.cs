@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,9 +29,13 @@ namespace ASC.Core.Common.EF;
 public class Subscription : BaseEntity
 {
     public int TenantId { get; set; }
+    [MaxLength(38)]
     public string Source { get; set; }
+    [MaxLength(128)]
     public string Action { get; set; }
+    [MaxLength(38)]
     public string Recipient { get; set; }
+    [MaxLength(128)]
     public string Object { get; set; }
     public bool Unsubscribed { get; set; }
 
@@ -93,25 +97,25 @@ public static class SubscriptionExtension
 
             entity.Property(e => e.Source)
                 .HasColumnName("source")
-                .HasColumnType("varchar(38)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Action)
                 .HasColumnName("action")
-                .HasColumnType("varchar(128)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Recipient)
                 .HasColumnName("recipient")
-                .HasColumnType("varchar(38)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Object)
                 .HasColumnName("object")
-                .HasColumnType("varchar(128)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -126,30 +130,32 @@ public static class SubscriptionExtension
     {
         modelBuilder.Entity<Subscription>(entity =>
         {
-            entity.HasKey(e => new { e.TenantId, e.Source, e.Action, e.Recipient, e.Object })
-                .HasName("core_subscription_pkey");
+            entity.HasKey(e => new { e.TenantId, e.Source, e.Action, e.Recipient, e.Object });
 
-            entity.ToTable("core_subscription", "onlyoffice");
+            entity.ToTable("core_subscription");
 
             entity.Property(e => e.TenantId).HasColumnName("tenant");
 
             entity.Property(e => e.Source)
                 .HasColumnName("source")
-                .HasMaxLength(38);
+                .HasColumnType("varchar");
 
             entity.Property(e => e.Action)
                 .HasColumnName("action")
-                .HasMaxLength(128);
+                .HasColumnType("varchar");
 
             entity.Property(e => e.Recipient)
                 .HasColumnName("recipient")
-                .HasMaxLength(38);
+                .HasColumnType("varchar");
 
             entity.Property(e => e.Object)
                 .HasColumnName("object")
-                .HasMaxLength(128);
+                .HasColumnType("varchar");
 
-            entity.Property(e => e.Unsubscribed).HasColumnName("unsubscribed");
+            entity.Property(e => e.Unsubscribed)
+                .HasColumnName("unsubscribed")
+                .HasColumnType("boolean")
+                .HasDefaultValue(false);
         });
     }
 }

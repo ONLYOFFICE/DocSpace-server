@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,17 +27,20 @@
 namespace ASC.Core.Tenants;
 
 /// <summary>
+/// The tenant audit settings parameters.
 /// </summary>
 public class TenantAuditSettings : ISettings<TenantAuditSettings>
 {
     public const int MaxLifeTime = 180;
 
-    /// <summary>Login history lifetime</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The login history lifetime.
+    /// </summary>
     public int LoginHistoryLifeTime { get; init; }
 
-    /// <summary>Audit trail lifetime</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The audit trail lifetime.
+    /// </summary>
     public int AuditTrailLifeTime { get; init; }
 
     public static readonly Guid Guid = new("{8337D0FB-AD67-4552-8297-802312E7F503}");
@@ -53,13 +56,17 @@ public class TenantAuditSettings : ISettings<TenantAuditSettings>
             AuditTrailLifeTime = MaxLifeTime
         };
     }
+    
+    public DateTime LastModified { get; set; }
 }
 
 /// <summary>
+/// The tenant audit settings wrapper.
 /// </summary>
 public class TenantAuditSettingsWrapper
 {
-    /// <summary>Audit trail settingse</summary>
-    /// <type>ASC.Core.Tenants.TenantAuditSettings, ASC.Core.Common</type>
+    /// <summary>
+    /// The tenant audit settings parameters.
+    /// </summary>
     public TenantAuditSettings Settings { get; set; }
 }

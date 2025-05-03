@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,6 +31,7 @@ public interface ILinkDao<T>
     Task AddLinkAsync(T sourceId, T linkedId);
     Task<T> GetSourceAsync(T linkedId);
     Task<T> GetLinkedAsync(T sourceId);
+    Task<Dictionary<T, T>> GetLinkedIdsAsync(IEnumerable<T> sourceIds);
     Task DeleteLinkAsync(T sourceId);
     Task DeleteAllLinkAsync(T sourceId);
 }

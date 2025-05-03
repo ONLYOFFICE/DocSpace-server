@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,22 +26,15 @@
 
 namespace ASC.Common.Threading.DistributedLock.ZooKeeperLock;
 
-public class ZooKeeperLockHandle : LockHandleBase
+public class ZooKeeperLockHandle(IDistributedSynchronizationHandle handle) : LockHandleBase
 {
-    private readonly IDistributedSynchronizationHandle _handle;
-
-    public ZooKeeperLockHandle(IDistributedSynchronizationHandle handle)
-    {
-        _handle = handle;
-    }
-
     public override async ValueTask DisposeAsync()
     {
         CheckDispose();
         
-        if (_handle != null)
+        if (handle != null)
         {
-            await _handle.DisposeAsync();
+            await handle.DisposeAsync();
         }
 
         _disposed = true;
@@ -51,7 +44,7 @@ public class ZooKeeperLockHandle : LockHandleBase
     {
         CheckDispose();
         
-        _handle?.Dispose();
+        handle?.Dispose();
         
         _disposed = true;
     }

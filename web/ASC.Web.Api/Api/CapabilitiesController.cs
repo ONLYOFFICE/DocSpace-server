@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,6 +33,7 @@ namespace ASC.Web.Api.Controllers;
 [DefaultRoute, Route("api/2.0/capabilities.json")]
 [ApiController]
 [AllowAnonymous]
+[ControllerName("capabilities")]
 public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
         TenantManager tenantManager,
         ProviderManager providerManager,
@@ -45,20 +46,19 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
 
 
     ///<summary>
-    ///Returns the information about portal capabilities.
+    /// Returns the information about portal capabilities.
     ///</summary>
     ///<short>
-    ///Get portal capabilities
+    /// Get portal capabilities
     ///</short>
-    ///<returns type="ASC.Web.Api.ApiModel.ResponseDto.CapabilitiesDto, ASC.Web.Api">Portal capabilities</returns>
     ///<path>api/2.0/capabilities</path>
-    ///<httpMethod>GET</httpMethod>
-    ///<requiresAuthorization>false</requiresAuthorization>
+    [Tags("Capabilities")]
+    [SwaggerResponse(200, "Portal capabilities", typeof(CapabilitiesDto))]
     [HttpGet] //NOTE: this method doesn't requires auth!!!  //NOTE: this method doesn't check payment!!!
     [AllowNotPayment]
     public async Task<CapabilitiesDto> GetPortalCapabilitiesAsync()
     {
-        var quota = await tenantManager.GetTenantQuotaAsync(await tenantManager.GetCurrentTenantIdAsync());
+        var quota = await tenantManager.GetTenantQuotaAsync(tenantManager.GetCurrentTenantId());
         var result = new CapabilitiesDto
         {
             LdapEnabled = false,
@@ -72,7 +72,7 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
         try
         {
             if (coreBaseSettings.Standalone
-                    || SetupInfo.IsVisibleSettings(ManagementType.LdapSettings.ToString())
+                    || SetupInfo.IsVisibleSettings(ManagementType.LdapSettings.ToStringFast())
                         && quota.Ldap)
             {
                 var settings = await settingsManager.LoadAsync<LdapSettings>();
@@ -111,7 +111,7 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
         try
         {
             if (coreBaseSettings.Standalone
-                    || SetupInfo.IsVisibleSettings(ManagementType.SingleSignOnSettings.ToString())
+                    || SetupInfo.IsVisibleSettings(ManagementType.SingleSignOnSettings.ToStringFast())
                         && quota.Sso)
             {
                 var settings = await settingsManager.LoadAsync<SsoSettingsV2>();
@@ -128,7 +128,7 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
             _log.ErrorWithException(ex);
         }
 
-        if (SetupInfo.IsVisibleSettings(ManagementType.IdentityServer.ToString()))
+        if (SetupInfo.IsVisibleSettings(ManagementType.IdentityServer.ToStringFast()))
         {
             result.IdentityServerEnabled = true;
         }

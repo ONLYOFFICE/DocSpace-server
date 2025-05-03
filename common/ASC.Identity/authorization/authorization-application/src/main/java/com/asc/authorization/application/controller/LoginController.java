@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -43,6 +43,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 @RequiredArgsConstructor
 public class LoginController {
   private static final String CLIENT_ID = "client_id";
+  private final HttpUtils httpUtils;
 
   /**
    * Handles login requests and redirects to the login page with appropriate query parameters.
@@ -61,7 +62,7 @@ public class LoginController {
           "redirect:%s",
           UriComponentsBuilder.fromUriString(
                   String.format(
-                      "%s://%s", request.getScheme(), HttpUtils.getFirstRequestIP(request)))
+                      "%s://%s", request.getScheme(), httpUtils.getFirstForwardedHost(request)))
               .path("login")
               .queryParam("client_id", clientId)
               .queryParam("type", "oauth2")

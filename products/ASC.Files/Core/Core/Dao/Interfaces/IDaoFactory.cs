@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,6 +33,7 @@ public interface IDaoFactory
     IFolderDao<T> GetFolderDao<T>();
     IFolderDao<T> GetCacheFolderDao<T>();
     IFileDao<T> GetFileDao<T>();
+    IFileDao<T> GetCacheFileDao<T>();
     ITagDao<T> GetTagDao<T>();
     ISecurityDao<T> GetSecurityDao<T>();
     ILinkDao<T> GetLinkDao<T>();

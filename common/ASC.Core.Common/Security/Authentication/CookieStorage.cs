@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -153,7 +153,7 @@ public class CookieStorage(InstanceCrypto instanceCrypto,
         var data = string.Empty;
         try
         {
-            if (_httpContext is { Request: not null, Connection.RemoteIpAddress: not null })
+            if (_httpContext is { Connection.RemoteIpAddress: not null })
             {
                 data = _httpContext.Connection.RemoteIpAddress.ToString();
             }

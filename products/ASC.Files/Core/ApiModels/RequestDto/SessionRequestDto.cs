@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,27 +27,55 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// The session request parameters.
 /// </summary>
-public class SessionRequestDto
+public class SessionRequest
 {
-    /// <summary>File name</summary>
-    /// <type>System.String, System</type>
-    public string FileName { get; set; }
+    /// <summary>
+    /// The file name.
+    /// </summary>
+    public required string FileName { get; set; }
 
-    /// <summary>File length in bytes</summary>
-    /// <type>System.Int64, System</type>
+    /// <summary>
+    /// The file size.
+    /// </summary>
     public long FileSize { get; set; }
 
-    /// <summary>Relative path to the folder</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The relative path to the file.
+    /// </summary>
     public string RelativePath { get; set; }
 
-    /// <summary>Creation time</summary>
-    /// <type>ASC.Api.Core.ApiDateTime, ASC.Api.Core</type>
+    /// <summary>
+    /// The date and time when the file was created.
+    /// </summary>
     public ApiDateTime CreateOn { get; set; }
 
-    /// <summary>Specifies whether to encrypt a file or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether the file is encrypted or not.
+    /// </summary>
     public bool Encrypted { get; set; }
+
+    /// <summary>
+    /// Specifies whether to create a new file if it already exists.
+    /// </summary>
     public bool CreateNewIfExist { get; set; }
+}
+
+/// <summary>
+/// The generic session request parameters.
+/// </summary>
+public class SessionRequestDto<T>
+{
+    /// <summary>
+    /// The folder ID of the session.
+    /// </summary>
+    [FromRoute(Name = "folderId")]
+    public required T FolderId { get; set; }
+
+    /// <summary>
+    /// The session parameters.
+    /// </summary>
+    [FromBody]
+    public SessionRequest Session {  get; set; }
 }

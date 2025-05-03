@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,47 +27,48 @@
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 /// <summary>
+/// The authentication token parameters.
 /// </summary>
 public class AuthenticationTokenDto
 {
-    /// <summary>Authentication token</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The authentication token.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "abcde12345")]
     public string Token { get; set; }
 
-    /// <summary>Token expiration time</summary>
-    /// <type>System.DateTime, System</type>
+    /// <summary>
+    /// The token expiration time.
+    /// </summary>
     public DateTime Expires { get; set; }
 
-    /// <summary>Specifies if the authentication code is sent by SMS or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the authentication code is sent by SMS or not.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
     public bool Sms { get; set; }
 
-    /// <summary>Phone number</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The phone number.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "")]
     public string PhoneNoise { get; set; }
 
-    /// <summary>Specifies if the two-factor application is used or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the two-factor application is used or not.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
     public bool Tfa { get; set; }
 
-    /// <summary>Two-factor authentication key</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The two-factor authentication key.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "")]
     public string TfaKey { get; set; }
 
-    /// <summary>Confirmation email URL</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The confirmation email URL.
+    /// </summary>
+    [Url]
     public string ConfirmUrl { get; set; }
-
-    public static AuthenticationTokenDto GetSample()
-    {
-        return new AuthenticationTokenDto
-        {
-            Expires = DateTime.UtcNow,
-            Token = "abcde12345",
-            Sms = false,
-            PhoneNoise = null,
-            Tfa = false,
-            TfaKey = null
-        };
-    }
 }

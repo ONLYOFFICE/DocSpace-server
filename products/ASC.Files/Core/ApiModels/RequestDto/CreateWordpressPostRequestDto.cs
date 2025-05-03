@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,18 +27,22 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// The request parameters for creating a WordPress post.
 /// </summary>
 public class CreateWordpressPostRequestDto
 {
-    /// <summary>Post title</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The WordPress post title.
+    /// </summary>
     public string Title { get; set; }
 
-    /// <summary>Post contents</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The WordPress post contents.
+    /// </summary>
     public string Content { get; set; }
 
-    /// <summary>Operation status</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The WordPress operation status.
+    /// </summary>
     public int Status { get; set; }
 }

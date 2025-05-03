@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,35 +27,43 @@
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
+/// The watermark settings.
 /// </summary>
 public class WatermarkDto
 {
-    /// <summary>Specifies whether to display: username, user email, user ip-adress, current date and room name </summary>
-    /// <type>WatermarkAdditions</type>
+    /// <summary>
+    /// Specifies whether to display in the watermark: username, user email, user ip-adress, current date, and room name.
+    /// </summary>
     public WatermarkAdditions Additions { get; set; }
 
-    /// <summary>Watermark Text</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The watermark text.
+    /// </summary>
     public string Text { get; set; }
 
-    /// <summary>Watermark text and image rotate</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The watermark text and image rotate.
+    /// </summary>
     public int Rotate { get; set; }
 
-    /// <summary>Watermark image scale</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The watermark image scale.
+    /// </summary>
     public int ImageScale { get; set; }
 
-    /// <summary>Watermark image url</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The watermark image url.
+    /// </summary>
     public string ImageUrl { get; set; }
 
-    /// <summary>Watermark image height</summary>
-    /// <type>System.Double, System</type>
+    /// <summary>
+    /// The watermark image height.
+    /// </summary>
     public double ImageHeight { get; set; }
 
-    /// <summary>Watermark image width</summary>
-    /// <type>System.Double, System</type>
+    /// <summary>
+    /// The watermark image width.
+    /// </summary>
     public double ImageWidth { get; set; }
 }
 [Scope]

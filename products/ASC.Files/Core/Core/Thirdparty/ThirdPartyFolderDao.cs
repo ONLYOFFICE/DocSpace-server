@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,7 +28,6 @@ using DriveFile = Google.Apis.Drive.v3.Data.File;
 
 namespace ASC.Files.Core.Core.Thirdparty;
 
-/// <inheritdoc />
 [Scope(GenericArguments = [typeof(BoxFile), typeof(BoxFolder), typeof(BoxItem)])]
 [Scope(GenericArguments = [typeof(FileMetadata), typeof(FolderMetadata), typeof(Metadata)])]
 [Scope(GenericArguments = [typeof(DriveFile), typeof(DriveFile), typeof(DriveFile)])]
@@ -78,7 +77,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
             return folder;
         }
 
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         folder.Shared = await Queries.SharedAsync(filesDbContext, tenantId, folder.Id, FileEntryType.Folder, SubjectType.PrimaryExternalLink);
 
@@ -112,7 +111,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
 
         if (!string.IsNullOrEmpty(searchText))
         {
-            rooms = rooms.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
+            rooms = rooms.Where(x => x.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase));
         }
 
         var filesDbContext = await dbContextFactory.CreateDbContextAsync();
@@ -137,7 +136,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     }
 
     public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, 
-        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT)
+        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = null, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, bool containingForms = false)
     {
         if (dao.CheckInvalidFilter(filterType))
         {
@@ -155,7 +154,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
 
         if (!string.IsNullOrEmpty(searchText))
         {
-            folders = folders.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
+            folders = folders.Where(x => x.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase));
         }
 
         orderBy ??= new OrderBy(SortedByType.DateAndTime, false);
@@ -191,7 +190,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
 
         if (!string.IsNullOrEmpty(searchText))
         {
-            folders = folders.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
+            folders = folders.Where(x => x.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase));
         }
 
         return folders;
@@ -253,7 +252,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
 
     public async Task DeleteFolderAsync(string folderId)
     {
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         var folder = await dao.GetFolderAsync(folderId);
         var id = dao.MakeId(folder);
 
@@ -315,7 +314,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         if (_providerInfo.MutableEntityId)
         {
             await dao.UpdateIdAsync(dao.MakeId(folder), newId);
-    }
+        }
 
         return newId;
     }
@@ -407,12 +406,12 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
 
     public Task<IDictionary<string, string>> CanMoveOrCopyAsync(IEnumerable<string> folderIds, string to)
         {
-        return Task.FromResult((IDictionary<string, string>)new Dictionary<string, string>());
+        return Task.FromResult<IDictionary<string, string>>(new Dictionary<string, string>());
     }
 
     public Task<IDictionary<string, string>> CanMoveOrCopyAsync(IEnumerable<string> folderIds, int to)
     {
-        return Task.FromResult((IDictionary<string, string>)new Dictionary<string, string>());
+        return Task.FromResult<IDictionary<string, string>>(new Dictionary<string, string>());
     }
 
     public async Task<string> UpdateFolderAsync(Folder<string> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark, string color, string cover)
@@ -455,7 +454,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         if (_providerInfo.MutableEntityId)
         {
             await dao.UpdateIdAsync(dao.MakeId(thirdFolder), newId);
-    }
+        }
 
         return newId;
     }
@@ -588,6 +587,11 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         return Task.FromResult<string>(null);
     }
 
+    public Task<string> GetFolderIDRoomTemplatesAsync(bool createIfNotExists)
+    {
+        return Task.FromResult<string>(null);
+    }
+
     public Task<string> GetFolderIDArchive(bool createIfNotExists)
     {
         return Task.FromResult<string>(null);
@@ -637,7 +641,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     
     public Task<(string RoomId, string RoomTitle)> GetParentRoomInfoFromFileEntryAsync(FileEntry<string> entry)
     {
-        return Task.FromResult(entry.RootFolderType is not (FolderType.VirtualRooms or FolderType.Archive) 
+        return Task.FromResult(entry.RootFolderType is not (FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates) 
             ? (string.Empty, string.Empty) 
             : (_providerInfo.FolderId, _providerInfo.CustomerTitle));
     }
@@ -646,8 +650,13 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     {
         throw new NotImplementedException();
     }
-    
-    public Task<int> GetFoldersCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool withSubfolders = false, bool excludeSubject = false, string roomId = default)
+    public Task<bool> ContainsFormsInFolder(Folder<string> folder)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<int> GetFoldersCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool withSubfolders = false, bool excludeSubject = false, string roomId = null,
+        FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All)
     {
         throw new NotImplementedException();
     }
@@ -657,9 +666,9 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         throw new NotImplementedException();
     }
 
-    public Task SetCustomOrder(string folderId, string parentFolderId, int order)
+    public Task<int> SetCustomOrder(string folderId, string parentFolderId, int order)
     {
-        return Task.CompletedTask;
+        return Task.FromResult(0);
     }
 
     public Task InitCustomOrder(Dictionary<string, int> folderIds, string parentFolderId)
@@ -694,6 +703,11 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     }
 
     public Task<Folder<string>> DeleteWatermarkSettings(Folder<string> room)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Folder<string>> DeleteLifetimeSettings(Folder<string> room)
     {
         throw new NotImplementedException();
     }

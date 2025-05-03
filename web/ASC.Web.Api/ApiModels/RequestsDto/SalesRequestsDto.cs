@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,18 +27,22 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
+/// The request parameters for handling sales and payment inquiries in the portal.
 /// </summary>
 public class SalesRequestsDto
 {
-    /// <summary>Username</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The name of the user submitting the sales request.
+    /// </summary>
     public string UserName { get; set; }
 
-    /// <summary>Email address</summary>
-    /// <type>System.String, System</type>
-    public string Email { get; set; }
+    /// <summary>
+    /// The contact email address for the sales inquiry.
+    /// </summary>
+    public required string Email { get; set; }
 
-    /// <summary>Message</summary>
-    /// <type>System.String, System</type>
-    public string Message { get; set; }
+    /// <summary>
+    /// The details of the sales inquiry or payment request.
+    /// </summary>
+    public required string Message { get; set; }
 }

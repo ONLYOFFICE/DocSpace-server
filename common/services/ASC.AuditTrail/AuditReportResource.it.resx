@@ -802,4 +802,127 @@
   <data name="FormSubmit" xml:space="preserve">
     <value>Utenti [{0}]. Moduli inviati: {1}</value>
   </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>File: {0}. Indice cambiato da {1} a {2}</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Cartella: {0}. Indice cambiato da {1} a {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Cartella: {0}. Indici riordinati</value>
+  </data>
+  <data name="OAuthModule" xml:space="preserve">
+    <value>OAuth</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Stanza: {0}. Rifiuta il download disabilitato</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Stanza: {0}. Rifiuta download abilitato</value>
+  </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Esportazione dell'indice della stanza salvato in Documents</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Indicizzazione stanza disabilitata</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Indicizzazione stanza abilitata</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>Tempo di durata disabilitato</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>Il tempo di durata è impostato. Valore: {0}. Periodo: {1}. Elimina definitivamente: {2}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Stanza: {0}. Filigrana disattivata</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Stanza: {0}. Filigrana abilitata</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Invito mandato di nuovo: {0}</value>
+  </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>Attivazione del cliente {0} cambiata</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>Visibilità del cliente {0} cambiata</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Cliente creato</value>
+  </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Cliente {0} eliminato</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>Codice di autorizzazione generato per il cliente {0}</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>Token personale di accesso generato per il cliente {0}</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>Segreto del cliente {0} rigenerato</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Accesso del cliente {0} revocato</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>Cliente {0} aggiornato</value>
+  </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>Chiave API utente creata: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>Chiave API utente eliminata: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>Chiave API utente aggiornata: {0}</value>
+  </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>File: {0}. Filtro personalizzato disattivato</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>File: {0}. Filtro personalizzato attivato</value>
+  </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>Impostazioni di accesso agli Strumenti per sviluppatori modificate</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>File [{0}]. Versione eliminata: {1}</value>
+  </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>Utenti [{0}]. Modulo compilato completamente: {1}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>Utenti [{0}]. Modulo compilato parzialmente: {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>Utenti [{0}]. Inizio compilazione: {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>Utenti [{0}]. Compilazione interrotta: {1}</value>
+  </data>
+  <data name="WebhookCreated" xml:space="preserve">
+    <value>Webhook creato: {0}</value>
+  </data>
+  <data name="WebhookDeleted" xml:space="preserve">
+    <value>Webhook eliminato: {0}</value>
+  </data>
+  <data name="WebhookUpdated" xml:space="preserve">
+    <value>Webhook aggiornato: {0}</value>
+  </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>Il link di autorizzazione è stato attivato</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>Autenticazione LDAP disabilitata</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>Autenticazione LDAP abilitata</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>Sincronizzazione LDAP completata</value>
+  </data>
 </root>

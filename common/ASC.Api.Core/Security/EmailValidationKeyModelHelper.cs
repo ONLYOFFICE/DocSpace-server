@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,9 +26,8 @@
 
 using System.Net.Mail;
 
-using static ASC.Security.Cryptography.EmailValidationKeyProvider;
-
 using SecurityContext = ASC.Core.SecurityContext;
+using ValidationResult = ASC.Security.Cryptography.EmailValidationKeyProvider.ValidationResult;
 
 namespace ASC.Api.Core.Security;
 
@@ -49,9 +48,9 @@ public class EmailValidationKeyModelHelper(
 {
     public EmailValidationKeyModel GetModel()
     {
-        var request = QueryHelpers.ParseQuery(httpContextAccessor.HttpContext.Request.Headers["confirm"]);
+        var request = ParseQuery(httpContextAccessor.HttpContext.Request.Headers["confirm"]);
 
-        var type = request.TryGetValue("type", out var value) ? value.FirstOrDefault() : null;
+        var type = request.TryGetValue("type", out var value) ? (string)value : null;
 
         ConfirmType? cType = null;
         if (ConfirmTypeExtensions.TryParse(type, out var confirmType))
@@ -95,13 +94,13 @@ public class EmailValidationKeyModelHelper(
         switch (type)
         {
             case ConfirmType.EmpInvite:
-                checkKeyResult = await provider.ValidateEmailKeyAsync(email + type + (int)emplType, key, provider.ValidEmailKeyInterval);
+                checkKeyResult = provider.ValidateEmailKey(email + type + (int)emplType, key, provider.ValidEmailKeyInterval);
                 if (checkKeyResult == ValidationResult.Invalid)
                 {   
-                    checkKeyResult = await provider.ValidateEmailKeyAsync(email + type + (int)emplType + "trust", key, provider.ValidEmailKeyInterval);
+                    checkKeyResult = provider.ValidateEmailKey(email + type + (int)emplType + "trust", key, provider.ValidEmailKeyInterval);
                     if (checkKeyResult == ValidationResult.Ok)
                     {                        
-                        var tenant = await tenantManager.GetCurrentTenantAsync();
+                        var tenant = tenantManager.GetCurrentTenant();
                         
                         if (tenant.TrustedDomainsType == TenantTrustedDomainsType.All)
                         {
@@ -142,7 +141,7 @@ public class EmailValidationKeyModelHelper(
                     checkKeyResult = ValidationResult.Invalid;
                     break;
                 }
-                checkKeyResult = await provider.ValidateEmailKeyAsync(email + type + uiD.GetValueOrDefault(), key, provider.ValidEmailKeyInterval);
+                checkKeyResult = provider.ValidateEmailKey(email + type + uiD.GetValueOrDefault(), key, provider.ValidEmailKeyInterval);
                 break;
 
             case ConfirmType.EmailChange:
@@ -150,7 +149,7 @@ public class EmailValidationKeyModelHelper(
                 var emailChangeEvent = (await auditEventsRepository.GetByFilterAsync(action: MessageAction.UserSentEmailChangeInstructions, entry: EntryType.User, target: MessageTarget.Create(userId).ToString(), limit: 1)).FirstOrDefault();
                 var postfix = emailChangeEvent == null ? userId.ToString() : tenantUtil.DateTimeToUtc(emailChangeEvent.Date).ToString("s", CultureInfo.InvariantCulture);
 
-                checkKeyResult = await provider.ValidateEmailKeyAsync(email + type + postfix, key, provider.ValidEmailKeyInterval);
+                checkKeyResult = provider.ValidateEmailKey(email + type + postfix, key, provider.ValidEmailKeyInterval);
                 break;
             case ConfirmType.PasswordChange:
                 userInfo = await userManager.GetUserByEmailAsync(email);
@@ -175,7 +174,7 @@ public class EmailValidationKeyModelHelper(
                     hash = passwordStamp.ToString("s", CultureInfo.InvariantCulture);
                 }
 
-                checkKeyResult = await provider.ValidateEmailKeyAsync(email + type + hash, key, provider.ValidEmailKeyInterval);
+                checkKeyResult = provider.ValidateEmailKey(email + type + hash, key, provider.ValidEmailKeyInterval);
                 
                 if (checkKeyResult is ValidationResult.Ok && userInfo.ActivationStatus is not EmployeeActivationStatus.Activated)
                 {
@@ -187,37 +186,44 @@ public class EmailValidationKeyModelHelper(
                 break;
 
             case ConfirmType.Activation:
-                checkKeyResult = await provider.ValidateEmailKeyAsync(email + type + uiD, key, provider.ValidEmailKeyInterval);
+                checkKeyResult = provider.ValidateEmailKey(email + type + uiD, key, provider.ValidEmailKeyInterval);
                 break;
 
             case ConfirmType.ProfileRemove:
                 // validate UiD
                 userInfo = await userManager.GetUsersAsync(uiD.GetValueOrDefault());
-                if (userInfo == null || Equals(userInfo, Constants.LostUser) || userInfo.Status == EmployeeStatus.Terminated || authContext.IsAuthenticated && (authContext.CurrentAccount.ID != uiD || userInfo.Email != email))
+                if (userInfo == null || Equals(userInfo, Constants.LostUser) || userInfo.Status == EmployeeStatus.Terminated || authContext.IsAuthenticated && authContext.CurrentAccount.ID != uiD || userInfo.Email != email)
                 {
                     return ValidationResult.Invalid;
                 }
 
-                checkKeyResult = await provider.ValidateEmailKeyAsync(email + type + uiD, key, provider.ValidEmailKeyInterval);
+                checkKeyResult = provider.ValidateEmailKey(email + type + uiD, key, provider.ValidEmailKeyInterval);
                 break;
 
             case ConfirmType.Wizard:
-                checkKeyResult = await provider.ValidateEmailKeyAsync("" + type, key, provider.ValidEmailKeyInterval);
+                checkKeyResult = provider.ValidateEmailKey("" + type, key, provider.ValidEmailKeyInterval);
                 break;
 
             case ConfirmType.PhoneActivation:
             case ConfirmType.PhoneAuth:
             case ConfirmType.TfaActivation:
             case ConfirmType.TfaAuth:
-                checkKeyResult = await provider.ValidateEmailKeyAsync(email + type + first, key, provider.ValidAuthKeyInterval);
+                checkKeyResult = provider.ValidateEmailKey(email + type + first, key, provider.ValidAuthKeyInterval);
                 break;
             case ConfirmType.Auth:
-                checkKeyResult = await provider.ValidateEmailKeyAsync(email + type + first, key, provider.ValidAuthKeyInterval);
+                var validInterval = DateTime.UtcNow.Add(-provider.ValidAuthKeyInterval);
+                var authLinkActivatedEvent = (await loginEventsRepository.GetByFilterAsync(action: MessageAction.AuthLinkActivated, fromDate: validInterval))
+                    .FirstOrDefault(x=> x.Description.Contains(key));
+                if (authLinkActivatedEvent != null)
+                {
+                    return ValidationResult.Invalid;
+                }
+
+                checkKeyResult = provider.ValidateEmailKey(email + type + first, key, provider.ValidAuthKeyInterval);
                 if (checkKeyResult == ValidationResult.Invalid)
                 {
                     userInfo = await userManager.GetUserByEmailAsync(email);
-                    var portalRenameEvent = (await auditEventsRepository.GetByFilterAsync(action: MessageAction.PortalRenamed, target: MessageTarget.Create(await tenantManager.GetCurrentTenantIdAsync()).ToString(), limit: 1)).FirstOrDefault();
-                    var validInterval = DateTime.UtcNow.Add(-provider.ValidAuthKeyInterval);
+                    var portalRenameEvent = (await auditEventsRepository.GetByFilterAsync(action: MessageAction.PortalRenamed, target: MessageTarget.Create(tenantManager.GetCurrentTenantId()).ToString(), limit: 1)).FirstOrDefault();
                     if (portalRenameEvent != null)
                     {                    
                         var portalRenameEventDate = tenantUtil.DateTimeToUtc(portalRenameEvent.Date);
@@ -226,7 +232,7 @@ public class EmailValidationKeyModelHelper(
                             var loginEvent = (await loginEventsRepository.GetByFilterAsync(userInfo.Id, MessageAction.LoginSuccessViaApi, limit: 1, fromDate: portalRenameEventDate)).FirstOrDefault();
                             if (loginEvent == null)
                             {
-                                checkKeyResult = await provider.ValidateEmailKeyAsync(email + type + portalRenameEventDate.ToString(CultureInfo.InvariantCulture), key, provider.ValidAuthKeyInterval);
+                                checkKeyResult = provider.ValidateEmailKey(email + type + portalRenameEventDate.ToString(CultureInfo.InvariantCulture), key, provider.ValidAuthKeyInterval);
                             }
                         }
                     }
@@ -244,11 +250,21 @@ public class EmailValidationKeyModelHelper(
 
                 var validTimeInterval = type == ConfirmType.PortalContinue ? TimeSpan.MaxValue : provider.ValidEmailKeyInterval;
 
-                checkKeyResult = await provider.ValidateEmailKeyAsync(email + type, key, validTimeInterval);
+                checkKeyResult = provider.ValidateEmailKey(email + type, key, validTimeInterval);
+                break;
+
+            case ConfirmType.GuestShareLink:
+                userInfo = await userManager.GetUserByEmailAsync(email);
+                if (Equals(userInfo, Constants.LostUser) || userInfo.Status == EmployeeStatus.Terminated)
+                {
+                    checkKeyResult = ValidationResult.Invalid;
+                    break;
+                }
+                checkKeyResult = provider.ValidateEmailKey(email + type + uiD + userInfo.Id, key, provider.ValidEmailKeyInterval);
                 break;
 
             default:
-                checkKeyResult = await provider.ValidateEmailKeyAsync(email + type, key, provider.ValidEmailKeyInterval);
+                checkKeyResult = provider.ValidateEmailKey(email + type, key, provider.ValidEmailKeyInterval);
                 break;
         }
 
@@ -256,9 +272,44 @@ public class EmailValidationKeyModelHelper(
 
         async Task<bool> CheckOwnerRights(string email)
         {
-            var ownerId = (await tenantManager.GetCurrentTenantAsync()).OwnerId;
+            var ownerId = (tenantManager.GetCurrentTenant()).OwnerId;
             var user = await userManager.GetUserByEmailAsync(email);
             return ownerId.Equals(user.Id);
         }
+    }
+    
+    private static Dictionary<string, StringValues> ParseQuery(string queryString)
+    {
+        var result = ParseNullableQuery(queryString);
+
+        if (result == null)
+        {
+            return new Dictionary<string, StringValues>();
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Parse a query string into its component key and value parts.
+    /// </summary>
+    /// <param name="queryString">The raw query string value, with or without the leading '?'.</param>
+    /// <returns>A collection of parsed keys and values, null if there are no entries.</returns>
+    private static Dictionary<string, StringValues> ParseNullableQuery(string queryString)
+    {
+        var accumulator = new KeyValueAccumulator();
+        var enumerable = new QueryStringEnumerable(queryString);
+
+        foreach (var pair in enumerable)
+        {
+            accumulator.Append(pair.EncodedName.ToString(), pair.DecodeValue().ToString());
+        }
+
+        if (!accumulator.HasValues)
+        {
+            return null;
+        }
+
+        return accumulator.GetResults();
     }
 }

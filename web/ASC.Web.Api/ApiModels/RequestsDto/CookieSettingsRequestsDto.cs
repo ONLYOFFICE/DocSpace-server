@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,14 +27,17 @@
 namespace ASC.Web.Api.Models;
 
 /// <summary>
+/// The request parameters for managing cookie settings.
 /// </summary>
 public class CookieSettingsRequestsDto
 {
-    /// <summary>Lifetime value in minutes</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The cookie lifetime in minutes.
+    /// </summary>
     public int LifeTime { get; set; }
 
-    /// <summary>Specifies if the cookie settings are enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether the cookie settings are enabled or disabled.
+    /// </summary>
     public bool Enabled { get; set; }
 }

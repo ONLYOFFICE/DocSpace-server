@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -45,7 +45,7 @@ public class LdapLogin(string username, string domain)
         string username;
         string domain = null;
 
-        if (login.Contains("\\"))
+        if (login.Contains('\\'))
         {
             var splited = login.Split('\\');
 
@@ -58,7 +58,7 @@ public class LdapLogin(string username, string domain)
             username = splited[1];
 
         }
-        else if (login.Contains("@"))
+        else if (login.Contains('@'))
         {
             var splited = login.Split('@');
 

@@ -76,16 +76,18 @@ public class MigrationContext : DbContext
 
     public DbSet<IntegrationEventLogEntry> IntegrationEventLogs { get; set; }
 
-    public DbSet<WebhooksConfig> WebhooksConfigs { get; set; }
-    public DbSet<WebhooksLog> WebhooksLogs { get; set; }
+    public DbSet<DbWebhooksConfig> WebhooksConfigs { get; set; }
+    public DbSet<DbWebhooksLog> WebhooksLogs { get; set; }
     public DbSet<DbWebhook> Webhooks { get; set; }
-
+    public DbSet<ApiKey> ApiKeys { get; set; }
+    
     public DbSet<DbFile> Files { get; set; }
     public DbSet<DbFolder> Folders { get; set; }
     public DbSet<DbFolderTree> Tree { get; set; }
     public DbSet<DbFilesBunchObjects> BunchObjects { get; set; }
     public DbSet<DbFilesSecurity> Security { get; set; }
     public DbSet<DbFilesThirdpartyIdMapping> ThirdpartyIdMapping { get; set; }
+    public DbSet<DbFilesFormRoleMapping> FilesFormRoleMapping { get; set; }
     public DbSet<DbFilesThirdpartyAccount> ThirdpartyAccount { get; set; }
     public DbSet<DbFilesTagLink> TagLink { get; set; }
     public DbSet<DbFilesTag> Tag { get; set; }
@@ -163,6 +165,7 @@ public class MigrationContext : DbContext
             .AddDbFilesBunchObjects()
             .AddDbFilesSecurity()
             .AddDbFilesThirdpartyIdMapping()
+            .AddDbFilesFormRoleMapping()
             .AddDbFilesTagLink()
             .AddDbFilesTag()
             .AddDbDbFilesThirdpartyApp()
@@ -178,11 +181,22 @@ public class MigrationContext : DbContext
             .AddDbWebhooks()
             .AddWebhooksConfig()
             .AddWebhooksLog()
+            .AddDbApiKeys()
             .AddShortLinks()
             .AddDbFileOrder()
             .AddDbRoomSettings()
             .AddFilesAuditReference()
             .AddIdentity()
+            .AddIdentityCert()
+            .AddIIdentityClient()
+            .AddIdentityClientAllowedOrigin()
+            .AddIdentityClientAuthenticationMethod()
+            .AddIdentityClientRedirectUri()
+            .AddIdentityClientScope()
+            .AddIdentityConsent()
+            .AddIdentityConsentScope()
+            .AddIdentityScope()
+            .AddIdentityShedlock()
             .AddUserRelation()
             .AddDbFunctions();
     }

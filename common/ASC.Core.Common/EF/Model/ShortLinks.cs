@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,6 +29,7 @@ public class ShortLink
 {
     public ulong Id { get; set; }
     public int TenantId { get; set; }
+    [MaxLength(15)]
     public string Short { get; set; }
     public string Link { get; set; }
 
@@ -69,7 +70,7 @@ public static class ShortLinksExtension
 
             entity.Property(e => e.Short)
                 .HasColumnName("short")
-                .HasColumnType("char(15)")
+                .HasColumnType("char")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci")
                 .IsRequired(false);
@@ -92,40 +93,42 @@ public static class ShortLinksExtension
     {
         modelBuilder.Entity<ShortLink>(entity =>
         {
-            entity.ToTable("short_links")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+            entity.ToTable("short_links");
+
+            entity.HasKey(e => e.Id)
+                .HasName("PK_short_links");
 
             entity.HasIndex(e => e.Short)
                 .IsUnique();
 
-            entity.HasKey(e => e.Id)
-                .HasName("PRIMARY");
-
             entity.HasIndex(e => e.TenantId)
-                .HasDatabaseName("tenant_id");
+                .HasDatabaseName("IX_short_links_tenant_id");
 
             entity.Property(e => e.Id)
-                .HasColumnName("id");
+                .HasColumnName("id")
+                .HasColumnType("bigint");
 
             entity.Property(e => e.Short)
                 .HasColumnName("short")
                 .HasColumnType("char(15)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
                 .IsRequired(false);
+
+            entity.Property(e => e.TenantId)
+                .HasColumnName("tenant_id")
+                .HasColumnType("integer")
+                .IsRequired()
+                .HasDefaultValue(-1);
 
             entity.Property(e => e.Link)
                 .HasColumnName("link")
                 .HasColumnType("text")
-                .UseCollation("utf8_bin")
                 .IsRequired(false);
 
-            entity.Property(e => e.TenantId)
-                .IsRequired()
-                .HasColumnName("tenant_id")
-                .HasColumnType("int(10)")
-                .HasDefaultValue("-1");
+            // Configure relationship if required
+            entity.HasOne(e => e.Tenant)
+                .WithMany()
+                .HasForeignKey(e => e.TenantId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 }

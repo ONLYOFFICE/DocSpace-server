@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,18 +27,22 @@
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
+/// The upload result parameters.
 /// </summary>
 public class UploadResultDto
 {
-    /// <summary>Specifies if the operation is successful or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the upload operation is successful or not.
+    /// </summary>
     public bool Success { get; set; }
 
-    /// <summary>Data</summary>
-    /// <type>System.Object, System</type>
+    /// <summary>
+    /// The uploaded data.
+    /// </summary>
     public object Data { get; set; }
 
-    /// <summary>Message</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The message sent after the successful upload operation.
+    /// </summary>
     public string Message { get; set; }
 }

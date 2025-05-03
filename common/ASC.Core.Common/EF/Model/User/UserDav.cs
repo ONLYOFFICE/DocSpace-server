@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -74,17 +74,23 @@ public static class UserDavExtension
     {
         modelBuilder.Entity<UserDav>(entity =>
         {
+            // Set the composite key for the UserDav table, consisting of TenantId and UserId.
             entity.HasKey(e => new { e.TenantId, e.UserId })
-                .HasName("core_userdav_pkey");
+                .HasName("core_userdav_pkey"); // Using a PostgreSQL-compatible name for the primary key constraint
 
-            entity.ToTable("core_userdav", "onlyoffice");
+            // Define the table name for the UserDav entity.
+            entity.ToTable("core_userdav");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+            // Configure the TenantId column.
+            entity.Property(e => e.TenantId)
+                .HasColumnName("tenant_id")
+                .IsRequired(); // Mark as required to ensure non-null values in PostgreSQL.
 
+            // Configure the UserId column.
             entity.Property(e => e.UserId)
                 .HasColumnName("user_id")
-                .HasMaxLength(38);
+                .HasColumnType("uuid") // Use the PostgreSQL 'uuid' type.
+                .IsRequired(); // Mark as required to ensure non-null values.
         });
-
     }
 }

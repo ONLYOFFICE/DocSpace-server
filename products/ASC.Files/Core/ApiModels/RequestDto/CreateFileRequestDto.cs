@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,22 +27,46 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// The parameters for creating a file.
+/// </summary>
+public class CreateFile<T>
+{
+    /// <summary>
+    /// The file title for creation.
+    /// </summary>
+    [StringLength(165)]
+    public required string Title { get; set; }
+
+    /// <summary>
+    /// The template file ID for creation.
+    /// </summary>
+    public T TemplateId { get; set; }
+
+    /// <summary>
+    /// Specifies whether to allow creating a file of an external extension or not.
+    /// </summary>
+    public bool EnableExternalExt { get; set; }
+
+    /// <summary>
+    /// The form ID for creation.
+    /// </summary>
+    public int FormId { get; set; }
+}
+
+/// <summary>
+/// The request parameters for creating a file.
 /// </summary>
 public class CreateFileRequestDto<T>
 {
-    /// <summary>File title</summary>
-    /// <type>System.String, System</type>
-    public string Title { get; set; }
+    /// <summary>
+    /// The folder ID for the file creation.
+    /// </summary>
+    [FromRoute(Name = "folderId")]
+    public required T FolderId { get; set; }
 
-    /// <summary>Template file ID</summary>
-    /// <type>System.Int32, System</type>
-    public T TemplateId { get; set; }
-
-    /// <summary>Specifies whether to allow the creation of external extension files or not</summary>
-    /// <type>System.Boolean, System</type>
-    public bool EnableExternalExt { get; set; }
-
-    /// <summary>Form ID</summary>
-    /// <type>System.Int32, System</type>
-    public int FormId { get; set; }
+    /// <summary>
+    /// The parameters for creating a file.
+    /// </summary>
+    [FromBody]
+    public CreateFile<JsonElement> File { get; set; }
 }

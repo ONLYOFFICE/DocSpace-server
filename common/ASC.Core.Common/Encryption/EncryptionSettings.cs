@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,6 +27,7 @@
 namespace ASC.Core.Encryption;
 
 /// <summary>
+/// The encryption settings.
 /// </summary>
 [ProtoContract]
 public class EncryptionSettings
@@ -41,28 +42,31 @@ public class EncryptionSettings
         NotifyUsers = true;
     }
 
-    /// <summary>Password</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The encryption password.
+    /// </summary>
     public string Password
     {
         get => Pass;
         set => Pass = (value ?? string.Empty).Replace('#', '_');
     }
 
-    /// <summary>Status</summary>
-    /// <type>ASC.Core.Encryption.EncryprtionStatus, ASC.Core.Common</type>
+    /// <summary>
+    /// The encryption status.
+    /// </summary>
     [ProtoMember(2)]
     public EncryprtionStatus Status { get; set; }
 
-    /// <summary>Specifies if the users will be notified or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the users will be notified about the encryption operation or not.
+    /// </summary>
     [ProtoMember(3)]
     public bool NotifyUsers { get; set; }
 
 }
 
 [Scope]
-public class EncryptionSettingsHelper(CoreConfiguration coreConfiguration, AscCacheNotify ascCacheNotify, InstanceCrypto instanceCrypto)
+public class EncryptionSettingsHelper(CoreConfiguration coreConfiguration, InstanceCrypto instanceCrypto)
 {
     private const string Key = "EncryptionSettings";
 
@@ -70,7 +74,6 @@ public class EncryptionSettingsHelper(CoreConfiguration coreConfiguration, AscCa
     {
         var settings = await SerializeAsync(encryptionSettings);
         await coreConfiguration.SaveSettingAsync(Key, settings);
-        await ascCacheNotify.ClearCacheAsync();
     }
 
     public async Task<EncryptionSettings> LoadAsync()
@@ -78,13 +81,6 @@ public class EncryptionSettingsHelper(CoreConfiguration coreConfiguration, AscCa
         var settings = await coreConfiguration.GetSettingAsync(Key);
 
         return await DeserializeAsync(settings);
-    }
-
-    public EncryptionSettings Load()
-    {
-        var settings = coreConfiguration.GetSetting(Key);
-
-        return Deserialize(settings);
     }
 
     private async Task<string> SerializeAsync(EncryptionSettings encryptionSettings)

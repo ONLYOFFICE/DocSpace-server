@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,32 +27,71 @@
 namespace ASC.Web.Studio.Utility;
 
 /// <summary>
+/// The confirmation email type.
 /// </summary>
 //  emp-invite - confirm ivite by email
 //  portal-suspend - confirm portal suspending - Tenant.SetStatus(TenantStatus.Suspended)
 //  portal-continue - confirm portal continuation  - Tenant.SetStatus(TenantStatus.Active)
 //  portal-remove - confirm portal deletation - Tenant.SetStatus(TenantStatus.RemovePending)
 //  DnsChange - change Portal Address and/or Custom domain name
-[System.Text.Json.Serialization.JsonConverter(typeof(JsonStringEnumConverter<ConfirmType>))]
+[JsonConverter(typeof(JsonStringEnumConverter<ConfirmType>))]
 [EnumExtensions]
 public enum ConfirmType
 {
+    [SwaggerEnum("Emp invite")]
     EmpInvite,
+
+    [SwaggerEnum("Link invite")]
     LinkInvite,
+
+    [SwaggerEnum("Portal suspend")]
     PortalSuspend,
+
+    [SwaggerEnum("Portal continue")]
     PortalContinue,
+
+    [SwaggerEnum("Portal remove")]
     PortalRemove,
+
+    [SwaggerEnum("Dns change")]
     DnsChange,
+
+    [SwaggerEnum("Portal owner change")]
     PortalOwnerChange,
+
+    [SwaggerEnum("Activation")]
     Activation,
+
+    [SwaggerEnum("Email change")]
     EmailChange,
+
+    [SwaggerEnum("Email activation")]
     EmailActivation,
+
+    [SwaggerEnum("Password change")]
     PasswordChange,
+
+    [SwaggerEnum("Profile remove")]
     ProfileRemove,
+
+    [SwaggerEnum("Phone activation")]
     PhoneActivation,
+
+    [SwaggerEnum("Phone auth")]
     PhoneAuth,
+
+    [SwaggerEnum("Auth")]
     Auth,
+
+    [SwaggerEnum("Tfa activation")]
     TfaActivation,
+
+    [SwaggerEnum("Tfa auth")]
     TfaAuth,
-    Wizard
+
+    [SwaggerEnum("Wizard")]
+    Wizard,
+
+    [SwaggerEnum("Guest share link")]
+    GuestShareLink
 }

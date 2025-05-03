@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,9 +26,28 @@
 
 namespace ASC.Files.Core.EF;
 
+/// <summary>
+/// The room data lifetime database.
+/// </summary>
 public class DbRoomDataLifetime : IMapFrom<RoomDataLifetime>
 {
+    /// <summary>
+    /// Specifies whether to permanently delete the room data or not.
+    /// </summary>
     public bool DeletePermanently { get; set; }
+
+    /// <summary>
+    /// Specifies the time period type of the room data lifetime.
+    /// </summary>
     public RoomDataLifetimePeriod Period { get; set; }
+
+    /// <summary>
+    /// Specifies the time period value of the room data lifetime.
+    /// </summary>
     public int Value { get; set; }
+
+    /// <summary>
+    /// The date and time when the room data lifetime setting has been enabled.
+    /// </summary>
+    public DateTime? StartDate { get; set; }
 }

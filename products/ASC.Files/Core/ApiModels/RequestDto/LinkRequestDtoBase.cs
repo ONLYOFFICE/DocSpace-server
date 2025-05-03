@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,17 +26,23 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// The sharing link request parameters.
+/// </summary>
 public abstract class LinkRequestDtoBase
 {
-    /// <summary>Link ID</summary>
-    /// <type>System.Guid, System</type>
+    /// <summary>
+    /// The Link ID.
+    /// </summary>
     public Guid LinkId { get; set; }
-    
-    /// <summary>Sharing rights</summary>
-    /// <type>ASC.Files.Core.Security.FileShare, ASC.Files.Core</type>
+
+    /// <summary>
+    /// The sharing access rights.
+    /// </summary>
     public FileShare Access { get; set; }
-    
-    /// <summary>Link expiration date</summary>
-    /// <type>ASC.Api.Core.ApiDateTime, ASC.Api.Core</type>
+
+    /// <summary>
+    /// The link expiration date.
+    /// </summary>
     public ApiDateTime ExpirationDate { get; set; }
 }

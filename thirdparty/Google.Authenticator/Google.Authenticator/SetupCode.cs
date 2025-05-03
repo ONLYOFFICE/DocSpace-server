@@ -1,11 +1,22 @@
 ﻿namespace Google.Authenticator
 {
+    /// <summary>
+    /// The setup TFA code parameters.
+    /// </summary>
     public class SetupCode
     {
-        public string Account { get; internal set; }
-        public string ManualEntryKey { get; internal set; }
         /// <summary>
-        /// Base64-encoded PNG image
+        /// The account for which the setup code is generated.
+        /// </summary>
+        public string Account { get; internal set; }
+        
+        /// <summary>
+        /// The manual entry key.
+        /// </summary>
+        public string ManualEntryKey { get; internal set; }
+        
+        /// <summary>
+        /// The QR-code setup image URL (base64-encoded PNG image).
         /// </summary>
         public string QrCodeSetupImageUrl { get; internal set; }
 

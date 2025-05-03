@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,10 +27,8 @@
 namespace ASC.Core.Notify.Senders;
 
 [Singleton]
-public class JabberSender(IServiceProvider serviceProvider, ILogger<JabberSender> logger)
-    : INotifySender
+public class JabberSender(IServiceProvider serviceProvider, ILogger<JabberSender> logger) : INotifySender
 {
-    private readonly ILogger _logger = logger;
 
     public void Init(IDictionary<string, string> properties) { }
 
@@ -50,7 +48,7 @@ public class JabberSender(IServiceProvider serviceProvider, ILogger<JabberSender
         }
         catch (Exception e)
         {
-            _logger.ErrorUnexpected(e);
+            logger.ErrorUnexpected(e);
         }
 
         return Task.FromResult(NoticeSendResult.OK);

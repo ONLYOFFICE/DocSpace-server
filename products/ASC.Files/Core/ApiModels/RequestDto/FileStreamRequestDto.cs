@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,22 +27,37 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// The request parameters for updating file contents.
 /// </summary>
-public class FileStreamRequestDto : IModelWithFile
+public class FileStreamRequestDto<T> : IModelWithFile
 {
-    /// <summary>Request input stream</summary>
-    /// <type>Microsoft.AspNetCore.Http.IFormFile, Microsoft.AspNetCore.Http</type>
+    /// <summary>
+    /// The file ID.
+    /// </summary>
+    [FromRoute(Name = "fileId")]
+    public required T FileId { get; set; }
+
+    /// <summary>
+    /// The request input stream.
+    /// </summary>
+    [FromForm(Name = "File")]
     public IFormFile File { get; set; }
 
-    /// <summary>Specifies whether to encrypt a file or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether to encrypt the file or not.
+    /// </summary>
+    [FromForm(Name = "Encrypted")]
     public bool Encrypted { get; set; }
 
-    /// <summary>Specifies whether to force save a file or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether to force save the file or not.
+    /// </summary>
+    [FromForm(Name = "Forcesave")]
     public bool Forcesave { get; set; }
 
-    /// <summary>File extension</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The file extension.
+    /// </summary>
+    [FromForm(Name = "FileExtension")]
     public string FileExtension { get; set; }
 }

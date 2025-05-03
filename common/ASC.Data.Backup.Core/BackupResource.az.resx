@@ -59,12 +59,21 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="BackupNotFound" xml:space="preserve">
-    <value>Yedək faylı etibarsızdır. ONLYOFFICE v11.5 və ya daha yeni versiyada yaradılmış fayldan istifadə edin.</value>
+    <value>Yedək faylı etibarsızdır. Eyni portalda yaradılmış fayldan istifadə edin.</value>
   </data>
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Parol təyin edin</value>
   </data>
   <data name="LargeBackup" xml:space="preserve">
     <value>Ehtiyat nüsxə portalın ümumi ölçüsündən böyükdür</value>
+  </data>
+  <data name="BackupException" xml:space="preserve">
+    <value>Yedəkləməni yaratmaqda problem yarandı. Lütfən, yenidən yaratmağa cəhd edin və ya dəstək ilə əlaqə saxlayın.</value>
+  </data>
+  <data name="BackupInvalid" xml:space="preserve">
+    <value>Yedək faylı etibarsızdır.</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>Yedəkləməni bərpa edərkən problem yarandı. Lütfən, yenidən bərpa etməyə cəhd edin və ya dəstək ilə əlaqə saxlayın.</value>
   </data>
 </root>

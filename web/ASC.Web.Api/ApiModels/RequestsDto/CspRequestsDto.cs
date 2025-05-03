@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,7 +26,13 @@
 
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
+/// <summary>
+/// The request parameters for configuring the Content Security Policy (CSP) settings.
+/// </summary>
 public class CspRequestsDto
 {
+    /// <summary>
+    /// The collection of allowed domains in the Content Security Policy (CSP).
+    /// </summary>
     public IEnumerable<string> Domains { get; set; }
 }

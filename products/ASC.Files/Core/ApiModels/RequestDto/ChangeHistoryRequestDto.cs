@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,14 +27,35 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// The parameters for changing version history.
 /// </summary>
-public class ChangeHistoryRequestDto
+public class ChangeHistory
 {
-    /// <summary>File version</summary>
-    /// <type>System.Int32, System</type>
-    public int Version { get; set; }
+    /// <summary>
+    /// The file version of the change history.
+    /// </summary>
+    public required int Version { get; set; }
 
-    /// <summary>Marks as a version or revision</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether to start a new version or continue revision of the change history.
+    /// </summary>
     public bool ContinueVersion { get; set; }
+}
+
+/// <summary>
+/// The request parameters for changing version history.
+/// </summary>
+public class ChangeHistoryRequestDto<T>
+{
+    /// <summary>
+    /// The file Id to change its version history.
+    /// </summary>
+    [FromRoute(Name = "fileId")]
+    public required T FileId { get; set; }
+
+    /// <summary>
+    /// The parameters for changing version history.
+    /// </summary>
+    [FromBody]
+    public ChangeHistory File { get; set; }
 }

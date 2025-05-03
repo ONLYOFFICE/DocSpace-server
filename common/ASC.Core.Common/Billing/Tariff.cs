@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,36 +27,52 @@
 namespace ASC.Core.Billing;
 
 /// <summary>
+/// The tariff parameters.
 /// </summary>
 [DebuggerDisplay("{State} before {DueDate}")]
+[ProtoContract]
 public class Tariff
 {
-    /// <summary>ID</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The tariff ID.
+    /// </summary>
+    [ProtoMember(1)]
     public int Id { get; set; }
 
-    /// <summary>Tariff state</summary>
-    /// <type>ASC.Core.Billing.TariffState, ASC.Core.Common</type>
+    /// <summary>
+    /// The tariff state.
+    /// </summary>
+    [ProtoMember(2)]
     public TariffState State { get; set; }
 
-    /// <summary>Due date</summary>
-    /// <type>System.DateTime, System</type>
+    /// <summary>
+    /// The tariff due date.
+    /// </summary>
+    [ProtoMember(3)]
     public DateTime DueDate { get; set; }
 
-    /// <summary>Delay due date</summary>
-    /// <type>System.DateTime, System</type>
+    /// <summary>
+    /// The tariff delay due date.
+    /// </summary>
+    [ProtoMember(4)]
     public DateTime DelayDueDate { get; set; }
 
-    /// <summary>License date</summary>
-    /// <type>System.DateTime, System</type>
+    /// <summary>
+    /// The tariff license date.
+    /// </summary>
+    [ProtoMember(5)]
     public DateTime LicenseDate { get; set; }
 
-    /// <summary>Customer ID</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The tariff customer ID.
+    /// </summary>
+    [ProtoMember(6)]
     public string CustomerId { get; set; }
 
-    /// <summary>List of quotas</summary>
-    /// <type>System.Collections.Generic.List{ASC.Core.Billing.Quota}, System.Collections.Generic</type>
+    /// <summary>
+    /// The list of tariff quotas.
+    /// </summary>
+    [ProtoMember(7)]
     public List<Quota> Quotas { get; set; }
 
     public override int GetHashCode()
@@ -74,22 +90,39 @@ public class Tariff
         return t != null
             && t.DueDate == DueDate
             && t.Quotas.Count == Quotas.Count
-            && t.Quotas.Exists(Quotas.Contains)
+            && t.Quotas.TrueForAll(Quotas.Contains)
             && t.CustomerId == CustomerId;
     }
 }
 
 /// <summary>
+/// The quota parameters.
 /// </summary>
-public class Quota(int id, int quantity) : IEquatable<Quota>
+[ProtoContract]
+public class Quota : IEquatable<Quota>
 {
-    /// <summary>ID</summary>
-    /// <type>System.Int32, System</type>
-    public int Id { get; set; } = id;
+    /// <summary>
+    /// The quota ID.
+    /// </summary>
+    [ProtoMember(1)]
+    public int Id { get; set; }
 
-    /// <summary>Quantity</summary>
-    /// <type>System.Int32, System</type>
-    public int Quantity { get; set; } = quantity;
+    /// <summary>
+    /// The quota quantity.
+    /// </summary>
+    [ProtoMember(2)]
+    public int Quantity { get; set; }
+
+    public Quota()
+    {
+        
+    }
+
+    public Quota(int id, int quantity)
+    {
+        Id = id;
+        Quantity = quantity;
+    }
 
     public bool Equals(Quota other)
     {

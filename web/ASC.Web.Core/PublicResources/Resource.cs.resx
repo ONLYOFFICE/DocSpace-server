@@ -619,6 +619,9 @@
   <data name="Tariffs_admin" xml:space="preserve">
     <value>Business</value>
   </data>
+  <data name="Tariffs_adminyear" xml:space="preserve">
+    <value>Business</value>
+  </data>
   <data name="Tariffs_startup" xml:space="preserve">
     <value>Startup</value>
   </data>
@@ -647,7 +650,7 @@
     <value>Povolte aplikaci přihlášení k portálu pomocí účtu Apple ID.</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
-    <value>Povolením této aplikace umožníte uživatelům přihlásit se do ONLYOFFICE pomocí Apple ID. {0}Přejděte na portál Apple Developers Portal a vytvořte novou integraci aplikace ONLYOFFICE. Vložte údaje, které jste obdrželi níže:</value>
+    <value>Povolením této aplikace umožníte uživatelům přihlásit se do {LogoText} pomocí Apple ID. {0}Přejděte na portál Apple Developers Portal a vytvořte novou integraci aplikace {LogoText}. Vložte údaje, které jste obdrželi níže:</value>
   </data>
   <data name="ConsumersappleIdKeyId" xml:space="preserve">
     <value>Desetimístný identifikátor klíče vygenerovaný pro přihlášení pomocí soukromého klíče Apple</value>
@@ -668,16 +671,16 @@
     <value>Povolením této aplikace zkrátíte odkazy na pozvánky a dokumenty. {0}Níže vložte přihlašovací jméno a klíč API služby Bitly:</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
-    <value>Povolením této aplikace propojíte svůj účet služby Box s modulem Dokumenty. Budete moci spravovat, upravovat a sdílet soubory ze služby Box s uživateli služby ONLYOFFICE. {0}Přihlaste se ke svému účtu na stránce pro vývojáře aplikace Box a vytvořte novou aplikaci pro integraci s aplikací ONLYOFFICE. Vložte údaje, které jste obdrželi níže:</value>
+    <value>Povolením této aplikace propojíte svůj účet služby Box s modulem Dokumenty. Budete moci spravovat, upravovat a sdílet soubory ze služby Box s uživateli služby {LogoText}. {0}Přihlaste se ke svému účtu na stránce pro vývojáře aplikace Box a vytvořte novou aplikaci pro integraci s aplikací {LogoText}. Vložte údaje, které jste obdrželi níže:</value>
   </data>
   <data name="ConsumersClickatellInstruction" xml:space="preserve">
-    <value>Pomocí této aplikace můžete povolit dvoufázové ověřování pomocí služby Clickatell. {0}Přihlaste se ke svému účtu SMS Platform a vytvořte novou integraci pro ONLYOFFICE. Zkopírujte apiKey a vložte jej níže:</value>
+    <value>Pomocí této aplikace můžete povolit dvoufázové ověřování pomocí služby Clickatell. {0}Přihlaste se ke svému účtu SMS Platform a vytvořte novou integraci pro {LogoText}. Zkopírujte apiKey a vložte jej níže:</value>
   </data>
   <data name="ConsumersDocuSignInstruction" xml:space="preserve">
-    <value>Povolením této aplikace můžete digitálně podepisovat dokumenty pomocí služby DocuSign. {0}Přejděte do své konzoly pro správu DocuSign a přidejte integraci ONLYOFFICE. Vložte údaje, které jste obdrželi níže:</value>
+    <value>Povolením této aplikace můžete digitálně podepisovat dokumenty pomocí služby DocuSign. {0}Přejděte do své konzoly pro správu DocuSign a přidejte integraci {LogoText}. Vložte údaje, které jste obdrželi níže:</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
-    <value>Povolením této aplikace propojíte svůj účet Dropbox s modulem Dokumenty. Budete moci spravovat, upravovat a sdílet soubory ze služby Dropbox s uživateli aplikace ONLYOFFICE. {0}Přihlaste se ke svému účtu na webu Dropbox Developers a vytvořte novou aplikaci pro integraci s ONLYOFFICE. Vložte údaje, které jste obdrželi níže:</value>
+    <value>Povolením této aplikace propojíte svůj účet Dropbox s modulem Dokumenty. Budete moci spravovat, upravovat a sdílet soubory ze služby Dropbox s uživateli aplikace {LogoText}. {0}Přihlaste se ke svému účtu na webu Dropbox Developers a vytvořte novou aplikaci pro integraci s {LogoText}. Vložte údaje, které jste obdrželi níže:</value>
   </data>
   <data name="ConsumerseasyBibappkey" xml:space="preserve">
     <value>Klíč k aplikaci</value>
@@ -689,7 +692,7 @@
     <value>Token aplikace</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
-    <value>Zapnutím této aplikace umožníte uživatelům přihlásit se do ONLYOFFICE pomocí Facebooku a propojit účty zákazníků na Facebooku s modulem CRM. {0}Přejděte na portál Facebook Developers Portal a vytvořte novou integraci aplikace ONLYOFFICE. Vložte údaje, které jste obdrželi níže:</value>
+    <value>Zapnutím této aplikace umožníte uživatelům přihlásit se do {LogoText} pomocí Facebooku a propojit účty zákazníků na Facebooku s modulem CRM. {0}Přejděte na portál Facebook Developers Portal a vytvořte novou integraci aplikace {LogoText}. Vložte údaje, které jste obdrželi níže:</value>
   </data>
   <data name="ConsumersGoogleCloudbucket" xml:space="preserve">
     <value>Kbelík</value>
@@ -704,10 +707,10 @@
     <value>GoogleCloud json</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
-    <value>Povolením této aplikace připojíte svůj účet Disku Google k modulu Dokumenty. Budete moci spravovat, upravovat a sdílet soubory z Disku Google s uživateli aplikace ONLYOFFICE. {0}Přejděte do konzoly Google API a vytvořte nový projekt pro integraci ONLYOFFICE. Vložte údaje, které jste obdrželi níže:</value>
+    <value>Povolením této aplikace připojíte svůj účet Disku Google k modulu Dokumenty. Budete moci spravovat, upravovat a sdílet soubory z Disku Google s uživateli aplikace {LogoText}. {0}Přejděte do konzoly Google API a vytvořte nový projekt pro integraci {LogoText}. Vložte údaje, které jste obdrželi níže:</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
-    <value>Povolte tuto aplikaci, aby se vaši uživatelé mohli přihlásit do ONLYOFFICE pomocí svých účtů LinkedIn. {0}Přejděte na webové stránky LinkedIn Developers a vytvořte novou integraci aplikace ONLYOFFICE. Vložte údaje, které jste obdrželi níže:</value>
+    <value>Povolte tuto aplikaci, aby se vaši uživatelé mohli přihlásit do {LogoText} pomocí svých účtů LinkedIn. {0}Přejděte na webové stránky LinkedIn Developers a vytvořte novou integraci aplikace {LogoText}. Vložte údaje, které jste obdrželi níže:</value>
   </data>
   <data name="ConsumersMailruClientId" xml:space="preserve">
     <value>ID</value>
@@ -728,7 +731,7 @@
     <value>Povolte aplikaci přihlášení k portálu pomocí účtu Microsoft.</value>
   </data>
   <data name="ConsumersMicrosoftInstruction" xml:space="preserve">
-    <value>Povolením této aplikace umožníte uživatelům přihlašovat se do ONLYOFFICE pomocí aplikace Microsoft. {0}Přejděte na Microsoft Azure a vytvořte novou aplikaci ONLYOFFICE integration. Vložte údaje, které jste obdrželi níže:</value>
+    <value>Povolením této aplikace umožníte uživatelům přihlašovat se do {LogoText} pomocí aplikace Microsoft. {0}Přejděte na Microsoft Azure a vytvořte novou aplikaci {LogoText} integration. Vložte údaje, které jste obdrželi níže:</value>
   </data>
   <data name="ConsumersRackspace" xml:space="preserve">
     <value>Cloudové úložiště Rackspace Cloud Storage</value>
@@ -800,7 +803,7 @@
     <value>ID aplikace</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
-    <value>Povolením této aplikace připojíte svůj účet OneDrive k modulu Dokumenty. Budete moci spravovat, upravovat a sdílet soubory ze služby OneDrive s uživateli služby ONLYOFFICE. {0}Přihlaste se ke svému účtu Microsoft Azure a vytvořte novou aplikaci pro integraci ONLYOFFICE. Vložte údaje, které jste obdrželi níže:</value>
+    <value>Povolením této aplikace připojíte svůj účet OneDrive k modulu Dokumenty. Budete moci spravovat, upravovat a sdílet soubory ze služby OneDrive s uživateli služby {LogoText}. {0}Přihlaste se ke svému účtu Microsoft Azure a vytvořte novou aplikaci pro integraci {LogoText}. Vložte údaje, které jste obdrželi níže:</value>
   </data>
   <data name="ConsumersSmscInstruction" xml:space="preserve">
     <value>Pomocí této aplikace můžete povolit dvoufázové ověřování pomocí služby Centrum SMS. {0}Vložte přihlašovací jméno k účtu smsc a heslo (nebo hash MD5 hesla) psané malými písmeny:</value>
@@ -827,7 +830,7 @@
     <value>ID klienta</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Zapnutím této aplikace umožníte svým uživatelům přihlásit se do ONLYOFFICE pomocí Twitteru a propojit účty Twitter svých zákazníků s modulem CRM. {0}Přejděte na portál Twitter Developers Portal a vytvořte novou integraci aplikace ONLYOFFICE. Vložte údaje, které jste obdrželi níže:</value>
+    <value>Zapnutím této aplikace umožníte svým uživatelům přihlásit se do {LogoText} pomocí Twitteru a propojit účty Twitter svých zákazníků s modulem CRM. {0}Přejděte na portál Twitter Developers Portal a vytvořte novou integraci aplikace {LogoText}. Vložte údaje, které jste obdrželi níže:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>Klíč API</value>
@@ -869,7 +872,7 @@
     <value>Tajemství klienta</value>
   </data>
   <data name="ConsumersYahooInstruction" xml:space="preserve">
-    <value>Povolením této aplikace můžete přidávat nové uživatele portálu ze seznamu kontaktů Yahoo. {0}Přejděte na stránku Vytvořit aplikaci v síti Yahoo Developer Network a vytvořte novou aplikaci pro integraci ONLYOFFICE. Vložte údaje, které jste obdrželi níže:</value>
+    <value>Povolením této aplikace můžete přidávat nové uživatele portálu ze seznamu kontaktů Yahoo. {0}Přejděte na stránku Vytvořit aplikaci v síti Yahoo Developer Network a vytvořte novou aplikaci pro integraci {LogoText}. Vložte údaje, které jste obdrželi níže:</value>
   </data>
   <data name="ConsumersYandexClientId" xml:space="preserve">
     <value>ID</value>
@@ -947,25 +950,25 @@
     <value>Recaptcha je neplatná</value>
   </data>
   <data name="ConsumersEasyBibInstruction" xml:space="preserve">
-    <value>Povolte tuto aplikaci pro vytváření bibliografií v editorech ONLYOFFICE. {0}Přejděte na registrační stránku EasyBib a vyplňte formulář pro přidání integrace s ONLYOFFICE. Po získání klíče aplikace jej vložte níže:</value>
+    <value>Povolte tuto aplikaci pro vytváření bibliografií v editorech {LogoText}. {0}Přejděte na registrační stránku EasyBib a vyplňte formulář pro přidání integrace s {LogoText}. Po získání klíče aplikace jej vložte níže:</value>
   </data>
   <data name="ConsumersFirebaseInstruction" xml:space="preserve">
-    <value>Povolte tuto aplikaci, aby vaši uživatelé mohli dostávat oznámení o zprávách i offline. {0}Přejděte do konzole Firebase a přidejte nový projekt pro integraci ONLYOFFICE. Níže vložte údaje, které jste obdrželi:</value>
+    <value>Povolte tuto aplikaci, aby vaši uživatelé mohli dostávat oznámení o zprávách i offline. {0}Přejděte do konzole Firebase a přidejte nový projekt pro integraci {LogoText}. Níže vložte údaje, které jste obdrželi:</value>
   </data>
   <data name="ConsumersGoogleCloudInstruction" xml:space="preserve">
-    <value>Připojte službu Google Cloud Storage pro zálohování a ukládání dat z vašeho portálu. {0}Přejděte do konzoly Google Cloud Platform a vytvořte nový účet služby pro ONLYOFFICE. Vložte údaje, které jste obdrželi níže:</value>
+    <value>Připojte službu Google Cloud Storage pro zálohování a ukládání dat z vašeho portálu. {0}Přejděte do konzoly Google Cloud Platform a vytvořte nový účet služby pro {LogoText}. Vložte údaje, které jste obdrželi níže:</value>
   </data>
   <data name="ConsumersRackspaceInstruction" xml:space="preserve">
     <value>Připojte službu Rackspace Cloud Storage k zálohování a ukládání dat z vašeho portálu. {0}V nastavení zabezpečení v ovládacím panelu služby Rackspace Cloud klikněte na odkaz Zobrazit vedle klíče Rackspace API. Vložte údaje, které jste obdrželi níže:</value>
   </data>
   <data name="ConsumersS3Instruction" xml:space="preserve">
-    <value>Připojte službu Amazon AWS S3 k zálohování a ukládání dat z vašeho portálu. {0}Přejděte do konzoly pro správu AWS a vytvořte přístupové klíče pro ONLYOFFICE. Vložte údaje, které jste obdrželi níže:</value>
+    <value>Připojte službu Amazon AWS S3 k zálohování a ukládání dat z vašeho portálu. {0}Přejděte do konzoly pro správu AWS a vytvořte přístupové klíče pro {LogoText}. Vložte údaje, které jste obdrželi níže:</value>
   </data>
   <data name="ConsumersSelectelInstruction" xml:space="preserve">
     <value>Připojte službu Selectel Cloud Storage k zálohování a ukládání dat z vašeho portálu. {0}Získejte přístupové údaje pro uživatele s právy čtení/zápisu pro kontejnery, do kterých plánujete ukládat zálohy, a vložte je níže:</value>
   </data>
   <data name="ConsumersWordpressInstruction" xml:space="preserve">
-    <value>Povolte aplikaci pro snadné publikování dokumentů na vašem webu WordPress. {0}Na stránce Wordpress Developers vytvořte novou aplikaci pro integraci ONLYOFFICE. Níže vložte údaje, které jste obdrželi:</value>
+    <value>Povolte aplikaci pro snadné publikování dokumentů na vašem webu WordPress. {0}Na stránce Wordpress Developers vytvořte novou aplikaci pro integraci {LogoText}. Níže vložte údaje, které jste obdrželi:</value>
   </data>
   <data name="TariffsFeature_thirdparty" xml:space="preserve">
     <value>Integrace třetích stran</value>
@@ -992,7 +995,7 @@
     <value>Povolte aplikaci přihlášení k portálu pomocí účtu Zoom.</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
-    <value>Povolením této aplikace umožníte uživatelům přihlásit se do ONLYOFFICE pomocí jejich účtů Zoom. {0}Přejděte na webové stránky Zoom Developers a vytvořte novou integraci aplikace ONLYOFFICE. Vložte údaje, které jste obdrželi níže:</value>
+    <value>Povolením této aplikace umožníte uživatelům přihlásit se do {LogoText} pomocí jejich účtů Zoom. {0}Přejděte na webové stránky Zoom Developers a vytvořte novou integraci aplikace {LogoText}. Vložte údaje, které jste obdrželi níže:</value>
   </data>
   <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
     <value>Příliš mnoho pokusů o přihlášení. Zkuste to prosím později</value>
@@ -1055,12 +1058,27 @@
     <value>Úložné kvóty a statistiky</value>
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} na správce/oprávněného uživatele a možnost přidat prostor na vyžádání</value>
+    <value>{0} na správce a možnost přidat prostor na vyžádání</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
     <value>Nepodařilo se nastavit kvótu na místnost. Zadaná hodnota je větší než celkové úložiště DocSpace.</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
     <value>Nepodařilo se nastavit kvótu na uživatele. Zadaná hodnota je větší než celkové úložiště DocSpace.</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Počet správců překročil limit: {0}/{1}.</value>
+  </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Přidejte alespoň 1 důvěryhodnou doménu.</value>
+  </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>Neziskové</value>
+  </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Přidejte alespoň 1 povolenou IP adresu.</value>
+  </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>Adresa URL webhooku není k dispozici. Požadavek HEAD neodpovídá na stav 200 http.</value>
   </data>
 </root>

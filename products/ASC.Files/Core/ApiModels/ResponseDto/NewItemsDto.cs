@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,15 +26,35 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// The new item parameters.
+/// </summary>
 public class NewItemsDto<TItem>
 {
+    /// <summary>
+    /// The date and time when the new item was created.
+    /// </summary>
     public ApiDateTime Date { get; init; }
+
+    /// <summary>
+    /// The list of items.
+    /// </summary>
     public IEnumerable<TItem> Items { get; init; }
 }
 
+/// <summary>
+/// The room new items information.
+/// </summary>
 public class RoomNewItemsDto
 {
+    /// <summary>
+    /// The room file entry.
+    /// </summary>
     public FileEntryDto Room { get; init; }
+
+    /// <summary>
+    /// The list of file entry items.
+    /// </summary>
     public IEnumerable<FileEntryDto> Items { get; init; }
 }
 
@@ -43,7 +63,7 @@ public class RoomNewItemsDtoHelper(FileDtoHelper fileDtoHelper, FolderDtoHelper 
 {
     private readonly ConcurrentDictionary<string, FileEntryDto> _roomDtoCache = new();
 
-    public async Task<RoomNewItemsDto> GetAsync(FileEntry roomEntry, IEnumerable<FileEntry> items)
+    public async Task<RoomNewItemsDto> GetAsync(FileEntry roomEntry, IEnumerable<FileEntry> entries)
     {
         var roomKey = GetRoomKey(roomEntry);
         if (!_roomDtoCache.TryGetValue(roomKey, out var roomDto))
@@ -51,13 +71,17 @@ public class RoomNewItemsDtoHelper(FileDtoHelper fileDtoHelper, FolderDtoHelper 
             roomDto = await GetShortRoomDtoAsync(roomEntry);
             _roomDtoCache.TryAdd(roomKey, roomDto);
         }
-        
-        var entries = await Task.WhenAll(items.Select(GetFileEntryDtoAsync));
+
+        var files = new List<FileEntryDto>();
+        foreach (var entry in entries)
+        {
+            files.Add(await GetFileEntryDtoAsync(entry));
+        }
         
         return new RoomNewItemsDto
         {
             Room = roomDto,
-            Items = entries
+            Items = files
         };
     }
     

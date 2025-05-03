@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -113,7 +113,7 @@ public class GeolocationHelper(IDbContextFactory<CustomDbContext> dbContextFacto
         {
             var ip = httpContextAccessor.HttpContext.Connection.RemoteIpAddress;
 
-            if (!ip.Equals(IPAddress.Loopback))
+            if (ip != null && !ip.Equals(IPAddress.Loopback))
             {
                 logger.TraceRemoteIpAddress(ip.ToString());
 

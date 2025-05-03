@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,8 +26,18 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
+/// <summary>
+/// The CSP (Content Security Policy) parameters.
+/// </summary>
 public class CspDto
 {
+    /// <summary>
+    /// The list of CSP domains.
+    /// </summary>
     public IEnumerable<string> Domains { get; set; }
+
+    /// <summary>
+    /// The CSP header.
+    /// </summary>
     public string Header { get; set; }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -38,8 +38,15 @@ public class DeleteExpiredService(
 
     protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
-        var dataStore = await globalStore.GetStoreAsync(false);
+        try
+        {
+            var dataStore = await globalStore.GetStoreAsync(false);
 
-        await dataStore.DeleteExpiredAsync(FileConstant.StorageDomainTmp, CommonChunkedUploadSessionHolder.StoragePath, CommonChunkedUploadSessionHolder.SlidingExpiration);
+            await dataStore.DeleteExpiredAsync(FileConstant.StorageDomainTmp, CommonChunkedUploadSessionHolder.StoragePath, CommonChunkedUploadSessionHolder.SlidingExpiration);
+        }
+        catch (Exception e)
+        {
+            logger.ErrorWithException(e);
+        }
     }
 }

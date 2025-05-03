@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -25,26 +25,22 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Api.Core.Model;
+
 /// <summary>
+/// The task progress parameters.
 /// </summary>
 public class TaskProgressDto
 {
-    /// <summary>Specifies if the operation is completed or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the operation is completed or not.
+    /// </summary>
     public bool IsCompleted { get; set; }
 
-    /// <summary>Progress percentage</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The task progress percentage.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 0)]
     public int Progress { get; set; }
-
-    public static TaskProgressDto GetSample()
-    {
-        return new TaskProgressDto
-        {
-            IsCompleted = true,
-            Progress = 0
-        };
-    }
 }
 
 

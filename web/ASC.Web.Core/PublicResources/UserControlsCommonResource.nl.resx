@@ -73,10 +73,16 @@
   <data name="TariffPerMonth" xml:space="preserve">
     <value>maand</value>
   </data>
+  <data name="TariffPerYear" xml:space="preserve">
+    <value>jaar</value>
+  </data>
   <data name="UnknownFirstName" xml:space="preserve">
     <value>Voornaam</value>
   </data>
   <data name="UnknownLastName" xml:space="preserve">
     <value>Achternaam</value>
+  </data>
+  <data name="LicenseTypeNotCorrect" xml:space="preserve">
+    <value>Licentieconflict. Zorg ervoor dat u de juiste editie van {0} DocSpace (Enterprise of Developer) hebt geïnstalleerd. Als u vragen heeft, neem dan contact op met uw verkoopmanager.</value>
   </data>
 </root>

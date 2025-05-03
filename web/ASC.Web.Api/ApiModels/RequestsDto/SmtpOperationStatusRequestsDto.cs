@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,38 +27,37 @@
 namespace ASC.Api.Settings.Smtp;
 
 /// <summary>
+/// The request parameters for tracking SMTP (Simple Mail Transfer Protocol) operation status.
 /// </summary>
 public class SmtpOperationStatusRequestsDto
 {
-    /// <summary>Specifies if the SMTP operation is completed or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether the SMTP operation has finished processing.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = true)]
     public bool Completed { get; set; }
 
-    /// <summary>SMTP operation ID</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The unique identifier for tracking the SMTP operation.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "{some-random-guid}")]
     public string Id { get; set; }
 
-    /// <summary>SMTP operation error</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The error message if the SMTP operation encountered issues.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "")]
     public string Error { get; set; }
 
-    /// <summary>SMTP operation status</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The current state of the SMTP operation.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "")]
     public string Status { get; set; }
 
-    /// <summary>Percentage of SMTP operation completion</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The progress indicator showing completion percentage of the operation.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 0)]
     public int Percents { get; set; }
-
-    public static SmtpOperationStatusRequestsDto GetSample()
-    {
-        return new SmtpOperationStatusRequestsDto
-        {
-            Id = "{some-random-guid}",
-            Error = "",
-            Status = "",
-            Percents = 0,
-            Completed = true
-        };
-    }
 }

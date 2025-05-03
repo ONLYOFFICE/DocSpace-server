@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,8 +28,10 @@ namespace ASC.Core.Common.Hosting;
 
 public class InstanceRegistration
 {
+    [MaxLength(255)]
     public string InstanceRegistrationId { get; set; }
     public DateTime? LastUpdated { get; set; }
+    [MaxLength(255)]
     public string WorkerTypeName { get; set; }
     public bool IsActive { get; set; }
 }

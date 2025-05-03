@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,80 +27,99 @@
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
+/// The quota information.
 /// </summary>
 public class QuotaDto
 {
-    /// <summary>ID</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The quota ID.
+    /// </summary>
     public int Id { get; set; }
 
-    /// <summary>Title</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The quota title.
+    /// </summary>
     public string Title { get; set; }
 
-    /// <summary>Price</summary>
-    /// <type>ASC.Web.Api.ApiModels.ResponseDto.PriceDto, ASC.Web.Api</type>
+    /// <summary>
+    /// The price parameters.
+    /// </summary>
     public PriceDto Price { get; set; }
 
-    /// <summary>Specifies if the quota is nonprofit or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the quota is nonprofit or not.
+    /// </summary>
     public bool NonProfit { get; set; }
 
-    /// <summary>Specifies if the quota is free or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the quota is free or not.
+    /// </summary>
     public bool Free { get; set; }
 
-    /// <summary>Specifies if the quota is trial or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the quota is trial or not.
+    /// </summary>
     public bool Trial { get; set; }
 
-    /// <summary>List of quota features</summary>
-    /// <type>System.Collections.Generic.IEnumerable{ASC.Web.Api.ApiModels.ResponseDto.TenantQuotaFeatureDto}, ASC.Web.Api</type>
+    /// <summary>
+    /// The list of tenant quota features.
+    /// </summary>
     public IEnumerable<TenantQuotaFeatureDto> Features { get; set; }
 
-    /// <summary>User quota</summary>
-    /// <type>ASC.Core.Tenants.TenantEntityQuotaSettings, ASC.Core.Common</type>
+    /// <summary>
+    /// The user quota.
+    /// </summary>
     public TenantEntityQuotaSettings UsersQuota {  get; set; }
 
-    /// <summary>Room quota</summary>
-    /// <type>ASC.Core.Tenants.TenantEntityQuotaSettings, ASC.Core.Common</type>
+    /// <summary>
+    /// The room quota.
+    /// </summary>
     public TenantEntityQuotaSettings RoomsQuota {  get; set; }
 
-    /// <summary>Tenant custom quota</summary>
-    /// <type>ASC.Core.Tenants.TenantQuotaSettings, ASC.Core.Common</type>
+    /// <summary>
+    /// The tenant custom quota.
+    /// </summary>
     public TenantQuotaSettings TenantCustomQuota { get; set; }
 }
 
 /// <summary>
+/// The tenant quota feature parameters.
 /// </summary>
 public class TenantQuotaFeatureDto : IEquatable<TenantQuotaFeatureDto>
 {
-    /// <summary>ID</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The ID of the tenant quota feature.
+    /// </summary>
     public string Id { get; set; }
 
-    /// <summary>Title</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The title of the tenant quota feature.
+    /// </summary>
     public string Title { get; set; }
 
-    /// <summary>Image URL</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The image URL of the tenant quota feature.
+    /// </summary>
     public string Image { get; set; }
 
-    /// <summary>Value</summary>
-    /// <type>System.Object, System</type>
+    /// <summary>
+    /// The value of the tenant quota feature.
+    /// </summary>
     public object Value { get; set; }
 
-    /// <summary>Type</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The type of the tenant quota feature.
+    /// </summary>
     public string Type { get; set; }
 
-    /// <summary>Used feature parameters</summary>
-    /// <type>ASC.Web.Api.ApiModels.ResponseDto.FeatureUsedDto, ASC.Web.Api</type>
+    /// <summary>
+    /// The used space parameters of the tenant quota feature.
+    /// </summary>
     public FeatureUsedDto Used { get; set; }
 
-    /// <summary>Price title</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The price title of the tenant quota feature.
+    /// </summary>
     public string PriceTitle { get; set; }
 
     public bool Equals(TenantQuotaFeatureDto other)
@@ -118,27 +137,34 @@ public class TenantQuotaFeatureDto : IEquatable<TenantQuotaFeatureDto>
 }
 
 /// <summary>
+/// The price parameters.
 /// </summary>
 public class PriceDto
 {
-    /// <summary>Value</summary>
-    /// <type>System.Nullable{System.Decimal}, System</type>
+    /// <summary>
+    /// The price value.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 10.0)]
     public decimal? Value { get; set; }
 
-    /// <summary>Currency symbol</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The currency symbol.
+    /// </summary>
     public string CurrencySymbol { get; set; }
 }
 
 /// <summary>
+/// The used space parameters of the tenant quota feature.
 /// </summary>
 public class FeatureUsedDto
 {
-    /// <summary>Value</summary>
-    /// <type>System.Object, System</type>
+    /// <summary>
+    /// The used space value.
+    /// </summary>
     public object Value { get; set; }
 
-    /// <summary>Title</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The used space title.
+    /// </summary>
     public string Title { get; set; }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,6 +28,9 @@ using Constants = ASC.Core.Configuration.Constants;
 
 namespace ASC.People.Api;
 
+///<summary>
+/// Third-party API.
+///</summary>
 [DefaultRoute("thirdparty")]
 public class ThirdpartyController(
     AccountLinker accountLinker,
@@ -48,42 +51,39 @@ public class ThirdpartyController(
     TenantManager tenantManager,
     InvitationService invitationService,
     LoginProfileTransport loginProfileTransport,
-    EmailValidationKeyModelHelper emailValidationKeyModelHelper)
+    EmailValidationKeyModelHelper emailValidationKeyModelHelper,
+    UserSocketManager socketManager,
+    UserWebhookManager webhookManager)
     : ApiControllerBase
     {
-    
+
 
     /// <summary>
     /// Returns a list of the available third-party accounts.
     /// </summary>
     /// <short>Get third-party accounts</short>
-    /// <category>Third-party accounts</category>
-    /// <param type="System.Boolean, System" name="inviteView">Specifies whether to return providers that are available for invitation links, i.e. the user can login or register through these providers</param>
-    /// <param type="System.Boolean, System" name="settingsView">Specifies whether to return URLs in the format that is used on the Settings page</param>
-    /// <param type="System.String, System" name="clientCallback">Method that is called after authorization</param>
-    /// <param type="System.String, System" name="fromOnly">Provider name if the response only from this provider is needed</param>
-    /// <returns type="ASC.People.ApiModels.ResponseDto.AccountInfoDto, ASC.People">List of third-party accounts</returns>
     /// <path>api/2.0/people/thirdparty/providers</path>
-    /// <httpMethod>GET</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <collection>list</collection>
+    [Tags("People / Third-party accounts")]
+    [SwaggerResponse(200, "List of third-party accounts", typeof(ICollection<AccountInfoDto>))]
     [AllowAnonymous, AllowNotPayment]
     [HttpGet("providers")]
-    public async Task<ICollection<AccountInfoDto>> GetAuthProvidersAsync(bool inviteView, bool settingsView, string clientCallback, string fromOnly)
+    public async Task<ICollection<AccountInfoDto>> GetAuthProvidersAsync(AuthProvidersRequestDto inDto)
     {
         var infos = new List<AccountInfoDto>();
-        IEnumerable<LoginProfile> linkedAccounts = new List<LoginProfile>();
+        var linkedAccounts = new List<LoginProfile>();
 
         if (authContext.IsAuthenticated)
         {
             linkedAccounts = await accountLinker.GetLinkedProfilesAsync(authContext.CurrentAccount.ID.ToString());
         }
 
-        fromOnly = string.IsNullOrWhiteSpace(fromOnly) ? string.Empty : fromOnly.ToLower();
+        inDto.FromOnly = string.IsNullOrWhiteSpace(inDto.FromOnly) ? string.Empty : inDto.FromOnly.ToLower();
 
-        foreach (var provider in ProviderManager.AuthProviders.Where(provider => string.IsNullOrEmpty(fromOnly) || fromOnly == provider || (provider == "google" && fromOnly == "openid")))
+        foreach (var provider in ProviderManager.AuthProviders.Where(provider => string.IsNullOrEmpty(inDto.FromOnly) || inDto.FromOnly == provider || (provider == "google" && inDto.FromOnly == "openid")))
         {
-            if (inviteView && ProviderManager.InviteExceptProviders.Contains(provider))
+            if (inDto.InviteView && ProviderManager.InviteExceptProviders.Contains(provider))
             {
                 continue;
             }
@@ -92,8 +92,8 @@ public class ThirdpartyController(
             {
 
                 var url = VirtualPathUtility.ToAbsolute("~/login.ashx") + $"?auth={provider}";
-                var mode = settingsView || inviteView || (!mobileDetector.IsMobile() && !Request.DesktopApp())
-                        ? $"&mode=popup&callback={clientCallback}"
+                var mode = inDto.SettingsView || inDto.InviteView || (!mobileDetector.IsMobile() && !Request.DesktopApp())
+                        ? $"&mode=popup&callback={inDto.ClientCallback}"
                         : "&mode=Redirect&desktop=true";
 
                 infos.Add(new AccountInfoDto
@@ -114,11 +114,10 @@ public class ThirdpartyController(
     /// <short>
     /// Link a third-pary account
     /// </short>
-    /// <category>Third-party accounts</category>
-    /// <param type="ASC.People.ApiModels.RequestDto.LinkAccountRequestDto, ASC.People" name="inDto">Request parameters for linking accounts</param>
     /// <path>api/2.0/people/thirdparty/linkaccount</path>
-    /// <httpMethod>PUT</httpMethod>
-    /// <returns></returns>
+    [Tags("People / Third-party accounts")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(405, "Error not allowed option")]
     [HttpPut("linkaccount")]
     public async Task LinkAccountAsync(LinkAccountRequestDto inDto)
     {
@@ -132,7 +131,7 @@ public class ThirdpartyController(
         if (string.IsNullOrEmpty(profile.AuthorizationError))
         {
             await accountLinker.AddLinkAsync(securityContext.CurrentAccount.ID, profile);
-            await messageService.SendAsync(MessageAction.UserLinkedSocialAccount, GetMeaningfulProviderName(profile.Provider));
+            messageService.Send(MessageAction.UserLinkedSocialAccount, GetMeaningfulProviderName(profile.Provider));
         }
         else
         {
@@ -150,12 +149,12 @@ public class ThirdpartyController(
     /// <short>
     /// Create a third-pary account
     /// </short>
-    /// <category>Third-party accounts</category>
-    /// <param type="ASC.People.ApiModels.RequestDto.SignupAccountRequestDto, ASC.People" name="inDto">Request parameters for creating a third-party account</param>
     /// <path>api/2.0/people/thirdparty/signup</path>
-    /// <httpMethod>POST</httpMethod>
-    /// <returns></returns>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("People / Third-party accounts")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(400, "Incorrect email")]
+    [SwaggerResponse(403, "The invitation link is invalid or its validity has expired")]
     [AllowAnonymous]
     [HttpPost("signup")]
     public async Task SignupAccountAsync(SignupAccountRequestDto inDto)
@@ -194,53 +193,69 @@ public class ThirdpartyController(
         }
 
         var employeeType = linkData.EmployeeType;
-        bool quotaLimit;
+        var quotaLimit = false;
 
-        Guid userId;
-        try
+        var user = await userManager.GetUserByEmailAsync(thirdPartyProfile.EMail);
+        if (user.Id != ASC.Core.Users.Constants.LostUser.Id)
         {
-            await securityContext.AuthenticateMeWithoutCookieAsync(Constants.CoreSystem);
-
-            var invitedByEmail = linkData.LinkType == InvitationLinkType.Individual;
-
-            (var newUser, quotaLimit) = await CreateNewUser(
-                GetFirstName(inDto, thirdPartyProfile), 
-                GetLastName(inDto, thirdPartyProfile), 
-                GetEmailAddress(inDto, thirdPartyProfile), 
-                passwordHash, 
-                employeeType, 
-                false, 
-                invitedByEmail,
-                inDto.Culture,
-                model?.UiD);
-            
-            var messageAction = employeeType == EmployeeType.RoomAdmin ? MessageAction.UserCreatedViaInvite : MessageAction.GuestCreatedViaInvite;
-            await messageService.SendAsync(MessageInitiator.System, messageAction, MessageTarget.Create(newUser.Id), description: newUser.DisplayUserName(false, displayUserSettingsHelper));
-            userId = newUser.Id;
-            if (!string.IsNullOrEmpty(thirdPartyProfile.Avatar))
+            if (!(await accountLinker.GetLinkedProfilesAsync(user.Id.ToString(), thirdPartyProfile.Provider)).Any())
             {
-                await SaveContactImage(userId, thirdPartyProfile.Avatar);
+                await accountLinker.AddLinkAsync(user.Id, thirdPartyProfile);
             }
 
-            await accountLinker.AddLinkAsync(userId, thirdPartyProfile);
+            await cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id);
         }
-        finally
+        else
         {
-            securityContext.Logout();
+            Guid userId;
+
+            try
+            {
+                await securityContext.AuthenticateMeWithoutCookieAsync(Constants.CoreSystem);
+
+                var invitedByEmail = linkData.LinkType == InvitationLinkType.Individual;
+
+                (var newUser, quotaLimit) = await CreateNewUser(
+                    GetFirstName(inDto, thirdPartyProfile),
+                    GetLastName(inDto, thirdPartyProfile),
+                    GetEmailAddress(inDto, thirdPartyProfile),
+                    passwordHash,
+                    employeeType,
+                    false,
+                    invitedByEmail,
+                    inDto.Culture,
+                    model?.UiD);
+
+                var messageAction = employeeType == EmployeeType.RoomAdmin ? MessageAction.UserCreatedViaInvite : MessageAction.GuestCreatedViaInvite;
+                messageService.Send(MessageInitiator.System, messageAction, MessageTarget.Create(newUser.Id), description: newUser.DisplayUserName(false, displayUserSettingsHelper));
+                userId = newUser.Id;
+                if (!string.IsNullOrEmpty(thirdPartyProfile.Avatar))
+                {
+                    await SaveContactImage(userId, thirdPartyProfile.Avatar);
+                }
+
+                await accountLinker.AddLinkAsync(userId, thirdPartyProfile);
+
+                await webhookManager.PublishAsync(WebhookTrigger.UserCreated, newUser);
+            }
+            finally
+            {
+                securityContext.Logout();
+            }
+
+            user = await userManager.GetUsersAsync(userId);
+
+            await cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id);
+
+            await studioNotifyService.UserHasJoinAsync();
+
+            if (mustChangePassword)
+            {
+                await studioNotifyService.UserPasswordChangeAsync(user, true);
+            }
+
+            await userHelpTourHelper.SetIsNewUser(true);
         }
-
-        var user = await userManager.GetUsersAsync(userId);
-
-        await cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id);
-
-        await studioNotifyService.UserHasJoinAsync();
-
-        if (mustChangePassword)
-        {
-            await studioNotifyService.UserPasswordChangeAsync(user, true);
-        }
-
-        await userHelpTourHelper.SetIsNewUser(true);
 
         if (linkData is { LinkType: InvitationLinkType.CommonToRoom })
         {
@@ -254,17 +269,14 @@ public class ThirdpartyController(
     /// <short>
     /// Unlink a third-pary account
     /// </short>
-    /// <category>Third-party accounts</category>
-    /// <param type="System.String, System" name="provider">Provider name</param>
     /// <path>api/2.0/people/thirdparty/unlinkaccount</path>
-    /// <httpMethod>DELETE</httpMethod>
-    /// <returns></returns>
+    [Tags("People / Third-party accounts")]
     [HttpDelete("unlinkaccount")]
-    public async Task UnlinkAccountAsync(string provider)
+    public async Task UnlinkAccountAsync(UnlinkAccountRequestDto inDto)
     {
-        await accountLinker.RemoveProviderAsync(securityContext.CurrentAccount.ID.ToString(), provider);
+        await accountLinker.RemoveProviderAsync(securityContext.CurrentAccount.ID.ToString(), inDto.Provider);
 
-        await messageService.SendAsync(MessageAction.UserUnlinkedSocialAccount, GetMeaningfulProviderName(provider));
+        messageService.Send(MessageAction.UserUnlinkedSocialAccount, GetMeaningfulProviderName(inDto.Provider));
     }
 
     private async Task<(UserInfo, bool)> CreateNewUser(string firstName, string lastName, string email, string passwordHash, EmployeeType employeeType, bool fromInviteLink, 
@@ -306,11 +318,20 @@ public class ThirdpartyController(
         try
         {
             user = await userManagerWrapper.AddUserAsync(user, passwordHash, true, true, employeeType, fromInviteLink, updateExising: inviteByEmail);
+            if (employeeType is EmployeeType.Guest)
+            {
+                await socketManager.AddGuestAsync(user);
+            }
+            else
+            {
+                await socketManager.AddUserAsync(user);
+            }
         }
         catch (TenantQuotaException)
         {
             quotaLimit = true;
             user = await userManagerWrapper.AddUserAsync(user, passwordHash, true, true, EmployeeType.User, fromInviteLink, updateExising: inviteByEmail);
+            await socketManager.AddUserAsync(user);
         }
 
         return (user, quotaLimit);

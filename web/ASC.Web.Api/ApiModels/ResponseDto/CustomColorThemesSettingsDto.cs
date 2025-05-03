@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,19 +27,23 @@
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
+/// The custom color themes settings.
 /// </summary>
 public class CustomColorThemesSettingsDto
 {
-    /// <summary>Room name</summary>
-    /// <type>System.Collections.Generic.IEnumerable{ASC.Web.Core.Utility.Settings.CustomColorThemesSettingsItem}, System.Collections.Generic</type>
+    /// <summary>
+    /// The list of the custom color themes.
+    /// </summary>
     public IEnumerable<CustomColorThemesSettingsItem> Themes { get; set; }
 
-    /// <summary>Room name</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// Specifies whether the custom color theme is selected.
+    /// </summary>
     public int Selected { get; set; }
 
-    /// <summary>Room name</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The maximum number of the custom color themes.
+    /// </summary>
     public int Limit { get; set; }
 
     public CustomColorThemesSettingsDto(CustomColorThemesSettings customColorThemesSettings, int limit)

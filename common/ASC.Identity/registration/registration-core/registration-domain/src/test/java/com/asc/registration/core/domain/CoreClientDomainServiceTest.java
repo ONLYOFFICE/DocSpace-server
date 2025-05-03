@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
 import com.asc.common.core.domain.entity.Audit;
+import com.asc.common.core.domain.value.UserId;
 import com.asc.common.core.domain.value.enums.AuthenticationMethod;
 import com.asc.common.core.domain.value.enums.ClientVisibility;
 import com.asc.registration.core.domain.entity.Client;
@@ -44,6 +45,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 class CoreClientDomainServiceTest {
+  private final String USER_ID = "userId";
   private CoreClientDomainService service;
   private Audit audit;
   private Client client;
@@ -54,17 +56,17 @@ class CoreClientDomainServiceTest {
     audit = mock(Audit.class);
     client = mock(Client.class);
 
-    when(audit.getUserEmail()).thenReturn("test@example.com");
+    when(audit.getUserId()).thenReturn(USER_ID);
   }
 
   @Test
-  void testCreateClient() {
-    var captor = ArgumentCaptor.forClass(String.class);
+  void whenClientIsCreated_thenEventIsGenerated() {
+    var captor = ArgumentCaptor.forClass(UserId.class);
     var event = service.createClient(audit, client);
 
     verify(client).initialize(captor.capture());
 
-    assertEquals("test@example.com", captor.getValue());
+    assertEquals(USER_ID, captor.getValue().getValue());
     assertNotNull(event);
     assertEquals(client, event.getClient());
     assertEquals(audit, event.getAudit());
@@ -72,13 +74,13 @@ class CoreClientDomainServiceTest {
   }
 
   @Test
-  void testEnableClient() {
-    var captor = ArgumentCaptor.forClass(String.class);
+  void whenClientIsEnabled_thenEventIsGenerated() {
+    var captor = ArgumentCaptor.forClass(UserId.class);
     var event = service.enableClient(audit, client);
 
     verify(client).enable(captor.capture());
 
-    assertEquals("test@example.com", captor.getValue());
+    assertEquals(USER_ID, captor.getValue().getValue());
     assertNotNull(event);
     assertEquals(client, event.getClient());
     assertEquals(audit, event.getAudit());
@@ -86,13 +88,13 @@ class CoreClientDomainServiceTest {
   }
 
   @Test
-  void testDisableClient() {
-    var captor = ArgumentCaptor.forClass(String.class);
+  void whenClientIsDisabled_thenEventIsGenerated() {
+    var captor = ArgumentCaptor.forClass(UserId.class);
     var event = service.disableClient(audit, client);
 
     verify(client).disable(captor.capture());
 
-    assertEquals("test@example.com", captor.getValue());
+    assertEquals(USER_ID, captor.getValue().getValue());
     assertNotNull(event);
     assertEquals(client, event.getClient());
     assertEquals(audit, event.getAudit());
@@ -100,13 +102,13 @@ class CoreClientDomainServiceTest {
   }
 
   @Test
-  void testInvalidateClient() {
-    var captor = ArgumentCaptor.forClass(String.class);
-    var event = service.invalidateClient(audit, client);
+  void whenClientIsDeleted_thenEventIsGenerated() {
+    var captor = ArgumentCaptor.forClass(UserId.class);
+    var event = service.deleteClient(audit, client);
 
-    verify(client).invalidate(captor.capture());
+    verify(client).disable(captor.capture());
 
-    assertEquals("test@example.com", captor.getValue());
+    assertEquals(USER_ID, captor.getValue().getValue());
     assertNotNull(event);
     assertEquals(client, event.getClient());
     assertEquals(audit, event.getAudit());
@@ -114,13 +116,13 @@ class CoreClientDomainServiceTest {
   }
 
   @Test
-  void testRegenerateClientSecret() {
-    var captor = ArgumentCaptor.forClass(String.class);
+  void whenClientSecretIsRegenerated_thenEventIsGenerated() {
+    var captor = ArgumentCaptor.forClass(UserId.class);
     var event = service.regenerateClientSecret(audit, client);
 
     verify(client).regenerateSecret(captor.capture());
 
-    assertEquals("test@example.com", captor.getValue());
+    assertEquals(USER_ID, captor.getValue().getValue());
     assertNotNull(event);
     assertEquals(client, event.getClient());
     assertEquals(audit, event.getAudit());
@@ -128,14 +130,14 @@ class CoreClientDomainServiceTest {
   }
 
   @Test
-  void testUpdateClientInfo() {
-    var captor = ArgumentCaptor.forClass(String.class);
+  void whenClientInfoIsUpdated_thenEventIsGenerated() {
+    var captor = ArgumentCaptor.forClass(UserId.class);
     var clientInfo = new ClientInfo("Updated Client", "Updated Description", "Updated Logo URL");
     var event = service.updateClientInfo(audit, client, clientInfo);
 
     verify(client).updateClientInfo(eq(clientInfo), captor.capture());
 
-    assertEquals("test@example.com", captor.getValue());
+    assertEquals(USER_ID, captor.getValue().getValue());
     assertNotNull(event);
     assertEquals(client, event.getClient());
     assertEquals(audit, event.getAudit());
@@ -143,8 +145,8 @@ class CoreClientDomainServiceTest {
   }
 
   @Test
-  void testUpdateClientWebsiteInfo() {
-    var captor = ArgumentCaptor.forClass(String.class);
+  void whenClientWebsiteInfoIsUpdated_thenEventIsGenerated() {
+    var captor = ArgumentCaptor.forClass(UserId.class);
     var clientWebsiteInfo =
         ClientWebsiteInfo.Builder.builder()
             .websiteUrl("http://updated.website")
@@ -155,7 +157,7 @@ class CoreClientDomainServiceTest {
 
     verify(client).updateClientWebsiteInfo(eq(clientWebsiteInfo), captor.capture());
 
-    assertEquals("test@example.com", captor.getValue());
+    assertEquals(USER_ID, captor.getValue().getValue());
     assertNotNull(event);
     assertEquals(client, event.getClient());
     assertEquals(audit, event.getAudit());
@@ -163,8 +165,8 @@ class CoreClientDomainServiceTest {
   }
 
   @Test
-  void testUpdateClientRedirectInfo() {
-    var captor = ArgumentCaptor.forClass(String.class);
+  void whenClientRedirectInfoIsUpdated_thenEventIsGenerated() {
+    var captor = ArgumentCaptor.forClass(UserId.class);
     var clientRedirectInfo =
         new ClientRedirectInfo(
             Set.of("http://updated.redirect"),
@@ -174,7 +176,7 @@ class CoreClientDomainServiceTest {
 
     verify(client).updateClientRedirectInfo(eq(clientRedirectInfo), captor.capture());
 
-    assertEquals("test@example.com", captor.getValue());
+    assertEquals(USER_ID, captor.getValue().getValue());
     assertNotNull(event);
     assertEquals(client, event.getClient());
     assertEquals(audit, event.getAudit());
@@ -182,14 +184,14 @@ class CoreClientDomainServiceTest {
   }
 
   @Test
-  void testAddAuthenticationMethod() {
-    var captor = ArgumentCaptor.forClass(String.class);
+  void whenAuthenticationMethodIsAdded_thenEventIsGenerated() {
+    var captor = ArgumentCaptor.forClass(UserId.class);
     var method = AuthenticationMethod.DEFAULT_AUTHENTICATION;
     var event = service.addAuthenticationMethod(audit, client, method);
 
     verify(client).addAuthenticationMethod(eq(method), captor.capture());
 
-    assertEquals("test@example.com", captor.getValue());
+    assertEquals(USER_ID, captor.getValue().getValue());
     assertNotNull(event);
     assertEquals(client, event.getClient());
     assertEquals(audit, event.getAudit());
@@ -197,14 +199,14 @@ class CoreClientDomainServiceTest {
   }
 
   @Test
-  void testRemoveAuthenticationMethod() {
-    var captor = ArgumentCaptor.forClass(String.class);
+  void whenAuthenticationMethodIsRemoved_thenEventIsGenerated() {
+    var captor = ArgumentCaptor.forClass(UserId.class);
     var method = AuthenticationMethod.DEFAULT_AUTHENTICATION;
     var event = service.removeAuthenticationMethod(audit, client, method);
 
     verify(client).removeAuthenticationMethod(eq(method), captor.capture());
 
-    assertEquals("test@example.com", captor.getValue());
+    assertEquals(USER_ID, captor.getValue().getValue());
     assertNotNull(event);
     assertEquals(client, event.getClient());
     assertEquals(audit, event.getAudit());
@@ -212,14 +214,14 @@ class CoreClientDomainServiceTest {
   }
 
   @Test
-  void testAddScope() {
-    var captor = ArgumentCaptor.forClass(String.class);
+  void whenScopeIsAdded_thenEventIsGenerated() {
+    var captor = ArgumentCaptor.forClass(UserId.class);
     var scope = "newScope";
     var event = service.addScope(audit, client, scope);
 
     verify(client).addScope(eq(scope), captor.capture());
 
-    assertEquals("test@example.com", captor.getValue());
+    assertEquals(USER_ID, captor.getValue().getValue());
     assertNotNull(event);
     assertEquals(client, event.getClient());
     assertEquals(audit, event.getAudit());
@@ -227,14 +229,14 @@ class CoreClientDomainServiceTest {
   }
 
   @Test
-  void testRemoveScope() {
-    var captor = ArgumentCaptor.forClass(String.class);
+  void whenScopeIsRemoved_thenEventIsGenerated() {
+    var captor = ArgumentCaptor.forClass(UserId.class);
     var scope = "existingScope";
     var event = service.removeScope(audit, client, scope);
 
     verify(client).removeScope(eq(scope), captor.capture());
 
-    assertEquals("test@example.com", captor.getValue());
+    assertEquals(USER_ID, captor.getValue().getValue());
     assertNotNull(event);
     assertEquals(client, event.getClient());
     assertEquals(audit, event.getAudit());
@@ -242,13 +244,13 @@ class CoreClientDomainServiceTest {
   }
 
   @Test
-  void testMakeClientPublic() {
-    var captor = ArgumentCaptor.forClass(String.class);
+  void whenClientIsMadePublic_thenEventIsGenerated() {
+    var captor = ArgumentCaptor.forClass(UserId.class);
     var event = service.makeClientPublic(audit, client);
 
     verify(client).changeVisibility(eq(ClientVisibility.PUBLIC), captor.capture());
 
-    assertEquals("test@example.com", captor.getValue());
+    assertEquals(USER_ID, captor.getValue().getValue());
     assertNotNull(event);
     assertEquals(client, event.getClient());
     assertEquals(audit, event.getAudit());
@@ -256,13 +258,13 @@ class CoreClientDomainServiceTest {
   }
 
   @Test
-  void testMakeClientPrivate() {
-    var captor = ArgumentCaptor.forClass(String.class);
+  void whenClientIsMadePrivate_thenEventIsGenerated() {
+    var captor = ArgumentCaptor.forClass(UserId.class);
     var event = service.makeClientPrivate(audit, client);
 
     verify(client).changeVisibility(eq(ClientVisibility.PRIVATE), captor.capture());
 
-    assertEquals("test@example.com", captor.getValue());
+    assertEquals(USER_ID, captor.getValue().getValue());
     assertNotNull(event);
     assertEquals(client, event.getClient());
     assertEquals(audit, event.getAudit());

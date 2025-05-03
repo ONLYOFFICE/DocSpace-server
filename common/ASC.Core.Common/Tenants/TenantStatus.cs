@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,13 +26,30 @@
 
 namespace ASC.Core.Tenants;
 
+/// <summary>
+/// The tenant status.
+/// </summary>
+[EnumExtensions]
 public enum TenantStatus
 {
+    [SwaggerEnum("Active")]
     Active = 0,
+
+    [SwaggerEnum("Suspended")]
     Suspended = 1,
+
+    [SwaggerEnum("Remove pending")]
     RemovePending = 2,
+
+    [SwaggerEnum("Transfering")]
     Transfering = 3,
+
+    [SwaggerEnum("Restoring")]
     Restoring = 4,
+
+    [SwaggerEnum("Migrating")]
     Migrating = 5,
+
+    [SwaggerEnum("Encryption")]
     Encryption = 6
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,9 +28,11 @@ namespace ASC.Core.Common;
 
 public static class ArabicNumeralHelper
 {
+    private static readonly string[] _langs = ["ar-lb", "ar-SA"];
+
     public static string ConvertNumerals(this DateTime input, string format)
     {
-        if (!new[] { "ar-lb", "ar-SA" }.Contains(Thread.CurrentThread.CurrentCulture.Name))
+        if (!_langs.Contains(Thread.CurrentThread.CurrentCulture.Name))
         {
             return input.ToString(format, Thread.CurrentThread.CurrentCulture);
         }

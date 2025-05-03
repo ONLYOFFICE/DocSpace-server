@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,23 +26,48 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// The document service URL parameters.
+/// </summary>
 public class DocServiceUrlDto
-{   
-    /// <type>System.String, System</type>
+{
+    /// <summary>
+    /// The version of the document service.
+    /// </summary>
     public required string Version { get; set; }
-    
-    /// <type>System.String, System</type>
+
+    /// <summary>
+    /// The document service URL API.
+    /// </summary>
     public required string DocServiceUrlApi { get; set; }
-    
-    /// <type>System.String, System</type>
+
+    /// <summary>
+    /// The document service URL.
+    /// </summary>
     public required string DocServiceUrl { get; set; }
-    
-    /// <type>System.String, System</type>
+
+    /// <summary>
+    /// The internal document service URL.
+    /// </summary>
     public required string DocServiceUrlInternal { get; set; }
-    
-    /// <type>System.String, System</type>
+
+    /// <summary>
+    /// The document service portal URL.
+    /// </summary>
     public required string DocServicePortalUrl { get; set; }
-    
-    /// <type>System.Boolean, System</type>
+
+    /// <summary>
+    /// The document service signature header.
+    /// </summary>
+    public string DocServiceSignatureHeader { get; set; }
+
+    /// <summary>
+    /// Specifies if the document service SSL verification is enabled.
+    /// </summary>
+    public bool DocServiceSslVerification { get; set; }
+
+    /// <summary>
+    /// Specifies if the document service is default.
+    /// </summary>
     public required bool IsDefault { get; set; }
 }

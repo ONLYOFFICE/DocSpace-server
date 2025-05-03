@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,6 +30,7 @@ public class DbFilesTag : IDbFile, IMapFrom<TagInfo>
 {
     public int TenantId { get; set; }
     public int Id { get; set; }
+    [MaxLength(255)]
     public string Name { get; set; }
     public Guid Owner { get; set; }
     public TagType Type { get; set; }
@@ -68,7 +69,7 @@ public static class DbFilesTagExtension
             entity.Property(e => e.Name)
                 .IsRequired()
                 .HasColumnName("name")
-                .HasColumnType("varchar(255)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -86,24 +87,26 @@ public static class DbFilesTagExtension
     {
         modelBuilder.Entity<DbFilesTag>(entity =>
         {
-            entity.ToTable("files_tag", "onlyoffice");
+            entity.ToTable("files_tag");
 
             entity.HasIndex(e => new { e.TenantId, e.Owner, e.Name, e.Type })
-                .HasDatabaseName("name_files_tag");
+                .HasDatabaseName("name");
 
             entity.Property(e => e.Id).HasColumnName("id");
 
-            entity.Property(e => e.Type).HasColumnName("flag");
+            entity.Property(e => e.Type)
+                .HasColumnName("flag")
+                .HasDefaultValueSql("0");
 
             entity.Property(e => e.Name)
                 .IsRequired()
                 .HasColumnName("name")
-                .HasMaxLength(255);
+                .HasColumnType("varchar");
 
             entity.Property(e => e.Owner)
                 .IsRequired()
                 .HasColumnName("owner")
-                .HasMaxLength(38);
+                .HasColumnType("uuid");
 
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
         });

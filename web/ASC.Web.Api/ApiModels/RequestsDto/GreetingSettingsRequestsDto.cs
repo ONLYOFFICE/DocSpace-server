@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,11 +27,13 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
+/// The request parameters for managing the greeting settings.
 /// </summary>
 public class GreetingSettingsRequestsDto
 {
-    /// <summary>Tenant name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The title of the tenant greeting settings.
+    /// </summary>
     [StringLength(255)]
-    public string Title { get; set; }
+    public required string Title { get; set; }
 }

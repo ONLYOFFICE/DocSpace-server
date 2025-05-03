@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,34 +27,42 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
+/// The request parameters for querying webhook delivery logs with filtering criteria.
 /// </summary>
 public class WebhooksLogRequest
 {
-    /// <summary>Delivey start time</summary>
-    /// <type>System.Nullable{System.DateTime}, System</type>
+    /// <summary>
+    /// Start of the time range for filtering webhook deliveries.
+    /// </summary>
     public DateTime? DeliveryFrom { get; set; }
 
-    /// <summary>Delivey end time</summary>
-    /// <type>System.Nullable{System.DateTime}, System</type>
+    /// <summary>
+    /// The end of the time range for filtering webhook deliveries.
+    /// </summary>
     public DateTime? DeliveryTo { get; set; }
 
-    /// <summary>Hook URI</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The destination URL where webhooks are delivered.
+    /// </summary>
     public string HookUri { get; set; }
 
-    /// <summary>Webhook ID</summary>
-    /// <type>System.Nullable{System.Int32}, System</type>
+    /// <summary>
+    /// The ID of a specific webhook delivery.
+    /// </summary>
     public int? WebhookId { get; set; }
 
-    /// <summary>Config ID</summary>
-    /// <type>System.Nullable{System.Int32}, System</type>
+    /// <summary>
+    /// The ID of the webhook configuration identifier.
+    /// </summary>
     public int? ConfigId { get; set; }
 
-    /// <summary>Event ID</summary>
-    /// <type>System.Nullable{System.Int32}, System</type>
+    /// <summary>
+    /// The ID of the event that triggered the webhook.
+    /// </summary>
     public int? EventId { get; set; }
 
-    /// <summary>Webhook group status</summary>
-    /// <type>System.Nullable{ASC.Webhooks.Core.WebhookGroupStatus}, System</type>
+    /// <summary>
+    /// The status of the webhook delivery group.
+    /// </summary>
     public WebhookGroupStatus? GroupStatus { get; set; }
 }

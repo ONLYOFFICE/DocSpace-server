@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -45,18 +45,16 @@ public abstract class MasterFormController<T>(FileStorageService fileStorageServ
     /// <summary>
     /// Checks if the current file is a form draft which can be filled out.
     /// </summary>
-    /// <short>Check the form draft</short>
-    /// <category>Files</category>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.CheckFillFormDraftRequestDto, ASC.Files.Core" name="inDto">Request parameters for checking a form draft</param>
-    /// <returns type="System.Object, System">Link to the form</returns>
+    /// <short>Check the form draft filling</short>
     /// <path>api/2.0/files/masterform/{fileId}/checkfillformdraft</path>
-    /// <httpMethod>POST</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "Link to the form", typeof(string))]
+    [SwaggerResponse(403, "You don't have enough permission to view the file")]
     [AllowAnonymous]
     [HttpPost("masterform/{fileId}/checkfillformdraft")]
-    public async Task<object> CheckFillFormDraftAsync(T fileId, CheckFillFormDraftRequestDto inDto)
+    public async Task<string> CheckFillFormDraftAsync(CheckFillFormDraftRequestDto<T> inDto)
     {
-        return await fileStorageService.CheckFillFormDraftAsync(fileId, inDto.Version,!inDto.RequestEmbedded, inDto.RequestView);
+        return await fileStorageService.CheckFillFormDraftAsync(inDto.FileId, inDto.File.Version,!inDto.File.RequestEmbedded, inDto.File.RequestView);
     }
 }

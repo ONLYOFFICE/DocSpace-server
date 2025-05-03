@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,40 +27,59 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
+/// The request parameters for configuring the Two-Factor Authentication (TFA) settings.
 /// </summary>
 public class TfaRequestsDto
 {
-    /// <summary>TFA type (None, Sms, or App)</summary>
-    /// <type>System.String, System</type>
-    public string Type { get; set; }
+    /// <summary>
+    /// The two-factor authentication type.
+    /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public TfaRequestsDtoType Type { get; set; }
 
-    /// <summary>User ID</summary>
-    /// <type>System.Nullable{System.Guid}, System</type>
-    /// <example>9924256A-739C-462b-AF15-E652A3B1B6EB</example>
-    public Guid? Id { get; set; }
+    /// <summary>
+    /// The ID of the user for whom the TFA settings are being configured.
+    /// </summary>
+    public Guid Id { get; set; }
 
-    /// <summary>List of trusted IP addresses</summary>
-    /// <type>System.Collections.Generic.List{System.String}, System.Collections.Generic</type>
+    /// <summary>
+    /// The list of IP addresses that bypass TFA verification.
+    /// </summary>
     public List<string> TrustedIps { get; set; }
 
-    /// <summary>List of users who must use the TFA verification</summary>
-    /// <type>System.Collections.Generic.List{System.Guid}, System.Collections.Generic</type>
-    /// <example>9924256A-739C-462b-AF15-E652A3B1B6EB</example>
-	/// <collection>list</collection>
+    /// <summary>
+    /// The list of user IDs for whom TFA is mandatory.
+    /// </summary>
     public List<Guid> MandatoryUsers { get; set; }
 
-    /// <summary>List of groups who must use the TFA verification</summary>
-    /// <type>System.Collections.Generic.List{System.Guid}, System.Collections.Generic</type>
-    /// <example>9924256A-739C-462b-AF15-E652A3B1B6EB</example>
-	/// <collection>list</collection>
+    /// <summary>
+    /// The list group IDs whose members must use TFA.
+    /// </summary>
     public List<Guid> MandatoryGroups { get; set; }
 }
 
 /// <summary>
+/// The two-factor authentication type.
+/// </summary>
+public enum TfaRequestsDtoType
+{
+    [SwaggerEnum("None")]
+    None = 0,
+
+    [SwaggerEnum("Sms")]
+    Sms = 1,
+
+    [SwaggerEnum("App")]
+    App = 2
+}
+
+/// <summary>
+/// The request parameters for validating the two-factor authentication codes.
 /// </summary>
 public class TfaValidateRequestsDto
 {
-    /// <summary>TFA code</summary>
-    /// <type>System.String, System</type>
-    public string Code { get; set; }
+    /// <summary>
+    /// The verification code provided by the user.
+    /// </summary>
+    public required string Code { get; set; }
 }

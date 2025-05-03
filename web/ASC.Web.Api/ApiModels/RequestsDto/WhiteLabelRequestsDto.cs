@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,41 +27,50 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
+/// The request parameters for configuring the white label branding settings.
 /// </summary>
 public class WhiteLabelRequestsDto
 {
-    /// <summary>Logo text</summary>
-    /// <type>System.String, System</type>
-    [StringLength(30)]
+    /// <summary>
+    /// The text to display alongside or in place of the logo.
+    /// </summary>
+    [StringLength(40)]
     public string LogoText { get; set; }
 
-    /// <summary>Tenant IDs with their logos (light or dark)</summary>
-    /// <type>System.Collections.Generic.IEnumerable{ASC.Api.Collections.ItemKeyValuePair{System.String, ASC.Web.Api.ApiModel.RequestsDto.LogoRequestsDto}}, System.Collections.Generic</type>
+    /// <summary>
+    /// The white label tenant IDs with their logos (light or dark).
+    /// </summary>
     public IEnumerable<ItemKeyValuePair<string, LogoRequestsDto>> Logo { get; set; }
 }
 
 /// <summary>
+/// The request parameters for the theme-specific logo configurations.
 /// </summary>
 public class LogoRequestsDto
 {
-    /// <summary>Light theme logo</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The URL or base64-encoded image data for the light theme logo.
+    /// </summary>
     public string Light { get; set; }
 
-    /// <summary>Dark theme logo</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The URL or base64-encoded image data for the dark theme logo.
+    /// </summary>
     public string Dark { get; set; }
 }
 
 /// <summary>
+/// The request parameters for querying the white label configurations.
 /// </summary>
 public class WhiteLabelQueryRequestsDto
 {
-    /// <summary>Specifies if the logo is for a dark theme or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    /// <summary>
+    /// Specifies if the white label logo is for the dark theme or not.
+    /// </summary>
     public bool? IsDark { get; set; }
 
-    /// <summary>Specifies if the logo is for a default tenant or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    /// <summary>
+    /// Specifies if the logo is for a default tenant or not.
+    /// </summary>
     public bool? IsDefault { get; set; }
 }

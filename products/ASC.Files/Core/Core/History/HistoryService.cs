@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -45,9 +45,15 @@ public class HistoryService(
         MessageAction.FileMovedToTrash, 
         MessageAction.FileCopied, 
         MessageAction.FileCopiedWithOverwriting, 
+        MessageAction.FileVersionRemoved, 
         MessageAction.FileDeleted, 
         MessageAction.FileConverted, 
-        MessageAction.FileRestoreVersion, 
+        MessageAction.FileRestoreVersion,
+        MessageAction.FileIndexChanged,
+        MessageAction.FileLocked,
+        MessageAction.FileUnlocked,
+        MessageAction.FileCustomFilterEnabled,
+        MessageAction.FileCustomFilterDisabled,
         MessageAction.FolderCreated,
         MessageAction.FolderRenamed,
         MessageAction.FolderMoved,
@@ -56,6 +62,8 @@ public class HistoryService(
         MessageAction.FolderCopiedWithOverwriting,
         MessageAction.FolderMovedToTrash,
         MessageAction.FolderDeleted,
+        MessageAction.FolderIndexChanged,
+        MessageAction.FolderIndexReordered,
         MessageAction.RoomCreateUser,
         MessageAction.RoomUpdateAccessForUser,
         MessageAction.RoomRemoveUser,
@@ -74,7 +82,25 @@ public class HistoryService(
         MessageAction.RoomExternalLinkDeleted,
         MessageAction.RoomExternalLinkRevoked,
         MessageAction.FormSubmit,
-        MessageAction.FormOpenedForFilling
+        MessageAction.FormOpenedForFilling,
+        MessageAction.RoomIndexingEnabled,
+        MessageAction.RoomIndexingDisabled,
+        MessageAction.RoomLifeTimeSet,
+        MessageAction.RoomLifeTimeDisabled,
+        MessageAction.RoomArchived,
+        MessageAction.RoomUnarchived,
+        MessageAction.RoomDenyDownloadEnabled,
+        MessageAction.RoomDenyDownloadDisabled,
+        MessageAction.RoomWatermarkSet,
+        MessageAction.RoomWatermarkDisabled,
+        MessageAction.RoomColorChanged,
+        MessageAction.RoomCoverChanged,
+        MessageAction.RoomIndexExportSaved,
+        MessageAction.RoomInviteResend,
+        MessageAction.FormStartedToFill,
+        MessageAction.FormPartiallyFilled,
+        MessageAction.FormCompletelyFilled,
+        MessageAction.FormStopped
     ];
 
     private static HashSet<int> FilterFolderActions => [
@@ -90,34 +116,53 @@ public class HistoryService(
         (int)MessageAction.FileMoved,
         (int)MessageAction.FileRenamed,
         (int)MessageAction.FormSubmit,
-        (int)MessageAction.FormOpenedForFilling
+        (int)MessageAction.FormOpenedForFilling,
+        (int)MessageAction.FormStartedToFill,
+        (int)MessageAction.FormPartiallyFilled,
+        (int)MessageAction.FormCompletelyFilled,
+        (int)MessageAction.FormStopped
     ];
     
-    public async IAsyncEnumerable<HistoryEntry> GetHistoryAsync(int entryId, FileEntryType entryType, int offset, int count, bool needFiltering, List<int> filterFolderIds, List<int> filterFilesIds)
+    public async IAsyncEnumerable<HistoryEntry> GetHistoryAsync(
+        FileEntry<int> entry,
+        int offset,
+        int count,
+        bool needFiltering,
+        List<int> filterFolderIds,
+        List<int> filterFilesIds,
+        DateTime? fromDate,
+        DateTime? toDate)
     {
         var messageDbContext = await dbContextFactory.CreateDbContextAsync();
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
 
-        var events = needFiltering ? 
-            messageDbContext.GetFilteredAuditEventsByReferences(tenantId, entryId, (byte)entryType, offset, count, filterFolderIds, filterFilesIds, FilterFolderActions, FilterFileActions) 
-            : messageDbContext.GetAuditEventsByReferences(tenantId, entryId, (byte)entryType, offset, count);
+        var events = needFiltering 
+            ? messageDbContext.GetFilteredAuditEventsByReferences(tenantId, entry.Id, (byte)entry.FileEntryType, offset, count, filterFolderIds, filterFilesIds, FilterFolderActions, FilterFileActions, fromDate, toDate) 
+            : messageDbContext.GetAuditEventsByReferences(tenantId, entry.Id, (byte)entry.FileEntryType, offset, count, fromDate, toDate);
 
-        await foreach (var hEntry in events.SelectAwait(interpreter.ToHistoryAsync).Where(x => x != null))
+        await foreach (var hEntry in events.SelectAwait(e => interpreter.ToHistoryAsync(e.Item1, e.Item2)).Where(x => x != null))
         {
             yield return hEntry;
         }
     }
 
-    public async Task<int> GetHistoryCountAsync(int entryId, FileEntryType entryType, bool needFiltering, List<int> filterFolderIds, List<int> filterFilesIds)
+    public async Task<int> GetHistoryCountAsync(
+        int entryId,
+        FileEntryType entryType,
+        bool needFiltering,
+        List<int> filterFolderIds,
+        List<int> filterFilesIds,
+        DateTime? fromDate,
+        DateTime? toDate)
     {
         var messageDbContext = await dbContextFactory.CreateDbContextAsync();
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
 
         if (needFiltering)
         {
-            return await messageDbContext.GetFilteredAuditEventsByReferencesTotalCount(tenantId, entryId, (byte)entryType, filterFolderIds, filterFilesIds, FilterFolderActions, FilterFileActions);
+            return await messageDbContext.GetFilteredAuditEventsByReferencesTotalCount(tenantId, entryId, (byte)entryType, filterFolderIds, filterFilesIds, FilterFolderActions, FilterFileActions, fromDate, toDate);
         }
         
-        return await messageDbContext.GetAuditEventsByReferencesTotalCount(tenantId, entryId, (byte)entryType);
+        return await messageDbContext.GetAuditEventsByReferencesTotalCount(tenantId, entryId, (byte)entryType, fromDate, toDate);
     }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -43,12 +43,12 @@ public class SecurityController(
     WebItemManagerSecurity webItemManagerSecurity,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     EmployeeDtoHelper employeeWrapperHelper,
-    IMemoryCache memoryCache,
+    IFusionCache fusionCache,
     IMapper mapper,
     IHttpContextAccessor httpContextAccessor,
     PasswordSettingsConverter passwordSettingsConverter,
     PasswordSettingsManager passwordSettingsManager)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
     /// Returns the security settings for the modules specified in the request.
@@ -56,23 +56,21 @@ public class SecurityController(
     /// <short>
     /// Get the security settings
     /// </short>
-    /// <category>Security</category>
-    /// <param type="System.Collections.Generic.IEnumerable{System.String}, System.Collections.Generic" name="ids">List of module IDs</param>
-    /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.SecurityDto, ASC.Web.Api">Security settings</returns>
     /// <path>api/2.0/settings/security</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Settings / Security")]
+    [SwaggerResponse(200, "Security settings", typeof(IAsyncEnumerable<SecurityDto>))]
     [HttpGet("")]
-    public async IAsyncEnumerable<SecurityDto> GetWebItemSecurityInfo([FromQuery] IEnumerable<string> ids)
+    public async IAsyncEnumerable<SecurityDto> GetWebItemSettingsSecurityInfo(SecuritySettingsRequestDto inDto)
     {
-        if (ids == null || !ids.Any())
+        if (inDto.Ids == null || !inDto.Ids.Any())
         {
-            ids = WebItemManager.GetItemsAll().Select(i => i.ID.ToString());
+            inDto.Ids = WebItemManager.GetItemsAll().Select(i => i.ID.ToString());
         }
 
         var subItemList = WebItemManager.GetItemsAll().Where(item => item.IsSubItem()).Select(i => i.ID.ToString());
 
-        foreach (var r in ids)
+        foreach (var r in inDto.Ids)
         {
             var i = await webItemSecurity.GetSecurityInfoAsync(r);
 
@@ -105,15 +103,13 @@ public class SecurityController(
     /// <short>
     /// Get the module availability
     /// </short>
-    /// <category>Security</category>
-    /// <param type="System.Guid, System" method="url" name="id">Module ID</param>
-    /// <returns type="System.Boolean, System">Boolean value: true - module is enabled, false - module is disabled</returns>
     /// <path>api/2.0/settings/security/{id}</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / Security")]
+    [SwaggerResponse(200, "Boolean value: true - module is enabled, false - module is disabled", typeof(bool))]
     [HttpGet("{id:guid}")]
-    public async Task<bool> GetWebItemSecurityInfoAsync(Guid id)
+    public async Task<bool> GetWebItemSecurityInfoAsync(IdRequestDto<Guid> inDto)
     {
-        var module = WebItemManager[id];
+        var module = WebItemManager[inDto.Id];
 
         return module != null && !await module.IsDisabledAsync(webItemSecurity, authContext);
     }
@@ -124,10 +120,9 @@ public class SecurityController(
     /// <short>
     /// Get the enabled modules
     /// </short>
-    /// <category>Security</category>
-    /// <returns type="System.Object, System">List of enabled modules</returns>
     /// <path>api/2.0/settings/security/modules</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / Security")]
+    [SwaggerResponse(200, "List of enabled modules", typeof(object))]
     [HttpGet("modules")]
     public object GetEnabledModules()
     {
@@ -144,17 +139,17 @@ public class SecurityController(
     /// <short>
     /// Get the password settings
     /// </short>
-    /// <category>Security</category>
-    /// <returns type="ASC.Web.Core.Utility.PasswordSettings, ASC.Web.Core">Password settings</returns>
     /// <path>api/2.0/settings/security/password</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / Security")]
+    [SwaggerResponse(200, "Password settings", typeof(PasswordSettingsDto))]
     [HttpGet("password")]
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Everyone")]
     public async Task<PasswordSettingsDto> GetPasswordSettingsAsync()
-    {
-        var settings = await settingsManager.LoadAsync<PasswordSettings>();
-        return passwordSettingsConverter.Convert(settings);
+    {        
+        var settings = await settingsManager.LoadAsync<PasswordSettings>(HttpContext.GetIfModifiedSince());
+        
+        return HttpContext.TryGetFromCache(settings.LastModified) ? null :  passwordSettingsConverter.Convert(settings);
     }
 
     /// <summary>
@@ -163,11 +158,10 @@ public class SecurityController(
     /// <short>
     /// Set the password settings
     /// </short>
-    /// <category>Security</category>
-    /// <param type="ASC.Web.Api.Models.PasswordSettingsRequestsDto, ASC.Web.Api" name="inDto">Password settings</param>
-    /// <returns type="ASC.Web.Core.Utility.PasswordSettings, ASC.Web.Core">Password settings</returns>
     /// <path>api/2.0/settings/security/password</path>
-    /// <httpMethod>PUT</httpMethod>
+    [Tags("Settings / Security")]
+    [SwaggerResponse(200, "Password settings", typeof(PasswordSettingsDto))]
+    [SwaggerResponse(400, "MinLength")]
     [HttpPut("password")]
     public async Task<PasswordSettingsDto> UpdatePasswordSettingsAsync(PasswordSettingsRequestsDto inDto)
     {
@@ -187,7 +181,7 @@ public class SecurityController(
 
         await settingsManager.SaveAsync(userPasswordSettings);
 
-        await messageService.SendAsync(MessageAction.PasswordStrengthSettingsUpdated);
+        messageService.Send(MessageAction.PasswordStrengthSettingsUpdated);
 
         return passwordSettingsConverter.Convert(userPasswordSettings);
     }
@@ -198,19 +192,18 @@ public class SecurityController(
     /// <short>
     /// Set the module security settings
     /// </short>
-    /// <category>Security</category>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.WebItemSecurityRequestsDto, ASC.Web.Api" name="inDto">Module request parameters</param>
     /// <path>api/2.0/settings/security</path>
-    /// <httpMethod>PUT</httpMethod>
-    /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.SecurityDto, ASC.Web.Api">Security settings</returns>
     /// <collection>list</collection>
+    [Tags("Settings / Security")]
+    [SwaggerResponse(200, "Security settings", typeof(IEnumerable<SecurityDto>))]
+    [SwaggerResponse(403, "Security settings are disabled for an open portal")]
     [HttpPut("")]
     public async Task<IEnumerable<SecurityDto>> SetWebItemSecurity(WebItemSecurityRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         await webItemSecurity.SetSecurityAsync(inDto.Id, inDto.Enabled, inDto.Subjects?.ToArray());
-        var securityInfo = await GetWebItemSecurityInfo(new List<string> { inDto.Id }).ToListAsync();
+        var securityInfo = await GetWebItemSettingsSecurityInfo(new SecuritySettingsRequestDto { Ids = new List<string> { inDto.Id } }).ToListAsync();
 
         if (inDto.Subjects == null)
         {
@@ -221,7 +214,7 @@ public class SecurityController(
 
         if (!inDto.Subjects.Any())
         {
-            await messageService.SendAsync(MessageAction.ProductAccessOpened, productName);
+            messageService.Send(MessageAction.ProductAccessOpened, productName);
         }
         else
         {
@@ -229,13 +222,13 @@ public class SecurityController(
             {
                 if (info.Groups.Count != 0)
                 {
-                    await messageService.SendAsync(MessageAction.GroupsOpenedProductAccess, productName,
+                    messageService.Send(MessageAction.GroupsOpenedProductAccess, productName,
                         info.Groups.Select(x => x.Name));
                 }
 
                 if (info.Users.Count != 0)
                 {
-                    await messageService.SendAsync(MessageAction.UsersOpenedProductAccess, productName,
+                    messageService.Send(MessageAction.UsersOpenedProductAccess, productName,
                         info.Users.Select(x => HttpUtility.HtmlDecode(x.DisplayName)));
                 }
             }
@@ -245,19 +238,18 @@ public class SecurityController(
     }
 
     /// <summary>
-    /// Sets the access settings to the products with the IDs specified in the request.
+    /// Sets the security settings to the modules with the IDs specified in the request.
     /// </summary>
     /// <short>
-    /// Set the access settings to products
+    /// Set the security settings to modules
     /// </short>
-    /// <category>Security</category>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.WebItemSecurityRequestsDto, ASC.Web.Api" name="inDto">Module request parameters</param>
     /// <path>api/2.0/settings/security/access</path>
-    /// <httpMethod>PUT</httpMethod>
-    /// <returns type="ASC.Web.Api.ApiModel.ResponseDto.SecurityDto, ASC.Web.Api">Security settings</returns>
     /// <collection>list</collection>
+    [Tags("Settings / Security")]
+    [SwaggerResponse(200, "Security settings", typeof(IEnumerable<SecurityDto>))]
+    [SwaggerResponse(403, "Security settings are disabled for an open portal")]
     [HttpPut("access")]
-    public async Task<IEnumerable<SecurityDto>> SetAccessToWebItems(WebItemSecurityRequestsDto inDto)
+    public async Task<IEnumerable<SecurityDto>> SetAccessToWebItems(WebItemsSecurityRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -297,27 +289,25 @@ public class SecurityController(
             await webItemSecurity.SetSecurityAsync(item.Key, item.Value, subjects);
         }
 
-        await messageService.SendAsync(MessageAction.ProductsListUpdated);
+        messageService.Send(MessageAction.ProductsListUpdated);
 
-        return await GetWebItemSecurityInfo(itemList.Keys.ToList()).ToListAsync();
+        return await GetWebItemSettingsSecurityInfo(new SecuritySettingsRequestDto { Ids = itemList.Keys.ToList() }).ToListAsync();
     }
 
     /// <summary>
-    /// Returns a list of all the product administrators with the ID specified in the request.
+    /// Returns a list of all the administrators of a product with the ID specified in the request.
     /// </summary>
     /// <short>
     /// Get the product administrators
     /// </short>
-    /// <category>Security</category>
-    /// <param type="System.Guid, System" method="url" name="productid">Product ID</param>
-    /// <returns type="ASC.Web.Api.Models.EmployeeDto, ASC.Api.Core">List of product administrators with the following parameters</returns>
     /// <path>api/2.0/settings/security/administrator/{productid}</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Settings / Security")]
+    [SwaggerResponse(200, "List of product administrators with the following parameters", typeof(IAsyncEnumerable<EmployeeDto>))]
     [HttpGet("administrator/{productid:guid}")]
-    public async IAsyncEnumerable<EmployeeDto> GetProductAdministrators(Guid productid)
+    public async IAsyncEnumerable<EmployeeDto> GetProductAdministrators(ProductIdRequestDto inDto)
     {
-        var admins = await webItemSecurity.GetProductAdministratorsAsync(productid);
+        var admins = await webItemSecurity.GetProductAdministratorsAsync(inDto.ProductId);
 
         foreach (var a in admins)
         {
@@ -326,37 +316,33 @@ public class SecurityController(
     }
 
     /// <summary>
-    /// Checks if the selected user is a product administrator with the ID specified in the request.
+    /// Checks if the selected user is an administrator of a product with the ID specified in the request.
     /// </summary>
     /// <short>
     /// Check a product administrator
     /// </short>
-    /// <category>Security</category>
-    /// <param type="System.Guid, System" name="productid">Product ID</param>
-    /// <param type="System.Guid, System" name="userid">User ID</param>
-    /// <returns type="System.Object, System">Object with the user security information: product ID, user ID, administrator or not</returns>
     /// <path>api/2.0/settings/security/administrator</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / Security")]
+    [SwaggerResponse(200, "Object with the user security information: product ID, user ID, administrator or not", typeof(ProductAdministratorDto))]
     [HttpGet("administrator")]
-    public async Task<object> IsProductAdministratorAsync(Guid productid, Guid userid)
+    public async Task<ProductAdministratorDto> IsProductAdministratorAsync(UserProductIdsRequestDto inDto)
     {
-        var result = await webItemSecurity.IsProductAdministratorAsync(productid, userid);
-        return new { ProductId = productid, UserId = userid, Administrator = result };
+        var result = await webItemSecurity.IsProductAdministratorAsync(inDto.ProductId, inDto.UserId);
+        return new ProductAdministratorDto { ProductId = inDto.ProductId, UserId = inDto.UserId, Administrator = result };
     }
 
     /// <summary>
-    /// Sets the selected user as a product administrator with the ID specified in the request.
+    /// Sets the selected user as an administrator of a product with the ID specified in the request.
     /// </summary>
     /// <short>
     /// Set a product administrator
     /// </short>
-    /// <category>Security</category>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.SecurityRequestsDto, ASC.Web.Api" name="inDto">Security request parameters</param>
-    /// <returns type="System.Object, System">Object with the user security information: product ID, user ID, administrator or not</returns>
     /// <path>api/2.0/settings/security/administrator</path>
-    /// <httpMethod>PUT</httpMethod>
+    [Tags("Settings / Security")]
+    [SwaggerResponse(200, "Object with the user security information: product ID, user ID, administrator or not", typeof(ProductAdministratorDto))]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpPut("administrator")]
-    public async Task<object> SetProductAdministrator(SecurityRequestsDto inDto)
+    public async Task<ProductAdministratorDto> SetProductAdministrator(SecurityRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -364,7 +350,7 @@ public class SecurityController(
                         (await tenantManager.GetCurrentTenantQuotaAsync()).Free;
         if (isStartup)
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption, "Administrator");
+            throw new BillingException(Resource.ErrorNotAllowedOption);
         }
 
         await webItemSecurity.SetProductAdministrator(inDto.ProductId, inDto.UserId, inDto.Administrator);
@@ -376,7 +362,7 @@ public class SecurityController(
             var messageAction = inDto.Administrator
                 ? MessageAction.AdministratorOpenedFullAccess
                 : MessageAction.AdministratorDeleted;
-            await messageService.SendAsync(messageAction, MessageTarget.Create(admin.Id),
+            messageService.Send(messageAction, MessageTarget.Create(admin.Id),
                 admin.DisplayUserName(false, displayUserSettingsHelper));
         }
         else
@@ -384,24 +370,22 @@ public class SecurityController(
             var messageAction = inDto.Administrator
                 ? MessageAction.ProductAddedAdministrator
                 : MessageAction.ProductDeletedAdministrator;
-            await messageService.SendAsync(messageAction, MessageTarget.Create(admin.Id),
+            messageService.Send(messageAction, MessageTarget.Create(admin.Id),
                 GetProductName(inDto.ProductId), admin.DisplayUserName(false, displayUserSettingsHelper));
         }
 
-        return new { inDto.ProductId, inDto.UserId, inDto.Administrator };
+        return new ProductAdministratorDto { ProductId = inDto.ProductId, UserId = inDto.UserId, Administrator = inDto.Administrator };
     }
 
     /// <summary>
     /// Updates the login settings with the parameters specified in the request.
     /// </summary>
     /// <short>
-    /// Update login settings
+    /// Update the login settings
     /// </short>
-    /// <category>Login settings</category>
-    /// <param type="ASC.Web.Api.ApiModels.RequestsDto.LoginSettingsRequestDto, ASC.Web.Api" name="inDto">Login settings request parameters</param>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LoginSettingsDto, ASC.Web.Api">Updated login settings</returns>
     /// <path>api/2.0/settings/security/loginsettings</path>
-    /// <httpMethod>PUT</httpMethod>
+    [Tags("Settings / Login settings")]
+    [SwaggerResponse(200, "Updated login settings", typeof(LoginSettingsDto))]
     [HttpPut("loginSettings")]
     public async Task<LoginSettingsDto> UpdateLoginSettingsAsync(LoginSettingsRequestDto inDto)
     {
@@ -423,22 +407,30 @@ public class SecurityController(
     /// Returns the portal login settings.
     /// </summary>
     /// <short>
-    /// Get login settings
+    /// Get the login settings
     /// </short>
-    /// <category>Login settings</category>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.LoginSettingsDto, ASC.Web.Api">Login settings</returns>
     /// <path>api/2.0/settings/security/loginsettings</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / Login settings")]
+    [SwaggerResponse(200, "Login settings", typeof(LoginSettingsDto))]
     [HttpGet("loginSettings")]
     public async Task<LoginSettingsDto> GetLoginSettingsAsync()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var settings = await settingsManager.LoadAsync<LoginSettings>();
-
-        return mapper.Map<LoginSettings, LoginSettingsDto>(settings);
+        var settings = await settingsManager.LoadAsync<LoginSettings>(HttpContext.GetIfModifiedSince());
+        
+        return HttpContext.TryGetFromCache(settings.LastModified) ? null :  mapper.Map<LoginSettings, LoginSettingsDto>(settings);
     }
-    
+
+    /// <summary>
+    /// Resets the portal login settings to default.
+    /// </summary>
+    /// <short>
+    /// Reset the login settings
+    /// </short>
+    /// <path>api/2.0/settings/security/loginsettings</path>
+    [Tags("Settings / Login settings")]
+    [SwaggerResponse(200, "Login settings", typeof(LoginSettingsDto))]
     [HttpDelete("loginSettings")]
     public async Task<LoginSettingsDto> SetDefaultLoginSettingsAsync()
     {

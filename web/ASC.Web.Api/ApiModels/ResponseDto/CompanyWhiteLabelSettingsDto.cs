@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,35 +27,44 @@
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
+/// The company white label settings.
 /// </summary>
 public class CompanyWhiteLabelSettingsDto: IMapFrom<CompanyWhiteLabelSettings>
 {
-    /// <summary>Company name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The company name.
+    /// </summary>
     public string CompanyName { get; set; }
 
-    /// <summary>Site</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The company site.
+    /// </summary>
     public string Site { get; set; }
 
-    /// <summary>Email</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The company email address.
+    /// </summary>
+    [EmailAddress]
     public string Email { get; set; }
 
-    /// <summary>Address</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The company address.
+    /// </summary>
     public string Address { get; set; }
 
-    /// <summary>Phone number</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The company phone number.
+    /// </summary>
     public string Phone { get; set; }
 
-    /// <summary>Specifies if a company is a licensor or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if a company is a licensor or not.
+    /// </summary>
     public bool IsLicensor { get; set; }
 
-    /// <summary>Specifies if these settings are default or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if company white label settings are default or not.
+    /// </summary>
     public bool IsDefault { get; set; }
 
     public void Mapping(Profile profile)

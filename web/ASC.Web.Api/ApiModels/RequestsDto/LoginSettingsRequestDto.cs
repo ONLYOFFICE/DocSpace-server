@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,21 +27,25 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
+/// The request parameters for configuring login security and performance settings.
 /// </summary>
 public class LoginSettingsRequestDto
 {
-    /// <summary>Maximum number of the user attempts to log in</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The maximum number of consecutive failed login attempts allowed before triggering account suspension.
+    /// </summary>
     [Range(1, 9999)]
     public int AttemptCount { get; set; }
 
-    /// <summary>The duration of the account suspension for unsuccessful login attempts</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The duration (in minutes) for which an account remains suspended after exceeding maximum login attempts.
+    /// </summary>
     [Range(1, 9999)]
     public int BlockTime { get; set; }
 
-    /// <summary>Expected server response time</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The maximum time (in seconds) allowed for server to process and respond to login requests.
+    /// </summary>
     [Range(1, 9999)]
     public int CheckPeriod { get; set; }
 }

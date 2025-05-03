@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,109 +27,137 @@
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
+/// The folder parameters.
 /// </summary>
 public class FolderDto<T> : FileEntryDto<T>
 {
-    /// <summary>Parent folder ID</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The parent folder ID of the folder.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 10)]
     public T ParentId { get; set; }
 
-    /// <summary>Number of files</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The number of files that the folder contains.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 5)]
     public int FilesCount { get; set; }
 
-    /// <summary>Number of folders</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The number of folders that the folder contains.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 7)]
     public int FoldersCount { get; set; }
 
-    /// <summary>Specifies if a folder is shareable or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    /// <summary>
+    /// Specifies if the folder can be shared or not.
+    /// </summary>
     public bool? IsShareable { get; set; }
 
-    /// <summary>Specifies if a folder is favorite or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    /// <summary>
+    /// Specifies if the folder is favorite or not.
+    /// </summary>
     public bool? IsFavorite { get; set; }
 
-    /// <summary>Number for a new folder</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The new element index in the folder.
+    /// </summary>
     public int New { get; set; }
 
-    /// <summary>Specifies if a folder is muted or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the folder notifications are enabled or not.
+    /// </summary>
     public bool Mute { get; set; }
 
-    /// <summary>List of tags</summary>
-    /// <type>System.Collections.Generic.IEnumerable{System.String}, System.Collections.Generic</type>
+    /// <summary>
+    /// The list of tags of the folder.
+    /// </summary>
     public IEnumerable<string> Tags { get; set; }
 
-    /// <summary>Logo</summary>
-    /// <type>ASC.Files.Core.VirtualRooms.Logo, ASC.Files.Core</type>
+    /// <summary>
+    /// The folder logo.
+    /// </summary>
     public Logo Logo { get; set; }
 
-    /// <summary>Specifies if a folder is pinned or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the folder is pinned or not.
+    /// </summary>
     public bool Pinned { get; set; }
 
-    /// <summary>Room type</summary>
-    /// <type>System.Nullable{ASC.Files.Core.ApiModels.RequestDto.RoomType}, System</type>
+    /// <summary>
+    /// The room type of the folder.
+    /// </summary>
     public RoomType? RoomType { get; set; }
 
-    /// <summary>Specifies if a folder is private or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the folder is private or not.
+    /// </summary>
     public bool Private { get; set; }
+
+    /// <summary>
+    /// Specifies if the folder is indexed or not.
+    /// </summary>
     public bool Indexing { get; set; }
+
+    /// <summary>
+    /// Specifies if the folder can be downloaded or not.
+    /// </summary>
     public bool DenyDownload { get; set; }
 
-    /// <summary>Room data lifetime settings</summary>
-    /// <type>ASC.Files.Core.ApiModels.RoomDataLifetimeDto, ASC.Files.Core</type>
+    /// <summary>
+    /// The room data lifetime settings of the folder.
+    /// </summary>
     public RoomDataLifetimeDto Lifetime { get; set; }
 
+    /// <summary>
+    /// The watermark settings of the folder.
+    /// </summary>
     public WatermarkDto Watermark { get; set; }
-    
-    /// <summary>Folder type</summary>
-    /// <type>System.Nullable{ASC.Files.Core.FolderType}, System</type>
+
+    /// <summary>
+    /// The folder type.
+    /// </summary>
     public FolderType? Type { get; set; }
 
+    /// <summary>
+    /// Specifies if the folder is placed in the room or not.
+    /// </summary>
     public bool? InRoom { get; set; }
 
-    /// <summary>Quota</summary>
-    /// <type>System.Nullable{System.Int64}, System</type>
+    /// <summary>
+    /// The folder quota limit.
+    /// </summary>
     public long? QuotaLimit { get; set; }
 
-    /// <summary>Specifies if the room has a custom quota or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    /// <summary>
+    /// Specifies if the folder room has a custom quota or not.
+    /// </summary>
     public bool? IsCustomQuota { get; set; }
 
-    /// <summary>Counter</summary>
-    /// <type>System.Nullable{System.Int64}, System</type>
+    /// <summary>
+    /// How much folder space is used (counter).
+    /// </summary>
     public long? UsedSpace { get; set; }
-    
+
+    /// <summary>
+    /// Specifies if the folder can be accessed via an external link or not.
+    /// </summary>
     public bool? External { get; set; }
+
+    /// <summary>
+    /// Specifies if the folder is password protected or not.
+    /// </summary>
     public bool? PasswordProtected { get; set; }
+
+    /// <summary>
+    /// Specifies if an external link to the folder is expired or not.
+    /// </summary>
     public bool? Expired { get; set; }
 
+    /// <summary>
+    /// The file entry type of the folder.
+    /// </summary>
     public override FileEntryType FileEntryType { get => FileEntryType.Folder; }
-
-    public static FolderDto<int> GetSample()
-    {
-        return new FolderDto<int>
-        {
-            Access = FileShare.ReadWrite,
-            //Updated = ApiDateTime.GetSample(),
-            //Created = ApiDateTime.GetSample(),
-            //CreatedBy = EmployeeWraper.GetSample(),
-            Id = 10,
-            RootFolderType = FolderType.BUNCH,
-            Shared = false,
-            Title = "Some titile",
-            //UpdatedBy = EmployeeWraper.GetSample(),
-            FilesCount = 5,
-            FoldersCount = 7,
-            ParentId = 10,
-            IsShareable = null,
-            IsFavorite = null
-        };
-    }
 }
 
 [Scope]
@@ -147,17 +175,18 @@ public class FolderDtoHelper(
     FilesSettingsHelper filesSettingsHelper,
     FileDateTime fileDateTime,
     SettingsManager settingsManager,
-    CoreBaseSettings coreBaseSettings,
     BreadCrumbsManager breadCrumbsManager,
     TenantManager tenantManager,
-    WatermarkManager watermarkManager,
     WatermarkDtoHelper watermarkHelper,
     IMapper mapper,
-    ExternalShare externalShare)
-    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime)
+    ExternalShare externalShare,
+    FileSecurityCommon fileSecurityCommon,
+    SecurityContext securityContext,
+    UserManager userManager)
+    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory)
     {
 
-    public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<FileShareRecord<string>> currentUserRecords = null, string order = null)
+    public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<FileShareRecord<string>> currentUserRecords = null, string order = null, IFolder contextFolder = null)
     {
         var result = await GetFolderWrapperAsync(folder);
         result.ParentId = folder.ParentId;
@@ -166,7 +195,7 @@ public class FolderDtoHelper(
         {
             if (folder.Tags == null)
             {
-                var tagDao = daoFactory.GetTagDao<T>();
+                var tagDao = _daoFactory.GetTagDao<T>();
                 result.Tags = await tagDao.GetTagsAsync(TagType.Custom, [folder]).Select(t => t.Name).ToListAsync();
             }
             else
@@ -183,6 +212,7 @@ public class FolderDtoHelper(
                 {
                     FolderType.VirtualRooms => IdConverter.Convert<T>(await _globalFolderHelper.FolderVirtualRoomsAsync),
                     FolderType.Archive => IdConverter.Convert<T>(await _globalFolderHelper.FolderArchiveAsync),
+                    FolderType.RoomTemplates => IdConverter.Convert<T>(await _globalFolderHelper.FolderRoomTemplatesAsync),
                     _ => result.ParentId
                 };
             }
@@ -205,9 +235,10 @@ public class FolderDtoHelper(
                                 !currentUserRecords.Exists(c => c.EntryId.Equals(folder.Id.ToString()) && c.SubjectType == SubjectType.Group);
             }
 
-            if ((coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Statistic) && 
-                    ((result.Security.TryGetValue(FileSecurity.FilesSecurityActions.Create, out var canCreate) && canCreate) || 
-                     (result.RootFolderType is FolderType.Archive or FolderType.TRASH && (result.Security.TryGetValue(FileSecurity.FilesSecurityActions.Delete, out var canDelete) && canDelete))))
+            if ((await tenantManager.GetCurrentTenantQuotaAsync()).Statistic &&
+                    ((result.Security.TryGetValue(FileSecurity.FilesSecurityActions.Create, out var canCreate) && canCreate) ||
+                     (result.RootFolderType is FolderType.Archive or FolderType.TRASH && result.Security.TryGetValue(FileSecurity.FilesSecurityActions.Delete, out var canDelete) && canDelete) ||
+                     await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID)))
             {
                 var quotaRoomSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
                 result.UsedSpace = folder.Counter;
@@ -219,8 +250,7 @@ public class FolderDtoHelper(
                 }
             }
             
-            var watermarkSettings = await watermarkManager.GetWatermarkAsync(folder);
-            result.Watermark = watermarkHelper.Get(watermarkSettings);
+            result.Watermark = watermarkHelper.Get(folder.SettingsWatermark);
 
             if (folder.ShareRecord is { IsLink: true })
             {
@@ -236,7 +266,7 @@ public class FolderDtoHelper(
 
         if (folder.Order != 0)
         {
-            if (string.IsNullOrEmpty(order))
+            if (string.IsNullOrEmpty(order) && (contextFolder == null || !DocSpaceHelper.IsRoom(contextFolder.FolderType)))
             {
                 order = await breadCrumbsManager.GetBreadCrumbsOrderAsync(folder.ParentId);
             }
@@ -274,7 +304,7 @@ public class FolderDtoHelper(
     {
         var newBadges = folder.NewForMe;
 
-        if (folder.RootFolderType == FolderType.VirtualRooms)
+        if (folder.RootFolderType is FolderType.VirtualRooms or FolderType.RoomTemplates)
         {
             var isEnabledBadges = await badgesSettingsHelper.GetEnabledForCurrentUserAsync();
 
@@ -285,7 +315,7 @@ public class FolderDtoHelper(
         }
 
         var result = await GetAsync<FolderDto<T>, T>(folder);
-        if (folder.FolderType != FolderType.VirtualRooms)
+        if (folder.FolderType != FolderType.VirtualRooms && folder.FolderType != FolderType.RoomTemplates)
         {
             result.FilesCount = folder.FilesCount;
             result.FoldersCount = folder.FoldersCount;

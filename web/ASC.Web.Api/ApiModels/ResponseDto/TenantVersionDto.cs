@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,20 +27,17 @@
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 /// <summary>
+/// The tenant version information.
 /// </summary>
-public class TenantVersionDto
+public class TenantVersionDto(int version, IEnumerable<TenantVersion> tenantVersions)
 {
-    /// <summary>Current portal version</summary>
-    /// <type>System.Int32, System</type>
-    public int Current { get; set; }
+    /// <summary>
+    /// The current portal version.
+    /// </summary>
+    public int Current { get; set; } = version;
 
-    /// <summary>List of available portal versions</summary>
-    /// <type>System.Collections.Generic.IEnumerable{ASC.Core.TenantVersion}, System.Collections.Generic</type>
-    public IEnumerable<TenantVersion> Versions { get; set; }
-
-    public TenantVersionDto(int version, IEnumerable<TenantVersion> tenantVersions)
-    {
-        Current = version;
-        Versions = tenantVersions;
-    }
+    /// <summary>
+    /// The list of available portal versions.
+    /// </summary>
+    public IEnumerable<TenantVersion> Versions { get; set; } = tenantVersions;
 }

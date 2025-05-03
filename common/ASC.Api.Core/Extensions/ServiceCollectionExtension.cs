@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,6 +23,11 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+using Microsoft.Extensions.Caching.Memory;
+
+using ZiggyCreatures.Caching.Fusion;
+using ZiggyCreatures.Caching.Fusion.Backplane.StackExchangeRedis;
 
 namespace ASC.Api.Core.Extensions;
 
@@ -56,20 +61,45 @@ public static class ServiceCollectionExtension
         return services;
     }
 
-    public static IServiceCollection AddDistributedCache(this IServiceCollection services, IConnectionMultiplexer connection)
-    {        
+    public static IServiceCollection AddHybridCache(this IServiceCollection services, IConnectionMultiplexer connection)
+    {
+        var cacheBuilder = services
+            .AddFusionCache()
+            .WithSystemTextJsonSerializer(new JsonSerializerOptions 
+            {
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+                WriteIndented = true 
+            })                
+            .WithOptions(new FusionCacheOptions
+            {
+                DistributedCacheKeyModifierMode = CacheKeyModifierMode.None,
+                DefaultEntryOptions = new FusionCacheEntryOptions
+                {
+                    Duration = TimeSpan.MaxValue,
+                    LockTimeout = TimeSpan.FromSeconds(5),
+                    FactoryHardTimeout = TimeSpan.FromSeconds(5)
+                }
+            })
+            .WithMemoryCache(new MemoryCache(new MemoryCacheOptions { ExpirationScanFrequency = TimeSpan.FromSeconds(10),  }))
+            .WithRegisteredLogger();
+        
         if (connection != null)
-        {
+        {        
+            //    hack for csp
             services.AddStackExchangeRedisCache(config =>
             {
                 config.ConnectionMultiplexerFactory = () => Task.FromResult(connection);
             });
+            
+            cacheBuilder.WithBackplane(new RedisBackplane(new RedisBackplaneOptions { ConnectionMultiplexerFactory = () => Task.FromResult(connection) }));
         }
         else
-        {
+        {            
             services.AddDistributedMemoryCache();
         }
 
+        cacheBuilder.WithRegisteredDistributedCache(false);
+        
         return services;
     }
 
@@ -285,7 +315,7 @@ public static class ServiceCollectionExtension
 
 
     private static readonly List<string> _registeredActivePassiveHostedService = [];
-    private static readonly object _locker = new();
+    private static readonly Lock _locker = new();
 
     /// <remarks>
     /// Add a IHostedService for given type. 
@@ -322,8 +352,6 @@ public static class ServiceCollectionExtension
 
     public static IServiceCollection AddDistributedTaskQueue(this IServiceCollection services)
     {
-        services.AddTransient<DistributedTaskQueue>();
-
         services.AddSingleton<IDistributedTaskQueueFactory, DefaultDistributedTaskQueueFactory>();
 
         return services;
@@ -347,7 +375,7 @@ public static class ServiceCollectionExtension
         }
 
         var configurationOption = redisConfiguration.ConfigurationOptions;
-
+        configurationOption.DefaultDatabase = redisConfiguration.Database;
         configurationOption.ClientName = clientName;
 
         var redisConnection = await RedisPersistentConnection.InitializeAsync(configurationOption);

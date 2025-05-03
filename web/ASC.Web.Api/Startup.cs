@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,17 +32,16 @@ public class Startup : BaseStartup
 {
     public Startup(IConfiguration configuration) : base(configuration)
     {
-        WebhooksEnabled = true;
-
         if (String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
         {
             configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
         }
     }
 
-    public override async Task ConfigureServices(IServiceCollection services)
+    public override async Task ConfigureServices(WebApplicationBuilder builder)
     {
-        await base.ConfigureServices(services);
+        var services = builder.Services;
+        await base.ConfigureServices(builder);
 
         if (!_configuration.GetValue<bool>("disableLdapNotifyService"))
         {
@@ -52,7 +51,10 @@ public class Startup : BaseStartup
         services.AddBaseDbContextPool<FilesDbContext>();
         services.AddBaseDbContextPool<BackupsContext>();
         services.RegisterQuotaFeature();
-
+        services.RegisterQueue<LdapOperationJob>();
+        services.RegisterQueue<SmtpJob>();
+        services.RegisterQueue<UsersQuotaSyncJob>();
+        
         services.AddStartupTask<CspStartupTask>()
                    .TryAddSingleton(services);
                 

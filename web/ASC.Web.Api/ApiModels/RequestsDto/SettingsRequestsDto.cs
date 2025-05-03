@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,34 +27,72 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
+/// The request parameters for managing the owner-specific settings.
+/// </summary>
+public class OwnerIdSettingsRequestDto
+{
+    /// <summary>
+    /// The ID of the owner whose settings are being managed.
+    /// </summary>
+    public required Guid OwnerId { get; set; }
+}
+
+/// <summary>
+/// The request parameters for the version-specific settings configuration.
 /// </summary>
 public class SettingsRequestsDto
 {
-    /// <summary>Default product ID</summary>
-    /// <type>System.Guid, System</type>
-    public Guid DefaultProductID { get; set; }
+    /// <summary>
+    /// The version ID.
+    /// </summary>
+    public required int VersionId { get; set; }
+}
 
-    /// <summary>Language</summary>
-    /// <type>System.String, System</type>
-    public string Lng { get; set; }
-
-    /// <summary>Time zone ID</summary>
-    /// <type>System.String, System</type>
-    public string TimeZoneID { get; set; }
-
-    /// <summary>Theme</summary>
-    /// <type>System.String, System</type>
-    public string Theme { get; set; }
-
-    /// <summary>Specifies whether to show tips for the user or not</summary>
-    /// <type>System.Boolean, System</type>
+/// <summary>
+/// The request parameters for managing the user interface tips visibility.
+/// </summary>
+public class TipsRequestDto
+{
+    /// <summary>
+    /// Controls the visibility of the user interface tips (displayed or hidden).
+    /// </summary>
     public bool Show { get; set; } //tips
+}
 
-    /// <summary>Version ID</summary>
-    /// <type>System.Int32, System</type>
-    public int VersionId { get; set; }
+/// <summary>
+/// The request parameters for setting the default product configuration.
+/// </summary>
+public class DefaultProductRequestDto
+{
+    /// <summary>
+    /// The ID of the product to be set as default.
+    /// </summary>
+    public required Guid DefaultProductID { get; set; }
+}
 
-    /// <summary>Owner ID</summary>
-    /// <type>System.Guid, System</type>
-    public Guid OwnerId { get; set; }
+/// <summary>
+/// The request parameters for configuring the time zone settings.
+/// </summary>
+public class TimeZoneRequestDto
+{
+    /// <summary>
+    /// The language code for the time zone localization.
+    /// </summary>
+    public required string Lng { get; set; }
+
+    /// <summary>
+    /// The IANA time zone identifier.
+    /// </summary>
+    public string TimeZoneID { get; set; }
+}
+
+/// <summary>
+/// The request parameters for managing the Developer Tools access settings for the current tenant.
+/// </summary>
+public class TenantDevToolsAccessSettingsDto
+{
+    /// <summary>
+    /// Determines if users have restricted access to the Developer Tools.
+    /// </summary>
+    public bool LimitedAccessForUsers { get; set; }
 }

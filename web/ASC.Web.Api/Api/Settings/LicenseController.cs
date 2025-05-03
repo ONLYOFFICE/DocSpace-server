@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,28 +32,29 @@ public class LicenseController(ILoggerProvider option,
         ApiContext apiContext,
         UserManager userManager,
         TenantManager tenantManager,
+        TenantLogoManager tenantLogoManager,
         TenantExtra tenantExtra,
         AuthContext authContext,
         LicenseReader licenseReader,
         SettingsManager settingsManager,
         WebItemManager webItemManager,
         CoreBaseSettings coreBaseSettings,
-        IMemoryCache memoryCache,
+        IFusionCache fusionCache,
         FirstTimeTenantSettings firstTimeTenantSettings,
         ITariffService tariffService,
-        IHttpContextAccessor httpContextAccessor)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+        IHttpContextAccessor httpContextAccessor,
+        DocumentServiceLicense documentServiceLicense)
+    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     private readonly ILogger _log = option.CreateLogger("ASC.Api");
 
     /// <summary>
-    /// Refreshes the license.
+    /// Refreshes the portal license.
     /// </summary>
     /// <short>Refresh the license</short>
-    /// <category>License</category>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/settings/license/refresh</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / License")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpGet("refresh")]
     [AllowNotPayment]
     public async Task<bool> RefreshLicenseAsync()
@@ -63,7 +64,7 @@ public class LicenseController(ILoggerProvider option,
             return false;
         }
 
-        await licenseReader.RefreshLicenseAsync();
+        await licenseReader.RefreshLicenseAsync(documentServiceLicense.ValidateLicense);
         return true;
     }
 
@@ -73,13 +74,12 @@ public class LicenseController(ILoggerProvider option,
     /// <short>
     /// Activate a license
     /// </short>
-    /// <category>License</category>
-    /// <returns type="System.Object, System">Message about the result of activating license</returns>
     /// <path>api/2.0/settings/license/accept</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("Settings / License")]
+    [SwaggerResponse(200, "Message about the result of activating license", typeof(string))]
     [AllowNotPayment]
     [HttpPost("accept")]
-    public async Task<object> AcceptLicenseAsync()
+    public async Task<string> AcceptLicenseAsync()
     {
         if (!tenantExtra.Enterprise)
         {
@@ -87,19 +87,25 @@ public class LicenseController(ILoggerProvider option,
         }
 
         await TariffSettings.SetLicenseAcceptAsync(settingsManager);
-        await messageService.SendAsync(MessageAction.LicenseKeyUploaded);
+        messageService.Send(MessageAction.LicenseKeyUploaded);
 
         try
         {
-            await licenseReader.RefreshLicenseAsync();
+            await licenseReader.RefreshLicenseAsync(documentServiceLicense.ValidateLicense);
         }
         catch (BillingNotFoundException)
         {
             return UserControlsCommonResource.LicenseKeyNotFound;
         }
-        catch (BillingNotConfiguredException)
+        catch (BillingNotConfiguredException ex)
         {
+            _log.ErrorWithException(ex);
             return UserControlsCommonResource.LicenseKeyNotCorrect;
+        }
+        catch (BillingLicenseTypeException)
+        {
+            var logoText = await tenantLogoManager.GetLogoTextAsync();
+            return string.Format(UserControlsCommonResource.LicenseTypeNotCorrect, logoText);
         }
         catch (BillingException)
         {
@@ -119,11 +125,11 @@ public class LicenseController(ILoggerProvider option,
     /// <short>
     /// Activate a trial license
     /// </short>
-    /// <category>License</category>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/settings/license/trial</path>
-    /// <httpMethod>POST</httpMethod>
-    ///<visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Settings / License")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("trial")]
     public async Task<bool> ActivateTrialAsync()
     {
@@ -170,13 +176,13 @@ public class LicenseController(ILoggerProvider option,
 
         var tariff = new Tariff
         {
-            Quotas = [new(quota.TenantId, 1)],
+            Quotas = [new Quota(quota.TenantId, 1)],
             DueDate = DateTime.Today.AddDays(DEFAULT_TRIAL_PERIOD)
         };
 
         await tariffService.SetTariffAsync(Tenant.DefaultTenant, tariff, [quota]);
 
-        await messageService.SendAsync(MessageAction.LicenseKeyUploaded);
+        messageService.Send(MessageAction.LicenseKeyUploaded);
 
         return true;
     }
@@ -187,11 +193,10 @@ public class LicenseController(ILoggerProvider option,
     /// <short>
     /// Request a license
     /// </short>
-    /// <category>License</category>
-    /// <returns type="System.Boolean, System">Boolean value: true if the license is required</returns>
     /// <path>api/2.0/settings/license/required</path>
-    /// <httpMethod>GET</httpMethod>
-    /// <requiresAuthorization>false</requiresAuthorization>
+    /// <requiresAuthorization>false</requiresAuthorization>\
+    [Tags("Settings / License")]
+    [SwaggerResponse(200, "Boolean value: true if the license is required", typeof(bool))]
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("required")]
@@ -207,15 +212,16 @@ public class LicenseController(ILoggerProvider option,
     /// <short>
     /// Upload a license
     /// </short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.UploadLicenseRequestsDto, ASC.Web.Api" name="inDto">Request parameters to upload a license</param>
-    /// <category>License</category>
-    /// <returns type="System.Object, System">License</returns>
     /// <path>api/2.0/settings/license</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("Settings / License")]
+    [SwaggerResponse(200, "License", typeof(string))]
+    [SwaggerResponse(400, "The uploaded file could not be found")]
+    [SwaggerResponse(403, "Portal Access")]
+    [SwaggerResponse(405, "Your pricing plan does not support this option")]
     [AllowNotPayment]
     [HttpPost("")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard, Administrators")]
-    public async Task<object> UploadLicenseAsync([FromForm] UploadLicenseRequestsDto inDto)
+    public async Task<string> UploadLicenseAsync([FromForm] UploadLicenseRequestsDto inDto)
     {
         try
         {
@@ -272,6 +278,12 @@ public class LicenseController(ILoggerProvider option,
         {
             _log.ErrorLicenseUpload(ex);
             throw new Exception(Resource.LicenseErrorPortal);
+        }
+        catch (BillingLicenseTypeException ex)
+        {
+            _log.ErrorLicenseUpload(ex);
+            var logoText = await tenantLogoManager.GetLogoTextAsync();
+            throw new Exception(string.Format(UserControlsCommonResource.LicenseTypeNotCorrect, logoText));
         }
         catch (Exception ex)
         {

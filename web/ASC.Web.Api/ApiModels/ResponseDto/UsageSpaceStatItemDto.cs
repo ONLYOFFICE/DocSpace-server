@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,38 +27,66 @@
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 /// <summary>
+/// The parameters of the usage space statistics item.
 /// </summary>
 public class UsageSpaceStatItemDto
 {
-    /// <summary>Name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The item name.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "Item name")]
     public string Name { get; set; }
 
-    /// <summary>Icon</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The item icon path.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "Item icon path")]
     public string Icon { get; set; }
 
-    /// <summary>Specifies if the module space is disabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the item is disabled or not.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
     public bool Disabled { get; set; }
 
-    /// <summary>Size</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The item used space.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "0 Byte")]
     public string Size { get; set; }
 
-    /// <summary>URL</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The item URL.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "Item url")]
     public string Url { get; set; }
+}
 
-    public static UsageSpaceStatItemDto GetSample()
-    {
-        return new UsageSpaceStatItemDto
-        {
-            Name = "Item name",
-            Icon = "Item icon path",
-            Disabled = false,
-            Size = "0 Byte",
-            Url = "Item url"
-        };
-    }
+/// <summary>
+/// The chart point parameters.
+/// </summary>
+public class ChartPointDto
+{
+    /// <summary>
+    /// The display date.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "6/1/2024")]
+    public string DisplayDate { get; set; }
+
+    /// <summary>
+    /// The chart point date.
+    /// </summary>
+    public DateTime Date { get; init; }
+
+    /// <summary>
+    /// The number of hosts.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 0)]
+    public int Hosts { get; set; }
+
+    /// <summary>
+    /// The number of hits.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 0)]
+    public int Hits { get; set; }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,18 +27,37 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// The request parameters for checking the document service location.
 /// </summary>
 public class CheckDocServiceUrlRequestDto
 {
-    /// <summary>The Document Server address</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The ONLYOFFICE Docs URL address.
+    /// </summary>
     public string DocServiceUrl { get; set; }
 
-    /// <summary>The Document Server address in the local private network</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The ONLYOFFICE Docs URL address in the local private network.
+    /// </summary>
     public string DocServiceUrlInternal { get; set; }
 
-    /// <summary>The Community Server address</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The ONLYOFFICE Docs URL address.
+    /// </summary>
     public string DocServiceUrlPortal { get; set; }
+
+    /// <summary>
+    /// The signature secret of the ONLYOFFICE Docs.
+    /// </summary>
+    public string DocServiceSignatureSecret { get; set; }
+
+    /// <summary>
+    /// The signature header of the ONLYOFFICE Docs.
+    /// </summary>
+    public string DocServiceSignatureHeader { get; set; }
+
+    /// <summary>
+    /// Specifies if the SSL verification of the ONLYOFFICE Docs is enabled or not.
+    /// </summary>
+    public bool? DocServiceSslVerification { get; set; }
 }

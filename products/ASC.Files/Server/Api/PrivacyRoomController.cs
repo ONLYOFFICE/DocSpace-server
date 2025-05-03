@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -52,21 +52,21 @@ public abstract class PrivacyRoomController<T>(SettingsManager settingsManager,
     /// Returns all the key pairs of the users who have access to the file with the ID specified in the request.
     /// </summary>
     /// <short>Get file key pairs</short>
-    /// <param type="System.Int32, System" method="url" name="fileId">File ID</param>
-    /// <returns type="ASC.Web.Files.Core.Entries.EncryptionKeyPairDto, ASC.Files.Core">List of encryption key pairs</returns>
     /// <path>api/2.0/privacyroom/access/{fileId}</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Files / Private room")]
+    [SwaggerResponse(200, "List of encryption key pairs", typeof(IEnumerable<EncryptionKeyPairDto>))]
+    [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
     [HttpGet("access/{fileId}")]
-    public async Task<IEnumerable<EncryptionKeyPairDto>> GetPublicKeysWithAccess(T fileId)
+    public async Task<IEnumerable<EncryptionKeyPairDto>> GetPublicKeysWithAccess(FileIdRequestDto<T> inDto)
     {
         if (!await PrivacyRoomSettings.GetEnabledAsync(settingsManager))
         {
             throw new SecurityException();
         }
 
-        return await encryptionKeyPairHelper.GetKeyPairAsync(fileId, fileStorageService);
+        return await encryptionKeyPairHelper.GetKeyPairAsync(inDto.FileId, fileStorageService);
     }
 }
 
@@ -88,10 +88,11 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     /// Returns a key pair for the current user.
     /// </summary>
     /// <short>Get encryption keys</short>
-    /// <returns type="ASC.Web.Files.Core.Entries.EncryptionKeyPairDto, ASC.Files.Core">Encryption key pair: private key, public key, user ID</returns>
     /// <path>api/2.0/privacyroom/keys</path>
-    /// <httpMethod>GET</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Files / Private room")]
+    [SwaggerResponse(200, "Encryption key pair: private key, public key, user ID", typeof(EncryptionKeyPairDto))]
+    [SwaggerResponse(403, "You don't have enough permission to this operation")]
     [HttpGet("keys")]
     public async Task<EncryptionKeyPairDto> GetKeysAsync()
     {
@@ -110,10 +111,10 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     /// Checks if the Private Room settings are enabled or not.
     /// </summary>
     /// <short>Check the Private Room settings</short>
-    /// <returns type="System.Boolean, System">Boolean value: true - the Private Room settings are enabled, false - the Private Room settings are disabled</returns>
     /// <path>api/2.0/privacyroom</path>
-    /// <httpMethod>GET</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Files / Private room")]
+    [SwaggerResponse(200, "Boolean value: true - the Private Room settings are enabled, false - the Private Room settings are disabled", typeof(bool))]
     [HttpGet("")]
     public async Task<bool> PrivacyRoomAsync()
     {
@@ -126,13 +127,13 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     /// Sets the key pair for the current user.
     /// </summary>
     /// <short>Set encryption keys</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.PrivacyRoomRequestDto, ASC.Files.Core" name="inDto">Request parameters for setting encryption keys</param>
-    /// <returns type="System.Object, System">Boolean value: true - the key pair is set</returns>
     /// <path>api/2.0/privacyroom/keys</path>
-    /// <httpMethod>PUT</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Files / Private room")]
+    [SwaggerResponse(200, "Boolean value: true - the key pair is set", typeof(PrivacyRoomKeysResponse))]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [HttpPut("keys")]
-    public async Task<object> SetKeysAsync(PrivacyRoomRequestDto inDto)
+    public async Task<PrivacyRoomKeysResponse> SetKeysAsync(PrivacyRoomRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(new UserSecurityProvider(authContext.CurrentAccount.ID), Constants.Action_EditUser);
 
@@ -146,7 +147,7 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
         {
             if (!string.IsNullOrEmpty(keyPair.PublicKey) && !inDto.Update)
             {
-                return new { isset = true };
+                return new PrivacyRoomKeysResponse { IsSet = true };
             }
 
             _logger.InformationUpdateAddress(authContext.CurrentAccount.ID);
@@ -154,23 +155,20 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
 
         await encryptionKeyPairHelper.SetKeyPairAsync(inDto.PublicKey, inDto.PrivateKeyEnc);
 
-        return new
-        {
-            isset = true
-        };
+        return new PrivacyRoomKeysResponse { IsSet = true };
     }
 
     /// <summary>
     /// Enables the Private Room settings.
     /// </summary>
     /// <short>Enable the Private Room settings</short>
-    /// <param type="ASC.Files.Core.ApiModels.RequestDto.PrivacyRoomRequestDto, ASC.Files.Core" name="inDto">Request parameters for setting encryption keys</param>
-    /// <returns type="System.Boolean, System">Boolean value: true - the Private Room settings are enabled, false - the Private Room settings are disabled</returns>
     /// <path>api/2.0/privacyroom</path>
-    /// <httpMethod>PUT</httpMethod>
-    /// <visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Files / Private room")]
+    [SwaggerResponse(200, "Boolean value: true - the Private Room settings are enabled, false - the Private Room settings are disabled", typeof(bool))]
+    [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpPut("")]
-    public async Task<bool> SetPrivacyRoomAsync(PrivacyRoomRequestDto inDto)
+    public async Task<bool> SetPrivacyRoomAsync(PrivacyRoomEnableRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -178,13 +176,13 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
         {
             if (!PrivacyRoomSettings.IsAvailable())
             {
-                throw new BillingException(Resource.ErrorNotAllowedOption, "PrivacyRoom");
+                throw new BillingException(Resource.ErrorNotAllowedOption);
             }
         }
 
         await PrivacyRoomSettings.SetEnabledAsync(settingsManager, inDto.Enable);
 
-        await messageService.SendAsync(inDto.Enable ? MessageAction.PrivacyRoomEnable : MessageAction.PrivacyRoomDisable);
+        messageService.Send(inDto.Enable ? MessageAction.PrivacyRoomEnable : MessageAction.PrivacyRoomDisable);
 
         return inDto.Enable;
     }

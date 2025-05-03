@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,10 +27,30 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// The external data parameters.
+/// </summary>
+public class ExternalShareRequestParam
+{
+    /// <summary>
+    /// The password to share external data.
+    /// </summary>
+    public string Password { get; set; }
+}
+
+/// <summary>
+/// The external data request parameters.
 /// </summary>
 public class ExternalShareRequestDto
 {
-    /// <summary>Password</summary>
-    /// <type>System.String, System</type>
-    public string Password { get; set; }
+    /// <summary>
+    /// The unique document identifier.
+    /// </summary>
+    [FromRoute(Name = "key")]
+    public required string Key { get; set; }
+
+    /// <summary>
+    /// The external data share request parameters.
+    /// </summary>
+    [FromBody]
+    public ExternalShareRequestParam RequestParam { get; set; }
 }

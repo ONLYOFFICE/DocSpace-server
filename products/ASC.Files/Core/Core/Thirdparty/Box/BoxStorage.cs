@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -302,7 +302,7 @@ internal class BoxStorage(TempStream tempStream) : IThirdPartyStorage<BoxFile, B
         return Math.Min(max, MaxChunkedUploadFileSize);
     }
 
-    public async Task<Stream> GetThumbnailAsync(string fileId, int width, int height)
+    public async Task<Stream> GetThumbnailAsync(string fileId, uint width, uint height)
     {
         var boxRepresentation = new BoxRepresentationRequest { FileId = fileId, XRepHints = "[jpg?dimensions=320x320]" };
         return await _boxClient.FilesManager.GetRepresentationContentAsync(boxRepresentation);

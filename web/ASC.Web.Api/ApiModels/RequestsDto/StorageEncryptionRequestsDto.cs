@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,10 +27,12 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
+/// The request parameters for managing storage encryption operations and notifications.
 /// </summary>
 public class StorageEncryptionRequestsDto
 {
-    /// <summary>Specifies if the users will be notified about the encryption process or note</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether the users receive notifications about the storage encryption operations.
+    /// </summary>
     public bool NotifyUsers { get; set; }
 }

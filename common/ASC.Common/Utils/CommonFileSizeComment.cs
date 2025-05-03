@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,6 +31,9 @@ public class CommonFileSizeComment
     /// <summary>
     /// Generates a string the file size
     /// </summary>
+    /// <param
+    ///     name="fileSizePostfix">
+    /// </param>
     /// <param name="size">Size in bytes</param>
     /// <returns>10 b, 100 Kb, 25 Mb, 1 Gb</returns>
     public static string FilesSizeToString(string fileSizePostfix, long size)

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -37,7 +37,7 @@ public class SecurityControllerHelper(
     FileShareDtoHelper fileShareDtoHelper,
     FileShareParamsHelper fileShareParamsHelper,
     FileChecker fileChecker,
-    IDistributedCache distributedCache)
+    WebhookManager webhookManager)
     : FilesHelperBase(
         filesSettingsHelper,
         fileUploader,
@@ -46,16 +46,16 @@ public class SecurityControllerHelper(
         fileStorageService,
         fileChecker,
         httpContextAccessor,
-        distributedCache)
+        webhookManager)
 {
     public IAsyncEnumerable<FileShareDto> GetFileSecurityInfoAsync<T>(T fileId)
     {
-        return GetSecurityInfoAsync(new List<T> { fileId }, new List<T>());
+        return GetSecurityInfoAsync(new List<T> { fileId }, []);
     }
 
     public IAsyncEnumerable<FileShareDto> GetFolderSecurityInfoAsync<T>(T folderId)
     {
-        return GetSecurityInfoAsync(new List<T>(), new List<T> { folderId });
+        return GetSecurityInfoAsync([], new List<T> { folderId });
     }
 
     public async IAsyncEnumerable<FileShareDto> GetSecurityInfoAsync<T>(IEnumerable<T> fileIds, IEnumerable<T> folderIds)
@@ -73,11 +73,6 @@ public class SecurityControllerHelper(
         await _fileStorageService.RemoveAceAsync(fileIds, folderIds);
 
         return true;
-    }
-
-    public IAsyncEnumerable<FileShareDto> SetFolderSecurityInfoAsync<T>(T folderId, IEnumerable<FileShareParams> share, bool notify, string sharingMessage)
-    {
-        return SetSecurityInfoAsync(new List<T>(), new List<T> { folderId }, share, notify, sharingMessage);
     }
 
     public async IAsyncEnumerable<FileShareDto> SetSecurityInfoAsync<T>(IEnumerable<T> fileIds, IEnumerable<T> folderIds, IEnumerable<FileShareParams> share, bool notify, string sharingMessage)

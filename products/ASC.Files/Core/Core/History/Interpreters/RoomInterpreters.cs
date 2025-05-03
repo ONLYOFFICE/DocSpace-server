@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -195,6 +195,111 @@ public class RoomCopiedInterpreter : ActionInterpreter
     }
 }
 
+public class RoomIndexingInterpreter : ActionInterpreter
+{
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    {
+        var desc = GetAdditionalDescription(description);
+        return ValueTask.FromResult<HistoryData>(new EntryData(target, desc.RoomTitle));
+    }
+}
+
+public class RoomLifeTimeSetInterpreter : ActionInterpreter
+{
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    {
+        var desc = GetAdditionalDescription(description);
+        
+        var lifetime = new RoomDataLifetime
+        {
+            Value = int.Parse(description[0]),
+            Period = RoomDataLifetimePeriodExtensions.TryParse(description[1], out var period) ? period : default,
+            DeletePermanently = bool.Parse(description[2])
+        };
+        
+        return ValueTask.FromResult<HistoryData>(new LifeTimeHistoryData(lifetime, target, desc.RoomTitle));
+    }
+}
+
+public class RoomLifeTimeDisabledInterpreter : ActionInterpreter
+{
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    {
+        var desc = GetAdditionalDescription(description);
+        return ValueTask.FromResult<HistoryData>(new LifeTimeHistoryData(null, target, desc.RoomTitle));
+    }
+}
+
+public class RoomArchivingInterpreter : ActionInterpreter
+{
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    {
+        return ValueTask.FromResult<HistoryData>(new EntryData(target, description[0]));
+    }
+}
+
+public class RoomDenyDownloadInterpreter : ActionInterpreter
+{
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    {
+        return ValueTask.FromResult<HistoryData>(new EntryData(target, description[0]));
+    }
+}
+
+public class RoomWatermarkSetInterpreter : ActionInterpreter
+{
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    {
+        var desc = GetAdditionalDescription(description);
+
+        return ValueTask.FromResult<HistoryData>(new EntryData(target, desc.RoomTitle));
+    }
+}
+
+public class RoomWatermarkDisabledInterpreter : RoomWatermarkSetInterpreter
+{
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    {
+        var desc = GetAdditionalDescription(description);
+        
+        return ValueTask.FromResult<HistoryData>(new EntryData(target, desc.RoomTitle));
+    }
+}
+
+public class RoomIndexExportSavedInterpreter : ActionInterpreter
+{
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    {
+        var desc = GetAdditionalDescription(description);
+        return ValueTask.FromResult<HistoryData>(new EntryData(target, desc.RoomTitle));
+    }
+}
+
+public class RoomInviteResendInterpreter : ActionInterpreter
+{
+    protected override async ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    {
+        var userId = Guid.Parse(description[1]);
+        var userManager = serviceProvider.GetRequiredService<UserManager>();
+
+        var user = await userManager.GetUsersAsync(userId);
+        if (user == null || user.Id == Constants.LostUser.Id || user.Id == ASC.Core.Configuration.Constants.Guest.ID)
+        {
+            return new UserHistoryData
+            {
+                User = new EmployeeDto { DisplayName = description[0] }
+            };
+        }
+
+        var employeeDtoHelper = serviceProvider.GetRequiredService<EmployeeDtoHelper>();
+        
+        return new UserHistoryData
+        {
+            User = await employeeDtoHelper.GetAsync(user)
+        };
+    }
+}
+
 public record UserHistoryData : HistoryData
 {
     public EmployeeDto User { get; set; }
@@ -210,3 +315,14 @@ public record GroupHistoryData : HistoryData
 }
 
 public record TagData(string[] Tags) : HistoryData;
+
+public record LifeTimeHistoryData : EntryData
+{
+    public LifeTimeHistoryData(RoomDataLifetime lifeTime, string id, string title, int? parentId = null, string parentTitle = null, int? parentType = null) 
+        : base(id, title, parentId, parentTitle, parentType)
+    {
+        LifeTime = lifeTime;
+    }
+
+    public RoomDataLifetime LifeTime { get; set; }
+}

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -44,14 +44,14 @@ public class AuthService
 
     public List<AuthKey> Props { get; private set; }
 
-    public static async Task<AuthService> From(Consumer consumer)
+    public static async Task<AuthService> From(Consumer consumer, string logoText)
     {
         var result = new AuthService
         {
             Consumer = consumer,
             Title = ConsumerExtension.GetResourceString(consumer.Name) ?? consumer.Name,
-            Description = ConsumerExtension.GetResourceString(consumer.Name + "Description"),
-            Instruction = ConsumerExtension.GetResourceString(consumer.Name + "Instruction"),
+            Description = ConsumerExtension.GetResourceString(consumer.Name + "Description")?.Replace("{LogoText}", logoText),
+            Instruction = ConsumerExtension.GetResourceString(consumer.Name + "Instruction")?.Replace("{LogoText}", logoText),
             Props = []
         };
         
@@ -85,12 +85,25 @@ public static class ConsumerExtension
     }
 }
 
+/// <summary>
+/// The authentication key parameters.
+/// </summary>
 [DebuggerDisplay("({Name},{Value})")]
 public class AuthKey
 {
+    /// <summary>
+    /// The authentication key name.
+    /// </summary>
     public string Name { get; init; }
 
+    /// <summary>
+    /// The authentication key value.
+    /// </summary>
+    [StringLength(255)]
     public string Value { get; init; }
 
+    /// <summary>
+    /// The authentication key title.
+    /// </summary>
     public string Title { get; set; }
 }

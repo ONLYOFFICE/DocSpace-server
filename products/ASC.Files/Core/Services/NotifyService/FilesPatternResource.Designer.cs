@@ -70,6 +70,33 @@ namespace ASC.Files.Core.Services.NotifyService {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A new document &quot;$DocumentTitle&quot; has been created in the room &quot;$RoomTitle&quot;.
+        /// </summary>
+        public static string pattern_DocumentCreatedInRoom_push {
+            get {
+                return ResourceManager.GetString("pattern_DocumentCreatedInRoom_push", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A new files have been uploaded to the room &quot;$RoomTitle&quot; ($Count).
+        /// </summary>
+        public static string pattern_DocumentsUploadedTo_push {
+            get {
+                return ResourceManager.GetString("pattern_DocumentsUploadedTo_push", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A new file &quot;$DocumentTitle&quot; has been uploaded to the room &quot;$RoomTitle&quot;.
+        /// </summary>
+        public static string pattern_DocumentUploadedTo_push {
+            get {
+                return ResourceManager.GetString("pattern_DocumentUploadedTo_push", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to h1. All signers completed $DocumentTitle
         ///
         ///This is an email notification to inform you that all signers completed &quot;$DocumentTitle&quot;:&quot;$DocumentURL&quot;..
@@ -105,6 +132,24 @@ namespace ASC.Files.Core.Services.NotifyService {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to $ToUserName mentioned you in the document $DocumentTitle.
+        /// </summary>
+        public static string pattern_EditorMentions_push {
+            get {
+                return ResourceManager.GetString("pattern_EditorMentions_push", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A new folder &quot;$FolderTitle&quot; has been created to the room &quot;$RoomTitle&quot;.
+        /// </summary>
+        public static string pattern_FolderCreatedInRoom_push {
+            get {
+                return ResourceManager.GetString("pattern_FolderCreatedInRoom_push", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to h1. Form $Message is filled out
         ///
         ///A new form &quot;$DocumentTitle&quot;:&quot;$DocumentURL&quot; is filled out in the room &quot;$RoomTitle&quot;:&quot;$RoomURL&quot;
@@ -116,6 +161,17 @@ namespace ASC.Files.Core.Services.NotifyService {
         public static string pattern_FormReceived {
             get {
                 return ResourceManager.GetString("pattern_FormReceived", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 
+        ///      Activity notification. &quot;$FromUserName&quot;:&quot;$FromUserLink&quot; started the form filling process:  &quot;$DocumentTitle&quot;:&quot;$DocumentURL&quot; in the room: &quot;$RoomTitle&quot;:&quot;$RoomURL&quot; — $__DateTime.
+        ///    .
+        /// </summary>
+        public static string pattern_FormStartedFilling {
+            get {
+                return ResourceManager.GetString("pattern_FormStartedFilling", resourceCulture);
             }
         }
         
@@ -135,6 +191,35 @@ namespace ASC.Files.Core.Services.NotifyService {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Form &quot;$DocumentTitle&quot; has been filled out in the room &quot;$RoomTitle&quot;.
+        /// </summary>
+        public static string pattern_FormSubmitted_push {
+            get {
+                return ResourceManager.GetString("pattern_FormSubmitted_push", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 
+        ///      Activity notification. The form &quot;$DocumentTitle&quot;:&quot;$DocumentURL&quot; was completely filled out in the room: &quot;$RoomTitle&quot;:&quot;$RoomURL&quot; — $__DateTime.
+        ///    .
+        /// </summary>
+        public static string pattern_FormWasCompletelyFilled {
+            get {
+                return ResourceManager.GetString("pattern_FormWasCompletelyFilled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You have been invited to the room &quot;$RoomTitle&quot;.
+        /// </summary>
+        public static string pattern_InvitedToRoom_push {
+            get {
+                return ResourceManager.GetString("pattern_InvitedToRoom_push", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to h1. Mailing completed
         ///
         ///This is an email notification to inform you that you have requested the mailing of $MailsCount messages and the process is now complete. $Message
@@ -148,6 +233,15 @@ namespace ASC.Files.Core.Services.NotifyService {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to $FromUserName moved the room &quot;$RoomTitle&quot; to the archive.
+        /// </summary>
+        public static string pattern_RoomMovedArchive_push {
+            get {
+                return ResourceManager.GetString("pattern_RoomMovedArchive_push", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to h1. $__AuthorName deleted a room
         ///
         ///$__AuthorName deleted the room: $RoomTitle.
@@ -155,6 +249,15 @@ namespace ASC.Files.Core.Services.NotifyService {
         public static string pattern_RoomRemoved {
             get {
                 return ResourceManager.GetString("pattern_RoomRemoved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your role in the room &quot;$RoomTitle&quot; has been changed to &quot;$RoomRole&quot;.
+        /// </summary>
+        public static string pattern_RoomUpdateAccessForUser_push {
+            get {
+                return ResourceManager.GetString("pattern_RoomUpdateAccessForUser_push", resourceCulture);
             }
         }
         
@@ -181,6 +284,28 @@ namespace ASC.Files.Core.Services.NotifyService {
         public static string pattern_ShareFolder {
             get {
                 return ResourceManager.GetString("pattern_ShareFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 
+        ///      Activity notification. &quot;$FromUserName&quot;:&quot;$FromUserLink&quot; stopped form filling: &quot;$DocumentTitle&quot;:&quot;$DocumentURL&quot; in the room: &quot;$RoomTitle&quot;:&quot;$RoomURL&quot; — $__DateTime.
+        ///    .
+        /// </summary>
+        public static string pattern_StoppedFormFilling {
+            get {
+                return ResourceManager.GetString("pattern_StoppedFormFilling", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 
+        ///      Activity notification. It’s your turn! Form filling is required: &quot;$DocumentTitle&quot;:&quot;$DocumentURL&quot; in the room: &quot;$RoomTitle&quot;:&quot;$RoomURL&quot; — $__DateTime.
+        ///    .
+        /// </summary>
+        public static string pattern_YourTurnFormFilling {
+            get {
+                return ResourceManager.GetString("pattern_YourTurnFormFilling", resourceCulture);
             }
         }
         
@@ -255,15 +380,6 @@ namespace ASC.Files.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Mentioned in document.
-        /// </summary>
-        public static string subject_EditorMentions_push {
-            get {
-                return ResourceManager.GetString("subject_EditorMentions_push", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to DocSpace notification. The form is filled out.
         /// </summary>
         public static string subject_FormReceived {
@@ -273,11 +389,29 @@ namespace ASC.Files.Core.Services.NotifyService {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to DocSpace notification..
+        /// </summary>
+        public static string subject_FormStartedFilling {
+            get {
+                return ResourceManager.GetString("subject_FormStartedFilling", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to DocSpace notification. The form is filled out.
         /// </summary>
         public static string subject_FormSubmitted {
             get {
                 return ResourceManager.GetString("subject_FormSubmitted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to DocSpace notification..
+        /// </summary>
+        public static string subject_FormWasCompletelyFilled {
+            get {
+                return ResourceManager.GetString("subject_FormWasCompletelyFilled", resourceCulture);
             }
         }
         
@@ -368,6 +502,24 @@ namespace ASC.Files.Core.Services.NotifyService {
         public static string subject_ShareFolder_tg {
             get {
                 return ResourceManager.GetString("subject_ShareFolder_tg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to DocSpace notification..
+        /// </summary>
+        public static string subject_StoppedFormFilling {
+            get {
+                return ResourceManager.GetString("subject_StoppedFormFilling", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to DocSpace notification..
+        /// </summary>
+        public static string subject_YourTurnFormFilling {
+            get {
+                return ResourceManager.GetString("subject_YourTurnFormFilling", resourceCulture);
             }
         }
     }

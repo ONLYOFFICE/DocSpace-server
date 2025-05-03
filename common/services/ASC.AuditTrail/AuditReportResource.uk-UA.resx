@@ -802,4 +802,115 @@
   <data name="FormSubmit" xml:space="preserve">
     <value>Користувачі [{0}]. Форму надіслано: {1}</value>
   </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Експорт індексу кімнати збережено в Документах</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Запрошення надіслані повторно: {0}</value>
+  </data>
+  <data name="OAuthModule" xml:space="preserve">
+    <value>OAuth</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>Клієнта {0} оновлено</value>
+  </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>Параметри доступу до інструментів розробника змінено</value>
+  </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Клієнта {0} видалено</value>
+  </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>Змінено активацію {0} для клієнта</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>Змінено видимість {0} для клієнта</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Клієнт створено</value>
+  </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>Файл: {0}. Індекс змінено з {1} на {2}</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>Файли [{0}]. Видалена версія: {1}</value>
+  </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>Користувачі [{0}]. Форму повністю заповнено: {1}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>Користувачі [{0}]. Заповнено частину форми: {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>Користувачі [{0}]. Заповнення розпочато: {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>Користувачі [{0}]. Форму зупинено: {1}</value>
+  </data>
+  <data name="WebhookCreated" xml:space="preserve">
+    <value>Вебхук створено: {0}</value>
+  </data>
+  <data name="WebhookDeleted" xml:space="preserve">
+    <value>Вебхук видалено: {0}</value>
+  </data>
+  <data name="WebhookUpdated" xml:space="preserve">
+    <value>Вебхук оновлено: {0}</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Папка: {0}. Індекс змінено з {1} на {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Папка: {0}. Порядок індексів змінено</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>Створено код авторизації для клієнта {0}</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>Створено маркер персонального доступу для клієнта {0}</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>Секрет клієнта {0} повторно створено</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Скасовано доступ клієнта {0}</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Кімната: {0}. Заборону завантаження вимкнено</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Кімната: {0}. Заборону завантаження ввімкнено</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Індексування кімнат вимкнено</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Увімкнено індексування кімнати</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>Період існування вимкнено</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>Період існування налаштовано. Значення: {0}. Період: {1}. Видалити назавжди: {2}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Кімната: {0}. Водяний знак вимкнено</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Кімната: {0}. Водяний знак ввімкнено</value>
+  </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>Файл: {0}. Користувацькі фільтри вимкнено</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>Файл: {0}. Користувацький фільтр увімкнуто</value>
+  </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>Створено ключ API користувача: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>Ключ API користувача видалено: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>Оновлено ключ API користувача: {0}</value>
+  </data>
 </root>

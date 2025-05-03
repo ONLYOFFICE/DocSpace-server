@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -42,6 +42,8 @@ public class PeopleNamesSettings : ISettings<PeopleNamesSettings>
     {
         return new PeopleNamesSettings { ItemId = PeopleNamesItem.DefaultID };
     }
+    
+    public DateTime LastModified { get; set; }
 }
 
 public class PeopleNamesItem
@@ -154,7 +156,7 @@ public class PeopleNamesItem
 [Scope]
 public class CustomNamingPeople(SettingsManager settingsManager)
 {
-    private static readonly object _locked = new();
+    private static readonly Lock _locked = new();
     private static bool _loaded;
 
     private static readonly List<PeopleNamesItem> _items = [];

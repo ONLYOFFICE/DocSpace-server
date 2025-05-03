@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -88,11 +88,11 @@ public class ChunkZipWriteOperator : IDataWriteOperator
         {
             var entry = TarEntry.CreateTarEntry(tarKey);
             entry.Size = buffered.Length;
-            await _tarOutputStream.PutNextEntryAsync(entry, default);
+            await _tarOutputStream.PutNextEntryAsync(entry, CancellationToken.None);
             buffered.Position = 0;
             await buffered.CopyToAsync(_tarOutputStream);
             await _tarOutputStream.FlushAsync();
-            await _tarOutputStream.CloseEntryAsync(default).ContinueWith(async _ => await action());
+            await _tarOutputStream.CloseEntryAsync(CancellationToken.None).ContinueWith(async _ => await action());
         }
         finally
         {

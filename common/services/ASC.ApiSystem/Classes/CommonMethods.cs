@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -59,7 +59,7 @@ public class CommonMethods(
             ownerId = t.OwnerId,
             paymentId = t.PaymentId,
             portalName = t.Alias,
-            status = t.Status.ToString(),
+            status = t.Status.ToStringFast(),
             tenantId = t.Id,
             timeZoneName = timeZoneConverter.GetTimeZone(t.TimeZone).DisplayName,
             quotaUsage,
@@ -79,28 +79,39 @@ public class CommonMethods(
 
     public async Task<string> SendCongratulations(string requestUriScheme, Tenant tenant, bool skipWelcome)
     {
-        var validationKey = emailValidationKeyProvider.GetEmailKey(tenant.Id, tenant.OwnerId.ToString() + ConfirmType.Auth);
+        return await CallSendMethod(requestUriScheme, "portal/sendcongratulations", HttpMethod.Post, tenant, ConfirmType.Auth, skipWelcome);
+    }
+
+    public async Task<string> SendRemoveInstructions(string requestUriScheme, Tenant tenant)
+    {
+        return await CallSendMethod(requestUriScheme, "portal/sendremoveinstructions", HttpMethod.Post, tenant, ConfirmType.PortalRemove, false);
+    }
+
+    private async Task<string> CallSendMethod(string requestUriScheme, string apiMethod, HttpMethod httpMethod, Tenant tenant, ConfirmType confirmType, bool skipAndReturnUrl)
+    {
+        var validationKey = emailValidationKeyProvider.GetEmailKey(tenant.OwnerId.ToString() + confirmType, tenant.Id);
 
         var url = string.Format("{0}{1}{2}{3}{4}?userid={5}&key={6}",
                             requestUriScheme,
                             Uri.SchemeDelimiter,
                             tenant.GetTenantDomain(coreSettings),
                             commonConstants.WebApiBaseUrl,
-                            "portal/sendcongratulations",
-                            tenant.OwnerId,
+                            apiMethod,
+                            tenant.OwnerId.ToString(),
                             validationKey);
 
-        if (skipWelcome)
+        if (skipAndReturnUrl)
         {
-            log.LogDebug("congratulations skiped");
+            log.LogDebug($"SendMethod {apiMethod} skiped");
             return url;
         }
 
         var request = new HttpRequestMessage
         {
-            Method = HttpMethod.Post,
+            Method = httpMethod,
             RequestUri = new Uri(url)
         };
+
         request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
         try
@@ -108,7 +119,7 @@ public class CommonMethods(
             var httpClient = clientFactory.CreateClient();
             using var response = await httpClient.SendAsync(request);
 
-            log.LogDebug("congratulations result = {0}", response.StatusCode);
+            log.LogDebug($"SendMethod {apiMethod} result = {response.StatusCode}");
 
             if (response.StatusCode != HttpStatusCode.OK)
             {
@@ -118,7 +129,7 @@ public class CommonMethods(
         }
         catch (Exception ex)
         {
-            log.LogError(ex, "SendCongratulations error");
+            log.LogError(ex, $"SendMethod {apiMethod} error");
             return url;
         }
 
@@ -275,6 +286,16 @@ public class CommonMethods(
 
     public string GetClientIp()
     {
+        var request = httpContextAccessor.HttpContext?.Request;
+        if (request != null)
+        {
+            var header = request.Headers["X-Forwarded-For"].FirstOrDefault();
+            if (!string.IsNullOrEmpty(header))
+            {
+                return header.Split(',').First();
+            }
+        }
+
         return httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
 
         //TODO: check old version

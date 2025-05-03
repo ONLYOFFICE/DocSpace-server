@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,191 +27,217 @@
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 /// <summary>
+/// The settings information.
 /// </summary>
 public class SettingsDto
 {
-    /// <summary>Time zone</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The time zone.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "UTC")]
     public string Timezone { get; set; }
 
-    /// <summary>List of trusted domains</summary>
-    /// <type>System.Collections.Generic.List{System.String}, System.Collections.Generic</type>
+    /// <summary>
+    /// The list of the trusted domains.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "mydomain.com")]
     public List<string> TrustedDomains { get; set; }
 
-    /// <summary>Trusted domains type</summary>
-    /// <type>ASC.Core.Tenants.TenantTrustedDomainsType, ASC.Core.Common</type>
+    /// <summary>
+    /// The type of the trusted domains.
+    /// </summary>
     public TenantTrustedDomainsType TrustedDomainsType { get; set; }
 
-    /// <summary>Language</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The language.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "en-US")]
     public string Culture { get; set; }
 
-    /// <summary>UTC offset</summary>
-    /// <type>System.TimeSpan, System</type>
+    /// <summary>
+    /// The UTC offset in the TimeSpan format.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "-8.5")]
     public TimeSpan UtcOffset { get; set; }
 
-    /// <summary>UTC hours offset</summary>
-    /// <type>System.Double, System</type>
+    /// <summary>
+    /// The UTC offset in hours.
+    /// </summary>
     public double UtcHoursOffset { get; set; }
 
-    /// <summary>Greeting settings</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The greeting settings.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "Web Office Applications")]
     public string GreetingSettings { get; set; }
 
-    /// <summary>Owner ID</summary>
-    /// <type>System.Guid, System</type>
+    /// <summary>
+    /// The owner ID.
+    /// </summary>
     public Guid OwnerId { get; set; }
 
-    /// <summary>Team template ID</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The team template ID.
+    /// </summary>
     public string NameSchemaId { get; set; }
 
-    /// <summary>Specifies if a user can join to the portal or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    /// <summary>
+    /// Specifies if a user can join the portal or not.
+    /// </summary>
     public bool? EnabledJoin { get; set; }
 
-    /// <summary>Specifies if a user can send a message to the administrator or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    /// <summary>
+    /// Specifies if a user can send a message to the administrator when accessing the DocSpace portal or not.
+    /// </summary>
     public bool? EnableAdmMess { get; set; }
 
-    /// <summary>Specifies if a user can connect third-party providers or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    /// <summary>
+    /// Specifies if a user can connect third-party providers to the portal or not.
+    /// </summary>
     public bool? ThirdpartyEnable { get; set; }
 
-    /// <summary>Specifies if this is a DocSpace portal or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if this portal is a DocSpace portal or not.
+    /// </summary>
     public bool DocSpace { get; set; }
 
-    /// <summary>Specifies if this is a standalone portal or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Indicates whether the system is running in standalone mode.
+    /// </summary>
     public bool Standalone { get; set; }
 
-    /// <summary>Specifies if this is a AMI instance or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if this portal is the AMI instance or not.
+    /// </summary>
     public bool IsAmi { get; set; }
 
-    /// <summary>Base domain</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The base domain.
+    /// </summary>
     public string BaseDomain { get; set; }
 
-    /// <summary>Wizard token</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The wizard token.
+    /// </summary>
     public string WizardToken { get; set; }
 
-    /// <summary>Password hash</summary>
-    /// <type>ASC.Security.Cryptography.PasswordHasher, ASC.Common</type>
+    /// <summary>
+    /// The password hash.
+    /// </summary>
     public PasswordHasher PasswordHash { get; set; }
 
-    /// <summary>Firebase parameters</summary>
-    /// <type>ASC.Web.Api.ApiModel.ResponseDto.FirebaseDto, ASC.Web.Api</type>
+    /// <summary>
+    /// The Firebase parameters.
+    /// </summary>
     public FirebaseDto Firebase { get; set; }
 
-    /// <summary>Version</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The portal version.
+    /// </summary>
     public string Version { get; set; }
 
-    /// <summary>Type of captcha</summary>
-    /// <type>ASC.Web.Core.RecaptchaType, ASC.Web.Core</type>
+    /// <summary>
+    /// The type of CAPTCHA validation used.
+    /// </summary>
     public RecaptchaType RecaptchaType { get; set; }
 
-    /// <summary>ReCAPTCHA public key</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The ReCAPTCHA public key.
+    /// </summary>
     public string RecaptchaPublicKey { get; set; }
 
-    /// <summary>Specifies if the debug information will be sent or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the debug information will be sent or not.
+    /// </summary>
     public bool DebugInfo { get; set; }
 
-    /// <summary>Socket URL</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The socket URL.
+    /// </summary>
     public string SocketUrl { get; set; }
 
-    /// <summary>Tenant status</summary>
-    /// <type>ASC.Core.Tenants.TenantStatus, ASC.Core.Common</type>
+    /// <summary>
+    /// The tenant status.
+    /// </summary>
     public TenantStatus TenantStatus { get; set; }
 
-    /// <summary>Tenant alias</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The tenant alias.
+    /// </summary>
     public string TenantAlias { get; set; }
 
-    /// <summary>Link to the help</summary>
-    /// <type>System.String, System</type>
-    public string HelpLink { get; set; }
-    
-    /// <summary>Link to the forum</summary>
-    /// <type>System.String, System</type>
-    public string ForumLink { get; set; }
-
-    /// <summary>Specifies whether to display the About section</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether to display the "About" portal section.
+    /// </summary>
     public bool DisplayAbout { get; set; }
 
-    /// <summary>API documentation link</summary>
-    /// <type>System.String, System</type>
-    public string ApiDocsLink { get; set; }
-
-    /// <summary>Domain validator</summary>
-    /// <type>ASC.Core.Tenants.TenantDomainValidator, ASC.Core.Common</type>
+    /// <summary>
+    /// The domain validator.
+    /// </summary>
     public TenantDomainValidator DomainValidator { get; set; }
 
-    /// <summary>Zendesk key</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The Zendesk key.
+    /// </summary>
     public string ZendeskKey { get; set; }
 
-    /// <summary>Tag manager ID</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The tag manager ID.
+    /// </summary>
     public string TagManagerId { get; set; }
 
-    /// <summary>Email for training booking</summary>
-    /// <type>System.String, System</type>
-    public string BookTrainingEmail { get; set; }
-
-    /// <summary>Documentation email</summary>
-    /// <type>System.String, System</type>
-    public string DocumentationEmail { get; set; }
-
-    /// <summary>Legal terms</summary>
-    /// <type>System.String, System</type>
-    public string LegalTerms { get; set; }
-
-    /// <summary>License url</summary>
-    /// <type>System.String, System</type>
-    public string LicenseUrl { get; set; }
-
-    /// <summary>Specifies whether the cookie settings are enabled</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether the cookie settings are enabled.
+    /// </summary>
     public bool CookieSettingsEnabled { get; set; }
+
+    /// <summary>
+    /// Specifies whether the access to the space management is limited or not.
+    /// </summary>
     public bool LimitedAccessSpace { get; set; }
 
-    /// <summary>User name validation regex</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Specifies whether the access to the Developer Tools is limited for users or not.
+    /// </summary>
+    public bool LimitedAccessDevToolsForUsers { get; set; }
+
+    /// <summary>
+    /// The user name validation regex.
+    /// </summary>
     public string UserNameRegex { get; set; }
 
-    /// <summary>Invitation limit</summary>
-    /// <type>System.Nullable{System.Int32}, System</type>
+    /// <summary>
+    /// The maximum number of invitations to the portal.
+    /// </summary>
     public int? InvitationLimit { get; set; }
 
-    /// <summary>Plugins</summary>
-    /// <type>ASC.Web.Api.ApiModel.ResponseDto.PluginsDto, ASC.Web.Api</type>
+    /// <summary>
+    /// The plugins settings.
+    /// </summary>
     public PluginsDto Plugins { get; set; }
 
+    /// <summary>
+    /// The deep link settings.
+    /// </summary>
     public DeepLinkDto DeepLink { get; set; }
 
+    /// <summary>
+    /// The form gallery settings.
+    /// </summary>
     public FormGalleryDto FormGallery { get; set; }
-    
+
+    /// <summary>
+    /// The maximum image upload size.
+    /// </summary>
     public long MaxImageUploadSize { get; set; }
 
-    public static SettingsDto GetSample()
-    {
-        return new SettingsDto
-        {
-            Culture = "en-US",
-            Timezone = TimeZoneInfo.Utc.ToString(),
-            TrustedDomains = ["mydomain.com"],
-            UtcHoursOffset = -8.5,
-            UtcOffset = TimeSpan.FromHours(-8.5),
-            GreetingSettings = "Web Office Applications",
-            OwnerId = new Guid()
-        };
-    }
+    /// <summary>
+    /// The white label logo text.
+    /// </summary>
+    public string LogoText { get; set; }
+
+    /// <summary>
+    /// The external resources settings.
+    /// </summary>
+    public CultureSpecificExternalResources ExternalResources { get; set; }
 }

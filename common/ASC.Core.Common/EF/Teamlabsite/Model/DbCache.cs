@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,6 +27,7 @@
 namespace ASC.Core.Common.EF.Teamlabsite.Model;
 public class DbCache
 {
+    [MaxLength(100)]
     public string TenantAlias { get; set; }
 }
 
@@ -54,7 +55,7 @@ public static class DbCacheExtension
 
             entity.Property(e => e.TenantAlias)
                 .HasColumnName("tenant_alias")
-                .HasColumnType("varchar(100)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -65,18 +66,15 @@ public static class DbCacheExtension
     {
         modelBuilder.Entity<DbCache>(entity =>
         {
-            entity.ToTable("tenants_cache")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+            entity.ToTable("tenants_cache");
 
             entity.HasKey(e => e.TenantAlias)
                 .HasName("PRIMARY");
 
             entity.Property(e => e.TenantAlias)
                 .HasColumnName("tenant_alias")
-                .HasColumnType("varchar(100)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .HasColumnType("character varying")
+                .HasMaxLength(100);
         });
     }
 }

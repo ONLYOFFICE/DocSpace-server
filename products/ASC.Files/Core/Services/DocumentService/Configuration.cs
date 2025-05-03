@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,19 +26,30 @@
 
 namespace ASC.Web.Files.Services.DocumentService;
 
+/// <summary>
+/// The editor type.
+/// </summary>
 [EnumExtensions]
 public enum EditorType
 {
+    [SwaggerEnum(Description = "Desktop")]
     Desktop,
+
+    [SwaggerEnum(Description = "Mobile")]
     Mobile,
+
+    [SwaggerEnum(Description = "Embedded")]
     Embedded
 }
 
 /// <summary>
+/// The config parameter which contains the information about the action in the document that will be scrolled to.
 /// </summary>
 public class ActionLinkConfig
 {
-    /// <summary>The information about the comment in the document that will be scrolled to</summary>
+    /// <summary>
+    /// The information about the action in the document that will be scrolled to.
+    /// </summary>
     [JsonPropertyName("action")]
     public ActionConfig Action { get; set; }
 
@@ -48,30 +59,65 @@ public class ActionLinkConfig
     }
 
     /// <summary>
+    /// The information about the action in the document that will be scrolled to.
     /// </summary>
     public class ActionConfig
     {
-        /// <summary>Comment data</summary>
+        /// <summary>
+        /// The action data that will be scrolled to.
+        /// </summary>
         [JsonPropertyName("data")]
         public string Data { get; set; }
 
-        /// <summary>Action type</summary>
+        /// <summary>
+        /// The action type.
+        /// </summary>
         [JsonPropertyName("type")]
         public string Type { get; set; }
     }
 }
 
+/// <summary>
+/// The co-editing configuration parameters.
+/// </summary>
 public class CoEditingConfig
 {
+    /// <summary>
+    /// Specifies if the co-editing mode can be changed in the editor interface or not. 
+    /// </summary>
     public bool Change { get; set; }
+
+    /// <summary>
+    /// Specifies if the co-editing mode is fast.
+    /// </summary>
     public bool Fast { get; init; }
 
-    public string Mode
+    /// <summary>
+    /// The co-editing mode (fast or strict).
+    /// </summary>
+    public CoEditingConfigMode Mode
     {
-        get { return Fast ? "fast" : "strict"; }
+        get { return Fast ? CoEditingConfigMode.Fast : CoEditingConfigMode.Strict; }
     }
 }
 
+/// <summary>
+/// The co-editing mode (fast or strict).
+/// </summary>
+[EnumExtensions]
+public enum CoEditingConfigMode
+{
+    [SwaggerEnum("Fast")]
+    Fast,
+
+    [SwaggerEnum("Strict")]
+    Strict
+}
+
+
+/// <summary>
+/// The configuration parameters.
+/// </summary>
 [Scope(GenericArguments = [typeof(int)])]
 [Scope(GenericArguments = [typeof(string)])]
 public class Configuration<T>(
@@ -86,14 +132,19 @@ public class Configuration<T>(
         { FileType.Pdf, "pdf" }
     };
 
+    /// <summary>
+    /// The type of the file for the source viewed or edited document.
+    /// </summary>
     private FileType _fileTypeCache = FileType.Unknown;
 
-    /// <summary>Document config</summary>
-    /// <type>ASC.Web.Files.Services.DocumentService.DocumentConfig, ASC.Files.Core</type>
+    /// <summary>
+    /// The document configuration parameters.
+    /// </summary>
     public DocumentConfig<T> Document { get; } = document;
 
-    /// <summary>Document type</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The document type to be opened.
+    /// </summary>
     public string GetDocumentType(File<T> file)
     {
         DocType.TryGetValue(GetFileType(file), out var documentType);
@@ -101,12 +152,14 @@ public class Configuration<T>(
         return documentType;
     }
 
-    /// <summary>Editor config</summary>
-    /// <type>ASC.Web.Files.Services.DocumentService.EditorConfiguration, ASC.Files.Core</type>
+    /// <summary>
+    /// The editor configuration parameters.
+    /// </summary>
     public EditorConfiguration<T> EditorConfig { get; } = editorConfig;
 
-    /// <summary>Editor type</summary>
-    /// <type>ASC.Web.Files.Services.DocumentService.EditorType, ASC.Files.Core</type>
+    /// <summary>
+    /// The editor type.
+    /// </summary>
     public EditorType EditorType
     {
         set => Document.Info.Type = value;
@@ -115,11 +168,12 @@ public class Configuration<T>(
     
     public string Error { get; set; }
 
-    /// <summary>Platform type</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The platform type used to access the document.
+    /// </summary>
     public string Type
     {
-        set => EditorType = (EditorType)Enum.Parse(typeof(EditorType), value, true);
+        set => EditorType = Enum.Parse<EditorType>(value, true);
         get => EditorType.ToString().ToLower();
     }
 
@@ -148,7 +202,7 @@ public class DocumentConfig<T>(
     private string _key = string.Empty;
     private FileReferenceData _referenceData;
     public string GetFileType(File<T> file) => file.ConvertedExtension.Trim('.');
-    public InfoConfig<T> Info { get; set; } = infoConfig;
+    public InfoConfig<T> Info { get; } = infoConfig;
     public bool IsLinkedForMe { get; set; }
 
     public string Key
@@ -162,23 +216,23 @@ public class DocumentConfig<T>(
 	public Options Options { get; set; }
     public string SharedLinkParam { get; set; }
     public string SharedLinkKey { get; set; }
-    public async Task<FileReferenceData> GetReferenceData(File<T> file)
+    public FileReferenceData GetReferenceData(File<T> file)
     {
         return _referenceData ??= new FileReferenceData
         {
             FileKey = file.Id.ToString(), 
-            InstanceId = (await tenantManager.GetCurrentTenantIdAsync()).ToString()
+            InstanceId = (tenantManager.GetCurrentTenantId()).ToString()
         };
     }
 
     public string Title { get; set; }
 
-    public async Task SetUrl(string val)
+    public void SetUrl(string val)
     {
-        _fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(val);
+        _fileUri = documentServiceConnector.ReplaceCommunityAddress(val);
     }
     
-    public async Task<string> GetUrl(File<T> file)
+    public string GetUrl(File<T> file)
     {
         if (!string.IsNullOrEmpty(_fileUri))
         {
@@ -186,7 +240,7 @@ public class DocumentConfig<T>(
         }
 
         var last = Permissions.Edit || Permissions.Review || Permissions.Comment;
-        _fileUri = await documentServiceConnector.ReplaceCommunityAddressAsync(await pathProvider.GetFileStreamUrlAsync(file, last));
+        _fileUri = documentServiceConnector.ReplaceCommunityAddress(pathProvider.GetFileStreamUrl(file, last));
 
         return _fileUri;
     }
@@ -253,7 +307,7 @@ public class EditorConfiguration<T>(
             return null;
         }
 
-        var callbackUrl = await documentServiceTrackerHelper.GetCallbackUrlAsync(file.Id.ToString());
+        var callbackUrl = documentServiceTrackerHelper.GetCallbackUrl(file.Id.ToString());
 
         if (file.ShareRecord is not { IsLink: true } || string.IsNullOrEmpty(file.ShareRecord.Options?.Password))
         {
@@ -474,24 +528,81 @@ public class InfoConfig<T>(
     public string GetUploaded(File<T> file) => file.CreateOnString;
 }
 
+/// <summary>
+/// The permissions configuration parameters.
+/// </summary>
 public class PermissionsConfig
 {
+    /// <summary>
+    /// Specifies whether to display the "Restore" button when using the "onRequestRestore" event.
+    /// </summary>
     public bool ChangeHistory { get; set; }
+
+    /// <summary>
+    /// Defines if the document can be commented or not.
+    /// </summary>
     public bool Comment { get; set; } = true;
+
+    /// <summary>
+    /// Defines if the chat functionality is enabled in the document or not.
+    /// </summary>
     public bool Chat { get; set; } = true;
+
+    /// <summary>
+    /// Defines if the document can be downloaded or only viewed or edited online.
+    /// </summary>
     public bool Download { get; set; } = true;
+
+    /// <summary>
+    /// Defines if the document can be edited or only viewed.
+    /// </summary>
     public bool Edit { get; set; } = true;
+
+    /// <summary>
+    /// Defines if the forms can be filled.
+    /// </summary>
     public bool FillForms { get; set; } = true;
+
+    /// <summary>
+    /// Defines if the filter can be applied globally (true) affecting all the other users,
+    /// or locally (false), i.e. for the current user only. 
+    /// </summary>
     public bool ModifyFilter { get; set; } = true;
+
+    /// <summary>
+    /// Defines if the "Protection" tab on the toolbar and the "Protect" button in the left menu are displayedor hidden.
+    /// </summary>
     public bool Protect { get; set; } = true;
+
+    /// <summary>
+    /// Defines if the document can be printed or not.
+    /// </summary>
     public bool Print { get; set; } = true;
+
+    /// <summary>
+    /// Specifies whether to display the "Rename..." button when using the "onRequestRename" event.
+    /// </summary>
     public bool Rename { get; set; }
+
+    /// <summary>
+    /// Defines if the document can be reviewed or not.
+    /// </summary>
     public bool Review { get; set; } = true;
+
+    /// <summary>
+    /// Defines if the content can be copied to the clipboard or not.
+    /// </summary>
     public bool Copy { get; set; } = true;
 }
 
+/// <summary>
+/// The document options.
+/// </summary>
 public class Options
 {
+    /// <summary>
+    /// The document watermark parameters.
+    /// </summary>
     [JsonPropertyName("watermark_on_draw")]
     public WatermarkOnDraw WatermarkOnDraw { get; set; }
 
@@ -506,6 +617,7 @@ public class Options
 
         _ = stringBuilder.Append(WatermarkOnDraw.Width.ToString(CultureInfo.InvariantCulture));
         _ = stringBuilder.Append(WatermarkOnDraw.Height.ToString(CultureInfo.InvariantCulture));
+        _ = stringBuilder.Append(string.Join(',',WatermarkOnDraw.Margins));
         _ = stringBuilder.Append(WatermarkOnDraw.Fill);
         _ = stringBuilder.Append(WatermarkOnDraw.Rotate);
         _ = stringBuilder.Append(WatermarkOnDraw.Transparent.ToString(CultureInfo.InvariantCulture));
@@ -533,35 +645,60 @@ public class Options
     }
 }
 
-public class WatermarkOnDraw
+/// <summary>
+/// The document watermark parameters.
+/// </summary>
+public class WatermarkOnDraw(double widthInPixels, double heightInPixels, string fill, int rotate, List<Paragraph> paragraphs)
 {
-    public WatermarkOnDraw(double width, double height, string fill, int rotate, List<Paragraph> paragraphs)
-    {
-        Width = width == 0 ? 200 : width; 
-        Height = height == 0 ? 240 : height;
-        Fill = fill;
-        Rotate = rotate;
-        Transparent = 0.4;
-        Paragraphs = paragraphs;
-    }
+    private const double DotsPerInch = 96;
+    private const double DotsPerMm = DotsPerInch / 25.4;
+
+    /// <summary>
+    /// Defines the watermark width measured in millimeters.
+    /// </summary>
     [JsonPropertyName("width")]
-    public double Width { get; set; }
+    public double Width { get; init; } = widthInPixels == 0 ? 100 : widthInPixels / DotsPerMm;
 
+    /// <summary>
+    /// Defines the watermark height measured in millimeters.
+    /// </summary>
     [JsonPropertyName("height")]
-    public double Height { get; set; }
+    public double Height { get; init; } = heightInPixels == 0 ? 100 : heightInPixels / DotsPerMm;
 
+    /// <summary>
+    /// Defines the watermark margins measured in millimeters.
+    /// </summary>
+    [JsonPropertyName("margins")]
+    public int[] Margins { get; init; } = [0, 0, 0, 0];
+
+    /// <summary>
+    /// Defines the watermark fill color.
+    /// </summary>
     [JsonPropertyName("fill")]
-    public string Fill { get; set; }
+    public string Fill { get; init; } = fill;
 
+    /// <summary>
+    /// Defines the watermark rotation angle.
+    /// </summary>
     [JsonPropertyName("rotate")]
-    public int Rotate { get; set; }
+    public int Rotate { get; init; } = rotate;
 
+    /// <summary>
+    /// Defines the watermark transparency percentage.
+    /// </summary>
     [JsonPropertyName("transparent")]
-    public double Transparent { get; set; }
+    public double Transparent { get; init; } = 0.4;
 
+    /// <summary>
+    /// The list of paragraphs of the watermark.
+    /// </summary>
     [JsonPropertyName("paragraphs")]
-    public List<Paragraph> Paragraphs { get; set; }
+    public List<Paragraph> Paragraphs { get; init; } = paragraphs;
 }
+
+/// <summary>
+/// The paragraph parameters.
+/// </summary>
 public class Paragraph
 {
     public Paragraph(List<Run> runs)
@@ -569,89 +706,118 @@ public class Paragraph
         Runs = runs;
         Align = 2;
     }
+
+    /// <summary>
+    /// The paragraph align.
+    /// </summary>
     [JsonPropertyName("align")]
     public int Align { get; set; }
 
+    /// <summary>
+    /// The list of text runs from the paragraph.
+    /// </summary>
     [JsonPropertyName("runs")]
     public List<Run> Runs { get; set; }
 }
-public class Run
+/// <summary>
+/// The text run parameters.
+/// </summary>
+public class Run(string text, bool usedInHash = true)
 {
-    private readonly bool _usedInHash;
+    internal bool UsedInHash => usedInHash;
 
-    internal bool UsedInHash => _usedInHash;
-
-    public Run(string text, bool usedInHash = true)
-    {
-        FontSize = "42";
-        Fill = [124, 124, 124];
-        Text = text;
-
-        _usedInHash = usedInHash;
-    }
-
+    /// <summary>
+    /// The fill color of the text run in RGB format.
+    /// </summary>
     [JsonPropertyName("fill")]
-    public int[] Fill { get; set; }
+    public int[] Fill { get; set; } = [124, 124, 124];
 
+    /// <summary>
+    /// The run text.
+    /// </summary>
     [JsonPropertyName("text")]
-    public string Text { get; set; }
+    public string Text { get; set; } = text;
 
+    /// <summary>
+    /// The font size of the text run in points.
+    /// </summary>
     [JsonPropertyName("font-size")]
-    public string FontSize { get; set; }
+    public string FontSize { get; set; } = "26";
 }
 
 /// <summary>
+/// The file reference parameters.
 /// </summary>
 public class FileReference
 {
-    /// <summary>File reference data</summary>
-    /// <type>ASC.Web.Files.Services.DocumentService.FileReferenceData, ASC.Files.Core</type>
+    /// <summary>
+    /// An object that is generated by the integrator to uniquely identify a file in its system.
+    /// </summary>
     public FileReferenceData ReferenceData { get; set; }
 
-    /// <summary>Error</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The error message text.
+    /// </summary>
     public string Error { get; set; }
 
-    /// <summary>Path</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The file name or relative path for the formula editor.
+    /// </summary>
     public string Path { get; set; }
 
-    /// <summary>URL</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The URL address to download the current file.
+    /// </summary>
+    [Url]
     public string Url { get; set; }
 
-    /// <summary>File type</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// An extension of the document specified with the url parameter.
+    /// </summary>
     public string FileType { get; set; }
 
-    /// <summary>Key</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The unique document identifier used by the service to take the data from the co-editing session.
+    /// </summary>
     public string Key { get; set; }
 
-    /// <summary>Link</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The file URL.
+    /// </summary>
     public string Link { get; set; }
 
-    /// <summary>Token</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The encrypted signature added to the parameter in the form of a token.
+    /// </summary>
     public string Token { get; set; }
 }
 
 /// <summary>
+/// An object that is generated by the integrator to uniquely identify a file in its system.
 /// </summary>
 public class FileReferenceData
 {
-    /// <summary>File key</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The unique document identifier used by the service to get a link to the file.
+    /// </summary>
     public string FileKey { get; set; }
 
-    /// <summary>Instance ID</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The unique system identifier.
+    /// </summary>
     public string InstanceId { get; set; }
+
+    /// <summary>
+    /// Room ID
+    /// </summary>
+    public string RoomId { get; set; }
 }
 
 #endregion Nested Classes
 
+/// <summary>
+/// The customer configuration parameters.
+/// </summary>
 [Transient]
 public class CustomerConfig(
     SettingsManager settingsManager,
@@ -702,7 +868,7 @@ public class CustomizationConfig<T>(
             return null;
         }
 
-        var link = await commonLinkUtility.GetFeedbackAndSupportLink(settingsManager);
+        var link = await commonLinkUtility.GetSupportLinkAsync(settingsManager);
 
         if (string.IsNullOrEmpty(link))
         {
@@ -793,46 +959,96 @@ public class CustomizationConfig<T>(
         return modeWrite ? null : "markup";
     }
 
-    public async Task<bool> GetSubmitForm(File<T> file, bool modeWrite)
+    public async Task<SubmitForm> GetSubmitForm(File<T> file)
     {
-
         var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
-
-        return properties is { FormFilling.CollectFillForm: true } && file.RootFolderType != FolderType.Archive;
+        return new SubmitForm()
+        {
+            Visible = file.RootFolderType != FolderType.Archive && await fileSecurity.CanFillFormsAsync(file) && (properties is { FormFilling.StartFilling: true } or { FormFilling.CollectFillForm: true }),
+            ResultMessage = ""
+        };
     }
 
     private FileSharing FileSharing { get; } = fileSharing;
 }
 
+/// <summary>
+/// The configuration parameters for the embedded document type.
+/// </summary>
 [Transient]
 public class EmbeddedConfig(BaseCommonLinkUtility baseCommonLinkUtility, FilesLinkUtility filesLinkUtility)
 {
-    public string EmbedUrl => baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=embedded&" + ShareLinkParam);
+    /// <summary>
+    /// The absolute URL to the document serving as a source file for the document embedded into the web page.
+    /// </summary>
+    public string EmbedUrl => ShareLinkParam != null && ShareLinkParam.Contains(FilesLinkUtility.ShareKey, StringComparison.Ordinal) ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=embedded&" + ShareLinkParam) : null;
 
+    /// <summary>
+    /// The absolute URL that will allow the document to be saved onto the user personal computer.
+    /// </summary>
     public string SaveUrl => baseCommonLinkUtility.GetFullAbsolutePath($"{filesLinkUtility.FileHandlerPath}download" + "?" + ShareLinkParam);
 
+    /// <summary>
+    /// The shared URL parameter.
+    /// </summary>
     public string ShareLinkParam { get; set; }
 
-    public string ShareUrl => baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=view&" + ShareLinkParam);
+    /// <summary>
+    /// The absolute URL that will allow other users to share this document.
+    /// </summary>
+    public string ShareUrl => ShareLinkParam != null && ShareLinkParam.Contains(FilesLinkUtility.ShareKey) ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=view&" + ShareLinkParam) : null;
 
+    /// <summary>
+    /// The place for the embedded viewer toolbar, can be either "top" or "bottom".
+    /// </summary>
     public string ToolbarDocked => "top";
 }
 
+/// <summary>
+/// The encryption keys of the editor configuration.
+/// </summary>
 public class EncryptionKeysConfig
 {
+    /// <summary>
+    /// The crypto engine ID of the encryption key.
+    /// </summary>
     public string CryptoEngineId => "{FFF0E1EB-13DB-4678-B67D-FF0A41DBBCEF}";
+
+    /// <summary>
+    /// The private key.
+    /// </summary>
     public string PrivateKeyEnc { get; set; }
+
+    /// <summary>
+    /// The public key.
+    /// </summary>
     public string PublicKey { get; set; }
 }
 
+/// <summary>
+/// The settings for the "Feedback &amp; Support" menu button.
+/// </summary>
 public class FeedbackConfig
 {
+    /// <summary>
+    /// The absolute URL to the website address which will be opened when clicking the "Feedback &amp; Support" menu button.
+    /// </summary>
     public string Url { get; set; }
+
+    /// <summary>
+    /// Shows or hides the "Feedback &amp; Support" menu button.
+    /// </summary>
     public bool Visible { get => true; }
 }
 
+/// <summary>
+/// The settings for the "Open file location" menu button and upper right corner button.
+/// </summary>
 public class GobackConfig
 {
+    /// <summary>
+    /// The absolute URL to the website address which will be opened when clicking the "Open file location" menu button.
+    /// </summary>
     public string Url { get; set; }
 }
 
@@ -872,6 +1088,9 @@ public class LogoConfig(
     }
 }
 
+/// <summary>
+/// The configuration settings to connect the special add-ons.
+/// </summary>
 [Transient]
 public class PluginsConfig
     // ConsumerFactory consumerFactory,
@@ -886,6 +1105,9 @@ public class PluginsConfig
     // private readonly CoreBaseSettings _coreBaseSettings = coreBaseSettings;
     // private readonly TenantManager _tenantManager = tenantManager;
 
+    /// <summary>
+    /// The array of absolute URLs to the plugin configuration files.
+    /// </summary>
     public string[] PluginsData
     {
         get
@@ -916,23 +1138,72 @@ public class PluginsConfig
     }
 }
 
+/// <summary>
+/// The presence or absence of the documents in the "Open Recent..." menu option.
+/// </summary>
 public class RecentConfig
 {
+    /// <summary>
+    /// The folder where the document is stored.
+    /// </summary>
     public string Folder { get; set; }
+
+    /// <summary>
+    /// The document title that will be displayed in the Open Recent... menu option.
+    /// </summary>
     public string Title { get; set; }
+
+    /// <summary>
+    /// The absolute URL to the document where it is stored.
+    /// </summary>
+    [Url]
     public string Url { get; set; }
 }
 
+/// <summary>
+/// The presence or absence of the templates in the "Create New..." menu option.
+/// </summary>
 public class TemplatesConfig
 {
+    /// <summary>
+    /// The absolute URL to the image for template.
+    /// </summary>
     public string Image { get; set; }
+
+    /// <summary>
+    /// The template title that will be displayed in the "Create New..." menu option.
+    /// </summary>
     public string Title { get; set; }
+
+    /// <summary>
+    /// The absolute URL to the document where it will be created and available after creation.
+    /// </summary>
+    [Url]
     public string Url { get; set; }
 }
 
+/// <summary>
+/// The configuration parameters of the user currently viewing or editing the document.
+/// </summary>
 public class UserConfig
 {
+    /// <summary>
+    /// The user ID.
+    /// </summary>
     public string Id { get; set; }
+
+    /// <summary>
+    /// The full name of the user.
+    /// </summary>
     public string Name { get; set; }
+
+    /// <summary>
+    /// The path to the user's avatar.
+    /// </summary>
     public string Image { get; set; }
+
+    /// <summary>
+    /// Roles
+    /// </summary>
+    public List<string> Roles { get; set; }
 }

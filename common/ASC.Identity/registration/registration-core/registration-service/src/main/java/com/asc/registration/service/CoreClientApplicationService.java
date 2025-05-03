@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,192 +28,197 @@
 package com.asc.registration.service;
 
 import com.asc.common.core.domain.entity.Audit;
+import com.asc.common.core.domain.value.ClientId;
+import com.asc.common.core.domain.value.Role;
+import com.asc.common.service.ports.output.message.publisher.AuthorizationMessagePublisher;
+import com.asc.common.service.transfer.message.TenantClientsRemovedEvent;
+import com.asc.common.service.transfer.message.UserClientsRemovedEvent;
 import com.asc.common.service.transfer.response.ClientResponse;
 import com.asc.registration.service.ports.input.service.ClientApplicationService;
 import com.asc.registration.service.transfer.request.create.CreateTenantClientCommand;
-import com.asc.registration.service.transfer.request.fetch.*;
+import com.asc.registration.service.transfer.request.fetch.ClientInfoPaginationQuery;
+import com.asc.registration.service.transfer.request.fetch.ClientInfoQuery;
+import com.asc.registration.service.transfer.request.fetch.TenantClientQuery;
+import com.asc.registration.service.transfer.request.fetch.TenantClientsPaginationQuery;
 import com.asc.registration.service.transfer.request.update.*;
 import com.asc.registration.service.transfer.response.ClientInfoResponse;
 import com.asc.registration.service.transfer.response.ClientSecretResponse;
-import com.asc.registration.service.transfer.response.ConsentResponse;
 import com.asc.registration.service.transfer.response.PageableResponse;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 /**
  * Service class providing core client application functionalities. This service handles client
- * creation, update, deletion, and retrieval operations. It also manages consent operations for
- * clients.
+ * creation, update, deletion, and retrieval operations. It also manages client consent, visibility,
+ * and activation states.
  */
 @Service
 @Validated
 @RequiredArgsConstructor
 public class CoreClientApplicationService implements ClientApplicationService {
-  private final ConsentUpdateCommandHandler consentUpdateCommandHandler;
+  private final AuthorizationMessagePublisher<TenantClientsRemovedEvent>
+      tenantClientsMessagePublisher;
+  private final AuthorizationMessagePublisher<UserClientsRemovedEvent> userClientsMessagePublisher;
   private final ClientCreateCommandHandler clientCreateCommandHandler;
   private final ClientUpdateCommandHandler clientUpdateCommandHandler;
-  private final ConsentQueryHandler consentQueryHandler;
   private final ClientQueryHandler clientQueryHandler;
 
   /**
-   * Retrieves detailed client information based on tenant client query.
+   * Retrieves detailed client information for a specific tenant and client.
    *
-   * @param query the tenant client query containing client ID and tenant ID.
-   * @return the client response containing detailed client information.
+   * @param query The query containing the tenant ID and client ID.
+   * @return A {@link ClientResponse} containing detailed client information.
    */
-  @Cacheable(value = "clients", key = "#query.clientId", unless = "#result == null")
-  public ClientResponse getClient(TenantClientQuery query) {
-    return clientQueryHandler.getClient(query);
+  public ClientResponse getClient(Role role, TenantClientQuery query) {
+    return clientQueryHandler.getClient(role, query);
   }
 
   /**
-   * Retrieves basic client information based on tenant client info query.
+   * Retrieves detailed client information by client ID.
    *
-   * @param query the tenant client info query containing client ID.
-   * @return the client info response containing basic client information.
+   * @param clientId The unique identifier of the client.
+   * @return A {@link ClientResponse} containing detailed client information.
    */
-  @Cacheable(value = "clientsInfo", key = "#query.clientId", unless = "#result == null")
-  public ClientInfoResponse getClientInfo(ClientInfoQuery query) {
-    return clientQueryHandler.getClientInfo(query);
+  public ClientResponse getClient(String clientId) {
+    return clientQueryHandler.getClient(clientId);
   }
 
   /**
-   * Retrieves a paginated list of basic client information.
+   * Retrieves basic client information for a specific tenant and client.
    *
-   * @param query the client info pagination query containing tenant ID, page, and limit.
-   * @return a pageable response containing a list of client info responses.
+   * @param query The query containing the client ID and optional tenant ID.
+   * @return A {@link ClientInfoResponse} containing basic client information.
    */
-  public PageableResponse<ClientInfoResponse> getClientsInfo(ClientInfoPaginationQuery query) {
-    return clientQueryHandler.getClientsInfo(query);
+  public ClientInfoResponse getClientInfo(Role role, ClientInfoQuery query) {
+    return clientQueryHandler.getClientInfo(role, query);
   }
 
   /**
-   * Retrieves basic client information based on client ID.
+   * Retrieves basic client information by client ID.
    *
-   * @param clientId the client ID to search for.
-   * @return the client info response containing basic client information.
+   * @param clientId The unique identifier of the client.
+   * @return A {@link ClientInfoResponse} containing basic client information.
    */
-  @Cacheable(value = "clientsInfo", key = "#clientId", unless = "#result == null")
   public ClientInfoResponse getClientInfo(String clientId) {
     return clientQueryHandler.getClientInfo(clientId);
   }
 
   /**
-   * Retrieves a paginated list of clients for a given tenant.
+   * Retrieves a paginated list of basic client information for a specific tenant.
    *
-   * @param query the tenant clients pagination query containing tenant ID, page, and limit.
-   * @return a pageable response containing a list of client responses.
+   * @param query The query containing the tenant ID, pagination parameters, and filters.
+   * @return A {@link PageableResponse} containing a list of {@link ClientInfoResponse}.
    */
-  public PageableResponse<ClientResponse> getClients(TenantClientsPaginationQuery query) {
-    return clientQueryHandler.getClients(query);
+  public PageableResponse<ClientInfoResponse> getClientsInfo(
+      Role role, ClientInfoPaginationQuery query) {
+    return clientQueryHandler.getClientsInfo(role, query);
   }
 
   /**
-   * Retrieves consents for a principal (user) with pagination.
+   * Retrieves a paginated list of clients for a specific tenant.
    *
-   * @param query the consents pagination query containing the principal name, page, and limit.
-   * @return a pageable response containing the consents.
+   * @param query The query containing the tenant ID, pagination parameters, and filters.
+   * @return A {@link PageableResponse} containing a list of {@link ClientResponse}.
    */
-  public PageableResponse<ConsentResponse> getConsents(ConsentsPaginationQuery query) {
-    return consentQueryHandler.getConsents(query);
+  public PageableResponse<ClientResponse> getClients(
+      Role role, TenantClientsPaginationQuery query) {
+    return clientQueryHandler.getClients(role, query);
+  }
+
+  public List<ClientResponse> getClients(List<ClientId> clientIds) {
+    return clientQueryHandler.getClients(clientIds);
   }
 
   /**
-   * Creates a new client.
+   * Creates a new client for a tenant.
    *
-   * @param audit the audit information related to the creation.
-   * @param command the command containing client creation details.
-   * @return the client response containing detailed client information.
+   * @param audit The audit details of the operation, including the user performing it.
+   * @param command The command containing the details of the client to be created.
+   * @return A {@link ClientResponse} containing the created client's information.
    */
   public ClientResponse createClient(Audit audit, CreateTenantClientCommand command) {
     return clientCreateCommandHandler.createClient(audit, command);
   }
 
   /**
-   * Regenerates the client secret for a given client.
+   * Regenerates the secret key for a specific client.
    *
-   * @param audit the audit information related to the operation.
-   * @param command the command containing client ID and tenant ID.
-   * @return the client secret response containing the new client secret.
+   * @param audit The audit details of the operation, including the user performing it.
+   * @param command The command containing the tenant ID and client ID.
+   * @return A {@link ClientSecretResponse} containing the new client secret.
    */
-  @CacheEvict(value = "clients", key = "#command.clientId")
   public ClientSecretResponse regenerateSecret(
-      Audit audit, RegenerateTenantClientSecretCommand command) {
-    return clientUpdateCommandHandler.regenerateSecret(audit, command);
+      Audit audit, Role role, RegenerateTenantClientSecretCommand command) {
+    return clientUpdateCommandHandler.regenerateSecret(audit, role, command);
   }
 
   /**
    * Changes the activation status of a client.
    *
-   * @param audit the audit information related to the operation.
-   * @param command the command containing client ID, tenant ID, and the new activation status.
+   * @param audit The audit details of the operation, including the user performing it.
+   * @param command The command containing the tenant ID, client ID, and new activation status.
    */
-  @Caching(
-      evict = {
-        @CacheEvict(value = "clients", key = "#command.clientId"),
-        @CacheEvict(value = "clientsInfo", key = "#command.clientId")
-      })
-  public void changeActivation(Audit audit, ChangeTenantClientActivationCommand command) {
-    clientUpdateCommandHandler.changeActivation(audit, command);
+  public void changeActivation(
+      Audit audit, Role role, ChangeTenantClientActivationCommand command) {
+    clientUpdateCommandHandler.changeActivation(audit, role, command);
   }
 
   /**
    * Changes the visibility status of a client.
    *
-   * @param audit the audit information related to the operation.
-   * @param command the command containing client ID, tenant ID, and the new visibility status.
+   * @param audit The audit details of the operation, including the user performing it.
+   * @param command The command containing the tenant ID, client ID, and new visibility status.
    */
-  @Caching(
-      evict = {
-        @CacheEvict(value = "clients", key = "#command.clientId"),
-        @CacheEvict(value = "clientsInfo", key = "#command.clientId")
-      })
-  public void changeVisibility(Audit audit, ChangeTenantClientVisibilityCommand command) {
-    clientUpdateCommandHandler.changeVisibility(audit, command);
+  public void changeVisibility(
+      Audit audit, Role role, ChangeTenantClientVisibilityCommand command) {
+    clientUpdateCommandHandler.changeVisibility(audit, role, command);
   }
 
   /**
-   * Updates the client information.
+   * Updates the information of an existing client.
    *
-   * @param audit the audit information related to the operation.
-   * @param command the command containing updated client details.
-   * @return the client response containing updated client information.
+   * @param audit The audit details of the operation, including the user performing it.
+   * @param command The command containing the updated client details.
+   * @return A {@link ClientResponse} containing the updated client's information.
    */
-  @Caching(
-      evict = {
-        @CacheEvict(value = "clients", key = "#command.clientId"),
-        @CacheEvict(value = "clientsInfo", key = "#command.clientId")
-      })
-  public ClientResponse updateClient(Audit audit, UpdateTenantClientCommand command) {
-    return clientUpdateCommandHandler.updateClient(audit, command);
+  public ClientResponse updateClient(Audit audit, Role role, UpdateTenantClientCommand command) {
+    return clientUpdateCommandHandler.updateClient(audit, role, command);
   }
 
   /**
-   * Deletes a client.
+   * Deletes an existing client.
    *
-   * @param audit the audit information related to the operation.
-   * @param command the command containing client ID and tenant ID.
+   * @param audit The audit details of the operation, including the user performing it.
+   * @param command The command containing the tenant ID and client ID of the client to be deleted.
+   * @return the result of the delete operation, the number of rows affected.
    */
-  @Caching(
-      evict = {
-        @CacheEvict(value = "clients", key = "#command.clientId"),
-        @CacheEvict(value = "clientsInfo", key = "#command.clientId")
-      })
-  public void deleteClient(Audit audit, DeleteTenantClientCommand command) {
-    clientUpdateCommandHandler.deleteClient(audit, command);
+  public int deleteClient(Audit audit, Role role, DeleteTenantClientCommand command) {
+    return clientUpdateCommandHandler.deleteClient(audit, role, command);
   }
 
   /**
-   * Revokes a client's consent.
+   * Deletes all clients created by a specific user within a tenant.
    *
-   * @param audit the audit information related to the operation.
-   * @param command the command containing client ID and principal name.
+   * @param command The command containing the tenant ID and user ID.
+   * @return The number of clients deleted.
    */
-  public void revokeClientConsent(Audit audit, RevokeClientConsentCommand command) {
-    consentUpdateCommandHandler.revokeConsent(command);
+  public int deleteUserClients(DeleteUserClientsCommand command) {
+    userClientsMessagePublisher.publish(
+        UserClientsRemovedEvent.builder().userId(command.getUserId()).build());
+    return clientUpdateCommandHandler.deleteUserClients(command);
+  }
+
+  /**
+   * Deletes all clients associated with a specific tenant.
+   *
+   * @param command The command containing the tenant ID.
+   * @return The number of clients deleted.
+   */
+  public int deleteTenantClients(DeleteTenantClientsCommand command) {
+    tenantClientsMessagePublisher.publish(
+        TenantClientsRemovedEvent.builder().tenantId(command.getTenantId()).build());
+    return clientUpdateCommandHandler.deleteTenantClients(command.getTenantId());
   }
 }

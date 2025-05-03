@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,12 +26,38 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-public class GroupMemberSecurityDto
+/// <summary>
+/// The security request parameters of the group member.
+/// </summary>
+public class GroupMemberSecurityRequestDto
 {
+    /// <summary>
+    /// The group member parameters.
+    /// </summary>
     public EmployeeFullDto User { get; init; }
+
+    /// <summary>
+    /// The group access rights to the files.
+    /// </summary>
     public FileShare GroupAccess { get; init; }
+
+    /// <summary>
+    /// The group member access rights to the files.
+    /// </summary>
     public FileShare? UserAccess { get; init; }
+
+    /// <summary>
+    /// Specifies if the group access rights are overridden or not.
+    /// </summary>
     public bool Overridden { get; init; }
+
+    /// <summary>
+    /// Specifies if the group member can edit the group access rights or not.
+    /// </summary>
     public bool CanEditAccess { get; init; }
+
+    /// <summary>
+    /// Specifies if the group member is a group owner or not.
+    /// </summary>
     public bool Owner { get; init; }
 }

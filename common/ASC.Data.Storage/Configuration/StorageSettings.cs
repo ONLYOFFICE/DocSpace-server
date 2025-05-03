@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,7 +29,7 @@ namespace ASC.Data.Storage.Configuration;
 [Singleton]
 public class BaseStorageSettingsListener(IServiceProvider serviceProvider, ICacheNotify<ConsumerCacheItem> cacheNotify)
 {
-    private readonly object _locker = new();
+    private readonly Lock _locker = new();
     private volatile bool _subscribed;
 
     public void Subscribe()
@@ -71,31 +71,42 @@ public class BaseStorageSettingsListener(IServiceProvider serviceProvider, ICach
 }
 
 /// <summary>
+/// The base storage settings.
 /// </summary>
-/// <typeparam name="T"></typeparam>
 public abstract class BaseStorageSettings<T> : ISettings<BaseStorageSettings<T>> where T : class, ISettings<T>, new()
 {
-    /// <summary>Storage name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The storage name.
+    /// </summary>
     public string Module { get; set; }
 
-    /// <summary>Storage properties</summary>
-    /// <type>System.Collections.Generic.Dictionary{System.String, System.String}, System.Collections.Generic</type>
+    /// <summary>
+    /// The storage properties.
+    /// </summary>
     public Dictionary<string, string> Props { get; set; }
+    
+    [JsonIgnore]
     public virtual Func<DataStoreConsumer, DataStoreConsumer> Switch => d => d;
     public abstract Guid ID { get; }
+    
     internal ICacheNotify<DataStoreCacheItem> Cache { get; set; }
 
     public BaseStorageSettings<T> GetDefault()
     {
         throw new NotImplementedException();
     }
+    
+    public DateTime LastModified { get; set; }
 }
 
 /// <summary>
+/// The storage settings.
 /// </summary>
 public class StorageSettings : BaseStorageSettings<StorageSettings>, ISettings<StorageSettings>
 {
+    /// <summary>
+    /// The storage ID.
+    /// </summary>
     [JsonIgnore]
     public override Guid ID => new("F13EAF2D-FA53-44F1-A6D6-A5AEDA46FA2B");
 
@@ -106,13 +117,18 @@ public class StorageSettings : BaseStorageSettings<StorageSettings>, ISettings<S
 }
 
 /// <summary>
+/// The CDN storage settings.
 /// </summary>
 [Scope]
 public class CdnStorageSettings : BaseStorageSettings<CdnStorageSettings>, ISettings<CdnStorageSettings>
 {
+    /// <summary>
+    /// The CDN storage ID.
+    /// </summary>
     [JsonIgnore]
     public override Guid ID => new("0E9AE034-F398-42FE-B5EE-F86D954E9FB2");
 
+    [JsonIgnore]
     public override Func<DataStoreConsumer, DataStoreConsumer> Switch => d => d.Cdn;
 
     CdnStorageSettings ISettings<CdnStorageSettings>.GetDefault()
@@ -202,13 +218,13 @@ public class StorageSettingsHelper
             return null;
         }
 
-        return _dataStore = ((IDataStore)_serviceProvider.GetService(handlerType))
-            .Configure((await _tenantManager.GetCurrentTenantIdAsync()).ToString(), null, null, dataStoreConsumer, null);
+        return _dataStore = await ((IDataStore)_serviceProvider.GetService(handlerType))
+            .ConfigureAsync((_tenantManager.GetCurrentTenantId()).ToString(), null, null, dataStoreConsumer, null);
     }
 
     internal async Task ClearDataStoreCacheAsync()
     {
-        var path = TenantPath.CreatePath(await _tenantManager.GetCurrentTenantIdAsync());
+        var path = TenantPath.CreatePath(_tenantManager.GetCurrentTenantId());
 
         foreach (var module in _storageFactoryConfig.GetModuleList("", true))
         {

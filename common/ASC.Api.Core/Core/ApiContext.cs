@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -106,6 +106,11 @@ public class ApiContext : ICloneable
     private static readonly int _maxCount = 1000;
     private readonly SecurityContext _securityContext;
 
+    public ApiContext()
+    {
+        
+    }
+    
     public ApiContext(IHttpContextAccessor httpContextAccessor, SecurityContext securityContext)
     {
         _securityContext = securityContext;

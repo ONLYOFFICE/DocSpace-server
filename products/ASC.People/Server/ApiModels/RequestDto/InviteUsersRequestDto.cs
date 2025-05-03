@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,21 +27,36 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
+/// The request parameters for inviting users.
 /// </summary>
 public class InviteUsersRequestDto
 {
-    /// <summary>List of user invitations</summary>
-    /// <type>System.Collections.Generic.IEnumerable{ASC.People.ApiModels.RequestDto.UserInvitation}, System.Collections.Generic</type>
+    /// <summary>
+    /// The list of user invitations.
+    /// </summary>
     [MaxEmailInvitations]
-    public IEnumerable<UserInvitation> Invitations { get; set; }
+    [Required]
+    public IEnumerable<UserInvitationRequestDto> Invitations { get; set; }
+
+    /// <summary>
+    /// The culture code of invitations.
+    /// </summary>
     public string Culture { get; set; }
 }
 
 /// <summary>
+/// The user invitation parameters.
 /// </summary>
-public class UserInvitation : EmailInvitationDto
+public class UserInvitationRequestDto
 {
-    /// <summary>Employee type</summary>
-    /// <type>ASC.Core.Users.EmployeeType, ASC.Core.Common</type>
+    /// <summary>
+    /// The user type.
+    /// </summary>
     public EmployeeType Type { get; set; }
+
+    /// <summary>
+    /// The user email address.
+    /// </summary>
+    [EmailAddress]
+    public string Email { get; set; }
 }

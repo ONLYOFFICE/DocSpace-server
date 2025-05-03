@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,22 +27,39 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// The request parameters for saving file edits.
 /// </summary>
-public class SaveEditingRequestDto : IModelWithFile
+public class SaveEditingRequestDto<T> : IModelWithFile
 {
-    /// <summary>File extension</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The editing file ID from the request.
+    /// </summary>
+    [FromRoute(Name = "fileId")]
+    public required T FileId { get; set; }
+
+    /// <summary>
+    /// The editing file extension from the request.
+    /// </summary>
+    [FromForm(Name = "FileExtension")]
+    [SwaggerSchemaCustom(Example = ".txt")]
     public string FileExtension { get; set; }
 
-    /// <summary>URI to download a file</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The URI to download the editing file.
+    /// </summary>
+    [FromForm(Name = "DownloadUri")]
     public string DownloadUri { get; set; }
 
-    /// <summary>Request file stream</summary>
-    /// <type>Microsoft.AspNetCore.Http.IFormFile, Microsoft.AspNetCore.Http</type>
+    /// <summary>
+    /// The request file stream.
+    /// </summary>
+    [FromForm(Name = "File")]
     public IFormFile File { get; set; }
 
-    /// <summary>Specifies whether to force save a file or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether to force save the file or not.
+    /// </summary>
+    [FromForm(Name = "Forcesave")]
     public bool Forcesave { get; set; }
 }
+

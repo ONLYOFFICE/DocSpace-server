@@ -134,9 +134,6 @@ $__AuthorName ha eliminato una stanza: $RoomTitle</value>
   <data name="subject_EditorMentions" xml:space="preserve">
     <value>Notifica di DocSpace. Menzionato nel documento</value>
   </data>
-  <data name="subject_EditorMentions_push" xml:space="preserve">
-    <value>Menzionato nel documento</value>
-  </data>
   <data name="subject_MailMergeEnd_push" xml:space="preserve">
     <value>L'invio è completato.</value>
   </data>
@@ -178,5 +175,64 @@ $OrangeButton</value>
   </data>
   <data name="subject_FormSubmitted" xml:space="preserve">
     <value>Notifica di DocSpace. Il modulo è compilato</value>
+  </data>
+  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
+    <value>Sei stato invitato nella stanza "$RoomTitle"</value>
+  </data>
+  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
+    <value>Un nuovo documento "$DocumentTitle" è stato creato nella stanza "$RoomTitle"</value>
+  </data>
+  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
+    <value>Nuovi file sono stati caricati nella stanza "$RoomTitle" ($Count)</value>
+  </data>
+  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
+    <value>Un nuovo file "$DocumentTitle" è stato caricato nella stanza "$RoomTitle"</value>
+  </data>
+  <data name="pattern_EditorMentions_push" xml:space="preserve">
+    <value>$ToUserName ti ha menzionato nel documento $DocumentTitle</value>
+  </data>
+  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
+    <value>Una nuova cartella "$FolderTitle" è stata creata nella stanza "$RoomTitle"</value>
+  </data>
+  <data name="pattern_FormStartedFilling" xml:space="preserve">
+    <value>
+      Notifica attività. "$FromUserName":"$FromUserLink" ha iniziato la compilazione del modulo: "$DocumentTitle":"$DocumentURL" nella stanza: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_FormSubmitted_push" xml:space="preserve">
+    <value>Il modulo "$DocumentTitle" è stato compilato nella stanza "$RoomTitle"</value>
+  </data>
+  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
+    <value>
+      Notifica attività. Il modulo "$DocumentTitle":"$DocumentURL" è stato compilato completamente nella stanza: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
+    <value>$FromUserName ha spostato la stanza "$RoomTitle" nell'archivio</value>
+  </data>
+  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
+    <value>Il tuo ruolo nella stanza "$RoomTitle" è stato modificato in "$RoomRole"</value>
+  </data>
+  <data name="pattern_StoppedFormFilling" xml:space="preserve">
+    <value>
+      Notifica attività. "$FromUserName":"$FromUserLink" ha interrotto la compilazione del modulo: "$DocumentTitle":"$DocumentURL" nella stanza: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_YourTurnFormFilling" xml:space="preserve">
+    <value>
+      Notifica attività. È il tuo turno! È richiesta la compilazione del modulo: "$DocumentTitle":"$DocumentURL" nella stanza: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="subject_FormStartedFilling" xml:space="preserve">
+    <value>Notifica DocSpace.</value>
+  </data>
+  <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
+    <value>Notifica DocSpace.</value>
+  </data>
+  <data name="subject_StoppedFormFilling" xml:space="preserve">
+    <value>Notifica DocSpace.</value>
+  </data>
+  <data name="subject_YourTurnFormFilling" xml:space="preserve">
+    <value>Notifica DocSpace.</value>
   </data>
 </root>

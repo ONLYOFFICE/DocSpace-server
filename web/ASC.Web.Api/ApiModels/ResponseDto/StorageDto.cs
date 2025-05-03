@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,27 +27,33 @@
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 /// <summary>
+/// The storage information.
 /// </summary>
 public class StorageDto
 {
-    /// <summary>ID</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The storage ID.
+    /// </summary>
     public string Id { get; set; }
 
-    /// <summary>Title</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The storage title.
+    /// </summary>
     public string Title { get; set; }
 
-    /// <summary>List of authentication keys</summary>
-    /// <type>System.Collections.Generic.List{ASC.Web.Core.CookiesType.AuthKey}, System.Collections.Generic</type>
+    /// <summary>
+    /// The list of storage authentication keys.
+    /// </summary>
     public List<AuthKey> Properties { get; set; }
 
-    /// <summary>Specifies if this is the current storage or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if this is the current portal storage or not.
+    /// </summary>
     public bool Current { get; set; }
 
-    /// <summary>Specifies if this storage can be set or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if this storage can be set or not.
+    /// </summary>
     public bool IsSet { get; set; }
 
     public static async Task<StorageDto> StorageWrapperInit<T>(DataStoreConsumer consumer, BaseStorageSettings<T> current) where T : class, ISettings<T>, new()

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -50,12 +50,26 @@ internal sealed class BackupCleanerService(
 
         foreach (var scheduledBackups in (await backupRepository.GetScheduledBackupRecordsAsync()).GroupBy(r => r.TenantId))
         {
+            foreach (var record in await backupRepository.GetBackupRecordsByTenantIdAsync(scheduledBackups.Key))
+            {
+                var storage = await backupStorageFactory.GetBackupStorageAsync(record);
+                if (storage == null)
+                {
+                    continue;
+                }
+
+                if (!await storage.IsExistsAsync(record.StoragePath))
+                {
+                    await backupRepository.DeleteBackupRecordAsync(record.Id);
+                }
+            }
+
             if (stoppingToken.IsCancellationRequested)
             {
                 return;
             }
 
-            var schedule = await backupRepository.GetBackupScheduleAsync(scheduledBackups.Key);
+            var schedule = await backupRepository.GetBackupScheduleAsync(scheduledBackups.Key, null);
 
             if (schedule != null)
             {
@@ -65,10 +79,6 @@ internal sealed class BackupCleanerService(
                     logger.DebugOnlyLast(schedule.BackupsStored, schedule.TenantId, scheduledBackupsToRemove.Count);
                     backupsToRemove.AddRange(scheduledBackupsToRemove);
                 }
-            }
-            else
-            {
-                backupsToRemove.AddRange(scheduledBackups);
             }
         }
 

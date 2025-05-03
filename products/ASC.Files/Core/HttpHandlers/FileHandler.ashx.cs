@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,9 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using SixLabors.ImageSharp.Processing;
+using ImageMagick;
 
-using Image = SixLabors.ImageSharp.Image;
 using JsonException = System.Text.Json.JsonException;
 using Status = ASC.Files.Core.Security.Status;
 
@@ -202,7 +201,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
 
         if (store.IsSupportedPreSignedUri)
         {
-            var headers = securityContext.IsAuthenticated ? null : new[] { await SecureHelper.GenerateSecureKeyHeaderAsync(path, emailValidationKeyProvider) };
+            var headers = securityContext.IsAuthenticated ? null : new[] { SecureHelper.GenerateSecureKeyHeader(path, emailValidationKeyProvider) };
 
             var tmp = await store.GetPreSignedUriAsync(FileConstant.StorageDomainTmp, path, TimeSpan.FromHours(1), headers);
             var url = tmp.ToString();
@@ -293,7 +292,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             //TODO
             //context.Response.Headers.Charset = "utf-8";
 
-            var range = (context.Request.Headers["Range"].FirstOrDefault() ?? "").Split('=', '-');
+            var range = (context.Request.Headers.Range.FirstOrDefault() ?? "").Split('=', '-');
             var isNeedSendAction = range.Length < 2 || Convert.ToInt64(range[1]) == 0;
 
             if (isNeedSendAction)
@@ -315,7 +314,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 }
             }
 
-            if (string.Equals(context.Request.Headers["If-None-Match"], GetEtag(file)))
+            if (string.Equals(context.Request.Headers.IfNoneMatch, GetEtag(file)))
             {
                 //Its cached. Reply 304
                 context.Response.StatusCode = (int)HttpStatusCode.NotModified;
@@ -343,11 +342,14 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                             ext = outType;
                         }
 
+                        var watermarkEnabled = false;
+
                         if (convertible)
                         {
                             var folderDao = daoFactory.GetFolderDao<T>();
-                            if (await DocSpaceHelper.IsWatermarkEnabled(file, folderDao) && value.Contains(FileUtility.WatermarkedDocumentExt))
+                            if (await DocSpaceHelper.IsWatermarkEnabled(file, folderDao))
                             {
+                                watermarkEnabled = true;
                                 ext = FileUtility.WatermarkedDocumentExt;
                             }
                         }
@@ -381,7 +383,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                         }
                         else
                         {
-                            if (!await fileConverter.EnableConvertAsync(file, ext))
+                            if (!await fileConverter.EnableConvertAsync(file, ext, watermarkEnabled))
                             {
                                 if (await fileDao.IsSupportedPreSignedUriAsync(file))
                                 {
@@ -457,6 +459,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             if (!flushed && !context.RequestAborted.IsCancellationRequested)
             {
                 context.Response.StatusCode = 400;
+                context.Response.ContentType = "text/html; charset=utf-8";
                 await context.Response.WriteAsync(HttpUtility.HtmlEncode(ex.Message));
             }
         }
@@ -469,8 +472,11 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             return true;
         }
 
-        return (fileUtility.CanImageView(file.Title) || fileUtility.CanMediaView(file.Title)) &&
-               file.ShareRecord is { IsLink: true, Share: not FileShare.Restrict } or { IsLink: false, Share: FileShare.Read, SubjectType: SubjectType.User  };
+        return (fileUtility.CanImageView(file.Title) || fileUtility.CanMediaView(file.Title)) && 
+               ((file.ShareRecord is 
+                   { IsLink: true, Share: not FileShare.Restrict } or 
+                   { Share: FileShare.Read, SubjectType: SubjectType.User or SubjectType.Group }) || 
+               (file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive && await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID)));
     }
 
     private async Task TryMarkAsRecentByLink<T>(File<T> file)
@@ -490,7 +496,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
     {
         ArgumentNullException.ThrowIfNull(context);
         
-        var rangeHeader = context.Request.Headers["Range"].FirstOrDefault();
+        var rangeHeader = context.Request.Headers.Range.FirstOrDefault();
         if (rangeHeader == null)
         {
             return fullLength;
@@ -581,7 +587,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             if (linkRight == FileShare.Restrict && !securityContext.IsAuthenticated)
             {
                 var auth = context.Request.Query[FilesLinkUtility.AuthKey];
-                var validateResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(id.ToString() + version, auth.FirstOrDefault() ?? "", global.StreamUrlExpire);
+                var validateResult = emailValidationKeyProvider.ValidateEmailKey(id.ToString() + version, auth.FirstOrDefault() ?? "", global.StreamUrlExpire);
                 if (validateResult != EmailValidationKeyProvider.ValidationResult.Ok)
                 {
                     var exc = new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMessage_SecurityException);
@@ -593,11 +599,13 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                     return;
                 }
 
-                if (!string.IsNullOrEmpty(fileUtility.SignatureSecret))
+                var signatureSecret = filesLinkUtility.DocServiceSignatureSecret;
+                if (!string.IsNullOrEmpty(signatureSecret))
                 {
                     try
                     {
-                        var header = context.Request.Headers[fileUtility.SignatureHeader].FirstOrDefault();
+                        var signatureHeader = filesLinkUtility.DocServiceSignatureHeader;
+                        var header = context.Request.Headers[signatureHeader].FirstOrDefault();
                         if (string.IsNullOrEmpty(header) || !header.StartsWith("Bearer "))
                         {
                             var requestHeaderTrace = new StringBuilder();
@@ -607,7 +615,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                                 requestHeaderTrace.Append($"{requestHeader.Key}={requestHeader.Value}" + Environment.NewLine);
                             }
 
-                            var exceptionMessage = $"Invalid signature header {fileUtility.SignatureHeader} with value {header}." +
+                            var exceptionMessage = $"Invalid signature header {signatureHeader} with value {header}." +
                                                    $"Trace headers: {requestHeaderTrace}  ";
 
 
@@ -616,7 +624,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
 
                         header = header["Bearer ".Length..];
 
-                        var stringPayload = JsonWebToken.Decode(header, fileUtility.SignatureSecret);
+                        var stringPayload = JsonWebToken.Decode(header, signatureSecret);
 
                         logger.DebugDocServiceStreamFilePayload(stringPayload);
                         //var data = JObject.Parse(stringPayload);
@@ -735,11 +743,12 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         try
         {
             var fileName = context.Request.Query[FilesLinkUtility.FileTitle];
-            if (!string.IsNullOrEmpty(fileUtility.SignatureSecret))
+            var signatureSecret = filesLinkUtility.DocServiceSignatureSecret;
+            if (!string.IsNullOrEmpty(signatureSecret))
             {
                 try
                 {
-                    var header = context.Request.Headers[fileUtility.SignatureHeader].FirstOrDefault();
+                    var header = context.Request.Headers[filesLinkUtility.DocServiceSignatureHeader].FirstOrDefault();
                     if (string.IsNullOrEmpty(header) || !header.StartsWith("Bearer "))
                     {
                         throw new Exception("Invalid header " + header);
@@ -747,7 +756,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
 
                     header = header["Bearer ".Length..];
 
-                    var stringPayload = JsonWebToken.Decode(header, fileUtility.SignatureSecret);
+                    var stringPayload = JsonWebToken.Decode(header, signatureSecret);
 
                     logger.DebugDocServiceStreamFilePayload(stringPayload);
                     //var data = JObject.Parse(stringPayload);
@@ -826,7 +835,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         var fileName = context.Request.Query[FilesLinkUtility.FileTitle];
         var auth = context.Request.Query[FilesLinkUtility.AuthKey].FirstOrDefault();
 
-        var validateResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(fileName, auth ?? "", global.StreamUrlExpire);
+        var validateResult = emailValidationKeyProvider.ValidateEmailKey(fileName, auth ?? "", global.StreamUrlExpire);
         if (validateResult != EmailValidationKeyProvider.ValidationResult.Ok)
         {
             var exc = new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMessage_SecurityException);
@@ -900,7 +909,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             if (linkRight == FileShare.Restrict && !securityContext.IsAuthenticated)
             {
                 var auth = context.Request.Query[FilesLinkUtility.AuthKey].FirstOrDefault();
-                var validateResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(id.ToString() + version, auth ?? "", global.StreamUrlExpire);
+                var validateResult = emailValidationKeyProvider.ValidateEmailKey(id.ToString() + version, auth ?? "", global.StreamUrlExpire);
                 if (validateResult != EmailValidationKeyProvider.ValidationResult.Ok)
                 {
                     var exc = new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMessage_SecurityException);
@@ -1002,8 +1011,8 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             var sizes = size.Split('x');
             if (sizes.Length == 2)
             {
-                _ = int.TryParse(sizes[0], out width);
-                _ = int.TryParse(sizes[1], out height);
+                _ = uint.TryParse(sizes[0], out width);
+                _ = uint.TryParse(sizes[1], out height);
             }
 
             fileDao = daoFactory.GetFileDao<int>();
@@ -1052,16 +1061,10 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 context.Response.Headers.Append("Content-Disposition", ContentDispositionUtil.GetHeaderValue(".jpeg", true));
 
                 await using var stream = await fileDao.GetFileStreamAsync(file);
-                var processedImage = await Image.LoadAsync(stream);
-
-                processedImage.Mutate(x => x.Resize(new ResizeOptions
-                {
-                    Size = new Size(width, height),
-                    Mode = ResizeMode.Crop
-                }));
-
-                // save as jpeg more fast, then webp
-                await processedImage.SaveAsJpegAsync(context.Response.Body);
+                var processedImage = new MagickImage(stream);
+                processedImage.Crop(width, height);
+                
+                await processedImage.WriteAsync(context.Response.Body, MagickFormat.Jpeg);
             }
             else
             {
@@ -1136,8 +1139,8 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             var sizes = size.Split('x');
             if (sizes.Length == 2)
             {
-                _ = int.TryParse(sizes[0], out width);
-                _ = int.TryParse(sizes[1], out height);
+                _ = uint.TryParse(sizes[0], out width);
+                _ = uint.TryParse(sizes[1], out height);
             }
 
             context.Response.Headers.Append("Content-Disposition", ContentDispositionUtil.GetHeaderValue("." + global.ThumbnailExtension));
@@ -1259,6 +1262,11 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
 
         if (isForm && file.IsForm)
         {
+            var fileDao = daoFactory.GetFileDao<T>();
+            var properties = await fileDao.GetProperties(file.Id) ?? new EntryProperties<T> { FormFilling = new FormFillingProperties<T>() };
+            properties.CopyToFillOut = true;
+            await fileDao.SaveProperties(file.Id, properties);
+
             if (responseMessage)
             {
                 await FormWriteOk(context, folder, file);
@@ -1478,18 +1486,21 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         logger.DebugDocServiceTrackFileid(fileId.ToString());
 
         var callbackSpan = TimeSpan.FromDays(128);
-        var validateResult = await emailValidationKeyProvider.ValidateEmailKeyAsync(fileId.ToString(), auth ?? "", callbackSpan);
+        var validateResult = emailValidationKeyProvider.ValidateEmailKey(fileId.ToString(), auth ?? "", callbackSpan);
         if (validateResult != EmailValidationKeyProvider.ValidationResult.Ok)
         {
             logger.ErrorDocServiceTrackAuth(validateResult, FilesLinkUtility.AuthKey, auth);
             throw new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMessage_SecurityException);
         }
         TrackerData fileData;
+        
+        var requestAborted = context.RequestAborted;
+
         try
         {
             var receiveStream = context.Request.Body;
             using var readStream = new StreamReader(receiveStream);
-            var body = await readStream.ReadToEndAsync();
+            var body = await readStream.ReadToEndAsync(requestAborted);
 
             logger.DebugDocServiceTrackBody(body);
             if (string.IsNullOrEmpty(body))
@@ -1503,6 +1514,11 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 PropertyNameCaseInsensitive = true
             };
             fileData = JsonSerializer.Deserialize<TrackerData>(body, options);
+        }
+        catch (OperationCanceledException e) 
+        {
+            logger.ErrorDocServiceTrackReadBody(e);
+            throw new HttpException(StatusCodes.Status499ClientClosedRequest, "Client closed the connection prematurely");
         }
         catch (JsonException e)
         {
@@ -1522,13 +1538,14 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 : $"{fileId}_{lastfileDataAction.UserId}")
             : string.Empty;
 
-        if (!string.IsNullOrEmpty(fileUtility.SignatureSecret))
+        var signatureSecret = filesLinkUtility.DocServiceSignatureSecret;
+        if (!string.IsNullOrEmpty(signatureSecret))
         {
             if (!string.IsNullOrEmpty(fileData.Token))
             {
                 try
                 {
-                    var dataString = JsonWebToken.Decode(fileData.Token, fileUtility.SignatureSecret);
+                    var dataString = JsonWebToken.Decode(fileData.Token, signatureSecret);
 
                     var data = JObject.Parse(dataString);
                     if (data == null)
@@ -1546,7 +1563,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             else
             {
                 //todo: remove old scheme
-                var header = context.Request.Headers[fileUtility.SignatureHeader].FirstOrDefault();
+                var header = context.Request.Headers[filesLinkUtility.DocServiceSignatureHeader].FirstOrDefault();
                 if (string.IsNullOrEmpty(header) || !header.StartsWith("Bearer "))
                 {
                     logger.ErrorDocServiceTrackHeaderIsNull();
@@ -1556,7 +1573,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
 
                 try
                 {
-                    var stringPayload = JsonWebToken.Decode(header, fileUtility.SignatureSecret);
+                    var stringPayload = JsonWebToken.Decode(header, signatureSecret);
 
                     logger.DebugDocServiceTrackPayload(stringPayload);
                     var jsonPayload = JObject.Parse(stringPayload);
@@ -1583,11 +1600,11 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         catch (Exception e)
         {
             logger.ErrorDocServiceTrack(e);
-            throw new HttpException((int)HttpStatusCode.BadRequest, e.Message);
+            throw new HttpException((int)HttpStatusCode.BadRequest, e.Message, e);
         }
         result ??= new TrackResponse();
 
-        await context.Response.WriteAsync(TrackResponse.Serialize(result));
+        await context.Response.WriteAsync(TrackResponse.Serialize(result), cancellationToken: requestAborted);
     }
 }
 

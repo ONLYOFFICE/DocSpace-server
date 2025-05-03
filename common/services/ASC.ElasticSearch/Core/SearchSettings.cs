@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -60,6 +60,8 @@ public class SearchSettings : ISettings<SearchSettings>
     {
         return new SearchSettings();
     }
+    
+    public DateTime LastModified { get; set; }
 
     internal bool IsEnabled(string name)
     {
@@ -114,7 +116,7 @@ public class SearchSettingsHelper(TenantManager tenantManager,
         settings.Data = JsonSerializer.Serialize(items);
         await settingsManager.SaveAsync(settings);
 
-        var action = new ReIndexAction { Tenant = await tenantManager.GetCurrentTenantIdAsync() };
+        var action = new ReIndexAction { Tenant = tenantManager.GetCurrentTenantId() };
         action.Names.AddRange(toReIndex.Select(r => r.ID).ToList());
 
         await cacheNotify.PublishAsync(action, CacheNotifyAction.Any);
@@ -156,7 +158,7 @@ public class SearchSettingsHelper(TenantManager tenantManager,
 
     public async Task<bool> CanSearchByContentAsync(Type t)
     {
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         if (!await CanIndexByContentAsync(t))
         {
             return false;

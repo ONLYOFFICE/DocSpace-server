@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,7 +29,7 @@ namespace ASC.Notify.Engine;
 class InterceptorStorage
 {
     private readonly string _callContextPrefix = "InterceptorStorage.CALLCONTEXT_KEY." + Guid.NewGuid();
-    private readonly object _syncRoot = new();
+    private readonly Lock _syncRoot = new();
     private readonly Dictionary<string, ISendInterceptor> _globalInterceptors = new(10);
 
     private Dictionary<string, ISendInterceptor> CallInterceptors

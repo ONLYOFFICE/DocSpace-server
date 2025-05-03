@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,9 +29,11 @@ namespace ASC.Data.Backup.EF.Model;
 public class BackupSchedule : BaseEntity
 {
     public int TenantId { get; set; }
+    [MaxLength(255)]
     public string Cron { get; set; }
     public int BackupsStored { get; set; }
     public BackupStorageType StorageType { get; set; }
+    [MaxLength(255)]
     public string StorageBasePath { get; set; }
     public DateTime LastBackupTime { get; set; }
     public string StorageParams { get; set; }
@@ -76,7 +78,7 @@ public static class BackupScheduleExtension
             entity.Property(e => e.Cron)
                 .IsRequired()
                 .HasColumnName("cron")
-                .HasColumnType("varchar(255)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -92,7 +94,7 @@ public static class BackupScheduleExtension
 
             entity.Property(e => e.StorageBasePath)
                 .HasColumnName("storage_base_path")
-                .HasColumnType("varchar(255)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci")
                 .HasDefaultValueSql("NULL");
@@ -124,61 +126,52 @@ public static class BackupScheduleExtension
     {
         modelBuilder.Entity<BackupSchedule>(entity =>
         {
-            entity.HasKey(e => new { e.TenantId })
-                .HasName("PRIMARY");
+            entity.HasKey(e => e.TenantId)
+                .HasName("PK_backup_schedule");
 
             entity.ToTable("backup_schedule");
 
             entity.Property(e => e.TenantId)
-                .IsRequired()
                 .HasColumnName("tenant_id")
-                .HasMaxLength(10);
+                .HasColumnType("integer")
+                .ValueGeneratedNever();
 
             entity.Property(e => e.Cron)
                 .IsRequired()
                 .HasColumnName("cron")
-                .HasMaxLength(255)
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .HasColumnType("varchar(255)");
 
             entity.Property(e => e.BackupsStored)
                 .IsRequired()
                 .HasColumnName("backups_stored")
-                .HasMaxLength(10);
+                .HasColumnType("integer");
 
             entity.Property(e => e.StorageType)
                 .IsRequired()
                 .HasColumnName("storage_type")
-                .HasMaxLength(10);
+                .HasColumnType("integer");
 
             entity.Property(e => e.StorageBasePath)
                 .HasColumnName("storage_base_path")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasDefaultValueSql("NULL")
-                .HasMaxLength(255);
+                .HasColumnType("varchar(255)");
 
             entity.Property(e => e.LastBackupTime)
                 .IsRequired()
                 .HasColumnName("last_backup_time")
-                .HasColumnType("datetime");
+                .HasColumnType("timestamptz");
 
             entity.Property(e => e.StorageParams)
                 .HasColumnName("storage_params")
-                .HasColumnType("text")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .HasDefaultValueSql("NULL");
+                .HasColumnType("text");
 
             entity.Property(e => e.Dump)
                 .HasColumnName("dump")
-                .HasColumnType("tinyint(1)")
-                .HasDefaultValueSql("'0'");
+                .HasColumnType("boolean");
 
             entity.HasOne(e => e.Tenant)
-                   .WithOne()
-                   .HasForeignKey<BackupSchedule>(b => b.TenantId)
-                   .OnDelete(DeleteBehavior.Cascade);
+                .WithOne()
+                .HasForeignKey<BackupSchedule>(b => b.TenantId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

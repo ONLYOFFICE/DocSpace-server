@@ -465,16 +465,16 @@ Je garantována 100% kompatibilita s MS Office formáty.</value>
     <value>Uživatel</value>
   </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Přesun několika souborů do místnosti pro vyplňování formulářů není podporován. Přesouvejte vždy jen jeden formulář ONLYOFFICE PDF.</value>
+    <value>Přesun několika souborů do místnosti pro vyplňování formulářů není podporován. Přesouvejte vždy jen jeden formulář {0} PDF.</value>
   </data>
   <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Přesun složek do místnosti pro vyplňování formulářů není podporován. Přesouvejte vždy jeden PDF formulář aplikace ONLYOFFICE.</value>
+    <value>Přesun složek do místnosti pro vyplňování formulářů není podporován. Přesouvejte vždy jeden PDF formulář aplikace {0}.</value>
   </data>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Soubor nelze do této místnosti přesunout. Zkuste prosím přesunout PDF formulář ONLYOFFICE.</value>
+    <value>Soubor nelze do této místnosti přesunout. Zkuste prosím přesunout PDF formulář {0}.</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Soubor nelze do této místnosti nahrát. Zkuste prosím nahrát PDF formulář ONLYOFFICE.</value>
+    <value>Soubor nelze do této místnosti nahrát. Zkuste prosím nahrát PDF formulář {0}.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Odkaz k vyplnění</value>
@@ -487,5 +487,29 @@ Je garantována 100% kompatibilita s MS Office formáty.</value>
   </data>
   <data name="ExternalUser" xml:space="preserve">
     <value>Externí uživatel</value>
+  </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Tvůrce obsahu</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Správce místnosti</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Tvůrce obsahu</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Správce místnosti</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Otevřít soubor</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Nelze odstranit aktuální verzi souboru</value>
+  </data>
+  <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
+    <value>Sdílet k vyplnění</value>
+  </data>
+  <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
+    <value>Začněte plnit</value>
   </data>
 </root>

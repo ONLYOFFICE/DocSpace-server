@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,23 +27,33 @@
 namespace ASC.Core.Tenants;
 
 /// <summary>
-/// 
+/// The tenant entity quota settings.
 /// </summary>
 public abstract class TenantEntityQuotaSettings
 {
+    /// <summary>
+    /// The tenant entity without quota.
+    /// </summary>
     public const int NoQuota = -1;
+
+    /// <summary>
+    /// The tenant entity default quota value.
+    /// </summary>
     public const int DefaultQuotaValue = -2;
 
-    /// <summary>Specifies if the quota is enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the quota is enabled for the tenant entity or not.
+    /// </summary>
     public bool EnableQuota { get; set; }
 
-    /// <summary>Default quota</summary>
-    /// <type>System.Int64, System</type>
+    /// <summary>
+    /// The default quota of the tenant entity.
+    /// </summary>
     public long DefaultQuota { get; set; } = DefaultQuotaValue;
 
-    /// <summary>Date of the last quota recalculation</summary>
-    /// <type>System.Nullable{System.DateTime}, System</type>
+    /// <summary>
+    /// The date of the last quota recalculation.
+    /// </summary>
     public DateTime? LastRecalculateDate { get; set; }
 
 }

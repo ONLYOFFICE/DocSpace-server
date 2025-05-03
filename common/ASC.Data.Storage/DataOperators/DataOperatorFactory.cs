@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -46,10 +46,8 @@ public static class DataOperatorFactory
         {
             return new ZipReadOperator(targetFile, removeTarget);
         }
-        else
-        {
-            return new TarReadOperator(targetFile, removeTarget);
-        }
+
+        return new TarReadOperator(targetFile, removeTarget);
     }
 
     public static IDataReadOperator GetReadOperator(string targetFile, CancellationToken token, bool removeTarget = true)
@@ -58,10 +56,8 @@ public static class DataOperatorFactory
         {
             return new ZipReadOperator(targetFile, token, removeTarget);
         }
-        else
-        {
-            return new TarReadOperator(targetFile, token, removeTarget);
-        }
+
+        return new TarReadOperator(targetFile, token, removeTarget);
     }
 }
  

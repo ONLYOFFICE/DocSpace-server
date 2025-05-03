@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,7 +34,7 @@ public class MigrationUser(DisplayUserSettingsHelper displayUserSettingsHelper)
     public bool HasPhoto { get; set; }
     public string PathToPhoto { get; set; }
 
-    public virtual MigratingApiUser ToApiInfo(string key)
+    public MigratingApiUser ToApiInfo(string key)
     {
         return new MigratingApiUser
         {

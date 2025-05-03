@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -84,20 +84,23 @@ public static class TelegramUsersExtension
         modelBuilder.Entity<TelegramUser>(entity =>
         {
             entity.HasKey(e => new { e.TenantId, e.PortalUserId })
-                .HasName("telegram_users_pkey");
+                .HasName("pk_telegram_user");
 
-            entity.ToTable("telegram_users", "onlyoffice");
+            entity.ToTable("telegram_users");
 
             entity.HasIndex(e => e.TelegramUserId)
-                .HasDatabaseName("tgId");
+                .HasDatabaseName("ix_telegram_user_id");
 
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 
             entity.Property(e => e.PortalUserId)
                 .HasColumnName("portal_user_id")
-                .HasMaxLength(38);
+                .HasColumnType("uuid");
 
-            entity.Property(e => e.TelegramUserId).HasColumnName("telegram_user_id");
+            entity.Property(e => e.TelegramUserId)
+                .HasColumnName("telegram_user_id")
+                .HasColumnType("bigint");
         });
+        
     }
 }

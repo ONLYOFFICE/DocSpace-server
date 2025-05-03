@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,7 +30,7 @@ namespace ASC.Web.Files.Utils;
 public class ChunkedUploadSessionHolder(
     GlobalStore globalStore,
     SetupInfo setupInfo,
-    AscDistributedCache cache,
+    IFusionCache cache,
     FileHelper fileHelper)
 {
     
@@ -40,7 +40,7 @@ public class ChunkedUploadSessionHolder(
 
     public async Task StoreSessionAsync<T>(ChunkedUploadSession<T> s)
     {
-        await cache.InsertAsync(s.Id, s, SlidingExpiration);
+        await cache.SetAsync(s.Id, s, SlidingExpiration);
     }
 
     public async Task RemoveSessionAsync<T>(ChunkedUploadSession<T> s)
@@ -62,7 +62,7 @@ public class ChunkedUploadSessionHolder(
     
     public async Task<ChunkedUploadSession<T>> GetSessionAsync<T>(string sessionId)
     {
-        var session = await cache.GetAsync<ChunkedUploadSession<T>>(sessionId);
+        var session = await cache.GetOrDefaultAsync<ChunkedUploadSession<T>>(sessionId);
         session.File.FileHelper = fileHelper;
         session.TransformItems();
         return session;

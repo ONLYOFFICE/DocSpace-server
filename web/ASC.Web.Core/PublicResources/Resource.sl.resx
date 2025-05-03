@@ -352,6 +352,9 @@
   <data name="Tariffs_admin" xml:space="preserve">
     <value>Business</value>
   </data>
+  <data name="Tariffs_adminyear" xml:space="preserve">
+    <value>Business</value>
+  </data>
   <data name="ConsumersfacebookClientId" xml:space="preserve">
     <value>Facebook ID</value>
   </data>
@@ -476,7 +479,7 @@
     <value>Omogočite aplikacijo za prijavo v portal z računom Apple ID.</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
-    <value>Omogočite to aplikacijo, da svojim uporabnikom ponudite prijavo v ONLYOFFICE z uporabo Apple ID. {0}Pojdite na Apple Developers Portal in ustvarite novo integracijo aplikacije ONLYOFFICE. Spodaj vnesite podatke, ki ste jih prejeli:</value>
+    <value>Omogočite to aplikacijo, da svojim uporabnikom ponudite prijavo v {LogoText} z uporabo Apple ID. {0}Pojdite na Apple Developers Portal in ustvarite novo integracijo aplikacije {LogoText}. Spodaj vnesite podatke, ki ste jih prejeli:</value>
   </data>
   <data name="ConsumersappleIdKeyId" xml:space="preserve">
     <value>10-mestni identifikator ključa, generiran za zasebni Apple ključ za prijavo</value>
@@ -515,13 +518,13 @@
     <value>Omogočite aplikacijo za upravljanje Box datotek in map.</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
-    <value>Omogočite to aplikacijo za povezavo svojega Box računa z modulom Dokumenti. Datoteke iz Box boste lahko upravljali, urejali in delili z uporabniki ONLYOFFICE. {0}Prijavite se v svoj račun na strani za razvijalce Box in ustvarite novo aplikacijo za integracijo ONLYOFFICE. Spodaj vnesite podatke, ki ste jih prejeli:</value>
+    <value>Omogočite to aplikacijo za povezavo svojega Box računa z modulom Dokumenti. Datoteke iz Box boste lahko upravljali, urejali in delili z uporabniki {LogoText}. {0}Prijavite se v svoj račun na strani za razvijalce Box in ustvarite novo aplikacijo za integracijo {LogoText}. Spodaj vnesite podatke, ki ste jih prejeli:</value>
   </data>
   <data name="ConsumersClickatellDescription" xml:space="preserve">
     <value>Omogočite aplikacijo za dvostopenjsko avtentikacijo preko Clickatell.</value>
   </data>
   <data name="ConsumersClickatellInstruction" xml:space="preserve">
-    <value>S to aplikacijo omogočite dvostopenjsko avtentikacijo s storitvijo Clickatell. {0}Prijavite se v svoj SMS Platform račun in ustvarite novo integracijo za ONLYOFFICE. Kopirajte apiKey in ga vstavite spodaj:</value>
+    <value>S to aplikacijo omogočite dvostopenjsko avtentikacijo s storitvijo Clickatell. {0}Prijavite se v svoj SMS Platform račun in ustvarite novo integracijo za {LogoText}. Kopirajte apiKey in ga vstavite spodaj:</value>
   </data>
   <data name="ConsumersdocuSignClientId" xml:space="preserve">
     <value>DocuSign ključ</value>
@@ -536,13 +539,13 @@
     <value>DocuSign končna točka avtentikacije</value>
   </data>
   <data name="ConsumersDocuSignInstruction" xml:space="preserve">
-    <value>Omogočite to aplikacijo za digitalno podpisovanje dokumentov z DocuSign. {0}Pojdite na skrbniško konzolo DocuSign in dodajte integracijo ONLYOFFICE. Spodaj vnesite podatke, ki ste jih prejeli:</value>
+    <value>Omogočite to aplikacijo za digitalno podpisovanje dokumentov z DocuSign. {0}Pojdite na skrbniško konzolo DocuSign in dodajte integracijo {LogoText}. Spodaj vnesite podatke, ki ste jih prejeli:</value>
   </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
     <value>Omogočite aplikacijo za upravljanje datotek in map Dropbox.</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
-    <value>Omogočite to aplikacijo za povezavo svojega računa Dropbox z modulom Dokumenti. Datoteke iz Dropbox boste lahko upravljali, urejali in delili z uporabniki ONLYOFFICE. {0}Vpišite se v svoj račun na spletnem mestu Dropbox razvijalcev in ustvarite novo aplikacijo za integracijo ONLYOFFICE. Spodaj vnesite podatke, ki ste jih prejeli:</value>
+    <value>Omogočite to aplikacijo za povezavo svojega računa Dropbox z modulom Dokumenti. Datoteke iz Dropbox boste lahko upravljali, urejali in delili z uporabniki {LogoText}. {0}Vpišite se v svoj račun na spletnem mestu Dropbox razvijalcev in ustvarite novo aplikacijo za integracijo {LogoText}. Spodaj vnesite podatke, ki ste jih prejeli:</value>
   </data>
   <data name="ConsumersDropBoxKey" xml:space="preserve">
     <value>DropBox ID</value>
@@ -557,7 +560,7 @@
     <value>Omogočite to aplikacijo za ustvarjanje bibliografskih seznamov v dokumentih z EasyBib.</value>
   </data>
   <data name="ConsumersEasyBibInstruction" xml:space="preserve">
-    <value>Omogočite to aplikacijo za ustvarjanje bibliografij v urejevalnikih ONLYOFFICE. {0}Pojdite na stran za prijavo v EasyBib in izpolnite obrazec za dodajanje ONLYOFFICE integracije. Ko dobite ključ aplikacije, ga prilepite spodaj:</value>
+    <value>Omogočite to aplikacijo za ustvarjanje bibliografij v urejevalnikih {LogoText}. {0}Pojdite na stran za prijavo v EasyBib in izpolnite obrazec za dodajanje {LogoText} integracije. Ko dobite ključ aplikacije, ga prilepite spodaj:</value>
   </data>
   <data name="ConsumersfacebookAccessToken_Default" xml:space="preserve">
     <value>Žeton aplikacije</value>
@@ -569,7 +572,7 @@
     <value>Omogočite aplikacijo za prijavo v portal z uporabo Facebook računa.</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
-    <value>Omogočite to aplikacijo, da svojim uporabnikom omogočite prijavo v ONLYOFFICE prek Facebooka in povežete Facebook račune svojih strank z modulom CRM. {0}Pojdite na Facebook Developers Portal in ustvarite novo integracijo aplikacije ONLYOFFICE. Spodaj vnesite podatke, ki ste jih prejeli:</value>
+    <value>Omogočite to aplikacijo, da svojim uporabnikom omogočite prijavo v {LogoText} prek Facebooka in povežete Facebook račune svojih strank z modulom CRM. {0}Pojdite na Facebook Developers Portal in ustvarite novo integracijo aplikacije {LogoText}. Spodaj vnesite podatke, ki ste jih prejeli:</value>
   </data>
   <data name="Consumersfirebase_apiKey" xml:space="preserve">
     <value>Web API ključ</value>
@@ -584,7 +587,7 @@
     <value>ID projekta</value>
   </data>
   <data name="ConsumersFirebaseInstruction" xml:space="preserve">
-    <value>Omogočite to aplikacijo, da svojim uporabnikom omogočite prejemanje obvestil o sporočilih tudi brez povezave. {0}Pojdite na konzolo Firebase in dodajte nov projekt za integracijo ONLYOFFICE. Spodaj vnesite podatke, ki ste jih prejeli:</value>
+    <value>Omogočite to aplikacijo, da svojim uporabnikom omogočite prejemanje obvestil o sporočilih tudi brez povezave. {0}Pojdite na konzolo Firebase in dodajte nov projekt za integracijo {LogoText}. Spodaj vnesite podatke, ki ste jih prejeli:</value>
   </data>
   <data name="ConsumersgoogleClientId" xml:space="preserve">
     <value>Google ID</value>
@@ -608,7 +611,7 @@
     <value>Povežite storitev Google Cloud shrambe za varnostno kopiranje in shranjevanje podatkov iz vašega portala.</value>
   </data>
   <data name="ConsumersGoogleCloudInstruction" xml:space="preserve">
-    <value>Povežite storitev Google Cloud shrambo za varnostno kopiranje in shranjevanje podatkov iz vašega portala. {0}Pojdite na konzolo Google Cloud platforme in ustvarite nov storitveni račun za ONLYOFFICE. Podatke, ki ste jih prejeli, prilepite spodaj:</value>
+    <value>Povežite storitev Google Cloud shrambo za varnostno kopiranje in shranjevanje podatkov iz vašega portala. {0}Pojdite na konzolo Google Cloud platforme in ustvarite nov storitveni račun za {LogoText}. Podatke, ki ste jih prejeli, prilepite spodaj:</value>
   </data>
   <data name="ConsumersGoogleCloudjson" xml:space="preserve">
     <value>GoogleCloud json</value>
@@ -617,13 +620,13 @@
     <value>Povežite projekt za prijavo v portal z Google Računom in upravljajte datoteke in mape na Google Drive.</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
-    <value>Omogočite to aplikacijo za povezavo svojega računa Google Drive z modulom Dokumenti. Datoteke iz storitve Google Drive boste lahko upravljali, urejali in delili z uporabniki ONLYOFFICE. {0}Pojdite na konzolo Google API in ustvarite nov projekt za integracijo ONLYOFFICE. Spodaj vnesite podatke, ki ste jih prejeli:</value>
+    <value>Omogočite to aplikacijo za povezavo svojega računa Google Drive z modulom Dokumenti. Datoteke iz storitve Google Drive boste lahko upravljali, urejali in delili z uporabniki {LogoText}. {0}Pojdite na konzolo Google API in ustvarite nov projekt za integracijo {LogoText}. Spodaj vnesite podatke, ki ste jih prejeli:</value>
   </data>
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
     <value>Omogočite aplikacijo za prijavo v portal z računom LinkedIn.</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
-    <value>Omogočite to aplikacijo, da svojim uporabnikom omogočite prijavo v ONLYOFFICE s svojimi računi LinkedIn. {0}Pojdite na spletno mesto za razvijalce LinkedIn in ustvarite novo integracijo aplikacije ONLYOFFICE. Spodaj vnesite podatke, ki ste jih prejeli:</value>
+    <value>Omogočite to aplikacijo, da svojim uporabnikom omogočite prijavo v {LogoText} s svojimi računi LinkedIn. {0}Pojdite na spletno mesto za razvijalce LinkedIn in ustvarite novo integracijo aplikacije {LogoText}. Spodaj vnesite podatke, ki ste jih prejeli:</value>
   </data>
   <data name="ConsumersLinkedInKey" xml:space="preserve">
     <value>Linkedin ID</value>
@@ -659,7 +662,7 @@
     <value>Omogočite aplikacijo za vpis v portal z Microsoftovim računom.</value>
   </data>
   <data name="ConsumersMicrosoftInstruction" xml:space="preserve">
-    <value>Omogočite to aplikacijo, da svojim uporabnikom dovolite prijavo v ONLYOFFICE z Microsoftom. {0}Pojdite v Microsoft Azure in ustvarite novo integracijo aplikacije ONLYOFFICE. Spodaj vnesite podatke, ki ste jih prejeli:</value>
+    <value>Omogočite to aplikacijo, da svojim uporabnikom dovolite prijavo v {LogoText} z Microsoftom. {0}Pojdite v Microsoft Azure in ustvarite novo integracijo aplikacije {LogoText}. Spodaj vnesite podatke, ki ste jih prejeli:</value>
   </data>
   <data name="ConsumersRackspace" xml:space="preserve">
     <value>Rackspace shramba v oblaku</value>
@@ -707,7 +710,7 @@
     <value>Povežite Amazon AWS S3 za varnostno kopiranje in shranjevanje podatkov iz vašega portala.</value>
   </data>
   <data name="ConsumersS3Instruction" xml:space="preserve">
-    <value>Povežite Amazon AWS S3 za varnostno kopiranje in shranjevanje podatkov iz vašega portala. {0}Pojdite na konzolo za upravljanje AWS in ustvarite ključe za dostop za ONLYOFFICE. Podatke, ki ste jih prejeli, prilepite spodaj:</value>
+    <value>Povežite Amazon AWS S3 za varnostno kopiranje in shranjevanje podatkov iz vašega portala. {0}Pojdite na konzolo za upravljanje AWS in ustvarite ključe za dostop za {LogoText}. Podatke, ki ste jih prejeli, prilepite spodaj:</value>
   </data>
   <data name="ConsumersS3regionDescription" xml:space="preserve">
     <value>Vnesite regijo AWS, kjer se nahaja vaš Amazon prostor za shranjevanje.</value>
@@ -740,7 +743,7 @@
     <value>ID aplikacije</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
-    <value>Omogočite to aplikacijo, da povežete svoj račun OneDrive z modulom Dokumenti. Datoteke iz storitve OneDrive boste lahko upravljali, urejali in delili z uporabniki ONLYOFFICE. {0}Vpišite se v svoj račun Microsoft Azure in ustvarite novo aplikacijo za integracijo ONLYOFFICE. Spodaj vnesite podatke, ki ste jih prejeli:</value>
+    <value>Omogočite to aplikacijo, da povežete svoj račun OneDrive z modulom Dokumenti. Datoteke iz storitve OneDrive boste lahko upravljali, urejali in delili z uporabniki {LogoText}. {0}Vpišite se v svoj račun Microsoft Azure in ustvarite novo aplikacijo za integracijo {LogoText}. Spodaj vnesite podatke, ki ste jih prejeli:</value>
   </data>
   <data name="ConsumersSmsc" xml:space="preserve">
     <value>SMS Center</value>
@@ -779,7 +782,7 @@
     <value>Skrivnost stranke</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Omogočite to aplikacijo, da svojim uporabnikom omogočite prijavo v ONLYOFFICE s svojim Twitter računom in povežite Twitter račune svojih strank z modulom CRM. {0}Pojdite na Twitter portal za razvijalce in ustvarite novo integracijo aplikacije ONLYOFFICE. Spodaj vnesite podatke, ki ste jih prejeli:</value>
+    <value>Omogočite to aplikacijo, da svojim uporabnikom omogočite prijavo v {LogoText} s svojim Twitter računom in povežite Twitter račune svojih strank z modulom CRM. {0}Pojdite na Twitter portal za razvijalce in ustvarite novo integracijo aplikacije {LogoText}. Spodaj vnesite podatke, ki ste jih prejeli:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>API Ključ</value>
@@ -806,7 +809,7 @@
     <value>Omogočite aplikacijo za objavo dokumentov neposredno v WordPress.</value>
   </data>
   <data name="ConsumersWordpressInstruction" xml:space="preserve">
-    <value>Omogočite aplikacijo za enostavno objavo dokumentov na vašem spletnem mestu WordPress. {0}Na strani za razvijalce programa Wordpress ustvarite novo aplikacijo za integracijo ONLYOFFICE. Podatke, ki ste jih prejeli, prilepite spodaj:</value>
+    <value>Omogočite aplikacijo za enostavno objavo dokumentov na vašem spletnem mestu WordPress. {0}Na strani za razvijalce programa Wordpress ustvarite novo aplikacijo za integracijo {LogoText}. Podatke, ki ste jih prejeli, prilepite spodaj:</value>
   </data>
   <data name="ConsumerswpClientId" xml:space="preserve">
     <value>WordPress ključ</value>
@@ -824,7 +827,7 @@
     <value>Omogočite aplikacijo za uvoz uporabnikov iz storitve Yahoo.</value>
   </data>
   <data name="ConsumersYahooInstruction" xml:space="preserve">
-    <value>Omogočite to aplikacijo, če želite dodati nove uporabnike portala s seznama stikov Yahoo. {0}Pojdite na stran za ustvarjanje aplikacije v Yahoo Developer Network in ustvarite novo aplikacijo za integracijo ONLYOFFICE. Spodaj vnesite podatke, ki ste jih prejeli:</value>
+    <value>Omogočite to aplikacijo, če želite dodati nove uporabnike portala s seznama stikov Yahoo. {0}Pojdite na stran za ustvarjanje aplikacije v Yahoo Developer Network in ustvarite novo aplikacijo za integracijo {LogoText}. Spodaj vnesite podatke, ki ste jih prejeli:</value>
   </data>
   <data name="ConsumersYandexClientId" xml:space="preserve">
     <value>ID</value>
@@ -992,7 +995,7 @@
     <value>Omogočite aplikaciji prijavo v portal z računom Zoom.</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
-    <value>Omogočite to aplikacijo, da svojim uporabnikom omogočite prijavo v ONLYOFFICE s svojimi računi Zoom. {0}Pojdite na spletno mesto Zoom Developers in ustvarite novo integracijo aplikacije ONLYOFFICE. Spodaj vnesite podatke, ki ste jih prejeli:</value>
+    <value>Omogočite to aplikacijo, da svojim uporabnikom omogočite prijavo v {LogoText} s svojimi računi Zoom. {0}Pojdite na spletno mesto Zoom Developers in ustvarite novo integracijo aplikacije {LogoText}. Spodaj vnesite podatke, ki ste jih prejeli:</value>
   </data>
   <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
     <value>Preveč poskusov prijave. Prosimo, poskusite kasneje</value>
@@ -1053,5 +1056,29 @@
   </data>
   <data name="TariffsFeature_statistic" xml:space="preserve">
     <value>Kvote za shranjevanje in statistika</value>
+  </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>Kvote na sobo ni bilo mogoče nastaviti. Vnesena vrednost je večja od skupnega prostora za shranjevanje DocSpace.</value>
+  </data>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>Kvote na uporabnika ni bilo mogoče nastaviti. Vnesena vrednost je večja od skupnega prostora za shranjevanje DocSpace.</value>
+  </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Dodajte vsaj 1 zaupanja vredno domeno.</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} na skrbnika in možnost dodajanja prostora na zahtevo</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Število skrbnikov presega omejitev: {0}/{1}.</value>
+  </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>Neprofitno</value>
+  </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Dodajte vsaj 1 dovoljen naslov IP.</value>
+  </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>URL Webhook ni na voljo. Zahteva HEAD ni odgovor na 200 http status.</value>
   </data>
 </root>

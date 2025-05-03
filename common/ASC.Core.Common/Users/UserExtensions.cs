@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -141,6 +141,37 @@ public static class UserExtensions
             EmployeeType.RoomAdmin;
     }
 
+    public static async Task<bool> CanUserViewAnotherUserAsync(this UserManager userManager, UserInfo sourceUser, UserInfo targetUser)
+    {
+        if (sourceUser.Id == targetUser.Id)
+        {
+            return true;
+        }
+
+        var sourceUserType = await userManager.GetUserTypeAsync(sourceUser);
+
+        if (sourceUserType is EmployeeType.DocSpaceAdmin)
+        {
+            return true;
+        }
+
+        if (sourceUserType is EmployeeType.User or EmployeeType.Guest)
+        {
+            return false;
+        }
+
+        var targetUserType = await userManager.GetUserTypeAsync(targetUser);
+
+        if (targetUserType is EmployeeType.Guest)
+        {
+            var userRelations = await userManager.GetUserRelationsAsync(sourceUser.Id);
+
+            return userRelations.ContainsKey(targetUser.Id);
+        }
+
+        return true;
+    }
+
     private const string _extMobPhone = "extmobphone";
     private const string _mobPhone = "mobphone";
     private const string _extMail = "extmail";
@@ -171,17 +202,16 @@ public static class UserExtensions
             {
                 case _extMobPhone:
                     newContacts.Add(_mobPhone);
-                    newContacts.Add(value);
                     break;
                 case _extMail:
                     newContacts.Add(_mail);
-                    newContacts.Add(value);
                     break;
                 default:
                     newContacts.Add(type);
-                    newContacts.Add(value);
                     break;
             }
+
+            newContacts.Add(value);
         }
 
         ui.ContactsList = newContacts;

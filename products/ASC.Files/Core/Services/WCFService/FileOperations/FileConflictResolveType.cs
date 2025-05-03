@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,11 +26,19 @@
 
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
+/// <summary>
+/// The overwriting behavior of the file copying or moving.
+/// </summary>
 [JsonConverter(typeof(JsonStringEnumConverter<FileConflictResolveType>))]
 [EnumExtensions]
 public enum FileConflictResolveType
 {
+    [SwaggerEnum(Description = "Skip")]
     Skip = 0,
+
+    [SwaggerEnum(Description = "Overwrite")]
     Overwrite = 1,
+
+    [SwaggerEnum(Description = "Duplicate")]
     Duplicate = 2
 }

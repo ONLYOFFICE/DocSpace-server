@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -127,7 +127,6 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
                     "mailaggregator",
                     "whitelabel",
                     "customnavigation",
-                    "userPhotos",
                     "room_logos",
                     "webplugins"
                 };
@@ -151,10 +150,8 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
 
     protected void SetStepsCount(int value)
     {
-        if (value <= 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(value));
-        }
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(value);
+        
         _stepsCount = value;
         Logger.DebugCountSteps(+_stepsCount);
     }
@@ -306,25 +303,28 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
                     commandText = sb.ToString();
                 }
 
-                try
-                {
-                    command = connection.CreateCommand();
-                    command.CommandText = commandText;
-                    await command.ExecuteNonQueryAsync();
-                }
-                catch (Exception)
+                var attempt = 0;
+                while (true)
                 {
                     try
                     {
-                        Thread.Sleep(2000);//avoiding deadlock
-                            command = connection.CreateCommand();
-                            command.CommandText = commandText;
-                            await command.ExecuteNonQueryAsync();
+                        command = connection.CreateCommand();
+                        command.CommandText = commandText;
+                        await command.ExecuteNonQueryAsync();
+                        break;
                     }
                     catch (Exception ex)
                     {
-                        Logger.ErrorRestore(ex);
+                        if (attempt == 5) 
+                        {
+                            Logger.ErrorRestore(ex);
+                        }
+                        else
+                        {
+                            attempt++;
+                        }
                     }
+                    Thread.Sleep(1000);//avoiding deadlock
                 }
             }
         }

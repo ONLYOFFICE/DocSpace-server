@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,12 +27,17 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// The room invitation parameters.
 /// </summary>
 public class RoomInvitation : EmailInvitationDto
 {
-    /// <summary>ID of the user with whom we want to share a room</summary>
+    /// <summary>
+    /// The ID of the user to share a room with.
+    /// </summary>
     public Guid Id { get; set; }
 
-    /// <summary>Sharing rights (None, ReadWrite, Read, Restrict, Varies, Review, Comment, FillForms, CustomFilter, RoomAdmin, Editing)</summary>
+    /// <summary>
+    /// The room sharing rights.
+    /// </summary>
     public FileShare Access { get; set; }
 }

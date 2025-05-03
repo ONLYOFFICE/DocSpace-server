@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,28 +27,68 @@
 namespace ASC.AuditTrail.Types;
 
 /// <summary>
+/// The action type.
 /// </summary>
 [EnumExtensions]
 public enum ActionType
 {
+    [SwaggerEnum("None")]
     None,
+
+    [SwaggerEnum("Create")]
     Create,
+
+    [SwaggerEnum("Update")]
     Update,
+
+    [SwaggerEnum("Delete")]
     Delete,
+
+    [SwaggerEnum("Link")]
     Link,
+
+    [SwaggerEnum("Unlink")]
     Unlink,
+
+    [SwaggerEnum("Attach")]
     Attach,
+
+    [SwaggerEnum("Detach")]
     Detach,
+
+    [SwaggerEnum("Send")]
     Send,
+
+    [SwaggerEnum("Import")]
     Import,
+
+    [SwaggerEnum("Export")]
     Export,
+
+    [SwaggerEnum("Update access")]
     UpdateAccess,
+
+    [SwaggerEnum("Download")]
     Download,
+
+    [SwaggerEnum("Upload")]
     Upload,
+
+    [SwaggerEnum("Copy")]
     Copy,
+
+    [SwaggerEnum("Move")]
     Move,
+
+    [SwaggerEnum("Reassigns")]
     Reassigns,
+
+    [SwaggerEnum("Follow")]
     Follow,
+
+    [SwaggerEnum("Unfollow")]
     Unfollow,
+
+    [SwaggerEnum("Logout")]
     Logout
 }

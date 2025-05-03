@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,173 +27,429 @@
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
+/// The configuration parameters.
 /// </summary>
 public class ConfigurationDto<T>
 {
-    /// <summary>Document config</summary>
-    /// <type>ASC.Web.Files.Services.DocumentService.DocumentConfig, ASC.Files.Core</type>
+    /// <summary>
+    /// The document configuration.
+    /// </summary>
     public DocumentConfigDto Document { get; set; }
 
-    /// <summary>Document type</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The document type.
+    /// </summary>
     public string DocumentType { get; set; }
 
-    /// <summary>Editor config</summary>
-    /// <type>ASC.Web.Files.Services.DocumentService.EditorConfiguration, ASC.Files.Core</type>
+    /// <summary>
+    /// The editor configuration.
+    /// </summary>
     public EditorConfigurationDto EditorConfig { get; set; }
 
-    /// <summary>Editor type</summary>
-    /// <type>ASC.Web.Files.Services.DocumentService.EditorType, ASC.Files.Core</type>
+    /// <summary>
+    /// The editor type.
+    /// </summary>
     public EditorType EditorType { get; set; }
 
-    /// <summary>Editor URL</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The editor URL.
+    /// </summary>
+    [Url]
     public string EditorUrl { get; set; }
 
-    /// <summary>Token</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The token of the file configuration.
+    /// </summary>
     public string Token { get; set; }
 
-    /// <summary>Platform type</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The platform type.
+    /// </summary>
     public string Type { get; set; }
 
-    /// <summary>File parameters</summary>
-    /// <type>ASC.Files.Core.ApiModels.ResponseDto.FileDto, ASC.Files.Core</type>
+    /// <summary>
+    /// The file parameters.
+    /// </summary>
     public FileDto<T> File { get; set; }
 
-    /// <summary>Error message</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The error message.
+    /// </summary>
     public string ErrorMessage { get; set; }
 
-    /// <summary>Specifies if the filling has started or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the file filling has started or not.
+    /// </summary>
     public bool? StartFilling { get; set; }
 
-    /// <summary>Filling session Id</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The file filling status.
+    /// </summary>
+    public bool? FillingStatus { get; set; }
+
+    /// <summary>
+    /// The start filling mode.
+    /// </summary>
+    public StartFillingMode StartFillingMode { get; set; }
+
+    /// <summary>
+    /// The file filling session ID.
+    /// </summary>
     public string FillingSessionId { get; set; }
 }
 
+/// <summary>
+/// The start filling mode.
+/// </summary>
+public enum StartFillingMode
+{
+    [SwaggerEnum("None")]
+    None,
+
+    [SwaggerEnum("Share to fill out")]
+    ShareToFillOut,
+
+    [SwaggerEnum("Start filling")]
+    StartFilling
+}
+
+/// <summary>
+/// The editor configuration parameters.
+/// </summary>
 public class EditorConfigurationDto
 {
+    /// <summary>
+    /// The callback URL of the editor.
+    /// </summary>
+    [Url]
     public string CallbackUrl { get; set; }
 
+    /// <summary>
+    /// The co-editing configuration parameters.
+    /// </summary>
     public CoEditingConfig CoEditing { get; set; }
 
+    /// <summary>
+    /// The creation URL of the editor.
+    /// </summary>
     public string CreateUrl { get; set; }
 
+    /// <summary>
+    /// The customization configuration.
+    /// </summary>
     public CustomizationConfigDto Customization { get; set; }
 
+    /// <summary>
+    /// The embedded configuration parameters for embedded documents.
+    /// </summary>
     public EmbeddedConfig Embedded { get; set; }
 
+    /// <summary>
+    /// The encryption keys of the editor configuration.
+    /// </summary>
     public EncryptionKeysConfig EncryptionKeys { get; set; }
-    
+
+    /// <summary>
+    /// The language of the editor configuration.
+    /// </summary>
     public string Lang { get; set; }
 
+    /// <summary>
+    /// The mode of the editor configuration.
+    /// </summary>
     public string Mode { get; set; }
-    
+
+    /// <summary>
+    /// Specifies if the mode is write of the editor configuration.
+    /// </summary>
     public bool ModeWrite { get; set; }
 
+    /// <summary>
+    /// The plugins configuration.
+    /// </summary>
     public PluginsConfig Plugins { get; set; }
 
+    /// <summary>
+    /// The recent configuration of the editor.
+    /// </summary>
     public List<RecentConfig> Recent { get; set; }
-    
+
+    /// <summary>
+    /// The templates of the editor configuration.
+    /// </summary>
     public List<TemplatesConfig> Templates { get; set; }
 
+    /// <summary>
+    /// The user configuration of the editor.
+    /// </summary>
     public UserConfig User { get; set; }
 }
+
+/// <summary>
+/// The customization config parameters.
+/// </summary>
 public class CustomizationConfigDto
 {
+    /// <summary>
+    /// Specifies if the customization is about.
+    /// </summary>
     public bool About { get; set; }
 
+    /// <summary>
+    /// The customization customer configuration.
+    /// </summary>
     public CustomerConfigDto Customer { get; set; }
+
+    /// <summary>
+    /// The anonymous configuration of the customization.
+    /// </summary>
     public AnonymousConfigDto Anonymous { get; set; }
 
+    /// <summary>
+    /// The feedback configuration of the customization.
+    /// </summary>
     public FeedbackConfig Feedback  { get; set; }
 
+    /// <summary>
+    /// Specifies if the customization should be force saved.
+    /// </summary>
     public bool? Forcesave { get; set; }
 
+    /// <summary>
+    /// The go back configuration of the customization.
+    /// </summary>
     public GobackConfig Goback { get; set; }
 
+    /// <summary>
+    /// The logo of the customization.
+    /// </summary>
     public LogoConfigDto Logo { get; set; }
 
+    /// <summary>
+    /// Specifies if the share should be mentioned.
+    /// </summary>
     public bool MentionShare { get; set; }
 
+    /// <summary>
+    /// The review display of the customization.
+    /// </summary>
     public string ReviewDisplay { get; set; }
 
-    public bool SubmitForm { get; set; }
+    /// <summary>
+    /// The "Complete &amp; Submit" button settings.
+    /// </summary>
+    public SubmitForm SubmitForm { get; set; }
+
+    /// <summary>
+    /// The parameters of the button that starts filling out the form.
+    /// </summary>
+    public StartFillingForm StartFillingForm { get; set; }
 }
 
+/// <summary>
+/// The "Complete &amp; Submit" button settings.
+/// </summary>
+public class SubmitForm
+{
+    /// <summary>
+    /// Specifies whether the "Complete  &amp; Submit" button will be displayed or hidden on the top toolbar.
+    /// </summary>
+    public bool Visible { get; set; }
+    /// <summary>
+    /// A message displayed after forms are submitted.
+    /// </summary>
+    public string ResultMessage { get; set; }
+}
+
+/// <summary>
+/// The parameters of the button that starts filling out the form.
+/// </summary>
+public class StartFillingForm
+{
+    /// <summary>
+    /// The caption of the button that starts filling out the form.
+    /// </summary>
+    public string Text { get; set; }
+}
+
+/// <summary>
+/// The logo config parameters.
+/// </summary>
 public class LogoConfigDto
 {
+    /// <summary>
+    /// The image of the logo.
+    /// </summary>
     public string Image { get; set; }
 
+    /// <summary>
+    /// The dark image of the logo.
+    /// </summary>
     public string ImageDark { get; set; }
 
+    /// <summary>
+    /// The embedded image of the logo.
+    /// </summary>
     public string ImageEmbedded { get; set; }
 
+    /// <summary>
+    /// The url link of the logo.
+    /// </summary>
     public string Url { get; set; }
+
+    /// <summary>
+    /// Specifies if the logo is visible.
+    /// </summary>
     public bool Visible { get; set; }
 }
 
+/// <summary>
+/// The anonymous config parameters.
+/// </summary>
 public class AnonymousConfigDto
 {
+    /// <summary>
+    /// Specifies if the anonymous is a request.
+    /// </summary>
     public bool Request { get; set; }
 }
 
+/// <summary>
+/// The customer config parameters.
+/// </summary>
 public class CustomerConfigDto
 {
+    /// <summary>
+    /// The address of the customer configuration.
+    /// </summary>
     public string Address { get; set; }
 
+    /// <summary>
+    /// The logo of the customer configuration.
+    /// </summary>
     public string Logo { get; set; }
 
+    /// <summary>
+    /// The dark logo of the customer configuration.
+    /// </summary>
     public string LogoDark { get; set; }
 
+    /// <summary>
+    /// The mail address of the customer configuration.
+    /// </summary>
     public string Mail { get; set; }
 
+    /// <summary>
+    /// The name of the customer configuration.
+    /// </summary>
     public string Name  { get; set; }
 
+    /// <summary>
+    /// The site web address of the customer configuration.
+    /// </summary>
     public string Www  { get; set; }
 }
 
+/// <summary>
+/// The document config parameters.
+/// </summary>
 public class DocumentConfigDto
 {
+    /// <summary>
+    /// The file type of the document.
+    /// </summary>
     public string FileType  { get; set; }
-    
+
+    /// <summary>
+    /// The configuration information of the document.
+    /// </summary>
     public InfoConfigDto Info { get; set; }
-    
+
+    /// <summary>
+    /// Specifies if the documnet is linked for current user.
+    /// </summary>
     public bool IsLinkedForMe { get; set; }
 
+    /// <summary>
+    /// The document key.
+    /// </summary>
     public string Key { get; set; }
 
+    /// <summary>
+    /// The document permissions.
+    /// </summary>
     public PermissionsConfig Permissions { get; set; }
-    
+
+    /// <summary>
+    /// The shared link parameter of the document.
+    /// </summary>
     public string SharedLinkParam { get; set; }
-    
+
+    /// <summary>
+    /// The shared link key of the document.
+    /// </summary>
     public string SharedLinkKey { get; set; }
-    
+
+    /// <summary>
+    /// The reference data of the document.
+    /// </summary>
     public FileReferenceData ReferenceData { get; set; }
 
+    /// <summary>
+    /// The document title.
+    /// </summary>
     public string Title { get; set; }
 
+    /// <summary>
+    /// The document url.
+    /// </summary>
+    [Url]
     public string Url { get; set; }
 
+    /// <summary>
+    /// Indicates whether this is a form.
+    /// </summary>
+    public bool IsForm { get; set; }
+
+    /// <summary>
+    /// The options of the document.
+    /// </summary>
     public Options Options { get; set; }
 }
 
+/// <summary>
+/// The information config parameters.
+/// </summary>
 public class InfoConfigDto
 {
+    /// <summary>
+    /// Specifies if the file is favorite or not.
+    /// </summary>
     public bool? Favorite { get; set; }
 
+    /// <summary>
+    /// The folder of the file.
+    /// </summary>
     public string Folder { get; set; }
 
+    /// <summary>
+    /// The file owner.
+    /// </summary>
     public string Owner { get; set; }
 
+    /// <summary>
+    /// The sharing settings of the file.
+    /// </summary>
     public List<AceShortWrapper> SharingSettings{ get; set; }
-    
+
+    /// <summary>
+    /// The editor type of the file.
+    /// </summary>
     public EditorType Type { get; set; }
 
+    /// <summary>
+    /// The uploaded file.
+    /// </summary>
     public string Uploaded { get; set; }
 }
 
@@ -224,8 +480,8 @@ public class ConfigurationConverter<T>(
             EditorUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.DocServiceApiUrl),
             ErrorMessage = source.Error
         };
-
-        result.EditorUrl = FilesLinkUtility.AddQueryString(result.EditorUrl, new Dictionary<string, string>() {
+        
+        result.EditorUrl = FilesLinkUtility.AddQueryString(result.EditorUrl, new Dictionary<string, string> {
             { FilesLinkUtility.ShardKey, result.Document?.Key }
         });
 
@@ -306,7 +562,7 @@ public class CustomizationConfigConverter<T>(
             Logo = await configConverter.Convert(configuration),
             MentionShare = await source.GetMentionShare(file),
             ReviewDisplay = source.GetReviewDisplay(configuration.EditorConfig.ModeWrite),
-            SubmitForm = await source.GetSubmitForm(file, configuration.EditorConfig.ModeWrite),
+            SubmitForm = await source.GetSubmitForm(file),
             Anonymous = anonymousConfigConverter.Convert(configuration)
         };
 
@@ -388,7 +644,7 @@ public class CustomerConfigConverter
 
 [Scope(GenericArguments = [typeof(int)])]
 [Scope(GenericArguments = [typeof(string)])]
-public class DocumentConfigConverter<T>(InfoConfigConverter<T> configConverter)
+public class DocumentConfigConverter<T>(InfoConfigConverter<T> configConverter,FileChecker fileChecker)
 {
     public async Task<DocumentConfigDto> Convert(DocumentConfig<T> source, File<T> file)
     {        
@@ -406,11 +662,20 @@ public class DocumentConfigConverter<T>(InfoConfigConverter<T> configConverter)
             Permissions = source.Permissions,
             SharedLinkParam = source.SharedLinkParam,
             SharedLinkKey = source.SharedLinkKey,
-            ReferenceData = await source.GetReferenceData(file),
+            ReferenceData = source.GetReferenceData(file),
             Title = source.Title ?? file.Title,
-            Url = await source.GetUrl(file),
-            Options = source.Options,
+            Url = source.GetUrl(file),
+            Options = source.Options
         };
+
+        if (FileUtility.GetFileTypeByExtention(FileUtility.GetFileExtension(file.Title)) == FileType.Pdf && !file.IsForm && (FilterType)file.Category == FilterType.None)
+        {
+            result.IsForm = await fileChecker.IsFormPDFFile(file);
+        }
+        else
+        {
+            result.IsForm = file.IsForm;
+        }
 
         return result;
     }

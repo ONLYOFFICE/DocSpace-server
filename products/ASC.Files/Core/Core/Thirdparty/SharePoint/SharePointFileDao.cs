@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -148,7 +148,7 @@ internal class SharePointFileDao(
 
         if (!string.IsNullOrEmpty(searchText))
         {
-            files = files.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
+            files = files.Where(x => x.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase));
         }
 
         if (!extension.IsNullOrEmpty())
@@ -171,7 +171,7 @@ internal class SharePointFileDao(
     }
 
     public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
-        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT)
+        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = null, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null, bool applyFormStepFilter = false)
     {
         if (filterType == FilterType.FoldersOnly)
         {
@@ -230,7 +230,7 @@ internal class SharePointFileDao(
 
         if (!string.IsNullOrEmpty(searchText))
         {
-            files = files.Where(x => x.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) != -1);
+            files = files.Where(x => x.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase));
         }
 
         if (!extension.IsNullOrEmpty())
@@ -344,10 +344,17 @@ internal class SharePointFileDao(
     {
         return await SaveFileAsync(file, fileStream);
     }
-    public async Task DeleteFileAsync(string fileId,Guid ownerId)
+
+    public async Task DeleteFileVersionAsync(File<string> file, int version)
+    {
+        await DeleteFileAsync(file.Id);
+    }
+
+    public async Task DeleteFileAsync(string fileId, Guid ownerId)
     {
         await DeleteFileAsync(fileId);
     }
+    
     public async Task DeleteFileAsync(string fileId)
     {
         await SharePointProviderInfo.DeleteFileAsync(fileId);
@@ -359,7 +366,11 @@ internal class SharePointFileDao(
 
         return files.Any(item => item.Name.Equals(title, StringComparison.InvariantCultureIgnoreCase));
     }
-    
+
+    public async Task<bool> IsExistAsync(string title, int category, string folderId)
+    {
+        return await IsExistAsync(title, folderId);
+    }
 
     public async Task<TTo> MoveFileAsync<TTo>(string fileId, TTo toFolderId, bool deleteLinks = false)
     {
@@ -505,9 +516,9 @@ internal class SharePointFileDao(
         return file;
     }
 
-    public Task SetCustomOrder(string fileId, string parentFolderId, int order)
+    public Task<int> SetCustomOrder(string fileId, string parentFolderId, int order)
     {
-        return Task.CompletedTask;
+        return Task.FromResult(0);
     }
 
     public Task InitCustomOrder(Dictionary<string, int> fileIds, string parentFolderId)
@@ -525,5 +536,30 @@ internal class SharePointFileDao(
         uploadSession.File = FixId(uploadSession.File);
         
         return Task.FromResult(transferred);
+    }
+
+    public Task SaveFormRoleMapping(string formId, IEnumerable<FormRole> formRoles)
+    {
+        return Task.CompletedTask;
+    }
+    public IAsyncEnumerable<FormRole> GetFormRoles(string formId)
+    {
+        return AsyncEnumerable.Empty<FormRole>();
+    }
+    public Task<(int, List<FormRole>)> GetUserFormRoles(string formId, Guid userId)
+    {
+        return Task.FromResult((-1, new List<FormRole>()));
+    }
+    public IAsyncEnumerable<FormRole> GetUserFormRolesInRoom(string roomId, Guid userId)
+    {
+        return AsyncEnumerable.Empty<FormRole>();
+    }
+    public Task<FormRole> ChangeUserFormRoleAsync(string formId, FormRole formRole)
+    {
+        return Task.FromResult<FormRole>(null);
+    }
+    public Task DeleteFormRolesAsync(string formId)
+    {
+        return Task.CompletedTask;
     }
 }

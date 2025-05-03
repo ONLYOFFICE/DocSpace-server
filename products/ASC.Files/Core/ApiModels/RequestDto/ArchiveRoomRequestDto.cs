@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,10 +27,30 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// The parameters for archiving a room.
 /// </summary>
-public class ArchiveRoomRequestDto
+public class ArchiveRoomRequest
 {
-    /// <summary>Specifies whether to archive a room after the editing session is finished or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether to archive a room after the editing session is finished or not.
+    /// </summary>
     public bool DeleteAfter { get; set; }
+}
+
+/// <summary>
+/// The request parameters for archiving a room.
+/// </summary>
+public class ArchiveRoomRequestDto<T>
+{
+    /// <summary>
+    /// The room ID.
+    /// </summary>
+    [FromRoute(Name = "id")]
+    public required T Id { get; set; }
+
+    /// <summary>
+    /// The parameters for archiving a room.
+    /// </summary>
+    [FromBody]
+    public ArchiveRoomRequest ArchiveRoom { get; set; }
 }

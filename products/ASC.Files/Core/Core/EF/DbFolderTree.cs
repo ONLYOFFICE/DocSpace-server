@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -80,12 +80,12 @@ public static class DbFolderTreeExtension
         modelBuilder.Entity<DbFolderTree>(entity =>
         {
             entity.HasKey(e => new { e.ParentId, e.FolderId })
-                .HasName("files_folder_tree_pkey");
+                .HasName("pk_files_folder_tree");
 
-            entity.ToTable("files_folder_tree", "onlyoffice");
+            entity.ToTable("files_folder_tree");
 
             entity.HasIndex(e => e.FolderId)
-                .HasDatabaseName("folder_id_files_folder_tree");
+                .HasDatabaseName("ix_folder_id");
 
             entity.Property(e => e.ParentId).HasColumnName("parent_id");
 
@@ -93,6 +93,5 @@ public static class DbFolderTreeExtension
 
             entity.Property(e => e.Level).HasColumnName("level");
         });
-
     }
 }

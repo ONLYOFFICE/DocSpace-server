@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,8 +26,54 @@
 
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
+/// <summary>
+/// The request parameters for handling third-party OAuth authentication requests.
+/// </summary>
 public class ThirdpartyRequestsDto
 {
+    /// <summary>
+    /// The authorization code received from the third-party OAuth provider.
+    /// </summary>
     public string Code { get; set; }
+
+    /// <summary>
+    /// The callback URL where the user should be redirected after authentication.
+    /// </summary>
     public string Redirect { get; set; }
+}
+
+/// <summary>
+/// The request parameters for generating OAuth confirmation code.
+/// </summary>
+public class ConfirmationCodeRequestDto
+{
+    /// <summary>
+    /// The callback URL for redirecting the user after successful authentication.
+    /// </summary>
+    [FromQuery(Name = "redirect")]
+    public string Redirect { get; set; }
+
+    /// <summary>
+    /// The OAuth authorization code received from the identity provider.
+    /// </summary>
+    [FromQuery(Name = "code")]
+    public string Code { get; set; }
+
+    /// <summary>
+    /// The error message or code returned by the OAuth provider if authentication fails.
+    /// </summary>
+    [FromQuery(Name = "error")]
+    public string Error { get; set; }
+}
+
+/// <summary>
+/// The request parameters for generating OAuth confirmation URLs.
+/// </summary>
+public class ConfirmationCodeUrlRequestDto
+{
+    /// <summary>
+    /// The identity provider used for authentication.
+    /// </summary>
+    [FromRoute(Name = "provider")]
+    public required LoginProvider Provider { get; set; }
 }

@@ -121,9 +121,18 @@
     <value>Uzstādīt paroli</value>
   </data>
   <data name="BackupNotFound" xml:space="preserve">
-    <value>Dublējuma fails ir nederīgs. Izmantojiet failu, kas izveidots ONLYOFFICE v11.5 vai jaunākā versijā.</value>
+    <value>Dublējuma fails ir nederīgs. Lūdzu, izmantojiet tajā pašā portālā izveidoto failu.</value>
   </data>
   <data name="LargeBackup" xml:space="preserve">
     <value>Dublējums ir lielāks par kopējo portāla izmēru</value>
+  </data>
+  <data name="BackupException" xml:space="preserve">
+    <value>Veidojot rezerves kopiju, radās problēma. Lūdzu, mēģiniet to izveidot vēlreiz vai sazinieties ar atbalsta centru.</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>Atjaunojot rezerves kopiju, radās problēma. Lūdzu, mēģiniet to atjaunot vēlreiz vai sazinieties ar atbalsta centru.</value>
+  </data>
+  <data name="BackupInvalid" xml:space="preserve">
+    <value>Rezerves kopijas fails ir nederīgs.</value>
   </data>
 </root>

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,8 +29,10 @@ namespace ASC.Core.Common.EF;
 public class DbQuotaRow : BaseEntity, IMapFrom<TenantQuotaRow>
 {
     public int TenantId { get; set; }
+    [MaxLength(255)]
     public string Path { get; set; }
     public long Counter { get; set; }
+    [MaxLength(1024)]
     public string Tag { get; set; }
     public DateTime LastModified { get; set; }
     public Guid UserId { get; set; }
@@ -73,7 +75,7 @@ public static class DbQuotaRowExtension
 
             entity.Property(e => e.Path)
                 .HasColumnName("path")
-                .HasColumnType("varchar(255)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -87,7 +89,7 @@ public static class DbQuotaRowExtension
 
             entity.Property(e => e.Tag)
                 .HasColumnName("tag")
-                .HasColumnType("varchar(1024)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -102,37 +104,34 @@ public static class DbQuotaRowExtension
     {
         modelBuilder.Entity<DbQuotaRow>(entity =>
         {
-            entity.HasKey(e => new { e.TenantId, e.Path })
-                .HasName("tenants_quotarow_pkey");
+            entity.HasKey(e => new { e.TenantId, e.UserId, e.Path });
 
-            entity.ToTable("tenants_quotarow", "onlyoffice");
+            entity.ToTable("tenants_quotarow");
 
             entity.HasIndex(e => e.LastModified)
-                .HasDatabaseName("last_modified_tenants_quotarow");
+                .HasDatabaseName("last_modified");
 
             entity.Property(e => e.TenantId).HasColumnName("tenant");
 
             entity.Property(e => e.Path)
                 .HasColumnName("path")
-                .HasMaxLength(255);
+                .HasColumnType("varchar(255)");
 
             entity.Property(e => e.Counter)
                 .HasColumnName("counter")
-                .HasDefaultValueSql("'0'");
+                .HasDefaultValueSql("0");
 
             entity.Property(e => e.LastModified)
                 .HasColumnName("last_modified")
-                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                .HasColumnType("timestamptz");
 
             entity.Property(e => e.Tag)
                 .HasColumnName("tag")
-                .HasMaxLength(1024)
-                .HasDefaultValueSql("'0'");
+                .HasColumnType("varchar(1024)");
 
             entity.Property(e => e.UserId)
                 .HasColumnName("user_id")
-                .HasMaxLength(36)
-                .HasDefaultValueSql("NULL");
+                .HasColumnType("uuid");
         });
     }
 }

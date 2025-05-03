@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -48,6 +48,7 @@ global using ASC.Api.Core.Convention;
 global using ASC.Api.Core.Core;
 global using ASC.Api.Core.Extensions;
 global using ASC.Api.Core.Security;
+global using ASC.Api.Core.Socket;
 global using ASC.Api.Settings;
 global using ASC.Api.Settings.Smtp;
 global using ASC.Api.Utils;
@@ -78,6 +79,7 @@ global using ASC.Core.Common.Quota;
 global using ASC.Core.Common.Quota.Custom;
 global using ASC.Core.Common.Security;
 global using ASC.Core.Common.Settings;
+global using ASC.Core.Common.WhiteLabel;
 global using ASC.Core.Configuration;
 global using ASC.Core.Data;
 global using ASC.Core.Encryption;
@@ -161,11 +163,14 @@ global using MailKit.Security;
 global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.WebUtilities;
-global using Microsoft.Extensions.Caching.Distributed;
 global using Microsoft.Extensions.Caching.Memory;
 global using Microsoft.Extensions.Hosting.WindowsServices;
 
 global using MimeKit;
+
+global using Swashbuckle.AspNetCore.Annotations;
+
+global using ZiggyCreatures.Caching.Fusion;
 
 global using static ASC.ActiveDirectory.Base.Settings.LdapSettings;
 

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,10 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ImageMagick;
+
 using UnknownImageFormatException = ASC.Web.Core.Users.UnknownImageFormatException;
 
 namespace ASC.People.Api;
 
+///<summary>
+/// Photo API.
+///</summary>
 public class PhotoController(
     UserManager userManager,
     PermissionContext permissionContext,
@@ -41,25 +46,25 @@ public class PhotoController(
     SetupInfo setupInfo,
     IHttpClientFactory httpClientFactory,
     IHttpContextAccessor httpContextAccessor,
-    TenantManager tenantManager)
+    TenantManager tenantManager,
+    UserWebhookManager webhookManager)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
 {
     /// <summary>
-    /// Creates photo thumbnails by coordinates of the original image specified in the request.
+    /// Creates the user photo thumbnails by coordinates of the original image specified in the request.
     /// </summary>
     /// <short>
     /// Create photo thumbnails
     /// </short>
-    /// <category>Photos</category>
-    /// <param type="System.String, System" method="url" name="userid">User ID</param>
-    /// <param type="ASC.People.ApiModels.RequestDto.ThumbnailsRequestDto, ASC.People" name="inDto">Thumbnail request parameters</param>
     /// <path>api/2.0/people/{userid}/photo/thumbnails</path>
-    /// <httpMethod>POST</httpMethod>
-    /// <returns type="ASC.People.ApiModels.ResponseDto.ThumbnailsDataDto, ASC.People">Thumbnail parameters</returns>
+    [Tags("People / Photos")]
+    [SwaggerResponse(200, "Thumbnail parameters", typeof(ThumbnailsDataDto))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "User not found")]
     [HttpPost("{userid}/photo/thumbnails")]
-    public async Task<ThumbnailsDataDto> CreateMemberPhotoThumbnails(string userid, ThumbnailsRequestDto inDto)
+    public async Task<ThumbnailsDataDto> CreateMemberPhotoThumbnails(ThumbnailsRequestDto inDto)
     {
-        var user = await GetUserInfoAsync(userid);
+        var user = await GetUserInfoAsync(inDto.UserId);
 
         if (_userManager.IsSystemUser(user.Id))
         {
@@ -68,21 +73,21 @@ public class PhotoController(
 
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser);
 
-        if (!string.IsNullOrEmpty(inDto.TmpFile))
+        if (!string.IsNullOrEmpty(inDto.Thumbnails.TmpFile))
         {
-            var fileName = Path.GetFileName(inDto.TmpFile);
+            var fileName = Path.GetFileName(inDto.Thumbnails.TmpFile);
             var data = await _userPhotoManager.GetTempPhotoData(fileName);
 
             UserPhotoThumbnailSettings settings;
 
-            if (inDto.Width == 0 && inDto.Height == 0)
+            if (inDto.Thumbnails.Width == 0 && inDto.Thumbnails.Height == 0)
             {
-                using var img = Image.Load(data);
-                settings = new UserPhotoThumbnailSettings(inDto.X, inDto.Y, img.Width, img.Height);
+                using var img = new MagickImage(data);
+                settings = new UserPhotoThumbnailSettings(inDto.Thumbnails.X, inDto.Thumbnails.Y, img.Width, img.Height);
             }
             else
             {
-                settings = new UserPhotoThumbnailSettings(inDto.X, inDto.Y, inDto.Width, inDto.Height);
+                settings = new UserPhotoThumbnailSettings(inDto.Thumbnails.X, inDto.Thumbnails.Y, inDto.Thumbnails.Width, inDto.Thumbnails.Height);
             }
 
             await settingsManager.SaveAsync(settings, user.Id);
@@ -93,11 +98,11 @@ public class PhotoController(
         }
         else
         {
-            await UserPhotoThumbnailManager.SaveThumbnails(_userPhotoManager, settingsManager, inDto.X, inDto.Y, inDto.Width, inDto.Height, user.Id);
+            await UserPhotoThumbnailManager.SaveThumbnails(_userPhotoManager, settingsManager, inDto.Thumbnails.X, inDto.Thumbnails.Y, inDto.Thumbnails.Width, inDto.Thumbnails.Height, user.Id);
         }
 
         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
-        await messageService.SendAsync(MessageAction.UserUpdatedAvatarThumbnails, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
+        messageService.Send(MessageAction.UserUpdatedAvatarThumbnails, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
         return await ThumbnailsDataDto.Create(user, _userPhotoManager);
     }
 
@@ -107,15 +112,15 @@ public class PhotoController(
     /// <short>
     /// Delete a user photo
     /// </short>
-    /// <category>Photos</category>
-    /// <param type="System.String, System" method="url" name="userid">User ID</param>
-    /// <returns type="ASC.People.ApiModels.ResponseDto.ThumbnailsDataDto, ASC.People">Thumbnail parameters: original photo, retina, maximum size photo, big, medium, small</returns>
     /// <path>api/2.0/people/{userid}/photo</path>
-    /// <httpMethod>DELETE</httpMethod>
+    [Tags("People / Photos")]
+    [SwaggerResponse(200, "Thumbnail parameters: original photo, retina, maximum size photo, big, medium, small", typeof(ThumbnailsDataDto))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "User not found")]
     [HttpDelete("{userid}/photo")]
-    public async Task<ThumbnailsDataDto> DeleteMemberPhotoAsync(string userid)
+    public async Task<ThumbnailsDataDto> DeleteMemberPhotoAsync(GetUserPhotoRequestDto inDto)
     {
-        var user = await GetUserInfoAsync(userid);
+        var user = await GetUserInfoAsync(inDto.UserId);
 
         if (_userManager.IsSystemUser(user.Id))
         {
@@ -124,7 +129,7 @@ public class PhotoController(
 
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser);
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         if (user.IsOwner(tenant) && await _userManager.IsDocSpaceAdminAsync(user.Id) && user.Id != securityContext.CurrentAccount.ID)
         {
             throw new Exception(Resource.ErrorAccessDenied);
@@ -132,7 +137,8 @@ public class PhotoController(
 
         await _userPhotoManager.RemovePhotoAsync(user.Id);
         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
-        await messageService.SendAsync(MessageAction.UserDeletedAvatar, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
+        messageService.Send(MessageAction.UserDeletedAvatar, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
+        await webhookManager.PublishAsync(WebhookTrigger.UserUpdated, user);
 
         return await ThumbnailsDataDto.Create(user, _userPhotoManager);
     }
@@ -143,15 +149,15 @@ public class PhotoController(
     /// <short>
     /// Get a user photo
     /// </short>
-    /// <category>Photos</category>
-    /// <param type="System.String, System" method="url" name="userid">User ID</param>
-    /// <returns type="ASC.People.ApiModels.ResponseDto.ThumbnailsDataDto, ASC.People">Thumbnail parameters: original photo, retina, maximum size photo, big, medium, small</returns>
     /// <path>api/2.0/people/{userid}/photo</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("People / Photos")]
+    [SwaggerResponse(200, "Thumbnail parameters: original photo, retina, maximum size photo, big, medium, small", typeof(ThumbnailsDataDto))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "User not found")]
     [HttpGet("{userid}/photo")]
-    public async Task<ThumbnailsDataDto> GetMemberPhoto(string userid)
+    public async Task<ThumbnailsDataDto> GetMemberPhoto(GetUserPhotoRequestDto inDto)
     {
-        var user = await GetUserInfoAsync(userid);
+        var user = await GetUserInfoAsync(inDto.UserId);
 
         if (_userManager.IsSystemUser(user.Id))
         {
@@ -167,35 +173,35 @@ public class PhotoController(
     /// <short>
     /// Update a user photo
     /// </short>
-    /// <category>Photos</category>
-    /// <param type="System.String, System" method="url" name="userid">User ID</param>
-    /// <param type="ASC.People.ApiModels.RequestDto.UpdateMemberRequestDto, ASC.People" name="inDto">Request parameters for updating user photo</param>
-    /// <returns type="ASC.People.ApiModels.ResponseDto.ThumbnailsDataDto, ASC.People">Updated thumbnail parameters: original photo, retina, maximum size photo, big, medium, small</returns>
     /// <path>api/2.0/people/{userid}/photo</path>
-    /// <httpMethod>PUT</httpMethod>
+    [Tags("People / Photos")]
+    [SwaggerResponse(200, "Updated thumbnail parameters: original photo, retina, maximum size photo, big, medium, small", typeof(ThumbnailsDataDto))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "User not found")]
     [HttpPut("{userid}/photo")]
-    public async Task<ThumbnailsDataDto> UpdateMemberPhoto(string userid, UpdateMemberRequestDto inDto)
+    public async Task<ThumbnailsDataDto> UpdateMemberPhoto(UpdatePhotoMemberRequestDto inDto)
     {
-        var user = await GetUserInfoAsync(userid);
+        var user = await GetUserInfoAsync(inDto.UserId);
 
         if (_userManager.IsSystemUser(user.Id))
         {
             throw new SecurityException();
         }
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         if (user.IsOwner(tenant) && await _userManager.IsDocSpaceAdminAsync(user.Id) && user.Id != securityContext.CurrentAccount.ID)
         {
             throw new Exception(Resource.ErrorAccessDenied);
         }
 
-        if (inDto.Files != await _userPhotoManager.GetPhotoAbsoluteWebPath(user.Id))
+        if (inDto.UpdatePhoto.Files != await _userPhotoManager.GetPhotoAbsoluteWebPath(user.Id))
         {
-            await UpdatePhotoUrlAsync(inDto.Files, user);
+            await UpdatePhotoUrlAsync(inDto.UpdatePhoto.Files, user);
         }
 
         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
-        await messageService.SendAsync(MessageAction.UserAddedAvatar, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
+        messageService.Send(MessageAction.UserAddedAvatar, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
+        await webhookManager.PublishAsync(WebhookTrigger.UserUpdated, user);
 
         return await ThumbnailsDataDto.Create(user, _userPhotoManager);
     }
@@ -206,26 +212,27 @@ public class PhotoController(
     /// <short>
     /// Upload a user photo
     /// </short>
-    /// <category>Photos</category>
-    /// <param type="System.String, System" method="url" name="userid">User ID</param>
-    /// <param type="Microsoft.AspNetCore.Http.IFormCollection, Microsoft.AspNetCore.Http" name="formCollection">Image data</param>
     /// <path>api/2.0/people/{userid}/photo</path>
-    /// <httpMethod>POST</httpMethod>
-    /// <returns type="ASC.People.ApiModels.ResponseDto.FileUploadResultDto, ASC.People">Result of file uploading</returns>
+    [Tags("People / Photos")]
+    [SwaggerResponse(200, "Result of file uploading", typeof(FileUploadResultDto))]
+    [SwaggerResponse(400, "The uploaded file could not be found")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(413, "Image size is too large")]
+    [SwaggerResponse(415, "Unknown image file type")]
     [HttpPost("{userid}/photo")]
-    public async Task<FileUploadResultDto> UploadMemberPhoto(string userid, IFormCollection formCollection)
+    public async Task<FileUploadResultDto> UploadMemberPhoto(UploadMemberPhotoRequestDto inDto)
     {
         var result = new FileUploadResultDto();
-        var autosave = bool.Parse(formCollection["Autosave"]);
+        var autosave = bool.Parse(inDto.FormCollection["Autosave"]);
 
         try
         {
-            if (formCollection.Files.Count != 0)
+            if (inDto.FormCollection.Files.Count != 0)
             {
                 Guid userId;
                 try
                 {
-                    userId = new Guid(userid);
+                    userId = new Guid(inDto.UserId);
                 }
                 catch
                 {
@@ -234,13 +241,13 @@ public class PhotoController(
 
                 await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(userId), Constants.Action_EditUser);
 
-                var tenant = await tenantManager.GetCurrentTenantAsync();
+                var tenant = tenantManager.GetCurrentTenant();
                 if (securityContext.CurrentAccount.ID != tenant.OwnerId && await _userManager.IsDocSpaceAdminAsync(userId) && userId != securityContext.CurrentAccount.ID)
                 {
                     throw new Exception(Resource.ErrorAccessDenied);
                 }
 
-                var userPhoto = formCollection.Files[0];
+                var userPhoto = inDto.FormCollection.Files[0];
 
                 if (userPhoto.Length > setupInfo.MaxImageUploadSize)
                 {
@@ -280,6 +287,9 @@ public class PhotoController(
                             medium = await _userPhotoManager.GetMediumPhotoURL(userId) + $"?hash={cacheKey}",
                             small = await _userPhotoManager.GetSmallPhotoURL(userId) + $"?hash={cacheKey}"
                         };
+
+                    messageService.Send(MessageAction.UserAddedAvatar, MessageTarget.Create(userId), userInfo.DisplayUserName(false, displayUserSettingsHelper));
+                    await webhookManager.PublishAsync(WebhookTrigger.UserUpdated, userInfo);
                 }
                 else
                 {
@@ -321,11 +331,11 @@ public class PhotoController(
 
     private static void CheckImgFormat(byte[] data)
     {
-        IImageFormat imgFormat;
+        MagickFormat imgFormat;
         try
         {
-            using var img = Image.Load(data);
-            imgFormat = img.Metadata.DecodedImageFormat;
+            using var img = new MagickImage(data);
+            imgFormat = img.Format;
         }
         catch (OutOfMemoryException)
         {
@@ -336,7 +346,7 @@ public class PhotoController(
             throw new UnknownImageFormatException(error);
         }
 
-        if (imgFormat.Name != "PNG" && imgFormat.Name != "JPEG")
+        if (imgFormat != MagickFormat.Png && imgFormat != MagickFormat.Jpeg)
         {
             throw new UnknownImageFormatException();
         }

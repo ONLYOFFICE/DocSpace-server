@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,7 +27,7 @@
 namespace ASC.Web.Files.Core.Compress;
 
 /// <summary>
-/// Archives the data stream in the format selected in the settings
+/// Archives the data stream in the format selected in the settings.
 /// </summary>
 [Scope]
 public class CompressToArchive(
@@ -51,6 +51,10 @@ public class CompressToArchive(
         return _compress;
     }
 
+    /// <summary>
+    /// Returns the archive extension.
+    /// </summary>
+    /// <param name="ext">The file extension.</param>
     public async Task<string> GetExt(string ext)
     {
         if (_exts.Contains(ext))
@@ -61,29 +65,33 @@ public class CompressToArchive(
         return await GetArchiveExtension();
     }
 
+    /// <summary>
+    /// Initializes and sets a new output stream for archiving.
+    /// </summary>
+    /// <param name="stream">Accepts a new stream, it will contain an archive upon completion of work.</param>
     public async Task SetStream(Stream stream)
     {
         await (await GetCompress()).SetStream(stream);
     }
 
     /// <summary>
-    /// The record name is created (the name of a separate file in the archive)
+    /// Creates an archive entity (a separate file in the archive).
     /// </summary>
-    /// <param name="title">File name with extension, this name will have the file in the archive</param>
-    /// <param name="lastModification"></param>
+    /// <param name="title">The file name with an extension.</param>
+    /// <param name="lastModification">The date and time when the file was last modified.</param>
     public async Task CreateEntry(string title, DateTime? lastModification = null)
     {
         await (await GetCompress()).CreateEntry(title, lastModification);
     }
 
     /// <summary>
-    /// Transfer the file itself to the archive
+    /// Transfers the file itself to the archive.
     /// </summary>
-    /// <param name="readStream">File data</param>
+    /// <param name="readStream">The file data.</param>
     public async Task PutStream(Stream readStream) => await (await GetCompress()).PutStream(readStream);
 
     /// <summary>
-    /// Put an entry on the output stream.
+    /// Puts an entry to the output stream.
     /// </summary>
     public async Task PutNextEntry()
     {
@@ -99,18 +107,18 @@ public class CompressToArchive(
     }
 
     /// <summary>
-    /// Resource title (does not affect the work of the class)
+    /// Returns the resource title (does not affect the work of the class).
     /// </summary>
-    /// <returns></returns>
     public async Task<string> GetTitle() => await (await GetCompress()).GetTitle();
 
     /// <summary>
-    /// Extension the archive (does not affect the work of the class)
+    /// Returns the archive extension (does not affect the work of the class).
     /// </summary>
-    /// <returns></returns>
     public async Task<string> GetArchiveExtension() => await (await GetCompress()).GetArchiveExtension();
 
-    /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
+    /// <summary>
+    /// Performs the application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+    /// </summary>
     public void Dispose()
     {
         _compress?.Dispose();

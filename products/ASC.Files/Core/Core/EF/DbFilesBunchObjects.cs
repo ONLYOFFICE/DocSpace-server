@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,7 +29,9 @@ namespace ASC.Files.Core.EF;
 public class DbFilesBunchObjects : BaseEntity, IDbFile
 {
     public int TenantId { get; set; }
+    [MaxLength(255)]
     public string RightNode { get; set; }
+    [MaxLength(255)]
     public string LeftNode { get; set; }
 
     public DbTenant Tenant { get; set; }
@@ -69,40 +71,49 @@ public static class DbFilesBunchObjectsExtension
 
             entity.Property(e => e.RightNode)
                 .HasColumnName("right_node")
-                .HasColumnType("varchar(255)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.LeftNode)
                 .IsRequired()
                 .HasColumnName("left_node")
-                .HasColumnType("varchar(255)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
         });
     }
+    
     public static void PgSqlAddDbFilesBunchObjects(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<DbFilesBunchObjects>(entity =>
         {
+            // Define composite primary key
             entity.HasKey(e => new { e.TenantId, e.RightNode })
-                .HasName("files_bunch_objects_pkey");
+                .HasName("pk_files_bunch_objects");
 
-            entity.ToTable("files_bunch_objects", "onlyoffice");
+            // Map to PostgreSQL table
+            entity.ToTable("files_bunch_objects");
 
+            // Create an index for LeftNode
             entity.HasIndex(e => e.LeftNode)
-                .HasDatabaseName("left_node");
+                .HasDatabaseName("idx_files_bunch_objects_left_node");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+            // Map TenantId column
+            entity.Property(e => e.TenantId)
+                .HasColumnName("tenant_id");
 
+            // Map RightNode column with PostgreSQL-specific type
             entity.Property(e => e.RightNode)
                 .HasColumnName("right_node")
-                .HasMaxLength(255);
+                .HasColumnType("varchar")
+                .IsRequired();
 
+            // Map LeftNode column with PostgreSQL-specific type
             entity.Property(e => e.LeftNode)
-                .IsRequired()
                 .HasColumnName("left_node")
-                .HasMaxLength(255);
+                .HasColumnType("varchar")
+                .IsRequired();
         });
     }
 }

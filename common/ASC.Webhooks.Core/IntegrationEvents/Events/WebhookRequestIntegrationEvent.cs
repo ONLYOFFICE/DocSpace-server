@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,20 +27,19 @@
 using ProtoBuf;
 
 namespace ASC.Webhooks.Core.IntegrationEvents.Events;
+
 [ProtoContract]
 public record WebhookRequestIntegrationEvent : IntegrationEvent
 {
-    public WebhookRequestIntegrationEvent()
+    public WebhookRequestIntegrationEvent() : base()
     {
-
     }
 
-    public WebhookRequestIntegrationEvent(Guid createBy, int tenantId) :
-        base(createBy, tenantId)
+    public WebhookRequestIntegrationEvent(Guid createBy, int tenantId, int webhookLogId) : base(createBy, tenantId)
     {
-
+        WebhookLogId = webhookLogId;
     }
 
     [ProtoMember(1)]
-    public int WebhookId { get; init; }
+    public int WebhookLogId { get; init; }
 }

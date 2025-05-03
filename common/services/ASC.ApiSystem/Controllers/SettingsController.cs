@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -40,6 +40,12 @@ public class SettingsController(CommonMethods commonMethods,
 
     #region For TEST api
 
+    /// <summary>
+    /// Test API.
+    /// </summary>
+    /// <path>apisystem/settings/test</path>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [SwaggerResponse(200, "Settings api works")]
     [HttpGet("test")]
     public IActionResult Check()
     {
@@ -53,6 +59,15 @@ public class SettingsController(CommonMethods commonMethods,
 
     #region API methods
 
+    /// <summary>
+    /// Returns the portal settings by the parameters specified in the request.
+    /// </summary>
+    /// <short>
+    /// Get settings
+    /// </short>
+    /// <path>apisystem/settings</path>
+    [Tags("Settings")]
+    [SwaggerResponse(200, "Settings", typeof(IActionResult))]
     [HttpGet("get")]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
     public async Task<IActionResult> GetSettingsAsync([FromQuery] SettingsModel model)
@@ -80,6 +95,15 @@ public class SettingsController(CommonMethods commonMethods,
         });
     }
 
+    /// <summary>
+    /// Saves the settings specified in the request for the current portal.
+    /// </summary>
+    /// <short>
+    /// Save settings
+    /// </short>
+    /// <path>apisystem/settings/save</path>
+    [Tags("Settings")]
+    [SwaggerResponse(200, "Settings", typeof(IActionResult))]
     [HttpPost("save")]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
     public async Task<IActionResult> SaveSettingsAsync([FromBody] SettingsModel model)
@@ -132,6 +156,15 @@ public class SettingsController(CommonMethods commonMethods,
         });
     }
 
+    /// <summary>
+    /// Checks the domain with the name specified in the request.
+    /// </summary>
+    /// <short>
+    /// Check the domain name
+    /// </short>
+    /// <path>apisystem/settings/checkdomain</path>
+    [Tags("Settings")]
+    [SwaggerResponse(200, "True if success", typeof(IActionResult))]
     [HttpPost("checkdomain")]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
     public async Task<IActionResult> CheckDomain([FromBody] DomainModel model)
@@ -180,7 +213,7 @@ public class SettingsController(CommonMethods commonMethods,
 
     #region private methods
 
-    private async Task<(bool, int, object)> GetTenantAsync(IModel model)
+    private async Task<(bool, int, object)> GetTenantAsync(SettingsModel model)
     {
         object error;
         var tenantId = -1;

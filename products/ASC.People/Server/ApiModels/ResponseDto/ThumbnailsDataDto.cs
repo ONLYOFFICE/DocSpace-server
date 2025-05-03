@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,8 +26,9 @@
 
 namespace ASC.People.ApiModels.ResponseDto;
 
-/// <summary>
-/// </summary>
+///<summary>
+/// The thumbnails data parameters.
+///</summary>
 public class ThumbnailsDataDto
 {
     private ThumbnailsDataDto() { }
@@ -47,40 +48,39 @@ public class ThumbnailsDataDto
         };
     }
 
-    /// <summary>Original photo</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The thumbnail original photo.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "default_user_photo_size_1280-1280.png")]
     public string Original { get; set; }
 
-    /// <summary>Retina</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The thumbnail retina.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "default_user_photo_size_360-360.png")]
     public string Retina { get; set; }
 
-    /// <summary>Maximum size</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The thumbnail maximum size photo.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "default_user_photo_size_200-200.png")]
     public string Max { get; set; }
 
-    /// <summary>Big</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The thumbnail big size photo.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "default_user_photo_size_82-82.png")]
     public string Big { get; set; }
 
-    /// <summary>Medium</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The thumbnail medium size photo.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "default_user_photo_size_48-48.png")]
     public string Medium { get; set; }
 
-    /// <summary>Small</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The thumbnail small size photo.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "default_user_photo_size_32-32.png")]
     public string Small { get; set; }
-
-    public static ThumbnailsDataDto GetSample()
-    {
-        return new ThumbnailsDataDto
-        {
-            Original = "default_user_photo_size_1280-1280.png",
-            Retina = "default_user_photo_size_360-360.png",
-            Max = "default_user_photo_size_200-200.png",
-            Big = "default_user_photo_size_82-82.png",
-            Medium = "default_user_photo_size_48-48.png",
-            Small = "default_user_photo_size_32-32.png"
-        };
-    }
 }

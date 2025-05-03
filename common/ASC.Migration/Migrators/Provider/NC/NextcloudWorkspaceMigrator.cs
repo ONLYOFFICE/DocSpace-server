@@ -1,29 +1,28 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
-//
+﻿// (c) Copyright Ascensio System SIA 2009-2025
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-
 
 using ASCShare = ASC.Files.Core.Security.FileShare;
 
@@ -50,12 +49,13 @@ public class NextcloudWorkspaceMigrator : Migrator
         MigrationLogger migrationLogger,
         AuthContext authContext,
         DisplayUserSettingsHelper displayUserSettingsHelper,
-        UserManagerWrapper userManagerWrapper) : base(securityContext, userManager, tenantQuotaFeatureStatHelper, quotaSocketManager, fileStorageService, globalFolderHelper, serviceProvider, daoFactory, entryManager, migrationLogger, authContext, displayUserSettingsHelper, userManagerWrapper)
+        UserManagerWrapper userManagerWrapper,
+        UserSocketManager socketManager) : base(securityContext, userManager, tenantQuotaFeatureStatHelper, quotaSocketManager, fileStorageService, globalFolderHelper, serviceProvider, daoFactory, entryManager, migrationLogger, authContext, displayUserSettingsHelper, userManagerWrapper, socketManager)
     {
         MigrationInfo = new MigrationInfo { Name = "Nextcloud" };
     }
 
-    public override async Task InitAsync(string path, CancellationToken cancellationToken, OperationType operation)
+    public override async Task InitAsync(string path, OperationType operation, CancellationToken cancellationToken)
     {
         MigrationLogger.Init();
         _cancellationToken = cancellationToken;
@@ -184,13 +184,21 @@ public class NextcloudWorkspaceMigrator : Migrator
                         {
                             MigrationInfo.WithoutEmailUsers.Add(user.Key, user.Value);
                         }
-                        else if (!(await UserManager.GetUserByEmailAsync(user.Value.Info.Email)).Equals(ASC.Core.Users.Constants.LostUser))
-                        {
-                            MigrationInfo.ExistUsers.Add(user.Key, user.Value);
-                        }
                         else
                         {
-                            MigrationInfo.Users.Add(user.Key, user.Value);
+                            var ascUser = await UserManager.GetUserByEmailAsync(user.Value.Info.Email);
+                            if (ascUser.Status == EmployeeStatus.Terminated)
+                            {
+                                continue;
+                            }
+                            if (!ascUser.Equals(ASC.Core.Users.Constants.LostUser))
+                            {
+                                MigrationInfo.ExistUsers.Add(user.Key, user.Value);
+                            }
+                            else
+                            {
+                                MigrationInfo.Users.Add(user.Key, user.Value);
+                            }
                         }
                     }
                     catch (Exception ex)
@@ -231,7 +239,7 @@ public class NextcloudWorkspaceMigrator : Migrator
 
         foreach (var g in groupList)
         {
-            var group = new MigrationGroup { Info = new(), UserKeys = [] };
+            var group = new MigrationGroup { Info = new GroupInfo(), UserKeys = [] };
             group.Info.Name = g.Split(',').First().Trim('\'');
             MigrationInfo.Groups.Add(group.Info.Name, group);
         }
@@ -454,7 +462,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                         {
                             Id = entry.FileId,
                             Level = j++,
-                            ParentId = split.Length > 1 ? filesAndFolders.FirstOrDefault(ff => ff.Path == string.Join('/',split[0..(split.Length - 1)])).FileId : int.Parse(user.Storage.RootKey),
+                            ParentId = split.Length > 1 ? filesAndFolders.FirstOrDefault(ff => ff.Path == string.Join('/',split[..(split.Length - 1)])).FileId : int.Parse(user.Storage.RootKey),
                             Title = split.Last()
                         };
                         user.Storage.Folders.Add(folder);
@@ -470,7 +478,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                             Id = entry.FileId,
                             Path = tmpPath,
                             Title = split.Last(),
-                            Folder = split.Length > 1 ? filesAndFolders.FirstOrDefault(ff => ff.Path == string.Join('/', split[0..(split.Length - 1)])).FileId : int.Parse(user.Storage.RootKey)
+                            Folder = split.Length > 1 ? filesAndFolders.FirstOrDefault(ff => ff.Path == string.Join('/', split[..(split.Length - 1)])).FileId : int.Parse(user.Storage.RootKey)
                         };
                         user.Storage.Files.Add(file);
                         AddShare(user, entry, true);

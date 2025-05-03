@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,14 +27,35 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// The parameters for updating a comment.
 /// </summary>
-public class UpdateCommentRequestDto
+public class UpdateComment
 {
-    /// <summary>File version</summary>
-    /// <type>System.Int32, System</type>
-    public int Version { get; set; }
+    /// <summary>
+    /// The comment version.
+    /// </summary>
+    public required int Version { get; set; }
 
-    /// <summary>Comment text</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The comment text.
+    /// </summary>
     public string Comment { get; set; }
+}
+
+/// <summary>
+/// The request parameters for updating a comment.
+/// </summary>
+public class UpdateCommentRequestDto<T>
+{
+    /// <summary>
+    /// The file ID where the comment is located.
+    /// </summary>
+    [FromRoute(Name = "fileId")]
+    public required T FileId { get; set; }
+
+    /// <summary>
+    /// The parameters for updating a comment.
+    /// </summary>
+    [FromBody]
+    public UpdateComment File { get; set; }
 }

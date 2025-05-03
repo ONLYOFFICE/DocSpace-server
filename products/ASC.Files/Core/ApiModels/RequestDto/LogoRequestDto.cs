@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,26 +27,50 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// The logo request parameters.
 /// </summary>
-public class LogoRequestDto
+public class LogoRequest
 {
-    /// <summary>The path to the temporary image file</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The path to the temporary image file.
+    /// </summary>
     public string TmpFile { get; set; }
 
-    /// <summary>The X coordinate of the rectangle starting point</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The X coordinate of the rectangle starting point.
+    /// </summary>
     public int X { get; set; }
 
-    /// <summary>The Y coordinate of the rectangle starting point</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The Y coordinate of the rectangle starting point.
+    /// </summary>
     public int Y { get; set; }
 
-    /// <summary>The rectangle width</summary>
-    /// <type>System.Int32, System</type>
-    public int Width { get; set; }
+    /// <summary>
+    /// The rectangle width.
+    /// </summary>
+    public uint Width { get; set; }
 
-    /// <summary>The rectangle height</summary>
-    /// <type>System.Int32, System</type>
-    public int Height { get; set; }
+    /// <summary>
+    /// The rectangle height.
+    /// </summary>
+    public uint Height { get; set; }
+}
+
+/// <summary>
+/// The logo request parameters for the specified room.
+/// </summary>
+public class LogoRequest<T>
+{
+    /// <summary>
+    /// The room ID.
+    /// </summary>
+    [FromRoute(Name = "id")]
+    public required T Id { get; set; }
+
+    /// <summary>
+    /// The logo request parameters.
+    /// </summary>
+    [FromBody]
+    public LogoRequest Logo { get; set; }
 }

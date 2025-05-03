@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,14 +27,17 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
+/// The request parameters for updating a user quota.
 /// </summary>
 public class UpdateMembersQuotaRequestDto
 {
-    /// <summary>List of user IDs</summary>
-    /// <type>System.Collections.Generic.IEnumerable{System.Guid}, System.Collections.Generic</type>
+    /// <summary>
+    /// The list of user IDs.
+    /// </summary>
     public IEnumerable<Guid> UserIds { get; set; }
 
-    /// <summary>User quota</summary>
-    /// <type>System.Int64, System</type>
+    /// <summary>
+    /// The quota in JSON format.
+    /// </summary>
     public JsonElement Quota { get; set; }
 }

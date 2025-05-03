@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,30 +26,67 @@
 
 namespace ASC.Files.Core;
 
+/// <summary>
+/// The parameters by which the files will be sorted.
+/// </summary>
 [EnumExtensions]
 public enum SortedByType
 {
+    [SwaggerEnum("Date and time")]
     DateAndTime,
+
+    [SwaggerEnum("AZ")]
     AZ,
+
+    [SwaggerEnum("Size")]
     Size,
+
+    [SwaggerEnum("Author")]
     Author,
+
+    [SwaggerEnum("Type")]
     Type,
+
+    [SwaggerEnum("New")]
     New,
+
+    [SwaggerEnum("Date and time creation")]
     DateAndTimeCreation,
+
+    [SwaggerEnum("Room type")]
     RoomType,
+
+    [SwaggerEnum("Tags")]
     Tags,
+
+    [SwaggerEnum("Room")]
     Room,
+
+    [SwaggerEnum("Custom order")]
     CustomOrder,
+
+    [SwaggerEnum("Last opened")]
     LastOpened,
+
+    [SwaggerEnum("Used space")]
     UsedSpace
 }
 
+/// <summary>
+/// The sorting parameters.
+/// </summary>
 [DebuggerDisplay("{SortedBy} {IsAsc}")]
 public class OrderBy(SortedByType sortedByType, bool isAsc)
 {
+    /// <summary>
+    /// Specifies if the order is ascending.
+    /// </summary>
     [JsonPropertyName("is_asc")]
     public bool IsAsc { get; init; } = isAsc;
 
+    /// <summary>
+    /// The parameters by which the files will be sorted.
+    /// </summary>
     [JsonPropertyName("property")]
     public SortedByType SortedBy { get; set; } = sortedByType;
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,20 +24,56 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.Services.DocumentBuilderService;
+
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// The document builder task parameters.
+/// </summary>
 public class DocumentBuilderTaskDto
 {
+    /// <summary>
+    /// The document builder ID.
+    /// </summary>
     public string Id { get; set; }
+
+    /// <summary>
+    /// The error message occured while the document building process.
+    /// </summary>
     public string Error { get; set; }
+
+    /// <summary>
+    /// The percentage of the progress of the document building process.
+    /// </summary>
     public int Percentage { get; set; }
+
+    /// <summary>
+    /// Specifies whether the document building process is completed or not.
+    /// </summary>
     public bool IsCompleted { get; set; }
+
+    /// <summary>
+    /// The status of the document building process.
+    /// </summary>
     public DistributedTaskStatus Status { get; set; }
+
+    /// <summary>
+    /// The result file ID.
+    /// </summary>
     public object ResultFileId { get; set; }
+
+    /// <summary>
+    /// The result file name.
+    /// </summary>
     public string ResultFileName { get; set; }
+
+    /// <summary>
+    /// The result file URL.
+    /// </summary>
     public string ResultFileUrl { get; set; }
 
-    public static DocumentBuilderTaskDto Get(DistributedTaskProgress task)
+    public static DocumentBuilderTaskDto Get<TId, TData>(DocumentBuilderTask<TId, TData> task)
     {
         return task == null
             ? null
@@ -48,9 +84,9 @@ public class DocumentBuilderTaskDto
                 Percentage = (int)task.Percentage,
                 IsCompleted = task.IsCompleted,
                 Status = task.Status,
-                ResultFileId = task["ResultFileId"],
-                ResultFileName = task["ResultFileName"],
-                ResultFileUrl = task["ResultFileUrl"]
+                ResultFileId = task.ResultFileId,
+                ResultFileName = task.ResultFileName,
+                ResultFileUrl = task.ResultFileUrl
             };
     }
 }

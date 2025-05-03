@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -49,8 +49,9 @@ public class RestorePortalTask(DbFactory dbFactory,
 
     private ColumnMapper _columnMapper;
     private string _region;
+    private bool _expectDump;
 
-    public void Init(string region, string fromFilePath, int tenantId = -1, ColumnMapper columnMapper = null, string upgradesPath = null)
+    public void Init(string region, string fromFilePath, bool expectDump, int tenantId = -1, ColumnMapper columnMapper = null, string upgradesPath = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(fromFilePath);
 
@@ -63,6 +64,7 @@ public class RestorePortalTask(DbFactory dbFactory,
         UpgradesPath = upgradesPath;
         _columnMapper = columnMapper ?? new ColumnMapper();
         _region = region;
+        _expectDump = expectDump; 
         Init(tenantId);
     }
 
@@ -76,7 +78,17 @@ public class RestorePortalTask(DbFactory dbFactory,
         {
             await using (var entry = dataReader.GetEntry(KeyHelper.GetDumpKey()))
             {
-                Dump = entry != null && coreBaseSettings.Standalone;
+                Dump = entry != null;
+            }
+
+            if (Dump && !coreBaseSettings.Standalone)
+            {
+                throw new ArgumentException(BackupResource.BackupNotFound);
+            }
+
+            if (Dump != _expectDump)
+            {
+                throw new ArgumentException(BackupResource.BackupInvalid);
             }
 
             if (Dump)
@@ -93,7 +105,7 @@ public class RestorePortalTask(DbFactory dbFactory,
                 {
                     var restoreTask = new RestoreDbModuleTask(logger, module, dataReader, _columnMapper, DbFactory, ReplaceDate, Dump, _region, StorageFactory, StorageFactoryConfig, ModuleProvider)
                     {
-                        ProgressChanged = (args) => SetCurrentStepProgress(args.Progress)
+                        ProgressChanged = args => SetCurrentStepProgress(args.Progress)
                     };
 
                     foreach (var tableName in _ignoredTables)
@@ -388,7 +400,7 @@ public class RestorePortalTask(DbFactory dbFactory,
         Logger.DebugEndDeleteStorage();
     }
 
-    private IEnumerable<BackupFileInfo> GetFilesToProcess(IDataReadOperator dataReader)
+    private static List<BackupFileInfo> GetFilesToProcess(IDataReadOperator dataReader)
     {
         using var stream = dataReader.GetEntry(KeyHelper.GetStorageRestoreInfoZipKey());
         if (stream == null)

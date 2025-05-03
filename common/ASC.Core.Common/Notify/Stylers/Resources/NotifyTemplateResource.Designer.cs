@@ -103,7 +103,7 @@ namespace ASC.Core.Common.Notify.Stylers.Resources {
         ///    &lt;tbody&gt;
         ///        &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;
         ///            &lt;td style=&quot;margin: 0; padding: 0; vertical-align: bottom;&quot;&gt;
-        ///                &lt;a href=&quot;https://www.facebook.com/pages/Onl [rest of string was truncated]&quot;;.
+        ///                &lt;a href=&quot;%SOCIALNETWORKFACEBOOK%&quot; style=&quot;bo [rest of string was truncated]&quot;;.
         /// </summary>
         public static string SocialNetworksFooter {
             get {
@@ -128,8 +128,8 @@ namespace ASC.Core.Common.Notify.Stylers.Resources {
         /// <summary>
         ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;
         ///    &lt;td style=&quot;margin: 0; text-align: center; vertical-align: top; width: 600px;&quot;&gt;
-        ///        &lt;a href=&quot;%SITEURL%&quot; style=&quot;color: #333333; display: block; font-size: 16px; font-weight: bold; line-height: 22px; margin-bottom: 32px; text-decoration: none;&quot; target=&quot;_blank&quot;&gt;
-        ///            &lt;img src=&quot;%LOGO%&quot; style=&quot;border: 0 none; height: 360px; width: 600px; color: #333333; font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 32px; font-weight: 70 [rest of string was truncated]&quot;;.
+        ///        &lt;a href=&quot;%SITEURL%&quot; style=&quot;color: #333333; display: block; font-size: 16px; font-weight: bold; line-height: 22px; text-decoration: none;&quot; target=&quot;_blank&quot;&gt;
+        ///            &lt;img src=&quot;%LOGO%&quot; style=&quot;border: 0 none; height: 360px; width: 600px; color: #333333; font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 32px; font-weight: 700; line-height: 1.33e [rest of string was truncated]&quot;;.
         /// </summary>
         public static string TopGif {
             get {

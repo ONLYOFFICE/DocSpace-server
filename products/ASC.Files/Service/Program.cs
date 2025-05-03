@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Data.Storage.Encryption.IntegrationEvents.Events;
 using ASC.Files.Service.IntegrationEvents.EventHandling;
 
 using NLog;
@@ -31,7 +32,7 @@ using NLog;
 var options = new WebApplicationOptions
 {
     Args = args,
-    ContentRootPath = WindowsServiceHelpers.IsWindowsService() ? AppContext.BaseDirectory : default
+    ContentRootPath = WindowsServiceHelpers.IsWindowsService() ? AppContext.BaseDirectory : null
 };
 
 var builder = WebApplication.CreateBuilder(options);
@@ -61,13 +62,15 @@ try
 
     var startup = new Startup(builder.Configuration, builder.Environment);
 
-    await startup.ConfigureServices(builder.Services);
+    await startup.ConfigureServices(builder);
 
     var app = builder.Build();
 
     startup.Configure(app);
 
-    var eventBus = ((IApplicationBuilder)app).ApplicationServices.GetRequiredService<IEventBus>();
+    var sp = ((IApplicationBuilder)app).ApplicationServices;
+
+    var eventBus = sp.GetRequiredService<IEventBus>();
 
     await eventBus.SubscribeAsync<ThumbnailRequestedIntegrationEvent, ThumbnailRequestedIntegrationEventHandler>();
     await eventBus.SubscribeAsync<RoomIndexExportIntegrationEvent, RoomIndexExportIntegrationEventHandler>();
@@ -77,6 +80,13 @@ try
     await eventBus.SubscribeAsync<BulkDownloadIntegrationEvent, BulkDownloadIntegrationEventHandler>();
     await eventBus.SubscribeAsync<MarkAsReadIntegrationEvent, MarkAsReadIntegrationEventHandler>();
     await eventBus.SubscribeAsync<EmptyTrashIntegrationEvent, EmptyTrashIntegrationEventHandler>();
+    await eventBus.SubscribeAsync<FormFillingReportIntegrationEvent, FormFillingReportIntegrationEventHandler>();
+    await eventBus.SubscribeAsync<RoomNotifyIntegrationEvent, RoomNotifyIntegrationEventHandler>();
+    await eventBus.SubscribeAsync<CreateRoomTemplateIntegrationEvent, RoomTemplatesIntegrationEventHandler>();
+    await eventBus.SubscribeAsync<CreateRoomFromTemplateIntegrationEvent, RoomTemplatesIntegrationEventHandler>();
+    await eventBus.SubscribeAsync<DataStorageEncryptionIntegrationEvent, DataStorageEncryptionIntegrationEventHandler>();
+
+    sp.GetRequiredService<FileTrackerHelper>().Subscribe();
 
     logger.Info("Starting web host ({applicationContext})...", AppName);
     await app.RunWithTasksAsync();

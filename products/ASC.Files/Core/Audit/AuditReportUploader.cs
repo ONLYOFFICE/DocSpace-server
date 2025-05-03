@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -40,7 +40,7 @@ public class AuditReportUploader(GlobalFolderHelper globalFolderHelper,
             var file = await fileUploader.ExecAsync(await globalFolderHelper.FolderMyAsync, reportName, stream.Length, stream, true);
             var fileUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebEditorUrl(file.Id));
 
-            fileUrl += string.Format("&options={{\"codePage\":{0}}}", Encoding.UTF8.CodePage);
+            fileUrl += $"&options={{\"codePage\":{Encoding.UTF8.CodePage}}}";
 
             return fileUrl;
         }

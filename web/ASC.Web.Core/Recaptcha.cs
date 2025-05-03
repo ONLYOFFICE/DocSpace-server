@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,11 +26,21 @@
 
 namespace ASC.Web.Core;
 
+/// <summary>
+/// The type of CAPTCHA validation used.
+/// </summary>
 public enum RecaptchaType
 {
+    [SwaggerEnum("Default")]
     Default = 0,
+
+    [SwaggerEnum("AndroidV2")]
     AndroidV2 = 1,
+
+    [SwaggerEnum("iOSV2")]
     iOSV2 = 2,
+
+    [SwaggerEnum("hCaptcha")]
     hCaptcha = 3
 }
 

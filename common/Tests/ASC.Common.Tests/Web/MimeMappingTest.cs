@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -40,13 +40,13 @@ namespace ASC.Common.Tests.Web
         public void GetExtentionTest()
         {
             var ext = MimeMapping.GetExtention("application/x-zip-compressed");
-            Assert.AreEqual(".zip", ext);
+            Assert.Equals(".zip", ext);
 
             ext = MimeMapping.GetExtention("Application/x-zip-Compressed");
-            Assert.AreEqual(".zip", ext);
+            Assert.Equals(".zip", ext);
 
             ext = MimeMapping.GetExtention("Application/ZIP");
-            Assert.AreEqual(".zip", ext);
+            Assert.Equals(".zip", ext);
         }
     }
 }

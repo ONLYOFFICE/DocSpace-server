@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,17 +27,20 @@
 namespace ASC.Web.Api.Models;
 
 /// <summary>
+/// The contact information.
 /// </summary>
 public class Contact
 {
-    /// <summary>Contact type</summary>
-    /// <type>System.String, System</type>
-    /// <example>GTalk</example>
+    /// <summary>
+    /// The contact type.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "GTalk")]
     public string Type { get; set; }
 
-    /// <summary>Contact value</summary>
-    /// <type>System.String, System</type>
-    /// <example>my@gmail.com</example>
+    /// <summary>
+    /// The contact value.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "my@gmail.com")]
     public string Value { get; set; }
 
     //For binder
@@ -47,10 +50,5 @@ public class Contact
     {
         Type = type;
         Value = value;
-    }
-
-    public static Contact GetSample()
-    {
-        return new Contact("GTalk", "my@gmail.com");
     }
 }

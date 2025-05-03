@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,60 +27,44 @@
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
+/// The additional white label settings parameters.
 /// </summary>
 public class AdditionalWhiteLabelSettingsDto: IMapFrom<AdditionalWhiteLabelSettings>
 {
-    /// <summary>Specifies if the start document is enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the sample documents are displayed or hidden.
+    /// </summary>
     public bool StartDocsEnabled { get; set; }
 
-    /// <summary>Specifies if the help center is enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the Help Center link is available or not.
+    /// </summary>
     public bool HelpCenterEnabled { get; set; }
 
-    /// <summary>Specifies if feedback and support are available or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the "Feedback &amp; Support" link is available or not.
+    /// </summary>
     public bool FeedbackAndSupportEnabled { get; set; }
 
-    /// <summary>Feedback and support URL</summary>
-    /// <type>System.String, System</type>
-    public string FeedbackAndSupportUrl { get; set; }
-
-    /// <summary>Specifies if the user forum is enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the user forum is available or not.
+    /// </summary>
     public bool UserForumEnabled { get; set; }
 
-    /// <summary>User forum URL</summary>
-    /// <type>System.String, System</type>
-    public string UserForumUrl { get; set; }
-
-    /// <summary>Specifies if the video guides are enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the Video Guides link is available or not.
+    /// </summary>
     public bool VideoGuidesEnabled { get; set; }
 
-    /// <summary>Video guides URL</summary>
-    /// <type>System.String, System</type>
-    public string VideoGuidesUrl { get; set; }
-
-    /// <summary>Sales email</summary>
-    /// <type>System.String, System</type>
-    public string SalesEmail { get; set; }
-
-    /// <summary>URL to pay for the portal</summary>
-    /// <type>System.String, System</type>
-    public string BuyUrl { get; set; }
-
-    /// <summary>Specifies if the license agreements are enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the License Agreements link is available or not.
+    /// </summary>
     public bool LicenseAgreementsEnabled { get; set; }
 
-    /// <summary>Specifies if these settings are default or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the additional white label settings are default or not.
+    /// </summary>
     public bool IsDefault { get; set; }
-
-    /// <summary>License agreements URL</summary>
-    /// <type>System.String, System</type>
-    public string LicenseAgreementsUrl { get; set; }
 
     public void Mapping(Profile profile)
     {

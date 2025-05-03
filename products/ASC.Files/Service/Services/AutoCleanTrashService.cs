@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Web.Files.Services.WCFService.FileOperations;
-
 using Constants = ASC.Core.Configuration.Constants;
 
 namespace ASC.Files.Service.Services;
@@ -42,24 +40,32 @@ public class AutoCleanTrashService(
 
     protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
-        List<TenantUserSettings> activeTenantsUsers;
-
-        await using (var scope = _scopeFactory.CreateAsyncScope())
+        try
         {
-            await using var userDbContext = await scope.ServiceProvider.GetRequiredService<IDbContextFactory<UserDbContext>>().CreateDbContextAsync(stoppingToken);
-            activeTenantsUsers = await Queries.DefaultTenantUserSettingsAsync(userDbContext).ToListAsync(stoppingToken);
-        }
+            List<TenantUserSettings> activeTenantsUsers;
 
-        if (activeTenantsUsers.Count == 0)
+            await using (var scope = _scopeFactory.CreateAsyncScope())
+            {
+                await using var userDbContext = await scope.ServiceProvider.GetRequiredService<IDbContextFactory<UserDbContext>>().CreateDbContextAsync(stoppingToken);
+                activeTenantsUsers = await Queries.DefaultTenantUserSettingsAsync(userDbContext).ToListAsync(stoppingToken);
+            }
+
+            if (activeTenantsUsers.Count == 0)
+            {
+                return;
+            }
+
+            logger.InfoFoundUsers(activeTenantsUsers.Count);
+
+            foreach (var tenantsUser in activeTenantsUsers)
+            {
+                await DeleteFilesAndFoldersAsync(tenantsUser, stoppingToken);
+            }
+        }
+        catch (Exception e)
         {
-            return;
+            logger.ErrorWithException(e);
         }
-
-        logger.InfoFoundUsers(activeTenantsUsers.Count);
-
-        await Parallel.ForEachAsync(activeTenantsUsers,
-                                    new ParallelOptions { MaxDegreeOfParallelism = 3, CancellationToken = stoppingToken }, //System.Environment.ProcessorCount
-                                    DeleteFilesAndFoldersAsync);
     }
 
     private async ValueTask DeleteFilesAndFoldersAsync(TenantUserSettings tenantUser, CancellationToken cancellationToken)
@@ -68,12 +74,12 @@ public class AutoCleanTrashService(
         {
             await using var scope = _scopeFactory.CreateAsyncScope();
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
-            await tenantManager.SetCurrentTenantAsync(tenantUser.TenantId);
+            tenantManager.SetCurrentTenant(new Tenant(tenantUser.TenantId, String.Empty));
 
             var authManager = scope.ServiceProvider.GetRequiredService<AuthManager>();
             var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
             var daoFactory = scope.ServiceProvider.GetRequiredService<IDaoFactory>();
-            var fileOperationsManager = scope.ServiceProvider.GetRequiredService<FileOperationsManager>();
+            var fileOperationsManager = scope.ServiceProvider.GetRequiredService<FileDeleteOperationsManager>();
             var fileDateTime = scope.ServiceProvider.GetRequiredService<FileDateTime>();
 
             var userAccount = await authManager.GetAccountByIDAsync(tenantUser.TenantId, tenantUser.UserId);
@@ -112,7 +118,7 @@ public class AutoCleanTrashService(
 
             logger.InfoCleanUp(tenantUser.TenantId, trashId);
 
-            await fileOperationsManager.PublishDelete(foldersList, filesList, true, true, true);
+            await fileOperationsManager.Publish(foldersList, filesList, true, true, true);
 
             logger.InfoCleanUpWait(tenantUser.TenantId, trashId);
 

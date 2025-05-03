@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -56,6 +56,12 @@ public class PortalController(
 {
     #region For TEST api
 
+    /// <summary>
+    /// Test API.
+    /// </summary>
+    /// <path>apisystem/portal/test</path>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [SwaggerResponse(200, "Portal api works")]
     [HttpGet("test")]
     public IActionResult Check()
     {
@@ -69,6 +75,15 @@ public class PortalController(
 
     #region API methods
 
+    /// <summary>
+    /// Registers a new portal with the parameters specified in the request.
+    /// </summary>
+    /// <short>
+    /// Register a portal
+    /// </short>
+    /// <path>apisystem/portal/register</path>
+    [Tags("Portal")]
+    [SwaggerResponse(200, "Ok", typeof(IActionResult))]
     [HttpPost("register")]
     //[AllowCrossSiteJson]
     [Authorize(AuthenticationSchemes = "auth:allowskip:registerportal,auth:portal,auth:portalbasic")]
@@ -85,7 +100,7 @@ public class PortalController(
 
         if (!ModelState.IsValid)
         {
-            List<string> message = new();
+            List<string> message = [];
 
             foreach (var k in ModelState.Keys)
             {
@@ -254,7 +269,7 @@ public class PortalController(
 
                 var tariff = new Tariff
                 {
-                    Quotas = [new(trialQuotaId, 1)],
+                    Quotas = [new Quota(trialQuotaId, 1)],
                     DueDate = dueDate
                 };
                 await hostedSolution.SetTariffAsync(t.Id, tariff);
@@ -303,11 +318,29 @@ public class PortalController(
         });
     }
 
+    /// <summary>
+    /// Deletes a portal with a name specified in the request.
+    /// </summary>
+    /// <short>
+    /// Remove a portal
+    /// </short>
+    /// <path>apisystem/portal/remove</path>
+    [Tags("Portal")]
+    [SwaggerResponse(200, "Ok", typeof(IActionResult))]
     [HttpDelete("remove")]
     [AllowCrossSiteJson]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
     public async Task<IActionResult> RemoveAsync([FromQuery] TenantModel model)
     {
+        if (!coreBaseSettings.Standalone)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new
+            {
+                error = "error",
+                message = "Method for server edition only."
+            });
+        }
+
         var (succ, tenant) = await commonMethods.TryGetTenantAsync(model);
         if (!succ)
         {
@@ -331,19 +364,70 @@ public class PortalController(
             });
         }
 
-        await hostedSolution.RemoveTenantAsync(tenant);
+        var isLastFullAccessSpace = true;
+
+        var activeTenants = await hostedSolution.GetTenantsAsync(default);
+
+        foreach (var t in activeTenants.Where(t => t.Id != tenant.Id))
+        {
+            var settings = await settingsManager.LoadAsync<TenantAccessSpaceSettings>(t.Id);
+            if (!settings.LimitedAccessSpace)
+            {
+                isLastFullAccessSpace = false;
+                break;
+            }
+        }
+
+        if (isLastFullAccessSpace)
+        {
+            return BadRequest(new
+            {
+                error = "error",
+                message = "The last full access space cannot be deleted."
+            });
+        }
+
+        var wizardSettings = await settingsManager.LoadAsync<WizardSettings>(tenant.Id);
+
+        if (!wizardSettings.Completed)
+        {
+            await hostedSolution.RemoveTenantAsync(tenant);
+        }
+        else
+        {
+            await commonMethods.SendRemoveInstructions(commonMethods.GetRequestScheme(), tenant);
+        }
 
         return Ok(new
         {
-            tenant = commonMethods.ToTenantWrapper(tenant)
+            tenant = commonMethods.ToTenantWrapper(tenant),
+            removed = !wizardSettings.Completed
         });
     }
 
+    /// <summary>
+    /// Changes a portal activation status with a value specified in the request.
+    /// </summary>
+    /// <short>
+    /// Change a portal status
+    /// </short>
+    /// <path>apisystem/portal/status</path>
+    [Tags("Portal")]
+    [SwaggerResponse(200, "Ok", typeof(IActionResult))]
     [HttpPut("status")]
     [AllowCrossSiteJson]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
     public async Task<IActionResult> ChangeStatusAsync(TenantModel model)
     {
+        if (!coreBaseSettings.Standalone)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new
+            {
+                error = "error",
+                message = "Method for server edition only."
+            });
+        }
+
         var (succ, tenant) = await commonMethods.TryGetTenantAsync(model);
         if (!succ)
         {
@@ -384,6 +468,15 @@ public class PortalController(
         });
     }
 
+    /// <summary>
+    /// Checks if the specified name is available to create a portal.
+    /// </summary>
+    /// <short>
+    /// Validate the portal name
+    /// </short>
+    /// <path>apisystem/portal/validateportalname</path>
+    [Tags("Portal")]
+    [SwaggerResponse(200, "Ok", typeof(IActionResult))]
     [HttpPost("validateportalname")]
     [AllowCrossSiteJson]
     public async ValueTask<IActionResult> CheckExistingNamePortalAsync(TenantModel model)
@@ -410,6 +503,15 @@ public class PortalController(
         });
     }
 
+    /// <summary>
+    /// Returns a list of all the portals registered for the user with the email address specified in the request.
+    /// </summary>
+    /// <short>
+    /// Get portals
+    /// </short>
+    /// <path>apisystem/portal/get</path>
+    [Tags("Portal")]
+    [SwaggerResponse(200, "Ok", typeof(IActionResult))]
     [HttpGet("get")]
     [AllowCrossSiteJson]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
@@ -476,6 +578,15 @@ public class PortalController(
         }
     }
 
+    /// <summary>
+    /// Signs in to the portal with the parameters specified in the request.
+    /// </summary>
+    /// <short>
+    /// Sign in to the portal
+    /// </short>
+    /// <path>apisystem/portal/signin</path>
+    [Tags("Portal")]
+    [SwaggerResponse(200, "Ok", typeof(IActionResult))]
     [HttpPost("signin")]
     [AllowCrossSiteJson]
     public async Task<IActionResult> SignInToPortalAsync(TenantModel model)
@@ -496,14 +607,12 @@ public class PortalController(
                         message = "Too much attempts already"
                     });
                 }
-                else
-                {
-                    var error = await GetRecaptchaError(model, clientIP, sw);
 
-                    if (error != null)
-                    {
-                        return StatusCode(StatusCodes.Status401Unauthorized, error);
-                    }
+                var error = await GetRecaptchaError(model, clientIP, sw);
+
+                if (error != null)
+                {
+                    return StatusCode(StatusCodes.Status401Unauthorized, error);
                 }
             }
 
@@ -662,7 +771,7 @@ public class PortalController(
                 option.LogDebug("PortalName = {0}; Elapsed ms. ValidateRecaptcha error: {1} {2}", model.PortalName, sw.ElapsedMilliseconds, data);
                 sw.Stop();
 
-                return new { error = "recaptchaInvalid", message = "Recaptcha is invalid" };
+                return new { error = "recaptchaInvalid", message = "Recaptcha is invalid", clientIP };
 
             }
 

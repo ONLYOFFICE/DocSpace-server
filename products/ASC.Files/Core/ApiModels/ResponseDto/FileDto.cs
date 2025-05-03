@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,134 +27,184 @@
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
+/// The file parameters.
 /// </summary>
 public class FileDto<T> : FileEntryDto<T>
 {
-    /// <summary>Folder ID</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The folder ID where the file is located.
+    /// </summary>
     public T FolderId { get; set; }
 
-    /// <summary>Version</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The file version.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 3)]
     public int Version { get; set; }
 
-    /// <summary>Version group</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The version group of the file.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 1)]
     public int VersionGroup { get; set; }
 
-    /// <summary>Content length</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The content length of the file.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "12345")]
     public string ContentLength { get; set; }
 
-    /// <summary>Pure content length</summary>
-    /// <type>System.Nullable{System.Int64}, System</type>
+    /// <summary>
+    /// The pure content length of the file.
+    /// </summary>
     public long? PureContentLength { get; set; }
 
-    /// <summary>File status</summary>
-    /// <type>ASC.Files.Core.FileStatus, ASC.Files.Core</type>
+    /// <summary>
+    /// The current status of the file.
+    /// </summary>
     public FileStatus FileStatus { get; set; }
 
-    /// <summary>Muted or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the file is muted or not.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
     public bool Mute { get; set; }
 
-    /// <summary>URL to view a file</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The URL link to view the file.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "https://www.onlyoffice.com/viewfile?fileid=2221")]
+    [Url]
     public string ViewUrl { get; set; }
 
-    /// <summary>Web URL</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The Web URL link to the file.
+    /// </summary>
+    [Url]
     public string WebUrl { get; set; }
 
-    /// <summary>File type</summary>
-    /// <type>ASC.Web.Core.Files.FileType, ASC.Web.Core</type>
+    /// <summary>
+    /// The short Web URL.
+    /// </summary>
+    [Url]
+    public string ShortWebUrl { get; set; }
+
+    /// <summary>
+    /// The file type.
+    /// </summary>
     public FileType FileType { get; set; }
 
-    /// <summary>File extension</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The file extension.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = ".txt")]
     public string FileExst { get; set; }
 
-    /// <summary>Comment</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The comment to the file.
+    /// </summary>
     public string Comment { get; set; }
 
-    /// <summary>Encrypted or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    /// <summary>
+    /// Specifies if the file is encrypted or not.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
     public bool? Encrypted { get; set; }
 
-    /// <summary>Thumbnail URL</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The thumbnail URL of the file.
+    /// </summary>
+    [Url]
     public string ThumbnailUrl { get; set; }
 
-    /// <summary>Thumbnail status</summary>
-    /// <type>ASC.Files.Core.Thumbnail, ASC.Files.Core</type>
+    /// <summary>
+    /// The current thumbnail status of the file.
+    /// </summary>
     public Thumbnail ThumbnailStatus { get; set; }
 
-    /// <summary>Locked or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
+    /// <summary>
+    /// Specifies if the file is locked or not.
+    /// </summary>
     public bool? Locked { get; set; }
 
-    /// <summary>User ID who locked a file</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The user ID of the person who locked the file.
+    /// </summary>
     public string LockedBy { get; set; }
 
-    /// <summary>Is there a draft or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the file has a draft or not.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
     public bool? HasDraft { get; set; }
 
-    /// <summary>Is there a form or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// The status of the form filling process.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
+    public FormFillingStatus FormFillingStatus { get; set; } = FormFillingStatus.None;
+
+    /// <summary>
+    /// Specifies if the file is a form or not.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
     public bool? IsForm { get; set; }
 
-    /// <summary>Specifies if the filling has started or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the Custom Filter editing mode is enabled for a file or not.
+    /// </summary>
+    public bool? CustomFilterEnabled { get; set; }
+
+    /// <summary>
+    /// The name of the user who enabled a Custom Filter editing mode for a file.
+    /// </summary>
+    public string CustomFilterEnabledBy { get; set; }
+
+    /// <summary>
+    /// Specifies if the filling has started or not.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
     public bool? StartFilling { get; set; }
 
-    /// <summary>InProcess folder ID</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The InProcess folder ID of the file.
+    /// </summary>
     public int? InProcessFolderId { get; set; }
 
-    /// <summary>InProcess folder title</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The InProcess folder title of the file.
+    /// </summary>
     public string InProcessFolderTitle { get; set; }
 
-    /// <summary>Draft info</summary>
-    /// <type>ASC.File.Core.ApiModels.ResponseDto.DraftLocation, ASC.Files.Core</type>
+    /// <summary>
+    /// The file draft information with its location.
+    /// </summary>
     public DraftLocation<T> DraftLocation { get; set; }
 
-    /// <summary>File accessibility</summary>
-    /// <type>System.Collections.IDictionary{ASC.Files.Core.Helpers.Accessibility, System.Boolean}, System.Collections</type>
+    /// <summary>
+    /// The file accessibility.
+    /// </summary>
     public IDictionary<Accessibility, bool> ViewAccessibility { get; set; }
 
+    /// <summary>
+    /// The available external rights of the file.
+    /// </summary>
     public IDictionary<string, bool> AvailableExternalRights { get; set; }
+
+    /// <summary>
+    /// The time when the file was last opened.
+    /// </summary>
     public ApiDateTime LastOpened { get; set; }
+
+    /// <summary>
+    /// The date when the file will be expired.
+    /// </summary>
     public ApiDateTime Expired { get; set; }
 
+    /// <summary>
+    /// The file entry type.
+    /// </summary>
     public override FileEntryType FileEntryType { get => FileEntryType.File; }
-
-    public static FileDto<int> GetSample()
-    {
-        return new FileDto<int>
-        {
-            Access = FileShare.ReadWrite,
-            //Updated = ApiDateTime.GetSample(),
-            //Created = ApiDateTime.GetSample(),
-            //CreatedBy = EmployeeWraper.GetSample(),
-            Id = 10,
-            RootFolderType = FolderType.BUNCH,
-            Shared = false,
-            Title = "Some titile.txt",
-            FileExst = ".txt",
-            FileType = FileType.Document,
-            //UpdatedBy = EmployeeWraper.GetSample(),
-            ContentLength = 12345.ToString(CultureInfo.InvariantCulture),
-            FileStatus = FileStatus.IsNew,
-            FolderId = 12334,
-            Version = 3,
-            VersionGroup = 1,
-            ViewUrl = "https://www.onlyoffice.com/viewfile?fileid=2221"
-        };
-    }
 }
 
 [Scope]
@@ -174,15 +224,17 @@ public class FileDtoHelper(
         FileDateTime fileDateTime,
         ExternalShare externalShare,
         BreadCrumbsManager breadCrumbsManager,
-        FileSharing fileSharing,
-        FileChecker fileChecker)
-    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime) 
+        FileChecker fileChecker,
+        SecurityContext securityContext,
+        UserManager userManager,
+        IUrlShortener urlShortener)
+    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory) 
 {
     private readonly ApiDateTimeHelper _apiDateTimeHelper = apiDateTimeHelper;
 
-    public async Task<FileDto<T>> GetAsync<T>(File<T> file, string order = null, TimeSpan? expiration = null)
+    public async Task<FileDto<T>> GetAsync<T>(File<T> file, string order = null, TimeSpan? expiration = null, IFolder contextFolder = null)
     {
-        var result = await GetFileWrapperAsync(file, order, expiration);
+        var result = await GetFileWrapperAsync(file, order, expiration, contextFolder);
 
         result.FolderId = file.ParentId;
         
@@ -191,15 +243,14 @@ public class FileDtoHelper(
             result.RootFolderType = FolderType.Recent;
             result.FolderId = await _globalFolderHelper.GetFolderRecentAsync<T>();
         }
-
+        
         result.ViewAccessibility = await fileUtility.GetAccessibility(file);
         result.AvailableExternalRights = _fileSecurity.GetFileAccesses(file, SubjectType.ExternalLink);
         
         return result;
     }
 
-    private Dictionary<string, AceWrapper> shareCache = new();
-    private async Task<FileDto<T>> GetFileWrapperAsync<T>(File<T> file, string order, TimeSpan? expiration)
+    private async Task<FileDto<T>> GetFileWrapperAsync<T>(File<T> file, string order, TimeSpan? expiration, IFolder contextFolder = null)
     {
         var result = await GetAsync<FileDto<T>, T>(file);
         var isEnabledBadges = await badgesSettingsHelper.GetEnabledForCurrentUserAsync();
@@ -207,14 +258,26 @@ public class FileDtoHelper(
         var extension = FileUtility.GetFileExtension(file.Title);
         var fileType = FileUtility.GetFileTypeByExtention(extension);
 
+        var fileDao = _daoFactory.GetFileDao<T>();
+
         if (fileType == FileType.Pdf)
         {
-            var linkDao = daoFactory.GetLinkDao<T>();
-            var folderDao = daoFactory.GetCacheFolderDao<T>();
-            var fileDao = daoFactory.GetFileDao<T>();
+            var folderDao = _daoFactory.GetCacheFolderDao<T>();
 
-            var linkedIdTask = linkDao.GetLinkedAsync(file.Id);
-            var propertiesTask = fileDao.GetProperties(file.Id);
+            Task<T> linkedIdTask;
+            Task<EntryProperties<T>> propertiesTask;
+            
+            if (file.FormInfo != null)
+            {
+                linkedIdTask = Task.FromResult(file.FormInfo.LinkedId);
+                propertiesTask = Task.FromResult(file.FormInfo.Properties);
+            }
+            else
+            {
+                linkedIdTask = _daoFactory.GetLinkDao<T>().GetLinkedAsync(file.Id);
+                propertiesTask = fileDao.GetProperties(file.Id);
+            }
+            
             var currentFolderTask = folderDao.GetFolderAsync(file.ParentId);
             await Task.WhenAll(linkedIdTask, propertiesTask, currentFolderTask);
 
@@ -223,26 +286,18 @@ public class FileDtoHelper(
             var currentFolder = currentFolderTask.Result;
 
             Folder<T> currentRoom;
-            if (!DocSpaceHelper.IsRoom(currentFolder.FolderType))
+            if (!DocSpaceHelper.IsRoom(currentFolder.FolderType) && file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates)
             {
-                var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
-                if (int.TryParse(roomId?.ToString(), out var curRoomId) && curRoomId != -1)
-                {
-                    currentRoom = await folderDao.GetFolderAsync(roomId);
-        }
-                else
-                {
-                    currentRoom = currentFolder;
-                }
+                currentRoom = await DocSpaceHelper.GetParentRoom(file, folderDao) ?? currentFolder;
             }
             else
             {
                 currentRoom = currentFolder;
             }
-        
+
             if (currentRoom is { FolderType: FolderType.FillingFormsRoom } && properties != null && properties.FormFilling.StartFilling)
             {
-                result.Security[FileSecurity.FilesSecurityActions.Lock] = false;
+                    result.Security[FileSecurity.FilesSecurityActions.Lock] = false;
             }
 
             if (currentRoom.Security == null)
@@ -250,17 +305,9 @@ public class FileDtoHelper(
                 _ = await _fileSecurity.SetSecurity(new[] { currentRoom }.ToAsyncEnumerable()).ToListAsync();
             }
 
-            AceWrapper ace = null;
-            var currentRoomId = currentRoom.Id?.ToString();
-            if (currentRoomId != null && !shareCache.TryGetValue(currentRoomId, out ace))
+            if (FileUtility.GetFileTypeByExtention(FileUtility.GetFileExtension(file.Title)) == FileType.Pdf && !file.IsForm && (FilterType)file.Category == FilterType.None)
             {
-                ace = await fileSharing.GetPureSharesAsync(currentRoom, [authContext.CurrentAccount.ID]).FirstOrDefaultAsync();
-                shareCache.TryAdd(currentRoomId, ace);
-            }
-
-            if (!file.IsForm && (FilterType)file.Category == FilterType.None)
-            {
-                result.IsForm = await fileChecker.CheckExtendedPDF(file);
+                result.IsForm = await fileChecker.IsFormPDFFile(file);
             }
             else
             {
@@ -290,6 +337,52 @@ public class FileDtoHelper(
                     result.DraftLocation = draftLocation;
                 }
             }
+
+            if (currentRoom is { FolderType: FolderType.VirtualDataRoom })
+            {
+                var (currentStep, roleList) = await fileDao.GetUserFormRoles(file.Id, authContext.CurrentAccount.ID);
+                if (currentStep == -1 && result.Security[FileSecurity.FilesSecurityActions.Edit] && properties != null && properties.CopyToFillOut)
+                {
+                    result.FormFillingStatus = FormFillingStatus.Draft;
+                }
+
+                if (currentStep != -1)
+                {
+                    if (!DateTime.MinValue.Equals(properties.FormFilling.FillingStopedDate))
+                    {
+                        result.FormFillingStatus = FormFillingStatus.Stoped;
+                    }
+                    else if (currentStep == 0)
+                    {
+                        result.FormFillingStatus = FormFillingStatus.Complete;
+                    }
+                    else
+                    {
+                        var unsubmittedRole = roleList.FirstOrDefault(r => !r.Submitted);
+                        switch (unsubmittedRole)
+                        {
+                            case not null:
+                                result.FormFillingStatus = currentStep == unsubmittedRole.Sequence
+                                    ? FormFillingStatus.YouTurn
+                                    : FormFillingStatus.InProgress;
+                                break;
+                            default:
+                                if (roleList.Count > 0 || properties.FormFilling.StartedByUserId.Equals(authContext.CurrentAccount.ID))
+                                {
+                                    result.FormFillingStatus = FormFillingStatus.InProgress;
+                                }
+                                break;
+                        }
+                    }
+                    try
+                    {
+                        result.ShortWebUrl = await urlShortener.GetShortenLinkAsync(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebEditorUrl(file.Id)));
+                    }
+                    catch (Exception)
+                    {
+                    }
+                }
+            }
         }
 
         result.FileExst = extension;
@@ -306,13 +399,14 @@ public class FileDtoHelper(
         result.LockedBy = file.LockedBy;
         result.Access = file.Access;
         result.LastOpened = _apiDateTimeHelper.Get(file.LastOpened);
+        result.CustomFilterEnabled = file.CustomFilterEnabled.NullIfDefault();
+        result.CustomFilterEnabledBy = file.CustomFilterEnabledBy;
 
-        if (file.RootFolderType == FolderType.VirtualRooms && !expiration.HasValue)
+        if (!file.ProviderEntry && file.RootFolderType == FolderType.VirtualRooms && !expiration.HasValue)
         {
-            var folderDao = daoFactory.GetFolderDao<T>();
-            var (roomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(file);
-            var room = await folderDao.GetFolderAsync(roomId).NotFoundIfNull();
-            if (room.SettingsLifetime != null)
+            var folderDao = _daoFactory.GetCacheFolderDao<T>();
+            var room = await DocSpaceHelper.GetParentRoom(file, folderDao);
+            if (room?.SettingsLifetime != null)
             {
                 expiration = DateTime.UtcNow - room.SettingsLifetime.GetExpirationUtc();
             }
@@ -320,12 +414,20 @@ public class FileDtoHelper(
 
         if (expiration.HasValue && expiration.Value != TimeSpan.MaxValue)
         {
-            result.Expired = new ApiDateTime(result.Updated.UtcTime + expiration.Value, result.Updated.TimeZoneOffset);
+            var update = result.Updated;
+
+            if (result.Version > 1)
+            {
+                var firstVersion = await fileDao.GetFileAsync(result.Id, 1);
+                update = _apiDateTimeHelper.Get(firstVersion.ModifiedOn);
+            }
+
+            result.Expired = new ApiDateTime(update.UtcTime + expiration.Value, update.TimeZoneOffset);
         }
 
         if (file.Order != 0)
-        {            
-            if (string.IsNullOrEmpty(order))
+        {
+            if (string.IsNullOrEmpty(order) && (contextFolder == null || !DocSpaceHelper.IsRoom(contextFolder.FolderType)))
             {
                 order = await breadCrumbsManager.GetBreadCrumbsOrderAsync(file.ParentId);
             }
@@ -336,7 +438,7 @@ public class FileDtoHelper(
         try
         {
             var externalMediaAccess = file.ShareRecord is { SubjectType: SubjectType.PrimaryExternalLink or SubjectType.ExternalLink };
-
+            
             if (externalMediaAccess)
             {
                 result.RequestToken = await externalShare.CreateShareKeyAsync(file.ShareRecord.Subject);
@@ -345,7 +447,6 @@ public class FileDtoHelper(
             result.ViewUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl), result.RequestToken);
 
             result.WebUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version, externalMediaAccess)), result.RequestToken);
-
             result.ThumbnailStatus = file.ThumbnailStatus;
 
             var cacheKey = Math.Abs(result.Updated.GetHashCode());
@@ -364,21 +465,28 @@ public class FileDtoHelper(
     }
 }
 
+/// <summary>
+/// The file draft parameters.
+/// </summary>
 public class DraftLocation<T>
 {
-    /// <summary>InProcess folder ID</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The InProcess folder ID of the draft.
+    /// </summary> 
     public T FolderId { get; set; }
 
-    /// <summary>InProcess folder title</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The InProcess folder title of the draft.
+    /// </summary>
     public string FolderTitle { get; set; }
 
-    /// <summary>Draft ID</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The draft ID.
+    /// </summary>
     public T FileId { get; set; }
 
-    /// <summary>Draft title</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The draft title.
+    /// </summary>
     public string FileTitle { get; set; }
 }

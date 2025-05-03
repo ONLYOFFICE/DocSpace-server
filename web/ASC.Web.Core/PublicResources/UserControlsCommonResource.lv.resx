@@ -73,10 +73,16 @@
   <data name="TariffPerMonth" xml:space="preserve">
     <value>mēnesis</value>
   </data>
+  <data name="TariffPerYear" xml:space="preserve">
+    <value>gads</value>
+  </data>
   <data name="UnknownFirstName" xml:space="preserve">
     <value>Vārds</value>
   </data>
   <data name="UnknownLastName" xml:space="preserve">
     <value>Uzvārds</value>
+  </data>
+  <data name="LicenseTypeNotCorrect" xml:space="preserve">
+    <value>Licences konflikts. Lūdzu, pārliecinieties, ka esat instalējis pareizo {0} DocSpace versiju (Enterprise vai Developer). Ja jums ir kādi jautājumi, sazinieties ar savu pārdošanas menedžeri.</value>
   </data>
 </root>

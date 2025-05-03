@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,42 +27,42 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// The third-party request parameters.
 /// </summary>
 public class ThirdPartyRequestDto
 {
-    /// <summary>Connection URL for the sharepoint</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The connection URL for the sharepoint.
+    /// </summary>
     public string Url { get; set; }
 
-    /// <summary>Login</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The third-party request login.
+    /// </summary>
     public string Login { get; set; }
 
-    /// <summary>Password</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The third-party request password.
+    /// </summary>
     public string Password { get; set; }
 
-    /// <summary>Authentication token</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The authentication token.
+    /// </summary>
     public string Token { get; set; }
 
-    /// <summary>Specifies if this is a corporate account or not</summary>
-    /// <type>System.Boolean, System</type>
-    public bool IsCorporate { get; set; }
-
-    /// <summary>Specifies if this is a room storage or not</summary>
-    /// <type>System.Boolean, System</type>
-    public bool IsRoomsStorage { get; set; }
-
-    /// <summary>Customer title</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The customer title. 
+    /// </summary>
     public string CustomerTitle { get; set; }
 
-    /// <summary>Provider key</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The provider key.
+    /// </summary>
     public string ProviderKey { get; set; }
 
-    /// <summary>Provider ID</summary>
-    /// <type>System.Nullable{System.Int32}, System</type>
+    /// <summary>
+    /// The provider ID.
+    /// </summary>
     public int? ProviderId { get; set; }
 }

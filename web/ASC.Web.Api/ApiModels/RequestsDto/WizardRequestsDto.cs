@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,31 +27,39 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
+/// The request parameters for initial configuration of the setup wizard.
 /// </summary>
 public class WizardRequestsDto
 {
-    /// <summary>Email</summary>
-    /// <type>System.String, System</type>
-    public string Email { get; set; }
+    /// <summary>
+    /// The user's email address for authentication and communication.
+    /// </summary>
+    [EmailAddress]
+    public required string Email { get; set; }
 
-    /// <summary>Password hash</summary>
-    /// <type>System.String, System</type>
-    public string PasswordHash { get; set; }
+    /// <summary>
+    /// The hashed representation of the user's password.
+    /// </summary>
+    public required string PasswordHash { get; set; }
 
-    /// <summary>Language</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The user's preferred interface language code.
+    /// </summary>
     public string Lng { get; set; }
 
-    /// <summary>Time zone</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The user's time zone identifier.
+    /// </summary>
     public string TimeZone { get; set; }
 
-    /// <summary>AMI ID</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The Amazon Machine Image (AMI) identifier.
+    /// </summary>
     public string AmiId { get; set; }
 
-    /// <summary>Subscribed from the site or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether the user opted in for site communications.
+    /// </summary>
     public bool SubscribeFromSite { get; set; }
 
     public void Deconstruct(out string email, out string passwordHash, out string lng, out string timeZone, out string amiid, out bool subscribeFromSite)

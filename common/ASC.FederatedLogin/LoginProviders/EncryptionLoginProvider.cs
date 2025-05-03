@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -68,7 +68,7 @@ public class EncryptionLoginProvider(
         }
         catch (Exception ex)
         {
-            var message = string.Format("Can not decrypt {0} keys for {1}", ProviderConstants.Encryption, userId);
+            var message = string.Format("Can not decrypt {0} keys for {1}", ProviderConstants.Encryption, userId.ToString());
             logger.ErrorWithException(message, ex);
             return null;
         }
@@ -90,7 +90,7 @@ public class EncryptionLoginProvider(
             }
             catch (Exception ex)
             {
-                var message = string.Format("Can not decrypt {0} keys for {1}", ProviderConstants.Encryption, userId);
+                var message = string.Format("Can not decrypt {0} keys for {1}", ProviderConstants.Encryption, userId.ToString());
                 logger.ErrorWithException(message, ex);
             }
         }

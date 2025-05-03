@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,50 +27,73 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
+/// The request parameters for the team template identification.
+/// </summary>
+public class SchemaBaseRequestsDto
+{
+    /// <summary>
+    /// The team template ID.
+    /// </summary>
+    public string Id { get; init; }
+}
+
+/// <summary>
+/// The request parameters for the comprehensive team template configuration.
 /// </summary>
 public class SchemaRequestsDto
 {
-    /// <summary>Team template ID</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The team template ID.
+    /// </summary>
     public string Id { get; init; }
 
-    /// <summary>Team template name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The display name for the team template.
+    /// </summary>
     public string Name { get; set; }
 
-    /// <summary>User caption</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The label for the single user references.
+    /// </summary>
     public string UserCaption { get; init; }
 
-    /// <summary>Users caption</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The label for the multiple user references.
+    /// </summary>
     public string UsersCaption { get; init; }
 
-    /// <summary>Group caption</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The label for the single group references.
+    /// </summary>
     public string GroupCaption { get; init; }
 
-    /// <summary>Groups caption</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The label for the multiple group references.
+    /// </summary>
     public string GroupsCaption { get; init; }
 
-    /// <summary>User status caption</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The label for the user position or status.
+    /// </summary>
     public string UserPostCaption { get; init; }
 
-    /// <summary>Registration date caption</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The label for the member registration date.
+    /// </summary>
     public string RegDateCaption { get; init; }
 
-    /// <summary>Group lead caption</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The label for the group leader position.
+    /// </summary>
     public string GroupHeadCaption { get; init; }
 
-    /// <summary>Guest caption</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The label for the single guest/external user references.
+    /// </summary>
     public string GuestCaption { get; init; }
 
-    /// <summary>Guests caption</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The label for the multiple guest/external user references.
+    /// </summary>
     public string GuestsCaption { get; init; }
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,75 +27,72 @@
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 /// <summary>
+/// The login event parameters.
 /// </summary>
-public class LoginEventDto
+public class LoginEventDto(LoginEvent loginEvent, ApiDateTimeHelper apiDateTimeHelper)
 {
-    /// <summary>ID</summary>
-    /// <type>System.Int32, System</type>
-    public int Id { get; set; }
+    /// <summary>
+    /// The login event ID.
+    /// </summary>
+    public int Id { get; set; } = loginEvent.Id;
 
-    /// <summary>Date</summary>
-    /// <type>ASC.Api.Core.ApiDateTime, ASC.Api.Core</type>
-    public ApiDateTime Date { get; set; }
+    /// <summary>
+    /// The login event date.
+    /// </summary>
+    public ApiDateTime Date { get; set; } = apiDateTimeHelper.Get(loginEvent.Date);
 
-    /// <summary>User</summary>
-    /// <type>System.String, System</type>
-    public string User { get; set; }
+    /// <summary>
+    /// The user name of the login event.
+    /// </summary>
+    public string User { get; set; } = loginEvent.UserName;
 
-    /// <summary>User ID</summary>
-    /// <type>System.Guid, System</type>
-    public Guid UserId { get; set; }
+    /// <summary>
+    /// The user ID of the login event.
+    /// </summary>
+    public Guid UserId { get; set; } = loginEvent.UserId;
 
-    /// <summary>Login</summary>
-    /// <type>System.String, System</type>
-    public string Login { get; set; }
+    /// <summary>
+    /// The user login of the login event.
+    /// </summary>
+    public string Login { get; set; } = loginEvent.Login;
 
-    /// <summary>Action</summary>
-    /// <type>System.String, System</type>
-    public string Action { get; set; }
+    /// <summary>
+    /// The login event action.
+    /// </summary>
+    public string Action { get; set; } = loginEvent.ActionText;
 
-    /// <summary>Action ID</summary>
-    /// <type>ASC.MessagingSystem.Core.MessageAction, ASC.Core.Common</type>
-    public MessageAction ActionId { get; set; }
+    /// <summary>
+    /// The login-related action to filter events by.
+    /// </summary>
+    public MessageAction ActionId { get; set; } = (MessageAction)loginEvent.Action;
 
-    /// <summary>IP</summary>
-    /// <type>System.String, System</type>
-    public string IP { get; set; }
+    /// <summary>
+    /// The login event IP.
+    /// </summary>
+    public string IP { get; set; } = loginEvent.IP;
 
-    /// <summary>Country</summary>
-    /// <type>System.String, System</type>
-    public string Country { get; set; }
+    /// <summary>
+    /// The login event country.
+    /// </summary>
+    public string Country { get; set; } = loginEvent.Country;
 
-    /// <summary>City</summary>
-    /// <type>System.String, System</type>
-    public string City { get; set; }
+    /// <summary>
+    /// The login event city.
+    /// </summary>
+    public string City { get; set; } = loginEvent.City;
 
-    /// <summary>Browser</summary>
-    /// <type>System.String, System</type>
-    public string Browser { get; set; }
+    /// <summary>
+    /// The login event browser.
+    /// </summary>
+    public string Browser { get; set; } = loginEvent.Browser;
 
-    /// <summary>Platform</summary>
-    /// <type>System.String, System</type>
-    public string Platform { get; set; }
+    /// <summary>
+    /// The login event platform.
+    /// </summary>
+    public string Platform { get; set; } = loginEvent.Platform;
 
-    /// <summary>Page</summary>
-    /// <type>System.String, System</type>
-    public string Page { get; set; }
-    
-    public LoginEventDto(LoginEvent loginEvent, ApiDateTimeHelper apiDateTimeHelper)
-    {
-        Id = loginEvent.Id;
-        Date = apiDateTimeHelper.Get(loginEvent.Date);
-        User = loginEvent.UserName;
-        UserId = loginEvent.UserId;
-        Login = loginEvent.Login;
-        Action = loginEvent.ActionText;
-        ActionId = (MessageAction)loginEvent.Action;
-        IP = loginEvent.IP;
-        Country = loginEvent.Country;
-        City = loginEvent.City;
-        Browser = loginEvent.Browser;
-        Platform = loginEvent.Platform;
-        Page = loginEvent.Page;
-    }
+    /// <summary>
+    /// The login event page.
+    /// </summary>
+    public string Page { get; set; } = loginEvent.Page;
 }

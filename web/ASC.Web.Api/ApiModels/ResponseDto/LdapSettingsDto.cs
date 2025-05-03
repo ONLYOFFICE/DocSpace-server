@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,103 +27,127 @@
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
+/// The LDAP settings parameters.
 /// </summary>
 public class LdapSettingsDto : IMapFrom<LdapSettings>
 {
-    /// <summary>Specifies if the LDAP authentication is enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether the LDAP authentication is active in the system.
+    /// </summary>
     public bool EnableLdapAuthentication { get; set; }
 
-    /// <summary>Specifies if the StartTLS is enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether the StartTLS (Transport Layer Security) protocol for secure LDAP communication is enabled or not.
+    /// </summary>
     public bool StartTls { get; set; }
 
-    /// <summary>Specifies if the SSL is enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether the SSL (Secure Sockets Layer) encryption is enabled for the LDAP communication or not.
+    /// </summary>
     public bool Ssl { get; set; }
 
-    /// <summary>Specifies if the welcome email is sent or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether the automatic welcome email dispatch to the new LDAP users is enabled or not.
+    /// </summary>
     public bool SendWelcomeEmail { get; set; }
 
-    /// <summary>LDAP server URL address</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The LDAP server's hostname or IP address.
+    /// </summary>
     public string Server { get; set; }
 
-    /// <summary>Absolute path to the top level directory containing users for the import</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The absolute path to the top level directory containing users for the import.
+    /// </summary>
     // ReSharper disable once InconsistentNaming
     public string UserDN { get; set; }
 
-    /// <summary>Port number</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The port number.
+    /// </summary>
     public int PortNumber { get; set; }
 
-    /// <summary>User filter value to import the users who correspond to the specified search criteria. The default filter value (uid=*) allows importing all users</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The user filter value to import the users who correspond to the specified search criteria. The default filter value (uid=*) allows importing all users.
+    /// </summary>
     public string UserFilter { get; set; }
 
-    /// <summary>Attribute in a user record that corresponds to the login that LDAP server users will use to log in to ONLYOFFICE</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The attribute in a user record that corresponds to the login that LDAP server users will use to log in to ONLYOFFICE.
+    /// </summary>
     public string LoginAttribute { get; set; }
 
-    /// <summary>Correspondence between the user data fields on the portal and the attributes in the LDAP server user record</summary>
-    /// <type>System.Collections.Generic.Dictionary{ASC.ActiveDirectory.Base.Settings.MappingFields, System.String}, System.Collections.Generic</type>
+    /// <summary>
+    /// The correspondence between the user data fields on the portal and the attributes in the LDAP server user record.
+    /// </summary>
     public Dictionary<MappingFields, string> LdapMapping { get; set; }
 
-    /// <summary>Group access rights</summary>
-    /// <type>System.Collections.Generic.Dictionary{ASC.ActiveDirectory.Base.Settings.AccessRight, System.String}, System.Collections.Generic</type>
+    /// <summary>
+    /// The group access rights.
+    /// </summary>
     //ToDo: use SId instead of group name
     public Dictionary<AccessRight, string> AccessRights { get; set; }
 
-    /// <summary>Specifies if the groups from the LDAP server are added to the portal or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the groups from the LDAP server are added to the portal or not.
+    /// </summary>
     public bool GroupMembership { get; set; }
 
-    /// <summary>The absolute path to the top level directory containing groups for the import</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The absolute path to the top level directory containing groups for the import.
+    /// </summary>
     // ReSharper disable once InconsistentNaming
     public string GroupDN { get; set; }
 
-    /// <summary>Attribute that determines whether this user is a member of the groups</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The attribute that determines whether the user is a member of the groups.
+    /// </summary>
     public string UserAttribute { get; set; }
 
-    /// <summary>Group filter value to import the groups who correspond to the specified search criteria. The default filter value (objectClass=posixGroup) allows importing all users</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The group filter value to import the groups which correspond to the specified search criteria. The default filter value (objectClass=posixGroup) allows importing all groups.
+    /// </summary>
     public string GroupFilter { get; set; }
 
-    /// <summary>Attribute that specifies the users that the group includes</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The attribute that specifies the users that the group includes.
+    /// </summary>
     public string GroupAttribute { get; set; }
 
-    /// <summary>Attribute that corresponds to a name of the group where the user is included</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The attribute that corresponds to a name of the group where the user is included.
+    /// </summary>
     public string GroupNameAttribute { get; set; }
 
-    /// <summary>Specifies if the user has rights to read data from LDAP server or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the user has rights to read data from LDAP server or not.
+    /// </summary>
     public bool Authentication { get; set; }
 
-    /// <summary>Login</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The user login.
+    /// </summary>
     public string Login { get; set; }
 
-    /// <summary>Password</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The user password.
+    /// </summary>
     public string Password { get; set; }
 
-    /// <summary>Specifies if the certificate is accepted or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the certificate is accepted or not.
+    /// </summary>
     public bool AcceptCertificate { get; set; }
 
-    /// <summary>Specifies if the default LDAP settings are used or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the default LDAP settings are used or not.
+    /// </summary>
     public bool IsDefault { get; set; }
 
     public void Mapping(Profile profile)
     {
-        profile.CreateMap<LdapSettings, LdapSettingsDto>();
+        profile.CreateMap<LdapSettings, LdapSettingsDto>()
+            .ForMember(dest => dest.Server, opt => opt.MapFrom(src => src.Server.Replace("LDAP://", "")));
     }
 
 }

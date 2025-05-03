@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,22 +26,49 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
+/// <summary>
+/// The password settings parameters.
+/// </summary>
 public class PasswordSettingsDto
 {
+    /// <summary>
+    /// The minimum number of characters required for valid passwords.
+    /// </summary>
     public int MinLength { get; set; }
-    
+
+    /// <summary>
+    /// Specifies whether the password should contain the uppercase letters or not.
+    /// </summary>
     public bool UpperCase { get; set; }
 
+    /// <summary>
+    /// Specifies whether the password should contain the digits or not.
+    /// </summary>
     public bool Digits { get; set; }
-    
+
+    /// <summary>
+    /// Specifies whether the password should contain the special symbols or not.
+    /// </summary>
     public bool SpecSymbols { get; set; }
-    
+
+    /// <summary>
+    /// The allowed password characters in the regex string format.
+    /// </summary>
     public string AllowedCharactersRegexStr { get; set; }
-    
+
+    /// <summary>
+    /// The password digits in the regex string format.
+    /// </summary>
     public string DigitsRegexStr { get; set; }
 
+    /// <summary>
+    /// The password uppercase letters in the regex string format.
+    /// </summary>
     public string UpperCaseRegexStr { get; set; }
 
+    /// <summary>
+    /// The passaword special symbols in the regex string format.
+    /// </summary>
     public string SpecSymbolsRegexStr { get; set; }
 }
 

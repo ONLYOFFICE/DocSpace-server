@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,30 +27,37 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// The request parameters for inserting a file.
 /// </summary>
 public class InsertFileRequestDto : IModelWithFile, IDisposable
 {
-    /// <summary>File</summary>
-    /// <type>Microsoft.AspNetCore.Http.IFormFile, Microsoft.AspNetCore.Http</type>
+    /// <summary>
+    /// The file to be inserted.
+    /// </summary>
     public IFormFile File { get; set; }
 
-    /// <summary>File name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The file title to be inserted.
+    /// </summary>
     public string Title { get; set; }
 
-    /// <summary>Specifies whether to create a new file if it already exists or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether to create a new file if it already exists or not.
+    /// </summary>
     public bool CreateNewIfExist { get; set; }
 
-    /// <summary>Specifies whether to keep the file converting status or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether to keep the file converting status or not.
+    /// </summary>
     public bool KeepConvertStatus { get; set; }
+
 
     private Stream _stream;
     private bool _disposedValue;
 
-    /// <summary>Request input stream</summary>
-    /// <type>System.IO.Stream, System.IO</type>
+    /// <summary>
+    /// The request input stream.
+    /// </summary>
     public Stream Stream
     {
         get => File?.OpenReadStream() ?? _stream;
@@ -82,4 +89,23 @@ public class InsertFileRequestDto : IModelWithFile, IDisposable
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
+}
+
+/// <summary>
+/// The generic request parameters for inserting a file.
+/// </summary>
+public class InsertWithFileRequestDto<T>
+{
+    /// <summary>
+    /// The folder ID for inserting a file.
+    /// </summary>
+    [FromRoute(Name = "folderId")]
+    public required T FolderId { get; set; }
+
+    /// <summary>
+    /// The request parameters for inserting a file.
+    /// </summary>
+    [FromForm]
+    [ModelBinder(BinderType = typeof(InsertFileModelBinder))]
+    public InsertFileRequestDto InsertFile { get; set; }
 }

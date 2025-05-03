@@ -58,18 +58,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="NewDocument" xml:space="preserve">
-    <value>Nov dokument</value>
-  </data>
-  <data name="TariffPerMonth" xml:space="preserve">
-    <value>mesec</value>
-  </data>
-  <data name="UnknownFirstName" xml:space="preserve">
-    <value>Ime</value>
-  </data>
-  <data name="UnknownLastName" xml:space="preserve">
-    <value>Priimek</value>
-  </data>
   <data name="LicenseException" xml:space="preserve">
     <value>Licenca je potekla ali uporabniška kvota ne ustreza licenci</value>
   </data>
@@ -78,5 +66,23 @@
   </data>
   <data name="LicenseKeyNotFound" xml:space="preserve">
     <value>Vnesti morate licenčni ključ</value>
+  </data>
+  <data name="NewDocument" xml:space="preserve">
+    <value>Nov dokument</value>
+  </data>
+  <data name="TariffPerMonth" xml:space="preserve">
+    <value>mesec</value>
+  </data>
+  <data name="TariffPerYear" xml:space="preserve">
+    <value>leto</value>
+  </data>
+  <data name="UnknownFirstName" xml:space="preserve">
+    <value>Ime</value>
+  </data>
+  <data name="UnknownLastName" xml:space="preserve">
+    <value>Priimek</value>
+  </data>
+  <data name="LicenseTypeNotCorrect" xml:space="preserve">
+    <value>Licenčni konflikt. Prepričajte se, da ste namestili pravilno izdajo {0} DocSpace (Enterprise ali Developer). Če imate kakršna koli vprašanja, se obrnite na svojega vodjo prodaje.</value>
   </data>
 </root>

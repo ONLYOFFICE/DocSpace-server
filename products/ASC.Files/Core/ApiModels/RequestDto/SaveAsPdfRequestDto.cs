@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,14 +27,36 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// The parameters for saving the file as PDF.
+/// </summary>
+public class SaveAsPdf<T>
+{
+    /// <summary>
+    /// The folder ID to save the file as PDF.
+    /// </summary>
+    public required T FolderId { get; set; }
+
+    /// <summary>
+    /// The file title to save as PDF.
+    /// </summary>
+    public required string Title { get; set; }
+}
+
+
+/// <summary>
+/// The request parameters for saving file as PDF.
 /// </summary>
 public class SaveAsPdfRequestDto<T>
 {
-    /// <summary>Folder ID</summary>
-    /// <type>System.Int32, System</type>
-    public T FolderId { get; set; }
+    /// <summary>
+    /// The file ID to save as PDF.
+    /// </summary>
+    [FromRoute(Name = "id")]
+    public required T Id { get; set; }
 
-    /// <summary>File title</summary>
-    /// <type>System.String, System</type>
-    public string Title { get; set; }
+    /// <summary>
+    /// The parameters for saving file as PDF.
+    /// </summary>
+    [FromBody]
+    public SaveAsPdf<T> File { get; set; }
 }

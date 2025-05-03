@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,51 +27,45 @@
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// Result of file conversation operation.
+/// The result of file convertion operation.
 /// </summary>
 public class ConversationResultDto
 {
     /// <summary>
-    /// Operation ID
+    /// The conversion operation ID.
     /// </summary>
-    /// <type>System.String, System</type>
     public string Id { get; set; }
 
     /// <summary>
-    /// Operation type
+    /// The conversion operation type.
     /// </summary>
-    /// <type>ASC.Web.Files.Services.WCFService.FileOperations.FileOperationType, ASC.Files.Core</type>
+    [SwaggerSchemaCustom(Example = "Move")]
     [JsonPropertyName("Operation")]
     public FileOperationType OperationType { get; set; }
 
     /// <summary>
-    /// Operation progress
+    /// The conversion operation progress.
     /// </summary>
-    /// <type>System.Int32, System</type>
     public int Progress { get; set; }
 
     /// <summary>
-    /// Source file
+    /// The source file for the conversion.
     /// </summary>
-    /// <type>System.String, System</type>
     public string Source { get; set; }
 
     /// <summary>
-    /// Resulting file
+    /// The resulting file after the conversion.
     /// </summary>
-    /// <type>System.Object, System</type>
     [JsonPropertyName("result")]
     public object File { get; set; }
 
     /// <summary>
-    /// Error
+    /// The conversion operation error message.
     /// </summary>
-    /// <type>System.String, System</type>
     public string Error { get; set; }
 
     /// <summary>
-    /// Specifies if the operation is processed or not
+    /// Specifies if the conversion operation is processed or not.
     /// </summary>
-    /// <type>System.String, System</type>
     public string Processed { get; set; }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,8 +30,11 @@ namespace ASC.MessagingSystem.EF.Model;
 
 public class DbLoginEvent : MessageEvent, IMapFrom<EventMessage>
 {
+    [MaxLength(200)]
     public string Login { get; set; }
     public bool Active { get; set; }
+    [MaxLength(500)]
+    public string DescriptionRaw { get; set; }
 
     public DbTenant Tenant { get; set; }
 
@@ -77,7 +80,7 @@ public static class LoginEventsExtension
 
             entity.Property(e => e.Browser)
                 .HasColumnName("browser")
-                .HasColumnType("varchar(200)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -87,31 +90,31 @@ public static class LoginEventsExtension
 
             entity.Property(e => e.DescriptionRaw)
                 .HasColumnName("description")
-                .HasColumnType("varchar(500)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Ip)
                 .HasColumnName("ip")
-                .HasColumnType("varchar(50)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Login)
                 .HasColumnName("login")
-                .HasColumnType("varchar(200)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Page)
                 .HasColumnName("page")
-                .HasColumnType("varchar(300)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Platform)
                 .HasColumnName("platform")
-                .HasColumnType("varchar(200)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -129,63 +132,64 @@ public static class LoginEventsExtension
                 .UseCollation("utf8_general_ci");
         });
     }
+
     public static void PgSqlAddLoginEvents(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<DbLoginEvent>(entity =>
         {
-            entity.ToTable("login_events", "onlyoffice");
+            entity.ToTable("login_events");
 
             entity.HasIndex(e => e.Date)
-                .HasDatabaseName("date_login_events");
+                .HasDatabaseName("idx_date");
 
-            entity.HasIndex(e => new { e.UserId, e.TenantId })
-                .HasDatabaseName("tenant_id_login_events");
+            entity.HasIndex(e => new { e.TenantId, e.UserId })
+                .HasDatabaseName("idx_tenant_id_user_id");
 
-            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Id)
+                .HasColumnName("id");
 
-            entity.Property(e => e.Action).HasColumnName("action");
+            entity.Property(e => e.Action)
+                .HasColumnName("action")
+                .IsRequired(false);
 
             entity.Property(e => e.Browser)
                 .HasColumnName("browser")
-                .HasMaxLength(200)
-                .HasDefaultValueSql("NULL::character varying");
+                .HasColumnType("varchar");
 
-            entity.Property(e => e.Date).HasColumnName("date");
+            entity.Property(e => e.Date)
+                .HasColumnName("date")
+                .HasColumnType("timestamptz");
 
             entity.Property(e => e.DescriptionRaw)
                 .HasColumnName("description")
-                .HasMaxLength(500)
-                .HasDefaultValueSql("NULL");
+                .HasColumnType("varchar");
 
             entity.Property(e => e.Ip)
                 .HasColumnName("ip")
-                .HasMaxLength(50)
-                .HasDefaultValueSql("NULL");
+                .HasColumnType("varchar");
 
             entity.Property(e => e.Login)
                 .HasColumnName("login")
-                .HasMaxLength(200)
-                .HasDefaultValueSql("NULL");
+                .HasColumnType("varchar");
 
             entity.Property(e => e.Page)
                 .HasColumnName("page")
-                .HasMaxLength(300)
-                .HasDefaultValueSql("NULL");
+                .HasColumnType("varchar");
 
             entity.Property(e => e.Platform)
                 .HasColumnName("platform")
-                .HasMaxLength(200)
-                .HasDefaultValueSql("NULL");
+                .HasColumnType("varchar");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+            entity.Property(e => e.TenantId)
+                .HasColumnName("tenant_id");
 
-            entity.Property(e => e.Active).HasColumnName("active");
+            entity.Property(e => e.Active)
+                .HasColumnName("active");
 
             entity.Property(e => e.UserId)
                 .IsRequired()
                 .HasColumnName("user_id")
-                .HasMaxLength(38)
-                .IsFixedLength();
+                .HasColumnType("uuid");
         });
     }
 }

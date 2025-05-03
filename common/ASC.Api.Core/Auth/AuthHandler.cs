@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -53,7 +53,7 @@ public class AuthHandler(
         {
             Context.Request.Headers.TryGetValue("Authorization", out var headers);
 
-            var header = headers.FirstOrDefault();
+            string header = headers;
 
             if (string.IsNullOrEmpty(header))
             {

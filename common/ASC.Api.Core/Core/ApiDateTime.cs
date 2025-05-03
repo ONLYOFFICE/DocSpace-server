@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,11 +28,22 @@ using System.ComponentModel;
 
 namespace ASC.Api.Core;
 
+/// <summary>
+/// The API date and time parameters.
+/// </summary>
 [TypeConverter(typeof(ApiDateTimeTypeConverter))]
 [JsonConverter(typeof(ApiDateTimeConverter))]
 public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
 {
+    /// <summary>
+    /// The time in UTC format.
+    /// </summary>
     public DateTime UtcTime { get; private set; }
+
+    /// <summary>
+    /// The time zone offset.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "00:00:00")]
     public TimeSpan TimeZoneOffset { get; private set; }
 
     internal static readonly string[] Formats =
@@ -101,7 +112,7 @@ public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
                 return new ApiDateTime(dateTime, tzOffset);
             }
 
-            if (!data.EndsWith("Z", true, CultureInfo.InvariantCulture))
+            if (!data.EndsWith('Z'))
             {
                 tz ??= GetTimeZoneInfo(tenantManager, timeZoneConverter);
 

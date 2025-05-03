@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,17 +27,71 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
+/// The request parameters for updating the user information.
 /// </summary>
 public class UpdateMembersRequestDto
 {
-    /// <summary>List of user IDs</summary>
-    /// <type>System.Collections.Generic.IEnumerable{System.Guid}, System.Collections.Generic</type>
-    /// <example>9924256A-739C-462b-AF15-E652A3B1B6EB</example>
-	/// <collection>list</collection>
+    /// <summary>
+    /// The list of user IDs.
+    /// </summary>
     public IEnumerable<Guid> UserIds { get; set; }
 
-    /// <summary>Specifies whether to resend invitation letters to all the users or not</summary>
-    /// <type>System.Boolean, System</type>
-    /// <example>true</example>
+    /// <summary>
+    /// Specifies whether to resend invitation letters to all the users or not.
+    /// </summary>
     public bool ResendAll { get; set; }
+}
+
+/// <summary>
+/// The request parameters for updating the user status.
+/// </summary>
+public class UpdateMemberStatusRequestDto
+{
+    /// <summary>
+    /// The new user status.
+    /// </summary>
+    [FromRoute(Name = "status")]
+    public required EmployeeStatus Status { get; set; }
+
+    /// <summary>
+    /// The request parameters for updating the user information.
+    /// </summary>
+    [FromBody]
+    public UpdateMembersRequestDto UpdateMembers { get; set; }
+}
+
+/// <summary>
+/// The request parameters for updating the user type.
+/// </summary>
+public class UpdateMemberTypeRequestDto
+{
+    /// <summary>
+    /// The new user type.
+    /// </summary>
+    [FromRoute(Name = "type")]
+    public required EmployeeType Type { get; set; }
+
+    /// <summary>
+    /// The request parameters for updating the user information.
+    /// </summary>
+    [FromBody]
+    public UpdateMembersRequestDto UpdateMembers { get; set; }
+}
+
+/// <summary>
+/// The request parameters for updating the user activation status.
+/// </summary>
+public class UpdateMemberActivationStatusRequestDto
+{
+    /// <summary>
+    /// The new user activation status.
+    /// </summary>
+    [FromRoute(Name = "activationstatus")]
+    public required EmployeeActivationStatus ActivationStatus { get; set; }
+
+    /// <summary>
+    /// The request parameters for updating the user information.
+    /// </summary>
+    [FromBody]
+    public UpdateMembersRequestDto UpdateMembers { get; set; }
 }

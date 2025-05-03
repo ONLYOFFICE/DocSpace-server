@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,7 +30,7 @@ using Constants = ASC.Core.Configuration.Constants;
 
 namespace ASC.Core.Common.Notify;
 
-class PushSenderSink(INotifySender sender) : Sink
+public class PushSenderSink(INotifySender sender) : Sink
 {
     private static readonly string _senderName = Constants.NotifyPushSenderSysName;
     private readonly INotifySender _sender = sender ?? throw new ArgumentNullException(nameof(sender));
@@ -41,7 +41,7 @@ class PushSenderSink(INotifySender sender) : Sink
         {
 
             var result = SendResult.OK;
-            var m = await scope.ServiceProvider.GetRequiredService<PushSenderSinkMessageCreator>().CreateNotifyMessageAsync(message, _senderName);
+            var m = await scope.ServiceProvider.GetRequiredService<PushSenderSinkMessageCreator>().CreateNotifyMessage(message, _senderName);
             if (string.IsNullOrEmpty(m.Reciever))
             {
                 result = SendResult.IncorrectRecipient;
@@ -74,13 +74,13 @@ public class LowerCaseNamingPolicy : JsonNamingPolicy
 [Scope]
 public class PushSenderSinkMessageCreator(UserManager userManager, TenantManager tenantManager) : SinkMessageCreator
 {
-    public override async Task<NotifyMessage> CreateNotifyMessageAsync(INoticeMessage message, string senderName)
+    public override async Task<NotifyMessage> CreateNotifyMessage(INoticeMessage message, string senderName)
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync(false);
+        var tenant = tenantManager.GetCurrentTenant(false);
         if (tenant == null)
         {
             await tenantManager.SetCurrentTenantAsync(Tenant.DefaultTenant);
-            tenant = await tenantManager.GetCurrentTenantAsync(false);
+            tenant = tenantManager.GetCurrentTenant(false);
         }      
 
         var user = await userManager.GetUsersAsync(new Guid(message.Recipient.ID));
@@ -98,7 +98,7 @@ public class PushSenderSinkMessageCreator(UserManager userManager, TenantManager
         var notifyData = new NotifyData
         {
             Email = user.Email,
-            Portal = (await tenantManager.GetCurrentTenantAsync()).TrustedDomains.FirstOrDefault(),
+            Portal = (tenantManager.GetCurrentTenant()).TrustedDomains.FirstOrDefault(),
             OriginalUrl = originalUrl is { Value: not null } ? originalUrl.Value.ToString() : "",
             Folder = new NotifyFolderData
             {
@@ -126,7 +126,7 @@ public class PushSenderSinkMessageCreator(UserManager userManager, TenantManager
 
         var serializeOptions = new JsonSerializerOptions
         {
-            PropertyNamingPolicy = new LowerCaseNamingPolicy(),
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             WriteIndented = true
         };
 

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,50 +27,99 @@
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
+/// The webhook log parameters.
 /// </summary>
-public class WebhooksLogDto : IMapFrom<WebhooksLog>
+public class WebhooksLogDto : IMapFrom<DbWebhooksLog>
 {
-    /// <summary>ID</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The webhook log ID.
+    /// </summary>
     public int Id { get; set; }
 
-    /// <summary>Config name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The webhook configuration name.
+    /// </summary>
     public string ConfigName { get; set; }
 
-    /// <summary>Creation time</summary>
-    /// <type>System.DateTime, System</type>
+    /// <summary>
+    /// The webhook trigger type.
+    /// </summary>
+    public WebhookTrigger Trigger { get; set; }
+
+    /// <summary>
+    /// The webhook creation time.
+    /// </summary>
     public DateTime CreationTime { get; set; }
 
-    /// <summary>Method</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The webhook method.
+    /// </summary>
     public string Method { get; set; }
 
-    /// <summary>Route</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The webhook route.
+    /// </summary>
     public string Route { get; set; }
 
-    /// <summary>Request headers</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The webhook request headers.
+    /// </summary>
     public string RequestHeaders { get; set; }
 
-    /// <summary>Request payload</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The webhook request payload.
+    /// </summary>
     public string RequestPayload { get; set; }
 
-    /// <summary>Response headers</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The webhook response headers.
+    /// </summary>
     public string ResponseHeaders { get; set; }
 
-    /// <summary>Response payload</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The webhook response payload.
+    /// </summary>
     public string ResponsePayload { get; set; }
 
-    /// <summary>Status</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The webhook status.
+    /// </summary>
     public int Status { get; set; }
 
-    /// <summary>Delivery time</summary>
-    /// <type>System.Nullable{System.DateTime}, System</type>
+    /// <summary>
+    /// The webhook delivery time.
+    /// </summary>
     public DateTime? Delivery { get; set; }
+
+    public void Mapping(Profile profile)
+    {
+        profile.CreateMap<DbWebhooksLog, WebhooksLogDto>()
+              .ConvertUsing<WebhooksLogConverter>();
+    }
+}
+
+[Scope]
+public class WebhooksLogConverter(TenantUtil tenantUtil) : ITypeConverter<DbWebhooksLog, WebhooksLogDto>
+{
+    public WebhooksLogDto Convert(DbWebhooksLog source, WebhooksLogDto destination, ResolutionContext context)
+    {
+        var result = new WebhooksLogDto
+        {
+             Id = source.Id,
+             CreationTime = tenantUtil.DateTimeFromUtc(source.CreationTime),
+             Status = source.Status,
+             RequestHeaders = source.RequestHeaders,
+             RequestPayload = source.RequestPayload,
+             ResponseHeaders = source.ResponseHeaders,
+             ResponsePayload = source.ResponsePayload,
+             Trigger = source.Trigger
+        };
+
+        if (source.Delivery.HasValue)
+        {
+            result.Delivery = tenantUtil.DateTimeFromUtc(source.Delivery.Value);
+        }
+        
+        return result;
+    }
 }

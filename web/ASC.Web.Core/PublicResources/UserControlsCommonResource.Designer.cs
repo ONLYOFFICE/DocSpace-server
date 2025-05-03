@@ -88,6 +88,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to License Conflict. Please ensure that you have installed the correct edition of {0} DocSpace (Enterprise or Developer). If you have any questions, feel free to contact your sales manager..
+        /// </summary>
+        public static string LicenseTypeNotCorrect {
+            get {
+                return ResourceManager.GetString("LicenseTypeNotCorrect", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to New document.
         /// </summary>
         public static string NewDocument {
@@ -102,6 +111,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string TariffPerMonth {
             get {
                 return ResourceManager.GetString("TariffPerMonth", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to year.
+        /// </summary>
+        public static string TariffPerYear {
+            get {
+                return ResourceManager.GetString("TariffPerYear", resourceCulture);
             }
         }
         

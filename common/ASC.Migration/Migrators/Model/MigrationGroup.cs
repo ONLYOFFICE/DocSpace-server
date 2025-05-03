@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,7 +31,7 @@ public class MigrationGroup
     public HashSet<string> UserKeys { get; set; }
     public string ManagerKey { get; set; }
     public bool ShouldImport { get; set; }
-    public virtual MigratingApiGroup ToApiInfo()
+    public MigratingApiGroup ToApiInfo()
     {
         return new MigratingApiGroup
         {

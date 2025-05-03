@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,6 +31,11 @@ public class WebPluginMappingConverter(EmployeeDtoHelper employeeDtoHelper) : IT
 {
     public EmployeeDto Convert(Guid source, EmployeeDto destination, ResolutionContext context)
     {
+        if (source == Guid.Empty)
+        {
+            return new EmployeeDto();
+        }
+        
         return employeeDtoHelper.GetAsync(source).Result;
     }
 }

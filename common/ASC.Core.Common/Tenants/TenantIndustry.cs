@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,23 +26,59 @@
 
 namespace ASC.Core.Tenants;
 
+/// <summary>
+/// The tenant industry.
+/// </summary>
 public enum TenantIndustry
 {
+    [SwaggerEnum("Other")]
     Other,
+
+    [SwaggerEnum("Accounting")]
     Accounting,
+
+    [SwaggerEnum("Advertising marketing PR")]
     AdvertisingMarketingPR,
+
+    [SwaggerEnum("Banking")]
     Banking,
+
+    [SwaggerEnum("Consulting")]
     Consulting,
+
+    [SwaggerEnum("Design")]
     Design,
+
+    [SwaggerEnum("Education")]
     Education,
+
+    [SwaggerEnum("Environment")]
     Environment,
+
+    [SwaggerEnum("Financial services")]
     FinancialServices,
+
+    [SwaggerEnum("Health care")]
     HealthCare,
+
+    [SwaggerEnum("IT")]
     IT,
+
+    [SwaggerEnum("Legal")]
     Legal,
+
+    [SwaggerEnum("Manufacturing")]
     Manufacturing,
+
+    [SwaggerEnum("Public sector")]
     PublicSector,
+
+    [SwaggerEnum("Publishing")]
     Publishing,
+
+    [SwaggerEnum("Retail sales")]
     RetailSales,
+
+    [SwaggerEnum("Telecommunications")]
     Telecommunications
 }

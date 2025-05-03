@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,49 +27,79 @@
 namespace ASC.Web.Files.Services.WCFService;
 
 /// <summary>
+/// The mention message parameters.
 /// </summary>
 public class MentionWrapper
 {
     internal MentionWrapper() { }
 
-    /// <summary>User information</summary>
-    /// <type>ASC.Core.Users.UserInfo, ASC.Core.Common</type>
+    /// <summary>
+    /// The user information.
+    /// </summary>
     public UserInfo User { get; internal set; }
 
-    /// <summary>User email</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The email address of the user.
+    /// </summary>
+    [EmailAddress]
     public string Email { get; internal set; }
 
-    /// <summary>User ID</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The identification of the user.
+    /// </summary>
     public string Id { get; internal set; }
 
-    /// <summary>User image</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The path to the user's avatar.
+    /// </summary>
     public string Image { get; internal set; }
 
-    /// <summary>Specifies if the user has the access to the file or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the user has the access to the file or not.
+    /// </summary>
     public bool HasAccess { get; internal set; }
 
-    /// <summary>User display name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The full name of the user.
+    /// </summary>
     public string Name { get; internal set; }
 }
 
 /// <summary>
+/// The mention message parameters.
 /// </summary>
 public class MentionMessageWrapper
 {
-    /// <summary>The config parameter which contains the information about the comment in the document that will be scrolled to</summary>
-    /// <type>ASC.Web.Files.Services.DocumentService.ActionLinkConfig, ASC.Files.Core</type>
+    /// <summary>
+    /// The config parameter which contains the information about the action in the document that will be scrolled to.
+    /// </summary>
     public ActionLinkConfig ActionLink { get; set; }
 
-    /// <summary>A list of emails which will receive the mention message</summary>
-    /// <type>System.Collections.Generic.List{System.String}, System.Collections.Generic</type>
+    /// <summary>
+    /// A list of emails which will receive the mention message.
+    /// </summary>
     public List<string> Emails { get; set; }
 
-    /// <summary>The comment message</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The comment message.
+    /// </summary>
     public string Message { get; set; }
+}
+
+/// <summary>
+/// The mention message request parameters.
+/// </summary>
+public class MentionMessageWrapperRequestDto<T>
+{
+    /// <summary>
+    /// The file ID of the mention message.
+    /// </summary>
+    [FromRoute(Name = "fileId")]
+    public T FileId { get; set; }
+
+    /// <summary>
+    /// The mention message.
+    /// </summary>
+    [FromBody]
+    public MentionMessageWrapper MentionMessage {  get; set; }
 }

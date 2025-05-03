@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,36 +27,43 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
+/// The request parameters for handling the authorization service.
 /// </summary>
 public class AuthServiceRequestsDto
 {
-    /// <summary>Name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The name of the authentication service.
+    /// </summary>
     public string Name { get; set; }
 
-    /// <summary>Title</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The user-friendly display title of the authentication service.
+    /// </summary>
     public string Title { get; set; }
 
-    /// <summary>Description</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The brief description of the authentication service.
+    /// </summary>
     public string Description { get; set; }
 
-    /// <summary>Instruction</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The detailed instructions for configuring or using the authentication service.
+    /// </summary>
     public string Instruction { get; set; }
 
-    /// <summary>Specifies if the authentication service can be set or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether the authentication service can be configured by the user.
+    /// </summary>
     public bool CanSet { get; set; }
 
-    /// <summary>List of authorization keys</summary>
-    /// <type>System.Collections.Generic.List{ASC.Web.Core.CookiesType.AuthKey}, System.Collections.Generic</type>
+    /// <summary>
+    /// The collection of authorization keys associated with the authentication service.
+    /// </summary>
     public List<AuthKey> Props { get; set; }
 
-    public static async Task<AuthServiceRequestsDto> From(Consumer consumer)
+    public static async Task<AuthServiceRequestsDto> From(Consumer consumer, string logoText)
     {
-        var authService = await AuthService.From(consumer);
+        var authService = await AuthService.From(consumer, logoText);
         var result = new AuthServiceRequestsDto 
         { 
             Name = authService.Name, 

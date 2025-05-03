@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -37,7 +37,8 @@ public class CustomTagsService(
 {
     public async Task<TagInfo> CreateTagAsync(string name)
     {
-        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
+        var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+        if (userType is not EmployeeType.RoomAdmin and not EmployeeType.DocSpaceAdmin)
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
@@ -61,7 +62,7 @@ public class CustomTagsService(
 
         var savedTag = await tagDao.SaveTagInfoAsync(tagInfo);
 
-        await filesMessageService.SendAsync(MessageAction.TagCreated, savedTag.Name);
+        filesMessageService.Send(MessageAction.TagCreated, savedTag.Name);
 
         return savedTag;
     }
@@ -85,7 +86,7 @@ public class CustomTagsService(
 
         await tagDao.RemoveTagsAsync(tags);
 
-        await filesMessageService.SendAsync(MessageAction.TagsDeleted, string.Join(',', tags.Select(t => t.Name).ToArray()));
+        filesMessageService.Send(MessageAction.TagsDeleted, string.Join(',', tags.Select(t => t.Name).ToArray()));
     }
 
     public async Task<Folder<T>> AddRoomTagsAsync<T>(T folderId, IEnumerable<string> names)

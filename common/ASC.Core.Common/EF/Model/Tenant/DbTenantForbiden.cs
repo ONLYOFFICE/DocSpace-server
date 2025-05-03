@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,6 +28,7 @@ namespace ASC.Core.Common.EF.Model;
 
 public class DbTenantForbiden
 {
+    [MaxLength(50)]
     public string Address { get; set; }
 }
 
@@ -58,7 +59,7 @@ public static class DbTenantForbidenExtension
 
             entity.Property(e => e.Address)
                 .HasColumnName("address")
-                .HasColumnType("varchar(50)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
         });
@@ -68,14 +69,14 @@ public static class DbTenantForbidenExtension
         modelBuilder.Entity<DbTenantForbiden>(entity =>
         {
             entity.HasKey(e => e.Address)
-                .HasName("tenants_forbiden_pkey");
+                .HasName("PK_tenants_forbiden");
 
-            entity.ToTable("tenants_forbiden", "onlyoffice");
+            entity.ToTable("tenants_forbiden");
 
             entity.Property(e => e.Address)
                 .HasColumnName("address")
-                .HasMaxLength(50);
+                .HasColumnType("varchar")
+                .IsRequired();
         });
-
     }
 }

@@ -733,6 +733,9 @@
   <data name="Tariffs_admin" xml:space="preserve">
     <value>Бизнес</value>
   </data>
+  <data name="Tariffs_adminyear" xml:space="preserve">
+    <value>Бизнес</value>
+  </data>
   <data name="Tariffs_startup" xml:space="preserve">
     <value>Стартъп</value>
   </data>
@@ -743,7 +746,7 @@
     <value>Разрешете на приложението да влезе в портала с помощта на Apple ID акаунт.</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
-    <value>Активирайте това приложение, за да позволите на вашите потребители да влизат в ONLYOFFICE с Apple ID. {0}Отидете на девелъпър портала на Apple и създайте нова ONLYOFFICE интеграция. Въведете данните, които сте получили по-долу:</value>
+    <value>Активирайте това приложение, за да позволите на вашите потребители да влизат в {LogoText} с Apple ID. {0}Отидете на девелъпър портала на Apple и създайте нова {LogoText} интеграция. Въведете данните, които сте получили по-долу:</value>
   </data>
   <data name="ConsumersappleIdKeyId" xml:space="preserve">
     <value>Идентифициращ ключ от 10 знака, генериран за вписване с личния Apple ключ</value>
@@ -764,22 +767,22 @@
     <value>Активирайте това приложение, за да съкратите поканата и линковете към документи. {0}Въведете данните си за вход в Bitly и API ключа по-долу:</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
-    <value>Активирайте това приложение, за да свържете Box акаунта си към модула за документи. Ще можете да управлявате, редактирате и споделяте файлове от Box с потребители на ONLYOFFICE. {0}Влезте в акаунта си от девелъпър страницата на Box и създайте ново приложение за интегриране на ONLYOFFICE. Въведете данните, които сте получили по-долу:</value>
+    <value>Активирайте това приложение, за да свържете Box акаунта си към модула за документи. Ще можете да управлявате, редактирате и споделяте файлове от Box с потребители на {LogoText}. {0}Влезте в акаунта си от девелъпър страницата на Box и създайте ново приложение за интегриране на {LogoText}. Въведете данните, които сте получили по-долу:</value>
   </data>
   <data name="ConsumersClickatellInstruction" xml:space="preserve">
-    <value>Използвайте това приложение, за да активирате двуфакторно удостоверяване с услугата Clickatell. {0}Влезте в акаунта си в SMS Platform и създайте нова интеграция за ONLYOFFICE. Копирайте apiKey и го поставете по-долу:</value>
+    <value>Използвайте това приложение, за да активирате двуфакторно удостоверяване с услугата Clickatell. {0}Влезте в акаунта си в SMS Platform и създайте нова интеграция за {LogoText}. Копирайте apiKey и го поставете по-долу:</value>
   </data>
   <data name="ConsumersdocuSignClientSecret" xml:space="preserve">
     <value>DocuSign Secret</value>
   </data>
   <data name="ConsumersDocuSignInstruction" xml:space="preserve">
-    <value>Разрешете това приложение за цифрово подписване на документи с помощта на DocuSign. {0}Отидете на вашата DocuSign администраторска конзола и добавете интеграция за ONLYOFFICE. Въведете данните, които сте получили по-долу:</value>
+    <value>Разрешете това приложение за цифрово подписване на документи с помощта на DocuSign. {0}Отидете на вашата DocuSign администраторска конзола и добавете интеграция за {LogoText}. Въведете данните, които сте получили по-долу:</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
-    <value>Активирайте това приложение, за да свържете вашия Dropbox акаунт към модула за документи. Ще можете да управлявате, редактирате и споделяте файлове от Dropbox с потребители на ONLYOFFICE. {0}Влезте в акаунта си на уебсайта за девелъпъри на Dropbox и създайте ново приложение за интегриране на ONLYOFFICE. Въведете данните, които сте получили по-долу:</value>
+    <value>Активирайте това приложение, за да свържете вашия Dropbox акаунт към модула за документи. Ще можете да управлявате, редактирате и споделяте файлове от Dropbox с потребители на {LogoText}. {0}Влезте в акаунта си на уебсайта за девелъпъри на Dropbox и създайте ново приложение за интегриране на {LogoText}. Въведете данните, които сте получили по-долу:</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
-    <value>Активирайте това приложение, за да позволите на вашите потребители да влизат в ONLYOFFICE с помощта на Facebook и да свържат Facebook акаунтите на своите клиенти към CRM модула. {0}Отидете в девелъпър портала на Facebook и създайте ново приложение ONLYOFFICE интеграция. Въведете данните, които сте получили по-долу:</value>
+    <value>Активирайте това приложение, за да позволите на вашите потребители да влизат в {LogoText} с помощта на Facebook и да свържат Facebook акаунтите на своите клиенти към CRM модула. {0}Отидете в девелъпър портала на Facebook и създайте ново приложение {LogoText} интеграция. Въведете данните, които сте получили по-долу:</value>
   </data>
   <data name="ConsumersGoogleCloud" xml:space="preserve">
     <value>Google Cloud Storage</value>
@@ -791,10 +794,10 @@
     <value>GoogleCloud json</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
-    <value>Активирайте това приложение, за да свържете Google Drive акаунта си с модула за документи. Ще можете да управлявате, редактирате и споделяте файлове от Google Drive с потребители на ONLYOFFICE. {0}Отидете в API конзолата на Google и създайте нов проект за интегриране на ONLYOFFICE. Въведете данните, които сте получили по-долу:</value>
+    <value>Активирайте това приложение, за да свържете Google Drive акаунта си с модула за документи. Ще можете да управлявате, редактирате и споделяте файлове от Google Drive с потребители на {LogoText}. {0}Отидете в API конзолата на Google и създайте нов проект за интегриране на {LogoText}. Въведете данните, които сте получили по-долу:</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
-    <value>Активирайте това приложение, за да позволите на вашите потребители да влизат в ONLYOFFICE, използвайки своите LinkedIn акаунти. {0}Отидете на уебсайта за разработчици на LinkedIn и създайте нова интеграция на ONLYOFFICE приложението. Въведете данните, които сте получили по-долу:</value>
+    <value>Активирайте това приложение, за да позволите на вашите потребители да влизат в {LogoText}, използвайки своите LinkedIn акаунти. {0}Отидете на уебсайта за разработчици на LinkedIn и създайте нова интеграция на {LogoText} приложението. Въведете данните, които сте получили по-долу:</value>
   </data>
   <data name="ConsumersMailruClientId" xml:space="preserve">
     <value>ID</value>
@@ -815,7 +818,7 @@
     <value>Разрешете на приложението да се вписва в портала с Microsoft акаунт.</value>
   </data>
   <data name="ConsumersMicrosoftInstruction" xml:space="preserve">
-    <value>Активирайте това приложение, за да позволите на вашите потребители да влизат в ONLYOFFICE с Microsoft акаунтите си. {0}Отидете в Microsoft Azure и създайте нова интеграция за приложението на ONLYOFFICE. Въведете данните, които сте получили по-долу:</value>
+    <value>Активирайте това приложение, за да позволите на вашите потребители да влизат в {LogoText} с Microsoft акаунтите си. {0}Отидете в Microsoft Azure и създайте нова интеграция за приложението на {LogoText}. Въведете данните, които сте получили по-долу:</value>
   </data>
   <data name="ConsumersRackspace" xml:space="preserve">
     <value>Rackspace Cloud Storage</value>
@@ -863,7 +866,7 @@
     <value>ID на приложението</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
-    <value>Активирайте това приложение, за да свържете вашия OneDrive акаунт към модула за документи. Ще можете да управлявате, редактирате и споделяте файлове от OneDrive с потребители на ONLYOFFICE. {0}Влезте в акаунта си в Microsoft Azure и създайте ново приложение за интегриране на ONLYOFFICE. Въведете данните, които сте получили по-долу:</value>
+    <value>Активирайте това приложение, за да свържете вашия OneDrive акаунт към модула за документи. Ще можете да управлявате, редактирате и споделяте файлове от OneDrive с потребители на {LogoText}. {0}Влезте в акаунта си в Microsoft Azure и създайте ново приложение за интегриране на {LogoText}. Въведете данните, които сте получили по-долу:</value>
   </data>
   <data name="ConsumersSmscInstruction" xml:space="preserve">
     <value>Използвайте това приложение, за да активирате двуфакторно удостоверяване с услугата SMS Center. {0}Въведете вашето име за вход в smsc акаунта и вашата парола (или парола MD5 хеш) с малки букви:</value>
@@ -887,7 +890,7 @@
     <value>ID на клиента</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Активирайте това приложение, за да позволите на вашите потребители да влизат в ONLYOFFICE, ползвайки техния Twitter и да свържат Twitter акаунтите на своите клиенти към CRM модула. {0}Отидете на портала за разработчици на Twitter и създайте нова интеграция за ONLYOFFICE. Въведете данните, които сте получили по-долу:</value>
+    <value>Активирайте това приложение, за да позволите на вашите потребители да влизат в {LogoText}, ползвайки техния Twitter и да свържат Twitter акаунтите на своите клиенти към CRM модула. {0}Отидете на портала за разработчици на Twitter и създайте нова интеграция за {LogoText}. Въведете данните, които сте получили по-долу:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>API ключ</value>
@@ -920,7 +923,7 @@
     <value>Тайна на клиента</value>
   </data>
   <data name="ConsumersYahooInstruction" xml:space="preserve">
-    <value>Активирайте това приложение, за да добавите нови потребители на портала от вашия списък с контакти в Yahoo. {0}Отидете на страницата за създаване на приложение в Yahoo Developer Network и създайте ново приложение за интегриране на ONLYOFFICE. Въведете данните, които сте получили по-долу:</value>
+    <value>Активирайте това приложение, за да добавите нови потребители на портала от вашия списък с контакти в Yahoo. {0}Отидете на страницата за създаване на приложение в Yahoo Developer Network и създайте ново приложение за интегриране на {LogoText}. Въведете данните, които сте получили по-долу:</value>
   </data>
   <data name="ConsumersYandexClientId" xml:space="preserve">
     <value>ID</value>
@@ -956,25 +959,25 @@
     <value>Активирайте приложението за управление на файлове и папки на Dropbox.</value>
   </data>
   <data name="ConsumersEasyBibInstruction" xml:space="preserve">
-    <value>Активирайте това приложение, за да създавате библиографии в ONLYOFFICE редакторите. {0}Отидете на страницата за регистрация на EasyBib и попълнете формуляра, за да добавите интеграция на ONLYOFFICE. След като получите ключ за приложението, поставете го по-долу:</value>
+    <value>Активирайте това приложение, за да създавате библиографии в {LogoText} редакторите. {0}Отидете на страницата за регистрация на EasyBib и попълнете формуляра, за да добавите интеграция на {LogoText}. След като получите ключ за приложението, поставете го по-долу:</value>
   </data>
   <data name="ConsumersFirebaseInstruction" xml:space="preserve">
-    <value>Активирайте това приложение, за да позволите на вашите потребители да получават известия за съобщения дори o офлайн. {0}Отидете в конзолата на Firebase и добавете нов проект за интегриране на ONLYOFFICE. Въведете данните, които сте получили по-долу:</value>
+    <value>Активирайте това приложение, за да позволите на вашите потребители да получават известия за съобщения дори o офлайн. {0}Отидете в конзолата на Firebase и добавете нов проект за интегриране на {LogoText}. Въведете данните, които сте получили по-долу:</value>
   </data>
   <data name="ConsumersGoogleCloudInstruction" xml:space="preserve">
-    <value>Свържете Google Cloud Storage услугата, за да архивирате и съхранявате данни от вашия портал. {0}Отидете на Google Cloud Platform Console и създайте нов акаунт за услуги за ONLYOFFICE. Поставете данните, които сте получили по-долу:</value>
+    <value>Свържете Google Cloud Storage услугата, за да архивирате и съхранявате данни от вашия портал. {0}Отидете на Google Cloud Platform Console и създайте нов акаунт за услуги за {LogoText}. Поставете данните, които сте получили по-долу:</value>
   </data>
   <data name="ConsumersRackspaceInstruction" xml:space="preserve">
     <value>Свържете услугата Rackspace Cloud Storage, за да архивирате и съхранявате данни от вашия портал. {0}В настройките за сигурност на Rackspace Cloud Control Panel щракнете върху Show линка до Rackspace API Key. Поставете данните, които сте получили по-долу:</value>
   </data>
   <data name="ConsumersS3Instruction" xml:space="preserve">
-    <value>Свържете Amazon AWS S3, за да архивирате и съхранявате данни от вашия портал. {0}Отидете до конзолата за управление на AWS и създайте ключове за достъп за ONLYOFFICE. Поставете данните, които сте получили по-долу:</value>
+    <value>Свържете Amazon AWS S3, за да архивирате и съхранявате данни от вашия портал. {0}Отидете до конзолата за управление на AWS и създайте ключове за достъп за {LogoText}. Поставете данните, които сте получили по-долу:</value>
   </data>
   <data name="ConsumersSelectelInstruction" xml:space="preserve">
     <value>Свържете услугата Selectel Cloud Storage, за да архивирате и съхранявате данни от вашия портал. {0}Вземете данните за достъп за потребител с права за Четене/Писане за контейнерите, където планирате да съхранявате резервните си копия, и ги поставете по-долу:</value>
   </data>
   <data name="ConsumersWordpressInstruction" xml:space="preserve">
-    <value>Активирайте приложението за лесно публикуване на документи на вашия WordPress уебсайт. {0}На страницата за разработчици на Wordpress създайте ново приложение за интегриране на ONLYOFFICE. Поставете данните, които сте получили по-долу:</value>
+    <value>Активирайте приложението за лесно публикуване на документи на вашия WordPress уебсайт. {0}На страницата за разработчици на Wordpress създайте ново приложение за интегриране на {LogoText}. Поставете данните, които сте получили по-долу:</value>
   </data>
   <data name="TariffsFeature_thirdparty" xml:space="preserve">
     <value>Интеграции на трети страни</value>
@@ -992,7 +995,7 @@
     <value>Разрешете приложението да влезе в портала с помощта на Zoom акаунт.</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
-    <value>Активирайте това приложение, за да позволите на потребителите Ви да влизат в ONLYOFFICE, използвайки своите Zoom профили. {0}Отидете в уебсайта на Zoom Developers и създайте нова интеграция на приложението ONLYOFFICE. Въведете данните, получени по-долу:</value>
+    <value>Активирайте това приложение, за да позволите на потребителите Ви да влизат в {LogoText}, използвайки своите Zoom профили. {0}Отидете в уебсайта на Zoom Developers и създайте нова интеграция на приложението {LogoText}. Въведете данните, получени по-долу:</value>
   </data>
   <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
     <value>Твърде много опити за списване. Моля, опитайте отново по-късно</value>
@@ -1055,12 +1058,27 @@
     <value>Квоти и статистики за съхранение</value>
   </data>
   <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} за администратор/опитен потребител и възможност за добавяне на място по заявка</value>
+    <value>{0} за администратор и възможност за добавяне на място по заявка</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
     <value>Неуспешно задаване на квота за стая. Въведената стойност е по-голяма от общото хранилище на DocSpace.</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
     <value>Неуспешно задаване на квота за потребител. Въведената стойност е по-голяма от общото хранилище на DocSpace.</value>
+  </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Добавете поне 1 доверен домейн.</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Броят на администраторите надвишава ограничението: {0}/{1}.</value>
+  </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>С нестопанска цел</value>
+  </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Добавете поне е1 позволен IP адрес.</value>
+  </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>URL адресът на Webhook не е наличен. Заявката HEAD не е отговор 200 http състояние.</value>
   </data>
 </root>

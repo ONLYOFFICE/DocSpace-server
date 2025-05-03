@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,19 +27,23 @@
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
+/// The currencies parameters.
 /// </summary>
 public class CurrenciesDto
 {
-    /// <summary>ISO country code</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The ISO country code.
+    /// </summary>
     public string ISOCountryCode { get; set; }
 
-    /// <summary>ISO currency symbol</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The ISO currency symbol.
+    /// </summary>
     public string ISOCurrencySymbol { get; set; }
 
-    /// <summary>Currency native name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The currency native name.
+    /// </summary>
     public string CurrencyNativeName { get; set; }
 
     public CurrenciesDto()

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,48 +27,57 @@
 namespace ASC.Data.Backup.ApiModels;
 
 /// <summary>
+/// The backup schedule parameters.
 /// </summary>
 public class BackupScheduleDto
 {
-    /// <summary>Storage type</summary>
-    /// <type>System.String, System</type>
-    /// <example>Documents</example>
-    public string StorageType { get; set; }
+    /// <summary>
+    /// The backup storage type.
+    /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public BackupStorageType? StorageType { get; set; }
 
-    /// <summary>Storage parameters</summary>
-    /// <type>System.Collections.Generic.IEnumerable{ASC.Api.Collections.ItemKeyValuePair{System.Object, System.Object}}, System.Collections.Generic</type>
+    /// <summary>
+    /// The backup storage parameters.
+    /// </summary>
     public IEnumerable<ItemKeyValuePair<object, object>> StorageParams { get; set; }
 
-    /// <summary>Maximum number of the stored backup copies</summary>
-    /// <type>System.String, System</type>
-    public string BackupsStored { get; set; }
+    /// <summary>
+    /// The maximum number of the stored backup copies.
+    /// </summary>
+    public int? BackupsStored { get; set; }
 
-    /// <summary>Cron parameters</summary>
-    /// <type>ASC.Data.Backup.ApiModels.Cron, ASC.Data.Backup</type>
+    /// <summary>
+    /// The backup cron parameters.
+    /// </summary>
     public Cron CronParams { get; set; }
 
-    /// <summary>Specifies if a dump will be created or not</summary>
-    /// <type>System.Boolean, System</type>
-    /// <example>true</example>
+    /// <summary>
+    /// Specifies if a dump will be created or not.
+    /// </summary>
     public bool Dump { get; set; }
 }
 
 /// <summary>
+/// The backup cron parameters.
 /// </summary>
 public class Cron
 {
-    /// <summary>Period</summary>
-    /// <type>System.String, System</type>
-    /// <example>0</example>
-    public string Period { get; set; }
+    /// <summary>
+    /// The backup period type.
+    /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public BackupPeriod? Period { get; set; }
 
-    /// <summary>Hour</summary>
-    /// <type>System.String, System</type>
-    /// <example>0</example>
-    public string Hour { get; set; }
+    /// <summary>
+    /// The time of the day to start the backup process.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 0)]
+    public int Hour { get; set; }
 
-    /// <summary>Day</summary>
-    /// <type>System.String, System</type>
-    /// <example>0</example>
-    public string Day { get; set; }
+    /// <summary>
+    /// The day of the week to start the backup process.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = 0)]
+    public int? Day { get; set; }
 }

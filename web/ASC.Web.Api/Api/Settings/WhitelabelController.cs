@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,37 +26,38 @@
 
 namespace ASC.Web.Api.Controllers.Settings;
 
-public class WhitelabelController(ApiContext apiContext,
-        PermissionContext permissionContext,
-        SettingsManager settingsManager,
-        WebItemManager webItemManager,
-        TenantInfoSettingsHelper tenantInfoSettingsHelper,
-        TenantWhiteLabelSettingsHelper tenantWhiteLabelSettingsHelper,
-        TenantLogoManager tenantLogoManager,
-        CoreBaseSettings coreBaseSettings,
-        CommonLinkUtility commonLinkUtility,
-        IMemoryCache memoryCache,
-        IHttpContextAccessor httpContextAccessor,
-        IMapper mapper,
-        CompanyWhiteLabelSettingsHelper companyWhiteLabelSettingsHelper,
-        TenantManager tenantManager,
-        TenantExtra tenantExtra,
-        StorageFactory storageFactory)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+public class WhitelabelController(
+    ApiContext apiContext,
+    PermissionContext permissionContext,
+    SettingsManager settingsManager,
+    WebItemManager webItemManager,
+    TenantInfoSettingsHelper tenantInfoSettingsHelper,
+    TenantWhiteLabelSettingsHelper tenantWhiteLabelSettingsHelper,
+    TenantLogoManager tenantLogoManager,
+    CoreBaseSettings coreBaseSettings,
+    CommonLinkUtility commonLinkUtility,
+    IFusionCache fusionCache,
+    IHttpContextAccessor httpContextAccessor,
+    IMapper mapper,
+    CompanyWhiteLabelSettingsHelper companyWhiteLabelSettingsHelper,
+    TenantManager tenantManager,
+    TenantExtra tenantExtra,
+    StorageFactory storageFactory)
+    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
+    #region Logos
+
     /// <summary>
-    /// Saves the white label settings specified in the request.
+    /// Saves the white label logos specified in the request.
     /// </summary>
     /// <short>
-    /// Save the white label settings
+    /// Save the white label logos
     /// </short>
-    /// <category>Rebranding</category>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.WhiteLabelRequestsDto, ASC.Web.Api" name="inDto">Request parameters for white label settings</param>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.WhiteLabelQueryRequestsDto, ASC.Web.Api" name="inQueryDto">White label request parameters</param>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is sucessful</returns>
-    /// <path>api/2.0/settings/whitelabel/save</path>
-    /// <httpMethod>POST</httpMethod>
-    [HttpPost("whitelabel/save")]
+    /// <path>api/2.0/settings/whitelabel/logos/save</path>
+    [Tags("Settings / Rebranding")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is sucessful", typeof(bool))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpPost("whitelabel/logos/save")]
     public async Task<bool> SaveWhiteLabelSettingsAsync(WhiteLabelRequestsDto inDto, [FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
@@ -81,7 +82,7 @@ public class WhitelabelController(ApiContext apiContext,
     {
         var settings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
 
         await SaveWhiteLabelSettingsForTenantAsync(settings, null, tenant.Id, inDto);
     }
@@ -111,23 +112,23 @@ public class WhitelabelController(ApiContext apiContext,
             await tenantWhiteLabelSettingsHelper.SetLogo(settings, logoDict, storage);
         }
 
-        settings.SetLogoText(inDto.LogoText);
+        await settingsManager.SaveAsync(settings, tenantId);
 
-        await tenantWhiteLabelSettingsHelper.SaveAsync(settings, tenantId, tenantLogoManager);
+        await tenantLogoManager.RemoveMailLogoDataFromCacheAsync();
     }
 
     /// <summary>
-    /// Saves the white label settings from files.
+    /// Saves the white label logos from files.
     /// </summary>
     /// <short>
-    /// Save the white label settings from files
+    /// Save the white label logos from files
     /// </short>
-    /// <category>Rebranding</category>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.WhiteLabelQueryRequestsDto, ASC.Web.Api" name="inQueryDto">White label request parameters</param>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
-    /// <path>api/2.0/settings/whitelabel/savefromfiles</path>
-    /// <httpMethod>POST</httpMethod>
-    [HttpPost("whitelabel/savefromfiles")]
+    /// <path>api/2.0/settings/whitelabel/logos/savefromfiles</path>
+    [Tags("Settings / Rebranding")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is sucessful", typeof(bool))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(409, "No input files")]
+    [HttpPost("whitelabel/logos/savefromfiles")]
     public async Task<bool> SaveWhiteLabelSettingsFromFilesAsync([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
@@ -157,7 +158,7 @@ public class WhitelabelController(ApiContext apiContext,
     {
         var settings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
 
         await SaveWhiteLabelSettingsFromFilesForTenantAsync(settings, null, tenant.Id);
     }
@@ -190,6 +191,8 @@ public class WhitelabelController(ApiContext apiContext,
         }
 
         await settingsManager.SaveAsync(settings, tenantId);
+
+        await tenantLogoManager.RemoveMailLogoDataFromCacheAsync();
     }
 
     private void GetParts(string fileName, out WhiteLabelLogoType logoType, out string fileExt)
@@ -205,13 +208,11 @@ public class WhitelabelController(ApiContext apiContext,
     /// <short>
     /// Get the white label logos
     /// </short>
-    /// <category>Rebranding</category>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.WhiteLabelQueryRequestsDto, ASC.Web.Api" name="inQueryDto">White label request parameters</param>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.WhiteLabelItemDto, ASC.Web.Api">White label logos</returns>
     /// <path>api/2.0/settings/whitelabel/logos</path>
-    /// <httpMethod>GET</httpMethod>
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <collection>list</collection>
+    [Tags("Settings / Rebranding")]
+    [SwaggerResponse(200, "White label logos", typeof(IAsyncEnumerable<WhiteLabelItemDto>))]
     [AllowNotPayment, AllowAnonymous, AllowSuspended]
     [HttpGet("whitelabel/logos")]
     public async IAsyncEnumerable<WhiteLabelItemDto> GetWhiteLabelLogosAsync([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
@@ -220,7 +221,7 @@ public class WhitelabelController(ApiContext apiContext,
 
         var tenantWhiteLabelSettings = isDefault ? null : await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
 
-        foreach (var logoType in (WhiteLabelLogoType[])Enum.GetValues(typeof(WhiteLabelLogoType)))
+        foreach (var logoType in Enum.GetValues<WhiteLabelLogoType>())
         {
             if (logoType == WhiteLabelLogoType.Notification)
             {
@@ -229,7 +230,7 @@ public class WhitelabelController(ApiContext apiContext,
 
             var result = new WhiteLabelItemDto
             {
-                Name = logoType.ToString(),
+                Name = logoType.ToStringFast(),
                 Size = TenantWhiteLabelSettings.GetSize(logoType)
             };
 
@@ -286,11 +287,10 @@ public class WhitelabelController(ApiContext apiContext,
     /// <short>
     /// Check the default white label logos
     /// </short>
-    /// <category>Rebranding</category>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.IsDefaultWhiteLabelLogosDto, ASC.Web.Api">Request properties of white label logos</returns>
     /// <path>api/2.0/settings/whitelabel/logos/isdefault</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Settings / Rebranding")]
+    [SwaggerResponse(200, "Request properties of white label logos", typeof(IAsyncEnumerable<IsDefaultWhiteLabelLogosDto>))]
     [HttpGet("whitelabel/logos/isdefault")]
     public async IAsyncEnumerable<IsDefaultWhiteLabelLogosDto> GetIsDefaultWhiteLabelLogos([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
     {
@@ -300,16 +300,11 @@ public class WhitelabelController(ApiContext apiContext,
             ? await settingsManager.LoadForDefaultTenantAsync<TenantWhiteLabelSettings>()
             : await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
 
-        yield return new IsDefaultWhiteLabelLogosDto
-        {
-            Name = "logotext",
-            Default = tenantWhiteLabelSettings.LogoText.IsNullOrEmpty() || tenantWhiteLabelSettings.LogoText.Equals(TenantWhiteLabelSettings.DefaultLogoText)
-        };
-        foreach (var logoType in (WhiteLabelLogoType[])Enum.GetValues(typeof(WhiteLabelLogoType)))
+        foreach (var logoType in Enum.GetValues<WhiteLabelLogoType>())
         {
             var result = new IsDefaultWhiteLabelLogosDto
             {
-                Name = logoType.ToString(),
+                Name = logoType.ToStringFast(),
                 Default = tenantWhiteLabelSettings.GetIsDefault(logoType)
             };
 
@@ -318,19 +313,114 @@ public class WhitelabelController(ApiContext apiContext,
     }
 
     /// <summary>
+    /// Restores the white label logos.
+    /// </summary>
+    /// <short>
+    /// Restore the white label logos
+    /// </short>
+    /// <path>api/2.0/settings/whitelabel/logos/restore</path>
+    [Tags("Settings / Rebranding")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpPut("whitelabel/logos/restore")]
+    public async Task<bool> RestoreWhiteLabelLogosAsync([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        if (inQueryDto is { IsDefault: not null } && inQueryDto.IsDefault.Value)
+        {
+            await DemandRebrandingPermissionAsync(false);
+
+            await RestoreWhiteLabelLogosForDefaultTenantAsync();
+        }
+        else
+        {
+            await RestoreWhiteLabelLogosForCurrentTenantAsync();
+        }
+
+        return true;
+    }
+
+    private async Task RestoreWhiteLabelLogosForCurrentTenantAsync()
+    {
+        var settings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
+        var tenant = tenantManager.GetCurrentTenant();
+
+        await RestoreWhiteLabelLogosForTenantAsync(settings, null, tenant.Id);
+
+        var tenantInfoSettings = await settingsManager.LoadAsync<TenantInfoSettings>();
+        await tenantInfoSettingsHelper.RestoreDefaultLogoAsync(tenantInfoSettings, tenantLogoManager);
+        await settingsManager.SaveAsync(tenantInfoSettings);
+    }
+
+    private async Task RestoreWhiteLabelLogosForDefaultTenantAsync()
+    {
+        var settings = await settingsManager.LoadForDefaultTenantAsync<TenantWhiteLabelSettings>();
+        var storage = await storageFactory.GetStorageAsync(Tenant.DefaultTenant, "static_partnerdata");
+
+        await RestoreWhiteLabelLogosForTenantAsync(settings, storage, Tenant.DefaultTenant);
+    }
+
+    private async Task RestoreWhiteLabelLogosForTenantAsync(TenantWhiteLabelSettings settings, IDataStore storage, int tenantId)
+    {
+        await tenantWhiteLabelSettingsHelper.RestoreDefaultLogos(settings, tenantLogoManager, tenantId, storage);
+    }
+
+    #endregion
+
+    #region Logo Text
+
+    /// <summary>
+    /// Saves the white label logo text specified in the request.
+    /// </summary>
+    /// <short>
+    /// Save the white label logo text settings
+    /// </short>
+    /// <path>api/2.0/settings/whitelabel/logotext/save</path>
+    [Tags("Settings / Rebranding")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is sucessful", typeof(bool))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpPost("whitelabel/logotext/save")]
+    public async Task<bool> SaveWhiteLabelLogoTextAsync(WhiteLabelRequestsDto inDto, [FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        int tenantId;
+
+        if (inQueryDto is { IsDefault: not null } && inQueryDto.IsDefault.Value)
+        {
+            await DemandRebrandingPermissionAsync();
+
+            tenantId = Tenant.DefaultTenant;
+        }
+        else
+        {
+            await tenantLogoManager.DemandWhiteLabelPermissionAsync();
+
+            tenantId = tenantManager.GetCurrentTenantId();
+        }
+
+        var settings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>(tenantId);
+
+        settings.SetLogoText(inDto.LogoText);
+
+        await settingsManager.SaveAsync(settings, tenantId);
+
+        return true;
+    }
+
+    /// <summary>
     /// Returns the white label logo text.
     /// </summary>
     /// <short>
     /// Get the white label logo text
     /// </short>
-    /// <category>Rebranding</category>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.WhiteLabelQueryRequestsDto, ASC.Web.Api" name="inQueryDto">White label request parameters</param>
-    /// <returns type="System.Object, System">Logo text</returns>
     /// <path>api/2.0/settings/whitelabel/logotext</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / Rebranding")]
+    [SwaggerResponse(200, "Logo text", typeof(string))]
     [AllowNotPayment]
     [HttpGet("whitelabel/logotext")]
-    public async Task<object> GetWhiteLabelLogoTextAsync([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
+    public async Task<string> GetWhiteLabelLogoTextAsync([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -341,74 +431,79 @@ public class WhitelabelController(ApiContext apiContext,
         return settings.LogoText ?? TenantWhiteLabelSettings.DefaultLogoText;
     }
 
-
     /// <summary>
-    /// Restores the white label options.
+    /// Specifies if the white label logo text are default or not.
     /// </summary>
     /// <short>
-    /// Restore the white label options
+    /// Check the default white label logo text
     /// </short>
-    /// <category>Rebranding</category>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.WhiteLabelQueryRequestsDto, ASC.Web.Api" name="inQueryDto">White label request parameters</param>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
-    /// <path>api/2.0/settings/whitelabel/restore</path>
-    /// <httpMethod>PUT</httpMethod>
-    [HttpPut("whitelabel/restore")]
-    public async Task<bool> RestoreWhiteLabelOptionsAsync([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
+    /// <path>api/2.0/settings/whitelabel/logotext/isdefault</path>
+    /// <collection>list</collection>
+    [Tags("Settings / Rebranding")]
+    [SwaggerResponse(200, "Request properties of white label logos", typeof(IsDefaultWhiteLabelLogosDto))]
+    [HttpGet("whitelabel/logotext/isdefault")]
+    public async Task<IsDefaultWhiteLabelLogosDto> GetIsDefaultWhiteLabelLogoText([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
+        var tenantWhiteLabelSettings = inQueryDto is { IsDefault: not null } && inQueryDto.IsDefault.Value
+            ? await settingsManager.LoadForDefaultTenantAsync<TenantWhiteLabelSettings>()
+            : await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
+
+        return new IsDefaultWhiteLabelLogosDto
+        {
+            Name = "logotext",
+            Default = string.IsNullOrEmpty(tenantWhiteLabelSettings.LogoText)
+        };
+    }
+
+    /// <summary>
+    /// Restores the white label logo text.
+    /// </summary>
+    /// <short>
+    /// Restore the white label logo text
+    /// </short>
+    /// <path>api/2.0/settings/whitelabel/logotext/restore</path>
+    [Tags("Settings / Rebranding")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpPut("whitelabel/logotext/restore")]
+    public async Task<bool> RestoreWhiteLabelLogoTextAsync([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        int tenantId;
+
         if (inQueryDto is { IsDefault: not null } && inQueryDto.IsDefault.Value)
         {
-            await DemandRebrandingPermissionAsync();
+            await DemandRebrandingPermissionAsync(false);
 
-            await RestoreWhiteLabelOptionsForDefaultTenantAsync();
+            tenantId = Tenant.DefaultTenant;
         }
         else
         {
-            await tenantLogoManager.DemandWhiteLabelPermissionAsync();
-
-            await RestoreWhiteLabelOptionsForCurrentTenantAsync();
+            tenantId = tenantManager.GetCurrentTenantId();
         }
+
+        var settings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>(tenantId);
+
+        await tenantWhiteLabelSettingsHelper.RestoreDefaultLogoText(settings, tenantId);
 
         return true;
     }
 
-    private async Task RestoreWhiteLabelOptionsForCurrentTenantAsync()
-    {
-        var settings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
-        var tenant = await tenantManager.GetCurrentTenantAsync();
-        
+    #endregion
 
-        await RestoreWhiteLabelOptionsForTenantAsync(settings, null, tenant.Id);
-
-        var tenantInfoSettings = await settingsManager.LoadAsync<TenantInfoSettings>();
-        await tenantInfoSettingsHelper.RestoreDefaultLogoAsync(tenantInfoSettings, tenantLogoManager);
-        await settingsManager.SaveAsync(tenantInfoSettings);
-    }
-
-    private async Task RestoreWhiteLabelOptionsForDefaultTenantAsync()
-    {
-        var settings = await settingsManager.LoadForDefaultTenantAsync<TenantWhiteLabelSettings>();
-        var storage = await storageFactory.GetStorageAsync(Tenant.DefaultTenant, "static_partnerdata");
-
-        await RestoreWhiteLabelOptionsForTenantAsync(settings, storage, Tenant.DefaultTenant);
-    }
-
-    private async Task RestoreWhiteLabelOptionsForTenantAsync(TenantWhiteLabelSettings settings, IDataStore storage, int tenantId)
-    {
-        await tenantWhiteLabelSettingsHelper.RestoreDefault(settings, tenantLogoManager, tenantId, storage);
-    }
+    #region Company
 
     /// <summary>
     /// Returns the licensor data.
     /// </summary>
     /// <short>Get the licensor data</short>
-    /// <category>Rebranding</category>
-    /// <returns type="ASC.Web.Core.WhiteLabel.CompanyWhiteLabelSettings, ASC.Web.Core">List of company white label settings</returns>
     /// <path>api/2.0/settings/companywhitelabel</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Settings / Rebranding")]
+    [SwaggerResponse(200, "List of company white label settings", typeof(List<CompanyWhiteLabelSettings>))]
     [HttpGet("companywhitelabel")]
     public async Task<List<CompanyWhiteLabelSettings>> GetLicensorDataAsync()
     {
@@ -429,29 +524,36 @@ public class WhitelabelController(ApiContext apiContext,
     /// <summary>
     /// Saves the company white label settings specified in the request.
     /// </summary>
-    /// <category>Rebranding</category>
     /// <short>Save the company white label settings</short>
-    /// <param type="ASC.Web.Core.WhiteLabel.CompanyWhiteLabelSettingsWrapper, ASC.Web.Core" name="companyWhiteLabelSettingsWrapper">Company white label settings</param>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/settings/rebranding/company</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("Settings / Rebranding")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
+    [SwaggerResponse(400, "Argument is empty or invalid")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("rebranding/company")]
-    public async Task<bool> SaveCompanyWhiteLabelSettingsAsync(CompanyWhiteLabelSettingsWrapper companyWhiteLabelSettingsWrapper)
+    public async Task<bool> SaveCompanyWhiteLabelSettingsAsync(CompanyWhiteLabelSettingsWrapper wrapper)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         await DemandRebrandingPermissionAsync();
 
-        if (companyWhiteLabelSettingsWrapper.Settings == null || 
-            companyWhiteLabelSettingsWrapper.Settings.Email.TestEmailPunyCode() || 
-            companyWhiteLabelSettingsWrapper.Settings.Site.TestUrlPunyCode())
+        ArgumentNullException.ThrowIfNull(wrapper?.Settings, "settings");
+        ArgumentNullException.ThrowIfNull(wrapper.Settings.Email, "email");
+        ArgumentNullException.ThrowIfNull(wrapper.Settings.Site, "site");
+
+        if (wrapper.Settings.Email.TestEmailPunyCode())
         {
-            throw new ArgumentNullException("settings");
+            throw new ArgumentException("email");
         }
 
-        companyWhiteLabelSettingsWrapper.Settings.IsLicensor = false;
+        if (wrapper.Settings.Site.TestUrlPunyCode())
+        {
+            throw new ArgumentException("site");
+        }
 
-        await settingsManager.SaveForDefaultTenantAsync(companyWhiteLabelSettingsWrapper.Settings);
+        wrapper.Settings.IsLicensor = false;
+
+        await settingsManager.SaveForDefaultTenantAsync(wrapper.Settings);
 
         return true;
     }
@@ -459,34 +561,33 @@ public class WhitelabelController(ApiContext apiContext,
     /// <summary>
     /// Returns the company white label settings.
     /// </summary>
-    /// <category>Rebranding</category>
     /// <short>Get the company white label settings</short>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.CompanyWhiteLabelSettingsDtov, ASC.Web.Api">Company white label settings</returns>
     /// <path>api/2.0/settings/rebranding/company</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / Rebranding")]
+    [SwaggerResponse(200, "Company white label settings", typeof(CompanyWhiteLabelSettingsDto))]
     [AllowNotPayment]
     [HttpGet("rebranding/company")]
     public async Task<CompanyWhiteLabelSettingsDto> GetCompanyWhiteLabelSettingsAsync()
     {
-        var settings = await settingsManager.LoadForDefaultTenantAsync<CompanyWhiteLabelSettings>();
-
-        return mapper.Map<CompanyWhiteLabelSettings, CompanyWhiteLabelSettingsDto>(settings);
+        var settings = await settingsManager.LoadForDefaultTenantAsync<CompanyWhiteLabelSettings>(HttpContext.GetIfModifiedSince());
+        
+        return HttpContext.TryGetFromCache(settings.LastModified) ? null :   mapper.Map<CompanyWhiteLabelSettings, CompanyWhiteLabelSettingsDto>(settings);
     }
 
     /// <summary>
     /// Deletes the company white label settings.
     /// </summary>
-    /// <category>Rebranding</category>
     /// <short>Delete the company white label settings</short>
-    /// <returns type="ASC.Web.Core.WhiteLabel.CompanyWhiteLabelSettings, ASC.Web.Core">Default company white label settings</returns>
     /// <path>api/2.0/settings/rebranding/company</path>
-    /// <httpMethod>DELETE</httpMethod>
+    [Tags("Settings / Rebranding")]
+    [SwaggerResponse(200, "Default company white label settings", typeof(CompanyWhiteLabelSettings))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpDelete("rebranding/company")]
     public async Task<CompanyWhiteLabelSettings> DeleteCompanyWhiteLabelSettingsAsync()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        await DemandRebrandingPermissionAsync();
+        await DemandRebrandingPermissionAsync(false);
 
         var defaultSettings = settingsManager.GetDefault<CompanyWhiteLabelSettings>();
 
@@ -495,15 +596,19 @@ public class WhitelabelController(ApiContext apiContext,
         return defaultSettings;
     }
 
+    #endregion
+
+    #region Additional
+
     /// <summary>
     /// Saves the additional white label settings specified in the request.
     /// </summary>
-    /// <category>Rebranding</category>
     /// <short>Save the additional white label settings</short>
-    /// <param type="ASC.Web.Core.WhiteLabel.AdditionalWhiteLabelSettingsWrapper, ASC.Web.Core" name="wrapper">Additional white label settings</param>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/settings/rebranding/additional</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("Settings / Rebranding")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
+    [SwaggerResponse(400, "Settings is empty")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("rebranding/additional")]
     public async Task<bool> SaveAdditionalWhiteLabelSettingsAsync(AdditionalWhiteLabelSettingsWrapper wrapper)
     {
@@ -511,10 +616,7 @@ public class WhitelabelController(ApiContext apiContext,
 
         await DemandRebrandingPermissionAsync();
 
-        if (wrapper.Settings == null)
-        {
-            throw new ArgumentNullException("settings");
-        }
+        ArgumentNullException.ThrowIfNull(wrapper?.Settings, "settings");
 
         await settingsManager.SaveForDefaultTenantAsync(wrapper.Settings);
 
@@ -524,11 +626,10 @@ public class WhitelabelController(ApiContext apiContext,
     /// <summary>
     /// Returns the additional white label settings.
     /// </summary>
-    /// <category>Rebranding</category>
     /// <short>Get the additional white label settings</short>
-    /// <returns type="ASC.Web.Api.ApiModels.ResponseDto.AdditionalWhiteLabelSettingsDto, ASC.Web.Api">Additional white label settings</returns>
     /// <path>api/2.0/settings/rebranding/additional</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / Rebranding")]
+    [SwaggerResponse(200, "Additional white label settings", typeof(AdditionalWhiteLabelSettingsDto))]
     [AllowNotPayment]
     [HttpGet("rebranding/additional")]
     public async Task<AdditionalWhiteLabelSettingsDto> GetAdditionalWhiteLabelSettingsAsync()
@@ -541,17 +642,17 @@ public class WhitelabelController(ApiContext apiContext,
     /// <summary>
     /// Deletes the additional white label settings.
     /// </summary>
-    /// <category>Rebranding</category>
     /// <short>Delete the additional white label settings</short>
-    /// <returns type="ASC.Web.Core.WhiteLabel.AdditionalWhiteLabelSettings, ASC.Web.Core">Default additional white label settings</returns>
     /// <path>api/2.0/settings/rebranding/additional</path>
-    /// <httpMethod>DELETE</httpMethod>
+    [Tags("Settings / Rebranding")]
+    [SwaggerResponse(200, "Default additional white label settings", typeof(AdditionalWhiteLabelSettings))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpDelete("rebranding/additional")]
     public async Task<AdditionalWhiteLabelSettings> DeleteAdditionalWhiteLabelSettingsAsync()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        await DemandRebrandingPermissionAsync();
+        await DemandRebrandingPermissionAsync(false);
 
         var defaultSettings = settingsManager.GetDefault<AdditionalWhiteLabelSettings>();
 
@@ -560,52 +661,30 @@ public class WhitelabelController(ApiContext apiContext,
         return defaultSettings;
     }
 
+    #endregion
+
+    #region Mail
+
     /// <summary>
     /// Saves the mail white label settings specified in the request.
     /// </summary>
-    /// <category>Rebranding</category>
     /// <short>Save the mail white label settings</short>
-    /// <param type="ASC.Web.Core.WhiteLabel.MailWhiteLabelSettings, ASC.Web.Core" name="settings">Mail white label settings</param>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
     /// <path>api/2.0/settings/rebranding/mail</path>
-    /// <httpMethod>POST</httpMethod>
-    ///<visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
+    [SwaggerResponse(400, "Settings is empty")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [Tags("Settings / Rebranding")]
     [HttpPost("rebranding/mail")]
-    public async Task<bool> SaveMailWhiteLabelSettingsAsync(MailWhiteLabelSettings settings)
+    public async Task<bool> SaveMailWhiteLabelSettingsAsync(MailWhiteLabelSettingsWrapper wrapper)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         await DemandRebrandingPermissionAsync();
 
-        ArgumentNullException.ThrowIfNull(settings);
+        ArgumentNullException.ThrowIfNull(wrapper?.Settings, "settings");
 
-        await settingsManager.SaveForDefaultTenantAsync(settings);
-
-        return true;
-    }
-
-    /// <summary>
-    /// Updates the mail white label settings with a paramater specified in the request.
-    /// </summary>
-    /// <category>Rebranding</category>
-    /// <short>Update the mail white label settings</short>
-    /// <param type="ASC.Web.Api.ApiModel.RequestsDto.MailWhiteLabelSettingsRequestsDto, ASC.Web.Api" name="inDto">Request parameters for mail white label settings</param>
-    /// <returns type="System.Boolean, System">Boolean value: true if the operation is successful</returns>
-    /// <path>api/2.0/settings/rebranding/mail</path>
-    /// <httpMethod>PUT</httpMethod>
-    ///<visible>false</visible>
-    [HttpPut("rebranding/mail")]
-    public async Task<bool> UpdateMailWhiteLabelSettings(MailWhiteLabelSettingsRequestsDto inDto)
-    {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-
-        await DemandRebrandingPermissionAsync();
-
-        var settings = await settingsManager.LoadForDefaultTenantAsync<MailWhiteLabelSettings>();
-
-        settings.FooterEnabled = inDto.FooterEnabled;
-
-        await settingsManager.SaveForDefaultTenantAsync(settings);
+        await settingsManager.SaveForDefaultTenantAsync(wrapper.Settings);
 
         return true;
     }
@@ -613,33 +692,34 @@ public class WhitelabelController(ApiContext apiContext,
     /// <summary>
     /// Returns the mail white label settings.
     /// </summary>
-    /// <category>Rebranding</category>
     /// <short>Get the mail white label settings</short>
-    /// <returns type="ASC.Web.Core.WhiteLabel.MailWhiteLabelSettings, ASC.Web.Core">Mail white label settings</returns>
     /// <path>api/2.0/settings/rebranding/mail</path>
-    /// <httpMethod>GET</httpMethod>
-    ///<visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Settings / Rebranding")]
+    [SwaggerResponse(200, "Mail white label settings", typeof(MailWhiteLabelSettingsDto))]
     [HttpGet("rebranding/mail")]
-    public async Task<MailWhiteLabelSettings> GetMailWhiteLabelSettingsAsync()
+    public async Task<MailWhiteLabelSettingsDto> GetMailWhiteLabelSettingsAsync()
     {
-        return await settingsManager.LoadForDefaultTenantAsync<MailWhiteLabelSettings>();
+        var settings = await settingsManager.LoadForDefaultTenantAsync<MailWhiteLabelSettings>();
+
+        return mapper.Map<MailWhiteLabelSettings, MailWhiteLabelSettingsDto>(settings);
     }
 
     /// <summary>
     /// Deletes the mail white label settings.
     /// </summary>
-    /// <category>Rebranding</category>
     /// <short>Delete the mail white label settings</short>
-    /// <returns type="ASC.Web.Core.WhiteLabel.MailWhiteLabelSettings, ASC.Web.Core">Default mail white label settings</returns>
     /// <path>api/2.0/settings/rebranding/mail</path>
-    /// <httpMethod>DELETE</httpMethod>
-    ///<visible>false</visible>
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Settings / Rebranding")]
+    [SwaggerResponse(200, "Default mail white label settings", typeof(MailWhiteLabelSettings))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpDelete("rebranding/mail")]
     public async Task<MailWhiteLabelSettings> DeleteMailWhiteLabelSettingsAsync()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        await DemandRebrandingPermissionAsync();
+        await DemandRebrandingPermissionAsync(false);
 
         var defaultSettings = settingsManager.GetDefault<MailWhiteLabelSettings>();
 
@@ -648,14 +728,15 @@ public class WhitelabelController(ApiContext apiContext,
         return defaultSettings;
     }
 
+    #endregion
+
     /// <summary>
     /// Checks if the white label is enabled or not.
     /// </summary>
-    /// <category>Rebranding</category>
     /// <short>Check the white label availability</short>
-    /// <returns type="System.Boolean, System">Boolean value: true if the white label is enabled</returns>
     /// <path>api/2.0/settings/enablewhitelabel</path>
-    /// <httpMethod>GET</httpMethod>
+    [Tags("Settings / Rebranding")]
+    [SwaggerResponse(200, "Boolean value: true if the white label is enabled", typeof(bool))]
     [HttpGet("enablewhitelabel")]
     public async Task<bool> GetEnableWhitelabelAsync()
     {
@@ -663,9 +744,8 @@ public class WhitelabelController(ApiContext apiContext,
 
         return await tenantLogoManager.GetEnableWhitelabelAsync();
     }
-    
 
-    private async Task DemandRebrandingPermissionAsync()
+    private async Task DemandRebrandingPermissionAsync(bool demandWhiteLabelPermission = true)
     {
         await tenantExtra.DemandAccessSpacePermissionAsync();
 
@@ -673,6 +753,10 @@ public class WhitelabelController(ApiContext apiContext,
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
-        await tenantLogoManager.DemandWhiteLabelPermissionAsync();
+
+        if (demandWhiteLabelPermission)
+        {
+            await tenantLogoManager.DemandWhiteLabelPermissionAsync();
+        }
     }
 }

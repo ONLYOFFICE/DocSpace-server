@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,6 +23,8 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace ASC.Common;
 
@@ -402,8 +404,9 @@ public class DIHelper
 
     private bool Register(DIAttribute c, Type service, Type implementation = null)
     {
-        if (service.IsSubclassOf(typeof(ControllerBase)) || service.GetInterfaces().Contains(typeof(IResourceFilter))
-            || service.GetInterfaces().Contains(typeof(IDictionary<string, string>)))
+        if (service.IsSubclassOf(typeof(ControllerBase)) || 
+            service.GetInterfaces().Contains(typeof(IResourceFilter)) || 
+            service.GetInterfaces().Contains(typeof(IDictionary<string, string>)))
         {
             return true;
         }
@@ -412,6 +415,13 @@ public class DIHelper
 
         if (!_services[c.DiAttributeType].Contains(serviceName))
         {
+            if (service.IsSubclassOf(typeof(DistributedTask)))
+            {
+                var mi = typeof(DIHelper).GetMethod("RegisterDistributedTask");
+                var fooRef = mi.MakeGenericMethod(service);
+                fooRef.Invoke(this, null);
+            }
+            
             c.TryAdd(_serviceCollection, service, implementation);
             _services[c.DiAttributeType].Add(serviceName);
 
@@ -419,5 +429,12 @@ public class DIHelper
         }
 
         return false;
+    }
+
+    public void RegisterDistributedTask<T>() where T : DistributedTask
+    {
+        _serviceCollection.TryAddSingleton(Channel.CreateUnbounded<T>());
+        _serviceCollection.TryAddSingleton(svc => svc.GetRequiredService<Channel<T>>().Writer);
+        _serviceCollection.TryAddTransient<DistributedTaskQueue<T>>();
     }
 }

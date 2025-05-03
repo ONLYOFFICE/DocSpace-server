@@ -465,16 +465,16 @@ Paras yhteensopivuus docx:n, xlsx:n, pptx:n kanssa.</value>
     <value>Käyttäjä</value>
   </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Useiden tiedostojen siirtämistä Lomakkeen täyttöhuoneeseen ei tueta. Siirrä yksi ONLYOFFICE PDF-lomake kerrallaan.</value>
+    <value>Useiden tiedostojen siirtämistä Lomakkeen täyttöhuoneeseen ei tueta. Siirrä yksi {0} PDF-lomake kerrallaan.</value>
   </data>
   <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Kansioiden siirtämistä Lomakkeen täyttöhuoneeseen ei tueta. Siirrä yksi ONLYOFFICE PDF-lomake kerrallaan.</value>
+    <value>Kansioiden siirtämistä Lomakkeen täyttöhuoneeseen ei tueta. Siirrä yksi {0} PDF-lomake kerrallaan.</value>
   </data>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Tiedostoa ei voi siirtää tähän huoneeseen. Kokeile siirtää ONLYOFFICE PDF-lomake.</value>
+    <value>Tiedostoa ei voi siirtää tähän huoneeseen. Kokeile siirtää {0} PDF-lomake.</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Tiedostoa ei voi ladata tähän huoneeseen. Kokeile ladata ONLYOFFICE PDF-lomake.</value>
+    <value>Tiedostoa ei voi ladata tähän huoneeseen. Kokeile ladata {0} PDF-lomake.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Linkki täyttämiseen</value>
@@ -484,5 +484,32 @@ Paras yhteensopivuus docx:n, xlsx:n, pptx:n kanssa.</value>
   </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Lomakkeen numero</value>
+  </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Sisällöntuottaja</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Huoneen johtaja</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Ulkoinen käyttäjä</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Sisällöntuottaja</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Huoneen johtaja</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Avaa tiedosto</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Nykyistä tiedoston versiota ei voi poistaa</value>
+  </data>
+  <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
+    <value>Jaa täyttääksesi</value>
+  </data>
+  <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
+    <value>Aloita täyttäminen</value>
   </data>
 </root>

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,13 +26,25 @@
 
 namespace ASC.Files.Core;
 
+/// <summary>
+/// The file thumbnail status.
+/// </summary>
 [DataContract(Namespace = "")]
 public enum Thumbnail
 {
+    [SwaggerEnum(Description = "Waiting")]
     [EnumMember(Value = "0")] Waiting = 0,
+
+    [SwaggerEnum(Description = "Created")]
     [EnumMember(Value = "1")] Created = 1,
+
+    [SwaggerEnum(Description = "Error")]
     [EnumMember(Value = "2")] Error = 2,
+
+    [SwaggerEnum(Description = "Not required")]
     [EnumMember(Value = "3")] NotRequired = 3,
+
+    [SwaggerEnum(Description = "Creating")]
     [EnumMember(Value = "4")] Creating = 4
 
 }

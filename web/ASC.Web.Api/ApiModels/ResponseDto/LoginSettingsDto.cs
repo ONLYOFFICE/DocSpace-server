@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,18 +27,30 @@
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
+/// The login settings parameters.
 /// </summary>
 public class LoginSettingsDto : IMapFrom<LoginSettings>
 {
-    /// <summary>Maximum number of the user attempts to log in</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The maximum number of consecutive failed login attempts allowed before triggering account suspension.
+    /// </summary>
     public int AttemptCount { get; set; }
 
-    /// <summary>The time for which the user will be blocked after unsuccessful login attempts</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The duration (in minutes) for which an account remains suspended after exceeding maximum login attempts.
+    /// </summary>
     public int BlockTime { get; set; }
 
-    /// <summary>The time to wait for a response from the server</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The maximum time (in seconds) allowed for server to process and respond to login requests.
+    /// </summary>
     public int CheckPeriod { get; set; }
+
+    /// <summary>
+    /// Specifies if these settings are default or not
+    /// </summary>
+    /// <summary>
+    /// Specifies whether the login settings are default or not.
+    /// </summary>
+    public bool IsDefault { get; set; }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,6 +34,12 @@ internal abstract class ThirdPartyProviderDao
     {
         return Task.CompletedTask;
     }
+
+    public Task ReassignFilesAsync(Guid newOwnerId, IEnumerable<string> fileIds)
+    {
+        return Task.CompletedTask;
+    }
+
 
     public IAsyncEnumerable<File<string>> GetFilesAsync(IEnumerable<string> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, 
         bool searchInContent)
@@ -72,7 +78,7 @@ internal abstract class ThirdPartyProviderDao
         return Task.FromResult(false);
     }
 
-    public string GetUniqThumbnailPath(File<string> file, int width, int height)
+    public string GetUniqThumbnailPath(File<string> file, uint width, uint height)
     {
         //Do nothing
         return null;
@@ -83,12 +89,12 @@ internal abstract class ThirdPartyProviderDao
         return Task.CompletedTask;
     }
 
-    public virtual Task<Stream> GetThumbnailAsync(File<string> file, int width, int height)
+    public virtual Task<Stream> GetThumbnailAsync(File<string> file, uint width, uint height)
     {
         return GetThumbnailAsync(file.Id, width, height);
     }
 
-    public virtual Task<Stream> GetThumbnailAsync(string file, int width, int height)
+    public virtual Task<Stream> GetThumbnailAsync(string file, uint width, uint height)
     {
         return Task.FromResult<Stream>(null);
     }
@@ -96,6 +102,11 @@ internal abstract class ThirdPartyProviderDao
     public Task<EntryProperties<string>> GetProperties(string fileId)
     {
         return Task.FromResult<EntryProperties<string>>(null);
+    }
+
+    public Task<Dictionary<string, EntryProperties<string>>> GetPropertiesAsync(IEnumerable<string> filesIds)
+    {
+        return Task.FromResult<Dictionary<string, EntryProperties<string>>>(null);
     }
 
     public Task SaveProperties(string fileId, EntryProperties<string> entryProperties)
@@ -189,6 +200,11 @@ internal abstract class ThirdPartyProviderDao
         return Task.FromResult<string>(null);
     }
 
+    public Task<string> GetFolderIDRoomTemplatesAsync(bool createIfNotExists)
+    {
+        return Task.FromResult<string>(null);
+    }
+
     public Task<string> GetFolderIDArchive(bool createIfNotExists)
     {
         return Task.FromResult<string>(null);
@@ -208,28 +224,33 @@ internal abstract class ThirdPartyProviderDao
     {
         throw new NotImplementedException();
     }
+    public Task<bool> ContainsFormsInFolder(Folder<string> folder)
+    {
+        throw new NotImplementedException();
+    }
+
     public Task<int> GetFilesCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, bool withSubfolders = false,
-        bool excludeSubject = false, string roomId = default)
+        bool excludeSubject = false, string roomId = null, FormsItemDto formsItemDto = null, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All)
     {
         throw new NotImplementedException();
     }
     
     public Task<int> GetFoldersCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool withSubfolders = false, bool excludeSubject = false, 
-        string roomId = default)
+        string roomId = null, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All)
     {
         throw new NotImplementedException();
     }
 
-    public IAsyncEnumerable<File<string>> GetFilesByTagAsync(Guid? tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
+    public IAsyncEnumerable<File<string>> GetFilesByTagAsync(Guid tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
         string searchText, string[] extension, bool searchInContent, bool excludeSubject, OrderBy orderBy, int offset = 0, int count = -1)
     {
         return AsyncEnumerable.Empty<File<string>>();
     }
 
-    public Task<int> GetFilesByTagCountAsync(Guid? tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
+    public Task<int> GetFilesByTagCountAsync(Guid tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
         string searchText, string[] extension, bool searchInContent, bool excludeSubject)
     {
-        return default;
+        return Task.FromResult(0);
     }
 
     public IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> parentsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText,
@@ -347,7 +368,7 @@ internal abstract class ThirdPartyProviderDao
             return rooms;
         }
 
-        return rooms.Where(x => x.Title.IndexOf(text, StringComparison.OrdinalIgnoreCase) != -1);
+        return rooms.Where(x => x.Title.Contains(text, StringComparison.OrdinalIgnoreCase));
     }
 
     internal static string GetProviderType(ProviderFilter providerFilter)
@@ -502,7 +523,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(
             return;
         }
 
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();

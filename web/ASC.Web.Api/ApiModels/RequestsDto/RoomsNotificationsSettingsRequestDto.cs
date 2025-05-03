@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,14 +27,17 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
+/// The request parameters for configuring notification settings for the chat or collaboration rooms.
 /// </summary>
 public class RoomsNotificationsSettingsRequestDto
 {
-    /// <summary>Room ID</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The target room identifier.
+    /// </summary>
     public object RoomsId { get; set; }
 
-    /// <summary>Specifies if the room notifications are disabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether the notifications will be delivered to the specified room or not.
+    /// </summary>
     public bool Mute { get; set; }
 }

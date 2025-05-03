@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,43 +27,59 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
+/// The request parameters for linking accounts.
 /// </summary>
 public class LinkAccountRequestDto
 {
-    /// <summary>Third-party profile in the serialized format</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The third-party profile in the serialized format.
+    /// </summary>
     public string SerializedProfile { get; set; }
 }
 
 /// <summary>
+/// The request parameters for creating a third-party account.
 /// </summary>
-public class SignupAccountRequestDto : LinkAccountRequestDto
+public class SignupAccountRequestDto
 {
-    /// <summary>Employee type (All, RoomAdmin, User, DocSpaceAdmin, Collaborator)</summary>
-    /// <type>System.Nullable{ASC.Core.Users.EmployeeType}, System</type>
+    /// <summary>
+    /// The user type.
+    /// </summary>
     public EmployeeType? EmployeeType { get; set; }
 
-    /// <summary>First name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The user first name.
+    /// </summary>
     public string FirstName { get; set; }
 
-    /// <summary>Last name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The user last name.
+    /// </summary>
     public string LastName { get; set; }
 
-    /// <summary>Email address</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The user email address.
+    /// </summary>
+    [EmailAddress]
     public string Email { get; set; }
 
-    /// <summary>Password hash</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The user password hash.
+    /// </summary>
     public string PasswordHash { get; set; }
-    
-    /// <summary>Link key</summary>
-    /// <type>System.String, System</type>
+
+    /// <summary>
+    /// The user link key.
+    /// </summary>
     public string Key { get; set; }
-    
-    /// <summary>Culture</summary>
-    /// <type>System.String, System</type>
+
+    /// <summary>
+    /// The user culture code.
+    /// </summary>
     public string Culture { get; set; }
+
+    /// <summary>
+    /// Third-party profile in the serialized format
+    /// </summary>
+    public string SerializedProfile { get; set; }
 }

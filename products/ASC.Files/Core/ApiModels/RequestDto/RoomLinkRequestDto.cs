@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,29 +24,65 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.ComponentModel.DataAnnotations;
-
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// The room link parameters.
 /// </summary>
-public class RoomLinkRequestDto : LinkRequestDtoBase
+public class RoomLinkRequest
 {
-    /// <summary>Link name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The room link ID.
+    /// </summary>
+    public Guid LinkId { get; set; }
+
+    /// <summary>
+    /// The link sharing rights.
+    /// </summary>
+    public FileShare Access { get; set; }
+
+    /// <summary>
+    /// The link expiration date.
+    /// </summary>
+    public ApiDateTime ExpirationDate { get; set; }
+
+    /// <summary>
+    /// The link name.
+    /// </summary>
     [StringLength(255)]
     public string Title { get; set; }
 
-    /// <summary>Link type (Invitation or External)</summary>
-    /// <type>ASC.Files.Core.ApiModels.ResponseDto.LinkType, ASC.Files.Core</type>
+    /// <summary>
+    /// The link type.
+    /// </summary>
     public LinkType LinkType { get; set; }
 
-    /// <summary>Link password</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The link password.
+    /// </summary>
     [StringLength(255)]
     public string Password { get; set; }
-    
-    /// <summary>Specifies whether downloading a file from a link is disabled or not</summary>
-    /// <type>System.Boolean, System</type>
+
+    /// <summary>
+    /// Specifies if downloading the file from the link is disabled or not.
+    /// </summary>
     public bool DenyDownload { get; set; }
+}
+
+/// <summary>
+/// The generic room link request parameters.
+/// </summary>
+public class RoomLinkRequestDto<T>
+{
+    /// <summary>
+    /// The room ID.
+    /// </summary>
+    [FromRoute(Name = "id")]
+    public required T Id { get; set; }
+
+    /// <summary>
+    /// The room link parameters.
+    /// </summary>
+    [FromBody]
+    public RoomLinkRequest RoomLink { get; set; }
 }

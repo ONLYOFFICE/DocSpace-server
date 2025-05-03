@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,68 +26,50 @@
 
 namespace ASC.Data.Backup.Services;
 
-public abstract class BaseBackupProgressItem(IServiceScopeFactory serviceScopeFactory) : DistributedTaskProgress
+public abstract class BaseBackupProgressItem : DistributedTaskProgress
 {
-    protected readonly IServiceScopeFactory _serviceScopeProvider = serviceScopeFactory;
-    private int? _tenantId;
-    private BackupProgressItemType? _backupProgressItemEnum;
-    private string _link;
-    private int? _newTenantId;
+    protected readonly IServiceScopeFactory _serviceScopeProvider;
 
-    public int NewTenantId
+    public BaseBackupProgressItem()
     {
-        get => _newTenantId ?? this[nameof(_newTenantId)];
-        set
-        {
-            _newTenantId = value;
-            this[nameof(_newTenantId)] = value;
-        }
+        
     }
 
-
-    public int TenantId
+    protected BaseBackupProgressItem(IServiceScopeFactory serviceScopeFactory)
     {
-        get => _tenantId ?? this[nameof(_tenantId)];
-        set
-        {
-            _tenantId = value;
-            this[nameof(_tenantId)] = value;
-        }
+        _serviceScopeProvider = serviceScopeFactory;
     }
 
-    public string Link
-    {
-        get
-        {
-            return _link ?? this[nameof(_link)];
-        }
-        set
-        {
-            _link = value;
-            this[nameof(_link)] = value;
-        }
-    }
-
-    public BackupProgressItemType BackupProgressItemType
-    {
-        get
-        {
-            return _backupProgressItemEnum ?? (BackupProgressItemType)this[nameof(_backupProgressItemEnum)];
-        }
-        protected init
-        {
-            _backupProgressItemEnum = value;
-
-            this[nameof(_backupProgressItemEnum)] = (int)value;
-        }
-    }
+    public int NewTenantId { get; set; }
+    public bool Dump {get; set; }
+    public int TenantId { get; set; }
+    public string Link { get; set; }
+    public BackupProgressItemType BackupProgressItemType { get; set; }
 
     protected void Init()
     {
-        this[nameof(_tenantId)] = 0;
-        this[nameof(_newTenantId)] = 0;
-        this[nameof(_link)] = "";
-        this[nameof(_backupProgressItemEnum)] = 0;
+        TenantId = 0;
+        NewTenantId = 0;
+        Link = "";
+    }
+
+    public BackupProgress ToBackupProgress()
+    {
+        var progress = new BackupProgress
+        {
+            IsCompleted = IsCompleted,
+            Progress = (int)Percentage,
+            Error = Exception != null ? Exception.Message : "",
+            TenantId = TenantId,
+            BackupProgressEnum = BackupProgressItemType.Convert(),
+            TaskId = Id
+        };
+        if (BackupProgressItemType is BackupProgressItemType.Backup or BackupProgressItemType.Transfer && Link != null)
+        {
+            progress.Link = Link;
+        }
+
+        return progress;
     }
 
     public abstract object Clone();

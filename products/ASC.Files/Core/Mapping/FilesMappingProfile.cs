@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -54,26 +54,22 @@ public class FilesMappingProfile : Profile
         CreateMap<FileShareRecord<int>, DbFilesSecurity>()
             .ForMember(dest=> dest.EntryId, cfg => cfg.MapFrom(src => src.EntryId.ToString()))
             .ForMember(dest => dest.TimeStamp, cfg => cfg.MapFrom(_ => DateTime.UtcNow))
-            .ForMember(dest => dest.Options, cfg => cfg.MapFrom(src => src.Options != null ? JsonSerializer.Serialize(src.Options, JsonSerializerOptions.Default) : null))
             .BeforeMap<FilesMappingAction>();
         
         CreateMap<FileShareRecord<string>, DbFilesSecurity>()
             .ForMember(dest => dest.TimeStamp, cfg => cfg.MapFrom(_ => DateTime.UtcNow))
-            .ForMember(dest => dest.Options, cfg => cfg.MapFrom(src => src.Options != null ? JsonSerializer.Serialize(src.Options, JsonSerializerOptions.Default) : null))
             .BeforeMap<FilesMappingAction>();
         
         CreateMap<DbFilesSecurity, FileShareRecord<int>>()
-            .ForMember(dest => dest.EntryId, cfg => cfg.MapFrom(src => Convert.ToInt32(src.EntryId)))
-            .ForMember(dest => dest.Options, cfg => cfg.MapFrom(src => JsonSerializer.Deserialize<FileShareOptions>(src.Options, JsonSerializerOptions.Default)));
+            .ForMember(dest => dest.EntryId, cfg => cfg.MapFrom(src => Convert.ToInt32(src.EntryId)));
         
-        CreateMap<DbFilesSecurity, FileShareRecord<string>>()
-            .ForMember(dest => dest.Options, cfg => cfg.MapFrom(src => JsonSerializer.Deserialize<FileShareOptions>(src.Options, JsonSerializerOptions.Default)));
+        CreateMap<DbFilesSecurity, FileShareRecord<string>>();
         
         CreateMap<SecurityTreeRecord, FileShareRecord<int>>()
-            .ForMember(dest=> dest.EntryId, cfg => cfg.MapFrom(src => Convert.ToInt32(src.EntryId)))
-            .ForMember(dest => dest.Options, cfg => cfg.MapFrom(src => JsonSerializer.Deserialize<FileShareOptions>(src.Options, JsonSerializerOptions.Default)));
+            .ForMember(dest=> dest.EntryId, cfg => cfg.MapFrom(src => Convert.ToInt32(src.EntryId)));
         
-        CreateMap<SecurityTreeRecord, FileShareRecord<string>>()
-            .ForMember(dest => dest.Options, cfg => cfg.MapFrom(src => JsonSerializer.Deserialize<FileShareOptions>(src.Options, JsonSerializerOptions.Default)));
+        CreateMap<SecurityTreeRecord, FileShareRecord<string>>();
+
+        CreateMap<DbFilesFormRoleMapping, FormRole>();
     }
 }

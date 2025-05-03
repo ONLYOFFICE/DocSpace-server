@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -76,7 +76,7 @@ public class AWSSender : SmtpSender, IDisposable
                     result = await SendMessage(m);
                 }
 
-                _logger.Debug(result.ToString());
+                _logger.Debug(result.ToStringFast());
             }
             catch (Exception e)
             {

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,4 +30,7 @@ internal static partial class CustomExceptionHandlerLogger
 {
     [LoggerMessage(LogLevel.Critical, "error during executing {RequestMethod}: {PathValue}")]
     public static partial void CriticalError(this ILogger<CustomExceptionHandler> logger, string RequestMethod, string PathValue, Exception exception);
+
+    [LoggerMessage(LogLevel.Information, "error during executing {RequestMethod}: {PathValue} {ExceptionMessage} {InnerExceptionMessage}")]
+    public static partial void InformationError(this ILogger<CustomExceptionHandler> logger, string RequestMethod, string PathValue, string ExceptionMessage, string InnerExceptionMessage);
 }

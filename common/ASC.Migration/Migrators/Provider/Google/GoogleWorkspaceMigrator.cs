@@ -1,25 +1,25 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
-//
+﻿// (c) Copyright Ascensio System SIA 2009-2025
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -57,12 +57,13 @@ public class GoogleWorkspaceMigrator : Migrator
         MigrationLogger migrationLogger,
         AuthContext authContext,
         DisplayUserSettingsHelper displayUserSettingsHelper,
-        UserManagerWrapper userManagerWrapper) : base(securityContext, userManager, tenantQuotaFeatureStatHelper, quotaSocketManager, fileStorageService, globalFolderHelper, serviceProvider, daoFactory, entryManager, migrationLogger, authContext, displayUserSettingsHelper, userManagerWrapper)
+        UserManagerWrapper userManagerWrapper,
+        UserSocketManager socketManager) : base(securityContext, userManager, tenantQuotaFeatureStatHelper, quotaSocketManager, fileStorageService, globalFolderHelper, serviceProvider, daoFactory, entryManager, migrationLogger, authContext, displayUserSettingsHelper, userManagerWrapper, socketManager)
     {
         MigrationInfo = new MigrationInfo { Name = "GoogleWorkspace" };
     }
 
-    public override async Task InitAsync(string path, CancellationToken cancellationToken, OperationType operation)
+    public override async Task InitAsync(string path, OperationType operation, CancellationToken cancellationToken)
     {
         MigrationLogger.Init();
         _cancellationToken = cancellationToken;
@@ -148,18 +149,26 @@ public class GoogleWorkspaceMigrator : Migrator
                     {
                         MigrationInfo.WithoutEmailUsers.Add(key, user);
                     }
-                    else if (await UserManager.GetUserByEmailAsync(user.Info.Email) != ASC.Core.Users.Constants.LostUser)
-                    {
-                        if (!MigrationInfo.ExistUsers.TryAdd(user.Info.Email, user))
-                        {
-                            MergeStorages(MigrationInfo.ExistUsers[user.Info.Email], user);
-                        }
-                    }
                     else
                     {
-                        if (!MigrationInfo.Users.TryAdd(user.Info.Email, user))
+                        var ascUser = await UserManager.GetUserByEmailAsync(user.Info.Email);
+                        if (ascUser.Status == EmployeeStatus.Terminated)
                         {
-                            MergeStorages(MigrationInfo.Users[user.Info.Email], user);
+                            continue;
+                        }
+                        if (!ascUser.Equals(ASC.Core.Users.Constants.LostUser))
+                        {
+                            if (!MigrationInfo.ExistUsers.TryAdd(user.Info.Email, user))
+                            {
+                                MergeStorages(MigrationInfo.ExistUsers[user.Info.Email], user);
+                            }
+                        }
+                        else
+                        {
+                            if (!MigrationInfo.Users.TryAdd(user.Info.Email, user))
+                            {
+                                MergeStorages(MigrationInfo.Users[user.Info.Email], user);
+                            }
                         }
                     }
                 }
@@ -229,7 +238,7 @@ public class GoogleWorkspaceMigrator : Migrator
 
     private MigrationUser ParseUser(string tmpFolder)
     {
-        var user = new MigrationUser(DisplayUserSettingsHelper) { Info = new() };
+        var user = new MigrationUser(DisplayUserSettingsHelper) { Info = new UserInfo() };
 
         ParseRootHtml(tmpFolder, user);
         ParseProfile(tmpFolder, user);
@@ -376,7 +385,7 @@ public class GoogleWorkspaceMigrator : Migrator
                 Title = f,
                 Level = j++
             };
-            var key = string.Join(',', split[0..(j - 1)]);
+            var key = string.Join(',', split[..(j - 1)]);
             foldersdictionary.TryAdd(key, folder);
         }
     }
@@ -424,7 +433,7 @@ public class GoogleWorkspaceMigrator : Migrator
         if (commentsVersionMatch.Success)
         {
             var baseName = entry.Substring(0, entry.Length - commentsVersionMatch.Groups[0].Value.Length);
-            baseName = baseName.Insert(baseName.LastIndexOf("."), commentsVersionMatch.Groups[1].Value);
+            baseName = baseName.Insert(baseName.LastIndexOf('.'), commentsVersionMatch.Groups[1].Value);
 
             if (entries.Contains(baseName))
             {
@@ -444,7 +453,7 @@ public class GoogleWorkspaceMigrator : Migrator
         if (infoVersionMatch.Success)
         {
             var baseName = entry.Substring(0, entry.Length - infoVersionMatch.Groups[0].Length);
-            baseName = baseName.Insert(baseName.LastIndexOf("."), infoVersionMatch.Groups[1].Value);
+            baseName = baseName.Insert(baseName.LastIndexOf('.'), infoVersionMatch.Groups[1].Value);
 
             if (entries.Contains(baseName))
             {

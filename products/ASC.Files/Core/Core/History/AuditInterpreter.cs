@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,18 +33,25 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
     private static readonly FolderMovedInterpreter _folderMovedInterpreter = new();
     private static readonly FileMovedInterpreter _fileMovedInterpreter = new();
     private static readonly FileDeletedInterpreter _fileDeletedInterpreter = new();
+    private static readonly FileVersionDeletedInterpreter _fileVersionDeletedInterpreter = new();
     private static readonly FolderDeletedInterpreter _folderDeletedInterpreter = new();
     private static readonly FileCopiedInterpreter _fileCopiedInterpreter = new();
     private static readonly RoomLogoChangedInterpreter _roomLogoChangedInterpreter = new();
     private static readonly FileUpdatedInterpreter _fileUpdatedInterpreter = new();
     private static readonly RoomTagsInterpreter _roomTagsInterpreter = new();
-    
+    private static readonly RoomIndexingInterpreter _roomIndexingInterpreter = new();
+    private static readonly RoomArchivingInterpreter _roomArchivingInterpreter = new();
+    private static readonly FileLockInterpreter _fileLockInterpreter = new();
+    private static readonly RoomDenyDownloadInterpreter _roomDenyDownloadInterpreter = new();
+    private static readonly UserFileUpdatedInterpreter _userFileUpdatedInterpreter = new();
+    private static readonly FileCustomFilterInterpreter _fileCustomFilterInterpreter = new();
+
     private static readonly FrozenDictionary<int, ActionInterpreter> _interpreters = new Dictionary<int, ActionInterpreter>
     {
         { (int)MessageAction.FileCreated, new FileCreateInterpreter() },
         { (int)MessageAction.FileUploaded, new FileUploadedInterpreter() },
         { (int)MessageAction.FileUploadedWithOverwriting, new FileUploadedInterpreter() },
-        { (int)MessageAction.UserFileUpdated, new UserFileUpdatedInterpreter() },
+        { (int)MessageAction.UserFileUpdated, _userFileUpdatedInterpreter },
         { (int)MessageAction.FileRenamed, new FileRenamedInterpreter() },
         { (int)MessageAction.FileMoved, _fileMovedInterpreter },
         { (int)MessageAction.FileMovedWithOverwriting, _fileMovedInterpreter },
@@ -52,6 +59,7 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
         { (int)MessageAction.FileCopied, _fileCopiedInterpreter },
         { (int)MessageAction.FileCopiedWithOverwriting, _fileCopiedInterpreter },
         { (int)MessageAction.FileDeleted, _fileDeletedInterpreter },
+        { (int)MessageAction.FileVersionRemoved, _fileVersionDeletedInterpreter },
         { (int)MessageAction.FileConverted, new FileConvertedInterpreter() },
         { (int)MessageAction.FileRestoreVersion, _fileUpdatedInterpreter },
         { (int)MessageAction.FolderCreated, new FolderCreatedInterpreter() },
@@ -79,14 +87,39 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
         { (int)MessageAction.RoomExternalLinkRenamed, new RoomExternalLinkRenamedInterpreter() },
         { (int)MessageAction.RoomExternalLinkDeleted, new RoomExternalLinkDeletedInterpreter() },
         { (int)MessageAction.RoomExternalLinkRevoked, new RoomExternalLinkRevokedInterpreter() },
-        { (int)MessageAction.FormSubmit, new UserFileUpdatedInterpreter() },
-        { (int)MessageAction.FormOpenedForFilling, new UserFileUpdatedInterpreter() }
+        { (int)MessageAction.FormSubmit, _userFileUpdatedInterpreter },
+        { (int)MessageAction.FormStartedToFill, _userFileUpdatedInterpreter },
+        { (int)MessageAction.FormOpenedForFilling, _userFileUpdatedInterpreter },
+        { (int)MessageAction.FormPartiallyFilled, _userFileUpdatedInterpreter },
+        { (int)MessageAction.FormCompletelyFilled, _userFileUpdatedInterpreter },
+        { (int)MessageAction.FormStopped, _userFileUpdatedInterpreter },
+        { (int)MessageAction.RoomIndexingEnabled, _roomIndexingInterpreter },
+        { (int)MessageAction.RoomIndexingDisabled, _roomIndexingInterpreter },
+        { (int)MessageAction.RoomLifeTimeSet, new RoomLifeTimeSetInterpreter() },
+        { (int)MessageAction.RoomLifeTimeDisabled, new RoomLifeTimeDisabledInterpreter() },
+        { (int)MessageAction.FolderIndexChanged, new FolderIndexChangedInterpreter() },
+        { (int)MessageAction.FileIndexChanged, new FileIndexChangedInterpreter() },
+        { (int)MessageAction.FileCustomFilterEnabled, _fileCustomFilterInterpreter },
+        { (int)MessageAction.FileCustomFilterDisabled, _fileCustomFilterInterpreter },
+        { (int)MessageAction.FolderIndexReordered, new FolderIndexReorderedInterpreter() },
+        { (int)MessageAction.RoomArchived, _roomArchivingInterpreter },
+        { (int)MessageAction.RoomUnarchived, _roomArchivingInterpreter },
+        { (int)MessageAction.FileLocked, _fileLockInterpreter },
+        { (int)MessageAction.FileUnlocked, _fileLockInterpreter },
+        { (int)MessageAction.RoomDenyDownloadEnabled, _roomDenyDownloadInterpreter },
+        { (int)MessageAction.RoomDenyDownloadDisabled, _roomDenyDownloadInterpreter },
+        { (int)MessageAction.RoomWatermarkSet, new RoomWatermarkSetInterpreter() },
+        { (int)MessageAction.RoomWatermarkDisabled, new RoomWatermarkDisabledInterpreter() },
+        { (int)MessageAction.RoomColorChanged, _roomLogoChangedInterpreter },
+        { (int)MessageAction.RoomCoverChanged, _roomLogoChangedInterpreter },
+        { (int)MessageAction.RoomIndexExportSaved, new RoomIndexExportSavedInterpreter() },
+        { (int)MessageAction.RoomInviteResend, new RoomInviteResendInterpreter() }
     }.ToFrozenDictionary();
     
-    public ValueTask<HistoryEntry> ToHistoryAsync(DbAuditEvent @event)
+    public ValueTask<HistoryEntry> ToHistoryAsync(DbAuditEvent @event, DbFilesAuditReference reference)
     {
         return !_interpreters.TryGetValue(@event.Action ?? -1, out var interpreter) 
             ? ValueTask.FromResult<HistoryEntry>(null) 
-            : interpreter.InterpretAsync(@event, serviceProvider);
+            : interpreter.InterpretAsync(@event, reference, serviceProvider);
     }
 }

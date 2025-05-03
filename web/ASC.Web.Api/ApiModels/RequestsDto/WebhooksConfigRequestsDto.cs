@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,33 +27,57 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
+/// The request parameters for creating the webhook configuration.
 /// </summary>
-public class WebhooksConfigRequestsDto
+public class CreateWebhooksConfigRequestsDto
 {
-    /// <summary>ID</summary>
-    /// <type>System.Int32, System</type>
-    public int Id { get; set; }
-
-    /// <summary>Name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The human-readable name of the webhook configuration.
+    /// </summary>
     [StringLength(50)]
+    [Required]
     public string Name { get; set; }
 
-    /// <summary>URI</summary>
-    /// <type>System.String, System</type>
-    [Url]
+    /// <summary>
+    /// The destination URL where the webhook events will be sent.
+    /// </summary>
+    [Required]
     public string Uri { get; set; }
 
-    /// <summary>Secret key</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The webhook secret key used to sign the webhook payloads for the security verification.
+    /// </summary>
     [StringLength(50)]
     public string SecretKey { get; set; }
 
-    /// <summary>Enabled or not</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
-    public bool? Enabled { get; set; }
+    /// <summary>
+    /// Specifies whether the webhook configuration is active or not.
+    /// </summary>
+    public bool Enabled { get; set; }
 
-    /// <summary>SSL</summary>
-    /// <type>System.Nullable{System.Boolean}, System</type>
-    public bool? SSL { get; set;}
+    /// <summary>
+    /// Specifies whether the SSL certificate verification is required or not.
+    /// </summary>
+    public bool SSL { get; set; }
+
+    /// <summary>
+    /// Defines which events will trigger webhook notifications.
+    /// </summary>
+    public WebhookTrigger Triggers { get; set; }
+
+    /// <summary>
+    /// Target ID
+    /// </summary>
+    public string TargetId { get; set; }
+}
+
+/// <summary>
+/// The request parameters for updating the webhook configuration.
+/// </summary>
+public class UpdateWebhooksConfigRequestsDto: CreateWebhooksConfigRequestsDto
+{
+    /// <summary>
+    /// The webhook configuration ID.
+    /// </summary>
+    public int Id { get; set; }
 }

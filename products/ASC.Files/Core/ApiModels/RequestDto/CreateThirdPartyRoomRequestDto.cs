@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,7 +26,77 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
-public class CreateThirdPartyRoomRequestDto : CreateRoomRequestDto
+/// <summary>
+/// The parameters for creating a third-party room.
+/// </summary>
+public class CreateThirdPartyRoom
 {
+    /// <summary>
+    /// Specifies whether to create a third-party room as a new folder or not.
+    /// </summary>
     public bool CreateAsNewFolder { get; set; }
+
+    /// <summary>
+    /// The third-party room name to be created.
+    /// </summary>
+    public required string Title { get; set; }
+
+    /// <summary>
+    /// The third-party room type to be created.
+    /// </summary>
+    public required RoomType RoomType { get; set; }
+
+    /// <summary>
+    /// Specifies whether to create the private third-party room or not.
+    /// </summary>
+    public bool Private { get; set; }
+
+    /// <summary>
+    /// Specifies whether to create the third-party room with indexing.
+    /// </summary>
+    public bool Indexing { get; set; }
+    
+    /// <summary>
+    /// Specifies whether to deny downloads from the third-party room.
+    /// </summary>
+    public bool DenyDownload { get; set; }
+    
+    /// <summary>
+    /// The color of the third-party room.
+    /// </summary>
+    public string Color { get; set; }
+
+    /// <summary>
+    /// The cover of the third-party room.
+    /// </summary>
+    public string Cover { get; set; }
+
+    /// <summary>
+    /// The list of tags of the third-party room.
+    /// </summary>
+    public IEnumerable<string> Tags { get; set; }
+
+    /// <summary>
+    /// The logo request parameters of the third-party room.
+    /// </summary>
+    public LogoRequest Logo { get; set; }
+}
+
+
+/// <summary>
+/// The request parameters for creating a third-party room.
+/// </summary>
+public class CreateThirdPartyRoomRequestDto
+{
+    /// <summary>
+    /// The ID of the folder in the third-party storage in which the contents of the room will be stored.
+    /// </summary>
+    [FromRoute(Name = "id")]
+    public required string Id { get; set; }
+
+    /// <summary>
+    /// The third-party room information.
+    /// </summary>
+    [FromBody]
+    public CreateThirdPartyRoom Room { get; set; }
 }

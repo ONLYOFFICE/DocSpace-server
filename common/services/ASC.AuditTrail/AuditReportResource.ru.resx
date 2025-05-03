@@ -802,4 +802,127 @@
   <data name="FormSubmit" xml:space="preserve">
     <value>Пользователи [{0}]. Отправлена форма: {1}</value>
   </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Экспорт индекса комнат, сохраненного в Документах</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Комната: {0} Отключен запрет загрузки</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Комната: {0} Подключен запрет загрузки</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Индексация комнат отключена</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Индексация комнат подключена</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Приглашение отправлено повторно: {0}</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>Отключен срок действия</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>Установлен срок действия. Значение: {0}. Период: {1}. Удалить навсегда: {2}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Комната: {0}. Водяной знак отключен</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Комната: {0}. Водяной знак подключен</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Папка: {0}. Индекс изменен с {1} на {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Папка: {0}. Изменен порядок индексов</value>
+  </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>Файл: {0}. Индекс изменен с {1} на {2}</value>
+  </data>
+  <data name="OAuthModule" xml:space="preserve">
+    <value>OAuth</value>
+  </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Клиент {0} удален</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>Секрет клиента {0} создан повторно</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Отменен доступ клиента {0}</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>Клиент {0} обновлен</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>Сгенерирован код авторизации для клиента {0}</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>Сгенерирован персональный токен доступа для клиента {0}</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Клиент создан</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>Видимость клиента {0} изменилась</value>
+  </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>Активация клиента {0} изменилась</value>
+  </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>Изменены настройки доступа к инструментам разработчика</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>Файлы [{0}]. Удалена версия: {1}</value>
+  </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>Пользователи [{0}]. Форма заполнена полностью: {1}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>Пользователи [{0}]. Заполнена часть формы: {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>Пользователи [{0}]. Начато заполнение: {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>Пользователи [{0}]. Форма остановлена: {1}</value>
+  </data>
+  <data name="WebhookCreated" xml:space="preserve">
+    <value>Вебхук создан: {0}</value>
+  </data>
+  <data name="WebhookDeleted" xml:space="preserve">
+    <value>Вебхук удален: {0}</value>
+  </data>
+  <data name="WebhookUpdated" xml:space="preserve">
+    <value>Вебхук обновлен: {0}</value>
+  </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>Создан Api Key пользователя: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>Удален Api Key пользователя: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>Обновлен Api Key пользователя: {0}</value>
+  </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>Файл: {0}. Пользовательский фильтр отключен</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>Файл: {0}. Пользовательский фильтр включен</value>
+  </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>Ссылка авторизации активирована</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>Аутентификация LDAP отключена</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>Аутентификация LDAP включена</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>Синхронизация LDAP выполнена</value>
+  </data>
 </root>

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,12 +26,34 @@
 
 namespace ASC.People.ApiModels.ResponseDto;
 
+/// <summary>
+/// The task progress response parameters.
+/// </summary>
 public class TaskProgressResponseDto
 {
+    /// <summary>
+    /// The task progress ID.
+    /// </summary>
     public string Id { get; set; }
+
+    /// <summary>
+    /// The task progress error message.
+    /// </summary>
     public string Error { get; set; }
+
+    /// <summary>
+    /// The percentage of the task progress.
+    /// </summary>
     public int Percentage { get; set; }
+
+    /// <summary>
+    /// Specifies if the task peogress is completed or not.
+    /// </summary>
     public bool IsCompleted { get; set; }
+
+    /// <summary>
+    /// The status of the distributed task.
+    /// </summary>
     public DistributedTaskStatus Status { get; set; }
 
     public static TaskProgressResponseDto Get(DistributedTaskProgress progressItem)

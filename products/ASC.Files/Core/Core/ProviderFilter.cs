@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,14 +29,33 @@ namespace ASC.Files.Core;
 [EnumExtensions]
 public enum ProviderFilter
 {
+    [SwaggerEnum("None")]
     None,
+
+    [SwaggerEnum("Box")]
     Box,
+
+    [SwaggerEnum("DropBox")]
     DropBox,
+
+    [SwaggerEnum("GoogleDrive")]
     GoogleDrive,
+
+    [SwaggerEnum("kDrive")]
     kDrive,
+
+    [SwaggerEnum("OneDrive")]
     OneDrive,
+
+    [SwaggerEnum("SharePoint")]
     SharePoint,
+
+    [SwaggerEnum("WebDav")]
     WebDav,
+
+    [SwaggerEnum("Yandex")]
     Yandex,
+
+    [SwaggerEnum("Storage")]
     Storage
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -42,7 +42,7 @@ public class BackupRestoreRequestedIntegrationEventHandler(
         {
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
 
-            if (!@event.Redelivered && await backupWorker.IsInstanceTooBusy())
+            if (!@event.Redelivered && await backupWorker.IsRestoreInstanceTooBusy())
             {
                 throw new IntegrationEventRejectExeption(@event.Id);
             }
@@ -54,7 +54,10 @@ public class BackupRestoreRequestedIntegrationEventHandler(
                                             @event.StorageType,
                                             @event.StorageParams,
                                             @event.Notify,
-                                            @event.ServerBaseUri);
+                                            @event.ServerBaseUri,
+                                            @event.Dump,
+                                            true,
+                                            @event.TaskId);
 
             await Task.CompletedTask;
         }

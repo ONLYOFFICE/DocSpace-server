@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,7 +30,7 @@ public class FilesChunkedUploadSessionHolder : CommonChunkedUploadSessionHolder
 {
     private readonly IDaoFactory _daoFactory;
 
-    public FilesChunkedUploadSessionHolder(IDaoFactory daoFactory, IDataStore dataStore, string domain, AscDistributedCache cache, long maxChunkUploadSize = 10485760)
+    public FilesChunkedUploadSessionHolder(IDaoFactory daoFactory, IDataStore dataStore, string domain, IFusionCache cache, long maxChunkUploadSize = 10485760)
         : base(dataStore, domain, cache, maxChunkUploadSize)
     {
         _daoFactory = daoFactory;
@@ -43,10 +43,8 @@ public class FilesChunkedUploadSessionHolder : CommonChunkedUploadSessionHolder
         {
             return ((await InternalUploadChunkAsync<int>(uploadSession, stream, length)).ToString(), null);
         }
-        else
-        {
-            return (await InternalUploadChunkAsync<string>(uploadSession, stream, length), null);
-        }
+
+        return (await InternalUploadChunkAsync<string>(uploadSession, stream, length), null);
     }
 
     private async Task<T> InternalUploadChunkAsync<T>(CommonChunkedUploadSession uploadSession, Stream stream, long length)

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,7 +26,10 @@
 
 namespace ASC.People.Api;
 
-public class NotificationController    : ApiControllerBase
+///<summary>
+/// Notification API.
+///</summary>
+public class NotificationController : ApiControllerBase
     // UserManager userManager,
     //     SecurityContext securityContext,
     //     AuthContext authContext,
@@ -41,13 +44,13 @@ public class NotificationController    : ApiControllerBase
     /// <short>
     /// Send a notification to change a phone
     /// </short>
-    /// <category>Profiles</category>
-    /// <param type="ASC.People.ApiModels.RequestDto.UpdateMemberRequestDto, ASC.People" name="inDto">Request parameters for updating user contacts</param>
-    /// <returns type="System.Object, System">Notification</returns>
     /// <path>api/2.0/people/phone</path>
-    /// <httpMethod>POST</httpMethod>
+    [Tags("People / Profiles")]
+    [SwaggerResponse(200, "Notification", typeof(string))]
+    [SwaggerResponse(501, "Not Implemented")]
+    [ApiExplorerSettings(IgnoreApi = true)]
     [HttpPost("phone")]
-    public Task<object> SendNotificationToChangeAsync(UpdateMemberRequestDto inDto)
+    public Task<string> SendNotificationToChangeAsync(UpdateMemberSimpleRequestDto inDto)
     {
         throw new NotImplementedException();
         // var user = await userManager.GetUsersAsync(string.IsNullOrEmpty(inDto.UserId)
@@ -66,11 +69,11 @@ public class NotificationController    : ApiControllerBase
         //
         // if (user.IsMe(authContext))
         // {
-        //     return await commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.PhoneActivation);
+        //     return commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.PhoneActivation);
         // }
         //
         // await studioNotifyService.SendMsgMobilePhoneChangeAsync(user);
         //
         // return string.Empty;
-    }
+        }
 }

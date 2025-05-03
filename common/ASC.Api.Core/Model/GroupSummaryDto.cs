@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,30 +29,27 @@ using GroupInfo = ASC.Core.Users.GroupInfo;
 namespace ASC.Web.Api.Models;
 
 /// <summary>
+/// The group summary parameters.
 /// </summary>
 public class GroupSummaryDto
 {
-    /// <summary>ID</summary>
-    /// <type>System.Guid, System</type>
+    /// <summary>
+    /// The group ID.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "{00000000-0000-0000-0000-000000000000}")]
     public Guid Id { get; set; }
 
-    /// <summary>Name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The group name.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "Group Name")]
     public string Name { get; init; }
 
-    /// <summary>Manager</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The group manager.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = "Jake.Zazhitski")]
     public string Manager { get; set; }
-
-    public static GroupSummaryDto GetSample()
-    {
-        return new GroupSummaryDto
-        {
-            Id = Guid.Empty,
-            Manager = "Jake.Zazhitski",
-            Name = "Group Name"
-        };
-    }
 }
 
 [Scope]

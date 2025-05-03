@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,8 +26,36 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
-public class SettingsRoomRequestDto
+/// <summary>
+/// The room settings parameters.
+/// </summary>
+public class SettingsRoom
 {
+    /// <summary>
+    /// Specifies whether to create the room with indexing.
+    /// </summary>
     public bool? Indexing { get; set; }
+
+    /// <summary>
+    /// Specifies whether to deny downloads from the room.
+    /// </summary>
     public bool? DenyDownload { get; set; }
+}
+
+/// <summary>
+/// The request parameters of the room settings.
+/// </summary>
+public class SettingsRoomRequestDto<T>
+{
+    /// <summary>
+    /// The room ID.
+    /// </summary>
+    [FromRoute(Name = "id")]
+    public required T Id { get; set; }
+
+    /// <summary>
+    /// The room settings parameters.
+    /// </summary>
+    [FromBody]
+    public SettingsRoom SettingsRoom { get; set; }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,10 +26,12 @@
 
 namespace ASC.Webhooks.Core.EF.Model;
 
-public class DbWebhook : IMapFrom<Webhook>
+public class DbWebhook
 {
     public int Id { get; set; }
+    [MaxLength(200)]
     public string Route { get; set; }
+    [MaxLength(10)]
     public string Method { get; set; }
 }
 
@@ -57,12 +59,10 @@ public static class DbWebhookExtension
                 .HasColumnName("id");
 
             entity.Property(e => e.Route)
-                .HasMaxLength(200)
                 .HasColumnName("route")
                 .HasDefaultValueSql("''");
 
             entity.Property(e => e.Method)
-                .HasMaxLength(10)
                 .HasColumnName("method")
                 .HasDefaultValueSql("''");
         });
@@ -72,24 +72,27 @@ public static class DbWebhookExtension
     {
         modelBuilder.Entity<DbWebhook>(entity =>
         {
+            // Define primary key
             entity.HasKey(e => new { e.Id })
-                .HasName("PRIMARY");
+                .HasName("webhooks_pkey"); // Default naming convention for PostgreSQL primary keys
 
-            entity.ToTable("webhooks");
+            // Define table name
+            entity.ToTable("webhooks"); // PostgreSQL typically uses snake_case for table names
 
+            // Define properties
             entity.Property(e => e.Id)
-                .HasColumnType("int")
-                .HasColumnName("id");
+                .HasColumnName("id") // PostgreSQL uses snake_case for column names
+                .HasColumnType("integer"); // PostgreSQL uses 'integer' for int type
 
             entity.Property(e => e.Route)
-                .HasMaxLength(200)
                 .HasColumnName("route")
-                .HasDefaultValueSql("''");
+                .HasColumnType("character varying(200)") // Equivalent to MaxLength(200)
+                .HasDefaultValue(string.Empty); // Set default value to an empty string
 
             entity.Property(e => e.Method)
-                .HasMaxLength(10)
                 .HasColumnName("method")
-                .HasDefaultValueSql("''");
+                .HasColumnType("character varying(10)") // Equivalent to MaxLength(10)
+                .HasDefaultValue(string.Empty); // Set default value to an empty string
         });
     }
 }

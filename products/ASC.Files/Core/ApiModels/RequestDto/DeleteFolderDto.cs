@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -25,15 +25,37 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
+
 /// <summary>
+/// The parameters for deleting a folder.
 /// </summary>
-public class DeleteFolderDto
+public class DeleteFolder
 {
-    /// <summary>Specifies whether to delete a folder after the editing session is finished or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether to delete a folder after the editing session is finished or not.
+    /// </summary>
     public bool DeleteAfter { get; set; }
 
-    /// <summary>Specifies whether to move a folder to the "Trash" folder or delete it immediately</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether to move a folder to the \"Trash\" folder or delete it immediately.
+    /// </summary>
     public bool Immediately { get; set; }
+}
+
+/// <summary>
+/// The request parameters for deleting a folder.
+/// </summary>
+public class DeleteFolder<T>
+{
+    /// <summary>
+    /// The folder ID to delete.
+    /// </summary>
+    [FromRoute(Name = "folderId")]
+    public required T FolderId { get; set; }
+
+    /// <summary>
+    /// The parameters for deleting a folder.
+    /// </summary>
+    [FromBody]
+    public DeleteFolder Delete { get; set; }
 }

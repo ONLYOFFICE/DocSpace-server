@@ -465,16 +465,16 @@
     <value>Usuário</value>
   </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Não é possível mover vários arquivos para a sala Preenchimento de formulários. Mova um formulário PDF do ONLYOFFICE por vez.</value>
+    <value>Não é possível mover vários arquivos para a sala Preenchimento de formulários. Mova um formulário PDF do {0} por vez.</value>
   </data>
   <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Não há suporte para mover pastas para a sala Preenchimento de formulários. Mova um formulário PDF do ONLYOFFICE por vez.</value>
+    <value>Não há suporte para mover pastas para a sala Preenchimento de formulários. Mova um formulário PDF do {0} por vez.</value>
   </data>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>O arquivo não pode ser movido para esta sala. Tente mover o formulário PDF do ONLYOFFICE.</value>
+    <value>O arquivo não pode ser movido para esta sala. Tente mover o formulário PDF do {0}.</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>O arquivo não pode ser carregado nesta sala. Tente fazer upload do formulário PDF do ONLYOFFICE.</value>
+    <value>O arquivo não pode ser carregado nesta sala. Tente fazer upload do formulário PDF do {0}.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Link para preencher</value>
@@ -487,5 +487,29 @@
   </data>
   <data name="ExternalUser" xml:space="preserve">
     <value>Usuário externo</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Gerente da sala</value>
+  </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Criador do conteúdo</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Criador do conteúdo</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Gerente da sala</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Abrir arquivo</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Não é possível excluir a versão atual do arquivo</value>
+  </data>
+  <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
+    <value>Compartilhe para preencher</value>
+  </data>
+  <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
+    <value>Comece a encher</value>
   </data>
 </root>

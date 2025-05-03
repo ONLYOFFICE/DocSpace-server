@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,24 +27,33 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
+/// The request parameters for configuring security settings of a single web module.
 /// </summary>
 public class WebItemSecurityRequestsDto
 {
-    /// <summary>Module ID</summary>
-    /// <type>System.String, System</type>
-    public string Id { get; set; }
+    /// <summary>
+    /// The module ID.
+    /// </summary>
+    public required string Id { get; set; }
 
-    /// <summary>Specifies if the module security settings are enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Controls whether the security restrictions are enforced for this module.
+    /// </summary>
     public bool Enabled { get; set; }
 
-    /// <summary>List of user/group IDs with the access to the module</summary>
-    /// <type>System.Collections.Generic.IEnumerable{System.Guid}, System.Collections.Generic</type>
-    /// <example>9924256A-739C-462b-AF15-E652A3B1B6EB</example>
-	/// <collection>list</collection>
+    /// <summary>
+    /// The collection of user and group identifiers granted access to the module.
+    /// </summary>
     public IEnumerable<Guid> Subjects { get; set; }
+}
 
-    /// <summary>Products with security information</summary>
-    /// <type>System.Collections.Generic.IEnumerable{ASC.Api.Collections.ItemKeyValuePair{System.String, System.Boolean}}, System.Collections.Generic</type>
+/// <summary>
+/// The request parameters for configuring security settings across multiple web modules.
+/// </summary>
+public class WebItemsSecurityRequestsDto
+{
+    /// <summary>
+    /// The list of module security configurations.
+    /// </summary>
     public IEnumerable<ItemKeyValuePair<string, bool>> Items { get; set; }
 }

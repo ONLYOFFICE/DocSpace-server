@@ -465,16 +465,16 @@ docx, xlsx, pptx와 최고의 호환성이 보장됩니다.</value>
     <value>사용자</value>
   </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>여러 파일을 양식 작성 룸으로 이동하는 것은 지원되지 않습니다. 한 번에 하나의 ONLYOFFICE PDF 양식을 이동하세요.</value>
+    <value>여러 파일을 양식 작성 룸으로 이동하는 것은 지원되지 않습니다. 한 번에 하나의 {0} PDF 양식을 이동하세요.</value>
   </data>
   <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>폴더를 양식 작성 룸으로 이동하는 것은 지원되지 않습니다. 한 번에 하나의 ONLYOFFICE PDF 양식을 이동하세요.</value>
+    <value>폴더를 양식 작성 룸으로 이동하는 것은 지원되지 않습니다. 한 번에 하나의 {0} PDF 양식을 이동하세요.</value>
   </data>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>파일을 이 룸으로 이동할 수 없습니다. ONLYOFFICE PDF 양식을 이동해 보세요.</value>
+    <value>파일을 이 룸으로 이동할 수 없습니다. {0} PDF 양식을 이동해 보세요.</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>파일을 이 룸으로 업로드할 수 없습니다. ONLYOFFICE PDF 양식을 업로드해 보세요.</value>
+    <value>파일을 이 룸으로 업로드할 수 없습니다. {0} PDF 양식을 업로드해 보세요.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>작성 링크</value>
@@ -484,5 +484,32 @@ docx, xlsx, pptx와 최고의 호환성이 보장됩니다.</value>
   </data>
   <data name="FormNumber" xml:space="preserve">
     <value>양식 번호</value>
+  </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>콘텐츠 작성자</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>콘텐츠 작성자</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>룸 관리자</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>룸 관리자</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>외부 사용자</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>파일 열기</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>현재 파일 버전을 삭제할 수 없습니다</value>
+  </data>
+  <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
+    <value>작성을 위해 공유하세요</value>
+  </data>
+  <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
+    <value>작성 시작</value>
   </data>
 </root>

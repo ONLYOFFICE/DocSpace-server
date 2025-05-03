@@ -103,4 +103,7 @@
   <data name="ReadyFormFolder" xml:space="preserve">
     <value>Dokončiť</value>
   </data>
+  <data name="RoomTemplates" xml:space="preserve">
+    <value>Šablóny</value>
+  </data>
 </root>

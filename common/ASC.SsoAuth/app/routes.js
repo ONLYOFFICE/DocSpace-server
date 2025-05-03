@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -289,6 +289,10 @@ module.exports = function (app, config) {
       return res.redirect(request.context);
     }
   }
+  function getValueByKeyIgnoreCase(obj, key) {
+      const entry = Object.entries(obj).find(([k]) => k.toLowerCase() === key.toLowerCase());
+      return entry ? entry[1] : undefined;
+  }
 
   const createAuthnTemplateCallback = (_idp, _sp, method) => (template) => {
     const metadata = { idp: _idp.entityMeta, sp: _sp.entityMeta };
@@ -567,8 +571,8 @@ module.exports = function (app, config) {
 
       //const logoutUser = new LogoutModel(userData.NameId, userData.SessionId);
       const user = {
-        logoutNameID: userData.NameId,
-        sessionIndex: userData.SessionId,
+          logoutNameID: getValueByKeyIgnoreCase(userData, "NameId"),
+          sessionIndex: getValueByKeyIgnoreCase(userData, "SessionId")
       };
 
       const data = sp.createLogoutRequest(

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,7 +34,7 @@ public class NovellLdapSearcher(IConfiguration configuration,
 {
     protected readonly ILogger<NovellLdapSearcher> _logger = logger;
     private LdapCertificateConfirmRequest _certificateConfirmRequest;
-    private static readonly object _rootSync = new();
+    private static readonly Lock _rootSync = new();
     private LdapConnection _ldapConnection;
 
     public string Login { get; private set; }

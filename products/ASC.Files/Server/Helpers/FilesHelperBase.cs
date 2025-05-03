@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,13 +34,12 @@ public abstract class FilesHelperBase(
     FileStorageService fileStorageService,
     FileChecker fileChecker,
     IHttpContextAccessor httpContextAccessor,
-    IDistributedCache distributedCache)
+    WebhookManager webhookManager)
     {
     protected readonly FilesSettingsHelper _filesSettingsHelper = filesSettingsHelper;
     protected readonly FileUploader _fileUploader = fileUploader;
     protected readonly FileDtoHelper _fileDtoHelper = fileDtoHelper;
     protected readonly FileStorageService _fileStorageService = fileStorageService;
-    protected readonly IDistributedCache _distributedCache = distributedCache;
 
     protected readonly FileChecker _fileChecker = fileChecker;
     protected readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
@@ -52,6 +51,8 @@ public abstract class FilesHelperBase(
             var resultFile = await _fileUploader.ExecAsync(folderId, title, file.Length, file, !createNewIfExist, !keepConvertStatus);
 
             await socketManager.CreateFileAsync(resultFile);
+
+            await webhookManager.PublishAsync(WebhookTrigger.FileUploaded, resultFile);
 
             return await _fileDtoHelper.GetAsync(resultFile);
         }

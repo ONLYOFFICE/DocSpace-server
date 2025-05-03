@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,12 +30,21 @@ namespace ASC.Migration.Core.Models.Api;
 [ProtoContract]
 public class MigratingApiGroup : ImportableApiEntity
 {
+    /// <summary>
+    /// Group name
+    /// </summary>
     [ProtoMember(2)]
     public string GroupName { get; set; }
 
+    /// <summary>
+    /// Module name
+    /// </summary>
     [ProtoMember(3)]
     public string ModuleName { get; set; }
 
+    /// <summary>
+    /// List of user uid
+    /// </summary>
     [ProtoMember(4)]
     public List<string> UserUidList { get; set; }
 }

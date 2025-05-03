@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,13 +30,13 @@ namespace ASC.Api.Core.Middleware;
 public class TenantStatusFilter(ILogger<TenantStatusFilter> logger, TenantManager tenantManager)
     : IAsyncResourceFilter
 {
-    private readonly string[] _passthroughtRequestEndings = ["preparation-portal", "getrestoreprogress", "settings", "settings.json", "colortheme.json", "logos.json", "build.json", "@self.json"
+    private readonly string[] _passthroughtRequestEndings = ["preparation-portal", "portal", "getrestoreprogress", "settings", "settings.json", "colortheme", "colortheme.json", "logos", "logos.json", "build", "build.json", "@self", "@self.json", "encryption/progress"
     ]; //TODO add or update when "preparation-portal" will be done
 
 
     public async Task OnResourceExecutionAsync(ResourceExecutingContext context, ResourceExecutionDelegate next)
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync(false);
+        var tenant = tenantManager.GetCurrentTenant(false);
         if (tenant == null)
         {
             context.Result = new StatusCodeResult((int)HttpStatusCode.NotFound);
@@ -59,7 +59,7 @@ public class TenantStatusFilter(ILogger<TenantStatusFilter> logger, TenantManage
             return;
         }
 
-        if (tenant.Status is TenantStatus.Transfering or TenantStatus.Restoring)
+        if (tenant.Status is TenantStatus.Transfering or TenantStatus.Restoring or TenantStatus.Encryption)
         {
             if (_passthroughtRequestEndings.Any(path => context.HttpContext.Request.Path.ToString().EndsWith(path, StringComparison.InvariantCultureIgnoreCase)))
             {

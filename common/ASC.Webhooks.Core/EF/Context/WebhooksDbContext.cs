@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,42 +26,42 @@
 
 namespace ASC.Webhooks.Core.EF.Context;
 
-public class WebhooksDbContext(DbContextOptions<WebhooksDbContext> options) : DbContext(options)
+public class WebhooksDbContext(DbContextOptions<WebhooksDbContext> options) : BaseDbContext(options)
 {
-    public DbSet<WebhooksConfig> WebhooksConfigs { get; set; }
-    public DbSet<WebhooksLog> WebhooksLogs { get; set; }
-    public DbSet<DbWebhook> Webhooks { get; set; }
+    public DbSet<DbWebhook> Webhooks { get; set; } // TODO: Deprecated
+    public DbSet<DbWebhooksConfig> WebhooksConfigs { get; set; }
+    public DbSet<DbWebhooksLog> WebhooksLogs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         ModelBuilderWrapper
-        .From(modelBuilder, Database)
-        .AddDbWebhooks()
-        .AddWebhooksConfig()
-        .AddWebhooksLog()
-        .AddDbTenant();
+            .From(modelBuilder, Database)
+            .AddDbWebhooks()
+            .AddWebhooksConfig()
+            .AddWebhooksLog()
+            .AddDbTenant();
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, null, null])]
-    public Task<WebhooksConfig> WebhooksConfigByUriAsync(int tenantId, string uri, string name)
+    public Task<DbWebhooksConfig> WebhooksConfigByUriAsync(int tenantId, string uri, string name)
     {
         return Queries.WebhooksConfigByUriAsync(this, tenantId, uri, name);
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt])]
-    public IAsyncEnumerable<WebhooksConfigWithStatus> WebhooksConfigWithStatusAsync(int tenantId)
+    public IAsyncEnumerable<WebhooksConfigWithStatus> WebhooksConfigWithStatusAsync(int tenantId, Guid? userId)
     {
-        return Queries.WebhooksConfigWithStatusAsync(this, tenantId);
+        return Queries.WebhooksConfigWithStatusAsync(this, tenantId, userId);
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt])]
-    public IAsyncEnumerable<WebhooksConfig> WebhooksConfigsAsync(int tenantId)
+    public IAsyncEnumerable<DbWebhooksConfig> WebhooksConfigsAsync(int tenantId, bool? enabled)
     {
-        return Queries.WebhooksConfigsAsync(this, tenantId);
+        return Queries.WebhooksConfigsAsync(this, tenantId, enabled);
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
-    public Task<WebhooksConfig> WebhooksConfigAsync(int tenantId, int id)
+    public Task<DbWebhooksConfig> WebhooksConfigAsync(int tenantId, int id)
     {
         return Queries.WebhooksConfigAsync(this, tenantId, id);
     }
@@ -71,51 +71,32 @@ public class WebhooksDbContext(DbContextOptions<WebhooksDbContext> options) : Db
     {
         return Queries.WebhooksLogAsync(this, id);
     }
-
-    [PreCompileQuery([])]
-    public IAsyncEnumerable<DbWebhook> DbWebhooksAsync()
-    {
-        return Queries.DbWebhooksAsync(this);
-    }
-    
-    [PreCompileQuery([PreCompileQuery.DefaultInt])]
-    public Task<DbWebhook> DbWebhookAsync(int id)
-    {
-        return Queries.DbWebhookAsync(this, id);
-    }
-
-    [PreCompileQuery([null, null])]
-    public Task<DbWebhook> DbWebhookByMethodAsync(string method, string routePattern)
-    {
-        return Queries.DbWebhookByMethodAsync(this, method, routePattern);
-    }
 }
 
 static file class Queries
 {
-    public static readonly Func<WebhooksDbContext, int, string, string, Task<WebhooksConfig>> WebhooksConfigByUriAsync =
+    public static readonly Func<WebhooksDbContext, int, string, string, Task<DbWebhooksConfig>> WebhooksConfigByUriAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (WebhooksDbContext ctx, int tenantId, string uri, string name) =>
                 ctx.WebhooksConfigs.FirstOrDefault(r => r.TenantId == tenantId && r.Uri == uri && r.Name == name));
 
-    public static readonly Func<WebhooksDbContext, int, IAsyncEnumerable<WebhooksConfigWithStatus>> WebhooksConfigWithStatusAsync =
+    public static readonly Func<WebhooksDbContext, int, Guid?, IAsyncEnumerable<WebhooksConfigWithStatus>> WebhooksConfigWithStatusAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (WebhooksDbContext ctx, int tenantId) =>
-                ctx.WebhooksConfigs.Where(it => it.TenantId == tenantId)
-             .GroupJoin(ctx.WebhooksLogs, c => c.Id, l => l.ConfigId, (configs, logs) => new { configs, logs })
-            .Select(it =>
-                new WebhooksConfigWithStatus
-                {
-                    WebhooksConfig = it.configs,
-                    Status = it.logs.OrderBy(webhooksLog => webhooksLog.Delivery).LastOrDefault().Status
-                }));
+            (WebhooksDbContext ctx, int tenantId, Guid? userId) =>
+                ctx.WebhooksConfigs.Where(it => it.TenantId == tenantId && (userId == null || it.CreatedBy == userId))
+                .GroupJoin(ctx.WebhooksLogs, c => c.Id, l => l.ConfigId, (configs, logs) => new { configs, logs })
+                .Select(it => new WebhooksConfigWithStatus
+                    {
+                        WebhooksConfig = it.configs,
+                        Status = it.logs.OrderByDescending(webhooksLog => webhooksLog.Delivery).FirstOrDefault().Status
+                    }));
 
-    public static readonly Func<WebhooksDbContext, int, IAsyncEnumerable<WebhooksConfig>> WebhooksConfigsAsync =
+    public static readonly Func<WebhooksDbContext, int, bool?, IAsyncEnumerable<DbWebhooksConfig>> WebhooksConfigsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (WebhooksDbContext ctx, int tenantId) =>
-                ctx.WebhooksConfigs.Where(it => it.TenantId == tenantId));
+            (WebhooksDbContext ctx, int tenantId, bool? enabled) =>
+                ctx.WebhooksConfigs.Where(it => it.TenantId == tenantId && (enabled == null || it.Enabled == enabled)));
 
-    public static readonly Func<WebhooksDbContext, int, int, Task<WebhooksConfig>> WebhooksConfigAsync =
+    public static readonly Func<WebhooksDbContext, int, int, Task<DbWebhooksConfig>> WebhooksConfigAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (WebhooksDbContext ctx, int tenantId, int id) =>
                 ctx.WebhooksConfigs.FirstOrDefault(it => it.TenantId == tenantId && it.Id == id));
@@ -127,17 +108,4 @@ static file class Queries
                     .Where(it => it.Id == id)
                     .Join(ctx.WebhooksConfigs, r => r.ConfigId, r => r.Id, (log, config) => new DbWebhooks { Log = log, Config = config })
                     .FirstOrDefault());
-
-    public static readonly Func<WebhooksDbContext, IAsyncEnumerable<DbWebhook>> DbWebhooksAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (WebhooksDbContext ctx) => ctx.Webhooks);
-
-    public static readonly Func<WebhooksDbContext, int, Task<DbWebhook>> DbWebhookAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (WebhooksDbContext ctx, int id) => ctx.Webhooks.FirstOrDefault(r => r.Id == id));
-
-    public static readonly Func<WebhooksDbContext, string, string, Task<DbWebhook>> DbWebhookByMethodAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (WebhooksDbContext ctx, string method, string routePattern) =>
-                ctx.Webhooks.FirstOrDefault(r => r.Method == method && r.Route == routePattern));
 }

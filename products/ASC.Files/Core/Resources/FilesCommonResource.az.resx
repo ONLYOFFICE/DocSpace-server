@@ -465,16 +465,16 @@ docx, xlsx, pptx ilə ən yüksək uyğunluq.</value>
     <value>İstifadəçi</value>
   </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Birdən çox faylın Forma Doldurma otağına köçürülməsi dəstəklənmir. Hər dəfə bir ONLYOFFICE PDF formasını köçürün.</value>
+    <value>Birdən çox faylın Forma Doldurma otağına köçürülməsi dəstəklənmir. Hər dəfə bir {0} PDF formasını köçürün.</value>
   </data>
   <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Qovluqların Forma Doldurma otağına köçürülməsi dəstəklənmir. Hər dəfə bir ONLYOFFICE PDF formasını köçürün.</value>
+    <value>Qovluqların Forma Doldurma otağına köçürülməsi dəstəklənmir. Hər dəfə bir {0} PDF formasını köçürün.</value>
   </data>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Fayl bu otağa köçürülə bilməz. Lütfən, ONLYOFFICE PDF formasını köçürməyə cəhd edin.</value>
+    <value>Fayl bu otağa köçürülə bilməz. Lütfən, {0} PDF formasını köçürməyə cəhd edin.</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Fayl bu otağa yüklənə bilməz. Lütfən, ONLYOFFICE PDF formasını yükləməyə cəhd edin.</value>
+    <value>Fayl bu otağa yüklənə bilməz. Lütfən, {0} PDF formasını yükləməyə cəhd edin.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Doldurmaq üçün link</value>
@@ -484,5 +484,32 @@ docx, xlsx, pptx ilə ən yüksək uyğunluq.</value>
   </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Forma nömrəsi</value>
+  </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Məzmun yaradıcısı</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Otaq meneceri</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Xarici istifadəçi</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Məzmun yaradıcısı</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Otaq meneceri</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Faylı açın</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Faylın cari versiyasını silmək mümkün deyil</value>
+  </data>
+  <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
+    <value>Doldurmaq üçün paylaşın</value>
+  </data>
+  <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
+    <value>Doldurmağa başlayın</value>
   </data>
 </root>

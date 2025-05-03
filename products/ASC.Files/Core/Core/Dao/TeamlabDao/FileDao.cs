@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,10 +32,12 @@ namespace ASC.Files.Core.Data;
 internal class FileDao(
         ILogger<FileDao> logger,
         FactoryIndexerFile factoryIndexer,
+        FactoryIndexerForm factoryIndexerFormData,
         UserManager userManager,
         FileUtility fileUtility,
         IDbContextFactory<FilesDbContext> dbContextManager,
         TenantManager tenantManager,
+        TenantLogoManager tenantLogoManager,
         TenantUtil tenantUtil,
         SetupInfo setupInfo,
         MaxTotalSizeStatistic maxTotalSizeStatistic,
@@ -61,7 +63,12 @@ internal class FileDao(
     SocketManager socketManager,
     SecurityContext securityContext,
     TempStream tempStream,
-    FileChecker fileChecker)
+    FileChecker fileChecker,
+    EntryManager entryManager,
+    FileSharing fileSharing,
+    FilesMessageService filesMessageService,
+    QuotaSocketManager quotaSocketManager,
+    CustomQuota customQuota)
     : AbstractDao(dbContextManager,
               userManager,
               tenantManager,
@@ -88,7 +95,7 @@ internal class FileDao(
 
     public async Task<File<int>> GetFileAsync(int fileId)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
@@ -99,7 +106,7 @@ internal class FileDao(
 
     public async Task<File<int>> GetFileAsync(int fileId, int fileVersion)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
@@ -112,7 +119,7 @@ internal class FileDao(
     {
         ArgumentException.ThrowIfNullOrEmpty(title);
 
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
@@ -123,7 +130,7 @@ internal class FileDao(
 
     public async Task<File<int>> GetFileStableAsync(int fileId, int fileVersion = -1)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
@@ -134,7 +141,7 @@ internal class FileDao(
 
     public async IAsyncEnumerable<File<int>> GetFileHistoryAsync(int fileId)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
@@ -151,7 +158,7 @@ internal class FileDao(
             yield break;
         }
 
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
@@ -170,7 +177,7 @@ internal class FileDao(
         }
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var query = await GetFileQuery(filesDbContext, r => fileIds.Contains(r.Id) && r.CurrentVersion);
+        var query = GetFileQuery(filesDbContext, r => fileIds.Contains(r.Id) && r.CurrentVersion);
 
         var searchByText = !string.IsNullOrEmpty(searchText);
         var searchByExtension = !extension.IsNullOrEmpty();
@@ -189,6 +196,7 @@ internal class FileDao(
                 var func = GetFuncForSearch(null, null, filterType, subjectGroup, subjectID, searchText, e, searchInContent);
 
                 (success, var result) = await factoryIndexer.TrySelectIdsAsync(s => func(s).In(r => r.Id, fileIds.ToArray()));
+                
                 if(!success)
                 {
                     break;
@@ -253,7 +261,7 @@ internal class FileDao(
 
     public async IAsyncEnumerable<int> GetFilesAsync(int parentId)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
@@ -264,7 +272,7 @@ internal class FileDao(
     }
 
     public async IAsyncEnumerable<File<int>> GetFilesAsync(int parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, 
-        bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, int roomId = default, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT)
+        bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, int roomId = 0, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null, bool applyFormStepFilter = false)
     {
         if (filterType == FilterType.FoldersOnly || count == 0)
         {
@@ -273,45 +281,16 @@ internal class FileDao(
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var q = await GetFilesQueryWithFilters(parentId, orderBy, filterType, subjectGroup, subjectID, searchText, searchInContent, withSubfolders, excludeSubject, roomId, extension, filesDbContext);
-
+        var q = await GetFilesQueryWithFilters(parentId, orderBy, filterType, subjectGroup, subjectID, searchText, searchInContent, withSubfolders, excludeSubject, roomId, extension, filesDbContext, formsItemDto);
+        
+        var tenantId = _tenantManager.GetCurrentTenantId();
         if (containingMyFiles)
         {
-            switch (parentType)
-            {
-                case FolderType.FillingFormsRoom:
-                case FolderType.InProcessFormFolder:
-                case FolderType.ReadyFormFolder:
-                    var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-
-                    var folderIds = filesDbContext.Folders
-                        .Join(filesDbContext.Tree, r => r.Id, b => b.FolderId, (folder, tree) => new { folder, tree })
-                        .Where(r => r.folder.TenantId == tenantId)
-                        .Where(r => r.tree.ParentId == parentId)
-                        .Select(r => new
-                        {
-                            r.folder.Id,
-                            IsSystemFolder = DocSpaceHelper.FormsFillingSystemFolders.Contains(r.folder.FolderType)
-                        });
-
-                    var roomSystemFolderIds = folderIds
-                        .Where(r => r.IsSystemFolder)
-                        .Select(r => r.Id);
-
-                    var roomDefaultFolderIds = folderIds
-                        .Where(r => !r.IsSystemFolder)
-                        .Select(r => r.Id);
-
-                    q = q.Where(r =>
-                        (roomSystemFolderIds.Contains(r.ParentId) &&
-                         r.CreateBy == securityContext.CurrentAccount.ID &&
-                         r.CreateBy != ASC.Core.Configuration.Constants.Guest.ID) ||
-                        roomDefaultFolderIds.Contains(r.ParentId));
-                    break;
-                default:
-                    q = q.Where(r => r.CreateBy == securityContext.CurrentAccount.ID);
-                    break;
-            }
+            q = ApplyAdditionalFileFilters(q, filesDbContext, parentId, parentType, AdditionalFilterOption.MyFilesAndFolders);
+        }
+        if (applyFormStepFilter)
+        {
+            q = ApplyAdditionalFileFilters(q, filesDbContext, parentId, parentType, AdditionalFilterOption.FormsWithFillingRole);
         }
 
         q = q.Skip(offset);
@@ -367,7 +346,7 @@ internal class FileDao(
 
         if (!_authContext.IsAuthenticated)
         {
-            headers.Add(await SecureHelper.GenerateSecureKeyHeaderAsync(path, emailValidationKeyProvider));
+            headers.Add(SecureHelper.GenerateSecureKeyHeader(path, emailValidationKeyProvider));
         }
 
         var url = (await storage.GetPreSignedUriAsync(string.Empty, path, expires, headers)).ToString();
@@ -417,7 +396,7 @@ internal class FileDao(
         {
             throw FileSizeComment.GetFileSizeException(maxChunkedUploadSize);
         }
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         var folderDao = daoFactory.GetFolderDao<int>();
         var fileDao = daoFactory.GetFileDao<int>();
         var currentFolder = await folderDao.GetFolderAsync(file.FolderIdDisplay);
@@ -432,7 +411,7 @@ internal class FileDao(
         }
         else
         {
-            user = await _userManager.GetUsersAsync(file.Id == default ? _authContext.CurrentAccount.ID : file.CreateBy);
+            user = await _userManager.GetUsersAsync(file.Id == 0 ? _authContext.CurrentAccount.ID : file.CreateBy);
             quotaLockKey = $"user_{user.Id}";
         }
 
@@ -492,7 +471,7 @@ internal class FileDao(
                 {
                     await using var tx = await filesDbContext.Database.BeginTransactionAsync();
 
-                    if (file.Id == default)
+                        if (file.Id == 0)
                     {
                             file.Id = await filesDbContext.FileMaxIdAsync() + 1;
                         file.Version = 1;
@@ -507,7 +486,7 @@ internal class FileDao(
                     file.ModifiedBy = _authContext.CurrentAccount.ID;
                     file.ModifiedOn = _tenantUtil.DateTimeNow();
                         
-                    if (file.CreateBy == default)
+                        if (file.CreateBy == Guid.Empty)
                     {
                         file.CreateBy = _authContext.CurrentAccount.ID;
                     }
@@ -555,7 +534,7 @@ internal class FileDao(
                         ParentId = file.ParentId,
                         Title = file.Title,
                         ContentLength = file.ContentLength,
-                            Category = file.Category != (int)FilterType.None ? file.Category : (int)file.FilterType,
+                        Category = file.Category != (int)FilterType.None ? file.Category : (int)file.FilterType,
                         CreateBy = file.CreateBy,
                         CreateOn = _tenantUtil.DateTimeToUtc(file.CreateOn),
                         ModifiedBy = file.ModifiedBy,
@@ -563,6 +542,7 @@ internal class FileDao(
                         ConvertedType = file.ConvertedType,
                         Comment = file.Comment,
                         Encrypted = file.Encrypted,
+                        FileStatus = (int)file.FileStatus,
                         Forcesave = file.Forcesave,
                         ThumbnailStatus = file.ThumbnailStatus,
                         TenantId = tenantId
@@ -576,9 +556,7 @@ internal class FileDao(
                     {                    
                         await filesDbContext.AddOrUpdateAsync(r => r.Files, toInsert);
                     }
-                    
                     await filesDbContext.SaveChangesAsync();
-
                     await tx.CommitAsync();
                 });
 
@@ -602,54 +580,70 @@ internal class FileDao(
             if (isNew)
             {
                 await IncrementCountAsync(filesDbContext, file.ParentId, tenantId, FileEntryType.File);
-            }
-        }
         
-        if (fileStream != null)
-        {
-            try
-            {
                     if (roomId != -1 && checkFolder)
                     {
                         var currentRoom = await folderDao.GetFolderAsync(roomId);
-                        if (currentRoom.FolderType == FolderType.FillingFormsRoom)
+                        if (currentRoom.FolderType == FolderType.FillingFormsRoom && currentRoom.RootFolderType != FolderType.RoomTemplates)
                         {
                             var fileProp = await fileDao.GetProperties(file.Id);
                             var extension = FileUtility.GetFileExtension(file.Title);
 
-                            if (file.IsForm || (extension == ".csv" && fileProp != null && Equals(fileProp.FormFilling.ResultsFolderId, file.ParentId)))
+                            if (file.IsForm || ((extension == ".csv" || extension == ".xlsx") && fileProp != null && Equals(fileProp.FormFilling.ResultsFolderId, file.ParentId)))
                             {
-                                await SaveFileStreamAsync(file, streamChange ? cloneStreamForSave : fileStream, currentFolder);
-
                                 var properties = fileProp ?? new EntryProperties<int> { FormFilling = new FormFillingProperties<int>() };
-                                if (!properties.FormFilling.CollectFillForm)
+                                if (!properties.FormFilling.StartFilling)
                                 {
+                                        var inProcessFormFolder = await folderDao.GetFoldersAsync(currentRoom.Id, FolderType.InProcessFormFolder).FirstOrDefaultAsync();
+                                        var readyFormFolder = await folderDao.GetFoldersAsync(currentRoom.Id, FolderType.ReadyFormFolder).FirstOrDefaultAsync();
+
+                                        if (inProcessFormFolder == null && readyFormFolder == null)
+                                        {
+                                            var (readyFormFolderId, inProcessFormFolderId) = await entryManager.InitSystemFormFillingFolders(currentRoom.Id, folderDao, file.CreateBy);
+                                            var systemFormFillingFolders = new List<Folder<int>>
+                                            {
+                                                await folderDao.GetFolderAsync(readyFormFolderId),
+                                                await folderDao.GetFolderAsync(inProcessFormFolderId)
+                                            };
+                                            foreach (var formFolder in systemFormFillingFolders)
+                                            {
+                                                var a = await fileSharing.GetSharedInfoAsync(formFolder);
+                                                var u = a.Where(ace => ace is not { Access: FileShare.FillForms }).Select(ace => ace.Id).ToList();
+
+                                                await socketManager.CreateFolderAsync(formFolder, u);
+                                                await filesMessageService.SendAsync(MessageAction.FolderCreated, formFolder, formFolder.Title);
+                                            }
+                                        }
                                     properties.FormFilling.StartFilling = true;
-                                    properties.FormFilling.CollectFillForm = true;
                                     properties.FormFilling.OriginalFormId = file.Id;
                                     await fileDao.SaveProperties(file.Id, properties);
                                     var count = await fileStorageService.GetPureSharesCountAsync(currentRoom.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
                                     if (file.IsForm)
                                     {
                                         await socketManager.CreateFormAsync(file, securityContext.CurrentAccount.ID, count <= 1);
-            }
+                                    }
                                 }
                             }
                             else
                             {
-                                throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
+                                var stored = await (await globalStore.GetStoreAsync()).IsDirectoryAsync(GetUniqFileDirectory(file.Id));
+                                await DeleteFileAsync(file.Id, stored, file.GetFileQuotaOwner());
+
+                                var logoText = await tenantLogoManager.GetLogoTextAsync();
+
+                                throw new Exception(string.Format(FilesCommonResource.ErrorMessage_UploadToFormRoom, logoText));
                             }
                         }
-                        else
-                        {
-                            await SaveFileStreamAsync(file, streamChange ? cloneStreamForSave : fileStream, currentFolder);
                         }
                     }
-                    else
+            }
+
+            if (fileStream != null)
                     {
+                try
+                {
                         await SaveFileStreamAsync(file, streamChange ? cloneStreamForSave : fileStream, currentFolder);
                     }
-                }
             catch (Exception saveException)
             {
                 try
@@ -661,7 +655,7 @@ internal class FileDao(
                     }
                     else if (!await IsExistOnStorageAsync(file))
                     {
-                        await DeleteVersionAsync(file);
+                            await DeleteFileVersionAsync(file);
                     }
                 }
                 catch (Exception deleteException)
@@ -692,7 +686,7 @@ internal class FileDao(
     }
 
     public async Task<int> GetFilesCountAsync(int parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, 
-        bool withSubfolders = false, bool excludeSubject = false, int roomId = default)
+        bool withSubfolders = false, bool excludeSubject = false, int roomId = 0, FormsItemDto formsItemDto = null, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All)
     {
         if (filterType == FilterType.FoldersOnly)
         {
@@ -701,15 +695,20 @@ internal class FileDao(
 
         var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        return await (await GetFilesQueryWithFilters(parentId, null, filterType, subjectGroup, subjectId, searchText, searchInContent, withSubfolders, excludeSubject, roomId, extension, filesDbContext))
-            .CountAsync();
+        var q = await GetFilesQueryWithFilters(parentId, null, filterType, subjectGroup, subjectId, searchText, searchInContent, withSubfolders, excludeSubject, roomId, extension, filesDbContext, formsItemDto);
+        if (additionalFilterOption != AdditionalFilterOption.All)
+        {
+            q = ApplyAdditionalFileFilters(q, filesDbContext, parentId, parentType, additionalFilterOption);
+        }
+
+        return await q.CountAsync();
     }
 
     public async Task<File<int>> ReplaceFileVersionAsync(File<int> file, Stream fileStream)
     {
         ArgumentNullException.ThrowIfNull(file);
 
-        if (file.Id == default)
+        if (file.Id == 0)
         {
             throw new ArgumentException("No file id or folder id toFolderId determine provider");
         }
@@ -721,7 +720,7 @@ internal class FileDao(
             throw FileSizeComment.GetFileSizeException(maxChunkedUploadSize);
         }
 
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         DbFile toUpdate = null;
 
         await using (await _distributedLockProvider.TryAcquireFairLockAsync(LockKey))
@@ -740,7 +739,7 @@ internal class FileDao(
 
                 file.ModifiedBy = _authContext.CurrentAccount.ID;
                 file.ModifiedOn = _tenantUtil.DateTimeNow();
-                if (file.CreateBy == default)
+                if (file.CreateBy == Guid.Empty)
                 {
                     file.CreateBy = _authContext.CurrentAccount.ID;
                 }
@@ -799,7 +798,7 @@ internal class FileDao(
             {
                 if (!await IsExistOnStorageAsync(file))
                 {
-                    await DeleteVersionAsync(file);
+                    await DeleteFileVersionAsync(file);
                 }
 
                 throw;
@@ -811,16 +810,22 @@ internal class FileDao(
         return await GetFileAsync(file.Id);
     }
 
-    private async ValueTask DeleteVersionAsync(File<int> file)
+    public async Task DeleteFileVersionAsync(File<int> file, int version = 0)
     {
-        if (file == null
-            || file.Id == default
-            || file.Version <= 1)
+        if (file == null || 
+            file.Id == 0 || 
+            file.Version <= 1 ||
+            version < 0)
         {
             return;
         }
 
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        if (version == 0)
+        {
+            version = file.Version;
+        }
+        
+        var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
@@ -829,8 +834,11 @@ internal class FileDao(
             await using var context = await _dbContextFactory.CreateDbContextAsync();
             await using var tr = await context.Database.BeginTransactionAsync();
 
-            await context.DeleteDbFilesByVersionAsync(tenantId, file.Id, file.Version);
-            await context.UpdateDbFilesByVersionAsync(tenantId, file.Id, file.Version - 1);
+            await context.DeleteDbFilesByVersionAsync(tenantId, file.Id, version);
+            if (version == file.Version)
+            {
+                await context.UpdateDbFilesByVersionAsync(tenantId, file.Id, version - 1);
+            }
 
             await tr.CommitAsync();
         });
@@ -838,7 +846,7 @@ internal class FileDao(
 
     private async Task DeleteVersionStreamAsync(File<int> file)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         tenantQuotaController.Init(tenantId, ThumbnailTitle);
         var store = await storageFactory.GetStorageAsync(tenantId, FileConstant.StorageModule, tenantQuotaController);
         await store.DeleteDirectoryAsync(GetUniqFileVersionPath(file.Id, file.Version));
@@ -867,12 +875,12 @@ internal class FileDao(
 
     private async ValueTask DeleteFileAsync(int fileId, bool deleteFolder, Guid ownerId)
     {
-        if (fileId == default)
+        if (fileId == 0)
         {
             return;
         }
 
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
@@ -901,6 +909,8 @@ internal class FileDao(
 
             await DeleteCustomOrder(filesDbContext, fileId);
 
+            var entryEventsIds = await context.GetAuditEventsIdsAsync(fileId, FileEntryType.File).ToListAsync();
+            await context.MarkAuditReferencesAsCorruptedAsync(entryEventsIds);
             await context.DeleteAuditReferencesAsync(fileId, FileEntryType.File);
 
             await context.SaveChangesAsync();
@@ -921,15 +931,23 @@ internal class FileDao(
             if (toDeleteFile != null)
             {
                 await factoryIndexer.DeleteAsync(toDeleteFile);
+                await factoryIndexerFormData.DeleteAsync(r=> r.Where(a => a.Id, toDeleteFile.Id));
             }
         });
     }
 
     public async Task<bool> IsExistAsync(string title, int folderId)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        return await filesDbContext.DbFilesAnyAsync(tenantId, title, folderId);
+        return await filesDbContext.DbFilesAnyAsync(tenantId, title, (int)FilterType.None, folderId);
+    }
+
+    public async Task<bool> IsExistAsync(string title, int category, int folderId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        return await filesDbContext.DbFilesAnyAsync(tenantId, title, category, folderId);
     }
 
     public async Task<TTo> MoveFileAsync<TTo>(int fileId, TTo toFolderId, bool deleteLinks = false)
@@ -949,9 +967,9 @@ internal class FileDao(
 
     public async Task<int> MoveFileAsync(int fileId, int toFolderId, bool deleteLinks = false)
     {
-        if (fileId == default)
+        if (fileId == 0)
         {
-            return default;
+            return 0;
         }
 
         var tagDao = daoFactory.GetTagDao<int>();
@@ -960,7 +978,7 @@ internal class FileDao(
         var file = await GetFileAsync(fileId);
         var fromFolder = await folderDao.GetFolderAsync(file.ParentId);
         var fileContentLength = file.ContentLength;
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
 
         var (fromRoomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(fromFolder);
         var (toRoomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(toFolder);
@@ -970,15 +988,20 @@ internal class FileDao(
 
         var trashId = await globalFolder.GetFolderTrashAsync(daoFactory);
 
+        var toUser = await _userManager.GetUsersAsync(toFolder.RootCreateBy);
+        var fromUser = await _userManager.GetUsersAsync(fromFolder.RootCreateBy);
+
+
         if (toRoomId != -1 && fromRoomId != toRoomId)
         {
+            var toRoom = DocSpaceHelper.IsRoom(toFolder.FolderType) ? toFolder : await folderDao.GetFolderAsync(toRoomId);
             var quotaRoomSettings = await _settingsManager.LoadAsync<TenantRoomQuotaSettings>();
             if (quotaRoomSettings.EnableQuota)
             {
-                var roomQuotaLimit = toFolder.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaRoomSettings.DefaultQuota : toFolder.SettingsQuota;
+                var roomQuotaLimit = toRoom.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaRoomSettings.DefaultQuota : toRoom.SettingsQuota;
                 if (roomQuotaLimit != TenantEntityQuotaSettings.NoQuota)
                 {
-                    if (roomQuotaLimit - toFolder.Counter < fileContentLength)
+                    if (roomQuotaLimit - toRoom.Counter < fileContentLength)
                     {
                         throw FileSizeComment.GetRoomFreeSpaceException(roomQuotaLimit);
                     }
@@ -1006,6 +1029,28 @@ internal class FileDao(
                 }
             }
         }
+        else
+        {
+            if (toUser != fromUser && toFolder.RootFolderType is FolderType.USER && fromFolder.RootFolderType is FolderType.USER) 
+            {
+                var quotaUserSettings = await _settingsManager.LoadAsync<TenantUserQuotaSettings>();
+                if (quotaUserSettings.EnableQuota)
+                {
+                    var toUserQuotaData = await _settingsManager.LoadAsync<UserQuotaSettings>(toUser);
+                    var toUserQuotaLimit = toUserQuotaData.UserQuota == toUserQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : toUserQuotaData.UserQuota;
+                    var toUserUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenantId, toUser.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
+                    if (toUserQuotaLimit != TenantEntityQuotaSettings.NoQuota)
+                    {
+                        if (toUserQuotaLimit - toUserUsedSpace < fileContentLength)
+                        {
+                            await _settingsManager.SaveAsync(new UserQuotaSettings { UserQuota = toUserQuotaLimit + fileContentLength }, toUser);
+
+                            _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(tenantId, customQuota.GetFeature<UserCustomQuotaFeature>().Name, quotaUserSettings.EnableQuota, toUserUsedSpace, toUserQuotaLimit + fileContentLength, [toUser.Id]);
+                        }
+                    }
+                }
+            }
+        }
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
@@ -1016,23 +1061,20 @@ internal class FileDao(
 
             var fromFolders = await context.ParentIdsAsync(tenantId, fileId).ToListAsync();
 
-            var q = (await Query(context.Files)).Where(r => r.Id == fileId);
+            var q = Query(context.Files).Where(r => r.Id == fileId);
 
             await using (var tx = await context.Database.BeginTransactionAsync())
             {
                 var oldParentId = (await q.FirstOrDefaultAsync())?.ParentId;
 
+                await q.ExecuteUpdateAsync(f => f.SetProperty(p => p.ParentId, toFolderId));
+                
                 if (trashId.Equals(toFolderId))
                 {
-                    await q.ExecuteUpdateAsync(f => f
-                    .SetProperty(p => p.ParentId, toFolderId)
-                    .SetProperty(p => p.ModifiedBy, _authContext.CurrentAccount.ID)
-                    .SetProperty(p => p.ModifiedOn, DateTime.UtcNow));
                     await DeleteCustomOrder(filesDbContext, fileId);
                 }
                 else
                 {
-                    await q.ExecuteUpdateAsync(f => f.SetProperty(p => p.ParentId, toFolderId));
                     await SetCustomOrder(filesDbContext, fileId, toFolderId);
                 }
 
@@ -1063,7 +1105,7 @@ internal class FileDao(
                         file.RootCreateBy = toFolder.RootCreateBy;
                         file.RootFolderType = toFolder.FolderType;
                         await storageFactory.QuotaUsedAddAsync(
-                            await _tenantManager.GetCurrentTenantIdAsync(),
+                            _tenantManager.GetCurrentTenantId(),
                             FileConstant.ModuleId, "",
                             WebItemManager.DocumentsProductID.ToString(), 
                             file.ContentLength, file.GetFileQuotaOwner());
@@ -1073,7 +1115,7 @@ internal class FileDao(
                         ((oldParentId == trashId && fromRoomTag == null) || roomId == -1))
                     {
                         await storageFactory.QuotaUsedDeleteAsync(
-                            await _tenantManager.GetCurrentTenantIdAsync(),
+                            _tenantManager.GetCurrentTenantId(),
                             FileConstant.ModuleId, "",
                             WebItemManager.DocumentsProductID.ToString(), 
                             file.ContentLength, file.GetFileQuotaOwner());
@@ -1083,6 +1125,21 @@ internal class FileDao(
                         await tagDao.RemoveTagLinksAsync(fileId, FileEntryType.File, TagType.FromRoom);
                         await tagDao.RemoveTagLinksAsync(fileId, FileEntryType.File, TagType.Origin);
                     }
+                }
+
+                if (toUser != fromUser && toFolder.RootFolderType is FolderType.USER && fromFolder.RootFolderType is FolderType.USER)
+                {
+                    await storageFactory.QuotaUsedAddAsync(
+                        _tenantManager.GetCurrentTenantId(),
+                        FileConstant.ModuleId, "",
+                        WebItemManager.DocumentsProductID.ToString(),
+                        file.ContentLength, toUser.Id);
+
+                    await storageFactory.QuotaUsedDeleteAsync(
+                        _tenantManager.GetCurrentTenantId(),
+                        FileConstant.ModuleId, "",
+                        WebItemManager.DocumentsProductID.ToString(),
+                        file.ContentLength, fromUser.Id);
                 }
 
                 if (deleteLinks)
@@ -1108,8 +1165,7 @@ internal class FileDao(
                         folderDao,
                         oldFolder,
                         toFolder,
-                        file,
-                        fileContentLength);
+                        file);
                 }
                 
                 await IncrementCountAsync(context, toFolderId, tenantId, FileEntryType.File);
@@ -1178,7 +1234,7 @@ internal class FileDao(
 
             if (file.ThumbnailStatus == Thumbnail.Created)
             {
-                var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+                var tenantId = _tenantManager.GetCurrentTenantId();
                 var dataStore = await storageFactory.GetStorageAsync(tenantId, FileConstant.StorageModule, (IQuotaController)null);
 
                 foreach (var size in thumbnailSettings.Sizes)
@@ -1215,7 +1271,7 @@ internal class FileDao(
     {
         newTitle = Global.ReplaceInvalidCharsAndTruncate(newTitle);
 
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var toUpdate = await filesDbContext.DbFileAsync(tenantId, file.Id);
 
@@ -1228,12 +1284,18 @@ internal class FileDao(
 
         await factoryIndexer.UpdateAsync(toUpdate, true, r => r.Title, r => r.ModifiedBy, r => r.ModifiedOn);
 
+        if (!Path.HasExtension(file.Title))
+        {
+            var storage = await storageFactory.GetStorageAsync(tenantId, FileConstant.StorageModule);
+            await storage.MoveAsync(GetUniqFilePath(file), "", GetUniqFilePath(file, "content" + FileUtility.GetFileExtension(newTitle)));
+        }
+
         return file.Id;
     }
 
     public async Task<string> UpdateCommentAsync(int fileId, int fileVersion, string comment)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         comment ??= string.Empty;
@@ -1246,7 +1308,7 @@ internal class FileDao(
 
     public async Task CompleteVersionAsync(int fileId, int fileVersion)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
@@ -1255,7 +1317,7 @@ internal class FileDao(
 
     public async Task ContinueVersionAsync(int fileId, int fileVersion)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
@@ -1307,30 +1369,10 @@ internal class FileDao(
                    : null;
     }
 
-    private async Task UpdateUsedFileSpace(IFolderDao<int> folderDao, Folder<int> fromFolder, Folder<int> toFolder, File<int> file, long size)
+    private async Task UpdateUsedFileSpace(IFolderDao<int> folderDao, Folder<int> fromFolder, Folder<int> toFolder, File<int> file)
     {
-        var (toFolderRoomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(toFolder);
-        var (oldFolderRoomId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(fromFolder);
-       
         await folderDao.ChangeTreeFolderSizeAsync(toFolder.Id, file.ContentLength);
         await folderDao.ChangeTreeFolderSizeAsync(fromFolder.Id, (-1) * file.ContentLength);
-
-        if (toFolderRoomId != -1 || oldFolderRoomId != -1)
-        {
-            var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-
-            if (toFolder.FolderType is FolderType.USER or FolderType.DEFAULT)
-            {
-                file.RootCreateBy = toFolder.RootCreateBy;
-                file.RootFolderType = toFolder.FolderType;
-                await storageFactory.QuotaUsedAddAsync(tenantId, FileConstant.ModuleId, "", WebItemManager.DocumentsProductID.ToString(), size, file.GetFileQuotaOwner());
-            }
-            if (fromFolder.FolderType is FolderType.USER or FolderType.DEFAULT)
-            {
-                await storageFactory.QuotaUsedDeleteAsync(tenantId, FileConstant.ModuleId, "", WebItemManager.DocumentsProductID.ToString(), size, file.GetFileQuotaOwner());
-            }
-        }
-
     }
     public static bool TryGetFileId(string path, out int fileId)
     {
@@ -1341,6 +1383,111 @@ internal class FileDao(
         var match = _pattern.Match(path);
         
         return match.Success && match.Groups.TryGetValue(FileIdGroupName, out var group) && int.TryParse(group.Value, out fileId);
+    }
+
+    public async Task SaveFormRoleMapping(int formId, IEnumerable<FormRole> formRoles)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        if (formRoles == null || !formRoles.Any())
+        {
+            await filesDbContext.DeleteFormRoleMappingsAsync(tenantId, formId);
+            return;
+        }
+        var sequence = 0;
+        foreach (var formRole in formRoles)
+        {
+            sequence++;
+            var roleDb = new DbFilesFormRoleMapping
+            {
+                TenantId = tenantId,
+                FormId = formId,
+                UserId = formRole.UserId,
+                RoomId = formRole.RoomId,
+                RoleName = formRole.RoleName,
+                RoleColor = formRole.RoleColor,
+                Sequence = sequence,
+                Submitted = formRole.Submitted
+
+            };
+            await filesDbContext.FilesFormRoleMapping.AddOrUpdateAsync(roleDb);
+        }
+
+        await filesDbContext.SaveChangesAsync();
+    }
+
+    public virtual async Task<(int, List<FormRole>)> GetUserFormRoles(int formId, Guid userId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var currentStep = await filesDbContext.DbFormRoleExistsAsync(tenantId, formId) ? await filesDbContext.DbFormRoleCurrentStepAsync(tenantId, formId) : -1;
+        var roles = await GetFormUserRoles(formId, userId).ToListAsync();
+        return (currentStep, roles);
+    }
+    public virtual async IAsyncEnumerable<FormRole> GetFormUserRoles(int formId, Guid userId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await foreach (var r in filesDbContext.DbFormUserRolesQueryAsync(tenantId, formId, userId))
+        {
+            yield return r;
+        }
+    }
+
+    public async IAsyncEnumerable<FormRole> GetUserFormRolesInRoom(int roomId, Guid userId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await foreach (var r in filesDbContext.DbUserFormRolesInRoomQueryAsync(tenantId, roomId, userId))
+        {
+            yield return r;
+        }
+    }
+    public virtual async IAsyncEnumerable<FormRole> GetFormRoles(int formId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await foreach (var r in filesDbContext.DbFormRolesAsync(tenantId, formId))
+        {
+            yield return r;
+        }
+    }
+    public async Task<FormRole> ChangeUserFormRoleAsync(int formId, FormRole formRole)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var toUpdate = await filesDbContext.FilesFormRoleAsync(tenantId, formId, formRole.RoleName, formRole.UserId);
+
+        toUpdate.Submitted = formRole.Submitted;
+        toUpdate.OpenedAt = formRole.OpenedAt;
+        toUpdate.SubmissionDate = formRole.SubmissionDate;
+
+        filesDbContext.Update(toUpdate);
+        await filesDbContext.SaveChangesAsync();
+
+        return formRole;
+    }
+    public async Task DeleteFormRolesAsync(int formId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var toDeleteRoles = await filesDbContext.DbFilesFormRoleMappingForDeleteAsync(tenantId, formId).ToListAsync();
+
+        if (toDeleteRoles.Any())
+        {
+            filesDbContext.RemoveRange(toDeleteRoles);
+            await filesDbContext.SaveChangesAsync();
+        }
     }
 
     #region chunking
@@ -1396,7 +1543,7 @@ internal class FileDao(
 
     private async Task<File<int>> GetFileForCommitAsync(ChunkedUploadSession<int> uploadSession)
     {
-        if (uploadSession.File.Id != default)
+        if (uploadSession.File.Id != 0)
         {
             var file = await GetFileAsync(uploadSession.File.Id);
             if (!uploadSession.KeepVersion)
@@ -1432,18 +1579,27 @@ internal class FileDao(
 
     public async Task ReassignFilesAsync(Guid oldOwnerId, Guid newOwnerId, IEnumerable<int> exceptFolderIds)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         if (exceptFolderIds == null || !exceptFolderIds.Any())
         {
-            await filesDbContext.ReassignFilesAsync(tenantId, oldOwnerId, newOwnerId);
+            await filesDbContext.ReassignFilesByCreateByAsync(tenantId, oldOwnerId, newOwnerId);
         }
         else
         {
             await filesDbContext.ReassignFilesPartiallyAsync(tenantId, oldOwnerId, newOwnerId, exceptFolderIds);
         }
+    }
+
+    public async Task ReassignFilesAsync(Guid newOwnerId, IEnumerable<int> fileIds)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await filesDbContext.ReassignFilesAsync(tenantId, newOwnerId, fileIds);
     }
 
     public IAsyncEnumerable<File<int>> GetFilesAsync(IEnumerable<int> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, bool searchInContent)
@@ -1458,7 +1614,7 @@ internal class FileDao(
 
     public async Task ReassignRoomsFilesAsync(Guid fromOwner)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var items = await filesDbContext.GetRoomsFilesReassignInfoAsync(tenantId, fromOwner).ToListAsync();
@@ -1474,7 +1630,7 @@ internal class FileDao(
     {
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var q = (await GetFileQuery(filesDbContext, r => r.CurrentVersion))
+        var q = GetFileQuery(filesDbContext, r => r.CurrentVersion)
             .Join(filesDbContext.Tree, a => a.ParentId, t => t.FolderId, (file, tree) => new { file, tree })
             .Where(r => parentIds.Contains(r.tree.ParentId))
             .Select(r => r.file);
@@ -1542,13 +1698,9 @@ internal class FileDao(
             case FilterType.SpreadsheetsOnly:
             case FilterType.ArchiveOnly:
             case FilterType.MediaOnly:
-                q = q.Where(r => r.Category == (int)filterType);
-                break;
             case FilterType.PdfForm:
-                q = q.Where(r => (r.Category == (int)filterType || r.Category == (int)FilterType.None) && r.Title.ToLower().EndsWith(".pdf"));
-                break;
             case FilterType.Pdf:
-                q = q.Where(r => r.Category == (int)filterType || r.Title.ToLower().EndsWith(".pdf"));
+                q = q.Where(r => r.Category == (int)filterType);
                 break;
             case FilterType.ByExtension:
                 if (!string.IsNullOrEmpty(searchText))
@@ -1566,7 +1718,7 @@ internal class FileDao(
 
     public async IAsyncEnumerable<File<int>> SearchAsync(string searchText, bool bunch = false)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
@@ -1613,7 +1765,7 @@ internal class FileDao(
         ArgumentException.ThrowIfNullOrEmpty(changes);
         ArgumentNullException.ThrowIfNull(differenceStream);
 
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
@@ -1624,10 +1776,9 @@ internal class FileDao(
 
     public async IAsyncEnumerable<EditHistory> GetEditHistoryAsync(DocumentServiceHelper documentServiceHelper, int fileId, int fileVersion = 0)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-
         await foreach (var r in filesDbContext.DbFilesByVersionAndWithoutForcesaveAsync(tenantId, fileId, fileVersion))
         {
             var item = _serviceProvider.GetService<EditHistory>();
@@ -1651,7 +1802,7 @@ internal class FileDao(
 
     public async Task<bool> ContainChangesAsync(int fileId, int fileVersion)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
@@ -1663,26 +1814,26 @@ internal class FileDao(
 
     public async Task SetThumbnailStatusAsync(File<int> file, Thumbnail status)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         await filesDbContext.UpdateThumbnailStatusAsync(tenantId, file.Id, file.Version, status);
     }
 
 
-    public string GetUniqThumbnailPath(File<int> file, int width, int height)
+    public string GetUniqThumbnailPath(File<int> file, uint width, uint height)
     {
         var thumbnailName = GetThumbnailName(width, height);
 
         return GetUniqFilePath(file, thumbnailName);
     }
 
-    public async Task<Stream> GetThumbnailAsync(int fileId, int width, int height)
+    public async Task<Stream> GetThumbnailAsync(int fileId, uint width, uint height)
     {
         var file = await GetFileAsync(fileId);
         return await GetThumbnailAsync(file, width, height);
     }
 
-    public async Task<Stream> GetThumbnailAsync(File<int> file, int width, int height)
+    public async Task<Stream> GetThumbnailAsync(File<int> file, uint width, uint height)
     {
         var thumnailName = GetThumbnailName(width, height);
         var path = GetUniqFilePath(file, thumnailName);
@@ -1697,7 +1848,7 @@ internal class FileDao(
         return await storage.GetReadStreamAsync(string.Empty, path, 0);
     }
 
-    public async IAsyncEnumerable<File<int>> GetFilesByTagAsync(Guid? tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
+    public async IAsyncEnumerable<File<int>> GetFilesByTagAsync(Guid tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
         string searchText, string[] extension, bool searchInContent, bool excludeSubject, OrderBy orderBy, int offset = 0, int count = -1)
     {
         if (filterType == FilterType.FoldersOnly)
@@ -1707,7 +1858,7 @@ internal class FileDao(
         
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         
-        var q = await GetFilesByTagQuery(tagOwner, tagType, filesDbContext);
+        var q = GetFilesByTagQuery(tagOwner, tagType, filesDbContext);
 
         q = await GetFilesQueryWithFilters(q, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject);
 
@@ -1743,7 +1894,7 @@ internal class FileDao(
         }
     }
 
-    public async Task<int> GetFilesByTagCountAsync(Guid? tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
+    public async Task<int> GetFilesByTagCountAsync(Guid tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
         string searchText, string[] extension, bool searchInContent, bool excludeSubject)
     {
         if (filterType == FilterType.FoldersOnly)
@@ -1753,7 +1904,7 @@ internal class FileDao(
         
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         
-        var q = await GetFilesByTagQuery(tagOwner, tagType, filesDbContext);
+        var q = GetFilesByTagQuery(tagOwner, tagType, filesDbContext);
         
         q = await GetFilesQueryWithFilters(q, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject);
 
@@ -1767,24 +1918,43 @@ internal class FileDao(
         return chunks.Sum(c => c.Value?.Length ?? 0);
     }
 
-    private string GetThumbnailName(int width, int height)
+    private string GetThumbnailName(uint width, uint height)
     {
         return $"{ThumbnailTitle}.{width}x{height}.{global.ThumbnailExtension}";
     }
 
-    public async Task<EntryProperties<int>> GetProperties(int fileId)
+    public virtual async Task<EntryProperties<int>> GetProperties(int fileId)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var data = await filesDbContext.DataAsync(tenantId, fileId.ToString());
         return data != null ? EntryProperties<int>.Deserialize(data, logger) : null;
+    }
+
+    public async Task<Dictionary<int, EntryProperties<int>>> GetPropertiesAsync(IEnumerable<int> filesIds)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var properties = await filesDbContext.FilesPropertiesAsync(tenantId, filesIds.Select(f => f.ToString())).ToListAsync();
+        
+        var propertiesMap = new Dictionary<int, EntryProperties<int>>(properties.Count);
+        foreach (var property in properties)
+        {
+            if (int.TryParse(property.EntryId, out var id))
+            {
+                propertiesMap.TryAdd(id, EntryProperties<int>.Deserialize(property.Data, logger));
+            }
+        }
+
+        return propertiesMap;
     }
 
     public async Task SaveProperties(int fileId, EntryProperties<int> entryProperties)
     {
         string data;
 
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
@@ -1798,10 +1968,10 @@ internal class FileDao(
         await filesDbContext.SaveChangesAsync();
     }
 
-    public async Task SetCustomOrder(int fileId, int parentFolderId, int order = 0)
+    public async Task<int> SetCustomOrder(int fileId, int parentFolderId, int order = 0)
     {
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        await SetCustomOrder(filesDbContext, fileId, parentFolderId, order);
+        return await SetCustomOrder(filesDbContext, fileId, parentFolderId, order);
     }
     
     public async Task InitCustomOrder(Dictionary<int, int> fileIds, int parentFolderId)
@@ -1909,6 +2079,81 @@ internal class FileDao(
 
             return result;
         };
+    }
+    private Func<Selector<DbFormsItemDataSearch>, Selector<DbFormsItemDataSearch>> GetFuncForSearchInFormsData(int parentId, string searchText, FormsItemDto formsItemDto)
+    {
+        return s =>
+        {
+            s.Where(r => r.ParentId, parentId);
+            s.Nested(a => a.FormsData, b => b.Term(c => c.FormsData.Select(r=> r.Key), char.ToLower(formsItemDto.Key[0]) + formsItemDto.Key[1..]) && b.Term(c => c.FormsData.Select(r=> r.Value), char.ToLower(searchText[0]) + searchText[1..]));
+
+            return s;
+        };
+    }
+
+    private IQueryable<DbFile> ApplyAdditionalFileFilters(
+        IQueryable<DbFile> q,
+        FilesDbContext filesDbContext,
+        int parentId,
+        FolderType parentType,
+        AdditionalFilterOption additionalFilterOption)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        var currentUserId = securityContext.CurrentAccount.ID;
+        var guestUserId = ASC.Core.Configuration.Constants.Guest.ID;
+
+        switch (additionalFilterOption)
+        {
+            case AdditionalFilterOption.MyFilesAndFolders:
+                switch (parentType)
+                {
+                    case FolderType.FillingFormsRoom:
+                    case FolderType.InProcessFormFolder:
+                    case FolderType.ReadyFormFolder:
+                        var folderQuery = filesDbContext.Folders
+                            .Join(filesDbContext.Tree, f => f.Id, t => t.FolderId, (folder, tree) => new { folder, tree })
+                            .Where(x => x.folder.TenantId == tenantId && x.tree.ParentId == parentId)
+                            .Select(x => new
+                            {
+                                x.folder.Id,
+                                IsSystemFolder = DocSpaceHelper.FormsFillingSystemFolders.Contains(x.folder.FolderType)
+                            });
+
+                        var systemFolderIds = folderQuery
+                            .Where(x => x.IsSystemFolder)
+                            .Select(x => x.Id);
+
+                        var defaultFolderIds = folderQuery
+                            .Where(x => !x.IsSystemFolder)
+                            .Select(x => x.Id);
+
+                        q = q.Where(file =>
+                            (systemFolderIds.Contains(file.ParentId) &&
+                             file.CreateBy == currentUserId &&
+                             file.CreateBy != guestUserId) ||
+                            defaultFolderIds.Contains(file.ParentId));
+                        break;
+
+                    default:
+                        q = q.Where(file => file.CreateBy == currentUserId);
+                        break;
+                }
+                break;
+
+            case AdditionalFilterOption.FormsWithFillingRole:
+                var pdfCategories = new[] { (int)FilterType.PdfForm, (int)FilterType.Pdf };
+
+                q = q.Where(file =>
+                    pdfCategories.Contains(file.Category) &&
+                    filesDbContext.FilesFormRoleMapping.Any(m =>
+                        m.TenantId == tenantId &&
+                        m.FormId == file.Id &&
+                        m.UserId == currentUserId)
+                );
+                break;
+        }
+
+        return q;
     }
 
     private IQueryable<DbFileQuery> FromQuery(FilesDbContext filesDbContext, IQueryable<DbFile> dbFiles)
@@ -2054,20 +2299,24 @@ internal class FileDao(
         return dbFile;
     }
 
-    private async Task<IQueryable<DbFile>> GetFilesQueryWithFilters(int parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, bool searchInContent,
-        bool withSubfolders, bool excludeSubject, int roomId, string[] extension, FilesDbContext filesDbContext)
+    private async Task<IQueryable<DbFile>> GetFilesQueryWithFilters(
+        int parentId, 
+        OrderBy orderBy, 
+        FilterType filterType, 
+        bool subjectGroup, 
+        Guid subjectID, 
+        string searchText, 
+        bool searchInContent,
+        bool withSubfolders, 
+        bool excludeSubject, 
+        int roomId, 
+        string[] extension, 
+        FilesDbContext filesDbContext,
+        FormsItemDto formsItemDto)
     {
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();        
-        var q = await GetFileQuery(filesDbContext, r => r.ParentId == parentId && r.CurrentVersion);
-
-        if (withSubfolders)
-        {
-            q = (await GetFileQuery(filesDbContext, r => r.CurrentVersion))
-                .Join(filesDbContext.Tree, r => r.ParentId, a => a.FolderId, (file, tree) => new { file, tree })
-                .Where(r => r.tree.ParentId == parentId)
-                .Select(r => r.file);
-        }
-
+        var tenantId = _tenantManager.GetCurrentTenantId();        
+        var q = GetFileQuery(filesDbContext, r => r.ParentId == parentId && r.CurrentVersion);
+        
         var searchByText = !string.IsNullOrEmpty(searchText);
         var searchByExtension = !extension.IsNullOrEmpty();
 
@@ -2075,14 +2324,23 @@ internal class FileDao(
         {
             extension = [""];
         }
-
+        
+        if (withSubfolders && (searchByExtension || filterType != FilterType.None || subjectID != Guid.Empty))
+        {
+            q = GetFileQuery(filesDbContext, r => r.CurrentVersion)
+                .Join(filesDbContext.Tree, r => r.ParentId, a => a.FolderId, (file, tree) => new { file, tree })
+                .Where(r => r.tree.ParentId == parentId)
+                .Select(r => r.file);
+        }
+        
         if (searchByText || searchByExtension)
         {
             var searchIds = new List<int>();
             var success = false;
+            
             foreach (var e in extension)
             {
-                var func = GetFuncForSearch(null, null, filterType, subjectGroup, subjectID, searchText, e, searchInContent);
+                var func = GetFuncForSearch(parentId, null, filterType, subjectGroup, subjectID, searchText, e, searchInContent);
 
                 Expression<Func<Selector<DbFile>, Selector<DbFile>>> expression = s => func(s);
 
@@ -2092,6 +2350,18 @@ internal class FileDao(
                     break;
                 }
                 searchIds = searchIds.Concat(result).ToList();
+            }
+
+            if (searchInContent && formsItemDto != null)
+            {
+                var funcForSearchInFormsData = GetFuncForSearchInFormsData(parentId, searchText, formsItemDto);
+                Expression<Func<Selector<DbFormsItemDataSearch>, Selector<DbFormsItemDataSearch>>> expressionSearchText = s => funcForSearchInFormsData(s);
+
+                (success, var resultForm) = await factoryIndexerFormData.TrySelectIdsAsync(expressionSearchText);
+            if (success)
+            {
+                    searchIds = searchIds.Intersect(resultForm).ToList();
+                }
             }
 
             if (success)
@@ -2133,7 +2403,6 @@ internal class FileDao(
 
         if (subjectID != Guid.Empty)
         {
-
             if (subjectGroup)
             {
                 var users = (await _userManager.GetUsersByGroupAsync(subjectID)).Select(u => u.Id).ToArray();
@@ -2147,31 +2416,25 @@ internal class FileDao(
 
         switch (filterType)
         {
-
             case FilterType.DocumentsOnly:
             case FilterType.ImagesOnly:
             case FilterType.PresentationsOnly:
             case FilterType.SpreadsheetsOnly:
             case FilterType.ArchiveOnly:
             case FilterType.MediaOnly:
-                q = q.Where(r => r.Category == (int)filterType);
-                break;
             case FilterType.PdfForm:
-                q = q.Where(r => (r.Category == (int)filterType || r.Category == (int)FilterType.None) && r.Title.ToLower().EndsWith(".pdf"));
-                break;
             case FilterType.Pdf:
-                q = q.Where(r => r.Category == (int)filterType || r.Title.ToLower().EndsWith(".pdf"));
+                q = q.Where(r => r.Category == (int)filterType);
                 break;
             case FilterType.ByExtension:
                 if (!string.IsNullOrEmpty(searchText))
                 {
                     q = BuildSearch(q, searchText, SearchType.End);
                 }
-
                 break;
         }
 
-        if (roomId != default)
+        if (roomId != 0)
         {
             q = q.Join(filesDbContext.TagLink.Join(filesDbContext.Tag, l => l.TagId, t => t.Id, (l, t) => new
             {
@@ -2265,13 +2528,9 @@ internal class FileDao(
             case FilterType.SpreadsheetsOnly:
             case FilterType.ArchiveOnly:
             case FilterType.MediaOnly:
-                q = q.Where(r => r.Entry.Category == (int)filterType);
-                break;
-            case FilterType.PdfForm:
-                q = q.Where(r => (r.Entry.Category == (int)filterType || r.Entry.Category == (int)FilterType.None) && r.Entry.Title.ToLower().EndsWith(".pdf"));
-                break;
             case FilterType.Pdf:
-                q = q.Where(r => r.Entry.Category == (int)filterType || r.Entry.Title.ToLower().EndsWith(".pdf"));
+            case FilterType.PdfForm:
+                q = q.Where(r => r.Entry.Category == (int)filterType);
                 break;
             case FilterType.ByExtension:
                 if (!string.IsNullOrEmpty(searchText))
@@ -2284,47 +2543,41 @@ internal class FileDao(
         return q;
     }
     
-    private async Task<IQueryable<FileByTagQuery>> GetFilesByTagQuery(Guid? tagOwner, TagType tagType, FilesDbContext filesDbContext)
+    private IQueryable<FileByTagQuery> GetFilesByTagQuery(Guid tagOwner, TagType tagType, FilesDbContext filesDbContext)
     {
         IQueryable<FileByTagQuery> query;
         
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
         
-        var initQuery = filesDbContext.Files
-            .Where(x => x.TenantId == tenantId && x.CurrentVersion)
+        var initQuery = filesDbContext.Tag
+            .Where(x => x.TenantId == tenantId && x.Owner == tagOwner && x.Type == tagType)
             .Join(filesDbContext.TagLink,
-                f => new
+                t => new
                 {
-                    tenantId, 
-                    entryId = f.Id.ToString(), 
-                    entryType = FileEntryType.File
+                    t.TenantId,
+                    TagId = t.Id 
                 }, 
                 l => new
                 {
-                    tenantId = l.TenantId, 
-                    entryId = l.EntryId, 
-                    entryType = l.EntryType
+                    l.TenantId,
+                    l.TagId
                 },
-                (f, l) => new { f, l })
-            .Join(filesDbContext.Tag, 
-                x => x.l.TagId, 
-                t => t.Id,
-                (x, t) => new { x.f, x.l, t })
-            .Where(x => x.t.Type == tagType);
+                (t, l) => new { t, l })
+            .Where(x => x.l.EntryType == FileEntryType.File)
+            .Join(filesDbContext.Files,
+                x => Convert.ToInt32(x.l.EntryId),
+                f => f.Id,
+                (x, f) => new { f, x.l, x.t })
+            .Where(x => x.f.CurrentVersion);
         
-        if (tagOwner.HasValue)
-        {
-            initQuery = initQuery.Where(x => x.t.Owner == tagOwner.Value);
-        }
-
         if (tagType == TagType.RecentByLink)
         {
             query = initQuery.Join(filesDbContext.Security, 
                     x => new
                     {
                         tenantId,
-                        entryId = x.f.Id.ToString(),
-                        entryType = FileEntryType.File, 
+                        entryId = x.l.EntryId,
+                        entryType = x.l.EntryType,
                         subject = x.t.Name
                     },
                     s => new
@@ -2393,4 +2646,141 @@ public record FileReassignInfo
 {
     public int FileId { get; init; }
     public Guid RoomOwnerId { get; init; }
+}
+
+[Scope(typeof(ICacheFileDao<int>))]
+internal class CacheFileDao(ILogger<FileDao> logger,
+        FactoryIndexerFile factoryIndexer,
+        FactoryIndexerForm factoryIndexerFormData,
+        UserManager userManager,
+        FileUtility fileUtility,
+        IDbContextFactory<FilesDbContext> dbContextManager,
+        TenantManager tenantManager,
+        TenantLogoManager tenantLogoManager,
+        TenantUtil tenantUtil,
+        SetupInfo setupInfo,
+        MaxTotalSizeStatistic maxTotalSizeStatistic,
+        SettingsManager settingsManager,
+        AuthContext authContext,
+        IServiceProvider serviceProvider,
+        GlobalStore globalStore,
+        GlobalFolder globalFolder,
+        Global global,
+        IDaoFactory daoFactory,
+        ChunkedUploadSessionHolder chunkedUploadSessionHolder,
+        SelectorFactory selectorFactory,
+        CrossDao crossDao,
+        Settings settings,
+        IMapper mapper,
+        ThumbnailSettings thumbnailSettings,
+        IQuotaService quotaService,
+        EmailValidationKeyProvider emailValidationKeyProvider,
+        StorageFactory storageFactory,
+    TenantQuotaController tenantQuotaController,
+    IDistributedLockProvider distributedLockProvider,
+    FileStorageService fileStorageService,
+    SocketManager socketManager,
+    SecurityContext securityContext,
+    TempStream tempStream,
+    FileChecker fileChecker,
+    EntryManager entryManager,
+    FileSharing fileSharing,
+    FilesMessageService filesMessageService,
+    QuotaSocketManager quotaSocketManager,
+    CustomQuota customQuota)
+    : FileDao(
+        logger,
+    factoryIndexer,
+    factoryIndexerFormData,
+    userManager,
+    fileUtility,
+    dbContextManager,
+    tenantManager,
+    tenantLogoManager,
+    tenantUtil,
+    setupInfo,
+    maxTotalSizeStatistic,
+    settingsManager,
+    authContext,
+    serviceProvider,
+    globalStore,
+    globalFolder,
+    global,
+    daoFactory,
+    chunkedUploadSessionHolder,
+    selectorFactory,
+    crossDao,
+    settings,
+    mapper,
+    thumbnailSettings,
+    quotaService,
+    emailValidationKeyProvider,
+    storageFactory,
+    tenantQuotaController,
+    distributedLockProvider,
+    fileStorageService,
+    socketManager,
+    securityContext,
+    tempStream,
+    fileChecker,
+    entryManager,
+    fileSharing,
+    filesMessageService,
+    quotaSocketManager,
+    customQuota), ICacheFileDao<int>
+{
+
+    private readonly ConcurrentDictionary<int, IEnumerable<FormRole>> _cache = new();
+    public override async IAsyncEnumerable<FormRole> GetFormRoles(int formId)
+    {
+        if (!_cache.TryGetValue(formId, out var result))
+        {
+            result = await base.GetFormRoles(formId).ToListAsync();
+            _cache.TryAdd(formId, result);
+        }
+
+        foreach (var folder in result)
+        {
+            yield return folder;
+        }
+    }
+    private readonly ConcurrentDictionary<(int, Guid), (int, List<FormRole>)> _cacheUserRoles = new();
+    public override async Task<(int, List<FormRole>)> GetUserFormRoles(int formId, Guid userId)
+    {
+        if (!_cacheUserRoles.TryGetValue((formId, userId), out var result))
+        {
+            result = await base.GetUserFormRoles(formId, userId);
+            _cacheUserRoles.TryAdd((formId, userId), result);
+        }
+
+        return result;
+    }
+
+    private readonly ConcurrentDictionary<(int, Guid), IEnumerable<FormRole>> _cacheFormUserRoles = new();
+    public override async IAsyncEnumerable<FormRole> GetFormUserRoles(int formId, Guid userId)
+    {
+        if (!_cacheFormUserRoles.TryGetValue((formId, userId), out var result))
+        {
+            result = await base.GetFormUserRoles(formId, userId).ToListAsync();
+            _cacheFormUserRoles.TryAdd((formId, userId), result);
+        }
+
+        foreach (var role in result)
+        {
+            yield return role;
+        }
+    }
+
+    private readonly ConcurrentDictionary<int, EntryProperties<int>> _cacheFileProperties = new();
+    public override async Task<EntryProperties<int>> GetProperties(int fileId)
+    {
+        if (!_cacheFileProperties.TryGetValue(fileId, out var result))
+        {
+            result = await base.GetProperties(fileId);
+            _cacheFileProperties.TryAdd(fileId, result);
+        }
+
+        return result;
+    }
+   
 }

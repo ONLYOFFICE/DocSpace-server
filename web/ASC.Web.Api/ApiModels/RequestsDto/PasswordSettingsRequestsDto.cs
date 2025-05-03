@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,21 +27,27 @@
 namespace ASC.Web.Api.Models;
 
 /// <summary>
+/// The request parameters for configuring the password complexity requirements.
 /// </summary>
 public class PasswordSettingsRequestsDto
 {
-    /// <summary>Minimum password length</summary>
+    /// <summary>
+    /// The minimum number of characters required for valid passwords.
+    /// </summary>
     public int MinLength { get; set; }
 
-    /// <summary>Specifies if the password must include the uppercase letters or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether the password should contain the uppercase letters or not.
+    /// </summary>
     public bool UpperCase { get; set; }
 
-    /// <summary>Specifies if the password must include the digits or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether the password should contain the digits or not.
+    /// </summary>
     public bool Digits { get; set; }
 
-    /// <summary>Specifies if the password must include the special symbols or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether the password should contain the special symbols or not.
+    /// </summary>
     public bool SpecSymbols { get; set; }
 }

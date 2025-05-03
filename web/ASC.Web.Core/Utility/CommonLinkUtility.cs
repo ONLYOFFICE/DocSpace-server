@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,8 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using NetEscapades.EnumGenerators;
+
 namespace ASC.Web.Studio.Utility;
 
+[EnumExtensions]
 public enum ManagementType
 {
     General = 0,
@@ -62,9 +65,8 @@ public class CommonLinkUtility(
         TenantManager tenantManager,
         UserManager userManager,
         EmailValidationKeyProvider emailValidationKeyProvider,
-        MailWhiteLabelSettingsHelper mailWhiteLabelSettingsHelper,
         ILoggerProvider options,
-        AdditionalWhiteLabelSettingsHelperInit additionalWhiteLabelSettingsHelper)
+        ExternalResourceSettingsHelper externalResourceSettingsHelper)
     : BaseCommonLinkUtility(httpContextAccessor, coreBaseSettings, coreSettings, tenantManager, options)
 {
     public const string ParamName_UserUserID = "uid";
@@ -120,96 +122,74 @@ public class CommonLinkUtility(
 
     #endregion
 
-    public async Task<string> GetUserForumLinkAsync(SettingsManager settingsManager, bool inCurrentCulture = true)
+    #region links to external resources
+
+    public async Task<string> GetUserForumLinkAsync(SettingsManager settingsManager)
     {
         if (!(await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>()).UserForumEnabled)
         {
             return string.Empty;
         }
 
-        var url = additionalWhiteLabelSettingsHelper.DefaultUserForumUrl;
+        var url = externalResourceSettingsHelper.Forum.GetDefaultRegionalDomain();
 
-        if (string.IsNullOrEmpty(url))
-        {
-            return string.Empty;
-        }
-
-        return GetRegionalUrl(url, inCurrentCulture ? CultureInfo.CurrentCulture.TwoLetterISOLanguageName : null);
+        return string.IsNullOrEmpty(url) ? string.Empty : url;
     }
-    
-    #region Help Centr
 
-    public async Task<string> GetHelpLinkAsync(SettingsManager settingsManager, bool inCurrentCulture = true)
+    public async Task<string> GetHelpLinkAsync(SettingsManager settingsManager)
     {
         if (!(await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>()).HelpCenterEnabled)
         {
             return string.Empty;
         }
 
-        var url = additionalWhiteLabelSettingsHelper.DefaultHelpCenterUrl;
+        var url = externalResourceSettingsHelper.Helpcenter.GetDefaultRegionalDomain();
 
-        if (string.IsNullOrEmpty(url))
-        {
-            return string.Empty;
-        }
-
-        return GetRegionalUrl(url, inCurrentCulture ? CultureInfo.CurrentCulture.TwoLetterISOLanguageName : null);
+        return string.IsNullOrEmpty(url) ? string.Empty : url;
     }
 
-    public async Task<string> GetSupportLinkAsync(SettingsManager settingsManager, bool inCurrentCulture = true)
+    public async Task<string> GetSupportLinkAsync(SettingsManager settingsManager)
     {
         if (!(await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>()).FeedbackAndSupportEnabled)
         {
             return string.Empty;
         }
 
-        var url = additionalWhiteLabelSettingsHelper.DefaultFeedbackAndSupportUrl;
+        var url = externalResourceSettingsHelper.Support.GetDefaultRegionalDomain();
 
-        if (string.IsNullOrEmpty(url))
-        {
-            return string.Empty;
-        }
-
-        return GetRegionalUrl(url, inCurrentCulture ? CultureInfo.CurrentCulture.TwoLetterISOLanguageName : null);
+        return string.IsNullOrEmpty(url) ? string.Empty : url;
     }
 
     public string GetSiteLink()
     {
-        var url = mailWhiteLabelSettingsHelper.DefaultMailSiteUrl;
+        var url = externalResourceSettingsHelper.Site.GetDefaultRegionalDomain();
 
         return string.IsNullOrEmpty(url) ? string.Empty : url;
     }
 
     public string GetSupportEmail()
     {
-        var url = mailWhiteLabelSettingsHelper.DefaultMailSupportEmail;
+        var email = externalResourceSettingsHelper.Common.GetDefaultRegionalFullEntry("supportemail");
 
-        return string.IsNullOrEmpty(url) ? string.Empty : url;
+        return string.IsNullOrEmpty(email) ? string.Empty : email;
     }
 
     public string GetSalesEmail()
     {
-        var mail = additionalWhiteLabelSettingsHelper.DefaultMailSalesEmail;
+        var email = externalResourceSettingsHelper.Common.GetDefaultRegionalFullEntry("paymentemail");
 
-        return string.IsNullOrEmpty(mail) ? string.Empty : mail;
-    }
-
-    public async Task<string> GetFeedbackAndSupportLink(SettingsManager settingsManager, bool inCurrentCulture = true)
-    {
-        var settings = await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>();
-
-        return !settings.FeedbackAndSupportEnabled || string.IsNullOrEmpty(settings.FeedbackAndSupportUrl)
-            ? string.Empty
-            : GetRegionalUrl(settings.FeedbackAndSupportUrl, inCurrentCulture ? CultureInfo.CurrentCulture.TwoLetterISOLanguageName : null);
+        return string.IsNullOrEmpty(email) ? string.Empty : email;
     }
 
     #endregion
 
     #region confirm links
 
-    public async Task<string> GetInvitationLinkAsync(string email, EmployeeType employeeType, Guid createdBy, string culture = null)
+    public string GetInvitationLink(string email, EmployeeType employeeType, Guid createdBy, string culture = null)
     {
-        var link = await GetConfirmationEmailUrlAsync(email, ConfirmType.LinkInvite, employeeType, createdBy)
+        var tenant = _tenantManager.GetCurrentTenant();
+        
+        var link = GetConfirmationEmailUrl(email, ConfirmType.LinkInvite, employeeType.ToStringFast() + tenant.Alias, createdBy)
                    + $"&emplType={employeeType:d}";
         
         if (!string.IsNullOrEmpty(culture))
@@ -220,18 +200,18 @@ public class CommonLinkUtility(
         return link;
     }
     
-    public async Task<(string, string)> GetConfirmationUrlAndKeyAsync(string email, ConfirmType confirmType, object postfix = null, Guid userId = default)
+    public (string, string) GetConfirmationUrlAndKey(string email, ConfirmType confirmType, object postfix = null, Guid userId = default)
     {
         var url = GetFullAbsolutePath($"confirm/{confirmType}?{GetTokenWithoutKey(email, confirmType, userId)}");
 
-        var tenantId = await _tenantManager.GetCurrentTenantIdAsync();
-        var key = emailValidationKeyProvider.GetEmailKey(tenantId, email + confirmType + (postfix ?? ""));
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        var key = emailValidationKeyProvider.GetEmailKey(email + confirmType + (postfix ?? ""), tenantId);
         return (url, key);
     }
 
-    public async Task<string> GetConfirmationEmailUrlAsync(string email, ConfirmType confirmType, object postfix = null, Guid userId = default)
+    public string GetConfirmationEmailUrl(string email, ConfirmType confirmType, object postfix = null, Guid userId = default)
     {
-        return GetFullAbsolutePath(await GetConfirmationUrlRelativeAsync(email, confirmType, postfix, userId));
+        return GetFullAbsolutePath(GetConfirmationUrlRelative(email, confirmType, postfix, userId));
     }
     
     public string GetConfirmationUrl(string key, ConfirmType confirmType, Guid userId = default)
@@ -239,9 +219,9 @@ public class CommonLinkUtility(
         return GetFullAbsolutePath(GetConfirmationUrlRelative(key, confirmType, userId));
     }
 
-    public async Task<string> GetConfirmationUrlRelativeAsync(string email, ConfirmType confirmType, object postfix = null, Guid userId = default)
+    public string GetConfirmationUrlRelative(string email, ConfirmType confirmType, object postfix = null, Guid userId = default)
     {
-        return GetConfirmationUrlRelative(await _tenantManager.GetCurrentTenantIdAsync(), email, confirmType, postfix, userId);
+        return GetConfirmationUrlRelative(_tenantManager.GetCurrentTenantId(), email, confirmType, postfix, userId);
     }
 
     public string GetConfirmationUrlRelative(int tenantId, string email, ConfirmType confirmType, object postfix = null, Guid userId = default)
@@ -273,7 +253,7 @@ public class CommonLinkUtility(
 
     public string GetToken(int tenantId, string email, ConfirmType confirmType, object postfix = null, Guid userId = default)
     {
-        var validationKey = emailValidationKeyProvider.GetEmailKey(tenantId, email + confirmType + (postfix ?? ""));
+        var validationKey = emailValidationKeyProvider.GetEmailKey(email + confirmType + (postfix ?? ""), tenantId);
 
         var link = $"type={confirmType}&key={validationKey}";
 

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,34 +27,41 @@
 namespace ASC.Web.Files.Services.WCFService;
 
 /// <summary>
+/// The third-party account parameters.
 /// </summary>
 public class ThirdPartyParams
 {
-    /// <summary>Authentication data</summary>
-    /// <type>ASC.Files.Core.AuthData, ASC.Files.Core</type>
+    /// <summary>
+    /// The authentication data.
+    /// </summary>
     [JsonPropertyName("auth_data")]
     public AuthData AuthData { get; init; }
 
-    /// <summary>Specifies if this is a corporate account or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if this is a corporate account or not.
+    /// </summary>
     public bool Corporate { get; init; }
 
-    /// <summary>Specifies if this is a room storage or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if this is a room storage or not.
+    /// </summary>
     public bool RoomsStorage { get; init; }
 
-    /// <summary>Customer title</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The customer title.
+    /// </summary>
     [JsonPropertyName("customer_title")]
     public string CustomerTitle { get; set; }
 
-    /// <summary>Provider ID</summary>
-    /// <type>System.Nullable{System.Int32}, System</type>
+    /// <summary>
+    /// The provider ID.
+    /// </summary>
     [JsonPropertyName("provider_id")]
     public int? ProviderId { get; init; }
 
-    /// <summary>Provider key</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The provider key.
+    /// </summary>
     [JsonPropertyName("provider_key")]
     public string ProviderKey { get; init; }
 }

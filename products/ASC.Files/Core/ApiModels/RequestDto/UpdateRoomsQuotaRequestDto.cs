@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,15 +27,29 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// The request parameters for updating the room quota.
 /// </summary>
 public class UpdateRoomsQuotaRequestDto<T>
 {
-    /// <summary>List of room IDs</summary>
-    /// <type>System.Collections.Generic.IEnumerable{System.Text.Json.JsonElement}, System.Collections.Generic</type>
+    /// <summary>
+    /// The list of room IDs.
+    /// </summary>
     public IEnumerable<JsonElement> RoomIds { get; set; } = new List<JsonElement>();
 
-    /// <summary>Room quota</summary>
-    /// <type>System.Int64, System</type>
+    /// <summary>
+    /// The room quota.
+    /// </summary>
     public long Quota { get; set; }
 
+}
+
+/// <summary>
+/// The request parameters for updating the room.
+/// </summary>
+public class UpdateRoomsRoomIdsRequestDto<T>
+{
+    /// <summary>
+    /// The list of room IDs.
+    /// </summary>
+    public IEnumerable<JsonElement> RoomIds { get; set; } = new List<JsonElement>();
 }

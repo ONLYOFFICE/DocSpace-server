@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,34 +27,42 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
+/// The parameters representing the Two-Factor Authentication (TFA) configuration settings.
 /// </summary>
 public class TfaSettingsDto
 {
-    /// <summary>ID</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The ID of the TFA configuration.
+    /// </summary>
     public string Id { get; set; }
 
-    /// <summary>Title</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The display name or description of the TFA configuration.
+    /// </summary>
     public string Title { get; set; }
 
-    /// <summary>Specifies if the TFA settings are enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Indicates whether the TFA configuration is currently active.
+    /// </summary>
     public bool Enabled { get; set; }
 
-    /// <summary>Specifies if the TFA settings are available or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Indicates whether the TFA configuration can be used.
+    /// </summary>
     public bool Avaliable { get; set; }
 
-    /// <summary>List of trusted IP addresses</summary>
-    /// <type>System.Collections.Generic.List{System.String}, System.Collections.Generic</type>
+    /// <summary>
+    /// The list of IP addresses that are exempt from TFA requirements.
+    /// </summary>
     public List<string> TrustedIps { get; set; }
 
-    /// <summary>List of users who must use the TFA verification</summary>
-    /// <type>System.Collections.Generic.List{System.Guid}, System.Collections.Generic</type>
+    /// <summary>
+    /// The list of user IDs that are required to use TFA.
+    /// </summary>
     public List<Guid> MandatoryUsers { get; set; }
 
-    /// <summary>List of groups who must use the TFA verification</summary>
-    /// <type>System.Collections.Generic.List{System.Guid}, System.Collections.Generic</type>
+    /// <summary>
+    /// The list of group IDs whose members are required to use TFA.
+    /// </summary>
     public List<Guid> MandatoryGroups { get; set; }
 }

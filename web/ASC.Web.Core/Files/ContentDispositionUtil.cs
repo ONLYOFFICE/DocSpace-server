@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -94,21 +94,19 @@ public static class ContentDispositionUtil
             return true; // uppercase letter
         }
 
-        switch (b)
+        return b switch
         {
-            case (byte)'-':
-            case (byte)'.':
-            case (byte)'_':
-            case (byte)'~':
-            case (byte)':':
-            case (byte)'!':
-            case (byte)'$':
-            case (byte)'&':
-            case (byte)'+':
-                return true;
-        }
-
-        return false;
+            (byte)'-' or 
+            (byte)'.' or 
+            (byte)'_' or 
+            (byte)'~' or 
+            (byte)':' or 
+            (byte)'!' or 
+            (byte)'$' or 
+            (byte)'&' or 
+            (byte)'+' => true,
+            _ => false
+        };
     }
 
     private static void AddByteToStringBuilder(byte b, StringBuilder builder)

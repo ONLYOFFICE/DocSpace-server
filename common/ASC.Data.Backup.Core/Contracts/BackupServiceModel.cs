@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,14 +26,27 @@
 
 namespace ASC.Data.Backup.Contracts;
 
-
+/// <summary>
+/// The backup storage type.
+/// </summary>
 public enum BackupStorageType
 {
+    [SwaggerEnum(Description = "Documents")]
     Documents = 0,
+
+    [SwaggerEnum(Description = "Thridparty documents")]
     ThridpartyDocuments = 1,
+
+    [SwaggerEnum(Description = "Custom cloud")]
     CustomCloud = 2,
+
+    [SwaggerEnum(Description = "Local")]
     Local = 3,
+
+    [SwaggerEnum(Description = "Data store")]
     DataStore = 4,
+
+    [SwaggerEnum(Description = "Thirdparty consumer")]
     ThirdPartyConsumer = 5
 }
 
@@ -49,27 +62,33 @@ public class StartBackupRequest
 }
 
 /// <summary>
+/// The backup history parameters.
 /// </summary>
 public class BackupHistoryRecord
 {
-    /// <summary>Backup ID</summary>
-    /// <type>System.Guid, System</type>
+    /// <summary>
+    /// The backup ID.
+    /// </summary>
     public Guid Id { get; set; }
 
-    /// <summary>File name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The backup file name.
+    /// </summary>
     public string FileName { get; set; }
 
-    /// <summary>Storage type</summary>
-    /// <type>ASC.Data.Backup.Contracts.BackupStorageType, ASC.Data.Backup.Core</type>
+    /// <summary>
+    /// The backup storage type.
+    /// </summary>
     public BackupStorageType StorageType { get; set; }
 
-    /// <summary>Creation date</summary>
-    /// <type>System.DateTime, System</type>
+    /// <summary>
+    /// The backup creation date.
+    /// </summary>
     public DateTime CreatedOn { get; set; }
 
-    /// <summary>Expiration date</summary>
-    /// <type>System.DateTime, System</type>
+    /// <summary>
+    /// The backup expiration date.
+    /// </summary>
     public DateTime ExpiresOn { get; set; }
 }
 
@@ -89,13 +108,14 @@ public class TransferRegion
 
 public class StartRestoreRequest
 {
-    public int TenantId { get; init; }
+    public int TenantId { get; set; }
     public Guid BackupId { get; set; }
     public BackupStorageType StorageType { get; set; }
     public string FilePathOrId { get; set; }
     public bool NotifyAfterCompletion { get; init; }
     public Dictionary<string, string> StorageParams { get; set; }
     public string ServerBaseUri { get; init; }
+    public bool Dump { get; init; }
 }
 
 public class CreateScheduleRequest : StartBackupRequest

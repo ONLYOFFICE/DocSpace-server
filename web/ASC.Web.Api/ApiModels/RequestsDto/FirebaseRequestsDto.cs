@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,14 +27,17 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
+/// The Firebase-related request parameters.
 /// </summary>
 public class FirebaseRequestsDto
 {
-    /// <summary>Firebase device token</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The Firebase device token.
+    /// </summary>
     public string FirebaseDeviceToken { get; set; }
 
-    /// <summary>Specifies if the user is subscribed to the push notification or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether the user is subscribed to the push notifications or not.
+    /// </summary>
     public bool IsSubscribed { get; set; }
 }

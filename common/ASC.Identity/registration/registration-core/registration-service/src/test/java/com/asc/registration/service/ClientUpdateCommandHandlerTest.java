@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,16 +29,18 @@ package com.asc.registration.service;
 
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.asc.common.core.domain.entity.Audit;
-import com.asc.common.core.domain.event.DomainEventPublisher;
 import com.asc.common.core.domain.value.ClientId;
 import com.asc.common.core.domain.value.ClientSecret;
+import com.asc.common.core.domain.value.Role;
 import com.asc.common.core.domain.value.TenantId;
+import com.asc.common.core.domain.value.UserId;
 import com.asc.common.core.domain.value.enums.AuditCode;
 import com.asc.common.core.domain.value.enums.AuthenticationMethod;
+import com.asc.common.service.ports.output.message.publisher.AuthorizationMessagePublisher;
+import com.asc.common.service.transfer.message.ClientRemovedEvent;
 import com.asc.common.service.transfer.response.ClientResponse;
 import com.asc.common.utilities.crypto.EncryptionService;
 import com.asc.registration.core.domain.ClientDomainService;
@@ -68,12 +70,14 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 public class ClientUpdateCommandHandlerTest {
+  private final UserId CREATOR_ID = new UserId("creator");
+
   @InjectMocks private ClientUpdateCommandHandler clientUpdateCommandHandler;
+  @Mock private AuthorizationMessagePublisher<ClientRemovedEvent> authorizationMessagePublisher;
   @Mock private ClientDomainService clientDomainService;
   @Mock private EncryptionService encryptionService;
   @Mock private ClientQueryRepository clientQueryRepository;
   @Mock private ClientCommandRepository clientCommandRepository;
-  @Mock private DomainEventPublisher<ClientEvent> messagePublisher;
   @Mock private ClientDataMapper clientDataMapper;
 
   private Audit audit;
@@ -107,7 +111,7 @@ public class ClientUpdateCommandHandlerTest {
             .authenticationMethods(Set.of(AuthenticationMethod.DEFAULT_AUTHENTICATION))
             .scopes(Set.of("read", "write"))
             .clientInfo(new ClientInfo("Test Client", "Description", "Logo URL"))
-            .clientTenantInfo(new ClientTenantInfo(new TenantId(1)))
+            .clientTenantInfo(new ClientTenantInfo(new TenantId(1L)))
             .clientRedirectInfo(
                 new ClientRedirectInfo(
                     Set.of("http://redirect.url"),
@@ -115,11 +119,11 @@ public class ClientUpdateCommandHandlerTest {
                     Set.of("http://logout.url")))
             .clientCreationInfo(
                 ClientCreationInfo.Builder.builder()
-                    .createdBy("creator")
+                    .createdBy(CREATOR_ID)
                     .createdOn(ZonedDateTime.now(ZoneId.of("UTC")))
                     .build())
             .build();
-    client.initialize("creator");
+    client.initialize(CREATOR_ID);
     clientResponse =
         ClientResponse.builder()
             .clientId(client.getId().getValue().toString())
@@ -130,7 +134,7 @@ public class ClientUpdateCommandHandlerTest {
   }
 
   @Test
-  public void testRegenerateSecret() {
+  public void whenSecretIsRegenerated_thenNewSecretIsReturned() {
     var command =
         RegenerateTenantClientSecretCommand.builder()
             .tenantId(1)
@@ -142,26 +146,27 @@ public class ClientUpdateCommandHandlerTest {
         .thenReturn(Optional.of(client));
     when(clientDomainService.regenerateClientSecret(any(Audit.class), any(Client.class)))
         .thenReturn(clientUpdatedEvent);
-    when(clientCommandRepository.updateClient(any(Client.class))).thenReturn(client);
+    when(clientCommandRepository.updateClient(any(ClientEvent.class), any(Client.class)))
+        .thenReturn(client);
     when(encryptionService.encrypt(anyString())).thenReturn("encryptedSecret");
     when(clientDataMapper.toClientSecret(any(Client.class))).thenReturn(clientSecretResponse);
 
-    var response = clientUpdateCommandHandler.regenerateSecret(audit, command);
+    var response = clientUpdateCommandHandler.regenerateSecret(audit, Role.ROLE_ADMIN, command);
 
     verify(clientQueryRepository, times(1))
         .findByClientIdAndTenantId(any(ClientId.class), any(TenantId.class));
     verify(clientDomainService, times(1))
         .regenerateClientSecret(any(Audit.class), any(Client.class));
     verify(encryptionService, times(1)).encrypt(anyString());
-    verify(clientCommandRepository, times(1)).updateClient(any(Client.class));
-    verify(messagePublisher, times(1)).publish(any(ClientEvent.class));
+    verify(clientCommandRepository, times(1))
+        .updateClient(any(ClientEvent.class), any(Client.class));
     verify(clientDataMapper, times(1)).toClientSecret(any(Client.class));
 
     assertNotEquals(client.getSecret().value(), response.getClientSecret());
   }
 
   @Test
-  public void testRegenerateSecretClientNotFound() {
+  public void whenSecretIsRegeneratedForNonexistentClient_thenThrowClientNotFoundException() {
     var command =
         RegenerateTenantClientSecretCommand.builder()
             .tenantId(1)
@@ -173,11 +178,11 @@ public class ClientUpdateCommandHandlerTest {
 
     assertThrows(
         ClientNotFoundException.class,
-        () -> clientUpdateCommandHandler.regenerateSecret(audit, command));
+        () -> clientUpdateCommandHandler.regenerateSecret(audit, Role.ROLE_ADMIN, command));
   }
 
   @Test
-  public void testChangeVisibilityToPublic() {
+  public void whenVisibilityIsChangedToPublic_thenVisibilityIsUpdated() {
     var command =
         ChangeTenantClientVisibilityCommand.builder()
             .tenantId(1)
@@ -191,17 +196,18 @@ public class ClientUpdateCommandHandlerTest {
     when(clientDomainService.makeClientPublic(any(Audit.class), any(Client.class)))
         .thenReturn(clientUpdatedEvent);
 
-    clientUpdateCommandHandler.changeVisibility(audit, command);
+    clientUpdateCommandHandler.changeVisibility(audit, Role.ROLE_ADMIN, command);
 
     verify(clientQueryRepository, times(1))
         .findByClientIdAndTenantId(any(ClientId.class), any(TenantId.class));
     verify(clientDomainService, times(1)).makeClientPublic(any(Audit.class), any(Client.class));
-    verify(clientCommandRepository, times(1)).updateClient(any(Client.class));
-    verify(messagePublisher, times(1)).publish(any(ClientEvent.class));
+    verify(clientCommandRepository, times(1))
+        .changeVisibilityByTenantIdAndClientId(
+            any(ClientEvent.class), any(TenantId.class), any(ClientId.class), anyBoolean());
   }
 
   @Test
-  public void testChangeVisibilityToPrivate() {
+  public void whenVisibilityIsChangedToPrivate_thenVisibilityIsUpdated() {
     var command =
         ChangeTenantClientVisibilityCommand.builder()
             .tenantId(1)
@@ -215,17 +221,18 @@ public class ClientUpdateCommandHandlerTest {
     when(clientDomainService.makeClientPrivate(any(Audit.class), any(Client.class)))
         .thenReturn(clientUpdatedEvent);
 
-    clientUpdateCommandHandler.changeVisibility(audit, command);
+    clientUpdateCommandHandler.changeVisibility(audit, Role.ROLE_ADMIN, command);
 
     verify(clientQueryRepository, times(1))
         .findByClientIdAndTenantId(any(ClientId.class), any(TenantId.class));
     verify(clientDomainService, times(1)).makeClientPrivate(any(Audit.class), any(Client.class));
-    verify(clientCommandRepository, times(1)).updateClient(any(Client.class));
-    verify(messagePublisher, times(1)).publish(any(ClientEvent.class));
+    verify(clientCommandRepository, times(1))
+        .changeVisibilityByTenantIdAndClientId(
+            any(ClientEvent.class), any(TenantId.class), any(ClientId.class), anyBoolean());
   }
 
   @Test
-  public void testChangeVisibilityClientNotFound() {
+  public void whenVisibilityChangeForNonexistentClient_thenThrowClientNotFoundException() {
     var command =
         ChangeTenantClientVisibilityCommand.builder()
             .tenantId(1)
@@ -238,75 +245,11 @@ public class ClientUpdateCommandHandlerTest {
 
     assertThrows(
         ClientNotFoundException.class,
-        () -> clientUpdateCommandHandler.changeVisibility(audit, command));
+        () -> clientUpdateCommandHandler.changeVisibility(audit, Role.ROLE_ADMIN, command));
   }
 
   @Test
-  public void testChangeActivation() {
-    var command =
-        ChangeTenantClientActivationCommand.builder()
-            .tenantId(1)
-            .clientId(client.getId().getValue().toString())
-            .enabled(true)
-            .build();
-
-    var clientUpdatedEvent = mock(ClientUpdatedEvent.class);
-
-    when(clientQueryRepository.findByClientIdAndTenantId(any(ClientId.class), any(TenantId.class)))
-        .thenReturn(Optional.of(client));
-    when(clientDomainService.enableClient(any(Audit.class), any(Client.class)))
-        .thenReturn(clientUpdatedEvent);
-
-    clientUpdateCommandHandler.changeActivation(audit, command);
-
-    verify(clientQueryRepository, times(1))
-        .findByClientIdAndTenantId(any(ClientId.class), any(TenantId.class));
-    verify(clientDomainService, times(1)).enableClient(any(Audit.class), any(Client.class));
-    verify(clientCommandRepository, times(1)).updateClient(any(Client.class));
-    verify(messagePublisher, times(1)).publish(any(ClientEvent.class));
-  }
-
-  @Test
-  public void testChangeActivationClientNotFound() {
-    var command =
-        ChangeTenantClientActivationCommand.builder()
-            .tenantId(1)
-            .clientId(client.getId().getValue().toString())
-            .enabled(true)
-            .build();
-
-    when(clientQueryRepository.findByClientIdAndTenantId(any(ClientId.class), any(TenantId.class)))
-        .thenReturn(Optional.empty());
-
-    assertThrows(
-        ClientNotFoundException.class,
-        () -> clientUpdateCommandHandler.changeActivation(audit, command));
-  }
-
-  @Test
-  public void testUpdateClientClientNotFound() {
-    var command =
-        UpdateTenantClientCommand.builder()
-            .tenantId(1)
-            .clientId(client.getId().getValue().toString())
-            .name("Updated Client")
-            .description("Updated Description")
-            .logo("Updated Logo URL")
-            .allowedOrigins(Set.of("http://allowed.origin"))
-            .allowPkce(true)
-            .isPublic(true)
-            .build();
-
-    when(clientQueryRepository.findByClientIdAndTenantId(any(ClientId.class), any(TenantId.class)))
-        .thenReturn(Optional.empty());
-
-    assertThrows(
-        ClientNotFoundException.class,
-        () -> clientUpdateCommandHandler.updateClient(audit, command));
-  }
-
-  @Test
-  public void testDeleteClient() {
+  public void whenClientIsDeleted_thenClientIsRemoved() {
     var command =
         DeleteTenantClientCommand.builder()
             .tenantId(1)
@@ -316,20 +259,22 @@ public class ClientUpdateCommandHandlerTest {
 
     when(clientQueryRepository.findByClientIdAndTenantId(any(ClientId.class), any(TenantId.class)))
         .thenReturn(Optional.of(client));
-    when(clientDomainService.invalidateClient(any(Audit.class), any(Client.class)))
+    when(clientDomainService.deleteClient(any(Audit.class), any(Client.class)))
         .thenReturn(clientDeletedEvent);
 
-    clientUpdateCommandHandler.deleteClient(audit, command);
+    clientUpdateCommandHandler.deleteClient(audit, Role.ROLE_ADMIN, command);
 
     verify(clientQueryRepository, times(1))
         .findByClientIdAndTenantId(any(ClientId.class), any(TenantId.class));
-    verify(clientDomainService, times(1)).invalidateClient(any(Audit.class), any(Client.class));
-    verify(clientCommandRepository, times(1)).updateClient(any(Client.class));
-    verify(messagePublisher, times(1)).publish(any(ClientEvent.class));
+    verify(clientDomainService, times(1)).deleteClient(any(Audit.class), any(Client.class));
+    verify(clientCommandRepository, times(1))
+        .deleteByTenantIdAndClientId(
+            any(ClientEvent.class), any(TenantId.class), any(ClientId.class));
+    verify(authorizationMessagePublisher).publish(any(ClientRemovedEvent.class));
   }
 
   @Test
-  public void testDeleteClientClientNotFound() {
+  public void whenDeletingNonexistentClient_thenThrowClientNotFoundException() {
     var command =
         DeleteTenantClientCommand.builder()
             .tenantId(1)
@@ -341,6 +286,6 @@ public class ClientUpdateCommandHandlerTest {
 
     assertThrows(
         ClientNotFoundException.class,
-        () -> clientUpdateCommandHandler.deleteClient(audit, command));
+        () -> clientUpdateCommandHandler.deleteClient(audit, Role.ROLE_ADMIN, command));
   }
 }

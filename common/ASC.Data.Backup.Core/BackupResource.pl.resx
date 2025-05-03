@@ -121,9 +121,18 @@
     <value>Ustaw hasło</value>
   </data>
   <data name="BackupNotFound" xml:space="preserve">
-    <value>Plik kopii zapasowej jest nieprawidłowy. Użyj pliku utworzonego w wersji 11.5 ONLYOFFICE lub nowszej.</value>
+    <value>Plik kopii zapasowej jest nieprawidłowy. Użyj pliku utworzonego w tym samym portalu.</value>
   </data>
   <data name="LargeBackup" xml:space="preserve">
     <value>Kopia zapasowa jest większa od całkowitego rozmiaru portalu</value>
+  </data>
+  <data name="BackupException" xml:space="preserve">
+    <value>Coś poszło nie tak, podczas tworzenia kopii zapasowej. Spróbuj utworzyć ją ponownie lub skontaktuj się z działem wsparcia.</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>Coś poszło nie tak, podczas odzyskiwania kopii zapasowej. Spróbuj odzyskać ją ponownie lub skontaktuj się z działem wsparcia.</value>
+  </data>
+  <data name="BackupInvalid" xml:space="preserve">
+    <value>Plik kopii zapasowej jest nieprawidłowy.</value>
   </data>
 </root>

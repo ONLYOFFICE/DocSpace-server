@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -77,7 +77,7 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
         Guid? withoutUserId = null,
         string description = null)
     {
-        var tenant = await tenantManager.GetCurrentTenantIdAsync();
+        var tenant = tenantManager.GetCurrentTenantId();
         await using var auditTrailContext = await dbContextFactory.CreateDbContextAsync();
 
         var q1 = auditTrailContext.AuditEvents
@@ -213,6 +213,16 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
             && r.Target.Contains(target));
         
         return q;
+    }
+
+    public async Task<DbAuditEvent> GetLastEventAsync(int tenantId)
+    {
+        await using var auditTrailContext = await dbContextFactory.CreateDbContextAsync();
+
+        return await auditTrailContext.AuditEvents
+            .Where(r => r.TenantId == tenantId)
+            .OrderByDescending(r => r.Id)
+            .FirstOrDefaultAsync();
     }
 
     public async Task<IEnumerable<int>> GetTenantsAsync(DateTime? from = null, DateTime? to = null)

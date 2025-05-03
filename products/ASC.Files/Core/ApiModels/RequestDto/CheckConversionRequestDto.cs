@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,29 +27,78 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// The parameters for checking file conversion.
 /// </summary>
 public class CheckConversionRequestDto<T>
 {
-    /// <summary>File ID</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The file ID to check conversion proccess.
+    /// </summary>
     public T FileId { get; set; }
 
-    /// <summary>Specifies if the conversion process is synchronous or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the conversion process is synchronous or not.
+    /// </summary>
     public bool Sync { get; set; }
 
-    /// <summary>Specifies whether to start a conversion process or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether to start a conversion process or not.
+    /// </summary>
     public bool StartConvert { get; set; }
 
-    /// <summary>File version</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The file version that is converted.
+    /// </summary>
     public int Version { get; set; }
 
-    /// <summary>Password</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The password of the converted file.
+    /// </summary>
     public string Password { get; set; }
-    
+
+    /// <summary>
+    /// The conversion output type.
+    /// </summary>
     public string OutputType { get; set; }
+
+    /// <summary>
+    /// Specifies whether to create a new file if it exists or not.
+    /// </summary>
     public bool CreateNewIfExist { get; set; }
+}
+
+/// <summary>
+/// The parameters for starting file conversion.
+/// </summary>
+public class StartConversionRequestDto<T>
+{
+    /// <summary>
+    /// The file ID to start conversion proccess.
+    /// </summary>
+    [FromRoute(Name = "fileId")]
+    public required T FileId { get; set; }
+
+    /// <summary>
+    /// The parameters for checking file conversion.
+    /// </summary>
+    [FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)]
+    public CheckConversionRequestDto<T> CheckConversion { get; set; }
+}
+
+/// <summary>
+/// The parameters for checking file conversion status.
+/// </summary>
+public class CheckConversionStatusRequestDto<T>
+{
+    /// <summary>
+    /// The file ID to check conversion status.
+    /// </summary>
+    [FromRoute(Name = "fileId")]
+    public required T FileId { get; set; }
+
+    /// <summary>
+    /// Specifies whether a conversion operation is started or not.
+    /// </summary>
+    [FromQuery(Name = "start")]
+    public bool Start { get; set; }
 }

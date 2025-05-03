@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,7 +26,7 @@
 
 global using System.Collections;
 global using System.Text.Json;
-
+global using ASC.Api.Core.Extensions;
 global using ASC.AuditTrail.Log;
 global using ASC.AuditTrail.Mappers;
 global using ASC.AuditTrail.Models;
@@ -41,12 +41,7 @@ global using ASC.Geolocation;
 global using ASC.MessagingSystem.Core;
 global using ASC.MessagingSystem.EF.Context;
 global using ASC.MessagingSystem.EF.Model;
-
 global using AutoMapper;
-
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Logging;
-
 global using NetEscapades.EnumGenerators;
-
-global using Newtonsoft.Json;

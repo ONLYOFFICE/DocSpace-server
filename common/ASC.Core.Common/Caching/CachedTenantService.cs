@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -75,7 +75,7 @@ class TenantServiceCache
     {
         private readonly Dictionary<int, Tenant> _byId = new();
         private readonly Dictionary<string, Tenant> _byDomain = new();
-        private readonly object _locker = new();
+        private readonly Lock _locker = new();
 
         public Tenant Get(int id)
         {

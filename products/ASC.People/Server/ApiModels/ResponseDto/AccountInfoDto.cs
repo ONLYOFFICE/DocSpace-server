@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,22 +27,23 @@
 namespace ASC.People.ApiModels.ResponseDto;
 
 /// <summary>
+/// The account information parameters.
 /// </summary>
 public class AccountInfoDto
 {
-    /// <summary>Provider</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The account provider.
+    /// </summary>
     public string Provider { get; set; }
 
-    /// <summary>URL</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The account URL.
+    /// </summary>
+    [Url]
     public string Url { get; set; }
 
-    /// <summary>Specifies if an account is linked or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if an account is linked with other profiles or not.
+    /// </summary>
     public bool Linked { get; set; }
-
-    /// <summary>Class</summary>
-    /// <type>System.String, System</type>
-    public string Class { get; set; }
 }

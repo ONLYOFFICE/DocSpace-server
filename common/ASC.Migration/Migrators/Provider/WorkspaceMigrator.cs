@@ -1,30 +1,28 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
-//
+﻿// (c) Copyright Ascensio System SIA 2009-2025
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-
-using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Migration.Core.Migrators.Provider;
 
@@ -47,12 +45,13 @@ public class WorkspaceMigrator : Migrator
         MigrationLogger migrationLogger,
         AuthContext authContext, 
         DisplayUserSettingsHelper displayUserSettingsHelper,
-        UserManagerWrapper userManagerWrapper) : base(securityContext, userManager, tenantQuotaFeatureStatHelper, quotaSocketManager, fileStorageService, globalFolderHelper, serviceProvider, daoFactory, entryManager, migrationLogger, authContext, displayUserSettingsHelper, userManagerWrapper)
+        UserManagerWrapper userManagerWrapper,
+        UserSocketManager socketManager) : base(securityContext, userManager, tenantQuotaFeatureStatHelper, quotaSocketManager, fileStorageService, globalFolderHelper, serviceProvider, daoFactory, entryManager, migrationLogger, authContext, displayUserSettingsHelper, userManagerWrapper, socketManager)
     {
         MigrationInfo = new MigrationInfo { Name = "Workspace" };
     }
 
-    public override async Task InitAsync(string path, CancellationToken cancellationToken, OperationType operation)
+    public override async Task InitAsync(string path, OperationType operation, CancellationToken cancellationToken)
     {
         MigrationLogger.Init();
         _cancellationToken = cancellationToken;
@@ -176,10 +175,7 @@ public class WorkspaceMigrator : Migrator
 
     private void ParseAndUnionStorage(MigrationStorage newStorage, MigrationStorage destinationStorage, string key = "")
     {
-        if (destinationStorage == null)
-        {
-            throw new ArgumentNullException("destinationStorage is null");
-        }
+        ArgumentNullException.ThrowIfNull(destinationStorage);
 
         ParseStorage(newStorage, key);
 
@@ -207,7 +203,7 @@ public class WorkspaceMigrator : Migrator
         destinationStorage.Folders = destinationStorage.Folders.Union(newStorage.Folders).ToList();
     }
 
-    public async Task ParseUsersAsync(bool reportProgress, int count)
+    private async Task ParseUsersAsync(bool reportProgress, int count)
     {
         await using var stream = _dataReader.GetEntry("databases/core/core_user");
         var data = new DataTable();
@@ -235,13 +231,11 @@ public class WorkspaceMigrator : Migrator
                 }
             };
 
-            var drivePath = Directory.Exists(Path.Combine(_dataReader.GetFolder(), "userPhotos")) ?
-            Path.Combine(_dataReader.GetFolder(), "userPhotos") : null;
+            var drivePath = (Directory.Exists(Path.Combine(_dataReader.GetFolder(), "userPhotos")) 
+                                ? Path.Combine(_dataReader.GetFolder(), "userPhotos") 
+                                : null) ?? 
+                            (Directory.GetFiles(_dataReader.GetFolder()).Any(f=> Path.GetFileName(f).StartsWith("userPhotos")) ? _dataReader.GetFolder() : null);
 
-            if(drivePath == null)
-            {
-                drivePath = Directory.GetFiles(_dataReader.GetFolder()).Any(f=> Path.GetFileName(f).StartsWith("userPhotos")) ? _dataReader.GetFolder() : null;
-            }
             if (drivePath == null)
             {
                 u.HasPhoto = false;
@@ -252,9 +246,36 @@ public class WorkspaceMigrator : Migrator
                 u.HasPhoto = u.PathToPhoto != null;
             }
 
+            if(!u.HasPhoto)
+            {
+                await using var streamPhotos = _dataReader.GetEntry("databases/core/core_userphoto");
+                var dataPhotots = new DataTable();
+                dataPhotots.ReadXml(streamPhotos);
+                foreach (var rowPhoto in dataPhotots.Rows.Cast<DataRow>())
+                {
+                    if (rowPhoto["userId"].ToString() == key)
+                    {
+                        var bytes = rowPhoto["photo"] as byte[];
+                        var img = new MagickImage(bytes);
+                        var format = img.Format;
+
+                        u.PathToPhoto = Path.Combine(_dataReader.GetFolder(), $"{key}.{CommonPhotoManager.GetImgFormatName(format)}");
+                        u.HasPhoto = true;
+
+                        await using var fs = new FileStream(u.PathToPhoto, FileMode.Create);
+                        await fs.WriteAsync(bytes, _cancellationToken);
+                    }
+                }
+            }
+
             u.Storage = new MigrationStorage { Type = FolderType.USER };
 
-            if (!(await UserManager.GetUserByEmailAsync(u.Info.Email)).Equals(Constants.LostUser))
+            var ascUser = await UserManager.GetUserByEmailAsync(u.Info.Email);
+            if (ascUser.Status == EmployeeStatus.Terminated)
+            {
+                continue;
+            }
+            if (!ascUser.Equals(Constants.LostUser))
             {
                 var user = MigrationInfo.ExistUsers.SingleOrDefault(eu => eu.Value.Info.Email == u.Info.Email);
                 if (user.Value == null)
@@ -283,18 +304,11 @@ public class WorkspaceMigrator : Migrator
         }
     }
 
-    public void ParseStorage(MigrationStorage storage, string createBy = "")
+    private void ParseStorage(MigrationStorage storage, string createBy = "")
     {
         //docker unzip filesfolder_... instend of files/folder... 
-        var folderFiles = _dataReader.GetDirectories("").Select(d => Path.GetFileName(d)).FirstOrDefault(d => d.StartsWith("files"));
-        if (folderFiles.Equals("files"))
-        {
-            folderFiles = "files/folder";
-        }
-        else
-        {
-            folderFiles = folderFiles.Split('_')[0];
-        }
+        var folderFiles = _dataReader.GetDirectories("").Select(Path.GetFileName).FirstOrDefault(d => d.StartsWith("files"));
+        folderFiles = folderFiles.Equals("files") ? "files/folder" : folderFiles.Split('_')[0];
 
         var rootFolders = new List<string>();
         using var streamFolders = _dataReader.GetEntry("databases/files/files_folder");
@@ -380,6 +394,13 @@ public class WorkspaceMigrator : Migrator
                         priv = projectTitle[id].Item2;
                         owner = projectTitle[id].Item3;
                     }
+                    else
+                    {
+                        if (folderTree[id] == 0)
+                        {
+                            continue;
+                        }
+                    }
                 }
                 var folder = new MigrationFolder
                 {
@@ -391,6 +412,36 @@ public class WorkspaceMigrator : Migrator
                     Owner = owner
                 };
                 storage.Folders.Add(folder);
+            }
+        }
+        
+        if (storage.Type == FolderType.BUNCH) 
+        {
+            var remove = new List<string>();
+            foreach (var entry in folderTree)
+            {
+                var id = int.Parse(entry.Key);
+                if (storage.Folders.All(f => f.Id != id))
+                {
+                    remove.Add(entry.Key);
+                }
+            }
+            var removeFolder = new List<MigrationFolder>();
+            foreach(var entry in storage.Folders)
+            {
+                if(entry.ParentId != 0 && storage.Folders.All(f => f.Id != entry.ParentId))
+                {
+                    remove.Add(entry.Id.ToString());
+                    removeFolder.Add(entry);
+                }
+            }
+            foreach (var r in remove)
+            {
+                folderTree.Remove(r);
+            }
+            foreach (var rf in removeFolder)
+            {
+                storage.Folders.Remove(rf);
             }
         }
 
@@ -499,7 +550,7 @@ public class WorkspaceMigrator : Migrator
         }
     }
 
-    public void ParseGroup()
+    private void ParseGroup()
     {
         using var streamGroup = _dataReader.GetEntry("databases/core/core_group");
         var dataGroup = new DataTable();
@@ -523,7 +574,7 @@ public class WorkspaceMigrator : Migrator
             }
             var group = new MigrationGroup
             {
-                Info = new()
+                Info = new GroupInfo
                 {
                     Name = row["name"].ToString()
                 },

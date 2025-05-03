@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,16 +27,26 @@
 namespace ASC.Core.Users;
 
 /// <summary>
+/// The user type.
 /// </summary>
 [Flags]
-[System.Text.Json.Serialization.JsonConverter(typeof(JsonStringEnumConverter<EmployeeType>))]
+[JsonConverter(typeof(JsonStringEnumConverter<EmployeeType>))]
 [EnumExtensions]
 public enum EmployeeType
 {
+    [SwaggerEnum("All")]
     All = 0,
+
+    [SwaggerEnum("Room admin")]
     RoomAdmin = 1,
+
+    [SwaggerEnum("Guest")]
     Guest = 2,
+
+    [SwaggerEnum("DocSpace admin")]
     DocSpaceAdmin = 3,
+	
+    [SwaggerEnum("User")]
     User = 4
 }
 

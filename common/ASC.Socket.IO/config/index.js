@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -57,7 +57,7 @@ function getAndSaveAppsettings(){
     if(redis != null)
     {
         redis.connect_timeout = redis.ConnectTimeout;
-        redis.db = redis.Database;
+        redis.database = redis.Database;
         redis.username = redis.User;
         redis.password = redis.Password;
         redis.socket = {

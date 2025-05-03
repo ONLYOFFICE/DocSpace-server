@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,11 +27,35 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// The user invitation parameters.
 /// </summary>
-public class UserInvitationRequestDto
+public class UserInvitation
 {
-    /// <summary>List of user IDs</summary>
-    /// <type>System.Collections.Generic.IEnumerable{System.Guid}, System.Collections.Generic</type>
+    /// <summary>
+    /// The list of user IDs.
+    /// </summary>
     public IEnumerable<Guid> UsersIds { get; set; }
+
+    /// <summary>
+    /// Specifies whether to resend all user invitations or not.
+    /// </summary>
     public bool ResendAll { get; set; }
+}
+
+/// <summary>
+/// The user invitation request parameters.
+/// </summary>
+public class UserInvitationRequestDto<T>
+{
+    /// <summary>
+    /// The room ID.
+    /// </summary>
+    [FromRoute(Name = "id")]
+    public required T Id { get; set; }
+
+    /// <summary>
+    /// The user invitation parameters.
+    /// </summary>
+    [FromBody]
+    public UserInvitation UserInvitation { get; set; }
 }

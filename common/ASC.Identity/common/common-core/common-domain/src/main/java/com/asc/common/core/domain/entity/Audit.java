@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,7 +35,7 @@ import com.asc.common.core.domain.value.enums.AuditCode;
  * as the audit code, initiator, target, IP address, browser, platform, tenant ID, user email, user
  * name, user ID, page, and description.
  */
-public class Audit extends BaseEntity<Integer> {
+public class Audit extends BaseEntity<Long> {
 
   /** The audit code for the event. */
   private final AuditCode auditCode;
@@ -56,7 +56,7 @@ public class Audit extends BaseEntity<Integer> {
   private final String platform;
 
   /** The ID of the tenant associated with the event. */
-  private final int tenantId;
+  private final long tenantId;
 
   /** The email of the user who initiated the event. */
   private final String userEmail;
@@ -79,7 +79,7 @@ public class Audit extends BaseEntity<Integer> {
    * @param builder The builder object containing the parameters for the Audit object.
    */
   private Audit(Builder builder) {
-    super.setId(0);
+    super.setId(0L);
     auditCode = builder.auditCode;
     initiator = builder.initiator;
     target = builder.target;
@@ -154,7 +154,7 @@ public class Audit extends BaseEntity<Integer> {
    *
    * @return The tenant ID.
    */
-  public int getTenantId() {
+  public long getTenantId() {
     return tenantId;
   }
 
@@ -233,7 +233,7 @@ public class Audit extends BaseEntity<Integer> {
     private String ip;
     private String browser;
     private String platform;
-    private int tenantId;
+    private long tenantId;
     private String userEmail;
     private String userName;
     private String userId;
@@ -324,7 +324,7 @@ public class Audit extends BaseEntity<Integer> {
      * @param val The tenant ID.
      * @return The Builder object.
      */
-    public Builder tenantId(int val) {
+    public Builder tenantId(long val) {
       tenantId = val;
       return this;
     }

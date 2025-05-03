@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -25,7 +25,32 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
-public class CheckUploadRequestDto
+
+/// <summary>
+/// The request parameters for checking file uploads.
+/// </summary>
+public class CheckUploadRequest
 {
+    /// <summary>
+    /// The list of file titles.
+    /// </summary>
     public IEnumerable<string> FilesTitle { get; set; }
+}
+
+/// <summary>
+/// The generic request parameters for checking file uploads.
+/// </summary>
+public class CheckUploadRequestDto<T>
+{
+    /// <summary>
+    /// The folder ID.
+    /// </summary>
+    [FromRoute(Name = "folderId")]
+    public required T FolderId { get; set; }
+
+    /// <summary>
+    /// The request parameters for checking file uploads.
+    /// </summary>
+    [FromBody]
+    public CheckUploadRequest Check { get; set; }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,14 +26,25 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+
 /// <summary>
+/// The room type.
 /// </summary>
 public enum RoomType
 {
+    [SwaggerEnum(Description = "Form filling room")]
     FillingFormsRoom = 1,
+
+    [SwaggerEnum(Description = "Collaboration room")]
     EditingRoom = 2,
+
+    [SwaggerEnum(Description = "Custom room")]
     CustomRoom = 5,
+
+    [SwaggerEnum(Description = "Public room")]
     PublicRoom = 6,
+
+    [SwaggerEnum(Description = "Virtual data room")]
     VirtualDataRoom = 8
 }
 
@@ -59,16 +70,75 @@ public static class RoomTypeExtensions
 }
 
 /// <summary>
+/// The request parameters for creating a room.
 /// </summary>
-public class CreateRoomRequestDto : UpdateRoomRequestDto
+public class CreateRoomRequestDto
 {
-    /// <summary>Room type</summary>
-    /// <type>ASC.Files.Core.ApiModels.RequestDto.RoomType, ASC.Files.Core</type>
-    public RoomType RoomType { get; set; }
+    /// <summary>
+    /// The room name.
+    /// </summary>
+    [StringLength(170)]
+    public required string Title { get; set; }
 
+    /// <summary>
+    /// The room quota.
+    /// </summary>
+    public long? Quota { get; set; }
+
+    /// <summary>
+    /// Specifies whether to create a room with indexing.
+    /// </summary>
+    public bool? Indexing { get; set; }
+
+    /// <summary>
+    /// Specifies whether to deny downloads from the room.
+    /// </summary>
+    public bool? DenyDownload { get; set; }
+
+    /// <summary>
+    /// The room data lifetime information.
+    /// </summary>
+    public RoomDataLifetimeDto Lifetime { get; set; }
+
+    /// <summary>
+    /// The watermark settings.
+    /// </summary>
+    public WatermarkRequestDto Watermark { get; set; }
+
+    /// <summary>
+    /// The room logo.
+    /// </summary>
+    public LogoRequest Logo { get; set; }
+
+    /// <summary>
+    /// The list of tags.
+    /// </summary>
+    public IEnumerable<string> Tags { get; set; }
+
+    /// <summary>
+    /// The room color.
+    /// </summary>
+    [StringLength(6)]
+    public string Color { get; set; }
+
+    /// <summary>
+    /// The room cover.
+    /// </summary>
+    [StringLength(50)]
+    public string Cover { get; set; }
+
+    /// <summary>
+    /// The room type.
+    /// </summary>
+    public required RoomType RoomType { get; set; }
+
+    /// <summary>
+    /// Specifies whether the room to be created is private or not.
+    /// </summary>
     public bool Private { get; set; }
 
-    /// <summary>Collection of sharing parameters</summary>
-    /// <type>System.Collections.Generic.IEnumerable{ASC.Files.Core.ApiModels.FileShareParams}, System.Collections.Generic</type>
+    /// <summary>
+    /// The collection of sharing parameters.
+    /// </summary>
     public IEnumerable<FileShareParams> Share { get; set; }
 }

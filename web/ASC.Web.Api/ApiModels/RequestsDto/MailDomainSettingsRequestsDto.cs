@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,39 +27,75 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
+/// The request parameters for configuring trusted mail domains and visitor invitation settings.
 /// </summary>
 public class MailDomainSettingsRequestsDto
 {
-    /// <summary>Trusted domain type</summary>
-    /// <type>ASC.Core.Tenants.TenantTrustedDomainsType, ASC.Core.Common</type>
-    public TenantTrustedDomainsType Type { get; set; }
+    /// <summary>
+    /// Defines how trusted domains are handled and validated.
+    /// </summary>
+    public required TenantTrustedDomainsType Type { get; set; }
 
-    /// <summary>List of trusted domains</summary>
-    /// <type>System.Collections.Generic.List{System.String}, System.Collections.Generic</type>
-    public List<string> Domains { get; set; }
+    /// <summary>
+    /// The list of authorized email domains that are considered trusted.
+    /// </summary>
+    public required List<string> Domains { get; set; }
 
-    /// <summary>Invites as a user or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies the default permission level for the invited users (visitors or not).
+    /// </summary>
     public bool InviteUsersAsVisitors { get; set; }
 }
 
 /// <summary>
+/// The request parameters for the administrator message configuration.
+/// </summary>
+public class AdminMessageBaseSettingsRequestsDto
+{
+    /// <summary>
+    /// The email address used for sending administrator messages.
+    /// </summary>
+    [EmailAddress]
+    [StringLength(255)]
+    public required string Email { get; set; }
+
+    /// <summary>
+    /// The locale identifier for message localization.
+    /// </summary>
+    public string Culture { get; set; }
+}
+
+/// <summary>
+/// The request parameters for configuring the administrator message content.
 /// </summary>
 public class AdminMessageSettingsRequestsDto
 {
-    /// <summary>Email</summary>
-    /// <type>System.String, System</type>
-    public string Email { get; set; }
+    /// <summary>
+    /// The content of the administrator message to be sent.
+    /// </summary>
+    [StringLength(255)]
+    public required string Message { get; set; }
 
-    /// <summary>Message</summary>
-    /// <type>System.String, System</type>
-    public string Message { get; set; }
+    /// <summary>
+    /// Email
+    /// </summary>
+    [EmailAddress]
+    [StringLength(255)]
+    public required string Email { get; set; }
 
-    /// <summary>Specifies if the administrator messages are enabled or not</summary>
-    /// <type>System.Boolean, System</type>
-    public bool TurnOn { get; set; }
-    
-    /// <summary>Culture</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// Culture
+    /// </summary>
     public string Culture { get; set; }
+}
+
+/// <summary>
+/// The request parameters for enabling or disabling administrator messaging system.
+/// </summary>
+public class TurnOnAdminMessageSettingsRequestDto
+{
+    /// <summary>
+    /// The global switch for the administrator messaging functionality.
+    /// </summary>
+    public bool TurnOn { get; set; }
 }

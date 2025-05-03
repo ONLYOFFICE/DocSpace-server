@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -76,11 +76,19 @@ public class NotificationControllerHelper(
 }
 
 /// <summary>
+/// The notification type.
 /// </summary>
 public enum NotificationType
 {
+    [SwaggerEnum("Badges")]
     Badges = 0,
+
+    [SwaggerEnum("Rooms activity")]
     RoomsActivity = 1,
+
+    [SwaggerEnum("Daily feed")]
     DailyFeed = 2,
+
+    [SwaggerEnum("Usefull tips")]
     UsefullTips = 3
 }

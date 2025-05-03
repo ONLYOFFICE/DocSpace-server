@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,6 +34,12 @@ public class DaoFactory(IServiceProvider serviceProvider, IProviderDao providerD
     public IFileDao<T> GetFileDao<T>()
     {
         return serviceProvider.GetService<IFileDao<T>>();
+    }
+
+    public IFileDao<T> GetCacheFileDao<T>()
+    {
+        return serviceProvider.GetService<ICacheFileDao<T>>() ??
+               serviceProvider.GetService<IFileDao<T>>();
     }
 
     public IFolderDao<T> GetFolderDao<T>()

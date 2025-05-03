@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,27 +27,33 @@
 namespace ASC.IPSecurity;
 
 /// <summary>
+/// The IP restiction parameters.
 /// </summary>
 public class IPRestriction : IpRestrictionBase, IMapFrom<TenantIpRestrictions>
 {
-    /// <summary>Restiction ID</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The IP restiction ID.
+    /// </summary>
     public int Id { get; set; }
 
-    /// <summary>Tenant ID</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The tenant ID.
+    /// </summary>
     public int TenantId { get; set; }
 }
 
 /// <summary>
+/// The IP restiction base parameters.
 /// </summary>
 public class IpRestrictionBase
 {
-    /// <summary>IP address</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The IP address.
+    /// </summary>
     public string Ip { get; set; }
 
-    /// <summary>Specifies if this address is for administrator users only or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the IP address is for administrator users only or not.
+    /// </summary>
     public bool ForAdmin { get; set; }
 }

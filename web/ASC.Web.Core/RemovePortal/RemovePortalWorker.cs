@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,15 +32,13 @@ public class RemovePortalWorker(
     IServiceProvider serviceProvider,
     IDistributedLockProvider distributedLockProvider)
 {
-    private readonly DistributedTaskQueue _queue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
-
-    public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "removePortal";
+    private readonly DistributedTaskQueue<RemovePortalOperation> _queue = queueFactory.CreateQueue<RemovePortalOperation>();
 
     public async Task StartAsync(int tenantId)
     {
-        await using (await distributedLockProvider.TryAcquireLockAsync($"lock_{CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME}"))
+        await using (await distributedLockProvider.TryAcquireLockAsync($"lock_removePortal"))
         {
-            var item = (await _queue.GetAllTasks<RemovePortalOperation>()).FirstOrDefault(t => t.TenantId == tenantId);
+            var item = (await _queue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenantId);
 
             if (item is { IsCompleted: true })
             {
@@ -62,7 +60,7 @@ public class RemovePortalWorker(
 
     public async Task Stop()
     {
-        var tasks = await _queue.GetAllTasks(DistributedTaskQueue.INSTANCE_ID);
+        var tasks = await _queue.GetAllTasks(DistributedTaskQueue<RemovePortalOperation>.INSTANCE_ID);
 
         foreach (var t in tasks)
         {

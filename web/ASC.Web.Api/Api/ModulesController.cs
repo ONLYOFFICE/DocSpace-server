@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,6 +34,8 @@ namespace ASC.Web.Api.Controllers;
 [Scope]
 [DefaultRoute]
 [ApiController]
+[ControllerName("modules")]
+[ApiExplorerSettings(IgnoreApi = true)]
 public class ModulesController(WebItemManagerSecurity webItemManagerSecurity) : ControllerBase
 {
     /// <summary>
@@ -42,12 +44,12 @@ public class ModulesController(WebItemManagerSecurity webItemManagerSecurity) : 
     /// <short>
     /// Get modules
     /// </short>
-    /// <returns type="System.String, System">List of modules</returns>
     /// <path>api/2.0/modules</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Modules")]
+    [SwaggerResponse(200, "List of modules", typeof(IEnumerable<string>))]
     [HttpGet]
-    public IEnumerable<string> GetAll()
+    public IEnumerable<string> GetAllPortalModules()
     {
         var result = new List<string>();
 
@@ -65,10 +67,10 @@ public class ModulesController(WebItemManagerSecurity webItemManagerSecurity) : 
     /// <short>
     /// Get modules information
     /// </short>
-    /// <returns type="ASC.Api.Core.Module, ASC.Api.Core">List of modules with their information</returns>
     /// <path>api/2.0/modules/info</path>
-    /// <httpMethod>GET</httpMethod>
     /// <collection>list</collection>
+    [Tags("Modules")]
+    [SwaggerResponse(200, "List of modules with their information", typeof(IEnumerable<Module>))]
     [HttpGet("info")]
     public IEnumerable<Module> GetAllWithInfo()
     {

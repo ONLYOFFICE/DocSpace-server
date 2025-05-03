@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,13 +26,39 @@
 
 namespace ASC.Files.Core.VirtualRooms;
 
+/// <summary>
+/// The room logo information.
+/// </summary>
 public class Logo
 {
+    /// <summary>
+    /// The original logo.
+    /// </summary>
     public string Original { get; set; }
+
+    /// <summary>
+    /// The large logo.
+    /// </summary>
     public string Large { get; set; }
+
+    /// <summary>
+    /// The medium logo.
+    /// </summary>
     public string Medium { get; set; }
+
+    /// <summary>
+    /// The small logo.
+    /// </summary>
     public string Small { get; set; }
+
+    /// <summary>
+    /// The logo color.
+    /// </summary>
     public string Color { get; set; }
+
+    /// <summary>
+    /// The logo cover.
+    /// </summary>
     public LogoCover Cover { get; set; }
 
     public bool IsDefault()
@@ -41,8 +67,18 @@ public class Logo
     }
 }
 
+/// <summary>
+/// The logo cover information.
+/// </summary>
 public class LogoCover
 {
+    /// <summary>
+    /// The logo cover ID.
+    /// </summary>
     public string Id { get; set; }
+
+    /// <summary>
+    /// The logo cover data.
+    /// </summary>
     public string Data { get; set; }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,7 +27,7 @@
 namespace ASC.Common.Caching;
 
 [Singleton]
-public class RedisCacheNotify<T>(IRedisClient redisCacheClient) : ICacheNotify<T> where T : new()
+public class RedisCacheNotify<T>(IRedisClient redisCacheClient, ILogger<RedisCacheNotify<T>> logger) : ICacheNotify<T> where T : new()
 {
     private readonly IRedisDatabase _redis = redisCacheClient.GetDefaultDatabase();
     private readonly ConcurrentDictionary<CacheNotifyAction, ConcurrentBag<Action<T>>> _invocationList = new();
@@ -39,7 +39,14 @@ public class RedisCacheNotify<T>(IRedisClient redisCacheClient) : ICacheNotify<T
 
         foreach (var handler in GetInvocationList(action))
         {
-            handler(obj);
+            try
+            {
+                handler(obj);
+            }
+            catch (Exception e)
+            {
+                logger.ErrorRedisCacheNotifyPublish(e);
+            }
         }
     }
 
@@ -49,7 +56,14 @@ public class RedisCacheNotify<T>(IRedisClient redisCacheClient) : ICacheNotify<T
         {
             if (i.Id != _instanceId && (i.Action == action || Enum.IsDefined(typeof(CacheNotifyAction), (i.Action & action))))
             {
-                onChange(i.Object);
+                try
+                {
+                    onChange(i.Object);
+                }
+                catch (Exception e)
+                {
+                    logger.ErrorRedisCacheNotifySubscribe(e);
+                }
             }
 
             return Task.FromResult(true);
@@ -80,7 +94,7 @@ public class RedisCacheNotify<T>(IRedisClient redisCacheClient) : ICacheNotify<T
     {
         var result = new List<Action<T>>();
 
-        foreach (var val in (CacheNotifyAction[])Enum.GetValues(typeof(CacheNotifyAction)))
+        foreach (var val in Enum.GetValues<CacheNotifyAction>())
         {
             if (!(val == action || Enum.IsDefined(typeof(CacheNotifyAction), (val & action))))
             {
