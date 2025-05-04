@@ -40,13 +40,13 @@ public class ThumbnailFileRequestDto<T>
     /// <summary>
     /// The size of the thumbnail
     /// </summary>
-    [FromRoute]
+    [FromQuery]
     public string Size { get; set; }
 
     /// <summary>
     /// Indicates whether the file is being viewed
     /// </summary>
-    [FromRoute]
+    [FromQuery]
     public bool View { get; set; }
 }
 
@@ -58,6 +58,6 @@ public class ThumbnailInternalFileRequestDto : ThumbnailFileRequestDto<int>
     /// <summary>
     /// The version of the file for which the thumbnail is requested
     /// </summary>
-    [FromRoute]
+    [FromQuery]
     public int Version { get; set; }
 }

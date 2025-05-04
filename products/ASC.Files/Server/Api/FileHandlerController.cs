@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -336,7 +336,7 @@ public abstract class FileHandlerController<T>(
     
         if (linkRight == FileShare.Restrict && !securityContext.IsAuthenticated)
         {
-            var validateResult = emailValidationKeyProvider.ValidateEmailKey(requestDto.FileId.ToString() + requestDto.Version, requestDto.Stream_Auth ?? "", _global.StreamUrlExpire);
+            var validateResult = emailValidationKeyProvider.ValidateEmailKey(requestDto.FileId.ToString() + requestDto.Version, requestDto.StreamAuth ?? "", _global.StreamUrlExpire);
             if (validateResult != EmailValidationKeyProvider.ValidationResult.Ok)
             {
                 var exc = new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMessage_SecurityException);
@@ -502,7 +502,7 @@ public abstract class FileHandlerController<T>(
         var (linkRight, file) = await CheckLinkAsync(requestDto.FileId, requestDto.Version, fileDao);
         if (linkRight == FileShare.Restrict && !securityContext.IsAuthenticated)
         {
-            var validateResult = emailValidationKeyProvider.ValidateEmailKey(requestDto.FileId.ToString() + requestDto.Version, requestDto.Stream_Auth ?? "", _global.StreamUrlExpire);
+            var validateResult = emailValidationKeyProvider.ValidateEmailKey(requestDto.FileId.ToString() + requestDto.Version, requestDto.StreamAuth ?? "", _global.StreamUrlExpire);
             if (validateResult != EmailValidationKeyProvider.ValidationResult.Ok)
             {
                 var exc = new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMessage_SecurityException);
@@ -553,10 +553,10 @@ public abstract class FileHandlerController<T>(
         _logger.DebugDocServiceTrackFileid(requestDto.FileId.ToString());
     
         var callbackSpan = TimeSpan.FromDays(128);
-        var validateResult = emailValidationKeyProvider.ValidateEmailKey(requestDto.FileId.ToString(), requestDto.Stream_Auth ?? "", callbackSpan);
+        var validateResult = emailValidationKeyProvider.ValidateEmailKey(requestDto.FileId.ToString(), requestDto.StreamAuth ?? "", callbackSpan);
         if (validateResult != EmailValidationKeyProvider.ValidationResult.Ok)
         {
-            _logger.ErrorDocServiceTrackAuth(validateResult, FilesLinkUtility.AuthKey, requestDto.Stream_Auth);
+            _logger.ErrorDocServiceTrackAuth(validateResult, FilesLinkUtility.AuthKey, requestDto.StreamAuth);
             throw new SecurityException();
         }
     
@@ -924,9 +924,8 @@ public abstract class FileHandlerController<T>(
     }
 }
 
-[AllowAnonymous]
 [DefaultRoute("filehandler")]
-public abstract class FileHandlerControllerCommon(
+public class FileHandlerControllerCommon(
     IHttpContextAccessor httpContextAccessor,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
@@ -946,7 +945,7 @@ public abstract class FileHandlerControllerCommon(
 {
     [AllowAnonymous]
     [HttpGet("bulk")]
-    public async Task BulkFile([FromQuery] BulkFileRequestDto requestDto)
+    public async Task BulkFile(BulkFileRequestDto requestDto)
     {        
         var context = httpContextAccessor.HttpContext!;
         if (!securityContext.IsAuthenticated && string.IsNullOrEmpty(requestDto.Session))
@@ -954,9 +953,9 @@ public abstract class FileHandlerControllerCommon(
             throw new SecurityException();
         }
     
-        string filename = requestDto.Filename;
-        string session = requestDto.Session;
-        string ext = requestDto.Ext;
+        var filename = requestDto.Filename;
+        var session = requestDto.Session;
+        var ext = requestDto.Ext;
 
         if (String.IsNullOrEmpty(filename))
         {
@@ -1027,10 +1026,10 @@ public abstract class FileHandlerControllerCommon(
     }
 
     [HttpGet("empty")]
-    public async Task EmptyFile([FromQuery] EmptyFileRequestDto requestDto)
+    public async Task EmptyFile(EmptyFileRequestDto requestDto)
     {
         var context = httpContextAccessor.HttpContext!;
-        string title = requestDto.Title;
+        var title = requestDto.Title;
 
         var signatureSecret = filesLinkUtility.DocServiceSignatureSecret;
         if (!string.IsNullOrEmpty(signatureSecret))
@@ -1098,13 +1097,13 @@ public abstract class FileHandlerControllerCommon(
     }
 
     [HttpGet("temp")]
-    public async Task TempFile([FromQuery] TempFileRequestDto requestDto)
+    public async Task TempFile(TempFileRequestDto requestDto)
     {        
         var context = httpContextAccessor.HttpContext!;
-        string title = requestDto.Title;
-        string stream_auth = requestDto.Stream_Auth;
+        var title = requestDto.Title;
+        var streamAuth = requestDto.StreamAuth;
 
-        var validateResult = emailValidationKeyProvider.ValidateEmailKey(title, stream_auth ?? "", global.StreamUrlExpire);
+        var validateResult = emailValidationKeyProvider.ValidateEmailKey(title, streamAuth ?? "", global.StreamUrlExpire);
         if (validateResult != EmailValidationKeyProvider.ValidationResult.Ok)
         {
             var exc = new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMessage_SecurityException);

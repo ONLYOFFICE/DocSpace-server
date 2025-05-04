@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,16 +24,49 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Microsoft.AspNetCore.Mvc;
-
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// Represents the data transfer object used for streaming files. This class encapsulates
+/// the necessary information to identify and access a file for streaming purposes,
+/// including file identifier, version, and authorization details.
+/// </summary>
+/// <typeparam name="T">
+/// Specifies the type of the file identifier. This allows for flexibility in using
+/// different data types as the file identifier, depending on the use case.
+/// </typeparam>
 public class StreamFileRequestDto<T>
 {
+    /// <summary>
+    /// Represents the unique identifier of a file.
+    /// </summary>
+    /// <remarks>
+    /// This property is used to specify the file identifier that is required
+    /// for operations such as file streaming or metadata retrieval.
+    /// The value is typically passed as part of the route or request payload.
+    /// </remarks>
     [FromRoute]
     public required T FileId { get; set; }
-    
+
+    /// <summary>
+    /// Gets or sets the version of the file to be streamed.
+    /// </summary>
+    /// <remarks>
+    /// The <see cref="Version"/> property specifies the specific version of the file
+    /// that should be retrieved or streamed, if applicable.
+    /// If set to a value greater than zero, it indicates a specific version.
+    /// A value of zero or less typically implies retrieving the latest version.
+    /// </remarks>
+    [FromQuery]
     public int Version { get; set; }
-    
-    public string Stream_Auth { get; set; }
+
+    /// <summary>
+    /// Gets or sets the authentication token used for validating the stream access request.
+    /// </summary>
+    /// <remarks>
+    /// This property is crucial for ensuring secure access to the requested file stream.
+    /// It is typically validated against a time-sensitive email validation key to enforce secure and authorized access.
+    /// </remarks>
+    [FromQuery(Name = "stream_auth")]
+    public string StreamAuth { get; set; }
 }

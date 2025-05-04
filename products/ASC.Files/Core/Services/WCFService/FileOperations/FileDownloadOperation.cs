@@ -177,7 +177,7 @@ public class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationD
                 MimeMapping.GetMimeMapping(path),
                 "attachment; filename=\"" + Uri.EscapeDataString(fileName) + "\"");
 
-            Result = $"{filesLinkUtility.FileHandlerPath}/bulk?filename={Uri.EscapeDataString(await instanceCrypto.EncryptAsync(fileName))}";
+            Result = $"{filesLinkUtility.FileHandlerPath}bulk?filename={Uri.EscapeDataString(await instanceCrypto.EncryptAsync(fileName))}";
 
             if (!isAuthenticated)
             {

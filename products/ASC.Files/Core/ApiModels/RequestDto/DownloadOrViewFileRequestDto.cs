@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,18 +24,41 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Microsoft.AspNetCore.Mvc;
-
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// Represents the data transfer object for handling requests to download or view a file.
+/// This class is used to process incoming requests related to files, including downloading
+/// specific versions or viewing files with specified output options. It includes properties
+/// for identifying the target file, the version of the file, and customization options such
+/// as the desired file format and whether to use preview conversions during the request.
+/// Type Parameter:
+/// T:
+/// The type representing the file identifier, which can vary depending on the implementation.
 public class DownloadOrViewFileRequestDto<T>
 {
+    /// Gets or sets the identifier of the file to be downloaded or viewed.
+    /// This property is used as part of the route in API operations for file handling.
+    /// The value represents a unique identifier for the file, which could vary in type
+    /// depending on the implementation.
     [FromRoute]
     public required T FileId { get; set; }
-    
+
+    /// Represents the version of the file being downloaded or viewed.
+    /// This property is used to specify the particular version of the file
+    /// to be accessed in a request. It is provided as part of the route data
+    /// and allows operations to target a specific version of the resource.
+    [FromQuery]
     public int Version { get; set; }
-    
+
+    /// Gets or sets the type of output for the operation (e.g., file content or file metadata).
+    /// This property specifies the format or representation of the requested file output.
+    /// It is used in file download or view operations to determine how the content should be delivered.
+    [FromQuery]
     public string OutputType { get; set; }
-    
+
+    /// Gets or sets a value indicating whether the file conversion for preview should be triggered.
+    /// This property is used to determine if the file should be converted to a preview-compatible format
+    /// during the download or view operation.
+    [FromQuery]
     public bool ConvPreview { get; set; }
 }

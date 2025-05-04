@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Microsoft.AspNetCore.Mvc;
-
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
@@ -42,6 +40,6 @@ public class TempFileRequestDto
     /// <summary>
     /// The authentication token for stream validation
     /// </summary>
-    [FromQuery]
-    public string Stream_Auth { get; set; }
+    [FromQuery(Name = "stream_auth")]
+    public string StreamAuth { get; set; }
 }
