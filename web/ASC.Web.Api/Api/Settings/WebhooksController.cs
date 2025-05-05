@@ -265,7 +265,7 @@ public class WebhooksController(ApiContext context,
             throw new ArgumentException(nameof(inDto.Id));
         }
 
-        var item = await dbWorker.ReadJournal(inDto.Id);
+        var item = await dbWorker.ReadJournal(tenantManager.GetCurrentTenantId(), inDto.Id);
 
         if (item == null)
         {
@@ -300,10 +300,11 @@ public class WebhooksController(ApiContext context,
     public async IAsyncEnumerable<WebhooksLogDto> RetryWebhooks(WebhookRetryRequestsDto inDto)
     {
         var isAdmin = await CheckAdminPermissionsAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
 
         foreach (var id in inDto.Ids)
         {
-            var item = await dbWorker.ReadJournal(id);
+            var item = await dbWorker.ReadJournal(tenantId, id);
 
             if (item == null)
             {
