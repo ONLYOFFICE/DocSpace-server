@@ -482,10 +482,6 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:delete-guest", guestId);
   }
 
-  function backupProgress({ tenantId, percentage } = {}) {
-    filesIO.to(`${tenantId}-backup`).emit("s:backup-progress", {progress: percentage});
-  }
-
   function restoreProgress({ tenantId, dump, percentage } = {})
   {
     if(dump)
