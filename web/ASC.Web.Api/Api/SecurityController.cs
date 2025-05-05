@@ -24,14 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-
 using ASC.Api.Core.Cors.Enums;
-using ASC.Core.Common;
+using ASC.Core.Common.Identity;
 
 using Microsoft.AspNetCore.Cors;
-using Microsoft.IdentityModel.Tokens;
 
 namespace ASC.Web.Api.Controllers;
 
@@ -56,11 +52,7 @@ public class SecurityController(PermissionContext permissionContext,
         ApiContext apiContext,
         CspSettingsHelper cspSettingsHelper, 
         ApiDateTimeHelper apiDateTimeHelper,
-        SecurityContext securityContext,
-        UserManager userManager,
-        UserFormatter userFormatter,
-        MachinePseudoKeys machinePseudoKeys,
-        BaseCommonLinkUtility baseCommonLinkUtility)
+        IdentityClient identityClient)
     : ControllerBase
 {
     /// <summary>
@@ -444,41 +436,7 @@ public class SecurityController(PermissionContext permissionContext,
     [SwaggerResponse(200, "Jwt Token", typeof(string))]
     public async Task<string> GenerateJwtToken()
     {
-        var key = new SymmetricSecurityKey(machinePseudoKeys.GetMachineConstant(256));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-        var tenant = tenantManager.GetCurrentTenant();
-        var userId = securityContext.CurrentAccount.ID;
-        var userInfo = await userManager.GetUsersAsync(userId);
-        var isAdmin = await userManager.GetUserTypeAsync(userInfo.Id) is EmployeeType.DocSpaceAdmin;
-        var isGuest = await userManager.IsGuestAsync(userId);
-        var serverRootPath = baseCommonLinkUtility.ServerRootPath;
-        var isPublic = true;
-
-        var tenantDevToolsAccessSettings = await settingsManager.LoadAsync<TenantDevToolsAccessSettings>();
-
-        if (tenantDevToolsAccessSettings != null)
-        {
-            isPublic = !tenantDevToolsAccessSettings.LimitedAccessForUsers;
-        }
-        
-        var token = new JwtSecurityToken(
-            issuer: serverRootPath,
-            audience: serverRootPath,
-            claims: new List<Claim> {
-                new("sub", securityContext.CurrentAccount.ID.ToString()), 
-                new("user_id", securityContext.CurrentAccount.ID.ToString()), 
-                new("user_name", userFormatter.GetUserName(userInfo)),
-                new("user_email", userInfo.Email),
-                new("tenant_id", tenant.Id.ToString()),
-                new("tenant_url", serverRootPath),
-                new("is_admin", isAdmin.ToString().ToLower()),
-                new("is_guest", isGuest.ToString().ToLower()),
-                new("is_public", isPublic.ToString().ToLower()) // TODO: check OAuth enable for non-admin users
-            },
-            expires: DateTime.Now.AddMinutes(5),
-            signingCredentials: creds);
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        return await identityClient.GenerateJwtTokenAsync();
     }
     
 

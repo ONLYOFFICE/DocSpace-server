@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Common.Identity;
+
 namespace ASC.People.Api;
 
 ///<summary>
@@ -79,7 +81,8 @@ public class UserController(
     CountPaidUserStatistic countPaidUserStatistic,
     UserSocketManager socketManager,
     GlobalFolderHelper globalFolderHelper,
-    UserWebhookManager webhookManager)
+    UserWebhookManager webhookManager,
+    IdentityClient client)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
 {
     /// <summary>
@@ -568,6 +571,8 @@ public class UserController(
         await CheckReassignProcessAsync([user.Id]);
 
         var userName = user.DisplayUserName(false, displayUserSettingsHelper);
+
+        await client.DeleteClientsAsync(user.Id);
         await _userPhotoManager.RemovePhotoAsync(user.Id);
         await _userManager.DeleteUserAsync(user.Id);
         await fileSecurity.RemoveSubjectAsync(user.Id, true);
@@ -1145,6 +1150,7 @@ public class UserController(
             
             var isGuest = userType == EmployeeType.Guest;
 
+            await client.DeleteClientsAsync(user.Id);
             await _userPhotoManager.RemovePhotoAsync(user.Id);
             await _userManager.DeleteUserAsync(user.Id);
             await fileSecurity.RemoveSubjectAsync(user.Id, true);

@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Common.Identity;
+
 using Microsoft.AspNetCore.RateLimiting;
 
 using Constants = ASC.Core.Users.Constants;
@@ -71,7 +73,8 @@ public class PortalController(
     IHttpContextAccessor httpContextAccessor,
     QuotaHelper quotaHelper,
     IEventBus eventBus,
-    CspSettingsHelper cspSettingsHelper)
+    CspSettingsHelper cspSettingsHelper,
+    IdentityClient client)
     : ControllerBase
 {
     /// <summary>
@@ -516,6 +519,7 @@ public class PortalController(
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
+        await client.DeleteTenantClientsAsync();
         await tenantManager.RemoveTenantAsync(tenant.Id);
 
         if (!coreBaseSettings.Standalone)
@@ -646,6 +650,7 @@ public class PortalController(
 
         await DemandPermissionToDeleteTenantAsync(tenant);
 
+        await client.DeleteTenantClientsAsync();
         await tenantManager.RemoveTenantAsync(tenant.Id);
 
         if (!coreBaseSettings.Standalone)
