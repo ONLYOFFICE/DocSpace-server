@@ -47,7 +47,6 @@ public class RoomLogoManager(
     FileSizeComment fileSizeComment,
     CommonLinkUtility commonLinkUtility, 
     ExternalShare externalShare,
-    GlobalFolderHelper globalFolderHelper,
     WebhookManager webhookManager)
 {
     internal const string LogosPathSplitter = "_";

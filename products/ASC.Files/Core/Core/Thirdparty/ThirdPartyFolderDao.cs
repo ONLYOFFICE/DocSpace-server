@@ -625,6 +625,11 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         return AsyncEnumerable.Empty<Folder<string>>();
     }
 
+    public Task<int> GetProviderBasedRoomsCountAsync(SearchArea searchArea)
+    {
+        return Task.FromResult(0);
+    }
+
     public Task<Folder<string>> GetRootFolderAsync(string folderId)
     {
         return dao.GetRootFolderAsync();

@@ -124,7 +124,7 @@ public class VirtualRoomsInternalController(
         WatermarkRequest watermark = null;
         if (dto.Watermark != null)
         {
-            watermark = new WatermarkRequest()
+            watermark = new WatermarkRequest
             {
                 Additions = dto.Watermark.Additions,
                 Enabled = dto.Watermark.Enabled,
@@ -459,6 +459,15 @@ public abstract class VirtualRoomsController<T>(
             return result;
         }
 
+        if (inDto.RoomInvitation.Invitations.Any(i => !string.IsNullOrEmpty(i.Email)))
+        {
+            var invitationSettings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
+            if (!invitationSettings.AllowInvitingGuests)
+            {
+                throw new SecurityException(Resource.ErrorAccessDenied);
+            }
+        }
+
         var room = await _fileStorageService.GetFolderAsync(inDto.Id).NotFoundIfNull("Folder not found");
 
         if (room.RootId is int root && root == await globalFolderHelper.FolderRoomTemplatesAsync 
@@ -483,7 +492,7 @@ public abstract class VirtualRoomsController<T>(
 
         var aceCollection = new AceCollection<T>
         {
-            Files = Array.Empty<T>(),
+            Files = [],
             Folders = [inDto.Id],
             Aces = wrappers,
             Message = inDto.RoomInvitation.Message

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,37 +24,20 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-const winston = require('winston');
-require('winston-daily-rotate-file')
+namespace ASC.Web.Api.ApiModels.ResponseDto;
 
-const path = require('path');
-const config = require('../config');
-const fs = require('fs');
-const fileName = config.get("logPath") || path.join(__dirname, "..", "..", "Logs", "web.thumb.%DATE%.log");
-const dirName = path.dirname(fileName);
-let logConsole = config.get("logConsole");
-
-if (!fs.existsSync(dirName)) {
-    fs.mkdirSync(dirName);
-}
-
-const fileTransport = new (winston.transports.DailyRotateFile)(
+/// <summary>
+/// User invitation settings
+/// </summary>
+public class TenantUserInvitationSettingsDto : IMapFrom<TenantUserInvitationSettings>
 {
-    filename: fileName,
-    datePattern: 'MM-DD',
-    handleExceptions: true,
-    humanReadableUnhandledException: true,
-    zippedArchive: true,
-    maxSize: '50m',
-    maxFiles: '30d'
-});
+    /// <summary>
+    /// Allow invite new DocSpace members through the Contacts section.
+    /// </summary>
+    public bool AllowInvitingMembers { get; init; }
 
-const transports = [fileTransport];
-
-if(logConsole) {
-    transports.push(new (winston.transports.Console)());
+    /// <summary>
+    /// Allow all DocSpace members to invite external guests to rooms.
+    /// </summary>
+    public bool AllowInvitingGuests { get; init; }
 }
-
-winston.exceptions.handle(fileTransport);
-
-module.exports = winston.createLogger({ transports: transports, exitOnError: false});

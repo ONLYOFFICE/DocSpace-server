@@ -1735,6 +1735,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The group could not be found.
+        /// </summary>
+        public static string ErrorGroupNotFound {
+            get {
+                return ResourceManager.GetString("ErrorGroupNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Image size exceed the allowed parameters.
         /// </summary>
         public static string ErrorImageSize {

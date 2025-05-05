@@ -74,11 +74,10 @@ public class UpdateUserTypeProgressItem: DistributedTaskProgress
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var scopeClass = scope.ServiceProvider.GetService<ChangeUserTypeProgressItemScope>();
-        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, displayUserSettingsHelper, options, webItemSecurityCache, distributedLockProvider, socketManager, webhookManager, userFormatter, daoFactory) = scopeClass;
+        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, _, displayUserSettingsHelper, options, webItemSecurityCache, distributedLockProvider, socketManager, webhookManager, userFormatter, daoFactory) = scopeClass;
         var logger = options.CreateLogger("ASC.Web");
         await tenantManager.SetCurrentTenantAsync(_tenantId);
         _userInfo = await userManager.GetUsersAsync(User);
-        var userName = userFormatter.GetUserName(_userInfo);
 
         try
         {
@@ -230,7 +229,6 @@ public class UpdateUserTypeProgressItem: DistributedTaskProgress
         await studioNotifyService.SendMsgReassignsCompletedAsync(_currentUserId, _userInfo, toUser);
 
         var fromUserName = _userInfo.DisplayUserName(false, displayUserSettingsHelper);
-        var toUserName = toUser.DisplayUserName(false, displayUserSettingsHelper);
 
         messageService.SendHeadersMessage(MessageAction.UsersUpdatedType, MessageTarget.Create([User]), _httpHeaders, [fromUserName], [_userInfo.Id], _employeeType);
 

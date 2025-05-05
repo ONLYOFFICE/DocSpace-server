@@ -58,15 +58,19 @@ public class CountRoomCheckerStatistic(IServiceProvider serviceProvider) : ITena
         var daoFactory = serviceProvider.GetService<IDaoFactory>();
         var folderDao = serviceProvider.GetService<IFolderDao<int>>();
         var globalFolder = serviceProvider.GetService<GlobalFolder>();
+        var folderThirdPartyDao = daoFactory.GetFolderDao<string>();
 
         var parentId = await globalFolder.GetFolderVirtualRoomsAsync(daoFactory, false);
-
         if (parentId == 0)
         {
             return 0;
         }
-        
-        return await folderDao.GetFoldersCountAsync(parentId, FilterType.None, false, Guid.Empty, string.Empty);
+
+        var roomsCount = await folderDao.GetFoldersCountAsync(parentId, FilterType.None, false, Guid.Empty, string.Empty);
+
+        var thirdPartyRoomsCount = await folderThirdPartyDao.GetProviderBasedRoomsCountAsync(SearchArea.Active);
+
+        return roomsCount + thirdPartyRoomsCount;
     }
 }
 

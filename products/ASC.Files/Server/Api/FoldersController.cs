@@ -500,7 +500,6 @@ public class FoldersControllerCommon(
     private async IAsyncEnumerable<int> GetRootFoldersIdsAsync(bool withoutTrash)
     {
         var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
-        var isGuest = await userManager.IsGuestAsync(user);
         var isOutsider = await userManager.IsOutsiderAsync(user);
 
         if (isOutsider)

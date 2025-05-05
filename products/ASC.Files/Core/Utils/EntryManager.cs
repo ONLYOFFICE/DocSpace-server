@@ -1276,8 +1276,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 {
                     throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
                 }
-                string title;
-                var ext = FileUtility.GetFileExtension(sourceFile.Title);
+
                 var sourceTitle = Path.GetFileNameWithoutExtension(sourceFile.Title);
 
                 linkedFile = serviceProvider.GetService<File<T>>();
@@ -1311,7 +1310,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 }
                 var properties = await fileDao.GetProperties(sourceFile.Id);
                 var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
-                title = $"{user.FirstName} {user.LastName} - {sourceFile.Title}";
+                var title = $"{user.FirstName} {user.LastName} - {sourceFile.Title}";
 
                 var resultFolder = await folderDao.GetFolderAsync(properties.FormFilling.ToFolderId);
 
@@ -2281,7 +2280,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
         await foreach(var record in records)
         {
-            aces.Add(new AceWrapper()
+            aces.Add(new AceWrapper
             {
                 Access = FileShare.Read,
                 Id = record.Subject,
@@ -2294,7 +2293,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
         await securityContext.AuthenticateMeWithoutCookieAsync(result.CreateBy);
 
-        var shares = await fileSharingAceHelper.SetAceObjectAsync(aces, result, false, null);
+        await fileSharingAceHelper.SetAceObjectAsync(aces, result, false, null);
 
         if (current == ASC.Core.Configuration.Constants.Guest.ID) 
         {
@@ -2392,7 +2391,7 @@ public class EntryManager(IDaoFactory daoFactory,
     {
         if (formRoles == null || !formRoles.Any()) 
         {
-            return (-1, new List<Guid>());
+            return (-1, []);
         }
 
         var allOthersSubmitted = formRoles
@@ -2403,7 +2402,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
         if (!allOthersSubmitted)
         {
-            return (-1, new List<Guid>());
+            return (-1, []);
         }
         var nextSequence = formRoles
             .Where(fr => fr.Sequence > currentRole.Sequence)
@@ -2412,7 +2411,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
         if (nextSequence == 0)
         {
-            return (0, new List<Guid>());
+            return (0, []);
         }
 
         return (nextSequence, formRoles

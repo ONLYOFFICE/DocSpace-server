@@ -68,6 +68,8 @@ public interface IFolderDao<T>
     IAsyncEnumerable<Folder<T>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<T> roomsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags,
         Guid subjectId, string searchText, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds);
 
+    Task<int> GetProviderBasedRoomsCountAsync(SearchArea searchArea);
+
     /// <summary>
     ///     Get a list of folders in current folder.
     /// </summary>

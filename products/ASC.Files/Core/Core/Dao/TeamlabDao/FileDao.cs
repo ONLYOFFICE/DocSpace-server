@@ -283,7 +283,6 @@ internal class FileDao(
 
         var q = await GetFilesQueryWithFilters(parentId, orderBy, filterType, subjectGroup, subjectID, searchText, searchInContent, withSubfolders, excludeSubject, roomId, extension, filesDbContext, formsItemDto);
         
-        var tenantId = _tenantManager.GetCurrentTenantId();
         if (containingMyFiles)
         {
             q = ApplyAdditionalFileFilters(q, filesDbContext, parentId, parentType, AdditionalFilterOption.MyFilesAndFolders);

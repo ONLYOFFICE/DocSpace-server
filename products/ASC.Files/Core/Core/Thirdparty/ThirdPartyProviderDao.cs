@@ -271,6 +271,12 @@ internal abstract class ThirdPartyProviderDao
     {
         return AsyncEnumerable.Empty<Folder<string>>();
     }
+
+    public virtual Task<int> GetProviderBasedRoomsCountAsync(SearchArea searchArea)
+    {
+        return Task.FromResult(0);
+    }
+
     public Task<string> ChangeTreeFolderSizeAsync(string folderId, long size)
     {
         throw new NotImplementedException();

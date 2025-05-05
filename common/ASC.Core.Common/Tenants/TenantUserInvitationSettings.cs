@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,37 +24,27 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-const winston = require('winston');
-require('winston-daily-rotate-file')
+namespace ASC.Core.Tenants;
 
-const path = require('path');
-const config = require('../config');
-const fs = require('fs');
-const fileName = config.get("logPath") || path.join(__dirname, "..", "..", "Logs", "web.thumb.%DATE%.log");
-const dirName = path.dirname(fileName);
-let logConsole = config.get("logConsole");
-
-if (!fs.existsSync(dirName)) {
-    fs.mkdirSync(dirName);
-}
-
-const fileTransport = new (winston.transports.DailyRotateFile)(
+public class TenantUserInvitationSettings : ISettings<TenantUserInvitationSettings>
 {
-    filename: fileName,
-    datePattern: 'MM-DD',
-    handleExceptions: true,
-    humanReadableUnhandledException: true,
-    zippedArchive: true,
-    maxSize: '50m',
-    maxFiles: '30d'
-});
+    public bool AllowInvitingMembers { get; init; }
+    public bool AllowInvitingGuests { get; init; }
 
-const transports = [fileTransport];
+    [JsonIgnore]
+    public Guid ID
+    {
+        get { return new Guid("{FF4F9A9E-0976-478B-8001-18DDE5AF2BD9}"); }
+    }
 
-if(logConsole) {
-    transports.push(new (winston.transports.Console)());
+    public TenantUserInvitationSettings GetDefault()
+    {
+        return new TenantUserInvitationSettings()
+        {
+            AllowInvitingMembers = true,
+            AllowInvitingGuests = true
+        };
+    }
+
+    public DateTime LastModified { get; set; }
 }
-
-winston.exceptions.handle(fileTransport);
-
-module.exports = winston.createLogger({ transports: transports, exitOnError: false});

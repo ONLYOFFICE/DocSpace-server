@@ -79,7 +79,7 @@ public class WebhooksController(ApiContext context,
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "Tenant webhook with its config parameters", typeof(WebhooksConfigDto))]
     [HttpPost("webhook")]
-    public async Task<WebhooksConfigDto> CreateWebhook(WebhooksConfigRequestsDto inDto)
+    public async Task<WebhooksConfigDto> CreateWebhook(CreateWebhooksConfigRequestsDto inDto)
     {
         _ = await CheckAdminPermissionsAsync();
 
@@ -102,7 +102,7 @@ public class WebhooksController(ApiContext context,
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "Updated tenant webhook with its config parameters", typeof(WebhooksConfigDto))]
     [HttpPut("webhook")]
-    public async Task<WebhooksConfigDto> UpdateWebhook(WebhooksConfigRequestsDto inDto)
+    public async Task<WebhooksConfigDto> UpdateWebhook(UpdateWebhooksConfigRequestsDto inDto)
     {
         await CheckWebhook(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.SSL, false);
 
@@ -150,7 +150,7 @@ public class WebhooksController(ApiContext context,
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "Enable or disable tenant webhook", typeof(WebhooksConfigDto))]
     [HttpPut("webhook/enable")]
-    public async Task<WebhooksConfigDto> EnableWebhook(WebhooksConfigRequestsDto inDto)
+    public async Task<WebhooksConfigDto> EnableWebhook(UpdateWebhooksConfigRequestsDto inDto)
     {
         var existingWebhook = await dbWorker.GetWebhookConfig(tenantManager.GetCurrentTenantId(), inDto.Id);
 
@@ -265,7 +265,7 @@ public class WebhooksController(ApiContext context,
             throw new ArgumentException(nameof(inDto.Id));
         }
 
-        var item = await dbWorker.ReadJournal(inDto.Id);
+        var item = await dbWorker.ReadJournal(tenantManager.GetCurrentTenantId(), inDto.Id);
 
         if (item == null)
         {
@@ -300,10 +300,11 @@ public class WebhooksController(ApiContext context,
     public async IAsyncEnumerable<WebhooksLogDto> RetryWebhooks(WebhookRetryRequestsDto inDto)
     {
         var isAdmin = await CheckAdminPermissionsAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
 
         foreach (var id in inDto.Ids)
         {
-            var item = await dbWorker.ReadJournal(id);
+            var item = await dbWorker.ReadJournal(tenantId, id);
 
             if (item == null)
             {
