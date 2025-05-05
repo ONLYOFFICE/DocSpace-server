@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,37 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-const winston = require('winston');
-require('winston-daily-rotate-file')
+namespace ASC.Files.Core.Core;
 
-const path = require('path');
-const config = require('../config');
-const fs = require('fs');
-const fileName = config.get("logPath") || path.join(__dirname, "..", "..", "Logs", "web.thumb.%DATE%.log");
-const dirName = path.dirname(fileName);
-let logConsole = config.get("logConsole");
-
-if (!fs.existsSync(dirName)) {
-    fs.mkdirSync(dirName);
-}
-
-const fileTransport = new (winston.transports.DailyRotateFile)(
+public enum AdditionalFilterOption
 {
-    filename: fileName,
-    datePattern: 'MM-DD',
-    handleExceptions: true,
-    humanReadableUnhandledException: true,
-    zippedArchive: true,
-    maxSize: '50m',
-    maxFiles: '30d'
-});
+    [SwaggerEnum("All")]
+    All,
 
-const transports = [fileTransport];
+    [SwaggerEnum("My files and folders")]
+    MyFilesAndFolders,
 
-if(logConsole) {
-    transports.push(new (winston.transports.Console)());
+    [SwaggerEnum("Forms with filling role")]
+    FormsWithFillingRole
 }
-
-winston.exceptions.handle(fileTransport);
-
-module.exports = winston.createLogger({ transports: transports, exitOnError: false});

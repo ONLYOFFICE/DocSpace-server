@@ -130,6 +130,7 @@ public class CreateRoomRequestDto
     /// <summary>
     /// The room type.
     /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter<RoomType>))]
     public required RoomType RoomType { get; set; }
 
     /// <summary>

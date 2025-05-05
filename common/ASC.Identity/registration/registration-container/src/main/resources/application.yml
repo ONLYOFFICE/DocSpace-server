@@ -62,6 +62,17 @@ management:
       enabled: true
     refresh:
       enabled: false
+logging:
+  cloudwatch:
+    enabled: ${SPRING_LOGGING_CLOUDWATCH_ENABLED:false}
+    log-group-name: ${SPRING_LOGGING_CLOUDWATCH_LOG_GROUP_NAME:ASC.Services}
+    use-localstack: ${SPRING_LOGGING_CLOUDWATCH_USE_LOCALSTACK:false}
+    use-instance-profile-provider: ${SPRING_LOGGING_CLOUDWATCH_USE_INSTANCE_PROFILE_PROVIDER:false}
+    endpoint: ${SPRING_LOGGING_CLOUDWATCH_ENDPOINT:http://localhost:4566}
+    region: ${SPRING_LOGGING_CLOUDWATCH_REGION:us-east-1}
+    access-key: ${SPRING_LOGGING_CLOUDWATCH_ACCESS_KEY:access-key}
+    secret-key: ${SPRING_LOGGING_CLOUDWATCH_SECRET_KEY:secret-key}
+    batch-size: ${SPRING_LOGGING_CLOUDWATCH_BATCH_SIZE:10}
 ---
 logging:
   level:

@@ -99,7 +99,6 @@ public class AutoDeletePersonalFolderService(
 
             await securityContext.AuthenticateMeWithoutCookieAsync(userAccount);
 
-            var fileDao = daoFactory.GetFileDao<int>();
             var folderDao = daoFactory.GetFolderDao<int>();
             var now = DateTime.UtcNow;
 

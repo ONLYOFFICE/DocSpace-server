@@ -42,7 +42,9 @@ public class UploadControllerHelper(
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
     FileChecker fileChecker,
-    WebhookManager webhookManager)
+    WebhookManager webhookManager,
+    IEventBus eventBus,
+    AuthContext authContext)
     : FilesHelperBase(
         filesSettingsHelper,
         fileUploader,
@@ -51,7 +53,11 @@ public class UploadControllerHelper(
         fileStorageService,
         fileChecker,
         httpContextAccessor,
-        webhookManager)
+        webhookManager,
+        daoFactory,
+        eventBus,
+        tenantManager,
+        authContext)
     {
     public async Task<object> CreateEditSessionAsync<T>(T fileId, long fileSize)
     {
@@ -62,8 +68,8 @@ public class UploadControllerHelper(
 
     public async Task<List<string>> CheckUploadAsync<T>(T folderId, IEnumerable<string> filesTitle)
     {
-        var folderDao = daoFactory.GetFolderDao<T>();
-        var fileDao = daoFactory.GetFileDao<T>();
+        var folderDao = _daoFactory.GetFolderDao<T>();
+        var fileDao = _daoFactory.GetFileDao<T>();
         var toFolder = await folderDao.GetFolderAsync(folderId);
         if (toFolder == null)
         {
@@ -109,7 +115,7 @@ public class UploadControllerHelper(
             };
         }
 
-        var createSessionUrl = await filesLinkUtility.GetInitiateUploadSessionUrlAsync(tenantManager.GetCurrentTenantId(), file.ParentId, file.Id, file.Title, file.ContentLength, encrypted, securityContext);
+        var createSessionUrl = await filesLinkUtility.GetInitiateUploadSessionUrlAsync(_tenantManager.GetCurrentTenantId(), file.ParentId, file.Id, file.Title, file.ContentLength, encrypted, securityContext);
 
         var httpClient = httpClientFactory.CreateClient();
 
