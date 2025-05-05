@@ -236,7 +236,7 @@ public class TimeZoneConverter
         }
         catch (Exception error)
         {
-            _mapZones = Array.Empty<MapZone>();
+            _mapZones = [];
             _logger.ErrorInitMapZones(error);
         }
     }

@@ -69,7 +69,7 @@ public class GoogleCloudStorage(TempStream tempStream,
             DomainsExpires.Add(string.Empty, moduleConfig.Expires);
 
             DomainsContentAsAttachment = moduleConfig.Domain.Where(x => x.ContentAsAttachment.HasValue).ToDictionary(x => x.Name, y => y.ContentAsAttachment.Value);
-            DomainsContentAsAttachment.Add(string.Empty, moduleConfig.ContentAsAttachment.HasValue ? moduleConfig.ContentAsAttachment.Value : false);
+            DomainsContentAsAttachment.Add(string.Empty, moduleConfig.ContentAsAttachment ?? false);
 
             _domainsAcl = moduleConfig.Domain.ToDictionary(x => x.Name, y => GetGoogleCloudAcl(y.Acl));
             _moduleAcl = GetGoogleCloudAcl(moduleConfig.Acl);

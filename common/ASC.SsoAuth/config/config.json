@@ -46,13 +46,6 @@
       "zippedArchive": true,
       "maxSize": "50m",
       "maxFiles": "30d"
-    },
-    "console": {
-      "level": "debug",
-      "handleExceptions": true,
-      "humanReadableUnhandledException": true,
-      "json": false,
-      "colorize": true
     }
   },
   "web": {

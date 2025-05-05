@@ -68,6 +68,8 @@ public interface IFolderDao<T>
     IAsyncEnumerable<Folder<T>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<T> roomsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags,
         Guid subjectId, string searchText, bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds);
 
+    Task<int> GetProviderBasedRoomsCountAsync(SearchArea searchArea);
+
     /// <summary>
     ///     Get a list of folders in current folder.
     /// </summary>
@@ -413,7 +415,7 @@ public interface IFolderDao<T>
     Task<(T RoomId, string RoomTitle)> GetParentRoomInfoFromFileEntryAsync(FileEntry<T> entry);
     Task<Folder<T>> GetFirstParentTypeFromFileEntryAsync(FileEntry<T> entry);
     Task<int> GetFoldersCountAsync(T parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool withSubfolders = false, bool excludeSubject = false,
-        T roomId = default);
+        T roomId = default, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All);
     Task<FilesStatisticsResultDto> GetFilesUsedSpace();
     Task<bool> ContainsFormsInFolder (Folder<T> folder);
     Task<int> SetCustomOrder(T folderId, T parentFolderId, int order);

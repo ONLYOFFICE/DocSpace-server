@@ -124,7 +124,7 @@ public class VirtualRoomsInternalController(
         WatermarkRequest watermark = null;
         if (dto.Watermark != null)
         {
-            watermark = new WatermarkRequest()
+            watermark = new WatermarkRequest
             {
                 Additions = dto.Watermark.Additions,
                 Enabled = dto.Watermark.Enabled,
@@ -492,7 +492,7 @@ public abstract class VirtualRoomsController<T>(
 
         var aceCollection = new AceCollection<T>
         {
-            Files = Array.Empty<T>(),
+            Files = [],
             Folders = [inDto.Id],
             Aces = wrappers,
             Message = inDto.RoomInvitation.Message

@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Common.Security.Authorizing;
 using ASC.Core.Users;
 using ASC.Web.Files.Services.WCFService;
 
@@ -99,7 +100,6 @@ public class AutoDeletePersonalFolderService(
 
             await securityContext.AuthenticateMeWithoutCookieAsync(userAccount);
 
-            var fileDao = daoFactory.GetFileDao<int>();
             var folderDao = daoFactory.GetFolderDao<int>();
             var now = DateTime.UtcNow;
 
@@ -143,7 +143,9 @@ static file class Queries
             (UserDbContext ctx) =>
                 ctx.Users
                    .Join(ctx.Tenants, x => x.TenantId, y => y.Id, (users, tenants) => new { users, tenants })
+                   .Join(ctx.UserGroups, x => x.users.Id, y => y.Userid, (x, y) => new { users = x.users, tenants = x.tenants, userGroups = y})
                    .Where(x => x.tenants.Status == TenantStatus.Active)
+                   .Where(x => x.userGroups.UserGroupId == AuthConstants.Guest.ID && !x.userGroups.Removed)
                    .Select(r => new TenantUserSettings
                    {
                        TenantId = r.tenants.Id,

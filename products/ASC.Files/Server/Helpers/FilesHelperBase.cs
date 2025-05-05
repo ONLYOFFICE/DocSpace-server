@@ -34,12 +34,18 @@ public abstract class FilesHelperBase(
     FileStorageService fileStorageService,
     FileChecker fileChecker,
     IHttpContextAccessor httpContextAccessor,
-    WebhookManager webhookManager)
+    WebhookManager webhookManager,
+    IDaoFactory daoFactory,
+    IEventBus eventBus,
+    TenantManager tenantManager,
+    AuthContext authContext)
     {
     protected readonly FilesSettingsHelper _filesSettingsHelper = filesSettingsHelper;
     protected readonly FileUploader _fileUploader = fileUploader;
     protected readonly FileDtoHelper _fileDtoHelper = fileDtoHelper;
     protected readonly FileStorageService _fileStorageService = fileStorageService;
+    protected readonly IDaoFactory _daoFactory = daoFactory;
+    protected readonly TenantManager _tenantManager = tenantManager;
 
     protected readonly FileChecker _fileChecker = fileChecker;
     protected readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
@@ -53,6 +59,27 @@ public abstract class FilesHelperBase(
             await socketManager.CreateFileAsync(resultFile);
 
             await webhookManager.PublishAsync(WebhookTrigger.FileUploaded, resultFile);
+
+            var folderDao = _daoFactory.GetFolderDao<T>();
+            var room = await folderDao.GetParentFoldersAsync(folderId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+            if (room != null)
+            {
+                var data = room.Id is int rId && resultFile.Id is int fId
+                    ? new RoomNotifyIntegrationData<int> { RoomId = rId, FileId = fId }
+                : null;
+
+                var thirdPartyData = room.Id is string srId && resultFile.Id is string sfId
+                    ? new RoomNotifyIntegrationData<string> { RoomId = srId, FileId = sfId }
+                : null;
+
+                var evt = new RoomNotifyIntegrationEvent(authContext.CurrentAccount.ID, _tenantManager.GetCurrentTenant().Id)
+                {
+                    Data = data,
+                    ThirdPartyData = thirdPartyData
+                };
+
+                await eventBus.PublishAsync(evt);
+            }
 
             return await _fileDtoHelper.GetAsync(resultFile);
         }
