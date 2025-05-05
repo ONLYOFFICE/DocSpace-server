@@ -76,7 +76,7 @@ public class ApiKeyManager(
             HashedKey = hashedKey,
             CreateBy = currentUserId,
             CreateOn = DateTime.UtcNow,
-            Permissions = permissions ?? new List<string>(),
+            Permissions = permissions ?? [],
             ExpiresAt = expiresIn.HasValue ? DateTime.UtcNow.Add(expiresIn.Value) : null,
             TenantId = tenantManager.GetCurrentTenantId(),
             IsActive = true

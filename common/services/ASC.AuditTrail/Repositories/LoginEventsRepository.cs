@@ -105,7 +105,7 @@ public class LoginEventsRepository(TenantManager tenantManager,
     {
         await using var auditTrailContext = await dbContextFactory.CreateDbContextAsync();
 
-        var successLoginEvents = new List<int>() {
+        var successLoginEvents = new List<int> {
             (int)MessageAction.LoginSuccess,
             (int)MessageAction.LoginSuccessViaSocialAccount,
             (int)MessageAction.LoginSuccessViaSms,

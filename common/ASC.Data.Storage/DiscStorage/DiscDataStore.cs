@@ -73,7 +73,7 @@ public class DiscDataStore(
         DomainsExpires.Add(string.Empty, moduleConfig.Expires);
 
         DomainsContentAsAttachment = moduleConfig.Domain.Where(x => x.ContentAsAttachment.HasValue).ToDictionary(x => x.Name, y => y.ContentAsAttachment.Value);
-        DomainsContentAsAttachment.Add(string.Empty, moduleConfig.ContentAsAttachment.HasValue ? moduleConfig.ContentAsAttachment.Value : false);
+        DomainsContentAsAttachment.Add(string.Empty, moduleConfig.ContentAsAttachment ?? false);
 
         var settings = moduleConfig.DisabledEncryption ? new EncryptionSettings() : await encryptionSettingsHelper.LoadAsync();
         _crypt = encryptionFactory.GetCrypt(moduleConfig.Name, settings);

@@ -634,16 +634,16 @@ public class FileStorageService //: IFileStorageService
             };
         }
 
-        var settingIndex = indexing.HasValue ? indexing : template.SettingsIndexing;
-        var SettingDenyDownload = denyDownload.HasValue ? denyDownload : template.SettingsDenyDownload;
-        var settingPrivate = @private.HasValue ? @private.Value : template.SettingsPrivate;
+        var settingIndex = indexing ?? template.SettingsIndexing;
+        var settingDenyDownload = denyDownload ?? template.SettingsDenyDownload;
+        var settingPrivate = @private ?? template.SettingsPrivate;
 
         return await CreateRoomAsync(async () =>
         {
             await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetRoomsCountCheckKey(tenantId)))
             {
                 await countRoomChecker.CheckAppend();
-                return await InternalCreateFolderAsync(parentId, title, template.FolderType, settingPrivate, settingIndex, template.SettingsQuota, lifeTimeSetting, SettingDenyDownload, watermarkDto, color, cover, tags, logo);
+                return await InternalCreateFolderAsync(parentId, title, template.FolderType, settingPrivate, settingIndex, template.SettingsQuota, lifeTimeSetting, settingDenyDownload, watermarkDto, color, cover, tags, logo);
             }
         }, template.SettingsPrivate, []);
     }
@@ -3076,30 +3076,24 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<bool> AnyRoomsAsync(Guid user)
     {
-        var tenant = tenantManager.GetCurrentTenant();
-        var initiator = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
-
         var any = (await GetFolderItemsAsync(
                     await globalFolderHelper.GetFolderVirtualRooms(),
                     0,
                     -1,
-                    new List<FilterType>() { FilterType.FoldersOnly },
+                    new List<FilterType> { FilterType.FoldersOnly },
                     false,
                     user.ToString(),
                     "",
                     [],
                     false,
                     false,
-                    null,
-                    SearchArea.Active)).Entries.Any();
+                    null)).Entries.Count != 0;
 
         return any;
     }
 
     public async Task ReassignRoomsAsync(Guid user, Guid? reassign)
     {
-        var initiator = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
-
         var rooms = (await GetFolderItemsAsync(
                     await globalFolderHelper.GetFolderVirtualRooms(),
                     0,
@@ -3111,20 +3105,17 @@ public class FileStorageService //: IFileStorageService
                     [],
                     false,
                     false,
-                    null,
-                    SearchArea.Active)).Entries;
+                    null)).Entries;
 
         var ids = rooms.Where(r => r is Folder<int>).Select(e => ((Folder<int>)e).Id);
         var thirdIds = rooms.Where(r => r is Folder<string>).Select(e => ((Folder<string>)e).Id);
 
-        await ChangeOwnerAsync(ids, [], reassign.HasValue ? reassign.Value : securityContext.CurrentAccount.ID, FileShare.ContentCreator).ToListAsync();
-        await ChangeOwnerAsync(thirdIds, [], reassign.HasValue ? reassign.Value : securityContext.CurrentAccount.ID, FileShare.ContentCreator).ToListAsync();
+        await ChangeOwnerAsync(ids, [], reassign ?? securityContext.CurrentAccount.ID, FileShare.ContentCreator).ToListAsync();
+        await ChangeOwnerAsync(thirdIds, [], reassign ?? securityContext.CurrentAccount.ID, FileShare.ContentCreator).ToListAsync();
     }
 
     public async Task<IEnumerable<FileEntry>> GetSharedFilesAsync(Guid user)
     {
-        var initUser = securityContext.CurrentAccount.ID;
-
         var fileDao = daoFactory.GetFileDao<int>();
         var folderDao = daoFactory.GetFolderDao<int>();
 
@@ -3133,7 +3124,7 @@ public class FileStorageService //: IFileStorageService
         {
             return [];
         }
-         var shared = await fileDao.GetFilesAsync(my, null, default, false, Guid.Empty, string.Empty, null, false, true, withShared: true).Where(q => q.Shared).ToListAsync();
+        var shared = await fileDao.GetFilesAsync(my, null, default, false, Guid.Empty, string.Empty, null, false, true, withShared: true).Where(q => q.Shared).ToListAsync();
 
         return shared;
     }
@@ -3680,7 +3671,7 @@ public class FileStorageService //: IFileStorageService
         var link = await fileSharing.GetPureSharesAsync(entry, ShareFilterType.PrimaryExternalLink, null, null, 0, 1).FirstOrDefaultAsync();
         if (link == null)
         {
-            if (entry is File<T> file && file.IsForm && share == FileShare.Read)
+            if (entry is File<T> { IsForm: true } && share == FileShare.Read)
             {
                 share = FileShare.Editing;
             }
@@ -5128,7 +5119,7 @@ public class FileStorageService //: IFileStorageService
     {
         var advancedSettings = new AceAdvancedSettingsWrapper { AllowSharingPrivateRoom = true };
 
-        var aceCollection = new AceCollection<T> { Folders = [room.Id], Files = Array.Empty<T>(), Aces = aces, AdvancedSettings = advancedSettings };
+        var aceCollection = new AceCollection<T> { Folders = [room.Id], Files = [], Aces = aces, AdvancedSettings = advancedSettings };
 
         await SetAceObjectAsync(aceCollection, false);
     }

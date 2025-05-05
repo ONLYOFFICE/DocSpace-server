@@ -200,7 +200,6 @@ public class NotifyTransferRequest(TenantManager tenantManager,
     {
         var aid = Guid.Empty;
         var aname = string.Empty;
-        var tenant = tenantManager.GetCurrentTenant();
 
         if (authContext.IsAuthenticated)
         {

@@ -521,7 +521,7 @@ public abstract class Migrator(
 
                             var collection = new AceCollection<int>
                             {
-                                Files = Array.Empty<int>(),
+                                Files = [],
                                 Folders = new List<int> { matchingRoomIds[security.EntryId].Id },
                                 Aces = aceList,
                                 Message = null
@@ -588,7 +588,7 @@ public abstract class Migrator(
 
                     var aceCollection = new AceCollection<int>
                     {
-                        Files = Array.Empty<int>(),
+                        Files = [],
                         Folders = new List<int> { matchingRoomIds[security.EntryId].Id },
                         Aces = list,
                         Message = null

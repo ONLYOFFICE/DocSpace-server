@@ -595,9 +595,6 @@ public class UserPhotoManager
                         height = maxHeight;
                     }
 
-                    var tmpW = width;
-                    var tmpH = height;
-
                     #endregion
 
                     var g = new MagickGeometry(width, height) { FillArea = true };

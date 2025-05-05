@@ -464,7 +464,7 @@ public class SecurityController(PermissionContext permissionContext,
         var token = new JwtSecurityToken(
             issuer: serverRootPath,
             audience: serverRootPath,
-            claims: new List<Claim>() {
+            claims: new List<Claim> {
                 new("sub", securityContext.CurrentAccount.ID.ToString()), 
                 new("user_id", securityContext.CurrentAccount.ID.ToString()), 
                 new("user_name", userFormatter.GetUserName(userInfo)),
