@@ -656,7 +656,9 @@ public class PortalController(
         // characters
         tenantDomainValidator.ValidateDomainCharacters(alias);
 
-        var sameAliasTenants = await apiSystemHelper.FindTenantsInCacheAsync(alias);
+        var forbidden = await hostedSolution.IsForbiddenDomainAsync(alias);
+
+        var sameAliasTenants = forbidden ? [alias] : await apiSystemHelper.FindTenantsInCacheAsync(alias);
 
         if (sameAliasTenants != null)
         {
