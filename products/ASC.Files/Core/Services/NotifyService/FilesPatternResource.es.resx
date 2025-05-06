@@ -204,7 +204,7 @@ $OrangeButton</value>
     <value>Se ha cargado un nuevo archivo "$DocumentTitle" en la sala "$RoomTitle"</value>
   </data>
   <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
-    <value>Se han cargado nuevos archivos en la sala "$RoomTitle" ($Count)</value>
+    <value>Se han cargado nuevos archivos en la sala "$RoomTitle": ($Count)</value>
   </data>
   <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
     <value>Se ha creado una nueva carpeta "$FolderTitle" en la sala "$RoomTitle"</value>

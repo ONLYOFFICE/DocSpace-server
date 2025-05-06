@@ -180,7 +180,7 @@ $OrangeButton</value>
     <value>Un document nou "$DocumentTitle" a fost creat în sala "$RoomTitle"</value>
   </data>
   <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
-    <value>Fișiere noi au fost încărcate în sala "$RoomTitle" ($Count)</value>
+    <value>Fișiere noi au fost încărcate în sala "$RoomTitle": ($Count)</value>
   </data>
   <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
     <value>Un fișier nou "$DocumentTitle" a fost încărcat în sala "$RoomTitle"</value>

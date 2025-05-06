@@ -215,7 +215,7 @@ $OrangeButton</value>
     <value>V místnosti "$RoomTitle" byl vytvořen nový dokument "$DocumentTitle"</value>
   </data>
   <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
-    <value>Do místnosti "$RoomTitle" byly nahrány nové soubory ($Count)</value>
+    <value>Do místnosti "$RoomTitle" byly nahrány nové soubory: ($Count)</value>
   </data>
   <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
     <value>Do místnosti "$RoomTitle" byl nahrán nový soubor "$DocumentTitle"</value>

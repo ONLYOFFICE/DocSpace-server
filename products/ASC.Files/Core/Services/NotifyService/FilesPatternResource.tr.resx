@@ -201,7 +201,7 @@ $OrangeButton</value>
     <value>"$RoomTitle" odasında "$FolderTitle" adlı yeni bir klasör oluşturuldu</value>
   </data>
   <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
-    <value>"$RoomTitle" odasına yeni dosyalar yüklendi ($Count)</value>
+    <value>"$RoomTitle" odasına yeni dosyalar yüklendi: ($Count)</value>
   </data>
   <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
     <value>"$RoomTitle" odasına "$DocumentTitle" adlı yeni bir dosya yüklendi</value>

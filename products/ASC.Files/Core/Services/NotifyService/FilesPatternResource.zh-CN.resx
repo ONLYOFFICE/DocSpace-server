@@ -180,7 +180,7 @@ $OrangeButton</value>
     <value>已在房间"$RoomTitle"中创建了新文档"$DocumentTitle"</value>
   </data>
   <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
-    <value>新文件已上传至房间"$RoomTitle" ($Count)</value>
+    <value>新文件已上传至房间"$RoomTitle"：($Count)</value>
   </data>
   <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
     <value>新文件"$DocumentTitle"已上传至房间"$RoomTitle"</value>

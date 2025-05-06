@@ -180,7 +180,7 @@ $OrangeButton</value>
     <value>Nov dokument "$DocumentTitle" je bil ustvarjen v sobi "$RoomTitle"</value>
   </data>
   <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
-    <value>Nove datoteke so bile naložene v sobo "$RoomTitle" ($Count)</value>
+    <value>Nove datoteke so bile naložene v sobo "$RoomTitle": ($Count)</value>
   </data>
   <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
     <value>Nova datoteka "$DocumentTitle" je bila naložena v sobo "$RoomTitle"</value>

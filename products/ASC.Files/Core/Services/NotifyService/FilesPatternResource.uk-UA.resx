@@ -212,7 +212,7 @@ $OrangeButton</value>
     <value>Новий документ "$DocumentTitle" створено в кімнаті "$RoomTitle"</value>
   </data>
   <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
-    <value>До кімнати "$RoomTitle" передано новий файл "$DocumentTitle"</value>
+    <value>До кімнати "$RoomTitle" завантажено нові файли: ($Count)</value>
   </data>
   <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
     <value>Новий файл "$DocumentTitle" було завантажено в кімнату "$RoomTitle"</value>

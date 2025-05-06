@@ -195,7 +195,7 @@ $OrangeButton</value>
     <value>Нов файл "$DocumentTitle" беше качен в стая "$RoomTitle"</value>
   </data>
   <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
-    <value>Нови файлове бяха качени в стая "$RoomTitle" ($Count)</value>
+    <value>Нови файлове бяха качени в стая "$RoomTitle": ($Count)</value>
   </data>
   <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
     <value>Нова папка "$FolderTitle" беше създадена в стая "$RoomTitle"</value>

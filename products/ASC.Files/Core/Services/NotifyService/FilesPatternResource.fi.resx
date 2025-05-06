@@ -204,7 +204,7 @@ $OrangeButton</value>
     <value>Uusi tiedosto "$DocumentTitle" on ladattu huoneeseen "$RoomTitle"</value>
   </data>
   <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
-    <value>Uusia tiedostoja on ladattu huoneeseen "$RoomTitle" ($Count)</value>
+    <value>Uusia tiedostoja on ladattu huoneeseen "$RoomTitle": ($Count)</value>
   </data>
   <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
     <value>Uusi asiakirja "$DocumentTitle" on luotu huoneessa "$RoomTitle"</value>

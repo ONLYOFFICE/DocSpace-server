@@ -183,7 +183,7 @@ $OrangeButton</value>
     <value>Un nuovo documento "$DocumentTitle" è stato creato nella stanza "$RoomTitle"</value>
   </data>
   <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
-    <value>Nuovi file sono stati caricati nella stanza "$RoomTitle" ($Count)</value>
+    <value>Nuovi file sono stati caricati nella stanza "$RoomTitle": ($Count)</value>
   </data>
   <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
     <value>Un nuovo file "$DocumentTitle" è stato caricato nella stanza "$RoomTitle"</value>

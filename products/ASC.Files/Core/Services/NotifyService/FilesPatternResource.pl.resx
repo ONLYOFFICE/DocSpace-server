@@ -201,7 +201,7 @@ $OrangeButton</value>
     <value>W pokoju "$RoomTitle" został utworzony nowy katalog "$FolderTitle"</value>
   </data>
   <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
-    <value>Do pokoju "$RoomTitle" zostały przesłane nowe pliki ($Count)</value>
+    <value>Do pokoju "$RoomTitle" zostały przesłane nowe pliki: ($Count)</value>
   </data>
   <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
     <value>Do pokoju "$RoomTitle" został przesłany nowy plik "$DocumentTitle"</value>

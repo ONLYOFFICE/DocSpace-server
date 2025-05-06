@@ -210,7 +210,7 @@ $OrangeButton</value>
     <value>Một tập tin mới "$DocumentTitle" đã được tải lên phòng "$RoomTitle"</value>
   </data>
   <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
-    <value>Một tập tin mới đã được tải lên phòng "$RoomTitle" ($Count)</value>
+    <value>Một tập tin mới đã được tải lên phòng "$RoomTitle": ($Count)</value>
   </data>
   <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
     <value>Một thư mục mới "$FolderTitle" đã được tạo trong phòng "$RoomTitle"</value>
