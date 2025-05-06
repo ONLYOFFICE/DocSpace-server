@@ -59,7 +59,7 @@ public class RoomNotifyQueueManager<T> : INotifyQueueManager<T>
 
     public void RemoveRoomQueue(string roomId)
     {
-        _queues.TryRemove(roomId, out var roomNotifyQueue);
+        _queues.TryRemove(roomId, out _);
     }
 
     public ConcurrentDictionary<string, IRoomNotifyQueue<T>> GetQueues()

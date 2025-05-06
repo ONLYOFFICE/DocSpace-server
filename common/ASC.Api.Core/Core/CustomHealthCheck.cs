@@ -103,7 +103,7 @@ public static class CustomHealthCheck
                                         return await rabbitMqPersistentConnection.GetConnection();
                                 },
                                 name: "rabbitMQ",
-                                tags: new[] { "rabbitMQ", "services" },
+                                tags: ["rabbitMQ", "services"],
                                 timeout: new TimeSpan(0, 0, 30));
         }
         else

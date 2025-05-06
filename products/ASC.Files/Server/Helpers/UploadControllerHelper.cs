@@ -44,7 +44,8 @@ public class UploadControllerHelper(
     FileChecker fileChecker,
     WebhookManager webhookManager,
     IEventBus eventBus,
-    AuthContext authContext)
+    AuthContext authContext,
+    Global global)
     : FilesHelperBase(
         filesSettingsHelper,
         fileUploader,
@@ -96,6 +97,7 @@ public class UploadControllerHelper(
 
     public async Task<object> CreateUploadSessionAsync<T>(T folderId, string fileName, long fileSize, string relativePath, bool encrypted, ApiDateTime createOn, bool createNewIfExist, bool keepVersion = false)
     {
+        fileName = await global.GetAvailableTitleAsync(fileName, folderId, _daoFactory.GetFileDao<T>().IsExistAsync, FileEntryType.File);
         var file = await _fileUploader.VerifyChunkedUploadAsync(folderId, fileName, fileSize, !createNewIfExist, relativePath);
         return await CreateUploadSessionAsync(file, encrypted, createOn, keepVersion);
     }

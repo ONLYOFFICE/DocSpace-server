@@ -88,7 +88,7 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
                     Items = new OpenApiSchema { Type = "object" }
                 };
             }
-            else if (schemaArray != null && schemaArray.Type == "array")
+            else if (schemaArray is { Type: "array" })
             {
                 responseSchemaKey = "ArrayArrayWrapper";
                 arrayResponseProperty = new OpenApiSchema

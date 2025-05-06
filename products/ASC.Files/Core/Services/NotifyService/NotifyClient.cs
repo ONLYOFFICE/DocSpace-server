@@ -592,7 +592,7 @@ public class NotifyClient(WorkContext notifyContext,
 
         foreach (var ace in aces)
         {
-            var recipient = await notifySource.GetRecipientsProvider().GetRecipientAsync(ace.ToString());
+            var recipient = await recipientsProvider.GetRecipientAsync(ace.ToString());
 
             await client.SendNoticeAsync(
                 action,
