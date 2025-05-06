@@ -54,8 +54,8 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 @Repository
 @Profile(value = "saas")
 public class CoreDynamoClientRepository implements DynamoClientRepository {
-  private final int CLIENTS_PER_TENANT_LIMIT = 150;
-  private final int CLIENTS_PER_USER_LIMIT = 15;
+  private final int CLIENTS_PER_TENANT_LIMIT = 100;
+  private final int CLIENTS_PER_USER_LIMIT = 10;
 
   private static final TableSchema<ClientDynamoEntity> CLIENT_SCHEMA =
       TableSchema.fromBean(ClientDynamoEntity.class);
