@@ -158,6 +158,9 @@ public class TariffService(
                             email = currentPayment.PaymentEmail;
                         }
 
+                        // need sort by wallet
+                        asynctariff.Quotas = asynctariff.Quotas.OrderBy(q => q.Wallet).ToList();
+
                         if (asynctariff.Quotas.All(q => q.Wallet))
                         {
                             await AddInitialQuotaAsync(asynctariff, tenantId);
