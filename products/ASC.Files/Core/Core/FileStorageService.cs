@@ -459,7 +459,8 @@ public class FileStorageService //: IFileStorageService
         var room = await folderDao.GetParentFoldersAsync(folder.Id).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
         if (room != null && !DocSpaceHelper.FormsFillingSystemFolders.Contains(folder.FolderType))
         {
-            var whoCanRead = await fileSecurity.WhoCanReadAsync(room, true);
+            var aces = await fileSharing.GetSharedInfoAsync(room);
+            var whoCanRead = aces.Where(a => a.Id != authContext.CurrentAccount.ID).Select(ace => ace.Id).ToList();
             await notifyClient.SendFolderCreatedInRoom(room, whoCanRead, folder, authContext.CurrentAccount.ID);
         }
 
@@ -1592,7 +1593,8 @@ public class FileStorageService //: IFileStorageService
         await socketManager.CreateFileAsync(file);
         if (room != null && !DocSpaceHelper.FormsFillingSystemFolders.Contains(folder.FolderType))
         {
-            var whoCanRead = await fileSecurity.WhoCanReadAsync(room, true);
+            var aces = await fileSharing.GetSharedInfoAsync(room);
+            var whoCanRead = aces.Where(a => a.Id != authContext.CurrentAccount.ID).Select(ace => ace.Id).ToList();
             await notifyClient.SendDocumentCreatedInRoom(room, whoCanRead, file, authContext.CurrentAccount.ID);
         }
 
@@ -4814,7 +4816,8 @@ public class FileStorageService //: IFileStorageService
             var recipients = roles
                 .Where(role => role.UserId != currentUserId)
                 .Select(role => role.UserId)
-                .Distinct();
+                .Distinct()
+                .ToList();
 
             if (recipients.Any())
             {
