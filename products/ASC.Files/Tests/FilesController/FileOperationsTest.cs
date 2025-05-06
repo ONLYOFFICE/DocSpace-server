@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,44 +24,36 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Tests;
+namespace ASC.Files.Tests.FilesController;
 
-public class HttpClientHelper
+[Collection("Test Collection")]
+public class FileOperationsTest(
+    FilesApiFactory filesFactory, 
+    WebApplicationFactory<WebApiProgram> apiFactory, 
+    WebApplicationFactory<PeopleProgram> peopleFactory,
+    WebApplicationFactory<FilesServiceProgram> filesServiceProgram) 
+    : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
 {
-    private static JsonSerializerOptions JsonResponseSerializerOptions { get; } = new()
-    {
-        AllowTrailingCommas = true, 
-        PropertyNameCaseInsensitive = true,
-        Converters = { new ApiDateTimeConverter(), new FileShareConverter() }
-    };
+
     
-    public static async Task<T> ReadFromJson<T>(HttpResponseMessage? response)
+
+    
+    [Fact]
+    public async Task GetPresignedUri_ValidFile_ReturnsDownloadUrl()
     {
-        ArgumentNullException.ThrowIfNull(response);
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
         
-        var data = await response.Content.ReadAsStringAsync();
+        var file = await CreateFile("file_for_download.docx", FolderType.USER, Initializer.Owner);
         
-        try
-        {
-            var successApiResponse = JsonSerializer.Deserialize<SuccessApiResponse>(data, JsonSerializerOptions.Web);
+        // Act
+        var downloadUrl = (await _filesFilesApi.GetPresignedUriAsync(file.Id, TestContext.Current.CancellationToken)).Response;
         
-            if (successApiResponse is { Response: JsonElement jsonElement })
-            {
-                return jsonElement.Deserialize<T>(JsonResponseSerializerOptions) ?? throw new InvalidOperationException();
-            }
-
-            throw new InvalidOperationException();
-        }
-        catch (Exception e)
-        {
-            var errorApiResponse = JsonSerializer.Deserialize<ErrorApiResponse>(data, JsonSerializerOptions.Web);
-
-            if (errorApiResponse != null)
-            {
-                throw new Exception(errorApiResponse.Error.Message, e);
-            }
-
-            throw;
-        }
+        // Assert
+        downloadUrl.Should().NotBeNull();
+        downloadUrl.Should().StartWith("http");
+        downloadUrl.Should().Contain("file");
     }
+    
+
 }

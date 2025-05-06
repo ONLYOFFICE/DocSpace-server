@@ -27,6 +27,8 @@
 extern alias ASCFiles;
 using ASC.Core.Common.EF;
 
+using Docspace.Client;
+
 using DotNet.Testcontainers.Builders;
 
 using Npgsql;
@@ -54,14 +56,18 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
     
     private DbConnection _dbconnection = null!;
     private Respawner _respawner = null!;
-    readonly List<string> _tablesToBackup = ["files_folder", "core_user", "core_usersecurity", "files_bunch_objects" ];
+    readonly List<string> _tablesToBackup = ["files_folder", "files_folder_tree", "core_user", "core_usersecurity", "files_bunch_objects" ];
     readonly List<string> _tablesToIgnore = ["core_acl", "core_settings", "core_subscription", "core_subscriptionmethod", "core_usergroup", "login_events", "tenants_tenants", "tenants_quota", "webstudio_settings" ];
     
     public string RedisConnectionString => _redisContainer.GetConnectionString(); 
     public string RabbitMqConnectionString => _rabbitMqContainer.GetConnectionString(); 
     public string OpenSearchConnectionString => $"{_openSearchContainer.Hostname}:{_openSearchContainer.GetMappedPublicPort(9200)}"; 
     public HttpClient HttpClient { get; private set;} = null!;
-    public JsonSerializerOptions JsonRequestSerializerOptions { get; } = new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault };
+    public FilesFoldersApi FilesFoldersApi { get; private set;} = null!;
+    public FilesFilesApi FilesFilesApi { get; private set;} = null!;
+    public FilesOperationsApi FilesOperationsApi { get; private set;} = null!;
+    public FilesRoomsApi FilesRoomsApi { get; private set;} = null!;
+    public FilesSettingsApi FilesSettingsApi { get; private set;} = null!;
 
     public readonly CustomProviderInfo ProviderInfo;
     
@@ -180,7 +186,11 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
         _dbconnection =  ProviderInfo.Provider == Provider.MySql ?  new MySqlConnection(_mySqlContainer.GetConnectionString()) : new NpgsqlConnection(_postgresSqlContainer.GetConnectionString());
 
         HttpClient = CreateClient();
-        HttpClient.BaseAddress = new Uri(HttpClient.BaseAddress, "api/2.0/files/");
+        FilesFoldersApi = new FilesFoldersApi(HttpClient, new Configuration { BasePath = HttpClient.BaseAddress!.ToString().TrimEnd('/') });
+        FilesFilesApi = new FilesFilesApi(HttpClient, new Configuration { BasePath = HttpClient.BaseAddress!.ToString().TrimEnd('/') });
+        FilesOperationsApi = new FilesOperationsApi(HttpClient, new Configuration { BasePath = HttpClient.BaseAddress!.ToString().TrimEnd('/') });
+        FilesRoomsApi = new FilesRoomsApi(HttpClient, new Configuration { BasePath = HttpClient.BaseAddress!.ToString().TrimEnd('/') });
+        FilesSettingsApi = new FilesSettingsApi(HttpClient, new Configuration { BasePath = HttpClient.BaseAddress!.ToString().TrimEnd('/') });
         
         var tablesToIgnore = _tablesToIgnore.Select(t => new Table(t)).ToList();
         tablesToIgnore.AddRange(_tablesToBackup.Select(r=> new Table(MakeCopyTableName(r))));
