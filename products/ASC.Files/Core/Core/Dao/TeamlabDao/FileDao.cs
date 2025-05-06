@@ -2694,7 +2694,8 @@ internal class CacheFileDao(ILogger<FileDao> logger,
     FileSharing fileSharing,
     FilesMessageService filesMessageService,
     QuotaSocketManager quotaSocketManager,
-    CustomQuota customQuota)
+    CustomQuota customQuota,
+    IFusionCacheProvider cacheProvider)
     : FileDao(
         logger,
     factoryIndexer,
@@ -2734,7 +2735,8 @@ internal class CacheFileDao(ILogger<FileDao> logger,
     fileSharing,
     filesMessageService,
     quotaSocketManager,
-    customQuota), ICacheFileDao<int>
+    customQuota,
+    cacheProvider), ICacheFileDao<int>
 {
 
     private readonly ConcurrentDictionary<int, IEnumerable<FormRole>> _cache = new();

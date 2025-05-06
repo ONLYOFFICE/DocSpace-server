@@ -69,13 +69,14 @@ public class CountRoomCheckerStatistic(IServiceProvider serviceProvider) : ITena
         
         var roomsCount = await folderDao.GetFoldersCountAsync(parentId, FilterType.None, false, Guid.Empty, string.Empty);
 
-        var tenant = tenantManager.GetCurrentTenantId();
-        if (tags != null) 
-        {
-            tags.Add(CacheExtention.GetFoldersTag(tenant, parentId));
-        }
-
         var thirdPartyRoomsCount = await folderThirdPartyDao.GetProviderBasedRoomsCountAsync(SearchArea.Active);
+
+        if (tags != null)
+        {
+            var tenant = tenantManager.GetCurrentTenantId();
+            tags.Add(CacheExtention.GetFoldersTag(tenant, parentId));
+            tags.Add(CacheExtention.GetThirdpartiesTag(tenant));
+        }
 
         return roomsCount + thirdPartyRoomsCount;
     }
