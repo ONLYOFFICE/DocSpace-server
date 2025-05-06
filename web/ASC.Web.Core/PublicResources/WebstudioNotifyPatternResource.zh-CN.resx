@@ -1918,4 +1918,44 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
+  <data name="subject_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>您的 ${LetterLogoText} 协作空间将被删除</value>
+  </data>
+  <data name="subject_user_role_changed" xml:space="preserve">
+    <value>您在协作空间房间中的权限已更改</value>
+  </data>
+  <data name="subject_user_type_changed" xml:space="preserve">
+    <value>您的协作空间用户类型已更改</value>
+  </data>
+  <data name="pattern_user_role_changed" xml:space="preserve">
+    <value>您好！
+
+您在协作空间房间 "${RoomTitle}":"${RoomUrl}" 中被分配了一个新权限：${UserRole}。
+
+了解更多关于房间中角色和权限的信息，请访问 "帮助中心":"${HelpCenterUrl}"。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_type_changed" xml:space="preserve">
+    <value>您好！
+
+您在协作空间中被分配了一个新的用户类型："${__VirtualRootPath}":"${__VirtualRootPath}"：${UserType}。
+
+在 "帮助中心":"${HelpCenterUrl}" 中了解更多关于用户类型和权限的信息。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;您的${LetterLogoText}协作空间将&lt;span style="color: #FF6F3D;"&gt;被删除&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;您的${LetterLogoText}协作空间&lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; 已超过一年未活跃使用。&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;由于您决定不再使用，依据&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;隐私政策&lt;/a&gt;，您的${LetterLogoText}协作空间及其所有数据将被删除。&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;我们非常希望您能提供反馈：请问出于哪些原因决定停用${LetterLogoText}协作空间？&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;如需继续使用您的${LetterLogoText}协作空间，请输入您的信息并进行任意操作即可保留。&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
 </root>

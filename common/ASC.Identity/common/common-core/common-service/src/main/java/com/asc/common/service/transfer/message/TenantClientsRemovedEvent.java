@@ -25,32 +25,27 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-package com.asc.authorization.application.controller.exception.handler;
+package com.asc.common.service.transfer.message;
 
-import io.github.resilience4j.ratelimiter.RequestNotPermitted;
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.*;
 
-/** Global exception handler for handling rate limiter exceptions. */
-@Slf4j
-@ControllerAdvice
-public class RateLimiterExceptionHandler {
+/**
+ * Event message class representing notification about tenant clients removal. This class is used
+ * for communication between services when clients associated with a specific tenant are removed.
+ */
+@Builder
+@Getter
+@Setter
+@ToString
+@EqualsAndHashCode
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class TenantClientsRemovedEvent {
 
-  /**
-   * Handles {@link RequestNotPermitted} exceptions, which are thrown when a request is not
-   * permitted by the rate limiter.
-   *
-   * @param ex the exception that was thrown.
-   * @param request the {@link HttpServletRequest} that resulted in the exception.
-   * @return a {@link ResponseEntity} with status code 429 (Too Many Requests).
-   */
-  @ExceptionHandler(value = {RequestNotPermitted.class})
-  public ResponseEntity<?> handleRequestNotPermitted(Throwable ex, HttpServletRequest request) {
-    log.warn("Request not permitted by a rate-limiter", ex);
-    return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
-  }
+  /** The unique identifier of the tenant whose clients were removed. */
+  @JsonProperty(value = "tenant_id", required = true)
+  private long tenantId;
 }

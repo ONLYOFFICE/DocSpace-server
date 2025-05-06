@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Common.Identity;
+
 using Microsoft.AspNetCore.RateLimiting;
 
 using Constants = ASC.Core.Users.Constants;
@@ -72,7 +74,8 @@ public class PortalController(
     QuotaHelper quotaHelper,
     IEventBus eventBus,
     CspSettingsHelper cspSettingsHelper,
-    IFusionCacheProvider cacheProvider)
+    IFusionCacheProvider cacheProvider,
+    IdentityClient client)
     : ControllerBase
 {
     private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
@@ -133,6 +136,13 @@ public class PortalController(
     [HttpGet("users/invite/{employeeType}")]
     public async Task<string> GeInviteLinkAsync(InvitationLinkRequestDto inDto)
     {
+        var invitationSettings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
+
+        if (!invitationSettings.AllowInvitingMembers)
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
         var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
         if ((inDto.EmployeeType == EmployeeType.DocSpaceAdmin && !currentUser.IsOwner(tenantManager.GetCurrentTenant()))
@@ -429,22 +439,6 @@ public class PortalController(
     }
 
     /// <summary>
-    /// Registers the mobile application installation.
-    /// </summary>
-    /// <short>
-    /// Register the mobile app installation
-    /// </short>
-    /// <path>api/2.0/portal/mobile/registration</path>
-    [ApiExplorerSettings(IgnoreApi = true)]
-    [Tags("Portal / Settings")]
-    [HttpPost("mobile/registration")]
-    public async Task RegisterMobileAppInstallAsync(MobileAppRequestsDto inDto)
-    {
-        var currentUser = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
-        await mobileAppInstallRegistrator.RegisterInstallAsync(currentUser.Email, inDto.Type);
-    }
-
-    /// <summary>
     /// Registers the mobile application installation by its type.
     /// </summary>
     /// <short>
@@ -568,6 +562,7 @@ public class PortalController(
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
+        await client.DeleteTenantClientsAsync();
         await tenantManager.RemoveTenantAsync(tenant.Id);
 
         if (!coreBaseSettings.Standalone)
@@ -698,6 +693,7 @@ public class PortalController(
 
         await DemandPermissionToDeleteTenantAsync(tenant);
 
+        await client.DeleteTenantClientsAsync();
         await tenantManager.RemoveTenantAsync(tenant.Id);
 
         if (!coreBaseSettings.Standalone)

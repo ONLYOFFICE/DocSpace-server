@@ -42,7 +42,11 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         PathProvider pathProvider,
         FileChecker fileChecker,
         FillingFormResultDtoHelper fillingFormResultDtoHelper,
-        WebhookManager webhookManager)
+        WebhookManager webhookManager,
+        IDaoFactory daoFactory,
+        IEventBus eventBus,
+        TenantManager tenantManager,
+        AuthContext authContext)
     : FilesHelperBase(filesSettingsHelper,
             fileUploader,
             socketManager,
@@ -50,7 +54,11 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
             fileStorageService,
             fileChecker,
             httpContextAccessor,
-            webhookManager)
+            webhookManager,
+            daoFactory,
+            eventBus,
+            tenantManager,
+            authContext)
     {
     private readonly ILogger _logger = logger;
 
@@ -263,7 +271,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         }
         catch (FileNotFoundException e)
         {
-            throw new ItemNotFoundException("File not found", e);
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound, e);
         }
     }
 
@@ -277,7 +285,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         }
         catch (FileNotFoundException e)
         {
-            throw new ItemNotFoundException("File not found", e);
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound, e);
         }
     }
 

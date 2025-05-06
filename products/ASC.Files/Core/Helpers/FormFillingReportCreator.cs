@@ -32,10 +32,7 @@ public class FormFillingReportCreator(
     IDaoFactory daoFactory,
     IHttpClientFactory clientFactory,
     TenantManager tenantManager,
-    FactoryIndexerForm factoryIndexerForm,
-    CommonLinkUtility commonLinkUtility,
-    FilesLinkUtility filesLinkUtility,
-    FileUtility fileUtility)
+    FactoryIndexerForm factoryIndexerForm)
 {
 
     private static readonly JsonSerializerOptions _options = new() {
@@ -85,17 +82,16 @@ public class FormFillingReportCreator(
 
     private async Task GetSubmitFormsData<T>(File<T> formsDataFile, int originalFormId, int roomId, int resultFormNumber, string url)
     {
-        var resultUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, formsDataFile.Title, formsDataFile.Id, formsDataFile.Version));
         var request = new HttpRequestMessage
         {
             RequestUri = new Uri(url),
             Method = HttpMethod.Get
         };
+        
         var httpClient = clientFactory.CreateClient();
         using var response = await httpClient.SendAsync(request);
         var data = await response.Content.ReadAsStringAsync();
 
-        var tenantCulture = (tenantManager.GetCurrentTenant()).GetCulture();
         var formNumber = new List<FormsItemData>
         {
             new()

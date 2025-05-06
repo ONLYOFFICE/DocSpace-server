@@ -365,11 +365,6 @@ public class UserManager(
 
         await permissionContext.DemandPermissionsAsync(new UserSecurityProvider(u.Id, type), Constants.Action_AddRemoveUser);
 
-        if (constants.MaxEveryoneCount <= (await GetUsersByGroupAsync(Constants.GroupEveryone.ID)).Length)
-        {
-            throw new TenantQuotaException("Maximum number of users exceeded");
-        }
-
         var oldUserData = await userService.GetUserByUserName(tenantManager.GetCurrentTenantId(), u.UserName);
 
         if (oldUserData != null && !Equals(oldUserData, Constants.LostUser))

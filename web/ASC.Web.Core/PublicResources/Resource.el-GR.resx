@@ -1078,4 +1078,7 @@
   <data name="ErrorIpRestriction" xml:space="preserve">
     <value>Προσθέστε τουλάχιστον 1 επιτρεπόμενη διεύθυνση IP.</value>
   </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>Η διεύθυνση URL Webhook δεν είναι διαθέσιμη. Το αίτημα HEAD δεν απαντά σε κατάσταση 200 http.</value>
+  </data>
 </root>

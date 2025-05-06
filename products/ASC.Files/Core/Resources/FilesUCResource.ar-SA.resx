@@ -162,4 +162,7 @@
   <data name="ReadyFormFolder" xml:space="preserve">
     <value>أكمل</value>
   </data>
+  <data name="RoomTemplates" xml:space="preserve">
+    <value>قوالب</value>
+  </data>
 </root>

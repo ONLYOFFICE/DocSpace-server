@@ -32,7 +32,6 @@ public class RoomTemplatesWorker(
     IServiceProvider serviceProvider,
     IDistributedLockProvider distributedLockProvider)
 {
-    private static readonly SemaphoreSlim _semaphoreSlim = new(1);
     private readonly DistributedTaskQueue<CreateRoomTemplateOperation> _templateQueue = queueFactory.CreateQueue<CreateRoomTemplateOperation>();
     private readonly DistributedTaskQueue<CreateRoomFromTemplateOperation> _roomQueue = queueFactory.CreateQueue<CreateRoomFromTemplateOperation>();
     public const string LockKey = $"lock_room_templates";
@@ -97,6 +96,11 @@ public class RoomTemplatesWorker(
         string cover,
         string color,
         long? quota,
+        bool? indexing,
+        bool? denyDownload,
+        RoomLifetime lifetime,
+        WatermarkRequest watermark,
+        bool? @private,
         bool enqueueTask = true,
         string taskId = null)
     {
@@ -113,7 +117,7 @@ public class RoomTemplatesWorker(
             {
                 item = serviceProvider.GetService<CreateRoomFromTemplateOperation>();
 
-                item.Init(tenantId, userId, templateId, title, logo, copyLogo, tags, cover, color, quota);
+                item.Init(tenantId, userId, templateId, title, logo, copyLogo, tags, cover, color, quota, indexing, denyDownload, lifetime, watermark, @private);
 
                 if (!string.IsNullOrEmpty(taskId))
                 {

@@ -41,7 +41,6 @@ public static class OpenApiExtension
         return services.AddSwaggerGen(c =>
         {
             var assemblyName = Assembly.GetEntryAssembly().FullName.Split(',').First();
-            var docName = assemblyName.Split(".").Last();
             c.ResolveConflictingActions(a => a.First());
             c.CustomOperationIds(r =>
             {
@@ -52,7 +51,7 @@ public static class OpenApiExtension
 
             c.CustomSchemaIds(CustomSchemaId);
 
-            c.SwaggerDoc("common", new OpenApiInfo { Title = docName, Version = "v2" });
+            c.SwaggerDoc("common", new OpenApiInfo { Title = "Api", Version = "3.1.0" });
             c.SchemaFilter<SwaggerSchemaCustomFilter>();
             c.DocumentFilter<LowercaseDocumentFilter>();
             c.DocumentFilter<HideRouteDocumentFilter>("/api/2.0/capabilities.json");
@@ -114,11 +113,9 @@ public static class OpenApiExtension
             // API Key Authentication
             c.AddSecurityDefinition("ApiKeyBearer", new OpenApiSecurityScheme
             {
-                Name = "Authorization",
-                Type = SecuritySchemeType.Http,
+                Name = "ApiKeyBearer",
+                Type = SecuritySchemeType.ApiKey,
                 In = ParameterLocation.Header,
-                Scheme = "bearer",
-                BearerFormat = "API Key",
                 Description = "Authentication is determined by the 'Authorization' header"
             });
 
@@ -262,26 +259,38 @@ public static class OpenApiExtension
                             Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = CookiesManager.AuthCookiesName }
                         },
                         ["read", "write"]
-                    },
+                    }
+                });
+                operation.Security.Add(new OpenApiSecurityRequirement
+                {
                     {
                         new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" } },
                         new List<string>()
-                    },
+                    }
+                });
+                operation.Security.Add(new OpenApiSecurityRequirement
+                {
                     {
-                        new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "ApiKeyBearer" } },
-                        new List<string>()
-                    },
+                        new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "ApiKeyBearer" } }, ["read", "write"]
+                    }
+                });
+                operation.Security.Add(new OpenApiSecurityRequirement
+                {
                     {
                         new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Basic" } },
                         new List<string>()
-                    },
+                    }
+                });
+                operation.Security.Add(new OpenApiSecurityRequirement
+                {
                     {
-                        new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "OAuth2" } },
-                        new[] { "api.read", "api.write" }
-                    },
+                        new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "OAuth2" } }, ["read", "write"]
+                    }
+                });
+                operation.Security.Add(new OpenApiSecurityRequirement
+                {
                     {
-                        new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "OpenId" } },
-                        Array.Empty<string>()
+                        new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "OpenId" } }, []
                     }
                 });
 

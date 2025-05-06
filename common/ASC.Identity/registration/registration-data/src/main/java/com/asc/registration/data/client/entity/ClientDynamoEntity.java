@@ -27,6 +27,7 @@
 
 package com.asc.registration.data.client.entity;
 
+import com.asc.registration.data.client.converter.SetDynamoAttributeConverter;
 import java.time.ZonedDateTime;
 import java.util.Set;
 import lombok.Setter;
@@ -80,7 +81,7 @@ public class ClientDynamoEntity {
    * @return the tenant ID.
    */
   @DynamoDbAttribute("tenant_id")
-  @DynamoDbSecondaryPartitionKey(indexNames = "tenant-created-index")
+  @DynamoDbSecondaryPartitionKey(indexNames = {"tenant-created-index"})
   public long getTenantId() {
     return tenantId;
   }
@@ -131,6 +132,7 @@ public class ClientDynamoEntity {
    * @return a set of authentication methods.
    */
   @DynamoDbAttribute("authentication_methods")
+  @DynamoDbConvertedBy(SetDynamoAttributeConverter.class)
   public Set<String> getAuthenticationMethods() {
     return authenticationMethods;
   }
@@ -171,6 +173,7 @@ public class ClientDynamoEntity {
    * @return a set of redirect URIs.
    */
   @DynamoDbAttribute("redirect_uris")
+  @DynamoDbConvertedBy(SetDynamoAttributeConverter.class)
   public Set<String> getRedirectUris() {
     return redirectUris;
   }
@@ -181,6 +184,7 @@ public class ClientDynamoEntity {
    * @return a set of allowed origins.
    */
   @DynamoDbAttribute("allowed_origins")
+  @DynamoDbConvertedBy(SetDynamoAttributeConverter.class)
   public Set<String> getAllowedOrigins() {
     return allowedOrigins;
   }
@@ -221,6 +225,7 @@ public class ClientDynamoEntity {
    * @return a set of scopes.
    */
   @DynamoDbAttribute("scopes")
+  @DynamoDbConvertedBy(SetDynamoAttributeConverter.class)
   public Set<String> getScopes() {
     return scopes;
   }

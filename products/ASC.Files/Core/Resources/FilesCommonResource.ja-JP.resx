@@ -503,4 +503,13 @@ docx、xlsx、pptxとの100％の互換性が保証されています。</value>
   <data name="OpenForm" xml:space="preserve">
     <value>ファイルを開く</value>
   </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>現在のファイルのバージョンを削除できません</value>
+  </data>
+  <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
+    <value>共有して記入してください</value>
+  </data>
+  <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
+    <value>記入を始める</value>
+  </data>
 </root>

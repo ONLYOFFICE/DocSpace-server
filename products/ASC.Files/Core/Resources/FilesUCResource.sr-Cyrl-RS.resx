@@ -162,4 +162,7 @@
   <data name="ReadyFormFolder" xml:space="preserve">
     <value>Спремно</value>
   </data>
+  <data name="RoomTemplates" xml:space="preserve">
+    <value>Шаблони</value>
+  </data>
 </root>

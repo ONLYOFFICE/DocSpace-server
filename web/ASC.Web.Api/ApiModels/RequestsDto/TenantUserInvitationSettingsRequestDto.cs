@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,44 +24,20 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Tests;
+namespace ASC.Web.Api.ApiModels.RequestsDto;
 
-public class HttpClientHelper
+/// <summary>
+/// User invitation settings
+/// </summary>
+public class TenantUserInvitationSettingsRequestDto
 {
-    private static JsonSerializerOptions JsonResponseSerializerOptions { get; } = new()
-    {
-        AllowTrailingCommas = true, 
-        PropertyNameCaseInsensitive = true,
-        Converters = { new ApiDateTimeConverter(), new FileShareConverter() }
-    };
-    
-    public static async Task<T> ReadFromJson<T>(HttpResponseMessage? response)
-    {
-        ArgumentNullException.ThrowIfNull(response);
-        
-        var data = await response.Content.ReadAsStringAsync();
-        
-        try
-        {
-            var successApiResponse = JsonSerializer.Deserialize<SuccessApiResponse>(data, JsonSerializerOptions.Web);
-        
-            if (successApiResponse is { Response: JsonElement jsonElement })
-            {
-                return jsonElement.Deserialize<T>(JsonResponseSerializerOptions) ?? throw new InvalidOperationException();
-            }
+    /// <summary>
+    /// Allow invite new DocSpace members through the Contacts section.
+    /// </summary>
+    public bool AllowInvitingMembers { get; init; }
 
-            throw new InvalidOperationException();
-        }
-        catch (Exception e)
-        {
-            var errorApiResponse = JsonSerializer.Deserialize<ErrorApiResponse>(data, JsonSerializerOptions.Web);
-
-            if (errorApiResponse != null)
-            {
-                throw new Exception(errorApiResponse.Error.Message, e);
-            }
-
-            throw;
-        }
-    }
+    /// <summary>
+    /// Allow all DocSpace members to invite external guests to rooms.
+    /// </summary>
+    public bool AllowInvitingGuests { get; init; }
 }

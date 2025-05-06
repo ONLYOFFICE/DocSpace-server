@@ -1137,4 +1137,7 @@
   <data name="Tariffs_nonprofit" xml:space="preserve">
     <value>Ոչ կոմերցիոն</value>
   </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>Webhook URL-ը հասանելի չէ։ HEAD հարցումը չի վերադարձնում 200 HTTP կարգավիճակ։</value>
+  </data>
 </root>

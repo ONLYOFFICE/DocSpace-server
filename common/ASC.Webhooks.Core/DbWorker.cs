@@ -225,11 +225,11 @@ public class DbWorker(
         return await (await GetQueryForJournal(deliveryFrom, deliveryTo, hookUri, configId, eventId, webhookGroupStatus, userId, trigger)).CountAsync();
     }
 
-    public async Task<DbWebhooksLog> ReadJournal(int id)
+    public async Task<DbWebhooksLog> ReadJournal(int tenantId, int id)
     {
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        var fromDb = await webhooksDbContext.WebhooksLogAsync(id);
+        var fromDb = await webhooksDbContext.WebhooksLogAsync(tenantId, id);
 
         if (fromDb != null)
         {
@@ -251,6 +251,7 @@ public class DbWorker(
 
     public async Task<DbWebhooksLog> UpdateWebhookJournal(
         int id,
+        int tenantId,
         int status,
         DateTime? delivery,
         string requestPayload,
@@ -260,7 +261,7 @@ public class DbWorker(
     {
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        var webhook = (await webhooksDbContext.WebhooksLogAsync(id))?.Log;
+        var webhook = (await webhooksDbContext.WebhooksLogAsync(tenantId, id))?.Log;
 
         if (webhook != null)
         {

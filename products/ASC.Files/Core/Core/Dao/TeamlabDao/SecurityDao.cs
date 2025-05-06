@@ -293,7 +293,6 @@ internal abstract class SecurityBaseDao<T>(
 
     public async Task<bool> IsPublicAsync(FileEntry<T> entry)
     {
-        var entryId = await daoFactory.GetMapping<T>().MappingIdAsync(entry.Id);
         var tenantId = _tenantManager.GetCurrentTenantId();
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
@@ -327,8 +326,6 @@ internal abstract class SecurityBaseDao<T>(
         {
             case ShareFilterType.UserOrGroup:
                 {
-                    var predicate = ShareCompareHelper.GetCompareExpression<SecurityOrderRecord>(r => r.Security.Share, entry.RootFolderType);
-
                     var userQuery = q.Join(filesDbContext.Users, s => s.Subject, u => u.Id,
                         (security, user) => new { security, user });
 
@@ -421,9 +418,7 @@ internal abstract class SecurityBaseDao<T>(
                     {
                         q1 = q1.Where(r => r.Name.ToLower().Contains(text));
                     }
-
-                    var predicate = ShareCompareHelper.GetCompareExpression<SecurityOrderRecord>(s => s.Security.Share, entry.RootFolderType);
-
+                    
                     q = q1.Select(r => r.Security);
                     break;
                 }

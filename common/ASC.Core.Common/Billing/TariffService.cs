@@ -871,7 +871,16 @@ public class TariffService(
 
     private async Task<T> GetFromCache<T>(string key)
     {
-        return await hybridCache.GetOrDefaultAsync<T>(key);
+        try
+        {
+            return await hybridCache.GetOrDefaultAsync<T>(key, token: new CancellationTokenSource(TimeSpan.FromSeconds(5)).Token);
+        }
+        catch (Exception e)
+        {
+            logger.ErrorWithException(e);
+            return default;
+        }
+
     }
     
     private void ResetCacheExpiration()

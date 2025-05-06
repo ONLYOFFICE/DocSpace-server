@@ -871,4 +871,46 @@
   <data name="UpdateClient" xml:space="preserve">
     <value>Client {0} bijgewerkt</value>
   </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>Toegangsinstellingen voor tools voor ontwikkelaars gewijzigd</value>
+  </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>Bestand: {0}. Aangepast filter uitgeschakeld</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>Bestand: {0}. Aangepast filter ingeschakeld</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>Bestanden [{0}]. Versie Verwijderd: {1}</value>
+  </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>Gebruiker Api sleutel aangemaakt: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>Gebruiker Api sleutel verwijderd: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>Gebruiker Api sleutel bijgewerkt: {0}</value>
+  </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>Gebruikers [{0}]. Volledig ingevuld formulier: {1}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>Gebruikers [{0}]. Deel van het formulier ingevuld: {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>Gebruikers [{0}]. Formulier gestopt: {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>Gebruikers [{0}]. Begon met vullen: {1}</value>
+  </data>
+  <data name="WebhookCreated" xml:space="preserve">
+    <value>Webhook aangemaakt: {0}</value>
+  </data>
+  <data name="WebhookDeleted" xml:space="preserve">
+    <value>Webhook verwijderd: {0}</value>
+  </data>
+  <data name="WebhookUpdated" xml:space="preserve">
+    <value>Webhook bijgewerkt: {0}</value>
+  </data>
 </root>

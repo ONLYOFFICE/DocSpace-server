@@ -126,4 +126,13 @@
   <data name="LargeBackup" xml:space="preserve">
     <value>Back-up is groter dan de totale grootte van het portaal</value>
   </data>
+  <data name="BackupException" xml:space="preserve">
+    <value>Er is iets misgegaan tijdens het maken van de back-up. Probeer het opnieuw te maken of neem contact op met de ondersteuning.</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>Er is iets misgegaan tijdens het herstellen van de back-up. Probeer het opnieuw te herstellen of neem contact op met de ondersteuning.</value>
+  </data>
+  <data name="BackupInvalid" xml:space="preserve">
+    <value>Het back-up bestand is ongeldig.</value>
+  </data>
 </root>

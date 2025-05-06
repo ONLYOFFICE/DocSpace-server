@@ -87,17 +87,13 @@ public class EmailValidationKeyProvider
         ValidVisitLinkInterval = validVisitLinkInterval;
         _logger = logger;
     }
+    
 
-    public string GetEmailKey(string email)
-    {
-        return GetEmailKey(_tenantManager.GetCurrentTenantId(), email);
-    }
-
-    public string GetEmailKey(int tenantId, string email)
+    public string GetEmailKey(string email, int? tenantId = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(email);
 
-        email = FormatEmail(tenantId, email);
+        email = FormatEmail(tenantId ?? _tenantManager.GetCurrentTenantId(), email);
 
         var ms = (long)(DateTime.UtcNow - _from).TotalMilliseconds;
         var hash = GetMachineHashedData(BitConverter.GetBytes(ms), Encoding.ASCII.GetBytes(email));

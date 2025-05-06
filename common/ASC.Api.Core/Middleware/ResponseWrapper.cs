@@ -45,9 +45,9 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
 
         switch (exception)
         {
-            case ItemNotFoundException:
+            case ItemNotFoundException e:
                 status = HttpStatusCode.NotFound;
-                message = "The record could not be found";
+                message = e.Message;
                 break;
             case ArgumentException e:
                 status = HttpStatusCode.BadRequest;

@@ -34,6 +34,7 @@ public class UpdateFile
     /// <summary>
     /// The file title to update.
     /// </summary>
+    [StringLength(165)]
     public string Title { get; set; }
 
     /// <summary>

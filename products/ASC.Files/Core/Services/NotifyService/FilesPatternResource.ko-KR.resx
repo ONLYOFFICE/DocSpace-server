@@ -176,4 +176,64 @@ $OrangeButton</value>
   <data name="subject_FormSubmitted" xml:space="preserve">
     <value>DocSpace 알림. 양식이 작성되었습니다</value>
   </data>
+  <data name="pattern_FormSubmitted_push" xml:space="preserve">
+    <value>"$RoomTitle" 룸에서 "$DocumentTitle" 양식이 작성되었습니다</value>
+  </data>
+  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
+    <value>"$RoomTitle" 방에 초대되었습니다</value>
+  </data>
+  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
+    <value>"$RoomTitle" 룸에서 고객님의 역할이 "$RoomRole"(으)로 변경되었습니다</value>
+  </data>
+  <data name="subject_YourTurnFormFilling" xml:space="preserve">
+    <value>DocSpace 알림.</value>
+  </data>
+  <data name="subject_StoppedFormFilling" xml:space="preserve">
+    <value>DocSpace 알림.</value>
+  </data>
+  <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
+    <value>DocSpace 알림.</value>
+  </data>
+  <data name="subject_FormStartedFilling" xml:space="preserve">
+    <value>DocSpace 알림.</value>
+  </data>
+  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
+    <value>$FromUserName님이 "$RoomTitle" 룸을 아카이브로 이동했습니다</value>
+  </data>
+  <data name="pattern_EditorMentions_push" xml:space="preserve">
+    <value>$ToUserName님이 $DocumentTitle 문서에서 고객님을 언급하였습니다</value>
+  </data>
+  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
+    <value>"$RoomTitle" 룸에 새 문서("$DocumentTitle")가 생성되었습니다</value>
+  </data>
+  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
+    <value>"$RoomTitle" 룸에 새 파일("$DocumentTitle")이 업로드되었습니다</value>
+  </data>
+  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
+    <value>"$RoomTitle" 룸에 새 파일이 업로드되었습니다($Count)</value>
+  </data>
+  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
+    <value>"$RoomTitle" 룸에 새 폴더("$FolderTitle")가 생성되었습니다</value>
+  </data>
+  <data name="pattern_FormStartedFilling" xml:space="preserve">
+    <value>
+      활동 알림. "$FromUserName":"$FromUserLink" 님이 "$RoomTitle":"$RoomURL" 룸에서 "$DocumentTitle":"$DocumentURL" 양식 작성을 시작하였습니다 — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_StoppedFormFilling" xml:space="preserve">
+    <value>
+      활동 알림. "$FromUserName":"$FromUserLink" 님이 "$RoomTitle":"$RoomURL" 룸에서 "$DocumentTitle":"$DocumentURL" 양식 작성을 중지하였습니다 — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_YourTurnFormFilling" xml:space="preserve">
+    <value>
+      활동 알림. 고객님의 차례입니다! "$RoomTitle":"$RoomURL" 룸에서 "$DocumentTitle":"$DocumentURL" 양식을 작성하세요 — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
+    <value>
+      활동 알림. "$RoomTitle":"$RoomURL" 룸에서 "$DocumentTitle":"$DocumentURL" 양식 작성이 완료되었습니다 — $__DateTime.
+    
+</value>
+  </data>
 </root>

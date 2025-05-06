@@ -228,7 +228,7 @@ public record FileVersionRemovedData : EntryData
 
 public class FileCreateInterpreter : FileActionInterpreterBase
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
         var desc = GetAdditionalDescription(description);
         var accessibility = GetAccessibility(serviceProvider, description[0]);
@@ -239,7 +239,7 @@ public class FileCreateInterpreter : FileActionInterpreterBase
 
 public class FileMovedInterpreter : FileActionInterpreterBase
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
         var splitTarget = target.Split(',');
         var desc = GetAdditionalDescription(description);
@@ -263,7 +263,7 @@ public class FileMovedInterpreter : FileActionInterpreterBase
 
 public class UserFileUpdatedInterpreter : FileActionInterpreterBase
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
         var desc = GetAdditionalDescription(description);
         var accessibility = GetAccessibility(serviceProvider, description[1]);
@@ -283,7 +283,7 @@ public class UserFileUpdatedInterpreter : FileActionInterpreterBase
 
 public class FileUpdatedInterpreter : FileActionInterpreterBase
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
         var desc = GetAdditionalDescription(description);
         var accessibility = GetAccessibility(serviceProvider, description[1]);
@@ -302,7 +302,7 @@ public class FileUpdatedInterpreter : FileActionInterpreterBase
 
 public class FileDeletedInterpreter : ActionInterpreter
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
         return new ValueTask<HistoryData>(new EntryData(target, description[0]));
     }
@@ -310,7 +310,7 @@ public class FileDeletedInterpreter : ActionInterpreter
 
 public class FileVersionDeletedInterpreter : ActionInterpreter
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {        
         var desc = GetAdditionalDescription(description);
         return new ValueTask<HistoryData>(new FileVersionRemovedData(
@@ -325,7 +325,7 @@ public class FileVersionDeletedInterpreter : ActionInterpreter
 
 public class FileRenamedInterpreter : FileActionInterpreterBase
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
         var desc = GetAdditionalDescription(description);
         var accessibility = GetAccessibility(serviceProvider, description[0]);
@@ -345,7 +345,7 @@ public class FileRenamedInterpreter : FileActionInterpreterBase
 
 public class FileUploadedInterpreter : FileActionInterpreterBase
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
         var desc = GetAdditionalDescription(description);
         var accessibility = GetAccessibility(serviceProvider, description[0]);
@@ -364,7 +364,7 @@ public class FileUploadedInterpreter : FileActionInterpreterBase
 
 public class FileCopiedInterpreter : FileActionInterpreterBase
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
         var splitTarget = target.Split(',');
         var desc = GetAdditionalDescription(description);
@@ -388,7 +388,7 @@ public class FileCopiedInterpreter : FileActionInterpreterBase
 
 public class FileConvertedInterpreter : FileActionInterpreterBase
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
         var desc = GetAdditionalDescription(description);
 
@@ -398,7 +398,7 @@ public class FileConvertedInterpreter : FileActionInterpreterBase
 
 public class FileLockInterpreter : FileActionInterpreterBase
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
         var desc = GetAdditionalDescription(description);
         var accessibility = GetAccessibility(serviceProvider, description[0]);
@@ -417,7 +417,7 @@ public class FileLockInterpreter : FileActionInterpreterBase
 
 public class FileIndexChangedInterpreter : FileActionInterpreterBase
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
         var desc = GetAdditionalDescription(description);
         var oldIndex = int.Parse(description[1]);
@@ -447,7 +447,7 @@ public class FileIndexChangedInterpreter : FileActionInterpreterBase
 
 public class FileCustomFilterInterpreter : FileActionInterpreterBase
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
         var desc = GetAdditionalDescription(description);
         var accessibility = GetAccessibility(serviceProvider, description[0]);

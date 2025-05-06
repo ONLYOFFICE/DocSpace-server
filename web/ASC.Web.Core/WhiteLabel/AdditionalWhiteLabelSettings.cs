@@ -58,7 +58,7 @@ public class AdditionalWhiteLabelSettings : ISettings<AdditionalWhiteLabelSettin
     public bool HelpCenterEnabled { get; init; }
 
     /// <summary>
-    /// Specifies if the "Feedback & Support" link is available or not.
+    /// Specifies if the "Feedback &amp; Support" link is available or not.
     /// </summary>
     public bool FeedbackAndSupportEnabled { get; init; }
 

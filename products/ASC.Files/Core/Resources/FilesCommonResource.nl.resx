@@ -503,4 +503,13 @@ Het beste geschikt voor docx, xlsx, pptx.</value>
   <data name="OpenForm" xml:space="preserve">
     <value>Open bestand</value>
   </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Kan huidige versie van bestand niet verwijderen</value>
+  </data>
+  <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
+    <value>Deel om in te vullen</value>
+  </data>
+  <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
+    <value>Begin met invullen</value>
+  </data>
 </root>

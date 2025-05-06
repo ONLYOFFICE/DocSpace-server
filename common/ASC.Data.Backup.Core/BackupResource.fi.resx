@@ -126,4 +126,13 @@
   <data name="LargeBackup" xml:space="preserve">
     <value>Varmuuskopio on suurempi kuin portaalin koko</value>
   </data>
+  <data name="BackupException" xml:space="preserve">
+    <value>Jokin meni vikaan varmuuskopiota luodessa. Ole hyvä ja kokeile luoda sitä uudelleen tai ota yhteyttä tukeen.</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>Jokin meni vikaan palautettaessa varmuuskopiota. Ole hyvä ja kokeile palautusta uudelleen tai ota yhteyttä tukeen.</value>
+  </data>
+  <data name="BackupInvalid" xml:space="preserve">
+    <value>Varmuuskopiotiedosto on virheellinen.</value>
+  </data>
 </root>

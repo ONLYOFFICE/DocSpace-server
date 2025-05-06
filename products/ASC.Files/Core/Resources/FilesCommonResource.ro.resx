@@ -503,4 +503,13 @@ Compatibilitate garantată 100% cu formatele MS Office.</value>
   <data name="OpenForm" xml:space="preserve">
     <value>Deschidere fișier</value>
   </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Imposibil de șters versiunea actuală a fișierului</value>
+  </data>
+  <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
+    <value>Partajare pentru completare</value>
+  </data>
+  <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
+    <value>Începe completarea</value>
+  </data>
 </root>

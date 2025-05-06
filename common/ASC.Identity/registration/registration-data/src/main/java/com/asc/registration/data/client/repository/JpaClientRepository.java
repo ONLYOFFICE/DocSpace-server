@@ -163,6 +163,31 @@ public interface JpaClientRepository extends JpaRepository<ClientEntity, String>
   int deleteByClientIdAndTenantId(String id, long tenantId);
 
   /**
+   * Deletes all records from the `identity_clients` table where the `created_by` field matches the
+   * specified `userId` and the `tenant_id` field matches the specified `tenantId`.
+   *
+   * @param tenantId the ID of the tenant
+   * @param userId the ID of the user who created the records
+   * @return the number of records deleted
+   */
+  @Modifying
+  @Query(
+      value = "DELETE FROM identity_clients WHERE created_by = :userId AND tenant_id = :tenantId",
+      nativeQuery = true)
+  int deleteAllByTenantIdAndCreatedBy(long tenantId, String userId);
+
+  /**
+   * Deletes all records from the `identity_clients` table where the `tenant_id` field matches the
+   * specified `tenantId`.
+   *
+   * @param tenantId the ID of the tenant
+   * @return the number of records deleted
+   */
+  @Modifying
+  @Query(value = "DELETE FROM identity_clients WHERE tenant_id = :tenantId", nativeQuery = true)
+  int deleteAllByTenantId(long tenantId);
+
+  /**
    * Updates the client secret for a specified client entity.
    *
    * <p>This operation sets a new client secret and updates the modification timestamp.
