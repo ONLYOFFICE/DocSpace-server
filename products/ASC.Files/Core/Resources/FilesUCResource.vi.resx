@@ -103,4 +103,7 @@
   <data name="ReadyFormFolder" xml:space="preserve">
     <value>Hoàn thành</value>
   </data>
+  <data name="RoomTemplates" xml:space="preserve">
+    <value>Mẫu</value>
+  </data>
 </root>

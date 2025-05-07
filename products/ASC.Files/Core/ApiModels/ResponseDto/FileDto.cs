@@ -260,7 +260,7 @@ public class FileDtoHelper(
 
         var fileDao = _daoFactory.GetFileDao<T>();
 
-        if (file.IsForm)
+        if (fileType == FileType.Pdf)
         {
             var folderDao = _daoFactory.GetCacheFolderDao<T>();
 
@@ -305,9 +305,9 @@ public class FileDtoHelper(
                 _ = await _fileSecurity.SetSecurity(new[] { currentRoom }.ToAsyncEnumerable()).ToListAsync();
             }
 
-            if (!file.IsForm && (FilterType)file.Category == FilterType.None)
+            if (FileUtility.GetFileTypeByExtention(FileUtility.GetFileExtension(file.Title)) == FileType.Pdf && !file.IsForm && (FilterType)file.Category == FilterType.None)
             {
-                result.IsForm = await fileChecker.CheckExtendedPDF(file);
+                result.IsForm = await fileChecker.IsFormPDFFile(file);
             }
             else
             {
@@ -321,12 +321,27 @@ public class FileDtoHelper(
 
             result.HasDraft = result.IsForm == true ? !Equals(linkedId, default(T)) : null;
 
+            var formFilling = properties?.FormFilling;
+            if (formFilling != null)
+            {
+                result.StartFilling = formFilling.StartFilling;
+                if (!Equals(linkedId, default(T)))
+                {
+                    var draftLocation = new DraftLocation<T> { FolderId = formFilling.ToFolderId, FolderTitle = formFilling.Title, FileId = linkedId };
+                    var draft = await fileDao.GetFileAsync(linkedId);
+                    if (draft != null)
+                    {
+                        draftLocation.FileTitle = draft.Title;
+                    }
+
+                    result.DraftLocation = draftLocation;
+                }
+            }
+
             if (currentRoom is { FolderType: FolderType.VirtualDataRoom })
             {
-                var (currentStep, roles) = await fileDao.GetUserFormRoles(file.Id, authContext.CurrentAccount.ID);
-                var roleList = await roles.ToListAsync();
-
-                if (currentStep == -1 && result.Security[FileSecurity.FilesSecurityActions.Edit] && properties != null && properties.CopyToFillOut)
+                var (currentStep, roleList) = await fileDao.GetUserFormRoles(file.Id, authContext.CurrentAccount.ID);
+                if (currentStep == -1 && result.Security[FileSecurity.FilesSecurityActions.Edit] && properties is { CopyToFillOut: true })
                 {
                     result.FormFillingStatus = FormFillingStatus.Draft;
                 }
@@ -359,23 +374,13 @@ public class FileDtoHelper(
                                 break;
                         }
                     }
-                }
-            }
-
-            var formFilling = properties?.FormFilling;
-            if (formFilling != null)
-            {
-                result.StartFilling = formFilling.StartFilling;
-                if (!Equals(linkedId, default(T)))
-                {
-                    var draftLocation = new DraftLocation<T> { FolderId = formFilling.ToFolderId, FolderTitle = formFilling.Title, FileId = linkedId };
-                    var draft = await fileDao.GetFileAsync(linkedId);
-                    if (draft != null)
+                    try
                     {
-                        draftLocation.FileTitle = draft.Title;
+                        result.ShortWebUrl = await urlShortener.GetShortenLinkAsync(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebEditorUrl(file.Id)));
                     }
-
-                    result.DraftLocation = draftLocation;
+                    catch (Exception)
+                    {
+                    }
                 }
             }
         }
@@ -442,7 +447,6 @@ public class FileDtoHelper(
             result.ViewUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl), result.RequestToken);
 
             result.WebUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version, externalMediaAccess)), result.RequestToken);
-            result.ShortWebUrl = await urlShortener.GetShortenLinkAsync(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebEditorUrl(file.Id)));
             result.ThumbnailStatus = file.ThumbnailStatus;
 
             var cacheKey = Math.Abs(result.Updated.GetHashCode());

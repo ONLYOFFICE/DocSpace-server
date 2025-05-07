@@ -88,14 +88,13 @@ public class CreateRoomTemplateOperation : DistributedTaskProgress
 
     protected override async Task DoJob()
     {
-        var tenantManager = _serviceProvider.GetService<TenantManager>();
-        var securityContext = _serviceProvider.GetService<SecurityContext>();
-        var globalHelper = _serviceProvider.GetService<GlobalFolderHelper>();
-        var fileStorageService = _serviceProvider.GetService<FileStorageService>();
-        var roomLogoManager = _serviceProvider.GetService<RoomLogoManager>();
-        var dbFactory = _serviceProvider.GetService<IDbContextFactory<FilesDbContext>>();
-        var daoFactory = _serviceProvider.GetService<IDaoFactory>();
-        var logger = _serviceProvider.GetService<ILogger<CreateRoomTemplateOperation>>();
+        await using var scope = _serviceProvider.CreateAsyncScope();
+        var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
+        var securityContext = scope.ServiceProvider.GetService<SecurityContext>();
+        var fileStorageService = scope.ServiceProvider.GetService<FileStorageService>();
+        var roomLogoManager = scope.ServiceProvider.GetService<RoomLogoManager>();
+        var daoFactory = scope.ServiceProvider.GetService<IDaoFactory>();
+        var logger = scope.ServiceProvider.GetService<ILogger<CreateRoomTemplateOperation>>();
         var fileDao = daoFactory.GetFileDao<int>();
         var folderDao = daoFactory.GetFolderDao<int>();
 
@@ -124,24 +123,24 @@ public class CreateRoomTemplateOperation : DistributedTaskProgress
             
             if (_emails != null)
             {
-                wrappers = _emails.Select(e => new AceWrapper() { Email = e, Access = FileShare.Read }).ToList();
+                wrappers = _emails.Select(e => new AceWrapper { Email = e, Access = FileShare.Read }).ToList();
             }
             if (_groups != null)
             {
-                wrappers = _groups.Select(e => new AceWrapper() { Id = e, Access = FileShare.Read, SubjectType = SubjectType.Group }).ToList();
+                wrappers = _groups.Select(e => new AceWrapper { Id = e, Access = FileShare.Read, SubjectType = SubjectType.Group }).ToList();
             }
 
             if (wrappers != null)
             {
                 var aceCollection = new AceCollection<int>
                 {
-                    Files = Array.Empty<int>(),
+                    Files = [],
                     Folders = [TemplateId],
                     Aces = wrappers,
                     Message = string.Empty
                 };
 
-                var warning = await fileStorageService.SetAceObjectAsync(aceCollection, false);
+                await fileStorageService.SetAceObjectAsync(aceCollection, false);
             }
 
             if (_copyLogo)

@@ -70,6 +70,11 @@ public class HostedSolution(ITenantService tenantService,
         await tenantService.ValidateDomainAsync(address);
     }
 
+    public async Task<bool> IsForbiddenDomainAsync(string domain)
+    {
+        return await tenantService.IsForbiddenDomainAsync(domain);
+    }
+
     public async Task<Tenant> RegisterTenantAsync(TenantRegistrationInfo registrationInfo)
     {
         ArgumentNullException.ThrowIfNull(registrationInfo);

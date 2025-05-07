@@ -383,6 +383,11 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         return item.Exists(i => Dao.GetName(i).Equals(title, StringComparison.InvariantCultureIgnoreCase));
     }
 
+    public async Task<bool> IsExistAsync(string title, int category, string folderId)
+    {
+        return await IsExistAsync(title, folderId);
+    }
+
     public Task<File<string>> ReplaceFileVersionAsync(File<string> file, Stream fileStream)
     {
         return SaveFileAsync(file, fileStream);
@@ -753,7 +758,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     }
 
     public Task<int> GetFilesCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, bool withSubfolders = false,
-        bool excludeSubject = false, string roomId = null, FormsItemDto formsItemDto = null)
+        bool excludeSubject = false, string roomId = null, FormsItemDto formsItemDto = null, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All)
     {
         throw new NotImplementedException();
     }
@@ -798,27 +803,27 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
 
     public Task SaveFormRoleMapping(string formId, IEnumerable<FormRole> formRoles)
     {
-        throw new NotImplementedException();
+        return Task.CompletedTask;
     }
     public IAsyncEnumerable<FormRole> GetFormRoles(string formId)
     {
-        throw new NotImplementedException();
+        return AsyncEnumerable.Empty<FormRole>();
     }
-    public Task<(int, IAsyncEnumerable<FormRole>)> GetUserFormRoles(string formId, Guid userId)
+    public Task<(int, List<FormRole>)> GetUserFormRoles(string formId, Guid userId)
     {
-        throw new NotImplementedException();
+        return Task.FromResult((-1, new List<FormRole>()));
     }
     public IAsyncEnumerable<FormRole> GetUserFormRolesInRoom(string roomId, Guid userId)
     {
-        throw new NotImplementedException();
+        return AsyncEnumerable.Empty<FormRole>();
     }
     public Task<FormRole> ChangeUserFormRoleAsync(string formId, FormRole formRole)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<FormRole>(null);
     }
     public Task DeleteFormRolesAsync(string formId)
     {
-        throw new NotImplementedException();
+        return Task.CompletedTask;
     }
 }
 

@@ -126,4 +126,13 @@
   <data name="LargeBackup" xml:space="preserve">
     <value>Պահուստավորումն ավելի մեծ է, քան պորտալի ընդհանուր չափը</value>
   </data>
+  <data name="BackupException" xml:space="preserve">
+    <value>Պահուստային պատճեն ստեղծելու ժամանակ մի բան սխալ է տեղի ունեցել։ Խնդրում ենք կրկին փորձել ստեղծել այն կամ դիմել աջակցությանը։</value>
+  </data>
+  <data name="BackupInvalid" xml:space="preserve">
+    <value>Պահուստային պատճենային ֆայլն անվավեր է։</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>Պահուստային պատճենը վերականգնելու ժամանակ մի բան սխալ է տեղի ունեցել։ Խնդրում ենք կրկին փորձել վերականգնել այն կամ դիմել աջակցությանը։</value>
+  </data>
 </root>

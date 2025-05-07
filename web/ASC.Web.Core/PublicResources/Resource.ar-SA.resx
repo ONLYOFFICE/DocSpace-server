@@ -1120,10 +1120,10 @@
     <value>{0} لكل مسؤول إمكانية إضافة مساحة عند الطلب</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>فشل في تحديد حصة لكل غرفة. القيمة المدخلة تتجاوز السعة الإجمالية لـ "DocSpace".</value>
+    <value>فشل في تحديد حصة لكل غرفة. القيمة المدخلة تتجاوز السعة الإجمالية لـ DocSpace.</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>فشل في تحديد حصة لكل مستخدم. القيمة المدخلة تتجاوز السعة الإجمالية لـ "DocSpace".</value>
+    <value>فشل في تحديد حصة لكل مستخدم. القيمة المدخلة تتجاوز السعة الإجمالية لـ DocSpace.</value>
   </data>
   <data name="ErrorTrustedMailDomain" xml:space="preserve">
     <value>أضف على الأقل نطاقًا موثوقًا واحدًا.</value>
@@ -1136,5 +1136,8 @@
   </data>
   <data name="Tariffs_nonprofit" xml:space="preserve">
     <value>غير ربحية</value>
+  </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>تعذّر الوصول إلى رابط Webhook لأن طلب HEAD لم يُرجِع رمز الحالة 200.</value>
   </data>
 </root>

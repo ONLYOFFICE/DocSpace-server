@@ -503,4 +503,13 @@ Najwyższy poziom kompatybilności z docx, xlsx, pptx.</value>
   <data name="OpenForm" xml:space="preserve">
     <value>Otwórz plik</value>
   </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Nie można usunąć bieżącej wersji pliku</value>
+  </data>
+  <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
+    <value>Udostępnij do wypełnienia</value>
+  </data>
+  <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
+    <value>Rozpocznij wypełnianie</value>
+  </data>
 </root>

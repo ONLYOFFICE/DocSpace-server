@@ -81,6 +81,9 @@ public abstract class DocumentBuilderTask<TId, TData> : DistributedTaskProgress
             var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
             await tenantManager.SetCurrentTenantAsync(_tenantId);
 
+            var securityContext = scope.ServiceProvider.GetService<SecurityContext>();
+            await securityContext.AuthenticateMeWithoutCookieAsync(_userId);
+            
             var filesLinkUtility = scope.ServiceProvider.GetService<FilesLinkUtility>();
             logger = scope.ServiceProvider.GetService<ILogger<DocumentBuilderTask<TId, TData>>>();
 
@@ -136,40 +139,14 @@ public abstract class DocumentBuilderTask<TId, TData> : DistributedTaskProgress
     protected abstract Task<File<TId>> ProcessSourceFileAsync(IServiceProvider serviceProvider, Uri fileUri, DocumentBuilderInputData inputData);
 }
 
-public record DocumentBuilderInputData
-{
-    public DocumentBuilderInputData(string Script, string TempFileName, string OutputFileName)
-    {
-        this.Script = Script;
-        this.TempFileName = TempFileName;
-        this.OutputFileName = OutputFileName;
-    }
-
-    public string Script { get; init; }
-    public string TempFileName { get; init; }
-    public string OutputFileName { get; init; }
-
-    public void Deconstruct(out string Script, out string TempFileName, out string OutputFileName)
-    {
-        Script = this.Script;
-        TempFileName = this.TempFileName;
-        OutputFileName = this.OutputFileName;
-    }
-}
+public record DocumentBuilderInputData(string Script, string TempFileName, string OutputFileName);
 
 [Scope]
-public class DocumentBuilderTask
+public class DocumentBuilderTask(DocumentServiceConnector documentServiceConnector)
 {
-    private readonly DocumentServiceConnector _documentServiceConnector;
-
-    public DocumentBuilderTask(DocumentServiceConnector documentServiceConnector)
-    {
-        _documentServiceConnector = documentServiceConnector;
-    }
-
     internal async Task<string> BuildFileAsync(DocumentBuilderInputData inputData, CancellationToken cancellationToken)
     {
-        var resultTuple = await _documentServiceConnector.DocbuilderRequestAsync(null, inputData.Script, true);
+        var resultTuple = await documentServiceConnector.DocbuilderRequestAsync(null, inputData.Script, true);
 
         if (string.IsNullOrEmpty(resultTuple.BuilderKey))
         {
@@ -182,7 +159,7 @@ public class DocumentBuilderTask
 
             await Task.Delay(1000, cancellationToken);
 
-            resultTuple = await _documentServiceConnector.DocbuilderRequestAsync(resultTuple.BuilderKey, null, true);
+            resultTuple = await documentServiceConnector.DocbuilderRequestAsync(resultTuple.BuilderKey, null, true);
 
             if (string.IsNullOrEmpty(resultTuple.BuilderKey))
             {

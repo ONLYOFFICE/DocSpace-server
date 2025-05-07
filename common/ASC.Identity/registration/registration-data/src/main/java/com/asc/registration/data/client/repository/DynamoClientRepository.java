@@ -177,4 +177,19 @@ public interface DynamoClientRepository {
    *     otherwise
    */
   ClientDynamoEntity deleteByIdAndTenantId(String clientId, long tenantId);
+
+  /**
+   * Deletes all client entities created by a specific user within a specific tenant.
+   *
+   * @param tenantId the tenant identifier
+   * @param userId the identifier of the user who created the clients
+   */
+  void deleteAllByTenantIdAndCreatedBy(long tenantId, String userId);
+
+  /**
+   * Deletes all client entities within a specific tenant.
+   *
+   * @param tenantId the tenant identifier
+   */
+  void deleteAllByTenantId(long tenantId);
 }

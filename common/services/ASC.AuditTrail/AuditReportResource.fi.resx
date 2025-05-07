@@ -871,4 +871,46 @@
   <data name="UpdateClient" xml:space="preserve">
     <value>Asiakasohjelma {0} päivitetty</value>
   </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>Käyttäjän Api-avain luotu: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>Käyttäjän Api-avain päivitetty: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>Käyttäjän API-avain poistettu: {0}</value>
+  </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>Käyttäjät [{0}]. Täysin täytetty lomake: {1}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>Käyttäjät [{0}]. Osa lomakkeesta täytetty: {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>Käyttäjät [{0}]. Lomake pysäytetty: {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>Käyttäjät [{0}]. Täyttäminen aloitettu: {1}</value>
+  </data>
+  <data name="WebhookCreated" xml:space="preserve">
+    <value>Webhook luotu: {0}</value>
+  </data>
+  <data name="WebhookDeleted" xml:space="preserve">
+    <value>Webhook poistettu: {0}</value>
+  </data>
+  <data name="WebhookUpdated" xml:space="preserve">
+    <value>Webhook päivitetty: {0}</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>Tiedostot [{0}]. Versio poistettu: {1}</value>
+  </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>Kehittäjän työkaluihin pääsyn asetuksia muutettu</value>
+  </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>Tiedosto: {0}. Mukautettu suodatin ei käytössä</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>Tiedosto: {0}. Mukautettu suodatin käytössä</value>
+  </data>
 </root>

@@ -230,13 +230,13 @@ internal abstract class ThirdPartyProviderDao
     }
 
     public Task<int> GetFilesCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, bool withSubfolders = false,
-        bool excludeSubject = false, string roomId = null, FormsItemDto formsItemDto = null)
+        bool excludeSubject = false, string roomId = null, FormsItemDto formsItemDto = null, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All)
     {
         throw new NotImplementedException();
     }
     
     public Task<int> GetFoldersCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool withSubfolders = false, bool excludeSubject = false, 
-        string roomId = null)
+        string roomId = null, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All)
     {
         throw new NotImplementedException();
     }
@@ -271,6 +271,12 @@ internal abstract class ThirdPartyProviderDao
     {
         return AsyncEnumerable.Empty<Folder<string>>();
     }
+
+    public virtual Task<int> GetProviderBasedRoomsCountAsync(SearchArea searchArea)
+    {
+        return Task.FromResult(0);
+    }
+
     public Task<string> ChangeTreeFolderSizeAsync(string folderId, long size)
     {
         throw new NotImplementedException();

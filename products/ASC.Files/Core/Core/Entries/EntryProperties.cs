@@ -60,7 +60,10 @@ public class EntryProperties<T>
     {
         try
         {
-            return JsonSerializer.Serialize(entryProperties);
+            return JsonSerializer.Serialize(entryProperties, new JsonSerializerOptions
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            });
         }
         catch (Exception e)
         {
@@ -126,6 +129,8 @@ public class FormFillingProperties<T>
     /// The form filling interruption.
     /// </summary>
     public FormFillingInterruption? FormFillingInterruption { get; set; }
+
+    public bool? CollectFillForm { get; set; }
 
 }
 

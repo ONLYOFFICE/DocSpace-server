@@ -24,6 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Globalization;
+
+using ASC.Core.Common.Identity;
+
 namespace ASC.People.Api;
 
 ///<summary>
@@ -79,7 +83,8 @@ public class UserController(
     CountPaidUserStatistic countPaidUserStatistic,
     UserSocketManager socketManager,
     GlobalFolderHelper globalFolderHelper,
-    UserWebhookManager webhookManager)
+    UserWebhookManager webhookManager,
+    IdentityClient client)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
 {
     /// <summary>
@@ -115,6 +120,23 @@ public class UserController(
     public async Task<EmployeeFullDto> AddMemberAsActivatedAsync(MemberRequestDto inDto)
     {
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(inDto.Type), Constants.Action_AddRemoveUser);
+
+        var invitationSettings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
+
+        if (inDto.Type is EmployeeType.Guest)
+        {
+            if (!invitationSettings.AllowInvitingGuests)
+            {
+                throw new SecurityException(Resource.ErrorAccessDenied);
+            }
+        }
+        else
+        {
+            if (!invitationSettings.AllowInvitingMembers)
+            {
+                throw new SecurityException(Resource.ErrorAccessDenied);
+            }
+        }
 
         var user = new UserInfo();
 
@@ -223,6 +245,23 @@ public class UserController(
         }
 
         inDto.Type = linkData?.EmployeeType ?? inDto.Type;
+
+        var invitationSettings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
+
+        if (inDto.Type is EmployeeType.Guest)
+        {
+            if (!invitationSettings.AllowInvitingGuests)
+            {
+                throw new SecurityException(Resource.ErrorAccessDenied);
+            }
+        }
+        else
+        {
+            if (!invitationSettings.AllowInvitingMembers)
+            {
+                throw new SecurityException(Resource.ErrorAccessDenied);
+            }
+        }
 
         var user = new UserInfo();
 
@@ -353,6 +392,13 @@ public class UserController(
     public async Task<List<EmployeeDto>> InviteUsersAsync(InviteUsersRequestDto inDto)
     {
         ArgumentNullException.ThrowIfNull(inDto);
+
+        var invitationSettings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
+
+        if (!invitationSettings.AllowInvitingMembers)
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
 
         var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
         var currentUserType = await _userManager.GetUserTypeAsync(currentUser);
@@ -568,6 +614,8 @@ public class UserController(
         await CheckReassignProcessAsync([user.Id]);
 
         var userName = user.DisplayUserName(false, displayUserSettingsHelper);
+
+        await client.DeleteClientsAsync(user.Id);
         await _userPhotoManager.RemovePhotoAsync(user.Id);
         await _userManager.DeleteUserAsync(user.Id);
         await fileSecurity.RemoveSubjectAsync(user.Id, true);
@@ -846,6 +894,8 @@ public class UserController(
     [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,GuestShareLink,Everyone")]
     public async Task<EmployeeFullDto> GetByEmailAsync(GetMemberByEmailRequestDto inDto)
     {
+        var cultureInfo = string.IsNullOrEmpty(inDto.Culture) ? null : new CultureInfo(inDto.Culture);
+
         var user = await _userManager.GetUserByEmailAsync(inDto.Email);
 
         var isConfirmLink = _httpContextAccessor.HttpContext!.User.Claims
@@ -855,7 +905,7 @@ public class UserController(
 
         if (user.Id == Constants.LostUser.Id)
         {
-            throw new ItemNotFoundException("User not found");
+            throw new ItemNotFoundException(Resource.ResourceManager.GetString("ErrorUserNotFound", cultureInfo));
         }
 
         if (isConfirmLink)
@@ -867,7 +917,7 @@ public class UserController(
 
         if (!await _userManager.CanUserViewAnotherUserAsync(currentUser, user))
         {
-            throw new SecurityException(Resource.ErrorAccessDenied);
+            throw new SecurityException(Resource.ResourceManager.GetString("ErrorAccessDenied", cultureInfo));
         }
 
         return await employeeFullDtoHelper.GetFullAsync(user);
@@ -909,7 +959,7 @@ public class UserController(
 
         if (user.Id == Constants.LostUser.Id)
         {
-            throw new ItemNotFoundException("User not found");
+            throw new ItemNotFoundException(Resource.ErrorUserNotFound);
         }
 
         if (isInvite)
@@ -1145,6 +1195,7 @@ public class UserController(
             
             var isGuest = userType == EmployeeType.Guest;
 
+            await client.DeleteClientsAsync(user.Id);
             await _userPhotoManager.RemovePhotoAsync(user.Id);
             await _userManager.DeleteUserAsync(user.Id);
             await fileSecurity.RemoveSubjectAsync(user.Id, true);
@@ -1895,6 +1946,15 @@ public class UserController(
     {
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(inDto.Type), Constants.Action_AddRemoveUser);
 
+        if (inDto.Type is EmployeeType.Guest)
+        {
+            var invitationSettings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
+            if (!invitationSettings.AllowInvitingGuests)
+            {
+                throw new SecurityException(Resource.ErrorAccessDenied);
+            }
+        }
+
         var users = await inDto.UpdateMembers.UserIds
             .ToAsyncEnumerable()
             .Where(userId => !_userManager.IsSystemUser(userId))
@@ -1941,6 +2001,15 @@ public class UserController(
     public async Task<TaskProgressResponseDto> StartUpdateUserTypeAsync(StartUpdateUserTypeDto inDto)
     {
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(inDto.Type), Constants.Action_AddRemoveUser);
+
+        if (inDto.Type is EmployeeType.Guest)
+        {
+            var invitationSettings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
+            if (!invitationSettings.AllowInvitingGuests)
+            {
+                throw new SecurityException(Resource.ErrorAccessDenied);
+            }
+        }
 
         var tenant = tenantManager.GetCurrentTenant();
 
@@ -2110,7 +2179,7 @@ public class UserController(
             var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenant.Id, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
             var quotaUserSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
             _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(tenant.Id, customQuota.GetFeature<UserCustomQuotaFeature>().Name, quotaUserSettings.EnableQuota, userUsedSpace, quota, [user.Id]);
-
+            await socketManager.UpdateUserAsync(user);
             yield return await employeeFullDtoHelper.GetFullAsync(user);
         }
 
@@ -2471,7 +2540,7 @@ public class UserControllerAdditional<T>(
     {
         var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(inDto.Id)).NotFoundIfNull();
 
-        if (!await fileSecurity.CanEditAccessAsync(room))
+        if (!await fileSecurity.CanReadAsync(room))
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }

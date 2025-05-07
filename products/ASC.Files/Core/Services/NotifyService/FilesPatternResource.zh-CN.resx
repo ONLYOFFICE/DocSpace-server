@@ -176,4 +176,60 @@ $OrangeButton</value>
   <data name="subject_FormSubmitted" xml:space="preserve">
     <value>协作空间通知。表单已填写完毕</value>
   </data>
+  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
+    <value>已在房间"$RoomTitle"中创建了新文档"$DocumentTitle"</value>
+  </data>
+  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
+    <value>新文件已上传至房间"$RoomTitle" ($Count)</value>
+  </data>
+  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
+    <value>新文件"$DocumentTitle"已上传至房间"$RoomTitle"</value>
+  </data>
+  <data name="pattern_EditorMentions_push" xml:space="preserve">
+    <value>$ToUserName在文档$DocumentTitle中提及了您</value>
+  </data>
+  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
+    <value>已在房间"$RoomTitle"中创建了新文件夹"$FolderTitle"</value>
+  </data>
+  <data name="pattern_FormStartedFilling" xml:space="preserve">
+    <value>
+      活动通知。"$FromUserName":"$FromUserLink" 已启动表单填写进程："$DocumentTitle":"$DocumentURL"，位于房间："$RoomTitle":"$RoomURL" — $__DateTime。
+</value>
+  </data>
+  <data name="pattern_FormSubmitted_push" xml:space="preserve">
+    <value>已在房间"$RoomTitle"中填写表单"$DocumentTitle"</value>
+  </data>
+  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
+    <value>
+      活动通知。表单 "$DocumentTitle":"$DocumentURL" 已在房间  "$RoomTitle":"$RoomURL" — $__DateTime中完成填写。
+</value>
+  </data>
+  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
+    <value>$FromUserName已将房间"$RoomTitle"移至归档</value>
+  </data>
+  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
+    <value>您在房间"$RoomTitle"中的权限已更改为"$RoomRole"</value>
+  </data>
+  <data name="pattern_StoppedFormFilling" xml:space="preserve">
+    <value>
+      活动通知。"$FromUserName":"$FromUserLink" 已停止房间  "$RoomTitle":"$RoomURL" — $__DateTime中的表单填写："$DocumentTitle":"$DocumentURL"。
+    </value>
+  </data>
+  <data name="pattern_YourTurnFormFilling" xml:space="preserve">
+    <value>
+      活动通知。轮到您填写房间 "$RoomTitle":"$RoomURL" — $__DateTime 中的表单："$DocumentTitle":"$DocumentURL"。
+</value>
+  </data>
+  <data name="subject_FormStartedFilling" xml:space="preserve">
+    <value>协作空间通知。</value>
+  </data>
+  <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
+    <value>协作空间通知。</value>
+  </data>
+  <data name="subject_StoppedFormFilling" xml:space="preserve">
+    <value>协作空间通知。</value>
+  </data>
+  <data name="subject_YourTurnFormFilling" xml:space="preserve">
+    <value>协作空间通知。</value>
+  </data>
 </root>

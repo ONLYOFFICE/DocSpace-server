@@ -82,4 +82,7 @@
   <data name="UnknownLastName" xml:space="preserve">
     <value>Priezvisko</value>
   </data>
+  <data name="LicenseTypeNotCorrect" xml:space="preserve">
+    <value>Konflikt licencií. Uistite sa, že ste nainštalovali správnu edíciu {0} DocSpace (Enterprise alebo Developer). Ak máte akékoľvek otázky, neváhajte sa obrátiť na svojho obchodného manažéra.</value>
+  </data>
 </root>

@@ -176,4 +176,63 @@ Manažer: "$ToUserName":"$ToUserLink"
  
 $OrangeButton</value>
   </data>
+  <data name="pattern_FormStartedFilling" xml:space="preserve">
+    <value>
+      Oznámení o činnosti. "$FromUserName":"$FromUserLink" zahájil proces vyplňování formuláře:  "$DocumentTitle":"$DocumentURL" v místnosti: "$RoomTitle":"$RoomURL" - $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_FormSubmitted_push" xml:space="preserve">
+    <value>V místnosti "$RoomTitle" byl vyplněn formulář "$DocumentTitle"</value>
+  </data>
+  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
+    <value>
+      Oznámení o činnosti. Formulář "$DocumentTitle":"$DocumentURL" byl v místnosti zcela vyplněn: "$RoomTitle":"$RoomURL" - $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_StoppedFormFilling" xml:space="preserve">
+    <value>
+      Oznámení o činnosti. "$FromUserName":"$FromUserLink" zastavilo vyplňování formuláře: "$DocumentTitle":"$DocumentURL" v místnosti: "$RoomTitle":"$RoomURL" - $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_YourTurnFormFilling" xml:space="preserve">
+    <value>
+      Oznámení o činnosti. Jste na řadě! Vyplnění formuláře je povinné: "$DocumentTitle":"$DocumentURL" v místnosti: "$RoomTitle":"$RoomURL" - $__DateTime.
+    </value>
+  </data>
+  <data name="subject_FormStartedFilling" xml:space="preserve">
+    <value>Oznámení DocSpace.</value>
+  </data>
+  <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
+    <value>Oznámení DocSpace.</value>
+  </data>
+  <data name="subject_StoppedFormFilling" xml:space="preserve">
+    <value>Oznámení DocSpace.</value>
+  </data>
+  <data name="subject_YourTurnFormFilling" xml:space="preserve">
+    <value>Oznámení DocSpace.</value>
+  </data>
+  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
+    <value>V místnosti "$RoomTitle" byl vytvořen nový dokument "$DocumentTitle"</value>
+  </data>
+  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
+    <value>Do místnosti "$RoomTitle" byly nahrány nové soubory ($Count)</value>
+  </data>
+  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
+    <value>Do místnosti "$RoomTitle" byl nahrán nový soubor "$DocumentTitle"</value>
+  </data>
+  <data name="pattern_EditorMentions_push" xml:space="preserve">
+    <value>$ToUserName vás zmínil v dokumentu $DocumentTitle</value>
+  </data>
+  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
+    <value>V místnosti "$RoomTitle" byla vytvořena nová složka "$FolderTitle"</value>
+  </data>
+  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
+    <value>Byli jste pozváni do místnosti "$RoomTitle"</value>
+  </data>
+  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
+    <value>$FromUserName přesunul místnost "$RoomTitle" do archivu</value>
+  </data>
+  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
+    <value>Vaše role v místnosti "$RoomTitle" byla změněna na "$RoomRole"</value>
+  </data>
 </root>

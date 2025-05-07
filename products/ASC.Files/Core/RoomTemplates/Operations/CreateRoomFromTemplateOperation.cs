@@ -34,6 +34,11 @@ public class CreateRoomFromTemplateOperation : DistributedTaskProgress
     private string _cover;
     private string _color;
     private long? _quota;
+    private bool? _indexing;
+    private bool? _denyDownload;
+    private bool? _private;
+    private RoomLifetime _lifetime;
+    private WatermarkRequest _watermark;
     private LogoSettings _logo;
     private bool _copyLogo;
     private IEnumerable<string> _tags;
@@ -64,7 +69,12 @@ public class CreateRoomFromTemplateOperation : DistributedTaskProgress
         IEnumerable<string> tags,
         string cover,
         string color,
-        long? quota)
+        long? quota,
+        bool? indexing,
+        bool? denyDownload,
+        RoomLifetime lifetime,
+        WatermarkRequest watermark,
+        bool? @private)
     {
         TenantId = tenantId;
         _userId = userId;
@@ -76,17 +86,24 @@ public class CreateRoomFromTemplateOperation : DistributedTaskProgress
         _cover = cover;
         _color = color;
         _quota = quota;
+        _indexing = indexing;
+        _denyDownload = denyDownload;
+        _lifetime = lifetime;
+        _watermark = watermark;
+        _private = @private;
         RoomId = -1;
     }
 
     protected override async Task DoJob()
     {
-        var tenantManager = _serviceProvider.GetService<TenantManager>();
-        var securityContext = _serviceProvider.GetService<SecurityContext>();
-        var fileStorageService = _serviceProvider.GetService<FileStorageService>();
-        var roomLogoManager = _serviceProvider.GetService<RoomLogoManager>();
-        var logger = _serviceProvider.GetService<ILogger<CreateRoomFromTemplateOperation>>();
-        var daoFactory = _serviceProvider.GetService<IDaoFactory>();
+
+        await using var scope = _serviceProvider.CreateAsyncScope();
+        var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
+        var securityContext = scope.ServiceProvider.GetService<SecurityContext>();
+        var fileStorageService = scope.ServiceProvider.GetService<FileStorageService>();
+        var roomLogoManager = scope.ServiceProvider.GetService<RoomLogoManager>();
+        var logger = scope.ServiceProvider.GetService<ILogger<CreateRoomFromTemplateOperation>>();
+        var daoFactory = scope.ServiceProvider.GetService<IDaoFactory>();
         var folderDao = daoFactory.GetFolderDao<int>();
 
         try
@@ -110,7 +127,7 @@ public class CreateRoomFromTemplateOperation : DistributedTaskProgress
                 };
             }
 
-            var room = await fileStorageService.CreateRoomFromTemplateAsync(_templateId, _title, _tags, dtoLogo, _cover, _color);
+            var room = await fileStorageService.CreateRoomFromTemplateAsync(_templateId, _title, _tags, dtoLogo, _cover, _color, _indexing, _denyDownload, _lifetime, _watermark, _private);
             RoomId = room.Id;
 
             if (_copyLogo)

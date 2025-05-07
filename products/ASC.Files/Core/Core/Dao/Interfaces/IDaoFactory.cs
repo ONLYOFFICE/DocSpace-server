@@ -33,6 +33,7 @@ public interface IDaoFactory
     IFolderDao<T> GetFolderDao<T>();
     IFolderDao<T> GetCacheFolderDao<T>();
     IFileDao<T> GetFileDao<T>();
+    IFileDao<T> GetCacheFileDao<T>();
     ITagDao<T> GetTagDao<T>();
     ISecurityDao<T> GetSecurityDao<T>();
     ILinkDao<T> GetLinkDao<T>();

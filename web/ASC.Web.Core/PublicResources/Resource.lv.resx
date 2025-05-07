@@ -1078,4 +1078,7 @@
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
     <value>Neizdevās iestatīt kvotu katram lietotājam. Ievadītā vērtība ir lielāka par kopējo DocSpace krātuves apjomu.</value>
   </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>Tīmekļa aizķeres URL nav pieejams. HEAD pieprasījumam nav atbildes 200 http statuss.</value>
+  </data>
 </root>

@@ -1078,4 +1078,7 @@
   <data name="ErrorIpRestriction" xml:space="preserve">
     <value>Lisää ainakin 1 sallittu IP-osoite.</value>
   </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>Webhook URL ei ole saatavilla. HEAD-pyyntö ei vastaa 200 http statusta.</value>
+  </data>
 </root>

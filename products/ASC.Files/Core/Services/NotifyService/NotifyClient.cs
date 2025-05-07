@@ -568,9 +568,9 @@ public class NotifyClient(WorkContext notifyContext,
         }
         return notifiableUsers.ToArray();
     }
-    public async Task SendFormFillingEvent<T>(FileEntry<T> room, File<T> file, IEnumerable<Guid> aces, INotifyAction action, Guid? userId = null)
+    public async Task SendFormFillingEvent<T>(FileEntry<T> room, File<T> file, List<Guid> aces, INotifyAction action, Guid? userId = null)
     {
-        if (aces.Count() == 0)
+        if (aces.Count == 0)
         {
             return;
         }
@@ -592,7 +592,7 @@ public class NotifyClient(WorkContext notifyContext,
 
         foreach (var ace in aces)
         {
-            var recipient = await notifySource.GetRecipientsProvider().GetRecipientAsync(ace.ToString());
+            var recipient = await recipientsProvider.GetRecipientAsync(ace.ToString());
 
             await client.SendNoticeAsync(
                 action,

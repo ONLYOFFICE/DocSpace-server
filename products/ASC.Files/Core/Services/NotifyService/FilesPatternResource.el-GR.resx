@@ -176,4 +176,63 @@ $OrangeButton</value>
   <data name="subject_FormSubmitted" xml:space="preserve">
     <value>Ειδοποίηση DocSpace. Η φόρμα έχει συμπληρωθεί</value>
   </data>
+  <data name="pattern_FormSubmitted_push" xml:space="preserve">
+    <value>Η φόρμα "$DocumentTitle" έχει συμπληρωθεί στο δωμάτιο "$RoomTitle"</value>
+  </data>
+  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
+    <value>Έχετε προσκληθεί στην αίθουσα "$RoomTitle"</value>
+  </data>
+  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
+    <value>Ο ρόλος σας στο δωμάτιο "$RoomTitle" έχει αλλάξει σε "$RoomRole"</value>
+  </data>
+  <data name="subject_YourTurnFormFilling" xml:space="preserve">
+    <value>Ειδοποίηση DocSpace.</value>
+  </data>
+  <data name="subject_StoppedFormFilling" xml:space="preserve">
+    <value>Ειδοποίηση DocSpace.</value>
+  </data>
+  <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
+    <value>Ειδοποίηση DocSpace.</value>
+  </data>
+  <data name="subject_FormStartedFilling" xml:space="preserve">
+    <value>Ειδοποίηση DocSpace.</value>
+  </data>
+  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
+    <value>Ο $FromUserName μετακίνησε το δωμάτιο "$RoomTitle" στο αρχείο</value>
+  </data>
+  <data name="pattern_EditorMentions_push" xml:space="preserve">
+    <value>Το $ToUserName σάς ανέφερε στο έγγραφο $DocumentTitle</value>
+  </data>
+  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
+    <value>Δημιουργήθηκε ένα νέο έγγραφο "$DocumentTitle" στο δωμάτιο "$RoomTitle"</value>
+  </data>
+  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
+    <value>Ένα νέο αρχείο "$DocumentTitle" έχει μεταφορτωθεί στο δωμάτιο "$RoomTitle"</value>
+  </data>
+  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
+    <value>Ένα νέο αρχείο έχει μεταφορτωθεί στο δωμάτιο "$RoomTitle" ($Count)</value>
+  </data>
+  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
+    <value>Ένας νέος φάκελος "$FolderTitle" δημιουργήθηκε στο δωμάτιο "$RoomTitle"</value>
+  </data>
+  <data name="pattern_FormStartedFilling" xml:space="preserve">
+    <value>
+      Ειδοποίηση δραστηριότητας. "$FromUserName":"$FromUserLink" ξεκίνησε η διαδικασία συμπλήρωσης της φόρμας: "$DocumentTitle":"$DocumentURL" στο δωμάτιο: "$RoomTitle":"$RoomURL" – $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_StoppedFormFilling" xml:space="preserve">
+    <value>
+      Ειδοποίηση δραστηριότητας. Ο "$FromUserName":"$FromUserLink" διέκοψε τη συμπλήρωση της φόρμας: "$DocumentTitle":"$DocumentURL" στο δωμάτιο: "$RoomTitle":"$RoomURL" – $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_YourTurnFormFilling" xml:space="preserve">
+    <value>
+      Ειδοποίηση δραστηριότητας. Σειρά σας! Απαιτείται η συμπλήρωση φόρμας: "$DocumentTitle":"$DocumentURL" στο δωμάτιο: "$RoomTitle":"$RoomURL" – $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
+    <value>
+      Ειδοποίηση δραστηριότητας. Η φόρμα "$DocumentTitle":"$DocumentURL" συμπληρώθηκε πλήρως στο δωμάτιο: "$RoomTitle":"$RoomURL" – $__DateTime.
+    </value>
+  </data>
 </root>

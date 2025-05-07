@@ -67,4 +67,13 @@
   <data name="LargeBackup" xml:space="preserve">
     <value>Yedekleme, portalın toplam boyutundan daha büyük</value>
   </data>
+  <data name="BackupException" xml:space="preserve">
+    <value>Yedekleme oluşturulurken bir hata oluştu. Lütfen tekrar oluşturmayı deneyin veya destek ile iletişime geçin.</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>Yedek geri yüklenirken bir hata oluştu. Lütfen tekrar deneyin veya destek ile iletişime geçin.</value>
+  </data>
+  <data name="BackupInvalid" xml:space="preserve">
+    <value>Yedekleme dosyası geçersiz.</value>
+  </data>
 </root>
