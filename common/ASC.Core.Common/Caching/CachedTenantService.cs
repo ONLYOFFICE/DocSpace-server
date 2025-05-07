@@ -154,18 +154,16 @@ class TenantServiceCache
 }
 
 [Scope(typeof(ITenantService))]
-class CachedTenantService() : ITenantService
+class CachedTenantService : ITenantService
 {
     private readonly DbTenantService _service;
     private readonly ICacheNotify<TenantCacheItem> _cacheNotifyItem;
     private readonly TenantServiceCache _tenantServiceCache;
     private static readonly TimeSpan _settingsExpiration = TimeSpan.FromMinutes(2);
-    private readonly ICache _cache;
     private readonly IFusionCache _fusionCache;
 
-    public CachedTenantService(DbTenantService service, TenantServiceCache tenantServiceCache, ICache cache, IFusionCacheProvider cacheProvider) : this()
+    public CachedTenantService(DbTenantService service, TenantServiceCache tenantServiceCache, IFusionCacheProvider cacheProvider)
     {
-        _cache = cache;
         _fusionCache = cacheProvider.GetMemoryCache();
         _service = service ?? throw new ArgumentNullException(nameof(service));
         _tenantServiceCache = tenantServiceCache;
