@@ -40,7 +40,7 @@ public class LoginEventsCache
 
     public void Insert(DbLoginEvent loginEvent)
     {
-        _cache.Set(BuildKey(loginEvent.Id), loginEvent, opt=> opt.SetDuration(_expiration).SetFailSafe(true));
+        _cache.Set(BuildKey(loginEvent.Id), loginEvent, opt=> opt.SetDuration(_expiration));
     }
 
     public DbLoginEvent Get(int id)

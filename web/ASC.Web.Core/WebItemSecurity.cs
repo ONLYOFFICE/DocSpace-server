@@ -66,7 +66,7 @@ public class WebItemSecurityCache
         if (dic == null)
         {
             dic = new Dictionary<string, bool>();
-            _cache.Set(GetCacheKey(tenantId), dic, opt=> opt.SetDuration(TimeSpan.FromMinutes(1)).SetFailSafe(true),[CacheExtention.GetWebItemSecurityTag(tenantId)]);
+            _cache.Set(GetCacheKey(tenantId), dic, opt=> opt.SetDuration(TimeSpan.FromMinutes(1)),[CacheExtention.GetWebItemSecurityTag(tenantId)]);
         }
 
         return dic;

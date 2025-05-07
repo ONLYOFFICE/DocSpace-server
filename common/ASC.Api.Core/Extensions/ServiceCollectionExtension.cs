@@ -126,12 +126,6 @@ public static class ServiceCollectionExtension
 
         if (connection != null)
         {
-            //    hack for csp
-            services.AddStackExchangeRedisCache(config =>
-            {
-                config.ConnectionMultiplexerFactory = () => Task.FromResult(connection);
-            });
-
             cacheBuilder.WithBackplane(new RedisBackplane(new RedisBackplaneOptions { ConnectionMultiplexerFactory = () => Task.FromResult(connection) }));
         }
 

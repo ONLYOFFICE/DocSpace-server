@@ -44,7 +44,7 @@ public class FileMarkerCache
 
     public async Task Insert(string key, object value)
     {
-        await _cache.SetAsync(key, value, opt=> opt.SetDuration(_cacheExpiration).SetFailSafe(true));
+        await _cache.SetAsync(key, value, opt=> opt.SetDuration(_cacheExpiration));
     }
 
     public async Task RemoveAsync(string key)

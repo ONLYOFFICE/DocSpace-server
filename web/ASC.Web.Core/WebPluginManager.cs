@@ -339,7 +339,7 @@ public class WebPluginManager
             ctx.Tags = [CacheExtention.GetWebPluginsTag(tenantId)];
             return ctx.Modified(webPlugins);
 
-        }, opt => opt.SetFailSafe(true));
+        });
 
         return webPlugins;
     }
