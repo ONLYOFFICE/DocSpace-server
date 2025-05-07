@@ -152,36 +152,46 @@
         </if>
     </springProfile>
     <springProfile name="staging,stage,s">
-        <if condition='isDefined("LOG_FILE_PATH")'>
-            <then>
-                <root level="INFO">
-                    <appender-ref ref="JSON_CONSOLE_ASYNC"/>
-                    <appender-ref ref="JSON_FILE"/>
-                </root>
-            </then>
-            <else>
-                <root level="INFO">
-                    <appender-ref ref="JSON_CONSOLE_ASYNC"/>
-                    <appender-ref ref="CLOUDWATCH_ASYNC"/>
-                </root>
-            </else>
-        </if>
+        <springProfile name="!saas">
+            <if condition='isDefined("LOG_FILE_PATH")'>
+                <then>
+                    <root level="INFO">
+                        <appender-ref ref="JSON_FILE"/>
+                    </root>
+                </then>
+                <else>
+                    <root level="INFO">
+                        <appender-ref ref="JSON_CONSOLE_ASYNC"/>
+                    </root>
+                </else>
+            </if>
+        </springProfile>
+        <springProfile name="saas">
+            <root level="INFO">
+                <appender-ref ref="CLOUDWATCH_ASYNC"/>
+            </root>
+        </springProfile>
     </springProfile>
     <springProfile name="production,prod,p">
-        <if condition='isDefined("LOG_FILE_PATH")'>
-            <then>
-                <root level="ERROR">
-                    <appender-ref ref="JSON_CONSOLE_ASYNC"/>
-                    <appender-ref ref="JSON_FILE"/>
-                </root>
-            </then>
-            <else>
-                <root level="ERROR">
-                    <appender-ref ref="JSON_CONSOLE_ASYNC"/>
-                    <appender-ref ref="CLOUDWATCH_ASYNC"/>
-                </root>
-            </else>
-        </if>
+        <springProfile name="!saas">
+            <if condition='isDefined("LOG_FILE_PATH")'>
+                <then>
+                    <root level="ERROR">
+                        <appender-ref ref="JSON_FILE"/>
+                    </root>
+                </then>
+                <else>
+                    <root level="ERROR">
+                        <appender-ref ref="JSON_CONSOLE_ASYNC"/>
+                    </root>
+                </else>
+            </if>
+        </springProfile>
+        <springProfile name="saas">
+            <root level="ERROR">
+                <appender-ref ref="CLOUDWATCH_ASYNC"/>
+            </root>
+        </springProfile>
     </springProfile>
     <!-- ###### -->
 </configuration>

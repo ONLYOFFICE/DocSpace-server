@@ -54,10 +54,10 @@ public class FirebaseDao(IDbContextFactory<FirebaseDbContext> dbContextFactory)
         return user;
     }
 
-    public async Task<List<FireBaseUser>> GetUserDeviceTokensAsync(Guid userId, int tenantId, string application)
+    public virtual async Task<List<FireBaseUser>> GetSubscribedUserDeviceTokensAsync(Guid userId, int tenantId, string application)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        return await Queries.FireBaseUsersAsync(dbContext, tenantId, userId, application).ToListAsync();
+        return await Queries.FireBaseSubscribedUsersAsync(dbContext, tenantId, userId, application).ToListAsync();
     }
 
     public async Task<FireBaseUser> UpdateUserAsync(Guid userId, int tenantId, string fbDeviceToken, bool isSubscribed, string application)
@@ -76,6 +76,28 @@ public class FirebaseDao(IDbContextFactory<FirebaseDbContext> dbContextFactory)
         return user;
     }
 
+    public async Task DeleteInvalidTokenAsync(Guid userId, int tenantId, string fbDeviceToken)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        var user = await Queries.DeleteFireBaseUserTokenAsync(dbContext, tenantId, userId, fbDeviceToken);
+    }
+
+}
+
+[Scope]
+public class CacheFirebaseDao(IDbContextFactory<FirebaseDbContext> dbContextFactory) : FirebaseDao(dbContextFactory)
+{
+    private readonly ConcurrentDictionary<(int, Guid, string), List<FireBaseUser>> _cache = new();
+    public override async Task<List<FireBaseUser>> GetSubscribedUserDeviceTokensAsync(Guid userId, int tenantId, string application)
+    {
+
+        if (!_cache.TryGetValue((tenantId, userId, application), out var result))
+        {
+            result = await base.GetSubscribedUserDeviceTokensAsync(userId, tenantId, application);
+            _cache.TryAdd((tenantId, userId, application), result);
+        }
+        return result;
+    }
 }
 
 static file class Queries
@@ -86,11 +108,21 @@ static file class Queries
                 ctx.Users.FirstOrDefault(r =>  r.UserId == userId && r.TenantId == tenantId && r.Application == application && r.FirebaseDeviceToken == fbDeviceToken));
 
     public static readonly Func<FirebaseDbContext, int, Guid, string, IAsyncEnumerable<FireBaseUser>>
-        FireBaseUsersAsync = Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+        FireBaseSubscribedUsersAsync = Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FirebaseDbContext ctx, int tenantId, Guid userId, string application) =>
                 ctx.Users
                     
                     .Where(r => r.UserId == userId)
                     .Where(r => r.TenantId == tenantId)
+                    .Where(r => r.IsSubscribed == true)
                     .Where(r => r.Application == application));
+
+    public static readonly Func<FirebaseDbContext, int, Guid, string, Task<int>> DeleteFireBaseUserTokenAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FirebaseDbContext ctx, int tenantId, Guid userId, string fbDeviceToken) =>
+                ctx.Users
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => r.UserId == userId)
+                    .Where(r => r.FirebaseDeviceToken == fbDeviceToken)
+                    .ExecuteDelete());
 }

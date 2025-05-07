@@ -185,6 +185,11 @@ class CachedTenantService() : ITenantService
         await _service.ValidateDomainAsync(domain);
     }
 
+    public async Task<bool> IsForbiddenDomainAsync(string domain)
+    {
+        return await _service.IsForbiddenDomainAsync(domain);
+    }
+
     public void ValidateTenantName(string name)
     {
         _service.ValidateTenantName(name);
