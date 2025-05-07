@@ -394,15 +394,10 @@ public enum WebhookGroupStatus
 }
 
 [Singleton]
-public class WebhookCache
+public class WebhookCache(IFusionCacheProvider cacheProvider)
 {
-    private readonly IFusionCache _cache;
+    private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
     private readonly TimeSpan _cacheExpiration = TimeSpan.FromHours(1);
-
-    public WebhookCache(IFusionCacheProvider cacheProvider)
-    {
-        _cache = cacheProvider.GetMemoryCache();
-    }
 
     public T Get<T>(string key) where T : class
     {

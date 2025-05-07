@@ -27,16 +27,11 @@
 namespace ASC.Core.Data;
 
 [Singleton]
-public class LoginEventsCache
+public class LoginEventsCache(IFusionCacheProvider cacheProvider)
 {
-    private readonly IFusionCache _cache;
+    private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
     private readonly TimeSpan _expiration = TimeSpan.FromMinutes(10);
     private const string GuidLoginEvent = "F4D8BBF6-EB63-4781-B55E-5885EAB3D759";
-
-    public LoginEventsCache(IFusionCacheProvider cacheProvider)
-    {
-        _cache = cacheProvider.GetMemoryCache();
-    }
 
     public void Insert(DbLoginEvent loginEvent)
     {

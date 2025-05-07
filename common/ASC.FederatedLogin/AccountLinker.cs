@@ -41,8 +41,8 @@ public class AccountLinker(
     TenantManager tenantManager,
     IFusionCacheProvider cacheProvider)
 {
-
     private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
+
     public async Task<IEnumerable<string>> GetLinkedObjectsByHashIdAsync(string hashId)
     {
         await using var accountLinkContext = await accountLinkContextManager.CreateDbContextAsync();

@@ -30,14 +30,9 @@ using SecurityAction = ASC.Common.Security.Authorizing.Action;
 namespace ASC.Web.Core;
 
 [Singleton]
-public class WebItemSecurityCache
+public class WebItemSecurityCache(IFusionCacheProvider cacheProvider)
 {
-    private readonly IFusionCache _cache;
-
-    public WebItemSecurityCache(IFusionCacheProvider cacheProvider)
-    {
-        _cache = cacheProvider.GetMemoryCache();
-    }
+    private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
 
     public void ClearCache(int tenantId)
     {
