@@ -568,9 +568,9 @@ public class NotifyClient(WorkContext notifyContext,
         }
         return notifiableUsers.ToArray();
     }
-    public async Task SendFormFillingEvent<T>(FileEntry<T> room, File<T> file, IEnumerable<Guid> aces, INotifyAction action, Guid? userId = null)
+    public async Task SendFormFillingEvent<T>(FileEntry<T> room, File<T> file, List<Guid> aces, INotifyAction action, Guid? userId = null)
     {
-        if (aces.Count() == 0)
+        if (aces.Count == 0)
         {
             return;
         }

@@ -4805,9 +4805,10 @@ public class FileStorageService //: IFileStorageService
             var recipients = roles
                 .Where(role => role.UserId != currentUserId)
                 .Select(role => role.UserId)
-                .Distinct();
+                .Distinct()
+                .ToList();
 
-            if (recipients.Any())
+            if (recipients.Count > 0)
             {
                 await notifyClient.SendFormFillingEvent(
                     currentRoom, form, recipients, NotifyConstants.EventFormStartedFilling, currentUserId);
