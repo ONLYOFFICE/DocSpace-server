@@ -37,7 +37,7 @@ public class RoomNotifyQueue<T> : IRoomNotifyQueue<T>
 {
     protected readonly TenantManager _tenantManager;
     private readonly NotifyClient _notifyClient;
-    private readonly FileSharing _fileSharing;
+    private readonly FileSecurity _fileSecurity;
 
     protected readonly int _tenantId;
     private readonly Folder<T> _room;
@@ -46,14 +46,14 @@ public class RoomNotifyQueue<T> : IRoomNotifyQueue<T>
     private readonly Queue<File<T>> _messages = new Queue<File<T>>();
 
     private Action<string> _removeCallback;
-    public RoomNotifyQueue(int tenantId, Folder<T> room, NotifyClient notifyClient, Guid currentAccountId, TenantManager tenantManager, FileSharing fileSharing)
+    public RoomNotifyQueue(int tenantId, Folder<T> room, NotifyClient notifyClient, Guid currentAccountId, TenantManager tenantManager, FileSecurity fileSecurity)
     {
         _room = room;
         _notifyClient = notifyClient;
         _currentAccountId = currentAccountId;
         _tenantManager = tenantManager;
         _tenantId = tenantId;
-        _fileSharing = fileSharing;
+        _fileSecurity = fileSecurity;
     }
 
     public void RegisterCallback(Action<string> callback)
@@ -75,8 +75,7 @@ public class RoomNotifyQueue<T> : IRoomNotifyQueue<T>
             return;
         }
 
-        var aces = await _fileSharing.GetSharedInfoAsync(_room);
-        var whoCanRead = aces.Where(a => a.Id != _currentAccountId).Select(ace => ace.Id).ToList();
+        var whoCanRead = await _fileSecurity.WhoCanReadAsync(_room, true);
 
         if (count <= 3)
         {

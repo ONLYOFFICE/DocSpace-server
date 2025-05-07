@@ -38,20 +38,20 @@ public class RoomNotifyQueueManager<T> : INotifyQueueManager<T>
 
     private readonly NotifyClient _notifyClient;
     private readonly TenantManager _tenantManager;
-    private readonly FileSharing _fileSharing;
+    private readonly FileSecurity _fileSecurity;
     
 
-    public RoomNotifyQueueManager(NotifyClient notifyClient, TenantManager tenantManager, FileSharing fileSharing)
+    public RoomNotifyQueueManager(NotifyClient notifyClient, TenantManager tenantManager, FileSecurity fileSecurity)
     {
         _notifyClient = notifyClient;
         _tenantManager = tenantManager;
-        _fileSharing = fileSharing;
+        _fileSecurity = fileSecurity;
     }
 
     public IRoomNotifyQueue<T> GetOrCreateRoomQueue(int tenantId, Folder<T> room, Guid currentAccountId)
     {
         return _queues.GetOrAdd(room.Id.ToString(), _ => {
-            var roomNotifyQueue = new RoomNotifyQueue<T>(tenantId, room, _notifyClient, currentAccountId, _tenantManager, _fileSharing);
+            var roomNotifyQueue = new RoomNotifyQueue<T>(tenantId, room, _notifyClient, currentAccountId, _tenantManager, _fileSecurity);
             roomNotifyQueue.RegisterCallback(RemoveRoomQueue);
             return roomNotifyQueue;
         });
