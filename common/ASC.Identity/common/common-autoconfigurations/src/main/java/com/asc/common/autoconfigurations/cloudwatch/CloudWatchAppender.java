@@ -243,7 +243,7 @@ public class CloudWatchAppender extends UnsynchronizedAppenderBase<ILoggingEvent
     try {
       queueLogEvent(event);
     } catch (Exception e) {
-      addWarn("Failed to queue log event: " + e.getMessage());
+      addError("Failed to queue log event: " + e.getMessage());
     }
   }
 
@@ -291,7 +291,7 @@ public class CloudWatchAppender extends UnsynchronizedAppenderBase<ILoggingEvent
       }
     }
 
-    addWarn("Failed to send logs to CloudWatch after " + MAX_RETRY_ATTEMPTS + " attempts");
+    addError("Failed to send logs to CloudWatch after " + MAX_RETRY_ATTEMPTS + " attempts");
   }
 
   /**
