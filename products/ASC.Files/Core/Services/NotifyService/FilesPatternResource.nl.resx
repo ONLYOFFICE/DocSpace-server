@@ -195,7 +195,7 @@ $OrangeButton</value>
     <value>Er is een nieuwe map "$FolderTitle" aangemaakt in de kamer "$RoomTitle"</value>
   </data>
   <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
-    <value>Er zijn nieuwe bestanden geüpload naar de kamer "$RoomTitle": ($Count)</value>
+    <value>Er zijn nieuwe bestanden geüpload naar de kamer "$RoomTitle" ($Count)</value>
   </data>
   <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
     <value>Een nieuw bestand "$DocumentTitle" is geüpload naar de kamer "$RoomTitle"</value>

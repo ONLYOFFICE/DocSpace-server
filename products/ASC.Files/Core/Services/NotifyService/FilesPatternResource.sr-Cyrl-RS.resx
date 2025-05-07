@@ -251,7 +251,7 @@ $OrangeButton</value>
     <value>Нови документ "$DocumentTitle" је креиран у просторији "$RoomTitle"</value>
   </data>
   <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
-    <value>Нове датотеке су отпремљене у просторију "$RoomTitle": ($Count)</value>
+    <value>Нове датотеке су отпремљене у просторију "$RoomTitle" ($Count)</value>
   </data>
   <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
     <value>Нова датотека "$DocumentTitle" је отпремљена у просторију "$RoomTitle"</value>

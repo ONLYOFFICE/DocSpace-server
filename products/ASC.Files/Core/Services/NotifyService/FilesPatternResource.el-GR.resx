@@ -210,7 +210,7 @@ $OrangeButton</value>
     <value>Ένα νέο αρχείο "$DocumentTitle" έχει μεταφορτωθεί στο δωμάτιο "$RoomTitle"</value>
   </data>
   <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
-    <value>Ένα νέο αρχείο έχει μεταφορτωθεί στο δωμάτιο "$RoomTitle": ($Count)</value>
+    <value>Ένα νέο αρχείο έχει μεταφορτωθεί στο δωμάτιο "$RoomTitle" ($Count)</value>
   </data>
   <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
     <value>Ένας νέος φάκελος "$FolderTitle" δημιουργήθηκε στο δωμάτιο "$RoomTitle"</value>

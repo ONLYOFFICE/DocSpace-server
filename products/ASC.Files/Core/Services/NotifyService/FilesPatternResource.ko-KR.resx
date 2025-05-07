@@ -210,7 +210,7 @@ $OrangeButton</value>
     <value>"$RoomTitle" 룸에 새 파일("$DocumentTitle")이 업로드되었습니다</value>
   </data>
   <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
-    <value>"$RoomTitle" 룸에 새 파일이 업로드되었습니다: ($Count)</value>
+    <value>"$RoomTitle" 룸에 새 파일이 업로드되었습니다 ($Count)</value>
   </data>
   <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
     <value>"$RoomTitle" 룸에 새 폴더("$FolderTitle")가 생성되었습니다</value>

@@ -201,7 +201,7 @@ $OrangeButton</value>
     <value>Telpā "$RoomTitle" ir izveidota jauna mape "$FolderTitle"</value>
   </data>
   <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
-    <value>Telpā "$RoomTitle" ir augšupielādēti jauni faili: ($Count)</value>
+    <value>Telpā "$RoomTitle" ir augšupielādēti jauni faili ($Count)</value>
   </data>
   <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
     <value>Telpā "$RoomTitle" ir augšupielādēts jauns fails "$DocumentTitle"</value>

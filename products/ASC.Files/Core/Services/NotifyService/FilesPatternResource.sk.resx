@@ -213,7 +213,7 @@ $OrangeButton</value>
     <value>Do miestnosti "$RoomTitle" bol nahraný nový súbor "$DocumentTitle"</value>
   </data>
   <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
-    <value>Do miestnosti "$RoomTitle" boli nahrané nové súbory: ($Count)</value>
+    <value>Do miestnosti "$RoomTitle" boli nahrané nové súbory ($Count)</value>
   </data>
   <data name="pattern_FormStartedFilling" xml:space="preserve">
     <value>
