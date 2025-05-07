@@ -1172,7 +1172,7 @@ public partial class SettingsController(MessageService messageService,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var settings = new TenantDevToolsAccessSettings() { LimitedAccessForUsers = inDto.LimitedAccessForUsers };
+        var settings = new TenantDevToolsAccessSettings { LimitedAccessForUsers = inDto.LimitedAccessForUsers };
 
         await settingsManager.SaveAsync(settings);
 

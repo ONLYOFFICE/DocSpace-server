@@ -24,44 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Tests;
+namespace ASC.Files.Core.Core;
 
-public class HttpClientHelper
+public enum AdditionalFilterOption
 {
-    private static JsonSerializerOptions JsonResponseSerializerOptions { get; } = new()
-    {
-        AllowTrailingCommas = true, 
-        PropertyNameCaseInsensitive = true,
-        Converters = { new ApiDateTimeConverter(), new FileShareConverter() }
-    };
-    
-    public static async Task<T> ReadFromJson<T>(HttpResponseMessage? response)
-    {
-        ArgumentNullException.ThrowIfNull(response);
-        
-        var data = await response.Content.ReadAsStringAsync();
-        
-        try
-        {
-            var successApiResponse = JsonSerializer.Deserialize<SuccessApiResponse>(data, JsonSerializerOptions.Web);
-        
-            if (successApiResponse is { Response: JsonElement jsonElement })
-            {
-                return jsonElement.Deserialize<T>(JsonResponseSerializerOptions) ?? throw new InvalidOperationException();
-            }
+    [SwaggerEnum("All")]
+    All,
 
-            throw new InvalidOperationException();
-        }
-        catch (Exception e)
-        {
-            var errorApiResponse = JsonSerializer.Deserialize<ErrorApiResponse>(data, JsonSerializerOptions.Web);
+    [SwaggerEnum("My files and folders")]
+    MyFilesAndFolders,
 
-            if (errorApiResponse != null)
-            {
-                throw new Exception(errorApiResponse.Error.Message, e);
-            }
-
-            throw;
-        }
-    }
+    [SwaggerEnum("Forms with filling role")]
+    FormsWithFillingRole
 }

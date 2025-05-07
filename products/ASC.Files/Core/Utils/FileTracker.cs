@@ -24,65 +24,24 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ZiggyCreatures.Caching.Fusion.Events;
+
 namespace ASC.Web.Files.Utils;
 
 [Singleton]
-public class FileTrackerHelper
+public class FileTrackerHelper(IFusionCache cache, IServiceProvider serviceProvider, ILogger<FileTrackerHelper> logger)
 {
     private const string Tracker = "filesTracker";
 
-    private readonly ICacheNotify<FileTrackerNotify> _cacheNotify;
-    private readonly ICache _cache;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger<FileTrackerHelper> _logger;
     private static readonly TimeSpan _trackTimeout = TimeSpan.FromSeconds(12);
     private static readonly TimeSpan _cacheTimeout = TimeSpan.FromSeconds(60);
     private static readonly TimeSpan _checkRightTimeout = TimeSpan.FromMinutes(1);
-    private readonly Action<object, object, EvictionReason, object> _callbackAction;
     private readonly Guid _instanceId = Guid.NewGuid();
     
-    public FileTrackerHelper(ICacheNotify<FileTrackerNotify> cacheNotify, ICache cache, IServiceProvider serviceProvider, ILogger<FileTrackerHelper> logger)
-    {
-        _cacheNotify = cacheNotify;
-        _cache = cache;
-        _serviceProvider = serviceProvider;
-        _logger = logger;
-        _callbackAction = EvictionCallback();
-    }
-
-    public void Subscribe()
-    {
-        _cacheNotify.Subscribe(a =>
-        {
-            try
-            {
-                _cache.Insert(GetCacheKey(a.FileId), a.FileTracker, _cacheTimeout, _instanceId == a.InstanceId ? _callbackAction : null);
-            }
-            catch (ObjectDisposedException)
-            {
-            }
-
-        }, CacheNotifyAction.InsertOrUpdate);
-        
-        _cacheNotify.Subscribe(a =>
-        {
-            try
-            {
-                _cache.Remove(GetCacheKey(a.FileId));
-            }
-            catch (ObjectDisposedException)
-            {
-                
-            }
-        }, CacheNotifyAction.Remove);
-        
-        _logger.Debug("FileTracker subscribed");
-    }
-
     public async Task<bool> ProlongEditingAsync<T>(T fileId, Guid tabId, Guid userId, Tenant tenant, string baseUri, string docKey, bool editingAlone = false, string token = null)
     {
         var checkRight = true;
-        var tracker = GetTracker(fileId);
+        var tracker = await GetTrackerAsync(fileId);
         if (tracker != null && await IsEditingAsync(fileId))
         {
             if (tracker.EditingBy.TryGetValue(tabId, out var trackInfo))
@@ -112,9 +71,14 @@ public class FileTrackerHelper
         return checkRight;
     }
 
+    public void Subscribe()
+    {
+        cache.Events.Memory.Eviction += MemoryOnEviction;
+    }
+
     public async Task RemoveAsync<T>(T fileId, Guid tabId = default, Guid userId = default)
     {
-        var tracker = GetTracker(fileId);
+        var tracker = await GetTrackerAsync(fileId);
         if (tracker != null)
         {
             if (tabId != Guid.Empty)
@@ -145,7 +109,7 @@ public class FileTrackerHelper
 
     public async Task<bool> IsEditingAsync<T>(T fileId, bool setTracker = true)
     {
-        var tracker = GetTracker(fileId);
+        var tracker = await GetTrackerAsync(fileId);
         if (tracker != null)
         {
             var now = DateTime.UtcNow;
@@ -176,21 +140,20 @@ public class FileTrackerHelper
             return true;
         }
 
-        await RemoveTrackerAsync(fileId);
-
         return false;
     }
 
-    public bool IsEditingAlone<T>(T fileId)
+    public async Task<bool> IsEditingAloneAsync<T>(T fileId)
     {
-        var tracker = GetTracker(fileId);
+        var tracker = await GetTrackerAsync(fileId);
 
         return tracker != null && tracker.EditingBy.Count == 1 && tracker.EditingBy.FirstOrDefault().Value.EditingAlone;
     }
 
     public async Task ChangeRight<T>(T fileId, Guid userId, bool check)
     {
-        var tracker = GetTracker(fileId);
+        var tracker = await GetTrackerAsync(fileId);
+        
         if (tracker != null)
         {
             foreach (var value in tracker.EditingBy.Values.Where(value => value.UserId == userId || userId == Guid.Empty))
@@ -204,61 +167,67 @@ public class FileTrackerHelper
 
     public async Task<List<Guid>> GetEditingByAsync<T>(T fileId)
     {
-        var tracker = GetTracker(fileId);
+        var tracker = await GetTrackerAsync(fileId);
 
         return tracker != null && await IsEditingAsync(fileId)
             ? tracker.EditingBy.Values.Select(i => i.UserId).Distinct().ToList()
             : [];
     }
 
-    public string GetTrackerDocKey<T>(T fileId)
+    public async Task<string> GetTrackerDocKey<T>(T fileId)
     {
-        var tracker = GetTracker(fileId);
+        var tracker = await GetTrackerAsync(fileId);
 
         return tracker?.DocKey;
     }
 
-    private FileTracker GetTracker<T>(T fileId)
+    private async Task<FileTracker> GetTrackerAsync<T>(T fileId)
     {
         if (EqualityComparer<T>.Default.Equals(fileId, default))
         {
             return null;
         }
 
-        return _cache.Get<FileTracker>(GetCacheKey(fileId));
+        return (await cache.GetOrDefaultAsync<FileTrackerNotify>(GetCacheKey(fileId)))?.FileTracker;
     }
 
     private async Task SetTrackerAsync<T>(T fileId, FileTracker tracker)
     {
-        if (!EqualityComparer<T>.Default.Equals(fileId, default) && tracker != null)
+        await cache.SetAsync(GetCacheKey(fileId), new FileTrackerNotify { FileId = fileId.ToString(), FileTracker = tracker, InstanceId = _instanceId}, options =>
         {
-            await _cacheNotify.PublishAsync(new FileTrackerNotify { FileId = fileId.ToString(), FileTracker = tracker, InstanceId = _instanceId }, CacheNotifyAction.Insert);
-        }
+            options.Duration = _cacheTimeout;
+            options.DistributedCacheDuration = _cacheTimeout * 2;
+        });
+
     }
     
     private async Task RemoveTrackerAsync<T>(T fileId)
     {
         if (!EqualityComparer<T>.Default.Equals(fileId, default))
         {
-            await _cacheNotify.PublishAsync(new FileTrackerNotify { FileId = fileId.ToString(), FileTracker = new FileTracker(), InstanceId = _instanceId }, CacheNotifyAction.Remove);
+            await cache.RemoveAsync(GetCacheKey(fileId));
         }
     }
 
-    private Action<object, object, EvictionReason, object> EvictionCallback()
+    private void MemoryOnEviction(object sender, FusionCacheEntryEvictionEventArgs e)
     {
-        return (cacheFileId, fileTracker, reason, state) =>
+        if (e.Reason != EvictionReason.Expired || e.Value == null)
         {
-            if (reason != EvictionReason.Expired || cacheFileId == null)
-            {
-                return;
-            }
+            return;
+        }
 
-            var fId = cacheFileId.ToString()?[Tracker.Length..];
+        if (e.Value is not FileTrackerNotify trackerNotify || trackerNotify.InstanceId != _instanceId)
+        {
+            return;
+        }
+        
+        var fId =  e.Key[Tracker.Length..];
             
-            _ = int.TryParse(fId, out var internalFileId) ? 
-                Callback(internalFileId, fileTracker as FileTracker).ConfigureAwait(false) : 
-                Callback(fId, fileTracker as FileTracker).ConfigureAwait(false);
-        };
+        _ = int.TryParse(fId, out var internalFileId) ? 
+            Callback(internalFileId, trackerNotify.FileTracker).ConfigureAwait(false) : 
+            Callback(fId, trackerNotify.FileTracker).ConfigureAwait(false);
+        
+        return;
 
         async Task Callback<T>(T fileId, FileTracker fileTracker)
         {
@@ -275,7 +244,7 @@ public class FileTrackerHelper
                     .Select(x => x.Value.Token)
                     .FirstOrDefault();
 
-                await using var scope = _serviceProvider.CreateAsyncScope();
+                await using var scope = serviceProvider.CreateAsyncScope();
                 var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
                 tenantManager.SetCurrentTenant(fileTracker.Tenant);
 
@@ -283,10 +252,15 @@ public class FileTrackerHelper
                 commonLinkUtility.ServerUri = fileTracker.BaseUri;
                 
                 var tracker = scope.ServiceProvider.GetRequiredService<DocumentServiceTrackerHelper>();
+                var tenantId = fileTracker.Tenant.Id;
                 
-                using (_logger.BeginScope(new[] { new KeyValuePair<string, object>("DocumentServiceConnector", $"{fileId}") }))
+                using (logger.BeginScope(new[]
+                       {
+                           new KeyValuePair<string, object>("DocumentServiceConnector", $"{fileId}"), 
+                           new KeyValuePair<string, object>("TenantId", $"{tenantId}") 
+                       }))
                 {
-                    if (await tracker.StartTrackAsync(fileId.ToString(), fileTracker.DocKey, token))
+                    if (await tracker.StartTrackAsync(fileId.ToString(), fileTracker.DocKey, token, tenantId))
                     {
                         await SetTrackerAsync(fileId, fileTracker);
                     }
@@ -296,9 +270,9 @@ public class FileTrackerHelper
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception exception)
             {
-                _logger.ErrorWithException(e);
+                logger.ErrorWithException(exception);
             }
         }
     }

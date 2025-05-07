@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Common.Identity;
+
 using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Web.Studio.Core.Notify;
@@ -47,7 +49,9 @@ public class StudioPeriodicNotify(ILoggerProvider log,
         AuditEventsRepository auditEventsRepository,
         LoginEventsRepository loginEventsRepository,
         IFusionCache hybridCache,
-        IEventBus eventBus)
+        IEventBus eventBus,
+        IdentityClient identityClient,
+        SecurityContext securityContext)
 {
     private readonly ILogger _log = log.CreateLogger("ASC.Notify");
 
@@ -331,6 +335,8 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                             if (nowDate >= startDateToRemoveUnusedPortals && nowDate.AddDays(-7).Day == tenant.CreationDateTime.Day)
                             {
+                                await securityContext.AuthenticateMeWithoutCookieAsync(tenant.OwnerId);
+                                await identityClient.DeleteTenantClientsAsync();
                                 await tenantManager.RemoveTenantAsync(tenant.Id, true);
 
                                 if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
@@ -420,6 +426,8 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                     }
                     else if (tariff.State == TariffState.NotPaid && dueDateIsNotMax && dueDate.AddMonths(6).AddDays(7) <= nowDate)
                     {
+                        await securityContext.AuthenticateMeWithoutCookieAsync(tenant.OwnerId);
+                        await identityClient.DeleteTenantClientsAsync();
                         await tenantManager.RemoveTenantAsync(tenant.Id, true);
 
                         if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)

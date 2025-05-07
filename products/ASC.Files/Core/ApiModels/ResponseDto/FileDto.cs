@@ -341,7 +341,7 @@ public class FileDtoHelper(
             if (currentRoom is { FolderType: FolderType.VirtualDataRoom })
             {
                 var (currentStep, roleList) = await fileDao.GetUserFormRoles(file.Id, authContext.CurrentAccount.ID);
-                if (currentStep == -1 && result.Security[FileSecurity.FilesSecurityActions.Edit] && properties != null && properties.CopyToFillOut)
+                if (currentStep == -1 && result.Security[FileSecurity.FilesSecurityActions.Edit] && properties is { CopyToFillOut: true })
                 {
                     result.FormFillingStatus = FormFillingStatus.Draft;
                 }
@@ -373,6 +373,13 @@ public class FileDtoHelper(
                                 }
                                 break;
                         }
+                    }
+                    try
+                    {
+                        result.ShortWebUrl = await urlShortener.GetShortenLinkAsync(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebEditorUrl(file.Id)));
+                    }
+                    catch (Exception)
+                    {
                     }
                 }
             }
@@ -440,7 +447,6 @@ public class FileDtoHelper(
             result.ViewUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl), result.RequestToken);
 
             result.WebUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version, externalMediaAccess)), result.RequestToken);
-            result.ShortWebUrl = await urlShortener.GetShortenLinkAsync(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebEditorUrl(file.Id)));
             result.ThumbnailStatus = file.ThumbnailStatus;
 
             var cacheKey = Math.Abs(result.Updated.GetHashCode());

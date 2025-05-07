@@ -61,7 +61,7 @@ public class RoomTemplatesController(IEventBus eventBus,
         if (dto.Public)
         {
             dto.Share = null;
-            dto.Groups = new List<Guid> { Constants.GroupEveryone.ID };
+            dto.Groups = [Constants.GroupEveryone.ID];
         }
 
         var taskId = await roomTemplatesWorker.StartCreateTemplateAsync(tenantManager.GetCurrentTenantId(), authContext.CurrentAccount.ID,
@@ -151,7 +151,7 @@ public class RoomTemplatesController(IEventBus eventBus,
     {
         var shared = fileStorageService.GetPureSharesAsync(inDto.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "", 0, -1);
 
-        var wrappers = new List<AceWrapper>() { new AceWrapper() { Id = Constants.GroupEveryone.ID, Access = inDto.Public ? FileShare.Read : FileShare.None, SubjectType = SubjectType.Group } };
+        var wrappers = new List<AceWrapper> { new() { Id = Constants.GroupEveryone.ID, Access = inDto.Public ? FileShare.Read : FileShare.None, SubjectType = SubjectType.Group } };
 
         await foreach (var share in shared)
         {
@@ -163,12 +163,12 @@ public class RoomTemplatesController(IEventBus eventBus,
 
         var aceCollection = new AceCollection<int>
         {
-            Files = Array.Empty<int>(),
+            Files = [],
             Folders = [inDto.Id],
             Aces = wrappers,
             Message = string.Empty
         };
 
-        var warning = await fileStorageService.SetAceObjectAsync(aceCollection, false);
+        await fileStorageService.SetAceObjectAsync(aceCollection, false);
     }
 }

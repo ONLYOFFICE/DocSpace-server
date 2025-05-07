@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,50 +24,36 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Tests.Models;
+namespace ASC.Files.Tests.FilesController;
 
-/// <summary>
-/// The folder content parameters.
-/// </summary>
-public class FolderContentDto
+[Collection("Test Collection")]
+public class FileOperationsTest(
+    FilesApiFactory filesFactory, 
+    WebApplicationFactory<WebApiProgram> apiFactory, 
+    WebApplicationFactory<PeopleProgram> peopleFactory,
+    WebApplicationFactory<FilesServiceProgram> filesServiceProgram) 
+    : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
 {
-    /// <summary>
-    /// The list of files from the folder.
-    /// </summary>
-    public List<FileDto<int>> Files { get; set; }
-    
-    /// <summary>
-    /// The list of folders from the folder.
-    /// </summary>
-    public List<FolderDto<int>> Folders { get; set; }
-    
-    /// <summary>
-    /// The current folder parameters.
-    /// </summary>
-    public FolderDto<int> Current { get; set; }
 
-    /// <summary>
-    /// The directory / file names that form part of a folder path.
-    /// </summary>
-    public object PathParts { get; set; }
     
-    /// <summary>
-    /// The folder start index.
-    /// </summary>
-    public int StartIndex { get; set; }
+
     
-    /// <summary>
-    /// The number of items in the folder.
-    /// </summary>
-    public int Count { get; set; }
+    [Fact]
+    public async Task GetPresignedUri_ValidFile_ReturnsDownloadUrl()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        
+        var file = await CreateFile("file_for_download.docx", FolderType.USER, Initializer.Owner);
+        
+        // Act
+        var downloadUrl = (await _filesFilesApi.GetPresignedUriAsync(file.Id, TestContext.Current.CancellationToken)).Response;
+        
+        // Assert
+        downloadUrl.Should().NotBeNull();
+        downloadUrl.Should().StartWith("http");
+        downloadUrl.Should().Contain("file");
+    }
     
-    /// <summary>
-    /// The total number of items in the folder.
-    /// </summary>
-    public int Total { get; set; }
-    
-    /// <summary>
-    /// The number of folder items that the user has not seen yet.
-    /// </summary>
-    public int New { get; set; }
+
 }
