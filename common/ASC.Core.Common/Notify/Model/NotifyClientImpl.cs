@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -64,6 +64,11 @@ class NotifyClientImpl(
         await SendNoticeToAsync(action, objectID, [recipient], [sendername], false, args);
     }
 
+    public async Task SendNoticeAsync(INotifyAction action, string objectID, IRecipient[] recipients, string sendername, params ITagValue[] args)
+    {
+        await SendNoticeToAsync(action, objectID, recipients, [sendername], false, args);
+    }
+
     public async Task SendNoticeAsync(INotifyAction action, string objectID, IRecipient recipient, bool checkSubscription, params ITagValue[] args)
     {
         await SendNoticeToAsync(action, objectID, [recipient], null, checkSubscription, args);
@@ -117,8 +122,10 @@ class NotifyClientImpl(
         ArgumentNullException.ThrowIfNull(action);
         ArgumentNullException.ThrowIfNull(recipient);
 
+        var tenantManager = serviceProvider.GetService<TenantManager>();
         var request = new NotifyRequest(loggerFactory, _notifySource, action, objectID, recipient)
         {
+            _tenantId = tenantManager.GetCurrentTenant().Id,
             _senderNames = senders,
             _isNeedCheckSubscriptions = checkSubsciption
         };

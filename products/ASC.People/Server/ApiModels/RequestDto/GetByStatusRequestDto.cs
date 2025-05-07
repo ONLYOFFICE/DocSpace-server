@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,15 +26,14 @@
 
 namespace ASC.People.ApiModels.RequestDto;
 
-
 /// <summary>
-/// 
+/// The request parameters for getting profiles by the user status.
 /// </summary>
 public class GetByStatusRequestDto
 {
     /// <summary>
-    /// User status
+    /// The user status.
     /// </summary>
     [FromRoute(Name = "status")]
-    public EmployeeStatus Status {  get; set; }
+    public required EmployeeStatus Status {  get; set; }
 }

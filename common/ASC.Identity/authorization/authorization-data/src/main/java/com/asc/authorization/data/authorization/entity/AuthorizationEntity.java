@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,12 +28,15 @@
 package com.asc.authorization.data.authorization.entity;
 
 import jakarta.persistence.*;
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
 
-/** Entity class representing an authorization. */
+/**
+ * Entity class representing an authorization. This class is mapped to the `identity_authorizations`
+ * table and manages authorization-related information such as tokens, scopes, and metadata.
+ */
 @Entity
 @Getter
 @Setter
@@ -61,7 +64,7 @@ public class AuthorizationEntity {
 
   /** The tenant ID. */
   @Column(name = "tenant_id", nullable = false)
-  private Integer tenantId;
+  private long tenantId;
 
   /** The state. */
   @Column(name = "state")
@@ -72,6 +75,7 @@ public class AuthorizationEntity {
   private String attributes;
 
   /** The authorization grant type. */
+  @Id
   @Column(name = "authorization_grant_type", nullable = false)
   private String authorizationGrantType;
 
@@ -143,10 +147,25 @@ public class AuthorizationEntity {
   @Column(name = "refresh_token_expires_at")
   private ZonedDateTime refreshTokenExpiresAt;
 
-  /** Indicates whether the authorization is invalidated. */
-  @Column(name = "is_invalidated")
-  @ColumnDefault("false")
-  private boolean invalidated;
+  /** The ID token value issued as part of the authorization for openid scope. */
+  @Column(name = "id_token_value")
+  private String idTokenValue;
+
+  /** The claims associated with the ID token, typically represented in JSON format. */
+  @Column(name = "id_token_claims")
+  private String idTokenClaims;
+
+  /** Metadata associated with the ID token. */
+  @Column(name = "id_token_metadata")
+  private String idTokenMetadata;
+
+  /** The timestamp when the ID token was issued. */
+  @Column(name = "id_token_issued_at")
+  private ZonedDateTime idTokenIssuedAt;
+
+  /** The timestamp when the ID token is set to expire. */
+  @Column(name = "id_token_expires_at")
+  private ZonedDateTime idTokenExpiresAt;
 
   /** The modified at timestamp. */
   @Column(name = "modified_at")
@@ -166,7 +185,7 @@ public class AuthorizationEntity {
   @AllArgsConstructor
   @NoArgsConstructor
   public static class AuthorizationId implements Serializable {
-    private static final long serialVersionUID = 1L;
+    @Serial private static final long serialVersionUID = 1L;
     private String registeredClientId;
     private String principalId;
     private String authorizationGrantType;

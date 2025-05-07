@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,13 +27,17 @@
 namespace ASC.Files.Core;
 
 /// <summary>
+/// The entry properties.
 /// </summary>
 [DebuggerDisplay("")]
 public class EntryProperties<T>
 {
-    /// <summary>Form filling properties</summary>
-    /// <type>ASC.Files.Core.FormFillingProperties, ASC.Files.Core</type>
+    /// <summary>
+    /// The form filling properties.
+    /// </summary>
     public FormFillingProperties<T> FormFilling { get; set; }
+
+    public bool CopyToFillOut { get; set; }
 
     public static EntryProperties<T> Deserialize(string data, ILogger logger)
     {
@@ -67,18 +71,76 @@ public class EntryProperties<T>
 }
 
 /// <summary>
+/// The form filling properties.
 /// </summary>
 [Transient]
 public class FormFillingProperties<T>
 {
-    public bool CollectFillForm { get; set; }
+    /// <summary>
+    /// Specifies if the form filling has started or not.
+    /// </summary>
     public bool StartFilling { get; set; }
+
+    public Guid StartedByUserId { get; set; }
+    /// <summary>
+    /// The form title.
+    /// </summary>
     public string Title { get; set; }
+
+    /// <summary>
+    /// The room ID of the form.
+    /// </summary>
     public T RoomId { get; set; }
+
+    /// <summary>
+    /// The ID of the folder where the form is added.
+    /// </summary>
     public T ToFolderId { get; set; }
+
+    /// <summary>
+    /// The original form ID.
+    /// </summary>
     public T OriginalFormId { get; set; }
+
+    /// <summary>
+    /// The ID of the folder where the form filling results are saved.
+    /// </summary>
     public T ResultsFolderId { get; set; }
+    
+    /// <summary>
+    /// The ID of the file with form filling results.
+    /// </summary>
     public T ResultsFileID { get; set; }
+
+    /// <summary>
+    /// The result form number.
+    /// </summary>
     public int ResultFormNumber { get; set; }
 
+    /// <summary>
+    /// The date when the form filling was stopped.
+    /// </summary>
+    public DateTime FillingStopedDate { get; set; }
+
+    /// <summary>
+    /// The form filling interruption.
+    /// </summary>
+    public FormFillingInterruption? FormFillingInterruption { get; set; }
+
+}
+
+/// <summary>
+/// The form filling interruption parameters.
+/// </summary>
+public struct FormFillingInterruption
+{
+    /// <summary>
+    /// The user ID of the form filling interruption.
+    /// </summary>
+    public Guid UserId { get; set; }
+
+    /// <summary>
+    /// The role name of the form filling interruption.
+    /// </summary>
+    public string RoleName { get; set; }
 }

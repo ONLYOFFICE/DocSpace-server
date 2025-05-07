@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,20 +26,58 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
-public class TariffDto : Tariff
+/// <summary>
+/// The tariff parameters.
+/// </summary>
+public class TariffDto
 {
     /// <summary>
-    /// Open source
+    /// Specifies whether the tariff is Community or not.
     /// </summary>
     public bool? OpenSource { get; set; }
 
     /// <summary>
-    /// Enterprise
+    /// Specifies whether the tariff is Enterprise or not.
     /// </summary>
     public bool? Enterprise { get; set; }
 
     /// <summary>
-    /// Developer
+    /// Specifies whether the tariff is Developer or not.
     /// </summary>
     public bool? Developer { get; set; }
+
+    /// <summary>
+    /// The tariff ID.
+    /// </summary>
+    public int Id { get; set; }
+
+    /// <summary>
+    /// The tariff state.
+    /// </summary>
+    public TariffState State { get; set; }
+
+    /// <summary>
+    /// The tariff due date.
+    /// </summary>
+    public DateTime DueDate { get; set; }
+
+    /// <summary>
+    /// The tariff delay due date.
+    /// </summary>
+    public DateTime DelayDueDate { get; set; }
+
+    /// <summary>
+    /// The tariff license date.
+    /// </summary>
+    public DateTime LicenseDate { get; set; }
+
+    /// <summary>
+    /// The customer ID.
+    /// </summary>
+    public string CustomerId { get; set; }
+
+    /// <summary>
+    /// The list of quotas.
+    /// </summary>
+    public List<Quota> Quotas { get; set; }
 }

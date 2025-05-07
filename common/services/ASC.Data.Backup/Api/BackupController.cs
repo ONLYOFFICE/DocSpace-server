@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -60,9 +60,13 @@ public class BackupController(
     [SwaggerResponse(200, "Backup schedule", typeof(BackupAjaxHandler.Schedule))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("getbackupschedule")]
-    public async Task<BackupAjaxHandler.Schedule> GetBackupSchedule()
+    public async Task<BackupAjaxHandler.Schedule> GetBackupSchedule(DumpDto dto)
     {
-        return await backupAjaxHandler.GetScheduleAsync();
+        if (dto.Dump)
+        {
+            await tenantExtra.DemandAccessSpacePermissionAsync();
+        }
+        return await backupAjaxHandler.GetScheduleAsync(dto.Dump);
     }
 
     /// <summary>
@@ -91,7 +95,7 @@ public class BackupController(
         {
             Period = inDto.CronParams.Period ?? BackupPeriod.EveryDay,
             Hour = inDto.CronParams.Hour,
-            Day = inDto.CronParams.Day.HasValue ? inDto.CronParams.Day.Value : 0
+            Day = inDto.CronParams.Day ?? 0
         };
         if(backupStored is > 30 or < 1)
         {
@@ -123,9 +127,13 @@ public class BackupController(
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpDelete("deletebackupschedule")]
-    public async Task<bool> DeleteBackupSchedule()
+    public async Task<bool> DeleteBackupSchedule(DumpDto dto)
     {
-        await backupAjaxHandler.DeleteScheduleAsync();
+        if (dto.Dump)
+        {
+            await tenantExtra.DemandAccessSpacePermissionAsync();
+        }
+        await backupAjaxHandler.DeleteScheduleAsync(dto.Dump);
 
         return true;
     }
@@ -181,18 +189,18 @@ public class BackupController(
                 await backupAjaxHandler.CheckAccessToFolderAsync(storageParams["folderId"]);
             }
         }
-        if (storageType is BackupStorageType.ThirdPartyConsumer && !storageParams.ContainsKey("subdir"))
+        if (storageType is BackupStorageType.ThirdPartyConsumer)
         {
-            storageParams.Add("subdir", "backup");
+            storageParams.TryAdd("subdir", "backup");
         }
         
 
         var serverBaseUri = coreBaseSettings.Standalone && await coreSettings.GetSettingAsync("BaseDomain") == null
             ? commonLinkUtility.GetFullAbsolutePath("")
-            : default;
+            : null;
         
         var taskId = await backupAjaxHandler.StartBackupAsync(storageType, storageParams, serverBaseUri, inDto.Dump, false);
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         
         await eventBus.PublishAsync(new BackupRequestIntegrationEvent(
              tenantId: tenantId,
@@ -204,7 +212,7 @@ public class BackupController(
              serverBaseUri: serverBaseUri
         ));
 
-        return await backupAjaxHandler.GetBackupProgressAsync();
+        return await backupAjaxHandler.GetBackupProgressAsync(inDto.Dump);
     }
 
     /// <summary>
@@ -217,9 +225,13 @@ public class BackupController(
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [AllowNotPayment]
     [HttpGet("getbackupprogress")]
-    public async Task<BackupProgress> GetBackupProgressAsync()
+    public async Task<BackupProgress> GetBackupProgressAsync(DumpDto dto)
     {
-        return await backupAjaxHandler.GetBackupProgressAsync();
+        if (dto.Dump)
+        {
+            await tenantExtra.DemandAccessSpacePermissionAsync();
+        }
+        return await backupAjaxHandler.GetBackupProgressAsync(dto.Dump);
     }
 
     /// <summary>
@@ -229,12 +241,16 @@ public class BackupController(
     /// <path>api/2.0/backup/getbackuphistory</path>
     /// <collection>list</collection>
     [Tags("Backup")]
-    [SwaggerResponse(200, "List of backup history records", typeof(BackupHistoryRecord))]
+    [SwaggerResponse(200, "List of backup history records", typeof(List<BackupHistoryRecord>))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("getbackuphistory")]
-    public async Task<List<BackupHistoryRecord>> GetBackupHistory()
+    public async Task<List<BackupHistoryRecord>> GetBackupHistory(DumpDto dto)
     {
-        return await backupAjaxHandler.GetBackupHistory();
+        if (dto.Dump)
+        {
+            await tenantExtra.DemandAccessSpacePermissionAsync();
+        }
+        return await backupAjaxHandler.GetBackupHistoryAsync(dto.Dump);
     }
 
     /// <summary>
@@ -253,7 +269,7 @@ public class BackupController(
     }
 
     /// <summary>
-    /// Deletes the backup history of the current portal.
+    /// Deletes the backup history from the current portal.
     /// </summary>
     /// <short>Delete the backup history</short>
     /// <path>api/2.0/backup/deletebackuphistory</path>
@@ -261,9 +277,13 @@ public class BackupController(
     [SwaggerResponse(200, "Boolean value: true if the operation is successful")]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpDelete("deletebackuphistory")]
-    public async Task<bool> DeleteBackupHistory()
+    public async Task<bool> DeleteBackupHistory(DumpDto dto)
     {
-        await backupAjaxHandler.DeleteAllBackupsAsync();
+        if (dto.Dump)
+        {
+            await tenantExtra.DemandAccessSpacePermissionAsync();
+        }
+        await backupAjaxHandler.DeleteAllBackupsAsync(dto.Dump);
         return true;
     }
 
@@ -281,17 +301,22 @@ public class BackupController(
     [HttpPost("startrestore")]
     public async Task<BackupProgress> StartBackupRestoreAsync(BackupRestoreDto inDto)
     {
+        if (inDto.Dump)
+        {
+            await tenantExtra.DemandAccessSpacePermissionAsync();
+        }
+
         await backupAjaxHandler.DemandPermissionsRestoreAsync();
 
         var storageParams = inDto.StorageParams == null ? new Dictionary<string, string>() : inDto.StorageParams.ToDictionary(r => r.Key.ToString(), r => r.Value.ToString());
 
         var serverBaseUri = coreBaseSettings.Standalone && await coreSettings.GetSettingAsync("BaseDomain") == null
             ? commonLinkUtility.GetFullAbsolutePath("")
-            : default;
+            : null;
         
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
 
-        var storageType = inDto.StorageType == null ? BackupStorageType.Documents : (BackupStorageType)(inDto.StorageType.Value);
+        var storageType = inDto.StorageType ?? BackupStorageType.Documents;
         if (storageType is BackupStorageType.Documents or BackupStorageType.ThridpartyDocuments && storageParams.ContainsKey("filePath"))
         {
             if (int.TryParse(storageParams["filePath"], out var fId))
@@ -303,11 +328,12 @@ public class BackupController(
                 await backupAjaxHandler.CheckAccessToFileAsync(storageParams["filePath"]);
             }
         }
-        if (storageType is BackupStorageType.ThirdPartyConsumer && !storageParams.ContainsKey("subdir"))
+        if (storageType is BackupStorageType.ThirdPartyConsumer)
         {
-            storageParams.Add("subdir", "backup");
+            storageParams.TryAdd("subdir", "backup");
         }
 
+        var taskId = await backupAjaxHandler.StartRestoreAsync(inDto.BackupId, storageType, storageParams, inDto.Notify, serverBaseUri, inDto.Dump, false);
         await eventBus.PublishAsync(new BackupRestoreRequestIntegrationEvent(
                              tenantId: tenantId,
                              createBy: CurrentUserId,
@@ -315,11 +341,13 @@ public class BackupController(
                              storageType: storageType,
                              notify: inDto.Notify,
                              backupId: inDto.BackupId,
-                             serverBaseUri: serverBaseUri
+                             dump: inDto.Dump,
+                             serverBaseUri: serverBaseUri,
+                             taskId: taskId
                         ));
 
 
-        return await backupAjaxHandler.GetRestoreProgressAsync();
+        return await backupAjaxHandler.GetRestoreProgressAsync(inDto.Dump);
     }
 
     /// <summary>
@@ -333,9 +361,9 @@ public class BackupController(
     [HttpGet("getrestoreprogress")]  //NOTE: this method doesn't check payment!!!
     [AllowAnonymous]
     [AllowNotPayment]
-    public async Task<BackupProgress> GetRestoreProgressAsync()
+    public async Task<BackupProgress> GetRestoreProgressAsync(RestoreDto dto)
     {
-        return await backupAjaxHandler.GetRestoreProgressAsync();
+        return await backupAjaxHandler.GetRestoreProgressAsync(dto.Dump);
     }
 
     /// <summary>
@@ -346,7 +374,7 @@ public class BackupController(
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Backup")]
     [HttpGet("backuptmp")]
-    [SwaggerResponse(200, "Path to the temporary folder with the stored backup")]
+    [SwaggerResponse(200, "Path to the temporary folder with the stored backup", typeof(object))]
     public object GetTempPath()
     {
         return backupAjaxHandler.GetTmpFolder();

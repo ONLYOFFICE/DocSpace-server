@@ -73,10 +73,16 @@
   <data name="TariffPerMonth" xml:space="preserve">
     <value>tháng</value>
   </data>
+  <data name="TariffPerYear" xml:space="preserve">
+    <value>năm</value>
+  </data>
   <data name="UnknownFirstName" xml:space="preserve">
     <value>Tên</value>
   </data>
   <data name="UnknownLastName" xml:space="preserve">
     <value>Họ</value>
+  </data>
+  <data name="LicenseTypeNotCorrect" xml:space="preserve">
+    <value>Xung đột giấy phép. Vui lòng đảm bảo rằng bạn đã cài đặt đúng phiên bản {0} DocSpace (Enterprise hoặc Developer). Nếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ với người quản lý bán hàng của bạn.</value>
   </data>
 </root>

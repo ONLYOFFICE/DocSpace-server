@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,12 +33,12 @@ public class VersionController(PermissionContext permissionContext,
         TenantManager tenantManager,
         WebItemManager webItemManager,
         BuildVersion buildVersion,
-        IMemoryCache memoryCache,
+        IFusionCache fusionCache,
         IHttpContextAccessor httpContextAccessor)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
-    /// Returns the current build version.
+    /// Returns the current portal build version.
     /// </summary>
     /// <short>Get the current build version</short>
     /// <path>api/2.0/settings/version/build</path>
@@ -67,7 +67,7 @@ public class VersionController(PermissionContext permissionContext,
     [HttpGet("")]
     public async Task<TenantVersionDto> GetVersionsAsync()
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         return new TenantVersionDto(tenant.Version, await tenantManager.GetTenantVersionsAsync());
     }
 
@@ -88,7 +88,7 @@ public class VersionController(PermissionContext permissionContext,
 
         (await tenantManager.GetTenantVersionsAsync()).FirstOrDefault(r => r.Id == inDto.VersionId).NotFoundIfNull();
         
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         await tenantManager.SetTenantVersionAsync(tenant, inDto.VersionId);
 
         return await GetVersionsAsync();

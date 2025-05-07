@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -37,12 +37,12 @@ public class MessageSettingsController(MessageService messageService,
         SettingsManager settingsManager,
         WebItemManager webItemManager,
         CustomNamingPeople customNamingPeople,
-        IMemoryCache memoryCache,
+        IFusionCache fusionCache,
         IHttpContextAccessor httpContextAccessor,
         TenantManager tenantManager,
         CookiesManager cookiesManager,
         CountPaidUserChecker countPaidUserChecker)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
     /// Displays the contact form on the "Sign In" page, allowing users to send a message to the DocSpace administrator in case they encounter any issues while accessing DocSpace.
@@ -52,15 +52,15 @@ public class MessageSettingsController(MessageService messageService,
     /// </short>
     /// <path>api/2.0/settings/messagesettings</path>
     [Tags("Settings / Messages")]
-    [SwaggerResponse(200, "Message about the result of saving new settings", typeof(object))]
+    [SwaggerResponse(200, "Message about the result of saving new settings", typeof(string))]
     [HttpPost("messagesettings")]
-    public async Task<object> EnableAdminMessageSettingsAsync(TurnOnAdminMessageSettingsRequestDto inDto)
+    public async Task<string> EnableAdminMessageSettingsAsync(TurnOnAdminMessageSettingsRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         await settingsManager.SaveAsync(new StudioAdminMessageSettings { Enable = inDto.TurnOn });
 
-        await messageService.SendAsync(MessageAction.AdministratorMessageSettingsUpdated);
+        messageService.Send(MessageAction.AdministratorMessageSettingsUpdated);
 
         return Resource.SuccessfullySaveSettingsMessage;
     }
@@ -94,21 +94,21 @@ public class MessageSettingsController(MessageService messageService,
     /// </short>
     /// <path>api/2.0/settings/cookiesettings</path>
     [Tags("Settings / Cookies")]
-    [SwaggerResponse(200, "Message about the result of saving new settings", typeof(object))]
+    [SwaggerResponse(200, "Message about the result of saving new settings", typeof(string))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpPut("cookiesettings")]
-    public async Task<object> UpdateCookieSettings(CookieSettingsRequestsDto inDto)
+    public async Task<string> UpdateCookieSettings(CookieSettingsRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         if (!SetupInfo.IsVisibleSettings("CookieSettings"))
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption, "CookieSettings");
+            throw new BillingException(Resource.ErrorNotAllowedOption);
         }
 
         await cookiesManager.SetLifeTimeAsync(inDto.LifeTime, inDto.Enabled);
 
-        await messageService.SendAsync(MessageAction.CookieSettingsUpdated);
+        messageService.Send(MessageAction.CookieSettingsUpdated);
 
         return Resource.SuccessfullySaveSettingsMessage;
     }
@@ -122,12 +122,12 @@ public class MessageSettingsController(MessageService messageService,
     /// <path>api/2.0/settings/sendadmmail</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / Messages")]
-    [SwaggerResponse(200, "Message about the result of sending a message", typeof(object))]
+    [SwaggerResponse(200, "Message about the result of sending a message", typeof(string))]
     [SwaggerResponse(400, "Incorrect email or message text is empty")]
     [SwaggerResponse(429, "Request limit is exceeded")]
     [AllowAnonymous, AllowNotPayment]
     [HttpPost("sendadmmail")]
-    public async Task<object> SendAdmMailAsync(AdminMessageSettingsRequestsDto inDto)
+    public async Task<string> SendAdmMailAsync(AdminMessageSettingsRequestsDto inDto)
     {
         var studioAdminMessageSettings = await settingsManager.LoadAsync<StudioAdminMessageSettings>();
         var enableAdmMess = studioAdminMessageSettings.Enable || (await tenantExtra.IsNotPaidAsync());
@@ -149,10 +149,10 @@ public class MessageSettingsController(MessageService messageService,
             throw new Exception(Resource.ErrorEmptyMessage);
         }
 
-        CheckCache("sendadmmail");
+        await CheckCache("sendadmmail");
 
         await studioNotifyService.SendMsgToAdminFromNotAuthUserAsync(inDto.Email, message, inDto.Culture);
-        await messageService.SendAsync(MessageAction.ContactAdminMailSent);
+        messageService.Send(MessageAction.ContactAdminMailSent);
 
         return Resource.AdminMessageSent;
     }
@@ -166,17 +166,17 @@ public class MessageSettingsController(MessageService messageService,
     /// <path>api/2.0/settings/sendjoininvite</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / Messages")]
-    [SwaggerResponse(200, "Message about sending a link to confirm joining the DocSpace", typeof(object))]
+    [SwaggerResponse(200, "Message about sending a link to confirm joining the DocSpace", typeof(string))]
     [SwaggerResponse(400, "Incorrect email or email already exists")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(429, "Request limit is exceeded")]
     [AllowAnonymous]
     [HttpPost("sendjoininvite")]
-    public async Task<object> SendJoinInviteMail(AdminMessageBaseSettingsRequestsDto inDto)
+    public async Task<string> SendJoinInviteMail(AdminMessageBaseSettingsRequestsDto inDto)
     {
         try
         {
-            var tenant = await tenantManager.GetCurrentTenantAsync();
+            var tenant = tenantManager.GetCurrentTenant();
             var email = inDto.Email;
             if (!(
                 (tenant.TrustedDomainsType == TenantTrustedDomainsType.Custom &&
@@ -191,7 +191,7 @@ public class MessageSettingsController(MessageService messageService,
                 throw new Exception(Resource.ErrorNotCorrectEmail);
             }
             
-            CheckCache("sendjoininvite");
+            await CheckCache("sendjoininvite");
 
             var user = await userManager.GetUserByEmailAsync(email);
             if (!user.Id.Equals(Constants.LostUser.Id))
@@ -224,7 +224,7 @@ public class MessageSettingsController(MessageService messageService,
                         if (tenant.TrustedDomains.Any(d => address.Address.EndsWith("@" + d.Replace("*", ""), StringComparison.InvariantCultureIgnoreCase)))
                         {
                             await studioNotifyService.SendJoinMsgAsync(email, employeeType, inDto.Culture, true);
-                            await messageService.SendAsync(MessageInitiator.System, MessageAction.SentInviteInstructions, email);
+                            messageService.Send(MessageInitiator.System, MessageAction.SentInviteInstructions, email);
                             return Resource.FinishInviteJoinEmailMessage;
                         }
 
@@ -233,7 +233,7 @@ public class MessageSettingsController(MessageService messageService,
                 case TenantTrustedDomainsType.All:
                     {
                         await studioNotifyService.SendJoinMsgAsync(email, employeeType, inDto.Culture, true);
-                        await messageService.SendAsync(MessageInitiator.System, MessageAction.SentInviteInstructions, email);
+                        messageService.Send(MessageInitiator.System, MessageAction.SentInviteInstructions, email);
                         return Resource.FinishInviteJoinEmailMessage;
                     }
                 default:

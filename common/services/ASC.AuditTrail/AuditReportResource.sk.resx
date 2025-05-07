@@ -871,4 +871,46 @@
   <data name="UpdateClient" xml:space="preserve">
     <value>Klient {0} aktualizovaný</value>
   </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>Vytvorený kľúč používateľa API: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>Odstránený kľúč používateľa API: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>Kľúč používateľa API aktualizovaný: {0}</value>
+  </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>Používatelia [{0}]. Vyplnený formulár: {1}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>Používatelia [{0}]. Vyplnená časť formulára: {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>Používatelia [{0}]. Formulár bol ukončený: {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>Používatelia [{0}]. Začal vypĺňať: {1}</value>
+  </data>
+  <data name="WebhookCreated" xml:space="preserve">
+    <value>Webhook vytvorený: {0}</value>
+  </data>
+  <data name="WebhookDeleted" xml:space="preserve">
+    <value>Webhook odstránený: {0}</value>
+  </data>
+  <data name="WebhookUpdated" xml:space="preserve">
+    <value>Webhook aktualizovaný: {0}</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>Súbory [{0}]. Verzia odstránená: {1}</value>
+  </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>Zmena nastavení prístupu k nástrojom pre vývojárov</value>
+  </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>Súbor: {0}. Vlastný filter vypnutý</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>Súbor: {0}. Vlastný filter povolený</value>
+  </data>
 </root>

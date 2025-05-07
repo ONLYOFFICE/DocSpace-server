@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,17 +27,17 @@
 namespace ASC.Web.Api.Models;
 
 /// <summary>
-/// DNS settings request parameters
+/// The request parameters for managing the DNS (Domain Name System) settings.
 /// </summary>
 public class DnsSettingsRequestsDto
 {
     /// <summary>
-    /// DNS
+    /// The DNS (Domain Name System) configuration name.
     /// </summary>
     public string DnsName { get; set; }
 
     /// <summary>
-    /// Enabled or not
+    /// Specifies whether the DNS settings are enabled.
     /// </summary>
     public bool Enable { get; set; }
 }

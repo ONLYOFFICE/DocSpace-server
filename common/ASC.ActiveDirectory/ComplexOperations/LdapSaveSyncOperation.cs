@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,16 +27,13 @@
 namespace ASC.ActiveDirectory.ComplexOperations;
 
 [Singleton]
-public class LdapSaveSyncOperation(IServiceProvider serviceProvider,
-    IDistributedTaskQueueFactory queueFactory)
+public class LdapSaveSyncOperation(IServiceProvider serviceProvider, IDistributedTaskQueueFactory queueFactory)
 {
-    public const string CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME = "ldapOperation";
-
-    private readonly DistributedTaskQueue _progressQueue = queueFactory.CreateQueue(CUSTOM_DISTRIBUTED_TASK_QUEUE_NAME);
+    private readonly DistributedTaskQueue<LdapOperationJob> _progressQueue = queueFactory.CreateQueue<LdapOperationJob>();
 
     public async Task RunJobAsync(LdapSettings settings, Tenant tenant, LdapOperationType operationType, LdapLocalization resource = null, string userId = null)
     {
-        var item = (await _progressQueue.GetAllTasks<LdapOperationJob>()).FirstOrDefault(t => t.TenantId == tenant.Id);
+        var item = (await _progressQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenant.Id);
         if (item is { IsCompleted: true })
         {
             await _progressQueue.DequeueTask(item.Id);
@@ -88,6 +85,7 @@ public class LdapSaveSyncOperation(IServiceProvider serviceProvider,
         if (!ldapSettings.LdapMapping.ContainsKey(LdapSettings.MappingFields.MailAttribute) || string.IsNullOrEmpty(ldapSettings.LdapMapping[LdapSettings.MappingFields.MailAttribute]))
         {
             ldapSettings.SendWelcomeEmail = false;
+            ldapSettings.DisableEmailVerification = false;
         }
 
         var ldapLocalization = new LdapLocalization();
@@ -141,7 +139,7 @@ public class LdapSaveSyncOperation(IServiceProvider serviceProvider,
 
     public async Task<LdapOperationStatus> ToLdapOperationStatus(int tenantId)
     {
-        var operations = (await _progressQueue.GetAllTasks<LdapOperationJob>()).ToList();
+        var operations = (await _progressQueue.GetAllTasks()).ToList();
 
         foreach (var o in operations)
         {
@@ -150,13 +148,11 @@ public class LdapSaveSyncOperation(IServiceProvider serviceProvider,
                 continue;
             }
 
-            o[LdapTaskProperty.PROGRESS] = 100;
+            o.Percentage = 100;
             await _progressQueue.DequeueTask(o.Id);
         }
 
-        var operation =
-            operations
-                .FirstOrDefault(t => t[LdapTaskProperty.OWNER] == tenantId);
+        var operation = operations.FirstOrDefault(t => t.TenantId == tenantId);
 
         if (operation == null)
         {
@@ -165,26 +161,26 @@ public class LdapSaveSyncOperation(IServiceProvider serviceProvider,
 
         if (DistributedTaskStatus.Running < operation.Status)
         {
-            operation[LdapTaskProperty.PROGRESS] = 100;
+            operation.Percentage = 100;
             await _progressQueue.DequeueTask(operation.Id);
         }
 
         var result = new LdapOperationStatus
         {
             Id = operation.Id,
-            Completed = operation[LdapTaskProperty.FINISHED],
-            Percents = operation[LdapTaskProperty.PROGRESS],
-            Status = operation[LdapTaskProperty.RESULT],
-            Error = operation[LdapTaskProperty.ERROR],
-            CertificateConfirmRequest = operation[LdapTaskProperty.CERT_REQUEST] != "" ? operation[LdapTaskProperty.CERT_REQUEST] : null,
-            Source = operation[LdapTaskProperty.SOURCE],
-            OperationType = operation[LdapTaskProperty.OPERATION_TYPE],
-            Warning = operation[LdapTaskProperty.WARNING]
+            Completed = operation.Finished,
+            Percents = (int)operation.Percentage,
+            Status = operation.Result,
+            Error = operation.Error,
+            CertificateConfirmRequest = operation.CertRequest != "" ? operation.CertRequest : null,
+            Source = operation.Source,
+            OperationType = operation.OperationType.ToString(),
+            Warning = operation.Warning
         };
 
         if (!(string.IsNullOrEmpty(result.Warning)))
         {
-            operation[LdapTaskProperty.WARNING] = ""; // "mark" as read
+            operation.Warning = ""; // "mark" as read
         }
 
         return result;
@@ -212,10 +208,9 @@ public class LdapSaveSyncOperation(IServiceProvider serviceProvider,
 
         var hasStarted = operations.Any(o =>
         {
-            var opType = o[LdapTaskProperty.OPERATION_TYPE];
+            var opType = o.OperationType;
 
-            return o.Status <= DistributedTaskStatus.Running &&
-                   (opType == arg1.ToString() || opType == arg2.ToString());
+            return o.Status <= DistributedTaskStatus.Running && (opType == arg1 || opType == arg2);
         });
 
         return (hasStarted, operations);
@@ -223,8 +218,8 @@ public class LdapSaveSyncOperation(IServiceProvider serviceProvider,
 
     private async Task<List<LdapOperationJob>> GetOperationsForTenant(int tenantId)
     {
-        return (await _progressQueue.GetAllTasks<LdapOperationJob>())
-            .Where(t => t[LdapTaskProperty.OWNER] == tenantId)
+        return (await _progressQueue.GetAllTasks())
+            .Where(t => t.TenantId == tenantId)
             .ToList();
     }
 }

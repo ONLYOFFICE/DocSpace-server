@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -97,9 +97,10 @@ public interface IFolderDao<T>
     /// <param name="roomId"></param>
     /// <param name="containingMyFiles"></param>
     /// <param name="parentType"></param>
+    /// <param name="containingForms"></param>
     /// <returns></returns>
     IAsyncEnumerable<Folder<T>> GetFoldersAsync(T parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
-        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, T roomId = default, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT);
+        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, T roomId = default, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, bool containingForms = false);
 
     /// <summary>
     /// Gets the folder (s) by ID (s)
@@ -383,6 +384,8 @@ public interface IFolderDao<T>
     /// <returns></returns>
     Task<T> GetFolderIDVirtualRooms(bool createIfNotExists);
 
+    Task<T> GetFolderIDRoomTemplatesAsync(bool createIfNotExists);
+
     /// <summary>
     /// Returns id folder "Archive"
     /// Only in TMFolderDao
@@ -412,6 +415,7 @@ public interface IFolderDao<T>
     Task<int> GetFoldersCountAsync(T parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool withSubfolders = false, bool excludeSubject = false,
         T roomId = default);
     Task<FilesStatisticsResultDto> GetFilesUsedSpace();
+    Task<bool> ContainsFormsInFolder (Folder<T> folder);
     Task<int> SetCustomOrder(T folderId, T parentFolderId, int order);
 
     Task InitCustomOrder(Dictionary<T, int> folderIds, T parentFolderId);

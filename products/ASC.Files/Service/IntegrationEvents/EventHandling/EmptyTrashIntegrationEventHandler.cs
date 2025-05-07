@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,7 +29,7 @@ namespace ASC.Files.Service.IntegrationEvents.EventHandling;
 [Scope]
 public class EmptyTrashIntegrationEventHandler(
     ILogger<DeleteIntegrationEventHandler> logger,
-    FileOperationsManager fileOperationsManager,
+    FileOperationsManager<FileDeleteOperation> fileOperationsManager,
     TenantManager tenantManager,
     SecurityContext securityContext) : IIntegrationEventHandler<EmptyTrashIntegrationEvent>
 {
@@ -42,7 +42,7 @@ public class EmptyTrashIntegrationEventHandler(
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
             await tenantManager.SetCurrentTenantAsync(@event.TenantId);
             await securityContext.AuthenticateMeWithoutCookieAsync(@event.TenantId, @event.CreateBy);
-            await fileOperationsManager.Enqueue<FileDeleteOperation, FileDeleteOperationData<string>, FileDeleteOperationData<int>>(@event.TaskId, @event.ThirdPartyData, @event.Data);
+            await fileOperationsManager.Enqueue(@event.TaskId, @event.ThirdPartyData, @event.Data);
         }
     }
 }

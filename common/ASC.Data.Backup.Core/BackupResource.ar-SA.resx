@@ -118,12 +118,21 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="BackupNotFound" xml:space="preserve">
-    <value>ملف النسخة الاحتياطية غير صالح. من فضلك قم باستخدام ملف تم انشاءه بنسخة ONLYOFFICE v11.5 أو بعد.</value>
+    <value>ملف النسخ الاحتياطي غير صالح. يرجى استخدام الملف الذي تم إنشاؤه في نفس البوابة.</value>
   </data>
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>تعيين كلمة المرور</value>
   </data>
   <data name="LargeBackup" xml:space="preserve">
     <value>النسخ الاحتياطي أكبر من الحجم الفعلي للبوابة</value>
+  </data>
+  <data name="BackupException" xml:space="preserve">
+    <value>حدث خطأ أثناء إنشاء النسخة الاحتياطية. يرجى المحاولة مرة أخرى أو التواصل مع الدعم.</value>
+  </data>
+  <data name="BackupInvalid" xml:space="preserve">
+    <value>ملف النسخة الاحتياطية غير صالح.</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>حدث خطأ أثناء استعادة النسخة الاحتياطية. يرجى المحاولة مرة أخرى أو التواصل مع الدعم.</value>
   </data>
 </root>

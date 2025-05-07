@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -40,11 +40,11 @@ public class OwnerController(
     PermissionContext permissionContext,
     WebItemManager webItemManager,
     DisplayUserSettingsHelper displayUserSettingsHelper,
-    IMemoryCache memoryCache,
+    IFusionCache fusionCache,
     IHttpContextAccessor httpContextAccessor,
     IUrlShortener urlShortener,
     UserManagerWrapper userManagerWrapper)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
     /// Sends the instructions to change the DocSpace owner.
@@ -54,14 +54,14 @@ public class OwnerController(
     /// </short>
     /// <path>api/2.0/settings/owner</path>
     [Tags("Settings / Owner")]
-    [SwaggerResponse(200, "Message about changing the portal owner", typeof(object))]
+    [SwaggerResponse(200, "Message about changing the portal owner", typeof(OwnerChangeInstructionsDto))]
     [SwaggerResponse(403, "Collaborator can not be an owner")]
     [HttpPost("")]
-    public async Task<object> SendOwnerChangeInstructionsAsync(OwnerIdSettingsRequestDto inDto)
+    public async Task<OwnerChangeInstructionsDto> SendOwnerChangeInstructionsAsync(OwnerIdSettingsRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var curTenant = await tenantManager.GetCurrentTenantAsync();
+        var curTenant = tenantManager.GetCurrentTenant();
         var owner = await userManager.GetUsersAsync(curTenant.OwnerId);
         var newOwner = await userManager.GetUsersAsync(inDto.OwnerId);
 
@@ -74,16 +74,16 @@ public class OwnerController(
             Guid.Empty.Equals(newOwner.Id) || 
             newOwner.Status != EmployeeStatus.Active)
         {
-            return new { Status = 0, Message = Resource.ErrorAccessDenied };
+            return new OwnerChangeInstructionsDto { Status = 0, Message = Resource.ErrorAccessDenied };
         }
 
-        var confirmLink = await commonLinkUtility.GetConfirmationEmailUrlAsync(owner.Email, ConfirmType.PortalOwnerChange, newOwner.Id, newOwner.Id);
+        var confirmLink = commonLinkUtility.GetConfirmationEmailUrl(owner.Email, ConfirmType.PortalOwnerChange, newOwner.Id, newOwner.Id);
         await studioNotifyService.SendMsgConfirmChangeOwnerAsync(owner, newOwner, await urlShortener.GetShortenLinkAsync(confirmLink));
 
-        await messageService.SendAsync(MessageAction.OwnerSentChangeOwnerInstructions, MessageTarget.Create(owner.Id), owner.DisplayUserName(false, displayUserSettingsHelper));
+        messageService.Send(MessageAction.OwnerSentChangeOwnerInstructions, MessageTarget.Create(owner.Id), owner.DisplayUserName(false, displayUserSettingsHelper));
 
         var emailLink = $"<a href=\"mailto:{owner.Email}\">{owner.Email}</a>";
-        return new { Status = 1, Message = Resource.ChangePortalOwnerMsg.Replace(":email", emailLink) };
+        return new OwnerChangeInstructionsDto { Status = 1, Message = Resource.ChangePortalOwnerMsg.Replace(":email", emailLink) };
     }
 
     /// <summary>
@@ -135,10 +135,10 @@ public class OwnerController(
             }
         }
 
-        var curTenant = await tenantManager.GetCurrentTenantAsync();
+        var curTenant = tenantManager.GetCurrentTenant();
         curTenant.OwnerId = newOwner.Id;
         await tenantManager.SaveTenantAsync(curTenant);
 
-        await messageService.SendAsync(MessageAction.OwnerUpdated, newOwner.DisplayUserName(false, displayUserSettingsHelper));
+        messageService.Send(MessageAction.OwnerUpdated, newOwner.DisplayUserName(false, displayUserSettingsHelper));
     }
 }

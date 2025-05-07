@@ -465,16 +465,16 @@ Alta compatibilidade com docx, xlsx, pptx.</value>
     <value>Utilizador</value>
   </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Não é possível mover vários arquivos para a sala Preenchimento de formulários. Mova um formulário PDF do ONLYOFFICE por vez.</value>
+    <value>Não é possível mover vários arquivos para a sala Preenchimento de formulários. Mova um formulário PDF do {0} por vez.</value>
   </data>
   <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Não há suporte para mover pastas para a sala Preenchimento de formulários. Mova um formulário PDF do ONLYOFFICE por vez.</value>
+    <value>Não há suporte para mover pastas para a sala Preenchimento de formulários. Mova um formulário PDF do {0} por vez.</value>
   </data>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>O arquivo não pode ser movido para esta sala. Tente mover o formulário PDF do ONLYOFFICE.</value>
+    <value>O arquivo não pode ser movido para esta sala. Tente mover o formulário PDF do {0}.</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>O arquivo não pode ser carregado nesta sala. Tente fazer upload do formulário PDF do ONLYOFFICE.</value>
+    <value>O arquivo não pode ser carregado nesta sala. Tente fazer upload do formulário PDF do {0}.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Link para preencher</value>
@@ -502,5 +502,14 @@ Alta compatibilidade com docx, xlsx, pptx.</value>
   </data>
   <data name="OpenForm" xml:space="preserve">
     <value>Abrir ficheiro</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Não é possível eliminar a versão atual do ficheiro</value>
+  </data>
+  <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
+    <value>Partilhe para preencher</value>
+  </data>
+  <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
+    <value>Iniciar o preenchimento</value>
   </data>
 </root>

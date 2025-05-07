@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -370,9 +370,9 @@ public class EFUserService(
                     var q2 = from user in q
                              join quota in userDbContext.QuotaRow.Where(qr => qr.UserId != Guid.Empty && qr.Tag != Guid.Empty.ToString() && qr.Tag != "")
                                 on user.Id equals quota.UserId into quotaRow
-                             from @quota in quotaRow.DefaultIfEmpty()
+                             from quota in quotaRow.DefaultIfEmpty()
 
-                             select new { user, @quota };
+                             select new { user, quota };
 
                     var q3 = q2.GroupBy(q => q.user, q => q.quota.Counter, (user, g) => new
                     {
@@ -709,7 +709,17 @@ public class EFUserService(
         
         return await q.ToDictionaryAsync(r => r.TargetUserId, mapper.Map<UserRelation>);
     }
-    
+
+    public async Task<Dictionary<Guid, UserRelation>> GetUserRelationsByTargetAsync(int tenantId, Guid targetUserId)
+    {
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        var q = userDbContext.UserRelations
+            .Where(r => r.TenantId == tenantId && r.TargetUserId == targetUserId);
+
+        return await q.ToDictionaryAsync(r => r.TargetUserId, mapper.Map<UserRelation>);
+    }
+
     public async Task DeleteUserRelationAsync(int tenantId, Guid sourceUserId, Guid targetUserId)
     {
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -45,13 +45,13 @@ global using ASC.ElasticSearch.Service;
 global using ASC.EventBus.Abstractions;
 global using ASC.EventBus.Log;
 global using ASC.Files.Core;
-global using ASC.Files.Core.ApiModels;
 global using ASC.Files.Core.Core;
 global using ASC.Files.Core.EF;
 global using ASC.Files.Core.Helpers;
 global using ASC.Files.Core.IntegrationEvents.Events;
 global using ASC.Files.Core.Log;
 global using ASC.Files.Core.Resources;
+global using ASC.Files.Core.RoomTemplates.Events;
 global using ASC.Files.Core.Security;
 global using ASC.Files.Core.Services.DocumentBuilderService;
 global using ASC.Files.Core.VirtualRooms;
@@ -75,8 +75,5 @@ global using Microsoft.AspNetCore.Builder;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Hosting.WindowsServices;
 global using Microsoft.Extensions.Logging;
-
-global using SixLabors.ImageSharp;
-global using SixLabors.ImageSharp.Processing;
 
 global using static ASC.Files.Core.Helpers.DocumentService;

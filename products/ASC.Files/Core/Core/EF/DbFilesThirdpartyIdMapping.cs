@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,6 +29,7 @@ namespace ASC.Files.Core.EF;
 public class DbFilesThirdpartyIdMapping : BaseEntity, IDbFile
 {
     public int TenantId { get; set; }
+    [MaxLength(32)]
     public string HashId { get; set; }
     public string Id { get; set; }
 
@@ -68,7 +69,7 @@ public static class DbFilesThirdpartyIdMappingExtension
 
             entity.Property(e => e.HashId)
                 .HasColumnName("hash_id")
-                .HasColumnType("char(32)")
+                .HasColumnType("char")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -82,28 +83,30 @@ public static class DbFilesThirdpartyIdMappingExtension
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
         });
     }
+
     public static void PgSqlAddDbFilesThirdpartyIdMapping(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<DbFilesThirdpartyIdMapping>(entity =>
         {
             entity.HasKey(e => e.HashId)
-                .HasName("files_thirdparty_id_mapping_pkey");
+                .HasName("files_thirdparty_id_mapping_pkey"); // Define primary key
 
-            entity.ToTable("files_thirdparty_id_mapping", "onlyoffice");
+            entity.ToTable("files_thirdparty_id_mapping"); // Define table name
 
             entity.HasIndex(e => new { e.TenantId, e.HashId })
-                .HasDatabaseName("index_1");
+                .HasDatabaseName("ix_files_thirdparty_id_mapping_tenantid_hashid"); // Define index
 
             entity.Property(e => e.HashId)
                 .HasColumnName("hash_id")
-                .HasMaxLength(32)
-                .IsFixedLength();
+                .HasColumnType("char(32)"); // Specify length explicitly since PostgreSQL requires it for char
 
             entity.Property(e => e.Id)
                 .IsRequired()
-                .HasColumnName("id");
+                .HasColumnName("id")
+                .HasColumnType("text"); // Map to PostgreSQL text type
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+            entity.Property(e => e.TenantId)
+                .HasColumnName("tenant_id");
         });
     }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -42,7 +42,7 @@ public class ThirdpartyController(
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
-    /// Returns a list of the available providers.
+    /// Returns the list of the available providers.
     /// </summary>
     /// <short>Get providers</short>
     /// <remarks>Available provider keys: DropboxV2, Box, WebDav, Yandex, OneDrive, SharePoint, GoogleDrive, kDrive.</remarks>
@@ -99,9 +99,9 @@ public class ThirdpartyController(
     /// <path>api/2.0/files/thirdparty/{providerId}</path>
     /// <exception cref="ArgumentException"></exception>
     [Tags("Files / Third-party integration")]
-    [SwaggerResponse(200, "Third-party folder ID", typeof(object))]
+    [SwaggerResponse(200, "Third-party folder ID", typeof(string))]
     [HttpDelete("thirdparty/{providerId:int}")]
-    public async Task<object> DeleteThirdPartyAsync(ProviderIdRequestDto inDto)
+    public async Task<string> DeleteThirdPartyAsync(ProviderIdRequestDto inDto)
     {
         return await fileStorageService.DeleteThirdPartyAsync(inDto.ProviderId.ToString(CultureInfo.InvariantCulture));
     }
@@ -113,33 +113,28 @@ public class ThirdpartyController(
     /// <path>api/2.0/files/wordpress-delete</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / WordPress")]
-    [SwaggerResponse(200, "Object with the \"success\" field: true if the operation is successful", typeof(object))]
+    [SwaggerResponse(200, "Object with the \"success\" field: true if the operation is successful", typeof(DeleteWordpressInfoResponse))]
     [HttpGet("wordpress-delete")]
-    public async Task<object> DeleteWordpressInfoAsync()
+    public async Task<DeleteWordpressInfoResponse> DeleteWordpressInfoAsync()
     {
         var token = await wordpressToken.GetTokenAsync();
         if (token != null)
         {
             await wordpressToken.DeleteTokenAsync(token);
-            return new
-            {
-                success = true
-            };
+            return DeleteWordpressInfoResponse.Succeeded();
         }
-        return new
-        {
-            success = false
-        };
+
+        return DeleteWordpressInfoResponse.Failed();
     }
 
     /// <summary>
     /// Returns a list of the third-party services connected to the "Common" section.
     /// </summary>
-    /// <short>Get common third-party services</short>
+    /// <short>Get the common third-party services</short>
     /// <path>api/2.0/files/thirdparty/common</path>
     /// <collection>list</collection>
     [Tags("Files / Third-party integration")]
-    [SwaggerResponse(200, "List of common third-party folderst", typeof(FolderDto<string>))]
+    [SwaggerResponse(200, "List of common third-party folderst", typeof(IAsyncEnumerable<FolderDto<string>>))]
     [HttpGet("thirdparty/common")]
     public async IAsyncEnumerable<FolderDto<string>> GetCommonThirdPartyFoldersAsync([FromServices] EntryManager entryManager)
     {
@@ -155,11 +150,11 @@ public class ThirdpartyController(
     /// <summary>
     /// Returns a list of all the connected third-party accounts.
     /// </summary>
-    /// <short>Get third-party accounts</short>
+    /// <short>Get the third-party accounts</short>
     /// <path>api/2.0/files/thirdparty</path>
     /// <collection>list</collection>
     [Tags("Files / Third-party integration")]
-    [SwaggerResponse(200, "List of connected providers information", typeof(ThirdPartyParams))]
+    [SwaggerResponse(200, "List of connected providers information", typeof(IAsyncEnumerable<ThirdPartyParams>))]
     [HttpGet("thirdparty")]
     public IAsyncEnumerable<ThirdPartyParams> GetThirdPartyAccountsAsync()
     {
@@ -167,7 +162,7 @@ public class ThirdpartyController(
     }
 
     /// <summary>
-    /// Return a backup of the connected third-party account.
+    /// Returns a backup of the connected third-party account.
     /// </summary>
     /// <short>Get a third-party account backup</short>
     /// <path>api/2.0/files/thirdparty/backup</path>
@@ -193,9 +188,9 @@ public class ThirdpartyController(
     /// <path>api/2.0/files/wordpress-info</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / WordPress")]
-    [SwaggerResponse(200, "Object with the following parameters: \"success\" - specifies if the operation is successful or not, \"data\" - blog information", typeof(object))]
+    [SwaggerResponse(200, "Object with the following parameters: \"success\" - specifies if the operation is successful or not, \"data\" - blog information", typeof(WordpressInfoResponse))]
     [HttpGet("wordpress-info")]
-    public async Task<object> GetWordpressInfoAsync()
+    public async Task<WordpressInfoResponse> GetWordpressInfoAsync()
     {
         var token = await wordpressToken.GetTokenAsync();
         if (token != null)
@@ -208,17 +203,10 @@ public class ThirdpartyController(
             var jsonBlogInfo = JObject.Parse(blogInfo);
             jsonBlogInfo.Add("username", wordpressUserName);
 
-            blogInfo = jsonBlogInfo.ToString();
-            return new
-            {
-                success = true,
-                data = blogInfo
-            };
+            return new WordpressInfoResponse { Success = true, Data = jsonBlogInfo.ToString() };
         }
-        return new
-        {
-            success = false
-        };
+
+        return new WordpressInfoResponse { Success = false, Data = null };
     }
 
     /// <summary>
@@ -251,7 +239,7 @@ public class ThirdpartyController(
     /// Saves a backup of the connected third-party account.
     /// </summary>
     /// <short>Save a third-party account backup</short>
-    /// <remarks>List of provider key: DropboxV2, Box, WebDav, Yandex, OneDrive, SharePoint, GoogleDrive, kDrive</remarks>
+    /// <remarks>List of provider keys: DropboxV2, Box, WebDav, Yandex, OneDrive, SharePoint, GoogleDrive, kDrive.</remarks>
     /// <path>api/2.0/files/thirdparty/backup</path>
     /// <exception cref="ArgumentException"></exception>
     [Tags("Files / Third-party integration")]
@@ -283,16 +271,13 @@ public class ThirdpartyController(
     /// <path>api/2.0/files/wordpress-save</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / WordPress")]
-    [SwaggerResponse(200, "Object with the following parameters: \"success\" - specifies if the operation is successful or not, \"data\" - blog information", typeof(object))]
+    [SwaggerResponse(200, "Object with the following parameters: \"success\" - specifies if the operation is successful or not, \"data\" - blog information", typeof(WordpressInfoResponse))]
     [HttpPost("wordpress-save")]
-    public async Task<object> WordpressSaveAsync(WordpressSaveRequestDto inDto)
+    public async Task<WordpressInfoResponse> WordpressSaveAsync(WordpressSaveRequestDto inDto)
     {
         if (inDto.Code.Length == 0)
         {
-            return new
-            {
-                success = false
-            };
+            return new WordpressInfoResponse();
         }
         try
         {
@@ -307,26 +292,23 @@ public class ThirdpartyController(
             jsonBlogInfo.Add("username", wordpressUserName);
 
             blogInfo = jsonBlogInfo.ToString();
-            return new
+            return new WordpressInfoResponse
             {
-                success = true,
-                data = blogInfo
+                Success = true,
+                Data = blogInfo
             };
         }
         catch (Exception)
         {
-            return new
-            {
-                success = false
-            };
+            return new WordpressInfoResponse();
         }
     }
 
     /// <summary>
-    /// Returns a list of the all providers.
+    /// Returns a list of all providers.
     /// </summary>
     /// <short>Get all providers</short>
-    /// <remarks>Available provider keys: Dropbox, Box, WebDav, OneDrive, GoogleDrive, kDrive, ownCloud, Nextcloud</remarks>
+    /// <remarks>Available provider keys: Dropbox, Box, WebDav, OneDrive, GoogleDrive, kDrive, ownCloud, Nextcloud.</remarks>
     /// <path>api/2.0/files/thirdparty/providers</path>
     /// <collection>list</collection>
     [Tags("Files / Third-party integration")]

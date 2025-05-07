@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -38,14 +38,19 @@ public abstract class ActionInterpreter
         { MessageAction.FileUploadedWithOverwriting, MessageAction.UserFileUpdated }
     }.ToFrozenDictionary();
     
-    public async ValueTask<HistoryEntry> InterpretAsync(DbAuditEvent @event, FileEntry<int> entry, IServiceProvider serviceProvider)
+    public async ValueTask<HistoryEntry> InterpretAsync(DbAuditEvent @event, DbFilesAuditReference reference, IServiceProvider serviceProvider)
     {
         var messageAction = @event.Action.HasValue ? (MessageAction)@event.Action.Value : MessageAction.None;
         var processedAction = _aliases.GetValueOrDefault(messageAction, messageAction);
         var key = processedAction != MessageAction.None ? processedAction.ToStringFast() : null;
         
         var description = JsonSerializer.Deserialize<List<string>>(@event.DescriptionRaw);
-        var data = await GetDataAsync(serviceProvider, @event.Target, description, entry);
+        var data = await GetDataAsync(serviceProvider, @event.Target, description);
+
+        if (reference.Corrupted && data is IdentifiedData identifiedData)
+        {
+            identifiedData.Id = 0;
+        }
         
         var initiatorId = @event.UserId ?? ASC.Core.Configuration.Constants.Guest.ID;
         string initiatorName = null;
@@ -74,12 +79,16 @@ public abstract class ActionInterpreter
         return JsonSerializer.Deserialize<EventDescription<int>>(description.Last());
     }
 
-    protected abstract ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry);
+    protected abstract ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description);
 }
 
-public record EntryData : HistoryData
+public abstract record IdentifiedData : HistoryData
 {
-    public int Id { get; }
+    public int? Id { get; internal set; }
+}
+
+public record EntryData : IdentifiedData
+{
     public string Title { get; }
     public string ParentTitle { get; }
     public int? ParentId { get; }
@@ -99,9 +108,8 @@ public record EntryData : HistoryData
     public override int GetId() => ParentId ?? 0;
 }
 
-public record RenameEntryData : HistoryData
+public record RenameEntryData : IdentifiedData
 {
-    public int? Id { get; }
     public string OldTitle { get; }
     public string NewTitle { get; }
     public int? ParentId { get; }
@@ -121,9 +129,8 @@ public record RenameEntryData : HistoryData
 
 public record LinkData(string Title, string Id = null, string OldTitle = null, string Access = null) : HistoryData;
 
-public record EntryOperationData : HistoryData
+public record EntryOperationData : IdentifiedData
 {
-    public int Id { get; }
     public string Title { get; }
     public string ToFolderId { get; }
     public string ParentTitle { get; }

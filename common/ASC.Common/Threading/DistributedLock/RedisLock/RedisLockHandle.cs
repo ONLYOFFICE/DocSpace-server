@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,20 +26,13 @@
 
 namespace ASC.Common.Threading.DistributedLock.RedisLock;
 
-public class RedisLockHandle : LockHandleBase
+public class RedisLockHandle(IDistributedSynchronizationHandle handle) : LockHandleBase
 {
-    private readonly IDistributedSynchronizationHandle _handle;
-
-    public RedisLockHandle(IDistributedSynchronizationHandle handle)
-    {
-        _handle = handle;
-    }
-
     public override void Dispose()
     {
         CheckDispose();
         
-        _handle?.Dispose();
+        handle?.Dispose();
 
         _disposed = true;
     }
@@ -48,9 +41,9 @@ public class RedisLockHandle : LockHandleBase
     {
         CheckDispose();
 
-        if (_handle != null)
+        if (handle != null)
         {
-            await _handle.DisposeAsync();
+            await handle.DisposeAsync();
         }
 
         _disposed = true;

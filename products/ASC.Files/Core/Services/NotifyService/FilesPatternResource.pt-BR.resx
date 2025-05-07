@@ -128,9 +128,6 @@ $Message</value>
   <data name="subject_DocuSignStatus_push" xml:space="preserve">
     <value>Status do sinal alterado</value>
   </data>
-  <data name="subject_EditorMentions_push" xml:space="preserve">
-    <value>Mencionado no documento</value>
-  </data>
   <data name="subject_MailMergeEnd_push" xml:space="preserve">
     <value>O envio está concluído.</value>
   </data>
@@ -178,5 +175,64 @@ $OrangeButton</value>
   </data>
   <data name="subject_FormSubmitted" xml:space="preserve">
     <value>Notificação do DocSpace. O formulário é preenchido</value>
+  </data>
+  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
+    <value>Um novo documento "$DocumentTitle" foi criado na sala "$RoomTitle"</value>
+  </data>
+  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
+    <value>Um novo arquivo foi carregado na sala "$RoomTitle" ($Count)</value>
+  </data>
+  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
+    <value>Um novo arquivo "$DocumentTitle" foi carregado na sala "$RoomTitle"</value>
+  </data>
+  <data name="pattern_EditorMentions_push" xml:space="preserve">
+    <value>$ToUserName mencionou você no documento $DocumentTitle</value>
+  </data>
+  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
+    <value>Uma nova pasta "$FolderTitle" foi criada para a sala "$RoomTitle"</value>
+  </data>
+  <data name="pattern_FormStartedFilling" xml:space="preserve">
+    <value>
+      Notificação de atividade. "$FromUserName":"$FromUserLink" iniciou o processo de preenchimento do formulário: "$DocumentTitle":"$DocumentURL" na sala: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_FormSubmitted_push" xml:space="preserve">
+    <value>O formulário "$DocumentTitle" foi preenchido na sala "$RoomTitle"</value>
+  </data>
+  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
+    <value>
+      Notificação de atividade. O formulário "$DocumentTitle":"$DocumentURL" foi completamente preenchido na sala: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
+    <value>Você foi convidado para a sala "$RoomTitle"</value>
+  </data>
+  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
+    <value>$FromUserName moveu a sala "$RoomTitle" para o arquivo</value>
+  </data>
+  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
+    <value>Sua função na sala "$RoomTitle" foi alterada para "$RoomRole"</value>
+  </data>
+  <data name="pattern_StoppedFormFilling" xml:space="preserve">
+    <value>
+      Notificação de atividade. "$FromUserName":"$FromUserLink" interrompeu o preenchimento do formulário: "$DocumentTitle":"$DocumentURL" na sala: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_YourTurnFormFilling" xml:space="preserve">
+    <value>
+      Notificação de atividade. É sua vez! O preenchimento do formulário é obrigatório: "$DocumentTitle":"$DocumentURL" na sala: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="subject_FormStartedFilling" xml:space="preserve">
+    <value>Notificação do DocSpace.</value>
+  </data>
+  <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
+    <value>Notificação do DocSpace.</value>
+  </data>
+  <data name="subject_StoppedFormFilling" xml:space="preserve">
+    <value>Notificação do DocSpace.</value>
+  </data>
+  <data name="subject_YourTurnFormFilling" xml:space="preserve">
+    <value>Notificação do DocSpace.</value>
   </data>
 </root>

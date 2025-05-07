@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -94,7 +94,7 @@ public class RedisCacheNotify<T>(IRedisClient redisCacheClient, ILogger<RedisCac
     {
         var result = new List<Action<T>>();
 
-        foreach (var val in (CacheNotifyAction[])Enum.GetValues(typeof(CacheNotifyAction)))
+        foreach (var val in Enum.GetValues<CacheNotifyAction>())
         {
             if (!(val == action || Enum.IsDefined(typeof(CacheNotifyAction), (val & action))))
             {

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,20 +27,24 @@
 namespace ASC.Web.Api.Controllers.Settings;
 
 [DefaultRoute("webplugins")]
-public class WebPluginsController(ApiContext apiContext,
-        IMemoryCache memoryCache,
-        WebItemManager webItemManager,
-        IHttpContextAccessor httpContextAccessor,
-        PermissionContext permissionContext,
-        WebPluginManager webPluginManager,
-        TenantManager tenantManager,
-        CspSettingsHelper cspSettingsHelper,
-        IMapper mapper)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+public class WebPluginsController(
+    ApiContext apiContext,
+    IFusionCache fusionCache,
+    WebItemManager webItemManager,
+    IHttpContextAccessor httpContextAccessor,
+    PermissionContext permissionContext,
+    WebPluginManager webPluginManager,
+    TenantManager tenantManager,
+    CspSettingsHelper cspSettingsHelper,
+    IMapper mapper)
+    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
-    /// Adds web plugins from file
+    /// Adds a web plugin from a file to the current portal.
     /// </summary>
+    /// <short>
+    /// Add a web plugin
+    /// </short>
     /// <path>api/2.0/settings/webplugins</path>
     /// <exception cref="CustomHttpException"></exception>
     [Tags("Settings / Webplugins")]
@@ -64,7 +68,7 @@ public class WebPluginsController(ApiContext apiContext,
 
         var file = HttpContext.Request.Form.Files[0] ?? throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginNoInputFile);
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
 
         var webPlugin = await webPluginManager.AddWebPluginFromFileAsync(tenant.Id, file, inDto.System);
 
@@ -76,16 +80,20 @@ public class WebPluginsController(ApiContext apiContext,
     }
 
     /// <summary>
-    /// Gets web plugins
+    /// Returns the portal web plugins.
     /// </summary>
+    /// <short>
+    /// Get web plugins
+    /// </short>
     /// <path>api/2.0/settings/webplugins</path>
+    /// <collection>list</collection>
     [Tags("Settings / Webplugins")]
-    [SwaggerResponse(200, "Web plugin", typeof(WebPluginDto))]
+    [SwaggerResponse(200, "Web plugin", typeof(IEnumerable<WebPluginDto>))]
     [SwaggerResponse(403, "Plugins disabled")]
     [HttpGet("")]
     public async Task<IEnumerable<WebPluginDto>> GetWebPluginsAsync(GetWebPluginsRequestDto inDto)
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
 
         var webPlugins = await webPluginManager.GetWebPluginsAsync(tenant.Id);
 
@@ -100,8 +108,11 @@ public class WebPluginsController(ApiContext apiContext,
     }
 
     /// <summary>
-    /// Gets web plugins by name specified in request
+    /// Returns a web plugin by the name specified in the request.
     /// </summary>
+    /// <short>
+    /// Get a web plugin by name
+    /// </short>
     /// <path>api/2.0/settings/webplugins/{name}</path>
     [Tags("Settings / Webplugins")]
     [SwaggerResponse(200, "Web plugin", typeof(WebPluginDto))]
@@ -109,7 +120,7 @@ public class WebPluginsController(ApiContext apiContext,
     [HttpGet("{name}")]
     public async Task<WebPluginDto> GetWebPluginAsync(WebPluginNameRequestDto inDto)
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
 
         var webPlugin = await webPluginManager.GetWebPluginByNameAsync(tenant.Id, inDto.Name);
 
@@ -119,8 +130,11 @@ public class WebPluginsController(ApiContext apiContext,
     }
 
     /// <summary>
-    /// Updates web plugins
+    /// Updates a web plugin with the parameters specified in the request.
     /// </summary>
+    /// <short>
+    /// Update a web plugin
+    /// </short>
     /// <path>api/2.0/settings/webplugins/{name}</path>
     [Tags("Settings / Webplugins")]
     [SwaggerResponse(200, "Ok")]
@@ -130,7 +144,7 @@ public class WebPluginsController(ApiContext apiContext,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
 
         var webPlugin = await webPluginManager.UpdateWebPluginAsync(tenant.Id, inDto.Name, inDto.WebPlugin.Enabled, inDto.WebPlugin.Settings);
 
@@ -138,8 +152,11 @@ public class WebPluginsController(ApiContext apiContext,
     }
 
     /// <summary>
-    /// Deletes web plugins by name specified in request
+    /// Deletes a web plugin by the name specified in the request.
     /// </summary>
+    /// <short>
+    /// Delete a web plugin
+    /// </short>
     /// <path>api/2.0/settings/webplugins/{name}</path>
     [Tags("Settings / Webplugins")]
     [SwaggerResponse(200, "Ok")]
@@ -149,7 +166,7 @@ public class WebPluginsController(ApiContext apiContext,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
 
         var webPlugin = await webPluginManager.DeleteWebPluginAsync(tenant.Id, inDto.Name);
 

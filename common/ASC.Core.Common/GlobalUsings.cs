@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -158,9 +158,11 @@ global using Telegram.Bot;
 global using Textile;
 global using Textile.Blocks;
 global using Textile.States;
-global using static ASC.Security.Cryptography.EmailValidationKeyProvider;
+
+global using ZiggyCreatures.Caching.Fusion;
+
 global using AppOptions = FirebaseAdmin.AppOptions;
 global using FirebaseAdminMessaging = FirebaseAdmin.Messaging;
 global using FirebaseApp = FirebaseAdmin.FirebaseApp;
-global using JsonIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute; 
-global using JsonSerializer = System.Text.Json.JsonSerializer; 
+global using JsonIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute;
+global using JsonSerializer = System.Text.Json.JsonSerializer;

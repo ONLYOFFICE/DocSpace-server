@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -52,6 +52,7 @@ public class ApiSystemHelper
     private const string TenantRegionKey = "tenant_region";
     private const string TenantDomainKey = "tenant_domain";
     private readonly string _regionTableName;
+    private readonly Dictionary<string, string> _regions = new Dictionary<string, string> { { "us-west-2", "US" }, { "us-east-2", "US" }, { "eu-central-1", "DEU" } };
 
     public ApiSystemHelper(
         IConfiguration configuration,
@@ -171,6 +172,38 @@ public class ApiSystemHelper
         };
 
         await awsDynamoDbClient.DeleteItemAsync(request);
+    }
+
+    public async Task<string> GetTenantRegionAsync(string portalName)
+    {
+        using var awsDynamoDbClient = GetDynamoDBClient();
+
+        portalName = portalName.Trim().ToLowerInvariant();
+
+        var tenantDomain = $"{portalName}.{_coreBaseSettings.Basedomain}";
+
+        var getItemRequest = new GetItemRequest
+        {
+            TableName = _regionTableName,
+            Key = new Dictionary<string, AttributeValue>
+            {
+                { TenantDomainKey, new AttributeValue { S = tenantDomain } }
+            },
+            ProjectionExpression = TenantRegionKey,
+            ConsistentRead = true
+        };
+
+        var getItemResponse = await awsDynamoDbClient.GetItemAsync(getItemRequest);
+
+        if (getItemResponse.Item.TryGetValue(TenantRegionKey, out var region))
+        {
+            if(_regions.TryGetValue(region.S, out var value))
+            {
+                return value;
+            }
+        }
+
+        return null;
     }
 
     public async Task<IEnumerable<string>> FindTenantsInCacheAsync(string portalName)

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -72,7 +72,7 @@ public class StorageHelper(UserPhotoManager userPhotoManager, StorageFactory sto
 
         try
         {
-            var store = await storageFactory.GetStorageAsync(await tenantManager.GetCurrentTenantIdAsync(), StorageName);
+            var store = await storageFactory.GetStorageAsync(tenantManager.GetCurrentTenantId(), StorageName);
 
             var fileName = Path.GetFileName(logoPath);
 
@@ -89,7 +89,7 @@ public class StorageHelper(UserPhotoManager userPhotoManager, StorageFactory sto
 
     private async Task<string> SaveLogoAsync(string fileName, byte[] data)
     {
-        var store = await storageFactory.GetStorageAsync(await tenantManager.GetCurrentTenantIdAsync(), StorageName);
+        var store = await storageFactory.GetStorageAsync(tenantManager.GetCurrentTenantId(), StorageName);
 
         using var stream = new MemoryStream(data);
         stream.Seek(0, SeekOrigin.Begin);

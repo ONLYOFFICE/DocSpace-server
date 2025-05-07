@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -87,7 +87,7 @@ public class AzManager(IRoleProvider roleProvider, IPermissionProvider permissio
             {
                 subject
             };
-        subjects.AddRange((await _roleProvider.GetRolesAsync(subject)).ConvertAll(r => (ISubject)r));
+        subjects.AddRange((await _roleProvider.GetRolesAsync(subject)).ConvertAll(ISubject (r) => r));
         if (objectId != null)
         {
             var secObjProviderHelper = new AzObjectSecurityProviderHelper(objectId, securityObjProvider);

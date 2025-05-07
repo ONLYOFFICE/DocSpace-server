@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -60,11 +60,11 @@ public class TelegramLoginProvider : Consumer, IValidateKeysProvider, ITelegramL
     {
         if (TelegramBotToken.Length == 0)
         {
-            await _telegramHelper.DisableClientAsync((await TenantManager.GetCurrentTenantAsync()).Id);
+            await _telegramHelper.DisableClientAsync((TenantManager.GetCurrentTenant()).Id);
 
             return true;
         }
 
-        return await _telegramHelper.CreateClientAsync((await TenantManager.GetCurrentTenantAsync()).Id, TelegramBotToken, TelegramAuthTokenLifespan, TelegramProxy);
+        return await _telegramHelper.CreateClientAsync((TenantManager.GetCurrentTenant()).Id, TelegramBotToken, TelegramAuthTokenLifespan, TelegramProxy);
     }
 }

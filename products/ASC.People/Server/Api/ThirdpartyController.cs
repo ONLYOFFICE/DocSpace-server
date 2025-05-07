@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,6 +28,9 @@ using Constants = ASC.Core.Configuration.Constants;
 
 namespace ASC.People.Api;
 
+///<summary>
+/// Third-party API.
+///</summary>
 [DefaultRoute("thirdparty")]
 public class ThirdpartyController(
     AccountLinker accountLinker,
@@ -48,7 +51,9 @@ public class ThirdpartyController(
     TenantManager tenantManager,
     InvitationService invitationService,
     LoginProfileTransport loginProfileTransport,
-    EmailValidationKeyModelHelper emailValidationKeyModelHelper)
+    EmailValidationKeyModelHelper emailValidationKeyModelHelper,
+    UserSocketManager socketManager,
+    UserWebhookManager webhookManager)
     : ApiControllerBase
     {
 
@@ -61,13 +66,13 @@ public class ThirdpartyController(
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <collection>list</collection>
     [Tags("People / Third-party accounts")]
-    [SwaggerResponse(200, "List of third-party accounts", typeof(AccountInfoDto))]
+    [SwaggerResponse(200, "List of third-party accounts", typeof(ICollection<AccountInfoDto>))]
     [AllowAnonymous, AllowNotPayment]
     [HttpGet("providers")]
     public async Task<ICollection<AccountInfoDto>> GetAuthProvidersAsync(AuthProvidersRequestDto inDto)
     {
         var infos = new List<AccountInfoDto>();
-        IEnumerable<LoginProfile> linkedAccounts = new List<LoginProfile>();
+        var linkedAccounts = new List<LoginProfile>();
 
         if (authContext.IsAuthenticated)
         {
@@ -126,7 +131,7 @@ public class ThirdpartyController(
         if (string.IsNullOrEmpty(profile.AuthorizationError))
         {
             await accountLinker.AddLinkAsync(securityContext.CurrentAccount.ID, profile);
-            await messageService.SendAsync(MessageAction.UserLinkedSocialAccount, GetMeaningfulProviderName(profile.Provider));
+            messageService.Send(MessageAction.UserLinkedSocialAccount, GetMeaningfulProviderName(profile.Provider));
         }
         else
         {
@@ -188,53 +193,69 @@ public class ThirdpartyController(
         }
 
         var employeeType = linkData.EmployeeType;
-        bool quotaLimit;
+        var quotaLimit = false;
 
-        Guid userId;
-        try
+        var user = await userManager.GetUserByEmailAsync(thirdPartyProfile.EMail);
+        if (user.Id != ASC.Core.Users.Constants.LostUser.Id)
         {
-            await securityContext.AuthenticateMeWithoutCookieAsync(Constants.CoreSystem);
-
-            var invitedByEmail = linkData.LinkType == InvitationLinkType.Individual;
-
-            (var newUser, quotaLimit) = await CreateNewUser(
-                GetFirstName(inDto, thirdPartyProfile), 
-                GetLastName(inDto, thirdPartyProfile), 
-                GetEmailAddress(inDto, thirdPartyProfile), 
-                passwordHash, 
-                employeeType, 
-                false, 
-                invitedByEmail,
-                inDto.Culture,
-                model?.UiD);
-            
-            var messageAction = employeeType == EmployeeType.RoomAdmin ? MessageAction.UserCreatedViaInvite : MessageAction.GuestCreatedViaInvite;
-            await messageService.SendAsync(MessageInitiator.System, messageAction, MessageTarget.Create(newUser.Id), description: newUser.DisplayUserName(false, displayUserSettingsHelper));
-            userId = newUser.Id;
-            if (!string.IsNullOrEmpty(thirdPartyProfile.Avatar))
+            if (!(await accountLinker.GetLinkedProfilesAsync(user.Id.ToString(), thirdPartyProfile.Provider)).Any())
             {
-                await SaveContactImage(userId, thirdPartyProfile.Avatar);
+                await accountLinker.AddLinkAsync(user.Id, thirdPartyProfile);
             }
 
-            await accountLinker.AddLinkAsync(userId, thirdPartyProfile);
+            await cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id);
         }
-        finally
+        else
         {
-            securityContext.Logout();
+            Guid userId;
+
+            try
+            {
+                await securityContext.AuthenticateMeWithoutCookieAsync(Constants.CoreSystem);
+
+                var invitedByEmail = linkData.LinkType == InvitationLinkType.Individual;
+
+                (var newUser, quotaLimit) = await CreateNewUser(
+                    GetFirstName(inDto, thirdPartyProfile),
+                    GetLastName(inDto, thirdPartyProfile),
+                    GetEmailAddress(inDto, thirdPartyProfile),
+                    passwordHash,
+                    employeeType,
+                    false,
+                    invitedByEmail,
+                    inDto.Culture,
+                    model?.UiD);
+
+                var messageAction = employeeType == EmployeeType.RoomAdmin ? MessageAction.UserCreatedViaInvite : MessageAction.GuestCreatedViaInvite;
+                messageService.Send(MessageInitiator.System, messageAction, MessageTarget.Create(newUser.Id), description: newUser.DisplayUserName(false, displayUserSettingsHelper));
+                userId = newUser.Id;
+                if (!string.IsNullOrEmpty(thirdPartyProfile.Avatar))
+                {
+                    await SaveContactImage(userId, thirdPartyProfile.Avatar);
+                }
+
+                await accountLinker.AddLinkAsync(userId, thirdPartyProfile);
+
+                await webhookManager.PublishAsync(WebhookTrigger.UserCreated, newUser);
+            }
+            finally
+            {
+                securityContext.Logout();
+            }
+
+            user = await userManager.GetUsersAsync(userId);
+
+            await cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id);
+
+            await studioNotifyService.UserHasJoinAsync();
+
+            if (mustChangePassword)
+            {
+                await studioNotifyService.UserPasswordChangeAsync(user, true);
+            }
+
+            await userHelpTourHelper.SetIsNewUser(true);
         }
-
-        var user = await userManager.GetUsersAsync(userId);
-
-        await cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id);
-
-        await studioNotifyService.UserHasJoinAsync();
-
-        if (mustChangePassword)
-        {
-            await studioNotifyService.UserPasswordChangeAsync(user, true);
-        }
-
-        await userHelpTourHelper.SetIsNewUser(true);
 
         if (linkData is { LinkType: InvitationLinkType.CommonToRoom })
         {
@@ -255,7 +276,7 @@ public class ThirdpartyController(
     {
         await accountLinker.RemoveProviderAsync(securityContext.CurrentAccount.ID.ToString(), inDto.Provider);
 
-        await messageService.SendAsync(MessageAction.UserUnlinkedSocialAccount, GetMeaningfulProviderName(inDto.Provider));
+        messageService.Send(MessageAction.UserUnlinkedSocialAccount, GetMeaningfulProviderName(inDto.Provider));
     }
 
     private async Task<(UserInfo, bool)> CreateNewUser(string firstName, string lastName, string email, string passwordHash, EmployeeType employeeType, bool fromInviteLink, 
@@ -297,11 +318,20 @@ public class ThirdpartyController(
         try
         {
             user = await userManagerWrapper.AddUserAsync(user, passwordHash, true, true, employeeType, fromInviteLink, updateExising: inviteByEmail);
+            if (employeeType is EmployeeType.Guest)
+            {
+                await socketManager.AddGuestAsync(user);
+            }
+            else
+            {
+                await socketManager.AddUserAsync(user);
+            }
         }
         catch (TenantQuotaException)
         {
             quotaLimit = true;
             user = await userManagerWrapper.AddUserAsync(user, passwordHash, true, true, EmployeeType.User, fromInviteLink, updateExising: inviteByEmail);
+            await socketManager.AddUserAsync(user);
         }
 
         return (user, quotaLimit);

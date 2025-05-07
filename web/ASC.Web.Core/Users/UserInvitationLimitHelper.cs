@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,16 +31,16 @@ public class UserInvitationLimitHelper(
     SetupInfo setupInfo,
     TenantManager tenantManager,
     QuotaSocketManager quotaSocketManager,
-    IDistributedCache distributedCache)
+    IFusionCache hybridCache)
 {
     private bool IsLimitEnabled()
     {
         return setupInfo.InvitationLimit != int.MaxValue;
     }
 
-    private async Task<string> GetCacheKey()
+    private string GetCacheKey()
     {
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
 
         return $"invitation_limit:{tenantId}";
     }
@@ -52,9 +52,9 @@ public class UserInvitationLimitHelper(
             return setupInfo.InvitationLimit;
         }
 
-        var cacheKey = await GetCacheKey();
+        var cacheKey = GetCacheKey();
 
-        var cacheValue = await distributedCache.GetStringAsync(cacheKey);
+        var cacheValue = await hybridCache.GetOrDefaultAsync<string>(cacheKey);
 
         return int.TryParse(cacheValue, out var result) ? result : setupInfo.InvitationLimit;
     }
@@ -66,9 +66,9 @@ public class UserInvitationLimitHelper(
             return;
         }
 
-        var cacheKey = await GetCacheKey();
+        var cacheKey = GetCacheKey();
 
-        var cacheValue = await distributedCache.GetStringAsync(cacheKey);
+        var cacheValue = await hybridCache.GetOrDefaultAsync<string>(cacheKey);
 
         if (!int.TryParse(cacheValue, out var oldValue))
         {
@@ -77,7 +77,7 @@ public class UserInvitationLimitHelper(
 
         var newValue = int.Min(oldValue + 1, setupInfo.InvitationLimit);
 
-        await distributedCache.SetStringAsync(cacheKey, newValue.ToString());
+        await hybridCache.SetAsync(cacheKey, newValue.ToString());
 
         await quotaSocketManager.ChangeInvitationLimitValue(newValue);
     }
@@ -89,15 +89,15 @@ public class UserInvitationLimitHelper(
             return;
         }
 
-        var cacheKey = await GetCacheKey();
+        var cacheKey = GetCacheKey();
 
-        var cacheValue = await distributedCache.GetStringAsync(cacheKey);
+        var cacheValue = await hybridCache.GetOrDefaultAsync<string>(cacheKey);
 
         if (int.TryParse(cacheValue, out var oldValue))
         {
             var newValue = int.Max(oldValue - 1, 0);
 
-            await distributedCache.SetStringAsync(cacheKey, newValue.ToString());
+            await hybridCache.SetAsync(cacheKey, newValue.ToString());
 
             await quotaSocketManager.ChangeInvitationLimitValue(newValue);
         }
@@ -105,7 +105,7 @@ public class UserInvitationLimitHelper(
         {
             var value = int.Max(setupInfo.InvitationLimit - 1, 0);
 
-            await distributedCache.SetStringAsync(cacheKey, value.ToString());
+            await hybridCache.SetAsync(cacheKey, value.ToString());
 
             await quotaSocketManager.ChangeInvitationLimitValue(value);
         }

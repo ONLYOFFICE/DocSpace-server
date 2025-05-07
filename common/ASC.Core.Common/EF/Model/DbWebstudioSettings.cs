@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,6 +32,7 @@ public class DbWebstudioSettings : BaseEntity
     public Guid Id { get; set; }
     public Guid UserId { get; set; }
     public string Data { get; set; }
+    public DateTime LastModified { get; set; }
 
     public DbTenant Tenant { get; set; }
 
@@ -94,31 +95,43 @@ public static class WebstudioSettingsExtension
                 .HasColumnType("mediumtext")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
+            
+            entity.Property(e => e.LastModified)
+                .HasColumnName("last_modified")
+                .HasColumnType("datetime");
         });
     }
+    
     public static void PgSqlAddWebstudioSettings(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<DbWebstudioSettings>(entity =>
         {
             entity.HasKey(e => new { e.TenantId, e.Id, e.UserId })
-                .HasName("webstudio_settings_pkey");
+                .HasName("PK_webstudio_settings");
 
-            entity.ToTable("webstudio_settings", "onlyoffice");
+            entity.ToTable("webstudio_settings");
 
             entity.HasIndex(e => e.Id)
-                .HasDatabaseName("ID");
+                .HasDatabaseName("IX_webstudio_settings_Id");
 
-            entity.Property(e => e.TenantId).HasColumnName("TenantID");
+            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 
             entity.Property(e => e.Id)
-                .HasColumnName("ID")
-                .HasMaxLength(64);
+                .HasColumnName("id")
+                .HasColumnType("uuid");
 
             entity.Property(e => e.UserId)
-                .HasColumnName("UserID")
-                .HasMaxLength(64);
+                .HasColumnName("user_id")
+                .HasColumnType("uuid");
 
-            entity.Property(e => e.Data).IsRequired();
+            entity.Property(e => e.Data)
+                .IsRequired()
+                .HasColumnName("data")
+                .HasColumnType("jsonb");
+            
+            entity.Property(e => e.LastModified)
+                .HasColumnName("last_modified")
+                .HasColumnType("timestamptz");
         });
     }
 }

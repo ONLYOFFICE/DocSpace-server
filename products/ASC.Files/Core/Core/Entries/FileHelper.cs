@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -48,7 +48,7 @@ public class FileHelper(FileTrackerHelper fileTracker,
                 currentStatus |= FileStatus.IsEditing;
             }
 
-            if (fileTracker.IsEditingAlone(file.Id))
+            if (await fileTracker.IsEditingAloneAsync(file.Id))
             {
                 currentStatus |= FileStatus.IsEditingAlone;
             }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -172,7 +172,7 @@ public class SmtpSettingsController(
 
         var settings = mapper.Map<SmtpSettings, SmtpSettingsDto>(await coreConfiguration.GetDefaultSmtpSettingsAsync());
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
 
         await smtpOperation.StartSmtpJob(settings, tenant, securityContext.CurrentAccount.ID);
 
@@ -180,10 +180,10 @@ public class SmtpSettingsController(
     }
 
     /// <summary>
-    /// Returns the SMTP test process status.
+    /// Returns the status of the SMTP testing process.
     /// </summary>
     /// <short>
-    /// Get the SMTP test process status
+    /// Get the SMTP testing process status
     /// </short>
     /// <path>api/2.0/smtpsettings/smtp/test/status</path>
     [Tags("Security / SMTP settings")]
@@ -194,7 +194,7 @@ public class SmtpSettingsController(
     {
         await CheckSmtpPermissionsAsync();
 
-        return await smtpOperation.GetStatus(await tenantManager.GetCurrentTenantAsync());
+        return await smtpOperation.GetStatus(tenantManager.GetCurrentTenant());
     }
 
     private async Task CheckSmtpPermissionsAsync()
@@ -202,7 +202,7 @@ public class SmtpSettingsController(
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         if (!SetupInfo.IsVisibleSettings(nameof(ManagementType.SmtpSettings)))
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption, "Smtp");
+            throw new BillingException(Resource.ErrorNotAllowedOption);
         }
     }
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -57,6 +57,7 @@ public class FileSecurity(IDaoFactory daoFactory,
     public readonly FileShare DefaultPrivacyShare = FileShare.Restrict;
     public readonly FileShare DefaultArchiveShare = FileShare.Restrict;
     public readonly FileShare DefaultVirtualRoomsShare = FileShare.Restrict;
+    public readonly FileShare DefaultRoomTemplatesShare = FileShare.Restrict;
 
     public static readonly HashSet<FileShare> PaidShares = [FileShare.RoomManager];
 
@@ -68,11 +69,11 @@ public class FileSecurity(IDaoFactory daoFactory,
             {
                 { 
                     SubjectType.ExternalLink, 
-                    [FileShare.Editing, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.Restrict, FileShare.None]
+                    [FileShare.Editing, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.FillForms, FileShare.Restrict, FileShare.None]
                 },
                 { 
                     SubjectType.PrimaryExternalLink, 
-                    [FileShare.Editing, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.Restrict, FileShare.None]
+                    [FileShare.Editing, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.FillForms, FileShare.Restrict, FileShare.None]
                 }
             }.ToFrozenDictionary()
         }
@@ -140,9 +141,9 @@ public class FileSecurity(IDaoFactory daoFactory,
                 FolderType.VirtualDataRoom,
                 new Dictionary<SubjectType, HashSet<FileShare>>
                 {
-                    { SubjectType.User, [FileShare.RoomManager, FileShare.ContentCreator, FileShare.Editing, FileShare.Read, FileShare.None] },
-                    { SubjectType.Group, [FileShare.ContentCreator, FileShare.Editing, FileShare.Read, FileShare.None] },
-                    { SubjectType.InvitationLink, [FileShare.ContentCreator, FileShare.Editing, FileShare.Read, FileShare.None] }
+                    { SubjectType.User, [FileShare.RoomManager, FileShare.ContentCreator, FileShare.Editing, FileShare.Read, FileShare.FillForms, FileShare.None] },
+                    { SubjectType.Group, [FileShare.ContentCreator, FileShare.Editing, FileShare.Read, FileShare.FillForms, FileShare.None] },
+                    { SubjectType.InvitationLink, [FileShare.ContentCreator, FileShare.Editing, FileShare.Read, FileShare.FillForms, FileShare.None] }
                 }.ToFrozenDictionary()
             }
         }.ToFrozenDictionary();
@@ -200,7 +201,13 @@ public class FileSecurity(IDaoFactory daoFactory,
                     FilesSecurityActions.Convert,
                     FilesSecurityActions.CreateRoomFrom,
                     FilesSecurityActions.CopyLink,
-                    FilesSecurityActions.Embed
+                    FilesSecurityActions.Embed,
+                    FilesSecurityActions.StartFilling,
+                    FilesSecurityActions.FillingStatus,
+                    FilesSecurityActions.ResetFilling,
+                    FilesSecurityActions.StopFilling,
+                    FilesSecurityActions.OpenForm
+
                 }
             },
             {
@@ -295,6 +302,18 @@ public class FileSecurity(IDaoFactory daoFactory,
     {
         return await CanAsync(entry, userId, FilesSecurityActions.FillForms);
     }
+    public async Task<bool> CanStartFillingAsync<T>(FileEntry<T> entry, Guid userId)
+    {
+        return await CanAsync(entry, userId, FilesSecurityActions.StartFilling);
+    }
+    public async Task<bool> CanStopFillingAsync<T>(FileEntry<T> entry, Guid userId)
+    {
+        return await CanAsync(entry, userId, FilesSecurityActions.StopFilling);
+    }
+    public async Task<bool> CanResetFillingAsync<T>(FileEntry<T> entry, Guid userId)
+    {
+        return await CanAsync(entry, userId, FilesSecurityActions.ResetFilling);
+    }
 
     public async Task<bool> CanFillFormsAsync<T>(FileEntry<T> entry)
     {
@@ -330,7 +349,17 @@ public class FileSecurity(IDaoFactory daoFactory,
     {
         return await CanCreateAsync(entry, authContext.CurrentAccount.ID);
     }
-    
+
+    public async Task<bool> CanCreateFromAsync<T>(FileEntry<T> entry)
+    {
+        return await CanCreateFromAsync(entry, authContext.CurrentAccount.ID);
+    }
+
+    public async Task<bool> CanCreateFromAsync<T>(FileEntry<T> entry, Guid userId)
+    {
+        return await CanAsync(entry, userId, FilesSecurityActions.CreateFrom);
+    }
+
     public async Task<bool> CanEditAsync<T>(FileEntry<T> entry, Guid userId)
     {
         return await CanAsync(entry, userId, FilesSecurityActions.Edit);
@@ -479,7 +508,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             GetLinksUsersAsync(shares.Where(r => r.SubjectType is SubjectType.PrimaryExternalLink or SubjectType.ExternalLink)) 
             : Task.FromResult(Enumerable.Empty<Guid>());
 
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         var copyShares = shares.GroupBy(k => k.Subject).ToDictionary(k => k.Key);
 
         FileShareRecord<T>[] defaultRecords;
@@ -746,10 +775,11 @@ public class FileSecurity(IDaoFactory daoFactory,
             }
 
             var security = new Dictionary<FilesSecurityActions, bool>();
+            var parentFolders = await GetFileParentFolders(entry.ParentId);
             
             foreach (var action in Enum.GetValues<FilesSecurityActions>().Where(r => _securityEntries[entry.FileEntryType].Contains(r)))
             {
-                var result = await FilterEntryAsync(entry, action, userId, null, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser);
+                var result = await FilterEntryAsync(entry, action, userId, null, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders);
                 security[action] = result;
             }
 
@@ -811,11 +841,12 @@ public class FileSecurity(IDaoFactory daoFactory,
         var isGuest = userType is EmployeeType.Guest;
         var isDocSpaceAdmin = userType is EmployeeType.DocSpaceAdmin;
         var isUser = userType is EmployeeType.User;
-        var isAuthenticated =  authContext.IsAuthenticated || (await authManager.GetAccountByIDAsync(await tenantManager.GetCurrentTenantIdAsync(), userId)).IsAuthenticated;
+        var isAuthenticated =  authContext.IsAuthenticated || (await authManager.GetAccountByIDAsync(tenantManager.GetCurrentTenantId(), userId)).IsAuthenticated;
 
         var accessSnapshot = entry.Access;
+        var parentFolders = await GetFileParentFolders(entry.ParentId);
         
-        var haveAccess = await FilterEntryAsync(entry, action, userId, shares, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser);
+        var haveAccess = await FilterEntryAsync(entry, action, userId, shares, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders);
 
         if (!setEntryAccess)
         {
@@ -842,17 +873,43 @@ public class FileSecurity(IDaoFactory daoFactory,
     }
 
     private async Task<bool> FilterEntryAsync<T>(FileEntry<T> e, FilesSecurityActions action, Guid userId, IEnumerable<FileShareRecord<T>> shares, bool isOutsider, bool isGuest, 
-        bool isAuthenticated, bool isDocSpaceAdmin, bool isUser)
+        bool isAuthenticated, bool isDocSpaceAdmin, bool isUser, List<Folder<T>> parentFolders)
     {
         var file = e as File<T>;
         var folder = e as Folder<T>;
         var isRoom = folder != null && DocSpaceHelper.IsRoom(folder.FolderType);
-
+        var cacheFileDao = daoFactory.GetCacheFileDao<T>();
         if (file != null &&
             action == FilesSecurityActions.FillForms &&
             !file.IsForm)
         {
             return false;
+        }
+        if (file != null && action == FilesSecurityActions.Edit && file.Category == (int)FilterType.Pdf && file.IsCompletedForm)
+        {
+            return false;
+        }
+        var room = parentFolders.FirstOrDefault(r => DocSpaceHelper.IsRoom(r.FolderType));
+        if (file != null && room != null && room.FolderType == FolderType.VirtualDataRoom && !await HasFullAccessAsync(file, userId, isGuest, isRoom, isUser) && !await DocSpaceHelper.IsFormOrCompletedForm(file, daoFactory))
+        {
+            var shareRecord = await GetShareRecordAsync(room, userId, isDocSpaceAdmin, shares);
+            if (shareRecord != null && shareRecord.Share is FileShare.FillForms)
+            {
+                return false;
+            }
+        }
+
+        if (folder != null && room != null && room.FolderType == FolderType.VirtualDataRoom && !await HasFullAccessAsync(folder, userId, isGuest, isRoom, isUser))
+        {
+            var shareRecord = await GetShareRecordAsync(room, userId, isDocSpaceAdmin, shares);
+            if (shareRecord != null && shareRecord.Share is FileShare.FillForms)
+            {
+                var folderDao = daoFactory.GetCacheFolderDao<T>();
+                if (!await folderDao.ContainsFormsInFolder(folder))
+                {
+                    return false;
+                }
+            }
         }
 
         if (action == FilesSecurityActions.IndexExport && (!isRoom || !folder.SettingsIndexing))
@@ -882,7 +939,7 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         if (action == FilesSecurityActions.CreateRoomFrom)
         {
-            return e.RootFolderType == FolderType.USER && e.RootCreateBy == userId && !isUser && (folder is { FolderType: FolderType.DEFAULT } || file != null);
+            return e.RootFolderType == FolderType.USER && e.RootCreateBy == userId && !isUser && !isGuest && (folder is { FolderType: FolderType.DEFAULT } || file != null);
         }
 
         if (action == FilesSecurityActions.Embed)
@@ -996,6 +1053,11 @@ public class FileSecurity(IDaoFactory daoFactory,
                         return action is FilesSecurityActions.Create or FilesSecurityActions.MoveTo;
                     }
 
+                    if (folder.FolderType == FolderType.RoomTemplates && !isUser)
+                    {
+                        return action is FilesSecurityActions.CreateFrom or FilesSecurityActions.MoveTo;
+                    }
+
                     if (folder.FolderType == FolderType.TRASH)
                     {
                         return action == FilesSecurityActions.MoveTo;
@@ -1013,7 +1075,22 @@ public class FileSecurity(IDaoFactory daoFactory,
                 if (folder.FolderType == FolderType.Archive)
                 {
                     return true;
+                
+                }if (folder.FolderType == FolderType.RoomTemplates)
+                {
+                    return true;
                 }
+            }
+        }
+        if (file == null || (file != null && !await DocSpaceHelper.IsFormOrCompletedForm(file, daoFactory)) || (file != null && file.IsForm && e.RootFolderType != FolderType.VirtualRooms))
+        {
+            switch (action)
+            {
+                case FilesSecurityActions.ResetFilling:
+                case FilesSecurityActions.StopFilling:
+                case FilesSecurityActions.StartFilling:
+                case FilesSecurityActions.FillingStatus:
+                    return false;
             }
         }
 
@@ -1039,13 +1116,33 @@ public class FileSecurity(IDaoFactory daoFactory,
                 }
                 break;
             case FolderType.USER:
-                if (isOutsider || action == FilesSecurityActions.Lock || (isGuest && !e.Shared))
+                if (isOutsider || action == FilesSecurityActions.Lock)
                 {
                     return false;
                 }
                 if (e.RootCreateBy == userId)
                 {
+                    if(isGuest && action != FilesSecurityActions.Read && action != FilesSecurityActions.Download)
+                    {
+                        return false;
+                    }
+
                     // user has all right in his folder
+                    return true;
+                }
+                break;
+
+            case FolderType.RoomTemplates:
+                if (action is FilesSecurityActions.FillForms 
+                    or FilesSecurityActions.EditHistory 
+                    or FilesSecurityActions.ReadHistory
+                    or FilesSecurityActions.SubmitToFormGallery
+                    or FilesSecurityActions.Lock)
+                {
+                    return false;
+                }
+                if (await HasFullAccessAsync(e, userId, isGuest, isRoom, isUser))
+                {
                     return true;
                 }
                 break;
@@ -1054,7 +1151,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 {
                     return false;
                 }
-                
+
                 if (isDocSpaceAdmin)
                 {
                     if (action == FilesSecurityActions.Download)
@@ -1073,9 +1170,6 @@ public class FileSecurity(IDaoFactory daoFactory,
                         }
                         else
                         {
-                            var parentFolders = await GetFileParentFolders(e.ParentId);
-                            var room = parentFolders.FirstOrDefault(r => DocSpaceHelper.IsRoom(r.FolderType));
-
                             if (room is not { SettingsDenyDownload: true })
                             {
                                 return true;
@@ -1095,26 +1189,89 @@ public class FileSecurity(IDaoFactory daoFactory,
                             return true;
                     }
 
-                    if (isRoom && action is FilesSecurityActions.Move or FilesSecurityActions.Pin or FilesSecurityActions.ChangeOwner or 
+                    if (isRoom && action is FilesSecurityActions.Move or FilesSecurityActions.Pin or FilesSecurityActions.ChangeOwner or
                             FilesSecurityActions.IndexExport)
                     {
                         return true;
                     }
                 }
-                
-                if (action == FilesSecurityActions.FillForms && file != null)
+
+                if (file != null && (action is
+                    FilesSecurityActions.FillForms or
+                    FilesSecurityActions.Edit or
+                    FilesSecurityActions.StartFilling or
+                    FilesSecurityActions.FillingStatus or
+                    FilesSecurityActions.ResetFilling or
+                    FilesSecurityActions.StopFilling or
+                    FilesSecurityActions.SubmitToFormGallery or
+                    FilesSecurityActions.CopyLink or
+                    FilesSecurityActions.OpenForm)
+                    && await DocSpaceHelper.IsFormOrCompletedForm(file, daoFactory))
                 {
-                    var parentFolders = await GetFileParentFolders(file.ParentId);
-                    if (parentFolders != null)
+                    var fileFolder = parentFolders.FirstOrDefault(r => DocSpaceHelper.IsRoom(r.FolderType));
+                    var fileParentFolder = parentFolders.LastOrDefault();
+                    if (action == FilesSecurityActions.FillForms && (fileParentFolder != null && ((fileParentFolder.FolderType == FolderType.FormFillingFolderInProgress && file.CreateBy != userId) || fileParentFolder.FolderType == FolderType.FormFillingFolderDone)))
                     {
-                        var fileFolder = parentFolders.LastOrDefault();
-                        if ((fileFolder.FolderType == FolderType.FormFillingFolderInProgress && file.CreateBy != userId) || fileFolder.FolderType == FolderType.FormFillingFolderDone)
+                        return false;
+                    }
+
+                    if (fileFolder != null && fileFolder.FolderType == FolderType.VirtualDataRoom)
+                    {
+                        var (currentStep, myRoles) = await cacheFileDao.GetUserFormRoles(file.Id, userId);
+                        var role = myRoles.Where(r => !r.Submitted).FirstOrDefault();
+                        var properties = await cacheFileDao.GetProperties(file.Id);
+                        var formFilling = properties?.FormFilling;
+
+                        var userHasFullAccess = await HasFullAccessAsync(e, userId, isGuest, isRoom, isUser);
+
+                        var shareRecord = await GetShareRecordAsync(room, userId, isDocSpaceAdmin, shares);
+
+                        var hasFullAccessToForm = userHasFullAccess || (shareRecord is { Share: FileShare.ContentCreator or FileShare.RoomManager});
+
+                        var IsFillingStoped = formFilling?.FillingStopedDate != null && !DateTime.MinValue.Equals(formFilling?.FillingStopedDate);
+                        return action switch
                         {
-                            return false;
+                            FilesSecurityActions.ResetFilling =>
+                                (userHasFullAccess || shareRecord is { Share: FileShare.RoomManager } || (shareRecord is { Share: FileShare.ContentCreator }) && file.CreateBy.Equals(userId)) && formFilling?.StartFilling == true && IsFillingStoped,
+
+                            FilesSecurityActions.StopFilling =>
+                                (userHasFullAccess || shareRecord is { Share: FileShare.RoomManager } || (shareRecord is { Share: FileShare.ContentCreator }) && file.CreateBy.Equals(userId)) && formFilling?.StartFilling == true && !IsFillingStoped && currentStep > 0,
+
+                            FilesSecurityActions.StartFilling =>
+                                hasFullAccessToForm && (formFilling == null || formFilling?.StartFilling == false || formFilling?.StartFilling == null),
+
+                            FilesSecurityActions.FillForms =>
+                                !IsFillingStoped && myRoles.Any() && (role != null && role.Sequence == currentStep),
+
+                            FilesSecurityActions.Edit =>
+                                currentStep == -1 && (hasFullAccessToForm || e.Access is FileShare.Editing),
+
+                            FilesSecurityActions.FillingStatus =>
+                                formFilling?.StartFilling == true,
+
+                            FilesSecurityActions.OpenForm =>
+                                (formFilling?.StartFilling == true && role == null) || currentStep == 0 || IsFillingStoped || (role != null && role.Sequence != currentStep),
+
+                            _ => false
+                        };
+                    }
+                    else if (fileFolder != null && fileFolder.FolderType == FolderType.FillingFormsRoom)
+                    {
+                        switch (action)
+                        {
+                            case FilesSecurityActions.ResetFilling:
+                            case FilesSecurityActions.StopFilling:
+                            case FilesSecurityActions.StartFilling:
+                            case FilesSecurityActions.FillingStatus:
+                                return false;
                         }
                     }
+                } 
+                else if ((file == null || !file.IsForm) && action is FilesSecurityActions.OpenForm)
+                {
+                    return false;
                 }
-                
+
                 if (action is 
                        FilesSecurityActions.Rename or 
                        FilesSecurityActions.Lock or 
@@ -1125,21 +1282,15 @@ public class FileSecurity(IDaoFactory daoFactory,
                        FilesSecurityActions.Embed && 
                    file != null )
                 {
-                    var parentFolders = await GetFileParentFolders(file.ParentId);
-                    if (parentFolders != null)
+                    var fileFolder = parentFolders?.LastOrDefault();
+                    if (fileFolder?.FolderType is FolderType.FormFillingFolderInProgress or FolderType.FormFillingFolderDone)
                     {
-                        var fileFolder = parentFolders.LastOrDefault();
-                        if ((fileFolder.FolderType == FolderType.FormFillingFolderInProgress) || fileFolder.FolderType == FolderType.FormFillingFolderDone)
-                        {
-                            return false;
-                        }
+                        return false;
                     }
                 }
                 
                 if (action == FilesSecurityActions.CopyLink && file != null)
                 {
-                    var parentFolders = await GetFileParentFolders(file.ParentId);
-
                     if (parentFolders.Exists(parent => DocSpaceHelper.IsFormsFillingSystemFolder(parent.FolderType)))
                     {
                         return false;
@@ -1194,9 +1345,6 @@ public class FileSecurity(IDaoFactory daoFactory,
                         }
                         else
                         {
-                            var parentFolders = await GetFileParentFolders(e.ParentId);
-                            var room = parentFolders.FirstOrDefault(r => DocSpaceHelper.IsRoom(r.FolderType));
-
                             if (room is not { SettingsDenyDownload: true })
                             {
                                 return true;
@@ -1233,33 +1381,41 @@ public class FileSecurity(IDaoFactory daoFactory,
         if (ace == null)
         {
             var cachedRecords = GetCachedRecords<T>();
-            if ((!isRoom && e.RootFolderType is FolderType.VirtualRooms or FolderType.Archive &&
-                 cachedRecords.TryGetValue(await GetCacheKey(e.ParentId, userId), out var value)) ||
-                cachedRecords.TryGetValue(await GetCacheKey(e.ParentId, await externalShare.GetLinkIdAsync()), out value))
+            if ((!isRoom && e.RootFolderType is FolderType.VirtualRooms or FolderType.RoomTemplates or FolderType.Archive &&
+                 cachedRecords.TryGetValue(GetCacheKey(e.ParentId, userId), out var value)) ||
+                cachedRecords.TryGetValue(GetCacheKey(e.ParentId, await externalShare.GetLinkIdAsync()), out value))
             {
                 ace = value.Clone();
                 ace.EntryId = e.Id;
             }
             else
             {
-                ace = await GetCurrentShareAsync(e, userId, isDocSpaceAdmin, shares);
-
-                if (e.RootFolderType is FolderType.VirtualRooms or FolderType.Archive && 
-                    ace is { SubjectType: SubjectType.User or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink })
+                var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+                if (e.RootFolderType != FolderType.RoomTemplates || userType == EmployeeType.RoomAdmin || userType == EmployeeType.DocSpaceAdmin) 
                 {
-                    var id = ace.SubjectType is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink ? ace.Subject : userId;
+                    ace = await GetCurrentShareAsync(e, userId, isDocSpaceAdmin, shares);
 
-                    cachedRecords.TryAdd(await GetCacheKey(e.ParentId, id), ace);
+                    if (e.RootFolderType is FolderType.VirtualRooms or FolderType.RoomTemplates or FolderType.Archive &&
+                        ace is { SubjectType: SubjectType.User or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink })
+                    {
+                        var id = ace.SubjectType is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink ? ace.Subject : userId;
+
+                        cachedRecords.TryAdd(GetCacheKey(e.ParentId, id), ace);
+                    }
                 }
             }
         }
 
         var defaultShare =
-            e.RootFolderType == FolderType.VirtualRooms ? DefaultVirtualRoomsShare :
-            e.RootFolderType == FolderType.USER ? DefaultMyShare :
-            e.RootFolderType == FolderType.Privacy ? DefaultPrivacyShare :
-            e.RootFolderType == FolderType.Archive ? DefaultArchiveShare :
-            DefaultCommonShare;
+            e.RootFolderType switch
+            {
+                FolderType.VirtualRooms => DefaultVirtualRoomsShare,
+                FolderType.USER => DefaultMyShare,
+                FolderType.Privacy => DefaultPrivacyShare,
+                FolderType.Archive => DefaultArchiveShare,
+                FolderType.RoomTemplates => DefaultRoomTemplatesShare,
+                _ => DefaultCommonShare
+            };
 
         e.ShareRecord = ace;
         e.Access = ace?.Share ?? defaultShare;
@@ -1270,7 +1426,6 @@ public class FileSecurity(IDaoFactory daoFactory,
             var fileType = FileUtility.GetFileTypeByFileName(file.Title);
             if (fileType is FileType.Pdf or FileType.Spreadsheet)
             {
-                var parentFolders = await GetFileParentFolders(file.ParentId);
                 if (parentFolders.Exists(parent => parent.FolderType is FolderType.ReadyFormFolder or FolderType.InProcessFormFolder))
                 {
                     if (ace is { Share: FileShare.FillForms } && !userId.Equals(file.CreateBy))
@@ -1318,7 +1473,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
-                        if (e.Access is FileShare.Editing or FileShare.Review or FileShare.FillForms)
+                        if (e.Access is FileShare.FillForms)
                         {
                             return true;
                         }
@@ -1381,11 +1536,20 @@ public class FileSecurity(IDaoFactory daoFactory,
 
                         break;
                     default:
-                        if (e.Access is FileShare.RoomManager or FileShare.ContentCreator || (e.Access is FileShare.Editing && !MustConvert(e)))
+                        if (isRoom)
                         {
-                            return true;
+                            if (e.Access is FileShare.RoomManager)
+                            {
+                                return true;
+                            }
                         }
-
+                        else
+                        {
+                            if (e.Access is FileShare.RoomManager or FileShare.ContentCreator || (e.Access is FileShare.Editing && !MustConvert(e)))
+                            {
+                                return true;
+                            }
+                        }
                         break;
                 }
 
@@ -1571,13 +1735,12 @@ public class FileSecurity(IDaoFactory daoFactory,
 
                         break;
                     default:
-                        if (e.Access == FileShare.RoomManager ||
-                            (e.Access == FileShare.ContentCreator && e.CreateBy == authContext.CurrentAccount.ID))
+                        if (ace is { SubjectType: SubjectType.ExternalLink or SubjectType.PrimaryExternalLink } && ace.Subject != userId)
                         {
-                            return true;
+                            return false;
                         }
 
-                        break;
+                        return true;
                 }
 
                 break;
@@ -1651,14 +1814,17 @@ public class FileSecurity(IDaoFactory daoFactory,
                 {
                     return true;
                 }
+                
+                if(e.RootFolderType == FolderType.RoomTemplates)
+                {
+                    return true;
+                }
 
                 if (isRoom)
                 {
                     return !folder.SettingsDenyDownload;
                 }
 
-                var parentFolders = await GetFileParentFolders(e.ParentId);
-                var room = parentFolders.FirstOrDefault(r => DocSpaceHelper.IsRoom(r.FolderType));
                 return room is not { SettingsDenyDownload: true };
             case FilesSecurityActions.CopySharedLink:
                 switch (e.RootFolderType)
@@ -1711,7 +1877,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         if (e.Access != FileShare.Restrict &&
             e.CreateBy == userId &&
             (e.FileEntryType == FileEntryType.File || folder.FolderType != FolderType.COMMON) &&
-            e.RootFolderType != FolderType.Archive && e.RootFolderType != FolderType.VirtualRooms)
+            e.RootFolderType != FolderType.Archive && e.RootFolderType != FolderType.RoomTemplates && e.RootFolderType != FolderType.VirtualRooms)
         {
             return true;
         }
@@ -1731,6 +1897,11 @@ public class FileSecurity(IDaoFactory daoFactory,
 
     public async Task<FileShareRecord<T>> GetCurrentShareAsync<T>(FileEntry<T> entry, Guid userId, bool isDocSpaceAdmin, IEnumerable<FileShareRecord<T>> shares = null)
     {
+        if (entry is Folder<T> { FolderType: FolderType.VirtualRooms or FolderType.Archive })
+        {
+            return null;
+        }
+        
         FileShareRecord<T> ace;
         var subjects = new List<Guid>();
         if (shares == null)
@@ -1780,7 +1951,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         var securityDao = daoFactory.GetSecurityDao<T>();
         var r = new FileShareRecord<T>
         {
-            TenantId = await tenantManager.GetCurrentTenantIdAsync(),
+            TenantId = tenantManager.GetCurrentTenantId(),
             EntryId = entryId,
             EntryType = entryType,
             Subject = @for,
@@ -1801,6 +1972,11 @@ public class FileSecurity(IDaoFactory daoFactory,
     public IAsyncEnumerable<FileShareRecord<T>> GetPureSharesAsync<T>(FileEntry<T> entry, IEnumerable<Guid> subjects)
     {
         return daoFactory.GetSecurityDao<T>().GetPureSharesAsync(entry, subjects);
+    }
+
+    public Task<bool> IsPublicAsync<T>(FileEntry<T> entry)
+    {
+        return daoFactory.GetSecurityDao<T>().IsPublicAsync(entry);
     }
 
     public IAsyncEnumerable<FileShareRecord<T>> GetPureSharesAsync<T>(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status, string text, int offset = 0, int count = -1)
@@ -1848,8 +2024,15 @@ public class FileSecurity(IDaoFactory daoFactory,
             : null;
 
         var isAdmin = await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID);
-        
-        var currentUserSubjects = await GetUserSubjectsAsync(authContext.CurrentAccount.ID, searchArea is SearchArea.Active or SearchArea.Any && !isAdmin);
+
+        List<Guid> currentUserSubjects = new();
+        var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+
+        if (searchArea != SearchArea.Templates || userType == EmployeeType.RoomAdmin || userType == EmployeeType.DocSpaceAdmin)
+        {
+            currentUserSubjects = await GetUserSubjectsAsync(authContext.CurrentAccount.ID, searchArea is SearchArea.Active or SearchArea.Any && !isAdmin);
+        }
+
         var currentUsersRecords = await securityDao.GetSharesAsync(currentUserSubjects)
             .Where(x => x.EntryType == FileEntryType.Folder)
             .ToListAsync();
@@ -1887,9 +2070,9 @@ public class FileSecurity(IDaoFactory daoFactory,
             }
         }
 
-        if (isAdmin)
+        if (isAdmin && searchArea != SearchArea.Templates)
         {
-            return await GetAllVirtualRoomsAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider, 
+            return await GetAllVirtualRoomsAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider,
                 subjectFilter, subjectEntries, quotaFilter, storageFilter, internalRoomsRecords, thirdPartyRoomsRecords);
         }
 
@@ -1925,6 +2108,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         {
             SearchArea.Active => [await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)],
             SearchArea.Archive => [await globalFolder.GetFolderArchiveAsync(daoFactory)],
+            SearchArea.Templates => [await globalFolder.GetFolderRoomTemplatesAsync(daoFactory)],
             _ => new[] { await globalFolder.GetFolderVirtualRoomsAsync(daoFactory), await globalFolder.GetFolderArchiveAsync(daoFactory) }
         };
 
@@ -1994,6 +2178,65 @@ public class FileSecurity(IDaoFactory daoFactory,
         }
     }
 
+    private async Task<List<FileEntry>> GetPublicRoomTemplatesAsync(
+        IEnumerable<FilterType> filterTypes,
+        Guid subjectId,
+        string search,
+        bool searchInContent,
+        bool withSubfolders,
+        bool withoutTags,
+        IEnumerable<string> tagNames,
+        bool excludeSubject,
+        ProviderFilter provider,
+        SubjectFilter subjectFilter,
+        IEnumerable<string> subjectEntries,
+        Dictionary<int, FileShareRecord<int>> internalRecords)
+    {
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var folderThirdPartyDao = daoFactory.GetFolderDao<string>();
+        var fileDao = daoFactory.GetFileDao<int>();
+        var thirdPartyFileDao = daoFactory.GetFileDao<string>();
+        var entries = new List<FileEntry>();
+
+        int[] rootFoldersIds = [await globalFolder.GetFolderRoomTemplatesAsync(daoFactory)];
+
+        var rooms = await folderDao.GetRoomsAsync(internalRecords.Keys, filterTypes, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider,
+                subjectFilter, subjectEntries, rootFoldersIds).Where(r => Filter(r, internalRecords)).ToListAsync();
+
+        if (withSubfolders && (filterTypes == null || !filterTypes.Contains(FilterType.FoldersOnly)))
+        {
+            var files = await fileDao.GetFilesAsync(rooms.Select(r => r.Id), FilterType.None, false, Guid.Empty, search, null, searchInContent).ToListAsync();
+
+            entries.AddRange(files.Where(f => Filter(f, internalRecords)));
+        }
+
+        var t1 = SetTagsAsync(rooms);
+        var t2 = SetPinAsync(rooms);
+
+        await Task.WhenAll(t1, t2);
+
+        entries.AddRange(rooms);
+
+        return entries;
+
+        bool Filter<T>(FileEntry<T> entry, IReadOnlyDictionary<T, FileShareRecord<T>> records)
+        {
+            var id = entry.FileEntryType == FileEntryType.Folder ? entry.Id : entry.ParentId;
+            var record = records.GetValueOrDefault(id);
+
+            if (entry.RootFolderType == FolderType.RoomTemplates)
+            {
+                entry.ShareRecord = record;
+                entry.Access = record?.Share ?? FileShare.None;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+    }
+
     private async Task<List<FileEntry>> GetVirtualRoomsForMeAsync(
         IEnumerable<FilterType> filterTypes,
         Guid subjectId,
@@ -2021,6 +2264,7 @@ public class FileSecurity(IDaoFactory daoFactory,
         {
             SearchArea.Active => [await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)],
             SearchArea.Archive => [await globalFolder.GetFolderArchiveAsync(daoFactory)],
+            SearchArea.Templates => [await globalFolder.GetFolderRoomTemplatesAsync(daoFactory)],
             _ => new[] { await globalFolder.GetFolderVirtualRoomsAsync(daoFactory), await globalFolder.GetFolderArchiveAsync(daoFactory) }
         };
 
@@ -2064,6 +2308,15 @@ public class FileSecurity(IDaoFactory daoFactory,
             switch (searchArea)
             {
                 case SearchArea.Archive when entry.RootFolderType == FolderType.Archive:
+                case SearchArea.Templates when entry.RootFolderType == FolderType.RoomTemplates:
+                    {
+                        if (entry.CreateBy != authContext.CurrentAccount.ID) 
+                        {
+                            entry.ShareRecord = record;
+                            entry.Access = record?.Share ?? FileShare.None;
+                        }
+                        return true;
+                    }
                 case SearchArea.Active when entry.RootFolderType == FolderType.VirtualRooms:
                 case SearchArea.Any when entry.RootFolderType is FolderType.VirtualRooms or FolderType.Archive:
                     {
@@ -2400,22 +2653,30 @@ public class FileSecurity(IDaoFactory daoFactory,
 
     public static void CorrectSecurityByLockedStatus<T>(FileEntry<T> entry)
     {
-        if (entry is not File<T> file || file.Security == null || file.LockedBy == null)
+        if (entry is not File<T> file || file.Security == null)
         {
             return;
         }
 
-        foreach (var action in _securityEntries[FileEntryType.File])
+        if (file.LockedBy != null)
         {
-            if (action != FilesSecurityActions.Read &&
-                action != FilesSecurityActions.ReadHistory &&
-                action != FilesSecurityActions.Copy &&
-                action != FilesSecurityActions.Duplicate &&
-                action != FilesSecurityActions.Lock &&
-                action != FilesSecurityActions.Download)
+            foreach (var action in _securityEntries[FileEntryType.File])
             {
-                file.Security[action] = false;
+                if (action != FilesSecurityActions.Read &&
+                    action != FilesSecurityActions.ReadHistory &&
+                    action != FilesSecurityActions.Copy &&
+                    action != FilesSecurityActions.Duplicate &&
+                    action != FilesSecurityActions.Lock &&
+                    action != FilesSecurityActions.Download)
+                {
+                    file.Security[action] = false;
+                }
             }
+        }
+
+        if (file.CustomFilterEnabledBy != null)
+        {
+            file.Security[FilesSecurityActions.Edit] = false;
         }
     }
 
@@ -2438,7 +2699,7 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         foreach (var s in shares)
         {
-            if (s is FileShare.Read or FileShare.Restrict or FileShare.None)
+            if (s is  FileShare.Restrict or FileShare.None || (s is FileShare.Read && !file.IsForm))
             {
                 result.Add(s.ToStringFast(), true);
                 continue;
@@ -2453,9 +2714,9 @@ public class FileSecurity(IDaoFactory daoFactory,
             switch (s)
             {
                 case FileShare.Editing when canEdit:
-                case FileShare.FillForms when fileType is FileType.Pdf:
+                case FileShare.FillForms when file.IsForm:
                 case FileShare.CustomFilter when canCustomFiltering:
-                case FileShare.Comment when canComment:
+                case FileShare.Comment when !file.IsForm && canComment:
                 case FileShare.Review when canReview:
                     result.Add(s.ToStringFast(), true);
                     break;
@@ -2532,7 +2793,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             return entry.CreateBy == userId;
         }
 
-        if (_cachedRoomOwner.TryGetValue(await GetCacheKey(entry.ParentId), out var roomOwner))
+        if (_cachedRoomOwner.TryGetValue(GetCacheKey(entry.ParentId), out var roomOwner))
         {
             return roomOwner == userId;
         }
@@ -2545,7 +2806,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             return false;
         }
 
-        _cachedRoomOwner.TryAdd(await GetCacheKey(entry.ParentId), room.CreateBy);
+        _cachedRoomOwner.TryAdd(GetCacheKey(entry.ParentId), room.CreateBy);
 
         return room.CreateBy == userId;
     }
@@ -2564,15 +2825,15 @@ public class FileSecurity(IDaoFactory daoFactory,
         return false;
     }
 
-    private async Task<string> GetCacheKey<T>(T parentId, Guid userId)
+    private string GetCacheKey<T>(T parentId, Guid userId)
     {
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         return $"{tenantId}-{userId}-{parentId}";
     }
 
-    private async Task<string> GetCacheKey<T>(T parentId)
+    private string GetCacheKey<T>(T parentId)
     {
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
         return $"{tenantId}-{parentId}";
     }
 
@@ -2597,7 +2858,23 @@ public class FileSecurity(IDaoFactory daoFactory,
             return 0;
         }
     }
+    async Task<FileShareRecord<T>> GetShareRecordAsync<T>(Folder<T> room, Guid userId, bool isDocSpaceAdmin, IEnumerable<FileShareRecord<T>> shares)
+    {
+        var cachedRecords = GetCachedRecords<T>();
+        var cacheKey = GetCacheKey(room.Id, userId);
 
+        if (!cachedRecords.TryGetValue(cacheKey, out var record))
+        {
+            record = await GetCurrentShareAsync(room, userId, isDocSpaceAdmin, shares);
+            cachedRecords.TryAdd(cacheKey, record);
+        }
+
+        return record;
+    }
+
+    /// <summary>
+    /// The actions that can be performed with the file.
+    /// </summary>
     public enum FilesSecurityActions
     {
         [SwaggerEnum("Read")]
@@ -2614,6 +2891,9 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         [SwaggerEnum("Create")]
         Create,
+
+        [SwaggerEnum("CreateFrom")]
+        CreateFrom,
 
         [SwaggerEnum("Edit")]
         Edit,
@@ -2690,9 +2970,25 @@ public class FileSecurity(IDaoFactory daoFactory,
         [SwaggerEnum("Embed")]
         Embed,
 
-        [SwaggerEnum("Change owner")]        ChangeOwner,
+        [SwaggerEnum("Change owner")]        
+        ChangeOwner,
 
         [SwaggerEnum("Index export")]
-        IndexExport
+        IndexExport,
+
+        [SwaggerEnum("Start filling")]
+        StartFilling,
+
+        [SwaggerEnum("Filling status")]
+        FillingStatus,
+
+        [SwaggerEnum("Reset filling")]
+        ResetFilling,
+
+        [SwaggerEnum("Start filling")]
+        StopFilling,
+
+        [SwaggerEnum("Open form")]
+        OpenForm
     }
 }

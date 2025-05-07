@@ -465,16 +465,16 @@ docx、xlsx、pptxとの100％の互換性が保証されています。</value>
     <value>ユーザー</value>
   </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>フォーム記入ルームに複数のファイルを移動することはサポートされていません。ONLYOFFICE PDFフォームを一度に 1 つずつ移動してください。</value>
+    <value>フォーム記入ルームに複数のファイルを移動することはサポートされていません。{0} PDFフォームを一度に 1 つずつ移動してください。</value>
   </data>
   <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>フォーム記入ルームへのフォルダの移動はサポートされていません。ONLYOFFICE PDFフォームを1つずつ移動します。</value>
+    <value>フォーム記入ルームへのフォルダの移動はサポートされていません。{0} PDFフォームを1つずつ移動します。</value>
   </data>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>このルームへのファイルの移動はできません。ONLYOFFICE PDFフォームの移動をお試しください。</value>
+    <value>このルームへのファイルの移動はできません。{0} PDFフォームの移動をお試しください。</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>このルームにはファイルをアップロードできません。ONLYOFFICE PDFフォームのアップロードをお試しください。</value>
+    <value>このルームにはファイルをアップロードできません。{0} PDFフォームのアップロードをお試しください。</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>フォーム記入用のリンク</value>
@@ -502,5 +502,14 @@ docx、xlsx、pptxとの100％の互換性が保証されています。</value>
   </data>
   <data name="OpenForm" xml:space="preserve">
     <value>ファイルを開く</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>現在のファイルのバージョンを削除できません</value>
+  </data>
+  <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
+    <value>共有して記入してください</value>
+  </data>
+  <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
+    <value>記入を始める</value>
   </data>
 </root>

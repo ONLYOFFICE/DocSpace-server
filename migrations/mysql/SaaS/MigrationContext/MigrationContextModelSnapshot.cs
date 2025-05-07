@@ -18,7 +18,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn)
-                .HasAnnotation("ProductVersion", "8.0.8")
+                .HasAnnotation("ProductVersion", "8.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("ASC.Core.Common.EF.Acl", b =>
@@ -41,7 +41,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.Property<string>("Object")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("varchar(255)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar")
                         .HasColumnName("object")
                         .HasDefaultValueSql("''")
                         .UseCollation("utf8_general_ci")
@@ -609,7 +610,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Subject = "88f11e7c-7407-4bea-b4cb-070010cdbb6b",
                             Action = "3e74aff2-7c0c-4089-b209-6495b8643471",
                             Object = "",
-                            AceType = 0
+                            AceType = 1
                         });
                 });
 
@@ -634,7 +635,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("varchar(128)")
+                        .HasMaxLength(128)
+                        .HasColumnType("varchar")
                         .HasColumnName("name")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -652,7 +654,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasDefaultValueSql("'0'");
 
                     b.Property<string>("Sid")
-                        .HasColumnType("varchar(512)")
+                        .HasMaxLength(512)
+                        .HasColumnType("varchar")
                         .HasColumnName("sid")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -681,7 +684,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("tenant");
 
                     b.Property<string>("Description")
-                        .HasColumnType("varchar(128)")
+                        .HasMaxLength(128)
+                        .HasColumnType("varchar")
                         .HasColumnName("description")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -691,7 +695,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("features");
 
                     b.Property<string>("Name")
-                        .HasColumnType("varchar(128)")
+                        .HasMaxLength(128)
+                        .HasColumnType("varchar")
                         .HasColumnName("name")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -703,7 +708,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasDefaultValueSql("'0.00'");
 
                     b.Property<string>("ProductId")
-                        .HasColumnType("varchar(128)")
+                        .HasMaxLength(128)
+                        .HasColumnType("varchar")
                         .HasColumnName("product_id")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -801,6 +807,16 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Price = 20m,
                             ProductId = "1006",
                             Visible = true
+                        },
+                        new
+                        {
+                            TenantId = -10,
+                            Description = "since 10.02.2025",
+                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,year",
+                            Name = "adminyear",
+                            Price = 200m,
+                            ProductId = "1009",
+                            Visible = true
                         });
                 });
 
@@ -817,7 +833,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("Path")
-                        .HasColumnType("varchar(255)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar")
                         .HasColumnName("path")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -833,7 +850,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("last_modified");
 
                     b.Property<string>("Tag")
-                        .HasColumnType("varchar(1024)")
+                        .HasMaxLength(1024)
+                        .HasColumnType("varchar")
                         .HasColumnName("tag")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -856,26 +874,30 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("tenant");
 
                     b.Property<string>("Source")
-                        .HasColumnType("varchar(38)")
+                        .HasMaxLength(38)
+                        .HasColumnType("varchar")
                         .HasColumnName("source")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("Action")
-                        .HasColumnType("varchar(128)")
+                        .HasMaxLength(128)
+                        .HasColumnType("varchar")
                         .HasColumnName("action")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("Recipient")
-                        .HasColumnType("varchar(38)")
+                        .HasMaxLength(38)
+                        .HasColumnType("varchar")
                         .HasColumnName("recipient")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("Sender")
                         .IsRequired()
-                        .HasColumnType("varchar(1024)")
+                        .HasMaxLength(1024)
+                        .HasColumnType("varchar")
                         .HasColumnName("sender")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -1155,7 +1177,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Comment")
-                        .HasColumnType("varchar(255)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar")
                         .HasColumnName("comment")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -1166,7 +1189,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.Property<string>("CustomerId")
                         .IsRequired()
-                        .HasColumnType("varchar(255)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar")
                         .HasColumnName("customer_id")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -1246,13 +1270,15 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Application")
-                        .HasColumnType("varchar(20)")
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar")
                         .HasColumnName("application")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("FirebaseDeviceToken")
-                        .HasColumnType("varchar(255)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar")
                         .HasColumnName("firebase_device_token")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -1284,13 +1310,15 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             modelBuilder.Entity("ASC.Core.Common.EF.Model.AccountLinks", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("varchar(200)")
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar")
                         .HasColumnName("id")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("UId")
-                        .HasColumnType("varchar(200)")
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar")
                         .HasColumnName("uid")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -1307,7 +1335,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("Provider")
-                        .HasColumnType("char(60)")
+                        .HasMaxLength(60)
+                        .HasColumnType("char")
                         .HasColumnName("provider")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -1323,6 +1352,80 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasAnnotation("MySql:CharSet", "utf8");
                 });
 
+            modelBuilder.Entity("ASC.Core.Common.EF.Model.ApiKey", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("CreateBy")
+                        .IsRequired()
+                        .HasColumnType("varchar(38)")
+                        .HasColumnName("create_by")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<DateTime>("CreateOn")
+                        .HasColumnType("datetime")
+                        .HasColumnName("create_on");
+
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("expires_at");
+
+                    b.Property<string>("HashedKey")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar")
+                        .HasColumnName("hashed_key")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("KeyPostfix")
+                        .IsRequired()
+                        .HasMaxLength(4)
+                        .HasColumnType("varchar")
+                        .HasColumnName("key_postfix")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<DateTime?>("LastUsed")
+                        .HasColumnType("datetime")
+                        .HasColumnName("last_used");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar")
+                        .HasColumnName("name")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<string>("Permissions")
+                        .HasColumnType("longtext")
+                        .HasColumnName("permissions");
+
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id")
+                        .HasName("PRIMARY");
+
+                    b.HasIndex("ExpiresAt")
+                        .HasDatabaseName("expires_at");
+
+                    b.HasIndex("TenantId", "HashedKey")
+                        .HasDatabaseName("hashed_key");
+
+                    b.ToTable("core_user_api_key", (string)null);
+
+                    b.HasAnnotation("MySql:CharSet", "utf8");
+                });
+
             modelBuilder.Entity("ASC.Core.Common.EF.Model.DbCoreSettings", b =>
                 {
                     b.Property<int>("TenantId")
@@ -1330,7 +1433,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("tenant");
 
                     b.Property<string>("Id")
-                        .HasColumnType("varchar(128)")
+                        .HasMaxLength(128)
+                        .HasColumnType("varchar")
                         .HasColumnName("id")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -1356,21 +1460,21 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         {
                             TenantId = -1,
                             Id = "CompanyWhiteLabelSettings",
-                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Utc),
                             Value = new byte[] { 245, 71, 4, 138, 72, 101, 23, 21, 135, 217, 206, 188, 138, 73, 108, 96, 29, 150, 3, 31, 44, 28, 62, 145, 96, 53, 57, 66, 238, 118, 93, 172, 211, 22, 244, 181, 244, 40, 146, 67, 111, 196, 162, 27, 154, 109, 248, 255, 181, 17, 253, 127, 42, 65, 19, 90, 26, 206, 203, 145, 159, 159, 243, 105, 24, 71, 188, 165, 53, 85, 57, 37, 186, 251, 57, 96, 18, 162, 218, 80, 0, 101, 250, 100, 66, 97, 24, 51, 240, 215, 216, 169, 105, 100, 15, 253, 29, 83, 182, 236, 203, 53, 68, 251, 2, 150, 149, 148, 58, 136, 84, 37, 151, 82, 92, 227, 30, 52, 111, 40, 154, 155, 7, 126, 149, 100, 169, 87, 10, 129, 228, 138, 177, 101, 77, 67, 177, 216, 189, 201, 1, 213, 136, 216, 107, 198, 253, 221, 106, 255, 198, 17, 68, 14, 110, 90, 174, 182, 68, 222, 188, 77, 157, 19, 26, 68, 86, 97, 15, 81, 24, 171, 214, 114, 191, 175, 56, 56, 48, 52, 125, 82, 253, 113, 71, 41, 201, 5, 8, 118, 162, 191, 99, 196, 48, 198, 223, 79, 204, 174, 31, 97, 236, 20, 213, 218, 85, 34, 16, 74, 196, 209, 235, 14, 71, 209, 32, 131, 195, 84, 11, 66, 74, 19, 115, 255, 99, 69, 235, 210, 204, 15, 13, 4, 143, 127, 152, 125, 212, 91 }
                         },
                         new
                         {
                             TenantId = -1,
                             Id = "FullTextSearchSettings",
-                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Utc),
                             Value = new byte[] { 8, 120, 207, 5, 153, 181, 23, 202, 162, 211, 218, 237, 157, 6, 76, 62, 220, 238, 175, 67, 31, 53, 166, 246, 66, 220, 173, 160, 72, 23, 227, 81, 50, 39, 187, 177, 222, 110, 43, 171, 235, 158, 16, 119, 178, 207, 49, 140, 72, 152, 20, 84, 94, 135, 117, 1, 246, 51, 251, 190, 148, 2, 44, 252, 221, 2, 91, 83, 149, 151, 58, 245, 16, 148, 52, 8, 187, 86, 150, 46, 227, 93, 163, 95, 47, 131, 116, 207, 95, 209, 38, 149, 53, 148, 73, 215, 206, 251, 194, 199, 189, 17, 42, 229, 135, 82, 23, 154, 162, 165, 158, 94, 23, 128, 30, 88, 12, 204, 96, 250, 236, 142, 189, 211, 214, 18, 196, 136, 102, 102, 217, 109, 108, 240, 96, 96, 94, 100, 201, 10, 31, 170, 128, 192 }
                         },
                         new
                         {
                             TenantId = -1,
                             Id = "SmtpSettings",
-                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Utc),
                             Value = new byte[] { 240, 82, 224, 144, 161, 163, 117, 13, 173, 205, 78, 153, 97, 218, 4, 170, 81, 239, 1, 151, 226, 192, 98, 60, 241, 44, 88, 56, 191, 164, 10, 155, 72, 186, 239, 203, 227, 113, 88, 119, 49, 215, 227, 220, 158, 124, 96, 9, 116, 47, 158, 65, 93, 86, 219, 15, 10, 224, 142, 50, 248, 144, 75, 44, 68, 28, 198, 87, 198, 69, 67, 234, 238, 38, 32, 68, 162, 139, 67, 53, 220, 176, 240, 196, 233, 64, 29, 137, 31, 160, 99, 105, 249, 132, 202, 45, 71, 92, 134, 194, 55, 145, 121, 97, 197, 130, 119, 105, 131, 21, 133, 35, 10, 102, 172, 119, 135, 230, 251, 86, 253, 62, 55, 56, 146, 103, 164, 106 }
                         });
                 });
@@ -1388,6 +1492,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Property<int>("AuditEventId")
                         .HasColumnType("int")
                         .HasColumnName("audit_event_id");
+
+                    b.Property<bool>("Corrupted")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("corrupted");
 
                     b.HasKey("EntryId", "EntryType", "AuditEventId")
                         .HasName("PRIMARY");
@@ -1409,22 +1517,26 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.Property<string>("City")
                         .IsRequired()
-                        .HasColumnType("varchar(80)")
+                        .HasMaxLength(80)
+                        .HasColumnType("varchar")
                         .HasColumnName("city");
 
                     b.Property<string>("Continent")
                         .IsRequired()
-                        .HasColumnType("char(2)")
+                        .HasMaxLength(2)
+                        .HasColumnType("char")
                         .HasColumnName("continent");
 
                     b.Property<string>("Country")
                         .IsRequired()
-                        .HasColumnType("char(2)")
+                        .HasMaxLength(2)
+                        .HasColumnType("char")
                         .HasColumnName("country");
 
                     b.Property<string>("District")
                         .IsRequired()
-                        .HasColumnType("varchar(80)")
+                        .HasMaxLength(80)
+                        .HasColumnType("varchar")
                         .HasColumnName("district");
 
                     b.Property<int?>("GeonameId")
@@ -1446,16 +1558,19 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.Property<string>("StateProv")
                         .IsRequired()
-                        .HasColumnType("varchar(80)")
+                        .HasMaxLength(80)
+                        .HasColumnType("varchar")
                         .HasColumnName("stateprov");
 
                     b.Property<string>("StateProvCode")
-                        .HasColumnType("varchar(15)")
+                        .HasMaxLength(15)
+                        .HasColumnType("varchar")
                         .HasColumnName("stateprov_code");
 
                     b.Property<string>("TimezoneName")
                         .IsRequired()
-                        .HasColumnType("varchar(64)")
+                        .HasMaxLength(64)
+                        .HasColumnType("varchar")
                         .HasColumnName("timezone_name");
 
                     b.Property<float>("TimezoneOffset")
@@ -1464,11 +1579,13 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.Property<string>("WeatherCode")
                         .IsRequired()
-                        .HasColumnType("varchar(10)")
+                        .HasMaxLength(10)
+                        .HasColumnType("varchar")
                         .HasColumnName("weather_code");
 
                     b.Property<string>("ZipCode")
-                        .HasColumnType("varchar(20)")
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar")
                         .HasColumnName("zipcode");
 
                     b.HasKey("AddrType", "IPStart");
@@ -1488,7 +1605,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.Property<string>("Alias")
                         .IsRequired()
-                        .HasColumnType("varchar(100)")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar")
                         .HasColumnName("alias")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -1512,7 +1630,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Property<string>("Language")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(10)")
+                        .HasMaxLength(10)
+                        .HasColumnType("char")
                         .HasColumnName("language")
                         .HasDefaultValueSql("'en-US'")
                         .UseCollation("utf8_general_ci")
@@ -1523,14 +1642,16 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("last_modified");
 
                     b.Property<string>("MappedDomain")
-                        .HasColumnType("varchar(100)")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar")
                         .HasColumnName("mappeddomain")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("varchar(255)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar")
                         .HasColumnName("name")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -1542,7 +1663,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("PaymentId")
-                        .HasColumnType("varchar(38)")
+                        .HasMaxLength(38)
+                        .HasColumnType("varchar")
                         .HasColumnName("payment_id")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -1558,7 +1680,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("statuschanged");
 
                     b.Property<string>("TimeZone")
-                        .HasColumnType("varchar(50)")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar")
                         .HasColumnName("timezone")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -1570,7 +1693,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasDefaultValueSql("'0'");
 
                     b.Property<string>("TrustedDomainsRaw")
-                        .HasColumnType("varchar(1024)")
+                        .HasMaxLength(1024)
+                        .HasColumnType("varchar")
                         .HasColumnName("trusteddomains")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -1612,7 +1736,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Calls = false,
                             CreationDateTime = new DateTime(2021, 3, 9, 17, 46, 59, 97, DateTimeKind.Utc).AddTicks(4317),
                             Industry = 0,
-                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Utc),
                             Name = "Web Office",
                             OwnerId = "66faa6e4-f133-11ea-b126-00ffeec8b4ef",
                             Status = 0,
@@ -1626,7 +1750,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Calls = false,
                             CreationDateTime = new DateTime(2021, 3, 9, 17, 46, 59, 97, DateTimeKind.Utc).AddTicks(4317),
                             Industry = 0,
-                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Utc),
                             Name = "Web Office",
                             OwnerId = "00000000-0000-0000-0000-000000000000",
                             Status = 1,
@@ -1638,7 +1762,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             modelBuilder.Entity("ASC.Core.Common.EF.Model.DbTenantForbiden", b =>
                 {
                     b.Property<string>("Address")
-                        .HasColumnType("varchar(50)")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar")
                         .HasColumnName("address")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -1668,19 +1793,22 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("tenant_id");
 
                     b.Property<string>("AffiliateId")
-                        .HasColumnType("varchar(50)")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar")
                         .HasColumnName("affiliate_id")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("Campaign")
-                        .HasColumnType("varchar(50)")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar")
                         .HasColumnName("campaign")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("PartnerId")
-                        .HasColumnType("varchar(36)")
+                        .HasMaxLength(36)
+                        .HasColumnType("varchar")
                         .HasColumnName("partner_id")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -1707,6 +1835,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.Property<string>("Url")
                         .IsRequired()
+                        .HasMaxLength(64)
                         .HasColumnType("varchar(64)")
                         .HasColumnName("url")
                         .UseCollation("utf8_general_ci")
@@ -1714,7 +1843,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.Property<string>("Version")
                         .IsRequired()
-                        .HasColumnType("varchar(64)")
+                        .HasMaxLength(64)
+                        .HasColumnType("varchar")
                         .HasColumnName("version")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -1735,7 +1865,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             modelBuilder.Entity("ASC.Core.Common.EF.Model.DbWebstudioIndex", b =>
                 {
                     b.Property<string>("IndexName")
-                        .HasColumnType("varchar(50)")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar")
                         .HasColumnName("index_name")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -1776,6 +1907,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
+                    b.Property<DateTime>("LastModified")
+                        .HasColumnType("datetime")
+                        .HasColumnName("last_modified");
+
                     b.HasKey("TenantId", "Id", "UserId")
                         .HasName("PRIMARY");
 
@@ -1792,20 +1927,23 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             TenantId = 1,
                             Id = "9a925891-1f92-4ed7-b277-d6f649739f06",
                             UserId = "00000000-0000-0000-0000-000000000000",
-                            Data = "{\"Completed\":false}"
+                            Data = "{\"Completed\":false}",
+                            LastModified = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         });
                 });
 
             modelBuilder.Entity("ASC.Core.Common.EF.Model.FilesConverts", b =>
                 {
                     b.Property<string>("Input")
-                        .HasColumnType("varchar(50)")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar")
                         .HasColumnName("input")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("Output")
-                        .HasColumnType("varchar(50)")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar")
                         .HasColumnName("output")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -4508,7 +4646,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             modelBuilder.Entity("ASC.Core.Common.EF.Model.MobileAppInstall", b =>
                 {
                     b.Property<string>("UserEmail")
-                        .HasColumnType("varchar(255)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar")
                         .HasColumnName("user_email")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -4589,7 +4728,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("AutoSubmitted")
-                        .HasColumnType("varchar(64)")
+                        .HasMaxLength(64)
+                        .HasColumnType("varchar")
                         .HasColumnName("auto_submitted")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -4601,7 +4741,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("ContentType")
-                        .HasColumnType("varchar(64)")
+                        .HasMaxLength(64)
+                        .HasColumnType("varchar")
                         .HasColumnName("content_type")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -4611,31 +4752,36 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("creation_date");
 
                     b.Property<string>("Reciever")
-                        .HasColumnType("varchar(255)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar")
                         .HasColumnName("reciever")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("ReplyTo")
-                        .HasColumnType("varchar(1024)")
+                        .HasMaxLength(1024)
+                        .HasColumnType("varchar")
                         .HasColumnName("reply_to")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("Sender")
-                        .HasColumnType("varchar(255)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar")
                         .HasColumnName("sender")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("SenderType")
-                        .HasColumnType("varchar(64)")
+                        .HasMaxLength(64)
+                        .HasColumnType("varchar")
                         .HasColumnName("sender_type")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("Subject")
-                        .HasColumnType("varchar(1024)")
+                        .HasMaxLength(1024)
+                        .HasColumnType("varchar")
                         .HasColumnName("subject")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -4689,7 +4835,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_bin");
 
                     b.Property<string>("Short")
-                        .HasColumnType("char(15)")
+                        .HasMaxLength(15)
+                        .HasColumnType("char")
                         .HasColumnName("short")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -4757,7 +4904,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.Property<string>("Ip")
                         .IsRequired()
-                        .HasColumnType("varchar(50)")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar")
                         .HasColumnName("ip")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -4783,25 +4931,29 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("tenant");
 
                     b.Property<string>("Source")
-                        .HasColumnType("varchar(38)")
+                        .HasMaxLength(38)
+                        .HasColumnType("varchar")
                         .HasColumnName("source")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("Action")
-                        .HasColumnType("varchar(128)")
+                        .HasMaxLength(128)
+                        .HasColumnType("varchar")
                         .HasColumnName("action")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("Recipient")
-                        .HasColumnType("varchar(38)")
+                        .HasMaxLength(38)
+                        .HasColumnType("varchar")
                         .HasColumnName("recipient")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("Object")
-                        .HasColumnType("varchar(128)")
+                        .HasMaxLength(128)
+                        .HasColumnType("varchar")
                         .HasColumnName("object")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -5031,7 +5183,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("bithdate");
 
                     b.Property<string>("Contacts")
-                        .HasColumnType("varchar(1024)")
+                        .HasMaxLength(1024)
+                        .HasColumnType("varchar")
                         .HasColumnName("contacts")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -5047,20 +5200,23 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("CultureName")
-                        .HasColumnType("varchar(20)")
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar")
                         .HasColumnName("culture")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("Email")
-                        .HasColumnType("varchar(255)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar")
                         .HasColumnName("email")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
-                        .HasColumnType("varchar(64)")
+                        .HasMaxLength(64)
+                        .HasColumnType("varchar")
                         .HasColumnName("firstname")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -5071,19 +5227,22 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.Property<string>("LastName")
                         .IsRequired()
-                        .HasColumnType("varchar(64)")
+                        .HasMaxLength(64)
+                        .HasColumnType("varchar")
                         .HasColumnName("lastname")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("Location")
-                        .HasColumnType("varchar(255)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar")
                         .HasColumnName("location")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("MobilePhone")
-                        .HasColumnType("varchar(255)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar")
                         .HasColumnName("phone")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -5095,7 +5254,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasDefaultValueSql("'0'");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("varchar(512)")
+                        .HasMaxLength(512)
+                        .HasColumnType("varchar")
                         .HasColumnName("notes")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -5111,7 +5271,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("sex");
 
                     b.Property<string>("Sid")
-                        .HasColumnType("varchar(512)")
+                        .HasMaxLength(512)
+                        .HasColumnType("varchar")
                         .HasColumnName("sid")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -5121,13 +5282,15 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("spam");
 
                     b.Property<string>("SsoNameId")
-                        .HasColumnType("varchar(512)")
+                        .HasMaxLength(512)
+                        .HasColumnType("varchar")
                         .HasColumnName("sso_name_id")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("SsoSessionId")
-                        .HasColumnType("varchar(512)")
+                        .HasMaxLength(512)
+                        .HasColumnType("varchar")
                         .HasColumnName("sso_session_id")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -5147,6 +5310,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("terminateddate");
 
                     b.Property<string>("Title")
+                        .HasMaxLength(64)
                         .HasColumnType("varchar(64)")
                         .HasColumnName("title")
                         .UseCollation("utf8_general_ci")
@@ -5154,7 +5318,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.Property<string>("UserName")
                         .IsRequired()
-                        .HasColumnType("varchar(255)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar")
                         .HasColumnName("username")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -5193,7 +5358,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         {
                             Id = "66faa6e4-f133-11ea-b126-00ffeec8b4ef",
                             ActivationStatus = 0,
-                            CreateDate = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreateDate = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "",
                             FirstName = "Administrator",
                             LastModified = new DateTime(2021, 3, 9, 9, 52, 55, 765, DateTimeKind.Utc).AddTicks(1420),
@@ -5274,7 +5439,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Userid = "66faa6e4-f133-11ea-b126-00ffeec8b4ef",
                             UserGroupId = "cd84e66b-b803-40fc-99f9-b2969a54a1de",
                             RefType = 0,
-                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Utc),
                             Removed = false
                         });
                 });
@@ -5322,7 +5487,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("timestamp");
 
                     b.Property<string>("PwdHash")
-                        .HasColumnType("varchar(512)")
+                        .HasMaxLength(512)
+                        .HasColumnType("varchar")
                         .HasColumnName("pwdhash")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -5348,7 +5514,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             UserId = "66faa6e4-f133-11ea-b126-00ffeec8b4ef",
-                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastModified = new DateTime(2022, 7, 8, 0, 0, 0, 0, DateTimeKind.Utc),
                             PwdHash = "jGl25bVBBBW96Qi9Te4V37Fnqchz/Eu4qB9vKrRIqRg=",
                             TenantId = 1
                         });
@@ -5357,7 +5523,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             modelBuilder.Entity("ASC.Core.Common.Hosting.InstanceRegistration", b =>
                 {
                     b.Property<string>("InstanceRegistrationId")
-                        .HasColumnType("varchar(255)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar")
                         .HasColumnName("instance_registration_id")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -5372,7 +5539,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.Property<string>("WorkerTypeName")
                         .IsRequired()
-                        .HasColumnType("varchar(255)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar")
                         .HasColumnName("worker_type_name")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -5407,7 +5575,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.Property<string>("Hash")
                         .IsRequired()
-                        .HasColumnType("varchar(64)")
+                        .HasMaxLength(64)
+                        .HasColumnType("varchar")
                         .HasColumnName("hash")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -5418,7 +5587,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("varchar(255)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar")
                         .HasColumnName("name")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -5429,7 +5599,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.Property<string>("StorageBasePath")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("varchar(255)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar")
                         .HasColumnName("storage_base_path")
                         .HasDefaultValueSql("NULL")
                         .UseCollation("utf8_general_ci")
@@ -5445,7 +5616,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.Property<string>("StoragePath")
                         .IsRequired()
-                        .HasColumnType("varchar(255)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar")
                         .HasColumnName("storage_path")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -5487,7 +5659,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.Property<string>("Cron")
                         .IsRequired()
-                        .HasColumnType("varchar(255)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar")
                         .HasColumnName("cron")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -5504,7 +5677,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.Property<string>("StorageBasePath")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("varchar(255)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar")
                         .HasColumnName("storage_base_path")
                         .HasDefaultValueSql("NULL")
                         .UseCollation("utf8_general_ci")
@@ -5559,7 +5733,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.Property<string>("EventTypeName")
                         .IsRequired()
-                        .HasColumnType("varchar(255)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar")
                         .HasColumnName("event_type_name")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -5617,7 +5792,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("Comment")
-                        .HasColumnType("varchar(255)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar")
                         .HasColumnName("comment")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -5629,7 +5805,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasDefaultValueSql("'0'");
 
                     b.Property<string>("ConvertedType")
-                        .HasColumnType("varchar(10)")
+                        .HasMaxLength(10)
+                        .HasColumnType("varchar")
                         .HasColumnName("converted_type")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -5694,7 +5871,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("varchar(400)")
+                        .HasMaxLength(400)
+                        .HasColumnType("varchar")
                         .HasColumnName("title")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -5771,14 +5949,16 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("tenant_id");
 
                     b.Property<string>("RightNode")
-                        .HasColumnType("varchar(255)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar")
                         .HasColumnName("right_node")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("LeftNode")
                         .IsRequired()
-                        .HasColumnType("varchar(255)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar")
                         .HasColumnName("left_node")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -5794,6 +5974,70 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasAnnotation("MySql:CharSet", "utf8");
                 });
 
+            modelBuilder.Entity("ASC.Files.Core.EF.DbFilesFormRoleMapping", b =>
+                {
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<int>("FormId")
+                        .HasColumnType("int")
+                        .HasColumnName("form_id");
+
+                    b.Property<string>("RoleName")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar")
+                        .HasColumnName("role_name")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("varchar(38)")
+                        .HasColumnName("user_id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<DateTime>("OpenedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("opened_at");
+
+                    b.Property<string>("RoleColor")
+                        .HasMaxLength(6)
+                        .HasColumnType("char")
+                        .HasColumnName("role_color")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<int>("RoomId")
+                        .HasColumnType("int")
+                        .HasColumnName("room_id");
+
+                    b.Property<int>("Sequence")
+                        .HasColumnType("int")
+                        .HasColumnName("sequence");
+
+                    b.Property<DateTime>("SubmissionDate")
+                        .HasColumnType("datetime")
+                        .HasColumnName("submission_date");
+
+                    b.Property<bool>("Submitted")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("submitted");
+
+                    b.HasKey("TenantId", "FormId", "RoleName", "UserId")
+                        .HasName("PRIMARY");
+
+                    b.HasIndex("TenantId", "FormId")
+                        .HasDatabaseName("tenant_id_form_id");
+
+                    b.HasIndex("TenantId", "FormId", "UserId")
+                        .HasDatabaseName("tenant_id_form_id_user_id");
+
+                    b.ToTable("files_form_role_mapping", (string)null);
+
+                    b.HasAnnotation("MySql:CharSet", "utf8");
+                });
+
             modelBuilder.Entity("ASC.Files.Core.EF.DbFilesLink", b =>
                 {
                     b.Property<int>("TenantId")
@@ -5801,13 +6045,15 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("tenant_id");
 
                     b.Property<string>("SourceId")
-                        .HasColumnType("varchar(32)")
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar")
                         .HasColumnName("source_id")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("LinkedId")
-                        .HasColumnType("varchar(32)")
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar")
                         .HasColumnName("linked_id")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -5837,7 +6083,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("tenant_id");
 
                     b.Property<string>("EntryId")
-                        .HasColumnType("varchar(32)")
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar")
                         .HasColumnName("entry_id")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -5861,7 +6108,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("tenant_id");
 
                     b.Property<string>("EntryId")
-                        .HasColumnType("varchar(50)")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar")
                         .HasColumnName("entry_id")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -5877,7 +6125,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("Options")
-                        .HasColumnType("text")
+                        .HasColumnType("json")
                         .HasColumnName("options")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -5925,7 +6173,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("varchar(255)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar")
                         .HasColumnName("name")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -5968,7 +6217,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("tag_id");
 
                     b.Property<string>("EntryId")
-                        .HasColumnType("varchar(32)")
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar")
                         .HasColumnName("entry_id")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -6016,7 +6266,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Color")
-                        .HasColumnType("char(6)")
+                        .HasMaxLength(6)
+                        .HasColumnType("char")
                         .HasColumnName("color")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -6049,7 +6300,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.Property<string>("Password")
                         .IsRequired()
-                        .HasColumnType("varchar(512)")
+                        .HasMaxLength(512)
+                        .HasColumnType("varchar")
                         .HasColumnName("password")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -6061,7 +6313,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Property<string>("Provider")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("varchar(50)")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar")
                         .HasColumnName("provider")
                         .HasDefaultValueSql("'0'")
                         .UseCollation("utf8_general_ci")
@@ -6077,7 +6330,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("varchar(400)")
+                        .HasMaxLength(400)
+                        .HasColumnType("varchar")
                         .HasColumnName("customer_title")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -6103,7 +6357,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.Property<string>("UserName")
                         .IsRequired()
-                        .HasColumnType("varchar(100)")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar")
                         .HasColumnName("user_name")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -6127,7 +6382,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("App")
-                        .HasColumnType("varchar(50)")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar")
                         .HasColumnName("app")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -6159,7 +6415,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             modelBuilder.Entity("ASC.Files.Core.EF.DbFilesThirdpartyIdMapping", b =>
                 {
                     b.Property<string>("HashId")
-                        .HasColumnType("char(32)")
+                        .HasMaxLength(32)
+                        .HasColumnType("char")
                         .HasColumnName("hash_id")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -6252,7 +6509,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("varchar(400)")
+                        .HasMaxLength(400)
+                        .HasColumnType("varchar")
                         .HasColumnName("title")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -6312,13 +6570,15 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("room_id");
 
                     b.Property<string>("Color")
-                        .HasColumnType("char(6)")
+                        .HasMaxLength(6)
+                        .HasColumnType("char")
                         .HasColumnName("color")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("Cover")
-                        .HasColumnType("varchar(50)")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar")
                         .HasColumnName("cover")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -6389,7 +6649,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("action");
 
                     b.Property<string>("Browser")
-                        .HasColumnType("varchar(200)")
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar")
                         .HasColumnName("browser")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -6399,31 +6660,36 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("date");
 
                     b.Property<string>("DescriptionRaw")
-                        .HasColumnType("varchar(20000)")
+                        .HasMaxLength(20000)
+                        .HasColumnType("varchar")
                         .HasColumnName("description")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("Initiator")
-                        .HasColumnType("varchar(200)")
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar")
                         .HasColumnName("initiator")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("Ip")
-                        .HasColumnType("varchar(50)")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar")
                         .HasColumnName("ip")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("Page")
-                        .HasColumnType("varchar(300)")
+                        .HasMaxLength(300)
+                        .HasColumnType("varchar")
                         .HasColumnName("page")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("Platform")
-                        .HasColumnType("varchar(200)")
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar")
                         .HasColumnName("platform")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -6471,7 +6737,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("active");
 
                     b.Property<string>("Browser")
-                        .HasColumnType("varchar(200)")
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar")
                         .HasColumnName("browser")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -6481,31 +6748,36 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("date");
 
                     b.Property<string>("DescriptionRaw")
-                        .HasColumnType("varchar(500)")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar")
                         .HasColumnName("description")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("Ip")
-                        .HasColumnType("varchar(50)")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar")
                         .HasColumnName("ip")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("Login")
-                        .HasColumnType("varchar(200)")
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar")
                         .HasColumnName("login")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("Page")
-                        .HasColumnType("varchar(300)")
+                        .HasMaxLength(300)
+                        .HasColumnType("varchar")
                         .HasColumnName("page")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("Platform")
-                        .HasColumnType("varchar(200)")
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar")
                         .HasColumnName("platform")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -6541,7 +6813,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("principal_id");
 
                     b.Property<string>("RegisteredClientId")
-                        .HasColumnType("varchar(36)")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("registered_client_id");
 
                     b.Property<string>("AuthorizationGrantType")
@@ -6611,6 +6883,28 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("varchar(255)")
                         .HasColumnName("id");
 
+                    b.Property<string>("IdTokenClaims")
+                        .HasColumnType("text")
+                        .HasColumnName("id_token_claims");
+
+                    b.Property<DateTime?>("IdTokenExpiresAt")
+                        .HasMaxLength(6)
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("id_token_expires_at");
+
+                    b.Property<DateTime?>("IdTokenIssuedAt")
+                        .HasMaxLength(6)
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("id_token_issued_at");
+
+                    b.Property<string>("IdTokenMetadata")
+                        .HasColumnType("text")
+                        .HasColumnName("id_token_metadata");
+
+                    b.Property<string>("IdTokenValue")
+                        .HasColumnType("text")
+                        .HasColumnName("id_token_value");
+
                     b.Property<bool?>("IsInvalidated")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(1)")
@@ -6661,13 +6955,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasIndex(new[] { "Id" }, "UK_id")
                         .IsUnique();
 
-                    b.HasIndex(new[] { "AuthorizationGrantType" }, "idx_identity_authorizations_grant_type");
-
-                    b.HasIndex(new[] { "IsInvalidated" }, "idx_identity_authorizations_is_invalidated");
-
-                    b.HasIndex(new[] { "PrincipalId" }, "idx_identity_authorizations_principal_id");
-
-                    b.HasIndex(new[] { "RegisteredClientId" }, "idx_identity_authorizations_registered_client_id");
+                    b.HasIndex(new[] { "Id" }, "idx_identity_authorizations_id");
 
                     b.ToTable("identity_authorizations", (string)null);
                 });
@@ -6718,8 +7006,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("client_secret");
 
                     b.Property<string>("CreatedBy")
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
+                        .HasMaxLength(36)
+                        .HasColumnType("varchar(36)")
                         .HasColumnName("created_by");
 
                     b.Property<DateTime?>("CreatedOn")
@@ -6758,8 +7046,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("logout_redirect_uri");
 
                     b.Property<string>("ModifiedBy")
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
+                        .HasMaxLength(36)
+                        .HasColumnType("varchar(36)")
                         .HasColumnName("modified_by");
 
                     b.Property<DateTime?>("ModifiedOn")
@@ -6800,7 +7088,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasIndex(new[] { "ClientId" }, "UK_client_id")
                         .IsUnique();
 
-                    b.HasIndex(new[] { "IsInvalidated" }, "idx_identity_clients_is_invalidated");
+                    b.HasIndex(new[] { "ClientSecret" }, "idx_client_secret");
 
                     b.HasIndex(new[] { "TenantId" }, "idx_identity_clients_tenant_id");
 
@@ -6907,12 +7195,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasKey("PrincipalId", "RegisteredClientId")
                         .HasName("PRIMARY");
 
-                    b.HasIndex(new[] { "IsInvalidated" }, "idx_identity_consents_is_invalidated");
-
-                    b.HasIndex(new[] { "PrincipalId" }, "idx_identity_consents_principal_id");
-
-                    b.HasIndex(new[] { "RegisteredClientId" }, "idx_identity_consents_registered_client_id");
-
                     b.ToTable("identity_consents", (string)null);
                 });
 
@@ -6928,18 +7210,18 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("varchar(36)")
                         .HasColumnName("registered_client_id");
 
-                    b.Property<string>("ScopeName")
+                    b.Property<string>("Scopes")
                         .HasColumnType("varchar(255)")
-                        .HasColumnName("scope_name");
+                        .HasColumnName("scopes");
 
-                    b.HasKey("PrincipalId", "RegisteredClientId", "ScopeName")
+                    b.HasKey("PrincipalId", "RegisteredClientId", "Scopes")
                         .HasName("PRIMARY");
 
                     b.HasIndex(new[] { "PrincipalId" }, "idx_identity_consent_scopes_principal_id");
 
                     b.HasIndex(new[] { "RegisteredClientId" }, "idx_identity_consent_scopes_registered_client_id");
 
-                    b.HasIndex(new[] { "ScopeName" }, "idx_identity_consent_scopes_scope_name");
+                    b.HasIndex(new[] { "Scopes" }, "idx_identity_consent_scopes_scopes");
 
                     b.ToTable("identity_consent_scopes", (string)null);
                 });
@@ -7081,7 +7363,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasAnnotation("MySql:CharSet", "utf8");
                 });
 
-            modelBuilder.Entity("ASC.Webhooks.Core.EF.Model.WebhooksConfig", b =>
+            modelBuilder.Entity("ASC.Webhooks.Core.EF.Model.DbWebhooksConfig", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -7089,11 +7371,45 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("id")
                         .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("varchar(36)")
+                        .HasColumnName("created_by")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<DateTime?>("CreatedOn")
+                        .HasColumnType("datetime")
+                        .HasColumnName("created_on");
+
                     b.Property<bool>("Enabled")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(1)")
                         .HasColumnName("enabled")
                         .HasDefaultValueSql("'1'");
+
+                    b.Property<string>("LastFailureContent")
+                        .HasColumnType("varchar(200)")
+                        .HasColumnName("last_failure_content")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<DateTime?>("LastFailureOn")
+                        .HasColumnType("datetime")
+                        .HasColumnName("last_failure_on");
+
+                    b.Property<DateTime?>("LastSuccessOn")
+                        .HasColumnType("datetime")
+                        .HasColumnName("last_success_on");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("varchar(36)")
+                        .HasColumnName("modified_by")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<DateTime?>("ModifiedOn")
+                        .HasColumnType("datetime")
+                        .HasColumnName("modified_on");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -7114,9 +7430,20 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("secret_key")
                         .HasDefaultValueSql("''");
 
+                    b.Property<string>("TargetId")
+                        .HasMaxLength(36)
+                        .HasColumnType("varchar(36)")
+                        .HasColumnName("target_id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
                     b.Property<int>("TenantId")
                         .HasColumnType("int")
                         .HasColumnName("tenant_id");
+
+                    b.Property<int>("Triggers")
+                        .HasColumnType("int")
+                        .HasColumnName("triggers");
 
                     b.Property<string>("Uri")
                         .ValueGeneratedOnAdd()
@@ -7137,7 +7464,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasAnnotation("MySql:CharSet", "utf8");
                 });
 
-            modelBuilder.Entity("ASC.Webhooks.Core.EF.Model.WebhooksLog", b =>
+            modelBuilder.Entity("ASC.Webhooks.Core.EF.Model.DbWebhooksLog", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -7185,6 +7512,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Property<int>("TenantId")
                         .HasColumnType("int")
                         .HasColumnName("tenant_id");
+
+                    b.Property<int>("Trigger")
+                        .HasColumnType("int")
+                        .HasColumnName("trigger");
 
                     b.Property<string>("Uid")
                         .IsRequired()
@@ -7288,6 +7619,17 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 });
 
             modelBuilder.Entity("ASC.Core.Common.EF.FireBaseUser", b =>
+                {
+                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("ASC.Core.Common.EF.Model.ApiKey", b =>
                 {
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
                         .WithMany()
@@ -7518,6 +7860,17 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Navigation("Tenant");
                 });
 
+            modelBuilder.Entity("ASC.Files.Core.EF.DbFilesFormRoleMapping", b =>
+                {
+                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
+                });
+
             modelBuilder.Entity("ASC.Files.Core.EF.DbFilesLink", b =>
                 {
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
@@ -7671,20 +8024,11 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
             modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityAuthorization", b =>
                 {
-                    b.HasOne("ASC.Migrations.Core.Identity.IdentityClient", "RegisteredClient")
-                        .WithMany("IdentityAuthorizations")
-                        .HasForeignKey("RegisteredClientId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_authorization_client_id");
-
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
                         .WithMany()
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("RegisteredClient");
 
                     b.Navigation("Tenant");
                 });
@@ -7757,23 +8101,11 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Navigation("ScopeNameNavigation");
                 });
 
-            modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityConsent", b =>
-                {
-                    b.HasOne("ASC.Migrations.Core.Identity.IdentityClient", "RegisteredClient")
-                        .WithMany("IdentityConsents")
-                        .HasForeignKey("RegisteredClientId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("identity_consents_ibfk_1");
-
-                    b.Navigation("RegisteredClient");
-                });
-
             modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityConsentScope", b =>
                 {
                     b.HasOne("ASC.Migrations.Core.Identity.IdentityScope", "ScopeNameNavigation")
                         .WithMany("IdentityConsentScopes")
-                        .HasForeignKey("ScopeName")
+                        .HasForeignKey("Scopes")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("identity_consent_scopes_ibfk_2");
@@ -7790,7 +8122,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Navigation("ScopeNameNavigation");
                 });
 
-            modelBuilder.Entity("ASC.Webhooks.Core.EF.Model.WebhooksConfig", b =>
+            modelBuilder.Entity("ASC.Webhooks.Core.EF.Model.DbWebhooksConfig", b =>
                 {
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
                         .WithMany()
@@ -7801,9 +8133,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Navigation("Tenant");
                 });
 
-            modelBuilder.Entity("ASC.Webhooks.Core.EF.Model.WebhooksLog", b =>
+            modelBuilder.Entity("ASC.Webhooks.Core.EF.Model.DbWebhooksLog", b =>
                 {
-                    b.HasOne("ASC.Webhooks.Core.EF.Model.WebhooksConfig", "Config")
+                    b.HasOne("ASC.Webhooks.Core.EF.Model.DbWebhooksConfig", "Config")
                         .WithMany()
                         .HasForeignKey("ConfigId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -7833,13 +8165,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             modelBuilder.Entity("ASC.MessagingSystem.EF.Model.DbAuditEvent", b =>
                 {
                     b.Navigation("FilesReferences");
-                });
-
-            modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityClient", b =>
-                {
-                    b.Navigation("IdentityAuthorizations");
-
-                    b.Navigation("IdentityConsents");
                 });
 
             modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityConsent", b =>

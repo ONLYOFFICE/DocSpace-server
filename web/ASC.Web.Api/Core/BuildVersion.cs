@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,20 +27,19 @@
 namespace ASC.Api.Settings;
 
 /// <summary>
+/// The build version parameters.
 /// </summary>
 [Scope]
 public class BuildVersion
 {
-    /// <summary>DocSpace version</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The ONLYOFFICE DocSpace version.
+    /// </summary>
     public string DocSpace { get; set; }
 
-    /// <summary>Community Server version</summary>
-    /// <type>System.String, System</type>
-    public string CommunityServer { get; set; } //old
-
-    /// <summary>Document Server version</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The ONLYOFFICE Docs version.
+    /// </summary>
     public string DocumentServer { get; set; }
 
     [JsonIgnore]
@@ -65,8 +64,6 @@ public class BuildVersion
 
     public async Task<BuildVersion> GetCurrentBuildVersionAsync()
     {
-        CommunityServer = "12.0.0";
-
         DocSpace = GetDocSpaceVersion();
         DocumentServer = await GetDocumentVersionAsync();
 
@@ -75,7 +72,7 @@ public class BuildVersion
 
     private string GetDocSpaceVersion()
     {
-        return _configuration["version:number"] ?? "1.0.0";
+        return _configuration["version:number"] ?? "3.1.0";
     }
 
     private async Task<string> GetDocumentVersionAsync()

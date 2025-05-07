@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -38,13 +38,13 @@ public class S3TarWriteOperator : IDataWriteOperator
     private readonly TaskScheduler _scheduler = new ConcurrentExclusiveSchedulerPair(TaskScheduler.Default, Limit).ConcurrentScheduler;
     private readonly ConcurrentQueue<int> _queue = new();
     private readonly CancellationTokenSource _cts = new();
-    private readonly AscDistributedCache _cache;
+    private readonly IFusionCache _cache;
 
     public string Hash { get; private set; }
     public string StoragePath { get; private set; }
     public bool NeedUpload => false;
 
-    public S3TarWriteOperator(CommonChunkedUploadSession chunkedUploadSession, CommonChunkedUploadSessionHolder sessionHolder, TempStream tempStream, AscDistributedCache cache)
+    public S3TarWriteOperator(CommonChunkedUploadSession chunkedUploadSession, CommonChunkedUploadSessionHolder sessionHolder, TempStream tempStream, IFusionCache cache)
     {
         _chunkedUploadSession = chunkedUploadSession;
         _sessionHolder = sessionHolder;
@@ -184,10 +184,11 @@ public class S3TarWriteOperator : IDataWriteOperator
                 chunk.Length = contentLength;
                 first = false;
             }
-            await _cache.InsertAsync($"{_chunkedUploadSession.Id} - {etag.PartNumber}", chunk, TimeSpan.FromHours(12));
+            await _cache.SetAsync($"{_chunkedUploadSession.Id} - {etag.PartNumber}", chunk, TimeSpan.FromHours(12));
         }
 
         StoragePath = await _sessionHolder.FinalizeAsync(_chunkedUploadSession);
-        
+
+        _cts?.Dispose();
     }
 }

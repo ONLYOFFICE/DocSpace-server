@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,7 +33,7 @@ public class DocumentsBackupStorage(SetupInfo setupInfo,
         IDaoFactory daoFactory,
         StorageFactory storageFactory,
         IServiceProvider serviceProvider,
-        AscDistributedCache cache)
+        IFusionCache cache)
     : IBackupStorage, IGetterWriteOperator
 {
     private int _tenantId;
@@ -139,6 +139,11 @@ public class DocumentsBackupStorage(SetupInfo setupInfo,
             await theMemStream.WriteAsync(buffer.AsMemory(0, bytesRead));
             theMemStream.Position = 0;
             file = await fileDao.UploadChunkAsync(chunkedUploadSession, theMemStream, bytesRead);
+        }
+
+        if (file.Id == null)
+        {
+            file = await fileDao.FinalizeUploadSessionAsync(chunkedUploadSession);
         }
 
         return file.Id;

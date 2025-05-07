@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -89,7 +89,7 @@ public static class IntegrationEventLogExtension
 
             entity.Property(e => e.EventTypeName)
                   .HasColumnName("event_type_name")
-                  .HasColumnType("varchar(255)")
+                  .HasColumnType("varchar")
                   .HasCharSet("utf8")
                   .UseCollation("utf8_general_ci")
                   .IsRequired();
@@ -105,61 +105,52 @@ public static class IntegrationEventLogExtension
     {
         modelBuilder.Entity<IntegrationEventLogEntry>(entity =>
         {
-            entity.ToTable("event_bus_integration_event_log")
-                .HasCharSet("utf8");
+            entity.ToTable("event_bus_integration_event_log");
 
             entity.HasKey(e => e.EventId)
-                  .HasName("PRIMARY");
+                  .HasName("pk_event_bus_integration_event_log");
 
             entity.HasIndex(e => e.TenantId)
-                  .HasDatabaseName("tenant_id");
+                  .HasDatabaseName("ix_tenant_id");
 
             entity.Property(e => e.EventId)
                   .HasColumnName("event_id")
-                  .HasColumnType("char(38)")
-                  .HasCharSet("utf8")
-                  .UseCollation("utf8_general_ci")
+                  .HasColumnType("uuid")
                   .IsRequired();
 
             entity.Property(e => e.Content)
                   .HasColumnName("content")
                   .HasColumnType("text")
-                  .HasCharSet("utf8")
-                  .UseCollation("utf8_general_ci")
                   .IsRequired();
 
             entity.Property(e => e.CreateOn)
                   .HasColumnName("create_on")
-                  .HasColumnType("datetime")
+                  .HasColumnType("timestamptz")
                   .IsRequired();
 
             entity.Property(e => e.CreateBy)
                   .HasColumnName("create_by")
-                  .HasColumnType("char(38)")
-                  .HasCharSet("utf8")
-                  .UseCollation("utf8_general_ci")
+                  .HasColumnType("uuid")
                   .IsRequired();
 
             entity.Property(e => e.State)
                   .HasColumnName("state")
-                  .HasColumnType("int(11)")
+                  .HasColumnType("integer")
                   .IsRequired();
 
             entity.Property(e => e.TimesSent)
                   .HasColumnName("times_sent")
-                  .HasColumnType("int(11)")
+                  .HasColumnType("integer")
                   .IsRequired();
 
             entity.Property(e => e.EventTypeName)
                   .HasColumnName("event_type_name")
-                  .HasColumnType("varchar(255)")
-                  .HasCharSet("utf8")
-                  .UseCollation("utf8_general_ci")
+                  .HasColumnType("varchar")
                   .IsRequired();
 
             entity.Property(e => e.TenantId)
                   .HasColumnName("tenant_id")
-                  .HasColumnType("int(11)")
+                  .HasColumnType("integer")
                   .IsRequired();
         });
     }

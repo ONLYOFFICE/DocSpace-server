@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -38,6 +38,8 @@ public class NotifyRequest(ILoggerProvider options, INotifySource notifySource, 
     public string CurrentSender { get; internal set; }
     public INoticeMessage CurrentMessage { get; internal set; }
     public Hashtable Properties { get; private set; } = new();
+
+    internal int _tenantId;
     internal string[] _senderNames;
     internal IPattern[] _patterns;
     internal List<string> _requaredTags = [];
@@ -93,6 +95,7 @@ public class NotifyRequest(ILoggerProvider options, INotifySource notifySource, 
 
         var newRequest = new NotifyRequest(options, _notifySource, NotifyAction, ObjectID, recipient)
         {
+            _tenantId = _tenantId,
             _senderNames = _senderNames,
             _patterns = _patterns,
             Arguments = [..Arguments],
@@ -135,7 +138,7 @@ public class NotifyRequest(ILoggerProvider options, INotifySource notifySource, 
 
         CultureInfo culture = null;
 
-        var tenant = await tenantManager.GetCurrentTenantAsync(false);
+        var tenant = tenantManager.GetCurrentTenant(false);
 
         if (tenant != null)
         {

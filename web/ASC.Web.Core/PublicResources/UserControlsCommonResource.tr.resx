@@ -73,10 +73,16 @@
   <data name="TariffPerMonth" xml:space="preserve">
     <value>ay</value>
   </data>
+  <data name="TariffPerYear" xml:space="preserve">
+    <value>yıl</value>
+  </data>
   <data name="UnknownFirstName" xml:space="preserve">
     <value>Ad</value>
   </data>
   <data name="UnknownLastName" xml:space="preserve">
     <value>Soyad</value>
+  </data>
+  <data name="LicenseTypeNotCorrect" xml:space="preserve">
+    <value>Lisans Çakışması. Lütfen {0} DocSpace'in doğru sürümünü (Enterprise veya Developer) yüklediğinizden emin olun. Herhangi bir sorunuz varsa, satış müdürünüzle iletişime geçmekten çekinmeyin.</value>
   </data>
 </root>

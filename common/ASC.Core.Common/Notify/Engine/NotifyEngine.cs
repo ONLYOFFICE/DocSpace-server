@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -192,6 +192,13 @@ public class NotifyEngine(Context context,
 
         try
         {
+            var tenantManager = serviceScope.ServiceProvider.GetService<TenantManager>();
+            var tenant = tenantManager.GetCurrentTenant(false);
+            if (tenant == null)
+            {
+                await tenantManager.SetCurrentTenantAsync(request._tenantId);
+            }
+
             await PrepareRequestFillSendersAsync(request, serviceScope);
             await PrepareRequestFillPatterns(request, serviceScope);
             await PrepareRequestFillTags(request, serviceScope);

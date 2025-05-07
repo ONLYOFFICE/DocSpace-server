@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,7 +31,7 @@ namespace ASC.Web.Api.Controllers.Settings;
 public class LdapController(
     ApiContext apiContext,
     WebItemManager webItemManager,
-    IMemoryCache memoryCache,
+    IFusionCache fusionCache,
     SettingsManager settingsManager,
     TenantManager tenantManager,
     LdapNotifyService ldapNotifyHelper,
@@ -41,7 +41,7 @@ public class LdapController(
     CoreBaseSettings coreBaseSettings,
     IHttpContextAccessor httpContextAccessor,
     IMapper mapper)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
     /// Returns the current portal LDAP settings.
@@ -87,7 +87,7 @@ public class LdapController(
     }
 
     /// <summary>
-    /// Returns the LDAP autosynchronous cron expression for the current portal if it exists.
+    /// Returns the LDAP asynchronous cron expression for the current portal if it exists.
     /// </summary>
     /// <short>
     /// Get the LDAP cron expression
@@ -112,7 +112,7 @@ public class LdapController(
     }
 
     /// <summary>
-    /// Sets the LDAP autosynchronous cron expression to the current portal.
+    /// Sets the LDAP asynchronous cron expression to the current portal.
     /// </summary>
     /// <short>
     /// Set the LDAP cron expression
@@ -142,7 +142,7 @@ public class LdapController(
         settings.Cron = cron;
         await settingsManager.SaveAsync(settings);
 
-        var t = await tenantManager.GetCurrentTenantAsync();
+        var t = tenantManager.GetCurrentTenant();
         if (!string.IsNullOrEmpty(cron))
         {
             ldapNotifyHelper.UnregisterAutoSync(t);
@@ -173,7 +173,7 @@ public class LdapController(
 
         var userId = authContext.CurrentAccount.ID.ToString();
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         
         var result = await ldapSaveSyncOperation.SyncLdapAsync(ldapSettings, tenant, userId);
 
@@ -197,7 +197,7 @@ public class LdapController(
 
         var ldapSettings = await settingsManager.LoadAsync<LdapSettings>();
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         
         var result = await ldapSaveSyncOperation.TestLdapSyncAsync(ldapSettings, tenant);
 
@@ -228,7 +228,7 @@ public class LdapController(
 
         var userId = authContext.CurrentAccount.ID.ToString();
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         
         var result = await ldapSaveSyncOperation.SaveLdapSettingsAsync(ldapSettings, tenant, userId);
 
@@ -252,7 +252,7 @@ public class LdapController(
 
         var userId = authContext.CurrentAccount.ID.ToString();
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         
         var result = await ldapSaveSyncOperation.TestLdapSaveAsync(inDto, tenant, userId);
 
@@ -263,7 +263,7 @@ public class LdapController(
     /// Returns the LDAP synchronization process status.
     /// </summary>
     /// <short>
-    /// Get the LDAP synchronization process status
+    /// Get the LDAP synchronization status
     /// </short>
     /// <path>api/2.0/settings/ldap/status</path>
     [ApiExplorerSettings(IgnoreApi = true)]
@@ -274,7 +274,7 @@ public class LdapController(
     {
         await CheckLdapPermissionsAsync();
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         
         var result = await ldapSaveSyncOperation.ToLdapOperationStatus(tenant.Id);
 
@@ -306,10 +306,10 @@ public class LdapController(
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         if (!coreBaseSettings.Standalone
-            && (!SetupInfo.IsVisibleSettings(ManagementType.LdapSettings.ToString())
+            && (!SetupInfo.IsVisibleSettings(ManagementType.LdapSettings.ToStringFast())
                 || !(await tenantManager.GetCurrentTenantQuotaAsync()).Ldap))
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption, "Ldap");
+            throw new BillingException(Resource.ErrorNotAllowedOption);
         }
     }
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -44,6 +44,8 @@ public class TenantInfoSettings : ISettings<TenantInfoSettings>
             IsDefault = true
         };
     }
+    
+    public DateTime LastModified { get; set; }
 
     [JsonIgnore]
     public Guid ID
@@ -51,6 +53,23 @@ public class TenantInfoSettings : ISettings<TenantInfoSettings>
         get { return new Guid("{5116B892-CCDD-4406-98CD-4F18297C0C0A}"); }
     }
 }
+
+public class Size
+{
+    public uint Height { get; set; }
+    public uint Width { get; set; }
+
+    public static implicit operator Size(MagickGeometry cache)
+    {
+        return new Size
+        {
+            Height = cache.Height, 
+            Width = cache.Width
+        };
+    }
+}
+
+public record Point(int X, int Y);
 
 [Scope]
 public class TenantInfoSettingsHelper(WebImageSupplier webImageSupplier,
@@ -66,7 +85,7 @@ public class TenantInfoSettingsHelper(WebImageSupplier webImageSupplier,
 
     public async Task RestoreDefaultTenantNameAsync()
     {
-        var currentTenant = await tenantManager.GetCurrentTenantAsync();
+        var currentTenant = tenantManager.GetCurrentTenant();
         currentTenant.Name = configuration["web:portal-name"] ?? "";
         await tenantManager.SaveTenantAsync(currentTenant);
     }
@@ -75,7 +94,7 @@ public class TenantInfoSettingsHelper(WebImageSupplier webImageSupplier,
     {
         tenantInfoSettings.IsDefault = true;
 
-        var store = await storageFactory.GetStorageAsync(await tenantManager.GetCurrentTenantIdAsync(), "logo");
+        var store = await storageFactory.GetStorageAsync(tenantManager.GetCurrentTenantId(), "logo");
         try
         {
             await store.DeleteFilesAsync("", "*", false);
@@ -83,14 +102,14 @@ public class TenantInfoSettingsHelper(WebImageSupplier webImageSupplier,
         catch
         {
         }
-        tenantInfoSettings.CompanyLogoSize = default;
+        tenantInfoSettings.CompanyLogoSize = null;
 
         await tenantLogoManager.RemoveMailLogoDataFromCacheAsync();
     }
 
     public async Task SetCompanyLogoAsync(string companyLogoFileName, byte[] data, TenantInfoSettings tenantInfoSettings, TenantLogoManager tenantLogoManager)
     {
-        var store = await storageFactory.GetStorageAsync(await tenantManager.GetCurrentTenantIdAsync(), "logo");
+        var store = await storageFactory.GetStorageAsync(tenantManager.GetCurrentTenantId(), "logo");
 
         if (!tenantInfoSettings.IsDefault)
         {
@@ -103,9 +122,9 @@ public class TenantInfoSettingsHelper(WebImageSupplier webImageSupplier,
             }
         }
         using (var memory = new MemoryStream(data))
-        using (var image = await Image.LoadAsync(memory))
+        using (var image = new MagickImage(memory))
         {
-            tenantInfoSettings.CompanyLogoSize = image.Size;
+            tenantInfoSettings.CompanyLogoSize = new MagickGeometry(image.Width, image.Height);
 
             memory.Seek(0, SeekOrigin.Begin);
             await store.SaveAsync(companyLogoFileName, memory);
@@ -123,7 +142,7 @@ public class TenantInfoSettingsHelper(WebImageSupplier webImageSupplier,
             return webImageSupplier.GetAbsoluteWebPath("notifications/logo.png");
         }
 
-        var store = await storageFactory.GetStorageAsync(await tenantManager.GetCurrentTenantIdAsync(), "logo");
+        var store = await storageFactory.GetStorageAsync(tenantManager.GetCurrentTenantId(), "logo");
         return (await store.GetUriAsync(tenantInfoSettings.CompanyLogoFileName ?? "")).ToString();
     }
 
@@ -137,7 +156,7 @@ public class TenantInfoSettingsHelper(WebImageSupplier webImageSupplier,
             return null;
         }
 
-        var storage = await storageFactory.GetStorageAsync(await tenantManager.GetCurrentTenantIdAsync(), "logo");
+        var storage = await storageFactory.GetStorageAsync(tenantManager.GetCurrentTenantId(), "logo");
 
         if (storage == null)
         {

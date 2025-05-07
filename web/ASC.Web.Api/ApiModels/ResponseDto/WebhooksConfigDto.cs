@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,55 +26,127 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
-public class WebhooksConfigDto : IMapFrom<WebhooksConfig>
+/// <summary>
+/// The webhook configuration parameters.
+/// </summary>
+public class WebhooksConfigDto
 {
     /// <summary>
-    /// ID
+    /// The webhook ID.
     /// </summary>
     public int Id { get; set; }
 
     /// <summary>
-    /// Name
+    /// The webhook name.
     /// </summary>
     public string Name { get; set; }
 
     /// <summary>
-    /// URI
+    /// The webhook URI.
     /// </summary>
     public string Uri { get; set; }
 
     /// <summary>
-    /// Secret key
-    /// </summary>
-    public string SecretKey { get; set; }
-
-    /// <summary>
-    /// Specifies if the webhooks are enabled or not
+    /// Specifies if the webhooks are enabled or not.
     /// </summary>
     public bool Enabled { get; set; }
 
     /// <summary>
-    /// SSL
+    /// The webhook SSL verification (enabled or not).
     /// </summary>
     public bool SSL { get; set; }
+
+    /// <summary>
+    /// The webhook trigger type.
+    /// </summary>
+    public WebhookTrigger Triggers { get; set; }
+
+    /// <summary>
+    /// The webhook target ID.
+    /// </summary>
+    public string TargetId { get; set; }
+
+    /// <summary>
+    /// The user who created the webhook.
+    /// </summary>
+    public EmployeeDto CreatedBy { get; set; }
+
+    /// <summary>
+    /// The date and time when the webhook was created.
+    /// </summary>
+    public DateTime? CreatedOn { get; set; }
+
+    /// <summary>
+    /// The user who modified the webhook.
+    /// </summary>
+    public EmployeeDto ModifiedBy { get; set; }
+
+    /// <summary>
+    /// The date and time when the webhook was modified.
+    /// </summary>
+    public DateTime? ModifiedOn { get; set; }
+
+    /// <summary>
+    /// The date and time of the webhook last failure.
+    /// </summary>
+    public DateTime? LastFailureOn { get; set; }
+
+    /// <summary>
+    /// The webhook last failure content.
+    /// </summary>
+    public string LastFailureContent { get; set; }
+
+    /// <summary>
+    /// The date and time of the webhook last success.
+    /// </summary>
+    public DateTime? LastSuccessOn { get; set; }
 }
 
-public class WebhooksConfigWithStatusDto : IMapFrom<WebhooksConfigWithStatus>
+/// <summary>
+/// The webhook configuration with its status.
+/// </summary>
+public class WebhooksConfigWithStatusDto
 {
     /// <summary>
-    /// Configs
+    /// The webhook configuration.
     /// </summary>
     public WebhooksConfigDto Configs { get; set; }
 
     /// <summary>
-    /// Status
+    /// The webhook status.
     /// </summary>
     public int Status { get; set; }
+}
 
-    public void Mapping(Profile profile)
+[Scope]
+public class WebhooksConfigDtoHelper(TenantUtil tenantUtil, EmployeeDtoHelper employeeDtoHelper)
+{
+    public async Task<WebhooksConfigDto> GetAsync(DbWebhooksConfig dbWebhooksConfig)
     {
-        profile.CreateMap<WebhooksConfigWithStatus, WebhooksConfigWithStatusDto>()
-            .ForMember(src => src.Configs, ex => ex
-                .MapFrom(map => map.WebhooksConfig));
+        return new WebhooksConfigDto
+        {
+            Id = dbWebhooksConfig.Id,
+            Name = dbWebhooksConfig.Name,
+            Uri = dbWebhooksConfig.Uri,
+            Enabled = dbWebhooksConfig.Enabled,
+            SSL = dbWebhooksConfig.SSL,
+            Triggers = dbWebhooksConfig.Triggers,
+            TargetId = dbWebhooksConfig.TargetId,
+            CreatedBy = dbWebhooksConfig.CreatedBy.HasValue ? await employeeDtoHelper.GetAsync(dbWebhooksConfig.CreatedBy.Value) : null,
+            CreatedOn = dbWebhooksConfig.CreatedOn.HasValue? tenantUtil.DateTimeFromUtc(dbWebhooksConfig.CreatedOn.Value) : null,
+            ModifiedBy = dbWebhooksConfig.ModifiedBy.HasValue ? await employeeDtoHelper.GetAsync(dbWebhooksConfig.ModifiedBy.Value) : null,
+            ModifiedOn = dbWebhooksConfig.ModifiedOn.HasValue ? tenantUtil.DateTimeFromUtc(dbWebhooksConfig.ModifiedOn.Value) : null,
+            LastFailureOn = dbWebhooksConfig.LastFailureOn.HasValue ? tenantUtil.DateTimeFromUtc(dbWebhooksConfig.LastFailureOn.Value) : null,
+            LastFailureContent = dbWebhooksConfig.LastFailureContent,
+            LastSuccessOn = dbWebhooksConfig.LastSuccessOn.HasValue ? tenantUtil.DateTimeFromUtc(dbWebhooksConfig.LastSuccessOn.Value) : null
+        };
+    }
+
+    public async Task<WebhooksConfigWithStatusDto> GetAsync(WebhooksConfigWithStatus webhooksConfigWithStatus)
+    {
+        return new WebhooksConfigWithStatusDto {
+            Configs = await GetAsync(webhooksConfigWithStatus.WebhooksConfig),
+            Status = webhooksConfigWithStatus.Status ?? 0
+        };
     }
 }

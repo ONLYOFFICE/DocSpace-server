@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Common.EF.Context;
 
-public class CustomDbContext(DbContextOptions<CustomDbContext> options) : DbContext(options)
+public class CustomDbContext(DbContextOptions<CustomDbContext> options) : BaseDbContext(options)
 {
     public DbSet<MobileAppInstall> MobileAppInstall { get; set; }
     public DbSet<DbIPLookup> DbIPLookup { get; set; }

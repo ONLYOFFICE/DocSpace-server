@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -41,7 +41,7 @@ public record BackupRequestIntegrationEvent : IntegrationEvent
                                   bool isScheduled = false,
                                   int backupsStored = 0,
                                   string storageBasePath = "",
-                                  string serverBaseUri = default,
+                                  string serverBaseUri = null,
                                   bool dump = false,
                                   string taskId = null) : base(createBy, tenantId)
     {

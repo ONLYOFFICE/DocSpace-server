@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,6 +26,9 @@
 
 namespace ASC.Core.Tenants;
 
+/// <summary>
+/// The domain validator.
+/// </summary>
 [Singleton]
 public class TenantDomainValidator
 {
@@ -34,21 +37,26 @@ public class TenantDomainValidator
     private const string DomainContainsInvalidCharacters = "Domain contains invalid characters.";
 
     /// <summary>
-    /// Regex
+    /// The regex string to validate a domain.
     /// </summary>
     public string Regex { get; }
 
     /// <summary>
-    /// Min length
+    /// The minimum length of the valid domain.
     /// </summary>
     public int MinLength { get; }
 
     /// <summary>
-    /// Max length
+    /// The maximum length of the valid domain.
     /// </summary>
     [SwaggerSchemaCustom(Example = 63)]
     public int MaxLength { get; }
 
+    public TenantDomainValidator()
+    {
+        
+    }
+    
     public TenantDomainValidator(IConfiguration configuration, CoreBaseSettings coreBaseSettings)
     {
         MaxLength = 63;

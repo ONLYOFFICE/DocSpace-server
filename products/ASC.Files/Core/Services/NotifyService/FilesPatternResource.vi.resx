@@ -119,9 +119,6 @@ $__AuthorName đã xóa phòng: $RoomTitle</value>
   <data name="subject_DocuSignStatus_push" xml:space="preserve">
     <value>Trạng thái ký tên đã thay đổi</value>
   </data>
-  <data name="subject_EditorMentions_push" xml:space="preserve">
-    <value>Được nhắc đến trong tài liệu</value>
-  </data>
   <data name="subject_MailMergeEnd_push" xml:space="preserve">
     <value>Gửi thư đã xong.</value>
   </data>
@@ -178,5 +175,64 @@ $OrangeButton</value>
   </data>
   <data name="subject_FormSubmitted" xml:space="preserve">
     <value>Thông báo DocSpace. Biểu mẫu đã được điền</value>
+  </data>
+  <data name="pattern_FormSubmitted_push" xml:space="preserve">
+    <value>Biểu mẫu "$DocumentTitle" đã được điền trong phòng "$RoomTitle"</value>
+  </data>
+  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
+    <value>Bạn đã được mời vào phòng "$RoomTitle"</value>
+  </data>
+  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
+    <value>Vai trò của bạn trong phòng "$RoomTitle" đã được thay đổi thành "$RoomRole"</value>
+  </data>
+  <data name="subject_YourTurnFormFilling" xml:space="preserve">
+    <value>Thông báo DocSpace.</value>
+  </data>
+  <data name="subject_StoppedFormFilling" xml:space="preserve">
+    <value>Thông báo DocSpace.</value>
+  </data>
+  <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
+    <value>Thông báo DocSpace.</value>
+  </data>
+  <data name="subject_FormStartedFilling" xml:space="preserve">
+    <value>Thông báo DocSpace.</value>
+  </data>
+  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
+    <value>$FromUserName đã chuyển phòng "$RoomTitle" vào sao lưu</value>
+  </data>
+  <data name="pattern_EditorMentions_push" xml:space="preserve">
+    <value>$ToUserName đã nhắc đến bạn trong tài liệu  $DocumentTitle</value>
+  </data>
+  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
+    <value>Một tài liệu mới "$DocumentTitle" đã được tạo trong phòng "$RoomTitle"</value>
+  </data>
+  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
+    <value>Một tập tin mới "$DocumentTitle" đã được tải lên phòng "$RoomTitle"</value>
+  </data>
+  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
+    <value>Một tập tin mới đã được tải lên phòng "$RoomTitle" ($Count)</value>
+  </data>
+  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
+    <value>Một thư mục mới "$FolderTitle" đã được tạo trong phòng "$RoomTitle"</value>
+  </data>
+  <data name="pattern_FormStartedFilling" xml:space="preserve">
+    <value>
+      Thông báo hoạt động. "$FromUserName":"$FromUserLink" đã bắt đầu quá trình điền biểu mẫu: "$DocumentTitle":"$DocumentURL" trong phòng: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_StoppedFormFilling" xml:space="preserve">
+    <value>
+      Thông báo hoạt động. "$FromUserName":"$FromUserLink" đã dừng điền biểu mẫu: "$DocumentTitle":"$DocumentURL" trong phòng: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_YourTurnFormFilling" xml:space="preserve">
+    <value>
+      Thông báo hoạt động. Đến lượt bạn! Yêu cầu điền biểu mẫu: "$DocumentTitle":"$DocumentURL" trong phòng: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
+    <value>
+      Thông báo hoạt động. Biểu mẫu "$DocumentTitle":"$DocumentURL" đã được điền đầy đủ trong phòng: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
   </data>
 </root>

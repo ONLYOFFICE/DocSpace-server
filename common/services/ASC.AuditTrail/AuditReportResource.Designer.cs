@@ -133,6 +133,33 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to User Api Key Created: {0}.
+        /// </summary>
+        public static string ApiKeyCreated {
+            get {
+                return ResourceManager.GetString("ApiKeyCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User Api Key Deleted: {0}.
+        /// </summary>
+        public static string ApiKeyDeleted {
+            get {
+                return ResourceManager.GetString("ApiKeyDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User Api Key Updated: {0}.
+        /// </summary>
+        public static string ApiKeyUpdated {
+            get {
+                return ResourceManager.GetString("ApiKeyUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Attach.
         /// </summary>
         public static string AttachActionType {
@@ -165,6 +192,15 @@ namespace ASC.AuditTrail {
         public static string AuditTrailReportName {
             get {
                 return ResourceManager.GetString("AuditTrailReportName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The authorization link has been activated.
+        /// </summary>
+        public static string AuthLinkActivated {
+            get {
+                return ResourceManager.GetString("AuthLinkActivated", resourceCulture);
             }
         }
         
@@ -385,6 +421,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Developer Tools access settings changed.
+        /// </summary>
+        public static string DevToolsAccessSettingsChanged {
+            get {
+                return ResourceManager.GetString("DevToolsAccessSettingsChanged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to DNS Settings Updated.
         /// </summary>
         public static string DnsSettingsUpdated {
@@ -534,6 +579,24 @@ namespace ASC.AuditTrail {
         public static string FileCreatedVersion {
             get {
                 return ResourceManager.GetString("FileCreatedVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to File: {0}. Custom filter disabled.
+        /// </summary>
+        public static string FileCustomFilterDisabled {
+            get {
+                return ResourceManager.GetString("FileCustomFilterDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to File: {0}. Custom filter enabled.
+        /// </summary>
+        public static string FileCustomFilterEnabled {
+            get {
+                return ResourceManager.GetString("FileCustomFilterEnabled", resourceCulture);
             }
         }
         
@@ -754,6 +817,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Files [{0}]. Version Deleted: {1}.
+        /// </summary>
+        public static string FileVersionRemoved {
+            get {
+                return ResourceManager.GetString("FileVersionRemoved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Folders [{0}]. Copied To Folder: {1}.
         /// </summary>
         public static string FolderCopied {
@@ -871,11 +943,47 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Users [{0}]. Completely filled out form: {1}.
+        /// </summary>
+        public static string FormCompletelyFilled {
+            get {
+                return ResourceManager.GetString("FormCompletelyFilled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to File Opened For Filling: {0}.
         /// </summary>
         public static string FormOpenedForFilling {
             get {
                 return ResourceManager.GetString("FormOpenedForFilling", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Users [{0}]. Filled out part of form: {1}.
+        /// </summary>
+        public static string FormPartiallyFilled {
+            get {
+                return ResourceManager.GetString("FormPartiallyFilled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Users [{0}]. Started to fill: {1}.
+        /// </summary>
+        public static string FormStartedToFill {
+            get {
+                return ResourceManager.GetString("FormStartedToFill", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Users [{0}]. Form stopped: {1}.
+        /// </summary>
+        public static string FormStopped {
+            get {
+                return ResourceManager.GetString("FormStopped", resourceCulture);
             }
         }
         
@@ -1038,6 +1146,33 @@ namespace ASC.AuditTrail {
         public static string LanguageSettingsUpdated {
             get {
                 return ResourceManager.GetString("LanguageSettingsUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to LDAP authentication disabled.
+        /// </summary>
+        public static string LdapDisabled {
+            get {
+                return ResourceManager.GetString("LdapDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to LDAP authentication enabled.
+        /// </summary>
+        public static string LdapEnabled {
+            get {
+                return ResourceManager.GetString("LdapEnabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to LDAP synchronization completed.
+        /// </summary>
+        public static string LdapSync {
+            get {
+                return ResourceManager.GetString("LdapSync", resourceCulture);
             }
         }
         
@@ -2496,6 +2631,33 @@ namespace ASC.AuditTrail {
         public static string UserUpdatedPassword {
             get {
                 return ResourceManager.GetString("UserUpdatedPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Webhook created: {0}.
+        /// </summary>
+        public static string WebhookCreated {
+            get {
+                return ResourceManager.GetString("WebhookCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Webhook deleted: {0}.
+        /// </summary>
+        public static string WebhookDeleted {
+            get {
+                return ResourceManager.GetString("WebhookDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Webhook updated: {0}.
+        /// </summary>
+        public static string WebhookUpdated {
+            get {
+                return ResourceManager.GetString("WebhookUpdated", resourceCulture);
             }
         }
     }

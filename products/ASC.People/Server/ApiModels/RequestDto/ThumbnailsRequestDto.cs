@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,49 +27,49 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// Thumbnail request parameters
+/// The thumbnail request.
 /// </summary>
 public class ThumbnailsRequest
 {
     /// <summary>
-    /// Path to the temporary file
+    /// The path to the temporary thumbnail file.
     /// </summary>
     public string TmpFile { get; set; }
 
     /// <summary>
-    /// Horizontal coordinate
+    /// The thumbnail horizontal coordinate.
     /// </summary>
     public int X { get; set; }
 
     /// <summary>
-    /// Vertical coordinate
+    /// The thumbnail vertical coordinate.
     /// </summary>
     public int Y { get; set; }
 
     /// <summary>
-    /// Thumbnail width
+    /// The thumbnail width.
     /// </summary>
-    public int Width { get; set; }
+    public uint Width { get; set; }
 
     /// <summary>
-    /// Thumbnail height
+    /// The thumbnail height.
     /// </summary>
-    public int Height { get; set; }
+    public uint Height { get; set; }
 }
 
 /// <summary>
-/// Thumbnail request parameters
+/// The thumbnail request parameters.
 /// </summary>
 public class ThumbnailsRequestDto
 {
     /// <summary>
-    /// User ID
+    /// The user ID.
     /// </summary>
     [FromRoute(Name = "userid")]
-    public string UserId { get; set; }
+    public required string UserId { get; set; }
 
     /// <summary>
-    /// Thumbnails
+    /// The thumbnail request.
     /// </summary>
     [FromBody]
     public ThumbnailsRequest Thumbnails { get; set; }

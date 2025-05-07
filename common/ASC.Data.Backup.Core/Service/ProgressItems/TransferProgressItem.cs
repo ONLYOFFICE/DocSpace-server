@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,7 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-
 namespace ASC.Data.Backup.Services;
 
 [Transient]
@@ -35,6 +34,11 @@ public class TransferProgressItem : BaseBackupProgressItem
     private readonly NotifyHelper _notifyHelper;
     private readonly IConfiguration _configuration;
 
+    public TransferProgressItem()
+    {
+        
+    }
+    
     public TransferProgressItem(
         ILogger<TransferProgressItem> logger,
         IServiceScopeFactory serviceScopeFactory,
@@ -61,6 +65,7 @@ public class TransferProgressItem : BaseBackupProgressItem
         bool notify)
     {
         Init();
+        BackupProgressItemType = BackupProgressItemType.Transfer;
         TenantId = tenantId;
         TargetRegion = targetRegion;
         Notify = notify;
@@ -84,7 +89,7 @@ public class TransferProgressItem : BaseBackupProgressItem
 
             await _notifyHelper.SendAboutTransferStartAsync(tenant, TargetRegion, Notify);
             transferProgressItem.Init(TenantId, TargetRegion, Limit, TempFolder);
-            transferProgressItem.ProgressChanged = async (args) =>
+            transferProgressItem.ProgressChanged = async args =>
             {
                 Percentage = args.Progress;
                 await PublishChanges();

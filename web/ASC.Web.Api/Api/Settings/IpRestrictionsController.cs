@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,10 +32,10 @@ public class IpRestrictionsController(ApiContext apiContext,
         SettingsManager settingsManager,
         WebItemManager webItemManager,
         IPRestrictionsService iPRestrictionsService,
-        IMemoryCache memoryCache,
+        IFusionCache fusionCache,
         TenantManager tenantManager,
         IHttpContextAccessor httpContextAccessor)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
     /// Returns the IP portal restrictions.
@@ -44,19 +44,23 @@ public class IpRestrictionsController(ApiContext apiContext,
     /// <path>api/2.0/settings/iprestrictions</path>
     /// <collection>list</collection>
     [Tags("Settings / IP restrictions")]
-    [SwaggerResponse(200, "List of IP restrictions parameters", typeof(IPRestriction))]
+    [SwaggerResponse(200, "List of IP restrictions parameters", typeof(IEnumerable<IPRestriction>))]
     [HttpGet("")]
     public async Task<IEnumerable<IPRestriction>> GetIpRestrictionsAsync()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        var tenant = await tenantManager.GetCurrentTenantAsync();
-        return await iPRestrictionsService.GetAsync(tenant.Id);
+        
+        var tenant = tenantManager.GetCurrentTenant();
+        var etagFromRequest = HttpContext.Request.Headers.IfNoneMatch;
+        var result = await iPRestrictionsService.GetAsync(tenant.Id, etagFromRequest);
+        
+        return HttpContext.TryGetFromCache(await HttpContextExtension.CalculateEtagAsync(result.Select(r=> r.Ip))) ? null : result;
     }
 
     /// <summary>
-    /// Updates the IP restriction settings with a parameter specified in the request.
+    /// Updates the IP restrictions with the parameters specified in the request.
     /// </summary>
-    /// <short>Save the IP restriction settings</short>
+    /// <short>Update the IP restrictions</short>
     /// <path>api/2.0/settings/iprestrictions</path>
     [Tags("Settings / IP restrictions")]
     [SwaggerResponse(200, "Updated IP restriction settings", typeof(IpRestrictionsDto))]
@@ -65,13 +69,13 @@ public class IpRestrictionsController(ApiContext apiContext,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        inDto.IpRestrictions = inDto.IpRestrictions ?? new List<IpRestrictionBase>();
+        inDto.IpRestrictions ??= new List<IpRestrictionBase>();
         var isEmpty = !inDto.IpRestrictions.Any();
 
         bool enable;
         if (!inDto.Enable.HasValue)
         {
-            enable = isEmpty ? false : true;
+            enable = !isEmpty;
         }
         else
         {
@@ -88,7 +92,7 @@ public class IpRestrictionsController(ApiContext apiContext,
             throw new ArgumentException(nameof(inDto.IpRestrictions));
         }
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         var ips = await iPRestrictionsService.SaveAsync(inDto.IpRestrictions, tenant.Id);
 
         var settings = new IPRestrictionsSettings { Enable = enable };
@@ -108,14 +112,16 @@ public class IpRestrictionsController(ApiContext apiContext,
     public async Task<IPRestrictionsSettings> ReadIpRestrictionsSettingsAsync()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-
-        return await settingsManager.LoadAsync<IPRestrictionsSettings>();
+        
+        var settings = await settingsManager.LoadAsync<IPRestrictionsSettings>(HttpContext.GetIfModifiedSince());
+        
+        return HttpContext.TryGetFromCache(settings.LastModified) ? null : settings;
     }
 
     /// <summary>
-    /// Updates the IP restriction settings with a parameter specified in the request.
+    /// Updates the IP restriction settings with the parameters specified in the request.
     /// </summary>
-    /// <short>Save the IP restriction settings</short>
+    /// <short>Update the IP restriction settings</short>
     /// <path>api/2.0/settings/iprestrictions/settings</path>
     [Tags("Settings / IP restrictions")]
     [SwaggerResponse(200, "Updated IP restriction settings", typeof(IpRestrictionsDto))]
@@ -124,13 +130,13 @@ public class IpRestrictionsController(ApiContext apiContext,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        inDto.IpRestrictions = inDto.IpRestrictions ?? new List<IpRestrictionBase>();
+        inDto.IpRestrictions ??= new List<IpRestrictionBase>();
         var isEmpty = !inDto.IpRestrictions.Any();
 
         bool enable;
         if (!inDto.Enable.HasValue)
         {
-            enable = isEmpty ? false : true;
+            enable = !isEmpty;
         }
         else
         {
@@ -147,7 +153,7 @@ public class IpRestrictionsController(ApiContext apiContext,
             throw new ArgumentException(nameof(inDto.IpRestrictions));
         }
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         var ips = await iPRestrictionsService.SaveAsync(inDto.IpRestrictions, tenant.Id);
 
         var settings = new IPRestrictionsSettings { Enable = enable };

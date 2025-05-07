@@ -465,16 +465,16 @@ Visaugstākā saderība ar docx, xlsx, pptx.</value>
     <value>Lietotājs</value>
   </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Vairāku failu pārvietošana uz veidlapu aizpildīšanas telpu netiek atbalstīta. Pārvietojiet pa vienai ONLYOFFICE PDF veidlapai.</value>
+    <value>Vairāku failu pārvietošana uz veidlapu aizpildīšanas telpu netiek atbalstīta. Pārvietojiet pa vienai {0} PDF veidlapai.</value>
   </data>
   <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Mapju pārvietošana uz veidlapu aizpildīšanas telpu netiek atbalstīta. Pārvietojiet pa vienai ONLYOFFICE PDF veidlapai.</value>
+    <value>Mapju pārvietošana uz veidlapu aizpildīšanas telpu netiek atbalstīta. Pārvietojiet pa vienai {0} PDF veidlapai.</value>
   </data>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Failu nevar pārvietot uz šo telpu. Mēģiniet pārvietot ONLYOFFICE PDF veidlapu.</value>
+    <value>Failu nevar pārvietot uz šo telpu. Mēģiniet pārvietot {0} PDF veidlapu.</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Failu nevar augšupielādēt šajā telpā. Mēģiniet augšupielādēt ONLYOFFICE PDF veidlapu.</value>
+    <value>Failu nevar augšupielādēt šajā telpā. Mēģiniet augšupielādēt {0} PDF veidlapu.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Aizpildāmā saite</value>
@@ -502,5 +502,14 @@ Visaugstākā saderība ar docx, xlsx, pptx.</value>
   </data>
   <data name="OpenForm" xml:space="preserve">
     <value>Atvērt failu</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Nevar dzēst pašreizējo faila versiju</value>
+  </data>
+  <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
+    <value>Dalīties, lai aizpildītu</value>
+  </data>
+  <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
+    <value>Sākt aizpildīšanu</value>
   </data>
 </root>

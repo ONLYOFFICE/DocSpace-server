@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -56,6 +56,7 @@ internal class CrossDao //Additional SharpBox
         var fromFileShareRecords = securityDao.GetPureShareRecordsAsync(fromFileCopy);
         var fromFileNewTags = tagDao.GetNewTagsAsync(Guid.Empty, fromFileCopy);
         var fromFileLockTag = await tagDao.GetTagsAsync(fromFileId, FileEntryType.File, TagType.Locked).FirstOrDefaultAsync();
+        var fromFileCustomFilterTag = await tagDao.GetTagsAsync(fromFileId, FileEntryType.File, TagType.CustomFilter).FirstOrDefaultAsync();
         var fromFileFavoriteTag = await tagDao.GetTagsAsync(fromFile.Id, FileEntryType.File, TagType.Favorite).ToListAsync();
         var fromFileTemplateTag = await tagDao.GetTagsAsync(fromFile.Id, FileEntryType.File, TagType.Template).ToListAsync();
 
@@ -104,6 +105,10 @@ internal class CrossDao //Additional SharpBox
         if (fromFileLockTag != null)
         {
             fromFileTags.Add(fromFileLockTag);
+        }
+        if (fromFileCustomFilterTag != null)
+        {
+            fromFileTags.Add(fromFileCustomFilterTag);
         }
 
         fromFileTags.AddRange(fromFileFavoriteTag);

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -160,8 +160,8 @@ internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHel
         {
             return null;
         }
-
-        var path = $"{parent.ParentReference.Path.Replace(RootPath, string.Empty)}/{parent.Name}/{title}";
+        var parentPath = parent.ParentReference.Path == null ? "" : parent.ParentReference.Path.Replace(RootPath, string.Empty) + $"/{parent.Name}";
+        var path = $"{parentPath}/{title}";
 
         return await OnedriveClient.Drive.Root.ItemWithPath(path)
             .Content.Request().PutAsync<Item>(fileStream);
@@ -314,7 +314,7 @@ internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHel
         using var response = await httpClient.SendAsync(request);
     }
 
-    public async Task<Stream> GetThumbnailAsync(string fileId, int width, int height)
+    public async Task<Stream> GetThumbnailAsync(string fileId, uint width, uint height)
     {
         var thumbnails = await OnedriveClient.Drive.Items[fileId].Thumbnails.Request().GetAsync();
         if (thumbnails.Count <= 0)

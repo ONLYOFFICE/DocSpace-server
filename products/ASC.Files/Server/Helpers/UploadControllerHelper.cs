@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -42,7 +42,7 @@ public class UploadControllerHelper(
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
     FileChecker fileChecker,
-    IDistributedCache distributedCache)
+    WebhookManager webhookManager)
     : FilesHelperBase(
         filesSettingsHelper,
         fileUploader,
@@ -51,13 +51,13 @@ public class UploadControllerHelper(
         fileStorageService,
         fileChecker,
         httpContextAccessor,
-        distributedCache)
+        webhookManager)
     {
     public async Task<object> CreateEditSessionAsync<T>(T fileId, long fileSize)
     {
         var file = await _fileUploader.VerifyChunkedUploadForEditing(fileId, fileSize);
 
-        return await CreateUploadSessionAsync(file, false, default, true);
+        return await CreateUploadSessionAsync(file, false, null, true);
     }
 
     public async Task<List<string>> CheckUploadAsync<T>(T folderId, IEnumerable<string> filesTitle)
@@ -109,7 +109,7 @@ public class UploadControllerHelper(
             };
         }
 
-        var createSessionUrl = await filesLinkUtility.GetInitiateUploadSessionUrlAsync(await tenantManager.GetCurrentTenantIdAsync(), file.ParentId, file.Id, file.Title, file.ContentLength, encrypted, securityContext);
+        var createSessionUrl = await filesLinkUtility.GetInitiateUploadSessionUrlAsync(tenantManager.GetCurrentTenantId(), file.ParentId, file.Id, file.Title, file.ContentLength, encrypted, securityContext);
 
         var httpClient = httpClientFactory.CreateClient();
 

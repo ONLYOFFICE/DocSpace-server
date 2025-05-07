@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -45,12 +45,15 @@ public class HistoryService(
         MessageAction.FileMovedToTrash, 
         MessageAction.FileCopied, 
         MessageAction.FileCopiedWithOverwriting, 
+        MessageAction.FileVersionRemoved, 
         MessageAction.FileDeleted, 
         MessageAction.FileConverted, 
         MessageAction.FileRestoreVersion,
         MessageAction.FileIndexChanged,
         MessageAction.FileLocked,
         MessageAction.FileUnlocked,
+        MessageAction.FileCustomFilterEnabled,
+        MessageAction.FileCustomFilterDisabled,
         MessageAction.FolderCreated,
         MessageAction.FolderRenamed,
         MessageAction.FolderMoved,
@@ -93,7 +96,11 @@ public class HistoryService(
         MessageAction.RoomColorChanged,
         MessageAction.RoomCoverChanged,
         MessageAction.RoomIndexExportSaved,
-        MessageAction.RoomInviteResend
+        MessageAction.RoomInviteResend,
+        MessageAction.FormStartedToFill,
+        MessageAction.FormPartiallyFilled,
+        MessageAction.FormCompletelyFilled,
+        MessageAction.FormStopped
     ];
 
     private static HashSet<int> FilterFolderActions => [
@@ -109,7 +116,11 @@ public class HistoryService(
         (int)MessageAction.FileMoved,
         (int)MessageAction.FileRenamed,
         (int)MessageAction.FormSubmit,
-        (int)MessageAction.FormOpenedForFilling
+        (int)MessageAction.FormOpenedForFilling,
+        (int)MessageAction.FormStartedToFill,
+        (int)MessageAction.FormPartiallyFilled,
+        (int)MessageAction.FormCompletelyFilled,
+        (int)MessageAction.FormStopped
     ];
     
     public async IAsyncEnumerable<HistoryEntry> GetHistoryAsync(
@@ -123,13 +134,13 @@ public class HistoryService(
         DateTime? toDate)
     {
         var messageDbContext = await dbContextFactory.CreateDbContextAsync();
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
 
         var events = needFiltering 
             ? messageDbContext.GetFilteredAuditEventsByReferences(tenantId, entry.Id, (byte)entry.FileEntryType, offset, count, filterFolderIds, filterFilesIds, FilterFolderActions, FilterFileActions, fromDate, toDate) 
             : messageDbContext.GetAuditEventsByReferences(tenantId, entry.Id, (byte)entry.FileEntryType, offset, count, fromDate, toDate);
 
-        await foreach (var hEntry in events.SelectAwait(e => interpreter.ToHistoryAsync(e, entry)).Where(x => x != null))
+        await foreach (var hEntry in events.SelectAwait(e => interpreter.ToHistoryAsync(e.Item1, e.Item2)).Where(x => x != null))
         {
             yield return hEntry;
         }
@@ -145,7 +156,7 @@ public class HistoryService(
         DateTime? toDate)
     {
         var messageDbContext = await dbContextFactory.CreateDbContextAsync();
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
 
         if (needFiltering)
         {

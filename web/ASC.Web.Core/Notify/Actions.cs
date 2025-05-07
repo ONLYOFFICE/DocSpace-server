@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -106,12 +106,10 @@ public static class Actions
     public static readonly INotifyAction EnterpriseWhitelabelAdminWelcomeV1 = new NotifyAction("enterprise_whitelabel_admin_welcome_v1");
     public static readonly INotifyAction OpensourceAdminWelcomeV1 = new NotifyAction("opensource_admin_welcome_v1");
 
-    public static readonly INotifyAction SaasAdminUserDocsTipsV1 = new NotifyAction("saas_admin_user_docs_tips_v1");
-    public static readonly INotifyAction OpensourceAdminDocsTipsV1 = new NotifyAction("opensource_admin_docs_tips_v1");
-    public static readonly INotifyAction OpensourceUserDocsTipsV1 = new NotifyAction("opensource_user_docs_tips_v1");
-    public static readonly INotifyAction EnterpriseAdminUserDocsTipsV1 = new NotifyAction("enterprise_admin_user_docs_tips_v1");
+    public static readonly INotifyAction DocsTips = new NotifyAction("docs_tips");
 
     public static readonly INotifyAction SaasAdminTrialWarningAfterHalfYearV1 = new NotifyAction("saas_admin_trial_warning_after_half_year_v1");
+    public static readonly INotifyAction SaasAdminStartupWarningAfterYearV1 = new NotifyAction("saas_admin_startup_warning_after_year_v1");
 
     public static readonly INotifyAction PortalDeleteSuccessV1 = new NotifyAction("portal_delete_success_v1");
 
@@ -157,4 +155,7 @@ public static class Actions
     public static readonly INotifyAction DeveloperAdminPaymentWarningGracePeriodActivation = new NotifyAction("developer_admin_payment_warning_grace_period_activation");
     public static readonly INotifyAction DeveloperAdminPaymentWarningGracePeriodBeforeExpiration = new NotifyAction("developer_admin_payment_warning_grace_period_before_expiration");
     public static readonly INotifyAction DeveloperAdminPaymentWarningGracePeriodExpiration = new NotifyAction("developer_admin_payment_warning_grace_period_expiration");
+
+    public static readonly INotifyAction UserTypeChanged = new NotifyAction("user_type_changed");
+    public static readonly INotifyAction UserRoleChanged = new NotifyAction("user_role_changed");
 }

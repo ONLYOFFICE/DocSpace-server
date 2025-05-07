@@ -35,15 +35,26 @@
             <artifactId>infrastructure-configuration</artifactId>
         </dependency>
 
+        <!-- Grpc Server Dependencies -->
+        <dependency>
+            <groupId>net.devh</groupId>
+            <artifactId>grpc-server-spring-boot-starter</artifactId>
+            <version>${grpc.starter.version}</version>
+        </dependency>
+
         <!-- Spring Boot Dependencies -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.github.jpmsilva.jsystemd</groupId>
             <artifactId>jsystemd-spring-boot-starter</artifactId>
             <version>${jsystemd.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -130,6 +141,58 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.bazaarvoice.maven.plugins</groupId>
+                <artifactId>process-exec-maven-plugin</artifactId>
+                <version>0.9</version>
+                <executions>
+                    <execution>
+                        <id>start-server</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>start</goal>
+                        </goals>
+                        <configuration>
+                            <name>run-server</name>
+                            <waitForInterrupt>false</waitForInterrupt>
+                            <healthcheckUrl>http://localhost:9090/health</healthcheckUrl>
+                            <waitAfterLaunch>90</waitAfterLaunch>
+                            <arguments>
+                                <argument>java</argument>
+                                <argument>-jar</argument>
+                                <argument>-Dspring.profiles.active=dev,server</argument>
+                                <argument>${project.build.directory}/${project.artifactId}-${project.version}.jar</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>stop-server</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>stop-all</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-maven-plugin</artifactId>
+                <version>${maven.documentation.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>integration-test</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <apiDocsUrl>http://localhost:9090/docs</apiDocsUrl>
+                    <outputFileName>identity-authorization-openapi.json</outputFileName>
+                    <outputDir>${build.directory}</outputDir>
+                    <skip>false</skip>
+                </configuration>
             </plugin>
         </plugins>
     </build>

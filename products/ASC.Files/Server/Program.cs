@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,7 +31,7 @@ using NLog;
 var options = new WebApplicationOptions
 {
     Args = args,
-    ContentRootPath = WindowsServiceHelpers.IsWindowsService() ? AppContext.BaseDirectory : default
+    ContentRootPath = WindowsServiceHelpers.IsWindowsService() ? AppContext.BaseDirectory : null
 };
 
 var builder = WebApplication.CreateBuilder(options);
@@ -65,7 +65,7 @@ try
 
     var startup = new Startup(builder.Configuration);
 
-    await startup.ConfigureServices(builder.Services);
+    await startup.ConfigureServices(builder);
 
     builder.Host.ConfigureContainer<ContainerBuilder>(startup.ConfigureContainer);
 

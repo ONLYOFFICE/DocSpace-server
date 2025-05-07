@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,10 +26,13 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// The default access rights request parameters.
+/// </summary>
 public class DefaultAccessRightsrequestDto
 {
     /// <summary>
-    /// Sharing rights (None, ReadWrite, Read, Restrict, Varies, Review, Comment, FillForms, CustomFilter, RoomAdmin, Editing, Collaborator)
+    /// Sharing rights (None, ReadWrite, Read, Restrict, Varies, Review, Comment, FillForms, CustomFilter, RoomAdmin, Editing, Collaborator).
     /// </summary>
     [FromBody]
     public List<FileShare> Value { get; set; }

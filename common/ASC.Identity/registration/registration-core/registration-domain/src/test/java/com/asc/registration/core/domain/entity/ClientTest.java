@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.asc.common.core.domain.value.ClientId;
 import com.asc.common.core.domain.value.ClientSecret;
 import com.asc.common.core.domain.value.TenantId;
+import com.asc.common.core.domain.value.UserId;
 import com.asc.common.core.domain.value.enums.AuthenticationMethod;
 import com.asc.common.core.domain.value.enums.ClientStatus;
 import com.asc.common.core.domain.value.enums.ClientVisibility;
@@ -45,6 +46,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class ClientTest {
+  private final UserId CREATOR_ID = new UserId("creator");
+  private final UserId MODIFIER_ID = new UserId("modifier");
   private Client client;
 
   @BeforeEach
@@ -56,7 +59,7 @@ class ClientTest {
             .authenticationMethods(Set.of(AuthenticationMethod.DEFAULT_AUTHENTICATION))
             .scopes(Set.of("read", "write"))
             .clientInfo(new ClientInfo("Test Client", "Description", "Logo URL"))
-            .clientTenantInfo(new ClientTenantInfo(new TenantId(1)))
+            .clientTenantInfo(new ClientTenantInfo(new TenantId(1L)))
             .clientRedirectInfo(
                 new ClientRedirectInfo(
                     Set.of("http://redirect.url"),
@@ -64,7 +67,7 @@ class ClientTest {
                     Set.of("http://logout.url")))
             .clientCreationInfo(
                 ClientCreationInfo.Builder.builder()
-                    .createdBy("creator")
+                    .createdBy(new UserId("creator"))
                     .createdOn(ZonedDateTime.now(ZoneId.of("UTC")))
                     .build())
             .clientVisibility(ClientVisibility.PRIVATE)
@@ -72,171 +75,153 @@ class ClientTest {
   }
 
   @Test
-  void testInitialize() {
-    client.initialize("creator@example.com");
+  void whenInitialized_thenClientIsEnabledAndFieldsAreSet() {
+    client.initialize(CREATOR_ID);
 
     assertNotNull(client.getId());
     assertNotNull(client.getSecret());
     assertEquals(ClientStatus.ENABLED, client.getStatus());
     assertNotNull(client.getClientCreationInfo());
-    assertEquals("creator@example.com", client.getClientCreationInfo().getCreatedBy());
+    assertEquals(CREATOR_ID, client.getClientCreationInfo().getCreatedBy());
     assertNotNull(client.getClientCreationInfo().getCreatedOn());
   }
 
   @Test
-  void testEnable() {
-    client.initialize("creator@example.com");
-    client.disable("modifier@example.com");
-    client.enable("modifier@example.com");
+  void whenEnabledAfterBeingDisabled_thenClientStatusIsEnabled() {
+    client.initialize(CREATOR_ID);
+    client.disable(MODIFIER_ID);
+    client.enable(MODIFIER_ID);
 
     assertEquals(ClientStatus.ENABLED, client.getStatus());
   }
 
   @Test
-  void testDisable() {
-    client.initialize("creator@example.com");
-    client.disable("modifier@example.com");
+  void whenDisabled_thenClientStatusIsDisabled() {
+    client.initialize(CREATOR_ID);
+    client.disable(MODIFIER_ID);
 
     assertEquals(ClientStatus.DISABLED, client.getStatus());
   }
 
   @Test
-  void testInvalidate() {
-    client.initialize("creator@example.com");
-    client.invalidate("modifier@example.com");
-
-    assertEquals(ClientStatus.INVALIDATED, client.getStatus());
-  }
-
-  @Test
-  void testInvalidateRegeneratesSecret() {
-    client.initialize("creator@example.com");
+  void whenSecretIsRegenerated_thenOldSecretIsReplaced() {
+    client.initialize(CREATOR_ID);
+    client.disable(MODIFIER_ID);
     String oldSecret = client.getSecret().value();
-    client.invalidate("modifier@example.com");
-
-    assertNotEquals(oldSecret, client.getSecret().value());
-    assertEquals(ClientStatus.INVALIDATED, client.getStatus());
-  }
-
-  @Test
-  void testRegenerateSecret() {
-    client.initialize("creator@example.com");
-    client.disable("modifier@example.com");
-    String oldSecret = client.getSecret().value();
-    client.regenerateSecret("modifier@example.com");
+    client.regenerateSecret(MODIFIER_ID);
 
     assertNotEquals(oldSecret, client.getSecret().value());
   }
 
   @Test
-  void testAddScope() {
-    client.initialize("creator@example.com");
+  void whenScopeIsAdded_thenScopeIsIncluded() {
+    client.initialize(CREATOR_ID);
     String newScope = "delete";
-    client.addScope(newScope, "modifier@example.com");
+    client.addScope(newScope, MODIFIER_ID);
 
     assertTrue(client.getScopes().contains(newScope));
   }
 
   @Test
-  void testRemoveScope() {
-    client.initialize("creator@example.com");
+  void whenScopeIsRemoved_thenScopeIsExcluded() {
+    client.initialize(CREATOR_ID);
     String scopeToRemove = "read";
-    client.removeScope(scopeToRemove, "modifier@example.com");
+    client.removeScope(scopeToRemove, MODIFIER_ID);
 
     assertFalse(client.getScopes().contains(scopeToRemove));
     assertTrue(client.getScopes().contains("write"));
   }
 
   @Test
-  void testRemoveLastScopeThrowsException() {
-    client.initialize("creator@example.com");
-    client.removeScope("read", "modifier@example.com");
+  void whenLastScopeIsRemoved_thenExceptionIsThrown() {
+    client.initialize(CREATOR_ID);
+    client.removeScope("read", MODIFIER_ID);
 
     ClientDomainException exception =
         assertThrows(
             ClientDomainException.class,
             () -> {
-              client.removeScope("write", "modifier@example.com");
+              client.removeScope("write", MODIFIER_ID);
             });
 
     assertEquals("Client must have at least one scope", exception.getMessage());
   }
 
   @Test
-  void testChangeVisibility() {
-    client.initialize("creator@example.com");
-    client.changeVisibility(ClientVisibility.PUBLIC, "modifier@example.com");
+  void whenVisibilityIsChanged_thenVisibilityIsUpdated() {
+    client.initialize(CREATOR_ID);
+    client.changeVisibility(ClientVisibility.PUBLIC, MODIFIER_ID);
 
     assertEquals(ClientVisibility.PUBLIC, client.getVisibility());
   }
 
   @Test
-  void testUpdateClientInfo() {
-    client.initialize("creator@example.com");
+  void whenClientInfoIsUpdated_thenClientInfoIsReplaced() {
+    client.initialize(CREATOR_ID);
     var newClientInfo = new ClientInfo("Updated Client", "Updated Description", "Updated Logo URL");
-    client.updateClientInfo(newClientInfo, "modifier@example.com");
+    client.updateClientInfo(newClientInfo, MODIFIER_ID);
 
     assertEquals(newClientInfo, client.getClientInfo());
   }
 
   @Test
-  void testUpdateClientWebsiteInfo() {
-    client.initialize("creator@example.com");
+  void whenClientWebsiteInfoIsUpdated_thenWebsiteInfoIsReplaced() {
+    client.initialize(CREATOR_ID);
     var newClientWebsiteInfo =
         ClientWebsiteInfo.Builder.builder()
             .websiteUrl("http://updated.url")
             .termsUrl("http://updated.url/terms")
             .policyUrl("http://updated.url/policy")
             .build();
-    client.updateClientWebsiteInfo(newClientWebsiteInfo, "modifier@example.com");
+    client.updateClientWebsiteInfo(newClientWebsiteInfo, MODIFIER_ID);
 
     assertEquals(newClientWebsiteInfo, client.getClientWebsiteInfo());
   }
 
   @Test
-  void testUpdateClientRedirectInfo() {
-    client.initialize("creator@example.com");
+  void whenClientRedirectInfoIsUpdated_thenRedirectInfoIsReplaced() {
+    client.initialize(CREATOR_ID);
     var newClientRedirectInfo =
         new ClientRedirectInfo(
             Set.of("http://updated.redirect.url"),
             Set.of("http://updated.allowed.origin"),
             Set.of("http://updated.logout.url"));
-    client.updateClientRedirectInfo(newClientRedirectInfo, "modifier@example.com");
+    client.updateClientRedirectInfo(newClientRedirectInfo, MODIFIER_ID);
 
     assertEquals(newClientRedirectInfo, client.getClientRedirectInfo());
   }
 
   @Test
-  void testAddAuthenticationMethod() {
-    client.initialize("creator@example.com");
+  void whenAuthenticationMethodIsAdded_thenMethodIsIncluded() {
+    client.initialize(CREATOR_ID);
     var newMethod = AuthenticationMethod.PKCE_AUTHENTICATION;
-    client.addAuthenticationMethod(newMethod, "modifier@example.com");
+    client.addAuthenticationMethod(newMethod, MODIFIER_ID);
 
     assertTrue(client.getAuthenticationMethods().contains(newMethod));
   }
 
   @Test
-  void testRemoveAuthenticationMethod() {
-    client.initialize("creator@example.com");
+  void whenAuthenticationMethodIsRemoved_thenMethodIsExcluded() {
+    client.initialize(CREATOR_ID);
     var methodToRemove = AuthenticationMethod.DEFAULT_AUTHENTICATION;
     var newMethod = AuthenticationMethod.PKCE_AUTHENTICATION;
-    client.addAuthenticationMethod(newMethod, "modifier@example.com");
-    client.removeAuthenticationMethod(methodToRemove, "modifier@example.com");
+    client.addAuthenticationMethod(newMethod, MODIFIER_ID);
+    client.removeAuthenticationMethod(methodToRemove, MODIFIER_ID);
 
     assertFalse(client.getAuthenticationMethods().contains(methodToRemove));
     assertTrue(client.getAuthenticationMethods().contains(newMethod));
   }
 
   @Test
-  void testRemoveLastAuthenticationMethodThrowsException() {
-    client.initialize("creator@example.com");
+  void whenLastAuthenticationMethodIsRemoved_thenExceptionIsThrown() {
+    client.initialize(CREATOR_ID);
 
     var exception =
         assertThrows(
             ClientDomainException.class,
             () -> {
               client.removeAuthenticationMethod(
-                  AuthenticationMethod.DEFAULT_AUTHENTICATION, "modifier@example.com");
+                  AuthenticationMethod.DEFAULT_AUTHENTICATION, MODIFIER_ID);
             });
 
     assertEquals(

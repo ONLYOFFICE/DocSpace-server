@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,15 +27,16 @@
 namespace ASC.Web.Api.Controllers.Settings;
 
 [DefaultRoute("customschemas")]
+[ApiExplorerSettings(IgnoreApi = true)]
 public class CustomSchemasController(MessageService messageService,
         ApiContext apiContext,
         TenantManager tenantManager,
         PermissionContext permissionContext,
         WebItemManager webItemManager,
         CustomNamingPeople customNamingPeople,
-        IMemoryCache memoryCache,
+        IFusionCache fusionCache,
         IHttpContextAccessor httpContextAccessor)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
     /// Returns all portal team templates that allow users to name their organization (or group), add members, and define their activities within the portal.
@@ -44,7 +45,7 @@ public class CustomSchemasController(MessageService messageService,
     /// <path>api/2.0/settings/customschemas</path>
     /// <collection>list</collection>
     [Tags("Settings / Team templates")]
-    [SwaggerResponse(200, "List of team templates with the following parameters", typeof(SchemaRequestsDto))]
+    [SwaggerResponse(200, "List of team templates with the following parameters", typeof(List<SchemaRequestsDto>))]
     [HttpGet("")]
     public async Task<List<SchemaRequestsDto>> PeopleSchemasAsync()
     {
@@ -86,9 +87,9 @@ public class CustomSchemasController(MessageService messageService,
 
         await customNamingPeople.SetPeopleNamesAsync(inDto.Id);
 
-        await tenantManager.SaveTenantAsync(await tenantManager.GetCurrentTenantAsync());
+        await tenantManager.SaveTenantAsync(tenantManager.GetCurrentTenant());
 
-        await messageService.SendAsync(MessageAction.TeamTemplateChanged);
+        messageService.Send(MessageAction.TeamTemplateChanged);
 
         var people = new IdRequestDto<string> { Id = inDto.Id };
 
@@ -147,9 +148,9 @@ public class CustomSchemasController(MessageService messageService,
 
         await customNamingPeople.SetPeopleNamesAsync(names);
 
-        await tenantManager.SaveTenantAsync(await tenantManager.GetCurrentTenantAsync());
+        await tenantManager.SaveTenantAsync(tenantManager.GetCurrentTenant());
 
-        await messageService.SendAsync(MessageAction.TeamTemplateChanged);
+        messageService.Send(MessageAction.TeamTemplateChanged);
 
         var people = new IdRequestDto<string> { Id = PeopleNamesItem.CustomID };
         return await PeopleSchemaAsync(people);

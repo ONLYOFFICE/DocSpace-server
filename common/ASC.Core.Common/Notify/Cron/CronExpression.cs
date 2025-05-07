@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -233,16 +233,15 @@ public class CronExpression : ICloneable, IDeserializationCallback
                     break;
                 }
 
-                if (exprOn == DayOfMonth && expr.IndexOf('L') != -1 && expr.Length > 1 && expr.IndexOf(',') >= 0)
+                if (exprOn == DayOfMonth && expr.Contains('L') && expr.Length > 1 && expr.Contains(','))
                 {
                     throw new FormatException(
                         "Support for specifying 'L' and 'LW' with other days of the month is not implemented");
                 }
 
-                if (exprOn == DayOfWeek && expr.IndexOf('L') != -1 && expr.Length > 1 && expr.IndexOf(',') >= 0)
+                if (exprOn == DayOfWeek && expr.Contains('L') && expr.Length > 1 && expr.Contains(','))
                 {
-                    throw new FormatException(
-                        "Support for specifying 'L' with other days of the week is not implemented");
+                    throw new FormatException("Support for specifying 'L' with other days of the week is not implemented");
                 }
                 var vTok = expr.Split(',');
                 foreach (var v in vTok)
@@ -1196,7 +1195,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
     private DateTime ProcessDayOfWeek(DateTime d, int day, int mon)
     {
         var dow = (int)_daysOfWeek.First();
-        var cDow = (int)d.DayOfWeek;
+        var cDow = ((int)d.DayOfWeek) == 7 ? 1 : (int)d.DayOfWeek + 1;
         var daysToAdd = cDow < dow ? dow - cDow : dow + (7 - cDow);
         var lDay = GetLastDayOfMonth(mon, d.Year);
 
@@ -1226,17 +1225,12 @@ public class CronExpression : ICloneable, IDeserializationCallback
                 {
                     d = new DateTime(d.Year, mon + 1, 1, d.Hour, d.Minute, d.Second);
                 }
-
+                daysToAdd = day + daysToAdd - lDay - 1;
             }
 
-            while ((day + daysToAdd + 7) <= lDay)
-            {
-                daysToAdd += 7;
-            }
-            day += daysToAdd;
             if (daysToAdd > 0)
             {
-                d = new DateTime(d.Year, mon, day, d.Hour, d.Minute, d.Second);
+                d = new DateTime(d.Year, d.Month, d.Day + daysToAdd, d.Hour, d.Minute, d.Second);
             }
         }
         else if (_nthdayOfWeek != 0)
@@ -1278,7 +1272,7 @@ public class CronExpression : ICloneable, IDeserializationCallback
 
             if (daysToAdd > 0 || dayShifted)
             {
-                d = new DateTime(d.Year, mon, day, d.Hour, d.Minute, d.Second);
+                d = new DateTime(d.Year, d.Month, d.Day, d.Hour, d.Minute, d.Second);
             }
         }
         else
@@ -1312,11 +1306,12 @@ public class CronExpression : ICloneable, IDeserializationCallback
                 {
                     d = new DateTime(d.Year, mon + 1, 1, d.Hour, d.Minute, d.Second);
                 }
+                daysToAdd = day + daysToAdd - lDay - 1;
             }
 
             if (daysToAdd > 0)
             {
-                d = new DateTime(d.Year, mon, day + daysToAdd, d.Hour, d.Minute, d.Second);
+                d = new DateTime(d.Year, d.Month, d.Day + daysToAdd, d.Hour, d.Minute, d.Second);
             }
         }
         return d;

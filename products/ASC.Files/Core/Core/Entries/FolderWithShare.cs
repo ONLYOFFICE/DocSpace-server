@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,9 +28,19 @@ using Profile = AutoMapper.Profile;
 
 namespace ASC.Files.Core.Core.Entries;
 
+/// <summary>
+/// The folder with its sharing settings.
+/// </summary>
 public class FolderWithShare : IMapFrom<DbFolderQueryWithSecurity>
 {
+    /// <summary>
+    /// The folder parameters.
+    /// </summary>
     public Folder<int> Folder { get; set; }
+
+    /// <summary>
+    /// The short record of the folder sharing settings.
+    /// </summary>
     public SmallShareRecord ShareRecord { get; set; }
 
     public void Mapping(Profile profile)

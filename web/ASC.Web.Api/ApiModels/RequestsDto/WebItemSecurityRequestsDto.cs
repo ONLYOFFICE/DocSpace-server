@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,33 +27,33 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// Module request parameters
+/// The request parameters for configuring security settings of a single web module.
 /// </summary>
 public class WebItemSecurityRequestsDto
 {
     /// <summary>
-    /// Module ID
+    /// The module ID.
     /// </summary>
-    public string Id { get; set; }
+    public required string Id { get; set; }
 
     /// <summary>
-    /// Specifies if the module security settings are enabled or not
+    /// Controls whether the security restrictions are enforced for this module.
     /// </summary>
     public bool Enabled { get; set; }
 
     /// <summary>
-    /// List of user/group IDs with the access to the module
+    /// The collection of user and group identifiers granted access to the module.
     /// </summary>
     public IEnumerable<Guid> Subjects { get; set; }
 }
 
 /// <summary>
-/// Module request parameters
+/// The request parameters for configuring security settings across multiple web modules.
 /// </summary>
 public class WebItemsSecurityRequestsDto
 {
     /// <summary>
-    /// Products with security information
+    /// The list of module security configurations.
     /// </summary>
     public IEnumerable<ItemKeyValuePair<string, bool>> Items { get; set; }
 }

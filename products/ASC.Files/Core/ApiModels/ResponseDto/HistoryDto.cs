@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,30 +26,33 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// The file history information.
+/// </summary>
 public record HistoryDto
 {
     /// <summary>
-    /// Action
+    /// The action performed on the file.
     /// </summary>
     public HistoryAction Action { get; init; }
 
     /// <summary>
-    /// Initiator
+    /// The action initiator.
     /// </summary>
     public EmployeeDto Initiator { get; init; }
 
     /// <summary>
-    /// Date
+    /// The date and time when an action on the file was performed.
     /// </summary>
     public ApiDateTime Date { get; init; }
 
     /// <summary>
-    /// Data
+    /// The history data.
     /// </summary>
     public HistoryData Data { get; init; }
 
     /// <summary>
-    /// Related
+    /// The list of related history.
     /// </summary>
     public List<HistoryDto> Related { get; set; }
 }
@@ -149,8 +152,8 @@ public class HistoryApiHelper(
             var fileDao = daoFactory.GetFileDao<int>();
 
             var f = entry as Folder<int>;
-            filterFolderIds = await folderDao.GetFoldersAsync(entryId, new OrderBy(SortedByType.DateAndTime, false), FilterType.None, false, Guid.Empty, null, true, false, 0, -1, default, true, f.FolderType).Select(r => r.Id).ToListAsync();
-            filterFileIds = await fileDao.GetFilesAsync(entryId, new OrderBy(SortedByType.DateAndTime, false), FilterType.None, false, Guid.Empty, null, null, false, true, false, 0, -1, default, false, true, f.FolderType).Select(r => r.Id).ToListAsync();
+            filterFolderIds = await folderDao.GetFoldersAsync(entryId, new OrderBy(SortedByType.DateAndTime, false), FilterType.None, false, Guid.Empty, null, true, false, 0, -1, 0, true, f.FolderType).Select(r => r.Id).ToListAsync();
+            filterFileIds = await fileDao.GetFilesAsync(entryId, new OrderBy(SortedByType.DateAndTime, false), FilterType.None, false, Guid.Empty, null, null, false, true, false, 0, -1, 0, false, true, f.FolderType).Select(r => r.Id).ToListAsync();
         }
 
         var totalCountTask = historyService.GetHistoryCountAsync(entryId, entryType, needFiltering, filterFolderIds, filterFileIds, fromDateUtc, toDateUtc);

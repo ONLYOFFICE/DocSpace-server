@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,15 +24,20 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+global using System.Security;
+
+global using ASC.Api.Core.Socket;
 global using ASC.Common;
 global using ASC.Common.Threading;
 global using ASC.Common.Threading.DistributedLock.Abstractions;
 global using ASC.Core;
 global using ASC.Core.Users;
 global using ASC.Data.Reassigns.Log;
+global using ASC.Files.Core;
 global using ASC.MessagingSystem.Core;
 global using ASC.MessagingSystem.EF.Model;
 global using ASC.Web.Core;
+global using ASC.Web.Core.PublicResources;
 global using ASC.Web.Core.Users;
 global using ASC.Web.Files.Services.WCFService;
 global using ASC.Web.Studio.Core.Notify;

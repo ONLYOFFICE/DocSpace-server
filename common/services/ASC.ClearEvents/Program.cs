@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,7 +33,7 @@ using NLog;
 var options = new WebApplicationOptions
 {
     Args = args,
-    ContentRootPath = WindowsServiceHelpers.IsWindowsService() ? AppContext.BaseDirectory : default
+    ContentRootPath = WindowsServiceHelpers.IsWindowsService() ? AppContext.BaseDirectory : null
 };
 
 var builder = WebApplication.CreateBuilder(options);
@@ -56,6 +56,11 @@ try
 
     builder.Host.ConfigureDefault();
 
+    if (builder.Configuration.GetValue<bool>("openTelemetry:enable"))
+    {
+        builder.ConfigureOpenTelemetry();
+    }
+    
     await builder.Services.AddClearEventsServices(builder.Configuration, Namespace);
 
     builder.Host.ConfigureContainer<ContainerBuilder>((context, containerBuilder) =>

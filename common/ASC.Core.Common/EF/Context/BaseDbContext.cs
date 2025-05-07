@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,6 +23,8 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+using ValidationResult = System.ComponentModel.DataAnnotations.ValidationResult;
 
 namespace ASC.Core.Common.EF;
 
@@ -83,6 +85,37 @@ public class InstallerOptionsAction(string region, string nameConnectionString)
     }
 }
 
+public class BaseDbContext(DbContextOptions options) : DbContext(options)
+{
+    public override int SaveChanges()
+    {
+        ValidateEntries();
+
+        return base.SaveChanges();
+    }
+
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        ValidateEntries();
+
+        return base.SaveChangesAsync(cancellationToken);
+    }
+
+    private void ValidateEntries()
+    {
+        var entities = from e in ChangeTracker.Entries()
+                       where e.State is EntityState.Added or EntityState.Modified
+                       select e.Entity;
+        foreach (var entity in entities)
+        {
+            List<ValidationResult> results = [];
+            if (!Validator.TryValidateObject(entity, new ValidationContext(entity), results, true))
+            {
+                throw new ArgumentException(results.First().ErrorMessage);
+            }
+        }
+    }
+}
 public static class BaseDbContextExtension
 {
     public static IServiceCollection AddBaseDbContextPool<T>(this IServiceCollection services, string region = "current", string nameConnectionString = "default") where T : DbContext

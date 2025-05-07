@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -44,7 +44,7 @@ global using Amazon.S3.Internal;
 global using Amazon.S3.Model;
 global using Amazon.S3.Transfer;
 global using Amazon.Util;
-global using ASC.Api.Core.Extensions;
+
 global using ASC.Common;
 global using ASC.Common.Caching;
 global using ASC.Common.Log;
@@ -92,5 +92,8 @@ global using Microsoft.Extensions.Logging;
 global using net.openstack.Core.Domain;
 global using net.openstack.Providers.Rackspace;
 global using ProtoBuf;
+
+global using ZiggyCreatures.Caching.Fusion;
+
 global using static Google.Cloud.Storage.V1.UrlSigner;
 global using MimeMapping = ASC.Common.Web.MimeMapping;

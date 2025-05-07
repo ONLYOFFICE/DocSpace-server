@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,7 +28,6 @@
 package com.asc.common.utilities;
 
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.Arrays;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
@@ -39,11 +38,9 @@ public class HttpUtils {
   private static final String IP_PATTERN =
       "https?://([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3})";
   private static final String DOMAIN_PATTERN = "https?://([a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})";
-  private static final String X_FORWARDED_HOST = "X-Forwarded-Host";
-  private static final String X_FORWARDED_FOR = "X-Forwarded-For";
-  private static final String X_FORWARDED_PROTO = "X-Forwarded-Proto";
-  private static final String HOST = "Host";
   private static final String[] IP_HEADERS = {
+    "X-Remote-Ip-Address",
+    "X-Real-IP",
     "X-Forwarded-Host",
     "X-Forwarded-For",
     "Proxy-Client-IP",
@@ -57,102 +54,12 @@ public class HttpUtils {
     "HTTP_VIA",
     "REMOTE_ADDR"
   };
+  private static final String[] HOST_HEADERS = {
+    "X-Forwarded-Host", "HTTP_X_FORWARDED", "HTTP_FORWARDED"
+  };
 
   private HttpUtils() {
     // Private constructor to prevent instantiation
-  }
-
-  /**
-   * Retrieves the address from the specified header of the request.
-   *
-   * @param request HttpServletRequest object
-   * @param header The header name to retrieve the address from
-   * @return An Optional containing the address if found, otherwise an empty Optional
-   */
-  private Optional<String> getRequestAddress(HttpServletRequest request, String header) {
-    var addressHeader = request.getHeader(header);
-    var protoHeader = request.getHeader(X_FORWARDED_PROTO);
-    if (addressHeader == null
-        || addressHeader.isBlank()
-        || protoHeader == null
-        || protoHeader.isBlank()) return Optional.empty();
-
-    var address =
-        Arrays.stream(addressHeader.split(","))
-            .map(String::trim)
-            .filter(s -> !s.isBlank())
-            .findFirst()
-            .orElse(null);
-
-    if (address == null || address.isBlank()) {
-      return Optional.of(String.format("%s://%s", request.getScheme(), request.getRemoteAddr()));
-    }
-
-    var protocol = request.getScheme();
-    var protocols = protoHeader.split(",");
-    for (String proto : protocols) {
-      if ("https".equalsIgnoreCase(proto)) {
-        protocol = "https";
-        break;
-      }
-    }
-
-    return Optional.of(String.format("%s://%s", protocol, address));
-  }
-
-  /**
-   * Retrieves the host address from the 'X-Forwarded-Host' header of the request.
-   *
-   * @param request HttpServletRequest object
-   * @return An Optional containing the host address if found, otherwise an empty Optional
-   */
-  public Optional<String> getRequestHostAddress(HttpServletRequest request) {
-    return getRequestAddress(request, X_FORWARDED_HOST);
-  }
-
-  /**
-   * Retrieves the client address from the 'X-Forwarded-For' header of the request.
-   *
-   * @param request HttpServletRequest object
-   * @return An Optional containing the client address if found, otherwise an empty Optional
-   */
-  public Optional<String> getRequestClientAddress(HttpServletRequest request) {
-    return getRequestAddress(request, X_FORWARDED_FOR);
-  }
-
-  /**
-   * Retrieves the domain from the 'Host' header of the request.
-   *
-   * @param request HttpServletRequest object
-   * @return An Optional containing the domain if found, otherwise an empty Optional
-   */
-  public Optional<String> getRequestDomain(HttpServletRequest request) {
-    var hostHeader = request.getHeader(HOST);
-    var protoHeader = request.getHeader(X_FORWARDED_PROTO);
-    if (hostHeader == null || hostHeader.isBlank() || protoHeader == null || protoHeader.isBlank())
-      return Optional.empty();
-
-    var host =
-        Arrays.stream(hostHeader.split(","))
-            .map(String::trim)
-            .filter(s -> !s.isBlank())
-            .findFirst()
-            .orElse(null);
-
-    if (host == null || host.isBlank()) {
-      return Optional.of(String.format("%s://%s", request.getScheme(), request.getRemoteAddr()));
-    }
-
-    var protocol = request.getScheme();
-    var protocols = protoHeader.split(",");
-    for (String proto : protocols) {
-      if ("https".equalsIgnoreCase(proto)) {
-        protocol = "https";
-        break;
-      }
-    }
-
-    return Optional.of(String.format("%s://%s", protocol, host));
   }
 
   /**
@@ -163,6 +70,22 @@ public class HttpUtils {
    */
   public String getFirstRequestIP(HttpServletRequest request) {
     for (var header : IP_HEADERS) {
+      var value = request.getHeader(header);
+      if (value != null && !value.isEmpty()) return value.split("\\s*,\\s*")[0];
+    }
+
+    return request.getRemoteAddr();
+  }
+
+  /**
+   * Retrieves the first host IP address from the request headers.
+   *
+   * @param request HttpServletRequest object
+   * @return The first host IP address found in the request headers, or the remote address if none
+   *     found
+   */
+  public String getFirstForwardedHost(HttpServletRequest request) {
+    for (var header : HOST_HEADERS) {
       var value = request.getHeader(header);
       if (value != null && !value.isEmpty()) return value.split("\\s*,\\s*")[0];
     }

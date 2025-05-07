@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -45,11 +45,7 @@ internal class EventTypeConverter(
 
         if (source.Event.DescriptionRaw != null)
         {
-            result.Description = JsonConvert.DeserializeObject<IList<string>>(source.Event.DescriptionRaw,
-                new JsonSerializerSettings
-                {
-                    DateTimeZoneHandling = DateTimeZoneHandling.Utc
-                });
+            result.Description = JsonSerializer.Deserialize<IList<string>>(source.Event.DescriptionRaw);
         }
 
         if (!(string.IsNullOrEmpty(source.FirstName) || string.IsNullOrEmpty(source.LastName)))
@@ -95,12 +91,7 @@ internal class EventTypeConverter(
 
         if (source.Event.DescriptionRaw != null)
         {
-            result.Description = JsonConvert.DeserializeObject<IList<string>>(
-               source.Event.DescriptionRaw,
-               new JsonSerializerSettings
-               {
-                   DateTimeZoneHandling = DateTimeZoneHandling.Utc
-               });
+            result.Description = JsonSerializer.Deserialize<IList<string>>(source.Event.DescriptionRaw);
         }
 
         if (result.UserId == Constants.CoreSystem.ID)

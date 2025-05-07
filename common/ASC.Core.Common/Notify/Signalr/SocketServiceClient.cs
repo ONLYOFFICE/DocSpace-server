@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -59,7 +59,7 @@ public class SocketServiceClient(
         var request = GenerateRequest(method, data);
         if (await channelWriter.WaitToWriteAsync())
         {
-            var tenant = tenantId ?? await _tenantManager.GetCurrentTenantIdAsync();
+            var tenant = tenantId ?? _tenantManager.GetCurrentTenantId();
             
             var tariff = await tariffService.GetTariffAsync(tenant);
             await channelWriter.WriteAsync(new SocketData(request, tariff.State));
@@ -103,8 +103,8 @@ public class SocketService(
 ) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    { 
-        if(!int.TryParse(configuration["web:hub:maxDegreeOfParallelism"], out var maxDegreeOfParallelism))
+    {
+        if (!int.TryParse(configuration["web:hub:maxDegreeOfParallelism"], out var maxDegreeOfParallelism))
         {
             maxDegreeOfParallelism = 10;
         }

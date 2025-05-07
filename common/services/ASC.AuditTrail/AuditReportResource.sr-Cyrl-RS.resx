@@ -930,4 +930,46 @@
   <data name="RevokeUserClient" xml:space="preserve">
     <value>Одузет клијенту {0} приступ</value>
   </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>Подешавања приступа алаткама за програмере су промењена</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>Датотеке [{0}]. Верзија обрисана: {1}</value>
+  </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>Корисници [{0}]. Потпуно попунили образац: {1}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>Корисници [{0}]. Делимично попунили образац: {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>Корисници [{0}]. Започели попуњавање: {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>Корисници [{0}]. Обустављено попуњавање обрасца: {1}</value>
+  </data>
+  <data name="WebhookCreated" xml:space="preserve">
+    <value>Webhook креиран: {0}</value>
+  </data>
+  <data name="WebhookDeleted" xml:space="preserve">
+    <value>Webhook обрисан: {0}</value>
+  </data>
+  <data name="WebhookUpdated" xml:space="preserve">
+    <value>Webhook ажуриран: {0}</value>
+  </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>Датотека: {0}. Прилагођени филтер је онемогућен</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>Датотека: {0}. Прилагођени филтер је омогућен</value>
+  </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>Направљен кориснички Api кључ: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>Korisnički Api ključ je izbrisan: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>Ажуриран кориснички Api кључ: {0}</value>
+  </data>
 </root>

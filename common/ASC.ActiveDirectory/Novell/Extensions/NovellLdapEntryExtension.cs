@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -75,7 +75,7 @@ public class NovellLdapEntryExtension(ILoggerProvider optionMonitor)
         return attribute?.StringValueArray;
     }
 
-    private static string DecodeSid(IReadOnlyList<byte> sid)
+    private static string DecodeSid(byte[] sid)
     {
         var strSid = new StringBuilder("S-");
 
@@ -95,7 +95,7 @@ public class NovellLdapEntryExtension(ILoggerProvider optionMonitor)
             authority |= ((long)sid[i]) << (8 * (5 - (i - 2)));
         }
 
-        strSid.Append("-");
+        strSid.Append('-');
         strSid.Append(authority);
 
         //iterate all the sub-auths
@@ -110,7 +110,7 @@ public class NovellLdapEntryExtension(ILoggerProvider optionMonitor)
                 subAuthority |= (long)(sid[offset + k] & 0xFF) << (8 * k);
             }
 
-            strSid.Append("-");
+            strSid.Append('-');
             strSid.Append(subAuthority);
 
             offset += size;

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,78 +27,88 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Security information request parameters
+/// The security information request parameters.
 /// </summary>
-public class SecurityInfoRequestDto : BaseBatchRequestDto
+public class SecurityInfoRequestDto
 {
     /// <summary>
-    /// Collection of sharing parameters
+    /// The list of the shared folder IDs.
+    /// </summary>
+    public IEnumerable<JsonElement> FolderIds { get; set; } = new List<JsonElement>();
+
+    /// <summary>
+    /// The list of the shared file IDs.
+    /// </summary>
+    public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
+
+    /// <summary>
+    /// The collection of sharing parameters.
     /// </summary>
     public IEnumerable<FileShareParams> Share { get; set; }
 
     /// <summary>
-    /// Notifies users about the shared file or not
+    /// Specifies whether to notify users about the shared file or not.
     /// </summary>
     public bool Notify { get; set; }
 
     /// <summary>
-    /// Message to send when notifying about the shared file
+    /// The message to send when notifying about the shared file.
     /// </summary>
     public string SharingMessage { get; set; }
 }
 
 /// <summary>
-/// Security information request parameters
+/// The parameters of the security information request.
 /// </summary>
 public class SecurityInfoSimpleRequestDto
 {
     /// <summary>
-    /// Collection of sharing parameters
+    /// The collection of sharing parameters.
     /// </summary>
     public IEnumerable<FileShareParams> Share { get; set; }
 
     /// <summary>
-    /// Notifies users about the shared file or not
+    /// Specifies whether to notify users about the shared file or not.
     /// </summary>
     public bool Notify { get; set; }
 
     /// <summary>
-    /// Message to send when notifying about the shared file
+    /// The message to send when notifying about the shared file.
     /// </summary>
     public string SharingMessage { get; set; }
 }
 
 /// <summary>
-/// Security information request parameters
+/// The parameters of the security information request for the specified file.
 /// </summary>
 public class FileSecurityInfoSimpleRequestDto<T>
 {
     /// <summary>
-    /// File ID
+    /// The file ID.
     /// </summary>
     [FromRoute(Name = "fileId")]
-    public T FileId { get; set; }
+    public required T FileId { get; set; }
 
     /// <summary>
-    /// Security info simple
+    /// The parameters of the security information simple request.
     /// </summary>
     [FromBody]
     public SecurityInfoSimpleRequestDto SecurityInfoSimpe { get; set; }
 }
 
 /// <summary>
-/// Security information request parameters
+/// The security information request parameters for the specified folder.
 /// </summary>
 public class FolderSecurityInfoSimpleRequestDto<T>
 {
     /// <summary>
-    /// Folder ID
+    /// The folder ID.
     /// </summary>
     [FromRoute(Name = "folderId")]
-    public T FolderId { get; set; }
+    public required T FolderId { get; set; }
 
     /// <summary>
-    /// Security info simple
+    /// The parameters of the security information simple request.
     /// </summary>
     [FromBody]
     public SecurityInfoSimpleRequestDto SecurityInfoSimpe { get; set; }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,49 +26,52 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+ /// <summary>
+/// The folder content information.
+/// </summary>
 public class FolderContentDto<T>
 {
     /// <summary>
-    /// List of files
+    /// The list of files in the folder.
     /// </summary>
     public List<FileEntryDto> Files { get; set; }
 
     /// <summary>
-    /// List of folders
+    /// The list of folders in the folder. 
     /// </summary>
     public List<FileEntryDto> Folders { get; set; }
 
     /// <summary>
-    /// Current folder information
+    /// The current folder information.
     /// </summary>
     public FolderDto<T> Current { get; set; }
 
     /// <summary>
-    /// Folder path
+    /// The folder path.
     /// </summary>
     [SwaggerSchemaCustom(Example = "{key = \"Key\", path = \"//path//to//folder\"}")]
     public object PathParts { get; set; }
 
     /// <summary>
-    /// Folder start index
+    /// The folder start index.
     /// </summary>
     [SwaggerSchemaCustom(Example = 0)]
     public int StartIndex { get; set; }
 
     /// <summary>
-    /// Number of folder elements
+    /// The number of folder elements.
     /// </summary>
     [SwaggerSchemaCustom(Example = 4)]
     public int Count { get; set; }
 
     /// <summary>
-    /// Total number of elements in the folder
+    /// The total number of elements in the folder.
     /// </summary>
     [SwaggerSchemaCustom(Example = 4)]
     public int Total { get; set; }
 
     /// <summary>
-    /// New element index
+    /// The new element index in the folder.
     /// </summary>
     public int New { get; set; }
 }
@@ -85,11 +88,11 @@ public class FolderContentDtoHelper(
     AuthContext authContext,
     BreadCrumbsManager breadCrumbsManager)
 {
-    public async Task<FolderContentDto<T>> GetAsync<T>(T folderId, Guid? userIdOrGroupId, FilterType? filterType, T roomId, bool? searchInContent, bool? withSubFolders, bool? excludeSubject, ApplyFilterOption? applyFilterOption, SearchArea? searchArea, string[] extension = null)
+    public async Task<FolderContentDto<T>> GetAsync<T>(T folderId, Guid? userIdOrGroupId, FilterType? filterType, T roomId, bool? searchInContent, bool? withSubFolders, bool? excludeSubject, ApplyFilterOption? applyFilterOption, SearchArea? searchArea, string[] extension = null, FormsItemDto formsItemDto = null)
     {
         var types = filterType.HasValue ? new[] { filterType.Value } : null;
-        
-        var folderContentWrapper = await ToFolderContentWrapperAsync(folderId, userIdOrGroupId ?? Guid.Empty, types, roomId, searchInContent ?? false, withSubFolders ?? false, excludeSubject ?? false, applyFilterOption ?? ApplyFilterOption.All, extension, searchArea ?? SearchArea.Active);
+
+        var folderContentWrapper = await ToFolderContentWrapperAsync(folderId, userIdOrGroupId ?? Guid.Empty, types, roomId, searchInContent ?? false, withSubFolders ?? false, excludeSubject ?? false, applyFilterOption ?? ApplyFilterOption.All, extension, searchArea ?? SearchArea.Active, formsItemDto);
 
         return folderContentWrapper.NotFoundIfNull();
     }
@@ -106,7 +109,7 @@ public class FolderContentDtoHelper(
         
         List<FileShareRecord<string>> currentUsersRecords = null;
         if (await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID) && 
-            folderItems.FolderInfo is { FolderType: FolderType.VirtualRooms or FolderType.Archive })
+            folderItems.FolderInfo is { FolderType: FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates })
         {
             currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
         }
@@ -179,15 +182,12 @@ public class FolderContentDtoHelper(
 
         async Task<FileEntryDto> GetFileDto(FileEntry fileEntry, string entriesOrder = null, IFolder contextFolder = null)
         {
-            switch (fileEntry)
+            return fileEntry switch
             {
-                case File<int> fol1:
-                    return await fileWrapperHelper.GetAsync(fol1, entriesOrder, expiration, contextFolder);
-                case File<string> fol2:
-                    return await fileWrapperHelper.GetAsync(fol2, entriesOrder, expiration, contextFolder);
-            }
-
-            return null;
+                File<int> fol1 => await fileWrapperHelper.GetAsync(fol1, entriesOrder, expiration, contextFolder),
+                File<string> fol2 => await fileWrapperHelper.GetAsync(fol2, entriesOrder, expiration, contextFolder),
+                _ => null
+            };
         }
 
         async IAsyncEnumerable<FileEntryDto> GetFoldersDto(IEnumerable<FileEntry> folderEntries, string entriesOrder = null)
@@ -224,7 +224,7 @@ public class FolderContentDtoHelper(
         }
     }
     
-    private async Task<FolderContentDto<T>> ToFolderContentWrapperAsync<T>(T folderId, Guid userIdOrGroupId, IEnumerable<FilterType> filterTypes, T roomId, bool searchInContent, bool withSubFolders, bool excludeSubject, ApplyFilterOption applyFilterOption, string[] extension, SearchArea searchArea)
+    private async Task<FolderContentDto<T>> ToFolderContentWrapperAsync<T>(T folderId, Guid userIdOrGroupId, IEnumerable<FilterType> filterTypes, T roomId, bool searchInContent, bool withSubFolders, bool excludeSubject, ApplyFilterOption applyFilterOption, string[] extension, SearchArea searchArea, FormsItemDto formsItemDto)
     {
         OrderBy orderBy = null;
         if (SortedByTypeExtensions.TryParse(apiContext.SortBy, true, out var sortBy))
@@ -234,7 +234,7 @@ public class FolderContentDtoHelper(
 
         var startIndex = Convert.ToInt32(apiContext.StartIndex);
         var items = await fileStorageService.GetFolderItemsAsync(folderId, startIndex, Convert.ToInt32(apiContext.Count), filterTypes, filterTypes?.FirstOrDefault() == FilterType.ByUser, userIdOrGroupId.ToString(), apiContext.FilterValue, extension, searchInContent, withSubFolders, orderBy, excludeSubject: excludeSubject,
-            roomId: roomId, applyFilterOption: applyFilterOption, searchArea: searchArea);
+            roomId: roomId, applyFilterOption: applyFilterOption, searchArea: searchArea, formsItemDto: formsItemDto);
 
         return await GetAsync(folderId, items, startIndex);
     }

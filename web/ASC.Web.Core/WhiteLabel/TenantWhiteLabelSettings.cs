@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -82,7 +82,7 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
 
     public async Task<string> GetLogoTextAsync(SettingsManager settingsManager)
     {
-        if (!string.IsNullOrEmpty(LogoText) && LogoText != DefaultLogoText)
+        if (!string.IsNullOrEmpty(LogoText))
         {
             return LogoText;
         }
@@ -93,22 +93,33 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
 
     public void SetLogoText(string val)
     {
-        LogoText = val;
+        LogoText = string.IsNullOrWhiteSpace(val) || val == DefaultLogoText ? null : val;
+    }
+
+    public async Task<bool> GetIsDefault(SettingsManager settingsManager)
+    {
+        if (!IsDefault())
+        {
+            return false;
+        }
+
+        var partnerSettings = await settingsManager.LoadForDefaultTenantAsync<TenantWhiteLabelSettings>();
+        return partnerSettings.IsDefault();
     }
 
     #endregion
 
     #region Logo available sizes
 
-    public static readonly Size LogoLightSmallSize = new(422, 48);
-    public static readonly Size LogoLoginPageSize = new(772, 88);
-    public static readonly Size LogoFaviconSize = new(32, 32);
-    public static readonly Size LogoDocsEditorSize = new(172, 40);
-    public static readonly Size LogoDocsEditorEmbedSize = new(172, 40);
-    public static readonly Size LogoLeftMenuSize = new(56, 56);
-    public static readonly Size LogoAboutPageSize = new(442, 48);
-    public static readonly Size LogoNotificationSize = new(386, 44);
-    public static Size GetSize(WhiteLabelLogoType type)
+    public static readonly IMagickGeometry LogoLightSmallSize = new MagickGeometry(422, 48);
+    public static readonly IMagickGeometry LogoLoginPageSize = new MagickGeometry(772, 88);
+    public static readonly IMagickGeometry LogoFaviconSize = new MagickGeometry(32, 32);
+    public static readonly IMagickGeometry LogoDocsEditorSize = new MagickGeometry(172, 40);
+    public static readonly IMagickGeometry LogoDocsEditorEmbedSize = new MagickGeometry(172, 40);
+    public static readonly IMagickGeometry LogoLeftMenuSize = new MagickGeometry(56, 56);
+    public static readonly IMagickGeometry LogoAboutPageSize = new MagickGeometry(442, 48);
+    public static readonly IMagickGeometry LogoNotificationSize = new MagickGeometry(386, 44);
+    public static IMagickGeometry GetSize(WhiteLabelLogoType type)
     {
         return type switch
         {
@@ -119,7 +130,7 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
             WhiteLabelLogoType.DocsEditorEmbed => LogoDocsEditorEmbedSize,
             WhiteLabelLogoType.LeftMenu => LogoLeftMenuSize,
             WhiteLabelLogoType.AboutPage => LogoAboutPageSize,
-            _ => new Size()
+            _ => new MagickGeometry()
         };
     }
 
@@ -163,7 +174,8 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
             LogoText = null
         };
     }
-    #endregion
+    
+    public DateTime LastModified { get; set; }
 
     [JsonIgnore]
     public Guid ID
@@ -171,7 +183,21 @@ public class TenantWhiteLabelSettings : ISettings<TenantWhiteLabelSettings>
         get { return new Guid("{05d35540-c80b-4b17-9277-abd9e543bf93}"); }
     }
 
+    #endregion
+
     #region Get/Set IsDefault and Extension
+
+    private bool IsDefault()
+    {
+        return LogoText == null
+            && IsDefaultLogoLightSmall
+            && IsDefaultLogoDark
+            && IsDefaultLogoFavicon
+            && IsDefaultLogoDocsEditor
+            && IsDefaultLogoDocsEditorEmbed
+            && IsDefaultLogoLeftMenu
+            && IsDefaultLogoAboutPage;
+    }
 
     public bool GetIsDefault(WhiteLabelLogoType type)
     {
@@ -318,7 +344,6 @@ public class TenantWhiteLabelSettingsHelper(
     WebImageSupplier webImageSupplier,
     UserPhotoManager userPhotoManager,
     StorageFactory storageFactory,
-    WhiteLabelHelper whiteLabelHelper,
     TenantManager tenantManager,
     AuthContext authContext,
     UserManager userManager,
@@ -330,7 +355,7 @@ public class TenantWhiteLabelSettingsHelper(
 
     #region Restore default
 
-    public async Task RestoreDefault(TenantWhiteLabelSettings tenantWhiteLabelSettings, TenantLogoManager tenantLogoManager, int tenantId, IDataStore storage = null)
+    public async Task RestoreDefaultLogos(TenantWhiteLabelSettings tenantWhiteLabelSettings, TenantLogoManager tenantLogoManager, int tenantId, IDataStore storage = null)
     {
         tenantWhiteLabelSettings.LogoLightSmallExt = null;
         tenantWhiteLabelSettings.DarkLogoLightSmallExt = null;
@@ -361,8 +386,6 @@ public class TenantWhiteLabelSettingsHelper(
         tenantWhiteLabelSettings.IsDefaultLogoLeftMenu = true;
         tenantWhiteLabelSettings.IsDefaultLogoAboutPage = true;
 
-        tenantWhiteLabelSettings.SetLogoText(null);
-
         var store = storage ?? await storageFactory.GetStorageAsync(tenantId, ModuleName);
 
         try
@@ -374,7 +397,16 @@ public class TenantWhiteLabelSettingsHelper(
             logger.ErrorRestoreDefault(e);
         }
 
-        await SaveAsync(tenantWhiteLabelSettings, tenantId, tenantLogoManager, true);
+        await settingsManager.SaveAsync(tenantWhiteLabelSettings, tenantId);
+
+        await tenantLogoManager.RemoveMailLogoDataFromCacheAsync();
+    }
+
+    public async Task RestoreDefaultLogoText(TenantWhiteLabelSettings tenantWhiteLabelSettings, int tenantId)
+    {
+        tenantWhiteLabelSettings.SetLogoText(null);
+
+        await settingsManager.SaveAsync(tenantWhiteLabelSettings, tenantId);
     }
 
     #endregion
@@ -383,7 +415,7 @@ public class TenantWhiteLabelSettingsHelper(
 
     private async Task SetLogoAsync(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoType type, string logoFileExt, byte[] data, bool dark, IDataStore storage = null)
     {
-        var store = storage ?? await storageFactory.GetStorageAsync(await tenantManager.GetCurrentTenantIdAsync(), ModuleName);
+        var store = storage ?? await storageFactory.GetStorageAsync(tenantManager.GetCurrentTenantId(), ModuleName);
 
         #region delete from storage if already exists
 
@@ -577,7 +609,7 @@ public class TenantWhiteLabelSettingsHelper(
 
     #region Get logo path
 
-    public async Task<string> GetAbsoluteLogoPathAsync(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoType type, bool dark = false, string culture = default)
+    public async Task<string> GetAbsoluteLogoPathAsync(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoType type, bool dark = false, string culture = null)
     {
         if (tenantWhiteLabelSettings.GetIsDefault(type))
         {
@@ -587,9 +619,9 @@ public class TenantWhiteLabelSettingsHelper(
         return await GetAbsoluteStorageLogoPath(tenantWhiteLabelSettings, type, dark, culture);
     }
 
-    private async Task<string> GetAbsoluteStorageLogoPath(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoType type, bool dark, string culture = default)
+    private async Task<string> GetAbsoluteStorageLogoPath(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoType type, bool dark, string culture = null)
     {
-        var store = await storageFactory.GetStorageAsync(await tenantManager.GetCurrentTenantIdAsync(), ModuleName);
+        var store = await storageFactory.GetStorageAsync(tenantManager.GetCurrentTenantId(), ModuleName);
         var fileName = BuildLogoFileName(type, tenantWhiteLabelSettings.GetExt(type, dark), dark);
 
         if (await store.IsFileAsync(fileName))
@@ -599,7 +631,7 @@ public class TenantWhiteLabelSettingsHelper(
         return await GetAbsoluteDefaultLogoPathAsync(type, dark, culture);
     }
 
-    public async Task<string> GetAbsoluteDefaultLogoPathAsync(WhiteLabelLogoType type, bool dark, string culture = default)
+    public async Task<string> GetAbsoluteDefaultLogoPathAsync(WhiteLabelLogoType type, bool dark, string culture = null)
     {
         var partnerLogoPath = await GetPartnerStorageLogoPathAsync(type, dark);
         if (!string.IsNullOrEmpty(partnerLogoPath))
@@ -668,7 +700,7 @@ public class TenantWhiteLabelSettingsHelper(
 
         if (string.IsNullOrEmpty(culture))
         {
-            culture = (await tenantManager.GetCurrentTenantAsync()).Language;
+            culture = (tenantManager.GetCurrentTenant()).Language;
         }
 
         return customCultures.Contains(culture, StringComparer.InvariantCultureIgnoreCase) ? $"{culture.ToLower()}/" : string.Empty;
@@ -693,7 +725,7 @@ public class TenantWhiteLabelSettingsHelper(
 
     private async Task<Stream> GetStorageLogoData(TenantWhiteLabelSettings tenantWhiteLabelSettings, WhiteLabelLogoType type, bool dark)
     {
-        var storage = await storageFactory.GetStorageAsync(await tenantManager.GetCurrentTenantIdAsync(), ModuleName);
+        var storage = await storageFactory.GetStorageAsync(tenantManager.GetCurrentTenantId(), ModuleName);
 
         if (storage == null)
         {
@@ -732,13 +764,13 @@ public class TenantWhiteLabelSettingsHelper(
     {
         if (CanBeDark(type))
         {
-            return $"{(dark ? "dark_" : "")}{type.ToString().ToLowerInvariant()}.{fileExt}";
+            return $"{(dark ? "dark_" : "")}{type.ToStringFast().ToLowerInvariant()}.{fileExt}";
         }
 
-        return $"{type.ToString().ToLowerInvariant()}.{fileExt}";
+        return $"{type.ToStringLowerFast()}.{fileExt}";
     }
 
-    private static Size GetSize(WhiteLabelLogoType type)
+    private static IMagickGeometry GetSize(WhiteLabelLogoType type)
     {
         return type switch
         {
@@ -750,60 +782,9 @@ public class TenantWhiteLabelSettingsHelper(
             WhiteLabelLogoType.LeftMenu => TenantWhiteLabelSettings.LogoLeftMenuSize,
             WhiteLabelLogoType.AboutPage => TenantWhiteLabelSettings.LogoAboutPageSize,
             WhiteLabelLogoType.Notification => TenantWhiteLabelSettings.LogoNotificationSize,
-            _ => new Size(0, 0)
+            _ => new MagickGeometry(0, 0)
         };
     }
-
-    #region Save for Resource replacement
-
-    private static readonly List<int> _appliedTenants = [];
-
-    public async Task ApplyAsync(TenantWhiteLabelSettings tenantWhiteLabelSettings, int tenantId)
-    {
-        if (_appliedTenants.Contains(tenantId))
-        {
-            return;
-        }
-
-        await SetNewLogoTextAsync(tenantWhiteLabelSettings, tenantId);
-
-        if (!_appliedTenants.Contains(tenantId))
-        {
-            _appliedTenants.Add(tenantId);
-        }
-    }
-
-    public async Task SaveAsync(TenantWhiteLabelSettings tenantWhiteLabelSettings, int tenantId, TenantLogoManager tenantLogoManager, bool restore = false)
-    {
-        await settingsManager.SaveAsync(tenantWhiteLabelSettings, tenantId);
-
-        if (tenantId == Tenant.DefaultTenant)
-        {
-            _appliedTenants.Clear();
-        }
-        else
-        {
-            await SetNewLogoTextAsync(tenantWhiteLabelSettings, tenantId, restore);
-            await tenantLogoManager.RemoveMailLogoDataFromCacheAsync();
-        }
-    }
-
-    private async Task SetNewLogoTextAsync(TenantWhiteLabelSettings tenantWhiteLabelSettings, int tenantId, bool restore = false)
-    {
-        whiteLabelHelper.DefaultLogoText = TenantWhiteLabelSettings.DefaultLogoText;
-        var partnerSettings = await settingsManager.LoadForDefaultTenantAsync<TenantWhiteLabelSettings>();
-
-        if (restore && string.IsNullOrEmpty(await partnerSettings.GetLogoTextAsync(settingsManager)))
-        {
-            whiteLabelHelper.RestoreOldText(tenantId);
-        }
-        else
-        {
-            whiteLabelHelper.SetNewText(tenantId, await tenantWhiteLabelSettings.GetLogoTextAsync(settingsManager));
-        }
-    }
-
-    #endregion
 
     #region Delete from Store
 

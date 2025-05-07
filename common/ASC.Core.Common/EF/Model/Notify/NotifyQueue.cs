@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,15 +30,22 @@ public class NotifyQueue
 {
     public int NotifyId { get; set; }
     public int TenantId { get; set; }
+    [MaxLength(255)]
     public string Sender { get; set; }
+    [MaxLength(255)]
     public string Reciever { get; set; }
+    [MaxLength(1024)]
     public string Subject { get; set; }
+    [MaxLength(64)]
     public string ContentType { get; set; }
     public string Content { get; set; }
+    [MaxLength(64)]
     public string SenderType { get; set; }
+    [MaxLength(1024)]
     public string ReplyTo { get; set; }
     public DateTime CreationDate { get; set; }
     public string Attachments { get; set; }
+    [MaxLength(64)]
     public string AutoSubmitted { get; set; }
 
     public DbTenant Tenant { get; set; }
@@ -75,7 +82,7 @@ public static class NotifyQueueExtension
 
             entity.Property(e => e.AutoSubmitted)
                 .HasColumnName("auto_submitted")
-                .HasColumnType("varchar(64)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -87,7 +94,7 @@ public static class NotifyQueueExtension
 
             entity.Property(e => e.ContentType)
                 .HasColumnName("content_type")
-                .HasColumnType("varchar(64)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -100,31 +107,31 @@ public static class NotifyQueueExtension
 
             entity.Property(e => e.Reciever)
                 .HasColumnName("reciever")
-                .HasColumnType("varchar(255)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.ReplyTo)
                 .HasColumnName("reply_to")
-                .HasColumnType("varchar(1024)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Sender)
                 .HasColumnName("sender")
-                .HasColumnType("varchar(255)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.SenderType)
                 .HasColumnName("sender_type")
-                .HasColumnType("varchar(64)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Subject)
                 .HasColumnName("subject")
-                .HasColumnType("varchar(1024)")
+                .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -136,57 +143,48 @@ public static class NotifyQueueExtension
         modelBuilder.Entity<NotifyQueue>(entity =>
         {
             entity.HasKey(e => e.NotifyId)
-                .HasName("notify_queue_pkey");
+                .HasName("pk_notify_queue");
 
-            entity.ToTable("notify_queue", "onlyoffice");
+            entity.ToTable("notify_queue");
 
             entity.Property(e => e.NotifyId).HasColumnName("notify_id");
 
-            entity.Property(e => e.Attachments).HasColumnName("attachments");
+            entity.Property(e => e.Attachments)
+                .HasColumnName("attachments");
 
             entity.Property(e => e.AutoSubmitted)
-                .HasColumnName("auto_submitted")
-                .HasMaxLength(64)
-                .HasDefaultValueSql("NULL");
+                .HasColumnName("auto_submitted");
 
-            entity.Property(e => e.Content).HasColumnName("content");
+            entity.Property(e => e.Content)
+                .HasColumnName("content");
 
             entity.Property(e => e.ContentType)
-                .HasColumnName("content_type")
-                .HasMaxLength(64)
-                .HasDefaultValueSql("NULL");
+                .HasColumnName("content_type");
 
-            entity.Property(e => e.CreationDate).HasColumnName("creation_date");
+            entity.Property(e => e.CreationDate)
+                .HasColumnName("creation_date")
+                .HasColumnType("timestamptz");
 
             entity.HasIndex(e => e.CreationDate)
-                    .HasDatabaseName("creation_date_notify_queue");
+                .HasDatabaseName("idx_creation_date");
 
             entity.Property(e => e.Reciever)
-                .HasColumnName("reciever")
-                .HasMaxLength(255)
-                .HasDefaultValueSql("NULL");
+                .HasColumnName("reciever");
 
             entity.Property(e => e.ReplyTo)
-                .HasColumnName("reply_to")
-                .HasMaxLength(1024)
-                .HasDefaultValueSql("NULL");
+                .HasColumnName("reply_to");
 
             entity.Property(e => e.Sender)
-                .HasColumnName("sender")
-                .HasMaxLength(255)
-                .HasDefaultValueSql("NULL");
+                .HasColumnName("sender");
 
             entity.Property(e => e.SenderType)
-                .HasColumnName("sender_type")
-                .HasMaxLength(64)
-                .HasDefaultValueSql("NULL");
+                .HasColumnName("sender_type");
 
             entity.Property(e => e.Subject)
-                .HasColumnName("subject")
-                .HasMaxLength(1024)
-                .HasDefaultValueSql("NULL");
+                .HasColumnName("subject");
 
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
         });
+        
     }
 }

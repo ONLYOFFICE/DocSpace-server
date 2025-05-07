@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,43 +27,38 @@
 namespace ASC.Common.Threading;
 
 /// <summary>
+/// The distributed task progress parameters.
 /// </summary>
-[ProtoContract(IgnoreUnknownSubTypes = true)]
 public class DistributedTaskProgress : DistributedTask
 {
-    [ProtoMember(1)]
+    [JsonInclude]
     private double _percentage;
 
-    /// <summary>Progress percentage</summary>
-    /// <type>System.Double, System</type>
+    /// <summary>
+    /// The distributed task progress percentage.
+    /// </summary>
     public double Percentage
     {
         get => Math.Min(100.0, Math.Max(0, _percentage));
         set => _percentage = value;
     }
 
-    /// <summary>Specifies if the process is completed or not</summary>
-    /// <type>System.Boolean, System</type>
-    [ProtoMember(2)]
+    /// <summary>
+    /// Specifies if the distributed task process is completed or not.
+    /// </summary>
     public bool IsCompleted { get; set; }
 
-    /// <summary>Number of steps</summary>
-    /// <type>System.Int32, System</type>
-    [ProtoMember(3)]
+    /// <summary>
+    /// The number of steps of the distributed task.
+    /// </summary>
     protected int StepCount { get; set; }
 
-    protected CancellationToken CancellationToken { get; set; }
-
-    public virtual async Task RunJob(DistributedTask distributedTask, CancellationToken cancellationToken)
+    public override async Task RunJob(CancellationToken cancellationToken)
     {
         Percentage = 0;
-        Status = DistributedTaskStatus.Running;
-        CancellationToken = cancellationToken;
 
-        await DoJob();
+        await base.RunJob(cancellationToken);
     }
-
-    protected virtual Task DoJob() { return Task.CompletedTask; }
 
     protected async Task StepDone()
     {

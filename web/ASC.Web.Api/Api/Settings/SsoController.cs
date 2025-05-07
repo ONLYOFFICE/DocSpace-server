@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,7 +30,7 @@ namespace ASC.Web.Api.Controllers.Settings;
 public class SsoController(TenantManager tenantManager,
         ApiContext apiContext,
         WebItemManager webItemManager,
-        IMemoryCache memoryCache,
+        IFusionCache fusionCache,
         IHttpContextAccessor httpContextAccessor,
         SettingsManager settingsManager,
         PermissionContext permissionContext,
@@ -38,7 +38,7 @@ public class SsoController(TenantManager tenantManager,
         UserManager userManager,
         MessageService messageService,
         AuthContext authContext)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
     /// Returns the current portal SSO settings.
@@ -208,7 +208,7 @@ public class SsoController(TenantManager tenantManager,
 
         var messageAction = enableSso ? MessageAction.SSOEnabled : MessageAction.SSODisabled;
 
-        await messageService.SendAsync(messageAction);
+        messageService.Send(messageAction);
 
         return settings;
     }
@@ -236,7 +236,7 @@ public class SsoController(TenantManager tenantManager,
 
         await ConverSsoUsersToOrdinaryAsync();
 
-        await messageService.SendAsync(MessageAction.SSODisabled);
+        messageService.Send(MessageAction.SSODisabled);
 
         return defaultSettings;
     }
@@ -274,10 +274,10 @@ public class SsoController(TenantManager tenantManager,
         }
 
         if (!coreBaseSettings.Standalone
-            && (!SetupInfo.IsVisibleSettings(ManagementType.SingleSignOnSettings.ToString())
+            && (!SetupInfo.IsVisibleSettings(ManagementType.SingleSignOnSettings.ToStringFast())
                 || !(await tenantManager.GetCurrentTenantQuotaAsync()).Sso))
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption, "Sso");
+            throw new BillingException(Resource.ErrorNotAllowedOption);
         }
     }
 

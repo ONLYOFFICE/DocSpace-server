@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -41,7 +41,9 @@ public class GroupController(
     GroupFullDtoHelper groupFullDtoHelper,
     MessageService messageService,
     PermissionContext permissionContext,
-    FileSecurity fileSecurity)
+    FileSecurity fileSecurity,
+    UserSocketManager socketManager,
+    UserWebhookManager webhookManager)
     : ControllerBase
 {
     /// <summary>
@@ -56,7 +58,7 @@ public class GroupController(
     /// <path>api/2.0/groups</path>
     /// <collection>list</collection>
     [Tags("Group")]
-    [SwaggerResponse(200, "List of groups", typeof(GroupDto))]
+    [SwaggerResponse(200, "List of groups", typeof(IAsyncEnumerable<GroupDto>))]
     [HttpGet]
     public async IAsyncEnumerable<GroupDto> GetGroupsAsync(GeneralInformationRequestDto inDto)
     {
@@ -114,7 +116,7 @@ public class GroupController(
     /// <path>api/2.0/groups/user/{userid}</path>
     /// <collection>list</collection>
     [Tags("Group")]
-    [SwaggerResponse(200, "List of groups", typeof(GroupSummaryDto))]
+    [SwaggerResponse(200, "List of groups", typeof(IEnumerable<GroupSummaryDto>))]
     [HttpGet("user/{userid:guid}")]
     public async Task<IEnumerable<GroupSummaryDto>> GetByUserIdAsync(GetGroupByUserIdRequestDto inDto)
     {
@@ -156,9 +158,15 @@ public class GroupController(
             }
         }
 
-        await messageService.SendAsync(MessageAction.GroupCreated, MessageTarget.Create(group.ID), group.Name);
+        messageService.Send(MessageAction.GroupCreated, MessageTarget.Create(group.ID), group.Name);
 
-        return await groupFullDtoHelper.Get(group, true);
+        var dto = await groupFullDtoHelper.Get(group, true);
+
+        await socketManager.AddGroupAsync(dto);
+
+        await webhookManager.PublishAsync(WebhookTrigger.GroupCreated, group);
+
+        return dto;
     }
 
     /// <summary>
@@ -199,9 +207,15 @@ public class GroupController(
             }
         }
 
-        await messageService.SendAsync(MessageAction.GroupUpdated, MessageTarget.Create(inDto.Id), group.Name);
+        messageService.Send(MessageAction.GroupUpdated, MessageTarget.Create(inDto.Id), group.Name);
 
-        return await GetGroupAsync(new DetailedInformationRequestDto { Id = inDto.Id });
+        var dto = await GetGroupAsync(new DetailedInformationRequestDto { Id = inDto.Id });
+
+        await socketManager.UpdateGroupAsync(dto);
+
+        await webhookManager.PublishAsync(WebhookTrigger.GroupUpdated, group);
+
+        return dto;
     }
 
     /// <summary>
@@ -224,7 +238,11 @@ public class GroupController(
         await userManager.DeleteGroupAsync(inDto.Id);
         await fileSecurity.RemoveSubjectAsync(inDto.Id, false);
 
-        await messageService.SendAsync(MessageAction.GroupDeleted, MessageTarget.Create(group.ID), group.Name);
+        messageService.Send(MessageAction.GroupDeleted, MessageTarget.Create(group.ID), group.Name);
+
+        await socketManager.DeleteGroupAsync(inDto.Id);
+
+        await webhookManager.PublishAsync(WebhookTrigger.GroupDeleted, group);
 
         return NoContent();
     }
@@ -418,11 +436,13 @@ public class GroupControllerAdditional<T>(
     GroupFullDtoHelper groupFullDtoHelper) : ControllerBase
 {
     /// <summary>
-    /// Gets groups with shared
+    /// Returns groups with their sharing settings.
     /// </summary>
+    /// <short>Get groups with sharing settings</short>
     /// <path>api/2.0/group/room/{id}</path>
+    /// <collection>list</collection>
     [Tags("Group / Rooms")]
-    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<GroupDto>))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("room/{id}")]
     public async IAsyncEnumerable<GroupDto> GetGroupsWithSharedAsync(GetGroupsWithSharedRequestDto<T> inDto)

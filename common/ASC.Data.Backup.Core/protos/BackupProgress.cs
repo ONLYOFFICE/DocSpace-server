@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,8 +23,12 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+
 namespace ASC.Data.Backup.Contracts;
 
+/// <summary>
+/// The backup progress type
+/// </summary>
 public enum BackupProgressEnum
 {
     [SwaggerEnum(Description = "Backup")]
@@ -37,49 +41,44 @@ public enum BackupProgressEnum
     Transfer
 }
 
-[ProtoContract]
+/// <summary>
+/// The backup progress parameters.
+/// </summary>
 public record BackupProgress
 {
     /// <summary>
-    /// Completed or not
+    /// Specifies if the backup is completed or not.
     /// </summary>
-    [ProtoMember(1)]
     public bool IsCompleted { get; set; }
 
     /// <summary>
-    /// Progress
+    /// The backup progress in percentage.
     /// </summary>
-    [ProtoMember(2)]
     public int Progress { get; set; }
 
     /// <summary>
-    /// Error
+    /// The backup error message.
     /// </summary>
-    [ProtoMember(3)]
     public string Error { get; set; }
 
     /// <summary>
-    /// Link
+    /// The backup link.
     /// </summary>
-    [ProtoMember(4)]
     public string Link { get; set; }
 
     /// <summary>
-    /// Tenant id
+    /// The tenant ID.
     /// </summary>
-    [ProtoMember(5)]
     public int TenantId { get; set; }
 
     /// <summary>
-    /// Backup progress type
+    /// The backup progress type.
     /// </summary>
-    [ProtoMember(6)]
     public BackupProgressEnum BackupProgressEnum { get; set;}
 
     /// <summary>
-    /// Task id
+    /// The task ID.
     /// </summary>
-    [ProtoMember(7)]
     public string TaskId { get; set; }
 }
 

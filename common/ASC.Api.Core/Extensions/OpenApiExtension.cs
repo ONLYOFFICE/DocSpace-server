@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -41,7 +41,7 @@ public static class OpenApiExtension
         return services.AddSwaggerGen(c =>
         {
             var assemblyName = Assembly.GetEntryAssembly().FullName.Split(',').First();
-
+            var docName = assemblyName.Split(".").Last();
             c.ResolveConflictingActions(a => a.First());
             c.CustomOperationIds(r =>
             {
@@ -52,31 +52,107 @@ public static class OpenApiExtension
 
             c.CustomSchemaIds(CustomSchemaId);
 
-            c.SwaggerDoc("common", new OpenApiInfo { Title = assemblyName, Version = "v2" });
+            c.SwaggerDoc("common", new OpenApiInfo { Title = docName, Version = "v2" });
             c.SchemaFilter<SwaggerSchemaCustomFilter>();
             c.DocumentFilter<LowercaseDocumentFilter>();
             c.DocumentFilter<HideRouteDocumentFilter>("/api/2.0/capabilities.json");
             c.DocumentFilter<TagDescriptionsDocumentFilter>();
             c.OperationFilter<SwaggerCustomOperationFilter>();
+            c.OperationFilter<ContentTypeOperationFilter>();
+            c.DocumentFilter<SwaggerSuccessApiResponseFilter>();
             c.EnableAnnotations();
-            var serverUrls = configuration.GetSection("openApi:servers").Get<List<string>>() ?? [];
-            var serverDescription = configuration.GetSection("openApi:serversDescription").Get<List<string>>() ?? [];
 
-            for (var i = 0; i < serverUrls.Count; i++)
+            var serverTemplate = configuration.GetValue<string>("openApi:server") ?? "";
+
+            var defaultUrl = configuration.GetValue<string>("openApi:url:default") ?? "";
+            var urlDescription = configuration.GetValue<string>("openApi:url:description") ?? "";
+
+            c.AddServer(new OpenApiServer
             {
-                c.AddServer(new OpenApiServer
+                Url = serverTemplate,
+                Description = "Server configuration",
+                Variables = new Dictionary<string, OpenApiServerVariable>
                 {
-                    Url = serverUrls[i], 
-                    Description = serverDescription.Count > i ? serverDescription[i] : null
-                });
-            }
-            
+                    ["baseUrl"] = new OpenApiServerVariable
+                    {
+                        Default = defaultUrl,
+                        Description = urlDescription
+                    }
+                }
+            });
+
             // ToDo: add security definitions
             c.AddSecurityDefinition(CookiesManager.AuthCookiesName, new OpenApiSecurityScheme
             {
                 Type = SecuritySchemeType.ApiKey,
                 In = ParameterLocation.Cookie,
-                Name = CookiesManager.AuthCookiesName
+                Name = CookiesManager.AuthCookiesName,
+                Description = "Use Cookie authentication"
+            });
+
+            // Basic Authentication
+            c.AddSecurityDefinition("Basic", new OpenApiSecurityScheme
+            {
+                Name = "Authorization",
+                Type = SecuritySchemeType.Http,
+                In = ParameterLocation.Header,
+                Scheme = "basic",
+                Description = "Enter your username and password"
+            });
+
+            // JWT Authentication
+            c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                Name = "Authorization",
+                Type = SecuritySchemeType.Http,
+                In = ParameterLocation.Header,
+                Scheme = "bearer",
+                BearerFormat = "JWT",
+                Description = "Enter 'Bearer {JWT Token}'"
+            });
+
+            // API Key Authentication
+            c.AddSecurityDefinition("ApiKeyBearer", new OpenApiSecurityScheme
+            {
+                Name = "Authorization",
+                Type = SecuritySchemeType.Http,
+                In = ParameterLocation.Header,
+                Scheme = "bearer",
+                BearerFormat = "API Key",
+                Description = "Authentication is determined by the 'Authorization' header"
+            });
+
+            var authorizationUrl = configuration.GetValue<string>("openApi:oauth2:authorizationUrl");
+            var tokenUrl = configuration.GetValue<string>("openApi:oauth2:tokenUrl");
+            // OAuth2
+            c.AddSecurityDefinition("OAuth2", new OpenApiSecurityScheme
+            {
+                Type = SecuritySchemeType.OAuth2,
+                In = ParameterLocation.Header,
+                Flows = new OpenApiOAuthFlows
+                {
+                    AuthorizationCode = new OpenApiOAuthFlow
+                    {
+                        AuthorizationUrl = string.IsNullOrEmpty(authorizationUrl) ? new Uri(string.Empty, UriKind.RelativeOrAbsolute) : new Uri(authorizationUrl),
+                        TokenUrl = string.IsNullOrEmpty(tokenUrl) ? new Uri(string.Empty, UriKind.RelativeOrAbsolute) : new Uri(tokenUrl),
+                        Scopes = new Dictionary<string, string>
+                        {
+                            { "read", "Read access to protected resources" },
+                            { "write", "Write access to protected resources" }
+                        }
+                    }
+                },
+                Description = "OAuth2 flow with Authorization Code"
+            });
+
+            var openIdConnectUrl = configuration.GetValue<string>("openApi:openId:openIdConnectUrl");
+            // OpenId Connect
+            c.AddSecurityDefinition("OpenId", new OpenApiSecurityScheme
+            {
+                Type = SecuritySchemeType.OpenIdConnect,
+                In = ParameterLocation.Header,
+                OpenIdConnectUrl = string.IsNullOrEmpty(openIdConnectUrl) ? new Uri(string.Empty, UriKind.RelativeOrAbsolute) : new Uri(openIdConnectUrl),
+                Description = "OpenID Connect authentication"
             });
 
             var xmlPath = Path.Combine(AppContext.BaseDirectory, $"{assemblyName}.xml");
@@ -139,7 +215,7 @@ public static class OpenApiExtension
 
     private static string CustomSchemaId(Type type)
     {
-        var name = type.FullName;
+        var name = type.Name;
 
         if (string.IsNullOrEmpty(name))
         {
@@ -148,12 +224,15 @@ public static class OpenApiExtension
         
         if (type.IsGenericType)
         {
-            name = $"{name.Split('`')[0]}.{string.Join(".", type.GenericTypeArguments.Select(CustomSchemaId))}";
+            name = name.Split('`')[0];
+
+            var genericArgs = string.Join("", type.GenericTypeArguments.Select(CustomSchemaId));
+            name += genericArgs;
         }
 
         // Fix for nested classes
         name = name.Replace("+", "_");
-
+        name = name.Replace("Int32", "Integer");
         return name;
     }
 
@@ -183,6 +262,26 @@ public static class OpenApiExtension
                             Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = CookiesManager.AuthCookiesName }
                         },
                         ["read", "write"]
+                    },
+                    {
+                        new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" } },
+                        new List<string>()
+                    },
+                    {
+                        new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "ApiKeyBearer" } },
+                        new List<string>()
+                    },
+                    {
+                        new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Basic" } },
+                        new List<string>()
+                    },
+                    {
+                        new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "OAuth2" } },
+                        new[] { "api.read", "api.write" }
+                    },
+                    {
+                        new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "OpenId" } },
+                        Array.Empty<string>()
                     }
                 });
 

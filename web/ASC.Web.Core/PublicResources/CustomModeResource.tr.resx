@@ -120,7 +120,7 @@
   <data name="pattern_enterprise_whitelabel_user_welcome_custom_mode_v1" xml:space="preserve">
     <value>Merhaba, $UserName!
 
-ONLYOFFICE DocSpace'e hoş geldiniz! Kullanıcı profiliniz "${__VirtualRootPath}":"${__VirtualRootPath}" konumuna başarıyla eklendi. Şimdi yapabilecekleriniz:
+${LetterLogoText} DocSpace'e hoş geldiniz! Kullanıcı profiliniz "${__VirtualRootPath}":"${__VirtualRootPath}" konumuna başarıyla eklendi. Şimdi yapabilecekleriniz:
 
 * Davet edildiğiniz odadaki diğer kullanıcılarla birlikte çalışmak*: gerçek zamanlı birlikte yazma için ortak çalışma odaları veya herhangi bir amaç için esnek ayarlara sahip özel odalar*.
 

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,19 +31,6 @@ namespace ASC.Core.Users;
 [Singleton]
 public sealed class Constants(IConfiguration configuration)
 {
-    public int MaxEveryoneCount
-    {
-        get
-        {
-            if (!int.TryParse(configuration["core:users"], out var count))
-            {
-                count = 10000;
-            }
-
-            return count;
-        }
-    }
-
     #region system group and category groups
 
     public static readonly Guid SysGroupCategoryId = new("{7717039D-FBE9-45ad-81C1-68A1AA10CE1F}");
@@ -51,31 +38,31 @@ public sealed class Constants(IConfiguration configuration)
     public static readonly GroupInfo GroupEveryone = new(SysGroupCategoryId)
     {
         ID = AuthConstants.Everyone.ID,
-        Name = AuthConstants.Everyone.Name,
+        Name = AuthConstants.Everyone.Name
     };
 
     public static readonly GroupInfo GroupGuest = new(SysGroupCategoryId)
     {
         ID = AuthConstants.Guest.ID,
-        Name = AuthConstants.Guest.Name,
+        Name = AuthConstants.Guest.Name
     };
 
     public static readonly GroupInfo GroupRoomAdmin = new(SysGroupCategoryId)
     {
         ID = AuthConstants.RoomAdmin.ID,
-        Name = AuthConstants.RoomAdmin.Name,
+        Name = AuthConstants.RoomAdmin.Name
     };
 
     public static readonly GroupInfo GroupAdmin = new(SysGroupCategoryId)
     {
         ID = AuthConstants.DocSpaceAdmin.ID,
-        Name = AuthConstants.DocSpaceAdmin.Name,
+        Name = AuthConstants.DocSpaceAdmin.Name
     };
 
     public static readonly GroupInfo GroupUser = new(SysGroupCategoryId)
     {
         ID = AuthConstants.User.ID, 
-        Name = AuthConstants.User.Name,
+        Name = AuthConstants.User.Name
     };
 
     public static readonly GroupInfo[] SystemGroups =

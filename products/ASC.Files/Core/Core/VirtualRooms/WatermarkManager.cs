@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2023
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.VirtualRooms;
 
+/// <summary>
+/// The watermark additions.
+/// </summary>
 [Flags]
 public enum WatermarkAdditions
 {
@@ -44,40 +47,57 @@ public enum WatermarkAdditions
     [SwaggerEnum("Room name")]
     RoomName = 16
 }
+
+/// <summary>
+/// The watermark settings information.
+/// </summary>
 public class WatermarkSettings : IMapFrom<DbRoomWatermark>, IMapFrom<WatermarkRequestDto>
 {
+    /// <summary>
+    /// The watermark text.
+    /// </summary>
     public string Text { get; set; }
+
+    /// <summary>
+    /// The watermark additions.
+    /// </summary>
     public WatermarkAdditions Additions { get; set; }
+
+    /// <summary>
+    /// The watermark rotate angle.
+    /// </summary>
     public int Rotate { get; set; }
+
+    /// <summary>
+    /// The watermark image width.
+    /// </summary>
     public double ImageWidth { get; set; }
+
+    /// <summary>
+    /// The watermark image height.
+    /// </summary>
     public double ImageHeight { get; set; }
+
+    /// <summary>
+    /// The watermark image URL.
+    /// </summary>
     public string ImageUrl { get; set; }
+
+    /// <summary>
+    /// The watermark image scale.
+    /// </summary>
     public int ImageScale { get; set; }
 }
 
 [Scope]
-public class WatermarkManager
+public class WatermarkManager(
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity,
+    RoomLogoManager roomLogoManager)
 {
-    private readonly IDaoFactory _daoFactory;
-    private readonly FileSecurity _fileSecurity;
-    private readonly RoomLogoManager _roomLogoManager;
-    private readonly FilesMessageService _filesMessageService;
-    
-    public WatermarkManager(
-        IDaoFactory daoFactory,
-        FileSecurity fileSecurity,
-        RoomLogoManager roomLogoManager,
-        FilesMessageService filesMessageService)
-    {
-        _daoFactory = daoFactory;
-        _fileSecurity = fileSecurity;
-        _roomLogoManager = roomLogoManager;
-        _filesMessageService = filesMessageService;
-    }
-
     public async Task<WatermarkSettings> SetWatermarkAsync<T>(Folder<T> room, WatermarkRequestDto watermarkRequestDto)
     {
-        var folderDao = _daoFactory.GetFolderDao<T>();
+        var folderDao = daoFactory.GetFolderDao<T>();
         if(watermarkRequestDto == null)
         {
             return new WatermarkSettings();
@@ -88,7 +108,7 @@ public class WatermarkManager
             throw new ItemNotFoundException();
         }
 
-        if (room.RootFolderType == FolderType.Archive || !await _fileSecurity.CanEditRoomAsync(room))
+        if (room.RootFolderType == FolderType.Archive || !await fileSecurity.CanEditRoomAsync(room))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
         }
@@ -127,7 +147,7 @@ public class WatermarkManager
             }
             else
             {
-                imageUrl = await _roomLogoManager.CreateWatermarkImageAsync(folder, imageUrlFromDto);
+                imageUrl = await roomLogoManager.CreateWatermarkImageAsync(folder, imageUrlFromDto);
             }
         }
 
@@ -140,12 +160,12 @@ public class WatermarkManager
             !DocSpaceHelper.IsRoom(room.FolderType) ||
             room.ProviderEntry ||
             room.RootFolderType == FolderType.Archive || 
-            !await _fileSecurity.CanEditRoomAsync(room))
+            !await fileSecurity.CanEditRoomAsync(room))
         {
             return null;
         }
 
-        var folderDao = _daoFactory.GetFolderDao<T>();
+        var folderDao = daoFactory.GetFolderDao<T>();
 
         var watermarkSettings = await folderDao.GetWatermarkSettings(room);
 

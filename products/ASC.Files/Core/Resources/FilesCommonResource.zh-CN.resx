@@ -384,7 +384,7 @@
     <value>角色不可用于此用户类型</value>
   </data>
   <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
-    <value>您没有足够的权限来归档房间</value>
+    <value>您没有足够的权限来存档房间</value>
   </data>
   <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
     <value>您没有复制此文件夹的权限</value>
@@ -396,10 +396,10 @@
     <value>您没有移动此文件夹的权限</value>
   </data>
   <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
-    <value>您没有足够的权限来取消归档房间</value>
+    <value>您没有足够的权限来取消存档房间</value>
   </data>
   <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
-    <value>您不能编辑已归档的房间</value>
+    <value>您不能编辑已存档的房间</value>
   </data>
   <data name="ErrorrMessage_PinRoom" xml:space="preserve">
     <value>您不能固定房间</value>
@@ -465,16 +465,16 @@
     <value>普通用户</value>
   </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>不支持将多个文件移动到表单填写房间。一次移动一个 ONLYOFFICE PDF 表单。</value>
+    <value>不支持将多个文件移动到表单填写房间。一次移动一个 {0} PDF 表单。</value>
   </data>
   <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>不支持将文件夹移动到表单填写房间。一次移动一个 ONLYOFFICE PDF 表单。</value>
+    <value>不支持将文件夹移动到表单填写房间。一次移动一个 {0} PDF 表单。</value>
   </data>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>无法将文件移动到此房间。请尝试移动 ONLYOFFICE PDF 表单。</value>
+    <value>无法将文件移动到此房间。请尝试移动 {0} PDF 表单。</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>无法将文件上传到此房间。请尝试上传 ONLYOFFICE PDF 表单。</value>
+    <value>无法将文件上传到此房间。请尝试上传 {0} PDF 表单。</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>填写链接</value>
@@ -502,5 +502,14 @@
   </data>
   <data name="OpenForm" xml:space="preserve">
     <value>打开文件</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>无法删除文件的当前版本</value>
+  </data>
+  <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
+    <value>共享给他人填写</value>
+  </data>
+  <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
+    <value>开始填写</value>
   </data>
 </root>

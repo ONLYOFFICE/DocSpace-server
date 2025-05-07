@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -74,7 +74,7 @@ public class TenantExtra(
 
     public async Task<Tariff> GetCurrentTariffAsync(bool withRequestToPaymentSystem = true, bool refresh = false)
     {
-        return await tariffService.GetTariffAsync(await tenantManager.GetCurrentTenantIdAsync(), withRequestToPaymentSystem, refresh);
+        return await tariffService.GetTariffAsync(tenantManager.GetCurrentTenantId(), withRequestToPaymentSystem, refresh);
     }
 
     public async Task<IEnumerable<TenantQuota>> GetTenantQuotasAsync()
@@ -90,6 +90,7 @@ public class TenantExtra(
         var quotas = await GetTenantQuotasAsync();
 
         return quotas.OrderBy(q => q.CountUser)
+                     .ThenBy(q => q.Year)
                      .FirstOrDefault(q =>
                                      q.CountUser > needUsersCount
                                      && q.MaxTotalSize > usedSpace

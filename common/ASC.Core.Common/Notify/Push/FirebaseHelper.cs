@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -59,17 +59,9 @@ public class FirebaseHelper(AuthContext authContext,
 
         var user = await _userManager.GetUserByUserNameAsync(msg.Reciever);
 
-        if (!Guid.TryParse(msg.ProductID, out var productID))
-        {
-            return;
-        }
-
         var fireBaseUser = new List<FireBaseUser>();
 
-        if (productID == new Guid("{E67BE73D-F9AE-4ce1-8FEC-1880CB518CB4}")) //documents product
-        {
-            fireBaseUser = await firebaseDao.GetUserDeviceTokensAsync(user.Id, msg.TenantId, PushConstants.PushDocAppName);
-        }
+        fireBaseUser = await firebaseDao.GetUserDeviceTokensAsync(user.Id, msg.TenantId, PushConstants.PushDocAppName);
 
         foreach (var fb in fireBaseUser.Where(fb => fb.IsSubscribed is true))
         {
@@ -91,7 +83,7 @@ public class FirebaseHelper(AuthContext authContext,
     public async Task<FireBaseUser> RegisterUserDeviceAsync(string fbDeviceToken, bool isSubscribed, string application)
     {
         var userId = authContext.CurrentAccount.ID;
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
 
         return await firebaseDao.RegisterUserDeviceAsync(userId, tenantId, fbDeviceToken, isSubscribed, application);
     }
@@ -99,7 +91,7 @@ public class FirebaseHelper(AuthContext authContext,
     public async Task<FireBaseUser> UpdateUserAsync(string fbDeviceToken, bool isSubscribed, string application)
     {
         var userId = authContext.CurrentAccount.ID;
-        var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
 
         return await firebaseDao.UpdateUserAsync(userId, tenantId, fbDeviceToken, isSubscribed, application);
     }

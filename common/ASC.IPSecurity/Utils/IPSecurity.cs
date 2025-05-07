@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -67,7 +67,7 @@ public class IPSecurity(
                 return _ipSecurityEnabled.Value;
             }
             
-            var hideSettings = (configuration["web:hide-settings"] ?? "").Split(',', ';', ' ');
+            var hideSettings = configuration.GetSection("web:hide-settings").Get<string[]>() ?? [];
             _ipSecurityEnabled = !hideSettings.Contains("IpSecurity", StringComparer.CurrentCultureIgnoreCase);
             return _ipSecurityEnabled.Value;
         }
@@ -76,7 +76,7 @@ public class IPSecurity(
     
     public async Task<bool> VerifyAsync()
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
 
         if (!IpSecurityEnabled)
         {

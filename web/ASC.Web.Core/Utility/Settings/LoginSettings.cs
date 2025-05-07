@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,14 +26,29 @@
 
 namespace ASC.Web.Core.Utility.Settings;
 
+/// <summary>
+/// The login settings parameters.
+/// </summary>
 public class LoginSettings : ISettings<LoginSettings>
 {
+    /// <summary>
+    /// The login attempt count.
+    /// </summary>
     public int AttemptCount { get; init; }
 
+    /// <summary>
+    /// The login block time.
+    /// </summary>
     public int BlockTime { get; init; }
 
+    /// <summary>
+    /// The login check period.
+    /// </summary>
     public int CheckPeriod { get; init; }
 
+    /// <summary>
+    /// The login ID.
+    /// </summary>
     public Guid ID => new("{588C7E01-8D41-4FCE-9779-D4126E019765}");
 
     public LoginSettings GetDefault()
@@ -45,6 +60,8 @@ public class LoginSettings : ISettings<LoginSettings>
             CheckPeriod = 60
         };
     }
+    
+    public DateTime LastModified { get; set; }
 
     public bool IsDefault
     {

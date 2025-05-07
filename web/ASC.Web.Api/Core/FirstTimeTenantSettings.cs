@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,9 +31,11 @@ public class FirstTimeTenantSettings(
     ILogger<FirstTimeTenantSettings> logger,
     TenantManager tenantManager,
     TenantExtra tenantExtra,
+    TenantLogoManager tenantLogoManager,
     SettingsManager settingsManager,
     UserManager userManager,
     SetupInfo setupInfo,
+    ExternalResourceSettingsHelper externalResourceSettingsHelper,
     SecurityContext securityContext,
     MessageService messageService,
     LicenseReader licenseReader,
@@ -51,7 +53,7 @@ public class FirstTimeTenantSettings(
         {
             var (email, passwordHash, lng, timeZone, amiid, subscribeFromSite) = inDto;
 
-            var tenant = await tenantManager.GetCurrentTenantAsync();
+            var tenant = tenantManager.GetCurrentTenant();
             var settings = await settingsManager.LoadAsync<WizardSettings>();
             if (settings.Completed)
             {
@@ -75,7 +77,7 @@ public class FirstTimeTenantSettings(
                 }
             }
 
-            var currentUser = await userManager.GetUsersAsync((await tenantManager.GetCurrentTenantAsync()).OwnerId);
+            var currentUser = await userManager.GetUsersAsync((tenantManager.GetCurrentTenant()).OwnerId);
 
             if (!UserManagerWrapper.ValidateEmail(email))
             {
@@ -85,6 +87,14 @@ public class FirstTimeTenantSettings(
             if (string.IsNullOrEmpty(passwordHash))
             {
                 throw new Exception(Resource.ErrorPasswordEmpty);
+            }
+
+            if ((await tenantExtra.GetEnableTariffSettings() || ami) && tenantExtra.Enterprise)
+            {
+                await licenseReader.RefreshLicenseAsync(documentServiceLicense.ValidateLicense);
+
+                await TariffSettings.SetLicenseAcceptAsync(settingsManager);
+                messageService.Send(MessageAction.LicenseKeyUploaded);
             }
 
             await securityContext.SetUserPasswordHashAsync(currentUser.Id, passwordHash);
@@ -97,14 +107,6 @@ public class FirstTimeTenantSettings(
             }
 
             await userManager.UpdateUserInfoAsync(currentUser);
-
-            if ((await tenantExtra.GetEnableTariffSettings() || ami) && tenantExtra.Enterprise)
-            {
-                await TariffSettings.SetLicenseAcceptAsync(settingsManager);
-                await messageService.SendAsync(MessageAction.LicenseKeyUploaded);
-
-                await licenseReader.RefreshLicenseAsync(documentServiceLicense.ValidateLicense);
-            }
 
             settings.Completed = true;
             await settingsManager.SaveAsync(settings);
@@ -132,9 +134,15 @@ public class FirstTimeTenantSettings(
         {
             throw new Exception(UserControlsCommonResource.LicenseKeyNotFound);
         }
-        catch (BillingNotConfiguredException)
+        catch (BillingNotConfiguredException ex)
         {
+            logger.ErrorWithException(ex);
             throw new Exception(UserControlsCommonResource.LicenseKeyNotCorrect);
+        }
+        catch (BillingLicenseTypeException)
+        {
+            var logoText = await tenantLogoManager.GetLogoTextAsync();
+            throw new Exception(string.Format(UserControlsCommonResource.LicenseTypeNotCorrect, logoText));
         }
         catch (BillingException)
         {
@@ -237,14 +245,13 @@ public class FirstTimeTenantSettings(
     {
         try
         {
-            var url = (setupInfo.TeamlabSiteRedirect ?? "").Trim().TrimEnd('/');
+            var url = externalResourceSettingsHelper.Site.GetDefaultRegionalFullEntry("subscribe");
 
             if (string.IsNullOrEmpty(url))
             {
                 return;
             }
 
-            url += "/post.ashx";
             var request = new HttpRequestMessage
             {
                 RequestUri = new Uri(url)

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -37,9 +37,10 @@ public class PaymentAccountHandler
         ITariffService tariffService,
         UserManager userManager,
         SecurityContext securityContext,
+        CommonLinkUtility commonLinkUtility,
         TenantManager tenantManager)
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         var payerId = (await tariffService.GetTariffAsync(tenant.Id)).CustomerId;
         var payer = await userManager.GetUserByEmailAsync(payerId);
 
@@ -50,7 +51,9 @@ public class PaymentAccountHandler
         }
 
         var backUrl = context.Request.Query["backUrl"];
-        context.Response.Redirect((await tariffService.GetAccountLinkAsync(tenant.Id, backUrl)).AbsoluteUri);
+        var accountLink = await tariffService.GetAccountLinkAsync(tenant.Id, backUrl);
+
+        context.Response.Redirect(accountLink?.AbsoluteUri ?? commonLinkUtility.GetFullAbsolutePath(""));
     }
 }
 

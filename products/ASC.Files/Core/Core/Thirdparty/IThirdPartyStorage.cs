@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,7 +34,7 @@ public interface IThirdPartyStorage
     public void Close();
     public Task<long> GetMaxUploadSizeAsync();
     public Task<bool> CheckAccessAsync();
-    public Task<Stream> GetThumbnailAsync(string fileId, int width, int height);
+    public Task<Stream> GetThumbnailAsync(string fileId, uint width, uint height);
 }
 
 public interface IThirdPartyItemStorage<TItem> : IThirdPartyStorage

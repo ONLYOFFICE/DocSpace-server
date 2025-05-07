@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,37 +24,43 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using SixLabors.ImageSharp;
+using ImageMagick;
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
+/// <summary>
+/// The white label item parameters.
+/// </summary>
 public class WhiteLabelItemDto
 {
     /// <summary>
-    /// File name
+    /// The white label file name.
     /// </summary>
     public string Name { get; set; }
 
     /// <summary>
-    /// Size
+    /// The white label file size.
     /// </summary>
-    public Size Size { get; set; }
+    public IMagickGeometry Size { get; set; }
 
     /// <summary>
-    /// Path
+    /// The white label file path.
     /// </summary>
     public WhiteLabelItemPathDto Path { get; set; }
 }
 
+/// <summary>
+/// The white label item path parameters.
+/// </summary>
 public class WhiteLabelItemPathDto
 {
     /// <summary>
-    /// Path to the light theme logo
+    /// The path to the light theme logo.
     /// </summary>
     public string Light { get; set; }
 
     /// <summary>
-    /// Path to the dark theme logo
+    /// The path to the dark theme logo.
     /// </summary>
     public string Dark { get; set; }
 }

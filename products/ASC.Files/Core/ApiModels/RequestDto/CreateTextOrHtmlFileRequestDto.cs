@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,41 +27,40 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Parameters for creating an HTML file
+/// The parameters for creating an HTML or text file.
 /// </summary>
 public class CreateTextOrHtmlFile
 {
     /// <summary>
-    /// File title
+    /// The file title for text or HTML file.
     /// </summary>
-    [Required]
     [StringLength(165)]
-    public string Title { get; set; }
+    public required string Title { get; set; }
 
     /// <summary>
-    /// File contents
+    /// The text or HTML file contents.
     /// </summary>
     public string Content { get; set; }
 
     /// <summary>
-    /// Create new if exist
+    /// Specifies whether to create a new text or HTML file if it exists or not.
     /// </summary>
     public bool CreateNewIfExist { get; set; }
 }
 
 /// <summary>
-/// Request parameters for creating an HTML file
+/// The request parameters for creating an HTML or text file.
 /// </summary>
 public class CreateTextOrHtmlFileRequestDto<T>
 {
     /// <summary>
-    /// Folder ID
+    /// The folder ID to create the text or HTML file.
     /// </summary>
     [FromRoute(Name = "folderId")]
-    public T FolderId { get; set; }
+    public required T FolderId { get; set; }
 
     /// <summary>
-    /// File
+    /// The parameters for creating an HTML or text file.
     /// </summary>
     [FromBody]
     public CreateTextOrHtmlFile File { get; set; }

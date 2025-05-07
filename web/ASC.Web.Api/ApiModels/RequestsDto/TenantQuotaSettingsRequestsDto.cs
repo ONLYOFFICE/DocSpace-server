@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,17 +27,17 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// Request parameters for the tenant quota settings
+/// The request parameters for managing the tenant storage quota settings in a multi-tenant system.
 /// </summary>
 public class TenantQuotaSettingsRequestsDto
 {
     /// <summary>
-    /// Tenant ID
+    /// The ID of the tenant whose quota is being configured.
     /// </summary>
-    public int TenantId { get; set; }
+    public required int TenantId { get; set; }
 
     /// <summary>
-    /// Quota
+    /// The storage quota limit in bytes allocated to the tenant.
     /// </summary>
     public long Quota { get; set; }
 }

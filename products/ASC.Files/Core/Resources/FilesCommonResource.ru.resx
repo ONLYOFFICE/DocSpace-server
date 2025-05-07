@@ -465,16 +465,16 @@
     <value>Пользователь</value>
   </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Перемещение нескольких файлов в комнату «Заполнение форм» не поддерживается. Перемещайте по одной PDF-форме ONLYOFFICE.</value>
+    <value>Перемещение нескольких файлов в комнату «Заполнение форм» не поддерживается. Перемещайте по одной PDF-форме {0}.</value>
   </data>
   <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Перемещение папок в комнату «Заполнение форм» не поддерживается. Перемещайте по одной PDF-форме ONLYOFFICE.</value>
+    <value>Перемещение папок в комнату «Заполнение форм» не поддерживается. Перемещайте по одной PDF-форме {0}.</value>
   </data>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Файл не может быть перемещен в эту комнату. Попробуйте переместить PDF-форму ONLYOFFICE.</value>
+    <value>Файл не может быть перемещен в эту комнату. Попробуйте переместить PDF-форму {0}.</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Файл не может быть загружен в эту комнату. Попробуйте загрузить PDF-форму ONLYOFFICE.</value>
+    <value>Файл не может быть загружен в эту комнату. Попробуйте загрузить PDF-форму {0}.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Ссылка для заполнения</value>
@@ -502,5 +502,14 @@
   </data>
   <data name="OpenForm" xml:space="preserve">
     <value>Открыть файл</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Невозможно удалить текущую версию файла</value>
+  </data>
+  <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
+    <value>Предоставить доступ для заполнения</value>
+  </data>
+  <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
+    <value>Начать заполнение</value>
   </data>
 </root>

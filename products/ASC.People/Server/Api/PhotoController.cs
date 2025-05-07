@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,10 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ImageMagick;
+
 using UnknownImageFormatException = ASC.Web.Core.Users.UnknownImageFormatException;
 
 namespace ASC.People.Api;
 
+///<summary>
+/// Photo API.
+///</summary>
 public class PhotoController(
     UserManager userManager,
     PermissionContext permissionContext,
@@ -41,11 +46,12 @@ public class PhotoController(
     SetupInfo setupInfo,
     IHttpClientFactory httpClientFactory,
     IHttpContextAccessor httpContextAccessor,
-    TenantManager tenantManager)
+    TenantManager tenantManager,
+    UserWebhookManager webhookManager)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
 {
     /// <summary>
-    /// Creates photo thumbnails by coordinates of the original image specified in the request.
+    /// Creates the user photo thumbnails by coordinates of the original image specified in the request.
     /// </summary>
     /// <short>
     /// Create photo thumbnails
@@ -76,7 +82,7 @@ public class PhotoController(
 
             if (inDto.Thumbnails.Width == 0 && inDto.Thumbnails.Height == 0)
             {
-                using var img = Image.Load(data);
+                using var img = new MagickImage(data);
                 settings = new UserPhotoThumbnailSettings(inDto.Thumbnails.X, inDto.Thumbnails.Y, img.Width, img.Height);
             }
             else
@@ -96,7 +102,7 @@ public class PhotoController(
         }
 
         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
-        await messageService.SendAsync(MessageAction.UserUpdatedAvatarThumbnails, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
+        messageService.Send(MessageAction.UserUpdatedAvatarThumbnails, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
         return await ThumbnailsDataDto.Create(user, _userPhotoManager);
     }
 
@@ -123,7 +129,7 @@ public class PhotoController(
 
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser);
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         if (user.IsOwner(tenant) && await _userManager.IsDocSpaceAdminAsync(user.Id) && user.Id != securityContext.CurrentAccount.ID)
         {
             throw new Exception(Resource.ErrorAccessDenied);
@@ -131,7 +137,8 @@ public class PhotoController(
 
         await _userPhotoManager.RemovePhotoAsync(user.Id);
         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
-        await messageService.SendAsync(MessageAction.UserDeletedAvatar, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
+        messageService.Send(MessageAction.UserDeletedAvatar, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
+        await webhookManager.PublishAsync(WebhookTrigger.UserUpdated, user);
 
         return await ThumbnailsDataDto.Create(user, _userPhotoManager);
     }
@@ -181,7 +188,7 @@ public class PhotoController(
             throw new SecurityException();
         }
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
         if (user.IsOwner(tenant) && await _userManager.IsDocSpaceAdminAsync(user.Id) && user.Id != securityContext.CurrentAccount.ID)
         {
             throw new Exception(Resource.ErrorAccessDenied);
@@ -193,7 +200,8 @@ public class PhotoController(
         }
 
         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
-        await messageService.SendAsync(MessageAction.UserAddedAvatar, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
+        messageService.Send(MessageAction.UserAddedAvatar, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
+        await webhookManager.PublishAsync(WebhookTrigger.UserUpdated, user);
 
         return await ThumbnailsDataDto.Create(user, _userPhotoManager);
     }
@@ -207,6 +215,10 @@ public class PhotoController(
     /// <path>api/2.0/people/{userid}/photo</path>
     [Tags("People / Photos")]
     [SwaggerResponse(200, "Result of file uploading", typeof(FileUploadResultDto))]
+    [SwaggerResponse(400, "The uploaded file could not be found")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(413, "Image size is too large")]
+    [SwaggerResponse(415, "Unknown image file type")]
     [HttpPost("{userid}/photo")]
     public async Task<FileUploadResultDto> UploadMemberPhoto(UploadMemberPhotoRequestDto inDto)
     {
@@ -229,7 +241,7 @@ public class PhotoController(
 
                 await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(userId), Constants.Action_EditUser);
 
-                var tenant = await tenantManager.GetCurrentTenantAsync();
+                var tenant = tenantManager.GetCurrentTenant();
                 if (securityContext.CurrentAccount.ID != tenant.OwnerId && await _userManager.IsDocSpaceAdminAsync(userId) && userId != securityContext.CurrentAccount.ID)
                 {
                     throw new Exception(Resource.ErrorAccessDenied);
@@ -275,6 +287,9 @@ public class PhotoController(
                             medium = await _userPhotoManager.GetMediumPhotoURL(userId) + $"?hash={cacheKey}",
                             small = await _userPhotoManager.GetSmallPhotoURL(userId) + $"?hash={cacheKey}"
                         };
+
+                    messageService.Send(MessageAction.UserAddedAvatar, MessageTarget.Create(userId), userInfo.DisplayUserName(false, displayUserSettingsHelper));
+                    await webhookManager.PublishAsync(WebhookTrigger.UserUpdated, userInfo);
                 }
                 else
                 {
@@ -316,11 +331,11 @@ public class PhotoController(
 
     private static void CheckImgFormat(byte[] data)
     {
-        IImageFormat imgFormat;
+        MagickFormat imgFormat;
         try
         {
-            using var img = Image.Load(data);
-            imgFormat = img.Metadata.DecodedImageFormat;
+            using var img = new MagickImage(data);
+            imgFormat = img.Format;
         }
         catch (OutOfMemoryException)
         {
@@ -331,7 +346,7 @@ public class PhotoController(
             throw new UnknownImageFormatException(error);
         }
 
-        if (imgFormat.Name != "PNG" && imgFormat.Name != "JPEG")
+        if (imgFormat != MagickFormat.Png && imgFormat != MagickFormat.Jpeg)
         {
             throw new UnknownImageFormatException();
         }

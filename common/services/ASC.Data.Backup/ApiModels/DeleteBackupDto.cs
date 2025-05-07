@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,13 +27,13 @@
 namespace ASC.Data.Backup.ApiModels;
 
 /// <summary>
-/// Delete backup parameters
+/// The parameters to delete the backup.
 /// </summary>
 public class DeleteBackupDto
 {
     /// <summary>
-    /// Backup Id
+    /// The backup ID.
     /// </summary>
     [FromRoute(Name = "id")]
-    public Guid BackupId { get; set; }
+    public required Guid BackupId { get; set; }
 }

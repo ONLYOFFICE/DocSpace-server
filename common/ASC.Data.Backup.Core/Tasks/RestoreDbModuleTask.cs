@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,6 +23,8 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+using ASC.Files.Core.Core.Thirdparty;
 
 namespace ASC.Data.Backup.Tasks;
 
@@ -106,6 +108,10 @@ public class RestoreDbModuleTask : PortalTaskBase
         SetColumns(connection, tableInfo);
 
         await using var stream = _reader.GetEntry(KeyHelper.GetTableZipKey(_module, tableInfo.Name));
+        if (stream == null)
+        {
+            throw new InvalidOperationException(tableInfo.Name + " not found");
+        }
         var lowImportanceRelations = _module
             .TableRelations
             .Where(r => string.Equals(r.ParentTable, tableInfo.Name, StringComparison.InvariantCultureIgnoreCase))

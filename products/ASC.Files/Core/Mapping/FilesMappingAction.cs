@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -62,6 +62,9 @@ public class FilesMappingAction(TenantUtil tenantUtil) :
                 break;
             case FolderType.VirtualRooms:
                 destination.Title = FilesUCResource.VirtualRooms;
+                break;
+            case FolderType.RoomTemplates:
+                destination.Title = FilesUCResource.RoomTemplates;
                 break;
             case FolderType.Archive:
                 destination.Title = FilesUCResource.Archive;

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,18 +27,18 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// 
+/// The parameters for filtering the audit trail types.
 /// </summary>
 public class AuditTrailTypesRequestDto
 {
     /// <summary>
-    /// Product
+    /// The type of product related to the audit trail.
     /// </summary>
     [FromQuery(Name = "productType")]
     public ProductType? ProductType { get; set; }
 
     /// <summary>
-    /// Module
+    /// The module within the product associated with the audit trail.
     /// </summary>
     [FromQuery(Name = "moduleType")]
     public ModuleType? ModuleType { get; set; }

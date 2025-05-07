@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,9 +34,9 @@ public class StorageUploader(
     IDistributedTaskQueueFactory queueFactory,
     ILogger<StorageUploader> logger, 
     IDistributedLockProvider distributedLockProvider,
-    AscDistributedCache cache)
+    IFusionCache cache)
 {
-    protected readonly DistributedTaskQueue _queue = queueFactory.CreateQueue();
+    private readonly DistributedTaskQueue<MigrateOperation> _queue = queueFactory.CreateQueue<MigrateOperation>();
 
     public async Task StartAsync(int tenantId, StorageSettings newStorageSettings, StorageFactoryConfig storageFactoryConfig)
     {
@@ -58,13 +58,13 @@ public class StorageUploader(
     {
         await using (await distributedLockProvider.TryAcquireLockAsync($"lock_{_queue.Name}"))
         {
-            return await _queue.PeekTask<MigrateOperation>(GetCacheKey(tenantId));
+            return await _queue.PeekTask(GetCacheKey(tenantId));
         }
     }
 
     public async Task Stop()
     {
-        foreach (var task in (await _queue.GetAllTasks(DistributedTaskQueue.INSTANCE_ID)).Where(r => r.Status == DistributedTaskStatus.Running))
+        foreach (var task in (await _queue.GetAllTasks(DistributedTaskQueue<MigrateOperation>.INSTANCE_ID)).Where(r => r.Status == DistributedTaskStatus.Running))
         {
             await _queue.DequeueTask(task.Id);
         }
@@ -87,7 +87,7 @@ public class MigrateOperation : DistributedTaskProgress
     private readonly IServiceProvider _serviceProvider;
     private readonly StorageFactoryConfig _storageFactoryConfig;
     private readonly TempStream _tempStream;
-    private readonly AscDistributedCache _cache;
+    private readonly IFusionCache _cache;
     private readonly ICacheNotify<MigrationProgress> _cacheMigrationNotify;
 
     static MigrateOperation()
@@ -109,7 +109,7 @@ public class MigrateOperation : DistributedTaskProgress
         StorageFactoryConfig storageFactoryConfig,
         TempStream tempStream,
         ILogger<StorageUploader> logger,
-        AscDistributedCache cache)
+        IFusionCache cache)
     {
         Id = id;
         Status = DistributedTaskStatus.Created;

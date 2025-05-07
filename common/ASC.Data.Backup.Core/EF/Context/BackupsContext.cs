@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,7 +26,7 @@
 
 namespace ASC.Data.Backup.EF.Context;
 
-public class BackupsContext(DbContextOptions<BackupsContext> options) : DbContext(options)
+public class BackupsContext(DbContextOptions<BackupsContext> options) : BaseDbContext(options)
 {
     public DbSet<BackupRecord> Backups { get; set; }
     public DbSet<BackupSchedule> Schedules { get; set; }

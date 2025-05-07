@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -152,12 +152,12 @@ internal class ProviderFileDao(
     }
 
     public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
-        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = default, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT)
+        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = null, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null, bool applyFormStepFilter = false)
     {
         var selector = _selectorFactory.GetSelector(parentId);
 
         var fileDao = selector.GetFileDao(parentId);
-        var files = fileDao.GetFilesAsync(selector.ConvertId(parentId), orderBy, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, withSubfolders, excludeSubject);
+        var files = fileDao.GetFilesAsync(selector.ConvertId(parentId), orderBy, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, withSubfolders, excludeSubject, formsItemDto: formsItemDto);
         var result = await files.Where(r => r != null).ToListAsync();
 
         foreach (var r in result)
@@ -316,6 +316,33 @@ internal class ProviderFileDao(
     {
         await DeleteFileAsync(fileId, Guid.Empty);
     }
+
+    public async Task DeleteFileVersionAsync(File<string> file, int version)
+    {
+        ArgumentNullException.ThrowIfNull(file);
+
+        if (file.Id == null)
+        {
+            throw new ArgumentException("No file id or folder id toFolderId determine provider");
+        }
+
+        var fileId = file.Id;
+        var folderId = file.ParentId;
+
+        //Convert
+        var selector = _selectorFactory.GetSelector(fileId);
+
+        file.Id = selector.ConvertId(fileId);
+        if (folderId != null)
+        {
+            file.ParentId = selector.ConvertId(folderId);
+        }
+
+        var fileDao = selector.GetFileDao(fileId);
+
+        await fileDao.DeleteFileVersionAsync(file, version);
+    }
+
     public async Task DeleteFileAsync(string fileId, Guid ownerId)
     {
         var selector = _selectorFactory.GetSelector(fileId);
@@ -455,6 +482,31 @@ internal class ProviderFileDao(
         return fileDao.UseTrashForRemove(file);
     }
 
+    public Task SaveFormRoleMapping(string formId, IEnumerable<FormRole> formRoles)
+    {
+        return Task.CompletedTask;
+    }
+    public IAsyncEnumerable<FormRole> GetFormRoles(string formId)
+    {
+        return AsyncEnumerable.Empty<FormRole>();
+    }
+    public Task<(int, List<FormRole>)> GetUserFormRoles(string formId, Guid userId)
+    {
+        return Task.FromResult((-1, new List<FormRole>()));
+    }
+    public IAsyncEnumerable<FormRole> GetUserFormRolesInRoom(string roomId, Guid userId)
+    {
+        return AsyncEnumerable.Empty<FormRole>();
+    }
+    public Task<FormRole> ChangeUserFormRoleAsync(string formId, FormRole formRole)
+    {
+        return Task.FromResult<FormRole>(null);
+    }
+    public Task DeleteFormRolesAsync(string formId)
+    {
+        return Task.CompletedTask;
+    }
+
     #region chunking
 
     public async Task<ChunkedUploadSession<string>> CreateUploadSessionAsync(File<string> file, long contentLength)
@@ -520,14 +572,14 @@ internal class ProviderFileDao(
         return file;
     }
 
-    public override Task<Stream> GetThumbnailAsync(string fileId, int width, int height)
+    public override Task<Stream> GetThumbnailAsync(string fileId, uint width, uint height)
     {
         var selector = _selectorFactory.GetSelector(fileId);
         var fileDao = selector.GetFileDao(fileId);
         return fileDao.GetThumbnailAsync(selector.ConvertId(fileId), width, height);
     }
 
-    public override Task<Stream> GetThumbnailAsync(File<string> file, int width, int height)
+    public override Task<Stream> GetThumbnailAsync(File<string> file, uint width, uint height)
     {
         var fileDao = GetFileDao(file);
         return fileDao.GetThumbnailAsync(file, width, height);

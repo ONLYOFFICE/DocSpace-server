@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -44,6 +44,8 @@ public class RoomsNotificationSettings : ISettings<RoomsNotificationSettings>
             DisabledRooms = []
         };
     }
+    
+    public DateTime LastModified { get; set; }
 }
 
 [Scope]
@@ -91,7 +93,7 @@ public class RoomsNotificationSettingsHelper(SettingsManager settingsManager, Au
             }
         }
 
-        var newSettings = new RoomsNotificationSettings { DisabledRooms = disabledRooms.Select(r => (object)r).ToList() };
+        var newSettings = new RoomsNotificationSettings { DisabledRooms = disabledRooms.Select(object (r) => r).ToList() };
         
         await settingsManager.SaveForCurrentUserAsync(newSettings);
 

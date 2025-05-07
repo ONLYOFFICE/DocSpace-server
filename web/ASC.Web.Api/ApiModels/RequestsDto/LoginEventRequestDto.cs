@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -25,32 +25,33 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Web.Api.ApiModels.RequestsDto;
+
+/// <summary>
+/// The request parameters for querying user login events within the specified time range.
+/// </summary>
 public class LoginEventRequestDto
 {
     /// <summary>
-    /// User ID
+    /// The ID of the user whose login events are being queried.
     /// </summary>
     [FromQuery(Name = "userId")]
     public Guid UserId { get; set; }
 
     /// <summary>
-    /// Action
+    /// The login-related action to filter events by.
     /// </summary>
-
     [FromQuery(Name = "action")]
     public MessageAction Action { get; set; }
 
     /// <summary>
-    /// Start date
+    /// The starting date and time for filtering login events.
     /// </summary>
-
     [FromQuery(Name = "from")]
     public ApiDateTime From { get; set; }
 
     /// <summary>
-    /// End date
+    /// The ending date and time for filtering login events.
     /// </summary>
-
     [FromQuery(Name = "to")]
     public ApiDateTime To { get; set; }
 }

@@ -132,10 +132,16 @@
   <data name="TariffPerMonth" xml:space="preserve">
     <value>mesec</value>
   </data>
+  <data name="TariffPerYear" xml:space="preserve">
+    <value>godina</value>
+  </data>
   <data name="UnknownFirstName" xml:space="preserve">
     <value>Ime</value>
   </data>
   <data name="UnknownLastName" xml:space="preserve">
     <value>Prezime</value>
+  </data>
+  <data name="LicenseTypeNotCorrect" xml:space="preserve">
+    <value>Sukob licenci. Uverite se da ste instalirali ispravno izdanje {0} DocSpace-a (Enterprise ili Developer). Ako imate pitanja, slobodno kontaktirajte svog menadžera prodaje.</value>
   </data>
 </root>

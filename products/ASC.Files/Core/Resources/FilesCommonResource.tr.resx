@@ -465,16 +465,16 @@ docx, xlsx, pptx ile en yüksek uyumluluk.</value>
     <value>Kullanıcı</value>
   </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Birden fazla dosyanın Form Doldurma odasına taşınması desteklenmemektedir. Bir seferde bir ONLYOFFICE PDF formu taşıyın.</value>
+    <value>Birden fazla dosyanın Form Doldurma odasına taşınması desteklenmemektedir. Bir seferde bir {0} PDF formu taşıyın.</value>
   </data>
   <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Klasörlerin Form Doldurma odasına taşınması desteklenmemektedir. Bir seferde bir ONLYOFFICE PDF formu taşıyın.</value>
+    <value>Klasörlerin Form Doldurma odasına taşınması desteklenmemektedir. Bir seferde bir {0} PDF formu taşıyın.</value>
   </data>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Dosya bu odaya taşınamıyor. Lütfen ONLYOFFICE PDF formunu taşımayı deneyin.</value>
+    <value>Dosya bu odaya taşınamıyor. Lütfen {0} PDF formunu taşımayı deneyin.</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Dosya bu odaya yüklenemiyor. Lütfen ONLYOFFICE PDF formunu yüklemeyi deneyin.</value>
+    <value>Dosya bu odaya yüklenemiyor. Lütfen {0} PDF formunu yüklemeyi deneyin.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Doldurulacak bağlantı</value>
@@ -499,5 +499,17 @@ docx, xlsx, pptx ile en yüksek uyumluluk.</value>
   </data>
   <data name="ExternalUser" xml:space="preserve">
     <value>Harici kullanıcı</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Dosyanın mevcut sürümü silinemiyor</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Dosyayı açın</value>
+  </data>
+  <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
+    <value>Doldurulması için paylaş</value>
+  </data>
+  <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
+    <value>Doldurmaya başla</value>
   </data>
 </root>

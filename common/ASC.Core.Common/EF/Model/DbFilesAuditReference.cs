@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,6 +31,7 @@ public class DbFilesAuditReference : BaseEntity
     public int EntryId { get; set; }
     public byte EntryType { get; set; }
     public int AuditEventId { get; set; }
+    public bool Corrupted { get; set; }
     public DbAuditEvent AuditEvent { get; set; }
     
     public override object[] GetKeys()
@@ -69,11 +70,32 @@ public static class FilesAuditReferenceExtension
 
             entity.Property(e => e.AuditEventId)
                 .HasColumnName("audit_event_id");
+            
+            entity.Property(e => e.Corrupted)
+                .HasColumnName("corrupted");
         });
     }
 
     public static void PgSqlAddFilesAuditReference(this ModelBuilder modelBuilder)
     {
-        throw new NotImplementedException();
+        modelBuilder.Entity<DbFilesAuditReference>(entity =>
+        {
+            entity.ToTable("files_audit_reference");
+
+            entity.HasKey(e => new { e.EntryId, e.EntryType, e.AuditEventId })
+                .HasName("pk_files_audit_reference");
+
+            entity.Property(e => e.EntryId)
+                .HasColumnName("entry_id");
+
+            entity.Property(e => e.EntryType)
+                .HasColumnName("entry_type");
+
+            entity.Property(e => e.AuditEventId)
+                .HasColumnName("audit_event_id");
+            
+            entity.Property(e => e.Corrupted)
+                .HasColumnName("corrupted");
+        });
     }
 }

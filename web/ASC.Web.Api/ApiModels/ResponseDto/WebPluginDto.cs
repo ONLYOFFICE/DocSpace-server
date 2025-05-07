@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,80 +26,83 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
+/// <summary>
+/// The web plugin information.
+/// </summary>
 public class WebPluginDto: IMapFrom<WebPlugin>
 {
     /// <summary>
-    /// Name
+    /// The web plugin name.
     /// </summary>
     public string Name { get; set; }
 
     /// <summary>
-    /// Version
+    /// The web plugin version.
     /// </summary>
     public string Version { get; set; }
 
     /// <summary>
-    /// Description
+    /// The web plugin description.
     /// </summary>
     public string Description { get; set; }
 
     /// <summary>
-    /// License
+    /// The web plugin license.
     /// </summary>
     public string License { get; set; }
 
     /// <summary>
-    /// Author
+    /// The web plugin author.
     /// </summary>
     public string Author { get; set; }
 
     /// <summary>
-    /// Home page
+    /// The web plugin home page URL.
     /// </summary>
     public string HomePage { get; set; }
 
     /// <summary>
-    /// PluginName
+    /// The name by which the web plugin is registered in the window object. 
     /// </summary>
     public string PluginName { get; set; }
 
     /// <summary>
-    /// Scopes
+    /// The web plugin scopes.
     /// </summary>
     public string Scopes { get; set; }
 
     /// <summary>
-    /// Image
+    /// The web plugin image.
     /// </summary>
     public string Image { get; set; }
 
     /// <summary>
-    /// Create by
+    /// The user who created the web plugin.
     /// </summary>
     public EmployeeDto CreateBy { get; set; }
 
     /// <summary>
-    /// Create on
+    /// The date and time when the web plugin was created.
     /// </summary>
     public DateTime CreateOn { get; set; }
 
     /// <summary>
-    /// Enabled
+    /// Specifies if the web plugin is enabled or not.
     /// </summary>
     public bool Enabled { get; set; }
 
     /// <summary>
-    /// System
+    /// Specifies if the web plugin is system or not.
     /// </summary>
     public bool System { get; set; }
 
     /// <summary>
-    /// Url
+    /// The web plugin URL.
     /// </summary>
     public string Url { get; set; }
 
     /// <summary>
-    /// Settings
+    /// The web plugin settings.
     /// </summary>
     public string Settings { get; set; }
 

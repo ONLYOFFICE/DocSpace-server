@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -42,8 +42,8 @@ public static class CustomHealthCheck
         hcBuilder.AddCheck("self", () => Running ? HealthCheckResult.Healthy()
                                     : HealthCheckResult.Unhealthy())
                  .AddDatabase(configuration)
-                 .AddDistibutedCache(configuration)
-                 .AddMessageQueue(configuration);
+                 .AddDistibutedCache(configuration);
+                 //.AddMessageQueue(configuration);
 
         return services;
     }
@@ -74,9 +74,10 @@ public static class CustomHealthCheck
         if (string.Equals(connectionString.ProviderName, "MySql.Data.MySqlClient"))
         {
             hcBuilder.AddMySql(connectionString.ConnectionString,
-                               name: "mysqldb",
-                               tags: ["mysqldb", "services"],
-                               timeout: new TimeSpan(0, 0, 30));
+                healthQuery: "SELECT 1;",
+                name: "mysqldb", 
+                tags: ["mysqldb", "services"], 
+                timeout: new TimeSpan(0, 0, 30));
         }
         else if (string.Equals(connectionString.ProviderName, "Npgsql"))
         {
@@ -96,10 +97,14 @@ public static class CustomHealthCheck
 
         if (rabbitMQConfiguration != null)
         {
-            //hcBuilder.AddRabbitMQ(x => x.ConnectionFactory = rabbitMQConfiguration.GetConnectionFactory(),
-            //                    name: "rabbitMQ",
-            //                    tags: new[] { "rabbitMQ", "services" },
-            //                    timeout: new TimeSpan(0, 0, 30));
+            hcBuilder.AddRabbitMQ(async sp => {
+                                        var rabbitMqPersistentConnection = sp.GetRequiredService<IRabbitMQPersistentConnection>();
+
+                                        return await rabbitMqPersistentConnection.GetConnection();
+                                },
+                                name: "rabbitMQ",
+                                tags: new[] { "rabbitMQ", "services" },
+                                timeout: new TimeSpan(0, 0, 30));
         }
         else
         {

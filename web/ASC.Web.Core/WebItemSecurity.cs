@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -103,7 +103,7 @@ public class WebItemSecurity(UserManager userManager,
 
     public async Task<bool> IsAvailableForUserAsync(Guid itemId, Guid @for)
     {
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
 
         var id = itemId.ToString();
         bool result;
@@ -192,7 +192,7 @@ public class WebItemSecurity(UserManager userManager,
             await authorizationManager.AddAceAsync(a);
         }
 
-        await webItemSecurityCache.PublishAsync(await tenantManager.GetCurrentTenantIdAsync());
+        await webItemSecurityCache.PublishAsync(tenantManager.GetCurrentTenantId());
     }
 
     public async Task<WebItemSecurityInfo> GetSecurityInfoAsync(string id)
@@ -243,7 +243,7 @@ public class WebItemSecurity(UserManager userManager,
 
         if (administrator)
         {
-            var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+            var tenantId = tenantManager.GetCurrentTenantId();
 
             await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenantId)))
             {
@@ -295,7 +295,7 @@ public class WebItemSecurity(UserManager userManager,
             await userManager.RemoveUserFromGroupAsync(userid, productId);
         }
 
-        await webItemSecurityCache.PublishAsync(await tenantManager.GetCurrentTenantIdAsync());
+        await webItemSecurityCache.PublishAsync(tenantManager.GetCurrentTenantId());
     }
 
     public async Task<bool> IsProductAdministratorAsync(Guid productId, Guid userid)

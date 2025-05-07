@@ -118,12 +118,21 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="BackupNotFound" xml:space="preserve">
-    <value>Резервна копија датотеке је неважећа. Молимо користите датотеку креирану у ONLYOFFICE верзији 11.5 или новијој.</value>
+    <value>Резервна копија датотеке је неважећа. Молимо користите датотеку креирану на истом порталу.</value>
   </data>
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Постави лозинку</value>
   </data>
   <data name="LargeBackup" xml:space="preserve">
     <value>Резервна копија је већа него целокупна величина портала</value>
+  </data>
+  <data name="BackupException" xml:space="preserve">
+    <value>Дошло је до грешке приликом креирања резервне копије. Покушајте поново или контактирајте подршку.</value>
+  </data>
+  <data name="BackupInvalid" xml:space="preserve">
+    <value>Фајл резервне копије није важећи.</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>Дошло је до грешке приликом враћања резервне копије. Покушајте поново или контактирајте подршку.</value>
   </data>
 </root>

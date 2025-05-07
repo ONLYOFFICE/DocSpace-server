@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -109,12 +109,10 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
                 Actions.EnterpriseWhitelabelAdminWelcomeV1,
                 Actions.OpensourceAdminWelcomeV1,
 
-                Actions.SaasAdminUserDocsTipsV1,
-                Actions.OpensourceAdminDocsTipsV1,
-                Actions.OpensourceUserDocsTipsV1,
-                Actions.EnterpriseAdminUserDocsTipsV1,
+                Actions.DocsTips,
 
                 Actions.SaasAdminTrialWarningAfterHalfYearV1,
+                Actions.SaasAdminStartupWarningAfterYearV1,
 
                 Actions.PortalDeleteSuccessV1,
 
@@ -157,7 +155,10 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
                 Actions.DeveloperAdminPaymentWarningGracePeriodBeforeActivation,
                 Actions.DeveloperAdminPaymentWarningGracePeriodActivation,
                 Actions.DeveloperAdminPaymentWarningGracePeriodBeforeExpiration,
-                Actions.DeveloperAdminPaymentWarningGracePeriodExpiration
+                Actions.DeveloperAdminPaymentWarningGracePeriodExpiration,
+
+                Actions.UserTypeChanged,
+                Actions.UserRoleChanged
             );
     }
 

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -141,16 +141,16 @@ public class ConnectionsController(
     }
 
     /// <summary>
-    /// Logs out from all the active connections of the current user and changes their password.
+    /// Logs out from all the active connections for the current user and changes their password.
     /// </summary>
     /// <short>
     /// Log out and change password
     /// </short>
     /// <path>api/2.0/security/activeconnections/logoutallchangepassword</path>
     [Tags("Security / Active connections")]
-    [SwaggerResponse(200, "URL to the confirmation message for changing a password", typeof(object))]
+    [SwaggerResponse(200, "URL to the confirmation message for changing a password", typeof(string))]
     [HttpPut("logoutallchangepassword")]
-    public async Task<object> LogOutAllActiveConnectionsChangePassword()
+    public async Task<string> LogOutAllActiveConnectionsChangePassword()
     {
         try
         {
@@ -165,9 +165,9 @@ public class ConnectionsController(
             auditEventDate = auditEventDate.AddTicks(-(auditEventDate.Ticks % TimeSpan.TicksPerSecond));
 
             var hash = auditEventDate.ToString("s", CultureInfo.InvariantCulture);
-            var confirmationUrl = await commonLinkUtility.GetConfirmationEmailUrlAsync(user.Email, ConfirmType.PasswordChange, hash, user.Id);
+            var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.PasswordChange, hash, user.Id);
 
-            await messageService.SendAsync(MessageAction.UserSentPasswordChangeInstructions, MessageTarget.Create(user.Id), auditEventDate, userName);
+            messageService.Send(MessageAction.UserSentPasswordChangeInstructions, MessageTarget.Create(user.Id), auditEventDate, userName);
 
             return confirmationUrl;
         }
@@ -179,7 +179,7 @@ public class ConnectionsController(
     }
 
     /// <summary>
-    /// Logs out from all the active connections of the user with the ID specified in the request.
+    /// Logs out from all the active connections for the user with the ID specified in the request.
     /// </summary>
     /// <short>
     /// Log out for the user by ID
@@ -206,13 +206,13 @@ public class ConnectionsController(
     /// Logs out from all the active connections except the current connection.
     /// </summary>
     /// <short>
-    /// Log out from all connections
+    /// Log out from all connections except the current one
     /// </short>
     /// <path>api/2.0/security/activeconnections/logoutallexceptthis</path>
     [Tags("Security / Active connections")]
-    [SwaggerResponse(200, "Current user name", typeof(object))]
+    [SwaggerResponse(200, "Current user name", typeof(string))]
     [HttpPut("logoutallexceptthis")]
-    public async Task<object> LogOutAllExceptThisConnection()
+    public async Task<string> LogOutAllExceptThisConnection()
     {
         try
         {
@@ -227,7 +227,7 @@ public class ConnectionsController(
                 await quotaSocketManager.LogoutSession(user.Id, loginEvent.Id);
             }
 
-            await messageService.SendAsync(MessageAction.UserLogoutActiveConnections, userName);
+            messageService.Send(MessageAction.UserLogoutActiveConnections, userName);
             return userName;
         }
         catch (Exception ex)
@@ -276,7 +276,7 @@ public class ConnectionsController(
                 await quotaSocketManager.LogoutSession(loginEvent.UserId.Value, loginEvent.Id);
             }
 
-            await messageService.SendAsync(MessageAction.UserLogoutActiveConnection, userName);
+            messageService.Send(MessageAction.UserLogoutActiveConnection, userName);
             return true;
         }
         catch (Exception ex)
@@ -293,7 +293,7 @@ public class ConnectionsController(
         var userName = user.DisplayUserName(false, displayUserSettingsHelper);
         var auditEventDate = DateTime.UtcNow;
 
-        await messageService.SendAsync(currentUserId.Equals(user.Id) ? MessageAction.UserLogoutActiveConnections : MessageAction.UserLogoutActiveConnectionsForUser, MessageTarget.Create(user.Id), auditEventDate, userName);
+        messageService.Send(currentUserId.Equals(user.Id) ? MessageAction.UserLogoutActiveConnections : MessageAction.UserLogoutActiveConnectionsForUser, MessageTarget.Create(user.Id), auditEventDate, userName);
         await cookiesManager.ResetUserCookieAsync(user.Id);
 
         await quotaSocketManager.LogoutSession(user.Id);

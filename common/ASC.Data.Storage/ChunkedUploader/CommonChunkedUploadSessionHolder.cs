@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,7 +29,7 @@ namespace ASC.Core.ChunkedUploader;
 public class CommonChunkedUploadSessionHolder(
     IDataStore dataStore,
     string domain,
-    AscDistributedCache cache,
+    IFusionCache cache,
     long maxChunkUploadSize = 10 * 1024 * 1024)
 {
     public IDataStore DataStore { get; set; } = dataStore;
@@ -63,7 +63,7 @@ public class CommonChunkedUploadSessionHolder(
         var dict = new Dictionary<int, Chunk>();
         for (var i = 1; i <= count; i++)
         {
-            var chunk = await cache.GetAsync<Chunk>($"{uploadSession.Id} - {i}");
+            var chunk = await cache.GetOrDefaultAsync<Chunk>($"{uploadSession.Id} - {i}");
             if (chunk == null)
             {
                 break;
@@ -82,15 +82,13 @@ public class CommonChunkedUploadSessionHolder(
         {
             throw new ArgumentException("uploadSize != bytesTotal");
         }
-        else
-        {
-            var path = uploadSession.TempPath;
-            var uploadId = uploadSession.UploadId;
-            var eTags = chunks.ToDictionary(c => c.Key, c => c.Value.ETag);
 
-            await DataStore.FinalizeChunkedUploadAsync(domain, path, uploadId, eTags);
-            return Path.GetFileName(path);
-        }
+        var path = uploadSession.TempPath;
+        var uploadId = uploadSession.UploadId;
+        var eTags = chunks.ToDictionary(c => c.Key, c => c.Value.ETag);
+
+        await DataStore.FinalizeChunkedUploadAsync(domain, path, uploadId, eTags);
+        return Path.GetFileName(path);
     }
 
     public async Task MoveAsync(CommonChunkedUploadSession chunkedUploadSession, string newPath,
@@ -136,6 +134,6 @@ public class CommonChunkedUploadSessionHolder(
             Length = length
         };
 
-        await cache.InsertAsync($"{uploadSession.Id} - {chunkNumber}", chunk, TimeSpan.FromHours(12));
+        await cache.SetAsync($"{uploadSession.Id} - {chunkNumber}", chunk, TimeSpan.FromHours(12));
     }
 }

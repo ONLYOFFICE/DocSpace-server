@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -275,7 +275,7 @@ public class SmscProvider : SmsProvider, IValidateKeysProvider
 
     public async Task<bool> ValidateKeysAsync()
     {
-        return double.TryParse(await GetBalanceAsync(await TenantManager.GetCurrentTenantAsync(false), true), NumberStyles.Number, CultureInfo.InvariantCulture, out var balance) && balance > 0;
+        return double.TryParse(await GetBalanceAsync(TenantManager.GetCurrentTenant(false), true), NumberStyles.Number, CultureInfo.InvariantCulture, out var balance) && balance > 0;
     }
 }
 

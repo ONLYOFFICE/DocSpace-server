@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,7 +30,6 @@ namespace ASC.Files.Core.Helpers;
 public class DocumentServiceLicense(ICache cache,
     CoreBaseSettings coreBaseSettings,
     FilesLinkUtility filesLinkUtility,
-    FileUtility fileUtility,
     IHttpClientFactory clientFactory)
 {
     private static readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(15);
@@ -53,14 +52,15 @@ public class DocumentServiceLicense(ICache cache,
         if (commandResponse == null)
         {
             commandResponse = await CommandRequestAsync(
-                   fileUtility,
                    filesLinkUtility.DocServiceCommandUrl,
                    CommandMethod.License,
                    null,
                    null,
                    null,
                    null,
-                   fileUtility.SignatureSecret,
+                   filesLinkUtility.DocServiceSignatureSecret,
+                   filesLinkUtility.DocServiceSignatureHeader,
+                   await filesLinkUtility.GetDocServiceSslVerificationAsync(),
                    clientFactory
                    );
 
@@ -73,23 +73,46 @@ public class DocumentServiceLicense(ICache cache,
         return commandResponse;
     }
 
-    public async Task<bool> ValidateLicense()
+    public async Task<(bool, string)> ValidateLicense(License license)
     {
-        var commandResponse = await GetDocumentServiceLicenseAsync(false);
+        var attempt = 0;
 
-        if (commandResponse == null)
+        while (attempt <= 3)
         {
-            return true;
+            await Task.Delay((int)(Math.Pow(2, attempt) * 1000));
+
+            var commandResponse = await GetDocumentServiceLicenseAsync(false);
+
+            if (commandResponse == null)
+            {
+                return (true, null);
+            }
+
+            if (commandResponse.Error != ErrorTypes.NoError)
+            {
+                return (false, commandResponse.ErrorString);
+            }
+
+            if (commandResponse.License.ResourceKey == license.ResourceKey ||
+                commandResponse.License.CustomerId == license.CustomerId)
+            {
+                if (commandResponse.Server == null)
+                {
+                    return (false, "Server is null");
+                }
+
+                return commandResponse.Server.ResultType == CommandResponse.ServerInfo.ResultTypes.Success ||
+                    commandResponse.Server.ResultType == CommandResponse.ServerInfo.ResultTypes.SuccessLimit
+                    ? (true, null)
+                    : (false, $"ResultType is {commandResponse.Server.ResultType}");
+            }
+            else
+            {
+                attempt += 1;
+            }
         }
 
-        if (commandResponse.Error != ErrorTypes.NoError)
-        {
-            return false;
-        }
-
-        return commandResponse.Server != null &&
-            (commandResponse.Server.ResultType == CommandResponse.ServerInfo.ResultTypes.Success ||
-            commandResponse.Server.ResultType == CommandResponse.ServerInfo.ResultTypes.SuccessLimit);
+        return (false,  $"{attempt} failed attempts");
     }
 
     public async Task<(Dictionary<string, DateTime>, License)> GetLicenseQuotaAsync()

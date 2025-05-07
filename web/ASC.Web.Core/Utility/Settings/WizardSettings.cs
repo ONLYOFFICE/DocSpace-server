@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,6 +26,9 @@
 
 namespace ASC.Web.Core.Utility.Settings;
 
+/// <summary>
+/// The Wizard settings.
+/// </summary>
 public class WizardSettings : ISettings<WizardSettings>
 {
     /// <summary>
@@ -33,6 +36,9 @@ public class WizardSettings : ISettings<WizardSettings>
     /// </summary>
     public bool Completed { get; set; }
 
+    /// <summary>
+    /// The tenant ID.
+    /// </summary>
     [JsonIgnore]
     public Guid ID
     {
@@ -47,4 +53,6 @@ public class WizardSettings : ISettings<WizardSettings>
             Completed = true
         };
     }
+    
+    public DateTime LastModified { get; set; }
 }

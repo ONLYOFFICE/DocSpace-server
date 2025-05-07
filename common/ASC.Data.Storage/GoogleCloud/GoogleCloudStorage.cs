@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -46,7 +46,6 @@ public class GoogleCloudStorage(TempStream tempStream,
     : BaseStorage(tempStream, tenantManager, pathUtils, emailValidationKeyProvider, httpContextAccessor, factory, options, clientFactory, tenantQuotaFeatureStatHelper, quotaSocketManager, settingsManager, quotaService, userManager, customQuota)
 {
     public override bool IsSupportChunking => true;
-    public override bool ContentAsAttachment => _contentAsAttachment;
 
     private string _subDir = string.Empty;
     private Dictionary<string, PredefinedObjectAcl> _domainsAcl;
@@ -56,9 +55,8 @@ public class GoogleCloudStorage(TempStream tempStream,
     private Uri _bucketRoot;
     private Uri _bucketSSlRoot;
     private bool _lowerCasing = true;
-    private bool _contentAsAttachment;
 
-    public override IDataStore Configure(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator dataStoreValidator)
+    public override Task<IDataStore> ConfigureAsync(string tenant, Handler handlerConfig, Module moduleConfig, IDictionary<string, string> props, IDataStoreValidator dataStoreValidator)
     {
         Tenant = tenant;
 
@@ -67,11 +65,11 @@ public class GoogleCloudStorage(TempStream tempStream,
             Modulename = moduleConfig.Name;
             DataList = new DataList(moduleConfig);
 
-            _contentAsAttachment = moduleConfig.ContentAsAttachment;
-
             DomainsExpires = moduleConfig.Domain.Where(x => x.Expires != TimeSpan.Zero).ToDictionary(x => x.Name, y => y.Expires);
-
             DomainsExpires.Add(string.Empty, moduleConfig.Expires);
+
+            DomainsContentAsAttachment = moduleConfig.Domain.Where(x => x.ContentAsAttachment.HasValue).ToDictionary(x => x.Name, y => y.ContentAsAttachment.Value);
+            DomainsContentAsAttachment.Add(string.Empty, moduleConfig.ContentAsAttachment.HasValue ? moduleConfig.ContentAsAttachment.Value : false);
 
             _domainsAcl = moduleConfig.Domain.ToDictionary(x => x.Name, y => GetGoogleCloudAcl(y.Acl));
             _moduleAcl = GetGoogleCloudAcl(moduleConfig.Acl);
@@ -82,6 +80,8 @@ public class GoogleCloudStorage(TempStream tempStream,
             DataList = null;
 
             DomainsExpires = new Dictionary<string, TimeSpan> { { string.Empty, TimeSpan.Zero } };
+            DomainsContentAsAttachment = new Dictionary<string, bool> { { string.Empty, false } };
+
             _domainsAcl = new Dictionary<string, PredefinedObjectAcl>();
             _moduleAcl = PredefinedObjectAcl.PublicRead;
         }
@@ -108,7 +108,7 @@ public class GoogleCloudStorage(TempStream tempStream,
 
         DataStoreValidator = dataStoreValidator;
         
-        return this;
+        return Task.FromResult<IDataStore>(this);
     }
 
     public static long DateToUnixTimestamp(DateTime date)
@@ -251,7 +251,7 @@ public class GoogleCloudStorage(TempStream tempStream,
             var uploaded = await storage.UploadObjectAsync(_bucket, MakePath(domain, path), mime, buffered, uploadObjectOptions);
 
             uploaded.ContentEncoding = contentEncoding;
-            uploaded.CacheControl = string.Format("public, maxage={0}", (int)TimeSpan.FromDays(cacheDays).TotalSeconds);
+            uploaded.CacheControl = $"public, maxage={(int)TimeSpan.FromDays(cacheDays).TotalSeconds}";
 
             uploaded.Metadata ??= new Dictionary<string, string>();
 
@@ -419,7 +419,7 @@ public class GoogleCloudStorage(TempStream tempStream,
         var dstKey = MakePath(newDomain, newPath);
         var size = await GetFileSizeAsync(srcDomain, srcPath);
 
-        storage.CopyObject(_bucket, srcKey, _bucket, dstKey, new CopyObjectOptions
+        await storage.CopyObjectAsync(_bucket, srcKey, _bucket, dstKey, new CopyObjectOptions
         {
             DestinationPredefinedAcl = GetDomainACL(newDomain)
         });
@@ -638,7 +638,7 @@ public class GoogleCloudStorage(TempStream tempStream,
 
             var uploaded = await storage.UploadObjectAsync(_bucket, MakePath(domain, path), "application/octet-stream", buffered, uploadObjectOptions);
 
-            uploaded.CacheControl = string.Format("public, maxage={0}", (int)TimeSpan.FromDays(5).TotalSeconds);
+            uploaded.CacheControl = $"public, maxage={(int)TimeSpan.FromDays(5).TotalSeconds}";
             uploaded.ContentDisposition = "attachment";
             uploaded.Metadata ??= new Dictionary<string, string>();
             uploaded.Metadata["Expires"] = DateTime.UtcNow.Add(TimeSpan.FromDays(5)).ToString("R", CultureInfo.InvariantCulture);

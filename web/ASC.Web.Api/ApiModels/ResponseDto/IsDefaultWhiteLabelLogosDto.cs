@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,15 +26,18 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
+/// <summary>
+/// The default white label logos parameters.
+/// </summary>
 public class IsDefaultWhiteLabelLogosDto
 {
     /// <summary>
-    /// White label logo name
+    /// The white label logo name.
     /// </summary>
     public string Name { get; set; }
 
     /// <summary>
-    /// Specifies if the white label logo is default or not
+    /// Specifies if the white label logo is default or not.
     /// </summary>
     public bool Default { get; set; }
 }

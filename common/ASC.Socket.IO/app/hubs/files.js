@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,6 +28,8 @@ module.exports = (io) => {
   const logger = require("../log.js");
   const moment = require("moment");
   const filesIO = io; //TODO: Restore .of("/files");
+
+  const commonRooms = ["storage-encryption"];
 
   filesIO.on("connection", (socket) => {
     const session = socket.handshake.session;
@@ -64,6 +66,14 @@ module.exports = (io) => {
       return;
     }
 
+    const isAdmin = () => {
+      return socket.handshake.session?.user?.isAdmin;
+    }
+
+    const isOwner = () => {
+      return socket.handshake.session?.user?.isOwner;
+    }
+
     const userId = () => {
       return socket.handshake.session?.user?.id;
     }
@@ -76,7 +86,7 @@ module.exports = (io) => {
     }
 
     const getRoom = (roomPart) => {
-      return `${tenantId()}-${roomPart}`;
+      return commonRooms.includes(roomPart) ? roomPart : `${tenantId()}-${roomPart}`;
     };
 
     const connectMessage = !session.anonymous ? 
@@ -101,20 +111,36 @@ module.exports = (io) => {
       changeSubscription(roomParts, individual, unsubscribe);
     });
 
+    socket.on("subscribeInSpaces", ({ roomParts, individual }) => {
+      changeSubscription(roomParts, individual, subscribeInSpaces);
+    });
+
+    socket.on("unsubscribeInSpaces", ({ roomParts, individual }) => {
+      changeSubscription(roomParts, individual, unsubscribeInSpaces);
+    });
+
     socket.on("refresh-folder", (folderId) => {
       const room = getRoom(`DIR-${folderId}`);
       logger.info(`refresh folder ${folderId} in room ${room}`);
       socket.to(room).emit("refresh-folder", folderId);
     });
 
-    socket.on("restore-backup", () => {
-      const room = getRoom("backup-restore");
+    socket.on("restore-backup", (data) => {
       const sess = socket.handshake.session;
       const tenant = sess?.portal?.tenantId || "unknown";
       const user = sess?.user?.id || "unknown";
       const sessId = sess?.id;
 
       logger.info(`WS: restore backup in room ${room} session=[sessionId='sess:${sessId}' tenantId=${tenant}|${tenantId()} userId='${user}'|'${userId()}']`);
+
+      if(data.dump)
+      {
+        var room = `restore`;
+      }
+      else
+      {
+        var room = getRoom("restore");
+      }
       socket.to(room).emit("restore-backup");
     });
 
@@ -144,21 +170,35 @@ module.exports = (io) => {
     function subscribe(roomParts) {
       if (!roomParts) return;
 
-      if (Array.isArray(roomParts)) {
+      if (Array.isArray(roomParts)) 
+      {
+        if(!isAdmin() && !isOwner())
+        {
+          roomParts = roomParts.filter(rp=> rp != "backup");
+        }
         const rooms = roomParts.map((p) => getRoom(p));
         logger.info(`client ${socket.id} join rooms [${rooms.join(",")}]`);
         socket.join(rooms);
-      } else {
+      } 
+      else 
+      {
+        if(roomParts == "backup" && !isAdmin() && !isOwner())
+        {
+            return;
+        }
         const room = getRoom(roomParts);
         logger.info(`client ${socket.id} join room ${room}`);
         socket.join(room);
       }
     }
 
+    changeSubscription("change-my-type", true, subscribe);
+
     function unsubscribe(roomParts) {
       if (!roomParts) return;
 
-      if (Array.isArray(roomParts)) {
+      if (Array.isArray(roomParts))
+      {
         const rooms = roomParts.map((p) => getRoom(p));
         logger.info(`client ${socket.id} leave rooms [${rooms.join(",")}]`);
         socket.leave(rooms);
@@ -166,6 +206,42 @@ module.exports = (io) => {
         const room = getRoom(roomParts);
         logger.info(`client ${socket.id} leave room ${room}`);
         socket.leave(room);
+      }
+    }
+
+    function subscribeInSpaces(roomParts) {
+      if (!roomParts) return;
+
+      if (Array.isArray(roomParts)) 
+      {
+        if(!isAdmin() && !isOwner())
+        {
+          roomParts = roomParts.filter(rp=> rp != "backup");
+        }
+        logger.info(`client ${socket.id} join rooms [${roomParts.join(",")}]`);
+        socket.join(roomParts);
+      } 
+      else 
+      {
+        if(roomParts == "backup" && !isAdmin() && !isOwner())
+        {
+            return;
+        }
+        logger.info(`client ${socket.id} join room ${roomParts}`);
+        socket.join(roomParts);
+      }
+    }
+
+    function unsubscribeInSpaces(roomParts) {
+      if (!roomParts) return;
+
+      if (Array.isArray(roomParts))
+      {
+        logger.info(`client ${socket.id} leave rooms [${roomParts.join(",")}]`);
+        socket.leave(roomParts);
+      } else {
+        logger.info(`client ${socket.id} leave room ${roomParts}`);
+        socket.leave(roomParts);
       }
     }
 
@@ -343,6 +419,116 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:logout-session", loginEventId);
   }
 
+  function backupProgress({ tenantId, dump, percentage } = {}) 
+  {
+    if(dump)
+    {
+      var room = `backup`;
+    }
+    else
+    {
+      var room = `${tenantId}-backup`;
+    }
+    filesIO.to(room).emit("s:backup-progress", {progress: percentage});
+  }
+  
+  function changeMyType({ tenantId, user, admin, hasPersonalFolder } = {}) {
+    var room = `${tenantId}-change-my-type-${user.id}`;
+    filesIO.to(room).emit("s:change-my-type",  {id: user.id, data: user, admin: admin, hasPersonalFolder: hasPersonalFolder});
+  }
+
+  function addUser({ tenantId, user } = {}) {
+    var room = `${tenantId}-users`;
+    filesIO.to(room).emit("s:add-user",  {id: user.id, data: user});
+  }
+
+  function updateUser({ tenantId, user } = {}) {
+    var room = `${tenantId}-users`;
+    filesIO.to(room).emit("s:update-user", {id: user.id, data: user});
+  }
+
+  function deleteUser({ tenantId, userId } = {}) {
+    var room = `${tenantId}-users`;
+    filesIO.to(room).emit("s:delete-user", userId);
+  }
+
+  function addGroup({ tenantId, group } = {}) {
+    var room = `${tenantId}-groups`;
+    filesIO.to(room).emit("s:add-group",  {id: group.id, data: group});
+  }
+
+  function updateGroup({ tenantId, group } = {}) {
+    var room = `${tenantId}-groups`;
+    filesIO.to(room).emit("s:update-group", {id: group.id, data: group});
+  }
+
+  function deleteGroup({ tenantId, groupId } = {}) {
+    var room = `${tenantId}-groups`;
+    filesIO.to(room).emit("s:delete-group", groupId);
+  }
+
+  function addGuest({ tenantId, room, guest } = {}) {
+    var room = `${tenantId}-guests-${room}`;
+    filesIO.to(room).emit("s:add-guest",  {id: guest.id, data: guest});
+  }
+
+  function updateGuest({ tenantId, room, guest } = {}) {
+    var room = `${tenantId}-guests-${room}`;
+    filesIO.to(room).emit("s:update-guest", {id: guest.id, data: guest});
+  }
+
+  function deleteGuest({ tenantId, room, guestId } = {}) {
+    var room = `${tenantId}-guests-${room}`;
+    filesIO.to(room).emit("s:delete-guest", guestId);
+  }
+
+  function backupProgress({ tenantId, percentage } = {}) {
+    filesIO.to(`${tenantId}-backup`).emit("s:backup-progress", {progress: percentage});
+  }
+
+  function restoreProgress({ tenantId, dump, percentage } = {})
+  {
+    if(dump)
+      {
+        var room = `restore`;
+      }
+      else
+      {
+        var room = `${tenantId}-restore`;
+      }
+    filesIO.to(room).emit("s:restore-progress", {progress: percentage});
+  }
+
+  function endBackup({ tenantId, dump, result } = {})
+  {
+    if(dump)
+      {
+        var room = `backup`;
+      }
+      else
+      {
+        var room = `${tenantId}-backup`;
+      }
+    filesIO.to(room).emit("s:backup-progress", result);
+  }
+
+  function endRestore({ tenantId, dump, result } = {}) {
+    if(dump)
+      {
+        var room = `restore`;
+      }
+      else
+      {
+        var room = `${tenantId}-restore`;
+      }
+    filesIO.to(room).emit("s:restore-progress", result);
+  }
+
+  function encryptionProgress({ room, percentage, error } = {}) {
+    logger.info(`${room} progress ${percentage}, error ${error}`);
+    filesIO.to(room).emit("s:encryption-progress", { percentage, error });
+  }
+
   return {
     startEdit,
     stopEdit,
@@ -360,6 +546,21 @@ module.exports = (io) => {
     markAsNewFolders,
     changeInvitationLimitValue,
     updateHistory,
-    logoutSession
+    logoutSession,
+    changeMyType,
+    addUser,
+    updateUser,
+    deleteUser,
+    addGroup,
+    updateGroup,
+    deleteGroup,
+    addGuest,
+    updateGuest,
+    deleteGuest,
+    backupProgress,
+    restoreProgress,
+    endBackup,
+    endRestore,
+    encryptionProgress
   };
 };

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,11 +32,13 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         FileSecurity fileSecurity,
         FileUtility fileUtility,
+        FilesLinkUtility filesLinkUtility,
         MachinePseudoKeys machinePseudoKeys,
         Global global,
         TenantUtil tenantUtil,
         DocumentServiceConnector documentServiceConnector,
         LockerManager lockerManager,
+        CustomFilterManager customFilterManager,
         FileTrackerHelper fileTracker,
         EntryStatusManager entryStatusManager,
         IServiceProvider serviceProvider,
@@ -119,7 +121,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             editPossible = false;
         }
 
-        rightModifyFilter = rightModifyFilter && await fileSecurity.CanEditAsync(file);
+        rightModifyFilter = rightModifyFilter && await fileSecurity.CanEditAsync(file) && !await customFilterManager.CustomFilterEnabledForMeAsync(file);
         rightToRename = rightToRename && rightToEdit && await fileSecurity.CanRenameAsync(file);
 
         rightToReview = rightToReview && await fileSecurity.CanReviewAsync(file);
@@ -177,7 +179,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         var locatedInPrivateRoom = false;
         Options options = null;
-        if (file.RootFolderType == FolderType.VirtualRooms || file.RootFolderType == FolderType.Archive)
+        if (file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
         {
             var folderDao = daoFactory.GetFolderDao<T>();
             var room = await DocSpaceHelper.GetParentRoom(file, folderDao);
@@ -222,7 +224,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             bool canCoAuthoring;
             if ((editPossible || reviewPossible || fillFormsPossible || commentPossible)
                 && tryCoAuthoring
-                && (!(canCoAuthoring = fileUtility.CanCoAuthoring(file.Title)) || fileTracker.IsEditingAlone(file.Id)))
+                && (!(canCoAuthoring = fileUtility.CanCoAuthoring(file.Title)) || await fileTracker.IsEditingAloneAsync(file.Id)))
             {
                 if (tryEdit)
                 {
@@ -302,12 +304,14 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
     public string GetSignature(object payload)
     {
-        if (string.IsNullOrEmpty(fileUtility.SignatureSecret))
+        var signatureSecret = filesLinkUtility.DocServiceSignatureSecret;
+
+        if (string.IsNullOrEmpty(signatureSecret))
         {
             return null;
         }
 
-        return JsonWebToken.Encode(payload, fileUtility.SignatureSecret);
+        return JsonWebToken.Encode(payload, signatureSecret);
     }
 
     public async Task<File<T>> CheckNeedDeletion<T>(IFileDao<T> fileDao, T fileId, FormFillingProperties<T> formFillingProperties)
@@ -370,13 +374,13 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             runs.Add(new Run(watermarkSettings.Text));
             runs.Add(new Run(Environment.NewLine, false));
         }
-        if (runs.Any())
+        if (runs.Count != 0)
         {
             runs.Remove(runs.Last());
         }
         paragrahs.Add(new Paragraph(runs));
 
-        var options = new Options()
+        var options = new Options
         {
             WatermarkOnDraw = new WatermarkOnDraw(watermarkSettings.ImageWidth * watermarkSettings.ImageScale / 100, watermarkSettings.ImageHeight * watermarkSettings.ImageScale / 100 , watermarkSettings.ImageUrl, watermarkSettings.Rotate, paragrahs)
         };
@@ -408,12 +412,12 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
     public string GetDocSubmitKeyAsync(string key)
     {
         var rnd = Guid.NewGuid();
-        return Convert.ToBase64String(Encoding.UTF8.GetBytes($"submit_{rnd}_{key}"));
+        return Convert.ToBase64String(Encoding.UTF8.GetBytes($"submit_{rnd}_{key}")).TrimEnd('=');
     }
 
     public bool IsDocSubmitKey(string docKey, string key)
     {
-        var submitKey = Encoding.UTF8.GetString(Convert.FromBase64String(ReplaceLastUnderscoresWithEquals(key)));
+        var submitKey = Encoding.UTF8.GetString(Convert.FromBase64String(FixBase64String(key)));
 
         var keySplit = submitKey.Split(Convert.ToChar("_"), 3);
 
@@ -423,20 +427,20 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         }
         return false;
     }
-    private string ReplaceLastUnderscoresWithEquals(string inputString)
+    
+    static string FixBase64String(string input)
     {
-        var charToReplace = '_';
-        var replaceWith = '=';
-
-        var lastCharIndex = inputString.LastIndexOf(charToReplace);
-
-        while (lastCharIndex != -1)
+        // Convert from URL-safe Base64 to standard Base64
+        var fixedInput = input.Replace('-', '+').Replace('_', '/');
+    
+        // Add padding if necessary
+        switch (fixedInput.Length % 4)
         {
-            inputString = inputString.Substring(0, lastCharIndex) + replaceWith + inputString.Substring(lastCharIndex + 1);
-            lastCharIndex = inputString.LastIndexOf(charToReplace);
+            case 2: fixedInput += "=="; break;
+            case 3: fixedInput += "="; break;
         }
-
-        return inputString;
+    
+        return fixedInput;
     }
 
     public async Task CheckUsersForDropAsync<T>(File<T> file)
@@ -501,5 +505,171 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         var meta = new MetaData { Title = file.Title };
 
         return await documentServiceConnector.CommandAsync(CommandMethod.Meta, docKeyForTrack, file.Id, meta: meta);
+    }
+
+    public async Task<Folder<T>> GetRootFolderAsync<T>(File<T> fileEntry)
+    {
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var folder = await folderDao.GetFolderAsync(fileEntry.ParentId);
+        if (DocSpaceHelper.IsRoom(folder.FolderType) ||
+            (folder.FolderType is FolderType.FormFillingFolderInProgress or FolderType.FormFillingFolderDone))
+        {
+            return folder;
+        }
+
+        var (rId, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(folder);
+        if (int.TryParse(rId.ToString(), out var roomId) && roomId != -1)
+        {
+            var room = await folderDao.GetFolderAsync((T)Convert.ChangeType(roomId, typeof(T)));
+            if (room.FolderType is FolderType.FillingFormsRoom or FolderType.VirtualDataRoom)
+            {
+                return room;
+            }
+        }
+
+        if(folder.RootFolderType == FolderType.USER)
+        {
+            return await folderDao.GetRootFolderAsync(folder.Id);
+        }
+
+        return folder;
+    }
+
+    public async Task<FormOpenSetup<T>> GetFormOpenSetupForFillingRoomAsync<T>(File<T> file, Folder<T> rootFolder, EditorType editorType, bool edit, EntryManager entryManager)
+    {
+        var result = new FormOpenSetup<T>();
+        var fileDao = daoFactory.GetFileDao<T>();
+        var properties = await fileDao.GetProperties(file.Id);
+        var linkDao = daoFactory.GetLinkDao<T>();
+
+        result.CanStartFilling = false;
+
+        if (securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
+        {
+            result.CanFill = true;
+            result.IsSubmitOnly = true;
+            result.FillingSessionId = FileConstant.AnonFillingSession + Guid.NewGuid();
+            result.EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
+            return result;
+        }
+
+        if (edit)
+        {
+            await linkDao.DeleteAllLinkAsync(file.Id);
+            await fileDao.SaveProperties(file.Id, null);
+
+            result.CanEdit = true;
+            result.EditorType = editorType;
+            return result;
+        }
+
+        if (!await fileSecurity.CanFillFormsAsync(rootFolder))
+        {
+            return result;
+        }
+
+        if (properties?.FormFilling?.StartFilling != true)
+        {
+            result.CanEdit = true;
+            return result;
+        }
+        var linkedId = await linkDao.GetLinkedAsync(file.Id);
+        var formDraft = !Equals(linkedId, default(T)) ? await fileDao.GetFileAsync(linkedId) : (await entryManager.GetFillFormDraftAsync(file, rootFolder.Id)).file;
+
+        result.CanFill = true;
+        result.EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
+        result.Draft = formDraft;
+        result.FillingSessionId = $"{formDraft.Id}_{securityContext.CurrentAccount.ID}";
+
+        return result;
+    }
+    public FormOpenSetup<T> GetFormOpenSetupForFolderInProgress<T>(File<T> file, EditorType editorType)
+    {
+        return new FormOpenSetup<T>
+        {
+            CanEdit = false,
+            CanFill = true,
+            FillingSessionId = $"{file.Id}_{securityContext.CurrentAccount.ID}",
+            EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded
+        };
+    }
+    public FormOpenSetup<T> GetFormOpenSetupForFolderDone<T>(EditorType editorType)
+    {
+        return new FormOpenSetup<T>
+        {
+            CanEdit = false,
+            CanFill = false,
+            EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded
+        };
+    }
+    public async Task<FormOpenSetup<T>> GetFormOpenSetupForVirtualDataRoomAsync<T>(File<T> file, EditorType editorType)
+    {
+        var fileDao = daoFactory.GetFileDao<T>();
+        var (currentStep, myRoles) = await fileDao.GetUserFormRoles(file.Id, securityContext.CurrentAccount.ID);
+
+        var result = new FormOpenSetup<T>
+        {
+            CanEdit = false,
+            CanFill = true
+        };
+
+        if (currentStep != -1)
+        {
+            if (!myRoles.Any())
+            {
+                return result;
+            }
+
+            var role = myRoles.FirstOrDefault(role => !role.Submitted && currentStep == role.Sequence);
+            if (role != null)
+            {
+                result.RoleName = role.RoleName;
+                if (role.OpenedAt.Equals(DateTime.MinValue))
+                {
+                    role.OpenedAt = DateTime.UtcNow;
+                    await fileDao.ChangeUserFormRoleAsync(file.Id, role);
+                }
+            }
+            else
+            {
+                role = myRoles.LastOrDefault();
+                result.RoleName = role.RoleName;
+            }
+            result.EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
+        }
+        else
+        {
+            result.CanEdit = true;
+            result.CanFill = false;
+        }
+        return result;
+    }
+
+    public async Task<FormOpenSetup<T>> GetFormOpenSetupForUserFolderAsync<T>(File<T> file, EditorType editorType, bool edit, bool fill)
+    {
+        var canEdit = await fileSecurity.CanEditAsync(file);
+        var canFill = await fileSecurity.CanFillFormsAsync(file);
+
+        FormOpenSetup<T> result = null;
+        if (file.CreateBy == securityContext.CurrentAccount.ID) 
+        {
+            result = new FormOpenSetup<T>
+            {
+                CanEdit = edit,
+                CanFill = fill || canFill,
+                CanStartFilling = true
+            };
+        }
+        else
+        {
+            result = new FormOpenSetup<T>
+            {
+                CanEdit = canEdit,
+                CanFill = canFill,
+                CanStartFilling = false
+            };
+        }
+
+        return result;
     }
 }

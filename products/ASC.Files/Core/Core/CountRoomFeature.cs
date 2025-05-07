@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,15 +35,15 @@ public class CountRoomChecker(
     ITariffService tariffService)
     : TenantQuotaFeatureCheckerCount<CountRoomFeature>(tenantQuotaFeatureStatistic, tenantManager)
 {
-    public override string GetExceptionMessage(long count)
+    public override string GetExceptionMessage(long size)
     {
-        return string.Format(Resource.TariffsFeature_room_exception, count);
+        return string.Format(Resource.TariffsFeature_room_exception, size);
     }
     public override async Task CheckAddAsync(int tenantId, int newValue)
     {
         if ((await tariffService.GetTariffAsync(tenantId)).State > TariffState.Paid)
         {
-            throw new BillingNotFoundException(Resource.ErrorNotAllowedOption, "room");
+            throw new BillingNotFoundException(Resource.ErrorNotAllowedOption);
         }
 
         await base.CheckAddAsync(tenantId, newValue);
@@ -61,7 +61,7 @@ public class CountRoomCheckerStatistic(IServiceProvider serviceProvider) : ITena
 
         var parentId = await globalFolder.GetFolderVirtualRoomsAsync(daoFactory, false);
 
-        if (parentId == default)
+        if (parentId == 0)
         {
             return 0;
         }

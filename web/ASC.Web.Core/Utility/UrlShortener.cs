@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -76,7 +76,7 @@ public class OnlyoShortener(IDbContextFactory<UrlShortenerDbContext> contextFact
         }
         if (Uri.IsWellFormedUriString(shareLink, UriKind.Absolute))
         {
-            var tenantId = await tenantManager.GetCurrentTenantIdAsync();
+            var tenantId = tenantManager.GetCurrentTenantId();
             var context = await contextFactory.CreateDbContextAsync();
             var link = await context.ShortLinks.FirstOrDefaultAsync(q=> q.TenantId == tenantId && q.Link == shareLink);
             if (link != null)

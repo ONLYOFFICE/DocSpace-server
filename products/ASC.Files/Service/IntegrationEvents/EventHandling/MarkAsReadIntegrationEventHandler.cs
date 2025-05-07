@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,7 +29,7 @@ namespace ASC.Files.Service.IntegrationEvents.EventHandling;
 [Scope]
 public class MarkAsReadIntegrationEventHandler(
     ILogger<MarkAsReadIntegrationEventHandler> logger,
-    FileOperationsManager fileOperationsManager,
+    FileOperationsManager<FileMarkAsReadOperation> fileOperationsManager,
     TenantManager tenantManager,
     SecurityContext securityContext)
     : IIntegrationEventHandler<MarkAsReadIntegrationEvent>
@@ -42,7 +42,7 @@ public class MarkAsReadIntegrationEventHandler(
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
             await tenantManager.SetCurrentTenantAsync(@event.TenantId);
             await securityContext.AuthenticateMeWithoutCookieAsync(@event.TenantId, @event.CreateBy);
-            await fileOperationsManager.Enqueue<FileMarkAsReadOperation, FileMarkAsReadOperationData<string>, FileMarkAsReadOperationData<int>>(@event.TaskId, @event.ThirdPartyData, @event.Data);
+            await fileOperationsManager.Enqueue(@event.TaskId, @event.ThirdPartyData, @event.Data);
         }
     }
 }

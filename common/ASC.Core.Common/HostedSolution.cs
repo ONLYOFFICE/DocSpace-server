@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -211,7 +211,7 @@ public class HostedSolution(ITenantService tenantService,
         var quota = (await quotaService.GetTenantQuotasAsync()).FirstOrDefault(q => paid ? q.NonProfit : q.Trial);
         if (quota != null)
         {
-            await tariffService.SetTariffAsync(tenant, new Tariff { Quotas = [new(quota.TenantId, 1)], DueDate = DateTime.MaxValue });
+            await tariffService.SetTariffAsync(tenant, new Tariff { Quotas = [new Quota(quota.TenantId, 1)], DueDate = DateTime.MaxValue });
         }
     }
 

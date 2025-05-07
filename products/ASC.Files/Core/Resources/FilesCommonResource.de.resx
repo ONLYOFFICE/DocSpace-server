@@ -465,16 +465,16 @@ Sicherheit durch garantierte 100%ige Kompatibilität mit docx, xslx und pptx For
     <value>Benutzer</value>
   </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Das Verschieben mehrerer Dateien in den Raum zum Ausfüllen von Formularen wird nicht unterstützt. Verschieben Sie immer nur ein ONLYOFFICE PDF-Formular auf einmal.</value>
+    <value>Das Verschieben mehrerer Dateien in den Raum zum Ausfüllen von Formularen wird nicht unterstützt. Verschieben Sie immer nur ein {0} PDF-Formular auf einmal.</value>
   </data>
   <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Das Verschieben von Ordnern in den Raum zum Ausfüllen von Formularen wird nicht unterstützt. Verschieben Sie immer nur ein ONLYOFFICE PDF-Formular auf einmal.</value>
+    <value>Das Verschieben von Ordnern in den Raum zum Ausfüllen von Formularen wird nicht unterstützt. Verschieben Sie immer nur ein {0} PDF-Formular auf einmal.</value>
   </data>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Die Datei kann nicht in diesen Raum verschoben werden. Bitte versuchen Sie, das ONLYOFFICE PDF-Formular zu verschieben.</value>
+    <value>Die Datei kann nicht in diesen Raum verschoben werden. Bitte versuchen Sie, das {0} PDF-Formular zu verschieben.</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Die Datei kann nicht in diesen Raum hochgeladen werden. Bitte versuchen Sie, das ONLYOFFICE PDF-Formular hochzuladen.</value>
+    <value>Die Datei kann nicht in diesen Raum hochgeladen werden. Bitte versuchen Sie, das {0} PDF-Formular hochzuladen.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Link zum Ausfüllen</value>
@@ -502,5 +502,14 @@ Sicherheit durch garantierte 100%ige Kompatibilität mit docx, xslx und pptx For
   </data>
   <data name="OpenForm" xml:space="preserve">
     <value>Datei öffnen</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Die aktuelle Dateiversion kann nicht gelöscht werden</value>
+  </data>
+  <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
+    <value>Zum Ausfüllen freigeben</value>
+  </data>
+  <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
+    <value>Ausfüllen beginnen</value>
   </data>
 </root>

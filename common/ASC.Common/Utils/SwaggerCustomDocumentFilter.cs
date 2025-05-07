@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,21 +28,13 @@ using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-public class HideRouteDocumentFilter : IDocumentFilter
+namespace ASC.Api.Core.Extensions;
+
+public class HideRouteDocumentFilter(string routeToHide) : IDocumentFilter
 {
-    private readonly string _routeToHide;
-
-    public HideRouteDocumentFilter(string RouteToHide)
-    {
-        _routeToHide = RouteToHide;
-    }
-
     public void Apply(OpenApiDocument document, DocumentFilterContext context)
     {
-        if (document.Paths.ContainsKey(_routeToHide))
-        {
-            document.Paths.Remove(_routeToHide);
-        }
+        document.Paths.Remove(routeToHide);
     }
 }
 
@@ -73,7 +65,7 @@ public class LowercaseDocumentFilter : IDocumentFilter
 
 public class TagDescriptionsDocumentFilter : IDocumentFilter
 {
-    private readonly Dictionary<string, string> _tagDescriptions = new Dictionary<string, string>
+    private readonly Dictionary<string, string> _tagDescriptions = new()
     {
         { "People", "Operations for working with people" },
         { "Portal", "Operations for working with portal" },
@@ -136,7 +128,8 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
         { "Settings / TFA settings", "Operations for working with TFA settings." },
         { "Settings / Tips", "Operations for working with tip settings." },
         { "Settings / Webhooks", "Operations for working with webhook settings." },
-        { "Settings / Webplugins", "Operations for working with webplugin settings." }
+        { "Settings / Webplugins", "Operations for working with webplugin settings." },
+        { "Api keys", "Operations for working with api keys." }
     };
 
     public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)

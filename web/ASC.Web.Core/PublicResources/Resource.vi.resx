@@ -589,6 +589,9 @@
   <data name="Tariffs_admin" xml:space="preserve">
     <value>Business</value>
   </data>
+  <data name="Tariffs_adminyear" xml:space="preserve">
+    <value>Business</value>
+  </data>
   <data name="Tariffs_startup" xml:space="preserve">
     <value>Startup</value>
   </data>
@@ -617,7 +620,7 @@
     <value>Cho phép ứng dụng đăng nhập vào cổng thông tin bằng tài khoản Apple ID.</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
-    <value>Bật ứng dụng này để cho phép người dùng của bạn đăng nhập vào ONLYOFFICE bằng Apple ID. {0}Truy cập Cổng thông tin Nhà phát triển Apple và tạo tích hợp ứng dụng ONLYOFFICE mới. Chèn dữ liệu bạn nhận được bên dưới:</value>
+    <value>Bật ứng dụng này để cho phép người dùng của bạn đăng nhập vào {LogoText} bằng Apple ID. {0}Truy cập Cổng thông tin Nhà phát triển Apple và tạo tích hợp ứng dụng {LogoText} mới. Chèn dữ liệu bạn nhận được bên dưới:</value>
   </data>
   <data name="ConsumersappleIdKeyId" xml:space="preserve">
     <value>Mã định danh khóa 10 ký tự đã được tạo cho Đăng nhập bằng khóa riêng của Apple</value>
@@ -644,19 +647,19 @@
     <value>Box Key</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
-    <value>Bật ứng dụng này để kết nối tài khoản Box của bạn với mô-đun Tài liệu. Bạn sẽ có thể quản lý, chỉnh sửa và chia sẻ tệp từ Box với người dùng ONLYOFFICE. {0}Đăng nhập vào tài khoản của bạn trên trang Nhà phát triển Box và tạo một ứng dụng mới để tích hợp ONLYOFFICE. Chèn dữ liệu bạn nhận được bên dưới:</value>
+    <value>Bật ứng dụng này để kết nối tài khoản Box của bạn với mô-đun Tài liệu. Bạn sẽ có thể quản lý, chỉnh sửa và chia sẻ tệp từ Box với người dùng {LogoText}. {0}Đăng nhập vào tài khoản của bạn trên trang Nhà phát triển Box và tạo một ứng dụng mới để tích hợp {LogoText}. Chèn dữ liệu bạn nhận được bên dưới:</value>
   </data>
   <data name="ConsumersClickatellInstruction" xml:space="preserve">
-    <value>Sử dụng ứng dụng này để bật xác thực hai yếu tố với dịch vụ Clickatell. {0}Đăng nhập vào tài khoản Nền tảng SMS của bạn và tạo tích hợp mới cho ONLYOFFICE. Sao chép một apiKey và chèn nó dưới đây:</value>
+    <value>Sử dụng ứng dụng này để bật xác thực hai yếu tố với dịch vụ Clickatell. {0}Đăng nhập vào tài khoản Nền tảng SMS của bạn và tạo tích hợp mới cho {LogoText}. Sao chép một apiKey và chèn nó dưới đây:</value>
   </data>
   <data name="ConsumersDocuSignInstruction" xml:space="preserve">
-    <value>Kích hoạt ứng dụng này để ký điện tử các tài liệu bằng DocuSign. {0}Chuyển đến Bảng điều khiển quản trị DocuSign của bạn và thêm tích hợp ONLYOFFICE. Chèn dữ liệu bạn nhận được bên dưới:</value>
+    <value>Kích hoạt ứng dụng này để ký điện tử các tài liệu bằng DocuSign. {0}Chuyển đến Bảng điều khiển quản trị DocuSign của bạn và thêm tích hợp {LogoText}. Chèn dữ liệu bạn nhận được bên dưới:</value>
   </data>
   <data name="ConsumersDropBox" xml:space="preserve">
     <value>DropBox</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
-    <value>Bật ứng dụng này để kết nối tài khoản Dropbox của bạn với mô-đun Tài liệu. Bạn sẽ có thể quản lý, chỉnh sửa và chia sẻ tập tin từ Dropbox với người dùng ONLYOFFICE. {0}Đăng nhập vào tài khoản của bạn trên trang Nhà phát triển Dropbox và tạo một ứng dụng mới để tích hợp ONLYOFFICE. Chèn dữ liệu bạn nhận được bên dưới:</value>
+    <value>Bật ứng dụng này để kết nối tài khoản Dropbox của bạn với mô-đun Tài liệu. Bạn sẽ có thể quản lý, chỉnh sửa và chia sẻ tập tin từ Dropbox với người dùng {LogoText}. {0}Đăng nhập vào tài khoản của bạn trên trang Nhà phát triển Dropbox và tạo một ứng dụng mới để tích hợp {LogoText}. Chèn dữ liệu bạn nhận được bên dưới:</value>
   </data>
   <data name="ConsumerseasyBibappkey" xml:space="preserve">
     <value>App key</value>
@@ -665,7 +668,7 @@
     <value>Bật ứng dụng này để tạo danh sách thư mục trong tài liệu với EasyBib.</value>
   </data>
   <data name="ConsumersEasyBibInstruction" xml:space="preserve">
-    <value>Bật ứng dụng này để tạo thư mục trong trình chỉnh sửa ONLYOFFICE. {0}Chuyển đến trang đăng ký EasyBib và điền vào biểu mẫu để thêm tích hợp ONLYOFFICE. Sau khi bạn nhận được app key, hãy dán nó vào bên dưới:</value>
+    <value>Bật ứng dụng này để tạo thư mục trong trình chỉnh sửa {LogoText}. {0}Chuyển đến trang đăng ký EasyBib và điền vào biểu mẫu để thêm tích hợp {LogoText}. Sau khi bạn nhận được app key, hãy dán nó vào bên dưới:</value>
   </data>
   <data name="ConsumersFacebook" xml:space="preserve">
     <value>Facebook</value>
@@ -674,13 +677,13 @@
     <value>App Token</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
-    <value>Bật ứng dụng này để cho phép người dùng của bạn đăng nhập vào ONLYOFFICE bằng Facebook và liên kết tài khoản Facebook của khách hàng với mô-đun CRM. {0}Truy cập Cổng thông tin Nhà phát triển Facebook và tạo tích hợp ứng dụng ONLYOFFICE mới. Chèn dữ liệu bạn nhận được bên dưới:</value>
+    <value>Bật ứng dụng này để cho phép người dùng của bạn đăng nhập vào {LogoText} bằng Facebook và liên kết tài khoản Facebook của khách hàng với mô-đun CRM. {0}Truy cập Cổng thông tin Nhà phát triển Facebook và tạo tích hợp ứng dụng {LogoText} mới. Chèn dữ liệu bạn nhận được bên dưới:</value>
   </data>
   <data name="Consumersfirebase_authorization" xml:space="preserve">
     <value>Server key</value>
   </data>
   <data name="ConsumersFirebaseInstruction" xml:space="preserve">
-    <value>Bật ứng dụng này để cho phép người dùng của bạn nhận thông báo về tin nhắn ngay cả khi ngoại tuyến. {0}Chuyển đến bảng điều khiển Firebase và thêm một dự án mới để tích hợp ONLYOFFICE. Chèn dữ liệu bạn nhận được bên dưới:</value>
+    <value>Bật ứng dụng này để cho phép người dùng của bạn nhận thông báo về tin nhắn ngay cả khi ngoại tuyến. {0}Chuyển đến bảng điều khiển Firebase và thêm một dự án mới để tích hợp {LogoText}. Chèn dữ liệu bạn nhận được bên dưới:</value>
   </data>
   <data name="ConsumersGoogleCloud" xml:space="preserve">
     <value>Google Cloud Storage</value>
@@ -695,19 +698,19 @@
     <value>Kết nối dịch vụ Google Cloud Storage để sao lưu và lưu trữ dữ liệu từ cổng thông tin của bạn.</value>
   </data>
   <data name="ConsumersGoogleCloudInstruction" xml:space="preserve">
-    <value>Kết nối dịch vụ Google Cloud Storage để sao lưu và lưu trữ dữ liệu từ cổng thông tin của bạn. {0}Truy cập Bảng điều khiển nền tảng Google Cloud và tạo tài khoản dịch vụ mới cho ONLYOFFICE. Dán dữ liệu bạn nhận được bên dưới:</value>
+    <value>Kết nối dịch vụ Google Cloud Storage để sao lưu và lưu trữ dữ liệu từ cổng thông tin của bạn. {0}Truy cập Bảng điều khiển nền tảng Google Cloud và tạo tài khoản dịch vụ mới cho {LogoText}. Dán dữ liệu bạn nhận được bên dưới:</value>
   </data>
   <data name="ConsumersGoogleCloudjson" xml:space="preserve">
     <value>GoogleCloud json</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
-    <value>Bật ứng dụng này để kết nối tài khoản Google Drive của bạn với mô-đun Tài liệu. Bạn sẽ có thể quản lý, chỉnh sửa và chia sẻ tệp từ Google Drive với người dùng ONLYOFFICE. {0}Chuyển đến bảng điều khiển Google APIs và tạo một dự án mới để tích hợp ONLYOFFICE. Chèn dữ liệu bạn nhận được bên dưới:</value>
+    <value>Bật ứng dụng này để kết nối tài khoản Google Drive của bạn với mô-đun Tài liệu. Bạn sẽ có thể quản lý, chỉnh sửa và chia sẻ tệp từ Google Drive với người dùng {LogoText}. {0}Chuyển đến bảng điều khiển Google APIs và tạo một dự án mới để tích hợp {LogoText}. Chèn dữ liệu bạn nhận được bên dưới:</value>
   </data>
   <data name="ConsumersLinkedIn" xml:space="preserve">
     <value>LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
-    <value>Bật ứng dụng này để cho phép người dùng của bạn đăng nhập vào ONLYOFFICE bằng tài khoản LinkedIn của họ. {0}Truy cập trang web của Nhà phát triển LinkedIn và tạo tích hợp ứng dụng ONLYOFFICE mới. Chèn dữ liệu bạn nhận được bên dưới:</value>
+    <value>Bật ứng dụng này để cho phép người dùng của bạn đăng nhập vào {LogoText} bằng tài khoản LinkedIn của họ. {0}Truy cập trang web của Nhà phát triển LinkedIn và tạo tích hợp ứng dụng {LogoText} mới. Chèn dữ liệu bạn nhận được bên dưới:</value>
   </data>
   <data name="ConsumersLinkedInKey" xml:space="preserve">
     <value>Linkedin ID</value>
@@ -737,7 +740,7 @@
     <value>Cho phép ứng dụng đăng nhập vào cổng thông tin bằng tài khoản Microsoft.</value>
   </data>
   <data name="ConsumersMicrosoftInstruction" xml:space="preserve">
-    <value>Bật ứng dụng này để cho phép người dùng của bạn đăng nhập vào ONLYOFFICE bằng Microsoft. {0}Truy cập Microsoft Azure và tạo tích hợp ứng dụng ONLYOFFICE mới. Chèn dữ liệu bạn nhận được bên dưới:</value>
+    <value>Bật ứng dụng này để cho phép người dùng của bạn đăng nhập vào {LogoText} bằng Microsoft. {0}Truy cập Microsoft Azure và tạo tích hợp ứng dụng {LogoText} mới. Chèn dữ liệu bạn nhận được bên dưới:</value>
   </data>
   <data name="ConsumersRackspace" xml:space="preserve">
     <value>Rackspace Cloud Storage</value>
@@ -788,7 +791,7 @@
     <value>Kết nối Amazon AWS S3 để sao lưu và lưu trữ dữ liệu từ cổng thông tin của bạn.</value>
   </data>
   <data name="ConsumersS3Instruction" xml:space="preserve">
-    <value>Kết nối Amazon AWS S3 để sao lưu và lưu trữ dữ liệu từ cổng thông tin của bạn. {0}Chuyển đến Bảng điều khiển AWS Management Console và tạo khóa truy cập cho ONLYOFFICE. Dán dữ liệu bạn nhận được bên dưới:</value>
+    <value>Kết nối Amazon AWS S3 để sao lưu và lưu trữ dữ liệu từ cổng thông tin của bạn. {0}Chuyển đến Bảng điều khiển AWS Management Console và tạo khóa truy cập cho {LogoText}. Dán dữ liệu bạn nhận được bên dưới:</value>
   </data>
   <data name="ConsumersS3regionDescription" xml:space="preserve">
     <value>Nhập AWS region nơi Amazon bucket của bạn được đặt.</value>
@@ -824,7 +827,7 @@
     <value>Client secret</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
-    <value>Bật ứng dụng này để kết nối tài khoản OneDrive của bạn với mô-đun Tài liệu. Bạn sẽ có thể quản lý, chỉnh sửa và chia sẻ tập tin từ OneDrive với người dùng ONLYOFFICE. {0}Đăng nhập vào tài khoản Microsoft Azure của bạn và tạo một ứng dụng mới để tích hợp ONLYOFFICE. Chèn dữ liệu bạn nhận được bên dưới:</value>
+    <value>Bật ứng dụng này để kết nối tài khoản OneDrive của bạn với mô-đun Tài liệu. Bạn sẽ có thể quản lý, chỉnh sửa và chia sẻ tập tin từ OneDrive với người dùng {LogoText}. {0}Đăng nhập vào tài khoản Microsoft Azure của bạn và tạo một ứng dụng mới để tích hợp {LogoText}. Chèn dữ liệu bạn nhận được bên dưới:</value>
   </data>
   <data name="ConsumersSmscInstruction" xml:space="preserve">
     <value>Sử dụng ứng dụng này để bật xác thực hai yếu tố với dịch vụ SMS Center. {0}Chèn thông tin đăng nhập tài khoản smsc và mật khẩu của bạn (hoặc hàm băm MD5 của mật khẩu) bằng chữ thường:</value>
@@ -851,7 +854,7 @@
     <value>Client Secret</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Bật ứng dụng này để cho phép người dùng của bạn đăng nhập vào ONLYOFFICE bằng Twitter và liên kết tài khoản Twitter của khách hàng với mô-đun CRM. {0}Truy cập Cổng thông tin Nhà phát triển Twitter và tạo tích hợp ứng dụng ONLYOFFICE mới. Chèn dữ liệu bạn nhận được bên dưới:</value>
+    <value>Bật ứng dụng này để cho phép người dùng của bạn đăng nhập vào {LogoText} bằng Twitter và liên kết tài khoản Twitter của khách hàng với mô-đun CRM. {0}Truy cập Cổng thông tin Nhà phát triển Twitter và tạo tích hợp ứng dụng {LogoText} mới. Chèn dữ liệu bạn nhận được bên dưới:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>API Key</value>
@@ -881,7 +884,7 @@
     <value>Cho phép ứng dụng xuất bản tài liệu trực tiếp trong WordPress.</value>
   </data>
   <data name="ConsumersWordpressInstruction" xml:space="preserve">
-    <value>Cho phép ứng dụng dễ dàng xuất bản tài liệu lên trang web WordPress của bạn. {0}Trên trang Nhà phát triển Wordpress, tạo một ứng dụng mới để tích hợp ONLYOFFICE. Dán dữ liệu bạn nhận được bên dưới:</value>
+    <value>Cho phép ứng dụng dễ dàng xuất bản tài liệu lên trang web WordPress của bạn. {0}Trên trang Nhà phát triển Wordpress, tạo một ứng dụng mới để tích hợp {LogoText}. Dán dữ liệu bạn nhận được bên dưới:</value>
   </data>
   <data name="ConsumerswpClientId" xml:space="preserve">
     <value>Khóa WordPress</value>
@@ -896,7 +899,7 @@
     <value>Client Secret</value>
   </data>
   <data name="ConsumersYahooInstruction" xml:space="preserve">
-    <value>Bật ứng dụng này để thêm người dùng cổng thông tin mới từ danh sách liên hệ Yahoo của bạn. {0}Truy cập trang Tạo ứng dụng trong Mạng Nhà phát triển Yahoo và tạo một ứng dụng mới để tích hợp ONLYOFFICE. Chèn dữ liệu bạn nhận được bên dưới:</value>
+    <value>Bật ứng dụng này để thêm người dùng cổng thông tin mới từ danh sách liên hệ Yahoo của bạn. {0}Truy cập trang Tạo ứng dụng trong Mạng Nhà phát triển Yahoo và tạo một ứng dụng mới để tích hợp {LogoText}. Chèn dữ liệu bạn nhận được bên dưới:</value>
   </data>
   <data name="ConsumersYandexClientId" xml:space="preserve">
     <value>ID</value>
@@ -992,7 +995,7 @@
     <value>Cho phép ứng dụng đăng nhập vào cổng thông tin bằng tài khoản Zoom.</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
-    <value>Bật ứng dụng này để cho phép người dùng của bạn đăng nhập vào ONLYOFFICE bằng tài khoản Zoom của họ. {0}Truy cập trang web của Nhà phát triển Zoom và tạo tích hợp ứng dụng ONLYOFFICE mới. Chèn dữ liệu bạn nhận được bên dưới:</value>
+    <value>Bật ứng dụng này để cho phép người dùng của bạn đăng nhập vào {LogoText} bằng tài khoản Zoom của họ. {0}Truy cập trang web của Nhà phát triển Zoom và tạo tích hợp ứng dụng {LogoText} mới. Chèn dữ liệu bạn nhận được bên dưới:</value>
   </data>
   <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
     <value>Quá nhiều lần đăng nhập. Xin vui lòng thử lại sau</value>
@@ -1074,5 +1077,8 @@
   </data>
   <data name="ErrorIpRestriction" xml:space="preserve">
     <value>Thêm ít nhất 1 địa chỉ IP được phép.</value>
+  </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>URL Webhook không khả dụng. Yêu cầu HEAD không nhận được mã trạng thái HTTP 200.</value>
   </data>
 </root>

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,31 +24,44 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Microsoft.Extensions.DependencyInjection.Extensions;
+
 namespace ASC.Common.Threading;
 
-public class DefaultDistributedTaskQueueFactory(IServiceProvider serviceProvider,
-                                              IOptionsMonitor<DistributedTaskQueueFactoryOptions> options)
-    : IDistributedTaskQueueFactory
+public class DefaultDistributedTaskQueueFactory(IServiceProvider serviceProvider, IOptionsMonitor<DistributedTaskQueueFactoryOptions> options) : IDistributedTaskQueueFactory 
+{
+    public DistributedTaskQueue<T> CreateQueue<T>() where T : DistributedTask
     {
-    public DistributedTaskQueue CreateQueue<T>(int timeUntilUnregisterInSeconds = 60) where T : DistributedTask
-    {
-        return CreateQueue(typeof(T).FullName, timeUntilUnregisterInSeconds);
-    }
-
-    public DistributedTaskQueue CreateQueue(Type type, int timeUntilUnregisterInSeconds = 60)
-    {
-        return CreateQueue(type.FullName, timeUntilUnregisterInSeconds);
-    }
-
-    public DistributedTaskQueue CreateQueue(string name = default, int timeUntilUnregisterInSeconds = 60)
-    {
-        var option = options.Get(name);
-        var queue = serviceProvider.GetRequiredService<DistributedTaskQueue>();
+        var option = options.Get(typeof(T).FullName ?? typeof(T).Name);
+        var queue = serviceProvider.GetRequiredService<DistributedTaskQueue<T>>();
 
         queue.MaxThreadsCount = option.MaxThreadsCount;
-        queue.Name = name;
-        queue.TimeUntilUnregisterInSeconds = timeUntilUnregisterInSeconds;
+        queue.Name = typeof(T).FullName ?? typeof(T).Name;
+        queue.TimeUntilUnregisterInSeconds = option.TimeUntilUnregisterInSeconds;
 
         return queue;
+    }
+}
+
+public static class DefaultDistributedTaskQueueFactoryExtension
+{
+    public static void RegisterQueue<T>(this IServiceCollection services, int? maxThreadsCount = 0, int? timeUntilUnregisterInSeconds = 60) where T : DistributedTask
+    { 
+        services.TryAddSingleton(svc => svc.GetRequiredService<Channel<T>>().Reader);
+        services.TryAddSingleton<DistributedTaskQueueService<T>>();
+        services.AddHostedService<DistributedTaskQueueService<T>>();
+        
+        services.Configure<DistributedTaskQueueFactoryOptions>(typeof(T).FullName ?? typeof(T).Name, options =>
+        {
+            if (maxThreadsCount.HasValue)
+            {
+                options.MaxThreadsCount = maxThreadsCount.Value;
+            }
+
+            if (timeUntilUnregisterInSeconds.HasValue)
+            {
+                options.TimeUntilUnregisterInSeconds = timeUntilUnregisterInSeconds.Value;
+            }
+        });
     }
 }

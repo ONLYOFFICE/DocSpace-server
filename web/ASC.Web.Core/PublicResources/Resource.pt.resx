@@ -238,6 +238,9 @@
   <data name="Tariffs_admin" xml:space="preserve">
     <value>Business</value>
   </data>
+  <data name="Tariffs_adminyear" xml:space="preserve">
+    <value>Business</value>
+  </data>
   <data name="ActivateTfaAppEmptyCode" xml:space="preserve">
     <value>Código de validação não pode estar vazio</value>
   </data>
@@ -311,7 +314,7 @@
     <value>Ativar a aplicação para iniciar sessão no portal utilizando uma conta Apple ID.</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
-    <value>Ative esta aplicação para permitir que os seus utilizadores iniciem sessão no ONLYOFFICE utilizando o Apple ID. {0}Aceda ao Portal Apple Developers e crie uma nova aplicação de integração do ONLYOFFICE. Insira os dados que recebeu abaixo:</value>
+    <value>Ative esta aplicação para permitir que os seus utilizadores iniciem sessão no {LogoText} utilizando o Apple ID. {0}Aceda ao Portal Apple Developers e crie uma nova aplicação de integração do {LogoText}. Insira os dados que recebeu abaixo:</value>
   </data>
   <data name="ConsumersappleIdKeyId" xml:space="preserve">
     <value>Uma chave de identificação com 10 caracteres gerada para Iniciar Sessão com a chave privada da Apple</value>
@@ -353,13 +356,13 @@
     <value>Ative esta aplicação para gerir ficheiros Box e pastas.</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
-    <value>Ative esta aplicação para conectar sua conta Box ao módulo Documentos. Poderá gerir, editar e compartilhar arquivos do Box com utilizadores da ONLYOFFICE. {0}Entre na sua conta na página de desenvolvedores do Box e crie uma nova aplicação para a integração do ONLYOFFICE. Insira os dados que recebeu abaixo:</value>
+    <value>Ative esta aplicação para conectar sua conta Box ao módulo Documentos. Poderá gerir, editar e compartilhar arquivos do Box com utilizadores da {LogoText}. {0}Entre na sua conta na página de desenvolvedores do Box e crie uma nova aplicação para a integração do {LogoText}. Insira os dados que recebeu abaixo:</value>
   </data>
   <data name="ConsumersClickatellDescription" xml:space="preserve">
     <value>Ativar a aplicação para a autenticação de dois fatores através do Clickatell.</value>
   </data>
   <data name="ConsumersClickatellInstruction" xml:space="preserve">
-    <value>Utilize esta aplicação para ativar a autenticação de dois fatores com o serviço Clickatell. {0}Inicie sessão na sua conta da Plataforma SMS e crie uma nova integração para o ONLYOFFICE. Copie uma apiKey e insira-a abaixo:</value>
+    <value>Utilize esta aplicação para ativar a autenticação de dois fatores com o serviço Clickatell. {0}Inicie sessão na sua conta da Plataforma SMS e crie uma nova integração para o {LogoText}. Copie uma apiKey e insira-a abaixo:</value>
   </data>
   <data name="ConsumersdocuSignClientId" xml:space="preserve">
     <value>Chave do DocuSign</value>
@@ -374,13 +377,13 @@
     <value>Ponto final de autenticação DocuSign</value>
   </data>
   <data name="ConsumersDocuSignInstruction" xml:space="preserve">
-    <value>Ative esta aplicação para assinar digitalmente documentos utilizando o DocuSign. {0}Vá para a sua Consola DocuSign Admin e adicione a integração do ONLYOFFICE. Introduza os dados que recebeu abaixo:</value>
+    <value>Ative esta aplicação para assinar digitalmente documentos utilizando o DocuSign. {0}Vá para a sua Consola DocuSign Admin e adicione a integração do {LogoText}. Introduza os dados que recebeu abaixo:</value>
   </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
     <value>Permitir que a aplicação gerencie ficheiros e pastas do Dropbox.</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
-    <value>Ative esta app para ligar a sua conta do Dropbox ao módulo Documentos. Poderá gerenciar, editar e compartilhar arquivos do Dropbox com utilizadores do ONLYOFFICE. {0}Inicie sessão na sua conta no site Dropbox Developers e crie uma nova aplicação para integração com o ONLYOFFICE. Insira os dados que recebeu abaixo:</value>
+    <value>Ative esta app para ligar a sua conta do Dropbox ao módulo Documentos. Poderá gerenciar, editar e compartilhar arquivos do Dropbox com utilizadores do {LogoText}. {0}Inicie sessão na sua conta no site Dropbox Developers e crie uma nova aplicação para integração com o {LogoText}. Insira os dados que recebeu abaixo:</value>
   </data>
   <data name="ConsumersDropBoxKey" xml:space="preserve">
     <value>ID DropBox</value>
@@ -395,7 +398,7 @@
     <value>Ative esta aplicação para criar listas bibliográficas nos documentos através do Easybib.</value>
   </data>
   <data name="ConsumersEasyBibInstruction" xml:space="preserve">
-    <value>Ative esta aplicação para criar bibliografias no ONLYOFFICE editors. {0}Vá à página de login do EasyBib e preencha o formulário para adicionar a integração com o ONLYOFFICE. Depois de obter a chave da app, cole-a abaixo:</value>
+    <value>Ative esta aplicação para criar bibliografias no {LogoText} editors. {0}Vá à página de login do EasyBib e preencha o formulário para adicionar a integração com o {LogoText}. Depois de obter a chave da app, cole-a abaixo:</value>
   </data>
   <data name="ConsumersfacebookAccessToken_Default" xml:space="preserve">
     <value>Token da App</value>
@@ -410,7 +413,7 @@
     <value>Ative esta aplicação para iniciar sessão no portal utilizando uma conta de Facebook.</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
-    <value>Ative esta app para permitir que os utilizadores iniciem sessão no ONLYOFFICE através do Facebook e ligue as contas de Facebook dos clientes ao módulo do CRM. {0}Vá ao Portal Facebook Developers e crie uma nova integração de app para a ONLYOFFICE. Introduza os dados que recebeu abaixo:</value>
+    <value>Ative esta app para permitir que os utilizadores iniciem sessão no {LogoText} através do Facebook e ligue as contas de Facebook dos clientes ao módulo do CRM. {0}Vá ao Portal Facebook Developers e crie uma nova integração de app para a {LogoText}. Introduza os dados que recebeu abaixo:</value>
   </data>
   <data name="Consumersfirebase_apiKey" xml:space="preserve">
     <value>Chave Web API</value>
@@ -428,7 +431,7 @@
     <value>Ative esta aplicação para receber notificações sobre as mensagens que recebeu através do Firebase Cloud Messaging.</value>
   </data>
   <data name="ConsumersFirebaseInstruction" xml:space="preserve">
-    <value>Ative esta aplicação para permitir que os seus utilizadores recebam notificações sobre as mensagens mesmo quando estão offline. {0}Vá à consola do Firebase e adicione um novo projeto para a integração da ONLYOFFICE. Introduza os dados que recebeu abaixo:</value>
+    <value>Ative esta aplicação para permitir que os seus utilizadores recebam notificações sobre as mensagens mesmo quando estão offline. {0}Vá à consola do Firebase e adicione um novo projeto para a integração da {LogoText}. Introduza os dados que recebeu abaixo:</value>
   </data>
   <data name="ConsumersgoogleClientId" xml:space="preserve">
     <value>ID da Google</value>
@@ -452,7 +455,7 @@
     <value>Ligue o Armazenamento na Nuvem da Google para criar uma cópia de segurança e armazenar os dados do seu portal.</value>
   </data>
   <data name="ConsumersGoogleCloudInstruction" xml:space="preserve">
-    <value>Ligue o serviço de Armazenamento em Nuvem da Google para fazer uma cópia de segurança e armazenar dados do seu portal. {0}Vá para a Plataforma da Consola da Nuvem da Google e crie uma nova conta de serviço para o ONLYOFFICE. Cole os dados que recebeu abaixo:</value>
+    <value>Ligue o serviço de Armazenamento em Nuvem da Google para fazer uma cópia de segurança e armazenar dados do seu portal. {0}Vá para a Plataforma da Consola da Nuvem da Google e crie uma nova conta de serviço para o {LogoText}. Cole os dados que recebeu abaixo:</value>
   </data>
   <data name="ConsumersGoogleCloudjson" xml:space="preserve">
     <value>Json da GoogleCloud</value>
@@ -461,13 +464,13 @@
     <value>Ligue o projeto para iniciar sessão no portal utilizando uma conta Google e para gerir ficheiros e pastas do Google Drive.</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
-    <value>Ative esta aplicação para ligar a sua conta Google Drive ao módulo dos Documentos. Poderá gerir, editar, e partilhar ficheiros do Google Drive com utilizadores da ONLYOFFICE.{0}Vá para a Consola de APIs da Google e crie um novo projeto para a integração do ONLYOFFICE. Introduza os dados que recebeu abaixo:</value>
+    <value>Ative esta aplicação para ligar a sua conta Google Drive ao módulo dos Documentos. Poderá gerir, editar, e partilhar ficheiros do Google Drive com utilizadores da {LogoText}.{0}Vá para a Consola de APIs da Google e crie um novo projeto para a integração do {LogoText}. Introduza os dados que recebeu abaixo:</value>
   </data>
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
     <value>Ative a aplicação para iniciar sessão no portal utilizando uma conta LinkedIn.</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
-    <value>Ative esta aplicação para permitir que os seus utilizadores iniciem sessão na ONLYOFFICE utilizando as suas contas de LinkedIn. {0}Vá para o website do LinkedIn Developers e crie uma nova integração de app para a ONLYOFFICE. Introduza os dados que recebeu abaixo:</value>
+    <value>Ative esta aplicação para permitir que os seus utilizadores iniciem sessão na {LogoText} utilizando as suas contas de LinkedIn. {0}Vá para o website do LinkedIn Developers e crie uma nova integração de app para a {LogoText}. Introduza os dados que recebeu abaixo:</value>
   </data>
   <data name="ConsumersLinkedInKey" xml:space="preserve">
     <value>ID do LinkedIn</value>
@@ -500,7 +503,7 @@
     <value>Ativa a aplicação para iniciar sessão no portal utilizando uma conta Microsoft.</value>
   </data>
   <data name="ConsumersMicrosoftInstruction" xml:space="preserve">
-    <value>Ative esta aplicação para permitir que os seus utilizadores possam iniciar sessão na ONLYOFFICE utilizando uma conta da Microsoft. {0}Vá ao Microsoft Azure e crie uma nova integração de aplicação para a ONLYOFFICE. Introduza os dados que recebeu abaixo:</value>
+    <value>Ative esta aplicação para permitir que os seus utilizadores possam iniciar sessão na {LogoText} utilizando uma conta da Microsoft. {0}Vá ao Microsoft Azure e crie uma nova integração de aplicação para a {LogoText}. Introduza os dados que recebeu abaixo:</value>
   </data>
   <data name="ConsumersRackspace" xml:space="preserve">
     <value>Armazenamento em Nuvem Rackspace</value>
@@ -548,7 +551,7 @@
     <value>Associe o Amazon AWS S3 para fazer cópias de segurança e armazenar dados do seu portal.</value>
   </data>
   <data name="ConsumersS3Instruction" xml:space="preserve">
-    <value>Associe o Amazon AWS S3 para fazer backup e armazenar dados do seu portal. {0}Aceda à Consola de Gestão AWS e crie chaves de acesso para a ONLYOFFICE. Cole os dados que recebeu abaixo:</value>
+    <value>Associe o Amazon AWS S3 para fazer backup e armazenar dados do seu portal. {0}Aceda à Consola de Gestão AWS e crie chaves de acesso para a {LogoText}. Cole os dados que recebeu abaixo:</value>
   </data>
   <data name="ConsumersS3regionDescription" xml:space="preserve">
     <value>Introduza a região AWS onde o seu bucket da Amazon reside.</value>
@@ -587,7 +590,7 @@
     <value>Ative a aplicação para gerir ficheiros e pastas do OneDrive.</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
-    <value>Ative esta aplicação para associar a sua conta do OneDrive a módulo dos Documentos. Poderá gerir, editar e partilhar ficheiros do OneDrive com os utilizadores da ONLYOFFICE. {0}Inicie sessão na sua conta Microsoft Azure e crie uma nova aplicação para a integração da ONLYOFFICE. Introduza os dados que recebeu abaixo:</value>
+    <value>Ative esta aplicação para associar a sua conta do OneDrive a módulo dos Documentos. Poderá gerir, editar e partilhar ficheiros do OneDrive com os utilizadores da {LogoText}. {0}Inicie sessão na sua conta Microsoft Azure e crie uma nova aplicação para a integração da {LogoText}. Introduza os dados que recebeu abaixo:</value>
   </data>
   <data name="ConsumersSmsc" xml:space="preserve">
     <value>Centro de SMS</value>
@@ -641,7 +644,7 @@
     <value>Ative esta aplicação para iniciar sessão no portal através de uma conta Twitter.</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Ative esta aplicação para permitir que os seus utilizadores iniciem sessão na ONLYOFFICE utilizando o seu Twitter, e para que liguem as contas Twitter dos seus clientes ao módulo CRM. {0}Aceda ao Portal de Programadores do Twitter e crie uma nova aplicação de integração para a ONLYOFFICE. Introduza os dados que recebeu abaixo:</value>
+    <value>Ative esta aplicação para permitir que os seus utilizadores iniciem sessão na {LogoText} utilizando o seu Twitter, e para que liguem as contas Twitter dos seus clientes ao módulo CRM. {0}Aceda ao Portal de Programadores do Twitter e crie uma nova aplicação de integração para a {LogoText}. Introduza os dados que recebeu abaixo:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>Chave API</value>
@@ -668,7 +671,7 @@
     <value>Ative a aplicação para publicar documentos diretamente no WordPress.</value>
   </data>
   <data name="ConsumersWordpressInstruction" xml:space="preserve">
-    <value>Ative a aplicação para publicar facilmente documentos no seu website WordPress. {0}Vá à Página de Developers do WordPress e crie uma nova app para a integração da ONLYOFFICE. Cole os dados que recebeu abaixo:</value>
+    <value>Ative a aplicação para publicar facilmente documentos no seu website WordPress. {0}Vá à Página de Developers do WordPress e crie uma nova app para a integração da {LogoText}. Cole os dados que recebeu abaixo:</value>
   </data>
   <data name="ConsumerswpClientId" xml:space="preserve">
     <value>Chave WordPress</value>
@@ -686,7 +689,7 @@
     <value>Ative a aplicação para importar utilizadores do serviço Yahoo.</value>
   </data>
   <data name="ConsumersYahooInstruction" xml:space="preserve">
-    <value>Ative esta app para adicionar novos utilizadores do portal através da sua lista de contactos Yahoo. {0}Vá à página Criar Aplicação na Yahoo Developer Network e crie uma nova aplicação para a integração da ONLYOFFICE. Introduza os dados que recebeu abaixo:</value>
+    <value>Ative esta app para adicionar novos utilizadores do portal através da sua lista de contactos Yahoo. {0}Vá à página Criar Aplicação na Yahoo Developer Network e crie uma nova aplicação para a integração da {LogoText}. Introduza os dados que recebeu abaixo:</value>
   </data>
   <data name="ConsumersYandexClientId" xml:space="preserve">
     <value>ID</value>
@@ -992,7 +995,7 @@
     <value>Habilite o aplicativo para fazer login no portal usando uma conta Zoom.</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
-    <value>Ative este aplicativo para permitir que seus usuários façam login no ONLYOFFICE usando suas contas Zoom. {0}Acesse o site do Zoom Developers e crie um novo aplicativo de integração com o ONLYOFFICE. Insira os dados que você recebeu abaixo:</value>
+    <value>Ative este aplicativo para permitir que seus usuários façam login no {LogoText} usando suas contas Zoom. {0}Acesse o site do Zoom Developers e crie um novo aplicativo de integração com o {LogoText}. Insira os dados que você recebeu abaixo:</value>
   </data>
   <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
     <value>Muitas tentativas de login. Por favor, tente novamente mais tarde</value>
@@ -1074,5 +1077,8 @@
   </data>
   <data name="Tariffs_nonprofit" xml:space="preserve">
     <value>Sem fins lucrativos</value>
+  </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>O URL do webhook não está disponível. O pedido HEAD não está a responder ao estado 200 http.</value>
   </data>
 </root>

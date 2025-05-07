@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -36,50 +36,65 @@ import io.swagger.v3.oas.annotations.info.License;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.security.SecuritySchemes;
 import io.swagger.v3.oas.annotations.servers.Server;
+import net.devh.boot.grpc.server.autoconfigure.GrpcServerSecurityAutoConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+/**
+ * Entry point for the ASC Identity Registration Service application.
+ *
+ * <p>This application provides APIs for managing registered clients in the ASC Identity ecosystem.
+ * It includes features like caching, retry, transaction management, and OpenAPI documentation.
+ */
 @EnableRetry
 @EnableCaching
 @EnableTransactionManagement
 @EntityScan(basePackages = {"com.asc.registration.data", "com.asc.common.data"})
 @EnableJpaRepositories(basePackages = {"com.asc.registration.data", "com.asc.common.data"})
-@SpringBootApplication(scanBasePackages = {"com.asc.registration", "com.asc.common"})
-@EnableFeignClients(basePackages = "com.asc.common.application.client")
+@SpringBootApplication(
+    scanBasePackages = {"com.asc.registration", "com.asc.common"},
+    exclude = {GrpcServerSecurityAutoConfiguration.class})
 @OpenAPIDefinition(
     info =
         @Info(
-            title = "Registered Clients API",
+            title = "ASC.Identity.Registration",
             version = "1.0.0",
-            description = "ASC.Identity Clients Registration API",
+            description = "API for managing oauth2 clients",
+            termsOfService = "",
             contact =
                 @Contact(
                     name = "ONLYOFFICE Support",
                     email = "support@onlyoffice.com",
                     url = "https://onlyoffice.com"),
-            license = @License(name = "Apache 2.0")),
-    servers = {@Server(description = "ASC.Identity Clients Registration API")})
+            license =
+                @License(
+                    name = "Apache 2.0",
+                    url = "https://www.apache.org/licenses/LICENSE-2.0.html")),
+    servers = {
+      @Server(
+          url = "http://localhost:8080",
+          description = "Local ASC.Identity.Registration API Server")
+    })
 @SecuritySchemes({
   @SecurityScheme(
-      name = "ascAuthAdmin",
-      paramName = "asc_auth_key",
-      description = "ASC admin cookie",
-      type = SecuritySchemeType.APIKEY,
-      in = SecuritySchemeIn.COOKIE),
-  @SecurityScheme(
-      name = "ascAuthUser",
-      paramName = "asc_auth_key",
-      description = "ASC user cookie",
+      name = "x-signature",
+      paramName = "x-signature",
+      description = "ASC JWT Signature",
       type = SecuritySchemeType.APIKEY,
       in = SecuritySchemeIn.COOKIE)
 })
 public class RegistrationServiceApplication {
+
+  /**
+   * The main method to start the Registration Service application.
+   *
+   * @param args command-line arguments passed to the application.
+   */
   public static void main(String[] args) {
     SpringApplication.run(RegistrationServiceApplication.class, args);
   }

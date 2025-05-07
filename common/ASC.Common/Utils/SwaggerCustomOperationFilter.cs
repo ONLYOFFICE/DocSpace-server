@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,9 +23,12 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+
 using Microsoft.OpenApi.Models;
 
 using Swashbuckle.AspNetCore.SwaggerGen;
+
+namespace ASC.Api.Core.Extensions;
 
 public class SwaggerCustomOperationFilter : IOperationFilter
 {
@@ -41,3 +44,29 @@ public class SwaggerCustomOperationFilter : IOperationFilter
     }
 }
 
+public class ContentTypeOperationFilter : IOperationFilter
+{
+    public void Apply(OpenApiOperation operation, OperationFilterContext context)
+    {
+        if (operation.RequestBody != null)
+        {
+            var content = operation.RequestBody.Content
+                .Where(c => c.Key != "text/json" && !c.Key.EndsWith("+json"))
+                .ToDictionary(c => c.Key, c => c.Value);
+
+            operation.RequestBody.Content = content;
+        }
+
+        if (operation.Responses != null)
+        {
+            foreach (var response in operation.Responses)
+            {
+                var content = response.Value.Content
+                    .Where(c => c.Key.Equals("application/json"))
+                    .ToDictionary(c => c.Key, c => c.Value);
+
+                response.Value.Content = content;
+            }
+        }
+    }
+}

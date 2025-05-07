@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,48 +26,51 @@
 
 namespace ASC.Core.Billing;
 
+/// <summary>
+/// The tariff parameters.
+/// </summary>
 [DebuggerDisplay("{State} before {DueDate}")]
 [ProtoContract]
 public class Tariff
 {
     /// <summary>
-    /// ID
+    /// The tariff ID.
     /// </summary>
     [ProtoMember(1)]
     public int Id { get; set; }
 
     /// <summary>
-    /// Tariff state
+    /// The tariff state.
     /// </summary>
     [ProtoMember(2)]
     public TariffState State { get; set; }
 
     /// <summary>
-    /// Due date
+    /// The tariff due date.
     /// </summary>
     [ProtoMember(3)]
     public DateTime DueDate { get; set; }
 
     /// <summary>
-    /// Delay due date
+    /// The tariff delay due date.
     /// </summary>
     [ProtoMember(4)]
     public DateTime DelayDueDate { get; set; }
 
     /// <summary>
-    /// License date
+    /// The tariff license date.
     /// </summary>
     [ProtoMember(5)]
     public DateTime LicenseDate { get; set; }
 
     /// <summary>
-    /// Customer ID
+    /// The tariff customer ID.
     /// </summary>
     [ProtoMember(6)]
     public string CustomerId { get; set; }
 
     /// <summary>
-    /// List of quotas
+    /// The list of tariff quotas.
     /// </summary>
     [ProtoMember(7)]
     public List<Quota> Quotas { get; set; }
@@ -85,24 +88,27 @@ public class Tariff
     public bool EqualsByParams(Tariff t)
     {
         return t != null
-               && t.DueDate == DueDate
-               && t.Quotas.Count == Quotas.Count
-               && t.Quotas.Exists(Quotas.Contains)
-               && t.CustomerId == CustomerId;
+            && t.DueDate == DueDate
+            && t.Quotas.Count == Quotas.Count
+            && t.Quotas.TrueForAll(Quotas.Contains)
+            && t.CustomerId == CustomerId;
     }
 }
 
+/// <summary>
+/// The quota parameters.
+/// </summary>
 [ProtoContract]
 public class Quota : IEquatable<Quota>
 {
     /// <summary>
-    /// ID
+    /// The quota ID.
     /// </summary>
     [ProtoMember(1)]
     public int Id { get; set; }
 
     /// <summary>
-    /// Quantity
+    /// The quota quantity.
     /// </summary>
     [ProtoMember(2)]
     public int Quantity { get; set; }

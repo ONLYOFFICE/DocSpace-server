@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,9 +33,9 @@ public class CustomNavigationController(MessageService messageService,
         SettingsManager settingsManager,
         WebItemManager webItemManager,
         StorageHelper storageHelper,
-        IMemoryCache memoryCache,
+        IFusionCache fusionCache,
         IHttpContextAccessor httpContextAccessor)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
     /// Returns a list of the custom navigation items.
@@ -44,7 +44,7 @@ public class CustomNavigationController(MessageService messageService,
     /// <path>api/2.0/settings/customnavigation/getall</path>
     /// <collection>list</collection>
     [Tags("Settings / Custom Navigation")]
-    [SwaggerResponse(200, "List of the custom navigation items", typeof(CustomNavigationItem))]
+    [SwaggerResponse(200, "List of the custom navigation items", typeof(List<CustomNavigationItem>))]
     [HttpGet("getall")]
     public async Task<List<CustomNavigationItem>> GetCustomNavigationItemsAsync()
     {
@@ -52,7 +52,7 @@ public class CustomNavigationController(MessageService messageService,
     }
 
     /// <summary>
-    /// Returns a custom navigation item sample.
+    /// Returns a sample of the custom navigation item.
     /// </summary>
     /// <short>Get a custom navigation item sample</short>
     /// <path>api/2.0/settings/customnavigation/getsample</path>
@@ -132,7 +132,7 @@ public class CustomNavigationController(MessageService messageService,
 
         await settingsManager.SaveAsync(settings);
 
-        await messageService.SendAsync(MessageAction.CustomNavigationSettingsUpdated);
+        messageService.Send(MessageAction.CustomNavigationSettingsUpdated);
 
         return inDto;
     }
@@ -163,6 +163,6 @@ public class CustomNavigationController(MessageService messageService,
         settings.Items.Remove(target);
         await settingsManager.SaveAsync(settings);
 
-        await messageService.SendAsync(MessageAction.CustomNavigationSettingsUpdated);
+        messageService.Send(MessageAction.CustomNavigationSettingsUpdated);
     }
 }

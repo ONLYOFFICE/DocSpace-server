@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -75,10 +75,7 @@ public class AscRandom : Random
 
     public override int Next(int maxValue)
     {
-        if (maxValue < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(maxValue));
-        }
+        ArgumentOutOfRangeException.ThrowIfNegative(maxValue);
 
         return (int)(InternalSample() * 4.6566128752457969E-10 * maxValue);
     }

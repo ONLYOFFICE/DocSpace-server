@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,29 +27,55 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Order request parameters
+/// The parameters for ordering requests.
 /// </summary>
 public class OrderRequestDto
 {
     /// <summary>
-    /// Order
+    /// The order value.
     /// </summary>
     [Range(1, int.MaxValue)]
     [JsonConverter(typeof(OrderRequestDtoConverter))]
     public int Order { get; set; }
 }
 
-public class OrdersItemRequestDto<T> : OrderRequestDto
+/// <summary>
+/// An item in the ordering request with its entry type and ID.
+/// </summary>
+public class OrdersItemRequestDto<T>
 {
+    /// <summary>
+    /// The entry unique identifier (file or folder).
+    /// </summary>
     public T EntryId { get; set; }
+
+    /// <summary>
+    /// The entry type (file or folder).
+    /// </summary>
     public FileEntryType EntryType { get; set; }
+
+    /// <summary>
+    /// The order value.
+    /// </summary>
+    [Range(1, int.MaxValue)]
+    [JsonConverter(typeof(OrderRequestDtoConverter))]
+    public int Order { get; set; }
 }
 
+/// <summary>
+/// The collection of items to be ordered.
+/// </summary>
 public class OrdersRequestDto<T>
 {
+    /// <summary>
+    /// The list of items with their ordering information.
+    /// </summary>
     public IEnumerable<OrdersItemRequestDto<T>> Items { get; set; }
 }
 
+/// <summary>
+/// The JSON converter for handling order values in different formats.
+/// </summary>
 public class OrderRequestDtoConverter : System.Text.Json.Serialization.JsonConverter<int>
 {
     public override int Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -74,36 +100,36 @@ public class OrderRequestDtoConverter : System.Text.Json.Serialization.JsonConve
 }
 
 /// <summary>
-/// 
+/// The request parameters for ordering a file.
 /// </summary>
 public class OrderFileRequestDto<T>
 {
     /// <summary>
-    /// File ID
+    /// The file unique identifier.
     /// </summary>
     [FromRoute(Name = "fileId")]
-    public T FileId { get; set; }
+    public required T FileId { get; set; }
 
     /// <summary>
-    /// Order
+    /// The file order information.
     /// </summary>
     [FromBody]
     public OrderRequestDto Order { get; set; }
 }
 
 /// <summary>
-/// 
+/// The request parameters for ordering a folder.
 /// </summary>
 public class OrderFolderRequestDto<T>
 {
     /// <summary>
-    /// Folder ID
+    /// The folder unique identifier.
     /// </summary>
     [FromRoute(Name = "folderId")]
-    public T FolderId { get; set; }
+    public required T FolderId { get; set; }
 
     /// <summary>
-    /// Order
+    /// The folder order information.
     /// </summary>
     [FromBody]
     public OrderRequestDto Order { get; set; }

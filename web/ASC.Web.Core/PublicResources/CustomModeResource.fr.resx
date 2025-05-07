@@ -90,7 +90,7 @@ L'effacement des données personnelles permet de libérer $DocsSpace</value>
   <data name="pattern_enterprise_whitelabel_user_welcome_custom_mode_v1" xml:space="preserve">
     <value>Bonjour, $UserName !
 
-Bienvenue à ONLYOFFICE DocSpace ! Votre profil utilisateur a été ajouté avec succès à "${__VirtualRootPath}":"${__VirtualRootPath}". Vous pouvez maintenant :
+Bienvenue à ${LetterLogoText} DocSpace ! Votre profil utilisateur a été ajouté avec succès à "${__VirtualRootPath}":"${__VirtualRootPath}". Vous pouvez maintenant :
 
 * Travailler avec d'autres utilisateurs dans la salle où vous êtes invité* : salles de collaboration pour la co-écriture en temps réel ou salles personnalisées avec des paramètres flexibles pour tout objectif*.
 

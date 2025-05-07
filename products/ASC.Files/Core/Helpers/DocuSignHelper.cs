@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -117,6 +117,8 @@ public class DocuSignHelper(DocuSignToken docuSignToken,
 
     public static readonly int MaxEmailLength = 10000;
 
+    private static readonly JsonSerializerOptions _serializerOptions = new() { PropertyNameCaseInsensitive = true };
+
     public async Task<bool> ValidateTokenAsync(OAuth20Token token)
     {
         await GetDocuSignAccountAsync(token);
@@ -150,7 +152,7 @@ public class DocuSignHelper(DocuSignToken docuSignToken,
 
         logger.DebugDocuSingUserInfo(userInfoString);
 
-        var userInfo = (DocuSignUserInfo)JsonConvert.DeserializeObject(userInfoString, typeof(DocuSignUserInfo));
+        var userInfo = JsonSerializer.Deserialize<DocuSignUserInfo>(userInfoString, _serializerOptions);
 
         if (userInfo.Accounts == null || userInfo.Accounts.Count == 0)
         {
@@ -219,8 +221,8 @@ public class DocuSignHelper(DocuSignToken docuSignToken,
             DocumentBase64 = Convert.ToBase64String(fileBytes),
             DocumentFields =
             [
-                new() { Name = FilesLinkUtility.FolderId, Value = folderId },
-                new() { Name = FilesLinkUtility.FileTitle, Value = file.Title }
+                new NameValue { Name = FilesLinkUtility.FolderId, Value = folderId },
+                new NameValue { Name = FilesLinkUtility.FileTitle, Value = file.Title }
             ],
             DocumentId = "1", //file.ID.ToString(),
             FileExtension = FileUtility.GetFileExtension(file.Title),
@@ -236,9 +238,9 @@ public class DocuSignHelper(DocuSignToken docuSignToken,
         {
             EnvelopeEvents =
             [
-                new() { EnvelopeEventStatusCode = nameof(DocuSignStatus.Completed) },
-                new() { EnvelopeEventStatusCode = nameof(DocuSignStatus.Declined) },
-                new() { EnvelopeEventStatusCode = nameof(DocuSignStatus.Voided) }
+                new EnvelopeEvent { EnvelopeEventStatusCode = nameof(DocuSignStatus.Completed) },
+                new EnvelopeEvent { EnvelopeEventStatusCode = nameof(DocuSignStatus.Declined) },
+                new EnvelopeEvent { EnvelopeEventStatusCode = nameof(DocuSignStatus.Voided) }
             ],
             IncludeDocumentFields = "true",
             //RecipientEvents = new List<RecipientEvent>
@@ -279,7 +281,7 @@ public class DocuSignHelper(DocuSignToken docuSignToken,
         {
             CustomFields = new CustomFields
             {
-                TextCustomFields = [new() { Name = UserField, Value = authContext.CurrentAccount.ID.ToString() }]
+                TextCustomFields = [new TextCustomField { Name = UserField, Value = authContext.CurrentAccount.ID.ToString() }]
             },
             Documents = [document],
             EmailBlurb = docuSignData.Message,

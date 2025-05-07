@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,9 +31,6 @@ public class NoticeMessage : INoticeMessage
     [NonSerialized]
     private readonly List<ITagValue> _arguments = [];
 
-    [NonSerialized]
-    private IPattern _pattern;
-
     public NoticeMessage() { }
 
     public NoticeMessage(IDirectRecipient recipient, INotifyAction action, string objectID)
@@ -64,11 +61,8 @@ public class NoticeMessage : INoticeMessage
 
     public IDirectRecipient Recipient { get; private set; }
 
-    public IPattern Pattern
-    {
-        get => _pattern;
-        internal set => _pattern = value;
-    }
+    [field: NonSerialized]
+    public IPattern Pattern { get; internal set; }
 
     public INotifyAction Action { get; private set; }
 

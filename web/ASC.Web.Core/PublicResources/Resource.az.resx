@@ -362,7 +362,7 @@
     <value>Apple ID hesabından istifadə edərək portala daxil olmaq üçün tətbiqi aktivləşdirin.</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
-    <value>İstifadəçilərinizə Apple ID-dən istifadə edərək ONLYOFFICE-a daxil olmaq üçün bu proqramı aktivləşdirin. {0}Apple Developers Portalına keçin və yeni tətbiq ONLYOFFICE inteqrasiyası yaradın. Aldığınız məlumatları aşağıya daxil edin:</value>
+    <value>İstifadəçilərinizə Apple ID-dən istifadə edərək {LogoText}-a daxil olmaq üçün bu proqramı aktivləşdirin. {0}Apple Developers Portalına keçin və yeni tətbiq {LogoText} inteqrasiyası yaradın. Aldığınız məlumatları aşağıya daxil edin:</value>
   </data>
   <data name="Consumersacesskey" xml:space="preserve">
     <value>S3 giriş açarı</value>
@@ -419,7 +419,7 @@
     <value>Box fayl və qovluqlarını idarə etmək üçün tətbiqi aktivləşdirin.</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
-    <value>Box hesabınızı Sənədlər moduluna qoşmaq üçün bu proqramı aktivləşdirin. Siz ONLYOFFICE istifadəçiləri ilə Box-dan faylları idarə edə, redaktə edə və paylaşa biləcəksiniz. {0}Box tərtibatçıları səhifəsində hesabınıza daxil olun və ONLYOFFICE inteqrasiyası üçün yeni proqram yaradın. Aldığınız məlumatları aşağıya daxil edin:</value>
+    <value>Box hesabınızı Sənədlər moduluna qoşmaq üçün bu proqramı aktivləşdirin. Siz {LogoText} istifadəçiləri ilə Box-dan faylları idarə edə, redaktə edə və paylaşa biləcəksiniz. {0}Box tərtibatçıları səhifəsində hesabınıza daxil olun və {LogoText} inteqrasiyası üçün yeni proqram yaradın. Aldığınız məlumatları aşağıya daxil edin:</value>
   </data>
   <data name="ConsumersClickatell" xml:space="preserve">
     <value>Clickatell</value>
@@ -431,7 +431,7 @@
     <value>Clickatell vasitəsilə iki faktorlu autentifikasiya üçün tətbiqi aktivləşdirin.</value>
   </data>
   <data name="ConsumersClickatellInstruction" xml:space="preserve">
-    <value>Clickatell xidməti ilə iki faktorlu autentifikasiyanı aktivləşdirmək üçün bu proqramdan istifadə edin. {0}SMS Platforma hesabınıza daxil olun və ONLYOFFICE üçün yeni inteqrasiya yaradın. ApiKey-ni kopyalayın və aşağıya daxil edin:</value>
+    <value>Clickatell xidməti ilə iki faktorlu autentifikasiyanı aktivləşdirmək üçün bu proqramdan istifadə edin. {0}SMS Platforma hesabınıza daxil olun və {LogoText} üçün yeni inteqrasiya yaradın. ApiKey-ni kopyalayın və aşağıya daxil edin:</value>
   </data>
   <data name="ConsumersDocuSign" xml:space="preserve">
     <value>DocuSign</value>
@@ -446,7 +446,7 @@
     <value>DocuSign autentifikasiya son nöqtəsi</value>
   </data>
   <data name="ConsumersDocuSignInstruction" xml:space="preserve">
-    <value>DocuSign istifadə edərək sənədləri rəqəmsal imzalamaq üçün bu proqramı aktivləşdirin. {0}DocuSign Admin Konsolunuza keçin və ONLYOFFICE inteqrasiyasını əlavə edin. Aldığınız məlumatları aşağıya daxil edin:</value>
+    <value>DocuSign istifadə edərək sənədləri rəqəmsal imzalamaq üçün bu proqramı aktivləşdirin. {0}DocuSign Admin Konsolunuza keçin və {LogoText} inteqrasiyasını əlavə edin. Aldığınız məlumatları aşağıya daxil edin:</value>
   </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
     <value>Dropbox fayl və qovluqlarını idarə etmək üçün tətbiqi aktivləşdirin.</value>
@@ -455,7 +455,7 @@
     <value>DropBox</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
-    <value>Dropbox hesabınızı Sənədlər moduluna qoşmaq üçün bu proqramı aktivləşdirin. Siz ONLYOFFICE istifadəçiləri ilə Dropbox-dan faylları idarə edə, redaktə edə və paylaşa biləcəksiniz. {0}Dropbox Developers vebsaytında hesabınıza daxil olun və ONLYOFFICE inteqrasiyası üçün yeni proqram yaradın. Aldığınız məlumatları aşağıya daxil edin:</value>
+    <value>Dropbox hesabınızı Sənədlər moduluna qoşmaq üçün bu proqramı aktivləşdirin. Siz {LogoText} istifadəçiləri ilə Dropbox-dan faylları idarə edə, redaktə edə və paylaşa biləcəksiniz. {0}Dropbox Developers vebsaytında hesabınıza daxil olun və {LogoText} inteqrasiyası üçün yeni proqram yaradın. Aldığınız məlumatları aşağıya daxil edin:</value>
   </data>
   <data name="ConsumersDropBoxKey" xml:space="preserve">
     <value>DropBox ID</value>
@@ -479,7 +479,7 @@
     <value>Facebook hesabından istifadə edərək portala daxil olmaq üçün tətbiqi aktivləşdirin.</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
-    <value>İstifadəçilərinizə Facebook-dan istifadə edərək ONLYOFFICE-a daxil olmaq və müştərilərinin Facebook hesablarını CRM modulu ilə əlaqələndirmək üçün bu proqramı aktivləşdirin. {0}Facebook Developers Portalına keçin və ONLYOFFICE inteqrasiyası üçün yeni tətbiq yaradın. Aldığınız məlumatları aşağıya daxil edin:</value>
+    <value>İstifadəçilərinizə Facebook-dan istifadə edərək {LogoText}-a daxil olmaq və müştərilərinin Facebook hesablarını CRM modulu ilə əlaqələndirmək üçün bu proqramı aktivləşdirin. {0}Facebook Developers Portalına keçin və {LogoText} inteqrasiyası üçün yeni tətbiq yaradın. Aldığınız məlumatları aşağıya daxil edin:</value>
   </data>
   <data name="ConsumersFirebase" xml:space="preserve">
     <value>Firebase</value>
@@ -512,7 +512,7 @@
     <value>Google hesabından istifadə edərək portala daxil olmaq və Google Disk fayl və qovluqlarını idarə etmək üçün layihəni qoşun.</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
-    <value>Google Disk hesabınızı Sənədlər moduluna qoşmaq üçün bu proqramı aktivləşdirin. Siz ONLYOFFICE istifadəçiləri ilə Google Diskdən faylları idarə edə, redaktə edə və paylaşa biləcəksiniz. {0}Google API konsoluna keçin və ONLYOFFICE inteqrasiyası üçün yeni layihə yaradın. Aldığınız məlumatları aşağıya daxil edin:</value>
+    <value>Google Disk hesabınızı Sənədlər moduluna qoşmaq üçün bu proqramı aktivləşdirin. Siz {LogoText} istifadəçiləri ilə Google Diskdən faylları idarə edə, redaktə edə və paylaşa biləcəksiniz. {0}Google API konsoluna keçin və {LogoText} inteqrasiyası üçün yeni layihə yaradın. Aldığınız məlumatları aşağıya daxil edin:</value>
   </data>
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
     <value>LinkedIn hesabından istifadə edərək portala daxil olmaq üçün tətbiqi aktivləşdirin.</value>
@@ -536,7 +536,7 @@
     <value>Microsoft hesabından istifadə edərək portala daxil olmaq üçün tətbiqi aktivləşdirin.</value>
   </data>
   <data name="ConsumersMicrosoftInstruction" xml:space="preserve">
-    <value>İstifadəçilərinizə Microsoft-dan istifadə edərək ONLYOFFICE-a daxil olmaq üçün bu proqramı aktivləşdirin. {0}Microsoft Azure-a keçin və yeni tətbiq ONLYOFFICE inteqrasiyası yaradın. Aldığınız məlumatları aşağıya daxil edin:</value>
+    <value>İstifadəçilərinizə Microsoft-dan istifadə edərək {LogoText}-a daxil olmaq üçün bu proqramı aktivləşdirin. {0}Microsoft Azure-a keçin və yeni tətbiq {LogoText} inteqrasiyası yaradın. Aldığınız məlumatları aşağıya daxil edin:</value>
   </data>
   <data name="ConsumersRackspace" xml:space="preserve">
     <value>Rackspace Bulud Yaddaşı</value>
@@ -599,7 +599,7 @@
     <value>OneDrive fayl və qovluqlarını idarə etmək üçün tətbiqi aktivləşdirin.</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
-    <value>OneDrive hesabınızı Sənədlər moduluna qoşmaq üçün bu proqramı aktivləşdirin. Siz ONLYOFFICE istifadəçiləri ilə OneDrive-dan faylları idarə edə, redaktə edə və paylaşa biləcəksiniz. {0}Microsoft Azure hesabınıza daxil olun və ONLYOFFICE inteqrasiyası üçün yeni proqram yaradın. Aldığınız məlumatları aşağıya daxil edin:</value>
+    <value>OneDrive hesabınızı Sənədlər moduluna qoşmaq üçün bu proqramı aktivləşdirin. Siz {LogoText} istifadəçiləri ilə OneDrive-dan faylları idarə edə, redaktə edə və paylaşa biləcəksiniz. {0}Microsoft Azure hesabınıza daxil olun və {LogoText} inteqrasiyası üçün yeni proqram yaradın. Aldığınız məlumatları aşağıya daxil edin:</value>
   </data>
   <data name="ConsumersSmscDescription" xml:space="preserve">
     <value>SMS Mərkəzi vasitəsilə iki faktorlu autentifikasiya üçün tətbiqi aktivləşdirin.</value>
@@ -635,7 +635,7 @@
     <value>Twitter hesabından istifadə edərək portala daxil olmaq üçün tətbiqi aktivləşdirin.</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>İstifadəçilərinizə Twitter-dən istifadə edərək ONLYOFFICE-a daxil olmaq və müştərilərinin Twitter hesablarını CRM modulu ilə əlaqələndirmək üçün bu proqramı işə salın. {0}Twitter Developers Portalına keçin və yeni tətbiq ONLYOFFICE inteqrasiyası yaradın. Aldığınız məlumatları aşağıya daxil edin:</value>
+    <value>İstifadəçilərinizə Twitter-dən istifadə edərək {LogoText}-a daxil olmaq və müştərilərinin Twitter hesablarını CRM modulu ilə əlaqələndirmək üçün bu proqramı işə salın. {0}Twitter Developers Portalına keçin və yeni tətbiq {LogoText} inteqrasiyası yaradın. Aldığınız məlumatları aşağıya daxil edin:</value>
   </data>
   <data name="ConsumersVkDescription" xml:space="preserve">
     <value>VK hesabından istifadə edərək portala daxil olmaq üçün tətbiqi aktivləşdirin.</value>
@@ -647,7 +647,7 @@
     <value>Yahoo xidmətindən istifadəçiləri daxil etmək üçün tətbiqi aktivləşdirin.</value>
   </data>
   <data name="ConsumersYahooInstruction" xml:space="preserve">
-    <value>Yahoo kontakt siyahınızdan yeni portal istifadəçiləri əlavə etmək üçün bu proqramı aktiv edin. {0}Yahoo Developer Network-də Tətbiq Yaradın səhifəsinə keçin və ONLYOFFICE inteqrasiyası üçün yeni proqram yaradın. Aldığınız məlumatları aşağıya daxil edin:</value>
+    <value>Yahoo kontakt siyahınızdan yeni portal istifadəçiləri əlavə etmək üçün bu proqramı aktiv edin. {0}Yahoo Developer Network-də Tətbiq Yaradın səhifəsinə keçin və {LogoText} inteqrasiyası üçün yeni proqram yaradın. Aldığınız məlumatları aşağıya daxil edin:</value>
   </data>
   <data name="ConsumersYandexDescription" xml:space="preserve">
     <value>Yandex hesabından istifadə edərək portala daxil olmaq üçün tətbiqi aktivləşdirin.</value>
@@ -923,7 +923,7 @@
     <value>Müştəri sirri</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
-    <value>İstifadəçilərinizə LinkedIn hesabından istifadə edərək ONLYOFFICE-a daxil olmağa icazə vermək üçün bu proqramı aktiv edin. {0}LinkedIn Developers vebsaytına keçin və yeni ONLYOFFICE inteqrasiyası tətbiqi yaradın. Aldığınız məlumatları aşağıya daxil edin:</value>
+    <value>İstifadəçilərinizə LinkedIn hesabından istifadə edərək {LogoText}-a daxil olmağa icazə vermək üçün bu proqramı aktiv edin. {0}LinkedIn Developers vebsaytına keçin və yeni {LogoText} inteqrasiyası tətbiqi yaradın. Aldığınız məlumatları aşağıya daxil edin:</value>
   </data>
   <data name="ConsumersMailruInstruction" xml:space="preserve">
     <value>Mail.ru tətbiqini əlavə etdikdə, profil səhifənizdəki Mail.ru hesabından istifadə edərək portala girişi aktivləşdirə bilərsiniz.</value>
@@ -952,26 +952,29 @@
   <data name="Tariffs_admin" xml:space="preserve">
     <value>Biznes</value>
   </data>
+  <data name="Tariffs_adminyear" xml:space="preserve">
+    <value>Biznes</value>
+  </data>
   <data name="Tariffs_startup" xml:space="preserve">
     <value>Startap</value>
   </data>
   <data name="ConsumersWordpressInstruction" xml:space="preserve">
-    <value>Sənədləri WordPress veb saytınızda asanlıqla dərc etmək üçün tətbiqi aktivləşdirin. {0}Wordpress Developers səhifəsində ONLYOFFICE inteqrasiyası üçün yeni proqram yaradın. Aldığınız məlumatları aşağıya yerləşdirin:</value>
+    <value>Sənədləri WordPress veb saytınızda asanlıqla dərc etmək üçün tətbiqi aktivləşdirin. {0}Wordpress Developers səhifəsində {LogoText} inteqrasiyası üçün yeni proqram yaradın. Aldığınız məlumatları aşağıya yerləşdirin:</value>
   </data>
   <data name="ConsumersEasyBibInstruction" xml:space="preserve">
-    <value>ONLYOFFICE redaktorlarında biblioqrafiya yaratmaq üçün bu tətbiqi aktiv edin. {0}EasyBib qeydiyyat səhifəsinə keçin və ONLYOFFICE inteqrasiyasını əlavə etmək üçün formanı doldurun. Proqram açarı əldə etdikdən sonra onu aşağıya yerləşdirin:</value>
+    <value>{LogoText} redaktorlarında biblioqrafiya yaratmaq üçün bu tətbiqi aktiv edin. {0}EasyBib qeydiyyat səhifəsinə keçin və {LogoText} inteqrasiyasını əlavə etmək üçün formanı doldurun. Proqram açarı əldə etdikdən sonra onu aşağıya yerləşdirin:</value>
   </data>
   <data name="ConsumersFirebaseInstruction" xml:space="preserve">
-    <value>İstifadəçilərinizə hətta oflayn olsa belə, mesajlar haqqında bildirişlər almağa icazə vermək üçün bu proqramı aktiv edin. {0}Firebase konsoluna keçin və ONLYOFFICE inteqrasiyası üçün yeni layihə əlavə edin. Aldığınız məlumatları aşağıya daxil edin:</value>
+    <value>İstifadəçilərinizə hətta oflayn olsa belə, mesajlar haqqında bildirişlər almağa icazə vermək üçün bu proqramı aktiv edin. {0}Firebase konsoluna keçin və {LogoText} inteqrasiyası üçün yeni layihə əlavə edin. Aldığınız məlumatları aşağıya daxil edin:</value>
   </data>
   <data name="ConsumersGoogleCloudInstruction" xml:space="preserve">
-    <value>Portalınızdakı məlumatların ehtiyat nüsxəsini çıxarmaq və saxlamaq üçün Google Bulud Saxlama xidmətinə qoşulun. {0}Google Bulud Platforma Konsoluna keçin və ONLYOFFICE üçün yeni xidmət hesabı yaradın. Aldığınız məlumatları aşağıya yerləşdirin:</value>
+    <value>Portalınızdakı məlumatların ehtiyat nüsxəsini çıxarmaq və saxlamaq üçün Google Bulud Saxlama xidmətinə qoşulun. {0}Google Bulud Platforma Konsoluna keçin və {LogoText} üçün yeni xidmət hesabı yaradın. Aldığınız məlumatları aşağıya yerləşdirin:</value>
   </data>
   <data name="ConsumersRackspaceInstruction" xml:space="preserve">
     <value>Portalınızdan məlumatların ehtiyat nüsxəsini çıxarmaq və saxlamaq üçün Rackspace Cloud Storage xidmətinə qoşulun. {0}Rackspace Cloud İdarəetmə Panelinin təhlükəsizlik parametrlərində Rackspace API Açarının yanındakı Göstər linkinə klikləyin. Aldığınız məlumatları aşağıya yerləşdirin:</value>
   </data>
   <data name="ConsumersS3Instruction" xml:space="preserve">
-    <value>Portalınızdan məlumatların ehtiyat nüsxəsini çıxarmaq və saxlamaq üçün Amazon AWS S3-ə qoşulun. {0}AWS İdarəetmə Konsoluna keçin və ONLYOFFICE üçün giriş açarları yaradın. Aldığınız məlumatları aşağıya yerləşdirin:</value>
+    <value>Portalınızdan məlumatların ehtiyat nüsxəsini çıxarmaq və saxlamaq üçün Amazon AWS S3-ə qoşulun. {0}AWS İdarəetmə Konsoluna keçin və {LogoText} üçün giriş açarları yaradın. Aldığınız məlumatları aşağıya yerləşdirin:</value>
   </data>
   <data name="ConsumersSelectelInstruction" xml:space="preserve">
     <value>Portalınızdan məlumatların ehtiyat nüsxəsini çıxarmaq və saxlamaq üçün Selectel Cloud Storage xidmətinə qoşulun. {0}Yedək nüsxələrinizi saxlamağı planlaşdırdığınız konteynerlər üçün Oxumaq/Yazmaq hüququ olan istifadəçi üçün giriş məlumatını əldə edin və aşağıda yerləşdirin:</value>
@@ -992,7 +995,7 @@
     <value>Zoom hesabından istifadə edərək portala daxil olmanı təmin edin.</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
-    <value>İstifadəçilərinizə Zoom hesablarından istifadə edərək ONLYOFFICE-a daxil olmaq üçün bu proqramı aktiv edin. {0}Zoom Developers veb-saytına keçin və yeni ONLYOFFICE inteqrasiyası tətbiqi yaradın. Aldığınız məlumatları aşağıda əlavə edin:</value>
+    <value>İstifadəçilərinizə Zoom hesablarından istifadə edərək {LogoText}-a daxil olmaq üçün bu proqramı aktiv edin. {0}Zoom Developers veb-saytına keçin və yeni {LogoText} inteqrasiyası tətbiqi yaradın. Aldığınız məlumatları aşağıda əlavə edin:</value>
   </data>
   <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
     <value>Həddindən artıq giriş cəhdi. Zəhmət olmasa, bir az sonra yenə cəhd edin</value>
@@ -1074,5 +1077,8 @@
   </data>
   <data name="Tariffs_nonprofit" xml:space="preserve">
     <value>Qeyri-kommersiya</value>
+  </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>Webhook URL-i mövcud deyil. HEAD sorğusu 200 http statusuna cavab vermir.</value>
   </data>
 </root>

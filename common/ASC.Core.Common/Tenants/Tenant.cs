@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,6 +28,9 @@ using Profile = AutoMapper.Profile;
 
 namespace ASC.Core.Tenants;
 
+/// <summary>
+/// The tenant parameters.
+/// </summary>
 [ProtoContract]
 public class Tenant : IMapFrom<DbTenant>
 {
@@ -77,13 +80,13 @@ public class Tenant : IMapFrom<DbTenant>
     public string Campaign { get; set; }
     
     [ProtoMember(5)]
-    public DateTime CreationDateTime { get; internal set; }
+    public DateTime CreationDateTime { get; set; }
     
     [ProtoMember(6)]
     public string HostedRegion { get; set; }
     
     [ProtoMember(7)]
-    public int Id { get; internal set; }
+    public int Id { get; set; }
     
     [ProtoMember(8)]
     public TenantIndustry Industry { get; set; }
@@ -110,10 +113,10 @@ public class Tenant : IMapFrom<DbTenant>
     public string PaymentId { get; set; }
     
     [ProtoMember(16)]
-    public TenantStatus Status { get; internal set; }
+    public TenantStatus Status { get; set; }
     
     [ProtoMember(17)]
-    public DateTime StatusChangeDate { get; internal set; }
+    public DateTime StatusChangeDate { get; set; }
     
     [ProtoMember(18)]
     public string TimeZone { get; set; }

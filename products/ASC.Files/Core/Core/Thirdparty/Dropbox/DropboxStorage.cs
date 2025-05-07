@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -148,7 +148,7 @@ internal class DropboxStorage(TempStream tempStream, IHttpClientFactory httpClie
         }
     }
 
-    public async Task<Stream> GetThumbnailAsync(string fileId, int width, int height)
+    public async Task<Stream> GetThumbnailAsync(string fileId, uint width, uint height)
     {
         try
         {
@@ -165,7 +165,7 @@ internal class DropboxStorage(TempStream tempStream, IHttpClientFactory httpClie
         }
     }
 
-    private static ThumbnailSize Convert(int width)
+    private static ThumbnailSize Convert(uint width)
     {
         if (width > 368)
         {

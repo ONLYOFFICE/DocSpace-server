@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -50,8 +50,14 @@ public class Startup
         }
     }
 
-    public async Task ConfigureServices(IServiceCollection services)
-    {
+    public async Task ConfigureServices(WebApplicationBuilder builder)
+    {        
+        var services = builder.Services;
+        if (_configuration.GetValue<bool>("openTelemetry:enable"))
+        {
+            builder.ConfigureOpenTelemetry();
+        }
+        
         services.AddCustomHealthCheck(_configuration);
         services.AddHttpContextAccessor();
         services.AddMemoryCache();
@@ -115,7 +121,7 @@ public class Startup
 
         var connectionMultiplexer = await services.GetRedisConnectionMultiplexerAsync(_configuration, GetType().Namespace);
 
-        services.AddDistributedCache(connectionMultiplexer)
+        services.AddHybridCache(connectionMultiplexer)
                 .AddEventBus(_configuration)
                 .AddDistributedTaskQueue()
                 .AddCacheNotify(_configuration)
@@ -155,13 +161,7 @@ public class Startup
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
         app.UseExceptionHandler();
-
         app.UseRouting();
-
-        if (!string.IsNullOrEmpty(_corsOrigin))
-        { 
-            app.UseCors(CustomCorsPolicyName);
-        }
 
         if (_configuration.GetValue<bool>("openApi:enable"))
         {
@@ -169,13 +169,20 @@ public class Startup
         }
         app.UseSynchronizationContextMiddleware();
 
+        app.UseTenantMiddleware();
+        
+        if (!string.IsNullOrEmpty(_corsOrigin))
+        { 
+            app.UseCors(CustomCorsPolicyName);
+        }
+        
         app.UseAuthentication();
 
         app.UseAuthorization();
 
         app.UseEndpoints(endpoints =>
         {
-            endpoints.MapCustomAsync().Wait();
+            endpoints.MapCustomAsync();
 
             endpoints.MapHealthChecks("/health", new HealthCheckOptions
             {

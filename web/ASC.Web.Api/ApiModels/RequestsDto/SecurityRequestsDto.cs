@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,33 +27,33 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// Security request parameters
+/// The request parameters for managing user security and access permissions.
 /// </summary>
 public class SecurityRequestsDto
 {
     /// <summary>
-    /// Product ID
+    /// The product ID for which permissions are being set.
     /// </summary>
-    public Guid ProductId { get; set; }
+    public required Guid ProductId { get; set; }
 
     /// <summary>
-    /// User ID
+    /// The ID of the user whose permissions are being configured.
     /// </summary>
-    public Guid UserId { get; set; }
+    public required Guid UserId { get; set; }
 
     /// <summary>
-    /// Administrator or not
+    /// Specifies whether the user has administrative privileges.
     /// </summary>
     public bool Administrator { get; set; }
 }
 
 /// <summary>
-/// 
+/// The request parameters for retrieving the security settings across the multiple modules.
 /// </summary>
 public class SecuritySettingsRequestDto
 {
     /// <summary>
-    /// List of module IDs
+    /// The list of module identifiers for which to retrieve the security settings.
     /// </summary>
     [FromQuery(Name = "ids")]
     public IEnumerable<string> Ids { get; set; }

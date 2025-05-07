@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,38 +27,38 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// Wizard settings request parameters
+/// The request parameters for initial configuration of the setup wizard.
 /// </summary>
 public class WizardRequestsDto
 {
     /// <summary>
-    /// Email
+    /// The user's email address for authentication and communication.
     /// </summary>
     [EmailAddress]
-    public string Email { get; set; }
+    public required string Email { get; set; }
 
     /// <summary>
-    /// Password hash
+    /// The hashed representation of the user's password.
     /// </summary>
-    public string PasswordHash { get; set; }
+    public required string PasswordHash { get; set; }
 
     /// <summary>
-    /// Language
+    /// The user's preferred interface language code.
     /// </summary>
     public string Lng { get; set; }
 
     /// <summary>
-    /// Time zone
+    /// The user's time zone identifier.
     /// </summary>
     public string TimeZone { get; set; }
 
     /// <summary>
-    /// AMI ID
+    /// The Amazon Machine Image (AMI) identifier.
     /// </summary>
     public string AmiId { get; set; }
 
     /// <summary>
-    /// Subscribed from the site or not
+    /// Specifies whether the user opted in for site communications.
     /// </summary>
     public bool SubscribeFromSite { get; set; }
 

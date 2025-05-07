@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -50,7 +50,7 @@ internal class LoginNoneModuleActionMapper : IModuleActionMapper
             MessageAction.LoginFailDisabledProfile, MessageAction.LoginFail,MessageAction.LoginFailViaSms,MessageAction.LoginFailViaApi,
             MessageAction.LoginFailViaApiSms,MessageAction.LoginFailViaApiTfa,MessageAction.LoginFailViaApiSocialAccount,
             MessageAction.LoginFailViaTfaApp,MessageAction.LoginFailIpSecurity,MessageAction.LoginFailViaSSO,MessageAction.LoginFailBruteForce,
-            MessageAction.LoginFailRecaptcha,MessageAction.Logout,MessageAction.SessionStarted,MessageAction.SessionCompleted
+            MessageAction.LoginFailRecaptcha,MessageAction.Logout,MessageAction.SessionStarted,MessageAction.SessionCompleted,MessageAction.AuthLinkActivated
         };
 
         Actions.Add(MessageAction.LoginSuccessViaSocialAccount, new MessageMaps("LoginSuccessSocialAccount"));

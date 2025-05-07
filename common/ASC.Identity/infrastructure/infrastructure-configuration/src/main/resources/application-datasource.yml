@@ -1,8 +1,15 @@
 spring:
+  cloud:
+    aws:
+      region:
+        auto: false
+        static: ${SPRING_CLOUD_AWS_REGION_STATIC:us-east-1}
+      dynamodb:
+        enabled: false
   datasource:
     driver-class-name: ${JDBC_DRIVER:com.mysql.cj.jdbc.Driver}
     password: ${JDBC_PASSWORD:dev}
-    url: jdbc:mysql://${JDBC_URL:localhost}/${JDBC_DATABASE:docspace}?${JDBC_PARAMETERS:}
+    url: jdbc:mysql://${JDBC_URL:localhost:3306}/${JDBC_DATABASE:docspace}?${JDBC_PARAMETERS:}
     username: ${JDBC_USER_NAME:dev}
   jpa:
     properties:
@@ -16,3 +23,21 @@ spring:
     show-sql: ${JPA_SHOW_SQL:false}
   lifecycle:
     timeout-per-shutdown-phase: ${SPRING_LIFECYCLE_TIMEOUT:1m}
+---
+spring:
+  config:
+    activate:
+      on-profile:
+        - saas
+  cloud:
+    aws:
+      region:
+        auto: true
+      dynamodb:
+        enabled: true
+        endpoint: ${SPRING_CLOUD_AWS_DYNAMODB_ENDPOINT:}
+        tables:
+          registeredClient: ${SPRING_CLOUD_AWS_DYNAMODB_TABLES_REGISTERED_CLIENT:RegisteredClient}
+      credentials:
+        access-key: ${SPRING_CLOUD_AWS_DYNAMODB_ACCESS_KEY:dummy}
+        secret-key: ${SPRING_CLOUD_AWS_DYNAMODB_SECRET_KEY:dummy}

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -41,8 +41,8 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         FileConverter fileConverter,
         PathProvider pathProvider,
         FileChecker fileChecker,
-        IDistributedCache distributedCache,
-        FillingFormResultDtoHelper fillingFormResultDtoHelper)
+        FillingFormResultDtoHelper fillingFormResultDtoHelper,
+        WebhookManager webhookManager)
     : FilesHelperBase(filesSettingsHelper,
             fileUploader,
             socketManager,
@@ -50,7 +50,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
             fileStorageService,
             fileChecker,
             httpContextAccessor,
-            distributedCache)
+            webhookManager)
     {
     private readonly ILogger _logger = logger;
 
@@ -80,7 +80,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
     public async Task<string> GetPresignedUri<T>(T fileId)
     {
         var file = await _fileStorageService.GetFileAsync(fileId, -1);
-        return await pathProvider.GetFileStreamUrlAsync(file);
+        return pathProvider.GetFileStreamUrl(file);
     }
 
     public async IAsyncEnumerable<ConversationResultDto> CheckConversionAsync<T>(CheckConversionRequestDto<T> checkConversionRequestDto)
@@ -203,6 +203,13 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
     public async Task<FileDto<T>> LockFileAsync<T>(T fileId, bool lockFile)
     {
         var result = await _fileStorageService.LockFileAsync(fileId, lockFile);
+
+        return await _fileDtoHelper.GetAsync(result);
+    }
+
+    public async Task<FileDto<T>> SetCustomFilterTagAsync<T>(T fileId, bool enabled)
+    {
+        var result = await _fileStorageService.SetCustomFilterTagAsync(fileId, enabled);
 
         return await _fileDtoHelper.GetAsync(result);
     }

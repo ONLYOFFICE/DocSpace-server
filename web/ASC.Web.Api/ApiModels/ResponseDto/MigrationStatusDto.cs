@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,26 +26,29 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
+/// <summary>
+/// The migration status parameters.
+/// </summary>
 public class MigrationStatusDto
 {
     /// <summary>
-    /// Migration progress
+    /// The migration progress.
     /// </summary>
     [SwaggerSchemaCustom(Example = 1.0)]
     public double Progress { get; set; }
 
     /// <summary>
-    /// Migration error
+    /// The migration error.
     /// </summary>
     public string Error { get; set; }
 
     /// <summary>
-    /// Migration API information
+    /// The migration API information.
     /// </summary>
     public MigrationApiInfo ParseResult { get; set; }
 
     /// <summary>
-    /// Specifies whether the migration is completed
+    /// Specifies whether the migration is completed or not.
     /// </summary>
     public bool IsCompleted { get; set; }
 }

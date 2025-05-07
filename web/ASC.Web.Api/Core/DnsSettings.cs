@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -48,7 +48,7 @@ public class DnsSettings(PermissionContext permissionContext,
 
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var tenant = await tenantManager.GetCurrentTenantAsync();
+        var tenant = tenantManager.GetCurrentTenant();
 
         dnsName = dnsName?.Trim().ToLowerInvariant();
 
@@ -63,7 +63,7 @@ public class DnsSettings(PermissionContext permissionContext,
 
             tenant.MappedDomain = dnsName;
             await tenantManager.SaveTenantAsync(tenant);
-            await messageService.SendAsync(MessageAction.DnsSettingsUpdated, oldDomain, [dnsName]);
+            messageService.Send(MessageAction.DnsSettingsUpdated, oldDomain, [dnsName]);
             await cspSettingsHelper.RenameDomain(oldDomain, tenant.GetTenantDomain(coreSettings));
             return null;
         }

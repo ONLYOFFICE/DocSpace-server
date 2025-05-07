@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,6 +27,7 @@
 namespace ASC.Web.Api.Controllers.Settings;
 
 [DefaultRoute("tips")]
+[ApiExplorerSettings(IgnoreApi = true)]
 public class TipsController(ILoggerProvider option,
         ApiContext apiContext,
         AuthContext authContext,
@@ -34,16 +35,16 @@ public class TipsController(ILoggerProvider option,
         SettingsManager settingsManager,
         WebItemManager webItemManager,
         SetupInfo setupInfo,
-        IMemoryCache memoryCache,
+        IFusionCache fusionCache,
         IHttpClientFactory clientFactory,
         TenantManager tenantManager,
         IHttpContextAccessor httpContextAccessor)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     private readonly ILogger _log = option.CreateLogger("ASC.Api");
 
     /// <summary>
-    /// Updates the tip settings with a parameter specified in the request.
+    /// Updates the user interface tip settings with the parameters specified in the request.
     /// </summary>
     /// <short>Update the tip settings</short>
     /// <path>api/2.0/settings/tips</path>
@@ -59,7 +60,7 @@ public class TipsController(ILoggerProvider option,
         {
             try
             {
-                var tenant = await tenantManager.GetCurrentTenantAsync();
+                var tenant = tenantManager.GetCurrentTenant();
                 var request = new HttpRequestMessage
                 {
                     RequestUri = new Uri($"{setupInfo.TipsAddress}/tips/deletereaded")

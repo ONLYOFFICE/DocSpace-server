@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -64,7 +64,7 @@ public record FolderIndexChangedData : EntryData
 
 public class FolderCreatedInterpreter : ActionInterpreter
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
         var desc = GetAdditionalDescription(description);
 
@@ -74,7 +74,7 @@ public class FolderCreatedInterpreter : ActionInterpreter
 
 public class FolderMovedInterpreter : ActionInterpreter
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
         var splitTarget = target.Split(',');
         var desc = GetAdditionalDescription(description);
@@ -94,7 +94,7 @@ public class FolderMovedInterpreter : ActionInterpreter
 
 public class FolderRenamedInterpreter : ActionInterpreter
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
         var desc = GetAdditionalDescription(description);
         
@@ -105,7 +105,7 @@ public class FolderRenamedInterpreter : ActionInterpreter
 
 public class FolderCopiedInterpreter : ActionInterpreter
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
         var splitTarget = target.Split(',');
         var desc = GetAdditionalDescription(description);
@@ -125,7 +125,7 @@ public class FolderCopiedInterpreter : ActionInterpreter
 
 public class FolderDeletedInterpreter : ActionInterpreter
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
         return new ValueTask<HistoryData>(new EntryData(target, description[0]));
     }
@@ -133,12 +133,12 @@ public class FolderDeletedInterpreter : ActionInterpreter
 
 public class FolderIndexReorderedInterpreter : ActionInterpreter
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
         var desc = GetAdditionalDescription(description);
         var title = description[0];
         
-        var isRoom = desc.ParentType is (int)FolderType.VirtualRooms or (int)FolderType.Archive;
+        var isRoom = desc.ParentType is (int)FolderType.VirtualRooms or (int)FolderType.RoomTemplates or (int)FolderType.Archive;
         var parentId = isRoom ? int.Parse(target) : desc.ParentId;
         var parentTitle = isRoom ? title : desc.ParentTitle;
         var parentType = isRoom ? (int)FolderType.VirtualDataRoom : desc.ParentType;
@@ -149,7 +149,7 @@ public class FolderIndexReorderedInterpreter : ActionInterpreter
 
 public class FolderIndexChangedInterpreter : ActionInterpreter
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description, FileEntry<int> entry)
+    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
         var oldIndex = int.Parse(description[1]);
         var newIndex = int.Parse(description[2]);

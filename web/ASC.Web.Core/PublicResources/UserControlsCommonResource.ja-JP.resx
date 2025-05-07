@@ -64,11 +64,17 @@
   <data name="LicenseKeyNotCorrect" xml:space="preserve">
     <value>ライセンスキーが間違っているようです</value>
   </data>
+  <data name="LicenseKeyNotFound" xml:space="preserve">
+    <value>ライセンスキーの入力が必要です</value>
+  </data>
   <data name="NewDocument" xml:space="preserve">
     <value>新しいドキュメント</value>
   </data>
   <data name="TariffPerMonth" xml:space="preserve">
     <value>月</value>
+  </data>
+  <data name="TariffPerYear" xml:space="preserve">
+    <value>年</value>
   </data>
   <data name="UnknownFirstName" xml:space="preserve">
     <value>名</value>
@@ -76,7 +82,7 @@
   <data name="UnknownLastName" xml:space="preserve">
     <value>姓</value>
   </data>
-  <data name="LicenseKeyNotFound" xml:space="preserve">
-    <value>ライセンスキーの入力が必要です</value>
+  <data name="LicenseTypeNotCorrect" xml:space="preserve">
+    <value>ライセンス問題。{0} DocSpace（EnterpriseまたはDeveloper）の正しいエディションがインストールされていることをご確認ください。ご質問がある場合は、担当営業までお問い合わせください。</value>
   </data>
 </root>

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -59,7 +59,7 @@ public class CommonMethods(
             ownerId = t.OwnerId,
             paymentId = t.PaymentId,
             portalName = t.Alias,
-            status = t.Status.ToString(),
+            status = t.Status.ToStringFast(),
             tenantId = t.Id,
             timeZoneName = timeZoneConverter.GetTimeZone(t.TimeZone).DisplayName,
             quotaUsage,
@@ -89,7 +89,7 @@ public class CommonMethods(
 
     private async Task<string> CallSendMethod(string requestUriScheme, string apiMethod, HttpMethod httpMethod, Tenant tenant, ConfirmType confirmType, bool skipAndReturnUrl)
     {
-        var validationKey = emailValidationKeyProvider.GetEmailKey(tenant.Id, tenant.OwnerId.ToString() + confirmType);
+        var validationKey = emailValidationKeyProvider.GetEmailKey(tenant.OwnerId.ToString() + confirmType, tenant.Id);
 
         var url = string.Format("{0}{1}{2}{3}{4}?userid={5}&key={6}",
                             requestUriScheme,
@@ -97,7 +97,7 @@ public class CommonMethods(
                             tenant.GetTenantDomain(coreSettings),
                             commonConstants.WebApiBaseUrl,
                             apiMethod,
-                            tenant.OwnerId,
+                            tenant.OwnerId.ToString(),
                             validationKey);
 
         if (skipAndReturnUrl)
@@ -286,6 +286,16 @@ public class CommonMethods(
 
     public string GetClientIp()
     {
+        var request = httpContextAccessor.HttpContext?.Request;
+        if (request != null)
+        {
+            var header = request.Headers["X-Forwarded-For"].FirstOrDefault();
+            if (!string.IsNullOrEmpty(header))
+            {
+                return header.Split(',').First();
+            }
+        }
+
         return httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
 
         //TODO: check old version

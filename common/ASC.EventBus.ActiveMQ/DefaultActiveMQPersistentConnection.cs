@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -130,7 +130,7 @@ public class DefaultActiveMQPersistentConnection(IConnectionFactory connectionFa
 
         if (IsConnected)
         {
-            _connection.ExceptionListener += async (e) => { await OnExceptionListenerAsync(e); };
+            _connection.ExceptionListener += async e => { await OnExceptionListenerAsync(e); };
             _connection.ConnectionInterruptedListener += async () => { await OnConnectionInterruptedListenerAsync(); };
             _connection.ConnectionResumedListener += async () => { await OnConnectionResumedListenerAsync(); };
 

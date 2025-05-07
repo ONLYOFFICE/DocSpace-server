@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -40,6 +40,17 @@ public static class NotifyConstants
     public static readonly INotifyAction EventRoomRemoved = new NotifyAction("RoomRemoved", "room removed");
     public static readonly INotifyAction EventFormSubmitted = new NotifyAction("FormSubmitted", "form submitted");
     public static readonly INotifyAction EventFormReceived = new NotifyAction("FormReceived", "form received");
+    public static readonly INotifyAction EventRoomMovedArchive = new NotifyAction("RoomMovedArchive");
+    public static readonly INotifyAction EventInvitedToRoom = new NotifyAction("InvitedToRoom");
+    public static readonly INotifyAction EventRoomUpdateAccessForUser = new NotifyAction("RoomUpdateAccessForUser");
+    public static readonly INotifyAction EventDocumentCreatedInRoom = new NotifyAction("DocumentCreatedInRoom");
+    public static readonly INotifyAction EventDocumentUploadedToRoom = new NotifyAction("DocumentUploadedTo");
+    public static readonly INotifyAction EventDocumentsUploadedToRoom = new NotifyAction("DocumentsUploadedTo");
+    public static readonly INotifyAction EventFolderCreatedInRoom = new NotifyAction("FolderCreatedInRoom");
+    public static readonly INotifyAction EventFormStartedFilling = new NotifyAction("FormStartedFilling");
+    public static readonly INotifyAction EventYourTurnFormFilling = new NotifyAction("YourTurnFormFilling");
+    public static readonly INotifyAction EventFormWasCompletelyFilled = new NotifyAction("FormWasCompletelyFilled");
+    public static readonly INotifyAction EventStoppedFormFilling = new NotifyAction("StoppedFormFilling");
 
     #endregion
 
@@ -56,6 +67,7 @@ public static class NotifyConstants
     public static readonly string TagMailsCount = "MailsCount";
     public static readonly string RoomTitle = "RoomTitle";
     public static readonly string RoomUrl = "RoomURL";
+    public static readonly string FolderTitle = "FolderTitle";
 
     #endregion
 }

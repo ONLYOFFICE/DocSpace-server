@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,7 +29,7 @@ namespace ASC.Files.Service.IntegrationEvents.EventHandling;
 [Scope]
 public class MoveOrCopyIntegrationEventHandler(
     ILogger<MoveOrCopyIntegrationEventHandler> logger,
-    FileOperationsManager fileOperationsManager,
+    FileOperationsManager<FileMoveCopyOperation> fileOperationsManager,
     TenantManager tenantManager,
     SecurityContext securityContext)
     : IIntegrationEventHandler<MoveOrCopyIntegrationEvent>
@@ -42,7 +42,7 @@ public class MoveOrCopyIntegrationEventHandler(
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
             await tenantManager.SetCurrentTenantAsync(@event.TenantId);
             await securityContext.AuthenticateMeWithoutCookieAsync(@event.TenantId, @event.CreateBy);
-            await fileOperationsManager.Enqueue<FileMoveCopyOperation, FileMoveCopyOperationData<string>, FileMoveCopyOperationData<int>>(@event.TaskId, @event.ThirdPartyData, @event.Data);
+            await fileOperationsManager.Enqueue(@event.TaskId, @event.ThirdPartyData, @event.Data);
         }
     }
 }

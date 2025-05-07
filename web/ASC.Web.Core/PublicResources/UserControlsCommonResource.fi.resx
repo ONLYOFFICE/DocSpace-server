@@ -73,10 +73,16 @@
   <data name="TariffPerMonth" xml:space="preserve">
     <value>kuukausi</value>
   </data>
+  <data name="TariffPerYear" xml:space="preserve">
+    <value>vuosi</value>
+  </data>
   <data name="UnknownFirstName" xml:space="preserve">
     <value>Etunimi</value>
   </data>
   <data name="UnknownLastName" xml:space="preserve">
     <value>Sukunimi</value>
+  </data>
+  <data name="LicenseTypeNotCorrect" xml:space="preserve">
+    <value>Lisenssiristiriita. Varmista, että olet asentanut oikean {0} DocSpace-version (Enterprise tai Developer). Jos sinulla on kysyttävää, ota rohkeasti yhteyttä myyntipäällikköösi.</value>
   </data>
 </root>

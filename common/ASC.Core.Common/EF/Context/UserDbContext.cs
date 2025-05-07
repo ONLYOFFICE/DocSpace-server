@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Common.EF;
 
-public partial class UserDbContext(DbContextOptions<UserDbContext> dbContextOptions) : DbContext(dbContextOptions)
+public partial class UserDbContext(DbContextOptions<UserDbContext> dbContextOptions) : BaseDbContext(dbContextOptions)
 {
     public DbSet<DbTenant> Tenants { get; set; }
     public DbSet<User> Users { get; set; }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -36,11 +36,12 @@ public static class ServiceCollectionExtension
         services.AddSingleton<EFLoggerFactory>();
         services.AddHostedService<ClearEventsService>();
         services.AddBaseDbContextPool<MessagesContext>();
+        services.AddEventBus(configuration); // only for healthcheck. need refactoring
         services.AddCustomHealthCheck(configuration);
         
         var connectionMultiplexer = await services.GetRedisConnectionMultiplexerAsync(configuration, @namespace);
 
-        services.AddDistributedCache(connectionMultiplexer);
+        services.AddHybridCache(connectionMultiplexer);
             
         return services;
 

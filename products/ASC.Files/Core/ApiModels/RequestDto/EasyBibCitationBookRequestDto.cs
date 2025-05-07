@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,10 +26,13 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// The request parameters of the EasyBib citation book.
+/// </summary>
 public class EasyBibCitationBookRequestDto
 {
     /// <summary>
-    /// Citation data
+    /// The EasyBib citation data.
     /// </summary>
     public string CitationData { get; set; }
 }

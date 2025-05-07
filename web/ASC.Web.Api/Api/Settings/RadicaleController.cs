@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -37,16 +37,16 @@ public class RadicaleController(RadicaleClient radicaleClient,
         AuthContext authContext,
         WebItemSecurity webItemSecurity,
         ApiContext apiContext,
-        IMemoryCache memoryCache,
+        IFusionCache fusionCache,
         WebItemManager webItemManager,
         IHttpContextAccessor httpContextAccessor)
-    : BaseSettingsController(apiContext, memoryCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
     /// Creates a CardDav address book for a user with all portal users and returns a link to this address book.
     /// </summary>
     /// <short>
-    /// Get a link to the CardDav address book
+    /// Get the CardDav address book URL
     /// </short>
     /// <path>api/2.0/settings/carddavurl</path>
     [ApiExplorerSettings(IgnoreApi = true)]
@@ -89,7 +89,7 @@ public class RadicaleController(RadicaleClient radicaleClient,
             {
                 try
                 {
-                    await dbRadicale.SaveCardDavUserAsync(await tenantManager.GetCurrentTenantIdAsync(), currUser.Id);
+                    await dbRadicale.SaveCardDavUserAsync(tenantManager.GetCurrentTenantId(), currUser.Id);
                 }
                 catch (Exception ex)
                 {
@@ -131,7 +131,7 @@ public class RadicaleController(RadicaleClient radicaleClient,
         var authorization = await cardDavAddressbook.GetSystemAuthorizationAsync();
         var myUri = HttpContext.Request.Url();
         var requestUrlBook = cardDavAddressbook.GetRadicaleUrl(myUri.ToString(), currentUserEmail, true, true);
-        var tenant = await tenantManager.GetCurrentTenantIdAsync();
+        var tenant = tenantManager.GetCurrentTenantId();
         var davRequest = new DavRequest
         {
             Url = requestUrlBook,

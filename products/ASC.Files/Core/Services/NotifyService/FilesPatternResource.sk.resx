@@ -146,9 +146,6 @@ $__AuthorName vymazal(a) miestnosť: $RoomTitle</value>
   <data name="subject_DocuSignStatus_push" xml:space="preserve">
     <value>Stav podpisu zmenený</value>
   </data>
-  <data name="subject_EditorMentions_push" xml:space="preserve">
-    <value>Uvedené v dokumente</value>
-  </data>
   <data name="subject_MailMergeEnd_push" xml:space="preserve">
     <value>Odosielanie je ukončené.</value>
   </data>
@@ -178,5 +175,64 @@ $OrangeButton</value>
   </data>
   <data name="subject_FormSubmitted" xml:space="preserve">
     <value>Oznámenie DocSpace. Formulár je vyplnený</value>
+  </data>
+  <data name="pattern_FormSubmitted_push" xml:space="preserve">
+    <value>Formulár "$DocumentTitle" bol vyplnený v miestnosti "$RoomTitle"</value>
+  </data>
+  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
+    <value>Boli ste pozvaní do miestnosti "$RoomTitle"</value>
+  </data>
+  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
+    <value>Vaša rola v miestnosti "$RoomTitle" bola zmenená na "$RoomRole"</value>
+  </data>
+  <data name="subject_YourTurnFormFilling" xml:space="preserve">
+    <value>Oznámenie DocSpace.</value>
+  </data>
+  <data name="subject_StoppedFormFilling" xml:space="preserve">
+    <value>Oznámenie DocSpace.</value>
+  </data>
+  <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
+    <value>Oznámenie DocSpace.</value>
+  </data>
+  <data name="subject_FormStartedFilling" xml:space="preserve">
+    <value>Oznámenie DocSpace.</value>
+  </data>
+  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
+    <value>V miestnosti "$RoomTitle" bol vytvorený nový priečinok "$FolderTitle"</value>
+  </data>
+  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
+    <value>$FromUserName presunul miestnosť "$RoomTitle" do archívu</value>
+  </data>
+  <data name="pattern_EditorMentions_push" xml:space="preserve">
+    <value>$ToUserName vás spomenul v dokumente $DocumentTitle</value>
+  </data>
+  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
+    <value>$ToUserName vás spomenul v dokumente $DocumentTitle</value>
+  </data>
+  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
+    <value>Do miestnosti "$RoomTitle" bol nahraný nový súbor "$DocumentTitle"</value>
+  </data>
+  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
+    <value>Do miestnosti "$RoomTitle" ($Count) boli nahrané nové súbory</value>
+  </data>
+  <data name="pattern_FormStartedFilling" xml:space="preserve">
+    <value>
+      Hlásenie o aktivite. "$FromUserName":"$FromUserLink" začal vypĺňať formulár: "$DocumentTitle":"$DocumentURL" v miestnosti: "$RoomTitle":"$RoomURL" - $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_StoppedFormFilling" xml:space="preserve">
+    <value>
+      Hlásenie o aktivite. "$FromUserName":"$FromUserLink" prestal vypĺňať formulár: "$DocumentTitle":"$DocumentURL" v miestnosti: "$RoomTitle":"$RoomURL" - $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_YourTurnFormFilling" xml:space="preserve">
+    <value>
+      Hlásenie o aktivite. Teraz ste na rade vy! Je potrebné vyplniť formulár: "$DocumentTitle":"$DocumentURL" v miestnosti: "$RoomTitle":"$RoomURL" - $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
+    <value>
+      Hlásenie o aktivite. Formulár "$DocumentTitle":"$DocumentURL" bol vyplnený v miestnosti: "$RoomTitle":"$RoomURL" - $__DateTime.
+    </value>
   </data>
 </root>

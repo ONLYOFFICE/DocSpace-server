@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -43,11 +43,10 @@ public class RegisterInstanceWorkerService<T>(
 
             return;
         }
-
-        await using var scope = serviceProvider.CreateAsyncScope();
-
+        
         while (!stoppingToken.IsCancellationRequested)
-        {
+        {        
+            await using var scope = serviceProvider.CreateAsyncScope();
             var registerInstanceService = scope.ServiceProvider.GetService<IRegisterInstanceManager<T>>();
 
             try

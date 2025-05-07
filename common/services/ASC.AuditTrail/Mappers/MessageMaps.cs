@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -251,7 +251,7 @@ internal class MessageMapsDictionary() : IDictionary<MessageAction, MessageMaps>
         ProductType? productType = null,
         ModuleType? moduleType = null)
     {
-        var map = new MessageMaps(action.ToString(), actionType, productType ?? _productType, moduleType ?? _moduleType, entryType1, entryType2);
+        var map = new MessageMaps(action.ToStringFast(), actionType, productType ?? _productType, moduleType ?? _moduleType, entryType1, entryType2);
         Actions.Add(new KeyValuePair<MessageAction, MessageMaps>(action, map));
         return this;
     }

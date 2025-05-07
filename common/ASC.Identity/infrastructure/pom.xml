@@ -17,5 +17,6 @@
         <module>infrastructure-benchmark</module>
         <module>infrastructure-migration-runner</module>
         <module>infrastructure-configuration</module>
+        <module>infrastructure-data-transfer</module>
     </modules>
 </project>

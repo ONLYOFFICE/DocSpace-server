@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -58,11 +58,12 @@ internal class FilesActionMapper : IModuleActionMapper
                         ActionType.Update, [
                             MessageAction.FileRenamed, MessageAction.FileUpdated, MessageAction.UserFileUpdated, MessageAction.FileUpdatedRevisionComment,
                             MessageAction.FileLocked, MessageAction.FileUnlocked, MessageAction.FileOpenedForChange, MessageAction.FileMarkedAsFavorite,
+                            MessageAction.FormStartedToFill, MessageAction.FormPartiallyFilled, MessageAction.FormCompletelyFilled, MessageAction.FormStopped,
                             MessageAction.FileRemovedFromFavorite, MessageAction.FileMarkedAsRead, MessageAction.FileReaded, MessageAction.FormSubmit, MessageAction.FormOpenedForFilling,
-                            MessageAction.FileIndexChanged, MessageAction.FolderIndexReordered
+                            MessageAction.FileIndexChanged, MessageAction.FolderIndexReordered, MessageAction.FileCustomFilterEnabled, MessageAction.FileCustomFilterDisabled
                         ]
                     },
-                    { ActionType.Delete, [MessageAction.FileDeletedVersion, MessageAction.FileDeleted, MessageAction.TrashEmptied
+                    { ActionType.Delete, [MessageAction.FileDeletedVersion, MessageAction.FileDeleted, MessageAction.TrashEmptied, MessageAction.FileVersionRemoved
                         ]
                     },
                     { ActionType.UpdateAccess, [MessageAction.FileUpdatedAccess, MessageAction.FileUpdatedAccessFor, MessageAction.FileRemovedFromList, MessageAction.FileExternalLinkAccessUpdated

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -96,7 +96,7 @@ public class LicenseReader(
         await tariffService.DeleteDefaultBillingInfoAsync();
     }
 
-    public async Task RefreshLicenseAsync(Func<Task<bool>> validateFunc)
+    public async Task RefreshLicenseAsync(Func<License, Task<(bool, string)>> validateFunc)
     {
         if (string.IsNullOrEmpty(LicensePath))
         {
@@ -124,9 +124,10 @@ public class LicenseReader(
                     await SaveLicenseAsync(licenseStream, LicensePath);
                 }
 
-                if (!await validateFunc())
+                var (valid, error) = await validateFunc(license);
+                if (!valid)
                 {
-                    throw new BillingNotConfiguredException("License not correct");
+                    throw new BillingNotConfiguredException($"License validation failed: {error}");
                 }
 
                 await LicenseToDBAsync(license);
@@ -142,7 +143,7 @@ public class LicenseReader(
                 File.Delete(_licensePathBcp);
             }
         }
-        catch (BillingNotConfiguredException ex)
+        catch (BillingException ex) when (ex is BillingNotConfiguredException or BillingLicenseTypeException)
         {
             if (bcp)
             {
@@ -206,13 +207,16 @@ public class LicenseReader(
 
     private DateTime Validate(License license)
     {
-        var invalidLicenseType = _licenseType == LicenseType.Enterprise ? license.Developer : !license.Developer;
-
         if (string.IsNullOrEmpty(license.CustomerId)
-            || string.IsNullOrEmpty(license.Signature)
-            || invalidLicenseType)
+            || string.IsNullOrEmpty(license.Signature))
         {
-            throw new BillingNotConfiguredException("License not correct", license.OriginalLicense);
+            throw new BillingNotConfiguredException("License file is not correct");
+        }
+
+        var invalidLicenseType = _licenseType == LicenseType.Enterprise ? license.Developer : !license.Developer;
+        if (invalidLicenseType)
+        {
+            throw new BillingLicenseTypeException("License type is not correct");
         }
 
         return license.DueDate.Date;
@@ -249,7 +253,7 @@ public class LicenseReader(
 
         var tariff = new Tariff
         {
-            Quotas = [new(quota.TenantId, 1)],
+            Quotas = [new Quota(quota.TenantId, 1)],
             DueDate = license.DueDate
         };
 
@@ -264,14 +268,7 @@ public class LicenseReader(
         }
         else
         {
-            if (logger.IsEnabled(LogLevel.Debug))
-            {
-                logger.ErrorWithException(error);
-            }
-            else
-            {
-                logger.ErrorWithException(error);
-            }
+            logger.ErrorWithException(error);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -52,7 +52,7 @@ public class StudioNotifyServiceHelper(StudioNotifyHelper studioNotifyHelper,
 
     public async Task SendNoticeToAsync(INotifyAction action, string objectID, IRecipient[] recipients, string[] senderNames, bool checkSubsciption, string baseUri, params ITagValue[] args)
     {
-        var item = new NotifyItemIntegrationEvent(authContext.CurrentAccount.ID, await tenantManager.GetCurrentTenantIdAsync())
+        var item = new NotifyItemIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId())
         {
             Action = (NotifyAction)action,
             CheckSubsciption = checkSubsciption,

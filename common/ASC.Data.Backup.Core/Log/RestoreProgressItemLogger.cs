@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,4 +32,10 @@ internal static partial class RestoreProgressItemLogger
 
     [LoggerMessage(LogLevel.Error, "publish")]
     public static partial void ErrorPublish(this ILogger<RestoreProgressItem> logger, Exception exception);
+
+    [LoggerMessage(LogLevel.Error, "NotifyComplete")]
+    public static partial void ErrorNotifyComplete(this ILogger<RestoreProgressItem> logger, Exception exception);
+
+    [LoggerMessage(LogLevel.Error, "DeleteFiles")]
+    public static partial void ErrorDeleteFiles(this ILogger<RestoreProgressItem> logger, Exception exception);
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -73,10 +73,8 @@ public class WebPluginCache
         return _cache.Get<List<WebPlugin>>(key);
     }
 
-    public async Task InsertAsync(string key, object value)
+    public void InsertAsync(string key, object value)
     {
-        await _notify.PublishAsync(new WebPluginCacheItem { Key = key }, CacheNotifyAction.Remove);
-
         _cache.Insert(key, value, _cacheExpiration);
     }
 
@@ -352,7 +350,7 @@ public class WebPluginManager(
         {
             webPlugins = await GetWebPluginsFromStorageAsync(tenantId);
 
-            await webPluginCache.InsertAsync(key, webPlugins);
+            webPluginCache.InsertAsync(key, webPlugins);
         }
 
         return webPlugins;

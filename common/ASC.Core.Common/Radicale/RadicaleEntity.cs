@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -75,6 +75,6 @@ public abstract class RadicaleEntity(IConfiguration configuration, InstanceCrypt
 
     private string HexFromRGB(int r, int g, int b)
     {
-        return string.Format("#{0:X2}{1:X2}{2:X2}", r, g, b);
+        return $"#{r:X2}{g:X2}{b:X2}";
     }
 }

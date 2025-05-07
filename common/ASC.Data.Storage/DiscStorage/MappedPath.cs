@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -37,7 +37,7 @@ internal class MappedPath
         tenant = tenant.Trim('/');
 
         ppath = _pathUtils.ResolvePhysicalPath(ppath, storageConfig);
-        PhysicalPath = ppath.IndexOf('{') == -1 && appendTenant ? CrossPlatform.PathCombine(ppath, tenant) : string.Format(ppath, tenant);
+        PhysicalPath = !ppath.Contains('{') && appendTenant ? CrossPlatform.PathCombine(ppath, tenant) : string.Format(ppath, tenant);
     }
 
     private MappedPath(PathUtils pathUtils)

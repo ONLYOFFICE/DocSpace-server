@@ -128,9 +128,6 @@ $__AuthorName poisti huoneen: $RoomTitle</value>
   <data name="subject_EditorMentions" xml:space="preserve">
     <value>DocSpace-ilmoitus. Mainittu dokumentissa</value>
   </data>
-  <data name="subject_EditorMentions_push" xml:space="preserve">
-    <value>Mainittu dokumentissa</value>
-  </data>
   <data name="subject_MailMergeEnd_push" xml:space="preserve">
     <value>Postitus on suoritettu.</value>
   </data>
@@ -178,5 +175,64 @@ $OrangeButton</value>
   </data>
   <data name="subject_FormSubmitted" xml:space="preserve">
     <value>DocSpace-ilmoitus. Lomake on täytetty</value>
+  </data>
+  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
+    <value>Sinut on kutsuttu huoneeseen "$RoomTitle"</value>
+  </data>
+  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
+    <value>Roolisi huoneessa "$RoomTitle" on muutettu "$RoomRole"</value>
+  </data>
+  <data name="pattern_FormSubmitted_push" xml:space="preserve">
+    <value>Lomake "$DocumentTitle" on täytetty huoneessa "$RoomTitle"</value>
+  </data>
+  <data name="subject_YourTurnFormFilling" xml:space="preserve">
+    <value>DocSpace-ilmoitus.</value>
+  </data>
+  <data name="subject_StoppedFormFilling" xml:space="preserve">
+    <value>DocSpace-ilmoitus.</value>
+  </data>
+  <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
+    <value>DocSpace-ilmoitus.</value>
+  </data>
+  <data name="subject_FormStartedFilling" xml:space="preserve">
+    <value>DocSpace-ilmoitus.</value>
+  </data>
+  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
+    <value>Uusi kansio "$FolderTitle" on luotu huoneeseen "$RoomTitle"</value>
+  </data>
+  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
+    <value>Uusi tiedosto "$DocumentTitle" on ladattu huoneeseen "$RoomTitle"</value>
+  </data>
+  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
+    <value>Uusia tiedostoja on ladattu huoneeseen "$RoomTitle" ($Count)</value>
+  </data>
+  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
+    <value>Uusi asiakirja "$DocumentTitle" on luotu huoneessa "$RoomTitle"</value>
+  </data>
+  <data name="pattern_EditorMentions_push" xml:space="preserve">
+    <value>$ToUserName mainitsi sinut asiakirjassa $DocumentTitle</value>
+  </data>
+  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
+    <value>$FromUserName siirsi huoneen "$RoomTitle" arkistoon</value>
+  </data>
+  <data name="pattern_FormStartedFilling" xml:space="preserve">
+    <value>
+      Toimintailmoitus. "$FromUserName":"$FromUserLink" aloitti lomakkeen täyttötoiminnon: "$DocumentTitle":"$DocumentURL" in huoneessa: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_StoppedFormFilling" xml:space="preserve">
+    <value>
+      Toimintailmoitus. "$FromUserName":"$FromUserLink" lopetti lomakkeen täyttämisen "$DocumentTitle":"$DocumentURL" huoneessa: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_YourTurnFormFilling" xml:space="preserve">
+    <value>
+      Toimintailmoitus. On sinun vuorosi! Lomakkeen täyttäminen vaaditaan: "$DocumentTitle":"$DocumentURL" huoneessa "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
+    <value>
+      Toimintailmoitus. Lomake "$DocumentTitle":"$DocumentURL" on täytetty huoneessa:"$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
   </data>
 </root>

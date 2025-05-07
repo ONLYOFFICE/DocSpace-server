@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,10 +28,13 @@ using System.Text.Json.Serialization;
 
 namespace ASC.IPSecurity;
 
+/// <summary>
+/// The IP restriction settings.
+/// </summary>
 public class IPRestrictionsSettings : ISettings<IPRestrictionsSettings>
 {
     /// <summary>
-    /// Specifies if the IP restrictions are enabled or not
+    /// Specifies if the IP restrictions are enabled or not.
     /// </summary>
     public bool Enable { get; init; }
 
@@ -42,4 +45,6 @@ public class IPRestrictionsSettings : ISettings<IPRestrictionsSettings>
     {
         return new IPRestrictionsSettings { Enable = false };
     }
+    
+    public DateTime LastModified { get; set; }
 }

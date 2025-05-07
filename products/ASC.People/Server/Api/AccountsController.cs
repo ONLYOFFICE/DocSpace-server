@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -61,11 +61,13 @@ public class AccountsController<T>(
     UserManager userManager) : ControllerBase
 {
     /// <summary>
-    /// Gets accounts entries with shared
+    /// Returns the account entries with their sharing settings.
     /// </summary>
+    /// <short>Get account entries</short>
     /// <path>api/2.0/accounts/room/{id}/search</path>
+    /// <collection>list</collection>
     [Tags("People / Search")]
-    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<object>))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("room/{id}/search")]
     public async IAsyncEnumerable<object> GetAccountsEntriesWithSharedAsync(AccountsEntriesRequestDto<T> inDto)
@@ -98,11 +100,13 @@ public class AccountsController<T>(
             inDto.EmployeeStatus,
             inDto.ActivationStatus,
             inDto.ExcludeShared ?? false,
+            inDto.IncludeShared ?? false,
             separator,
             includeStrangers,
             inDto.Area,
             inDto.InvitedByMe,
-            inDto.InviterId);
+            inDto.InviterId,
+            inDto.EmployeeTypes);
         
         var total = totalGroups + totalUsers;
         
@@ -124,11 +128,13 @@ public class AccountsController<T>(
                            inDto.EmployeeStatus,
                            inDto.ActivationStatus,
                            inDto.ExcludeShared ?? false,
+                           inDto.IncludeShared ?? false,
                            separator,
                            includeStrangers,
                            inDto.Area,
                            inDto.InvitedByMe,
                            inDto.InviterId,
+                           inDto.EmployeeTypes,
                            usersOffset,
                            usersCount))
         {

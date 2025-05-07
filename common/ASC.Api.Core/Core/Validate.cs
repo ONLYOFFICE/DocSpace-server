@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,7 +35,7 @@ public static class Validate
 
     public static T IfNull<T>(this T item, Func<T> func) where T : class
     {
-        return item.If(x => x == default(T), func);
+        return item.If(x => x == null, func);
     }
 
     public static T ThrowIfNull<T>(this T item, Exception e) where T : class
@@ -50,6 +50,6 @@ public static class Validate
 
     public static T? NullIfDefault<T>(this T item) where T : struct
     {
-        return EqualityComparer<T>.Default.Equals(item, default) ? default(T?) : item;
+        return EqualityComparer<T>.Default.Equals(item, default) ? null : item;
     }
 }

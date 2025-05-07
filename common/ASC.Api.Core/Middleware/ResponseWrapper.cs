@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -41,7 +41,7 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
         }
 
         var withStackTrace = true;
-        var criticalException = true;
+        var criticalException = false;
 
         switch (exception)
         {
@@ -54,6 +54,7 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
                 message = e.Message;
                 break;
             case SecurityException:
+            case AuthorizingException:
                 status = HttpStatusCode.Forbidden;
                 message = "Access denied";
                 break;
@@ -65,7 +66,6 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
             case AuthenticationException:
                 status = HttpStatusCode.Unauthorized;
                 withStackTrace = false;
-                criticalException = false;
                 break;
             case InvalidOperationException:
                 status = HttpStatusCode.Forbidden;
@@ -81,6 +81,9 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
             case NotSupportedException:
                 status = HttpStatusCode.UnsupportedMediaType;
                 withStackTrace = false;
+                break;
+            default:
+                criticalException = true;
                 break;
         }
 
