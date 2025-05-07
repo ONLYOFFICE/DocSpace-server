@@ -41,10 +41,10 @@ public class CacheTest(
         await _filesClient.Authenticate(Initializer.Owner);
 
         //send for get If-Modified-Since
-        var response = await _filesClient.GetAsync("@root", TestContext.Current.CancellationToken);
+        var response = await _filesClient.GetAsync("/api/2.0/files/@root", TestContext.Current.CancellationToken);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var httpRequest = CreateRequest("@root", response, HttpMethod.Get);
+        var httpRequest = CreateRequest("/api/2.0/files/@root", response, HttpMethod.Get);
 
         //send for check 304
         var responseCached = await _filesClient.SendAsync(httpRequest, TestContext.Current.CancellationToken);
@@ -53,7 +53,7 @@ public class CacheTest(
         //send for clear cache
         var createdFile = await CreateFile("test.docx", FolderType.USER, Initializer.Owner);
 
-        var httpRequestAfterChanged = CreateRequest("@root", response, HttpMethod.Get);
+        var httpRequestAfterChanged = CreateRequest("/api/2.0/files/@root", response, HttpMethod.Get);
 
         //send for check 200
         var responseAfterChanged = await _filesClient.SendAsync(httpRequestAfterChanged, TestContext.Current.CancellationToken);
@@ -65,24 +65,22 @@ public class CacheTest(
     {
         await _filesClient.Authenticate(Initializer.Owner);
         //send for get folderId
-        var responseFolder = await _filesClient.GetAsync("@my", TestContext.Current.CancellationToken);
-        var folder = await HttpClientHelper.ReadFromJson<FolderContentDto>(responseFolder);
+        var folder = await GetUserFolderIdAsync(Initializer.Owner);
 
         //send for get If-Modified-Since
-        var response = await _filesClient.GetAsync($"{folder.Current.Id}", TestContext.Current.CancellationToken);
+        var response = await _filesClient.GetAsync($"/api/2.0/files/{folder}", TestContext.Current.CancellationToken);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var httpRequest = CreateRequest($"{folder.Current.Id}", response, HttpMethod.Get);
+        var httpRequest = CreateRequest($"/api/2.0/files/{folder}", response, HttpMethod.Get);
 
         //send for check 304
         var responseCached = await _filesClient.SendAsync(httpRequest, TestContext.Current.CancellationToken);
         responseCached.StatusCode.Should().Be(HttpStatusCode.NotModified);
 
         //send for clear cache
-        var file = new CreateFile<JsonElement> { Title = "test.docx" };
-        _ = await _filesClient.PostAsJsonAsync($"{folder.Current.Id}/file", file, _filesFactory.JsonRequestSerializerOptions, TestContext.Current.CancellationToken);
+        await CreateFile("test.docx", FolderType.USER, Initializer.Owner);
 
-        var httpRequestAfterChanged = CreateRequest($"{folder.Current.Id}", response, HttpMethod.Get);
+        var httpRequestAfterChanged = CreateRequest($"/api/2.0/files/{folder}", response, HttpMethod.Get);
 
         //send for check 200
         var responseAfterChanged = await _filesClient.SendAsync(httpRequestAfterChanged, TestContext.Current.CancellationToken);
@@ -95,10 +93,10 @@ public class CacheTest(
         await _filesClient.Authenticate(Initializer.Owner);
 
         //send for get If-Modified-Since
-        var response = await _filesClient.GetAsync("settings", TestContext.Current.CancellationToken);
+        var response = await _filesClient.GetAsync("/api/2.0/files/settings", TestContext.Current.CancellationToken);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var httpRequest = CreateRequest("settings", response, HttpMethod.Get);
+        var httpRequest = CreateRequest("/api/2.0/files/settings", response, HttpMethod.Get);
 
         //send for check 304
         var responseCached = await _filesClient.SendAsync(httpRequest, TestContext.Current.CancellationToken);
