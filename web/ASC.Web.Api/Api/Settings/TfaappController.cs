@@ -50,7 +50,8 @@ public class TfaappController(
     SecurityContext securityContext,
     IHttpContextAccessor httpContextAccessor,
     TenantManager tenantManager,
-    AuditEventsRepository auditEventsRepository)
+    AuditEventsRepository auditEventsRepository,
+    UserSocketManager userSocketManager)
     : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
@@ -121,7 +122,8 @@ public class TfaappController(
         securityContext.Logout();
 
         var result = await tfaManager.ValidateAuthCodeAsync(user, inDto.Code);
-
+        await userSocketManager.UpdateUserAsync(userManager.GetUsers(authContext.CurrentAccount.ID));
+        
         var request = QueryHelpers.ParseQuery(_httpContextAccessor.HttpContext.Request.Headers["confirm"]);
         var type = request.TryGetValue("type", out var value) ? (string)value : "";
         cookiesManager.ClearCookies(CookiesType.ConfirmKey, $"_{type}");
@@ -412,7 +414,8 @@ public class TfaappController(
 
         await TfaAppUserSettings.DisableForUserAsync(settingsManager, user.Id);
         messageService.Send(MessageAction.UserDisconnectedTfaApp, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
-
+        await userSocketManager.UpdateUserAsync(userManager.GetUsers(authContext.CurrentAccount.ID));
+        
         await cookiesManager.ResetUserCookieAsync(user.Id);
         if (isMe)
         {

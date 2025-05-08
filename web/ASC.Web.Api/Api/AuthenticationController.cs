@@ -125,6 +125,7 @@ public class AuthenticationController(
                 if (await tfaManager.ValidateAuthCodeAsync(user, inDto.Code, true, true))
                 {
                     messageService.Send(MessageAction.UserConnectedTfaApp, MessageTarget.Create(user.Id));
+                    await socketManager.UpdateUserAsync(userManager.GetUsers(authContext.CurrentAccount.ID));
                 }
             }
             else
