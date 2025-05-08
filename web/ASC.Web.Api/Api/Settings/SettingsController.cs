@@ -577,7 +577,7 @@ public partial class SettingsController(MessageService messageService,
     [AllowNotPayment]
     public object GetMachineName()
     {
-        return _httpContextAccessor.HttpContext.Request.Host.Value;
+        return Request.Host.Value;
     }
 
     /// <summary>

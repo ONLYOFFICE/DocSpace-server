@@ -75,7 +75,7 @@ public class JwtBearerAuthHandler(
                                                                                         new OpenIdConnectConfigurationRetriever(),
                                                                                         httpDocumentRetriever);
 
-        var accessToken = httpContextAccessor?.HttpContext?.Request.Headers.Authorization.ToString();
+        var accessToken = Request.Headers.Authorization.ToString();
 
         if (string.IsNullOrEmpty(accessToken))
         {

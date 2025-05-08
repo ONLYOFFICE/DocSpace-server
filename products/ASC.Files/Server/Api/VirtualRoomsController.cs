@@ -998,7 +998,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
 
         var taskProgress = await documentBuilderTaskManager.StartTask(task, false);
         
-        var headers = MessageSettings.GetHttpHeaders(httpContextAccessor?.HttpContext?.Request);
+        var headers = MessageSettings.GetHttpHeaders(Request);
         var evt = new RoomIndexExportIntegrationEvent(userId, tenantId, inDto.Id, baseUri, headers: headers != null 
             ? headers.ToDictionary(x => x.Key, x => x.Value.ToString())
             : []);
