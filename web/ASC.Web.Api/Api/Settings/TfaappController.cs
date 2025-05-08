@@ -49,7 +49,8 @@ public class TfaappController(
     Signature signature,
     SecurityContext securityContext,
     IHttpContextAccessor httpContextAccessor,
-    TenantManager tenantManager)
+    TenantManager tenantManager,
+    AuditEventsRepository auditEventsRepository)
     : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
     /// <summary>
@@ -151,10 +152,11 @@ public class TfaappController(
         }
 
         if (tfaAppAuthSettingsHelper.IsVisibleSettings && await tfaAppAuthSettingsHelper.TfaEnabledForUserAsync(user.Id))
-        {
-            var confirmType = await TfaAppUserSettings.EnableForUserAsync(settingsManager, authContext.CurrentAccount.ID)
-                ? ConfirmType.TfaAuth
-                : ConfirmType.TfaActivation;
+        {            
+            var tfaExpired = await TfaAppUserSettings.TfaExpiredAndResetAsync(settingsManager, auditEventsRepository, user.Id);
+            var confirmType = tfaExpired || !await TfaAppUserSettings.EnableForUserAsync(settingsManager, authContext.CurrentAccount.ID)
+                ? ConfirmType.TfaActivation
+                : ConfirmType.TfaAuth;
 
             var (url, key) = commonLinkUtility.GetConfirmationUrlAndKey(user.Email, confirmType);
             await cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, key, true, $"_{confirmType}");
