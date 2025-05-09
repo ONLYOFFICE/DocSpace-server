@@ -199,7 +199,6 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
         BruteForceLoginManager bruteForceLoginManager,
-        IHttpContextAccessor httpContextAccessor,
         ExternalLinkHelper externalLinkHelper,
         IMapper mapper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)

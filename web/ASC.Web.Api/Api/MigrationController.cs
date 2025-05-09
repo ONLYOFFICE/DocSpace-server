@@ -38,7 +38,6 @@ public class MigrationController(
     UserManager userManager,
     AuthContext authContext,
     StudioNotifyService studioNotifyService,
-    IHttpContextAccessor httpContextAccessor,
     MigrationCore migrationCore,
     MigrationLogger migrationLogger) : ControllerBase
 {
