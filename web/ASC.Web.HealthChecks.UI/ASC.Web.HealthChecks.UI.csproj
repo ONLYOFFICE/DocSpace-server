@@ -8,12 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AspNetCore.HealthChecks.UI" Version="9.0.0" />
-    <PackageReference Include="AspNetCore.HealthChecks.UI.InMemory.Storage" Version="9.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\common\ASC.Api.Core\ASC.Api.Core.csproj" />
+      <PackageReference Include="AspNetCore.HealthChecks.UI" Version="9.0.0" />
+      <PackageReference Include="AspNetCore.HealthChecks.UI.InMemory.Storage" Version="9.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="9.0.3" />
+      <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.3" />
   </ItemGroup>
 
 </Project>
