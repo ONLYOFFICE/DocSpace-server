@@ -797,8 +797,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         UserManager userManager,
         IServiceProvider serviceProvider,
         ApiDateTimeHelper apiDateTimeHelper,
-        RoomNewItemsDtoHelper roomNewItemsDtoHelper,
-        IHttpContextAccessor httpContextAccessor)
+        RoomNewItemsDtoHelper roomNewItemsDtoHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>

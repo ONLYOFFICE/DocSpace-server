@@ -45,7 +45,6 @@ public class PaymentController(
     RegionHelper regionHelper,
     QuotaHelper tariffHelper,
     IFusionCache fusionCache,
-    IHttpContextAccessor httpContextAccessor,
     MessageService messageService,
     StudioNotifyService studioNotifyService,
     PermissionContext permissionContext)

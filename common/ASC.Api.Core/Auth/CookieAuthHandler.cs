@@ -33,8 +33,7 @@ public class CookieAuthHandler(
     ILoggerFactory logger,
     UrlEncoder encoder,
     SecurityContext securityContext,
-    CookiesManager cookiesManager,
-    IHttpContextAccessor httpContextAccessor)
+    CookiesManager cookiesManager)
     : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
 {
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()

@@ -40,7 +40,6 @@ public class JwtBearerAuthHandler(
     ILoggerFactory logger,
     UrlEncoder encoder,
     SecurityContext securityContext,
-    IHttpContextAccessor httpContextAccessor,
     BaseCommonLinkUtility baseCommonLinkUtility,
     IConfiguration configuration,
     IHttpClientFactory httpClientFactory)
