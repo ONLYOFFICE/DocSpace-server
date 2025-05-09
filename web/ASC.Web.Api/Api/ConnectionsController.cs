@@ -121,7 +121,7 @@ public class ConnectionsController(
 
         async Task<BaseEvent> GetBaseEvent()
         {
-            var request = httpContextAccessor.HttpContext.Request;
+            var request = Request;
             var uaHeader = MessageSettings.GetUAHeader(request);
             var clientInfo = MessageSettings.GetClientInfo(uaHeader);
             var platformAndDevice = MessageSettings.GetPlatformAndDevice(clientInfo);

@@ -72,6 +72,7 @@ public class AuthenticationController(
     InvitationService invitationService,
     UserSocketManager socketManager,
     LoginProfileTransport loginProfileTransport,
+    AuditEventsRepository auditEventsRepository,
     IMapper mapper)
     : ControllerBase
 {
@@ -124,6 +125,7 @@ public class AuthenticationController(
                 if (await tfaManager.ValidateAuthCodeAsync(user, inDto.Code, true, true))
                 {
                     messageService.Send(MessageAction.UserConnectedTfaApp, MessageTarget.Create(user.Id));
+                    await socketManager.UpdateUserAsync(userManager.GetUsers(authContext.CurrentAccount.ID));
                 }
             }
             else
@@ -222,7 +224,9 @@ public class AuthenticationController(
 
         if (tfaAppAuthSettingsHelper.IsVisibleSettings && await tfaAppAuthSettingsHelper.TfaEnabledForUserAsync(user.Id))
         {
-            if (!await TfaAppUserSettings.EnableForUserAsync(settingsManager, user.Id))
+            var tfaExpired = await TfaAppUserSettings.TfaExpiredAndResetAsync(settingsManager, auditEventsRepository, user.Id);
+            
+            if (tfaExpired || !await TfaAppUserSettings.EnableForUserAsync(settingsManager, user.Id))
             {
                 var (urlActivation, keyActivation) = commonLinkUtility.GetConfirmationUrlAndKey(user.Email, ConfirmType.TfaActivation);
                 await cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, keyActivation, true, $"_{ConfirmType.TfaActivation}");

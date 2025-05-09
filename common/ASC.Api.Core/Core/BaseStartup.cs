@@ -31,6 +31,8 @@ using ASC.Api.Core.Cors.Middlewares;
 using ASC.Common.Mapping;
 using ASC.MessagingSystem;
 using Flurl.Util;
+
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 using IPNetwork = Microsoft.AspNetCore.HttpOverrides.IPNetwork;
 
 namespace ASC.Api.Core;
@@ -572,9 +574,17 @@ public abstract class BaseStartup
         {
             endpoints.MapCustomAsync();
 
-            endpoints.MapHealthChecks("/health", new HealthCheckOptions { Predicate = _ => true, ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse }).ShortCircuit();
+            endpoints.MapHealthChecks("/health", new HealthCheckOptions
+            {
+                Predicate = _ => true, 
+                ResponseWriter = DefaultHealthChecksResponseWriter
+            }).ShortCircuit();
 
-            endpoints.MapHealthChecks("/ready", new HealthCheckOptions { Predicate = r => r.Name.Contains("services") });
+            endpoints.MapHealthChecks("/ready", new HealthCheckOptions
+            {
+                Predicate = r => r.Name.Contains("services"),
+                ResponseWriter = DefaultHealthChecksResponseWriter
+            });
 
             endpoints.MapHealthChecks("/liveness", new HealthCheckOptions { Predicate = r => r.Name.Contains("self") });
         });
@@ -587,6 +597,26 @@ public abstract class BaseStartup
                 await context.Response.WriteAsync($"{Environment.MachineName} running {CustomHealthCheck.Running}");
             });
         });
+    }
+
+    private async Task DefaultHealthChecksResponseWriter(HttpContext httpContext, HealthReport healthReport)
+    {
+        var logger = httpContext.RequestServices.GetRequiredService<ILoggerProvider>().CreateLogger("ASC.Api.HealthChecks");
+
+        if (healthReport.Status != HealthStatus.Healthy)
+        {
+            logger.ErrorHealthCheckFailed(healthReport.Status.ToString(), healthReport.TotalDuration.TotalMilliseconds);
+
+            foreach (var entry in healthReport.Entries.Where(e => e.Value.Status != HealthStatus.Healthy))
+            {
+                logger.ErrorHealthCheckEntry(entry.Key, 
+                    entry.Value.Status.ToString(), 
+                    entry.Value.Duration.TotalMilliseconds, 
+                    entry.Value.Description);
+            }
+        }
+
+        await UIResponseWriter.WriteHealthCheckUIResponse(httpContext, healthReport); 
     }
 
     public void ConfigureContainer(ContainerBuilder builder)

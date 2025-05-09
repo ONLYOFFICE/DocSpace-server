@@ -288,7 +288,7 @@ public class PaymentController(
     
     private async Task CheckCache(string baseKey)
     {
-        var key = httpContextAccessor.HttpContext?.Connection.RemoteIpAddress + baseKey;
+        var key = HttpContext.Connection.RemoteIpAddress + baseKey;
         var countFromCache = await fusionCache.TryGetAsync<int>(key);
         var count = countFromCache.HasValue ? countFromCache.Value : 0;
         if (count > _maxCount)
