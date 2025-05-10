@@ -2396,19 +2396,16 @@ public class FileStorageService //: IFileStorageService
         return (await tempStream.CloneMemoryStream(memoryStream, 300), await tempStream.CloneMemoryStream(memoryStream));
     }
 
-    private async IAsyncEnumerable<ThirdPartyParams> InternalGetThirdPartyAsync(IProviderDao providerDao)
+    private static IAsyncEnumerable<ThirdPartyParams> InternalGetThirdPartyAsync(IProviderDao providerDao)
     {
-        await foreach (var r in providerDao.GetProvidersInfoAsync())
+        return providerDao.GetProvidersInfoAsync().Select(r => new ThirdPartyParams
         {
-            yield return new ThirdPartyParams
-            {
-                CustomerTitle = r.CustomerTitle,
-                Corporate = r.RootFolderType == FolderType.COMMON,
-                RoomsStorage = r.RootFolderType is FolderType.VirtualRooms or FolderType.RoomTemplates or FolderType.Archive,
-                ProviderId = r.ProviderId,
-                ProviderKey = r.ProviderKey
-            };
-        }
+            CustomerTitle = r.CustomerTitle,
+            Corporate = r.RootFolderType == FolderType.COMMON,
+            RoomsStorage = r.RootFolderType is FolderType.VirtualRooms or FolderType.RoomTemplates or FolderType.Archive,
+            ProviderId = r.ProviderId,
+            ProviderKey = r.ProviderKey
+        });
     }
 
     public async ValueTask<Folder<string>> GetBackupThirdPartyAsync()

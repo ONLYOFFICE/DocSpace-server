@@ -816,7 +816,7 @@ public class GlobalFolder(
     }
 
     private async Task SaveFileAsync(IServiceProvider serviceProvider, IDataStore storeTemplate, FileMarker fileMarker, FileDao fileDao, SocketManager socketManager,
-        string filePath, int folderId, IEnumerable<string> files)
+        string filePath, int folderId, List<string> files)
     {
         try
         {

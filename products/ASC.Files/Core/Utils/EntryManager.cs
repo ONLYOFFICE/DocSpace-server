@@ -2276,18 +2276,13 @@ public class EntryManager(IDaoFactory daoFactory,
 
         var records = fileSecurity.GetPureSharesAsync(result, ShareFilterType.Link, null, null);
 
-        var aces = new List<AceWrapper>();
-
-        await foreach(var record in records)
+        var aces = await records.Select(record => new AceWrapper
         {
-            aces.Add(new AceWrapper
-            {
-                Access = FileShare.Read,
-                Id = record.Subject,
-                SubjectType = record.SubjectType,
-                FileShareOptions = record.Options
-            });
-        };
+            Access = FileShare.Read,
+            Id = record.Subject, 
+            SubjectType = record.SubjectType, 
+            FileShareOptions = record.Options
+        }).ToListAsync();
 
         var current = securityContext.CurrentAccount.ID;
 
