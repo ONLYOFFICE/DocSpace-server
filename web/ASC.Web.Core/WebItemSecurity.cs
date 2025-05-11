@@ -39,7 +39,7 @@ public class WebItemSecurityCache(IFusionCacheProvider cacheProvider)
         _cache.Remove(GetCacheKey(tenantId));
     }
 
-    private string GetCacheKey(int tenantId)
+    private static string GetCacheKey(int tenantId)
     {
         return $"{tenantId}:webitemsecurity";
     }
@@ -54,14 +54,13 @@ public class WebItemSecurityCache(IFusionCacheProvider cacheProvider)
         return _cache.GetOrDefault<Dictionary<string, bool>>(GetCacheKey(tenantId));
     }
 
-    public Dictionary<string, bool> GetOrInsert(int tenantId)
+    public async Task<Dictionary<string, bool>> GetOrInsertAsync(int tenantId)
     {
-
         var dic = Get(tenantId);
         if (dic == null)
         {
             dic = new Dictionary<string, bool>();
-            _cache.Set(GetCacheKey(tenantId), dic, opt=> opt.SetDuration(TimeSpan.FromMinutes(1)),[CacheExtention.GetWebItemSecurityTag(tenantId)]);
+            await _cache.SetAsync(GetCacheKey(tenantId), dic, opt => opt.SetDuration(TimeSpan.FromMinutes(1)),[CacheExtention.GetWebItemSecurityTag(tenantId)]);
         }
 
         return dic;
@@ -69,18 +68,19 @@ public class WebItemSecurityCache(IFusionCacheProvider cacheProvider)
 }
 
 [Scope]
-public class WebItemSecurity(UserManager userManager,
-        AuthContext authContext,
-        PermissionContext permissionContext,
-        AuthManager authentication,
-        WebItemManager webItemManager,
-        TenantManager tenantManager,
-        AuthorizationManager authorizationManager,
-        WebItemSecurityCache webItemSecurityCache,
-        SettingsManager settingsManager,
-        CountPaidUserChecker countPaidUserChecker, 
-        IDistributedLockProvider distributedLockProvider)
-    {
+public class WebItemSecurity(
+    UserManager userManager,
+    AuthContext authContext,
+    PermissionContext permissionContext,
+    AuthManager authentication,
+    WebItemManager webItemManager,
+    TenantManager tenantManager,
+    AuthorizationManager authorizationManager,
+    WebItemSecurityCache webItemSecurityCache,
+    SettingsManager settingsManager,
+    CountPaidUserChecker countPaidUserChecker, 
+    IDistributedLockProvider distributedLockProvider)
+{
     
     private static readonly SecurityAction _read = new(new Guid("77777777-32ae-425f-99b5-83176061d1ae"), "ReadWebItem", false);
 
@@ -96,7 +96,7 @@ public class WebItemSecurity(UserManager userManager,
 
         var id = itemId.ToString();
         bool result;
-        var dic = webItemSecurityCache.GetOrInsert(tenant.Id);
+        var dic = await webItemSecurityCache.GetOrInsertAsync(tenant.Id);
         if (dic != null)
         {
             lock (dic)
