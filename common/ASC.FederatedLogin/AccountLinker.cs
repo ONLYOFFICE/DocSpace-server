@@ -28,15 +28,8 @@ using ZiggyCreatures.Caching.Fusion;
 
 namespace ASC.FederatedLogin;
 
-[Singleton]
-public class AccountLinkerStorage
-{
-    private readonly IFusionCache _cache;
-}
-
 [Scope]
 public class AccountLinker(
-    AccountLinkerStorage accountLinkerStorage,
     IDbContextFactory<AccountLinkContext> accountLinkContextManager,
     TenantManager tenantManager,
     IFusionCacheProvider cacheProvider)

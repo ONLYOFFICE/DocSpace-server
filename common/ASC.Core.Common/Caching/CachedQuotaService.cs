@@ -63,12 +63,8 @@ class CachedQuotaService() : IQuotaService
             quotas = await _service.GetTenantQuotasAsync();
             if (_quotaCacheEnabled)
             {
-                var tags = new List<string>();
-                foreach (var quota in quotas)
-                {
-                    tags.Add(CacheExtention.GetTenantQuotaTag(quota.TenantId));
-                }
-                _cache.Set(cacheKey, quotas, opt => opt.SetDuration(_cacheExpiration), tags: tags);
+                var tags = quotas.Select(quota => CacheExtention.GetTenantQuotaTag(quota.TenantId)).ToList();
+                await _cache.SetAsync(cacheKey, quotas, opt => opt.SetDuration(_cacheExpiration), tags: tags);
             }
         }
 
@@ -115,14 +111,7 @@ class CachedQuotaService() : IQuotaService
         var result = await _cache.GetOrSetAsync<IEnumerable<TenantQuotaRow>>(key, async (ctx, token) =>
         {
             var result = await _service.FindTenantQuotaRowsAsync(tenantId);
-
-            var tags = new List<string>();
-            foreach(var r in result)
-            {
-                tags.Add(CacheExtention.GetTenantQuotaRowTag(tenantId, r.Path));
-            }
-
-            ctx.Tags = tags.ToArray();
+            ctx.Tags = result.Select(r => CacheExtention.GetTenantQuotaRowTag(tenantId, r.Path)).ToArray();
             return ctx.Modified(result);
         }, opt => opt.SetDuration(_cacheExpiration));
 
@@ -136,26 +125,19 @@ class CachedQuotaService() : IQuotaService
         var result = await _cache.GetOrSetAsync<IEnumerable<TenantQuotaRow>>(key, async (ctx, token) =>
         {
             var result = await _service.FindUserQuotaRowsAsync(tenantId, userId);
-
-            var tags = new List<string>();
-            foreach(var r in result)
-            {
-                tags.Add(CacheExtention.GetTenantQuotaRowTag(tenantId, r.Path, userId));
-            }
-
-            ctx.Tags = tags.ToArray();
+            ctx.Tags = result.Select(r => CacheExtention.GetTenantQuotaRowTag(tenantId, r.Path, userId)).ToArray();
             return ctx.Modified(result);
         }, opt => opt.SetDuration(_cacheExpiration));
 
         return result;
     }
 
-    public string GetKey(int tenant)
+    private static string GetKey(int tenant)
     {
         return KeyQuotaRows + tenant;
     }
 
-    public string GetKey(int tenant, Guid userId)
+    private static string GetKey(int tenant, Guid userId)
     {
         return KeyQuotaRows + tenant + userId;
     }

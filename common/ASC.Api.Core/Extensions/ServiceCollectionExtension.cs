@@ -118,17 +118,25 @@ public static class ServiceCollectionExtension
                 DistributedCacheKeyModifierMode = CacheKeyModifierMode.None,
                 DefaultEntryOptions = new FusionCacheEntryOptions
                 {
-                    Duration = TimeSpan.MaxValue
+                    Duration = TimeSpan.MaxValue,
+                    SkipDistributedCacheRead = true,
+                    SkipDistributedCacheWrite = true
                 }
             })
             .WithMemoryCache(new MemoryCache(new MemoryCacheOptions()))
             .WithRegisteredLogger();
 
         if (connection != null)
-        {
+        {        
             cacheBuilder.WithBackplane(new RedisBackplane(new RedisBackplaneOptions { ConnectionMultiplexerFactory = () => Task.FromResult(connection) }));
         }
-
+        else
+        {            
+            services.AddDistributedMemoryCache();
+        }
+        
+        cacheBuilder.WithRegisteredDistributedCache(false);
+        
         return services;
     }
 
