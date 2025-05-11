@@ -54,7 +54,7 @@ public class RoomTemplateDto
     /// <summary>
     /// The collection of email addresses of users with whom to share a room.
     /// </summary>
-    public IEnumerable<string> Share { get; set; }
+    public List<string> Share { get; set; }
 
     /// <summary>
     /// The collection of groups with whom to share a room.

@@ -195,7 +195,7 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
             }).FirstOrDefault()
         });
         
-        var events = mapper.Map<List<AuditEventQuery>, IEnumerable<AuditEvent>>(await q2.ToListAsync());
+        var events = mapper.Map<List<AuditEventQuery>, List<AuditEvent>>(await q2.ToListAsync());
         
         foreach (var e in events)
         {

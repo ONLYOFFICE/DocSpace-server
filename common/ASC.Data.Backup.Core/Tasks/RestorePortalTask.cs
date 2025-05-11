@@ -180,10 +180,10 @@ public class RestorePortalTask(DbFactory dbFactory,
 
         if (ProcessStorage)
         {
-            var storageModules = StorageFactoryConfig.GetModuleList(_region).Where(IsStorageModuleAllowed);
+            var storageModules = StorageFactoryConfig.GetModuleList(_region).Where(IsStorageModuleAllowed).ToList();
             var tenants = await tenantManager.GetTenantsAsync(false);
 
-            stepscount += storageModules.Count() * tenants.Count;
+            stepscount += storageModules.Count * tenants.Count;
 
             SetStepsCount(stepscount + 1);
 
@@ -364,7 +364,7 @@ public class RestorePortalTask(DbFactory dbFactory,
         options.DebugEndRestoreStorage();
     }
 
-    private async Task DoDeleteStorageAsync(IEnumerable<string> storageModules, IEnumerable<Tenant> tenants)
+    private async Task DoDeleteStorageAsync(List<string> storageModules, IEnumerable<Tenant> tenants)
     {
         options.DebugBeginDeleteStorage();
 

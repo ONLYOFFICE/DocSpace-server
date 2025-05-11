@@ -76,11 +76,11 @@ public class BackupPortalTask(
                 var modulesToProcess = GetModulesToProcess().ToList();
                 SetStepsCount(1);
                 var count = modulesToProcess.Select(m => m.Tables.Count(t => !_ignoredTables.Contains(t.Name) && t.InsertMethod != InsertMethod.None)).Sum();
-                IAsyncEnumerable<BackupFileInfo> files = null;
+                List<BackupFileInfo> files = null;
                 if (ProcessStorage)
                 {
-                    files = GetFiles();
-                    count += await files.CountAsync();
+                    files = await GetFiles();
+                    count += files.Count;
                 }
 
                 var completedCount = await DoBackupModule(WriteOperator, modulesToProcess, count);
@@ -126,7 +126,7 @@ public class BackupPortalTask(
             await writer.WriteEntryAsync(KeyHelper.GetDumpKey(), stream, () => Task.CompletedTask);
         }
 
-        IAsyncEnumerable<BackupFileInfo> files = null;
+        List<BackupFileInfo> files = null;
         
         var count = databases.Select(d => d.Value.Count * 4).Sum(); // (schema + data) * (dump + zip)
         var completedCount = count;
@@ -134,9 +134,9 @@ public class BackupPortalTask(
         if (ProcessStorage)
         {
             var tenants = (await tenantManager.GetTenantsAsync(false)).Select(r => r.Id);
-            files = GetFilesTenants(tenants);
+            files = await GetFilesTenants(tenants);
             logger.DebugFilesCount(count);
-            count += await files.CountAsync();
+            count += files.Count;
         }
         SetStepsCount(1);
 
@@ -488,24 +488,22 @@ public class BackupPortalTask(
         logger.DebugArchiveDirEnd(subDir);
     }
 
-    private IAsyncEnumerable<BackupFileInfo> GetFiles()
+    private Task<List<BackupFileInfo>> GetFiles()
     {
         return GetFiles(TenantId);
     }
 
-    private async IAsyncEnumerable<BackupFileInfo> GetFilesTenants(IEnumerable<int> tenantIds)
+    private async Task<List<BackupFileInfo>> GetFilesTenants(IEnumerable<int> tenantIds)
     {
+        var result = new List<BackupFileInfo>();
         foreach(var tenantId in tenantIds)
         {
-            var files = GetFiles(tenantId);
-            await foreach(var file in files)
-            {
-                yield return file;
-            }
+            result.AddRange(await GetFiles(tenantId));
         }
+        return result;
     }
 
-    private async IAsyncEnumerable<BackupFileInfo> GetFiles(int tenantId)
+    private async Task<List<BackupFileInfo>> GetFiles(int tenantId)
     {
         var files = GetFilesToProcess(tenantId).Distinct();
 
@@ -515,10 +513,7 @@ public class BackupPortalTask(
         files = files.Where(f => !exclude.Exists(e => f.Path.Replace('\\', '/').Contains($"/file_{e.StoragePath}/")));
         files = files.Where(f => !f.Path.Contains("/thumb."));
 
-        await foreach (var file in files)
-        {
-            yield return file;
-        }
+        return await files.ToListAsync();
     }
 
     private async Task<int> DoBackupModule(IDataWriteOperator writer, List<IModuleSpecifics> modules, int count)
@@ -588,7 +583,7 @@ public class BackupPortalTask(
         return tablesProcessed;
     }
 
-    private async Task DoBackupStorageAsync(IDataWriteOperator writer, IAsyncEnumerable<BackupFileInfo> files, int completedCount, int count, bool dump = false)
+    private async Task DoBackupStorageAsync(IDataWriteOperator writer, List<BackupFileInfo> files, int completedCount, int count, bool dump = false)
     {
         logger.DebugBeginBackupStorage();
 
@@ -603,7 +598,8 @@ public class BackupPortalTask(
         var bytes = "<storage_restore>"u8.ToArray();
         await tmpFile.WriteAsync(bytes);
         var storages = new Dictionary<string, IDataStore>();
-        await foreach (var file in files)
+        
+        foreach (var file in files)
         {
             if (!storages.TryGetValue(file.Module + file.Tenant, out var storage))
             {
