@@ -1228,20 +1228,20 @@ public class FileSecurity(IDaoFactory daoFactory,
 
                         var hasFullAccessToForm = userHasFullAccess || (shareRecord is { Share: FileShare.ContentCreator or FileShare.RoomManager});
 
-                        var IsFillingStoped = formFilling?.FillingStopedDate != null && !DateTime.MinValue.Equals(formFilling?.FillingStopedDate);
+                        var isFillingStoped = formFilling?.FillingStopedDate != null && !DateTime.MinValue.Equals(formFilling?.FillingStopedDate);
                         return action switch
                         {
                             FilesSecurityActions.ResetFilling =>
-                                (userHasFullAccess || shareRecord is { Share: FileShare.RoomManager } || (shareRecord is { Share: FileShare.ContentCreator }) && file.CreateBy.Equals(userId)) && formFilling?.StartFilling == true && IsFillingStoped,
+                                (userHasFullAccess || shareRecord is { Share: FileShare.RoomManager } || (shareRecord is { Share: FileShare.ContentCreator }) && file.CreateBy.Equals(userId)) && formFilling?.StartFilling == true && isFillingStoped,
 
                             FilesSecurityActions.StopFilling =>
-                                (userHasFullAccess || shareRecord is { Share: FileShare.RoomManager } || (shareRecord is { Share: FileShare.ContentCreator }) && file.CreateBy.Equals(userId)) && formFilling?.StartFilling == true && !IsFillingStoped && currentStep > 0,
+                                (userHasFullAccess || shareRecord is { Share: FileShare.RoomManager } || (shareRecord is { Share: FileShare.ContentCreator }) && file.CreateBy.Equals(userId)) && formFilling?.StartFilling == true && !isFillingStoped && currentStep > 0,
 
                             FilesSecurityActions.StartFilling =>
                                 hasFullAccessToForm && (formFilling == null || formFilling?.StartFilling == false || formFilling?.StartFilling == null),
 
                             FilesSecurityActions.FillForms =>
-                                !IsFillingStoped && myRoles.Any() && (role != null && role.Sequence == currentStep),
+                                !isFillingStoped && myRoles.Count != 0 && (role != null && role.Sequence == currentStep),
 
                             FilesSecurityActions.Edit =>
                                 currentStep == -1 && (hasFullAccessToForm || e.Access is FileShare.Editing),
@@ -1250,7 +1250,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                                 formFilling?.StartFilling == true,
 
                             FilesSecurityActions.OpenForm =>
-                                (formFilling?.StartFilling == true && role == null) || currentStep == 0 || IsFillingStoped || (role != null && role.Sequence != currentStep),
+                                (formFilling?.StartFilling == true && role == null) || currentStep == 0 || isFillingStoped || (role != null && role.Sequence != currentStep),
 
                             _ => false
                         };
@@ -2329,9 +2329,9 @@ public class FileSecurity(IDaoFactory daoFactory,
         }
     }
 
-    private async Task SetTagsAsync<T>(IEnumerable<FileEntry<T>> entries)
+    private async Task SetTagsAsync<T>(List<Folder<T>> entries)
     {
-        if (!entries.Any())
+        if (entries.Count == 0)
         {
             return;
         }
@@ -2346,9 +2346,9 @@ public class FileSecurity(IDaoFactory daoFactory,
         }
     }
 
-    private async Task SetPinAsync<T>(IEnumerable<FileEntry<T>> entries)
+    private async Task SetPinAsync<T>(List<Folder<T>> entries)
     {
-        if (!entries.Any())
+        if (entries.Count == 0)
         {
             return;
         }
@@ -2359,10 +2359,9 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         foreach (var fileEntry in entries.Where(e => e.FileEntryType == FileEntryType.Folder))
         {
-            var room = (Folder<T>)fileEntry;
-            if (tags.ContainsKey(room.Id))
+            if (tags.ContainsKey(fileEntry.Id))
             {
-                room.Pinned = true;
+                fileEntry.Pinned = true;
             }
         }
     }

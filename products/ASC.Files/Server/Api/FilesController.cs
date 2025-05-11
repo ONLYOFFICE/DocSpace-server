@@ -123,16 +123,13 @@ public abstract class FilesController<T>(
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Conversion result", typeof(IAsyncEnumerable<ConversationResultDto>))]
     [HttpGet("file/{fileId}/checkconversion")]
-    public async IAsyncEnumerable<ConversationResultDto> CheckConversionAsync(CheckConversionStatusRequestDto<T> inDto)
+    public IAsyncEnumerable<ConversationResultDto> CheckConversionAsync(CheckConversionStatusRequestDto<T> inDto)
     {
-        await foreach (var r in filesControllerHelper.CheckConversionAsync(new CheckConversionRequestDto<T>
+        return filesControllerHelper.CheckConversionAsync(new CheckConversionRequestDto<T>
         {
             FileId = inDto.FileId,
             StartConvert = inDto.Start
-        }))
-        {
-            yield return r;
-        }
+        });
     }
 
     /// <summary>
@@ -240,7 +237,7 @@ public abstract class FilesController<T>(
     [HttpDelete("file/{fileId}")]
     public async IAsyncEnumerable<FileOperationDto> DeleteFile(DeleteRequestDto<T> inDto)
     {
-        await fileOperationsManager.Publish(new List<T>(), new List<T> { inDto.FileId }, false, !inDto.File.DeleteAfter, inDto.File.Immediately);
+        await fileOperationsManager.Publish([], [inDto.FileId], false, !inDto.File.DeleteAfter, inDto.File.Immediately);
         
         foreach (var e in await fileOperationsManager.GetOperationResults())
         {
@@ -433,7 +430,10 @@ public abstract class FilesController<T>(
     [HttpPut("{fileId}/update")]
     public async Task<FileDto<T>> UpdateFileStreamFromFormAsync(FileStreamRequestDto<T> inDto)
     {
-        return await filesControllerHelper.UpdateFileStreamAsync(filesControllerHelper.GetFileFromRequest(inDto).OpenReadStream(), inDto.FileId, inDto.FileExtension, inDto.Encrypted, inDto.Forcesave);
+        IEnumerable<IFormFile> files = Request.Form.Files;
+        var file = files.Any() ? files.First() : inDto.File;
+
+        return await filesControllerHelper.UpdateFileStreamAsync(file.OpenReadStream(), inDto.FileId, inDto.FileExtension, inDto.Encrypted, inDto.Forcesave);
     }
 
     /// <summary>
@@ -499,14 +499,12 @@ public abstract class FilesController<T>(
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Updated file entries information", typeof(IAsyncEnumerable<FileDto<int>>))]
     [HttpPut("order")]
-    public async IAsyncEnumerable<FileEntryDto<T>> SetFilesOrder(OrdersRequestDto<T> inDto)
+    public IAsyncEnumerable<FileEntryDto<T>> SetFilesOrder(OrdersRequestDto<T> inDto)
     {
-        await foreach (var e in fileStorageService.SetOrderAsync(inDto.Items))
-        {
-            yield return e.FileEntryType == FileEntryType.Folder
-                ? await _folderDtoHelper.GetAsync(e as Folder<T>)
-                : await _fileDtoHelper.GetAsync(e as File<T>);
-        }
+        return fileStorageService.SetOrderAsync(inDto.Items).SelectAwait<FileEntry<T>, FileEntryDto<T>>(
+            async e => e.FileEntryType == FileEntryType.Folder ? 
+                await _folderDtoHelper.GetAsync(e as Folder<T>) : 
+                await _fileDtoHelper.GetAsync(e as File<T>));
     }
 
     /// <summary>

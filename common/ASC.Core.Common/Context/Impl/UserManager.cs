@@ -925,7 +925,7 @@ public class UserManager(
     #endregion Groups
 
 
-    private bool IsPropertiesContainsWords(IEnumerable<string> properties, IEnumerable<string> words)
+    private bool IsPropertiesContainsWords(string[] properties, IEnumerable<string> words)
     {
         foreach (var w in words)
         {

@@ -559,12 +559,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
         var objToDel = client
                       .ListObjects(_private_container, null, null, null, MakePath(domain, path));
 
-        long result = 0;
-
-        foreach (var obj in objToDel)
-        {
-            result += obj.Bytes;
-        }
+        var result = objToDel.Sum(obj => obj.Bytes);
 
         return Task.FromResult(result);
     }
@@ -578,12 +573,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
 
         if (QuotaController != null)
         {
-            long size = 0;
-
-            foreach (var obj in objects)
-            {
-                size += obj.Bytes;
-            }
+            var size = objects.Sum(obj => obj.Bytes);
 
             await QuotaController.QuotaUsedSetAsync(Modulename, domain, DataList.GetData(domain), size);
 
@@ -600,12 +590,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
         var objects = client
                       .ListObjects(_private_container, null, null, null, MakePath(domain, string.Empty), _region);
 
-        long result = 0;
-
-        foreach (var obj in objects)
-        {
-            result += obj.Bytes;
-        }
+        var result = objects.Sum(obj => obj.Bytes);
 
         return Task.FromResult(result);
     }

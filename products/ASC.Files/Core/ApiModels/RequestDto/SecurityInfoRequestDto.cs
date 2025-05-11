@@ -34,17 +34,17 @@ public class SecurityInfoRequestDto
     /// <summary>
     /// The list of the shared folder IDs.
     /// </summary>
-    public IEnumerable<JsonElement> FolderIds { get; set; } = new List<JsonElement>();
+    public List<JsonElement> FolderIds { get; set; } = [];
 
     /// <summary>
     /// The list of the shared file IDs.
     /// </summary>
-    public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
+    public List<JsonElement> FileIds { get; set; } = [];
 
     /// <summary>
     /// The collection of sharing parameters.
     /// </summary>
-    public IEnumerable<FileShareParams> Share { get; set; }
+    public List<FileShareParams> Share { get; set; }
 
     /// <summary>
     /// Specifies whether to notify users about the shared file or not.
@@ -65,7 +65,7 @@ public class SecurityInfoSimpleRequestDto
     /// <summary>
     /// The collection of sharing parameters.
     /// </summary>
-    public IEnumerable<FileShareParams> Share { get; set; }
+    public List<FileShareParams> Share { get; set; }
 
     /// <summary>
     /// Specifies whether to notify users about the shared file or not.

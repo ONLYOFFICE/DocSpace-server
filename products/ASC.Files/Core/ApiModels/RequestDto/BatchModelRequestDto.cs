@@ -34,12 +34,12 @@ public class BaseBatchRequestDto
     /// <summary>
     /// The list of folder IDs of the base batch request.
     /// </summary>
-    public IEnumerable<JsonElement> FolderIds { get; set; } = new List<JsonElement>();
+    public List<JsonElement> FolderIds { get; set; } = [];
 
     /// <summary>
     /// The list of file IDs of the base batch request.
     /// </summary>
-    public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
+    public List<JsonElement> FileIds { get; set; } = [];
 }
 
 /// <summary>
@@ -50,17 +50,17 @@ public class DownloadRequestDto
     /// <summary>
     /// The list of folder IDs to be downloaded.
     /// </summary>
-    public IEnumerable<JsonElement> FolderIds { get; set; } = new List<JsonElement>();
+    public List<JsonElement> FolderIds { get; set; } = [];
 
     /// <summary>
     /// The list of file IDs to be downloaded.
     /// </summary>
-    public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
+    public List<JsonElement> FileIds { get; set; } = [];
 
     /// <summary>
     /// The list of file IDs which will be converted.
     /// </summary>
-    public IEnumerable<DownloadRequestItemDto> FileConvertIds { get; set; } = new List<DownloadRequestItemDto>();
+    public List<DownloadRequestItemDto> FileConvertIds { get; set; } = [];
 }
 
 /// <summary>
@@ -92,12 +92,12 @@ public class DeleteBatchRequestDto
     /// <summary>
     /// The list of folder IDs to be deleted.
     /// </summary>
-    public IEnumerable<JsonElement> FolderIds { get; set; } = new List<JsonElement>();
+    public List<JsonElement> FolderIds { get; set; } = [];
 
     /// <summary>
     /// The list of file IDs to be deleted.
     /// </summary>
-    public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
+    public List<JsonElement> FileIds { get; set; } = [];
 
     /// <summary>
     /// Specifies whether to delete a file after the editing session is finished or not
@@ -128,7 +128,7 @@ public class DeleteVersionBatchRequestDto
     /// <summary>
     /// The collection of file versions to be deleted.
     /// </summary>
-    public required IEnumerable<int> Versions { get; set; } = new List<int>();
+    public required List<int> Versions { get; set; } = [];
 }
 
 /// <summary>
@@ -173,12 +173,12 @@ public class BatchRequestDto
     /// <summary>
     /// The list of folder IDs to be copied/moved.
     /// </summary>
-    public IEnumerable<JsonElement> FolderIds { get; set; } = new List<JsonElement>();
+    public List<JsonElement> FolderIds { get; set; } = [];
 
     /// <summary>
     /// The list of file IDs to be copied/moved.
     /// </summary>
-    public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
+    public List<JsonElement> FileIds { get; set; } = [];
 
     /// <summary>
     /// The destination folder ID.

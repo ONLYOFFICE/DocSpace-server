@@ -70,7 +70,7 @@ public class OrdersRequestDto<T>
     /// <summary>
     /// The list of items with their ordering information.
     /// </summary>
-    public IEnumerable<OrdersItemRequestDto<T>> Items { get; set; }
+    public List<OrdersItemRequestDto<T>> Items { get; set; }
 }
 
 /// <summary>

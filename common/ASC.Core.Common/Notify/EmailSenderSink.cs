@@ -98,13 +98,8 @@ public class EmailSenderSinkMessageCreator(TenantManager tenantManager, CoreConf
             catch { }
         }
         m.Sender = from.ToString();
-
-        var to = new List<string>();
-        foreach (var address in message.Recipient.Addresses)
-        {
-            to.Add(MailAddressUtils.Create(address, message.Recipient.Name).ToString());
-        }
-        m.Reciever = string.Join("|", to.ToArray());
+        var to = message.Recipient.Addresses.Select(address => MailAddressUtils.Create(address, message.Recipient.Name).ToString()).ToArray();
+        m.Reciever = string.Join("|",to);
 
         var replyTag = message.Arguments.FirstOrDefault(x => x.Tag == "replyto");
         if (replyTag is { Value: string value })

@@ -143,7 +143,7 @@ public abstract class FoldersController<T>(
     [HttpDelete("folder/{folderId}")]
     public async IAsyncEnumerable<FileOperationDto> DeleteFolder(DeleteFolder<T> inDto)
     {
-        await fileOperationsManager.Publish(new List<T> { inDto.FolderId }, new List<T>(), false, !inDto.Delete.DeleteAfter, inDto.Delete.Immediately);
+        await fileOperationsManager.Publish([inDto.FolderId], [], false, !inDto.Delete.DeleteAfter, inDto.Delete.Immediately);
         
         foreach (var e in await fileOperationsManager.GetOperationResults())
         {

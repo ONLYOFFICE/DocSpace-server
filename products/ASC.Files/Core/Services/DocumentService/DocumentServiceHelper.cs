@@ -615,7 +615,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         if (currentStep != -1)
         {
-            if (!myRoles.Any())
+            if (myRoles.Count == 0)
             {
                 return result;
             }
