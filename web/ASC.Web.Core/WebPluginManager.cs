@@ -54,7 +54,15 @@ public class WebPlugin
 }
 
 [Scope]
-public class WebPluginManager
+public class WebPluginManager(
+    CoreBaseSettings coreBaseSettings,
+    SettingsManager settingsManager,
+    InstanceCrypto instanceCrypto,
+    WebPluginConfigSettings webPluginConfigSettings,
+    StorageFactory storageFactory,
+    AuthContext authContext,
+    ILogger<WebPluginManager> log,
+    IFusionCacheProvider cacheProvider)
 {
     private const string StorageSystemModuleName = "systemwebplugins";
     private const string StorageModuleName = "webplugins";
@@ -62,43 +70,16 @@ public class WebPluginManager
     private const string PluginFileName = "plugin.js";
     private const string AssetsFolderName = "assets";
 
-    private readonly CoreBaseSettings _coreBaseSettings;
-    private readonly SettingsManager _settingsManager;
-    private readonly InstanceCrypto _instanceCrypto;
-    private readonly WebPluginConfigSettings _webPluginConfigSettings;
-    private readonly StorageFactory _storageFactory;
-    private readonly AuthContext _authContext;
-    private readonly ILogger<WebPluginManager> _log;
-    private readonly IFusionCache _cache;
-
-    public WebPluginManager(
-        CoreBaseSettings coreBaseSettings,
-        SettingsManager settingsManager,
-        InstanceCrypto instanceCrypto,
-        WebPluginConfigSettings webPluginConfigSettings,
-        StorageFactory storageFactory,
-        AuthContext authContext,
-        ILogger<WebPluginManager> log,
-        IFusionCacheProvider cacheProvider)
-    {
-        _coreBaseSettings = coreBaseSettings;
-        _settingsManager = settingsManager;
-        _instanceCrypto = instanceCrypto;
-        _webPluginConfigSettings = webPluginConfigSettings;
-        _storageFactory = storageFactory;
-        _authContext = authContext;
-        _log = log;
-        _cache = cacheProvider.GetMemoryCache();
-    }
+    private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
 
     private void DemandWebPlugins(bool upload = false, bool delete = false)
     {
-        if (!_webPluginConfigSettings.Enabled)
+        if (!webPluginConfigSettings.Enabled)
         {
             throw new SecurityException("Plugins disabled");
         }
 
-        if ((upload && !_webPluginConfigSettings.Upload) || (delete && !_webPluginConfigSettings.Delete))
+        if ((upload && !webPluginConfigSettings.Upload) || (delete && !webPluginConfigSettings.Delete))
         {
             throw new SecurityException("Forbidden action");
         }
@@ -108,7 +89,7 @@ public class WebPluginManager
     {
         var module = tenantId == Tenant.DefaultTenant ? StorageSystemModuleName : StorageModuleName;
 
-        var storage = await _storageFactory.GetStorageAsync(tenantId, module);
+        var storage = await storageFactory.GetStorageAsync(tenantId, module);
 
         return storage;
     }
@@ -129,17 +110,17 @@ public class WebPluginManager
     {
         DemandWebPlugins(upload: true);
 
-        if (system && !_coreBaseSettings.Standalone)
+        if (system && !coreBaseSettings.Standalone)
         {
             throw new CustomHttpException(HttpStatusCode.Forbidden, Resource.ErrorWebPluginForbiddenSystem);
         }
 
-        if (Path.GetExtension(file.FileName).ToLowerInvariant() != _webPluginConfigSettings.Extension)
+        if (Path.GetExtension(file.FileName).ToLowerInvariant() != webPluginConfigSettings.Extension)
         {
             throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginFileExtension);
         }
 
-        if (file.Length > _webPluginConfigSettings.MaxSize)
+        if (file.Length > webPluginConfigSettings.MaxSize)
         {
             throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginFileSize);
         }
@@ -179,7 +160,7 @@ public class WebPluginManager
                 await storage.DeleteDirectoryAsync(webPlugin.Name);
             }
 
-            webPlugin.CreateBy = _authContext.CurrentAccount.ID;
+            webPlugin.CreateBy = authContext.CurrentAccount.ID;
             webPlugin.CreateOn = DateTime.UtcNow;
 
             var configString = JsonSerializer.Serialize(webPlugin, options);
@@ -200,7 +181,7 @@ public class WebPluginManager
             {
                 var ext = Path.GetExtension(zipEntry.Name);
 
-                if (_webPluginConfigSettings.AssetExtensions.Length != 0 && !_webPluginConfigSettings.AssetExtensions.Contains(ext))
+                if (webPluginConfigSettings.AssetExtensions.Length != 0 && !webPluginConfigSettings.AssetExtensions.Contains(ext))
                 {
                     continue;
                 }
@@ -297,7 +278,7 @@ public class WebPluginManager
             return webPlugins;
         }
 
-        var webPluginSettings = await _settingsManager.LoadAsync<WebPluginSettings>();
+        var webPluginSettings = await settingsManager.LoadAsync<WebPluginSettings>();
 
         var enabledPlugins = webPluginSettings?.EnabledPlugins ?? [];
 
@@ -310,11 +291,11 @@ public class WebPluginManager
                     try
                     {
                         webPlugin.Enabled = webPluginState.Enabled;
-                        webPlugin.Settings = string.IsNullOrEmpty(webPluginState.Settings) ? null : await _instanceCrypto.DecryptAsync(webPluginState.Settings);
+                        webPlugin.Settings = string.IsNullOrEmpty(webPluginState.Settings) ? null : await instanceCrypto.DecryptAsync(webPluginState.Settings);
                     }
                     catch (CryptographicException e)
                     {
-                        _log.ErrorWithException(webPlugin.Name, e);
+                        log.ErrorWithException(webPlugin.Name, e);
 
                         webPlugin.Enabled = false;
                         webPlugin.Settings = null;
@@ -381,7 +362,7 @@ public class WebPluginManager
             }
             catch (Exception e)
             {
-                _log.ErrorWithException(e);
+                log.ErrorWithException(e);
             }
         }
 
@@ -406,11 +387,11 @@ public class WebPluginManager
 
     private async Task<WebPlugin> UpdateWebPluginAsync(int tenantId, WebPlugin webPlugin, bool enabled, string settings)
     {
-        var webPluginSettings = await _settingsManager.LoadAsync<WebPluginSettings>();
+        var webPluginSettings = await settingsManager.LoadAsync<WebPluginSettings>();
 
         var enabledPlugins = webPluginSettings?.EnabledPlugins ?? new Dictionary<string, WebPluginState>();
 
-        var encryptedSettings = string.IsNullOrEmpty(settings) ? null : await _instanceCrypto.EncryptAsync(settings);
+        var encryptedSettings = string.IsNullOrEmpty(settings) ? null : await instanceCrypto.EncryptAsync(settings);
 
         if (enabled || encryptedSettings != null)
         {
@@ -427,7 +408,7 @@ public class WebPluginManager
 
         webPluginSettings.EnabledPlugins = enabledPlugins.Count != 0 ? enabledPlugins : null;
 
-        await _settingsManager.SaveAsync(webPluginSettings);
+        await settingsManager.SaveAsync(webPluginSettings);
 
         webPlugin.Enabled = enabled;
         webPlugin.Settings = settings;
@@ -445,7 +426,7 @@ public class WebPluginManager
 
         var webPlugin = await GetWebPluginByNameAsync(tenantId, name);
 
-        if (webPlugin.System && !_coreBaseSettings.Standalone)
+        if (webPlugin.System && !coreBaseSettings.Standalone)
         {
             throw new CustomHttpException(HttpStatusCode.Forbidden, Resource.ErrorWebPluginForbiddenSystem);
         }
