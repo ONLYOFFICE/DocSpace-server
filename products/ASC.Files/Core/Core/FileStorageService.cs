@@ -2241,11 +2241,6 @@ public class FileStorageService //: IFileStorageService
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
             }
 
-            if (!await fileSecurity.CanEditAsync(entry))
-            {
-                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
-            }
-
             switch (entry)
             {
                 case File<T> file:
