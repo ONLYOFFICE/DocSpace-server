@@ -42,6 +42,7 @@ public static class ServiceCollectionExtension
         var connectionMultiplexer = await services.GetRedisConnectionMultiplexerAsync(configuration, @namespace);
 
         services.AddHybridCache(connectionMultiplexer);
+        services.AddMemoryCache(connectionMultiplexer);
             
         return services;
 

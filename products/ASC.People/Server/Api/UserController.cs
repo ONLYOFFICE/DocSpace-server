@@ -1776,7 +1776,7 @@ public class UserController(
                 {
                     await activeUsersChecker.CheckAppend();
                     await _userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupGuest.ID);
-                    webItemSecurityCache.ClearCache(tenant.Id);
+                    await webItemSecurityCache.ClearCacheAsync(tenant.Id);
                     changed = true;
                 }
             }
@@ -1786,7 +1786,7 @@ public class UserController(
                 {
                     await countPaidUserChecker.CheckAppend();
                     await _userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupGuest.ID);
-                    webItemSecurityCache.ClearCache(tenant.Id);
+                    await webItemSecurityCache.ClearCacheAsync(tenant.Id);
                     changed = true;
                 }
             }

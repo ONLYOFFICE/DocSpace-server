@@ -57,6 +57,11 @@ internal class OneDriveDaoBase(
         return item.Id;
     }
 
+    public bool IsFile(Item item)
+    {
+        return item.Folder == null;
+    }
+
     public string MakeThirdId(object entryId)
     {
         var id = Convert.ToString(entryId, CultureInfo.InvariantCulture);
@@ -257,7 +262,7 @@ internal class OneDriveDaoBase(
     public async Task<List<Item>> GetItemsAsync(string parentId, bool? folder = null)
     {
         var onedriveFolderId = MakeThirdId(parentId);
-        var items = await _providerInfo.GetItemsAsync(onedriveFolderId);
+        var items = await _providerInfo.GetItemsAsync(onedriveFolderId, GetId, IsFile);
 
         if (!folder.HasValue)
         {
