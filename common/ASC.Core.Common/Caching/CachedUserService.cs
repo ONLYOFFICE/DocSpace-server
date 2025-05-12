@@ -180,7 +180,7 @@ public class CachedUserService : IUserService
         await _service.SetUserPhotoAsync(tenant, id, photo);
 
         var tag = CacheExtention.GetUserPhotoTag(tenant, id);
-        await _cache.RemoveAsync(tag);
+        await _cache.RemoveByTagAsync(tag);
     }
 
     public async Task SaveUsersRelationAsync(int tenantId, Guid sourceUserId, Guid targetUserId)
