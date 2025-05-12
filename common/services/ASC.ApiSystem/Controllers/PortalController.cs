@@ -389,7 +389,8 @@ public class PortalController(
             return BadRequest(error);
         }
 
-        var portalName = (model.PortalName ?? $"{model.Email.Split('@')[0]}-{DateTime.UtcNow.ToString("yyMMddHHmm")}").Trim();
+        var emailPart = Regex.Replace(model.Email.Split('@')[0], @"[^a-z0-9\-]", "", RegexOptions.IgnoreCase).Trim('-');
+        var portalName = (model.PortalName ?? $"{emailPart}{DateTime.UtcNow.ToString("yyMMddHHmm")}").Trim();
 
         model.PortalName = portalName;
 
