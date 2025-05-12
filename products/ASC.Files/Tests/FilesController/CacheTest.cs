@@ -25,6 +25,9 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 extern alias ASCPeople;
 extern alias ASCWebApi;
+
+using Docspace.Client;
+
 namespace ASC.Files.Tests.FilesController;
 
 [Collection("Test Collection")]
@@ -41,23 +44,24 @@ public class CacheTest(
         await _filesClient.Authenticate(Initializer.Owner);
 
         //send for get If-Modified-Since
-        var response = await _filesClient.GetAsync("/api/2.0/files/@root", TestContext.Current.CancellationToken);
+        var response = await _filesFoldersApi.GetRootFoldersWithHttpInfoAsync(cancellationToken: TestContext.Current.CancellationToken);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var httpRequest = CreateRequest("/api/2.0/files/@root", response, HttpMethod.Get);
+        SetIfModifiedSince(response);
 
         //send for check 304
-        var responseCached = await _filesClient.SendAsync(httpRequest, TestContext.Current.CancellationToken);
+        var responseCached = await _filesFoldersApi.GetRootFoldersWithHttpInfoAsync(cancellationToken: TestContext.Current.CancellationToken);
         responseCached.StatusCode.Should().Be(HttpStatusCode.NotModified);
 
         //send for clear cache
+        ClearIfModifiedSince();
         var createdFile = await CreateFile("test.docx", FolderType.USER, Initializer.Owner);
-
-        var httpRequestAfterChanged = CreateRequest("/api/2.0/files/@root", response, HttpMethod.Get);
+        SetIfModifiedSince(response);
 
         //send for check 200
-        var responseAfterChanged = await _filesClient.SendAsync(httpRequestAfterChanged, TestContext.Current.CancellationToken);
+        var responseAfterChanged = await _filesFoldersApi.GetRootFoldersWithHttpInfoAsync(cancellationToken: TestContext.Current.CancellationToken);
         responseAfterChanged.StatusCode.Should().Be(HttpStatusCode.OK);
+        ClearIfModifiedSince();
     }
 
     [Fact]
@@ -68,23 +72,22 @@ public class CacheTest(
         var folder = await GetUserFolderIdAsync(Initializer.Owner);
 
         //send for get If-Modified-Since
-        var response = await _filesClient.GetAsync($"/api/2.0/files/{folder}", TestContext.Current.CancellationToken);
+        var response = await _filesFoldersApi.GetFolderByFolderIdWithHttpInfoAsync(folder, cancellationToken: TestContext.Current.CancellationToken);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var httpRequest = CreateRequest($"/api/2.0/files/{folder}", response, HttpMethod.Get);
+        SetIfModifiedSince(response);
 
         //send for check 304
-        var responseCached = await _filesClient.SendAsync(httpRequest, TestContext.Current.CancellationToken);
+        var responseCached = await _filesFoldersApi.GetFolderByFolderIdWithHttpInfoAsync(folder, cancellationToken: TestContext.Current.CancellationToken);
         responseCached.StatusCode.Should().Be(HttpStatusCode.NotModified);
 
         //send for clear cache
         await CreateFile("test.docx", FolderType.USER, Initializer.Owner);
 
-        var httpRequestAfterChanged = CreateRequest($"/api/2.0/files/{folder}", response, HttpMethod.Get);
-
         //send for check 200
-        var responseAfterChanged = await _filesClient.SendAsync(httpRequestAfterChanged, TestContext.Current.CancellationToken);
+        var responseAfterChanged = await _filesFoldersApi.GetFolderByFolderIdWithHttpInfoAsync(folder, cancellationToken: TestContext.Current.CancellationToken);
         responseAfterChanged.StatusCode.Should().Be(HttpStatusCode.OK);
+        ClearIfModifiedSince();
     }
 
     [Fact]
@@ -93,23 +96,24 @@ public class CacheTest(
         await _filesClient.Authenticate(Initializer.Owner);
 
         //send for get If-Modified-Since
-        var response = await _filesClient.GetAsync("/api/2.0/files/settings", TestContext.Current.CancellationToken);
+        var response = await _filesSettingsApi.GetFilesSettingsWithHttpInfoAsync(TestContext.Current.CancellationToken);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var httpRequest = CreateRequest("/api/2.0/files/settings", response, HttpMethod.Get);
+        SetIfModifiedSince(response);
 
         //send for check 304
-        var responseCached = await _filesClient.SendAsync(httpRequest, TestContext.Current.CancellationToken);
+        var responseCached = await _filesSettingsApi.GetFilesSettingsWithHttpInfoAsync(TestContext.Current.CancellationToken);
         responseCached.StatusCode.Should().Be(HttpStatusCode.NotModified);
+        ClearIfModifiedSince();
     }
 
-    private HttpRequestMessage CreateRequest(string url, HttpResponseMessage response, HttpMethod method)
+    private void SetIfModifiedSince<T>(ApiResponse<T> response)
     {
-        var httpRequest = new HttpRequestMessage();
-        httpRequest.Method = method;
-        httpRequest.RequestUri = new Uri(_filesClient.BaseAddress, url);
-        httpRequest.Headers.TryAddWithoutValidation("If-Modified-Since", response.Content.Headers.GetValues("Last-Modified").FirstOrDefault());
+        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation("If-Modified-Since", response.Headers["Last-Modified"]);
+    }
 
-        return httpRequest;
+    private void ClearIfModifiedSince()
+    {
+        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation("If-Modified-Since", "");
     }
 }
