@@ -35,7 +35,7 @@ public class LoginEventsCache(IFusionCacheProvider cacheProvider)
 
     public void Insert(DbLoginEvent loginEvent)
     {
-        _cache.Set(BuildKey(loginEvent.Id), loginEvent, opt=> opt.SetDuration(_expiration));
+        _cache.Set(BuildKey(loginEvent.Id), loginEvent, _expiration);
     }
 
     public DbLoginEvent Get(int id)

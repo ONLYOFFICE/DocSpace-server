@@ -64,7 +64,7 @@ class CachedQuotaService() : IQuotaService
             if (_quotaCacheEnabled)
             {
                 var tags = quotas.Select(quota => CacheExtention.GetTenantQuotaTag(quota.TenantId)).ToList();
-                await _cache.SetAsync(cacheKey, quotas, opt => opt.SetDuration(_cacheExpiration), tags: tags);
+                await _cache.SetAsync(cacheKey, quotas, _cacheExpiration, tags: tags);
             }
         }
 
@@ -113,7 +113,7 @@ class CachedQuotaService() : IQuotaService
             var result = await _service.FindTenantQuotaRowsAsync(tenantId);
             ctx.Tags = result.Select(r => CacheExtention.GetTenantQuotaRowTag(tenantId, r.Path)).ToArray();
             return ctx.Modified(result);
-        }, opt => opt.SetDuration(_cacheExpiration));
+        }, _cacheExpiration);
 
         return result;
     }
@@ -127,7 +127,7 @@ class CachedQuotaService() : IQuotaService
             var result = await _service.FindUserQuotaRowsAsync(tenantId, userId);
             ctx.Tags = result.Select(r => CacheExtention.GetTenantQuotaRowTag(tenantId, r.Path, userId)).ToArray();
             return ctx.Modified(result);
-        }, opt => opt.SetDuration(_cacheExpiration));
+        }, _cacheExpiration);
 
         return result;
     }

@@ -108,7 +108,7 @@ public class CachedUserService : IUserService
             var user = await _service.GetUserAsync(tenant, id);
 
             return ctx.Modified(user);
-        }, opt => opt.SetDuration(_cacheExpiration), [CacheExtention.GetUserTag(tenant, id)]);
+        }, _cacheExpiration, [CacheExtention.GetUserTag(tenant, id)]);
 
         return user;
     }
@@ -121,7 +121,7 @@ public class CachedUserService : IUserService
             var user = _service.GetUser(tenant, id);
 
             return ctx.Modified(user, lastModified: DateTime.UtcNow);
-        }, opt => opt.SetDuration(_cacheExpiration), [CacheExtention.GetUserTag(tenant, id)]);
+        }, _cacheExpiration, [CacheExtention.GetUserTag(tenant, id)]);
 
         return user;
     }
@@ -171,7 +171,7 @@ public class CachedUserService : IUserService
             var photo = await _service.GetUserPhotoAsync(tenant, id);
 
             return ctx.Modified(photo);
-        }, opt => opt.SetDuration(_photoExpiration), [CacheExtention.GetUserPhotoTag(tenant, id)]);
+        }, _photoExpiration, [CacheExtention.GetUserPhotoTag(tenant, id)]);
         return photo;
     }
 
@@ -200,7 +200,7 @@ public class CachedUserService : IUserService
             var relations = await _service.GetUserRelationsAsync(tenantId, sourceUserId);
 
             return ctx.Modified(relations);
-        }, opt => opt.SetDuration(_cacheExpiration), [CacheExtention.GetRelationTag(tenantId, sourceUserId)]);
+        }, _cacheExpiration, [CacheExtention.GetRelationTag(tenantId, sourceUserId)]);
 
         return relations;
     }
@@ -239,7 +239,7 @@ public class CachedUserService : IUserService
             var group = await _service.GetGroupAsync(tenant, id);
 
             return ctx.Modified(group);
-        }, opt => opt.SetDuration(_cacheExpiration), [CacheExtention.GetGroupTag(tenant, id)]);
+        }, _cacheExpiration, [CacheExtention.GetGroupTag(tenant, id)]);
 
         return group;
     }
@@ -280,7 +280,7 @@ public class CachedUserService : IUserService
             ctx.Tags = tags.ToArray();
 
             return ctx.Modified(new UserGroupRefStore(refs));
-        }, opt => opt.SetDuration(_cacheExpiration));
+        }, _cacheExpiration);
 
         return refs;
     }
@@ -296,7 +296,7 @@ public class CachedUserService : IUserService
             ctx.Tags = [CacheExtention.GetGroupRefTag(tenant, groupId, groupRef.UserId), CacheExtention.GetGroupTag(tenant, groupId)];
 
             return ctx.Modified(groupRef, lastModified: DateTime.UtcNow);
-        }, opt => opt.SetDuration(_cacheExpiration));
+        }, _cacheExpiration);
 
         return groupRef;
     }
@@ -333,7 +333,7 @@ public class CachedUserService : IUserService
             ctx.Tags = users.Select(u => CacheExtention.GetUserTag(tenant, u.Id)).ToArray();
 
             return ctx.Modified(users);
-        }, opt => opt.SetDuration(_cacheExpiration));
+        }, _cacheExpiration);
 
         return users;
     }
@@ -348,7 +348,7 @@ public class CachedUserService : IUserService
             ctx.Tags = groups.Select(g => CacheExtention.GetGroupTag(tenant, g.Id)).ToArray();
 
             return ctx.Modified(groups);
-        }, opt => opt.SetDuration(_cacheExpiration));
+        }, _cacheExpiration);
 
         return groups;
     }

@@ -142,11 +142,8 @@ public class AccountLinker(
         {
             var profiles = await fromDb(obj);
 
-            var tags = new List<string>();
-
-            ctx.Tags = tags.ToArray();
             return ctx.Modified(profiles);
-        }, opt => opt.SetDuration(TimeSpan.FromMinutes(10)));
+        }, TimeSpan.FromMinutes(10));
 
         return profiles;
     }

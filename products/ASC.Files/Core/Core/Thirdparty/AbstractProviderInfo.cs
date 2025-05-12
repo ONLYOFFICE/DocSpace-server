@@ -170,7 +170,7 @@ public class ProviderInfoHelper(IFusionCacheProvider cacheProvider)
             var file = await storage.GetFileAsync(fileId);
 
             return ctx.Modified(file);
-        }, opt => opt.SetDuration(_cacheExpiration),
+        }, _cacheExpiration,
         [CacheExtention.GetProviderTag(selector, id), CacheExtention.GetProviderFileTag(selector, id, fileId)]);
 
         return file;
@@ -186,7 +186,7 @@ public class ProviderInfoHelper(IFusionCacheProvider cacheProvider)
         }
 
         var key = $"{selector}d-" + id + "-" + idSelector(folder);
-        await _cache.SetAsync(key, folder, opt => opt.SetDuration(_cacheExpiration),
+        await _cache.SetAsync(key, folder, _cacheExpiration,
             [CacheExtention.GetProviderTag(selector, id), CacheExtention.GetProviderFolderTag(selector, id, idSelector(folder))]);
 
         return folder;
@@ -201,7 +201,7 @@ public class ProviderInfoHelper(IFusionCacheProvider cacheProvider)
             var folder = await storage.GetFolderAsync(folderId);
 
             return ctx.Modified(folder);
-        }, opt => opt.SetDuration(_cacheExpiration),
+        }, _cacheExpiration,
         [CacheExtention.GetProviderTag(selector, id), CacheExtention.GetProviderFolderTag(selector, id, folderId)]);
 
         return folder;

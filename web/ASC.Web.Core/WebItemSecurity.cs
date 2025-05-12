@@ -60,7 +60,7 @@ public class WebItemSecurityCache(IFusionCacheProvider cacheProvider)
         if (dic == null)
         {
             dic = new Dictionary<string, bool>();
-            await _cache.SetAsync(GetCacheKey(tenantId), dic, opt => opt.SetDuration(TimeSpan.FromMinutes(1)),[CacheExtention.GetWebItemSecurityTag(tenantId)]);
+            await _cache.SetAsync(GetCacheKey(tenantId), dic, TimeSpan.FromMinutes(1), [CacheExtention.GetWebItemSecurityTag(tenantId)]);
         }
 
         return dic;

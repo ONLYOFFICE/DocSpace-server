@@ -322,7 +322,7 @@ class CachedTenantService : ITenantService
             var data = await _service.GetTenantSettingsAsync(tenant, key);
 
             return ctx.Modified(data);
-        }, opt => opt.SetDuration(_settingsExpiration), [CacheExtention.GetTenantSettingsTag(tenant, key)]);
+        }, _settingsExpiration, [CacheExtention.GetTenantSettingsTag(tenant, key)]);
 
         return data == null ? null : data.Length == 0 ? null : data;
     }
@@ -335,7 +335,7 @@ class CachedTenantService : ITenantService
             var data = _service.GetTenantSettings(tenant, key);
 
             return ctx.Modified(data);
-        }, opt => opt.SetDuration(_settingsExpiration), [CacheExtention.GetTenantSettingsTag(tenant, key)]);
+        }, _settingsExpiration, [CacheExtention.GetTenantSettingsTag(tenant, key)]);
 
         return data == null ? null : data.Length == 0 ? null : data;
     }

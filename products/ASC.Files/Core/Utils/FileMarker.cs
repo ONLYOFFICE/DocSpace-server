@@ -39,7 +39,7 @@ public class FileMarkerCache(IFusionCacheProvider cacheProvider)
 
     public async Task Insert(string key, object value)
     {
-        await _cache.SetAsync(key, value, opt=> opt.SetDuration(_cacheExpiration));
+        await _cache.SetAsync(key, value, _cacheExpiration);
     }
 
     public async Task RemoveAsync(string key)
