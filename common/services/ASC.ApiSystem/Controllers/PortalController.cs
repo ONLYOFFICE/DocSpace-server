@@ -26,6 +26,8 @@
 
 using System.Text.Json;
 
+using ASC.FederatedLogin;
+using ASC.FederatedLogin.Profile;
 using ASC.Web.Api.Core;
 
 namespace ASC.ApiSystem.Controllers;
@@ -51,7 +53,9 @@ public class PortalController(
         CspSettingsHelper cspSettingsHelper,
         CoreBaseSettings coreBaseSettings,
         QuotaUsageManager quotaUsageManager,
-        PasswordSettingsManager passwordSettingsManager)
+        PasswordSettingsManager passwordSettingsManager,
+        LoginProfileTransport loginProfileTransport,
+        AccountLinker accountLinker)
     : ControllerBase
 {
     #region For TEST api
@@ -377,9 +381,31 @@ public class PortalController(
             model.PasswordHash = passwordHasher.GetClientPassword(model.Password);
         }
 
-        var defaultName = string.IsNullOrEmpty(model.FirstName) && string.IsNullOrEmpty(model.LastName) ? "Administrator" : "";
+        LoginProfile loginProfile = null;
+        if (!string.IsNullOrEmpty(model.ThirdPartyProfile))
+        {
+            try
+            {
+                var profile = await loginProfileTransport.FromPureTransport(model.ThirdPartyProfile);
+                if (profile != null && string.IsNullOrEmpty(profile.AuthorizationError))
+                {
+                    loginProfile = profile;
+                    model.FirstName = loginProfile.FirstName;
+                    model.LastName = loginProfile.LastName;
+                }
+            }
+            catch (Exception e)
+            {
+                option.LogError(e, "");
+            }
+        }
 
-        model.FirstName = (model.FirstName ?? defaultName).Trim();
+        if (string.IsNullOrEmpty(model.FirstName) && string.IsNullOrEmpty(model.LastName))
+        {
+            model.FirstName = "Administrator";
+        }
+
+        model.FirstName = (model.FirstName ?? "").Trim();
         model.LastName = (model.LastName ?? "").Trim();
 
         if (!CheckValidName(model.FirstName + model.LastName, out var error))
@@ -498,6 +524,11 @@ public class PortalController(
                 await apiSystemHelper.AddTenantToCacheAsync(t.GetTenantDomain(coreSettings), model.AWSRegion);
 
                 option.LogDebug("PortalName = {0}; Elapsed ms. CacheController.AddTenantToCache: {1}", model.PortalName, sw.ElapsedMilliseconds);
+            }
+
+            if (loginProfile != null)
+            {
+                await accountLinker.AddLinkAsync(t.OwnerId, loginProfile);
             }
 
             /*********/
