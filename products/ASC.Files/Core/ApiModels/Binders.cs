@@ -81,7 +81,7 @@ public static class ModelBindingContextExtension
         return ParseQuery(bindingContext, $"{modelName}[]");
     }
 
-    internal static IEnumerable<DownloadRequestItemDto> ParseDictionary(this ModelBindingContext bindingContext, string modelName)
+    internal static List<DownloadRequestItemDto> ParseDictionary(this ModelBindingContext bindingContext, string modelName)
     {
         var result = new List<DownloadRequestItemDto>();
 

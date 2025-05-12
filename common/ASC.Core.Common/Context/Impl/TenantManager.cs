@@ -284,12 +284,12 @@ public class TenantManager(
     }
 
 
-    public async Task<IEnumerable<TenantQuota>> GetTenantQuotasAsync()
+    public async Task<List<TenantQuota>> GetTenantQuotasAsync()
     {
         return await GetTenantQuotasAsync(false);
     }
 
-    public async Task<IEnumerable<TenantQuota>> GetTenantQuotasAsync(bool all)
+    public async Task<List<TenantQuota>> GetTenantQuotasAsync(bool all)
     {
         return (await quotaService.GetTenantQuotasAsync()).Where(q => q.TenantId < 0 && (all || q.Visible)).OrderByDescending(q => q.TenantId).ToList();
     }

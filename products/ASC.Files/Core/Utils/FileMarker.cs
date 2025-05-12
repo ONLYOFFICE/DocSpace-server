@@ -516,12 +516,14 @@ public class FileMarker(
             if (file.IsForm && room.FolderType == FolderType.VirtualDataRoom)
             {
                 var allRoleUserIds = await fileDao.GetFormRoles(file.Id).Where(r => r.UserId != authContext.CurrentAccount.ID).Select(r => r.UserId).ToListAsync();
-                if (allRoleUserIds.Any())
+                if (allRoleUserIds.Count == 0)
                 {
-                    taskData.UserIDs = allRoleUserIds;
-                    var markerHelper = serviceProvider.GetService<FileMarkerHelper<T>>();
-                    await markerHelper.Add(taskData);
+                    return;
                 }
+
+                taskData.UserIDs = allRoleUserIds;
+                var markerHelper = serviceProvider.GetService<FileMarkerHelper<T>>();
+                await markerHelper.Add(taskData);
                 return;
             }
         }
@@ -899,11 +901,37 @@ public class FileMarker(
             .Distinct()
             .ToList();
         
-        var entryTagsProvider = await filesSettingsHelper.GetEnableThirdParty() 
-            ? await GetEntryTagsAsync<string>(tags.Where(r => r.EntryId is string)) 
+        var enableThirdParty = await filesSettingsHelper.GetEnableThirdParty();
+        List<Tag> tagsProvider = [];
+        List<Tag> tagsInternal = [];
+
+        foreach (var t in tags
+                     .Where(r => (r.EntryType == FileEntryType.Folder && !Equals(r.EntryId, folder.Id)) || r.EntryType == FileEntryType.File)
+                     .Distinct())
+        {
+            switch (t.EntryId)
+            {
+                case string:
+                    {
+                        if (enableThirdParty)
+                        {
+                            tagsProvider.Add(t);
+                        }
+
+                        break;
+                    }
+                case int:
+                    tagsInternal.Add(t);
+                    break;
+            }
+        }
+
+        var entryTagsProvider = enableThirdParty 
+            ? await GetEntryTagsAsync<string>(tagsInternal) 
             : [];
-        
-        var entryTagsInternal = await GetEntryTagsAsync<int>(tags.Where(r => r.EntryId is int));
+
+
+        var entryTagsInternal = await GetEntryTagsAsync<int>(tagsProvider);
 
         foreach (var entryTag in entryTagsInternal)
         {
@@ -977,7 +1005,7 @@ public class FileMarker(
         return tree;
     }
     
-    private async Task<Dictionary<FileEntry<T>, Tag>> GetEntryTagsAsync<T>(IEnumerable<Tag> tags)
+    private async Task<Dictionary<FileEntry<T>, Tag>> GetEntryTagsAsync<T>(List<Tag> tags)
     {
         var fileDao = daoFactory.GetFileDao<T>();
         var folderDao = daoFactory.GetFolderDao<T>();
