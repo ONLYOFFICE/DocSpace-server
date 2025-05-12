@@ -48,7 +48,7 @@ public class PortalController(
     CommonLinkUtility commonLinkUtility,
     IUrlShortener urlShortener,
     AuthContext authContext,
-        CookiesManager cookiesManager,
+    CookiesManager cookiesManager,
     SecurityContext securityContext,
     SettingsManager settingsManager,
     IMobileAppInstallRegistrator mobileAppInstallRegistrator,
@@ -70,7 +70,6 @@ public class PortalController(
     TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
     ExternalResourceSettingsHelper externalResourceSettingsHelper,
     IMapper mapper,
-    IHttpContextAccessor httpContextAccessor,
     QuotaHelper quotaHelper,
     IEventBus eventBus,
     CspSettingsHelper cspSettingsHelper,
@@ -525,7 +524,7 @@ public class PortalController(
             return string.Empty;
         }
 
-        var rewriter = httpContextAccessor.HttpContext.Request.Url();
+        var rewriter = HttpContext.Request.Url();
         var confirmUrl = string.Format("{0}{1}{2}{3}/{4}",
                                 rewriter?.Scheme ?? Uri.UriSchemeHttp,
                                 Uri.SchemeDelimiter,

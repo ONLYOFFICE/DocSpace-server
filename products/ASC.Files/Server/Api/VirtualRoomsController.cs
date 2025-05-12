@@ -387,7 +387,7 @@ public abstract class VirtualRoomsController<T>(
     [HttpDelete("{id}")]
     public async Task<FileOperationDto> DeleteRoomAsync(DeleteRoomRequestDto<T> inDto)
     {
-        await fileDeleteOperationsManager.Publish(new List<T> { inDto.Id }, new List<T>(), false, !inDto.DeleteRoom.DeleteAfter, true);
+        await fileDeleteOperationsManager.Publish([inDto.Id], [], false, !inDto.DeleteRoom.DeleteAfter, true);
         
         return await fileOperationDtoHelper.GetAsync((await fileDeleteOperationsManager.GetOperationResults()).FirstOrDefault());
     }
@@ -806,8 +806,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         UserManager userManager,
         IServiceProvider serviceProvider,
         ApiDateTimeHelper apiDateTimeHelper,
-        RoomNewItemsDtoHelper roomNewItemsDtoHelper,
-        IHttpContextAccessor httpContextAccessor)
+        RoomNewItemsDtoHelper roomNewItemsDtoHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -1007,7 +1006,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
 
         var taskProgress = await documentBuilderTaskManager.StartTask(task, false);
         
-        var headers = MessageSettings.GetHttpHeaders(httpContextAccessor?.HttpContext?.Request);
+        var headers = MessageSettings.GetHttpHeaders(Request);
         var evt = new RoomIndexExportIntegrationEvent(userId, tenantId, inDto.Id, baseUri, headers: headers != null 
             ? headers.ToDictionary(x => x.Key, x => x.Value.ToString())
             : []);

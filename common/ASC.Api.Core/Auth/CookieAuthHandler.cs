@@ -33,15 +33,14 @@ public class CookieAuthHandler(
     ILoggerFactory logger,
     UrlEncoder encoder,
     SecurityContext securityContext,
-    CookiesManager cookiesManager,
-    IHttpContextAccessor httpContextAccessor)
+    CookiesManager cookiesManager)
     : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
 {
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
         try
         {
-            var authorization = httpContextAccessor.HttpContext.Request.Cookies[cookiesManager.GetAscCookiesName()] ?? httpContextAccessor.HttpContext.Request.Headers.Authorization.ToString();
+            var authorization =Request.Cookies[cookiesManager.GetAscCookiesName()] ?? Request.Headers.Authorization.ToString();
 
             if (string.IsNullOrEmpty(authorization))
             {

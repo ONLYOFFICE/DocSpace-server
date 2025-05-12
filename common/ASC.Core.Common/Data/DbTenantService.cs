@@ -44,6 +44,15 @@ public class DbTenantService(
         await ValidateDomainAsync(domain, Tenant.DefaultTenant, true);
     }
 
+    public async Task<bool> IsForbiddenDomainAsync(string domain)
+    {
+        await using var tenantDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        domain = domain.Trim().ToLowerInvariant();
+
+        return await IsForbiddenDomainAsync(tenantDbContext, domain);
+    }
+
     public void ValidateTenantName(string name)
     {
         tenantDomainValidator.ValidateTenantName(name);
@@ -307,10 +316,9 @@ public class DbTenantService(
         await using var tenantDbContext = await dbContextFactory.CreateDbContextAsync();
         // forbidden or exists
 
-        domain = domain.ToLowerInvariant();
-        _forbiddenDomains ??= await tenantDbContext.AddressAsync().ToListAsync();
+        domain = domain.Trim().ToLowerInvariant();
 
-        var exists = tenantId != 0 && _forbiddenDomains.Contains(domain);
+        var exists = tenantId != 0 && await IsForbiddenDomainAsync(tenantDbContext, domain);
 
         if (!exists)
         {
@@ -337,6 +345,13 @@ public class DbTenantService(
 
             throw new TenantAlreadyExistsException("Address busy.", existsTenants.Distinct());
         }
+    }
+
+    private async Task<bool> IsForbiddenDomainAsync(TenantDbContext tenantDbContext, string domain)
+    {
+        _forbiddenDomains ??= await tenantDbContext.AddressAsync().ToListAsync();
+
+        return _forbiddenDomains.Contains(domain);
     }
 
     private string GetPasswordHash(Guid userId, string password)

@@ -93,4 +93,24 @@ public class TfaAppUserSettings : ISettings<TfaAppUserSettings>
         var defaultSettings = settingsManager.GetDefault<TfaAppUserSettings>();
         await settingsManager.SaveAsync(defaultSettings, guid);
     }
+    
+    public static async Task<bool> TfaExpiredAndResetAsync(SettingsManager settingsManager, AuditEventsRepository auditEventsRepository, Guid userId)
+    {
+        var tfaExpired = false;
+        var tfaLastEnabled = await settingsManager.LoadAsync<TfaAppUserSettings>(userId);
+        if (tfaLastEnabled != null)
+        {            
+            var tfaLastDisabled = (await auditEventsRepository.GetByFilterAsync(action: MessageAction.TwoFactorAuthenticationDisabled, limit: 1)).FirstOrDefault();
+            if (tfaLastDisabled != null)
+            {
+                tfaExpired = tfaLastEnabled.LastModified.AddDays(1) < DateTime.UtcNow;
+                if (tfaExpired)
+                {
+                    await DisableForUserAsync(settingsManager, userId);
+                }
+            }
+        }
+        
+        return tfaExpired;
+    }
 }

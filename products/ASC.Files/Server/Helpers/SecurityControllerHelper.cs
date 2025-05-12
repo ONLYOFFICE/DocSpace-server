@@ -83,9 +83,9 @@ public class SecurityControllerHelper(
         return true;
     }
 
-    public async IAsyncEnumerable<FileShareDto> SetSecurityInfoAsync<T>(IEnumerable<T> fileIds, IEnumerable<T> folderIds, IEnumerable<FileShareParams> share, bool notify, string sharingMessage)
+    public async IAsyncEnumerable<FileShareDto> SetSecurityInfoAsync<T>(List<T> fileIds, List<T> folderIds, List<FileShareParams> share, bool notify, string sharingMessage)
     {
-        if (share != null && share.Any())
+        if (share != null && share.Count != 0)
         {
             var list = await share.ToAsyncEnumerable().SelectAwait(async s => await fileShareParamsHelper.ToAceObjectAsync(s)).ToListAsync();
 

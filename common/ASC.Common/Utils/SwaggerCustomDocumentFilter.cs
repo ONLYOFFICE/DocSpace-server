@@ -107,6 +107,7 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
         { "Security / Login history", "Operations for getting login history." },
         { "Security / SMTP settings", "Operations for working with SMTP settings." },
         { "Settings / Authorization", "Operations for working with authorization settings." },
+        { "Security / Access to DevTools", "Operations for working with acess to devtools."},
         { "Settings / Common settings", "Operations for working with common settings." },
         { "Settings / Cookies", "Operations for working with cookies settings." },
         { "Settings / Custom Navigation", "Operations for working with custom navigation settings." },
@@ -129,6 +130,7 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
         { "Settings / Tips", "Operations for working with tip settings." },
         { "Settings / Webhooks", "Operations for working with webhook settings." },
         { "Settings / Webplugins", "Operations for working with webplugin settings." },
+        { "Settings / Access to DevTools", "Operations for working with acess to devtools."},
         { "Api keys", "Operations for working with api keys." }
     };
 

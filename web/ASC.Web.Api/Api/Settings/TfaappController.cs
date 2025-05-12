@@ -50,6 +50,8 @@ public class TfaappController(
     SecurityContext securityContext,
     IHttpContextAccessor httpContextAccessor,
     TenantManager tenantManager,
+    AuditEventsRepository auditEventsRepository,
+    UserSocketManager userSocketManager,
     IFusionCacheProvider cacheProvider)
     : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
 {
@@ -143,8 +145,9 @@ public class TfaappController(
         securityContext.Logout();
 
         var result = await tfaManager.ValidateAuthCodeAsync(user, inDto.Code);
-
-        var request = QueryHelpers.ParseQuery(_httpContextAccessor.HttpContext.Request.Headers["confirm"]);
+        await userSocketManager.UpdateUserAsync(userManager.GetUsers(authContext.CurrentAccount.ID));
+        
+        var request = QueryHelpers.ParseQuery(Request.Headers["confirm"]);
         var type = request.TryGetValue("type", out var value) ? (string)value : "";
         cookiesManager.ClearCookies(CookiesType.ConfirmKey, $"_{type}");
 
@@ -174,10 +177,11 @@ public class TfaappController(
         }
 
         if (tfaAppAuthSettingsHelper.IsVisibleSettings && await tfaAppAuthSettingsHelper.TfaEnabledForUserAsync(user.Id))
-        {
-            var confirmType = await TfaAppUserSettings.EnableForUserAsync(settingsManager, authContext.CurrentAccount.ID)
-                ? ConfirmType.TfaAuth
-                : ConfirmType.TfaActivation;
+        {            
+            var tfaExpired = await TfaAppUserSettings.TfaExpiredAndResetAsync(settingsManager, auditEventsRepository, user.Id);
+            var confirmType = tfaExpired || !await TfaAppUserSettings.EnableForUserAsync(settingsManager, authContext.CurrentAccount.ID)
+                ? ConfirmType.TfaActivation
+                : ConfirmType.TfaAuth;
 
             var (url, key) = commonLinkUtility.GetConfirmationUrlAndKey(user.Email, confirmType);
             await cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, key, true, $"_{confirmType}");
@@ -433,7 +437,8 @@ public class TfaappController(
 
         await TfaAppUserSettings.DisableForUserAsync(settingsManager, user.Id);
         messageService.Send(MessageAction.UserDisconnectedTfaApp, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
-
+        await userSocketManager.UpdateUserAsync(userManager.GetUsers(authContext.CurrentAccount.ID));
+        
         await cookiesManager.ResetUserCookieAsync(user.Id);
         if (isMe)
         {

@@ -65,7 +65,7 @@ public class SettingsController(CommonMethods commonMethods,
     /// <short>
     /// Get settings
     /// </short>
-    /// <path>apisystem/settings</path>
+    /// <path>apisystem/settings/get</path>
     [Tags("Settings")]
     [SwaggerResponse(200, "Settings", typeof(IActionResult))]
     [HttpGet("get")]

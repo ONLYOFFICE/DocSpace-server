@@ -68,7 +68,7 @@ public class SecurityController(
             inDto.Ids = WebItemManager.GetItemsAll().Select(i => i.ID.ToString());
         }
 
-        var subItemList = WebItemManager.GetItemsAll().Where(item => item.IsSubItem()).Select(i => i.ID.ToString());
+        var subItemList = WebItemManager.GetItemsAll().Where(item => item.IsSubItem()).Select(i => i.ID.ToString()).ToList();
 
         foreach (var r in inDto.Ids)
         {
@@ -126,11 +126,11 @@ public class SecurityController(
     [HttpGet("modules")]
     public object GetEnabledModules()
     {
-        var EnabledModules = webItemManagerSecurity.GetItems(WebZoneType.All)
+        var enabledModules = webItemManagerSecurity.GetItems(WebZoneType.All)
                                     .Where(item => !item.IsSubItem() && item.Visible)
             .Select(item => new { id = item.ProductClassName.HtmlEncode(), title = item.Name.HtmlEncode() });
 
-        return EnabledModules;
+        return enabledModules;
     }
 
     /// <summary>

@@ -67,12 +67,9 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "List of shared file information", typeof(IAsyncEnumerable<FileShareDto>))]
     [HttpGet("file/{fileId}/share")]
-    public async IAsyncEnumerable<FileShareDto> GetFileSecurityInfoAsync(FileIdRequestDto<T> inDto)
+    public IAsyncEnumerable<FileShareDto> GetFileSecurityInfoAsync(FileIdRequestDto<T> inDto)
     {
-        await foreach (var s in securityControllerHelper.GetFileSecurityInfoAsync(inDto.FileId))
-        {
-            yield return s;
-        }
+        return securityControllerHelper.GetFileSecurityInfoAsync(inDto.FileId);
     }
 
     /// <summary>
@@ -85,12 +82,9 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "List of shared file information", typeof(IAsyncEnumerable<FileShareDto>))]
     [HttpGet("folder/{folderId}/share")]
-    public async IAsyncEnumerable<FileShareDto> GetFolderSecurityInfoAsync(FolderIdRequestDto<T> inDto)
+    public IAsyncEnumerable<FileShareDto> GetFolderSecurityInfoAsync(FolderIdRequestDto<T> inDto)
     {
-        await foreach (var s in securityControllerHelper.GetFolderSecurityInfoAsync(inDto.FolderId))
-        {
-            yield return s;
-        }
+        return securityControllerHelper.GetFolderSecurityInfoAsync(inDto.FolderId);
     }
 
     /// <summary>
@@ -103,12 +97,9 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "List of shared file information: sharing rights, a user who has the access to the specified file, the file is locked by this user or not, this user is an owner of the specified file or not, this user can edit the access to the specified file or not", typeof(IAsyncEnumerable<FileShareDto>))]
     [HttpPut("file/{fileId}/share")]
-    public async IAsyncEnumerable<FileShareDto> SetFileSecurityInfoAsync(FileSecurityInfoSimpleRequestDto<T> inDto)
+    public IAsyncEnumerable<FileShareDto> SetFileSecurityInfoAsync(FileSecurityInfoSimpleRequestDto<T> inDto)
     {
-        await foreach (var s in securityControllerHelper.SetSecurityInfoAsync(new List<T> { inDto.FileId }, new List<T>(), inDto.SecurityInfoSimpe.Share, inDto.SecurityInfoSimpe.Notify, inDto.SecurityInfoSimpe.SharingMessage))
-        {
-            yield return s;
-        }
+        return securityControllerHelper.SetSecurityInfoAsync([inDto.FileId], [], inDto.SecurityInfoSimpe.Share, inDto.SecurityInfoSimpe.Notify, inDto.SecurityInfoSimpe.SharingMessage);
     }
 
     /// <summary>
@@ -123,7 +114,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     [HttpPut("folder/{folderId}/share")]
     public async IAsyncEnumerable<FileShareDto> SetFolderSecurityInfoAsync(FolderSecurityInfoSimpleRequestDto<T> inDto)
     {
-        await foreach (var s in securityControllerHelper.SetSecurityInfoAsync(new List<T>(), new List<T> { inDto.FolderId }, inDto.SecurityInfoSimpe.Share, inDto.SecurityInfoSimpe.Notify, inDto.SecurityInfoSimpe.SharingMessage))
+        await foreach (var s in securityControllerHelper.SetSecurityInfoAsync([], [inDto.FolderId], inDto.SecurityInfoSimpe.Share, inDto.SecurityInfoSimpe.Notify, inDto.SecurityInfoSimpe.SharingMessage))
         {
             yield return s;
         }
@@ -199,7 +190,6 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
         BruteForceLoginManager bruteForceLoginManager,
-        IHttpContextAccessor httpContextAccessor,
         ExternalLinkHelper externalLinkHelper,
         IMapper mapper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
@@ -330,7 +320,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     [HttpPost("share/{key}/password")]
     public async Task<ExternalShareDto> ApplyExternalSharePasswordAsync(ExternalShareRequestDto inDto)
     {
-        var ip = MessageSettings.GetIP(httpContextAccessor.HttpContext?.Request);
+        var ip = MessageSettings.GetIP(Request);
         
         await bruteForceLoginManager.IncrementAsync(inDto.Key, ip, true, FilesCommonResource.ErrorMessage_SharePasswordManyAttempts);
         

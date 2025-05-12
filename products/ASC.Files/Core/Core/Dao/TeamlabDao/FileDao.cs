@@ -1484,13 +1484,14 @@ internal class FileDao(
 
         return formRole;
     }
+    
     public async Task DeleteFormRolesAsync(int formId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var toDeleteRoles = await filesDbContext.DbFilesFormRoleMappingForDeleteAsync(tenantId, formId).ToListAsync();
 
-        if (toDeleteRoles.Any())
+        if (toDeleteRoles.Count != 0)
         {
             filesDbContext.RemoveRange(toDeleteRoles);
             await filesDbContext.SaveChangesAsync();
