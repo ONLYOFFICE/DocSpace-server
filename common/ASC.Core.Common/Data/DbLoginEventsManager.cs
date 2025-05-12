@@ -33,14 +33,14 @@ public class LoginEventsCache(IFusionCacheProvider cacheProvider)
     private readonly TimeSpan _expiration = TimeSpan.FromMinutes(10);
     private const string GuidLoginEvent = "F4D8BBF6-EB63-4781-B55E-5885EAB3D759";
 
-    public void Insert(DbLoginEvent loginEvent)
+    public async Task InsertAsync(DbLoginEvent loginEvent)
     {
-        _cache.Set(BuildKey(loginEvent.Id), loginEvent, _expiration);
+        await _cache.SetAsync(BuildKey(loginEvent.Id), loginEvent, _expiration);
     }
 
-    public DbLoginEvent Get(int id)
+    public async Task<DbLoginEvent> GetAsync(int id)
     {
-        return _cache.GetOrDefault<DbLoginEvent>(BuildKey(id));
+        return await _cache.GetOrDefaultAsync<DbLoginEvent>(BuildKey(id));
     }
 
     public async Task RemoveAsync(IEnumerable<int> ids)
@@ -85,7 +85,7 @@ public class DbLoginEventsManager(
             return null;
         }
 
-        var loginEvent = cache.Get(id);
+        var loginEvent = await cache.GetAsync(id);
         if (loginEvent != null)
         {
             return loginEvent;
@@ -96,7 +96,7 @@ public class DbLoginEventsManager(
 
         if (loginEvent != null)
         {
-            cache.Insert(loginEvent);
+            await cache.InsertAsync(loginEvent);
         }
 
         return loginEvent;

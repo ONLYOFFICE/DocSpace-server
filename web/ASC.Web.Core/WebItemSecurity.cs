@@ -34,11 +34,6 @@ public class WebItemSecurityCache(IFusionCacheProvider cacheProvider)
 {
     private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
 
-    public void ClearCache(int tenantId)
-    {
-        _cache.Remove(GetCacheKey(tenantId));
-    }
-
     private static string GetCacheKey(int tenantId)
     {
         return $"{tenantId}:webitemsecurity";
@@ -49,14 +44,14 @@ public class WebItemSecurityCache(IFusionCacheProvider cacheProvider)
         await _cache.RemoveByTagAsync(CacheExtention.GetWebItemSecurityTag(tenantId));
     }
 
-    public Dictionary<string, bool> Get(int tenantId)
+    public async Task<Dictionary<string, bool>> GetAsync(int tenantId)
     {
-        return _cache.GetOrDefault<Dictionary<string, bool>>(GetCacheKey(tenantId));
+        return await _cache.GetOrDefaultAsync<Dictionary<string, bool>>(GetCacheKey(tenantId));
     }
 
     public async Task<Dictionary<string, bool>> GetOrInsertAsync(int tenantId)
     {
-        var dic = Get(tenantId);
+        var dic = await GetAsync(tenantId);
         if (dic == null)
         {
             dic = new Dictionary<string, bool>();
@@ -140,7 +135,7 @@ public class WebItemSecurity(
             result = false;
         }
 
-        dic = webItemSecurityCache.Get(tenant.Id);
+        dic = await webItemSecurityCache.GetAsync(tenant.Id);
         if (dic != null)
         {
             lock (dic)

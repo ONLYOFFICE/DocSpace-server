@@ -32,9 +32,9 @@ public class FileMarkerCache(IFusionCacheProvider cacheProvider)
     private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
     private readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(10);
 
-    public T Get<T>(string key) where T : class
+    public async Task<T> GetAsync<T>(string key) where T : class
     {
-        return _cache.GetOrDefault<T>(key);
+        return await _cache.GetOrDefaultAsync<T>(key);
     }
 
     public async Task Insert(string key, object value)
@@ -696,7 +696,7 @@ public class FileMarker(
 
     public async Task<int> GetRootFoldersIdMarkedAsNewAsync<T>(T rootId)
     {
-        var fromCache = GetCountFromCache(rootId);
+        var fromCache = await GetCountFromCacheAsync(rootId);
         if (fromCache == -1)
         {
             var tagDao = daoFactory.GetTagDao<T>();
@@ -1243,10 +1243,10 @@ public class FileMarker(
         await fileMarkerCache.Insert(key, count.ToString());
     }
 
-    private int GetCountFromCache(object folderId)
+    private async Task<int> GetCountFromCacheAsync(object folderId)
     {
         var key = string.Format(CacheKeyFormat, authContext.CurrentAccount.ID, folderId);
-        var count = fileMarkerCache.Get<string>(key);
+        var count = await fileMarkerCache.GetAsync<string>(key);
 
         return count == null ? -1 : int.Parse(count);
     }
