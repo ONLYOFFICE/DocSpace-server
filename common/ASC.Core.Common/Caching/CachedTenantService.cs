@@ -292,7 +292,7 @@ class CachedTenantService : ITenantService
     {
         tenant = await _service.SaveTenantAsync(coreSettings, tenant);
         await _cacheNotifyItem.PublishAsync(new TenantCacheItem { TenantId = tenant.Id }, CacheNotifyAction.InsertOrUpdate);
-        await _cache.RemoveByTagAsync(CacheExtention.GetTenantTag(tenant.Id));
+        await _fusionCache.RemoveByTagAsync(CacheExtention.GetTenantTag(tenant.Id));
         return tenant;
     }
 
@@ -300,14 +300,14 @@ class CachedTenantService : ITenantService
     {
         await _service.RemoveTenantAsync(id, auto);
         await _cacheNotifyItem.PublishAsync(new TenantCacheItem { TenantId = id }, CacheNotifyAction.InsertOrUpdate);
-        await _cache.RemoveByTagAsync(CacheExtention.GetTenantTag(id));
+        await _fusionCache.RemoveByTagAsync(CacheExtention.GetTenantTag(id));
     }
 
     public async Task PermanentlyRemoveTenantAsync(int id)
     {
         await _service.PermanentlyRemoveTenantAsync(id);
         await _cacheNotifyItem.PublishAsync(new TenantCacheItem { TenantId = id }, CacheNotifyAction.Remove);
-        await _cache.RemoveByTagAsync(CacheExtention.GetTenantTag(id));
+        await _fusionCache.RemoveByTagAsync(CacheExtention.GetTenantTag(id));
     }
 
     public async Task<IEnumerable<TenantVersion>> GetTenantVersionsAsync()
@@ -319,7 +319,7 @@ class CachedTenantService : ITenantService
     {
         var cacheKey = GetCacheKey(tenant, key);
 
-        var data = await _cache.GetOrSetAsync<byte[]>(cacheKey, async (ctx, token) =>
+        var data = await _fusionCache.GetOrSetAsync<byte[]>(cacheKey, async (ctx, token) =>
         {
             var data = await _service.GetTenantSettingsAsync(tenant, key);
 
@@ -332,7 +332,7 @@ class CachedTenantService : ITenantService
     public byte[] GetTenantSettings(int tenant, string key)
     {
         var cacheKey = GetCacheKey(tenant, key);
-        var data = _cache.GetOrSet<byte[]>(cacheKey, (ctx, token) =>
+        var data = _fusionCache.GetOrSet<byte[]>(cacheKey, (ctx, token) =>
         {
             var data = _service.GetTenantSettings(tenant, key);
 
@@ -346,7 +346,7 @@ class CachedTenantService : ITenantService
     {
         await _service.SetTenantSettingsAsync(tenant, key, data);
         var tag = CacheExtention.GetTenantSettingsTag(tenant, key);
-        await _cache.RemoveByTagAsync(tag);
+        await _fusionCache.RemoveByTagAsync(tag);
     }
 
     private string GetCacheKey(int tenant, string key)
