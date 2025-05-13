@@ -27,13 +27,17 @@
 namespace ASC.Api.Documents;
 
 [ConstraintRoute("int")]
-public class PrivacyRoomControllerInternal(SettingsManager settingsManager,
-        EncryptionKeyPairDtoHelper encryptionKeyPairHelper, FileStorageService fileStorageService)
-    : PrivacyRoomController<int>(settingsManager, encryptionKeyPairHelper, fileStorageService);
+public class PrivacyRoomControllerInternal(
+    SettingsManager settingsManager,
+    EncryptionKeyPairDtoHelper encryptionKeyPairHelper,
+    SharingService sharingService)
+    : PrivacyRoomController<int>(settingsManager, encryptionKeyPairHelper, sharingService);
 
-public class PrivacyRoomControllerThirdparty(SettingsManager settingsManager,
-        EncryptionKeyPairDtoHelper encryptionKeyPairHelper, FileStorageService fileStorageService)
-    : PrivacyRoomController<string>(settingsManager, encryptionKeyPairHelper, fileStorageService);
+public class PrivacyRoomControllerThirdparty(
+    SettingsManager settingsManager,
+    EncryptionKeyPairDtoHelper encryptionKeyPairHelper,
+    SharingService sharingService)
+    : PrivacyRoomController<string>(settingsManager, encryptionKeyPairHelper, sharingService);
 
 /// <summary>
 /// Provides access to Private Room.
@@ -43,9 +47,10 @@ public class PrivacyRoomControllerThirdparty(SettingsManager settingsManager,
 [DefaultRoute]
 [ApiController]
 [ControllerName("privacyroom")]
-public abstract class PrivacyRoomController<T>(SettingsManager settingsManager,
-        EncryptionKeyPairDtoHelper encryptionKeyPairHelper,
-        FileStorageService fileStorageService)
+public abstract class PrivacyRoomController<T>(
+    SettingsManager settingsManager,
+    EncryptionKeyPairDtoHelper encryptionKeyPairHelper,
+    SharingService sharingService)
     : ControllerBase
 {
     /// <summary>
@@ -66,7 +71,7 @@ public abstract class PrivacyRoomController<T>(SettingsManager settingsManager,
             throw new SecurityException();
         }
 
-        return await encryptionKeyPairHelper.GetKeyPairAsync(inDto.FileId, fileStorageService);
+        return await encryptionKeyPairHelper.GetKeyPairAsync(inDto.FileId, sharingService);
     }
 }
 

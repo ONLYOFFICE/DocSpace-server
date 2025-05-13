@@ -92,6 +92,8 @@ public class CreateRoomTemplateOperation : DistributedTaskProgress
         var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
         var securityContext = scope.ServiceProvider.GetService<SecurityContext>();
         var fileStorageService = scope.ServiceProvider.GetService<FileStorageService>();
+        var sharingService = scope.ServiceProvider.GetService<SharingService>();
+        var folderOperationsService = scope.ServiceProvider.GetService<FolderOperationsService>();
         var roomLogoManager = scope.ServiceProvider.GetService<RoomLogoManager>();
         var daoFactory = scope.ServiceProvider.GetService<IDaoFactory>();
         var logger = scope.ServiceProvider.GetService<ILogger<CreateRoomTemplateOperation>>();
@@ -116,7 +118,7 @@ public class CreateRoomTemplateOperation : DistributedTaskProgress
                 };
             }
 
-            var template = await fileStorageService.CreateRoomTemplateAsync(_roomId, _title, new List<FileShareParams>(), _tags, dtoLogo, _cover, _color);
+            var template = await folderOperationsService.CreateRoomTemplateAsync(_roomId, _title, new List<FileShareParams>(), _tags, dtoLogo, _cover, _color);
             TemplateId = template.Id;
 
             List<AceWrapper> wrappers = null;
@@ -140,7 +142,7 @@ public class CreateRoomTemplateOperation : DistributedTaskProgress
                     Message = string.Empty
                 };
 
-                await fileStorageService.SetAceObjectAsync(aceCollection, false);
+                await sharingService.SetAceObjectAsync(aceCollection, false);
             }
 
             if (_copyLogo)

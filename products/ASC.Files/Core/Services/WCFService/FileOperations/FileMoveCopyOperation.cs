@@ -872,7 +872,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
         var webhookManager = scope.ServiceProvider.GetService<WebhookManager>();
         var globalStorage = scope.ServiceProvider.GetService<GlobalStore>();
-        var fileStorageService = scope.ServiceProvider.GetService<FileStorageService>();
+        var sharingService = scope.ServiceProvider.GetService<SharingService>();
         var securityContext = scope.ServiceProvider.GetService<SecurityContext>();
         var cachedFolderDao = scope.ServiceProvider.GetService<ICacheFolderDao<T>>();
 
@@ -1064,7 +1064,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     }
                                     if (toRoom?.FolderType == FolderType.FillingFormsRoom)
                                     {
-                                        var numberRoomMembers = await fileStorageService.GetPureSharesCountAsync(toFolder.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
+                                        var numberRoomMembers = await sharingService.GetPureSharesCountAsync(toFolder.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
                                         var properties = await fileDao.GetProperties(newFile.Id) ?? new EntryProperties<TTo> { FormFilling = new FormFillingProperties<TTo>() };
                                         properties.FormFilling.StartFilling = true;
                                         properties.FormFilling.OriginalFormId = newFile.Id;

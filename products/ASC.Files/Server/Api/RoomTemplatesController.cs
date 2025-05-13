@@ -31,9 +31,9 @@ public class RoomTemplatesController(IEventBus eventBus,
     AuthContext authContext, 
     TenantManager tenantManager, 
     FolderDtoHelper folderDtoHelper,
-    FileStorageService fileStorageService,
     FileDtoHelper fileDtoHelper,
-    RoomTemplatesWorker roomTemplatesWorker) : ApiControllerBase(folderDtoHelper, fileDtoHelper)
+    RoomTemplatesWorker roomTemplatesWorker,
+    SharingService sharingService) : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
 
     /// <summary>
@@ -136,7 +136,7 @@ public class RoomTemplatesController(IEventBus eventBus,
     [HttpGet("{id}/public")]
     public async Task<bool> IsPublic(PublicDto inDto)
     {
-        return await fileStorageService.IsPublicAsync(inDto.Id);
+        return await sharingService.IsPublicAsync(inDto.Id);
     }
 
 
@@ -149,7 +149,7 @@ public class RoomTemplatesController(IEventBus eventBus,
     [HttpPut("public")]
     public async Task SetPublic(SetPublicDto inDto)
     {
-        var shared = fileStorageService.GetPureSharesAsync(inDto.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "", 0, -1);
+        var shared = sharingService.GetPureSharesAsync(inDto.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "", 0, -1);
 
         var wrappers = new List<AceWrapper> { new() { Id = Constants.GroupEveryone.ID, Access = inDto.Public ? FileShare.Read : FileShare.None, SubjectType = SubjectType.Group } };
 
@@ -169,6 +169,6 @@ public class RoomTemplatesController(IEventBus eventBus,
             Message = string.Empty
         };
 
-        await fileStorageService.SetAceObjectAsync(aceCollection, false);
+        await sharingService.SetAceObjectAsync(aceCollection, false);
     }
 }

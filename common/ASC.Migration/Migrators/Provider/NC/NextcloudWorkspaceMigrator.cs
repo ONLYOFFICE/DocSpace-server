@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.Core;
+
 using ASCShare = ASC.Files.Core.Security.FileShare;
 
 namespace ASC.Migration.Core.Migrators.Provider.NC;
@@ -37,11 +39,13 @@ public class NextcloudWorkspaceMigrator : Migrator
     private readonly Regex _emailRegex = new(@"(\S*@\S*\.\S*)");
     private readonly Regex _phoneRegex = new(@"(\+?\d+)");
 
-    public NextcloudWorkspaceMigrator(SecurityContext securityContext,
+    public NextcloudWorkspaceMigrator(
+        SecurityContext securityContext,
         UserManager userManager,
         TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
         QuotaSocketManager quotaSocketManager,
-        FileStorageService fileStorageService,
+        FolderOperationsService folderOperationsService,
+        SharingService sharingService,
         GlobalFolderHelper globalFolderHelper,
         IServiceProvider serviceProvider,
         IDaoFactory daoFactory,
@@ -50,14 +54,14 @@ public class NextcloudWorkspaceMigrator : Migrator
         AuthContext authContext,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         UserManagerWrapper userManagerWrapper,
-        UserSocketManager socketManager) : base(securityContext, userManager, tenantQuotaFeatureStatHelper, quotaSocketManager, fileStorageService, globalFolderHelper, serviceProvider, daoFactory, entryManager, migrationLogger, authContext, displayUserSettingsHelper, userManagerWrapper, socketManager)
+        UserSocketManager socketManager) : base(securityContext, userManager, tenantQuotaFeatureStatHelper, quotaSocketManager, folderOperationsService, sharingService, globalFolderHelper, serviceProvider, daoFactory, entryManager, migrationLogger, authContext, displayUserSettingsHelper, userManagerWrapper, socketManager)
     {
         MigrationInfo = new MigrationInfo { Name = "Nextcloud" };
     }
 
     public override async Task InitAsync(string path, OperationType operation, CancellationToken cancellationToken)
     {
-        MigrationLogger.Init();
+        _migrationLogger.Init();
         _cancellationToken = cancellationToken;
 
         MigrationInfo.Operation = operation;
@@ -186,7 +190,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                         }
                         else
                         {
-                            var ascUser = await UserManager.GetUserByEmailAsync(user.Value.Info.Email);
+                            var ascUser = await _userManager.GetUserByEmailAsync(user.Value.Info.Email);
                             if (ascUser.Status == EmployeeStatus.Terminated)
                             {
                                 continue;
@@ -203,7 +207,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                     }
                     catch (Exception ex)
                     {
-                        Log(string.Format(MigrationResource.CanNotParseUser, user.Value.Info.DisplayUserName(DisplayUserSettingsHelper)), ex);
+                        Log(string.Format(MigrationResource.CanNotParseUser, user.Value.Info.DisplayUserName(_displayUserSettingsHelper)), ex);
                     }
                 }
             }
@@ -283,7 +287,7 @@ public class NextcloudWorkspaceMigrator : Migrator
         {
             var userId = account.Split(',').First().Trim('\'');
 
-            usersData.Add(userId, new MigrationUser(DisplayUserSettingsHelper)
+            usersData.Add(userId, new MigrationUser(_displayUserSettingsHelper)
             {
                 Info = new UserInfo(),
                 Storage = new MigrationStorage()

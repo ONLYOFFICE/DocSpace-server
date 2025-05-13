@@ -1,5 +1,6 @@
 namespace ASC.Files.Core;
 
+[Scope]
 public class FileOperationsService(
     Global global,
     GlobalStore globalStore,

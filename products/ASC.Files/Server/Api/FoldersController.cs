@@ -38,7 +38,9 @@ public class FoldersControllerInternal(
     PermissionContext permissionContext,
     FileShareDtoHelper fileShareDtoHelper,
     HistoryApiHelper historyApiHelper,
-    FormFillingReportCreator formFillingReportCreator)
+    FormFillingReportCreator formFillingReportCreator,
+    FolderOperationsService folderOperationsService,
+    SharingService sharingService)
     : FoldersController<int>(
         breadCrumbsManager,
         folderContentDtoHelper,
@@ -48,7 +50,9 @@ public class FoldersControllerInternal(
         folderDtoHelper,
         fileDtoHelper,
         permissionContext,
-        fileShareDtoHelper)
+        fileShareDtoHelper,
+        folderOperationsService,
+        sharingService)
 {
     /// <summary>
     /// Returns the activity history of a folder with a specified identifier.
@@ -94,7 +98,9 @@ public class FoldersControllerThirdparty(
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     PermissionContext permissionContext,
-    FileShareDtoHelper fileShareDtoHelper)
+    FileShareDtoHelper fileShareDtoHelper,
+    FolderOperationsService folderOperationsService,
+    SharingService sharingService)
     : FoldersController<string>(breadCrumbsManager,
         folderContentDtoHelper,
         fileStorageService,
@@ -103,7 +109,9 @@ public class FoldersControllerThirdparty(
         folderDtoHelper,
         fileDtoHelper,
         permissionContext,
-        fileShareDtoHelper);
+        fileShareDtoHelper,
+        folderOperationsService,
+        sharingService);
 
 public abstract class FoldersController<T>(
     BreadCrumbsManager breadCrumbsManager,
@@ -114,7 +122,9 @@ public abstract class FoldersController<T>(
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     PermissionContext permissionContext,
-    FileShareDtoHelper fileShareDtoHelper)
+    FileShareDtoHelper fileShareDtoHelper,
+    FolderOperationsService folderOperationsService,
+    SharingService sharingService)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -127,7 +137,7 @@ public abstract class FoldersController<T>(
     [HttpPost("folder/{folderId}")]
     public async Task<FolderDto<T>> CreateFolderAsync(CreateFolderRequestDto<T> inDto)
     {
-        var folder = await fileStorageService.CreateFolderAsync(inDto.FolderId, inDto.Folder.Title);
+        var folder = await folderOperationsService.CreateFolderAsync(inDto.FolderId, inDto.Folder.Title);
 
         return await _folderDtoHelper.GetAsync(folder);
     }
@@ -207,7 +217,7 @@ public abstract class FoldersController<T>(
     [HttpGet("folder/{folderId}")]
     public async Task<FolderDto<T>> GetFolderInfoAsync(FolderIdRequestDto<T> inDto)
     {        
-        var folder = await fileStorageService.GetFolderAsync(inDto.FolderId).NotFoundIfNull("Folder not found");
+        var folder = await folderOperationsService.GetFolderAsync(inDto.FolderId).NotFoundIfNull("Folder not found");
 
         return await _folderDtoHelper.GetAsync(folder);
     }
@@ -244,7 +254,7 @@ public abstract class FoldersController<T>(
     [HttpGet("{folderId}/subfolders")]
     public async IAsyncEnumerable<FileEntryDto> GetFoldersAsync(FolderIdRequestDto<T> inDto)
     {
-        var folders = await fileStorageService.GetFoldersAsync(inDto.FolderId);
+        var folders = await folderOperationsService.GetFoldersAsync(inDto.FolderId);
         foreach (var folder in folders)
         {
             yield return await GetFileEntryWrapperAsync(folder);
@@ -282,7 +292,7 @@ public abstract class FoldersController<T>(
     [HttpPut("folder/{folderId}")]
     public async Task<FolderDto<T>> RenameFolderAsync(CreateFolderRequestDto<T> inDto)
     {
-        var folder = await fileStorageService.FolderRenameAsync(inDto.FolderId, inDto.Folder.Title);
+        var folder = await folderOperationsService.FolderRenameAsync(inDto.FolderId, inDto.Folder.Title);
 
         return await _folderDtoHelper.GetAsync(folder);
     }
@@ -315,7 +325,7 @@ public abstract class FoldersController<T>(
     [HttpGet("folder/{id}/link")]
     public async Task<FileShareDto> GetFolderPrimaryExternalLinkAsync(FolderPrimaryIdRequestDto<T> inDto)
     {
-        var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(inDto.Id, FileEntryType.Folder);
+        var linkAce = await sharingService.GetPrimaryExternalLinkAsync(inDto.Id, FileEntryType.Folder);
 
         return await fileShareDtoHelper.Get(linkAce);
     }

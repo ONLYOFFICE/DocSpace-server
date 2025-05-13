@@ -42,7 +42,8 @@ public class SecurityControllerHelper(
     IEventBus eventBus,
     TenantManager tenantManager,
     AuthContext authContext,
-    FileOperationsService fileOperationsService)
+    FileOperationsService fileOperationsService,
+    SharingService sharingService)
     : FilesHelperBase(
         filesSettingsHelper,
         fileUploader,
@@ -70,7 +71,7 @@ public class SecurityControllerHelper(
 
     public async IAsyncEnumerable<FileShareDto> GetSecurityInfoAsync<T>(IEnumerable<T> fileIds, IEnumerable<T> folderIds)
     {
-        var fileShares = await _fileStorageService.GetSharedInfoAsync(fileIds, folderIds);
+        var fileShares = await sharingService.GetSharedInfoAsync(fileIds, folderIds);
 
         foreach (var fileShareDto in fileShares)
         {
@@ -80,7 +81,7 @@ public class SecurityControllerHelper(
 
     public async Task<bool> RemoveSecurityInfoAsync<T>(List<T> fileIds, List<T> folderIds)
     {
-        await _fileStorageService.RemoveAceAsync(fileIds, folderIds);
+        await sharingService.RemoveAceAsync(fileIds, folderIds);
 
         return true;
     }
@@ -99,7 +100,7 @@ public class SecurityControllerHelper(
                 Message = sharingMessage
             };
 
-            await _fileStorageService.SetAceObjectAsync(aceCollection, notify);
+            await sharingService.SetAceObjectAsync(aceCollection, notify);
         }
 
         await foreach (var s in GetSecurityInfoAsync(fileIds, folderIds))

@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.Core;
+
 namespace ASC.Migration.Core.Migrators.Provider;
 
 [Transient(typeof(Migrator))]
@@ -37,7 +39,8 @@ public class WorkspaceMigrator : Migrator
         UserManager userManager,
         TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
         QuotaSocketManager quotaSocketManager, 
-        FileStorageService fileStorageService,
+        FolderOperationsService folderOperationsService,
+        SharingService sharingService,
         GlobalFolderHelper globalFolderHelper, 
         IServiceProvider serviceProvider,
         IDaoFactory daoFactory, 
@@ -46,14 +49,14 @@ public class WorkspaceMigrator : Migrator
         AuthContext authContext, 
         DisplayUserSettingsHelper displayUserSettingsHelper,
         UserManagerWrapper userManagerWrapper,
-        UserSocketManager socketManager) : base(securityContext, userManager, tenantQuotaFeatureStatHelper, quotaSocketManager, fileStorageService, globalFolderHelper, serviceProvider, daoFactory, entryManager, migrationLogger, authContext, displayUserSettingsHelper, userManagerWrapper, socketManager)
+        UserSocketManager socketManager) : base(securityContext, userManager, tenantQuotaFeatureStatHelper, quotaSocketManager, folderOperationsService, sharingService, globalFolderHelper, serviceProvider, daoFactory, entryManager, migrationLogger, authContext, displayUserSettingsHelper, userManagerWrapper, socketManager)
     {
         MigrationInfo = new MigrationInfo { Name = "Workspace" };
     }
 
     public override async Task InitAsync(string path, OperationType operation, CancellationToken cancellationToken)
     {
-        MigrationLogger.Init();
+        _migrationLogger.Init();
         _cancellationToken = cancellationToken;
 
         MigrationInfo.Operation = operation;
@@ -220,7 +223,7 @@ public class WorkspaceMigrator : Migrator
                 continue;
             }
             var key = row["id"].ToString();
-            var u = new MigrationUser(DisplayUserSettingsHelper)
+            var u = new MigrationUser(_displayUserSettingsHelper)
             {
                 Info = new UserInfo
                 {
@@ -270,7 +273,7 @@ public class WorkspaceMigrator : Migrator
 
             u.Storage = new MigrationStorage { Type = FolderType.USER };
 
-            var ascUser = await UserManager.GetUserByEmailAsync(u.Info.Email);
+            var ascUser = await _userManager.GetUserByEmailAsync(u.Info.Email);
             if (ascUser.Status == EmployeeStatus.Terminated)
             {
                 continue;

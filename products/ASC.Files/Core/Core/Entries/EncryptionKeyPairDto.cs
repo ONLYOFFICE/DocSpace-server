@@ -98,7 +98,7 @@ public class EncryptionKeyPairDtoHelper(UserManager userManager,
         return keyPair;
     }
 
-    public async Task<IEnumerable<EncryptionKeyPairDto>> GetKeyPairAsync<T>(T fileId, FileStorageService FileStorageService)
+    public async Task<IEnumerable<EncryptionKeyPairDto>> GetKeyPairAsync<T>(T fileId, SharingService sharingService)
     {
         var fileDao = daoFactory.GetFileDao<T>();
         var folderDao = daoFactory.GetFolderDao<T>();
@@ -124,7 +124,7 @@ public class EncryptionKeyPairDtoHelper(UserManager userManager,
             throw new NotSupportedException();
         }
 
-        var tmpFiles = await FileStorageService.GetSharedInfoAsync(new List<T> { fileId }, new List<T>());
+        var tmpFiles = await sharingService.GetSharedInfoAsync(new List<T> { fileId }, new List<T>());
         var fileShares = tmpFiles.ToList();
         fileShares = fileShares.Where(share => !share.SubjectGroup && share.Access == FileShare.ReadWrite).ToList();
 

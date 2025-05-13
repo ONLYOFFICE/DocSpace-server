@@ -30,6 +30,7 @@ namespace ASC.Files.Api;
 public class FilesControllerInternal(
     FilesControllerHelper filesControllerHelper,
     FileStorageService fileStorageService,
+    SharingService sharingService,
     FileDeleteOperationsManager fileOperationsManager,
     FileOperationDtoHelper fileOperationDtoHelper,
     FolderDtoHelper folderDtoHelper,
@@ -38,8 +39,10 @@ public class FilesControllerInternal(
     FileShareDtoHelper fileShareDtoHelper,
     HistoryApiHelper historyApiHelper,
     IFusionCache hybridCache)
-    : FilesController<int>(filesControllerHelper,
+    : FilesController<int>(
+        filesControllerHelper,
         fileStorageService,
+        sharingService,
         fileOperationsManager,
         fileOperationDtoHelper,
         folderDtoHelper,
@@ -70,6 +73,7 @@ public class FilesControllerInternal(
 public class FilesControllerThirdparty(
     FilesControllerHelper filesControllerHelper,
     FileStorageService fileStorageService,
+    SharingService sharingService,
     FileDeleteOperationsManager fileOperationsManager,
     FileOperationDtoHelper fileOperationDtoHelper,
     FolderDtoHelper folderDtoHelper,
@@ -77,8 +81,10 @@ public class FilesControllerThirdparty(
     ApiContext apiContext,
     FileShareDtoHelper fileShareDtoHelper,
     IFusionCache hybridCache)
-    : FilesController<string>(filesControllerHelper,
+    : FilesController<string>(
+        filesControllerHelper,
         fileStorageService,
+        sharingService,
         fileOperationsManager,
         fileOperationDtoHelper,
         folderDtoHelper,
@@ -89,14 +95,15 @@ public class FilesControllerThirdparty(
 
 public abstract class FilesController<T>(
     FilesControllerHelper filesControllerHelper,
-        FileStorageService fileStorageService,
-        FileDeleteOperationsManager fileOperationsManager,
-        FileOperationDtoHelper fileOperationDtoHelper,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper,
-        ApiContext apiContext,
-        FileShareDtoHelper fileShareDtoHelper,
-        IFusionCache hybridCache)
+    FileStorageService fileStorageService,
+    SharingService sharingService,
+    FileDeleteOperationsManager fileOperationsManager,
+    FileOperationDtoHelper fileOperationDtoHelper,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper,
+    ApiContext apiContext,
+    FileShareDtoHelper fileShareDtoHelper,
+    IFusionCache hybridCache)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -447,7 +454,7 @@ public abstract class FilesController<T>(
     [HttpPost("file/{id}/link")]
     public async Task<FileShareDto> CreatePrimaryExternalLinkAsync(FileLinkRequestDto<T> inDto)
     {
-        var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(inDto.Id, FileEntryType.File, inDto.File.Access, expirationDate: inDto.File.ExpirationDate, requiredAuth: inDto.File.Internal, allowUnlimitedDate: true);
+        var linkAce = await sharingService.GetPrimaryExternalLinkAsync(inDto.Id, FileEntryType.File, inDto.File.Access, expirationDate: inDto.File.ExpirationDate, requiredAuth: inDto.File.Internal, allowUnlimitedDate: true);
         return await fileShareDtoHelper.Get(linkAce);
     }
 
@@ -464,7 +471,7 @@ public abstract class FilesController<T>(
     [HttpGet("file/{id}/link")]
     public async Task<FileShareDto> GetFilePrimaryExternalLinkAsync(FilePrimaryIdRequestDto<T> inDto)
     {
-        var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(inDto.Id, FileEntryType.File);
+        var linkAce = await sharingService.GetPrimaryExternalLinkAsync(inDto.Id, FileEntryType.File);
 
         return await fileShareDtoHelper.Get(linkAce);
     }
@@ -521,11 +528,11 @@ public abstract class FilesController<T>(
         var offset = Convert.ToInt32(apiContext.StartIndex);
         var count = Convert.ToInt32(apiContext.Count);
 
-        var totalCount = await fileStorageService.GetPureSharesCountAsync(inDto.Id, FileEntryType.File, ShareFilterType.ExternalLink, null);
+        var totalCount = await sharingService.GetPureSharesCountAsync(inDto.Id, FileEntryType.File, ShareFilterType.ExternalLink, null);
 
         apiContext.SetCount(Math.Min(totalCount - offset, count)).SetTotalCount(totalCount);
 
-        await foreach (var ace in fileStorageService.GetPureSharesAsync(inDto.Id, FileEntryType.File, ShareFilterType.ExternalLink, null, offset, count))
+        await foreach (var ace in sharingService.GetPureSharesAsync(inDto.Id, FileEntryType.File, ShareFilterType.ExternalLink, null, offset, count))
         {
             yield return await fileShareDtoHelper.Get(ace);
         }
@@ -541,7 +548,7 @@ public abstract class FilesController<T>(
     [HttpPut("file/{id}/links")]
     public async Task<FileShareDto> SetExternalLinkAsync(FileLinkRequestDto<T> inDto)
     {
-        var linkAce = await fileStorageService.SetExternalLinkAsync(inDto.Id, FileEntryType.File, inDto.File.LinkId, null, inDto.File.Access, requiredAuth: inDto.File.Internal, 
+        var linkAce = await sharingService.SetExternalLinkAsync(inDto.Id, FileEntryType.File, inDto.File.LinkId, null, inDto.File.Access, requiredAuth: inDto.File.Internal, 
             primary: inDto.File.Primary, expirationDate: inDto.File.ExpirationDate);
 
         return linkAce is not null ? await fileShareDtoHelper.Get(linkAce) : null;

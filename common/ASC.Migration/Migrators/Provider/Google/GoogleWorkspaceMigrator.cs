@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.Core;
+
 using ASCShare = ASC.Files.Core.Security.FileShare;
 
 namespace ASC.Migration.Core.Migrators.Provider.Google;
@@ -45,11 +47,13 @@ public class GoogleWorkspaceMigrator : Migrator
     private readonly Regex _infoVersionFile = new(@"-info(\([\d]+\))\.json");
     private readonly Regex _versionRegex = new(@"(\([\d]+\))");
 
-    public GoogleWorkspaceMigrator(SecurityContext securityContext,
+    public GoogleWorkspaceMigrator(
+        SecurityContext securityContext,
         UserManager userManager,
         TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
         QuotaSocketManager quotaSocketManager,
-        FileStorageService fileStorageService,
+        FolderOperationsService folderOperationsService,
+        SharingService sharingService,
         GlobalFolderHelper globalFolderHelper,
         IServiceProvider serviceProvider,
         IDaoFactory daoFactory,
@@ -58,14 +62,14 @@ public class GoogleWorkspaceMigrator : Migrator
         AuthContext authContext,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         UserManagerWrapper userManagerWrapper,
-        UserSocketManager socketManager) : base(securityContext, userManager, tenantQuotaFeatureStatHelper, quotaSocketManager, fileStorageService, globalFolderHelper, serviceProvider, daoFactory, entryManager, migrationLogger, authContext, displayUserSettingsHelper, userManagerWrapper, socketManager)
+        UserSocketManager socketManager) : base(securityContext, userManager, tenantQuotaFeatureStatHelper, quotaSocketManager, folderOperationsService, sharingService, globalFolderHelper, serviceProvider, daoFactory, entryManager, migrationLogger, authContext, displayUserSettingsHelper, userManagerWrapper, socketManager)
     {
         MigrationInfo = new MigrationInfo { Name = "GoogleWorkspace" };
     }
 
     public override async Task InitAsync(string path, OperationType operation, CancellationToken cancellationToken)
     {
-        MigrationLogger.Init();
+        _migrationLogger.Init();
         _cancellationToken = cancellationToken;
 
         MigrationInfo.Operation = operation;
@@ -151,7 +155,7 @@ public class GoogleWorkspaceMigrator : Migrator
                     }
                     else
                     {
-                        var ascUser = await UserManager.GetUserByEmailAsync(user.Info.Email);
+                        var ascUser = await _userManager.GetUserByEmailAsync(user.Info.Email);
                         if (ascUser.Status == EmployeeStatus.Terminated)
                         {
                             continue;
@@ -238,7 +242,7 @@ public class GoogleWorkspaceMigrator : Migrator
 
     private MigrationUser ParseUser(string tmpFolder)
     {
-        var user = new MigrationUser(DisplayUserSettingsHelper) { Info = new UserInfo() };
+        var user = new MigrationUser(_displayUserSettingsHelper) { Info = new UserInfo() };
 
         ParseRootHtml(tmpFolder, user);
         ParseProfile(tmpFolder, user);
