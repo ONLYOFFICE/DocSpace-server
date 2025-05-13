@@ -429,15 +429,13 @@ public class DbTenantService(
     {
         var postfix = auto ? "_auto_deleted" : "_deleted";
 
-        var alias = await tenantDbContext.GetAliasAsync(id);
-
-        var count = await tenantDbContext.TenantsCountAsync(alias + postfix);
-
         var tenant = await tenantDbContext.TenantAsync(id);
 
         if (tenant != null)
         {
-            tenant.Alias = alias + postfix + (count > 0 ? count.ToString() : "");
+            var count = await tenantDbContext.TenantsCountAsync(tenant.Alias + postfix);
+
+            tenant.Alias = tenant.Alias + postfix + (count > 0 ? count.ToString() : "");
             tenant.Status = TenantStatus.RemovePending;
             tenant.StatusChanged = DateTime.UtcNow;
             tenant.LastModified = DateTime.UtcNow;
