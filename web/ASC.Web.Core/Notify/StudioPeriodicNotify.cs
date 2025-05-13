@@ -336,7 +336,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                             if (nowDate >= startDateToRemoveUnusedPortals && nowDate.AddDays(-7).Day == tenant.CreationDateTime.Day)
                             {
                                 await securityContext.AuthenticateMeWithoutCookieAsync(tenant.OwnerId);
-                                await identityClient.DeleteTenantClientsAsync();
+                                await identityClient.DeleteTenantClientsAsync(false);
                                 await tenantManager.RemoveTenantAsync(tenant.Id, true);
 
                                 if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
@@ -427,7 +427,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                     else if (tariff.State == TariffState.NotPaid && dueDateIsNotMax && dueDate.AddMonths(6).AddDays(7) <= nowDate)
                     {
                         await securityContext.AuthenticateMeWithoutCookieAsync(tenant.OwnerId);
-                        await identityClient.DeleteTenantClientsAsync();
+                        await identityClient.DeleteTenantClientsAsync(false);
                         await tenantManager.RemoveTenantAsync(tenant.Id, true);
 
                         if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
