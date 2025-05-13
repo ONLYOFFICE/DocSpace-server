@@ -114,6 +114,6 @@ public class CacheTest(
 
     private void ClearIfModifiedSince()
     {
-        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation("If-Modified-Since", "");
+        _filesClient.DefaultRequestHeaders.Remove("If-Modified-Since");
     }
 }
