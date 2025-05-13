@@ -45,7 +45,8 @@ public class UploadControllerHelper(
     WebhookManager webhookManager,
     IEventBus eventBus,
     AuthContext authContext,
-    Global global)
+    Global global,
+    FileOperationsService fileOperationsService)
     : FilesHelperBase(
         filesSettingsHelper,
         fileUploader,
@@ -58,7 +59,8 @@ public class UploadControllerHelper(
         daoFactory,
         eventBus,
         tenantManager,
-        authContext)
+        authContext,
+        fileOperationsService)
     {
     public async Task<object> CreateEditSessionAsync<T>(T fileId, long fileSize)
     {

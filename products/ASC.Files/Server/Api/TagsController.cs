@@ -27,22 +27,28 @@
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
-public class TagsControllerInternal(FileStorageService fileStorageService,
+public class TagsControllerInternal(
+        FileStorageService fileStorageService,
         EntryManager entryManager,
         FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
-    : TagsController<int>(fileStorageService, entryManager, folderDtoHelper, fileDtoHelper);
+        FileDtoHelper fileDtoHelper,
+        FileOperationsService fileOperationsService)
+    : TagsController<int>(fileStorageService, entryManager, folderDtoHelper, fileDtoHelper, fileOperationsService);
 
-public class TagsControllerThirdparty(FileStorageService fileStorageService,
+public class TagsControllerThirdparty(
+        FileStorageService fileStorageService,
         EntryManager entryManager,
         FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
-    : TagsController<string>(fileStorageService, entryManager, folderDtoHelper, fileDtoHelper);
+        FileDtoHelper fileDtoHelper,
+        FileOperationsService fileOperationsService)
+    : TagsController<string>(fileStorageService, entryManager, folderDtoHelper, fileDtoHelper, fileOperationsService);
 
-public abstract class TagsController<T>(FileStorageService fileStorageService,
+public abstract class TagsController<T>(
+        FileStorageService fileStorageService,
         EntryManager entryManager,
         FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
+        FileDtoHelper fileDtoHelper,
+        FileOperationsService fileOperationsService)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -56,7 +62,7 @@ public abstract class TagsController<T>(FileStorageService fileStorageService,
     [HttpPost("file/{fileId}/recent")]
     public async Task<FileDto<T>> AddToRecentAsync(FileIdRequestDto<T> inDto)
     {
-        var file = await fileStorageService.GetFileAsync(inDto.FileId, -1).NotFoundIfNull("File not found");
+        var file = await fileOperationsService.GetFileAsync(inDto.FileId, -1).NotFoundIfNull("File not found");
 
         await entryManager.MarkAsRecent(file);
 

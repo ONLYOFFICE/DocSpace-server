@@ -46,7 +46,8 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         IDaoFactory daoFactory,
         IEventBus eventBus,
         TenantManager tenantManager,
-        AuthContext authContext)
+        AuthContext authContext,
+        FileOperationsService fileOperationsService)
     : FilesHelperBase(filesSettingsHelper,
             fileUploader,
             socketManager,
@@ -58,7 +59,8 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
             daoFactory,
             eventBus,
             tenantManager,
-            authContext)
+            authContext,
+            fileOperationsService)
     {
     private readonly ILogger _logger = logger;
 
@@ -75,7 +77,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
 
     public async Task<bool> isFormPDF<T>(T fileId)
     {
-        var file = await _fileStorageService.GetFileAsync(fileId, -1);
+        var file = await _fileOperationsService.GetFileAsync(fileId, -1);
         var fileType = FileUtility.GetFileTypeByFileName(file.Title);
 
         if (fileType == FileType.Pdf)
@@ -87,7 +89,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
 
     public async Task<string> GetPresignedUri<T>(T fileId)
     {
-        var file = await _fileStorageService.GetFileAsync(fileId, -1);
+        var file = await _fileOperationsService.GetFileAsync(fileId, -1);
         return pathProvider.GetFileStreamUrl(file);
     }
 
@@ -137,15 +139,15 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
 
         if (templateId.ValueKind == JsonValueKind.Number)
         {
-            file = await _fileStorageService.CreateNewFileAsync(new FileModel<T, int> { ParentId = folderId, Title = title, TemplateId = templateId.GetInt32() }, enableExternalExt);
+            file = await _fileOperationsService.CreateNewFileAsync(new FileModel<T, int> { ParentId = folderId, Title = title, TemplateId = templateId.GetInt32() }, enableExternalExt);
         }
         else if (templateId.ValueKind == JsonValueKind.String)
         {
-            file = await _fileStorageService.CreateNewFileAsync(new FileModel<T, string> { ParentId = folderId, Title = title, TemplateId = templateId.GetString() }, enableExternalExt);
+            file = await _fileOperationsService.CreateNewFileAsync(new FileModel<T, string> { ParentId = folderId, Title = title, TemplateId = templateId.GetString() }, enableExternalExt);
         }
         else
         {
-            file = await _fileStorageService.CreateNewFileAsync(new FileModel<T, int> { ParentId = folderId, Title = title, TemplateId = 0, FormId = formId }, enableExternalExt);
+            file = await _fileOperationsService.CreateNewFileAsync(new FileModel<T, int> { ParentId = folderId, Title = title, TemplateId = 0, FormId = formId }, enableExternalExt);
         }
 
         return await _fileDtoHelper.GetAsync(file);
@@ -240,7 +242,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
 
         if (!string.IsNullOrEmpty(title))
         {
-            file = await _fileStorageService.FileRenameAsync(fileId, title);
+            file = await _fileOperationsService.FileRenameAsync(fileId, title);
         }
 
         if (lastVersion <= 0)
@@ -271,7 +273,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
     {
         try
         {
-            var resultFile = await _fileStorageService.UpdateFileStreamAsync(fileId, file, fileExtension, encrypted, forcesave);
+            var resultFile = await _fileOperationsService.UpdateFileStreamAsync(fileId, file, fileExtension, encrypted, forcesave);
 
             return await _fileDtoHelper.GetAsync(resultFile);
         }
@@ -283,14 +285,13 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
 
     public async Task<FileDto<TTemplate>> CopyFileAsAsync<T, TTemplate>(T fileId, TTemplate destFolderId, string destTitle, string password = null, bool toForm = false)
     {
-        var service = serviceProvider.GetService<FileStorageService>();
-        var file = await _fileStorageService.GetFileAsync(fileId, -1);
+        var file = await _fileOperationsService.GetFileAsync(fileId, -1);
         var ext = FileUtility.GetFileExtension(file.Title);
         var destExt = FileUtility.GetFileExtension(destTitle);
 
         if (ext == destExt)
         {
-            var newFile = await service.CreateNewFileAsync(new FileModel<TTemplate, T> { ParentId = destFolderId, Title = destTitle, TemplateId = fileId }, true);
+            var newFile = await _fileOperationsService.CreateNewFileAsync(new FileModel<TTemplate, T> { ParentId = destFolderId, Title = destTitle, TemplateId = fileId }, true);
 
             return await _fileDtoHelper.GetAsync(newFile);
         }

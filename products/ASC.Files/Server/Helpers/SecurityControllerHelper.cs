@@ -41,7 +41,8 @@ public class SecurityControllerHelper(
     IDaoFactory daoFactory,
     IEventBus eventBus,
     TenantManager tenantManager,
-    AuthContext authContext)
+    AuthContext authContext,
+    FileOperationsService fileOperationsService)
     : FilesHelperBase(
         filesSettingsHelper,
         fileUploader,
@@ -54,7 +55,8 @@ public class SecurityControllerHelper(
         daoFactory,
         eventBus,
         tenantManager,
-        authContext)
+        authContext,
+        fileOperationsService)
 {
     public IAsyncEnumerable<FileShareDto> GetFileSecurityInfoAsync<T>(T fileId)
     {

@@ -68,17 +68,17 @@ public class FillingFormResultDtoHelper(
     UserManager userManager,
     IDaoFactory daoFactory,
     FileDtoHelper fileDtoHelper,
-    FileStorageService fileStorageService,
     EmployeeFullDtoHelper employeeFullDtoHelper,
     ExternalShare externalShare,
     FileSharing fileSharing,
-    AuthContext authContext)
+    AuthContext authContext,
+    FileOperationsService fileOperationsService)
 {
     public async Task<FillingFormResultDto<T>> GetAsync<T>(T completedFormId)
     {
         var fileDao = daoFactory.GetFileDao<T>();
 
-        var file = await fileStorageService.GetFileAsync(completedFormId, -1);
+        var file = await fileOperationsService.GetFileAsync(completedFormId, -1);
 
         var linkId = await externalShare.GetLinkIdAsync();
         var securityDao = daoFactory.GetSecurityDao<int>();
@@ -92,7 +92,7 @@ public class FillingFormResultDtoHelper(
             if (properties is { FormFilling: not null })
             {
 
-                var originalForm = await fileStorageService.GetFileAsync(properties.FormFilling.OriginalFormId, -1);
+                var originalForm = await fileOperationsService.GetFileAsync(properties.FormFilling.OriginalFormId, -1);
                 var manager = await userManager.GetUsersAsync(originalForm.CreateBy);
 
                 var folderDao = daoFactory.GetFolderDao<T>();
