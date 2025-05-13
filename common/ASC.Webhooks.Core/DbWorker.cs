@@ -102,7 +102,7 @@ public class DbWorker(
         var tenantId = tenantManager.GetCurrentTenantId();
         var key = GetCacheKey(tenantId);
 
-        var result = aw webhookCache.GetAsync<List<DbWebhooksConfig>>(key);
+        var result = await webhookCache.GetAsync<List<DbWebhooksConfig>>(key);
 
         if (result != null)
         {
