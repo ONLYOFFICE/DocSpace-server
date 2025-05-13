@@ -1957,6 +1957,16 @@ public class FileStorageService //: IFileStorageService
         var tags = tagDao.GetTagsAsync(file.Id, FileEntryType.File, TagType.Locked);
         var tagLocked = await tags.FirstOrDefaultAsync();
 
+        if (tagLocked != null)
+        {
+            if (tagLocked.Owner != authContext.CurrentAccount.ID
+                && file.Access != FileShare.RoomManager
+                && !await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
+            {
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_LockedFile);
+            }
+        }
+
         if (lockfile)
         {
             if (tagLocked == null)
@@ -2024,13 +2034,23 @@ public class FileStorageService //: IFileStorageService
         var folderDao = daoFactory.GetFolderDao<T>();
         var room = await DocSpaceHelper.GetParentRoom(file, folderDao);
 
-        if (room == null || !await fileSecurity.CanEditAsync(room))
+        if (room == null || !await fileSecurity.CanEditAsync(file))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
         var tagDao = daoFactory.GetTagDao<T>();
         var tagCustomFilter = await tagDao.GetTagsAsync(file.Id, FileEntryType.File, TagType.CustomFilter).FirstOrDefaultAsync();
+
+        if (tagCustomFilter != null)
+        {
+            if (tagCustomFilter.Owner != authContext.CurrentAccount.ID
+                && file.Access != FileShare.RoomManager
+                && !await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
+            {
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_LockedFile);
+            }
+        }
 
         if (enabled)
         {
