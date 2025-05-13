@@ -153,7 +153,7 @@ public class AccountLinker(
 
             ctx.Tags = tags.ToArray();
             return ctx.Modified(profiles);
-        }, opt => opt.SetDuration(TimeSpan.FromMinutes(10)).SetFailSafe(true));
+        }, TimeSpan.FromMinutes(10));
 
         return profiles;
     }

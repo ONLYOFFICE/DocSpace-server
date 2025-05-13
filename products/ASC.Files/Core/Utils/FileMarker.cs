@@ -37,14 +37,14 @@ public class FileMarkerCache
         _cache = cacheProvider.GetMemoryCache();
     }
 
-    public T Get<T>(string key) where T : class
+    public async Task<T> GetAsync<T>(string key) where T : class
     {
-        return _cache.GetOrDefault<T>(key);
+        return await _cache.GetOrDefaultAsync<T>(key);
     }
 
-    public void Insert(string key, object value)
+    public async Task InsertAsync(string key, object value)
     {
-        _cache.Set(key, value, opt=> opt.SetDuration(_cacheExpiration).SetFailSafe(true));
+        await _cache.SetAsync(key, value, _cacheExpiration);
     }
 
     public async Task RemoveAsync(string key)
@@ -701,7 +701,7 @@ public class FileMarker(
 
     public async Task<int> GetRootFoldersIdMarkedAsNewAsync<T>(T rootId)
     {
-        var fromCache = GetCountFromCache(rootId);
+        var fromCache = await GetCountFromCacheAsync(rootId);
         if (fromCache == -1)
         {
             var tagDao = daoFactory.GetTagDao<T>();
@@ -709,7 +709,7 @@ public class FileMarker(
             var requestTags = tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, await folderDao.GetFolderAsync(rootId));
             var requestTag = await requestTags.FirstOrDefaultAsync(tag => tag.EntryType == FileEntryType.Folder && tag.EntryId.Equals(rootId));
             var count = requestTag?.Count ?? 0;
-            InsertToCache(rootId, count);
+            await InsertToCacheAsync(rootId, count);
 
             return count;
         }
@@ -1242,16 +1242,16 @@ public class FileMarker(
         return MarkResult.Marked;
     }
 
-    private void InsertToCache(object folderId, int count)
+    private async Task InsertToCacheAsync(object folderId, int count)
     {
         var key = string.Format(CacheKeyFormat, authContext.CurrentAccount.ID, folderId);
-        fileMarkerCache.Insert(key, count.ToString());
+        await fileMarkerCache.InsertAsync(key, count.ToString());
     }
 
-    private int GetCountFromCache(object folderId)
+    private async Task<int> GetCountFromCacheAsync(object folderId)
     {
         var key = string.Format(CacheKeyFormat, authContext.CurrentAccount.ID, folderId);
-        var count = fileMarkerCache.Get<string>(key);
+        var count = await fileMarkerCache.GetAsync<string>(key);
 
         return count == null ? -1 : int.Parse(count);
     }

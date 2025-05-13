@@ -66,8 +66,8 @@ public class DocumentServiceLicense(IFusionCacheProvider cacheProvider,
 
             if (useCache)
             {
-                await _cache.SetAsync(cacheKey, commandResponse, 
-                    opt=> opt.SetDuration(_cacheExpiration).SetFailSafe(true),
+                await _cache.SetAsync(cacheKey, commandResponse,
+                    _cacheExpiration,
                     [CacheExtention.GetDocumentServiceLicenseTag()]);
             }
         }

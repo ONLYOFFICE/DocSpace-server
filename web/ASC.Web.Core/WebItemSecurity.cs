@@ -39,11 +39,6 @@ public class WebItemSecurityCache
         _cache = cacheProvider.GetMemoryCache();
     }
 
-    public void ClearCache(int tenantId)
-    {
-        _cache.Remove(GetCacheKey(tenantId));
-    }
-
     private string GetCacheKey(int tenantId)
     {
         return $"{tenantId}:webitemsecurity";
@@ -54,19 +49,19 @@ public class WebItemSecurityCache
         await _cache.RemoveByTagAsync(CacheExtention.GetWebItemSecurityTag(tenantId));
     }
 
-    public Dictionary<string, bool> Get(int tenantId)
+    public async Task<Dictionary<string, bool>> GetAsync(int tenantId)
     {
-        return _cache.GetOrDefault<Dictionary<string, bool>>(GetCacheKey(tenantId));
+        return await _cache.GetOrDefaultAsync<Dictionary<string, bool>>(GetCacheKey(tenantId));
     }
 
-    public Dictionary<string, bool> GetOrInsert(int tenantId)
+    public async Task<Dictionary<string, bool>> GetOrInsertAsync(int tenantId)
     {
 
-        var dic = Get(tenantId);
+        var dic = await GetAsync(tenantId);
         if (dic == null)
         {
             dic = new Dictionary<string, bool>();
-            _cache.Set(GetCacheKey(tenantId), dic, opt=> opt.SetDuration(TimeSpan.FromMinutes(1)).SetFailSafe(true),[CacheExtention.GetWebItemSecurityTag(tenantId)]);
+            await _cache.SetAsync(GetCacheKey(tenantId), dic, TimeSpan.FromMinutes(1), [CacheExtention.GetWebItemSecurityTag(tenantId)]);
         }
 
         return dic;
@@ -101,7 +96,7 @@ public class WebItemSecurity(UserManager userManager,
 
         var id = itemId.ToString();
         bool result;
-        var dic = webItemSecurityCache.GetOrInsert(tenant.Id);
+        var dic = await webItemSecurityCache.GetOrInsertAsync(tenant.Id);
         if (dic != null)
         {
             lock (dic)
@@ -145,7 +140,7 @@ public class WebItemSecurity(UserManager userManager,
             result = false;
         }
 
-        dic = webItemSecurityCache.Get(tenant.Id);
+        dic = await webItemSecurityCache.GetAsync(tenant.Id);
         if (dic != null)
         {
             lock (dic)

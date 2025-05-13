@@ -46,7 +46,7 @@ class CachedAzService(DbAzService service, IFusionCacheProvider cacheProvider) :
             var records = await _service.GetAcesAsync(tenant, default);
             var aces = new AzRecordStore(records);
             return ctx.Modified(aces);
-        }, opt => opt.SetDuration(_cacheExpiration).SetFailSafe(true));
+        }, _cacheExpiration);
 
         return aces;
     }

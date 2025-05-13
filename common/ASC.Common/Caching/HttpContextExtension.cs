@@ -57,23 +57,13 @@ public static class HttpContextExtension
         return false;
     }
 
-    public static void SetOutputCache(this HttpContext httpContext, IFusionCache cache, string key, List<string> tags)
-    {
-        var lastModified = DateTime.Now;
-        httpContext.Response.Headers.LastModified = lastModified.ToString(CultureInfo.InvariantCulture);
-        cache.Set(key,
-            new CacheEntry() { LastModified = lastModified },
-            opt => opt.SetDuration(CacheExtention.OutputDuration).SetFailSafe(true),
-            tags.ToArray());
-    }
-
     public static async Task SetOutputCacheAsync(this HttpContext httpContext, IFusionCache cache, string key, List<string> tags)
     {
         var lastModified = DateTime.Now;
         httpContext.Response.Headers.LastModified = lastModified.ToString(CultureInfo.InvariantCulture);
         await cache.SetAsync(key,
             new CacheEntry() { LastModified = lastModified },
-            opt => opt.SetDuration(CacheExtention.OutputDuration).SetFailSafe(true),
+            CacheExtention.OutputDuration,
             tags.ToArray());
     }
 

@@ -88,7 +88,7 @@ public class BuildVersion
         {
             var version = await _documentServiceConnector.GetVersionAsync();
             return ctx.Modified(version);
-        }, opt => opt.SetDuration(TimeSpan.FromMinutes(15)).SetFailSafe(true), [CacheExtention.GetDocumentServiceTag()]);
+        }, TimeSpan.FromMinutes(15), [CacheExtention.GetDocumentServiceTag()]);
 
         return version;
     }

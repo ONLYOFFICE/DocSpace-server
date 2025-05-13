@@ -102,7 +102,7 @@ public class DbWorker(
         var tenantId = tenantManager.GetCurrentTenantId();
         var key = GetCacheKey(tenantId);
 
-        var result = webhookCache.Get<List<DbWebhooksConfig>>(key);
+        var result = aw webhookCache.GetAsync<List<DbWebhooksConfig>>(key);
 
         if (result != null)
         {
@@ -111,7 +111,7 @@ public class DbWorker(
 
         result = await GetWebhookConfigs(true).ToListAsync();
 
-        webhookCache.Insert(key, result);
+        await webhookCache.InsertAsync(key, result);
 
         return result;
     }
@@ -404,14 +404,14 @@ public class WebhookCache
         _cache = cacheProvider.GetMemoryCache();
     }
 
-    public T Get<T>(string key) where T : class
+    public async Task<T> GetAsync<T>(string key) where T : class
     {
-        return _cache.GetOrDefault<T>(key);
+        return await _cache.GetOrDefaultAsync<T>(key);
     }
 
-    public void Insert<T>(string key, T value) where T : class
+    public async Task InsertAsync<T>(string key, T value) where T : class
     {
-        _cache.Set(key, value, _cacheExpiration);
+        await _cache.SetAsync(key, value, _cacheExpiration);
     }
 
     public async Task ClearAsync(string key)

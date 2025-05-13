@@ -38,14 +38,14 @@ public class LoginEventsCache
         _cache = cacheProvider.GetMemoryCache();
     }
 
-    public void Insert(DbLoginEvent loginEvent)
+    public async Task InsertAsync(DbLoginEvent loginEvent)
     {
-        _cache.Set(BuildKey(loginEvent.Id), loginEvent, opt=> opt.SetDuration(_expiration).SetFailSafe(true));
+        await _cache.SetAsync(BuildKey(loginEvent.Id), loginEvent, _expiration);
     }
 
-    public DbLoginEvent Get(int id)
+    public async Task<DbLoginEvent> GetAsync(int id)
     {
-        return _cache.GetOrDefault<DbLoginEvent>(BuildKey(id));
+        return await _cache.GetOrDefaultAsync<DbLoginEvent>(BuildKey(id));
     }
 
     public async Task RemoveAsync(IEnumerable<int> ids)
@@ -90,7 +90,7 @@ public class DbLoginEventsManager(
             return null;
         }
 
-        var loginEvent = cache.Get(id);
+        var loginEvent = await cache.GetAsync(id);
         if (loginEvent != null)
         {
             return loginEvent;
@@ -101,7 +101,7 @@ public class DbLoginEventsManager(
 
         if (loginEvent != null)
         {
-            cache.Insert(loginEvent);
+            await cache.InsertAsync(loginEvent);
         }
 
         return loginEvent;
