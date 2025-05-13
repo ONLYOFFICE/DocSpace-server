@@ -131,15 +131,10 @@ internal abstract class AbstractProviderInfo<TFile, TFolder, TItem, TProvider>(D
 }
 
 [Singleton]
-public class ProviderInfoHelper
+public class ProviderInfoHelper(IFusionCacheProvider cacheProvider)
 {
-    private readonly IFusionCache _cache;
+    private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
     private readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(1);
-
-    public ProviderInfoHelper(IFusionCacheProvider cacheProvider)
-    {
-        _cache = cacheProvider.GetMemoryCache();
-    }
 
     internal async Task CacheResetAsync(string selector, int thirdId, string id = null, bool? isFile = null)
     {

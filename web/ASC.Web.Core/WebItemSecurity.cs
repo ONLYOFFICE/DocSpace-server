@@ -30,16 +30,11 @@ using SecurityAction = ASC.Common.Security.Authorizing.Action;
 namespace ASC.Web.Core;
 
 [Singleton]
-public class WebItemSecurityCache
+public class WebItemSecurityCache(IFusionCacheProvider cacheProvider)
 {
-    private readonly IFusionCache _cache;
+    private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
 
-    public WebItemSecurityCache(IFusionCacheProvider cacheProvider)
-    {
-        _cache = cacheProvider.GetMemoryCache();
-    }
-
-    private string GetCacheKey(int tenantId)
+    private static string GetCacheKey(int tenantId)
     {
         return $"{tenantId}:webitemsecurity";
     }
@@ -56,7 +51,6 @@ public class WebItemSecurityCache
 
     public async Task<Dictionary<string, bool>> GetOrInsertAsync(int tenantId)
     {
-
         var dic = await GetAsync(tenantId);
         if (dic == null)
         {
@@ -69,18 +63,19 @@ public class WebItemSecurityCache
 }
 
 [Scope]
-public class WebItemSecurity(UserManager userManager,
-        AuthContext authContext,
-        PermissionContext permissionContext,
-        AuthManager authentication,
-        WebItemManager webItemManager,
-        TenantManager tenantManager,
-        AuthorizationManager authorizationManager,
-        WebItemSecurityCache webItemSecurityCache,
-        SettingsManager settingsManager,
-        CountPaidUserChecker countPaidUserChecker, 
-        IDistributedLockProvider distributedLockProvider)
-    {
+public class WebItemSecurity(
+    UserManager userManager,
+    AuthContext authContext,
+    PermissionContext permissionContext,
+    AuthManager authentication,
+    WebItemManager webItemManager,
+    TenantManager tenantManager,
+    AuthorizationManager authorizationManager,
+    WebItemSecurityCache webItemSecurityCache,
+    SettingsManager settingsManager,
+    CountPaidUserChecker countPaidUserChecker, 
+    IDistributedLockProvider distributedLockProvider)
+{
     
     private static readonly SecurityAction _read = new(new Guid("77777777-32ae-425f-99b5-83176061d1ae"), "ReadWebItem", false);
 
