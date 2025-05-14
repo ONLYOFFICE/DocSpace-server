@@ -26,6 +26,7 @@
 
 using ASC.Api.Core.Cors.Enums;
 using ASC.Core.Common.Identity;
+using ASC.Files.Core.Utils;
 
 using Microsoft.AspNetCore.Cors;
 
