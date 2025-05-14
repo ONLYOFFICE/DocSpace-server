@@ -1,13 +1,9 @@
 namespace ASC.Files.Core;
 
 /// <summary>
-/// Provides a service to perform various file operations within the system, including retrieval, creation, updating, renaming,
-/// and managing file access and security.
+/// Provides a comprehensive set of methods for managing file operations such as retrieving, creating, updating, renaming,
+/// and restoring file versions within the system. The service also handles file versioning and history management.
 /// </summary>
-/// <remarks>
-/// This service contains methods for handling file-related operations, enforcing file security, and integrating with other
-/// components like file sharing, notifications, and tracking.
-/// </remarks>
 [Scope]
 public class FileOperationsService(
     Global global,
@@ -32,7 +28,11 @@ public class FileOperationsService(
     TempStream tempStream,
     FileChecker fileChecker,
     WebhookManager webhookManager,
-    ILogger<FileOperationsService> logger)
+    ILogger<FileOperationsService> logger,
+    DocumentServiceHelper documentServiceHelper,
+    DocumentServiceConnector documentServiceConnector,
+    PathProvider pathProvider,
+    LockerManager lockerManager)
 {
     /// <summary>
     /// Retrieves a file with the specified ID and version
@@ -465,6 +465,373 @@ public class FileOperationsService(
         catch (Exception ex)
         {
             throw GenerateException(ex);
+        }
+    }
+
+    /// <summary>
+    /// Restores a specific version of a file and retrieves the edit history of the restored version.
+    /// </summary>
+    /// <typeparam name="T">Type of the file ID</typeparam>
+    /// <param name="fileId">The ID of the file to restore</param>
+    /// <param name="version">The version number to restore</param>
+    /// <param name="url">Optional URL parameter for restoring the file remotely</param>
+    /// <returns>A stream of edit history entries for the restored file</returns>
+    public async IAsyncEnumerable<EditHistory> RestoreVersionAsync<T>(T fileId, int version, string url = null)
+    {
+        File<T> file;
+        if (string.IsNullOrEmpty(url))
+        {
+            file = await entryManager.UpdateToVersionFileAsync(fileId, version);
+        }
+        else
+        {
+            var fileDao = daoFactory.GetFileDao<T>();
+            var fromFile = await fileDao.GetFileAsync(fileId, version);
+            var modifiedOnString = fromFile.ModifiedOnString;
+            file = await entryManager.SaveEditingAsync(fileId, null, url, null, string.Format(FilesCommonResource.CommentRevertChanges, modifiedOnString));
+        }
+
+        await filesMessageService.SendAsync(MessageAction.FileRestoreVersion, file, file.Title, version.ToString(CultureInfo.InvariantCulture));
+
+        await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
+
+        await foreach (var f in daoFactory.GetFileDao<T>().GetEditHistoryAsync(documentServiceHelper, file.Id))
+        {
+            yield return f;
+        }
+    }
+
+    /// <summary>
+    /// Updates the specified file to the given version asynchronously.
+    /// </summary>
+    /// <typeparam name="T">Type of the file identifier.</typeparam>
+    /// <param name="fileId">The identifier of the file to update.</param>
+    /// <param name="version">The version number to which the file should be updated.</param>
+    /// <returns>A key-value pair containing the updated file and an asynchronous enumerable of its version history.</returns>
+    public async Task<KeyValuePair<File<T>, IAsyncEnumerable<File<T>>>> UpdateToVersionAsync<T>(T fileId, int version)
+    {
+        var file = await entryManager.UpdateToVersionFileAsync(fileId, version);
+        await filesMessageService.SendAsync(MessageAction.FileRestoreVersion, file, file.Title, version.ToString(CultureInfo.InvariantCulture));
+
+        if (file.RootFolderType == FolderType.USER
+            && !Equals(file.RootCreateBy, authContext.CurrentAccount.ID))
+        {
+            var folderDao = daoFactory.GetFolderDao<T>();
+            if (!await fileSecurity.CanReadAsync(await folderDao.GetFolderAsync(file.ParentId)))
+            {
+                file.FolderIdDisplay = await globalFolderHelper.GetFolderShareAsync<T>();
+            }
+        }
+
+        await socketManager.UpdateFileAsync(file);
+
+        await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
+
+        return new KeyValuePair<File<T>, IAsyncEnumerable<File<T>>>(file, GetFileHistoryAsync(fileId));
+    }
+
+    /// <summary>
+    /// Finalizes the versioning process for the specified file and optionally continues the version chain.
+    /// </summary>
+    /// <typeparam name="T">The type of the file ID.</typeparam>
+    /// <param name="fileId">The ID of the file whose version is to be completed.</param>
+    /// <param name="version">The version of the file to complete.</param>
+    /// <param name="continueVersion">Indicates whether to continue the version chain.</param>
+    /// <returns>A key-value pair containing the completed file and an asynchronous enumerable of its version history.</returns>
+    public async Task<KeyValuePair<File<T>, IAsyncEnumerable<File<T>>>> CompleteVersionAsync<T>(T fileId, int version, bool continueVersion)
+    {
+        var file = await entryManager.CompleteVersionFileAsync(fileId, version, continueVersion);
+
+        await filesMessageService.SendAsync(
+            continueVersion ? MessageAction.FileDeletedVersion : MessageAction.FileCreatedVersion,
+            file,
+            file.Title, version == 0 ? (file.Version - 1).ToString(CultureInfo.InvariantCulture) : version.ToString(CultureInfo.InvariantCulture));
+
+        if (file.RootFolderType == FolderType.USER
+            && !Equals(file.RootCreateBy, authContext.CurrentAccount.ID))
+        {
+            var folderDao = daoFactory.GetFolderDao<T>();
+            if (!await fileSecurity.CanReadAsync(await folderDao.GetFolderAsync(file.ParentId)))
+            {
+                file.FolderIdDisplay = await globalFolderHelper.GetFolderShareAsync<T>();
+            }
+        }
+
+        await socketManager.UpdateFileAsync(file);
+
+        return new KeyValuePair<File<T>, IAsyncEnumerable<File<T>>>(file, GetFileHistoryAsync(fileId));
+    }
+
+    /// <summary>
+    /// Retrieves the version history of a file with the specified ID.
+    /// </summary>
+    /// <typeparam name="T">Type of the file ID.</typeparam>
+    /// <param name="fileId">The ID of the file for which the version history is retrieved.</param>
+    /// <returns>An asynchronous enumerable containing the file's version history.</returns>
+    public async IAsyncEnumerable<File<T>> GetFileHistoryAsync<T>(T fileId)
+    {
+        var fileDao = daoFactory.GetFileDao<T>();
+        var file = await fileDao.GetFileAsync(fileId);
+        if (!await fileSecurity.CanReadHistoryAsync(file))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
+        }
+
+        var history = await fileDao.GetFileHistoryAsync(fileId).ToListAsync();
+
+        var t1 = entryStatusManager.SetFileStatusAsync(history);
+        var t2 = entryStatusManager.SetFormInfoAsync(history);
+        await Task.WhenAll(t1, t2);
+
+        foreach (var r in history)
+        {
+            yield return r;
+        }
+    }
+
+    /// <summary>
+    /// Locks or unlocks a file based on the specified parameters.
+    /// </summary>
+    /// <typeparam name="T">Type of file ID.</typeparam>
+    /// <param name="fileId">The ID of the file to lock or unlock.</param>
+    /// <param name="lockfile">A boolean value specifying whether to lock (true) or unlock (false) the file.</param>
+    /// <returns>The locked or unlocked file entry.</returns>
+    public async Task<File<T>> LockFileAsync<T>(T fileId, bool lockfile)
+    {
+        var tagDao = daoFactory.GetTagDao<T>();
+        var fileDao = daoFactory.GetFileDao<T>();
+        var file = await fileDao.GetFileAsync(fileId);
+
+        if (file == null)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
+        if (!await fileSecurity.CanLockAsync(file))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
+        }
+
+        if (file.RootFolderType == FolderType.TRASH)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ViewTrashItem);
+        }
+
+        var tags = tagDao.GetTagsAsync(file.Id, FileEntryType.File, TagType.Locked);
+        var tagLocked = await tags.FirstOrDefaultAsync();
+
+        if (lockfile)
+        {
+            if (tagLocked == null)
+            {
+                tagLocked = new Tag("locked", TagType.Locked, authContext.CurrentAccount.ID).AddEntry(file);
+
+                await tagDao.SaveTagsAsync(tagLocked);
+            }
+
+            var usersDrop = (await fileTracker.GetEditingByAsync(file.Id)).Where(uid => uid != authContext.CurrentAccount.ID).Select(u => u.ToString()).ToArray();
+            if (usersDrop.Length > 0)
+            {
+                var docKey = await fileTracker.GetTrackerDocKey(file.Id);
+                await documentServiceHelper.DropUserAsync(docKey, usersDrop, file.Id);
+            }
+
+            await filesMessageService.SendAsync(MessageAction.FileLocked, file, file.Title);
+        }
+        else
+        {
+            if (tagLocked != null)
+            {
+                await tagDao.RemoveTagsAsync(tagLocked);
+
+                await filesMessageService.SendAsync(MessageAction.FileUnlocked, file, file.Title);
+            }
+
+            if (!file.ProviderEntry)
+            {
+                await UpdateCommentAsync(file.Id, file.Version, FilesCommonResource.UnlockComment);
+            }
+        }
+
+        await entryStatusManager.SetFileStatusAsync(file);
+
+        if (file.RootFolderType == FolderType.USER
+            && !Equals(file.RootCreateBy, authContext.CurrentAccount.ID))
+        {
+            var folderDao = daoFactory.GetFolderDao<T>();
+            if (!await fileSecurity.CanReadAsync(await folderDao.GetFolderAsync(file.ParentId)))
+            {
+                file.FolderIdDisplay = await globalFolderHelper.GetFolderShareAsync<T>();
+            }
+        }
+
+        await socketManager.UpdateFileAsync(file);
+
+        await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
+
+        return file;
+    }
+
+    /// <summary>
+    /// Enables or disables a custom filter tag for a specified file.
+    /// </summary>
+    /// <typeparam name="T">Type of the file ID.</typeparam>
+    /// <param name="fileId">The identifier of the file for which the custom filter tag is to be updated.</param>
+    /// <param name="enabled">Indicates whether the custom filter tag should be enabled or disabled.</param>
+    /// <returns>The updated file with the applied changes to the custom filter tag.</returns>
+    public async Task<File<T>> SetCustomFilterTagAsync<T>(T fileId, bool enabled)
+    {
+        var fileDao = daoFactory.GetFileDao<T>();
+        var file = await fileDao.GetFileAsync(fileId);
+
+        file.NotFoundIfNull();
+
+        if (file.RootFolderType != FolderType.VirtualRooms || !fileUtility.CanWebCustomFilterEditing(file.Title))
+        {
+            throw new ArgumentException();
+        }
+
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var room = await DocSpaceHelper.GetParentRoom(file, folderDao);
+
+        if (room == null || !await fileSecurity.CanEditAsync(room))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        var tagDao = daoFactory.GetTagDao<T>();
+        var tagCustomFilter = await tagDao.GetTagsAsync(file.Id, FileEntryType.File, TagType.CustomFilter).FirstOrDefaultAsync();
+
+        if (enabled)
+        {
+            if (tagCustomFilter == null)
+            {
+                tagCustomFilter = new Tag("customfilter", TagType.CustomFilter, authContext.CurrentAccount.ID).AddEntry(file);
+
+                await tagDao.SaveTagsAsync(tagCustomFilter);
+
+                var usersDrop = (await fileTracker.GetEditingByAsync(file.Id)).Where(uid => uid != authContext.CurrentAccount.ID).Select(u => u.ToString()).ToArray();
+                if (usersDrop.Length > 0)
+                {
+                    var docKey = await fileTracker.GetTrackerDocKey(file.Id);
+                    await documentServiceHelper.DropUserAsync(docKey, usersDrop, file.Id);
+                }
+            }
+
+            await filesMessageService.SendAsync(MessageAction.FileCustomFilterEnabled, file, file.Title);
+        }
+        else
+        {
+            if (tagCustomFilter != null)
+            {
+                await tagDao.RemoveTagsAsync(tagCustomFilter);
+            }
+
+            await filesMessageService.SendAsync(MessageAction.FileCustomFilterDisabled, file, file.Title);
+        }
+
+        await entryStatusManager.SetFileStatusAsync(file);
+
+        await socketManager.UpdateFileAsync(file);
+
+        return file;
+    }
+
+    /// <summary>
+    /// Generates a presigned URI for the specified file.
+    /// </summary>
+    /// <typeparam name="T">Type of the file ID</typeparam>
+    /// <param name="fileId">The ID of the file for which the presigned URI is generated</param>
+    /// <returns>A <see cref="DocumentService.FileLink"/> containing the file type and the presigned URL</returns>
+    public async Task<FileLink> GetPresignedUriAsync<T>(T fileId)
+    {
+        var file = await GetFileAsync(fileId, -1);
+        var result = new FileLink
+        {
+            FileType = FileUtility.GetFileExtension(file.Title), 
+            Url = documentServiceConnector.ReplaceCommunityAddress(pathProvider.GetFileStreamUrl(file))
+        };
+
+        result.Token = documentServiceHelper.GetSignature(result);
+
+        return result;
+    }
+
+    /// <summary>
+    /// Updates the comment for a specific file version in the data storage.
+    /// </summary>
+    /// <typeparam name="T">Type of the file ID.</typeparam>
+    /// <param name="fileId">The unique identifier of the file.</param>
+    /// <param name="version">The version of the file for which the comment will be updated.</param>
+    /// <param name="comment">The new comment to be associated with the specified file version.</param>
+    /// <returns>The updated comment for the specified file version.</returns>
+    public async Task<string> UpdateCommentAsync<T>(T fileId, int version, string comment)
+    {
+        var fileDao = daoFactory.GetFileDao<T>();
+        var file = await fileDao.GetFileAsync(fileId, version);
+        if (file == null)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
+        if (!await fileSecurity.CanEditHistoryAsync(file))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
+        }
+
+        if (await lockerManager.FileLockedForMeAsync(file.Id))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_LockedFile);
+        }
+
+        if (file.RootFolderType == FolderType.TRASH)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ViewTrashItem);
+        }
+
+        comment = await fileDao.UpdateCommentAsync(fileId, version, comment);
+
+        await filesMessageService.SendAsync(MessageAction.FileUpdatedRevisionComment, file, [file.Title, version.ToString(CultureInfo.InvariantCulture)]);
+
+        await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
+
+        return comment;
+    }
+
+    /// <summary>
+    /// Saves the editing changes of a file to the storage.
+    /// </summary>
+    /// <typeparam name="T">Type of file ID</typeparam>
+    /// <param name="fileId">The unique identifier of the file being edited.</param>
+    /// <param name="fileExtension">The extension of the file being saved, such as ".docx" or ".pdf".</param>
+    /// <param name="fileUri">The URI of the file's current state.</param>
+    /// <param name="stream">The stream containing the updated file content.</param>
+    /// <param name="forceSave">Specifies whether the save operation should be forced regardless of the editing context.</param>
+    /// <returns>The file entry after it is saved, including updated metadata and content.</returns>
+    public async Task<File<T>> SaveEditingAsync<T>(T fileId, string fileExtension, string fileUri, Stream stream, bool forceSave = false)
+    {
+        try
+        {
+            if (!forceSave && await fileTracker.IsEditingAloneAsync(fileId))
+            {
+                await fileTracker.RemoveAsync(fileId);
+                await socketManager.StopEditAsync(fileId);
+            }
+
+            var file = await entryManager.SaveEditingAsync(fileId, fileExtension, fileUri, stream, forceSave: forceSave ? ForcesaveType.User : ForcesaveType.None, keepLink: true);
+
+            if (file != null)
+            {
+                await filesMessageService.SendAsync(MessageAction.FileUpdated, file, file.Title);
+
+                await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
+            }
+
+            return file;
+        }
+        catch (Exception e)
+        {
+            throw GenerateException(e);
         }
     }
     

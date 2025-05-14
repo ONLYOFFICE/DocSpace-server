@@ -38,9 +38,9 @@ public class ReassignController(
     TenantManager tenantManager,
     SecurityContext securityContext,
     WebItemSecurity webItemSecurity,
-    FileStorageService fileStorageService)
-    : ApiControllerBase
-    {
+    FileStorageService fileStorageService,
+    RoomService roomService) : ApiControllerBase
+{
     /// <summary>
     /// Returns the progress of the started data reassignment for the user with the ID specified in the request.
     /// </summary>
@@ -150,7 +150,7 @@ public class ReassignController(
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
-        var result = await fileStorageService.AnyRoomsAsync(inDto.UserId);
+        var result = await roomService.AnyRoomsAsync(inDto.UserId);
 
         if (inDto.Type is EmployeeType.Guest && !result)
         {

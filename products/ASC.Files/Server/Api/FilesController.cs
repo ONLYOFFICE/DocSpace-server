@@ -43,7 +43,9 @@ public class FilesControllerInternal(
     ApiDateTimeHelper apiDateTimeHelper,
     UserManager userManager,
     DisplayUserSettingsHelper displayUserSettingsHelper,
-    EntriesOrderService entriesOrderService)
+    EntriesOrderService entriesOrderService,
+    FileOperationsService fileOperationsService,
+    FillingFormResultDtoHelper fillingFormResultDtoHelper)
     : FilesController<int>(
         documentProcessingService,
         filesControllerHelper,
@@ -59,7 +61,9 @@ public class FilesControllerInternal(
         apiDateTimeHelper,
         userManager,
         displayUserSettingsHelper,
-        entriesOrderService)
+        entriesOrderService,
+        fileOperationsService,
+        fillingFormResultDtoHelper)
 {
     /// <summary>
     /// Returns the list of actions performed on the file with the specified identifier.
@@ -95,7 +99,9 @@ public class FilesControllerThirdparty(
     ApiDateTimeHelper apiDateTimeHelper,
     UserManager userManager,
     DisplayUserSettingsHelper displayUserSettingsHelper,
-    EntriesOrderService entriesOrderService)
+    EntriesOrderService entriesOrderService,
+    FileOperationsService fileOperationsService,
+    FillingFormResultDtoHelper fillingFormResultDtoHelper)
     : FilesController<string>(
         documentProcessingService,
         filesControllerHelper,
@@ -111,7 +117,9 @@ public class FilesControllerThirdparty(
         apiDateTimeHelper,
         userManager,
         displayUserSettingsHelper, 
-        entriesOrderService);
+        entriesOrderService,
+        fileOperationsService,
+        fillingFormResultDtoHelper);
 
 public abstract class FilesController<T>(
     DocumentProcessingService documentProcessingService,
@@ -128,7 +136,9 @@ public abstract class FilesController<T>(
     ApiDateTimeHelper apiDateTimeHelper,
     UserManager userManager,
     DisplayUserSettingsHelper displayUserSettingsHelper,
-    EntriesOrderService entriesOrderService)
+    EntriesOrderService entriesOrderService,
+    FileOperationsService fileOperationsService,
+    FillingFormResultDtoHelper fillingFormResultDtoHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -291,9 +301,9 @@ public abstract class FilesController<T>(
     [HttpGet("file/fillresult")]
     public async Task<FillingFormResultDto<T>> GetFillResultAsync(GetFillResultRequestDto inDto)
     {
-        var completedFormId = await hybridCache.GetOrDefaultAsync<string>(inDto.FillingSessionId);
+        var completedFormId = await hybridCache.GetOrDefaultAsync<T>(inDto.FillingSessionId);
 
-        return await filesControllerHelper.GetFillResultAsync((T)Convert.ChangeType(completedFormId, typeof(T)));
+        return completedFormId != null ? await fillingFormResultDtoHelper.GetAsync(completedFormId) : null;
     }
 
     /// <summary>
@@ -356,7 +366,7 @@ public abstract class FilesController<T>(
     [HttpGet("file/{fileId}/history")]
     public IAsyncEnumerable<FileDto<T>> GetFileVersionInfoAsync(FileIdRequestDto<T> inDto)
     {
-        return filesControllerHelper.GetFileVersionInfoAsync(inDto.FileId);
+        return fileOperationsService.GetFileHistoryAsync(inDto.FileId).SelectAwait(async e => await _fileDtoHelper.GetAsync(e));
     }
 
     /// <summary>
@@ -368,8 +378,10 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "Locked file information", typeof(FileDto<int>))]
     [HttpPut("file/{fileId}/lock")]
     public async Task<FileDto<T>> LockFileAsync(LockFileRequestDto<T> inDto)
-    {
-        return await filesControllerHelper.LockFileAsync(inDto.FileId, inDto.File.LockFile);
+    {       
+        var result = await fileOperationsService.LockFileAsync(inDto.FileId, inDto.File.LockFile);
+
+        return await _fileDtoHelper.GetAsync(result);
     }
 
     /// <summary>
@@ -381,8 +393,10 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "File information", typeof(FileDto<int>))]
     [HttpPut("file/{fileId}/customfilter")]
     public async Task<FileDto<T>> SetCustomFilterTagAsync(FileCustomFilterRequestDto<T> inDto)
-    {
-        return await filesControllerHelper.SetCustomFilterTagAsync(inDto.FileId, inDto.Parameters.Enabled);
+    {        
+        var result = await fileOperationsService.SetCustomFilterTagAsync(inDto.FileId, inDto.Parameters.Enabled);
+
+        return await _fileDtoHelper.GetAsync(result);
     }
 
     /// <summary>
@@ -400,7 +414,7 @@ public abstract class FilesController<T>(
     [HttpGet("file/{fileId}/restoreversion")]
     public IAsyncEnumerable<EditHistoryDto> RestoreVersionAsync(RestoreVersionRequestDto<T> inDto)
     {
-        return filesControllerHelper.RestoreVersionAsync(inDto.FileId, inDto.Version, inDto.Url);
+        return fileOperationsService.RestoreVersionAsync(inDto.FileId, inDto.Version, inDto.Url).Select(e => new EditHistoryDto(e, apiDateTimeHelper, userManager, displayUserSettingsHelper));
     }
 
     /// <summary>
@@ -430,7 +444,7 @@ public abstract class FilesController<T>(
     [HttpPut("file/{fileId}/comment")]
     public async Task<string> UpdateCommentAsync(UpdateCommentRequestDto<T> inDto)
     {
-        return await filesControllerHelper.UpdateCommentAsync(inDto.FileId, inDto.File.Version, inDto.File.Comment);
+        return await fileOperationsService.UpdateCommentAsync(inDto.FileId, inDto.File.Version, inDto.File.Comment);
     }
 
     /// <summary>

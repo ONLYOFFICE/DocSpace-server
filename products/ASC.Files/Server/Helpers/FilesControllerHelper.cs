@@ -36,9 +36,6 @@ public class FilesControllerHelper(
     FileStorageService fileStorageService,
     IHttpContextAccessor httpContextAccessor,
     ILogger<FilesControllerHelper> logger,
-    ApiDateTimeHelper apiDateTimeHelper,
-    UserManager userManager,
-    DisplayUserSettingsHelper displayUserSettingsHelper,
     FileConverter fileConverter,
     PathProvider pathProvider,
     FileChecker fileChecker,
@@ -68,7 +65,7 @@ public class FilesControllerHelper(
 
     public async IAsyncEnumerable<FileDto<T>> ChangeHistoryAsync<T>(T fileId, int version, bool continueVersion)
     {
-        var pair = await _fileStorageService.CompleteVersionAsync(fileId, version, continueVersion);
+        var pair = await _fileOperationsService.CompleteVersionAsync(fileId, version, continueVersion);
         var history = pair.Value;
 
         await foreach (var e in history)
@@ -191,41 +188,11 @@ public class FilesControllerHelper(
         return null;
     }
 
-    public IAsyncEnumerable<FileDto<T>> GetFileVersionInfoAsync<T>(T fileId)
-    {
-        return _fileStorageService.GetFileHistoryAsync(fileId).SelectAwait(async e => await _fileDtoHelper.GetAsync(e));
-    }
-
-    public async Task<FileDto<T>> LockFileAsync<T>(T fileId, bool lockFile)
-    {
-        var result = await _fileStorageService.LockFileAsync(fileId, lockFile);
-
-        return await _fileDtoHelper.GetAsync(result);
-    }
-
-    public async Task<FileDto<T>> SetCustomFilterTagAsync<T>(T fileId, bool enabled)
-    {
-        var result = await _fileStorageService.SetCustomFilterTagAsync(fileId, enabled);
-
-        return await _fileDtoHelper.GetAsync(result);
-    }
-
-    public IAsyncEnumerable<EditHistoryDto> RestoreVersionAsync<T>(T fileId, int version = 0, string url = null)
-    {
-        return _fileStorageService.RestoreVersionAsync(fileId, version, url)
-            .Select(e => new EditHistoryDto(e, apiDateTimeHelper, userManager, displayUserSettingsHelper));
-    }
-
     public IAsyncEnumerable<ConversationResultDto> StartConversionAsync<T>(CheckConversionRequestDto<T> cheqConversionRequestDto)
     {
         cheqConversionRequestDto.StartConvert = true;
 
         return CheckConversionAsync(cheqConversionRequestDto);
-    }
-
-    public async Task<string> UpdateCommentAsync<T>(T fileId, int version, string comment)
-    {
-        return await _fileStorageService.UpdateCommentAsync(fileId, version, comment);
     }
 
     public async Task<FileDto<T>> UpdateFileAsync<T>(T fileId, string title, int lastVersion)
@@ -242,7 +209,7 @@ public class FilesControllerHelper(
             return await GetFileInfoAsync(file!.Id);
         }
 
-        var result = await _fileStorageService.UpdateToVersionAsync(fileId, lastVersion);
+        var result = await _fileOperationsService.UpdateToVersionAsync(fileId, lastVersion);
         file = result.Key;
 
         return await GetFileInfoAsync(file.Id);

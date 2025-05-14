@@ -49,7 +49,16 @@ public class SharingService(
     InvitationValidator invitationValidator,
     ExternalShare externalShare,
     TenantUtil tenantUtil,
-    ILogger<FolderOperationsService> logger)
+    ILogger<FolderOperationsService> logger,
+    FileSecurity fileSecurity,
+    EntryStatusManager entryStatusManager,
+    WebhookManager webhookManager,
+    FileMarker fileMarker,
+    ThumbnailSettings thumbnailSettings,
+    LockerManager lockerManager,
+    GlobalStore globalStore,
+    FileTrackerHelper fileTracker,
+    IServiceProvider serviceProvider)
 {
     private static readonly FrozenDictionary<SubjectType, FrozenDictionary<EventType, MessageAction>> _roomMessageActions =
         new Dictionary<SubjectType, FrozenDictionary<EventType, MessageAction>> { { SubjectType.InvitationLink, new Dictionary<EventType, MessageAction> { { EventType.Create, MessageAction.RoomInvitationLinkCreated }, { EventType.Update, MessageAction.RoomInvitationLinkUpdated }, { EventType.Remove, MessageAction.RoomInvitationLinkDeleted } }.ToFrozenDictionary() }, { SubjectType.ExternalLink, new Dictionary<EventType, MessageAction> { { EventType.Create, MessageAction.RoomExternalLinkCreated }, { EventType.Update, MessageAction.RoomExternalLinkUpdated }, { EventType.Remove, MessageAction.RoomExternalLinkDeleted } }.ToFrozenDictionary() } }.ToFrozenDictionary();
@@ -492,6 +501,166 @@ public class SharingService(
             FileShareExtensions.GetAccessString(result.Ace.Access, true));
 
         return (await fileSharing.GetPureSharesAsync(room, [result.Ace.Id]).FirstOrDefaultAsync());
+    }
+    
+    public async IAsyncEnumerable<FileEntry> ChangeOwnerAsync<T>(IEnumerable<T> foldersId, IEnumerable<T> filesId, Guid userId, FileShare newShare = FileShare.RoomManager)
+    {
+        var userInfo = await userManager.GetUsersAsync(userId);
+        if (Equals(userInfo, Constants.LostUser) ||
+            userInfo.Status != EmployeeStatus.Active ||
+            await userManager.IsGuestAsync(userInfo) ||
+            await userManager.IsUserAsync(userInfo))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ChangeOwner);
+        }
+
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var folders = folderDao.GetFoldersAsync(foldersId);
+
+        await foreach (var folder in folders)
+        {
+            if (folder.RootFolderType is not FolderType.COMMON and not FolderType.VirtualRooms and not FolderType.RoomTemplates)
+            {
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+            }
+
+            if (!await fileSecurity.CanChangeOwnerAsync(folder))
+            {
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+            }
+
+            var isRoom = DocSpaceHelper.IsRoom(folder.FolderType);
+
+            if (folder.ProviderEntry && !isRoom)
+            {
+                continue;
+            }
+
+            var newFolder = folder;
+            if (folder.CreateBy != userInfo.Id)
+            {
+                var createBy = folder.CreateBy;
+
+                await SetAceObjectAsync(new AceCollection<T>
+                {
+                    Files = [],
+                    Folders = [folder.Id],
+                    Aces =
+                    [
+                        new AceWrapper { Access = FileShare.None, Id = userInfo.Id },
+                        new AceWrapper { Access = newShare, Id = createBy }
+                    ]
+                }, false, socket: false, beforeOwnerChange: true);
+
+                var folderAccess = folder.Access;
+
+                newFolder.CreateBy = userInfo.Id;
+
+                if (folder.ProviderEntry && isRoom)
+                {
+                    var providerDao = daoFactory.ProviderDao;
+                    await providerDao.UpdateRoomProviderInfoAsync(new ProviderData { Id = folder.ProviderId, CreateBy = userInfo.Id });
+                }
+                else
+                {
+                    var newFolderId = await folderDao.SaveFolderAsync(newFolder);
+                    newFolder = await folderDao.GetFolderAsync(newFolderId);
+                    newFolder.Access = folderAccess;
+
+                    await entryStatusManager.SetIsFavoriteFolderAsync(folder);
+                }
+
+                await filesMessageService.SendAsync(MessageAction.FileChangeOwner, newFolder, [
+                    newFolder.Title, userInfo.DisplayUserName(false, displayUserSettingsHelper)
+                ]);
+
+                await webhookManager.PublishAsync(WebhookTrigger.FolderUpdated, newFolder);
+            }
+
+            yield return newFolder;
+        }
+
+        var fileDao = daoFactory.GetFileDao<T>();
+        var files = fileDao.GetFilesAsync(filesId);
+
+        await foreach (var file in files)
+        {
+            if (!await fileSecurity.CanChangeOwnerAsync(file))
+            {
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+            }
+
+            if (await lockerManager.FileLockedForMeAsync(file.Id))
+            {
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_LockedFile);
+            }
+
+            if (await fileTracker.IsEditingAsync(file.Id))
+            {
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_UpdateEditingFile);
+            }
+
+            if (file.RootFolderType != FolderType.COMMON)
+            {
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+            }
+
+            if (file.ProviderEntry)
+            {
+                continue;
+            }
+
+            var newFile = file;
+            if (file.CreateBy != userInfo.Id)
+            {
+                newFile = serviceProvider.GetService<File<T>>();
+                newFile.Id = file.Id;
+                newFile.Version = file.Version + 1;
+                newFile.VersionGroup = file.VersionGroup + 1;
+                newFile.Title = file.Title;
+                newFile.SetFileStatus(await file.GetFileStatus());
+                newFile.ParentId = file.ParentId;
+                newFile.CreateBy = userInfo.Id;
+                newFile.CreateOn = file.CreateOn;
+                newFile.ConvertedType = file.ConvertedType;
+                newFile.Comment = FilesCommonResource.CommentChangeOwner;
+                newFile.Encrypted = file.Encrypted;
+                newFile.ThumbnailStatus = file.ThumbnailStatus == Thumbnail.Created ? Thumbnail.Creating : Thumbnail.Waiting;
+
+                await using (var stream = await fileDao.GetFileStreamAsync(file))
+                {
+                    newFile.ContentLength = stream.CanSeek ? stream.Length : file.ContentLength;
+                    newFile = await fileDao.SaveFileAsync(newFile, stream);
+                }
+
+                if (file.ThumbnailStatus == Thumbnail.Created)
+                {
+                    foreach (var size in thumbnailSettings.Sizes)
+                    {
+                        await (await globalStore.GetStoreAsync()).CopyAsync(String.Empty,
+                            fileDao.GetUniqThumbnailPath(file, size.Width, size.Height),
+                            String.Empty,
+                            fileDao.GetUniqThumbnailPath(newFile, size.Width, size.Height));
+                    }
+
+                    await fileDao.SetThumbnailStatusAsync(newFile, Thumbnail.Created);
+
+                    newFile.ThumbnailStatus = Thumbnail.Created;
+                }
+
+                await fileMarker.MarkAsNewAsync(newFile);
+
+                await entryStatusManager.SetFileStatusAsync(newFile);
+
+                await filesMessageService.SendAsync(MessageAction.FileChangeOwner, newFile, [
+                    newFile.Title, userInfo.DisplayUserName(false, displayUserSettingsHelper)
+                ]);
+
+                await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, newFile);
+            }
+
+            yield return newFile;
+        }
     }
     
     private async Task<ProcessedItem<T>> SetAceLinkAsync<T>(FileEntry<T> entry, SubjectType subjectType, Guid linkId, FileShare share, FileShareOptions options)

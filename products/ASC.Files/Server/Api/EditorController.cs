@@ -41,8 +41,9 @@ public class EditorControllerInternal(FileStorageService fileStorageService,
         AuthContext authContext,
         ConfigurationConverter<int> configurationConverter,
         SecurityContext securityContext,
-        DocumentProcessingService documentProcessingService)
-        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, securityContext, documentProcessingService);
+        DocumentProcessingService documentProcessingService,
+        FileOperationsService fileOperationsService)
+        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, securityContext, documentProcessingService, fileOperationsService);
 
 [DefaultRoute("file")]
 public class EditorControllerThirdparty(FileStorageService fileStorageService,
@@ -56,21 +57,24 @@ public class EditorControllerThirdparty(FileStorageService fileStorageService,
         AuthContext authContext,
         ConfigurationConverter<string> configurationConverter,
         SecurityContext securityContext,
-        DocumentProcessingService documentProcessingService)
-        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, securityContext, documentProcessingService);
+        DocumentProcessingService documentProcessingService,
+        FileOperationsService fileOperationsService)
+        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, securityContext, documentProcessingService, fileOperationsService);
 
-public abstract class EditorController<T>(FileStorageService fileStorageService,
-        DocumentServiceHelper documentServiceHelper,
-        EncryptionKeyPairDtoHelper encryptionKeyPairDtoHelper,
-        SettingsManager settingsManager,
-        EntryManager entryManager,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper,
-        ExternalShare externalShare,
-        AuthContext authContext,
-        ConfigurationConverter<T> configurationConverter,
-        SecurityContext securityContext,
-        DocumentProcessingService documentProcessingService)
+public abstract class EditorController<T>(
+    FileStorageService fileStorageService,
+    DocumentServiceHelper documentServiceHelper,
+    EncryptionKeyPairDtoHelper encryptionKeyPairDtoHelper,
+    SettingsManager settingsManager,
+    EntryManager entryManager,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper,
+    ExternalShare externalShare,
+    AuthContext authContext,
+    ConfigurationConverter<T> configurationConverter,
+    SecurityContext securityContext,
+    DocumentProcessingService documentProcessingService,
+    FileOperationsService fileOperationsService)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
 
@@ -86,7 +90,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     [HttpPut("{fileId}/saveediting")]
     public async Task<FileDto<T>> SaveEditingFromFormAsync(SaveEditingRequestDto<T> inDto)
     {
-        return await _fileDtoHelper.GetAsync(await fileStorageService.SaveEditingAsync(inDto.FileId, inDto.FileExtension, inDto.DownloadUri, inDto.File?.OpenReadStream(), inDto.Forcesave));
+        return await _fileDtoHelper.GetAsync(await fileOperationsService.SaveEditingAsync(inDto.FileId, inDto.FileExtension, inDto.DownloadUri, inDto.File?.OpenReadStream(), inDto.Forcesave));
     }
 
     /// <summary>
@@ -273,7 +277,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     [HttpGet("{fileId}/presigned")]
     public async Task<DocumentService.FileLink> GetPresignedFileUriAsync(FileIdRequestDto<T> inDto)
     {
-        return await fileStorageService.GetPresignedUriAsync(inDto.FileId);
+        return await fileOperationsService.GetPresignedUriAsync(inDto.FileId);
     }
 
     /// <summary>

@@ -75,7 +75,7 @@ public class UpdateUserTypeProgressItem: DistributedTaskProgress
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var scopeClass = scope.ServiceProvider.GetService<ChangeUserTypeProgressItemScope>();
-        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, displayUserSettingsHelper, options, webItemSecurityCache, distributedLockProvider, socketManager, webhookManager, daoFactory, reassignService) = scopeClass;
+        var (tenantManager, messageService, studioNotifyService, securityContext, userManager, displayUserSettingsHelper, options, webItemSecurityCache, distributedLockProvider, socketManager, webhookManager, daoFactory, reassignService) = scopeClass;
         var logger = options.CreateLogger("ASC.Web");
         await tenantManager.SetCurrentTenantAsync(_tenantId);
         _userInfo = await userManager.GetUsersAsync(User);
@@ -88,7 +88,7 @@ public class UpdateUserTypeProgressItem: DistributedTaskProgress
             await reassignService.DemandPermissionToReassignDataAsync(User, ToUser);
             await SetPercentageAndCheckCancellationAsync(10, true);
 
-            await fileStorageService.ReassignRoomsAsync(User, ToUser);
+            await reassignService.ReassignRoomsAsync(User, ToUser);
             await SetPercentageAndCheckCancellationAsync(40, true);
 
             if (_employeeType == EmployeeType.Guest)
@@ -248,7 +248,6 @@ public class UpdateUserTypeProgressItem: DistributedTaskProgress
 public record ChangeUserTypeProgressItemScope(
     TenantManager TenantManager,
     MessageService MessageService,
-    FileStorageService FileStorageService,
     StudioNotifyService StudioNotifyService,
     SecurityContext SecurityContext,
     UserManager UserManager,

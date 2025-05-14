@@ -59,7 +59,12 @@ public class FolderOperationsService(
     CustomTagsService customTagsService,
     WebhookManager webhookManager,
     ILogger<FolderOperationsService> logger,
-    SharingService sharingService)
+    SharingService sharingService,
+    FilesSettingsHelper filesSettingsHelper,
+    BreadCrumbsManager breadCrumbsManager,
+    FileSharing fileSharing,
+    FileMarker fileMarker,
+    FileConverter fileConverter)
 {
     /// <summary>
     /// Retrieves a folder asynchronously by its identifier with additional metadata such as tags, favorites, and pin information.
@@ -503,6 +508,238 @@ public class FolderOperationsService(
         }
 
         return renamedFolder;
+    }
+    
+        public async Task<DataWrapper<T>> GetFolderItemsAsync<T>(
+        T parentId,
+        int from,
+        int count,
+        IEnumerable<FilterType> filterTypes,
+        bool subjectGroup,
+        string subject,
+        string searchText,
+        string[] extension,
+        bool searchInContent,
+        bool withSubfolders,
+        OrderBy orderBy,
+        SearchArea searchArea = SearchArea.Active,
+        T roomId = default,
+        bool withoutTags = false,
+        IEnumerable<string> tagNames = null,
+        bool excludeSubject = false,
+        ProviderFilter provider = ProviderFilter.None,
+        SubjectFilter subjectFilter = SubjectFilter.Owner,
+        ApplyFilterOption applyFilterOption = ApplyFilterOption.All,
+        QuotaFilter quotaFilter = QuotaFilter.All,
+        StorageFilter storageFilter = StorageFilter.None,
+        FormsItemDto formsItemDto = null)
+    {
+        var subjectId = string.IsNullOrEmpty(subject) ? Guid.Empty : new Guid(subject);
+
+        var folderDao = daoFactory.GetFolderDao<T>();
+
+        Folder<T> parent = null;
+        Folder<T> parentRoom = null;
+
+        try
+        {
+            parent = await folderDao.GetFolderAsync(parentId);
+
+            if (parent == null)
+            {
+                throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+            }
+
+            if (parent != null && !string.IsNullOrEmpty(parent.Error))
+            {
+                throw new Exception(parent.Error);
+            }
+
+            if (parent == null)
+            {
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderNotFound);
+            }
+
+            if (parent.RootFolderType == FolderType.VirtualRooms)
+            {
+                parentRoom = !DocSpaceHelper.IsRoom(parent.FolderType) && parent.FolderType != FolderType.VirtualRooms && !parent.ProviderEntry ? await folderDao.GetFirstParentTypeFromFileEntryAsync(parent) : parent;
+
+                parent.ParentRoomType = parentRoom.FolderType;
+            }
+
+            if (parent.RootFolderType == FolderType.RoomTemplates)
+            {
+                parentRoom = !DocSpaceHelper.IsRoom(parent.FolderType) && parent.FolderType != FolderType.RoomTemplates && !parent.ProviderEntry ? await folderDao.GetFirstParentTypeFromFileEntryAsync(parent) : parent;
+
+                parent.ParentRoomType = parentRoom.FolderType;
+            }
+        }
+        catch (Exception e)
+        {
+            if (parent is { ProviderEntry: true })
+            {
+                throw GenerateException(new Exception(FilesCommonResource.ErrorMessage_SharpBoxException, e));
+            }
+
+            throw GenerateException(e);
+        }
+
+        if (!await fileSecurity.CanReadAsync(parent))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
+        }
+
+        if (parent.RootFolderType == FolderType.TRASH && !Equals(parent.Id, await globalFolderHelper.FolderTrashAsync))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ViewTrashItem);
+        }
+
+        if (parent.FolderType is FolderType.FormFillingFolderDone or FolderType.FormFillingFolderInProgress)
+        {
+            if (parent.ShareRecord is { Share: FileShare.FillForms })
+            {
+                subjectId = authContext.CurrentAccount.ID;
+            }
+        }
+
+        if (orderBy != null)
+        {
+            await filesSettingsHelper.SetDefaultOrder(orderBy);
+        }
+        else
+        {
+            orderBy = await filesSettingsHelper.GetDefaultOrder();
+        }
+
+        if (Equals(parent.Id, await globalFolderHelper.FolderShareAsync) && orderBy.SortedBy == SortedByType.DateAndTime)
+        {
+            orderBy.SortedBy = SortedByType.New;
+        }
+
+        searchArea = parent.FolderType switch
+        {
+            FolderType.Archive => SearchArea.Archive,
+            FolderType.RoomTemplates => SearchArea.Templates,
+            _ => searchArea
+        };
+
+        int total;
+        IEnumerable<FileEntry> entries;
+
+        try
+        {
+            (entries, total) = await entryManager.GetEntriesAsync(
+                parent,
+                parentRoom,
+                from,
+                count,
+                filterTypes,
+                subjectGroup,
+                subjectId,
+                searchText,
+                extension,
+                searchInContent,
+                withSubfolders,
+                orderBy,
+                roomId,
+                searchArea,
+                withoutTags,
+                tagNames,
+                excludeSubject,
+                provider,
+                subjectFilter,
+                applyFilterOption,
+                quotaFilter,
+                storageFilter,
+                formsItemDto);
+        }
+        catch (Exception e)
+        {
+            if (parent.ProviderEntry)
+            {
+                throw GenerateException(new Exception(FilesCommonResource.ErrorMessage_SharpBoxException, e));
+            }
+
+            throw GenerateException(e);
+        }
+
+        var breadCrumbsTask = breadCrumbsManager.GetBreadCrumbsAsync(parentId, folderDao);
+        var shareableTask = fileSharing.CanSetAccessAsync(parent);
+        var newTask = fileMarker.GetRootFoldersIdMarkedAsNewAsync(parentId);
+        var breadCrumbs = await breadCrumbsTask;
+
+        var prevVisible = breadCrumbs.ElementAtOrDefault(breadCrumbs.Count - 2);
+        if (prevVisible != null && !DocSpaceHelper.IsRoom(parent.FolderType) && prevVisible.FileEntryType == FileEntryType.Folder)
+        {
+            if (prevVisible is Folder<string> f1)
+            {
+                parent.ParentId = (T)Convert.ChangeType(f1.Id, typeof(T));
+            }
+            else if (prevVisible is Folder<int> f2)
+            {
+                parent.ParentId = (T)Convert.ChangeType(f2.Id, typeof(T));
+            }
+        }
+
+        parent.Shareable =
+            parent.FolderType == FolderType.SHARE ||
+            parent.RootFolderType == FolderType.Privacy ||
+            await shareableTask;
+
+        entries = entries.ToAsyncEnumerable().WhereAwait(async x =>
+        {
+            if (x.FileEntryType == FileEntryType.Folder)
+            {
+                return true;
+            }
+
+            if (x is File<string> f1)
+            {
+                return !await fileConverter.IsConverting(f1);
+            }
+
+            return x is File<int> f2 && !await fileConverter.IsConverting(f2);
+        }).ToEnumerable();
+
+        if (parent.FolderType == FolderType.Recent && searchArea == SearchArea.RecentByLinks)
+        {
+            parent.Title = FilesUCResource.MyFiles;
+        }
+
+        var result = new DataWrapper<T>
+        {
+            Total = total,
+            Entries = entries.ToList(),
+            FolderPathParts =
+            [
+                ..breadCrumbs.Select(object (f) =>
+                {
+                    if (f.FileEntryType == FileEntryType.Folder)
+                    {
+                        switch (f)
+                        {
+                            case Folder<string> f1:
+                                return new { f1.Id, f1.Title, RoomType = DocSpaceHelper.MapToRoomType(f1.FolderType) };
+                            case Folder<int> f2:
+                                {
+                                    var title = f2.FolderType is FolderType.Recent && searchArea == SearchArea.RecentByLinks
+                                        ? FilesUCResource.MyFiles
+                                        : f2.Title;
+
+                                    return new { f2.Id, title, RoomType = DocSpaceHelper.MapToRoomType(f2.FolderType) };
+                                }
+                        }
+                    }
+
+                    return 0;
+                })
+            ],
+            FolderInfo = parent,
+            New = await newTask,
+            ParentRoom = parentRoom
+        };
+
+        return result;
     }
     
     private async Task<Folder<T>> CreateRoomAsync<T>(Func<Task<Folder<T>>> folderFactory, bool privacy, IEnumerable<FileShareParams> shares)

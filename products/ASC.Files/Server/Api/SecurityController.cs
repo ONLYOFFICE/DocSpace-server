@@ -185,13 +185,14 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     }
 }
 
-public class SecurityControllerCommon(FileStorageService fileStorageService,
-        SecurityControllerHelper securityControllerHelper,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper,
-        BruteForceLoginManager bruteForceLoginManager,
-        ExternalLinkHelper externalLinkHelper,
-        IMapper mapper)
+public class SecurityControllerCommon(
+    SecurityControllerHelper securityControllerHelper,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper,
+    BruteForceLoginManager bruteForceLoginManager,
+    ExternalLinkHelper externalLinkHelper,
+    IMapper mapper,
+    SharingService sharingService)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -210,8 +211,8 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
         var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds);
 
         var data = AsyncEnumerable.Empty<FileEntry>();
-        data = data.Concat(fileStorageService.ChangeOwnerAsync(folderIntIds, fileIntIds, inDto.UserId));
-        data = data.Concat(fileStorageService.ChangeOwnerAsync(folderStringIds, fileStringIds, inDto.UserId));
+        data = data.Concat(sharingService.ChangeOwnerAsync(folderIntIds, fileIntIds, inDto.UserId));
+        data = data.Concat(sharingService.ChangeOwnerAsync(folderStringIds, fileStringIds, inDto.UserId));
 
         await foreach (var e in data)
         {

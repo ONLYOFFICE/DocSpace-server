@@ -78,7 +78,6 @@ public class FolderContentDto<T>
 
 [Scope]
 public class FolderContentDtoHelper(
-    FileStorageService fileStorageService,
     ApiContext apiContext,
     FileSecurity fileSecurity,
     FileDtoHelper fileWrapperHelper,
@@ -86,7 +85,8 @@ public class FolderContentDtoHelper(
     BadgesSettingsHelper badgesSettingsHelper,
     FileSecurityCommon fileSecurityCommon,
     AuthContext authContext,
-    BreadCrumbsManager breadCrumbsManager)
+    BreadCrumbsManager breadCrumbsManager,
+    FolderOperationsService folderOperationsService)
 {
     public async Task<FolderContentDto<T>> GetAsync<T>(T folderId, Guid? userIdOrGroupId, FilterType? filterType, T roomId, bool? searchInContent, bool? withSubFolders, bool? excludeSubject, ApplyFilterOption? applyFilterOption, SearchArea? searchArea, string[] extension = null, FormsItemDto formsItemDto = null)
     {
@@ -233,7 +233,7 @@ public class FolderContentDtoHelper(
         }
 
         var startIndex = Convert.ToInt32(apiContext.StartIndex);
-        var items = await fileStorageService.GetFolderItemsAsync(folderId, startIndex, Convert.ToInt32(apiContext.Count), filterTypes, filterTypes?.FirstOrDefault() == FilterType.ByUser, userIdOrGroupId.ToString(), apiContext.FilterValue, extension, searchInContent, withSubFolders, orderBy, excludeSubject: excludeSubject,
+        var items = await folderOperationsService.GetFolderItemsAsync(folderId, startIndex, Convert.ToInt32(apiContext.Count), filterTypes, filterTypes?.FirstOrDefault() == FilterType.ByUser, userIdOrGroupId.ToString(), apiContext.FilterValue, extension, searchInContent, withSubFolders, orderBy, excludeSubject: excludeSubject,
             roomId: roomId, applyFilterOption: applyFilterOption, searchArea: searchArea, formsItemDto: formsItemDto);
 
         return await GetAsync(folderId, items, startIndex);

@@ -40,8 +40,7 @@ public class TemplatesService(
     FileUtility fileUtility,
     FileSecurity fileSecurity,
     IDaoFactory daoFactory,
-    EntryManager entryManager,
-    ILogger<ThirdPartyIntegrationService> logger)
+    EntryManager entryManager)
 {
     /// <summary>
     /// Adds specified files to the templates.

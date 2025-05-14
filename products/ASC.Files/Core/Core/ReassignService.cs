@@ -39,7 +39,11 @@ public class ReassignService(
     FileMarker fileMarker,
     TenantManager tenantManager,
     ICacheNotify<ClearMyFolderItem> notifyMyFolder,
-    ILogger<ReassignService> logger)
+    ILogger<ReassignService> logger,
+    GlobalFolderHelper globalFolderHelper,
+    SecurityContext securityContext,
+    FolderOperationsService folderOperationsService,
+    SharingService sharingService)
 {
     /// <summary>
     /// Reassigns providers associated with a user to another user, optionally checking permissions before performing the operation.
@@ -305,6 +309,28 @@ public class ReassignService(
             var cacheKey = $"my/{tenantManager.GetCurrentTenantId()}/{userId}";
             await notifyMyFolder.PublishAsync(new ClearMyFolderItem { Key = cacheKey }, CacheNotifyAction.Remove);
         }
+    }
+    
+    public async Task ReassignRoomsAsync(Guid user, Guid? reassign)
+    {
+        var rooms = (await folderOperationsService.GetFolderItemsAsync(
+            await globalFolderHelper.GetFolderVirtualRooms(),
+            0,
+            -1,
+            new List<FilterType>() { FilterType.FoldersOnly },
+            false,
+            user.ToString(),
+            "",
+            [],
+            false,
+            false,
+            null)).Entries;
+
+        var ids = rooms.Where(r => r is Folder<int>).Select(e => ((Folder<int>)e).Id);
+        var thirdIds = rooms.Where(r => r is Folder<string>).Select(e => ((Folder<string>)e).Id);
+
+        await sharingService.ChangeOwnerAsync(ids, [], reassign ?? securityContext.CurrentAccount.ID, FileShare.ContentCreator).ToListAsync();
+        await sharingService.ChangeOwnerAsync(thirdIds, [], reassign ?? securityContext.CurrentAccount.ID, FileShare.ContentCreator).ToListAsync();
     }
     
     private async Task DemandPermissionToDeletePersonalDataAsync(Guid userFromId)
