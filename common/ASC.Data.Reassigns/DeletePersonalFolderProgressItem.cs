@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.Core;
+
 namespace ASC.Data.Reassigns;
 
 [Transient]
@@ -53,6 +55,7 @@ public class DeletePersonalFolderProgressItem : DistributedTaskProgress
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var fileStorageService = scope.ServiceProvider.GetService<FileStorageService>();
+        var reassignService = scope.ServiceProvider.GetService<ReassignService>();
         var options = scope.ServiceProvider.GetService<ILoggerProvider>();
         var daoFactory = scope.ServiceProvider.GetService<IDaoFactory>();
         var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
@@ -91,7 +94,7 @@ public class DeletePersonalFolderProgressItem : DistributedTaskProgress
             Percentage = 50;
             await PublishChanges();
 
-            await fileStorageService.DeletePersonalFolderAsync(_userId);
+            await reassignService.DeletePersonalFolderAsync(_userId);
 
             Percentage = 100;
         }

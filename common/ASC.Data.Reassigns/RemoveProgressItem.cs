@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Core.Common.Identity;
+using ASC.Files.Core.Core;
 using ASC.Web.Core.WebZones;
 
 using SecurityContext = ASC.Core.SecurityContext;
@@ -92,7 +93,7 @@ public class RemoveProgressItem : DistributedTaskProgress
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var scopeClass = scope.ServiceProvider.GetService<RemoveProgressItemScope>();
-        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, webItemManagerSecurity,  userFormatter, options, client) = scopeClass;
+        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, webItemManagerSecurity,  userFormatter, options, client, reassignService) = scopeClass;
         var logger = options.CreateLogger("ASC.Web");
         await tenantManager.SetCurrentTenantAsync(_tenantId);
         var userName = userFormatter.GetUserName(User);
@@ -107,7 +108,7 @@ public class RemoveProgressItem : DistributedTaskProgress
             Percentage = 5;
             await PublishChanges();
 
-            await fileStorageService.DemandPermissionToDeletePersonalDataAsync(User);
+            await reassignService.DemandPermissionToDeletePersonalDataAsync(User);
 
             Percentage = 10;
             await PublishChanges();
@@ -118,17 +119,17 @@ public class RemoveProgressItem : DistributedTaskProgress
             Percentage = 30;
             await PublishChanges();
 
-            await fileStorageService.DeletePersonalDataAsync(UserId);
+            await reassignService.DeletePersonalDataAsync(UserId);
 
             Percentage = 50;
             await PublishChanges();
 
-            await fileStorageService.ReassignRoomsFilesAsync(UserId);
+            await reassignService.ReassignRoomsFilesAsync(UserId);
                 
             Percentage = 70;
             await PublishChanges();
                 
-            await fileStorageService.ReassignRoomsFoldersAsync(UserId);
+            await reassignService.ReassignRoomsFoldersAsync(UserId);
 
             Percentage = 95;
             await PublishChanges();
@@ -268,7 +269,8 @@ public record RemoveProgressItemScope(
     WebItemManagerSecurity WebItemManagerSecurity,
     UserFormatter UserFormatter,
     ILoggerProvider Options,
-    IdentityClient Client);
+    IdentityClient Client,
+    ReassignService ReassignService);
 
 class UsageSpaceWrapper
 {

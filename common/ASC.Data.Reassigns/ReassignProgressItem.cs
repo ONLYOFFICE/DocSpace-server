@@ -26,6 +26,7 @@
 
 using ASC.Api.Core.Webhook;
 using ASC.Core.Common.Identity;
+using ASC.Files.Core.Core;
 using ASC.Webhooks.Core;
 
 using SecurityContext = ASC.Core.SecurityContext;
@@ -84,7 +85,7 @@ public class ReassignProgressItem : DistributedTaskProgress
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var scopeClass = scope.ServiceProvider.GetService<ReassignProgressItemScope>();
-        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, displayUserSettingsHelper, options, socketManager, webhookManager, client) = scopeClass;
+        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, displayUserSettingsHelper, options, socketManager, webhookManager, client, reassignService) = scopeClass;
         var logger = options.CreateLogger("ASC.Web");
         await tenantManager.SetCurrentTenantAsync(_tenantId);
 
@@ -94,7 +95,7 @@ public class ReassignProgressItem : DistributedTaskProgress
 
             await SetPercentageAndCheckCancellationAsync(5, true);
 
-            await fileStorageService.DemandPermissionToReassignDataAsync(FromUser, ToUser);
+            await reassignService.DemandPermissionToReassignDataAsync(FromUser, ToUser);
 
             await SetPercentageAndCheckCancellationAsync(10, true);
 
@@ -105,7 +106,7 @@ public class ReassignProgressItem : DistributedTaskProgress
                 await fileStorageService.MoveSharedFilesAsync(FromUser, ToUser);
 
                 await SetPercentageAndCheckCancellationAsync(20, true);
-                await fileStorageService.DeletePersonalDataAsync(FromUser);
+                await reassignService.DeletePersonalDataAsync(FromUser);
             }
             else
             {
@@ -114,15 +115,15 @@ public class ReassignProgressItem : DistributedTaskProgress
 
             await SetPercentageAndCheckCancellationAsync(30, true);
 
-            await fileStorageService.ReassignProvidersAsync(FromUser, ToUser);
+            await reassignService.ReassignProvidersAsync(FromUser, ToUser);
 
             await SetPercentageAndCheckCancellationAsync(50, true);
 
-            await fileStorageService.ReassignFoldersAsync(FromUser, ToUser, personalFolderIds);
+            await reassignService.ReassignFoldersAsync(FromUser, ToUser, personalFolderIds);
 
             await SetPercentageAndCheckCancellationAsync(70, true);
 
-            await fileStorageService.ReassignFilesAsync(FromUser, ToUser, personalFolderIds);
+            await reassignService.ReassignFilesAsync(FromUser, ToUser, personalFolderIds);
 
             await SetPercentageAndCheckCancellationAsync(90, true);
 
@@ -251,4 +252,5 @@ public record ReassignProgressItemScope(
     ILoggerProvider Options,
     UserSocketManager SocketManager,
     UserWebhookManager WebhookManager,
-    IdentityClient Client);
+    IdentityClient Client,
+    ReassignService ReassignService);

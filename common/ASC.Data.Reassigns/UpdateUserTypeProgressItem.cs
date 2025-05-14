@@ -26,6 +26,7 @@
 
 using ASC.Api.Core.Webhook;
 using ASC.Core.Common;
+using ASC.Files.Core.Core;
 using ASC.Webhooks.Core;
 
 using SecurityContext = ASC.Core.SecurityContext;
@@ -74,7 +75,7 @@ public class UpdateUserTypeProgressItem: DistributedTaskProgress
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var scopeClass = scope.ServiceProvider.GetService<ChangeUserTypeProgressItemScope>();
-        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, _, displayUserSettingsHelper, options, webItemSecurityCache, distributedLockProvider, socketManager, webhookManager, userFormatter, daoFactory) = scopeClass;
+        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, displayUserSettingsHelper, options, webItemSecurityCache, distributedLockProvider, socketManager, webhookManager, daoFactory, reassignService) = scopeClass;
         var logger = options.CreateLogger("ASC.Web");
         await tenantManager.SetCurrentTenantAsync(_tenantId);
         _userInfo = await userManager.GetUsersAsync(User);
@@ -84,7 +85,7 @@ public class UpdateUserTypeProgressItem: DistributedTaskProgress
             await securityContext.AuthenticateMeWithoutCookieAsync(_currentUserId);
             await SetPercentageAndCheckCancellationAsync(5, true);
 
-            await fileStorageService.DemandPermissionToReassignDataAsync(User, ToUser);
+            await reassignService.DemandPermissionToReassignDataAsync(User, ToUser);
             await SetPercentageAndCheckCancellationAsync(10, true);
 
             await fileStorageService.ReassignRoomsAsync(User, ToUser);
@@ -93,7 +94,7 @@ public class UpdateUserTypeProgressItem: DistributedTaskProgress
             if (_employeeType == EmployeeType.Guest)
             {
                 await securityContext.AuthenticateMeWithoutCookieAsync(ToUser);
-                await fileStorageService.UpdatePersonalFolderModified(User);
+                await reassignService.UpdatePersonalFolderModified(User);
                 await securityContext.AuthenticateMeWithoutCookieAsync(_currentUserId);
 
                 await SetPercentageAndCheckCancellationAsync(60, true);
@@ -251,12 +252,11 @@ public record ChangeUserTypeProgressItemScope(
     StudioNotifyService StudioNotifyService,
     SecurityContext SecurityContext,
     UserManager UserManager,
-    UserPhotoManager UserPhotoManager,
     DisplayUserSettingsHelper DisplayUserSettingsHelper,
     ILoggerProvider Options,
     WebItemSecurityCache WebItemSecurityCache,
     IDistributedLockProvider DistributedLockProvider,
     UserSocketManager SocketManager,
     UserWebhookManager WebhookManager,
-    UserFormatter UserFormatter,
-    IDaoFactory DaoFactory);
+    IDaoFactory DaoFactory,
+    ReassignService ReassignService);
