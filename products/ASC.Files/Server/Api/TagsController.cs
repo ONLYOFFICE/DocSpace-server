@@ -28,30 +28,27 @@ namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
 public class TagsControllerInternal(
-        FileStorageService fileStorageService,
         EntryManager entryManager,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
         FileOperationsService fileOperationsService,
-        TemplatesService templatesService)
-    : TagsController<int>(fileStorageService, entryManager, folderDtoHelper, fileDtoHelper, fileOperationsService, templatesService);
+        FavoritesService favoritesService)
+    : TagsController<int>(entryManager, folderDtoHelper, fileDtoHelper, fileOperationsService, favoritesService);
 
 public class TagsControllerThirdparty(
-        FileStorageService fileStorageService,
         EntryManager entryManager,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
         FileOperationsService fileOperationsService,
-        TemplatesService templatesService)
-    : TagsController<string>(fileStorageService, entryManager, folderDtoHelper, fileDtoHelper, fileOperationsService, templatesService);
+        FavoritesService favoritesService)
+    : TagsController<string>(entryManager, folderDtoHelper, fileDtoHelper, fileOperationsService, favoritesService);
 
 public abstract class TagsController<T>(
-        FileStorageService fileStorageService,
         EntryManager entryManager,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
         FileOperationsService fileOperationsService,
-        TemplatesService templatesService)
+        FavoritesService favoritesService)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -84,7 +81,7 @@ public abstract class TagsController<T>(
     [HttpGet("favorites/{fileId}")]
     public async Task<bool> ToggleFileFavoriteAsync(ToggleFileFavoriteRequestDto<T> inDto)
     {
-        return await fileStorageService.ToggleFileFavoriteAsync(inDto.FileId, inDto.Favorite);
+        return await favoritesService.ToggleFileFavoriteAsync(inDto.FileId, inDto.Favorite);
     }
 }
 
@@ -92,7 +89,8 @@ public class TagsControllerCommon(
     FileStorageService fileStorageService,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
-    TemplatesService templatesService)
+    TemplatesService templatesService,
+    FavoritesService favoritesService)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -110,8 +108,8 @@ public class TagsControllerCommon(
         var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
         var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds);
 
-        await fileStorageService.AddToFavoritesAsync(folderIntIds, fileIntIds);
-        await fileStorageService.AddToFavoritesAsync(folderStringIds, fileStringIds);
+        await favoritesService.AddToFavoritesAsync(folderIntIds, fileIntIds);
+        await favoritesService.AddToFavoritesAsync(folderStringIds, fileStringIds);
 
         return true;
     }
@@ -201,8 +199,8 @@ public class TagsControllerCommon(
         var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
         var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds);
 
-        await fileStorageService.DeleteFavoritesAsync(folderIntIds, fileIntIds);
-        await fileStorageService.DeleteFavoritesAsync(folderStringIds, fileStringIds);
+        await favoritesService.DeleteFavoritesAsync(folderIntIds, fileIntIds);
+        await favoritesService.DeleteFavoritesAsync(folderStringIds, fileStringIds);
 
         return true;
     }

@@ -1195,7 +1195,6 @@ public class FileStorageService //: IFileStorageService
         else
         {
             checkedFiles.AddRange(filesId);
-            return checkedFiles;
         }
 
         return checkedFiles;
@@ -1540,7 +1539,6 @@ public class FileStorageService //: IFileStorageService
         }
 
         await fileSecurity.RemoveSubjectAsync(userFromId, true);
-        return;
     }
 
     public async Task UpdatePersonalFolderModified(Guid userId)
@@ -1739,83 +1737,6 @@ public class FileStorageService //: IFileStorageService
         }
 
         await fileDao.ReassignRoomsFilesAsync(userFromId);
-    }
-
-    #endregion
-
-    #region Favorites Manager
-
-    public async Task<bool> ToggleFileFavoriteAsync<T>(T fileId, bool favorite)
-    {
-        if (favorite)
-        {
-            await AddToFavoritesAsync(new List<T>(0), new List<T>(1) { fileId });
-        }
-        else
-        {
-            await DeleteFavoritesAsync(new List<T>(0), new List<T>(1) { fileId });
-        }
-
-        return favorite;
-    }
-
-    public async ValueTask<List<FileEntry<T>>> AddToFavoritesAsync<T>(IEnumerable<T> foldersId, IEnumerable<T> filesId)
-    {
-        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
-        {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
-        }
-
-        var tagDao = daoFactory.GetTagDao<T>();
-        var fileDao = daoFactory.GetFileDao<T>();
-        var folderDao = daoFactory.GetFolderDao<T>();
-
-        var files = fileSecurity.FilterReadAsync(fileDao.GetFilesAsync(filesId).Where(file => !file.Encrypted)).ToListAsync();
-        var folders = fileSecurity.FilterReadAsync(folderDao.GetFoldersAsync(foldersId)).ToListAsync();
-
-        List<FileEntry<T>> entries = [];
-
-        foreach (var items in await Task.WhenAll(files.AsTask(), folders.AsTask()))
-        {
-            entries.AddRange(items);
-        }
-
-        var tags = entries.Select(entry => Tag.Favorite(authContext.CurrentAccount.ID, entry));
-
-        await tagDao.SaveTagsAsync(tags);
-
-        foreach (var entry in entries)
-        {
-            await filesMessageService.SendAsync(MessageAction.FileMarkedAsFavorite, entry, entry.Title);
-        }
-
-        return entries;
-    }
-
-    public async Task DeleteFavoritesAsync<T>(IEnumerable<T> foldersId, IEnumerable<T> filesId)
-    {
-        var tagDao = daoFactory.GetTagDao<T>();
-        var fileDao = daoFactory.GetFileDao<T>();
-        var folderDao = daoFactory.GetFolderDao<T>();
-
-        var files = fileSecurity.FilterReadAsync(fileDao.GetFilesAsync(filesId)).ToListAsync();
-        var folders = fileSecurity.FilterReadAsync(folderDao.GetFoldersAsync(foldersId)).ToListAsync();
-
-        List<FileEntry<T>> entries = [];
-
-        foreach (var items in await Task.WhenAll(files.AsTask(), folders.AsTask()))
-        {
-            entries.AddRange(items);
-        }
-
-        var tags = entries.Select(entry => Tag.Favorite(authContext.CurrentAccount.ID, entry));
-
-        await tagDao.RemoveTagsAsync(tags);
-
-        foreach (var entry in entries)
-        {
-            await filesMessageService.SendAsync(MessageAction.FileRemovedFromFavorite, entry, entry.Title);
-        }
     }
 
     #endregion
