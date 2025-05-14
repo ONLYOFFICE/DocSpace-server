@@ -414,7 +414,7 @@ public class TfaappController(
 
         await TfaAppUserSettings.DisableForUserAsync(settingsManager, user.Id);
         messageService.Send(MessageAction.UserDisconnectedTfaApp, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
-        await userSocketManager.UpdateUserAsync(userManager.GetUsers(authContext.CurrentAccount.ID));
+        await userSocketManager.UpdateUserAsync(user);
         
         await cookiesManager.ResetUserCookieAsync(user.Id);
         if (isMe)

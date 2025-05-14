@@ -170,4 +170,9 @@ public class TenantModel : IModel
     /// Specifies whether the access to the space management is limited or not.
     /// </summary>
     public bool LimitedAccessSpace { get; set; }
+
+    /// <summary>
+    /// The serialized third party profile.
+    /// </summary>
+    public string ThirdPartyProfile { get; set; }
 }
