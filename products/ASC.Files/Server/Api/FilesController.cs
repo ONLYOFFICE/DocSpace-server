@@ -28,6 +28,7 @@ namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
 public class FilesControllerInternal(
+    DocumentProcessingService documentProcessingService,
     FilesControllerHelper filesControllerHelper,
     FileStorageService fileStorageService,
     SharingService sharingService,
@@ -38,8 +39,12 @@ public class FilesControllerInternal(
     ApiContext apiContext,
     FileShareDtoHelper fileShareDtoHelper,
     HistoryApiHelper historyApiHelper,
-    IFusionCache hybridCache)
+    IFusionCache hybridCache,
+    ApiDateTimeHelper apiDateTimeHelper,
+    UserManager userManager,
+    DisplayUserSettingsHelper displayUserSettingsHelper)
     : FilesController<int>(
+        documentProcessingService,
         filesControllerHelper,
         fileStorageService,
         sharingService,
@@ -49,7 +54,10 @@ public class FilesControllerInternal(
         fileDtoHelper,
         apiContext,
         fileShareDtoHelper,
-        hybridCache)
+        hybridCache,
+        apiDateTimeHelper,
+        userManager,
+        displayUserSettingsHelper)
 {
     /// <summary>
     /// Returns the list of actions performed on the file with the specified identifier.
@@ -71,6 +79,7 @@ public class FilesControllerInternal(
 }
 
 public class FilesControllerThirdparty(
+    DocumentProcessingService documentProcessingService,
     FilesControllerHelper filesControllerHelper,
     FileStorageService fileStorageService,
     SharingService sharingService,
@@ -80,8 +89,12 @@ public class FilesControllerThirdparty(
     FileDtoHelper fileDtoHelper,
     ApiContext apiContext,
     FileShareDtoHelper fileShareDtoHelper,
-    IFusionCache hybridCache)
+    IFusionCache hybridCache,
+    ApiDateTimeHelper apiDateTimeHelper,
+    UserManager userManager,
+    DisplayUserSettingsHelper displayUserSettingsHelper)
     : FilesController<string>(
+        documentProcessingService,
         filesControllerHelper,
         fileStorageService,
         sharingService,
@@ -91,9 +104,13 @@ public class FilesControllerThirdparty(
         fileDtoHelper,
         apiContext,
         fileShareDtoHelper,
-        hybridCache);
+        hybridCache, 
+        apiDateTimeHelper,
+        userManager,
+        displayUserSettingsHelper);
 
 public abstract class FilesController<T>(
+    DocumentProcessingService documentProcessingService,
     FilesControllerHelper filesControllerHelper,
     FileStorageService fileStorageService,
     SharingService sharingService,
@@ -103,7 +120,10 @@ public abstract class FilesController<T>(
     FileDtoHelper fileDtoHelper,
     ApiContext apiContext,
     FileShareDtoHelper fileShareDtoHelper,
-    IFusionCache hybridCache)
+    IFusionCache hybridCache,
+    ApiDateTimeHelper apiDateTimeHelper,
+    UserManager userManager,
+    DisplayUserSettingsHelper displayUserSettingsHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -283,7 +303,7 @@ public abstract class FilesController<T>(
     [HttpGet("file/{fileId}/edit/diff")]
     public async Task<EditHistoryDataDto> GetEditDiffUrlAsync(EditDiffUrlRequestDto<T> inDto)
     {
-        return await filesControllerHelper.GetEditDiffUrlAsync(inDto.FileId, inDto.Version);
+        return await documentProcessingService.GetEditDiffUrlAsync(inDto.FileId, inDto.Version);
     }
 
     /// <summary>
@@ -299,7 +319,7 @@ public abstract class FilesController<T>(
     [HttpGet("file/{fileId}/edit/history")]
     public IAsyncEnumerable<EditHistoryDto> GetEditHistoryAsync(FileIdRequestDto<T> inDto)
     {
-        return filesControllerHelper.GetEditHistoryAsync(inDto.FileId);
+        return documentProcessingService.GetEditHistoryAsync(inDto.FileId).Select(f => new EditHistoryDto(f, apiDateTimeHelper, userManager, displayUserSettingsHelper));
     }
 
     /// <summary>

@@ -39,7 +39,8 @@ public class ThirdpartyController(
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
         FileSecurityCommon fileSecurityCommon,
-        FolderOperationsService folderOperationsService)
+        FolderOperationsService folderOperationsService,
+        ThirdPartyIntegrationService integrationService)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -104,7 +105,7 @@ public class ThirdpartyController(
     [HttpDelete("thirdparty/{providerId:int}")]
     public async Task<string> DeleteThirdPartyAsync(ProviderIdRequestDto inDto)
     {
-        return await fileStorageService.DeleteThirdPartyAsync(inDto.ProviderId.ToString(CultureInfo.InvariantCulture));
+        return await integrationService.DeleteThirdPartyAsync(inDto.ProviderId.ToString(CultureInfo.InvariantCulture));
     }
 
     /// <summary>
@@ -159,7 +160,7 @@ public class ThirdpartyController(
     [HttpGet("thirdparty")]
     public IAsyncEnumerable<ThirdPartyParams> GetThirdPartyAccountsAsync()
     {
-        return fileStorageService.GetThirdPartyAsync();
+        return integrationService.GetThirdPartyAsync();
     }
 
     /// <summary>
@@ -172,7 +173,7 @@ public class ThirdpartyController(
     [HttpGet("thirdparty/backup")]
     public async Task<FolderDto<string>> GetBackupThirdPartyAccountAsync()
     {
-        var folder = await fileStorageService.GetBackupThirdPartyAsync();
+        var folder = await integrationService.GetBackupThirdPartyAsync();
         if (folder != null)
         {
 
@@ -231,7 +232,7 @@ public class ThirdpartyController(
             ProviderKey = inDto.ProviderKey
         };
 
-        var folder = await fileStorageService.SaveThirdPartyAsync(thirdPartyParams);
+        var folder = await integrationService.SaveThirdPartyAsync(thirdPartyParams);
 
         return await _folderDtoHelper.GetAsync(folder);
     }
@@ -260,7 +261,7 @@ public class ThirdpartyController(
             ProviderKey = inDto.ProviderKey
         };
 
-        var folder = await fileStorageService.SaveThirdPartyBackupAsync(thirdPartyParams);
+        var folder = await integrationService.SaveThirdPartyBackupAsync(thirdPartyParams);
 
         return await _folderDtoHelper.GetAsync(folder);
     }

@@ -27,28 +27,29 @@
 namespace ASC.Files.Helpers;
 
 [Scope]
-public class FilesControllerHelper(IServiceProvider serviceProvider,
-        FilesSettingsHelper filesSettingsHelper,
-        FileUploader fileUploader,
-        SocketManager socketManager,
-        FileDtoHelper fileDtoHelper,
-        FileStorageService fileStorageService,
-        IHttpContextAccessor httpContextAccessor,
-        ILogger<FilesControllerHelper> logger,
-        ApiDateTimeHelper apiDateTimeHelper,
-        UserManager userManager,
-        DisplayUserSettingsHelper displayUserSettingsHelper,
-        FileConverter fileConverter,
-        PathProvider pathProvider,
-        FileChecker fileChecker,
-        FillingFormResultDtoHelper fillingFormResultDtoHelper,
-        WebhookManager webhookManager,
-        IDaoFactory daoFactory,
-        IEventBus eventBus,
-        TenantManager tenantManager,
-        AuthContext authContext,
-        FileOperationsService fileOperationsService,
-        DocumentProcessingService documentProcessingService)
+public class FilesControllerHelper(
+    IServiceProvider serviceProvider,
+    FilesSettingsHelper filesSettingsHelper,
+    FileUploader fileUploader,
+    SocketManager socketManager,
+    FileDtoHelper fileDtoHelper,
+    FileStorageService fileStorageService,
+    IHttpContextAccessor httpContextAccessor,
+    ILogger<FilesControllerHelper> logger,
+    ApiDateTimeHelper apiDateTimeHelper,
+    UserManager userManager,
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    FileConverter fileConverter,
+    PathProvider pathProvider,
+    FileChecker fileChecker,
+    FillingFormResultDtoHelper fillingFormResultDtoHelper,
+    WebhookManager webhookManager,
+    IDaoFactory daoFactory,
+    IEventBus eventBus,
+    TenantManager tenantManager,
+    AuthContext authContext,
+    FileOperationsService fileOperationsService,
+    DocumentProcessingService documentProcessingService)
     : FilesHelperBase(filesSettingsHelper,
             fileUploader,
             socketManager,
@@ -181,11 +182,6 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         return await _fileDtoHelper.GetAsync(file);
     }
 
-    public async Task<EditHistoryDataDto> GetEditDiffUrlAsync<T>(T fileId, int version = 0)
-    {
-        return await _fileStorageService.GetEditDiffUrlAsync(fileId, version);
-    }
-
     public async Task<FillingFormResultDto<T>> GetFillResultAsync<T>(T formId)
     {
         if (formId != null)
@@ -193,11 +189,6 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
             return await fillingFormResultDtoHelper.GetAsync(formId);
         }
         return null;
-    }
-
-    public IAsyncEnumerable<EditHistoryDto> GetEditHistoryAsync<T>(T fileId)
-    {
-        return documentProcessingService.GetEditHistoryAsync(fileId).Select(f => new EditHistoryDto(f, apiDateTimeHelper, userManager, displayUserSettingsHelper));
     }
 
     public IAsyncEnumerable<FileDto<T>> GetFileVersionInfoAsync<T>(T fileId)

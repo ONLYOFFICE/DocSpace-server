@@ -34,19 +34,24 @@ namespace ASC.Files.Core.Core;
 /// </remarks>
 [Scope]
 public class DocumentProcessingService(
+    GlobalStore globalStore,
     AuthContext authContext,
+    UserManager userManager,
+    BaseCommonLinkUtility baseCommonLinkUtility,
+    PathProvider pathProvider,
     FileSecurity fileSecurity,
     SocketManager socketManager,
     IDaoFactory daoFactory,
     EntryManager entryManager,
-    DocumentServiceTrackerHelper documentServiceTrackerHelper,
     FileConverter fileConverter,
     DocumentServiceHelper documentServiceHelper,
+    DocumentServiceConnector documentServiceConnector,
     IServiceProvider serviceProvider,
     TenantManager tenantManager,
     FileTrackerHelper fileTracker,
     ExternalShare externalShare,
-    ILogger<FileOperationsService> logger)
+    DocumentServiceTrackerHelper documentServiceTrackerHelper,
+    ILogger<DocumentProcessingService> logger)
 {
     /// Tracks the editing process of a specified file, validating the document key and updating the editing state.
     /// This helps in managing the document operations and ensures proper tracking of file modifications within the service.
@@ -242,6 +247,70 @@ public class DocumentProcessingService(
         {
             yield return res;
         }
+    }
+    
+    public async Task<EditHistoryDataDto> GetEditDiffUrlAsync<T>(T fileId, int version = 0)
+    {
+        var fileDao = daoFactory.GetFileDao<T>();
+
+        var file = version > 0
+            ? await fileDao.GetFileAsync(fileId, version)
+            : await fileDao.GetFileAsync(fileId);
+
+        if (file == null)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
+        if (!await fileSecurity.CanReadHistoryAsync(file))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
+        }
+
+        if (file.ProviderEntry)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_BadRequest);
+        }
+
+        var result = new EditHistoryDataDto { FileType = file.ConvertedExtension.Trim('.'), Key = await documentServiceHelper.GetDocKeyAsync(file), Url = documentServiceConnector.ReplaceCommunityAddress(pathProvider.GetFileStreamUrl(file)), Version = version };
+
+        if (await fileDao.ContainChangesAsync(file.Id, file.Version))
+        {
+            string previousKey;
+            string sourceFileUrl;
+            string sourceExt;
+
+            var history = await fileDao.GetFileHistoryAsync(file.Id).ToListAsync();
+            var previousFileStable = history.OrderByDescending(r => r.Version).FirstOrDefault(r => r.Version < file.Version);
+            if (previousFileStable != null)
+            {
+                sourceFileUrl = pathProvider.GetFileStreamUrl(previousFileStable);
+                sourceExt = previousFileStable.ConvertedExtension;
+
+                previousKey = await documentServiceHelper.GetDocKeyAsync(previousFileStable);
+            }
+            else
+            {
+                var culture = (await userManager.GetUsersAsync(authContext.CurrentAccount.ID)).GetCulture();
+                var storeTemplate = await globalStore.GetStoreTemplateAsync();
+                var fileExt = FileUtility.GetFileExtension(file.Title);
+                var path = await globalStore.GetNewDocTemplatePath(storeTemplate, fileExt, culture);
+                var uri = await storeTemplate.GetUriAsync("", path);
+
+                sourceFileUrl = baseCommonLinkUtility.GetFullAbsolutePath(uri.ToString());
+                sourceExt = fileExt.Trim('.');
+
+                previousKey = DocumentServiceConnector.GenerateRevisionId(Guid.NewGuid().ToString());
+            }
+
+            result.Previous = new EditHistoryUrl { Key = previousKey, Url = documentServiceConnector.ReplaceCommunityAddress(sourceFileUrl), FileType = sourceExt.Trim('.') };
+
+            result.ChangesUrl = documentServiceConnector.ReplaceCommunityAddress(pathProvider.GetFileChangesUrl(file));
+        }
+
+        result.Token = documentServiceHelper.GetSignature(result);
+
+        return result;
     }
     
     private Exception GenerateException(Exception error, bool warning = false)
