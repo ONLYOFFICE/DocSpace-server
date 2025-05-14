@@ -1,0 +1,565 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AceShareLink" xml:space="preserve">
+    <value>Portali i jashtëm</value>
+  </data>
+  <data name="AceStatusEnum_Collaborator" xml:space="preserve">
+    <value>Bashkëpunëtor</value>
+  </data>
+  <data name="AceStatusEnum_Comment" xml:space="preserve">
+    <value>Komentoni</value>
+  </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Krijuesi i përmbajtjes</value>
+  </data>
+  <data name="AceStatusEnum_CustomFilter" xml:space="preserve">
+    <value>Filtri i personalizuar</value>
+  </data>
+  <data name="AceStatusEnum_Editing" xml:space="preserve">
+    <value>Redaktori</value>
+  </data>
+  <data name="AceStatusEnum_FillForms" xml:space="preserve">
+    <value>Plotësimi i formularit</value>
+  </data>
+  <data name="AceStatusEnum_Read" xml:space="preserve">
+    <value>Vetëm lexoni</value>
+  </data>
+  <data name="AceStatusEnum_ReadWrite" xml:space="preserve">
+    <value>Akses i plotë</value>
+  </data>
+  <data name="AceStatusEnum_Restrict" xml:space="preserve">
+    <value>Refuzoni aksesin</value>
+  </data>
+  <data name="AceStatusEnum_Review" xml:space="preserve">
+    <value>Rishikimi</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Menaxheri i dhomës</value>
+  </data>
+  <data name="Admin" xml:space="preserve">
+    <value>Administratori</value>
+  </data>
+  <data name="AppAccessDenied" xml:space="preserve">
+    <value>Për të punuar me skedarin, duhet të jepni akses në të</value>
+  </data>
+  <data name="Author_Me" xml:space="preserve">
+    <value>Unë</value>
+  </data>
+  <data name="CommentAutosave" xml:space="preserve">
+    <value>Ruajtje automatike</value>
+  </data>
+  <data name="CommentChangeOwner" xml:space="preserve">
+    <value>Pronar i ndryshuar</value>
+  </data>
+  <data name="CommentConvert" xml:space="preserve">
+    <value>Kovertuar nga {0}</value>
+  </data>
+  <data name="CommentCopy" xml:space="preserve">
+    <value>E kopjuar</value>
+  </data>
+  <data name="CommentCreate" xml:space="preserve">
+    <value>E krijuar</value>
+  </data>
+  <data name="CommentCreateByDocuSign" xml:space="preserve">
+    <value>Krijuar nga DocuSign</value>
+  </data>
+  <data name="CommentCreateFillFormDraft" xml:space="preserve">
+    <value>Krijuar për të plotësuar formularin</value>
+  </data>
+  <data name="CommentEdit" xml:space="preserve">
+    <value>Redaktuar</value>
+  </data>
+  <data name="CommentEditEncrypt" xml:space="preserve">
+    <value>Redaktuar me kodifikim</value>
+  </data>
+  <data name="CommentEncrypted" xml:space="preserve">
+    <value>E koduar</value>
+  </data>
+  <data name="CommentForcesave" xml:space="preserve">
+    <value>Ruajtur</value>
+  </data>
+  <data name="CommentOverwrite" xml:space="preserve">
+    <value>I mbushkruar</value>
+  </data>
+  <data name="CommentRevert" xml:space="preserve">
+    <value>Restauruar nga rishikimi i {0}</value>
+  </data>
+  <data name="CommentRevertChanges" xml:space="preserve">
+    <value>Restauruar nga ndryshimi i dokumentit të {0}</value>
+  </data>
+  <data name="CommentSubmitFillForm" xml:space="preserve">
+    <value>Formulari i dorëzuar</value>
+  </data>
+  <data name="CommentUpload" xml:space="preserve">
+    <value>Ngarkuar</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>Data</value>
+  </data>
+  <data name="DefaultExternalLinkTitle" xml:space="preserve">
+    <value>Lidhje e shpërndarë</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Lidhja e ftesës</value>
+  </data>
+  <data name="DocuSignStatusDeclined" xml:space="preserve">
+    <value>Refuzuar</value>
+  </data>
+  <data name="DocuSignStatusError" xml:space="preserve">
+    <value>Pati një gabim gjatë operacionit të dërgimit</value>
+  </data>
+  <data name="DocuSignStatusNotSended" xml:space="preserve">
+    <value>Dërgimi i dokumentit nëpërmjet DocuSign është anuluar</value>
+  </data>
+  <data name="DocuSignStatusSended" xml:space="preserve">
+    <value>Dokumenti u dërgua për nënshkrim nëpërmjet DocuSign</value>
+  </data>
+  <data name="DocuSignStatusVoided" xml:space="preserve">
+    <value>I zbrazur</value>
+  </data>
+  <data name="ErrorMessage_BadRequest" xml:space="preserve">
+    <value>Kërkesë e keqe.</value>
+  </data>
+  <data name="ErrorMessage_ChangeOwner" xml:space="preserve">
+    <value>Ju nuk mund ta zgjidhni këtë përdorues</value>
+  </data>
+  <data name="ErrorMessage_ConvertTimeout" xml:space="preserve">
+    <value>Konvertimi kërkon shumë kohë.</value>
+  </data>
+  <data name="ErrorMessage_DocServiceException" xml:space="preserve">
+    <value>Ndodhi një gabim në shërbimin e dokumenteve</value>
+  </data>
+  <data name="ErrorMessage_EditingCoauth" xml:space="preserve">
+    <value>Skedari hapet për redaktim nga {0}. Aktualisht, veçoria e bashkë-redaktimit nuk mbështetet për këtë format skedari.</value>
+  </data>
+  <data name="ErrorMessage_EditingMobile" xml:space="preserve">
+    <value>Skedari është i hapur për modifikim në një aplikacion celular nga {0}</value>
+  </data>
+  <data name="ErrorMessage_EmptyFile" xml:space="preserve">
+    <value>Skedar bosh</value>
+  </data>
+  <data name="ErrorMessage_FileNotFound" xml:space="preserve">
+    <value>Skedari i kërkuar nuk u gjet</value>
+  </data>
+  <data name="ErrorMessage_FileSizeCopy" xml:space="preserve">
+    <value>Skedari më i madh se {0} nuk do të kopjohet</value>
+  </data>
+  <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
+    <value>Skedari më i madh se {0} nuk do të zhvendoset</value>
+  </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Zhvendosja e disa skedarëve në dhomën e plotësimit të formularit nuk mbështetet. Lëvizni një formular PDF {0} në të njëjtën kohë.</value>
+  </data>
+  <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
+    <value>Versioni i ri nuk mund të jetë i njëjtë me atë aktual</value>
+  </data>
+  <data name="ErrorMessage_FolderCopyError" xml:space="preserve">
+    <value>Nuk mund ta kopjoni dosjen në nënfolderin e saj</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Zhvendosja e dosjeve në dhomën e plotësimit të formularit nuk mbështetet. Lëvizni një formular PDF {0} në të njëjtën kohë.</value>
+  </data>
+  <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
+    <value>Dosja e kërkuar nuk u gjet</value>
+  </data>
+  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
+    <value>Ofruesi i pavlefshëm</value>
+  </data>
+  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
+    <value>Nuk është e mundur të përdoret kjo dosje për të ruajtur dhomën</value>
+  </data>
+  <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
+    <value>Titulli i pasaktë</value>
+  </data>
+  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
+    <value>Lidhja e ftesës është e pavlefshme ose vlefshmëria e saj ka skaduar</value>
+  </data>
+  <data name="ErrorMessage_LockedFile" xml:space="preserve">
+    <value>Skedari aktualisht është i kyçur nga një përdorues tjetër</value>
+  </data>
+  <data name="ErrorMessage_MailMergeCount" xml:space="preserve">
+    <value>Të paktën {0} mesazhe postare nuk mund të dërgoheshin. Ju lutemi vizitoni modulin Mail për të parë se cila mund të jetë arszeja e dështimit.</value>
+  </data>
+  <data name="ErrorMessage_ManyDownloads" xml:space="preserve">
+    <value>Shumë shkarkime.</value>
+  </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>Numri maksimal i lidhjeve nuk mund të kalojë {0}</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Skedari nuk mund të zhvendoset në këtë dhomë. Ju lutemi provoni të zhvendosni formularin PDF {0}.</value>
+  </data>
+  <data name="ErrorMessage_NotSupportedFormat" xml:space="preserve">
+    <value>Na vjen keq, ky format skedari nuk mbështetet</value>
+  </data>
+  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
+    <value>Ky ofrues është i lidhur tashmë me dhomën</value>
+  </data>
+  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
+    <value>Roli nuk është i disponueshëm për këtë lloj përdoruesi</value>
+  </data>
+  <data name="ErrorMessage_SaveAnonymous" xml:space="preserve">
+    <value>Autori i ruajtjes është i panjohur</value>
+  </data>
+  <data name="ErrorMessage_SaveCorrupted" xml:space="preserve">
+    <value>Skedari u korruptua kur u përpoqët ta ruani</value>
+  </data>
+  <data name="ErrorMessage_SaveUrlLost" xml:space="preserve">
+    <value>Dështoi në marrjen e skedarit për t’u ruajtur</value>
+  </data>
+  <data name="ErrorMessage_SecurityException" xml:space="preserve">
+    <value>Nuk keni leje të mjaftueshme për të kryer operacionin</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
+    <value>Nuk keni leje të mjaftueshme për të arkivuar dhomën</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_Auth" xml:space="preserve">
+    <value>Nuk mund të autorizohet te ofruesi i {0} me kredencialet e dhëna.</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_CopyFile" xml:space="preserve">
+    <value>Nuk keni leje të mjaftueshme për të kopjuar skedarin</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
+    <value>Nuk keni leje mjaftueshme për të kopjuar dosjen</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
+    <value>Ju nuk keni leje të kopjoni në këtë dosje</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_Create" xml:space="preserve">
+    <value>Nuk keni leje të mjaftueshme për të krijuar</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_DeleteEditingFile" xml:space="preserve">
+    <value>Skedari nuk mund të fshihet sepse është i hapur për redaktim</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_DeleteEditingFolder" xml:space="preserve">
+    <value>Dosja nuk mund të fshihet sepse një nga skedarët është hapur për modifikim</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_DeleteFile" xml:space="preserve">
+    <value>Ju nuk keni leje të mjaftueshme për të fshirë skedarin</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_DeleteFolder" xml:space="preserve">
+    <value>Ju nuk keni leje të mjaftueshme për të fshirë dosjen</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_EditFile" xml:space="preserve">
+    <value>Ju nuk keni leje të mjaftueshme për të redaktuar skedarin</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_EditFileTwice" xml:space="preserve">
+    <value>Ky dokument po modifikohet nga ju në një skedë tjetër</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
+    <value>Ju nuk keni leje për të redaktuar dhomën</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Versioni aktual i skedarit nuk mund të fshihet</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_MoveFile" xml:space="preserve">
+    <value>Ju nuk keni leje të mjaftueshme për të zhvendosur skedarin</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_MoveFolder" xml:space="preserve">
+    <value>Ju nuk keni leje të mjaftueshme për të lëvizur dosjen</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
+    <value>Ju nuk keni leje të kalosh në këtë dosje</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_ReadFile" xml:space="preserve">
+    <value>Ju nuk keni leje të mjaftueshme për të parë skedarin</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_ReadFolder" xml:space="preserve">
+    <value>Ju nuk keni leje të mjaftueshme për të parë përmbajtjen e dosjes</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_RenameFile" xml:space="preserve">
+    <value>Ju nuk keni leje të mjaftueshme për të riemërtuar skedarin</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_RenameFolder" xml:space="preserve">
+    <value>Ju nuk keni leje të mjaftueshme për të riemërtuar dosjen</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
+    <value>Ju nuk keni leje të mjaftueshme për të hequr arkivin e dhomës</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_UpdateEditingFile" xml:space="preserve">
+    <value>Skedari nuk mund të përditësohet sepse është i hapur për redaktim</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_ViewFolder" xml:space="preserve">
+    <value>Ju nuk keni leje të mjaftueshme për të parë përmbajtjen e dosjes</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>Ju jeni përpjekur shumë herë për të futur fjalëkalimin tuaj. Ju lutem provoni përsëri më vonë</value>
+  </data>
+  <data name="ErrorMessage_SharpBoxException" xml:space="preserve">
+    <value>Përmbajtja e dosjes së palëve të treta nuk është e disponueshme. Provoni të rilidhni llogarinë.</value>
+  </data>
+  <data name="ErrorMessage_StartEditing" xml:space="preserve">
+    <value>Gabim në fillimin e redaktimit të skedarit</value>
+  </data>
+  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
+    <value>Ju nuk mund të modifikoni dhomat e arkivuara</value>
+  </data>
+  <data name="ErrorMessage_UpdateEditingFile" xml:space="preserve">
+    <value>Ju nuk mund të përditësoni një skedar që hapet për redaktim</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>Skedari nuk mund të ngarkohet në këtë dhomë. Ju lutem provoni të ngarkoni formularin PDF {0}.</value>
+  </data>
+  <data name="ErrorMessage_UserNotFound" xml:space="preserve">
+    <value>Përdoruesi nuk mund të gjendej</value>
+  </data>
+  <data name="ErrorMessage_ViewTrashItem" xml:space="preserve">
+    <value>Nuk ju lejohet të shikoni paraprakisht elementët në kosh</value>
+  </data>
+  <data name="ErrorrMessage_PinRoom" xml:space="preserve">
+    <value>Ju nuk mund të gozhdoni një dhomë</value>
+  </data>
+  <data name="Everyone" xml:space="preserve">
+    <value>Të gjithë</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Përdorues i jashtëm</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Lidhje për të plotësuar</value>
+  </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>Numri i formularit</value>
+  </data>
+  <data name="Guest" xml:space="preserve">
+    <value>Anonim</value>
+  </data>
+  <data name="IndexTitle" xml:space="preserve">
+    <value>Kërkoni në përmbajtjen e dokumenteve</value>
+  </data>
+  <data name="MessageFileCreated" xml:space="preserve">
+    <value>Skedari u krijua në dosjen "{0}"</value>
+  </data>
+  <data name="MessageFileCreatedForm" xml:space="preserve">
+    <value>Dokumenti PDF i plotësueshëm është gati. Është ruajtur në {0}</value>
+  </data>
+  <data name="MessageFillFormDraftCreated" xml:space="preserve">
+    <value>Kopja PDF krijohet në dosjen {0}. Ju lutemi plotësoni formularin dhe shkarkoni rezultatin si një skedar PDF ose DOCX.</value>
+  </data>
+  <data name="MessageFillFormDraftDiscard" xml:space="preserve">
+    <value>Skedari nuk është më një draft për të plotësuar formularin.</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Hapni skedarin</value>
+  </data>
+  <data name="ProductAdminOpportunities" xml:space="preserve">
+    <value>Bëni të njëjtën gjë si një përdorues |Link Dropbox, Box dhe llogari të tjera në seksionin e 'Përbashkët'| Konfiguroni të drejtat e aksesit në dokumentet dhe dosjet në seksionin e 'Përbashkët'</value>
+  </data>
+  <data name="ProductDescription" xml:space="preserve">
+    <value>Krijoni, modifikoni dhe ndani dokumentet e zyrës. Bashkëpunoni për të në kohë reale. Përputhshmëria më e lartë me docx, xlsx, pptx e garantuar.</value>
+  </data>
+  <data name="ProductDescriptionEx" xml:space="preserve">
+    <value>Redaktoni, shpërndani dhe bashkëpunoni në dokumentet e zyrës në kohë reale. Krijoni dhe menaxhoni dokumente të përbashkëta për gjithë ekipin për t’i aksesuar.
+Përputhshmëria më e lartë me docx, xlsx, pptx.</value>
+  </data>
+  <data name="ProductDescriptionShort" xml:space="preserve">
+    <value>Shikoni dhe shkarkoni dokumente të përbashkëta. Ngarkoni skedarët në dosjet e përbashkëta. Përputhshmëria më e lartë me docx, xlsx, pptx e garantuar.</value>
+  </data>
+  <data name="ProductName" xml:space="preserve">
+    <value>Dokumentet</value>
+  </data>
+  <data name="ProductUserOpportunities" xml:space="preserve">
+    <value>Krijoni dhe modifikoni dokumentet e veta, si dhe dokumentet e përbashkëta me të drejtat e duhura të aksesit |Jepni akses për lexim/redaktim përdoruesve të tjerë në dokumente dhe dosje|Link Dropbox, Box dhe llogari të tjera në seksionin 'Dokumentet'</value>
+  </data>
+  <data name="RoleEnum_Collaborator" xml:space="preserve">
+    <value>Bashkëpunëtor</value>
+  </data>
+  <data name="RoleEnum_Comment" xml:space="preserve">
+    <value>Komentues</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Krijuesi i përmbajtjes</value>
+  </data>
+  <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
+    <value>Administratori i DocSpace</value>
+  </data>
+  <data name="RoleEnum_Editing" xml:space="preserve">
+    <value>Redaktor</value>
+  </data>
+  <data name="RoleEnum_FillForms" xml:space="preserve">
+    <value>Mbushës i formës</value>
+  </data>
+  <data name="RoleEnum_Read" xml:space="preserve">
+    <value>Shikuesi</value>
+  </data>
+  <data name="RoleEnum_Review" xml:space="preserve">
+    <value>Rishikuesi</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Menaxher i dhomës</value>
+  </data>
+  <data name="RoleEnum_User" xml:space="preserve">
+    <value>Përdoruesi</value>
+  </data>
+  <data name="RoomIndex_Author" xml:space="preserve">
+    <value>Autori</value>
+  </data>
+  <data name="RoomIndex_Company" xml:space="preserve">
+    <value>Kompania</value>
+  </data>
+  <data name="RoomIndex_Created" xml:space="preserve">
+    <value>Krijuar</value>
+  </data>
+  <data name="RoomIndex_DateGenerated" xml:space="preserve">
+    <value>Data e krijimit</value>
+  </data>
+  <data name="RoomIndex_ExportAuthor" xml:space="preserve">
+    <value>Autori i eksportit</value>
+  </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Dosja</value>
+  </data>
+  <data name="RoomIndex_Index" xml:space="preserve">
+    <value>Indeksi</value>
+  </data>
+  <data name="RoomIndex_Modified" xml:space="preserve">
+    <value>I modifikuar</value>
+  </data>
+  <data name="RoomIndex_Name" xml:space="preserve">
+    <value>Emri</value>
+  </data>
+  <data name="RoomIndex_Room" xml:space="preserve">
+    <value>Dhoma</value>
+  </data>
+  <data name="RoomIndex_SheetName" xml:space="preserve">
+    <value>Indeksi i dhomës</value>
+  </data>
+  <data name="RoomIndex_Size" xml:space="preserve">
+    <value>Madhësia (MB)</value>
+  </data>
+  <data name="RoomIndex_Total" xml:space="preserve">
+    <value>Totali</value>
+  </data>
+  <data name="RoomIndex_Type" xml:space="preserve">
+    <value>Lloji</value>
+  </data>
+  <data name="UnknownFirstName" xml:space="preserve">
+    <value>Emri</value>
+  </data>
+  <data name="UnknownLastName" xml:space="preserve">
+    <value>Mbiemri</value>
+  </data>
+  <data name="UnlockComment" xml:space="preserve">
+    <value>Skedari është i hapur</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>Përdoruesi</value>
+  </data>
+</root>

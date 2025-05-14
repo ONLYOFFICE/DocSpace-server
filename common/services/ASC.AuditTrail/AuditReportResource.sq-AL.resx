@@ -1,0 +1,930 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ActionCol" xml:space="preserve">
+    <value>Veprimi</value>
+  </data>
+  <data name="ActionIdCol" xml:space="preserve">
+    <value>ID e veprimit</value>
+  </data>
+  <data name="ActionTypeCol" xml:space="preserve">
+    <value>Lloji i veprimit</value>
+  </data>
+  <data name="AddedRoomTags" xml:space="preserve">
+    <value>Etiketat e shtuara: [{1}]</value>
+  </data>
+  <data name="AdministratorAdded" xml:space="preserve">
+    <value>Është shtuar administratori: {0}</value>
+  </data>
+  <data name="AdministratorDeleted" xml:space="preserve">
+    <value>Administratori është fshirë: {0}</value>
+  </data>
+  <data name="AdministratorMessageSettingsUpdated" xml:space="preserve">
+    <value>Cilësimet e mesazheve të administratorëve janë përditësuar</value>
+  </data>
+  <data name="AdministratorOpenedFullAccess" xml:space="preserve">
+    <value>Administratorët [{0}]. Aksesi i plotë është hapur</value>
+  </data>
+  <data name="AttachActionType" xml:space="preserve">
+    <value>Bashkangjitni</value>
+  </data>
+  <data name="AuditSettingsUpdated" xml:space="preserve">
+    <value>Cilësimet e jetëgjatësisë së auditimit u përditësuan</value>
+  </data>
+  <data name="AuditTrailReportDownloaded" xml:space="preserve">
+    <value>Raporti i gjurmës së auditimit u shkarkua</value>
+  </data>
+  <data name="AuditTrailReportName" xml:space="preserve">
+    <value>Raporti i gjurmës së auditimit ({0}-{1})</value>
+  </data>
+  <data name="AuthorizationKeysSetting" xml:space="preserve">
+    <value>Çelësat e autorizimit të palëve të treta janë përditësuar</value>
+  </data>
+  <data name="BrowserCol" xml:space="preserve">
+    <value>Shfletuesi</value>
+  </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>Ndryshimi i aktivizimit të klientit {0}</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>Ndryshimi i dukshmërisë së klientit {0}</value>
+  </data>
+  <data name="CityCol" xml:space="preserve">
+    <value>Qyteti</value>
+  </data>
+  <data name="ColorThemeChanged" xml:space="preserve">
+    <value>Është ndryshuar tema e ngjyrës</value>
+  </data>
+  <data name="CookieSettingsUpdated" xml:space="preserve">
+    <value>Cilësimet e biskotës u përditësuar</value>
+  </data>
+  <data name="CopyActionType" xml:space="preserve">
+    <value>Kopjoni</value>
+  </data>
+  <data name="CountryCol" xml:space="preserve">
+    <value>Shteti</value>
+  </data>
+  <data name="CreateActionType" xml:space="preserve">
+    <value>Krijoni</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Klienti ka krijuar</value>
+  </data>
+  <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
+    <value>Cilësimet e navigacionit të personalizuar është përditësuar</value>
+  </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>Dhomat [{0}]. Caktoni kuotën e ruajtjes për dhomat: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>Dhomat [{0}]. Caktoni kuotën e parazgjedhur të ruajtjes për dhomat: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>Dhomat [{0}]. Çaktivizoni kuotën e ruajtjes për dhomat</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>Përdoruesit [{0}]. Caktoni kuotën e personalizuar për përdoruesit: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>Përdoruesit [{0}]. Caktoni kuotën e parazgjedhur për përdoruesit: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>Përdoruesit [{0}]. Çaktivizoni kuotën e ruajtjes për përdoruesit</value>
+  </data>
+  <data name="DateCol" xml:space="preserve">
+    <value>Data</value>
+  </data>
+  <data name="DefaultStartPageSettingsUpdated" xml:space="preserve">
+    <value>Cilësimet e faqes fillestare të parazgjedhur janë përditësuar</value>
+  </data>
+  <data name="DeleteActionType" xml:space="preserve">
+    <value>Fshini</value>
+  </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Klienti {0} është fshirë</value>
+  </data>
+  <data name="DeletedRoomTags" xml:space="preserve">
+    <value>Etiketat janë fshirë: [{1}]</value>
+  </data>
+  <data name="DetachActionType" xml:space="preserve">
+    <value>Çmontuar</value>
+  </data>
+  <data name="DnsSettingsUpdated" xml:space="preserve">
+    <value>Cilësimet e DNS janë përditësuar</value>
+  </data>
+  <data name="DocumentServiceLocationSetting" xml:space="preserve">
+    <value>Është përditësuar lokacioni i shërbimit të dokumenteve</value>
+  </data>
+  <data name="DocumentsForcesave" xml:space="preserve">
+    <value>Është përditësuar cilësimet e ruajtjes së Forcesave</value>
+  </data>
+  <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
+    <value>Janë përditësuar cilësimet e përsëritjes</value>
+  </data>
+  <data name="DocumentsProduct" xml:space="preserve">
+    <value>Dokumentet</value>
+  </data>
+  <data name="DocumentsSettingsModule" xml:space="preserve">
+    <value>Cilësimet</value>
+  </data>
+  <data name="DocumentsStoreForcesave" xml:space="preserve">
+    <value>Janë përditësuar cilësimet e ruajtjes së Forcesave</value>
+  </data>
+  <data name="DocumentsThirdPartySettingsUpdated" xml:space="preserve">
+    <value>Janë përditësuar cilësimet e palëve të treta</value>
+  </data>
+  <data name="DocumentsUploadingFormatsSettingsUpdated" xml:space="preserve">
+    <value>Janë përditësuar cilësimet e formateve të ngarkimit</value>
+  </data>
+  <data name="DownloadActionType" xml:space="preserve">
+    <value>Shkarkoni</value>
+  </data>
+  <data name="ExportActionType" xml:space="preserve">
+    <value>Eksport</value>
+  </data>
+  <data name="FileChangeOwner" xml:space="preserve">
+    <value>Caktoni pronarin e [{0}] në [{1}]</value>
+  </data>
+  <data name="FileConverted" xml:space="preserve">
+    <value>Skedari u konvertua në formatin e brendshëm: {0}</value>
+  </data>
+  <data name="FileCopied" xml:space="preserve">
+    <value>Skedarët [{0}]. U kopjuan nga Dosja "{1}" në Dosjen: "{2}"</value>
+  </data>
+  <data name="FileCopiedWithOverwriting" xml:space="preserve">
+    <value>Skedarët [{0}]. U kopjuan me mbishkrim nga Dosja "{1}" në Dosjen: "{2}"</value>
+  </data>
+  <data name="FileCreated" xml:space="preserve">
+    <value>Skedari u krijua: {0}</value>
+  </data>
+  <data name="FileCreatedVersion" xml:space="preserve">
+    <value>Skedarët [{0}]. Rishikim: {1}. Versioni i krijuar</value>
+  </data>
+  <data name="FileDeleted" xml:space="preserve">
+    <value>Skedari është fshirë: {0}</value>
+  </data>
+  <data name="FileDeletedVersion" xml:space="preserve">
+    <value>Skedarët [{0}]. Rishikim: {1}. Versioni është fshirë</value>
+  </data>
+  <data name="FileDownloaded" xml:space="preserve">
+    <value>Skedari është fshirë: {0}</value>
+  </data>
+  <data name="FileDownloadedAs" xml:space="preserve">
+    <value>Skedarët [{0}]. Është shkaruar si: {1}</value>
+  </data>
+  <data name="FileImported" xml:space="preserve">
+    <value>Dosjet[{0}]. Dosja e importuar: {1}. Ofruesi: {2}</value>
+  </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>Skedari: {0}. Indeksi ndryshoi nga {1} në {2}</value>
+  </data>
+  <data name="FileLocked" xml:space="preserve">
+    <value>Skedari është mbyllur: {0}</value>
+  </data>
+  <data name="FileMoved" xml:space="preserve">
+    <value>Skedarët [{0}]. Ka lëvizur nga Dosja "{1}" në Dosjen: "{2}"</value>
+  </data>
+  <data name="FileMovedToTrash" xml:space="preserve">
+    <value>Skedarët [{0}]. Kanë lëvizur në dosjen e koshit</value>
+  </data>
+  <data name="FileMovedWithOverwriting" xml:space="preserve">
+    <value>Skedarët [{0}]. Kanë lëvizur me mbishkrim nga Dosja "{1}" në Dosjen: "{2}"</value>
+  </data>
+  <data name="FileOpenedForChange" xml:space="preserve">
+    <value>Skedari i hapur për ndryshim: {0}</value>
+  </data>
+  <data name="FileRenamed" xml:space="preserve">
+    <value>Skedari është riemëruar: {0}</value>
+  </data>
+  <data name="FileRestoreVersion" xml:space="preserve">
+    <value>Skedarët [{0}]. Rishikim: {1}. Versioni i rikthyer</value>
+  </data>
+  <data name="FilesDocumentSigned" xml:space="preserve">
+    <value>Dokumenti {1} i nënshkruar përmes {0}</value>
+  </data>
+  <data name="FileSendAccessLink" xml:space="preserve">
+    <value>Lidhja e shpërndarë është dërguar në [{0}] skedar. Marrësit: [{1}]</value>
+  </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>bytes,KB,MB,GB,TB</value>
+  </data>
+  <data name="FilesModule" xml:space="preserve">
+    <value>Skedarët</value>
+  </data>
+  <data name="FilesRequestSign" xml:space="preserve">
+    <value>Dokumenti {1} është dërguar për nënshkrim përmes {0}</value>
+  </data>
+  <data name="FileUnlocked" xml:space="preserve">
+    <value>Skedari është hapur: {0}</value>
+  </data>
+  <data name="FileUpdated" xml:space="preserve">
+    <value>Skedari është përditësuar: {0}</value>
+  </data>
+  <data name="FileUpdatedAccess" xml:space="preserve">
+    <value>Skedarët [{0}]. Aksesi është përditësuar</value>
+  </data>
+  <data name="FileUpdatedRevisionComment" xml:space="preserve">
+    <value>Skedarët [{0}]. Rishikim {1}. Komenti është përditësuar</value>
+  </data>
+  <data name="FileUploaded" xml:space="preserve">
+    <value>Skedari është ngarkuar: {0}</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>Skedarët [{0}]. Versioni i fshirë: {1}</value>
+  </data>
+  <data name="FolderCopiedWithOverwriting" xml:space="preserve">
+    <value>Dosjet [{0}]. U kopjuan me mbishkrim në dosjen: {1}</value>
+  </data>
+  <data name="FolderCreated" xml:space="preserve">
+    <value>Dosja është krijuar: {0}</value>
+  </data>
+  <data name="FolderDeleted" xml:space="preserve">
+    <value>Dosja është fshirë: {0}</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Dosja: {0}. Indeksi ndryshoi nga {1} nč {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Dosja: {0}. Indekset u rirenditën</value>
+  </data>
+  <data name="FolderMoved" xml:space="preserve">
+    <value>Dosjet [{0}]. Është lëvizur në Dosjen: {1}</value>
+  </data>
+  <data name="FolderMovedToTrash" xml:space="preserve">
+    <value>Dosjet [{0}]. Është lëvizur në dosjen e koshit</value>
+  </data>
+  <data name="FolderMovedWithOverwriting" xml:space="preserve">
+    <value>Dosjet [{0}]. Është lëvizur me mbishkrim në dosjen: {1}</value>
+  </data>
+  <data name="FolderRenamed" xml:space="preserve">
+    <value>Dosja është riemëruar: {0}</value>
+  </data>
+  <data name="FoldersModule" xml:space="preserve">
+    <value>Dosjet</value>
+  </data>
+  <data name="FolderUpdatedAccess" xml:space="preserve">
+    <value>Dosjet [{0}]. Aksesi është përditësuar</value>
+  </data>
+  <data name="FollowActionType" xml:space="preserve">
+    <value>Ndiqni</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>Skedar i hapur për plotësim: {0}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>Përdoruesit [{0}]. Formular i dorëzuar: {1}</value>
+  </data>
+  <data name="FullTextSearchSetting" xml:space="preserve">
+    <value>Cilësimet e Sphinx u perditësuan</value>
+  </data>
+  <data name="GeneralModule" xml:space="preserve">
+    <value>Gjeneral</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>Kodi i gjeneruar i autorizimit për klientin {0}</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>Gjeneruar shtrirjen e aksesit personal për klientët {0}</value>
+  </data>
+  <data name="GreetingSettingsUpdated" xml:space="preserve">
+    <value>Cilësimet e faqes së mirëseardhjes u përditësuan</value>
+  </data>
+  <data name="GroupCreated" xml:space="preserve">
+    <value>Grup i krijuar: {0}</value>
+  </data>
+  <data name="GroupDeleted" xml:space="preserve">
+    <value>Grup i fshirë: {0}</value>
+  </data>
+  <data name="GroupsModule" xml:space="preserve">
+    <value>Grupe</value>
+  </data>
+  <data name="GroupUpdated" xml:space="preserve">
+    <value>Grupi u përditësua: {0}</value>
+  </data>
+  <data name="GuestAccount" xml:space="preserve">
+    <value>Anonim</value>
+  </data>
+  <data name="GuestActivated" xml:space="preserve">
+    <value>Mysafir i aktivizuar: {0}</value>
+  </data>
+  <data name="GuestCreated" xml:space="preserve">
+    <value>Mysafir është krijuar: {0}</value>
+  </data>
+  <data name="GuestCreatedViaInvite" xml:space="preserve">
+    <value>Vizitori u krijua nëpërmjet ftesës: {0}</value>
+  </data>
+  <data name="GuestImported" xml:space="preserve">
+    <value>Mysafir i importuar: {0}</value>
+  </data>
+  <data name="ImportActionType" xml:space="preserve">
+    <value>Import</value>
+  </data>
+  <data name="IpCol" xml:space="preserve">
+    <value>IP</value>
+  </data>
+  <data name="LanguageSettingsUpdated" xml:space="preserve">
+    <value>Cilësimet e gjuhës janë përmirësuar</value>
+  </data>
+  <data name="LicenseKeyUploaded" xml:space="preserve">
+    <value>Çelësi i licensës është ngarkuar</value>
+  </data>
+  <data name="LinkActionType" xml:space="preserve">
+    <value>Lidhje</value>
+  </data>
+  <data name="LoginFail" xml:space="preserve">
+    <value>Identifikimi dështoi</value>
+  </data>
+  <data name="LoginFailBruteForce" xml:space="preserve">
+    <value>Identifikimi dështoi. Shumë përpjekje</value>
+  </data>
+  <data name="LoginFailDisabledProfile" xml:space="preserve">
+    <value>Identifikimi dështoi. Profil i çaktivizuar</value>
+  </data>
+  <data name="LoginFailInvalidCombination" xml:space="preserve">
+    <value>Identifikimi dështoi. Kombinimi i pavlefshëm emër përdoruesi - fjalëkalim</value>
+  </data>
+  <data name="LoginFailIpSecurity" xml:space="preserve">
+    <value>Siguria IP: Identifikimi dështoi</value>
+  </data>
+  <data name="LoginFailRecaptcha" xml:space="preserve">
+    <value>Identifikimi dështoi. Recaptcha është i pavlefshëm</value>
+  </data>
+  <data name="LoginFailSocialAccountNotFound" xml:space="preserve">
+    <value>Identifikimi dështoi. Llogaria sociale e lidhur nuk u gjet</value>
+  </data>
+  <data name="LoginFailViaApi" xml:space="preserve">
+    <value>Dështoi identifikimi përmes API</value>
+  </data>
+  <data name="LoginFailViaApiSms" xml:space="preserve">
+    <value>Identifikimi i dështuar nëpërmjet API dhe dokit SMS</value>
+  </data>
+  <data name="LoginFailViaApiSocialAccount" xml:space="preserve">
+    <value>Identifikimi përmes API dhe mediave sociale dështoi</value>
+  </data>
+  <data name="LoginFailViaApiTfa" xml:space="preserve">
+    <value>Identifikimi i dështuar nëpërmjet API dhe aplikacionit të vërtetimit</value>
+  </data>
+  <data name="LoginFailViaSms" xml:space="preserve">
+    <value>Identifkimi me SMS dështoi</value>
+  </data>
+  <data name="LoginFailViaSSO" xml:space="preserve">
+    <value>Identifikimi me SSO dështoi</value>
+  </data>
+  <data name="LoginFailViaTfaApp" xml:space="preserve">
+    <value>Identifikimi nëpërmjet aplikacionit të autentifikimit dështoi</value>
+  </data>
+  <data name="LoginHistoryReportDownloaded" xml:space="preserve">
+    <value>Raporti i historisë së hyrjes u shkarkua</value>
+  </data>
+  <data name="LoginHistoryReportName" xml:space="preserve">
+    <value>Raporti i historisë së hyrjes ({0}-{1})</value>
+  </data>
+  <data name="LoginSuccess" xml:space="preserve">
+    <value>Identifikimi me sukses</value>
+  </data>
+  <data name="LoginSuccessSocialApp" xml:space="preserve">
+    <value>Hyrja e suksesshme përmes aplikacionit social</value>
+  </data>
+  <data name="LoginSuccessViaApi" xml:space="preserve">
+    <value>Identifikimi i suksesshëm nëpërmjet API</value>
+  </data>
+  <data name="LoginSuccessViaApiSms" xml:space="preserve">
+    <value>Identifikimi i suksesshëm përmes API dhe kodit SMS</value>
+  </data>
+  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
+    <value>Identifikohuni me sukses në llogarinë social</value>
+  </data>
+  <data name="LoginSuccessViaApiTfa" xml:space="preserve">
+    <value>Identifikimi i susesshëm përmes API dhe aplikacionit të vërtetimit</value>
+  </data>
+  <data name="LoginSuccessViaSms" xml:space="preserve">
+    <value>Hyrjame SMS me sukses</value>
+  </data>
+  <data name="LoginSuccessViaSocialAccount" xml:space="preserve">
+    <value>Identifikimi përmes API dhe mediave sociale me sukses</value>
+  </data>
+  <data name="LoginSuccessViaSSO" xml:space="preserve">
+    <value>Identifikimi i suksesshëm nëpërmjet SSO</value>
+  </data>
+  <data name="LoginSuccesViaTfaApp" xml:space="preserve">
+    <value>Identifikimi i suksesshëm përmes aplikacionit të vërtetuesit</value>
+  </data>
+  <data name="Logout" xml:space="preserve">
+    <value>Dilni</value>
+  </data>
+  <data name="MailServiceSettingsUpdated" xml:space="preserve">
+    <value>Cilësimet e shërbimit të postës u përditësuan</value>
+  </data>
+  <data name="ModuleCol" xml:space="preserve">
+    <value>Moduli</value>
+  </data>
+  <data name="MoveActionType" xml:space="preserve">
+    <value>Lëvizni</value>
+  </data>
+  <data name="OAuthModule" xml:space="preserve">
+    <value>OAuth</value>
+  </data>
+  <data name="OthersProduct" xml:space="preserve">
+    <value>Të tjerët</value>
+  </data>
+  <data name="OwnerChanged" xml:space="preserve">
+    <value>Pronari u ndryshua: {0}</value>
+  </data>
+  <data name="OwnerSentChangeOwnerInstructions" xml:space="preserve">
+    <value>Pronari [{0}]. Dërguar udhëzimet për ndryshimin e pronarit</value>
+  </data>
+  <data name="OwnerSentPortalDeactivationInstructions" xml:space="preserve">
+    <value>Pronari [{0}]. Udhëzime për çaktivizimin e portalit të dërguar</value>
+  </data>
+  <data name="OwnerSentPortalDeleteInstructions" xml:space="preserve">
+    <value>Pronari [{0}]. Udhëzime për çaktivizimin e portalit të dërguar</value>
+  </data>
+  <data name="PageCol" xml:space="preserve">
+    <value>Faqe</value>
+  </data>
+  <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
+    <value>Cilësimet e fuqisë së fjalëkalimit u përditësuan</value>
+  </data>
+  <data name="PeopleProduct" xml:space="preserve">
+    <value>Njerëz</value>
+  </data>
+  <data name="PlatformCol" xml:space="preserve">
+    <value>Platforma</value>
+  </data>
+  <data name="PortalAccessSettingsUpdated" xml:space="preserve">
+    <value>Cilësimet e hyrjes në portal u përditësuan</value>
+  </data>
+  <data name="PortalDeactivated" xml:space="preserve">
+    <value>Portali u çaktivizua</value>
+  </data>
+  <data name="PortalDeleted" xml:space="preserve">
+    <value>Portali u fshi</value>
+  </data>
+  <data name="PortalRenamed" xml:space="preserve">
+    <value>Portali u riemërua</value>
+  </data>
+  <data name="PrivacyRoomDisable" xml:space="preserve">
+    <value>Dhoma private është e çaktivizuar</value>
+  </data>
+  <data name="PrivacyRoomEnable" xml:space="preserve">
+    <value>Dhoma private është aktivizuar</value>
+  </data>
+  <data name="ProductAccessOpened" xml:space="preserve">
+    <value>Produktet [{0}]. Aksesi u hap</value>
+  </data>
+  <data name="ProductAccessOpenedForGroups" xml:space="preserve">
+    <value>Produktet: [{0}]. Grupet [{1}]. Aksesi u hap</value>
+  </data>
+  <data name="ProductAccessOpenedForUsers" xml:space="preserve">
+    <value>Produktet: [{0}]. Përdoruesit [{1}]. Aksesi është hapur</value>
+  </data>
+  <data name="ProductAccessRestricted" xml:space="preserve">
+    <value>Produktet [{0}]. Aksesi është i kufizuar</value>
+  </data>
+  <data name="ProductAddedAdministrator" xml:space="preserve">
+    <value>Produktet [{0}]. Administratori u shtua: {1}</value>
+  </data>
+  <data name="ProductCol" xml:space="preserve">
+    <value>Produkti</value>
+  </data>
+  <data name="ProductDeletedAdministrator" xml:space="preserve">
+    <value>Produktet[{0}]. Administratori u fshi: {1}</value>
+  </data>
+  <data name="ProductsListUpdated" xml:space="preserve">
+    <value>Lista e produkteve u përditësua</value>
+  </data>
+  <data name="ProductsModule" xml:space="preserve">
+    <value>Produktet</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Caktoni kuotën e paracaktuar të ruajtje: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Kuota e paracaktuar e ruajtjes është çaktivizuar</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Caktoni kuotën e paracaktuar të ruajtjes për dhomat: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Kuota e paracaktuar e ruajtjes së dhomave është çaktivizuar</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>Caktoni kuotë e paracaktuar të ruajtjes për përdoruesit: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Kuota e paracaktuar e ruajtjes së çaktivizuar për përdoruesit</value>
+  </data>
+  <data name="ReassignsActionType" xml:space="preserve">
+    <value>Ricaktoni</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>Sekreti {0} i klientit u rigjenerua</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Aksesi i klientit {0} u anulua</value>
+  </data>
+  <data name="RoomArchived" xml:space="preserve">
+    <value>Dhoma u arkivua</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Dhoma e kopjuar: {0}</value>
+  </data>
+  <data name="RoomCreated" xml:space="preserve">
+    <value>Dhoma e krijuar</value>
+  </data>
+  <data name="RoomCreateUser" xml:space="preserve">
+    <value>Përdorues i shtuar: {0}. Roli: {1}</value>
+  </data>
+  <data name="RoomDeleted" xml:space="preserve">
+    <value>Dhoma është fshirë</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Dhoma: {0}. Refuzimi i shkarkimit është çaktivizuar</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Dhoma: {0}. Refuzimi i shkarkimit është aktivizuar</value>
+  </data>
+  <data name="RoomExternalLinkCreated" xml:space="preserve">
+    <value>Lidhja e jashtme u krijua: {0}. Roli: {1}</value>
+  </data>
+  <data name="RoomExternalLinkDeleted" xml:space="preserve">
+    <value>Lidhja e jashtme u fshi: {0}</value>
+  </data>
+  <data name="RoomExternalLinkUpdated" xml:space="preserve">
+    <value>Lidhja e jashtme u përditësua: {0}. Roli: {1}</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Grupi i shtuar: {0}. Roli: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Grupi i fshirë: {0}</value>
+  </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Eksportimi i indeksit të dhomës u ruajt te Dokumentet</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Indeksimi i dhomës është çaktivizuar</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Indeksimi i dhomës është aktivizuar</value>
+  </data>
+  <data name="RoomInvitationLinkCreated" xml:space="preserve">
+    <value>Lidhja u krijua. Roli: {1}</value>
+  </data>
+  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
+    <value>Lidhja u fshi</value>
+  </data>
+  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
+    <value>Lidhja u përditësua. Roli: {1}</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Ftesa u dërgua sërish: {0}</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>Jeta e çaktivizuar</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>Koha e jetës është vendosur. Vlera: {0}. Periudha: {1}. Fshirë përfundimisht: {2}</value>
+  </data>
+  <data name="RoomLogoCreated" xml:space="preserve">
+    <value>Logoja është krijuar</value>
+  </data>
+  <data name="RoomLogoDeleted" xml:space="preserve">
+    <value>Logoja është fshirë</value>
+  </data>
+  <data name="RoomRemoveUser" xml:space="preserve">
+    <value>Përdoruesi u fshi: {0}</value>
+  </data>
+  <data name="RoomRenamed" xml:space="preserve">
+    <value>Dhoma u riemërtua: {0}</value>
+  </data>
+  <data name="RoomsModule" xml:space="preserve">
+    <value>Dhomat</value>
+  </data>
+  <data name="RoomUnarchived" xml:space="preserve">
+    <value>Dhoma nuk është ruajtur</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} emëruar: {1}</value>
+  </data>
+  <data name="RoomUpdateAccessForUser" xml:space="preserve">
+    <value>{0} emëruar: {1}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Dhoma: {0}. Filigrani u çaktivizua</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Dhoma: {0}. Filigrani u aktivizua</value>
+  </data>
+  <data name="SendActionType" xml:space="preserve">
+    <value>Dërgoni</value>
+  </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>Përdoruesi {0} dërgoi një ftesë {1} për të ju bashkuar me këtë DocSpace</value>
+  </data>
+  <data name="SentInviteInstructions" xml:space="preserve">
+    <value>Udhëzimet e ftesës u dërguan: {0}</value>
+  </data>
+  <data name="SessionCompleted" xml:space="preserve">
+    <value>Sesioni i përfunduar</value>
+  </data>
+  <data name="SessionStarted" xml:space="preserve">
+    <value>Sesioni filloi</value>
+  </data>
+  <data name="SettingsProduct" xml:space="preserve">
+    <value>Cilësimet</value>
+  </data>
+  <data name="SSODisabled" xml:space="preserve">
+    <value>SSO u çaktivizua</value>
+  </data>
+  <data name="SSOEnabled" xml:space="preserve">
+    <value>SSO u aktivizua</value>
+  </data>
+  <data name="StartBackupSetting" xml:space="preserve">
+    <value>Filloni rezervimin</value>
+  </data>
+  <data name="StartStorageDecryption" xml:space="preserve">
+    <value>Filloni deshifrimin e ruajtjes</value>
+  </data>
+  <data name="StartStorageEncryption" xml:space="preserve">
+    <value>Filloni enkriptimin e ruajtjes</value>
+  </data>
+  <data name="StartTransferSetting" xml:space="preserve">
+    <value>Filloni migrimin e rajonit të portalit</value>
+  </data>
+  <data name="SystemAccount" xml:space="preserve">
+    <value>Llogaria e sistemit</value>
+  </data>
+  <data name="TagCreated" xml:space="preserve">
+    <value>Etiketa u krijua: {0}</value>
+  </data>
+  <data name="TagsDeleted" xml:space="preserve">
+    <value>Etiketat u fshinë: {0}</value>
+  </data>
+  <data name="TargetIdCol" xml:space="preserve">
+    <value>ID-ja e objektivit</value>
+  </data>
+  <data name="TeamTemplateChanged" xml:space="preserve">
+    <value>Modeli i ekipit u ndryshua</value>
+  </data>
+  <data name="ThirdPartyCreated" xml:space="preserve">
+    <value>Pala e tretë u krijua: {0}. Ofruesi: {1}</value>
+  </data>
+  <data name="ThirdPartyDeleted" xml:space="preserve">
+    <value>Pala e tretë u fshi: {0}. Ofruesi: {1}</value>
+  </data>
+  <data name="ThirdPartyUpdated" xml:space="preserve">
+    <value>Pala e tretë u përditësua: {0}. Ofruesi: {1}</value>
+  </data>
+  <data name="TimeTrackingModule" xml:space="preserve">
+    <value>Ndjekja e kohës</value>
+  </data>
+  <data name="TimeZoneSettingsUpdated" xml:space="preserve">
+    <value>Cilësimet e zonës kohore u përditësuan</value>
+  </data>
+  <data name="TrashEmptied" xml:space="preserve">
+    <value>Mbeturinat u zbrazën</value>
+  </data>
+  <data name="TrustedMailDomainSettingsUpdated" xml:space="preserve">
+    <value>Cilësimet e domenit të besuar të postës u përditësuan</value>
+  </data>
+  <data name="TwoFactorAuthenticationSettingsDisabled" xml:space="preserve">
+    <value>Cilësimet e vërtetimit me dy faktorë u përditësuan: Vërtetimi me dy faktorë u çaktivizua</value>
+  </data>
+  <data name="TwoFactorAuthenticationSettingsEnabledBySms" xml:space="preserve">
+    <value>Cilësimet e vërtetimit me dy faktorë u përditësuan: Konfirmimi SMS u aktivizua</value>
+  </data>
+  <data name="TwoFactorAuthenticationSettingsEnabledByTfaApp" xml:space="preserve">
+    <value>Cilësimet e vërtetimit me dy faktorë u përditësuan: Aplikacioni i vërtetimit u aktivizua</value>
+  </data>
+  <data name="TwoFactorAuthenticationSettingsUpdated" xml:space="preserve">
+    <value>Cilësimet e vërtetimit me dy faktorë u përditësuan</value>
+  </data>
+  <data name="UnfollowActionType" xml:space="preserve">
+    <value>Mos e ndiqni</value>
+  </data>
+  <data name="UnknownAccount" xml:space="preserve">
+    <value>Llogari e panjohur</value>
+  </data>
+  <data name="UnlinkActionType" xml:space="preserve">
+    <value>Shkëputni</value>
+  </data>
+  <data name="UpdateAccessActionType" xml:space="preserve">
+    <value>Akses i përditësuar</value>
+  </data>
+  <data name="UpdateActionType" xml:space="preserve">
+    <value>Përditësoni</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>Klienti {0} është përditësuar</value>
+  </data>
+  <data name="UploadActionType" xml:space="preserve">
+    <value>Ngarkoni</value>
+  </data>
+  <data name="UserActivated" xml:space="preserve">
+    <value>Përdorues i aktivizuar: {0}</value>
+  </data>
+  <data name="UserAddedAvatar" xml:space="preserve">
+    <value>Përdoruesit [{0}]. Avatari u shtua</value>
+  </data>
+  <data name="UserCol" xml:space="preserve">
+    <value>Përdorues</value>
+  </data>
+  <data name="UserCreated" xml:space="preserve">
+    <value>Përdoruesi është krijuar: {0}</value>
+  </data>
+  <data name="UserCreatedViaInvite" xml:space="preserve">
+    <value>Përdoruesi u krijua përmes ftesës: {0}</value>
+  </data>
+  <data name="UserDataReassigns" xml:space="preserve">
+    <value>Të dhënat e ricaktuara: nga përdoruesi {0} te përdoruesi{1}</value>
+  </data>
+  <data name="UserDataRemoving" xml:space="preserve">
+    <value>Të dhënat e përdoruesit për {0} janë fshirë</value>
+  </data>
+  <data name="UserDeleted" xml:space="preserve">
+    <value>Përdoruesi është fshi: {0}</value>
+  </data>
+  <data name="UserDeletedAvatar" xml:space="preserve">
+    <value>Përdoruesit [{0}]. Avatari është fshirë</value>
+  </data>
+  <data name="UserFileUpdated" xml:space="preserve">
+    <value>Përdoruesit [{0}]. Skedari është përditësuar: {1}</value>
+  </data>
+  <data name="UserImported" xml:space="preserve">
+    <value>Përdorues i importuar: {0}</value>
+  </data>
+  <data name="UserLinkedSocialAccount" xml:space="preserve">
+    <value>Llogaria sociale e lidhur. Ofruesi: {0}</value>
+  </data>
+  <data name="UsersDeleted" xml:space="preserve">
+    <value>Përdoruesit janë fshirë: {0}</value>
+  </data>
+  <data name="UserSentActivationInstructions" xml:space="preserve">
+    <value>Përdoruesit [{0}]. Udhëzimet e aktivizimit të dërguara</value>
+  </data>
+  <data name="UserSentDeleteInstructions" xml:space="preserve">
+    <value>Udhëzimet e dërguara për fshirjen e profilit</value>
+  </data>
+  <data name="UserSentEmailInstructions" xml:space="preserve">
+    <value>Përdoruesit [{0}]. Udhëzimet për ndryshimin e email-it është dërguar</value>
+  </data>
+  <data name="UserSentPasswordInstructions" xml:space="preserve">
+    <value>Përdoruesit [{0}]. Udhëzimet për ndryshimin e fjalëkalimit është dërguar</value>
+  </data>
+  <data name="UsersModule" xml:space="preserve">
+    <value>Përdoruesit</value>
+  </data>
+  <data name="UsersSentActivationInstructions" xml:space="preserve">
+    <value>Përdoruesit [{0}]. Udhëzimet e aktivizimit u dërguan</value>
+  </data>
+  <data name="UsersUpdatedStatus" xml:space="preserve">
+    <value>Përdoruesit [{0}]. Satusi është përditësuar</value>
+  </data>
+  <data name="UsersUpdatedType" xml:space="preserve">
+    <value>Përdoruesit [{0}]. Lloji i përditësimit</value>
+  </data>
+  <data name="UserTfaDisconnected" xml:space="preserve">
+    <value>Aplikacioni i autentifikimit është shkëputur: {0}</value>
+  </data>
+  <data name="UserTfaGenerateCodes" xml:space="preserve">
+    <value>Janë krijuar kode të reja rezervë</value>
+  </data>
+  <data name="UserUnlinkedSocialAccount" xml:space="preserve">
+    <value>Llogaria social është shkëputur. Ofruesi: {0}</value>
+  </data>
+  <data name="UserUpdated" xml:space="preserve">
+    <value>Përdoruesi është përditësuar: {0}</value>
+  </data>
+  <data name="UserUpdatedAvatarThumbnails" xml:space="preserve">
+    <value>Përdoruesit [{0}]. Miniaturat e avatarit janë përditësuar</value>
+  </data>
+  <data name="UserUpdatedEmail" xml:space="preserve">
+    <value>Email-i është përditësuar</value>
+  </data>
+  <data name="UserUpdatedLanguage" xml:space="preserve">
+    <value>Gjuha është përditësuar</value>
+  </data>
+  <data name="UserUpdatedMobileNumber" xml:space="preserve">
+    <value>Përdoruesit [{0}]. Numri i telefonit është përditësuar: {1}</value>
+  </data>
+  <data name="UserUpdatedPassword" xml:space="preserve">
+    <value>Fjalëkalimi është përditësuar</value>
+  </data>
+</root>
