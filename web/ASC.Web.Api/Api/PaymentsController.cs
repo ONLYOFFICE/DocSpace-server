@@ -167,7 +167,7 @@ public class PaymentController(
 
         var tariff = await tariffService.GetTariffAsync(tenant.Id);
 
-        if (inDto.ProductQuantityType == BillingClient.ProductQuantityType.Set)
+        if (inDto.ProductQuantityType == BillingClient.ProductQuantityType.Set && !quota.Wallet)
         {
             if (tariff.Quotas.Any(q => q.Id == quota.TenantId && q.Quantity == productQty))
             {
