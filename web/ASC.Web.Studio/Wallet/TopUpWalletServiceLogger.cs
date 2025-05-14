@@ -24,30 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Core.Tenants;
+namespace ASC.Web.Studio.Wallet;
 
-[Scope]
-internal class TenantQuotaPriceResolver(TenantManager tenantManager, RegionHelper regionHelper) : IValueResolver<DbQuota, TenantQuota, decimal>
+internal static partial class TopUpWalletServiceLogger
 {
-    public decimal Resolve(DbQuota source, TenantQuota destination, decimal destMember, ResolutionContext context)
-    {
-        var priceInfo = tenantManager.GetProductPriceInfo(source.ProductId, source.Wallet);
+    [LoggerMessage(LogLevel.Information, "Found {count} active portals with TenantWalletSettings")]
+    public static partial void InfoTopUpWalletServiceFound(this ILogger<TopUpWalletService> logger, int count);
 
-        if (priceInfo != null)
-        {
-            var currentRegion = regionHelper.GetCurrentRegionInfoAsync(new Dictionary<string, Dictionary<string, decimal>> { { source.ProductId, priceInfo } }).Result;
+    [LoggerMessage(LogLevel.Information, "Wallet topped up: tenant {tenantId}, {description}")]
+    public static partial void InfoTopUpWalletServiceDone(this ILogger<TopUpWalletService> logger, int tenantId, string description);
 
-            if (priceInfo.TryGetValue(currentRegion.ISOCurrencySymbol, out var resolve))
-            {
-                destination.PriceCurrencySymbol = currentRegion.CurrencySymbol;
-                destination.PriceISOCurrencySymbol = currentRegion.ISOCurrencySymbol;
-                return resolve;
-            }
-        }
-
-        var defaultRegion = regionHelper.GetDefaultRegionInfo();
-        destination.PriceCurrencySymbol = defaultRegion.CurrencySymbol;
-        destination.PriceISOCurrencySymbol = defaultRegion.ISOCurrencySymbol;
-        return source.Price;
-    }
+    [LoggerMessage(LogLevel.Error, "Wallet top up failed: tenant {tenantId}")]
+    public static partial void ErrorTopUpWalletServiceFail(this ILogger<TopUpWalletService> logger, int tenantId);
 }

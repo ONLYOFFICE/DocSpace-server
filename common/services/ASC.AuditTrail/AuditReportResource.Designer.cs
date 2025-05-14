@@ -304,6 +304,51 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Customer operation performed.
+        /// </summary>
+        public static string CustomerOperationPerformed {
+            get {
+                return ResourceManager.GetString("CustomerOperationPerformed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Customer operations report downloaded.
+        /// </summary>
+        public static string CustomerOperationsReportDownloaded {
+            get {
+                return ResourceManager.GetString("CustomerOperationsReportDownloaded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Customer subscription updated.
+        /// </summary>
+        public static string CustomerSubscriptionUpdated {
+            get {
+                return ResourceManager.GetString("CustomerSubscriptionUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Customer wallet topped up.
+        /// </summary>
+        public static string CustomerWalletToppedUp {
+            get {
+                return ResourceManager.GetString("CustomerWalletToppedUp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Customer wallet top up settings updated.
+        /// </summary>
+        public static string CustomerWalletTopUpSettingsUpdated {
+            get {
+                return ResourceManager.GetString("CustomerWalletTopUpSettingsUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Custom Navigation Settings Updated.
         /// </summary>
         public static string CustomNavigationSettingsUpdated {

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,28 +26,54 @@
 
 namespace ASC.Core.Tenants;
 
-[Scope]
-internal class TenantQuotaPriceResolver(TenantManager tenantManager, RegionHelper regionHelper) : IValueResolver<DbQuota, TenantQuota, decimal>
+/// <summary>
+/// Tenant wallet settings
+/// </summary>
+public class TenantWalletSettingsWrapper
 {
-    public decimal Resolve(DbQuota source, TenantQuota destination, decimal destMember, ResolutionContext context)
+    /// <summary>
+    /// Tenant wallet settings
+    /// </summary>
+    public TenantWalletSettings Settings { get; set; }
+}
+
+[Scope]
+[Serializable]
+public class TenantWalletSettings : ISettings<TenantWalletSettings>
+{
+    /// <summary>
+    /// Enabled
+    /// </summary>
+    public bool Enabled { get; set; }
+
+    /// <summary>
+    /// Minimun balance
+    /// </summary>
+    [Range(5, 1000)]
+    public int MinBalance { get; set; }
+
+    /// <summary>
+    /// Up to balance
+    /// </summary>
+    [Range(6, 5000)]
+    public int UpToBalance { get; set; }
+
+    /// <summary>
+    /// Currency
+    /// </summary>
+    public string Currency { get; set; }
+
+
+    [JsonIgnore]
+    public Guid ID
     {
-        var priceInfo = tenantManager.GetProductPriceInfo(source.ProductId, source.Wallet);
-
-        if (priceInfo != null)
-        {
-            var currentRegion = regionHelper.GetCurrentRegionInfoAsync(new Dictionary<string, Dictionary<string, decimal>> { { source.ProductId, priceInfo } }).Result;
-
-            if (priceInfo.TryGetValue(currentRegion.ISOCurrencySymbol, out var resolve))
-            {
-                destination.PriceCurrencySymbol = currentRegion.CurrencySymbol;
-                destination.PriceISOCurrencySymbol = currentRegion.ISOCurrencySymbol;
-                return resolve;
-            }
-        }
-
-        var defaultRegion = regionHelper.GetDefaultRegionInfo();
-        destination.PriceCurrencySymbol = defaultRegion.CurrencySymbol;
-        destination.PriceISOCurrencySymbol = defaultRegion.ISOCurrencySymbol;
-        return source.Price;
+        get { return new Guid("{40069709-492A-4F41-988C-F1A053A8A560}"); }
     }
+
+    public TenantWalletSettings GetDefault()
+    {
+        return new TenantWalletSettings();
+    }
+
+    public DateTime LastModified { get; set; }
 }

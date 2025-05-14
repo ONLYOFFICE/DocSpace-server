@@ -50,3 +50,15 @@ public class PaymentInformationRequestDto
     [FromQuery(Name = "refresh")]
     public bool Refresh { get; set; }
 }
+
+/// <summary>
+/// The request parameters for getting the quotas.
+/// </summary>
+public class QuotasRequestDto
+{
+    /// <summary>
+    /// Get wallet quotas only
+    /// </summary>
+    [FromQuery(Name = "wallet")]
+    public bool Wallet { get; set; }
+}

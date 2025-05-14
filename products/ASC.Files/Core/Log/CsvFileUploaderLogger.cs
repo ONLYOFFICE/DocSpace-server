@@ -24,30 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Core.Tenants;
+using ASC.Files.Core.Utils;
 
-[Scope]
-internal class TenantQuotaPriceResolver(TenantManager tenantManager, RegionHelper regionHelper) : IValueResolver<DbQuota, TenantQuota, decimal>
+namespace ASC.Files.Core.Log;
+internal static partial class CsvFileUploaderLogger
 {
-    public decimal Resolve(DbQuota source, TenantQuota destination, decimal destMember, ResolutionContext context)
-    {
-        var priceInfo = tenantManager.GetProductPriceInfo(source.ProductId, source.Wallet);
-
-        if (priceInfo != null)
-        {
-            var currentRegion = regionHelper.GetCurrentRegionInfoAsync(new Dictionary<string, Dictionary<string, decimal>> { { source.ProductId, priceInfo } }).Result;
-
-            if (priceInfo.TryGetValue(currentRegion.ISOCurrencySymbol, out var resolve))
-            {
-                destination.PriceCurrencySymbol = currentRegion.CurrencySymbol;
-                destination.PriceISOCurrencySymbol = currentRegion.ISOCurrencySymbol;
-                return resolve;
-            }
-        }
-
-        var defaultRegion = regionHelper.GetDefaultRegionInfo();
-        destination.PriceCurrencySymbol = defaultRegion.CurrencySymbol;
-        destination.PriceISOCurrencySymbol = defaultRegion.ISOCurrencySymbol;
-        return source.Price;
-    }
+    [LoggerMessage(LogLevel.Error, "Error while uploading csv file:")]
+    public static partial void ErrorWhileUploading(this ILogger<CsvFileUploader> logger, Exception exception);
 }
