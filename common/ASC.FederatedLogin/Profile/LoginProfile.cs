@@ -205,4 +205,10 @@ public class LoginProfileTransport(InstanceCrypto instanceCrypto, TenantManager 
         var tenantId = tenantManager.GetCurrentTenantId();
         return new LoginProfile(serialized.Substring(0, serialized.LastIndexOf(tenantId.ToString(), StringComparison.Ordinal)));
     }
+
+    public async Task<LoginProfile> FromPureTransport(string transportString)
+    {
+        var serialized = await instanceCrypto.DecryptAsync(WebEncoders.Base64UrlDecode(transportString));
+        return new LoginProfile(serialized);
+    }
 }
