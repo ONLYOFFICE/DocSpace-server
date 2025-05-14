@@ -40,7 +40,8 @@ public class FoldersControllerInternal(
     HistoryApiHelper historyApiHelper,
     FormFillingReportCreator formFillingReportCreator,
     FolderOperationsService folderOperationsService,
-    SharingService sharingService)
+    SharingService sharingService,
+    EntriesOrderService entriesOrderService)
     : FoldersController<int>(
         breadCrumbsManager,
         folderContentDtoHelper,
@@ -52,7 +53,8 @@ public class FoldersControllerInternal(
         permissionContext,
         fileShareDtoHelper,
         folderOperationsService,
-        sharingService)
+        sharingService,
+        entriesOrderService)
 {
     /// <summary>
     /// Returns the activity history of a folder with a specified identifier.
@@ -100,7 +102,8 @@ public class FoldersControllerThirdparty(
     PermissionContext permissionContext,
     FileShareDtoHelper fileShareDtoHelper,
     FolderOperationsService folderOperationsService,
-    SharingService sharingService)
+    SharingService sharingService,
+    EntriesOrderService entriesOrderService)
     : FoldersController<string>(breadCrumbsManager,
         folderContentDtoHelper,
         fileStorageService,
@@ -111,7 +114,8 @@ public class FoldersControllerThirdparty(
         permissionContext,
         fileShareDtoHelper,
         folderOperationsService,
-        sharingService);
+        sharingService,
+        entriesOrderService);
 
 public abstract class FoldersController<T>(
     BreadCrumbsManager breadCrumbsManager,
@@ -124,7 +128,8 @@ public abstract class FoldersController<T>(
     PermissionContext permissionContext,
     FileShareDtoHelper fileShareDtoHelper,
     FolderOperationsService folderOperationsService,
-    SharingService sharingService)
+    SharingService sharingService,
+    EntriesOrderService entriesOrderService)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -172,7 +177,7 @@ public abstract class FoldersController<T>(
     [HttpPut("folder/{folderId}/order")]
     public async Task<FolderDto<T>> SetFileOrder(OrderFolderRequestDto<T> inDto)
     {
-        var folder = await fileStorageService.SetFolderOrder(inDto.FolderId, inDto.Order.Order);
+        var folder = await entriesOrderService.SetFolderOrder(inDto.FolderId, inDto.Order.Order);
 
         return await _folderDtoHelper.GetAsync(folder);
     }

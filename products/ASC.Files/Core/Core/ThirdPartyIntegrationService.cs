@@ -45,7 +45,7 @@ public class ThirdPartyIntegrationService(
     DocuSignHelper docuSignHelper,
     ThirdpartyConfiguration thirdpartyConfiguration,
     ConsumerFactory consumerFactory,
-    ILogger<DocumentProcessingService> logger)
+    ILogger<ThirdPartyIntegrationService> logger)
 {
     /// <summary>
     /// Retrieves an asynchronous enumerable list of third-party integration parameters.

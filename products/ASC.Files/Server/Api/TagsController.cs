@@ -32,23 +32,26 @@ public class TagsControllerInternal(
         EntryManager entryManager,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
-        FileOperationsService fileOperationsService)
-    : TagsController<int>(fileStorageService, entryManager, folderDtoHelper, fileDtoHelper, fileOperationsService);
+        FileOperationsService fileOperationsService,
+        TemplatesService templatesService)
+    : TagsController<int>(fileStorageService, entryManager, folderDtoHelper, fileDtoHelper, fileOperationsService, templatesService);
 
 public class TagsControllerThirdparty(
         FileStorageService fileStorageService,
         EntryManager entryManager,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
-        FileOperationsService fileOperationsService)
-    : TagsController<string>(fileStorageService, entryManager, folderDtoHelper, fileDtoHelper, fileOperationsService);
+        FileOperationsService fileOperationsService,
+        TemplatesService templatesService)
+    : TagsController<string>(fileStorageService, entryManager, folderDtoHelper, fileDtoHelper, fileOperationsService, templatesService);
 
 public abstract class TagsController<T>(
         FileStorageService fileStorageService,
         EntryManager entryManager,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
-        FileOperationsService fileOperationsService)
+        FileOperationsService fileOperationsService,
+        TemplatesService templatesService)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -85,9 +88,11 @@ public abstract class TagsController<T>(
     }
 }
 
-public class TagsControllerCommon(FileStorageService fileStorageService,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
+public class TagsControllerCommon(
+    FileStorageService fileStorageService,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper,
+    TemplatesService templatesService)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -121,7 +126,7 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     [HttpPost("templates")]
     public async Task<bool> AddTemplatesAsync(TemplatesRequestDto inDto)
     {
-        await fileStorageService.AddToTemplatesAsync(inDto.FileIds);
+        await templatesService.AddToTemplatesAsync(inDto.FileIds);
 
         return true;
     }
@@ -165,7 +170,7 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     [HttpDelete("templates")]
     public async Task<bool> DeleteTemplatesAsync(DeleteTemplateFilesRequestDto inDto)
     {
-        await fileStorageService.DeleteTemplatesAsync(inDto.FileIds);
+        await templatesService.DeleteTemplatesAsync(inDto.FileIds);
 
         return true;
     }

@@ -26,6 +26,14 @@
 
 namespace ASC.Files.Core.Core;
 
+/// <summary>
+/// Provides methods for managing file and folder sharing within the application.
+/// </summary>
+/// <remarks>
+/// This service handles various responsibilities such as retrieving shared information,
+/// managing access control entries (ACEs), generating external and invitation links for shared resources,
+/// and handling the removal of access permissions.
+/// </remarks>
 [Scope]
 public class SharingService(
     AuthContext authContext,
@@ -49,13 +57,27 @@ public class SharingService(
     private static readonly FrozenDictionary<SubjectType, FrozenDictionary<EventType, MessageAction>> _fileMessageActions =
         new Dictionary<SubjectType, FrozenDictionary<EventType, MessageAction>> { { SubjectType.ExternalLink, new Dictionary<EventType, MessageAction> { { EventType.Create, MessageAction.FileExternalLinkCreated }, { EventType.Update, MessageAction.FileExternalLinkUpdated }, { EventType.Remove, MessageAction.FileExternalLinkDeleted } }.ToFrozenDictionary() } }.ToFrozenDictionary();
 
+    /// Retrieves information about shared files and folders asynchronously.
+    /// <param name="fileIds">A collection of file IDs for which to retrieve shared information.</param>
+    /// <param name="folderIds">A collection of folder IDs for which to retrieve shared information.</param>
+    /// <typeparam name="T">The type of the identifiers for files and folders.</typeparam>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a list of AceWrapper objects detailing the shared information.</returns>
     public async Task<List<AceWrapper>> GetSharedInfoAsync<T>(
         IEnumerable<T> fileIds,
         IEnumerable<T> folderIds)
     {
         return await fileSharing.GetSharedInfoAsync(fileIds, folderIds);
     }
-    
+
+    /// Retrieves a filtered collection of share information for a specific file or folder asynchronously.
+    /// <param name="entryId">The ID of the file or folder for which share information is to be retrieved.</param>
+    /// <param name="entryType">The type of entry, either file or folder, represented by <see cref="FileEntryType"/>.</param>
+    /// <param name="filterType">The type of sharing filter to apply, defined by <see cref="ShareFilterType"/>.</param>
+    /// <param name="text">A search keyword to match share information.</param>
+    /// <param name="offset">The starting point for retrieving records, used for pagination.</param>
+    /// <param name="count">The maximum number of records to retrieve.</param>
+    /// <typeparam name="T">The type of the identifier used for file or folder entries.</typeparam>
+    /// <returns>An asynchronous stream of <see cref="AceWrapper"/> objects containing the filtered share information.</returns>
     public async IAsyncEnumerable<AceWrapper> GetPureSharesAsync<T>(T entryId, FileEntryType entryType, ShareFilterType filterType, string text, int offset, int count)
     {
         var entry = await GetEntryAsync(entryId, entryType);
@@ -65,7 +87,19 @@ public class SharingService(
             yield return ace;
         }
     }
-    
+
+    /// Retrieves the primary external link for a specified file or folder entry asynchronously.
+    /// <param name="entryId">The identifier of the file or folder entry for which to retrieve the primary external link.</param>
+    /// <param name="entryType">Specifies whether the entry is a file or folder.</param>
+    /// <param name="share">The level of file sharing permissions. Defaults to FileShare.Read.</param>
+    /// <param name="title">The title of the shared link. Optional.</param>
+    /// <param name="expirationDate">The expiration date for the link. Optional, defaults to no expiration.</param>
+    /// <param name="denyDownload">A flag indicating whether download is denied. Defaults to false.</param>
+    /// <param name="requiredAuth">A flag indicating whether authentication is required to access the link. Defaults to false.</param>
+    /// <param name="password">The password associated with the shared link, if any. Optional.</param>
+    /// <param name="allowUnlimitedDate">A flag allowing an unlimited expiration date for the link. Defaults to false.</param>
+    /// <typeparam name="T">The type of the identifier for the file or folder entry.</typeparam>
+    /// <returns>A task that represents the asynchronous operation. The task result contains an AceWrapper object representing the primary external link details.</returns>
     public async Task<AceWrapper> GetPrimaryExternalLinkAsync<T>(
         T entryId,
         FileEntryType entryType,
@@ -144,7 +178,15 @@ public class SharingService(
 
         return link;
     }
-    
+
+    /// Sets access control entries (ACE) for files and folders asynchronously.
+    /// <param name="aceCollection">A collection of ACEs, along with associated files and folders, to be updated.</param>
+    /// <param name="notify">A boolean value indicating whether to send notifications for the ACE changes.</param>
+    /// <param name="culture">An optional culture identifier for the operation, used for localization purposes.</param>
+    /// <param name="socket">A boolean value indicating whether to use socket notifications for real-time updates. Default is true.</param>
+    /// <param name="beforeOwnerChange">A boolean value indicating whether the ACE update is performed prior to an ownership change. Default is false.</param>
+    /// <typeparam name="T">The type of identifiers for files and folders within the ACE collection.</typeparam>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a string indicating any warnings or results of the operation.</returns>
     public async Task<string> SetAceObjectAsync<T>(AceCollection<T> aceCollection, bool notify, string culture = null, bool socket = true, bool beforeOwnerChange = false)
     {
         var fileDao = daoFactory.GetFileDao<T>();
@@ -254,7 +296,20 @@ public class SharingService(
 
         return warning;
     }
-    
+
+    /// Creates or updates an external link for a file or folder asynchronously.
+    /// <param name="entryId">The unique identifier for the file or folder.</param>
+    /// <param name="entryType">The type of the entry, indicating whether it is a file or folder.</param>
+    /// <param name="linkId">The unique identifier of the external link to be set or updated.</param>
+    /// <param name="title">The title of the external link.</param>
+    /// <param name="share">The sharing permissions to associate with the external link.</param>
+    /// <param name="expirationDate">The expiration date of the external link, if any. Defaults to no expiration if not provided.</param>
+    /// <param name="password">The optional password required to access the external link.</param>
+    /// <param name="denyDownload">A flag indicating whether downloading is denied for the external link.</param>
+    /// <param name="requiredAuth">A flag indicating whether authentication is required to use the external link.</param>
+    /// <param name="primary">A flag indicating whether the external link is marked as primary.</param>
+    /// <typeparam name="T">The type of the unique identifier for the file or folder.</typeparam>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the AceWrapper object with details of the external link.</returns>
     public async Task<AceWrapper> SetExternalLinkAsync<T>(T entryId, FileEntryType entryType, Guid linkId, string title, FileShare share, DateTime expirationDate = default,
         string password = null, bool denyDownload = false, bool requiredAuth = false, bool primary = false)
     {
@@ -265,6 +320,18 @@ public class SharingService(
         return await SetExternalLinkAsync(entry.NotFoundIfNull(), linkId, share, title, expirationDate, password, denyDownload, primary, requiredAuth);
     }
 
+    /// Sets an external link for the specified file or folder entry asynchronously.
+    /// <param name="entry">The file or folder entry for which to set the external link.</param>
+    /// <param name="linkId">The unique identifier of the existing link or a new GUID for creating a link.</param>
+    /// <param name="share">The level of sharing permissions to assign to the link.</param>
+    /// <param name="title">The title of the external link.</param>
+    /// <param name="expirationDate">The expiration date of the link. Defaults to no expiration if not provided.</param>
+    /// <param name="password">The optional password to secure the link. Defaults to null.</param>
+    /// <param name="denyDownload">Indicates whether downloading should be denied through the link. Defaults to false.</param>
+    /// <param name="primary">Indicates whether the link is the primary external link for the entry. Defaults to false.</param>
+    /// <param name="requiredAuth">Indicates whether authentication is required to access the link. Defaults to false.</param>
+    /// <typeparam name="T">The type parameter for the entry object.</typeparam>
+    /// <returns>A task representing the asynchronous operation. Upon completion, returns an AceWrapper object containing the external share link details.</returns>
     public async Task<AceWrapper> SetExternalLinkAsync<T>(FileEntry<T> entry, Guid linkId, FileShare share, string title, DateTime expirationDate = default,
         string password = null, bool denyDownload = false, bool primary = false, bool requiredAuth = false)
     {
@@ -345,6 +412,87 @@ public class SharingService(
 
         return (await fileSharing.GetPureSharesAsync(entry, [linkId]).FirstOrDefaultAsync());
     }
+
+    /// Removes access control entries (ACEs) from the specified files and folders asynchronously.
+    /// <param name="filesId">A list of file IDs for which to remove the ACEs.</param>
+    /// <param name="foldersId">A list of folder IDs for which to remove the ACEs.</param>
+    /// <typeparam name="T">The type of the identifiers for files and folders.</typeparam>
+    /// <returns>A task that represents the asynchronous operation. The task result does not return a value.</returns>
+    public async Task RemoveAceAsync<T>(List<T> filesId, List<T> foldersId)
+    {
+        if (!authContext.IsAuthenticated)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        var fileDao = daoFactory.GetFileDao<T>();
+        var folderDao = daoFactory.GetFolderDao<T>();
+
+        foreach (var fileId in filesId)
+        {
+            var entry = await fileDao.GetFileAsync(fileId);
+            await fileSharingAceHelper.RemoveAceAsync(entry);
+            await filesMessageService.SendAsync(MessageAction.FileRemovedFromList, entry, entry.Title);
+        }
+
+        foreach (var folderId in foldersId)
+        {
+            var entry = await folderDao.GetFolderAsync(folderId);
+            await fileSharingAceHelper.RemoveAceAsync(entry);
+            await filesMessageService.SendAsync(MessageAction.FolderRemovedFromList, entry, entry.Title);
+        }
+    }
+
+    /// Checks asynchronously whether a given file or folder is publicly accessible.
+    /// <param name="entryId">The identifier of the entry (file or folder) to check.</param>
+    /// <typeparam name="T">The type of the entry identifier.</typeparam>
+    /// <returns>A task that represents the asynchronous operation. The task result is true if the entry is publicly accessible; otherwise, false.</returns>
+    public async Task<bool> IsPublicAsync<T>(T entryId)
+    {
+        var entry = await GetEntryAsync(entryId, FileEntryType.Folder);
+        return await fileSharing.IsPublicAsync(entry);
+    }
+
+    /// Retrieves the count of pure shares for a specified file or folder entry asynchronously.
+    /// <param name="entryId">The identifier of the file or folder entry.</param>
+    /// <param name="entryType">The type of the entry, either file or folder.</param>
+    /// <param name="filterType">The filter type to refine the query, such as user, group, or link shares.</param>
+    /// <param name="text">Optional search text to filter the shares by specific criteria.</param>
+    /// <typeparam name="T">The type of the identifier for the file or folder entry.</typeparam>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the count of pure shares matching the specified criteria.</returns>
+    public async Task<int> GetPureSharesCountAsync<T>(T entryId, FileEntryType entryType, ShareFilterType filterType, string text)
+    {
+        var entry = await GetEntryAsync(entryId, entryType);
+
+        return await fileSharing.GetPureSharesCountAsync(entry, filterType, text);
+    }
+
+    /// Sets an invitation link with the specified properties asynchronously.
+    /// <param name="roomId">The identifier of the folder or room for which the invitation link is being set.</param>
+    /// <param name="linkId">The unique identifier of the invitation link to be set.</param>
+    /// <param name="title">The title for the invitation link. If not provided, a default title will be used.</param>
+    /// <param name="share">The sharing permissions associated with the invitation link.</param>
+    /// <typeparam name="T">The type of the folder or room identifier.</typeparam>
+    /// <returns>A task that represents the asynchronous operation. The task result contains an AceWrapper object with the details of the created or updated invitation link.</returns>
+    public async Task<AceWrapper> SetInvitationLinkAsync<T>(T roomId, Guid linkId, string title, FileShare share)
+    {
+        var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(roomId)).NotFoundIfNull();
+
+        var options = new FileShareOptions
+        {
+            Title = !string.IsNullOrEmpty(title)
+                ? title
+                : FilesCommonResource.DefaultInvitationLinkTitle,
+            ExpirationDate = DateTime.UtcNow.Add(invitationValidator.IndividualLinkExpirationInterval)
+        };
+
+        var result = await SetAceLinkAsync(room, SubjectType.InvitationLink, linkId, share, options);
+
+        await filesMessageService.SendAsync(_roomMessageActions[SubjectType.InvitationLink][result.EventType], room, result.Ace.Id, result.Ace.FileShareOptions?.Title,
+            FileShareExtensions.GetAccessString(result.Ace.Access, true));
+
+        return (await fileSharing.GetPureSharesAsync(room, [result.Ace.Id]).FirstOrDefaultAsync());
+    }
     
     private async Task<ProcessedItem<T>> SetAceLinkAsync<T>(FileEntry<T> entry, SubjectType subjectType, Guid linkId, FileShare share, FileShareOptions options)
     {
@@ -371,64 +519,6 @@ public class SharingService(
         {
             throw GenerateException(e);
         }
-    }
-    
-    public async Task RemoveAceAsync<T>(List<T> filesId, List<T> foldersId)
-    {
-        if (!authContext.IsAuthenticated)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
-        }
-
-        var fileDao = daoFactory.GetFileDao<T>();
-        var folderDao = daoFactory.GetFolderDao<T>();
-
-        foreach (var fileId in filesId)
-        {
-            var entry = await fileDao.GetFileAsync(fileId);
-            await fileSharingAceHelper.RemoveAceAsync(entry);
-            await filesMessageService.SendAsync(MessageAction.FileRemovedFromList, entry, entry.Title);
-        }
-
-        foreach (var folderId in foldersId)
-        {
-            var entry = await folderDao.GetFolderAsync(folderId);
-            await fileSharingAceHelper.RemoveAceAsync(entry);
-            await filesMessageService.SendAsync(MessageAction.FolderRemovedFromList, entry, entry.Title);
-        }
-    }
-    
-    public async Task<bool> IsPublicAsync<T>(T entryId)
-    {
-        var entry = await GetEntryAsync(entryId, FileEntryType.Folder);
-        return await fileSharing.IsPublicAsync(entry);
-    }
-
-    public async Task<int> GetPureSharesCountAsync<T>(T entryId, FileEntryType entryType, ShareFilterType filterType, string text)
-    {
-        var entry = await GetEntryAsync(entryId, entryType);
-
-        return await fileSharing.GetPureSharesCountAsync(entry, filterType, text);
-    }
-    
-    public async Task<AceWrapper> SetInvitationLinkAsync<T>(T roomId, Guid linkId, string title, FileShare share)
-    {
-        var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(roomId)).NotFoundIfNull();
-
-        var options = new FileShareOptions
-        {
-            Title = !string.IsNullOrEmpty(title)
-                ? title
-                : FilesCommonResource.DefaultInvitationLinkTitle,
-            ExpirationDate = DateTime.UtcNow.Add(invitationValidator.IndividualLinkExpirationInterval)
-        };
-
-        var result = await SetAceLinkAsync(room, SubjectType.InvitationLink, linkId, share, options);
-
-        await filesMessageService.SendAsync(_roomMessageActions[SubjectType.InvitationLink][result.EventType], room, result.Ace.Id, result.Ace.FileShareOptions?.Title,
-            FileShareExtensions.GetAccessString(result.Ace.Access, true));
-
-        return (await fileSharing.GetPureSharesAsync(room, [result.Ace.Id]).FirstOrDefaultAsync());
     }
     
     private async Task<FileEntry<T>> GetEntryAsync<T>(T entryId, FileEntryType entryType)

@@ -42,7 +42,8 @@ public class FilesControllerInternal(
     IFusionCache hybridCache,
     ApiDateTimeHelper apiDateTimeHelper,
     UserManager userManager,
-    DisplayUserSettingsHelper displayUserSettingsHelper)
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    EntriesOrderService entriesOrderService)
     : FilesController<int>(
         documentProcessingService,
         filesControllerHelper,
@@ -57,7 +58,8 @@ public class FilesControllerInternal(
         hybridCache,
         apiDateTimeHelper,
         userManager,
-        displayUserSettingsHelper)
+        displayUserSettingsHelper,
+        entriesOrderService)
 {
     /// <summary>
     /// Returns the list of actions performed on the file with the specified identifier.
@@ -92,7 +94,8 @@ public class FilesControllerThirdparty(
     IFusionCache hybridCache,
     ApiDateTimeHelper apiDateTimeHelper,
     UserManager userManager,
-    DisplayUserSettingsHelper displayUserSettingsHelper)
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    EntriesOrderService entriesOrderService)
     : FilesController<string>(
         documentProcessingService,
         filesControllerHelper,
@@ -107,7 +110,8 @@ public class FilesControllerThirdparty(
         hybridCache, 
         apiDateTimeHelper,
         userManager,
-        displayUserSettingsHelper);
+        displayUserSettingsHelper, 
+        entriesOrderService);
 
 public abstract class FilesController<T>(
     DocumentProcessingService documentProcessingService,
@@ -123,7 +127,8 @@ public abstract class FilesController<T>(
     IFusionCache hybridCache,
     ApiDateTimeHelper apiDateTimeHelper,
     UserManager userManager,
-    DisplayUserSettingsHelper displayUserSettingsHelper)
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    EntriesOrderService entriesOrderService)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -510,7 +515,7 @@ public abstract class FilesController<T>(
     [HttpPut("{fileId}/order")]
     public async Task<FileDto<T>> SetOrderFile(OrderFileRequestDto<T> inDto)
     {
-        var file = await fileStorageService.SetFileOrder(inDto.FileId, inDto.Order.Order);
+        var file = await entriesOrderService.SetFileOrder(inDto.FileId, inDto.Order.Order);
 
         return await _fileDtoHelper.GetAsync(file);
     }
@@ -528,7 +533,7 @@ public abstract class FilesController<T>(
     [HttpPut("order")]
     public IAsyncEnumerable<FileEntryDto<T>> SetFilesOrder(OrdersRequestDto<T> inDto)
     {
-        return fileStorageService.SetOrderAsync(inDto.Items).SelectAwait<FileEntry<T>, FileEntryDto<T>>(
+        return entriesOrderService.SetOrderAsync(inDto.Items).SelectAwait<FileEntry<T>, FileEntryDto<T>>(
             async e => e.FileEntryType == FileEntryType.Folder ? 
                 await _folderDtoHelper.GetAsync(e as Folder<T>) : 
                 await _fileDtoHelper.GetAsync(e as File<T>));
