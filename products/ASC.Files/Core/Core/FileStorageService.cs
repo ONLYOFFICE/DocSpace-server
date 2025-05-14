@@ -49,7 +49,6 @@ public class FileStorageService //: IFileStorageService
     LockerManager lockerManager,
     EntryManager entryManager,
     FilesMessageService filesMessageService,
-    DocumentServiceTrackerHelper documentServiceTrackerHelper,
     DocuSignToken docuSignToken,
     DocuSignHelper docuSignHelper,
     FileConverter fileConverter,
@@ -697,39 +696,7 @@ public class FileStorageService //: IFileStorageService
         return folder;
     }
 
-    public async Task<KeyValuePair<bool, string>> TrackEditFileAsync<T>(T fileId, Guid tabId, string docKeyForTrack, bool isFinish = false)
-    {
-        try
-        {
-            if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() == Guid.Empty)
-            {
-                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
-            }
-
-            var (file, _) = await documentServiceHelper.GetCurFileInfoAsync(fileId, -1);
-
-            if (docKeyForTrack != await documentServiceHelper.GetDocKeyAsync(fileId, -1, DateTime.MinValue) && docKeyForTrack != await documentServiceHelper.GetDocKeyAsync(file.Id, file.Version, file.ProviderEntry ? file.ModifiedOn : file.CreateOn))
-            {
-                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
-            }
-
-            if (isFinish)
-            {
-                await fileTracker.RemoveAsync(fileId, tabId);
-                await socketManager.StopEditAsync(fileId);
-            }
-            else
-            {
-                await entryManager.TrackEditingAsync(fileId, tabId, authContext.CurrentAccount.ID, tenantManager.GetCurrentTenant());
-            }
-
-            return new KeyValuePair<bool, string>(true, string.Empty);
-        }
-        catch (Exception ex)
-        {
-            return new KeyValuePair<bool, string>(false, ex.Message);
-        }
-    }
+    
 
     public async Task<File<T>> SaveEditingAsync<T>(T fileId, string fileExtension, string fileUri, Stream stream, bool forceSave = false)
     {
@@ -793,48 +760,7 @@ public class FileStorageService //: IFileStorageService
         return file;
     }
 
-    public async Task<string> StartEditAsync<T>(T fileId, bool editingAlone = false)
-    {
-        try
-        {
-            if (editingAlone)
-            {
-                if (await fileTracker.IsEditingAsync(fileId))
-                {
-                    throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFileTwice);
-                }
-
-                await entryManager.TrackEditingAsync(fileId, Guid.Empty, authContext.CurrentAccount.ID, tenantManager.GetCurrentTenant(), true);
-
-                //without StartTrack, track via old scheme
-                return await documentServiceHelper.GetDocKeyAsync(fileId, -1, DateTime.MinValue);
-            }
-
-            var fileOptions = await documentServiceHelper.GetParamsAsync(fileId, -1, true, true, false, true);
-
-            var configuration = fileOptions.Configuration;
-            if (!configuration.EditorConfig.ModeWrite || !(configuration.Document.Permissions.Edit || configuration.Document.Permissions.ModifyFilter || configuration.Document.Permissions.Review
-                                                           || configuration.Document.Permissions.FillForms || configuration.Document.Permissions.Comment))
-            {
-                throw new InvalidOperationException(!string.IsNullOrEmpty(configuration.Error) ? configuration.Error : FilesCommonResource.ErrorMessage_SecurityException_EditFile);
-            }
-
-            var key = configuration.Document.Key;
-
-            if (!await documentServiceTrackerHelper.StartTrackAsync(fileId.ToString(), key))
-            {
-                throw new Exception(FilesCommonResource.ErrorMessage_StartEditing);
-            }
-
-            return key;
-        }
-        catch (Exception e)
-        {
-            await fileTracker.RemoveAsync(fileId);
-
-            throw GenerateException(e);
-        }
-    }
+   
 
     public async IAsyncEnumerable<File<T>> GetFileHistoryAsync<T>(T fileId)
     {
@@ -1068,32 +994,6 @@ public class FileStorageService //: IFileStorageService
         await socketManager.UpdateFileAsync(file);
 
         return file;
-    }
-
-    public async IAsyncEnumerable<EditHistory> GetEditHistoryAsync<T>(T fileId)
-    {
-        var fileDao = daoFactory.GetFileDao<T>();
-        var file = await fileDao.GetFileAsync(fileId);
-
-        if (file == null)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
-        }
-
-        if (!await fileSecurity.CanReadHistoryAsync(file))
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
-        }
-
-        if (file.ProviderEntry)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_BadRequest);
-        }
-
-        await foreach (var f in fileDao.GetEditHistoryAsync(documentServiceHelper, file.Id))
-        {
-            yield return f;
-        }
     }
 
     public async Task<EditHistoryDataDto> GetEditDiffUrlAsync<T>(T fileId, int version = 0)
@@ -1871,71 +1771,6 @@ public class FileStorageService //: IFileStorageService
         var filesIdTask = await fileDao.GetFilesAsync(trashId).ToListAsync();
 
         return (foldersIdTask, filesIdTask);
-    }
-
-    public async IAsyncEnumerable<FileOperationResult> CheckConversionAsync<T>(List<CheckConversionRequestDto<T>> filesInfoJson, bool sync = false)
-    {
-        if (filesInfoJson == null || filesInfoJson.Count == 0)
-        {
-            yield break;
-        }
-
-        var results = AsyncEnumerable.Empty<FileOperationResult>();
-        var fileDao = daoFactory.GetFileDao<T>();
-        var files = new List<KeyValuePair<File<T>, bool>>();
-        foreach (var fileInfo in filesInfoJson)
-        {
-            var file = fileInfo.Version > 0
-                ? await fileDao.GetFileAsync(fileInfo.FileId, fileInfo.Version)
-                : await fileDao.GetFileAsync(fileInfo.FileId);
-
-            if (file == null)
-            {
-                var newFile = serviceProvider.GetService<File<T>>();
-                newFile.Id = fileInfo.FileId;
-                newFile.Version = fileInfo.Version;
-
-                files.Add(new KeyValuePair<File<T>, bool>(newFile, true));
-
-                continue;
-            }
-
-            if (!await fileSecurity.CanConvertAsync(file))
-            {
-                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
-            }
-
-            if (fileInfo.StartConvert && fileConverter.MustConvert(file))
-            {
-                try
-                {
-                    if (sync)
-                    {
-                        results = results.Append(await fileConverter.ExecSynchronouslyAsync(file, !fileInfo.CreateNewIfExist, fileInfo.OutputType));
-                    }
-                    else
-                    {
-                        await fileConverter.ExecAsynchronouslyAsync(file, false, !fileInfo.CreateNewIfExist, fileInfo.Password, fileInfo.OutputType);
-                    }
-                }
-                catch (Exception e)
-                {
-                    throw GenerateException(e);
-                }
-            }
-
-            files.Add(new KeyValuePair<File<T>, bool>(file, false));
-        }
-
-        if (!sync)
-        {
-            results = fileConverter.GetStatusAsync(files);
-        }
-
-        await foreach (var res in results)
-        {
-            yield return res;
-        }
     }
 
     public async Task<string> CheckFillFormDraftAsync<T>(T fileId, int version, bool editPossible, bool view)

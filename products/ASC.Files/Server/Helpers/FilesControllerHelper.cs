@@ -47,7 +47,8 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         IEventBus eventBus,
         TenantManager tenantManager,
         AuthContext authContext,
-        FileOperationsService fileOperationsService)
+        FileOperationsService fileOperationsService,
+        DocumentProcessingService documentProcessingService)
     : FilesHelperBase(filesSettingsHelper,
             fileUploader,
             socketManager,
@@ -95,7 +96,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
 
     public async IAsyncEnumerable<ConversationResultDto> CheckConversionAsync<T>(CheckConversionRequestDto<T> checkConversionRequestDto)
     {
-        var checkConversation = _fileStorageService.CheckConversionAsync([checkConversionRequestDto], checkConversionRequestDto.Sync);
+        var checkConversation = documentProcessingService.CheckConversionAsync([checkConversionRequestDto], checkConversionRequestDto.Sync);
 
         await foreach (var r in checkConversation)
         {
@@ -196,7 +197,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
 
     public IAsyncEnumerable<EditHistoryDto> GetEditHistoryAsync<T>(T fileId)
     {
-        return _fileStorageService.GetEditHistoryAsync(fileId).Select(f => new EditHistoryDto(f, apiDateTimeHelper, userManager, displayUserSettingsHelper));
+        return documentProcessingService.GetEditHistoryAsync(fileId).Select(f => new EditHistoryDto(f, apiDateTimeHelper, userManager, displayUserSettingsHelper));
     }
 
     public IAsyncEnumerable<FileDto<T>> GetFileVersionInfoAsync<T>(T fileId)

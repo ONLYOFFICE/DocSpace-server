@@ -1,5 +1,13 @@
 namespace ASC.Files.Core;
 
+/// <summary>
+/// Provides a service to perform various file operations within the system, including retrieval, creation, updating, renaming,
+/// and managing file access and security.
+/// </summary>
+/// <remarks>
+/// This service contains methods for handling file-related operations, enforcing file security, and integrating with other
+/// components like file sharing, notifications, and tracking.
+/// </remarks>
 [Scope]
 public class FileOperationsService(
     Global global,

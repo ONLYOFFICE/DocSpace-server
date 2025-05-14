@@ -40,8 +40,9 @@ public class EditorControllerInternal(FileStorageService fileStorageService,
         ExternalShare externalShare,
         AuthContext authContext,
         ConfigurationConverter<int> configurationConverter,
-        SecurityContext securityContext)
-        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, securityContext);
+        SecurityContext securityContext,
+        DocumentProcessingService documentProcessingService)
+        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, securityContext, documentProcessingService);
 
 [DefaultRoute("file")]
 public class EditorControllerThirdparty(FileStorageService fileStorageService,
@@ -54,8 +55,9 @@ public class EditorControllerThirdparty(FileStorageService fileStorageService,
         ExternalShare externalShare,
         AuthContext authContext,
         ConfigurationConverter<string> configurationConverter,
-        SecurityContext securityContext)
-        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, securityContext);
+        SecurityContext securityContext,
+        DocumentProcessingService documentProcessingService)
+        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, securityContext, documentProcessingService);
 
 public abstract class EditorController<T>(FileStorageService fileStorageService,
         DocumentServiceHelper documentServiceHelper,
@@ -67,7 +69,8 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         ExternalShare externalShare,
         AuthContext authContext,
         ConfigurationConverter<T> configurationConverter,
-        SecurityContext securityContext)
+        SecurityContext securityContext,
+        DocumentProcessingService documentProcessingService)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
 
@@ -99,7 +102,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     [HttpPost("{fileId}/startedit")]
     public async Task<string> StartEditAsync(StartEditRequestDto<T> inDto)
     {
-        return await fileStorageService.StartEditAsync(inDto.FileId, inDto.File.EditingAlone);
+        return await documentProcessingService.StartEditAsync(inDto.FileId, inDto.File.EditingAlone);
     }
 
     /// <summary>
@@ -131,7 +134,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     [HttpGet("{fileId}/trackeditfile")]
     public async Task<KeyValuePair<bool, string>> TrackEditFileAsync(TrackEditFileRequestDto<T> inDto)
     {
-        return await fileStorageService.TrackEditFileAsync(inDto.FileId, inDto.TabId, inDto.DocKeyForTrack, inDto.IsFinish);
+        return await documentProcessingService.TrackEditFileAsync(inDto.FileId, inDto.TabId, inDto.DocKeyForTrack, inDto.IsFinish);
     }
 
     /// <summary>
