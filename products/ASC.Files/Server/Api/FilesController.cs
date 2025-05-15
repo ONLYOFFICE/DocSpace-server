@@ -661,7 +661,7 @@ public abstract class FilesController<T>(
 
 public class FilesControllerCommon(
         GlobalFolderHelper globalFolderHelper,
-        FileStorageService fileStorageService,
+        FileService fileService,
         FilesControllerHelper filesControllerHelperInternal,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper)
@@ -750,6 +750,6 @@ public class FilesControllerCommon(
     [HttpPost("thumbnails")]
     public async Task<IEnumerable<JsonElement>> CreateThumbnailsAsync(BaseBatchRequestDto inDto)
     {
-        return await fileStorageService.CreateThumbnailsAsync(inDto.FileIds.ToList());
+        return await fileService.CreateThumbnailsAsync(inDto.FileIds.ToList());
     }
 }

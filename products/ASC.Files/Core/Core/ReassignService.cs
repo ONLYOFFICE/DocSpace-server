@@ -43,7 +43,8 @@ public class ReassignService(
     GlobalFolderHelper globalFolderHelper,
     SecurityContext securityContext,
     FolderService folderService,
-    SharingService sharingService)
+    SharingService sharingService,
+    RecentService recentService)
 {
     /// <summary>
     /// Reassigns providers associated with a user to another user, optionally checking permissions before performing the operation.
@@ -331,6 +332,80 @@ public class ReassignService(
 
         await sharingService.ChangeOwnerAsync(ids, [], reassign ?? securityContext.CurrentAccount.ID, FileShare.ContentCreator).ToListAsync();
         await sharingService.ChangeOwnerAsync(thirdIds, [], reassign ?? securityContext.CurrentAccount.ID, FileShare.ContentCreator).ToListAsync();
+    }
+    
+        public async Task<List<T>> GetPersonalFolderIdsAsync<T>(Guid userId)
+    {
+        var result = new List<T>();
+
+        var folderDao = daoFactory.GetFolderDao<T>();
+        if (folderDao == null)
+        {
+            return result;
+        }
+
+        var folderIdMy = await folderDao.GetFolderIDUserAsync(false, userId);
+        if (!Equals(folderIdMy, 0))
+        {
+            result.Add(folderIdMy);
+        }
+
+        var folderIdTrash = await folderDao.GetFolderIDTrashAsync(false, userId);
+        if (!Equals(folderIdTrash, 0))
+        {
+            result.Add(folderIdTrash);
+        }
+
+        return result;
+    }
+    
+    public async Task<IEnumerable<FileEntry>> GetSharedFilesAsync(Guid user)
+    {
+        var fileDao = daoFactory.GetFileDao<int>();
+        var folderDao = daoFactory.GetFolderDao<int>();
+
+        var my = await folderDao.GetFolderIDUserAsync(false, user);
+        if (my == 0)
+        {
+            return [];
+        }
+        var shared = await fileDao.GetFilesAsync(my, null, default, false, Guid.Empty, string.Empty, null, false, true, withShared: true).Where(q => q.Shared).ToListAsync();
+
+        return shared;
+    }
+
+    public async Task MoveSharedFilesAsync(Guid user, Guid toUser)
+    {
+        var initUser = securityContext.CurrentAccount.ID;
+
+        var fileDao = daoFactory.GetFileDao<int>();
+        var folderDao = daoFactory.GetFolderDao<int>();
+
+        var my = await folderDao.GetFolderIDUserAsync(false, user);
+        if (my == 0)
+        {
+            return;
+        }
+
+        var shared = await fileDao.GetFilesAsync(my, null, default, false, Guid.Empty, string.Empty, null, false, true, withShared: true).Where(q => q.Shared).ToListAsync();
+
+        await securityContext.AuthenticateMeWithoutCookieAsync(toUser);
+        if (shared.Count > 0)
+        {
+            await securityContext.AuthenticateMeWithoutCookieAsync(toUser);
+            var userInfo = await userManager.GetUsersAsync(user, false);
+            var folder = await folderService.CreateFolderAsync(await globalFolderHelper.FolderMyAsync, $"Documents of user {userInfo.FirstName} {userInfo.LastName}");
+            foreach (var file in shared)
+            {
+                await socketManager.DeleteFileAsync(file, action: async () => await fileDao.MoveFileAsync(file.Id, folder.Id));
+                await socketManager.CreateFileAsync(file);
+            }
+            var ids = shared.Select(s => s.Id).ToList();
+            await recentService.DeleteFromRecentAsync([], ids, true);
+            await fileDao.ReassignFilesAsync(toUser, ids);
+        }
+
+        await securityContext.AuthenticateMeWithoutCookieAsync(initUser);
     }
     
     private async Task DemandPermissionToDeletePersonalDataAsync(Guid userFromId)

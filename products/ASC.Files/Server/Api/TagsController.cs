@@ -86,11 +86,11 @@ public abstract class TagsController<T>(
 }
 
 public class TagsControllerCommon(
-    FileStorageService fileStorageService,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     TemplatesService templatesService,
-    FavoritesService favoritesService)
+    FavoritesService favoritesService,
+    RecentService recentService)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -186,8 +186,8 @@ public class TagsControllerCommon(
         var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
         var (fileIntIds, _) = FileOperationsManager.GetIds(inDto.FileIds);
         
-        var t1 = fileStorageService.DeleteFromRecentAsync(folderIntIds, fileIntIds, true);
-        var t2 = fileStorageService.DeleteFromRecentAsync(folderStringIds, [], true);
+        var t1 = recentService.DeleteFromRecentAsync(folderIntIds, fileIntIds, true);
+        var t2 = recentService.DeleteFromRecentAsync(folderStringIds, [], true);
         
         await Task.WhenAll(t1, t2);
         

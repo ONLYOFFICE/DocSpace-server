@@ -37,28 +37,17 @@ public class FileStorageService //: IFileStorageService
     ILoggerProvider optionMonitor,
     PathProvider pathProvider,
     FileSecurity fileSecurity,
-    SocketManager socketManager,
     IDaoFactory daoFactory,
     EntryManager entryManager,
     DocumentServiceHelper documentServiceHelper,
     DocumentServiceConnector documentServiceConnector,
-    FileSharing fileSharing,
-    EncryptionKeyPairDtoHelper encryptionKeyPairHelper,
-    SettingsManager settingsManager,
     TenantManager tenantManager,
-    IEventBus eventBus,
     EntryStatusManager entryStatusManager,
-    ExternalShare externalShare,
-    CoreBaseSettings coreBaseSettings,
     MentionWrapperCreator mentionWrapperCreator,
-    SecurityContext securityContext,
     FileChecker fileChecker,
     CommonLinkUtility commonLinkUtility,
     ShortUrl shortUrl,
-    IDbContextFactory<UrlShortenerDbContext> dbContextFactory,
-    WebhookManager webhookManager,
-    FolderService folderService,
-    SharingService sharingService)
+    IDbContextFactory<UrlShortenerDbContext> dbContextFactory)
 {
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
     
@@ -120,75 +109,6 @@ public class FileStorageService //: IFileStorageService
 
         return result;
     }
-    
-    public async Task<Folder<T>> FolderQuotaChangeAsync<T>(T folderId, long quota)
-    {
-        var tenantId = tenantManager.GetCurrentTenantId();
-
-        var tenantSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenantId);
-        var maxTotalSize = tenantSpaceQuota?.MaxTotalSize ?? -1;
-
-        if (maxTotalSize < quota)
-        {
-            throw new InvalidOperationException(Resource.RoomQuotaGreaterPortalError);
-        }
-
-        if (coreBaseSettings.Standalone)
-        {
-            var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
-            if (tenantQuotaSetting.EnableQuota)
-            {
-                if (tenantQuotaSetting.Quota < quota)
-                {
-                    throw new InvalidOperationException(Resource.RoomQuotaGreaterPortalError);
-                }
-            }
-        }
-
-        var folderDao = daoFactory.GetFolderDao<T>();
-        var folder = await folderDao.GetFolderAsync(folderId);
-        var isRoom = DocSpaceHelper.IsRoom(folder.FolderType);
-
-        if (maxTotalSize < quota)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderNotFound);
-        }
-        var canEdit = isRoom ? folder.RootFolderType != FolderType.Archive && await fileSecurity.CanEditRoomAsync(folder)
-            : await fileSecurity.CanRenameAsync(folder);
-
-        if (!canEdit)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_RenameFolder);
-        }
-
-        if (folder.RootFolderType == FolderType.TRASH)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ViewTrashItem);
-        }
-
-        if (folder.RootFolderType == FolderType.Archive)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_UpdateArchivedRoom);
-        }
-
-        var folderAccess = folder.Access;
-
-        if (folder.SettingsQuota != quota)
-        {
-            var newFolderID = await folderDao.ChangeFolderQuotaAsync(folder, quota);
-            folder = await folderDao.GetFolderAsync(newFolderID);
-            folder.Access = folderAccess;
-        }
-
-        await socketManager.UpdateFolderAsync(folder);
-
-        await webhookManager.PublishAsync(isRoom ? WebhookTrigger.RoomUpdated : WebhookTrigger.FolderUpdated, folder);
-
-        return folder;
-    }
-
-    
-
 
     #region MoveOrCopy
 
@@ -365,170 +285,11 @@ public class FileStorageService //: IFileStorageService
 
         return (foldersIdTask, filesIdTask);
     }
-
-   
-
-    #region [Reassign|Delete] Data Manager
-    public async Task<List<T>> GetPersonalFolderIdsAsync<T>(Guid userId)
-    {
-        var result = new List<T>();
-
-        var folderDao = daoFactory.GetFolderDao<T>();
-        if (folderDao == null)
-        {
-            return result;
-        }
-
-        var folderIdMy = await folderDao.GetFolderIDUserAsync(false, userId);
-        if (!Equals(folderIdMy, 0))
-        {
-            result.Add(folderIdMy);
-        }
-
-        var folderIdTrash = await folderDao.GetFolderIDTrashAsync(false, userId);
-        if (!Equals(folderIdTrash, 0))
-        {
-            result.Add(folderIdTrash);
-        }
-
-        return result;
-    }
     
     public async Task<FilesStatisticsResultDto> GetFilesUsedSpace()
     {
         var folderDao = daoFactory.GetFolderDao<int>();
         return await folderDao.GetFilesUsedSpace();
-    }
-
-    public async Task<IEnumerable<FileEntry>> GetSharedFilesAsync(Guid user)
-    {
-        var fileDao = daoFactory.GetFileDao<int>();
-        var folderDao = daoFactory.GetFolderDao<int>();
-
-        var my = await folderDao.GetFolderIDUserAsync(false, user);
-        if (my == 0)
-        {
-            return [];
-        }
-        var shared = await fileDao.GetFilesAsync(my, null, default, false, Guid.Empty, string.Empty, null, false, true, withShared: true).Where(q => q.Shared).ToListAsync();
-
-        return shared;
-    }
-
-    public async Task MoveSharedFilesAsync(Guid user, Guid toUser)
-    {
-        var initUser = securityContext.CurrentAccount.ID;
-
-        var fileDao = daoFactory.GetFileDao<int>();
-        var folderDao = daoFactory.GetFolderDao<int>();
-
-        var my = await folderDao.GetFolderIDUserAsync(false, user);
-        if (my == 0)
-        {
-            return;
-        }
-
-        var shared = await fileDao.GetFilesAsync(my, null, default, false, Guid.Empty, string.Empty, null, false, true, withShared: true).Where(q => q.Shared).ToListAsync();
-
-        await securityContext.AuthenticateMeWithoutCookieAsync(toUser);
-        if (shared.Count > 0)
-        {
-            await securityContext.AuthenticateMeWithoutCookieAsync(toUser);
-            var userInfo = await userManager.GetUsersAsync(user, false);
-            var folder = await folderService.CreateFolderAsync(await globalFolderHelper.FolderMyAsync, $"Documents of user {userInfo.FirstName} {userInfo.LastName}");
-            foreach (var file in shared)
-            {
-                await socketManager.DeleteFileAsync(file, action: async () => await fileDao.MoveFileAsync(file.Id, folder.Id));
-                await socketManager.CreateFileAsync(file);
-            }
-            var ids = shared.Select(s => s.Id).ToList();
-            await DeleteFromRecentAsync([], ids, true);
-            await fileDao.ReassignFilesAsync(toUser, ids);
-        }
-
-        await securityContext.AuthenticateMeWithoutCookieAsync(initUser);
-    }
-
-    #endregion
-
-    #region Templates Manager
-
-    public async Task DeleteFromRecentAsync<T>(List<T> foldersIds, List<T> filesIds, bool recentByLinks)
-    {
-        var fileDao = daoFactory.GetFileDao<T>();
-        var folderDao = daoFactory.GetFolderDao<T>();
-        var tagDao = daoFactory.GetTagDao<T>();
-
-        var entries = new List<FileEntry<T>>(foldersIds.Count + filesIds.Count);
-
-        var folders = folderDao.GetFoldersAsync(foldersIds).Cast<FileEntry<T>>().ToListAsync().AsTask();
-        var files = fileDao.GetFilesAsync(filesIds).Cast<FileEntry<T>>().ToListAsync().AsTask();
-
-        foreach (var items in await Task.WhenAll(folders, files))
-        {
-            entries.AddRange(items);
-        }
-
-        var tags = recentByLinks
-            ? await tagDao.GetTagsAsync(authContext.CurrentAccount.ID, TagType.RecentByLink, entries).ToListAsync()
-            : entries.Select(f => Tag.Recent(authContext.CurrentAccount.ID, f));
-
-        await tagDao.RemoveTagsAsync(tags);
-
-        var users = new[] { authContext.CurrentAccount.ID };
-
-        var tasks = new List<Task>(entries.Count);
-
-        foreach (var e in entries)
-        {
-            switch (e)
-            {
-                case File<T> file:
-                    tasks.Add(socketManager.DeleteFileAsync(file, users: users));
-                    break;
-                case Folder<T> folder:
-                    tasks.Add(socketManager.DeleteFolder(folder, users: users));
-                    break;
-            }
-        }
-
-        await Task.WhenAll(tasks);
-    }
-    
-    #endregion
-    
-
-    public async Task<List<MentionWrapper>> GetInfoUsersAsync(List<Guid> userIds)
-    {
-        if (!authContext.IsAuthenticated)
-        {
-            return null;
-        }
-
-        var users = new List<MentionWrapper>();
-
-        foreach (var uid in userIds)
-        {
-            var user = await userManager.GetUsersAsync(uid);
-            if (user.Id.Equals(Constants.LostUser.Id))
-            {
-                continue;
-            }
-
-            users.Add(await mentionWrapperCreator.CreateMentionWrapperAsync(user));
-        }
-
-        return users;
-    }
-    
-    public Task<List<MentionWrapper>> SharedUsersAsync<T>(T fileId)
-    {
-        if (!authContext.IsAuthenticated)
-        {
-            return Task.FromResult<List<MentionWrapper>>(null);
-        }
-
-        return InternalSharedUsersAsync(fileId);
     }
     
     public async Task<FileReference> GetReferenceDataAsync<T>(string fileId, string portalName, T sourceFileId, string path, string link)
@@ -633,153 +394,6 @@ public class FileStorageService //: IFileStorageService
         };
         fileReference.Token = documentServiceHelper.GetSignature(fileReference);
         return fileReference;
-    }
-
-    public async Task<bool> ShouldPreventUserDeletion<T>(Folder<T> room, Guid userId)
-    {
-        if (room.FolderType != FolderType.VirtualDataRoom)
-        {
-            return false;
-        }
-
-        var fileDao = daoFactory.GetFileDao<T>();
-        return await fileDao.GetUserFormRolesInRoom(room.Id, userId).AnyAsync();
-    }
-
-    private async Task<List<MentionWrapper>> InternalSharedUsersAsync<T>(T fileId)
-    {
-        var fileDao = daoFactory.GetFileDao<T>();
-
-        FileEntry<T> file = await fileDao.GetFileAsync(fileId);
-
-        if (file == null)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
-        }
-        
-        var usersIdWithAccess = await WhoCanRead(file);
-        var links = await fileSecurity.GetPureSharesAsync(file, ShareFilterType.Link, null, null)
-            .Select(x => x.Subject).ToHashSetAsync();
-
-        var users = usersIdWithAccess
-            .Where(id => !id.Equals(authContext.CurrentAccount.ID) && !links.Contains(id))
-            .Select(userManager.GetUsers);
-
-        var result = await users
-            .Where(u => u.Status != EmployeeStatus.Terminated)
-            .ToAsyncEnumerable()
-            .SelectAwait(async u => await mentionWrapperCreator.CreateMentionWrapperAsync(u))
-            .OrderBy(u => u.User, UserInfoComparer.Default)
-            .ToListAsync();
-
-        return result;
-    }
-
-    private async Task<List<Guid>> WhoCanRead<T>(FileEntry<T> entry)
-    {
-        var whoCanReadTask = (await fileSecurity.WhoCanReadAsync(entry, true)).ToList();
-        whoCanReadTask.AddRange((await userManager.GetUsersByGroupAsync(Constants.GroupAdmin.ID))
-            .Select(x => x.Id));
-
-        whoCanReadTask.Add((tenantManager.GetCurrentTenant()).OwnerId);
-
-        var userIds = whoCanReadTask
-            .Concat([entry.CreateBy])
-            .Distinct()
-            .ToList();
-
-        return userIds;
-    }
-
-    public async Task<List<EncryptionKeyPairDto>> GetEncryptionAccessAsync<T>(T fileId)
-    {
-        if (!await PrivacyRoomSettings.GetEnabledAsync(settingsManager))
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
-        }
-
-        var fileKeyPair = await encryptionKeyPairHelper.GetKeyPairAsync(fileId, sharingService);
-
-        return [..fileKeyPair];
-    }
-
-    
-
-    public async Task<IEnumerable<JsonElement>> CreateThumbnailsAsync(List<JsonElement> fileIds)
-    {
-        if (!authContext.IsAuthenticated && (await externalShare.GetLinkIdAsync()) == Guid.Empty)
-        {
-            throw GenerateException(new SecurityException(FilesCommonResource.ErrorMessage_SecurityException),  _logger, authContext);
-        }
-
-        try
-        {
-            var (fileIntIds, _) = FileOperationsManager.GetIds(fileIds);
-
-            await eventBus.PublishAsync(new ThumbnailRequestedIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId()) { BaseUrl = baseCommonLinkUtility.GetFullAbsolutePath(""), FileIds = fileIntIds });
-        }
-        catch (Exception e)
-        {
-            _logger.ErrorCreateThumbnails(e);
-        }
-
-        return fileIds;
-    }
-
-    public async Task<List<MentionWrapper>> ProtectUsersAsync<T>(T fileId)
-    {
-        if (!authContext.IsAuthenticated)
-        {
-            return null;
-        }
-
-        var fileDao = daoFactory.GetFileDao<T>();
-        var file = await fileDao.GetFileAsync(fileId);
-
-        if (file == null)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
-        }
-
-        var users = new List<MentionWrapper>();
-        if (file.RootFolderType == FolderType.BUNCH)
-        {
-            //todo: request project team
-            return [..users];
-        }
-
-        var acesForObject = await fileSharing.GetSharedInfoAsync(file);
-
-        var usersInfo = new List<UserInfo>();
-        foreach (var ace in acesForObject)
-        {
-            if (ace.Access == FileShare.Restrict)
-            {
-                continue;
-            }
-
-            if (ace.SubjectGroup)
-            {
-                usersInfo.AddRange(await userManager.GetUsersByGroupAsync(ace.Id));
-            }
-            else
-            {
-                usersInfo.Add(await userManager.GetUsersAsync(ace.Id));
-            }
-        }
-
-        users = await usersInfo.Distinct()
-            .Where(user => !user.Id.Equals(authContext.CurrentAccount.ID)
-                           && !user.Id.Equals(Constants.LostUser.Id))
-            .ToAsyncEnumerable()
-            .SelectAwait(async user => await mentionWrapperCreator.CreateMentionWrapperAsync(user))
-            .ToListAsync();
-
-        users = users
-            .OrderBy(user => user.User, UserInfoComparer.Default)
-            .ToList();
-
-        return [..users];
     }
     
     internal static Exception GenerateException(Exception error, ILogger logger, AuthContext authContext, bool warning = false)

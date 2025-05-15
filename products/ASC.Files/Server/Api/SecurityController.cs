@@ -28,7 +28,6 @@ namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
 public class SecurityControllerInternal(
-    FileStorageService fileStorageService,
     SecurityControllerHelper securityControllerHelper,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
@@ -37,10 +36,9 @@ public class SecurityControllerInternal(
     FileSharing fileSharing,
     EmployeeFullDtoHelper employeeFullDtoHelper,
     FileService fileService)
-    : SecurityController<int>(fileStorageService, securityControllerHelper, folderDtoHelper, fileDtoHelper, apiContext, daoFactory, fileSharing, employeeFullDtoHelper, fileService);
+    : SecurityController<int>(securityControllerHelper, folderDtoHelper, fileDtoHelper, apiContext, daoFactory, fileSharing, employeeFullDtoHelper, fileService);
 
 public class SecurityControllerThirdparty(
-    FileStorageService fileStorageService,
     SecurityControllerHelper securityControllerHelper,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
@@ -49,10 +47,9 @@ public class SecurityControllerThirdparty(
     FileSharing fileSharing,
     EmployeeFullDtoHelper employeeFullDtoHelper,
     FileService fileService)
-    : SecurityController<string>(fileStorageService, securityControllerHelper, folderDtoHelper, fileDtoHelper, apiContext, daoFactory, fileSharing, employeeFullDtoHelper, fileService);
+    : SecurityController<string>(securityControllerHelper, folderDtoHelper, fileDtoHelper, apiContext, daoFactory, fileSharing, employeeFullDtoHelper, fileService);
 
 public abstract class SecurityController<T>(
-    FileStorageService fileStorageService,
     SecurityControllerHelper securityControllerHelper,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
@@ -139,7 +136,7 @@ public abstract class SecurityController<T>(
     [HttpGet("file/{fileId}/publickeys")]
     public async Task<List<EncryptionKeyPairDto>> GetEncryptionAccess(FileIdRequestDto<T> inDto)
     {
-        return await fileStorageService.GetEncryptionAccessAsync(inDto.FileId);
+        return await fileService.GetEncryptionAccessAsync(inDto.FileId);
     }
 
     /// <summary>

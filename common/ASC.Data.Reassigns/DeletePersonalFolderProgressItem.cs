@@ -54,7 +54,6 @@ public class DeletePersonalFolderProgressItem : DistributedTaskProgress
     protected override async Task DoJob()
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
-        var fileStorageService = scope.ServiceProvider.GetService<FileStorageService>();
         var reassignService = scope.ServiceProvider.GetService<ReassignService>();
         var options = scope.ServiceProvider.GetService<ILoggerProvider>();
         var daoFactory = scope.ServiceProvider.GetService<IDaoFactory>();
@@ -89,7 +88,7 @@ public class DeletePersonalFolderProgressItem : DistributedTaskProgress
                 userTo = tenantManager.GetCurrentTenant().OwnerId;
             }
 
-            await fileStorageService.MoveSharedFilesAsync(_userId, userTo);
+            await reassignService.MoveSharedFilesAsync(_userId, userTo);
 
             Percentage = 50;
             await PublishChanges();

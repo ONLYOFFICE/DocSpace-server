@@ -38,7 +38,7 @@ public class ReassignController(
     TenantManager tenantManager,
     SecurityContext securityContext,
     WebItemSecurity webItemSecurity,
-    FileStorageService fileStorageService,
+    ReassignService reassignService,
     RoomService roomService) : ApiControllerBase
 {
     /// <summary>
@@ -154,7 +154,7 @@ public class ReassignController(
 
         if (inDto.Type is EmployeeType.Guest && !result)
         {
-            result = (await fileStorageService.GetSharedFilesAsync(inDto.UserId)).Any();
+            result = (await reassignService.GetSharedFilesAsync(inDto.UserId)).Any();
         }
 
         return result;

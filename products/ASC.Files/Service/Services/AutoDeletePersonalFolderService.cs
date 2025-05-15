@@ -84,7 +84,6 @@ public class AutoDeletePersonalFolderService(
             var daoFactory = scope.ServiceProvider.GetRequiredService<IDaoFactory>();
             var fileDateTime = scope.ServiceProvider.GetRequiredService<FileDateTime>();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager>();
-            var fileStorageService = scope.ServiceProvider.GetRequiredService<FileStorageService>();
             var reassignService = scope.ServiceProvider.GetRequiredService<ReassignService>();
 
             var userAccount = await authManager.GetAccountByIDAsync(tenantUser.TenantId, tenantUser.UserId);
@@ -125,7 +124,7 @@ public class AutoDeletePersonalFolderService(
                 userTo = tenantManager.GetCurrentTenant().OwnerId;
             }
 
-            await fileStorageService.MoveSharedFilesAsync(tenantUser.UserId, userTo);
+            await reassignService.MoveSharedFilesAsync(tenantUser.UserId, userTo);
             await reassignService.DeletePersonalFolderAsync(tenantUser.UserId);
 
             logger.InfoCleanUpFinish(myId);

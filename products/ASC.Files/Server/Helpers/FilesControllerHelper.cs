@@ -39,7 +39,6 @@ public class FilesControllerHelper(
     FileConverter fileConverter,
     PathProvider pathProvider,
     FileChecker fileChecker,
-    FillingFormResultDtoHelper fillingFormResultDtoHelper,
     WebhookManager webhookManager,
     IDaoFactory daoFactory,
     IEventBus eventBus,
@@ -178,16 +177,7 @@ public class FilesControllerHelper(
 
         return await _fileDtoHelper.GetAsync(file);
     }
-
-    public async Task<FillingFormResultDto<T>> GetFillResultAsync<T>(T formId)
-    {
-        if (formId != null)
-        {
-            return await fillingFormResultDtoHelper.GetAsync(formId);
-        }
-        return null;
-    }
-
+    
     public IAsyncEnumerable<ConversationResultDto> StartConversionAsync<T>(CheckConversionRequestDto<T> cheqConversionRequestDto)
     {
         cheqConversionRequestDto.StartConvert = true;

@@ -34,6 +34,7 @@ public abstract class Migrator(
     TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
     QuotaSocketManager quotaSocketManager,
     FolderService folderService,
+    RoomService roomService,
     SharingService sharingService,
     GlobalFolderHelper globalFolderHelper,
     IServiceProvider serviceProvider,
@@ -315,7 +316,7 @@ public abstract class Migrator(
         {
             newFolder = storage.Type == FolderType.USER ? 
                 await folderService.CreateFolderAsync(await globalFolderHelper.FolderMyAsync, $"ASC migration files {DateTime.Now:dd.MM.yyyy}") : 
-                await folderService.CreateRoomAsync($"ASC migration common files {DateTime.Now:dd.MM.yyyy}", RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0, null, false, null, null, null, null, null);
+                await roomService.CreateRoomAsync($"ASC migration common files {DateTime.Now:dd.MM.yyyy}", RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0, null, false, null, null, null, null, null);
         Log(MigrationResource.СreateRootFolder);
         }
         else
@@ -333,7 +334,7 @@ public abstract class Migrator(
             {
                 if (storage.Type == FolderType.BUNCH && !folder.Private)
                 {
-                    newFolder = await folderService.CreateRoomAsync(folder.Title, RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0, null, false, null, null, null, null, null);
+                    newFolder = await roomService.CreateRoomAsync(folder.Title, RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0, null, false, null, null, null, null, null);
                 }
                 else
                 {
@@ -491,7 +492,7 @@ public abstract class Migrator(
                         {
                             await securityContext.AuthenticateMeAsync(user.Info.Id);
                         }
-                        var room = await folderService.CreateRoomAsync($"{matchingFilesIds[key].Title}", RoomType.EditingRoom, false, false, new List<FileShareParams>(), 0, null, false, null, null, null, null, null);
+                        var room = await roomService.CreateRoomAsync($"{matchingFilesIds[key].Title}", RoomType.EditingRoom, false, false, new List<FileShareParams>(), 0, null, false, null, null, null, null, null);
 
                         orderedFolders = storage.Folders.Where(f => f.ParentId == security.EntryId).OrderBy(f => f.Level);
                         matchingRoomIds.Add(security.EntryId, room);

@@ -295,7 +295,7 @@ public abstract class EditorController<T>(
     [HttpGet("{fileId}/sharedusers")]
     public async Task<List<MentionWrapper>> SharedUsers(FileIdRequestDto<T> inDto)
     {
-        return await fileStorageService.SharedUsersAsync(inDto.FileId);
+        return await fileService.SharedUsersAsync(inDto.FileId);
     }
 
     /// <summary>
@@ -310,7 +310,7 @@ public abstract class EditorController<T>(
     [HttpPost("infousers")]
     public async Task<List<MentionWrapper>> GetInfoUsers(GetInfoUsersRequestDto inDto)
     {
-        return await fileStorageService.GetInfoUsersAsync(inDto.UserIds);
+        return await fileService.GetInfoUsersAsync(inDto.UserIds);
     }
 
     /// <summary>
@@ -337,7 +337,7 @@ public abstract class EditorController<T>(
     [HttpGet("{fileId}/protectusers")]
     public async Task<List<MentionWrapper>> ProtectUsers(FileIdRequestDto<T> inDto)
     {
-        return await fileStorageService.ProtectUsersAsync(inDto.FileId);
+        return await fileService.ProtectUsersAsync(inDto.FileId);
     }
 }
 

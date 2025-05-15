@@ -33,7 +33,15 @@ public class FileService(
     DocumentServiceConnector documentServiceConnector,
     PathProvider pathProvider,
     LockerManager lockerManager,
-    FilesLinkUtility filesLinkUtility)
+    FilesLinkUtility filesLinkUtility,
+    SettingsManager settingsManager,
+    EncryptionKeyPairDtoHelper encryptionKeyPairHelper,
+    SharingService sharingService,
+    MentionWrapperCreator mentionWrapperCreator,
+    ExternalShare externalShare,
+    IEventBus eventBus,
+    TenantManager tenantManager,
+    BaseCommonLinkUtility baseCommonLinkUtility)
 {
     /// <summary>
     /// Retrieves a file with the specified ID and version
@@ -910,6 +918,173 @@ public class FileService(
         }
 
         return showSharingSettings ? await fileSharing.GetSharedInfoShortFileAsync(file) : null;
+    }
+    
+    public async Task<List<EncryptionKeyPairDto>> GetEncryptionAccessAsync<T>(T fileId)
+    {
+        if (!await PrivacyRoomSettings.GetEnabledAsync(settingsManager))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        var fileKeyPair = await encryptionKeyPairHelper.GetKeyPairAsync(fileId, sharingService);
+
+        return [..fileKeyPair];
+    }
+
+    public async Task<IEnumerable<JsonElement>> CreateThumbnailsAsync(List<JsonElement> fileIds)
+    {
+        if (!authContext.IsAuthenticated && (await externalShare.GetLinkIdAsync()) == Guid.Empty)
+        {
+            throw FileStorageService.GenerateException(new SecurityException(FilesCommonResource.ErrorMessage_SecurityException),  logger, authContext);
+        }
+
+        try
+        {
+            var (fileIntIds, _) = FileOperationsManager.GetIds(fileIds);
+
+            await eventBus.PublishAsync(new ThumbnailRequestedIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId()) { BaseUrl = baseCommonLinkUtility.GetFullAbsolutePath(""), FileIds = fileIntIds });
+        }
+        catch (Exception e)
+        {
+            logger.ErrorCreateThumbnails(e);
+        }
+
+        return fileIds;
+    }
+
+    public async Task<List<MentionWrapper>> ProtectUsersAsync<T>(T fileId)
+    {
+        if (!authContext.IsAuthenticated)
+        {
+            return null;
+        }
+
+        var fileDao = daoFactory.GetFileDao<T>();
+        var file = await fileDao.GetFileAsync(fileId);
+
+        if (file == null)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
+        var users = new List<MentionWrapper>();
+        if (file.RootFolderType == FolderType.BUNCH)
+        {
+            //todo: request project team
+            return [..users];
+        }
+
+        var acesForObject = await fileSharing.GetSharedInfoAsync(file);
+
+        var usersInfo = new List<UserInfo>();
+        foreach (var ace in acesForObject)
+        {
+            if (ace.Access == FileShare.Restrict)
+            {
+                continue;
+            }
+
+            if (ace.SubjectGroup)
+            {
+                usersInfo.AddRange(await userManager.GetUsersByGroupAsync(ace.Id));
+            }
+            else
+            {
+                usersInfo.Add(await userManager.GetUsersAsync(ace.Id));
+            }
+        }
+
+        users = await usersInfo.Distinct()
+            .Where(user => !user.Id.Equals(authContext.CurrentAccount.ID)
+                           && !user.Id.Equals(Constants.LostUser.Id))
+            .ToAsyncEnumerable()
+            .SelectAwait(async user => await mentionWrapperCreator.CreateMentionWrapperAsync(user))
+            .ToListAsync();
+
+        users = users
+            .OrderBy(user => user.User, UserInfoComparer.Default)
+            .ToList();
+
+        return [..users];
+    }
+    
+    public Task<List<MentionWrapper>> SharedUsersAsync<T>(T fileId)
+    {
+        if (!authContext.IsAuthenticated)
+        {
+            return Task.FromResult<List<MentionWrapper>>(null);
+        }
+
+        return InternalSharedUsersAsync(fileId);
+    }
+    
+    public async Task<List<MentionWrapper>> GetInfoUsersAsync(List<Guid> userIds)
+    {
+        if (!authContext.IsAuthenticated)
+        {
+            return null;
+        }
+
+        var users = new List<MentionWrapper>();
+
+        foreach (var uid in userIds)
+        {
+            var user = await userManager.GetUsersAsync(uid);
+            if (user.Id.Equals(Constants.LostUser.Id))
+            {
+                continue;
+            }
+
+            users.Add(await mentionWrapperCreator.CreateMentionWrapperAsync(user));
+        }
+
+        return users;
+    }
+    
+    private async Task<List<MentionWrapper>> InternalSharedUsersAsync<T>(T fileId)
+    {
+        var fileDao = daoFactory.GetFileDao<T>();
+
+        FileEntry<T> file = await fileDao.GetFileAsync(fileId);
+
+        if (file == null)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+        
+        var usersIdWithAccess = await WhoCanRead(file);
+        var links = await fileSecurity.GetPureSharesAsync(file, ShareFilterType.Link, null, null)
+            .Select(x => x.Subject).ToHashSetAsync();
+
+        var users = usersIdWithAccess
+            .Where(id => !id.Equals(authContext.CurrentAccount.ID) && !links.Contains(id))
+            .Select(userManager.GetUsers);
+
+        var result = await users
+            .Where(u => u.Status != EmployeeStatus.Terminated)
+            .ToAsyncEnumerable()
+            .SelectAwait(async u => await mentionWrapperCreator.CreateMentionWrapperAsync(u))
+            .OrderBy(u => u.User, UserInfoComparer.Default)
+            .ToListAsync();
+
+        return result;
+    }
+
+    private async Task<List<Guid>> WhoCanRead<T>(FileEntry<T> entry)
+    {
+        var whoCanReadTask = (await fileSecurity.WhoCanReadAsync(entry, true)).ToList();
+        whoCanReadTask.AddRange((await userManager.GetUsersByGroupAsync(Constants.GroupAdmin.ID))
+            .Select(x => x.Id));
+
+        whoCanReadTask.Add((tenantManager.GetCurrentTenant()).OwnerId);
+
+        var userIds = whoCanReadTask
+            .Concat([entry.CreateBy])
+            .Distinct()
+            .ToList();
+
+        return userIds;
     }
     
     private Exception GenerateException(Exception error, bool warning = false)

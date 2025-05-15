@@ -93,7 +93,7 @@ public class RemoveProgressItem : DistributedTaskProgress
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var scopeClass = scope.ServiceProvider.GetService<RemoveProgressItemScope>();
-        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, webItemManagerSecurity,  userFormatter, options, client, reassignService) = scopeClass;
+        var (tenantManager, messageService, studioNotifyService, securityContext, userManager, userPhotoManager, webItemManagerSecurity,  userFormatter, options, client, reassignService) = scopeClass;
         var logger = options.CreateLogger("ASC.Web");
         await tenantManager.SetCurrentTenantAsync(_tenantId);
         var userName = userFormatter.GetUserName(User);
@@ -115,7 +115,7 @@ public class RemoveProgressItem : DistributedTaskProgress
 
             var wrapper = await GetUsageSpace(webItemManagerSecurity);
 
-            await fileStorageService.MoveSharedFilesAsync(UserId, _currentUserId);
+            await reassignService.MoveSharedFilesAsync(UserId, _currentUserId);
             Percentage = 30;
             await PublishChanges();
 
@@ -261,7 +261,6 @@ public class RemoveProgressItem : DistributedTaskProgress
 public record RemoveProgressItemScope(
     TenantManager TenantManager,
     MessageService MessageService,
-    FileStorageService FileStorageService,
     StudioNotifyService StudioNotifyService,
     SecurityContext SecurityContext,
     UserManager UserManager,

@@ -28,7 +28,6 @@ namespace ASC.Files.Api;
 
 public class ThirdpartyController(
         FilesSettingsHelper filesSettingsHelper,
-        FileStorageService fileStorageService,
         GlobalFolderHelper globalFolderHelper,
         SecurityContext securityContext,
         ThirdpartyConfiguration thirdPartyConfiguration,

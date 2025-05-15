@@ -100,8 +100,7 @@ public class CreateRoomFromTemplateOperation : DistributedTaskProgress
         await using var scope = _serviceProvider.CreateAsyncScope();
         var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
         var securityContext = scope.ServiceProvider.GetService<SecurityContext>();
-        var fileStorageService = scope.ServiceProvider.GetService<FileStorageService>();
-        var folderOperationsService = scope.ServiceProvider.GetService<FolderService>();
+        var roomService = scope.ServiceProvider.GetService<RoomService>();
         var roomLogoManager = scope.ServiceProvider.GetService<RoomLogoManager>();
         var logger = scope.ServiceProvider.GetService<ILogger<CreateRoomFromTemplateOperation>>();
         var daoFactory = scope.ServiceProvider.GetService<IDaoFactory>();
@@ -128,7 +127,7 @@ public class CreateRoomFromTemplateOperation : DistributedTaskProgress
                 };
             }
 
-            var room = await folderOperationsService.CreateRoomFromTemplateAsync(_templateId, _title, _tags, dtoLogo, _cover, _color, _indexing, _denyDownload, _lifetime, _watermark, _private);
+            var room = await roomService.CreateRoomFromTemplateAsync(_templateId, _title, _tags, dtoLogo, _cover, _color, _indexing, _denyDownload, _lifetime, _watermark, _private);
             RoomId = room.Id;
 
             if (_copyLogo)
@@ -186,7 +185,7 @@ public class CreateRoomFromTemplateOperation : DistributedTaskProgress
 
             if (_quota.HasValue)
             {
-                await fileStorageService.FolderQuotaChangeAsync(room.Id, _quota.Value);
+                await roomService.FolderQuotaChangeAsync(room.Id, _quota.Value);
             }
 
             Percentage = 100;
