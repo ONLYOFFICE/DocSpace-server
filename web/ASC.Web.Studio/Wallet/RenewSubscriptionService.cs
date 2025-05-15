@@ -29,8 +29,10 @@ using System.Globalization;
 using ASC.Core;
 using ASC.Core.Billing;
 using ASC.Core.Common.Hosting;
+using ASC.Core.Common.Quota.Features;
 using ASC.Core.Tenants;
 using ASC.MessagingSystem.Core;
+using ASC.Web.Core.Quota;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -50,7 +52,7 @@ public class RenewSubscriptionService(
 
     private const string CacheKey = "renewsubscriptionservice_lastrun";
 
-    private Dictionary<int, string> _walletQuotas;
+    private Dictionary<int, TenantQuota> _walletQuotas;
     private List<DbTariffRow> _closeToExpirationWalletQuotas;
 
     protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.Parse(configuration["core:accounting:renewperiod"] ?? "0:1:0", CultureInfo.InvariantCulture);
@@ -80,7 +82,9 @@ public class RenewSubscriptionService(
 
                 if (_walletQuotas == null)
                 {
-                    _walletQuotas = await Queries.GetWalletQuotasAsync(coreDbContext).ToDictionaryAsync(x => x.Key, x => x.Value, stoppingToken);
+                    var quotaService = scope.ServiceProvider.GetRequiredService<IQuotaService>();
+                    var tenantQuotas = await quotaService.GetTenantQuotasAsync();
+                    _walletQuotas = tenantQuotas.Where(x => x.Wallet).ToDictionary(x => x.TenantId, x => x);
                 }
 
                 _closeToExpirationWalletQuotas = await Queries.GetWalletQuotasCloseToExpirationAsync(coreDbContext, _walletQuotas.Keys.ToArray(), from, to).ToListAsync(stoppingToken);
@@ -117,21 +121,52 @@ public class RenewSubscriptionService(
                 return;
             }
 
-            var tariffService = scope.ServiceProvider.GetRequiredService<ITariffService>();
+            var walletQuota = _walletQuotas[data.Quota];
 
-            var quotaName = _walletQuotas[data.Quota];
+            var walletQuotaFeatureName = walletQuota.Features.Split(':').FirstOrDefault(); // wallet quota must contains only one feature
+
+            var nextQuantity = data.NextQuantity.Value;
+
+            var currentQuota = await tenantManager.GetCurrentTenantQuotaAsync(refresh: true);
+
+            foreach (var feature in currentQuota.TenantQuotaFeatures)
+            {
+                if (feature.Name == walletQuotaFeatureName)
+                {
+                    if (feature is MaxTotalSizeFeature size)
+                    {
+                        var tenantQuotaSize = size.Value; // size by tariff (quota size * quantity)
+
+                        var maxTotalSizeStatistic = scope.ServiceProvider.GetRequiredService<MaxTotalSizeStatistic>();
+
+                        var usedSize = await maxTotalSizeStatistic.GetValueAsync();
+
+                        var walletQuotaSize = walletQuota.GetFeature<long>(feature.Name).Value; // wallet quota size by database
+
+                        if (walletQuotaSize > 0 && usedSize > tenantQuotaSize + (walletQuotaSize * nextQuantity))
+                        {
+                            var oversize = usedSize - tenantQuotaSize;
+                            nextQuantity = (int)((oversize + walletQuotaSize - 1) / walletQuotaSize); // round up
+                        }
+                    }
+
+                    break; //TODO: add nextQuantity calculations for another wallet quotas (for example admins count)
+                }
+            }
 
             var quantity = new Dictionary<string, int>
             {
-                { quotaName, data.NextQuantity ?? data.Quantity }
+                { walletQuota.Name, nextQuantity }
             };
+
+            var tariffService = scope.ServiceProvider.GetRequiredService<ITariffService>();
 
             var result = await tariffService.PaymentChangeAsync(data.TenantId, quantity, BillingClient.ProductQuantityType.Renew);
             if (result)
             {
-                var newTariff = await tariffService.GetTariffAsync(data.TenantId, refresh: true);
+                var newTariff = await tariffService.GetTariffAsync(data.TenantId, refresh: false);
 
-                var description = $"{quotaName} {data.Quantity}";
+                var description = $"{walletQuota.Name} {data.Quantity}";
                 var messageService = scope.ServiceProvider.GetRequiredService<MessageService>();
                 messageService.Send(MessageInitiator.System, MessageAction.CustomerSubscriptionUpdated, description);
 
@@ -175,11 +210,4 @@ static file class Queries
                     )
                     .Where(r => quotas.Contains(r.Quota) && r.DueDate.HasValue && r.DueDate > from && r.DueDate < to)
             );
-
-    public static readonly Func<CoreDbContext, IAsyncEnumerable<KeyValuePair<int, string>>>
-        GetWalletQuotasAsync = EF.CompileAsyncQuery(
-            (CoreDbContext ctx) =>
-                ctx.Quotas
-                    .Where(r => r.Wallet)
-                    .Select(r => new KeyValuePair<int, string>(r.TenantId, r.Name)));
 }

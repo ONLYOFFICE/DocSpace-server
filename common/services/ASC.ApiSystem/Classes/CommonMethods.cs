@@ -210,6 +210,11 @@ public class CommonMethods(
 
         var tenants = await hostedSolution.FindTenantsAsync(email, passwordHash);
 
+        if (tenants.Count == 0)
+        {
+            throw new Exception("Invalid login or password.");
+        }
+
         return tenants;
     }
 
