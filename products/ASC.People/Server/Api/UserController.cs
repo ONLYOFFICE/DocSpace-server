@@ -1922,6 +1922,7 @@ public class UserController(
                 await socketManager.UpdateUserAsync(user);
             }
             await socketManager.ChangeUserTypeAsync(user, true);
+            await studioNotifyService.SendMsgUserTypeChangedAsync(user, inDto.Type.ToStringFast());
         }
 
         messageService.Send(MessageAction.UsersUpdatedType, MessageTarget.Create(users.Select(x => x.Id)),
