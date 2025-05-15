@@ -347,7 +347,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                             await securityContext.AuthenticateMeWithoutCookieAsync(tenant.OwnerId);
                             await identityClient.DeleteTenantClientsAsync(false);
-                            await tenantManager.RemoveTenantAsync(tenant.Id, true);
+                            await tenantManager.RemoveTenantAsync(tenant, true);
 
                             if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
                             {
@@ -437,7 +437,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                     {
                         await securityContext.AuthenticateMeWithoutCookieAsync(tenant.OwnerId);
                         await identityClient.DeleteTenantClientsAsync(false);
-                        await tenantManager.RemoveTenantAsync(tenant.Id, true);
+                        await tenantManager.RemoveTenantAsync(tenant, true);
 
                         if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
                         {

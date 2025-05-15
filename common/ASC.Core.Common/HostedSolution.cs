@@ -157,7 +157,7 @@ public class HostedSolution(ITenantService tenantService,
 
     public async Task RemoveTenantAsync(Tenant tenant)
     {
-        await tenantService.RemoveTenantAsync(tenant.Id);
+        await tenantService.RemoveTenantAsync(tenant);
     }
 
     public async Task<string> CreateAuthenticationCookieAsync(CookieStorage cookieStorage, int tenantId, Guid userId)

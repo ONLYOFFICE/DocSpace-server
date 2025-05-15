@@ -146,11 +146,11 @@ public class DbTenantService(
         }
     }
 
-    public async Task<Tenant> RestoreTenantAsync(int oldId, Tenant newTenant, CoreSettings coreSettings)
+    public async Task<Tenant> RestoreTenantAsync(Tenant oldTenant, Tenant newTenant, CoreSettings coreSettings)
     {
         await using var tenantDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        _ = await InnerRemoveTenantAsync(tenantDbContext, oldId);
+        _ = await InnerRemoveTenantAsync(tenantDbContext, oldTenant);
 
         _ = await InnerSaveTenantAsync(tenantDbContext, coreSettings, newTenant);
 
@@ -234,11 +234,11 @@ public class DbTenantService(
         return tenant;
     }
 
-    public async Task RemoveTenantAsync(int id, bool auto = false)
+    public async Task RemoveTenantAsync(Tenant tenant, bool auto = false)
     {
         await using var tenantDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        var tenant = await InnerRemoveTenantAsync(tenantDbContext, id, auto);
+        tenant = await InnerRemoveTenantAsync(tenantDbContext, tenant, auto);
 
         if (tenant != null)
         {
@@ -425,23 +425,30 @@ public class DbTenantService(
         return dbTenant;
     }
 
-    private async Task<DbTenant> InnerRemoveTenantAsync(TenantDbContext tenantDbContext, int id, bool auto = false)
+    private static async Task<Tenant> InnerRemoveTenantAsync(TenantDbContext tenantDbContext, Tenant tenant, bool auto = false)
     {
         var postfix = auto ? "_auto_deleted" : "_deleted";
-
-        var tenant = await tenantDbContext.TenantAsync(id);
 
         if (tenant != null)
         {
             var count = await tenantDbContext.TenantsCountAsync(tenant.Alias + postfix);
 
+            var now = DateTime.UtcNow;
+
             tenant.Alias = tenant.Alias + postfix + (count > 0 ? count.ToString() : "");
             tenant.Status = TenantStatus.RemovePending;
-            tenant.StatusChanged = DateTime.UtcNow;
-            tenant.LastModified = DateTime.UtcNow;
+            tenant.LastModified = now;
 
-            tenantDbContext.Update(tenant);
+            _ = await tenantDbContext.Tenants
+                .Where(t => t.Id == tenant.Id)
+                .ExecuteUpdateAsync(t => t
+                    .SetProperty(p => p.Alias, tenant.Alias)
+                    .SetProperty(p => p.Status, tenant.Status)
+                    .SetProperty(p => p.StatusChanged, now)
+                    .SetProperty(p => p.LastModified, now)
+                );
         }
+
         return tenant;
     }
 }
