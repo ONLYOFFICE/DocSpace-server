@@ -101,7 +101,7 @@ public class CreateRoomFromTemplateOperation : DistributedTaskProgress
         var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
         var securityContext = scope.ServiceProvider.GetService<SecurityContext>();
         var fileStorageService = scope.ServiceProvider.GetService<FileStorageService>();
-        var folderOperationsService = scope.ServiceProvider.GetService<FolderOperationsService>();
+        var folderOperationsService = scope.ServiceProvider.GetService<FolderService>();
         var roomLogoManager = scope.ServiceProvider.GetService<RoomLogoManager>();
         var logger = scope.ServiceProvider.GetService<ILogger<CreateRoomFromTemplateOperation>>();
         var daoFactory = scope.ServiceProvider.GetService<IDaoFactory>();

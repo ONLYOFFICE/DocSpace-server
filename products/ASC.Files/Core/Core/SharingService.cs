@@ -49,7 +49,7 @@ public class SharingService(
     InvitationValidator invitationValidator,
     ExternalShare externalShare,
     TenantUtil tenantUtil,
-    ILogger<FolderOperationsService> logger,
+    ILogger<FolderService> logger,
     FileSecurity fileSecurity,
     EntryStatusManager entryStatusManager,
     WebhookManager webhookManager,
@@ -299,7 +299,7 @@ public class SharingService(
             }
             catch (Exception e)
             {
-                throw GenerateException(e);
+                throw FileStorageService.GenerateException(e, logger, authContext);
             }
         }
 
@@ -676,8 +676,8 @@ public class SharingService(
         {
             var result = await fileSharingAceHelper.SetAceObjectAsync(aces, entry, false, null);
             if (!string.IsNullOrEmpty(result.Warning))
-            {
-                throw GenerateException(new InvalidOperationException(result.Warning));
+            { 
+                throw FileStorageService.GenerateException(new InvalidOperationException(result.Warning), logger, authContext);
             }
 
             var processedItem = result.ProcessedItems[0];
@@ -686,7 +686,7 @@ public class SharingService(
         }
         catch (Exception e)
         {
-            throw GenerateException(e);
+            throw FileStorageService.GenerateException(e, logger, authContext);
         }
     }
     
@@ -697,26 +697,5 @@ public class SharingService(
             : await daoFactory.GetFileDao<T>().GetFileAsync(entryId);
 
         return entry.NotFoundIfNull();
-    }
-    
-    private Exception GenerateException(Exception error, bool warning = false)
-    {
-        if (warning || error is ItemNotFoundException or SecurityException or ArgumentException or TenantQuotaException or InvalidOperationException)
-        {
-            logger.Information(error.ToString());
-        }
-        else
-        {
-            logger.ErrorFileStorageService(error);
-        }
-
-        if (error is ItemNotFoundException)
-        {
-            return !authContext.CurrentAccount.IsAuthenticated
-                ? new SecurityException(FilesCommonResource.ErrorMessage_SecurityException)
-                : error;
-        }
-
-        return new InvalidOperationException(error.Message, error);
     }
 }

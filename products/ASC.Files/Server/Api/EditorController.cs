@@ -42,8 +42,9 @@ public class EditorControllerInternal(FileStorageService fileStorageService,
         ConfigurationConverter<int> configurationConverter,
         SecurityContext securityContext,
         DocumentProcessingService documentProcessingService,
-        FileOperationsService fileOperationsService)
-        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, securityContext, documentProcessingService, fileOperationsService);
+        FileService fileService,
+        FormService formService)
+        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, securityContext, documentProcessingService, fileService, formService);
 
 [DefaultRoute("file")]
 public class EditorControllerThirdparty(FileStorageService fileStorageService,
@@ -58,8 +59,9 @@ public class EditorControllerThirdparty(FileStorageService fileStorageService,
         ConfigurationConverter<string> configurationConverter,
         SecurityContext securityContext,
         DocumentProcessingService documentProcessingService,
-        FileOperationsService fileOperationsService)
-        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, securityContext, documentProcessingService, fileOperationsService);
+        FileService fileService,
+        FormService formService)
+        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, securityContext, documentProcessingService, fileService, formService);
 
 public abstract class EditorController<T>(
     FileStorageService fileStorageService,
@@ -74,7 +76,8 @@ public abstract class EditorController<T>(
     ConfigurationConverter<T> configurationConverter,
     SecurityContext securityContext,
     DocumentProcessingService documentProcessingService,
-    FileOperationsService fileOperationsService)
+    FileService fileService,
+    FormService formService)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
 
@@ -90,7 +93,7 @@ public abstract class EditorController<T>(
     [HttpPut("{fileId}/saveediting")]
     public async Task<FileDto<T>> SaveEditingFromFormAsync(SaveEditingRequestDto<T> inDto)
     {
-        return await _fileDtoHelper.GetAsync(await fileOperationsService.SaveEditingAsync(inDto.FileId, inDto.FileExtension, inDto.DownloadUri, inDto.File?.OpenReadStream(), inDto.Forcesave));
+        return await _fileDtoHelper.GetAsync(await fileService.SaveEditingAsync(inDto.FileId, inDto.FileExtension, inDto.DownloadUri, inDto.File?.OpenReadStream(), inDto.Forcesave));
     }
 
     /// <summary>
@@ -120,7 +123,7 @@ public abstract class EditorController<T>(
     [HttpPut("{fileId}/startfilling")]
     public async Task<FileDto<T>> StartFillingAsync(StartFillingRequestDto<T> inDto)
     {
-        var file = await fileStorageService.StartFillingAsync(inDto.FileId);
+        var file = await formService.StartFillingAsync(inDto.FileId);
 
         return await _fileDtoHelper.GetAsync(file);
     }
@@ -277,7 +280,7 @@ public abstract class EditorController<T>(
     [HttpGet("{fileId}/presigned")]
     public async Task<DocumentService.FileLink> GetPresignedFileUriAsync(FileIdRequestDto<T> inDto)
     {
-        return await fileOperationsService.GetPresignedUriAsync(inDto.FileId);
+        return await fileService.GetPresignedUriAsync(inDto.FileId);
     }
 
     /// <summary>

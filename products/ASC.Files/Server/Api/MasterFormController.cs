@@ -27,19 +27,22 @@
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
-public class MasterFormControllerInternal(FileStorageService fileStorageServiceString,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
-    : MasterFormController<int>(fileStorageServiceString, folderDtoHelper, fileDtoHelper);
+public class MasterFormControllerInternal(
+    FormService formService,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper)
+    : MasterFormController<int>(formService, folderDtoHelper, fileDtoHelper);
 
-public class MasterFormControllerThirdparty(FileStorageService fileStorageService,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
-    : MasterFormController<string>(fileStorageService, folderDtoHelper, fileDtoHelper);
+public class MasterFormControllerThirdparty(
+    FormService formService,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper)
+    : MasterFormController<string>(formService, folderDtoHelper, fileDtoHelper);
 
-public abstract class MasterFormController<T>(FileStorageService fileStorageService,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
+public abstract class MasterFormController<T>(
+    FormService formService,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
     {
     /// <summary>
@@ -55,6 +58,6 @@ public abstract class MasterFormController<T>(FileStorageService fileStorageServ
     [HttpPost("masterform/{fileId}/checkfillformdraft")]
     public async Task<string> CheckFillFormDraftAsync(CheckFillFormDraftRequestDto<T> inDto)
     {
-        return await fileStorageService.CheckFillFormDraftAsync(inDto.FileId, inDto.File.Version,!inDto.File.RequestEmbedded, inDto.File.RequestView);
+        return await formService.CheckFillFormDraftAsync(inDto.FileId, inDto.File.Version,!inDto.File.RequestEmbedded, inDto.File.RequestView);
     }
 }

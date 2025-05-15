@@ -45,7 +45,7 @@ public class FilesControllerHelper(
     IEventBus eventBus,
     TenantManager tenantManager,
     AuthContext authContext,
-    FileOperationsService fileOperationsService,
+    FileService fileService,
     DocumentProcessingService documentProcessingService)
     : FilesHelperBase(filesSettingsHelper,
             fileUploader,
@@ -59,13 +59,13 @@ public class FilesControllerHelper(
             eventBus,
             tenantManager,
             authContext,
-            fileOperationsService)
+            fileService)
     {
     private readonly ILogger _logger = logger;
 
     public async IAsyncEnumerable<FileDto<T>> ChangeHistoryAsync<T>(T fileId, int version, bool continueVersion)
     {
-        var pair = await _fileOperationsService.CompleteVersionAsync(fileId, version, continueVersion);
+        var pair = await _fileService.CompleteVersionAsync(fileId, version, continueVersion);
         var history = pair.Value;
 
         await foreach (var e in history)
@@ -76,7 +76,7 @@ public class FilesControllerHelper(
 
     public async Task<bool> isFormPDF<T>(T fileId)
     {
-        var file = await _fileOperationsService.GetFileAsync(fileId, -1);
+        var file = await _fileService.GetFileAsync(fileId, -1);
         var fileType = FileUtility.GetFileTypeByFileName(file.Title);
 
         if (fileType == FileType.Pdf)
@@ -88,7 +88,7 @@ public class FilesControllerHelper(
 
     public async Task<string> GetPresignedUri<T>(T fileId)
     {
-        var file = await _fileOperationsService.GetFileAsync(fileId, -1);
+        var file = await _fileService.GetFileAsync(fileId, -1);
         return pathProvider.GetFileStreamUrl(file);
     }
 
@@ -138,15 +138,15 @@ public class FilesControllerHelper(
 
         if (templateId.ValueKind == JsonValueKind.Number)
         {
-            file = await _fileOperationsService.CreateNewFileAsync(new FileModel<T, int> { ParentId = folderId, Title = title, TemplateId = templateId.GetInt32() }, enableExternalExt);
+            file = await _fileService.CreateNewFileAsync(new FileModel<T, int> { ParentId = folderId, Title = title, TemplateId = templateId.GetInt32() }, enableExternalExt);
         }
         else if (templateId.ValueKind == JsonValueKind.String)
         {
-            file = await _fileOperationsService.CreateNewFileAsync(new FileModel<T, string> { ParentId = folderId, Title = title, TemplateId = templateId.GetString() }, enableExternalExt);
+            file = await _fileService.CreateNewFileAsync(new FileModel<T, string> { ParentId = folderId, Title = title, TemplateId = templateId.GetString() }, enableExternalExt);
         }
         else
         {
-            file = await _fileOperationsService.CreateNewFileAsync(new FileModel<T, int> { ParentId = folderId, Title = title, TemplateId = 0, FormId = formId }, enableExternalExt);
+            file = await _fileService.CreateNewFileAsync(new FileModel<T, int> { ParentId = folderId, Title = title, TemplateId = 0, FormId = formId }, enableExternalExt);
         }
 
         return await _fileDtoHelper.GetAsync(file);
@@ -201,7 +201,7 @@ public class FilesControllerHelper(
 
         if (!string.IsNullOrEmpty(title))
         {
-            file = await _fileOperationsService.FileRenameAsync(fileId, title);
+            file = await _fileService.FileRenameAsync(fileId, title);
         }
 
         if (lastVersion <= 0)
@@ -209,30 +209,18 @@ public class FilesControllerHelper(
             return await GetFileInfoAsync(file!.Id);
         }
 
-        var result = await _fileOperationsService.UpdateToVersionAsync(fileId, lastVersion);
+        var result = await _fileService.UpdateToVersionAsync(fileId, lastVersion);
         file = result.Key;
 
         return await GetFileInfoAsync(file.Id);
     }
-
-    public async Task<FileDto<T>> SaveAsPdf<T>(T fileId, T folderId, string title)
-    {
-        try
-        {
-            var resultFile = await _fileStorageService.SaveAsPdf(fileId, folderId, title);
-            return await _fileDtoHelper.GetAsync(resultFile);
-        }
-        catch (FileNotFoundException e)
-        {
-            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound, e);
-        }
-    }
+    
 
     public async Task<FileDto<T>> UpdateFileStreamAsync<T>(Stream file, T fileId, string fileExtension, bool encrypted = false, bool forcesave = false)
     {
         try
         {
-            var resultFile = await _fileOperationsService.UpdateFileStreamAsync(fileId, file, fileExtension, encrypted, forcesave);
+            var resultFile = await _fileService.UpdateFileStreamAsync(fileId, file, fileExtension, encrypted, forcesave);
 
             return await _fileDtoHelper.GetAsync(resultFile);
         }
@@ -244,13 +232,13 @@ public class FilesControllerHelper(
 
     public async Task<FileDto<TTemplate>> CopyFileAsAsync<T, TTemplate>(T fileId, TTemplate destFolderId, string destTitle, string password = null, bool toForm = false)
     {
-        var file = await _fileOperationsService.GetFileAsync(fileId, -1);
+        var file = await _fileService.GetFileAsync(fileId, -1);
         var ext = FileUtility.GetFileExtension(file.Title);
         var destExt = FileUtility.GetFileExtension(destTitle);
 
         if (ext == destExt)
         {
-            var newFile = await _fileOperationsService.CreateNewFileAsync(new FileModel<TTemplate, T> { ParentId = destFolderId, Title = destTitle, TemplateId = fileId }, true);
+            var newFile = await _fileService.CreateNewFileAsync(new FileModel<TTemplate, T> { ParentId = destFolderId, Title = destTitle, TemplateId = fileId }, true);
 
             return await _fileDtoHelper.GetAsync(newFile);
         }

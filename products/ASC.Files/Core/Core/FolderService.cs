@@ -34,7 +34,7 @@ namespace ASC.Files.Core.Core;
 /// It integrates various application components to facilitate folder-related workflows and ensure secure and organized data operations.
 /// </remarks>
 [Scope]
-public class FolderOperationsService(
+public class FolderService(
     GlobalFolderHelper globalFolderHelper,
     AuthContext authContext,
     UserManager userManager,
@@ -58,13 +58,14 @@ public class FolderOperationsService(
     WatermarkManager watermarkManager,
     CustomTagsService customTagsService,
     WebhookManager webhookManager,
-    ILogger<FolderOperationsService> logger,
+    ILogger<FolderService> logger,
     SharingService sharingService,
     FilesSettingsHelper filesSettingsHelper,
     BreadCrumbsManager breadCrumbsManager,
     FileSharing fileSharing,
     FileMarker fileMarker,
-    FileConverter fileConverter)
+    FileConverter fileConverter,
+    FileMarkAsReadOperationsManager fileOperationsManager)
 {
     /// <summary>
     /// Retrieves a folder asynchronously by its identifier with additional metadata such as tags, favorites, and pin information.
@@ -128,7 +129,7 @@ public class FolderOperationsService(
         }
         catch (Exception e)
         {
-            throw GenerateException(e);
+            throw FileStorageService.GenerateException(e, logger, authContext);
         }
 
         return entries;
@@ -510,7 +511,7 @@ public class FolderOperationsService(
         return renamedFolder;
     }
     
-        public async Task<DataWrapper<T>> GetFolderItemsAsync<T>(
+    public async Task<DataWrapper<T>> GetFolderItemsAsync<T>(
         T parentId,
         int from,
         int count,
@@ -578,10 +579,10 @@ public class FolderOperationsService(
         {
             if (parent is { ProviderEntry: true })
             {
-                throw GenerateException(new Exception(FilesCommonResource.ErrorMessage_SharpBoxException, e));
+                throw FileStorageService.GenerateException(new Exception(FilesCommonResource.ErrorMessage_SharpBoxException, e), logger, authContext);
             }
 
-            throw GenerateException(e);
+            throw FileStorageService.GenerateException(e, logger, authContext);
         }
 
         if (!await fileSecurity.CanReadAsync(parent))
@@ -656,11 +657,11 @@ public class FolderOperationsService(
         catch (Exception e)
         {
             if (parent.ProviderEntry)
-            {
-                throw GenerateException(new Exception(FilesCommonResource.ErrorMessage_SharpBoxException, e));
+            {            
+                throw FileStorageService.GenerateException(new Exception(FilesCommonResource.ErrorMessage_SharpBoxException, e), logger, authContext);
             }
 
-            throw GenerateException(e);
+            throw FileStorageService.GenerateException(e, logger, authContext);
         }
 
         var breadCrumbsTask = breadCrumbsManager.GetBreadCrumbsAsync(parentId, folderDao);
@@ -740,6 +741,30 @@ public class FolderOperationsService(
         };
 
         return result;
+    }
+    
+    public async Task<List<FileEntry>> GetNewItemsAsync<T>(T folderId)
+    {
+        try
+        {
+            var folderDao = daoFactory.GetFolderDao<T>();
+            var folder = await folderDao.GetFolderAsync(folderId);
+
+            var result = await fileMarker.MarkedItemsAsync(folder).Where(e => e.FileEntryType == FileEntryType.File).ToListAsync();
+
+            result = [..await entryManager.SortEntries<T>(result, new OrderBy(SortedByType.DateAndTime, false))];
+
+            if (result.Count == 0)
+            {
+                await fileOperationsManager.Publish([JsonSerializer.SerializeToElement(folderId)], []);
+            }
+
+            return result;
+        }
+        catch (Exception e)
+        {
+            throw FileStorageService.GenerateException(e, logger, authContext);
+        }
     }
     
     private async Task<Folder<T>> CreateRoomAsync<T>(Func<Task<Folder<T>>> folderFactory, bool privacy, IEnumerable<FileShareParams> shares)
@@ -970,7 +995,7 @@ public class FolderOperationsService(
         }
         catch (Exception e)
         {
-            throw GenerateException(e);
+            throw FileStorageService.GenerateException(e, logger, authContext);
         }
     }
         
@@ -1013,26 +1038,5 @@ public class FolderOperationsService(
         var aceCollection = new AceCollection<T> { Folders = [room.Id], Files = [], Aces = aces, AdvancedSettings = advancedSettings };
 
         await sharingService.SetAceObjectAsync(aceCollection, false);
-    }
-    
-    private Exception GenerateException(Exception error, bool warning = false)
-    {
-        if (warning || error is ItemNotFoundException or SecurityException or ArgumentException or TenantQuotaException or InvalidOperationException)
-        {
-            logger.Information(error.ToString());
-        }
-        else
-        {
-            logger.ErrorFileStorageService(error);
-        }
-
-        if (error is ItemNotFoundException)
-        {
-            return !authContext.CurrentAccount.IsAuthenticated
-                ? new SecurityException(FilesCommonResource.ErrorMessage_SecurityException)
-                : error;
-        }
-
-        return new InvalidOperationException(error.Message, error);
     }
 }

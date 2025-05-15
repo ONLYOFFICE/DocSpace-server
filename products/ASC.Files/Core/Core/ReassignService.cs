@@ -42,7 +42,7 @@ public class ReassignService(
     ILogger<ReassignService> logger,
     GlobalFolderHelper globalFolderHelper,
     SecurityContext securityContext,
-    FolderOperationsService folderOperationsService,
+    FolderService folderService,
     SharingService sharingService)
 {
     /// <summary>
@@ -313,7 +313,7 @@ public class ReassignService(
     
     public async Task ReassignRoomsAsync(Guid user, Guid? reassign)
     {
-        var rooms = (await folderOperationsService.GetFolderItemsAsync(
+        var rooms = (await folderService.GetFolderItemsAsync(
             await globalFolderHelper.GetFolderVirtualRooms(),
             0,
             -1,

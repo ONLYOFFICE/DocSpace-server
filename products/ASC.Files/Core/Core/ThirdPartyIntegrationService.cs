@@ -173,12 +173,12 @@ public class ThirdPartyIntegrationService(
                 messageAction = MessageAction.ThirdPartyCreated;
             }
             catch (UnauthorizedAccessException e)
-            {
-                throw GenerateException(e, true);
+            {                
+                throw FileStorageService.GenerateException(e, logger, authContext, true);
             }
             catch (Exception e)
-            {
-                throw GenerateException(e.InnerException ?? e);
+            {                
+                throw FileStorageService.GenerateException(e.InnerException ?? e, logger, authContext, true);
             }
         }
         else
@@ -285,12 +285,12 @@ public class ThirdPartyIntegrationService(
                 messageAction = MessageAction.ThirdPartyCreated;
             }
             catch (UnauthorizedAccessException e)
-            {
-                throw GenerateException(e, true);
+            {                
+                throw FileStorageService.GenerateException(e, logger, authContext, true);
             }
             catch (Exception e)
-            {
-                throw GenerateException(e.InnerException ?? e);
+            {                
+                throw FileStorageService.GenerateException(e.InnerException ?? e, logger, authContext);
             }
         }
         else
@@ -391,7 +391,7 @@ public class ThirdPartyIntegrationService(
         }
         catch (Exception e)
         {
-            throw GenerateException(e);
+            throw FileStorageService.GenerateException(e, logger, authContext);
         }
     }
     
@@ -405,26 +405,5 @@ public class ThirdPartyIntegrationService(
             ProviderId = r.ProviderId,
             ProviderKey = r.ProviderKey
         });
-    }
-    
-    private Exception GenerateException(Exception error, bool warning = false)
-    {
-        if (warning || error is ItemNotFoundException or SecurityException or ArgumentException or TenantQuotaException or InvalidOperationException)
-        {
-            logger.Information(error.ToString());
-        }
-        else
-        {
-            logger.ErrorFileStorageService(error);
-        }
-
-        if (error is ItemNotFoundException)
-        {
-            return !authContext.CurrentAccount.IsAuthenticated
-                ? new SecurityException(FilesCommonResource.ErrorMessage_SecurityException)
-                : error;
-        }
-
-        return new InvalidOperationException(error.Message, error);
     }
 }

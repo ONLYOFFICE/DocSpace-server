@@ -39,7 +39,7 @@ public abstract class FilesHelperBase(
     IEventBus eventBus,
     TenantManager tenantManager,
     AuthContext authContext,
-    FileOperationsService fileOperationsService)
+    FileService fileService)
 {
     protected readonly FilesSettingsHelper _filesSettingsHelper = filesSettingsHelper;
     protected readonly FileUploader _fileUploader = fileUploader;
@@ -47,7 +47,7 @@ public abstract class FilesHelperBase(
     protected readonly FileStorageService _fileStorageService = fileStorageService;
     protected readonly IDaoFactory _daoFactory = daoFactory;
     protected readonly TenantManager _tenantManager = tenantManager;
-    protected readonly FileOperationsService _fileOperationsService = fileOperationsService;
+    protected readonly FileService _fileService = fileService;
     protected readonly FileChecker _fileChecker = fileChecker;
     protected readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
@@ -96,7 +96,7 @@ public abstract class FilesHelperBase(
 
     public async Task<FileDto<T>> GetFileInfoAsync<T>(T fileId, int version = -1)
     {
-        var file = await _fileOperationsService.GetFileAsync(fileId, version);
+        var file = await _fileService.GetFileAsync(fileId, version);
         file = file.NotFoundIfNull("File not found");
 
         return await _fileDtoHelper.GetAsync(file);

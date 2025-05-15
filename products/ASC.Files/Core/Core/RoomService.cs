@@ -52,9 +52,9 @@ public class RoomService(
     CustomTagsService customTagsService,
     IMapper mapper,
     WebhookManager webhookManager,
-    FolderOperationsService folderOperationsService,
+    FolderService folderService,
     EntriesOrderService entriesOrderService,
-    ILogger<FileOperationsService> logger)
+    ILogger<FileService> logger)
 {
     public async Task<Folder<T>> UpdateRoomAsync<T>(T folderId, UpdateRoomRequest updateData)
     {
@@ -321,7 +321,7 @@ public class RoomService(
         }
         catch (Exception e)
         {
-            throw GenerateException(e);
+            throw FileStorageService.GenerateException(e, logger, authContext);
         }
     }
 
@@ -347,13 +347,13 @@ public class RoomService(
         }
         catch (Exception e)
         {
-            throw GenerateException(e);
+            throw FileStorageService.GenerateException(e, logger, authContext);
         }
     }
     
     public async Task<bool> AnyRoomsAsync(Guid user)
     {
-        var any = (await folderOperationsService.GetFolderItemsAsync(
+        var any = (await folderService.GetFolderItemsAsync(
             await globalFolderHelper.GetFolderVirtualRooms(),
             0,
             -1,
@@ -525,26 +525,5 @@ public class RoomService(
             userRelations ??= await userManager.GetUserRelationsAsync(currentUserId);
             return userRelations.ContainsKey(user.Id);
         }
-    }
-        
-    private Exception GenerateException(Exception error, bool warning = false)
-    {
-        if (warning || error is ItemNotFoundException or SecurityException or ArgumentException or TenantQuotaException or InvalidOperationException)
-        {
-            logger.Information(error.ToString());
-        }
-        else
-        {
-            logger.ErrorFileStorageService(error);
-        }
-
-        if (error is ItemNotFoundException)
-        {
-            return !authContext.CurrentAccount.IsAuthenticated
-                ? new SecurityException(FilesCommonResource.ErrorMessage_SecurityException)
-                : error;
-        }
-
-        return new InvalidOperationException(error.Message, error);
     }
 }

@@ -33,7 +33,7 @@ public abstract class Migrator(
     UserManager userManager,
     TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
     QuotaSocketManager quotaSocketManager,
-    FolderOperationsService folderOperationsService,
+    FolderService folderService,
     SharingService sharingService,
     GlobalFolderHelper globalFolderHelper,
     IServiceProvider serviceProvider,
@@ -314,8 +314,8 @@ public abstract class Migrator(
         if (storage.Type != FolderType.BUNCH) 
         {
             newFolder = storage.Type == FolderType.USER ? 
-                await folderOperationsService.CreateFolderAsync(await globalFolderHelper.FolderMyAsync, $"ASC migration files {DateTime.Now:dd.MM.yyyy}") : 
-                await folderOperationsService.CreateRoomAsync($"ASC migration common files {DateTime.Now:dd.MM.yyyy}", RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0, null, false, null, null, null, null, null);
+                await folderService.CreateFolderAsync(await globalFolderHelper.FolderMyAsync, $"ASC migration files {DateTime.Now:dd.MM.yyyy}") : 
+                await folderService.CreateRoomAsync($"ASC migration common files {DateTime.Now:dd.MM.yyyy}", RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0, null, false, null, null, null, null, null);
         Log(MigrationResource.СreateRootFolder);
         }
         else
@@ -333,11 +333,11 @@ public abstract class Migrator(
             {
                 if (storage.Type == FolderType.BUNCH && !folder.Private)
                 {
-                    newFolder = await folderOperationsService.CreateRoomAsync(folder.Title, RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0, null, false, null, null, null, null, null);
+                    newFolder = await folderService.CreateRoomAsync(folder.Title, RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0, null, false, null, null, null, null, null);
                 }
                 else
                 {
-                    newFolder = await folderOperationsService.CreateFolderAsync(matchingFilesIds[$"{FolderKey}-{folder.ParentId}"].Id, folder.Title);
+                    newFolder = await folderService.CreateFolderAsync(matchingFilesIds[$"{FolderKey}-{folder.ParentId}"].Id, folder.Title);
                 }
 
                 Log(string.Format(MigrationResource.CreateFolder, newFolder.Title));
@@ -491,7 +491,7 @@ public abstract class Migrator(
                         {
                             await securityContext.AuthenticateMeAsync(user.Info.Id);
                         }
-                        var room = await folderOperationsService.CreateRoomAsync($"{matchingFilesIds[key].Title}", RoomType.EditingRoom, false, false, new List<FileShareParams>(), 0, null, false, null, null, null, null, null);
+                        var room = await folderService.CreateRoomAsync($"{matchingFilesIds[key].Title}", RoomType.EditingRoom, false, false, new List<FileShareParams>(), 0, null, false, null, null, null, null, null);
 
                         orderedFolders = storage.Folders.Where(f => f.ParentId == security.EntryId).OrderBy(f => f.Level);
                         matchingRoomIds.Add(security.EntryId, room);
@@ -522,7 +522,7 @@ public abstract class Migrator(
 
                         foreach (var folder in orderedFolders)
                         {
-                            newFolder = await folderOperationsService.CreateFolderAsync(matchingRoomIds[folder.ParentId].Id, folder.Title);
+                            newFolder = await folderService.CreateFolderAsync(matchingRoomIds[folder.ParentId].Id, folder.Title);
                             matchingRoomIds.Add(folder.Id, newFolder);
                             innerFolders.Add(folder.Id);
                             Log(string.Format(MigrationResource.CreateFolder, newFolder.Title));

@@ -39,7 +39,7 @@ public class ThirdpartyController(
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
         FileSecurityCommon fileSecurityCommon,
-        FolderOperationsService folderOperationsService,
+        FolderService folderService,
         ThirdPartyIntegrationService integrationService)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
@@ -140,7 +140,7 @@ public class ThirdpartyController(
     [HttpGet("thirdparty/common")]
     public async IAsyncEnumerable<FolderDto<string>> GetCommonThirdPartyFoldersAsync([FromServices] EntryManager entryManager)
     {
-        var parent = await folderOperationsService.GetFolderAsync(await globalFolderHelper.FolderCommonAsync);
+        var parent = await folderService.GetFolderAsync(await globalFolderHelper.FolderCommonAsync);
         var thirdpartyFolders = entryManager.GetThirdPartyFoldersAsync(parent);
 
         await foreach (var r in thirdpartyFolders)

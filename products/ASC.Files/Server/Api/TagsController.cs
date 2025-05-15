@@ -31,23 +31,23 @@ public class TagsControllerInternal(
         EntryManager entryManager,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
-        FileOperationsService fileOperationsService,
+        FileService fileService,
         FavoritesService favoritesService)
-    : TagsController<int>(entryManager, folderDtoHelper, fileDtoHelper, fileOperationsService, favoritesService);
+    : TagsController<int>(entryManager, folderDtoHelper, fileDtoHelper, fileService, favoritesService);
 
 public class TagsControllerThirdparty(
         EntryManager entryManager,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
-        FileOperationsService fileOperationsService,
+        FileService fileService,
         FavoritesService favoritesService)
-    : TagsController<string>(entryManager, folderDtoHelper, fileDtoHelper, fileOperationsService, favoritesService);
+    : TagsController<string>(entryManager, folderDtoHelper, fileDtoHelper, fileService, favoritesService);
 
 public abstract class TagsController<T>(
         EntryManager entryManager,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
-        FileOperationsService fileOperationsService,
+        FileService fileService,
         FavoritesService favoritesService)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
@@ -62,7 +62,7 @@ public abstract class TagsController<T>(
     [HttpPost("file/{fileId}/recent")]
     public async Task<FileDto<T>> AddToRecentAsync(FileIdRequestDto<T> inDto)
     {
-        var file = await fileOperationsService.GetFileAsync(inDto.FileId, -1).NotFoundIfNull("File not found");
+        var file = await fileService.GetFileAsync(inDto.FileId, -1).NotFoundIfNull("File not found");
 
         await entryManager.MarkAsRecent(file);
 

@@ -42,7 +42,7 @@ public class SecurityControllerHelper(
     IEventBus eventBus,
     TenantManager tenantManager,
     AuthContext authContext,
-    FileOperationsService fileOperationsService,
+    FileService fileService,
     SharingService sharingService)
     : FilesHelperBase(
         filesSettingsHelper,
@@ -57,7 +57,7 @@ public class SecurityControllerHelper(
         eventBus,
         tenantManager,
         authContext,
-        fileOperationsService)
+        fileService)
 {
     public IAsyncEnumerable<FileShareDto> GetFileSecurityInfoAsync<T>(T fileId)
     {

@@ -5,7 +5,7 @@ namespace ASC.Files.Core;
 /// and restoring file versions within the system. The service also handles file versioning and history management.
 /// </summary>
 [Scope]
-public class FileOperationsService(
+public class FileService(
     Global global,
     GlobalStore globalStore,
     GlobalFolderHelper globalFolderHelper,
@@ -28,11 +28,12 @@ public class FileOperationsService(
     TempStream tempStream,
     FileChecker fileChecker,
     WebhookManager webhookManager,
-    ILogger<FileOperationsService> logger,
+    ILogger<FileService> logger,
     DocumentServiceHelper documentServiceHelper,
     DocumentServiceConnector documentServiceConnector,
     PathProvider pathProvider,
-    LockerManager lockerManager)
+    LockerManager lockerManager,
+    FilesLinkUtility filesLinkUtility)
 {
     /// <summary>
     /// Retrieves a file with the specified ID and version
@@ -833,6 +834,82 @@ public class FileOperationsService(
         {
             throw GenerateException(e);
         }
+    }
+    
+    public async Task<List<AceShortWrapper>> SendEditorNotifyAsync<T>(T fileId, MentionMessageWrapper mentionMessage)
+    {
+        if (!authContext.IsAuthenticated)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        var fileDao = daoFactory.GetFileDao<T>();
+        var file = await fileDao.GetFileAsync(fileId);
+
+        if (file == null)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
+        var canRead = await fileSecurity.CanReadAsync(file);
+
+        if (!canRead)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
+        }
+
+        if (mentionMessage?.Emails == null)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_BadRequest);
+        }
+
+        var showSharingSettings = false;
+        bool? canShare = null;
+        if (file.Encrypted)
+        {
+            canShare = false;
+            showSharingSettings = true;
+        }
+
+
+        var recipients = new List<Guid>();
+        foreach (var email in mentionMessage.Emails)
+        {
+            canShare ??= await fileSharing.CanSetAccessAsync(file);
+
+            var recipient = await userManager.GetUserByEmailAsync(email);
+            if (recipient == null || recipient.Id == Constants.LostUser.Id)
+            {
+                showSharingSettings = canShare.Value;
+                continue;
+            }
+
+            recipients.Add(recipient.Id);
+        }
+
+        var fileLink = filesLinkUtility.GetFileWebEditorUrl(file.Id);
+        if (mentionMessage.ActionLink != null)
+        {
+            fileLink += "&" + FilesLinkUtility.Anchor + "=" + HttpUtility.UrlEncode(ActionLinkConfig.Serialize(mentionMessage.ActionLink));
+        }
+
+        var message = (mentionMessage.Message ?? "").Trim();
+        const int maxMessageLength = 200;
+        if (message.Length > maxMessageLength)
+        {
+            message = message[..maxMessageLength] + "...";
+        }
+
+        try
+        {
+            await notifyClient.SendEditorMentions(file, fileLink, recipients, message);
+        }
+        catch (Exception ex)
+        {
+            logger.ErrorWithException(ex);
+        }
+
+        return showSharingSettings ? await fileSharing.GetSharedInfoShortFileAsync(file) : null;
     }
     
     private Exception GenerateException(Exception error, bool warning = false)

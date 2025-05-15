@@ -27,34 +27,40 @@
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
-public class SecurityControllerInternal(FileStorageService fileStorageService,
-        SecurityControllerHelper securityControllerHelper,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper,
-        ApiContext apiContext,
-        IDaoFactory daoFactory,
-        FileSharing fileSharing,
-        EmployeeFullDtoHelper employeeFullDtoHelper)
-    : SecurityController<int>(fileStorageService, securityControllerHelper, folderDtoHelper, fileDtoHelper, apiContext, daoFactory, fileSharing, employeeFullDtoHelper);
+public class SecurityControllerInternal(
+    FileStorageService fileStorageService,
+    SecurityControllerHelper securityControllerHelper,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper,
+    ApiContext apiContext,
+    IDaoFactory daoFactory,
+    FileSharing fileSharing,
+    EmployeeFullDtoHelper employeeFullDtoHelper,
+    FileService fileService)
+    : SecurityController<int>(fileStorageService, securityControllerHelper, folderDtoHelper, fileDtoHelper, apiContext, daoFactory, fileSharing, employeeFullDtoHelper, fileService);
 
-public class SecurityControllerThirdparty(FileStorageService fileStorageService,
-        SecurityControllerHelper securityControllerHelper,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper,
-        ApiContext apiContext,
-        IDaoFactory daoFactory,
-        FileSharing fileSharing,
-        EmployeeFullDtoHelper employeeFullDtoHelper)
-    : SecurityController<string>(fileStorageService, securityControllerHelper, folderDtoHelper, fileDtoHelper, apiContext, daoFactory, fileSharing, employeeFullDtoHelper);
+public class SecurityControllerThirdparty(
+    FileStorageService fileStorageService,
+    SecurityControllerHelper securityControllerHelper,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper,
+    ApiContext apiContext,
+    IDaoFactory daoFactory,
+    FileSharing fileSharing,
+    EmployeeFullDtoHelper employeeFullDtoHelper,
+    FileService fileService)
+    : SecurityController<string>(fileStorageService, securityControllerHelper, folderDtoHelper, fileDtoHelper, apiContext, daoFactory, fileSharing, employeeFullDtoHelper, fileService);
 
-public abstract class SecurityController<T>(FileStorageService fileStorageService,
-        SecurityControllerHelper securityControllerHelper,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper,
-        ApiContext apiContext,
-        IDaoFactory daoFactory,
-        FileSharing fileSharing,
-        EmployeeFullDtoHelper employeeFullDtoHelper)
+public abstract class SecurityController<T>(
+    FileStorageService fileStorageService,
+    SecurityControllerHelper securityControllerHelper,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper,
+    ApiContext apiContext,
+    IDaoFactory daoFactory,
+    FileSharing fileSharing,
+    EmployeeFullDtoHelper employeeFullDtoHelper,
+    FileService fileService)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -148,7 +154,7 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     [HttpPost("file/{fileId}/sendeditornotify")]
     public async Task<List<AceShortWrapper>> SendEditorNotify(MentionMessageWrapperRequestDto<T> inDto)
     {
-        return await fileStorageService.SendEditorNotifyAsync(inDto.FileId, inDto.MentionMessage);
+        return await fileService.SendEditorNotifyAsync(inDto.FileId, inDto.MentionMessage);
     }
 
     /// <summary>

@@ -32,42 +32,32 @@ public class FileStorageService //: IFileStorageService
     GlobalFolderHelper globalFolderHelper,
     AuthContext authContext,
     UserManager userManager,
-    FileUtility fileUtility,
     FilesLinkUtility filesLinkUtility,
     BaseCommonLinkUtility baseCommonLinkUtility,
-    DisplayUserSettingsHelper displayUserSettingsHelper,
     ILoggerProvider optionMonitor,
     PathProvider pathProvider,
     FileSecurity fileSecurity,
     SocketManager socketManager,
     IDaoFactory daoFactory,
-    FileMarker fileMarker,
     EntryManager entryManager,
-    FilesMessageService filesMessageService,
     DocumentServiceHelper documentServiceHelper,
     DocumentServiceConnector documentServiceConnector,
     FileSharing fileSharing,
-    NotifyClient notifyClient,
-    IServiceProvider serviceProvider,
     EncryptionKeyPairDtoHelper encryptionKeyPairHelper,
     SettingsManager settingsManager,
-    FileMarkAsReadOperationsManager fileOperationsManager,
     TenantManager tenantManager,
     IEventBus eventBus,
     EntryStatusManager entryStatusManager,
     ExternalShare externalShare,
     CoreBaseSettings coreBaseSettings,
-    IHttpClientFactory clientFactory,
-    TempStream tempStream,
     MentionWrapperCreator mentionWrapperCreator,
     SecurityContext securityContext,
     FileChecker fileChecker,
     CommonLinkUtility commonLinkUtility,
     ShortUrl shortUrl,
     IDbContextFactory<UrlShortenerDbContext> dbContextFactory,
-    FormRoleDtoHelper formRoleDtoHelper,
     WebhookManager webhookManager,
-    FolderOperationsService folderOperationsService,
+    FolderService folderService,
     SharingService sharingService)
 {
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
@@ -197,64 +187,7 @@ public class FileStorageService //: IFileStorageService
         return folder;
     }
 
-    public async Task<File<T>> StartFillingAsync<T>(T fileId)
-    {
-        var fileDao = daoFactory.GetFileDao<T>();
-        var folderDao = daoFactory.GetFolderDao<T>();
-        var file = await fileDao.GetFileAsync(fileId);
-
-        if (file == null)
-        {
-            throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
-        }
-
-        var folder = await folderDao.GetFolderAsync(file.ParentId);
-
-        if (folder.FolderType == FolderType.FillingFormsRoom && FileUtility.GetFileTypeByFileName(file.Title) == FileType.Pdf)
-        {
-            var ace = await fileSharing.GetPureSharesAsync(folder, new List<Guid> { authContext.CurrentAccount.ID }).FirstOrDefaultAsync();
-            if (ace is { Access: FileShare.FillForms })
-            {
-                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
-            }
-
-            var properties = await fileDao.GetProperties(fileId) ?? new EntryProperties<T> { FormFilling = new FormFillingProperties<T>() };
-            properties.FormFilling.StartFilling = true;
-            properties.FormFilling.OriginalFormId = fileId;
-
-            await fileDao.SaveProperties(fileId, properties);
-
-            var count = await sharingService.GetPureSharesCountAsync(folder.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
-            await socketManager.CreateFormAsync(file, securityContext.CurrentAccount.ID, count <= 1);
-            await socketManager.CreateFileAsync(file);
-        }
-
-        return file;
-    }
     
-    public async Task<List<FileEntry>> GetNewItemsAsync<T>(T folderId)
-    {
-        try
-        {
-            var folderDao = daoFactory.GetFolderDao<T>();
-            var folder = await folderDao.GetFolderAsync(folderId);
-
-            var result = await fileMarker.MarkedItemsAsync(folder).Where(e => e.FileEntryType == FileEntryType.File).ToListAsync();
-
-            result = [..await entryManager.SortEntries<T>(result, new OrderBy(SortedByType.DateAndTime, false))];
-
-            if (result.Count == 0)
-            {
-                await fileOperationsManager.Publish([JsonSerializer.SerializeToElement(folderId)], []);
-            }
-
-            return result;
-        }
-        catch (Exception e)
-        {
-            throw GenerateException(e);
-        }
-    }
 
 
     #region MoveOrCopy
@@ -413,7 +346,7 @@ public class FileStorageService //: IFileStorageService
         }
         catch (Exception e)
         {
-            throw GenerateException(e);
+            throw GenerateException(e, _logger, authContext);
         }
 
         return (checkedFiles, checkedFolders);
@@ -433,57 +366,7 @@ public class FileStorageService //: IFileStorageService
         return (foldersIdTask, filesIdTask);
     }
 
-    public async Task<string> CheckFillFormDraftAsync<T>(T fileId, int version, bool editPossible, bool view)
-    {
-        var (file, configuration, _) = await documentServiceHelper.GetParamsAsync(fileId, version, editPossible, !view, true, editPossible);
-        var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
-
-        var linkId = await externalShare.GetLinkIdAsync();
-        if (linkId != Guid.Empty)
-        {
-            configuration.Document.SharedLinkKey += externalShare.GetKey();
-        }
-
-        if (configuration.EditorConfig.ModeWrite
-            && fileUtility.CanWebRestrictedEditing(file.Title)
-            && await fileSecurity.CanFillFormsAsync(file)
-            && !await fileSecurity.CanEditAsync(file)
-            && (properties != null && properties.FormFilling.StartFilling))
-        {
-            if (!await entryManager.LinkedForMeAsync(file))
-            {
-                await fileMarker.RemoveMarkAsNewAsync(file);
-
-                Folder<T> folderIfNew;
-                File<T> form;
-                try
-                {
-                    (form, folderIfNew) = await entryManager.GetFillFormDraftAsync(file, file.ParentId);
-                }
-                catch (Exception ex)
-                {
-                    _logger.ErrorDocEditor(ex);
-                    throw;
-                }
-
-                var comment = folderIfNew == null
-                    ? string.Empty
-                    : "#message/" + HttpUtility.UrlEncode(string.Format(FilesCommonResource.MessageFillFormDraftCreated, folderIfNew.Title));
-
-                await socketManager.StopEditAsync(fileId);
-                return filesLinkUtility.GetFileWebEditorUrl(form.Id) + comment;
-            }
-
-            if (!await entryManager.CheckFillFormDraftAsync(file))
-            {
-                var comment = "#message/" + HttpUtility.UrlEncode(FilesCommonResource.MessageFillFormDraftDiscard);
-
-                return filesLinkUtility.GetFileWebEditorUrl(file.Id) + comment;
-            }
-        }
-
-        return filesLinkUtility.GetFileWebEditorUrl(file.Id);
-    }
+   
 
     #region [Reassign|Delete] Data Manager
     public async Task<List<T>> GetPersonalFolderIdsAsync<T>(Guid userId)
@@ -552,7 +435,7 @@ public class FileStorageService //: IFileStorageService
         {
             await securityContext.AuthenticateMeWithoutCookieAsync(toUser);
             var userInfo = await userManager.GetUsersAsync(user, false);
-            var folder = await folderOperationsService.CreateFolderAsync(await globalFolderHelper.FolderMyAsync, $"Documents of user {userInfo.FirstName} {userInfo.LastName}");
+            var folder = await folderService.CreateFolderAsync(await globalFolderHelper.FolderMyAsync, $"Documents of user {userInfo.FirstName} {userInfo.LastName}");
             foreach (var file in shared)
             {
                 await socketManager.DeleteFileAsync(file, action: async () => await fileDao.MoveFileAsync(file.Id, folder.Id));
@@ -636,85 +519,6 @@ public class FileStorageService //: IFileStorageService
         }
 
         return users;
-    }
-    
-    public async Task<File<T>> SaveAsPdf<T>(T fileId, T folderId, string title)
-    {
-        try
-        {
-            var fileDao = daoFactory.GetFileDao<T>();
-            var folderDao = daoFactory.GetFolderDao<T>();
-
-            var file = await fileDao.GetFileAsync(fileId);
-            file.NotFoundIfNull();
-            if (!await fileSecurity.CanReadAsync(file))
-            {
-                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
-            }
-
-            var folder = await folderDao.GetFolderAsync(folderId);
-            folder.NotFoundIfNull();
-            if (!await fileSecurity.CanCreateAsync(folder))
-            {
-                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
-            }
-
-            var fileUri = pathProvider.GetFileStreamUrl(file);
-            var fileExtension = file.ConvertedExtension;
-            var docKey = await documentServiceHelper.GetDocKeyAsync(file);
-
-            fileUri = documentServiceConnector.ReplaceCommunityAddress(fileUri);
-
-            var (_, convertedDocumentUri, _) = await documentServiceConnector.GetConvertedUriAsync(fileUri, fileExtension, "pdf", docKey, null, CultureInfo.CurrentUICulture.Name, null, null, null, false, false);
-
-            var pdfFile = serviceProvider.GetService<File<T>>();
-            pdfFile.Title = !string.IsNullOrEmpty(title) ? $"{title}.pdf" : FileUtility.ReplaceFileExtension(file.Title, "pdf");
-            pdfFile.ParentId = folder.Id;
-            pdfFile.Comment = FilesCommonResource.CommentCreate;
-
-            var request = new HttpRequestMessage { RequestUri = new Uri(convertedDocumentUri) };
-
-            var httpClient = clientFactory.CreateClient();
-            using var response = await httpClient.SendAsync(request);
-            await using var fileStream = await response.Content.ReadAsStreamAsync();
-            File<T> result;
-
-            if (fileStream.CanSeek)
-            {
-                pdfFile.ContentLength = fileStream.Length;
-                result = await fileDao.SaveFileAsync(pdfFile, fileStream);
-            }
-            else
-            {
-                var (buffered, isNew) = await tempStream.TryGetBufferedAsync(fileStream);
-                try
-                {
-                    pdfFile.ContentLength = buffered.Length;
-                    result = await fileDao.SaveFileAsync(pdfFile, buffered);
-                }
-                finally
-                {
-                    if (isNew)
-                    {
-                        await buffered.DisposeAsync();
-                    }
-                }
-            }
-
-            if (result != null)
-            {
-                await filesMessageService.SendAsync(MessageAction.FileCreated, result, result.Title);
-                await fileMarker.MarkAsNewAsync(result);
-                await socketManager.CreateFileAsync(result);
-                await webhookManager.PublishAsync(WebhookTrigger.FileCreated, result);
-            }
-
-            return result;
-        }
-        catch (Exception e)
-        {
-            throw GenerateException(e);
-        }
     }
     
     public Task<List<MentionWrapper>> SharedUsersAsync<T>(T fileId)
@@ -886,82 +690,6 @@ public class FileStorageService //: IFileStorageService
 
         return userIds;
     }
-    
-    public async Task<List<AceShortWrapper>> SendEditorNotifyAsync<T>(T fileId, MentionMessageWrapper mentionMessage)
-    {
-        if (!authContext.IsAuthenticated)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
-        }
-
-        var fileDao = daoFactory.GetFileDao<T>();
-        var file = await fileDao.GetFileAsync(fileId);
-
-        if (file == null)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
-        }
-
-        var canRead = await fileSecurity.CanReadAsync(file);
-
-        if (!canRead)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
-        }
-
-        if (mentionMessage?.Emails == null)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_BadRequest);
-        }
-
-        var showSharingSettings = false;
-        bool? canShare = null;
-        if (file.Encrypted)
-        {
-            canShare = false;
-            showSharingSettings = true;
-        }
-
-
-        var recipients = new List<Guid>();
-        foreach (var email in mentionMessage.Emails)
-        {
-            canShare ??= await fileSharing.CanSetAccessAsync(file);
-
-            var recipient = await userManager.GetUserByEmailAsync(email);
-            if (recipient == null || recipient.Id == Constants.LostUser.Id)
-            {
-                showSharingSettings = canShare.Value;
-                continue;
-            }
-
-            recipients.Add(recipient.Id);
-        }
-
-        var fileLink = filesLinkUtility.GetFileWebEditorUrl(file.Id);
-        if (mentionMessage.ActionLink != null)
-        {
-            fileLink += "&" + FilesLinkUtility.Anchor + "=" + HttpUtility.UrlEncode(ActionLinkConfig.Serialize(mentionMessage.ActionLink));
-        }
-
-        var message = (mentionMessage.Message ?? "").Trim();
-        const int maxMessageLength = 200;
-        if (message.Length > maxMessageLength)
-        {
-            message = message[..maxMessageLength] + "...";
-        }
-
-        try
-        {
-            await notifyClient.SendEditorMentions(file, fileLink, recipients, message);
-        }
-        catch (Exception ex)
-        {
-            _logger.ErrorWithException(ex);
-        }
-
-        return showSharingSettings ? await fileSharing.GetSharedInfoShortFileAsync(file) : null;
-    }
 
     public async Task<List<EncryptionKeyPairDto>> GetEncryptionAccessAsync<T>(T fileId)
     {
@@ -981,7 +709,7 @@ public class FileStorageService //: IFileStorageService
     {
         if (!authContext.IsAuthenticated && (await externalShare.GetLinkIdAsync()) == Guid.Empty)
         {
-            throw GenerateException(new SecurityException(FilesCommonResource.ErrorMessage_SecurityException));
+            throw GenerateException(new SecurityException(FilesCommonResource.ErrorMessage_SecurityException),  _logger, authContext);
         }
 
         try
@@ -1053,192 +781,16 @@ public class FileStorageService //: IFileStorageService
 
         return [..users];
     }
-
-    public async Task SaveFormRoleMapping<T>(T formId, IEnumerable<FormRole> roles)
-    {
-        var fileDao = daoFactory.GetFileDao<T>();
-        var folderDao = daoFactory.GetFolderDao<T>();
-
-        var form = await fileDao.GetFileAsync(formId);
-        var currentRoom = await DocSpaceHelper.GetParentRoom(form, folderDao);
-
-        await ValidateChangeRolesPermission(form);
-
-        if ((roles?.Any() == false && !await fileSecurity.CanResetFillingAsync(form, authContext.CurrentAccount.ID)) ||
-            (roles?.Any() == true && !await fileSecurity.CanStartFillingAsync(form, authContext.CurrentAccount.ID)))
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
-        }
-
-        await fileDao.SaveFormRoleMapping(formId, roles);
-
-        var properties = await fileDao.GetProperties(formId) ?? new EntryProperties<T> { FormFilling = new FormFillingProperties<T>() };
-        if (roles?.Any() == false)
-        {
-            await fileDao.SaveProperties(formId, null);
-        }
-        else
-        {
-            properties.FormFilling.StartFilling = true;
-            properties.FormFilling.StartedByUserId = authContext.CurrentAccount.ID;
-            await fileDao.SaveProperties(formId, properties);
-            var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
-            await filesMessageService.SendAsync(MessageAction.FormStartedToFill, form, MessageInitiator.DocsService, user?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
-
-            var currentUserId = authContext.CurrentAccount.ID;
-            var recipients = roles
-                .Where(role => role.UserId != currentUserId)
-                .Select(role => role.UserId)
-                .Distinct()
-                .ToList();
-
-            if (recipients.Count > 0)
-            {
-                await notifyClient.SendFormFillingEvent(
-                    currentRoom, form, recipients, NotifyConstants.EventFormStartedFilling, currentUserId);
-            }
-
-            var roleUserIds = roles.Where(r => r.UserId != currentUserId).Select(r => r.UserId);
-
-            var aces = fileSecurity.GetPureSharesAsync(currentRoom, roleUserIds);
-
-            var formFillers = await aces.Where(ace => ace is { Share: FileShare.FillForms }).Select(s => s.Subject).ToListAsync();
-
-            if (formFillers.Count != 0)
-            {
-                if (!form.ParentId.Equals(currentRoom.Id))
-                {
-                    var parentFolders = await folderDao.GetParentFoldersAsync(form.ParentId).Where(f => !DocSpaceHelper.IsRoom(f.FolderType)).ToListAsync();
-                    foreach (var folder in parentFolders)
-                    {
-                        await socketManager.CreateFolderAsync(folder, formFillers);
-                    }
-                }
-                await socketManager.CreateFileAsync(form, formFillers);
-            }
-
-        }
-
-        await socketManager.UpdateFileAsync(form);
-    }
     
-    public async IAsyncEnumerable<FormRoleDto> GetAllFormRoles<T>(T formId)
-    {
-        var fileDao = daoFactory.GetFileDao<T>();
-        var form = await fileDao.GetFileAsync(formId);
-
-        if (form == null)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
-        }
-        if (!await DocSpaceHelper.IsFormOrCompletedForm(form, daoFactory))
-        {
-            throw new InvalidOperationException();
-        }
-        var roles = await fileDao.GetFormRoles(formId).ToListAsync();
-        var properties = await daoFactory.GetFileDao<T>().GetProperties(formId);
-        var currentStep = roles.Where(r => !r.Submitted).Min(r => (int?)r.Sequence) ?? 0;
-
-
-        foreach (var r in roles)
-        {
-            var role = await formRoleDtoHelper.Get(properties, r);
-            if (!DateTime.MinValue.Equals(properties.FormFilling.FillingStopedDate) &&
-                properties.FormFilling.FormFillingInterruption?.RoleName == role.RoleName)
-            {
-                role.RoleStatus = FormFillingStatus.Stoped;
-            }
-            else
-            {
-                role.RoleStatus = currentStep switch
-                {
-                    0 => FormFillingStatus.Complete,
-                    _ when currentStep > role.Sequence => FormFillingStatus.Complete,
-                    _ when currentStep < role.Sequence => FormFillingStatus.Draft,
-                    _ when currentStep == role.Sequence && !role.Submitted && r.OpenedAt.Equals(DateTime.MinValue) => FormFillingStatus.YouTurn,
-                    _ when currentStep == role.Sequence && !role.Submitted && !r.OpenedAt.Equals(DateTime.MinValue) => FormFillingStatus.InProgress,
-                    _ => FormFillingStatus.Complete
-                };
-            }
-
-            yield return role;
-        }
-    }
-    
-    public async Task ManageFormFilling<T>(T formId, FormFillingManageAction action)
-    {
-        var fileDao = daoFactory.GetFileDao<T>();
-        var folderDao = daoFactory.GetFolderDao<T>();
-        var form = await fileDao.GetFileAsync(formId);
-        await ValidateChangeRolesPermission(form);
-
-        var properties = await daoFactory.GetFileDao<T>().GetProperties(formId);
-        switch (action)
-        {
-            case FormFillingManageAction.Stop:
-                if (!await fileSecurity.CanStopFillingAsync(form, authContext.CurrentAccount.ID))
-                {
-                    throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
-                }
-                var role = await fileDao.GetFormRoles(formId).Where(r => r.Submitted == false).FirstOrDefaultAsync();
-                properties.FormFilling.FillingStopedDate = DateTime.UtcNow;
-                properties.FormFilling.FormFillingInterruption =
-                    new FormFillingInterruption
-                    {
-                        UserId = authContext.CurrentAccount.ID,
-                        RoleName = role?.RoleName
-                    };
-                var room = await DocSpaceHelper.GetParentRoom(form, folderDao);
-                var allRoleUserIds = await fileDao.GetFormRoles(form.Id).Where(role => role.UserId != authContext.CurrentAccount.ID).Select(r => r.UserId).ToListAsync();
-
-                var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
-                await filesMessageService.SendAsync(MessageAction.FormStopped, form, MessageInitiator.DocsService, user?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
-                await notifyClient.SendFormFillingEvent(room, form, allRoleUserIds, NotifyConstants.EventStoppedFormFilling, authContext.CurrentAccount.ID);
-                break;
-
-            case FormFillingManageAction.Resume:
-                properties.FormFilling.FillingStopedDate = DateTime.MinValue;
-                properties.FormFilling.FormFillingInterruption = null;
-                break;
-
-            default:
-                throw new InvalidOperationException();
-        }
-
-        await fileDao.SaveProperties(formId, properties);
-        await socketManager.UpdateFileAsync(form);
-    }
-    
-    private async Task ValidateChangeRolesPermission<T>(File<T> form)
-    {
-        if (form == null)
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
-        }
-        if (!form.IsForm)
-        {
-            throw new InvalidOperationException();
-        }
-
-
-        var folderDao = daoFactory.GetFolderDao<T>();
-        var currentRoom = await DocSpaceHelper.GetParentRoom(form, folderDao);
-
-        if (currentRoom == null)
-        {
-            throw new InvalidOperationException();
-        }
-    }
-    
-    private Exception GenerateException(Exception error, bool warning = false)
+    internal static Exception GenerateException(Exception error, ILogger logger, AuthContext authContext, bool warning = false)
     {
         if (warning || error is ItemNotFoundException or SecurityException or ArgumentException or TenantQuotaException or InvalidOperationException)
         {
-            _logger.Information(error.ToString());
+            logger.Information(error.ToString());
         }
         else
         {
-            _logger.ErrorFileStorageService(error);
+            logger.ErrorFileStorageService(error);
         }
 
         if (error is ItemNotFoundException)

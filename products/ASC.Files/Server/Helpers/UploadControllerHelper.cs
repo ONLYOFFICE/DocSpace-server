@@ -46,7 +46,7 @@ public class UploadControllerHelper(
     IEventBus eventBus,
     AuthContext authContext,
     Global global,
-    FileOperationsService fileOperationsService)
+    FileService fileService)
     : FilesHelperBase(
         filesSettingsHelper,
         fileUploader,
@@ -60,7 +60,7 @@ public class UploadControllerHelper(
         eventBus,
         tenantManager,
         authContext,
-        fileOperationsService)
+        fileService)
     {
     public async Task<object> CreateEditSessionAsync<T>(T fileId, long fileSize)
     {

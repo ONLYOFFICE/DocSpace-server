@@ -39,7 +39,7 @@ public class FoldersControllerInternal(
     FileShareDtoHelper fileShareDtoHelper,
     HistoryApiHelper historyApiHelper,
     FormFillingReportCreator formFillingReportCreator,
-    FolderOperationsService folderOperationsService,
+    FolderService folderService,
     SharingService sharingService,
     EntriesOrderService entriesOrderService)
     : FoldersController<int>(
@@ -52,7 +52,7 @@ public class FoldersControllerInternal(
         fileDtoHelper,
         permissionContext,
         fileShareDtoHelper,
-        folderOperationsService,
+        folderService,
         sharingService,
         entriesOrderService)
 {
@@ -101,7 +101,7 @@ public class FoldersControllerThirdparty(
     FileDtoHelper fileDtoHelper,
     PermissionContext permissionContext,
     FileShareDtoHelper fileShareDtoHelper,
-    FolderOperationsService folderOperationsService,
+    FolderService folderService,
     SharingService sharingService,
     EntriesOrderService entriesOrderService)
     : FoldersController<string>(breadCrumbsManager,
@@ -113,7 +113,7 @@ public class FoldersControllerThirdparty(
         fileDtoHelper,
         permissionContext,
         fileShareDtoHelper,
-        folderOperationsService,
+        folderService,
         sharingService,
         entriesOrderService);
 
@@ -127,7 +127,7 @@ public abstract class FoldersController<T>(
     FileDtoHelper fileDtoHelper,
     PermissionContext permissionContext,
     FileShareDtoHelper fileShareDtoHelper,
-    FolderOperationsService folderOperationsService,
+    FolderService folderService,
     SharingService sharingService,
     EntriesOrderService entriesOrderService)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
@@ -142,7 +142,7 @@ public abstract class FoldersController<T>(
     [HttpPost("folder/{folderId}")]
     public async Task<FolderDto<T>> CreateFolderAsync(CreateFolderRequestDto<T> inDto)
     {
-        var folder = await folderOperationsService.CreateFolderAsync(inDto.FolderId, inDto.Folder.Title);
+        var folder = await folderService.CreateFolderAsync(inDto.FolderId, inDto.Folder.Title);
 
         return await _folderDtoHelper.GetAsync(folder);
     }
@@ -222,7 +222,7 @@ public abstract class FoldersController<T>(
     [HttpGet("folder/{folderId}")]
     public async Task<FolderDto<T>> GetFolderInfoAsync(FolderIdRequestDto<T> inDto)
     {        
-        var folder = await folderOperationsService.GetFolderAsync(inDto.FolderId).NotFoundIfNull("Folder not found");
+        var folder = await folderService.GetFolderAsync(inDto.FolderId).NotFoundIfNull("Folder not found");
 
         return await _folderDtoHelper.GetAsync(folder);
     }
@@ -259,7 +259,7 @@ public abstract class FoldersController<T>(
     [HttpGet("{folderId}/subfolders")]
     public async IAsyncEnumerable<FileEntryDto> GetFoldersAsync(FolderIdRequestDto<T> inDto)
     {
-        var folders = await folderOperationsService.GetFoldersAsync(inDto.FolderId);
+        var folders = await folderService.GetFoldersAsync(inDto.FolderId);
         foreach (var folder in folders)
         {
             yield return await GetFileEntryWrapperAsync(folder);
@@ -278,7 +278,7 @@ public abstract class FoldersController<T>(
     [HttpGet("{folderId}/news")]
     public async IAsyncEnumerable<FileEntryDto> GetNewItemsAsync(FolderIdRequestDto<T> inDto)
     {
-        var newItems = await fileStorageService.GetNewItemsAsync(inDto.FolderId);
+        var newItems = await folderService.GetNewItemsAsync(inDto.FolderId);
 
         foreach (var e in newItems)
         {
@@ -297,7 +297,7 @@ public abstract class FoldersController<T>(
     [HttpPut("folder/{folderId}")]
     public async Task<FolderDto<T>> RenameFolderAsync(CreateFolderRequestDto<T> inDto)
     {
-        var folder = await folderOperationsService.FolderRenameAsync(inDto.FolderId, inDto.Folder.Title);
+        var folder = await folderService.FolderRenameAsync(inDto.FolderId, inDto.Folder.Title);
 
         return await _folderDtoHelper.GetAsync(folder);
     }
