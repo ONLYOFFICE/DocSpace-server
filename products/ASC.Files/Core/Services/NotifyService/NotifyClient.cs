@@ -404,7 +404,10 @@ public class NotifyClient(WorkContext notifyContext,
                 recipients,
                 ConfigurationConstants.NotifyPushSenderSysName,
                 new TagValue(NotifyConstants.RoomTitle, room.Title),
-                new TagValue(Tags.FromUserName, user.DisplayUserName(displayUserSettingsHelper))
+                new TagValue(Tags.FromUserName, user.DisplayUserName(displayUserSettingsHelper)),
+                new TagValue(NotifyConstants.TagFolderID, room.Id),
+                new TagValue(NotifyConstants.TagFolderParentId, room.ParentId),
+                new TagValue(NotifyConstants.TagFolderRootFolderType, room.RootFolderType)
                 );
     }
     public async Task SendInvitedToRoom<T>(FileEntry<T> room, UserInfo user)
