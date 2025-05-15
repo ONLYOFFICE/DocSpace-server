@@ -58,7 +58,7 @@ public class UserGroupObject : SecurityObject
             return [AuthConstants.User];
         }
 
-        return Array.Empty<IRole>();
+        return [];
     }
 
     protected override IRuleData GetRuleData()

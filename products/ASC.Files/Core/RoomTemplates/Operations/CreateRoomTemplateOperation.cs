@@ -88,14 +88,11 @@ public class CreateRoomTemplateOperation : DistributedTaskProgress
 
     protected override async Task DoJob()
     {
-
         await using var scope = _serviceProvider.CreateAsyncScope();
         var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
         var securityContext = scope.ServiceProvider.GetService<SecurityContext>();
-        var globalHelper = scope.ServiceProvider.GetService<GlobalFolderHelper>();
         var fileStorageService = scope.ServiceProvider.GetService<FileStorageService>();
         var roomLogoManager = scope.ServiceProvider.GetService<RoomLogoManager>();
-        var dbFactory = scope.ServiceProvider.GetService<IDbContextFactory<FilesDbContext>>();
         var daoFactory = scope.ServiceProvider.GetService<IDaoFactory>();
         var logger = scope.ServiceProvider.GetService<ILogger<CreateRoomTemplateOperation>>();
         var fileDao = daoFactory.GetFileDao<int>();
@@ -126,24 +123,24 @@ public class CreateRoomTemplateOperation : DistributedTaskProgress
             
             if (_emails != null)
             {
-                wrappers = _emails.Select(e => new AceWrapper() { Email = e, Access = FileShare.Read }).ToList();
+                wrappers = _emails.Select(e => new AceWrapper { Email = e, Access = FileShare.Read }).ToList();
             }
             if (_groups != null)
             {
-                wrappers = _groups.Select(e => new AceWrapper() { Id = e, Access = FileShare.Read, SubjectType = SubjectType.Group }).ToList();
+                wrappers = _groups.Select(e => new AceWrapper { Id = e, Access = FileShare.Read, SubjectType = SubjectType.Group }).ToList();
             }
 
             if (wrappers != null)
             {
                 var aceCollection = new AceCollection<int>
                 {
-                    Files = Array.Empty<int>(),
+                    Files = [],
                     Folders = [TemplateId],
                     Aces = wrappers,
                     Message = string.Empty
                 };
 
-                var warning = await fileStorageService.SetAceObjectAsync(aceCollection, false);
+                await fileStorageService.SetAceObjectAsync(aceCollection, false);
             }
 
             if (_copyLogo)

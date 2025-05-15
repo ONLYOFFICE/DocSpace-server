@@ -172,13 +172,13 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         }
 
         var docParams = await documentServiceHelper.GetParamsAsync(
-            formOpenSetup != null && formOpenSetup.Draft != null ? formOpenSetup.Draft : file, 
+            formOpenSetup is { Draft: not null } ? formOpenSetup.Draft : file, 
             lastVersion,
-            formOpenSetup != null ? formOpenSetup.CanEdit : !file.IsCompletedForm,
+            formOpenSetup?.CanEdit ?? !file.IsCompletedForm,
             !inDto.View, 
             true, formOpenSetup == null || formOpenSetup.CanFill,
-            formOpenSetup != null ? formOpenSetup.EditorType : inDto.EditorType,
-            formOpenSetup != null && formOpenSetup.IsSubmitOnly);
+            formOpenSetup?.EditorType ?? inDto.EditorType,
+            formOpenSetup is { IsSubmitOnly: true });
 
         var configuration = docParams.Configuration;
         file = docParams.File;
@@ -225,7 +225,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                 result.EditorConfig.Customization.StartFillingForm = new StartFillingForm { Text = FilesCommonResource.StartFillingModeEnum_StartFilling };
                 if (!string.IsNullOrEmpty(formOpenSetup.RoleName))
                 {
-                    result.EditorConfig.User.Roles = new List<string> { formOpenSetup.RoleName };
+                    result.EditorConfig.User.Roles = [formOpenSetup.RoleName];
                     result.FillingStatus = true;
                 }
             }
@@ -380,7 +380,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
         await filesLinkUtility.SetDocServicePortalUrlAsync(inDto.DocServiceUrlPortal);
         await filesLinkUtility.SetDocServiceSignatureSecretAsync(inDto.DocServiceSignatureSecret);
         await filesLinkUtility.SetDocServiceSignatureHeaderAsync(inDto.DocServiceSignatureHeader);
-        await filesLinkUtility.SetDocServiceSslVerificationAsync(inDto.DocServiceSslVerification.HasValue ? inDto.DocServiceSslVerification.Value : true);
+        await filesLinkUtility.SetDocServiceSslVerificationAsync(inDto.DocServiceSslVerification ?? true);
 
         var https = new Regex(@"^https://", RegexOptions.IgnoreCase);
         var http = new Regex(@"^http://", RegexOptions.IgnoreCase);

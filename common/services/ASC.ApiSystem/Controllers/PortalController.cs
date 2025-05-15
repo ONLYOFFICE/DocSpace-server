@@ -26,6 +26,8 @@
 
 using System.Text.Json;
 
+using ASC.FederatedLogin;
+using ASC.FederatedLogin.Profile;
 using ASC.Web.Api.Core;
 
 namespace ASC.ApiSystem.Controllers;
@@ -51,7 +53,9 @@ public class PortalController(
         CspSettingsHelper cspSettingsHelper,
         CoreBaseSettings coreBaseSettings,
         QuotaUsageManager quotaUsageManager,
-        PasswordSettingsManager passwordSettingsManager)
+        PasswordSettingsManager passwordSettingsManager,
+        LoginProfileTransport loginProfileTransport,
+        AccountLinker accountLinker)
     : ControllerBase
 {
     #region For TEST api
@@ -317,6 +321,296 @@ public class PortalController(
             referenceWelcome = sendCongratulationsAddress
         });
     }
+
+
+    /// <summary>
+    /// Registers a new portal by email with the parameters specified in the request.
+    /// </summary>
+    /// <short>
+    /// Register a portal by email
+    /// </short>
+    /// <path>apisystem/portal/registerbyemail</path>
+    [Tags("Portal")]
+    [SwaggerResponse(200, "Ok", typeof(IActionResult))]
+    [HttpPost("registerbyemail")]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
+    public async ValueTask<IActionResult> RegisterByEmailAsync(TenantModel model)
+    {
+        if (string.IsNullOrEmpty(model?.Email))
+        {
+            return BadRequest(new
+            {
+                error = "emailEmpty",
+                message = "Email is required"
+            });
+        }
+
+        if (!ModelState.IsValid)
+        {
+            List<string> message = [];
+
+            foreach (var k in ModelState.Keys)
+            {
+                message.Add(ModelState[k].Errors.FirstOrDefault().ErrorMessage);
+            }
+
+            return BadRequest(new
+            {
+                error = "params",
+                message = JsonSerializer.Serialize(message.ToArray())
+            });
+        }
+
+        var sw = Stopwatch.StartNew();
+
+        if (string.IsNullOrEmpty(model.PasswordHash))
+        {
+            if (string.IsNullOrEmpty(model.Password))
+            {
+                model.Password = Guid.NewGuid().ToString();
+            }
+            else
+            {
+                if (!CheckPasswordPolicy(model.Password, out var error1))
+                {
+                    sw.Stop();
+                    return BadRequest(error1);
+                }
+            }
+
+            model.PasswordHash = passwordHasher.GetClientPassword(model.Password);
+        }
+
+        LoginProfile loginProfile = null;
+        if (!string.IsNullOrEmpty(model.ThirdPartyProfile))
+        {
+            try
+            {
+                var profile = await loginProfileTransport.FromPureTransport(model.ThirdPartyProfile);
+                if (profile != null && string.IsNullOrEmpty(profile.AuthorizationError))
+                {
+                    loginProfile = profile;
+                    model.FirstName = loginProfile.FirstName;
+                    model.LastName = loginProfile.LastName;
+                }
+            }
+            catch (Exception e)
+            {
+                option.LogError(e, "");
+            }
+        }
+
+        if (string.IsNullOrEmpty(model.FirstName) && string.IsNullOrEmpty(model.LastName))
+        {
+            model.FirstName = "Administrator";
+        }
+
+        model.FirstName = (model.FirstName ?? "").Trim();
+        model.LastName = (model.LastName ?? "").Trim();
+
+        if (!CheckValidName(model.FirstName + model.LastName, out var error))
+        {
+            sw.Stop();
+
+            return BadRequest(error);
+        }
+
+        var emailPart = Regex.Replace(model.Email.Split('@')[0], @"[^a-z0-9\-]", "", RegexOptions.IgnoreCase).Trim('-');
+        var portalName = (model.PortalName ?? $"{emailPart}{DateTime.UtcNow.ToString("yyMMddHHmm")}").Trim();
+
+        model.PortalName = portalName;
+
+        var attempt = 0;
+
+        while (true)
+        {
+            (var success, error) = await CheckExistingNamePortalAsync(model.PortalName);
+
+            if (success)
+            {
+                break;
+            }
+            else
+            {
+                if (error.GetType().GetProperty("error")?.GetValue(error).ToString() == "portalNameExist")
+                {
+                    model.PortalName = $"{portalName}-{++attempt}";
+                }
+                else
+                {
+                    sw.Stop();
+                    return BadRequest(error);
+                }
+            }
+        }
+
+        option.LogDebug("PortalName = {0}; Elapsed ms. CheckExistingNamePortal: {1}", model.PortalName, sw.ElapsedMilliseconds);
+
+        var clientIP = commonMethods.GetClientIp();
+
+        if (commonMethods.CheckMuchRegistration(model, clientIP, sw))
+        {
+            return BadRequest(new
+            {
+                error = "tooMuchAttempts",
+                message = "Too much attempts already"
+            });
+        }
+
+        var language = model.Language ?? string.Empty;
+
+        var tz = timeZonesProvider.GetCurrentTimeZoneInfo(language);
+
+        option.LogDebug("PortalName = {0}; Elapsed ms. TimeZonesProvider.GetCurrentTimeZoneInfo: {1}", model.PortalName, sw.ElapsedMilliseconds);
+
+        if (!string.IsNullOrEmpty(model.TimeZoneName))
+        {
+            tz = timeZoneConverter.GetTimeZone(model.TimeZoneName.Trim(), false) ?? tz;
+
+            option.LogDebug("PortalName = {0}; Elapsed ms. TimeZonesProvider.OlsonTimeZoneToTimeZoneInfo: {1}", model.PortalName, sw.ElapsedMilliseconds);
+        }
+
+        var lang = timeZonesProvider.GetCurrentCulture(language);
+
+        option.LogDebug("PortalName = {0}; model.Language = {1}, resultLang.DisplayName = {2}", model.PortalName, language, lang.DisplayName);
+
+        var info = new TenantRegistrationInfo
+        {
+            Name = configuration["web:portal-name"] ?? "",
+            Address = model.PortalName,
+            Culture = lang,
+            FirstName = model.FirstName,
+            LastName = model.LastName,
+            PasswordHash = string.IsNullOrEmpty(model.PasswordHash) ? null : model.PasswordHash,
+            Email = (model.Email ?? "").Trim(),
+            TimeZoneInfo = tz,
+            MobilePhone = string.IsNullOrEmpty(model.Phone) ? null : model.Phone.Trim(),
+            Industry = (TenantIndustry)model.Industry,
+            Spam = model.Spam,
+            Calls = model.Calls,
+            HostedRegion = model.Region,
+            LimitedAccessSpace = model.LimitedAccessSpace,
+            ActivationStatus = EmployeeActivationStatus.Activated // register as activated !!!
+        };
+
+        if (!string.IsNullOrEmpty(model.AffiliateId))
+        {
+            info.AffiliateId = model.AffiliateId;
+        }
+
+        if (!string.IsNullOrEmpty(model.PartnerId))
+        {
+            info.PartnerId = model.PartnerId;
+        }
+
+        if (!string.IsNullOrEmpty(model.Campaign))
+        {
+            info.Campaign = model.Campaign;
+        }
+
+        Tenant t;
+        try
+        {
+            /****REGISTRATION!!!*****/
+
+            t = await hostedSolution.RegisterTenantAsync(info);
+
+            tenantManager.SetCurrentTenant(t);
+
+            await cspSettingsHelper.SaveAsync(null);
+
+            if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
+            {
+                await apiSystemHelper.AddTenantToCacheAsync(t.GetTenantDomain(coreSettings), model.AWSRegion);
+
+                option.LogDebug("PortalName = {0}; Elapsed ms. CacheController.AddTenantToCache: {1}", model.PortalName, sw.ElapsedMilliseconds);
+            }
+
+            if (loginProfile != null)
+            {
+                await accountLinker.AddLinkAsync(t.OwnerId, loginProfile);
+            }
+
+            /*********/
+
+            option.LogDebug("PortalName = {0}; Elapsed ms. HostedSolution.RegisterTenant: {1}", model.PortalName, sw.ElapsedMilliseconds);
+        }
+        catch (Exception e)
+        {
+            sw.Stop();
+
+            option.LogError(e, "");
+
+            return StatusCode(StatusCodes.Status500InternalServerError, new
+            {
+                error = "registerNewTenantError",
+                message = e.Message,
+                stacktrace = e.StackTrace
+            });
+        }
+
+        var trialQuota = configuration["quota:id"];
+        if (!string.IsNullOrEmpty(trialQuota))
+        {
+            if (int.TryParse(trialQuota, out var trialQuotaId))
+            {
+                var dueDate = DateTime.MaxValue;
+                if (int.TryParse(configuration["quota:due"], out var dueTrial))
+                {
+                    dueDate = DateTime.UtcNow.AddDays(dueTrial);
+                }
+
+                var tariff = new Tariff
+                {
+                    Quotas = [new Quota(trialQuotaId, 1)],
+                    DueDate = dueDate
+                };
+                await hostedSolution.SetTariffAsync(t.Id, tariff);
+            }
+        }
+
+        var isFirst = true;
+        string sendCongratulationsAddress = null;
+
+        var scheme = commonMethods.GetRequestScheme();
+
+        if (!string.IsNullOrEmpty(model.PasswordHash))
+        {
+            sendCongratulationsAddress = await commonMethods.SendCongratulations(scheme, t, model.SkipWelcome);
+            isFirst = sendCongratulationsAddress != null;
+        }
+        else if (configuration["core:base-domain"] == "localhost")
+        {
+            try
+            {
+                /* set wizard not completed*/
+                tenantManager.SetCurrentTenant(t);
+
+                var settings = await settingsManager.LoadAsync<WizardSettings>();
+
+                settings.Completed = false;
+
+                await settingsManager.SaveAsync(settings);
+            }
+            catch (Exception e)
+            {
+                option.LogError(e, "RegisterAsync");
+            }
+        }
+
+        var reference = commonMethods.CreateReference(t.Id, scheme, t.GetTenantDomain(coreSettings), info.Email, isFirst);
+        option.LogDebug("PortalName = {0}; Elapsed ms. CreateReferenceByCookie...: {1}", model.PortalName, sw.ElapsedMilliseconds);
+
+        sw.Stop();
+
+        return Ok(new
+        {
+            reference,
+            tenant = commonMethods.ToTenantWrapper(t),
+            referenceWelcome = sendCongratulationsAddress
+        });
+    }
+
 
     /// <summary>
     /// Deletes a portal with a name specified in the request.
@@ -656,7 +950,9 @@ public class PortalController(
         // characters
         tenantDomainValidator.ValidateDomainCharacters(alias);
 
-        var sameAliasTenants = await apiSystemHelper.FindTenantsInCacheAsync(alias);
+        var forbidden = await hostedSolution.IsForbiddenDomainAsync(alias);
+
+        var sameAliasTenants = forbidden ? [alias] : await apiSystemHelper.FindTenantsInCacheAsync(alias);
 
         if (sameAliasTenants != null)
         {

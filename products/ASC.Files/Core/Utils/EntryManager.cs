@@ -487,13 +487,19 @@ public class EntryManager(IDaoFactory daoFactory,
             var folderDao = daoFactory.GetFolderDao<T>();
             var fileDao = daoFactory.GetFileDao<T>();
 
-            var allFoldersCountTask = folderDao.GetFoldersCountAsync(parent.Id, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, roomId);
-            var allFilesCountTask = fileDao.GetFilesCountAsync(parent.Id, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject, roomId, formsItemDto);
+            Task<int> allFoldersCountTask;
+            Task<int> allFilesCountTask;
             var filesToUpdate = new List<File<T>>();
             
             if (room is { FolderType: FolderType.VirtualDataRoom, SettingsIndexing: true })
             {
                 orderBy.SortedBy = SortedByType.CustomOrder;
+                var (parentFolderType, additionalOption) = parent.ShareRecord is { Share: FileShare.FillForms }
+                    ? (parent.FolderType, AdditionalFilterOption.FormsWithFillingRole)
+                    : (FolderType.DEFAULT, AdditionalFilterOption.All);
+
+                allFoldersCountTask = folderDao.GetFoldersCountAsync(parent.Id, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, roomId, parentFolderType, additionalOption);
+                allFilesCountTask = fileDao.GetFilesCountAsync(parent.Id, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject, roomId, formsItemDto, parentFolderType, additionalOption);
 
                 var folders = folderDao.GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, 0, -1, roomId, parentType: room.FolderType, containingForms: parent.ShareRecord is { Share: FileShare.FillForms });
                 var files = fileDao.GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject, 0, -1, roomId, withShared, formsItemDto: formsItemDto, applyFormStepFilter: parent.ShareRecord is { Share: FileShare.FillForms });
@@ -541,6 +547,14 @@ public class EntryManager(IDaoFactory daoFactory,
                 {
                     folders = folders.GroupBy(folder => folder.Id).Select(f => f.First()).ToList();
                 }
+
+                allFilesCountTask = fileDao.GetFilesCountAsync(parent.Id, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject, roomId, formsItemDto,
+                    containingMyFiles && withSubfolders ? parent.FolderType : FolderType.DEFAULT, 
+                    containingMyFiles && withSubfolders ? AdditionalFilterOption.MyFilesAndFolders : AdditionalFilterOption.All);
+
+                allFoldersCountTask = folderDao.GetFoldersCountAsync(parent.Id, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, roomId,
+                    containingMyFiles ? parent.FolderType : FolderType.DEFAULT,
+                    containingMyFiles ? AdditionalFilterOption.MyFilesAndFolders : AdditionalFilterOption.All);
 
                 var filesCount = count - folders.Count;
                 var filesOffset = Math.Max(folders.Count > 0 ? 0 : from - await allFoldersCountTask, 0);
@@ -1262,8 +1276,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 {
                     throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
                 }
-                string title;
-                var ext = FileUtility.GetFileExtension(sourceFile.Title);
+
                 var sourceTitle = Path.GetFileNameWithoutExtension(sourceFile.Title);
 
                 linkedFile = serviceProvider.GetService<File<T>>();
@@ -1297,7 +1310,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 }
                 var properties = await fileDao.GetProperties(sourceFile.Id);
                 var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
-                title = $"{user.FirstName} {user.LastName} - {sourceFile.Title}";
+                var title = $"{user.FirstName} {user.LastName} - {sourceFile.Title}";
 
                 var resultFolder = await folderDao.GetFolderAsync(properties.FormFilling.ToFolderId);
 
@@ -2267,7 +2280,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
         await foreach(var record in records)
         {
-            aces.Add(new AceWrapper()
+            aces.Add(new AceWrapper
             {
                 Access = FileShare.Read,
                 Id = record.Subject,
@@ -2280,7 +2293,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
         await securityContext.AuthenticateMeWithoutCookieAsync(result.CreateBy);
 
-        var shares = await fileSharingAceHelper.SetAceObjectAsync(aces, result, false, null);
+        await fileSharingAceHelper.SetAceObjectAsync(aces, result, false, null);
 
         if (current == ASC.Core.Configuration.Constants.Guest.ID) 
         {
@@ -2344,7 +2357,7 @@ public class EntryManager(IDaoFactory daoFactory,
                     await fileTracker.RemoveAsync(form.Id);
                     await socketManager.StopEditAsync(form.Id);
                     await filesMessageService.SendAsync(MessageAction.FormCompletelyFilled, form, MessageInitiator.DocsService, user?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
-                    await notifyClient.SendFormFillingEvent(room, form, allRoles.Select(role => role.UserId), NotifyConstants.EventFormWasCompletelyFilled);
+                    await notifyClient.SendFormFillingEvent(room, form, allRoles.Select(role => role.UserId).ToList(), NotifyConstants.EventFormWasCompletelyFilled);
                 }
                 else if (nextRoleUserIds.Any())
                 {
@@ -2378,7 +2391,7 @@ public class EntryManager(IDaoFactory daoFactory,
     {
         if (formRoles == null || !formRoles.Any()) 
         {
-            return (-1, new List<Guid>());
+            return (-1, []);
         }
 
         var allOthersSubmitted = formRoles
@@ -2389,7 +2402,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
         if (!allOthersSubmitted)
         {
-            return (-1, new List<Guid>());
+            return (-1, []);
         }
         var nextSequence = formRoles
             .Where(fr => fr.Sequence > currentRole.Sequence)
@@ -2398,7 +2411,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
         if (nextSequence == 0)
         {
-            return (0, new List<Guid>());
+            return (0, []);
         }
 
         return (nextSequence, formRoles

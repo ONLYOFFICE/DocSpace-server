@@ -360,6 +360,11 @@ internal class ProviderFileDao(
         return await fileDao.IsExistAsync(title, selector.ConvertId(folderId));
     }
 
+    public async Task<bool> IsExistAsync(string title, int category, string folderId)
+    {
+        return await IsExistAsync(title, folderId);
+    }
+
     public async Task<TTo> MoveFileAsync<TTo>(string fileId, TTo toFolderId, bool deleteLinks = false)
     {
         if (toFolderId is int tId)
@@ -490,9 +495,9 @@ internal class ProviderFileDao(
     {
         return AsyncEnumerable.Empty<FormRole>();
     }
-    public Task<(int, IAsyncEnumerable<FormRole>)> GetUserFormRoles(string formId, Guid userId)
+    public Task<(int, List<FormRole>)> GetUserFormRoles(string formId, Guid userId)
     {
-        return Task.FromResult((-1, AsyncEnumerable.Empty<FormRole>()));
+        return Task.FromResult((-1, new List<FormRole>()));
     }
     public IAsyncEnumerable<FormRole> GetUserFormRolesInRoom(string roomId, Guid userId)
     {

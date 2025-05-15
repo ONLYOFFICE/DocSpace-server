@@ -644,7 +644,7 @@ public class CustomerConfigConverter
 
 [Scope(GenericArguments = [typeof(int)])]
 [Scope(GenericArguments = [typeof(string)])]
-public class DocumentConfigConverter<T>(InfoConfigConverter<T> configConverter)
+public class DocumentConfigConverter<T>(InfoConfigConverter<T> configConverter,FileChecker fileChecker)
 {
     public async Task<DocumentConfigDto> Convert(DocumentConfig<T> source, File<T> file)
     {        
@@ -656,7 +656,6 @@ public class DocumentConfigConverter<T>(InfoConfigConverter<T> configConverter)
         var result = new DocumentConfigDto
         {
             FileType = source.GetFileType(file),
-            IsForm = file.IsForm,
             Info = await configConverter.Convert(source.Info, file),
             IsLinkedForMe = source.IsLinkedForMe,
             Key = source.Key,
@@ -668,6 +667,15 @@ public class DocumentConfigConverter<T>(InfoConfigConverter<T> configConverter)
             Url = source.GetUrl(file),
             Options = source.Options
         };
+
+        if (FileUtility.GetFileTypeByExtention(FileUtility.GetFileExtension(file.Title)) == FileType.Pdf && !file.IsForm && (FilterType)file.Category == FilterType.None)
+        {
+            result.IsForm = await fileChecker.IsFormPDFFile(file);
+        }
+        else
+        {
+            result.IsForm = file.IsForm;
+        }
 
         return result;
     }

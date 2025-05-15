@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Web.Studio.Core.TFA;
+
 namespace ASC.Web.Api.Models;
 
 /// <summary>
@@ -220,6 +222,11 @@ public class EmployeeFullDto : EmployeeDto
     /// Specifies if the user has a personal folder or not.
     /// </summary>
     public bool HasPersonalFolder { get; set; }
+
+    /// <summary>
+    /// Indicates whether the user has enabled two-factor authentication (TFA) using an authentication app.
+    /// </summary>
+    public bool? TfaAppEnabled { get; set; }
 }
 [Scope]
 public class EmployeeFullDtoHelper(
@@ -237,6 +244,7 @@ public class EmployeeFullDtoHelper(
         TenantManager tenantManager,
         CoreBaseSettings coreBaseSettings,
         GroupSummaryDtoHelper groupSummaryDtoHelper,
+        TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
         ILogger<EmployeeDtoHelper> logger)
     : EmployeeDtoHelper(httpContext, displayUserSettingsHelper, userPhotoManager, commonLinkUtility, userManager, authContext, logger)
 {
@@ -426,6 +434,11 @@ public class EmployeeFullDtoHelper(
         }
             
         result.RegistrationDate = apiDateTimeHelper.Get(userInfo.CreateDate);
+
+        if (await tfaAppAuthSettingsHelper.GetEnable())
+        {
+            result.TfaAppEnabled = await TfaAppUserSettings.EnableForUserAsync(settingsManager, userInfo.Id);
+        }
 
         return result;
     }

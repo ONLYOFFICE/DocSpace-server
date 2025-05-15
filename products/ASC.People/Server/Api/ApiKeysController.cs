@@ -42,6 +42,7 @@ public class ApiKeysController(
     UserManager userManager,
     MessageService messageService,
     SettingsManager settingsManager,
+    IHttpContextAccessor httpContextAccessor,
     IMapper mapper) : ControllerBase
 {
     /// <summary>
@@ -145,6 +146,28 @@ public class ApiKeysController(
         }
     }
 
+    
+    /// <summary>
+    ///  Returns current user API key info.
+    /// </summary>  
+    /// <short>
+    ///  Get user API key info
+    /// </short>
+    /// <path>api/2.0/keys/@self</path>
+    [Tags("Api keys")]
+    [SwaggerResponse(200, "List of api keys for user", typeof(ApiKeyResponseDto))]
+    [HttpGet("@self")]
+    [Authorize(AuthenticationSchemes = ApiKeyBearerDefaults.AuthenticationScheme)]
+    public async Task<ApiKeyResponseDto> GetApiKey()
+    {
+        var token = httpContextAccessor?.HttpContext?.Request.Headers.Authorization.ToString()["Bearer ".Length..];
+
+        var apiKey = await apiKeyManager.GetApiKeyAsync(token);
+        
+        return mapper.Map<ApiKeyResponseDto>(apiKey);
+    }
+    
+    
     /// <summary>
     ///  Updates an existing API key changing its name, permissions and status.
     /// </summary>  

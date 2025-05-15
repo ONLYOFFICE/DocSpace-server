@@ -54,7 +54,8 @@ public class BackupCode
 }
 
 [Scope]
-public class TfaManager(SettingsManager settingsManager,
+public class TfaManager(
+    SettingsManager settingsManager,
     SecurityContext securityContext,
     CookiesManager cookiesManager,
     SetupInfo setupInfo,
@@ -62,14 +63,16 @@ public class TfaManager(SettingsManager settingsManager,
     InstanceCrypto instanceCrypto,
     MachinePseudoKeys machinePseudoKeys,
     ICache cache,
-    TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper)
+    TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
+    TenantManager tenantManager,
+    CoreSettings coreSettings)
 {
     private static readonly TwoFactorAuthenticator _tfa = new();
     private ICache Cache { get; set; } = cache;
 
     public async Task<SetupCode> GenerateSetupCodeAsync(UserInfo user)
     {
-        return _tfa.GenerateSetupCode(setupInfo.TfaAppSender, user.Email, await GenerateAccessTokenAsync(user), false, 4);
+        return _tfa.GenerateSetupCode(tenantManager.GetCurrentTenant().GetTenantDomain(coreSettings), user.Email, await GenerateAccessTokenAsync(user), false, 4);
     }
 
     public async Task<bool> ValidateAuthCodeAsync(UserInfo user, string code, bool checkBackup = true, bool isEntryPoint = false)

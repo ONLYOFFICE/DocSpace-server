@@ -199,7 +199,6 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
         BruteForceLoginManager bruteForceLoginManager,
-        IHttpContextAccessor httpContextAccessor,
         ExternalLinkHelper externalLinkHelper,
         IMapper mapper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
@@ -330,7 +329,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     [HttpPost("share/{key}/password")]
     public async Task<ExternalShareDto> ApplyExternalSharePasswordAsync(ExternalShareRequestDto inDto)
     {
-        var ip = MessageSettings.GetIP(httpContextAccessor.HttpContext?.Request);
+        var ip = MessageSettings.GetIP(Request);
         
         await bruteForceLoginManager.IncrementAsync(inDto.Key, ip, true, FilesCommonResource.ErrorMessage_SharePasswordManyAttempts);
         
