@@ -1,0 +1,1417 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ActionFileCreated" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; krijuar një dokument të ri: &lt;a href={1}&gt;{2}&lt;/a&gt; në dhomë: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionFileEdited" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; redaktuat dokumentin: &lt;a href={1}&gt;{2}&lt;/a&gt;  në dhomë: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionFileUploaded" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; ngarkuar një dokument të ri: &lt;a href={1}&gt;{2}&lt;/a&gt; në dhomë: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionNewComment" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; shtuar një koment të ri në versionin e dokumentit: &lt;a href={1}&gt;{2}&lt;/a&gt; në dhomë: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionRoomArchived" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; zhvendosur dhoma: &lt;a href={1}&gt;{2}&lt;/a&gt; në arkiv - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionRoomCreated" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; krijuar një dhomë të re: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionRoomRemoved" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; dhoma është fshirë: &lt;b&gt;{1}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionRoomRenamed" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; e riemëruar dhomën: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href={2}&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionRoomUpdateAccessForUser" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; iu caktua roli &lt;b&gt;{1}&lt;/b&gt; në dhomë: &lt;a href={2}&gt;{3}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserAddedToRoom" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; u shtua në dhomë: &lt;a href={1}&gt;{2}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserCreated" xml:space="preserve">
+    <value>Përdoruesi i ri i DocSpace u shtua: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionUserRemovedFromRoom" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; u hoq nga dhoma: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionUsersUpdatedType" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; ndryshoi nivelin e aksesit të përdoruesve &lt;b&gt;{1}&lt;/b&gt; to &lt;b&gt;{2}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionUserUpdated" xml:space="preserve">
+    <value>Përdoruesi i DocSpace u përditësua: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
+  </data>
+  <data name="BestRegardsText" xml:space="preserve">
+    <value>Përshëndetje, Ekipi Mbështetës i ${LetterLogoText}</value>
+  </data>
+  <data name="ButtonAccept" xml:space="preserve">
+    <value>Pranoje</value>
+  </data>
+  <data name="ButtonAccessControlPanel" xml:space="preserve">
+    <value>Paneli i kontrollit të aksesit</value>
+  </data>
+  <data name="ButtonAccessYourPortal" xml:space="preserve">
+    <value>Hyni në portalin tuaj</value>
+  </data>
+  <data name="ButtonAccessYouWebOffice" xml:space="preserve">
+    <value>Hyni në zyrën tuaj të internetit</value>
+  </data>
+  <data name="ButtonActivateEmail" xml:space="preserve">
+    <value>Klikoni këtu për të aktivizuar adresën tuaj të email-it</value>
+  </data>
+  <data name="ButtonChangeEmail" xml:space="preserve">
+    <value>Ndryshoni adresën e email-it</value>
+  </data>
+  <data name="ButtonChangePassword" xml:space="preserve">
+    <value>Ndryshoni fjalëkalimin</value>
+  </data>
+  <data name="ButtonChangePhone" xml:space="preserve">
+    <value>Ndryshoni numrin e telefonit celular</value>
+  </data>
+  <data name="ButtonChangeTfa" xml:space="preserve">
+    <value>Konfiguroni aplikacionin e vërtetuesit</value>
+  </data>
+  <data name="ButtonCollaborate" xml:space="preserve">
+    <value>Bashkëpunoni në DocSpace</value>
+  </data>
+  <data name="ButtonConfigureRightNow" xml:space="preserve">
+    <value>Konfiguroni tani</value>
+  </data>
+  <data name="ButtonConfirm" xml:space="preserve">
+    <value>Konfirmoni</value>
+  </data>
+  <data name="ButtonConfirmInvite" xml:space="preserve">
+    <value>Konfirmoni ftesën për DocSpace</value>
+  </data>
+  <data name="ButtonConfirmRoomInvite" xml:space="preserve">
+    <value>Konfirmoni ftesën në dhomë</value>
+  </data>
+  <data name="ButtonConfirmTermination" xml:space="preserve">
+    <value>Konfirmoni mbylljen e llogarisë</value>
+  </data>
+  <data name="ButtonDeactivatePortal" xml:space="preserve">
+    <value>Çaktivizoni portalin</value>
+  </data>
+  <data name="ButtonDeletePortal" xml:space="preserve">
+    <value>Fshini portalin</value>
+  </data>
+  <data name="ButtonGetFreeApp" xml:space="preserve">
+    <value>Merrni aplikacionin falas</value>
+  </data>
+  <data name="ButtonGetStarted" xml:space="preserve">
+    <value>Filloni</value>
+  </data>
+  <data name="ButtonInviteRightNow" xml:space="preserve">
+    <value>Ftoni tani</value>
+  </data>
+  <data name="ButtonJoin" xml:space="preserve">
+    <value>Klikoni këtu për t’u bashkuar me portalin</value>
+  </data>
+  <data name="ButtonJoinRoom" xml:space="preserve">
+    <value>Bashkohuni në dhomë</value>
+  </data>
+  <data name="ButtonLeaveFeedback" xml:space="preserve">
+    <value>Lërini kontaktet</value>
+  </data>
+  <data name="ButtonPurchaseNow" xml:space="preserve">
+    <value>Proçesoni tani</value>
+  </data>
+  <data name="ButtonRegister" xml:space="preserve">
+    <value>Regjistrohuni</value>
+  </data>
+  <data name="ButtonRemoveProfile" xml:space="preserve">
+    <value>Çaktivizoni llogarinë</value>
+  </data>
+  <data name="ButtonRenewNow" xml:space="preserve">
+    <value>Rinovoni tani</value>
+  </data>
+  <data name="ButtonRequestCallButton" xml:space="preserve">
+    <value>Kërkoni një telefonatë</value>
+  </data>
+  <data name="ButtonSelectPricingPlans" xml:space="preserve">
+    <value>Zgjidhni planet e çmimeve menjëherë</value>
+  </data>
+  <data name="ButtonSetPassword" xml:space="preserve">
+    <value>Vendosni fjalëkalimin</value>
+  </data>
+  <data name="ButtonStartFreeTrial" xml:space="preserve">
+    <value>Filloni provën falas</value>
+  </data>
+  <data name="ButtonUpgrade" xml:space="preserve">
+    <value>Përmirësoni</value>
+  </data>
+  <data name="ButtonUseDiscount" xml:space="preserve">
+    <value>Përdorni zbritjen</value>
+  </data>
+  <data name="ButtonVisitPaymentsSection" xml:space="preserve">
+    <value>Vizitoni seksionin e pagesave</value>
+  </data>
+  <data name="ButtonWatchFullPlaylist" xml:space="preserve">
+    <value>Shikoni listën e plotë të luajtjes</value>
+  </data>
+  <data name="subject_activate_email" xml:space="preserve">
+    <value>${LetterLogoText}. Ju lutemi aktivizoni adresën tuaj të email-it</value>
+  </data>
+  <data name="subject_backup_created" xml:space="preserve">
+    <value>${LetterLogoText}. U krijua një kopje rezervë e portalit ${__VirtualRootHost}</value>
+  </data>
+  <data name="subject_change_email_v115" xml:space="preserve">
+    <value>Konfirmoni ndryshimin e emailit tuaj</value>
+  </data>
+  <data name="subject_change_password" xml:space="preserve">
+    <value>Asistencë për fjalëkalimin ${LetterLogoText}</value>
+  </data>
+  <data name="subject_change_password_v115" xml:space="preserve">
+    <value>Konfirmoni ndryshimin e fjalëkalimit tuaj</value>
+  </data>
+  <data name="subject_change_phone" xml:space="preserve">
+    <value>${LetterLogoText}. Kërkesa për ndryshim të telefonit celular</value>
+  </data>
+  <data name="subject_change_tfa" xml:space="preserve">
+    <value>${LetterLogoText}. Njoftim sigurie</value>
+  </data>
+  <data name="subject_confirm_owner_change" xml:space="preserve">
+    <value>${LetterLogoText}. Ndyshim i pronarit të portalit</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Periudha e hirit për ${LetterLogoText} DocSpace Developer është aktivizuar</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Licensa juaj e ${LetterLogoText} DocSpace Developer do të skadojë së shpejti</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Periudha e hirit për ${LetterLogoText} DocSpace Developer do të skadojë së shpejti</value>
+  </data>
+  <data name="subject_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Licensa juaj ${LetterLogoText} DocSpace Developer nuk ofrohet më</value>
+  </data>
+  <data name="subject_docs_tips" xml:space="preserve">
+    <value>5 këshilla për punë efektive në dokumentet tuaja</value>
+  </data>
+  <data name="subject_enterprise_admin_activation_v1" xml:space="preserve">
+    <value>Mirë se vini në ${LetterLogoText} DocSpace!</value>
+  </data>
+  <data name="subject_enterprise_guest_welcome_v1" xml:space="preserve">
+    <value>Mirë se vini në ${LetterLogoText} DocSpace!</value>
+  </data>
+  <data name="subject_enterprise_user_welcome_v1" xml:space="preserve">
+    <value>Mirë se vini në ${LetterLogoText} DocSpace!</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
+    <value>Mirë se vini në ${LetterLogoText} DocSpace!</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_guest_welcome_v1" xml:space="preserve">
+    <value>Mirë se vini në ${LetterLogoText} DocSpace!</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_user_welcome_v1" xml:space="preserve">
+    <value>Mirë se vini në ${LetterLogoText} DocSpace!</value>
+  </data>
+  <data name="subject_opensource_admin_activation_v1" xml:space="preserve">
+    <value>Mirë se vini në ${LetterLogoText} DocSpace!</value>
+  </data>
+  <data name="subject_opensource_guest_welcome_v1" xml:space="preserve">
+    <value>Mirë se vini në ${LetterLogoText} DocSpace!</value>
+  </data>
+  <data name="subject_opensource_user_welcome_v1" xml:space="preserve">
+    <value>Mirë se vini në ${LetterLogoText} DocSpace!</value>
+  </data>
+  <data name="subject_saas_admin_activation_v1" xml:space="preserve">
+    <value>Mirë se vini në ${LetterLogoText} DocSpace!</value>
+  </data>
+  <data name="subject_saas_guest_welcome_v1" xml:space="preserve">
+    <value>Mirë se vini në ${LetterLogoText} DocSpace!</value>
+  </data>
+  <data name="subject_saas_user_welcome_v1" xml:space="preserve">
+    <value>Mirë se vini në ${LetterLogoText} DocSpace!</value>
+  </data>
+  <data name="subject_zoom_welcome" xml:space="preserve">
+    <value>Mirë se vini në ${LetterLogoText} DocSpace!</value>
+  </data>
+  <data name="subject_enterprise_guest_activation_v10" xml:space="preserve">
+    <value>Bashkohuni me ${__VirtualRootHost}</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
+    <value>Bashkohuni me ${__VirtualRootHost}</value>
+  </data>
+  <data name="subject_opensource_guest_activation_v11" xml:space="preserve">
+    <value>Bashkohuni me ${__VirtualRootHost}</value>
+  </data>
+  <data name="subject_saas_guest_activation_v115" xml:space="preserve">
+    <value>Bashkohuni me ${__VirtualRootHost}</value>
+  </data>
+  <data name="subject_saas_user_activation_v1" xml:space="preserve">
+    <value>Bashkohuni me ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_saas_room_invite" xml:space="preserve">
+    <value>Bashkohuni me ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_saas_docspace_invite" xml:space="preserve">
+    <value>Bashkohuni me ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_enterprise_user_activation_v1" xml:space="preserve">
+    <value>Bashkohuni me ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_user_activation_v1" xml:space="preserve">
+    <value>Bashkohuni me ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_opensource_user_activation_v1" xml:space="preserve">
+    <value>Bashkohuni me ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_enterprise_admin_welcome_v1" xml:space="preserve">
+    <value>Zbuloni abonimin e biznesit të ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_enterprise_whitelabel_admin_welcome_v1" xml:space="preserve">
+    <value>Zbuloni abonimin e biznesit të ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_opensource_admin_welcome_v1" xml:space="preserve">
+    <value>Zbuloni abonimin e biznesit të ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_saas_admin_welcome_v1" xml:space="preserve">
+    <value>Zbuloni abonimin e biznesit të ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Periudha e hirit për ${LetterLogoText} DocSpace Enterprise është aktivizuar</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Licensa juaj e ${LetterLogoText} DocSpace Enterprise do të skadojë së shpejti</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Periudha e hirit për ${LetterLogoText} DocSpace Enterprise do të skadojë së shpejti</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Licensa juaj ${LetterLogoText} DocSpace Enterprise nuk ofrohet më</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
+    <value>Licensa juaj e ${LetterLogoText} DocSpace Enterprise do të skadojë së shpejti</value>
+  </data>
+  <data name="subject_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
+    <value>Licensa juaj ${LetterLogoText} DocSpace Enterprise skadon sot</value>
+  </data>
+  <data name="subject_enterprise_admin_user_apps_tips_v1" xml:space="preserve">
+    <value>Merrni aplikacione falas ${LetterLogoText}</value>
+  </data>
+  <data name="subject_for_admin_notify" xml:space="preserve">
+    <value>Mesazh i përdoruesit për administratorët</value>
+  </data>
+  <data name="subject_for_sales_notify" xml:space="preserve">
+    <value>Kërkesa e departamentit të shitjeve</value>
+  </data>
+  <data name="subject_join" xml:space="preserve">
+    <value>Ftesë për t’u bashkuar me portalin ${__VirtualRootHost}</value>
+  </data>
+  <data name="subject_mailbox_created" xml:space="preserve">
+    <value>${LetterLogoText}. Krijimi i kutisë postare</value>
+  </data>
+  <data name="subject_mailbox_password_changed" xml:space="preserve">
+    <value>${LetterLogoText}. Ndryshimi i fjalëkalimit të kutisë postare</value>
+  </data>
+  <data name="subject_migration_error" xml:space="preserve">
+    <value>${LetterLogoText}. Një tjetër migrim i portalit rajonal filloi</value>
+  </data>
+  <data name="subject_migration_personal_to_docspace" xml:space="preserve">
+    <value>Migrimi i të dhënave në ${LetterLogoText} DocSpace përfundoi me sukses</value>
+  </data>
+  <data name="subject_migration_start" xml:space="preserve">
+    <value>${LetterLogoText}. Një tjetër migrim i portalit rajonal përfundoi me sukses</value>
+  </data>
+  <data name="subject_migration_success" xml:space="preserve">
+    <value>${LetterLogoText}. Një tjetër migrim i portalit rajonal përfundoi me sukses</value>
+  </data>
+  <data name="subject_portal_deactivate" xml:space="preserve">
+    <value>Çaktivizimi i portalit ${__VirtualRootHost } portal</value>
+  </data>
+  <data name="subject_portal_delete" xml:space="preserve">
+    <value>Fshirja e portalit ${__VirtualRootHost}</value>
+  </data>
+  <data name="subject_portal_delete_success_v1" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace është çaktivizuar</value>
+  </data>
+  <data name="subject_portal_rename" xml:space="preserve">
+    <value>${LetterLogoText}. Ndryshimi i adresës së portalit</value>
+  </data>
+  <data name="subject_profile_delete" xml:space="preserve">
+    <value>Çaktivizimi i llogarisë në ${__VirtualRootHost}</value>
+  </data>
+  <data name="subject_profile_has_deleted_itself" xml:space="preserve">
+    <value>Përdoruesi ka fshirë profilin e tij/saj</value>
+  </data>
+  <data name="subject_profile_updated" xml:space="preserve">
+    <value>Profili yt në ${__VirtualRootHost} është ndryshuar</value>
+  </data>
+  <data name="subject_reassigns_completed" xml:space="preserve">
+    <value>${LetterLogoText}. Ricaktimi i të dhënave të përdoruesit ka përfunduar</value>
+  </data>
+  <data name="subject_reassigns_failed" xml:space="preserve">
+    <value>${LetterLogoText}. Ricaktimi i të dhënave të përdoruesit dështoi</value>
+  </data>
+  <data name="subject_remove_user_data_completed" xml:space="preserve">
+    <value>${LetterLogoText}. Heqja e të dhënave të përdoruesit përfundoi</value>
+  </data>
+  <data name="subject_remove_user_data_failed" xml:space="preserve">
+    <value>${LetterLogoText}. Heqja e të dhënave të përdoruesit dështoi</value>
+  </data>
+  <data name="subject_request_license" xml:space="preserve">
+    <value>Kërkesa për licensën të ndërmarrjes</value>
+  </data>
+  <data name="subject_request_tariff" xml:space="preserve">
+    <value>Kërkesë për planin e çmimeve SaaS</value>
+  </data>
+  <data name="subject_restore_completed" xml:space="preserve">
+    <value>${LetterLogoText}. Rivendosja përfundoi</value>
+  </data>
+  <data name="subject_restore_started" xml:space="preserve">
+    <value>${LetterLogoText}. Rivendosja dështoi</value>
+  </data>
+  <data name="subject_rooms_activity" xml:space="preserve">
+    <value>Çfarë ka të re në portalin tuaj ${__VirtualRootHost} për orën e fundit</value>
+  </data>
+  <data name="subject_saas_admin_integrations_v1" xml:space="preserve">
+    <value>Eksploroni integrime të dobishme për ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_saas_admin_modules_v1" xml:space="preserve">
+    <value>Kofiguroni ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace juaj do të fshihet</value>
+  </data>
+  <data name="subject_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace juaj do të fshihet</value>
+  </data>
+  <data name="subject_saas_admin_user_apps_tips_v1" xml:space="preserve">
+    <value>Merrni aplikacione falas ${LetterLogoText}</value>
+  </data>
+  <data name="subject_saas_docspace_registration" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace: regjistrimi i plotë</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Periudha e hirit për ${LetterLogoText} DocSpace tuaj u aktivizua</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Abonimi juaj në ${LetterLogoText} DocSpace është fati të skadojë</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
+    <value>Periudha e hirit për ${LetterLogoText} DocSpace tuaj ka skaduar</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
+    <value>Periudha e hirit për ${LetterLogoText} DocSpace tuaj skadon nesër</value>
+  </data>
+  <data name="subject_saas_room_invite_existing_user" xml:space="preserve">
+    <value>Jeni i ftuar në dhomën e ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="TrulyYoursText" xml:space="preserve">
+    <value>I juaji, ekipi i ${LetterLogoText}</value>
+  </data>
+  <data name="subject_smtp_test" xml:space="preserve">
+    <value>Mesazh testimi SMTP</value>
+  </data>
+  <data name="subject_saas_video_guides_v1" xml:space="preserve">
+    <value>Master ${LetterLogoText} DocSpace me udhëzues video</value>
+  </data>
+  <data name="subject_self_profile_updated" xml:space="preserve">
+    <value>Njoftim për ndryshimin e profilit të portalit ${__VirtualRootHost}</value>
+  </data>
+  <data name="subject_send_whats_new" xml:space="preserve">
+    <value>Çfarë ka të re në portalin tuaj ${__VirtualRootHost} për $Data</value>
+  </data>
+  <data name="subject_set_password" xml:space="preserve">
+    <value>Vendosni një fjalëkalim për ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_storage_decryption_error" xml:space="preserve">
+    <value>${LetterLogoText}. Procesi i deshifrimit dështoi</value>
+  </data>
+  <data name="subject_storage_decryption_start" xml:space="preserve">
+    <value>${LetterLogoText}. Procesi i deshifrimit filloi</value>
+  </data>
+  <data name="subject_storage_decryption_success" xml:space="preserve">
+    <value>${LetterLogoText}. Procesi i deshifrimit përfundoi</value>
+  </data>
+  <data name="subject_storage_encryption_error" xml:space="preserve">
+    <value>${LetterLogoText}. Procesi i enkriptimit dështoi</value>
+  </data>
+  <data name="subject_storage_encryption_start" xml:space="preserve">
+    <value>${LetterLogoText}. Procesi i enkriptimit filloi</value>
+  </data>
+  <data name="subject_storage_encryption_success" xml:space="preserve">
+    <value>${LetterLogoText}. Procesi i enkriptimit përfundoi</value>
+  </data>
+  <data name="subject_user_has_join" xml:space="preserve">
+    <value>Përdorues i ri u shtua në portal ${LetterLogoText}</value>
+  </data>
+  <data name="subject_user_ldap_activation" xml:space="preserve">
+    <value>Jeni ftuar të bashkoheni në ${__VirtualRootHost}</value>
+  </data>
+  <data name="pattern_activate_email" xml:space="preserve">
+    <value>h1.Aktivizoni email-it tuaj për portalin "${__VirtualRootPath}":"$InviteLink".
+
+Përshëndetje!
+
+Për të filluar pjesëmarrjen në jetën e portalit "${__VirtualRootPath}":"$InviteLink" duhet të aktivizoni adresën tuaj të email-it. Kjo është bërë për arsye sigurie.
+
+$OrangeButton
+
+Kjo lidhje është e vlefshme vetëm për 7 ditë. Ju lutemi plotësoni aktivizimin tuaj të email-it asaj periudhe.</value>
+  </data>
+  <data name="pattern_backup_created" xml:space="preserve">
+    <value>modeli_backup_i krijuar
+
+h1. Krijohet një kopje rezervë e portalit "${__VirtualRootPath}":"${__VirtualRootPath}"
+
+I/E dashur $OwnerName,
+
+Është krijuar një skedar rezervë që përmban të dhëna nga portali juaj "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+"Rezervimi i të dhënave":"$URL1" udhëzues.
+
+Nëse keni ndonjë pzetje ose keni nevojë për ndihmë, ju lutemi mos ngurroni të na kontaktoni në "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_backup_created_tg" xml:space="preserve">
+    <value>Është krijuar një kopje rezervë e portalit [${__VirtualRootPath}](${__VirtualRootPath})
+
+I/ E dashur $OwnerName,
+
+Është krijuar një skedar rezervë që përmban të dhëna nga portali juaj [${__VirtualRootPath}](${__VirtualRootPath}).
+
+Për të mësuar më shumë mbi procedurën e kopjimit, ju lutem referojuni udhëzuesit tonë të përdoruesit [Rezervimi i të dhënave](${URL1}).
+
+Nëse keni ndonjë pyetje ose keni  nevojë për ndihmë, mos ngurroni të na kontaktoni në [${__SupportLink}](${__SupportLink})
+
+Gjithë të mirat,
+Ekipi suportit i ${LetterLogoText}
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
+  <data name="pattern_change_email_v115" xml:space="preserve">
+    <value>Dëshironi të ndryshoni emailin në llogarinë tuaj ${LetterLogoText}?
+
+Klikoni butonin më poshtë dhe hyni* në renë tuaj.
+
+$OrangeButton
+
+Lidhja ëshë e vlefshme për 7 ditë.
+
+*Nëse nuk jeni identifikuar në ${LetterLogoText} në këtë shfletues, do të ju duhet të përdorni email-in tuaj të vjetës për konfirmim. Nëse nuk e mbani mend, kontaktoni administratorin e portalit tuaj.
+
+Nuk dëshironi të ndryshoni email-in tuaj? Thjesht injorojeni këtë mesazh.</value>
+  </data>
+  <data name="pattern_change_password_v115" xml:space="preserve">
+    <value>Dëshironi të ndryshoni fjalëkalimin në llogarinë tuaj ${LetterLogoText}? Klikoni butonin më poshtë për të konfirmuar.
+
+$OrangeButton
+
+Lidhja është e vlefshme për 7 ditë.
+
+Nuk dëshironi të ndryshoni fjalëkalimin tuaj? Thjesht injorojeni këtë mesazh</value>
+  </data>
+  <data name="pattern_change_phone" xml:space="preserve">
+    <value>h1.Kërkesë për ndryshim të celularit
+
+Ju keni kërkuar të ndryshoni telefonin tuaj të përdorur për të hyrë në portalin ${LetterLogoText} portal.
+
+Ju lutemi ndiqni lidhjen e mëposhtme për të ndryshuar telefonin tuaj. 
+
+$OrangeButton
+
+Nëse nuk dëshironi të ndryshoni telefonin tuaj celular ose e keni marrë gabimisht këtë email, ju lutem injorojeni atë ose kontaktoni administratorin e portalit tuaj për të mësuar detajet.</value>
+  </data>
+  <data name="pattern_change_tfa" xml:space="preserve">
+    <value>h1.Njoftim sigurie
+
+Konfigurimi i aplikacionit të vërtetuesit që përdorni për të hyrë në portalin ${LetterLogoText} është rivendosur.
+
+Ju lutemi, klikoni butonin më poshtë për të shkuar në faqen e hyrjes së portalit dhe për të konfigururar aplikacionin e vërtetuesit:
+
+$OrangeButton</value>
+  </data>
+  <data name="pattern_confirm_owner_change" xml:space="preserve">
+    <value>h1.Ndyshimi i pronarit të portalit "${__VirtualRootPath}":"${__VirtualRootPath}"
+
+I/E dashur $OwnerName,
+
+Ka pasur një kërkesë për të ndryshuar pronarin e portalit "${__VirtualRootPath}":"${__VirtualRootPath}" në $UserName.
+
+Ju lutemi ndiqni lidhjen e mëposhtme për të konfirmuar operacionin:
+
+$OrangeButton
+
+*Shënim*: kjo lidhje është e vlefshme vetëm për 7 ditë. Ju lutemi, plotësoni procesin e ndryshimit të pronarit të portalit brenda asaj periudhe.</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Përshëndetje, $UserName!
+
+Licensa juaj për ${LetterLogoText} DocSpace Developer skadon sot.
+
+Ne kemi aktivizuar një periudhe mospagimi prej $PaymentDelay. Gjatë kësaj kohe, aksesi në redaktimin e dokumenteve është e kufizuar në 20 lidhje të njëkohshme (mbështetja dhe përditësimet nuk ofrohen më).
+
+Për të përditësuar licensën, ju lutemi kontaktoni drejtpërdrejt menaxherin tuaj të dedikuar të shitjeve ose na kontaktoni nëpërmjet "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+Për pyetje mbi pagesën, kontaktoni në "${__SalesEmail}":"mailto:${__SalesEmail}". Për zgjidhjen e çdo problemi teknik, përdorni "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Përshëndetje, $UserName!
+
+Licensa juaj për ${LetterLogoText} DocSpace Developer do të skadojë për 7 ditë.
+
+Për të përditësuar licensën, ju lutemi kontaktoni drejtpërdrejt menaxherin tuaj të dedikuar të shitjeve ose na kontaktoni nëpërmjet "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+Për pyetje mbi pagesën, na kontaktoni në "${__SalesEmail}":"mailto:${__SalesEmail}". Për zgjidhjen e çdo problemi teknik, përdorni "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Përshëndetje, $UserName!
+
+Periudha e hirit për licensën tuaj të zhvilluesit ${LetterLogoText} DocSpace do të skadojë për 7 ditë. Do të thotë që DocSpace do të bëhet i padisponueshëm.
+
+Për të përditësuar licensën, ju lutem kontaktoni drejtpërdrejt menaxherin tuaj të dedikuar të shitjeve ose na kontaktoni nëpërmjet "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+Për pyetje mbi pagesën, na kontaktoni në "${__SalesEmail}":"mailto:${__SalesEmail}". Për zgjidhjen e çdo problemi teknik, përdorni "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Përshëndetje, $UserName!
+
+Periudha e hirit pë licensën tuaj të zhvilluesit ${LetterLogoText} DocSpace skadon sot. Do të thotë që DocSpace nuk do të jetë më i disponueshëm.
+
+Për të përditësuar licencën, ju lutemi kontaktoni drejtpërdrejt menaxherin tuaj të dedikuar të shitjeve ose na kontaktoni nëpërmjet "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+Për pyetje mbi pagesën, na kontaktoni në "${__SalesEmail}":"mailto:${__SalesEmail}". Për zgjidhjen e çdo problemi teknik, përdorni "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Përshëndetje, $UserName!
+
+Licensa juaj për ${LetterLogoText} DocSpace Enterprise skadon sot.
+
+Ne kemi aktivizuar *një periudhë mospagimi prej $VonesëPagese ditë* për ty. Gjatë kësaj kohe, aksesi në DocSpace ofrohet për 3 përdorues me emër* (mbështetja dhe përditësimet nuk ofrohen më).
+
+Për të qenë në gjendje të përdorni të gjitha veçoritë e disponueshme në momentin e blerjes për një *periudhë kohe të pakufizuar*, ne ju rekomandojmë *të merrni një licensë për gjithë jetën* për ${LetterLogoText} DocSpace Enterprise (me 3 vjet mbështetje dhe pëditësime të përfshira):
+
+$OrangeButton
+
+
+Jeni gjithashtu të mirëpritur të kontaktoni direkt menaxherin tuaj të dedikuar të shitjeve për përditësimin e licensës.
+
+Për pyetje mbi pagesë, na kontaktoni në "${__SalesEmail}":"mailto:${__SalesEmail}". Për zgjidhjen e çdo problemi teknik, përdorni "${__SupportLink}":"${__SupportLink}".
+
+*ID-të e regjistruara të 3 përdoruesve të parë që do të hapni çdo skedar për redaktim. Numri i dokumenteve që mund të modifikohen në të njëjtën kohë nuk është i kufizuar. Përdoruesit e tjerë do të mund të hapin dokumente vetëm për shikim.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Përshëndetje, $UserName!
+
+Licensa juaj për ${LetterLogoText} DocsSpace Enterprise do të skadojë për 7 ditë.
+
+Për të qenë në gjendje të përdorni të gjitha veçoritë e disponueshme në momentin e blerjes për një *periudhë kohe të pakufizuar*, ju rekomandojmë *të merrni një licensë për gjithë jetën* për ${LetterLogoText} DocSpace Enterprise (me 3 vjet mbështetje dhe përditësime të përfshira).
+
+$OrangeButton
+
+Jeni gjithashtu të mirëpritur të kontaktoni direkt menaxherin tuaj të dedikuar të shitjeve për përditësimin e licensës.
+
+Për pyetje mbi pagesën, na kontakoni në "${__SalesEmail}":"mailto:${__SalesEmail}". Për zgjidhjen e çdo problemi teknik, përdorni "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
+    <value>Përshëndetje, $UserName!
+
+Periudha e hirit për licensën tuaj ${LetterLogoText} DocSpace Enterprise do të skadojë për 7 ditë. Do të thotë që DocSpace do të bëhet i padisponueshëm.
+
+Për të qenë në gjendje të përdorni të gjitha veçoritë e disponueshme në momentin e blerjes për një *periudhë kohe të pakufizuar*, ju rekomandojmë *të merrni një licensë përgjithmonë* për ${LetterLogoText} DocSpace Enterprise (me 3 vjet mbështetje dhe përditësime të perfshira):
+
+$OrangeButton
+
+Jeni gjithashtu të mirëpritur të kontaktoni direkt menaxherin tuaj të dedikuar të shitjeve për përditësimin e licensës.
+
+Për pyetje mbi pagesën, na kontakoni në "${__SalesEmail}":"mailto:${__SalesEmail}". Për zgjidhjen e çdo problemi teknik, përdorni "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_grace_period_expiration" xml:space="preserve">
+    <value>Përshëndetje, $UserName!
+
+Periudha e hirit për licensën tuaj ${LetterLogoText} DocSpace Enterprise skadon sot. Do të thotë që DocSpace nuk do të jetë më i disponueshëm.
+
+Për të qenë në gjendje të përdorni të gjitha veçoritë e disponueshme në momentin e blerjes për një *periudhë kohe të pakufizuar*, ju rekomandojmë *të merrni një licensë për gjithë jetën * për ${LetterLogoText} DocSpace Enterprise (me 3 vjet mbështetje dhe përditësime të përfshira):
+
+$OrangeButton
+
+Ju jeni gjithashtu të mirëpritur të ontaktoni direkt menaxherin tuaj të dedikuar të shitjeve për përditësimin e licensës. 
+
+Për pyetje mbi pagesën, na kontaktoni në  "${__SalesEmail}":"mailto:${__SalesEmail}". Për zgjidhjen e çdo problemi teknik, përdorni "${__SupportLink}":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_lifetime_before_expiration" xml:space="preserve">
+    <value>Përshëndetje, $UserName!
+
+Licensa juaj për ${LetterLogoText} DocSpace Enterprise do të skadojë për 7 ditë. Do të thotë që përditësimet dhe mbështetja nuk do të jenë më të disponueshme.*
+
+Për të përditësuar licensën, ju lutem kontaktoni dretpërdrejt menaxherin tuaj të dedikuar të shitjeve ose na kontaktoni nëpërmjet "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+Për pyetje mbi pagesën, na kontaktoni në "${__SalesEmail}":"mailto:${__SalesEmail}". Për zgjidhjen e çdo problemi teknik, përdorni "${__SupportLink}":"${__SupportLink}".
+
+*Mund të përdorni të gjitha veçoritë e disponueshme në momentin e blerjes së licensës për një periudhë të pakufizuar kohe.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_admin_payment_warning_lifetime_expiration" xml:space="preserve">
+    <value>Përshëndetje, $UserName!
+
+Licensa juaj për ${LetterLogoText} DocSpace Enterprise skadon sot. Do të thotë që përditësimet dhe mbështetja nuk janë më të disponueshme.*
+
+Për të përditësuar licensën, ju lutemi kontaktoni drejtpërdrejt menaxherin tuaj të dedikuar të shitjeve ose na kontaktoni nëpërmjet "${__SalesEmail}":"mailto:${__SalesEmail}".
+
+Për pyetje mbi pagesën, na kontaktoni në "${__SalesEmail}":"mailto:${__SalesEmail}". Për zgjidhjen e çdo problemi teknik, përdorni "${__SupportLink}":"${__SupportLink}".
+
+*Mund të përdorni të gjitha veçoritë e disponueshme në momentin e blerjes së licensës për një periudhë të pakufizuar kohe.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
+    <value>h1. Bashkohunë &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace
+
+
+Përshëndetje, $UserName!
+
+Ju jeni ftuar të bashkoheni në "${__VirtualRootPath}":"${__VirtualRootPath}" si përdorues i futas. Pranojeni ftesën duke klikuar linkun:
+
+$OrangeButton
+
+Lidhja është e vlefshme vetëm për 7 ditë.
+
+Do të merrni më shumë këshilla se si të përdorni zyrën tuaj të internetit. Ju mund që t’i anuloni abonimet nñ faqen tuaj tñ profilit në çdo moment si dhe të i riaktivizoni ato.</value>
+  </data>
+  <data name="pattern_enterprise_whitelabel_guest_activation_v10" xml:space="preserve">
+    <value>h1. Bashkohuni me &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace
+
+
+Përshëndetje, $UserName!
+
+$__AuthorName ju ka futar si përdorues mysafir në "${__VirtualRootPath}":"${__VirtualRootPath}". Pranojeni ftesën duke klikuar lidhjen:
+
+$OrangeButton
+
+Lidhja është e vlefshme vetëm për 7 ditë.
+
+Do të merrni më shumë këshilla se si të përdorni zyrën tuaj të internetit. Ju mund që t’i anuloni abonimet në faqen tuaj të profilit në çdo moment si dhe të i riaktivizoni ato.</value>
+  </data>
+  <data name="pattern_for_admin_notify" xml:space="preserve">
+    <value>h1.Mesazhi nga portali "${__VirtualRootPath}":"${__VirtualRootPath}" portal
+
+Email: $UserEmail
+
+$Body</value>
+  </data>
+  <data name="pattern_for_admin_notify_tg" xml:space="preserve">
+    <value>Mesazhu nga portal [${__VirtualRootPath}](${__VirtualRootPath}) portal
+
+Email: $UserEmail
+
+$Body</value>
+  </data>
+  <data name="pattern_for_sales_notify" xml:space="preserve">
+    <value>h1.Mesazhi nga portal "${__VirtualRootPath}":"${__VirtualRootPath}" 
+
+Emri: $UserName
+
+Email: $UserEmail
+
+$Body</value>
+  </data>
+  <data name="pattern_join" xml:space="preserve">
+    <value>h1.Ftesë për t’u bashkuar me portalin "${__VirtualRootPath}":"$InviteLink" portal
+
+Përshëndetje,
+
+Ju keni kërkuar të bashkoheni me portalin"${__VirtualRootPath}":"$InviteLink" në ${LetterLogoText} – një platformë për menaxhimin e dokumenteve dhe projekteve. Bashkohuni me portalin dhe filloni menjëherë bashkëpunimin me kolegët ose miqtë tuaj.
+
+Për të pranuar ftesën, ju lutem shkruani emrin dhe fjalëkalimin tuaj duke ndjekur këtë lidhje:
+
+$OrangeButton
+
+*Shënim*: kjo lidhje është e vlefshme vetëm për 48 orë. Ju lutemi, përfundoni operacionin brenda asaj kohe.</value>
+  </data>
+  <data name="pattern_mailbox_created" xml:space="preserve">
+    <value>I/E dashur $UserName,
+
+      Administratori ka krijuar një kuti postare të re&lt;b&gt;$Address&lt;/b&gt; për ju në portalin"${__VirtualRootPath}":"${__VirtualRootPath}".
+
+      Përdorni cilësimet e mëposhtme për klientët e tjerë të postës elektronike:
+      Identifikohuni: &lt;b&gt;$Login&lt;/b&gt;
+      Fjalëkalimi: "&lt;b&gt;vendosni fjalëkalimin&lt;/b&gt;":"$MyStaffLink"
+
+      Posta hyrëse (IMAP): 
+      Serveri: &lt;b&gt;$Server&lt;/b&gt;
+      Porta: &lt;b&gt;$ImapPort&lt;/b&gt;
+      SSL/TLS: &lt;b&gt;$Encryption&lt;/b&gt;
+
+      Posta dalëse (SMTP): 
+      Serveri: &lt;b&gt;$Server&lt;/b&gt;
+      Porta: &lt;b&gt;$SmtpPort&lt;/b&gt;
+      SSL/TLS: &lt;b&gt;$Encryption&lt;/b&gt;
+      Requires Authentication: &lt;b&gt;Yes&lt;/b&gt;
+
+      Nëse keni marrë gabimisht këtë email, ju lutem shpërfilleni ose kontaktoni administratorin e portalit tuaj për të mësuar detajet.</value>
+  </data>
+  <data name="pattern_mailbox_password_changed" xml:space="preserve">
+    <value>I/E dashur $UserName,
+
+      Fjalëkalimi për kutinë postare &lt;b&gt;$Address&lt;/b&gt; është ndryshuar.
+
+      Nëse e keni marrë gabimisht këtë email, ju lutem shpërfilleni ose kontaktoni administratorin e portalit tuaj për të mësuar detajet.</value>
+  </data>
+  <data name="pattern_mailbox_without_settings_created" xml:space="preserve">
+    <value>I/E dashur $UserName,
+
+      Administratori ka krijuar një kuti postare të re&lt;b&gt;$Address&lt;/b&gt; për ju në portalin "${__VirtualRootPath}":"${__VirtualRootPath}" portal.
+
+      Nëse e keni marrë gabimisht këtë email, ju lutem injorojeni ose kontaktoni administratorin e portalit tuaj për të mësuar detajet.</value>
+  </data>
+  <data name="pattern_migration_error" xml:space="preserve">
+    <value>h1.Një gabim tjetër i migrimit të portalit të rajonit
+
+Ka ndodhur një gabim gjatë migrimit në rajonin $RegionName. Ju lutem, provoni dhe një herë më vonë.
+Portali juaj është tani në dispozicion në adresën e vjetër "$PortalUrl":"$PortalUrl"
+
+Nëse keni ndonjë pyetje ose keni nevojë për ndihmë, ju lutem mos nguroni të na kontaktoni në "${__SalesEmail}":"mailto:${__SalesEmail}"
+
+$TrulyYours
+
+^Për të ndryshuar llojin e njoftimit, ju lutem menaxhoni "cilësimet e abonimit":"$RecipientSubscriptionConfigURL".^</value>
+  </data>
+  <data name="pattern_migration_personal_to_docspace" xml:space="preserve">
+    <value>Përshëndetje!
+
+Procesi i migrimit të të dhënave nga ${LetterLogoText} Personal në ${LetterLogoText} DocSpace tuaj të ri is përfundoi me sukses.
+
+Për të hyrë në DocSpace me të dhënat e importuara, thjesht klikoni butonin më poshtë:
+
+$OrangeButton
+
+Plani yt aktual i DocSpace është STARTUP. Është absolutisht falas
+
+==Nëse është e nevojshme, mund të ndryshoni emrin e DocSpace tuaj të ri. Thjesht kaloni të Cilësimet -&gt; Personalizimet-&gt; Riemërtimi i DocSpace.==
+
+Shijoni një mënyrë të re të bashkëpunimit të dokumenteve!
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_migration_server_failure" xml:space="preserve">
+    <value>h1.Një gabim tjetër i migrimit të portalit të rajonit
+
+Ka ndodhur një gabim gjatë migrimit në një rajon tjetër. Ju lutemi, provoni edhe një herë më vonë.
+Portali juaj është tani të dispozicion në adresën e vjetër "$PortalUrl":"$PortalUrl"
+
+Nëse keni ndonjë pyetje ose keni nevojë për ndihmë, ju lutem mos nguroni të na kontaktoni në "${__SalesEmail}":"mailto:${__SalesEmail}"
+
+$TrulyYours
+
+^Për të ndryshuar llojin e njoftimit, ju lutemi menaxhoni "cilësimet e abonimit":"$RecipientSubscriptionConfigURL".^</value>
+  </data>
+  <data name="pattern_migration_start" xml:space="preserve">
+    <value>h1.Filloi migrimi i portalit të një rajoni tjetër
+
+Ka filluar migrimi i portalit në rajonin $RegionName. Mund të marrë pak kohë në varësi të sasisë së të dhënave tuaja.
+
+*Shënim*: portali nuk do të jetë i disponueshëm gjatë procesit të migrimit. Pas përfundimit të migrimit, URL-ja e portalit do të ndryshohet dhe të gjitha lidhjet e dokumenteve të përbashkëta do të jenë të paarritshme.
+
+Nëse keni ndonjë pyetje ose keni nevojë për  ndihmë, ju lutem mos nguroni të na kontaktoni në "${__SalesEmail}":"mailto:${__SalesEmail}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_migration_success_v115" xml:space="preserve">
+    <value>h1.Migrimi i portalit
+h1."$PortalUrl":"$PortalUrl"
+
+Portali juaj është migruar në një domen të ri. Ju lutem rivendosni aksesin tuaj në portal duke specifikuar fjalëkalimin që do të përdoret për të identifikuar.
+
+Ju lutem ndiqni lidhjen më poshtë për të vendosur fjalëkalimin tuaj për llogarinë:
+
+$OrangeButton
+
+*Shënim*: kjo lidhje është e vlefshme vetëm për 7 ditë. Përdundoni procesin e rivendosjes së aksesit brenda asaj periudhe.
+
+Nëse e keni marrë gabimisht këtë email, ju lutemi shpërfilleni ose kontaktoni administratorin e portalit tuaj "$PortalUrl":"$PortalUrl" për të mësuar detajet.</value>
+  </data>
+  <data name="pattern_opensource_guest_activation_v11" xml:space="preserve">
+    <value>h1. Bashkohuni me &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace
+
+
+Përshëndetje!
+
+Jeni të ftuar të bashkoheni në "${__VirtualRootPath}":"${__VirtualRootPath}" si përdorues i ftuar. Pranojeni ftesën duke klikuar lidhjen:
+
+"$ActivateUrl":"$ActivateUrl"
+
+Lidhja është e vlefshme vetëm për 7 ditë.
+
+Do të merrni më shumë këshilla se si të përdorni zyrën tuaj të internetit. Ju mund të i anuloni abonimet në faqen tuaj të profilit në çdo moment si dhe të i riaktivizoni ato.</value>
+  </data>
+  <data name="pattern_portal_deactivate" xml:space="preserve">
+    <value>h1.Çaktivizimi i portalit "${__VirtualRootPath}":"${__VirtualRootPath}" 
+
+I dashur $OwnerName,
+
+Ju keni kërkuar një çaktivizim të përkohshëm të portalit tuaj "${__VirtualRootPath}":"${__VirtualRootPath}". Ju lutem ndiqni lidhjen e mëposhtme për të konfirmuar operacionin:
+
+$OrangeButton
+
+*Shënim*: kjo lidhje është e vlefshme vetëm për 7 ditë. Përfundoni procesin e çaktivizimit të portalit brenda asaj periudhe.
+
+Ju mund ta riaktivizoni portalin tuaj në çdo kohë duke klikuar lidhjen e mëposhtme:
+p=. "Riaktivizoni Portalin":"$ActivateUrl" (kjo lidhje nuk ka kufi kohor)
+
+Nëse keni ndonjë pyetje ose keni nevojë për ndihmë, ju lutem mos ngurroni të na kontaktoni në "${__SalesEmail}":"mailto:${__SalesEmail}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_delete" xml:space="preserve">
+    <value>h1.Fshirja e hapësirës "${__VirtualRootPath}":"${__VirtualRootPath}" 
+
+I/E dashur $OwnerName,
+
+Ju keni kërkuar të fshini përgjithmonë hapësirën tuaj"${__VirtualRootPath}":"${__VirtualRootPath}".
+
+*E rëndësishme! Të gjitha të dhënat e ruajtura në hapësirën tuaj, si dhe të dhënat tuaja të regjistrimit do të humbasin dhe nuk mund të rikuperohen.*
+
+#if($AutoRenew == "True")
+Përpara se të fshini hapësirën, sigurohuni që faturimi automatik është çaktivizuar. Ju mund të kontrolloni statusin e faturimit automatik në llogarinë tuaj Stripe.
+#end
+
+Në qoftë se ende dëshironi të fshini hapësirën tuaj"${__VirtualRootPath}":"${__VirtualRootPath}", ju lutem ndiqni lidhjen më poshtë për të konfirmuar operacionin:
+
+$OrangeButton
+
+*Shënim*: kjo lidhje është e vlefshme vetëm për 7 ditë. Përfundoni procesin e fshirjes së portalit brenda asaj periudhe.
+
+Në qoftë se keni ndonjë pyetje ose keni nevojë për ndihmë, ju lutem mos ngurroni të na kontaktoni në "${__SalesEmail}":"mailto:${__SalesEmail}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_deactivate_tg" xml:space="preserve">
+    <value>Çaktivizimi i portalit [${__VirtualRootPath}](${__VirtualRootPath}) portal
+
+I dashur $OwnerName,
+
+Ju keni kërkuar një çaktivizim të përkohshëm të portalit tuaj [${__VirtualRootPath}](${__VirtualRootPath}). Ju lutemi ndiqni lidhjen e mëposhtme për të konfirmuar operacionin:
+
+$OrangeButton
+
+_Shënim_: kjo lidhje është e vlefshme vetëm për 7 ditë. Përfundoni procesin e çaktivizimit të portalit brenda asaj periudhe.
+
+Ju mund ta riaktivizoni portalin tuaj në çdo kohë duke klikuar lidhjen e mëposhtme:
+[Reaktivizoni Portalin]($ActivateUrl) (kjo lidhje nuk ka kufi kohor)
+
+Nëse keni ndonjë pyetje ose keni nevojë për ndihmë, ju lutem mos ngurroni të na kontaktoni në [${__SalesEmail}](mailto:${__SalesEmail})
+
+Gjithë të mirat,
+Ekipi suportit i ${LetterLogoText}
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
+  <data name="pattern_portal_delete_tg" xml:space="preserve">
+    <value>Fshirja e portalit [${__VirtualRootPath}](${__VirtualRootPath})
+
+I/E dashur $OwnerName,
+
+Ju keni kërkuar të fshini përgjithmonë [${__VirtualRootPath}](${__VirtualRootPath}).
+
+_E rëndësishme! Të gjitha të dhënat e ruajtura në portalin tuaj, si dhe të dhënat tuaja të regjistrimit do të humbasin dhe nuk mund të rikuperohen._
+
+#if($AutoRenew == "True")
+Përpara se të fshini portalin, ju lutem sigurohuni që faturimi automatik është çaktivizuar. Mund të kontrolloni statusin e faturimit autimatik në llogarinë tuaj Stripe.
+#end
+
+Në qoftë se dëshironi të fshini portalin tuaj [${__VirtualRootPath}](${__VirtualRootPath}) ndiqni lidhjen më poshtë për të konfirmuar operacionin:
+
+$OrangeButton
+
+_Shënim_: kjo lidhje është e vlefshme vetëm për 7 ditë. Përfundoni procesin e fshirjes së portalit brenda asaj periudhe.
+
+Në qoftë se keni ndonjë pyetje ose keni nevojë për ndihmë, ju lutem mos ngurroni të na kontaktoni në [${__SalesEmail}](mailto:${__SalesEmail})
+
+Gjithë të mirat,
+Ekipi suportit i ${LetterLogoText}
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
+  <data name="pattern_portal_rename" xml:space="preserve">
+    <value>h1.Ndryshimi i adresës së portalit
+
+I/E dashur $UserDisplayName,
+
+Adresa juaj e portalit $PortalUrl u ndryshua në adresën e re "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+*Shënim*: Cilësimet e DNS dhe opsionet e hyrjes së vetme ndalojnë së punuari derisa të i ndryshoni ato.</value>
+  </data>
+  <data name="pattern_profile_delete" xml:space="preserve">
+    <value>h1.Çaktivizimi i llogarisë në "${__VirtualRootPath}":"${__VirtualRootPath}"
+
+Ju keni kërkuar të çaktivizoni llogarinë tuaj në DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+Nëse ende dëshironi të çaktivizoni llogarinë tuaj, ju lutem ndiqni lidhjen e mëposhtme për të konfirmuar operacionin:
+
+$OrangeButton
+
+*Shënim*: kjo lidhje është e vlefshme vetëm për 7 ditë. Ju lutem, plotësoni procesin e çaktivizimit të llogarisë brenda asaj periudhe.</value>
+  </data>
+  <data name="pattern_profile_has_deleted_itself" xml:space="preserve">
+    <value>Përdoruesi "$FromUserName":"$FromUserLink" ka fshirë profilin e tij/saj, dhe ky profil tani është i bllokuar. Të gjitha skedarët e përdoruesit i janë caktuar ende atij/asaj dhe zënë hapësirë në disk. 
+
+Ju mund të i ricaktoni dokumentet e përdoruesit të ndara me të tjerët te një përdorues tjetër aktiv, ose të i hiqni ato për të liruar hapësirën e diskut të portalit.
+
+Ju lutem shkoni te profili i përdoruesit duke përdorur "këtë lidhje":"$FromUserLink" për t'ia ricaktuar dokumentet një përdoruesi tjetër ose për të hequr të dhënat.</value>
+  </data>
+  <data name="pattern_profile_updated" xml:space="preserve">
+    <value>h1.Profili yt në "$__VirtualRootPath":"$__VirtualRootPath" është ndryshuar
+
+I/E dashur $UserName,
+
+Të dhënat e profilit tuaj të përdoruesit në "$__VirtualRootPath":"$__VirtualRootPath" janë ndryshuar nga "$__AuthorName":"$__AuthorUrl".
+
+Për të parë profilin tuaj ndiqni lidhjen e mëposhtme:
+"$UserName":"$MyStaffLink"</value>
+  </data>
+  <data name="pattern_profile_updated_tg" xml:space="preserve">
+    <value>Profili yt në [${__VirtualRootPath}](${__VirtualRootPath}) është ndryshuar
+
+I/E dashur $UserName,
+
+Detajet e profilit tuaj të përdoruesit në [${__VirtualRootPath}](${__VirtualRootPath}) janë ndryshuar nga [$__AuthorName]($__AuthorUrl).
+
+Për të parë profilin tuaj ndiqni lidhjen e mëposhtme:
+[$UserName]($MyStaffLink)</value>
+  </data>
+  <data name="pattern_reassigns_completed" xml:space="preserve">
+    <value>I/E dashur $UserName,
+
+Procesi i ricaktimit të të dhënave nga përdoruesi "$FromUserName":"$FromUserLink" te përdoruesit "$ToUserName":"$ToUserLink"është përfunduar me sukses.</value>
+  </data>
+  <data name="pattern_reassigns_failed" xml:space="preserve">
+    <value>I/E dashur $UserName,
+
+Procesi i ricaktimit të të dhënave nga përdoruesi "$FromUserName":"$FromUserLink" te përdoruesit "$ToUserName":"$ToUserLink"dështoi.
+
+Mesazh përjashtimi: $Message</value>
+  </data>
+  <data name="pattern_remove_user_data_completed" xml:space="preserve">
+    <value>I/E dashur $UserName,
+
+Procesi i heqjes së të dhënave nga përdoruesit "$FromUserName":"$FromUserLink" ka përfunduar me sukses.
+
+Fshirja e të dhënave personale lejohet të çlirojë $DocsSpace</value>
+  </data>
+  <data name="pattern_remove_user_data_failed" xml:space="preserve">
+    <value>I/E dashur $UserName,
+
+Procesi i heqjes së të dhënave për përdoruesin "$FromUserName":"$FromUserLink" dështoi.
+
+Mesazh përjashtimi: $Message</value>
+  </data>
+  <data name="pattern_request_license" xml:space="preserve">
+    <value>h1.Kërkesë për licensë të ndërmarrjes
+
+h3.Emri
+$UserName
+
+h3.Mbiemri
+$UserLastName
+
+h3.Pozicioni
+$Position
+
+h3.Email-i
+"$UserEmail":"mailto:$UserEmail"
+
+
+h3.Telefoni
+$Phone
+
+h3.Faqja e internetiti e kompanisë
+$Website
+
+h3.Emri Kompanisë
+$CompanyTitle
+
+h3.Madhësia e Kompanisë
+$CompanySize
+
+h3.Përmbajtja Kërkesës
+$Body
+
+h3.Adresa Portalit
+"${__VirtualRootPath}":"${__VirtualRootPath}"</value>
+  </data>
+  <data name="pattern_request_tariff1" xml:space="preserve">
+    <value>h1.Kërkesë për Tarifën SAAS për "${__VirtualRootPath}":"${__VirtualRootPath}"
+
+h3.Emri
+$UserName
+
+h3.Mbiemri
+$UserLastName
+
+h3.Pozicioni
+$Position
+
+h3.Email-i
+"$UserEmail":"mailto:$UserEmail"
+
+h3.Telefoni
+$Phone
+
+h3.Faqja e internetit e kompanisë
+$Website
+
+h3.Emri kompanisë
+$CompanyTitle
+
+h3.Madhësia e kompanisë
+$CompanySize
+
+h3.Përmbajtja e kërkesës
+$Body</value>
+  </data>
+  <data name="pattern_restore_completed_v115" xml:space="preserve">
+    <value>h1.Restaurimi i portalit
+h1."${__VirtualRootPath}":"${__VirtualRootPath}"
+
+Portali juaj është restauruar. Për të hyrë në të, duhet të vendosni një fjalëkalim të ri:
+
+$OrangeButton
+
+*Shënim*: kjo lidhje është e vlefshme vetëm për 7 ditë.
+
+Nëse e keni marrë gabimisht këtë email, ju lutemi shpërfilleni ose kontaktoni administratorin e portalit tuaj "${__VirtualRootPath}":"${__VirtualRootPath}" për të mësuar detajet.</value>
+  </data>
+  <data name="pattern_restore_started" xml:space="preserve">
+    <value>h1.Filloi restaurimi i portalit
+
+Ka filluar restaurimi i portalit. Mund të marrë pak kohë në varësi të sasisë së të dhënave tuaja.
+
+*Shënim*: portali nuk do të jetë i disponueshëm gjatë procesit të restaurimit.
+
+Nëse keni ndonjë pyetje ose keni nevojë për ndihmë, ju lutem mos ngurroni të na kontaktoni në "${__SalesEmail}":"mailto:${__SalesEmail}"
+
+$TrulyYours
+
+^Për të ndryshuar llojin e njoftimit, ju lutem menaxhoni "cilësimet e abonimit":"$RecipientSubscriptionConfigURL".^</value>
+  </data>
+  <data name="pattern_rooms_activity" xml:space="preserve">
+    <value>h1.Ja çfarë ka të re në DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" në orën e fundit
+
+#foreach($activity in $Activities)
+$activity
+
+#end</value>
+  </data>
+  <data name="pattern_saas_docspace_registration" xml:space="preserve">
+    <value>h1. ${LetterLogoText} DocSpace: regjistrimi i plotë
+
+
+Përshëndetje!
+
+Jeni të ftuar të përfundoni regjistrimin për ${LetterLogoText} DocSpace në "${__VirtualRootPath}":"${__VirtualRootPath}". Futni emrin tuaj dhe vendosni një fjalëkalim duke klikuar lidhjen:
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_guest_activation_v115" xml:space="preserve">
+    <value>h1. Bashkohuni me &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace
+
+
+Përshëndetje!
+
+Jeni të ftuar të bashkoheni në "${__VirtualRootPath}":"${__VirtualRootPath}" si përdorues i ftuar. Pranojeni ftesën duke klikuar lidhjen:
+
+$OrangeButton
+
+Ne gjithashtu do të ju dërgojmë këshilla të dobishme dhe lajme më të fundit të ${LetterLogoText} herë pas here. Ju mund të anuloni abonimet në faqen tuaj të profilit në çdo moment si dhe të i riaktivizoni ato.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
+    <value>Përshëndetje, $UserName!
+
+Ju lutem, kini parasysh që periudha e hirit prej $PaymentDelay‎ ditësh për ${LetterLogoText} DocSpace tuaj është aktivizuar.
+
+Sigurohuni që të paguani abonimin tuaj të Biznesit përpara afatit të periudhës së hirit. KËshtu, ju do të jeni në gjendje të përdorni më tej të gjitha përfitimet e ${LetterLogoText} DocSpace tuaj.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Ju lutem, kini parasysh se abonimi juaj në ${LetterLogoText} DocSpace skadon për tre ditë. Pas kësaj, periudha e hirit prej $PaymentDelay ditësh do të aktivizohet.
+
+Ne ju rekomandojmë të paguar tani abonimin tuaj të Biznesit dhe të vazhdoni të përdorni të gjitha përfitimet e ${LetterLogoText} DocSpace.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
+    <value>Përshëndetje, $UserName!
+
+Ju lutem, kini parasysh se periudha e hirit prej $PaymentDelay ditësh për ${LetterLogoText} DocSpace tuaj ka përfunduar.
+
+Sigurohuni që të paguani abonimin tuaj të Biznesit sa më shpejt të jetë e mundur. Kështu, do të mund të përdorni të gjitha përfitimet e ${LetterLogoText} DocSpace tuaj si më parë.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
+    <value>Përshëndetje, $UserName!
+
+Ju lutem, kini parasysh se periudha e hirit prej $PaymentDelay ditësh për ${LetterLogoText} DocSpace tuaj do të skadojë nesër.
+
+Sigurohuni që të paguani sot abonimin tuaj të Biznesit. Kështu, ju do të jeni në gjendje të përdorni më tej të gjitha përfitimet e ${LetterLogoText} DocSpace tuaj.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_room_invite" xml:space="preserve">
+    <value>Përshëndetje!
+
+Jeni të ftuar të bashkoheni në një dhomë të DocSpace në "${__VirtualRootPath}":"${__VirtualRootPath}". Pranojeni ftesën duke klikuar lidhjen:
+
+$OrangeButton
+
+Pasi të klikoni në lidhjen e ftesës, vendosni një fjalëkalim të ri për llogarinë tuaj.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_room_invite_existing_user" xml:space="preserve">
+    <value>Përshëndetje!
+
+$__AuthorName ju ftoi të bashkoheni në dhomën "$Message":"$InviteLink" në "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_self_profile_updated" xml:space="preserve">
+    <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" njoftimi pñr ndryshimin e profilit të portalit
+
+"$__AuthorName":"$__AuthorUrl" ka ndryshuar detajet e profilit të tij/saj në portal "${__VirtualRootPath}":"${__VirtualRootPath}" portal.
+
+
+^Në qoftë se nuk dëshironi të merrni njoftimet për përditësimet e profilit, ju lutem menaxhoni "cilësimet e abonimit":"$RecipientSubscriptionConfigURL".^</value>
+  </data>
+  <data name="pattern_self_profile_updated_tg" xml:space="preserve">
+    <value>[${__VirtualRootPath}](${__VirtualRootPath}) njoftimi për ndryshimin e profilit të portalit
+
+[$__AuthorName]($__AuthorUrl) ka ndryshuar detajet e profilit të tij/sj në portal [${__VirtualRootPath}](${__VirtualRootPath}).</value>
+  </data>
+  <data name="pattern_send_whats_new" xml:space="preserve">
+    <value>h1.Ja çfarë ka të re në DocSpace tuaj "${__VirtualRootPath}":"${__VirtualRootPath}" on $Date
+
+#foreach($activity in $Activities)
+$activity
+
+#end</value>
+  </data>
+  <data name="pattern_set_password" xml:space="preserve">
+    <value>Përshëndetje! Ju lutem vendosni një fjalëkalim për llogarinë tuaj të DocSpace në ${LetterLogoText}. Thjesht klikoni butonin më poshtë:
+
+$OrangeButton
+
+Lidhja është e vlefshme për 7 ditë.</value>
+  </data>
+  <data name="pattern_smtp_test" xml:space="preserve">
+    <value>Mesazh testimi SMTP
+
+Ky mesazh u krijua automatikisht për të testuar cilësimet tuaja SMTP. Nëse po e shikoni, kjo do të thotë që cilësimet janë të sakta dhe mund të i përdorni në portalin tuaj.
+
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_storage_decryption_start" xml:space="preserve">
+    <value>Përshëndetje, $UserName!
+
+Procesi i deshifrimit të skedarit ka filluar në portalin tuaj "${PortalUrl}":"${PortalUrl}".
+
+Deshifrimi mund të marrë pak kohë, kështu që portali do të jetë përkohësisht i padisponueshëm. Sapo të përfundojë deshifrimi, do të mund të punoni përsëri me të dhënat tuaja.</value>
+  </data>
+  <data name="pattern_storage_decryption_error" xml:space="preserve">
+    <value>Përshëndetje, $UserName!
+
+Procesi i deshifrimit të skedarit në portalin tuaj "${PortalUrl}":"${PortalUrl}" dështoi.
+
+Disa skedarë nuk mund të deshifroheshin. Gjeni më shumë detaje në "panelin e kontrollit":"${PortalUrl}/management/settings".</value>
+  </data>
+  <data name="pattern_storage_decryption_success" xml:space="preserve">
+    <value>Përshëndetje, $UserName!
+
+Procesi i deshifrimit të skedarit në portalin tuaj "${PortalUrl}":"${PortalUrl}" ka përfunduar me sukses.
+
+Portali juaj është sërish i disponueshëm.</value>
+  </data>
+  <data name="pattern_storage_encryption_error" xml:space="preserve">
+    <value>Përshëndetje, $UserName!
+
+Procesi i enkriptimit të skedarit në portalin "${PortalUrl}":"${PortalUrl}" dështoi.
+
+Disa skedarë nuk mund të enkriptoheshin. Gjeni më shumë detaje në "panelin e kontrollit":"${PortalUrl}/management/settings".</value>
+  </data>
+  <data name="pattern_storage_encryption_start" xml:space="preserve">
+    <value>Përshëndetje, $UserName!
+
+Procesi i enkriptimit të skedarëve ka filluar në portalin tuaj "${PortalUrl}":"${PortalUrl}".
+
+Enkriptimi mund të marrë pak kohë, kështu që portali do të jetë përkohësisht i padisponueshëm. Sapo ekriptimi të përfundojë, do të mund të punoni përsëri me të dhënat tuaja.</value>
+  </data>
+  <data name="pattern_storage_encryption_success" xml:space="preserve">
+    <value>Përshëndetje, $UserName!
+
+Procesi i enkriptimit të skedarëve në portalin tuaj "${PortalUrl}":"${PortalUrl}" ka përfunduar me sukses.
+
+Portali juaj është sërish i disponueshëm.</value>
+  </data>
+  <data name="pattern_user_has_join" xml:space="preserve">
+    <value>h1.Në portal është shtuar një përdorues i ri "${__VirtualRootPath}":"${__VirtualRootPath}"
+
+"$__AuthorName":"$__AuthorUrl" është bashkuar me portalin tuaj në "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+
+^Në qoftë se nuk dëshironi të merrni njoftimet për përdoruesit e rinj, ju lutem menaxhoni "cilësimet e abonimit":"$RecipientSubscriptionConfigURL".^"</value>
+  </data>
+  <data name="pattern_user_has_join_tg" xml:space="preserve">
+    <value>Në portal është shtuar një përdorues i ri [${__VirtualRootPath}](${__VirtualRootPath})
+[$__AuthorName]($__AuthorUrl) është bashkuar portalit tuaj në [${__VirtualRootPath}](${__VirtualRootPath}).</value>
+  </data>
+  <data name="pattern_user_ldap_activation" xml:space="preserve">
+    <value>Ju jeni ftuar të bashkoheni në zyrën e internetit të sigurt të kompanisë suaj që do të përmirësonte bashkëpunimin tuaj. Adresa e tij është "${__VirtualRootPath}":"${__VirtualRootPath}". Shtimi i kësaj lidhjeje të faqeshënuesit tuaj është një ide e mirë, ka të ngjarë ta përdorni shumë.
+
+Pranoni ftesën duke ndjekur lidhjen më poshtë dhe përdorni hyrjen dhe fjalëkalimin nga llogaria e korporatës për të u identifikuar.
+
+$OrangeButton
+
+Lidhja është e vlefshme vetëm për 7 ditë.</value>
+  </data>
+</root>
