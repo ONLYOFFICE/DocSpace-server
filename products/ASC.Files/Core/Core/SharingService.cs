@@ -58,7 +58,8 @@ public class SharingService(
     LockerManager lockerManager,
     GlobalStore globalStore,
     FileTrackerHelper fileTracker,
-    IServiceProvider serviceProvider)
+    IServiceProvider serviceProvider,
+    FileShareParamsHelper fileShareParamsHelper)
 {
     private static readonly FrozenDictionary<SubjectType, FrozenDictionary<EventType, MessageAction>> _roomMessageActions =
         new Dictionary<SubjectType, FrozenDictionary<EventType, MessageAction>> { { SubjectType.InvitationLink, new Dictionary<EventType, MessageAction> { { EventType.Create, MessageAction.RoomInvitationLinkCreated }, { EventType.Update, MessageAction.RoomInvitationLinkUpdated }, { EventType.Remove, MessageAction.RoomInvitationLinkDeleted } }.ToFrozenDictionary() }, { SubjectType.ExternalLink, new Dictionary<EventType, MessageAction> { { EventType.Create, MessageAction.RoomExternalLinkCreated }, { EventType.Update, MessageAction.RoomExternalLinkUpdated }, { EventType.Remove, MessageAction.RoomExternalLinkDeleted } }.ToFrozenDictionary() } }.ToFrozenDictionary();
@@ -188,6 +189,26 @@ public class SharingService(
         return link;
     }
 
+    public async Task<List<AceWrapper>> SetSecurityInfoAsync<T>(List<T> fileIds, List<T> folderIds, List<FileShareParams> share, bool notify, string sharingMessage)
+    {
+        if (share != null && share.Count != 0)
+        {
+            var list = await share.ToAsyncEnumerable().SelectAwait(async s => await fileShareParamsHelper.ToAceObjectAsync(s)).ToListAsync();
+
+            var aceCollection = new AceCollection<T>
+            {
+                Files = fileIds,
+                Folders = folderIds,
+                Aces = list,
+                Message = sharingMessage
+            };
+
+            await SetAceObjectAsync(aceCollection, notify);
+        }
+
+        return await GetSharedInfoAsync(fileIds, folderIds);
+    }
+    
     /// Sets access control entries (ACE) for files and folders asynchronously.
     /// <param name="aceCollection">A collection of ACEs, along with associated files and folders, to be updated.</param>
     /// <param name="notify">A boolean value indicating whether to send notifications for the ACE changes.</param>

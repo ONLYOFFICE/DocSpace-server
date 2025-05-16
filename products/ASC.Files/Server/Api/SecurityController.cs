@@ -28,36 +28,39 @@ namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
 public class SecurityControllerInternal(
-    SecurityControllerHelper securityControllerHelper,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     ApiContext apiContext,
     IDaoFactory daoFactory,
     FileSharing fileSharing,
     EmployeeFullDtoHelper employeeFullDtoHelper,
-    FileService fileService)
-    : SecurityController<int>(securityControllerHelper, folderDtoHelper, fileDtoHelper, apiContext, daoFactory, fileSharing, employeeFullDtoHelper, fileService);
+    FileService fileService,
+    SharingService sharingService,
+    FileShareDtoHelper fileShareDtoHelper)
+    : SecurityController<int>(folderDtoHelper, fileDtoHelper, apiContext, daoFactory, fileSharing, employeeFullDtoHelper, fileService, sharingService, fileShareDtoHelper);
 
 public class SecurityControllerThirdparty(
-    SecurityControllerHelper securityControllerHelper,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     ApiContext apiContext,
     IDaoFactory daoFactory,
     FileSharing fileSharing,
     EmployeeFullDtoHelper employeeFullDtoHelper,
-    FileService fileService)
-    : SecurityController<string>(securityControllerHelper, folderDtoHelper, fileDtoHelper, apiContext, daoFactory, fileSharing, employeeFullDtoHelper, fileService);
+    FileService fileService,
+    SharingService sharingService,
+    FileShareDtoHelper fileShareDtoHelper)
+    : SecurityController<string>(folderDtoHelper, fileDtoHelper, apiContext, daoFactory, fileSharing, employeeFullDtoHelper, fileService, sharingService, fileShareDtoHelper);
 
 public abstract class SecurityController<T>(
-    SecurityControllerHelper securityControllerHelper,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     ApiContext apiContext,
     IDaoFactory daoFactory,
     FileSharing fileSharing,
     EmployeeFullDtoHelper employeeFullDtoHelper,
-    FileService fileService)
+    FileService fileService,
+    SharingService sharingService,
+    FileShareDtoHelper fileShareDtoHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -70,9 +73,14 @@ public abstract class SecurityController<T>(
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "List of shared file information", typeof(IAsyncEnumerable<FileShareDto>))]
     [HttpGet("file/{fileId}/share")]
-    public IAsyncEnumerable<FileShareDto> GetFileSecurityInfoAsync(FileIdRequestDto<T> inDto)
-    {
-        return securityControllerHelper.GetFileSecurityInfoAsync(inDto.FileId);
+    public async IAsyncEnumerable<FileShareDto> GetFileSecurityInfoAsync(FileIdRequestDto<T> inDto)
+    {        
+        var fileShares = await sharingService.GetSharedInfoAsync([inDto.FileId], []);
+
+        foreach (var fileShareDto in fileShares)
+        {
+            yield return await fileShareDtoHelper.Get(fileShareDto);
+        }
     }
 
     /// <summary>
@@ -85,9 +93,14 @@ public abstract class SecurityController<T>(
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "List of shared file information", typeof(IAsyncEnumerable<FileShareDto>))]
     [HttpGet("folder/{folderId}/share")]
-    public IAsyncEnumerable<FileShareDto> GetFolderSecurityInfoAsync(FolderIdRequestDto<T> inDto)
+    public async IAsyncEnumerable<FileShareDto> GetFolderSecurityInfoAsync(FolderIdRequestDto<T> inDto)
     {
-        return securityControllerHelper.GetFolderSecurityInfoAsync(inDto.FolderId);
+        var fileShares = await sharingService.GetSharedInfoAsync([], [inDto.FolderId ]);
+
+        foreach (var fileShareDto in fileShares)
+        {
+            yield return await fileShareDtoHelper.Get(fileShareDto);
+        }
     }
 
     /// <summary>
@@ -100,9 +113,14 @@ public abstract class SecurityController<T>(
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "List of shared file information: sharing rights, a user who has the access to the specified file, the file is locked by this user or not, this user is an owner of the specified file or not, this user can edit the access to the specified file or not", typeof(IAsyncEnumerable<FileShareDto>))]
     [HttpPut("file/{fileId}/share")]
-    public IAsyncEnumerable<FileShareDto> SetFileSecurityInfoAsync(FileSecurityInfoSimpleRequestDto<T> inDto)
-    {
-        return securityControllerHelper.SetSecurityInfoAsync([inDto.FileId], [], inDto.SecurityInfoSimpe.Share, inDto.SecurityInfoSimpe.Notify, inDto.SecurityInfoSimpe.SharingMessage);
+    public async IAsyncEnumerable<FileShareDto> SetFileSecurityInfoAsync(FileSecurityInfoSimpleRequestDto<T> inDto)
+    {        
+        var ids = await sharingService.SetSecurityInfoAsync([inDto.FileId], [], inDto.SecurityInfoSimpe.Share, inDto.SecurityInfoSimpe.Notify, inDto.SecurityInfoSimpe.SharingMessage);
+        
+        foreach (var r in ids)
+        {
+            yield return await fileShareDtoHelper.Get(r);
+        }
     }
 
     /// <summary>
@@ -117,9 +135,11 @@ public abstract class SecurityController<T>(
     [HttpPut("folder/{folderId}/share")]
     public async IAsyncEnumerable<FileShareDto> SetFolderSecurityInfoAsync(FolderSecurityInfoSimpleRequestDto<T> inDto)
     {
-        await foreach (var s in securityControllerHelper.SetSecurityInfoAsync([], [inDto.FolderId], inDto.SecurityInfoSimpe.Share, inDto.SecurityInfoSimpe.Notify, inDto.SecurityInfoSimpe.SharingMessage))
+        var ids = await sharingService.SetSecurityInfoAsync([], [inDto.FolderId], inDto.SecurityInfoSimpe.Share, inDto.SecurityInfoSimpe.Notify, inDto.SecurityInfoSimpe.SharingMessage);
+        
+        foreach (var r in ids)
         {
-            yield return s;
+            yield return await fileShareDtoHelper.Get(r);
         }
     }
 
@@ -189,13 +209,14 @@ public abstract class SecurityController<T>(
 }
 
 public class SecurityControllerCommon(
-    SecurityControllerHelper securityControllerHelper,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     BruteForceLoginManager bruteForceLoginManager,
     ExternalLinkHelper externalLinkHelper,
     IMapper mapper,
-    SharingService sharingService)
+    SharingService sharingService,
+    FileShareDtoHelper fileShareDtoHelper,
+    FileShareParamsHelper fileShareParamsHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -237,13 +258,13 @@ public class SecurityControllerCommon(
     {
         var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
         var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds);
-
-        var internalIds = securityControllerHelper.GetSecurityInfoAsync(fileIntIds, folderIntIds);
-        var thirdpartyIds = securityControllerHelper.GetSecurityInfoAsync(fileStringIds, folderStringIds);
-
-        await foreach (var r in internalIds.Concat(thirdpartyIds))
+        
+        var internalIds = await sharingService.GetSharedInfoAsync(fileIntIds, folderIntIds);
+        var thirdpartyIds = await sharingService.GetSharedInfoAsync(fileStringIds, folderStringIds);
+        
+        foreach (var r in internalIds.Concat(thirdpartyIds))
         {
-            yield return r;
+            yield return await fileShareDtoHelper.Get(r);
         }
     }
 
@@ -260,9 +281,9 @@ public class SecurityControllerCommon(
     {
         var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
         var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds);
-
-        await securityControllerHelper.RemoveSecurityInfoAsync(fileIntIds, folderIntIds);
-        await securityControllerHelper.RemoveSecurityInfoAsync(fileStringIds, folderStringIds);
+        
+        await sharingService.RemoveAceAsync(fileIntIds, folderIntIds);
+        await sharingService.RemoveAceAsync(fileStringIds, folderStringIds);
 
         return true;
     }
@@ -283,12 +304,12 @@ public class SecurityControllerCommon(
         var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
         var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds);
 
-        var internalIds = securityControllerHelper.SetSecurityInfoAsync(fileIntIds, folderIntIds, inDto.Share, inDto.Notify, inDto.SharingMessage);
-        var thirdpartyIds = securityControllerHelper.SetSecurityInfoAsync(fileStringIds, folderStringIds, inDto.Share, inDto.Notify, inDto.SharingMessage);
-
-        await foreach (var s in internalIds.Concat(thirdpartyIds))
+        var internalIds = await sharingService.SetSecurityInfoAsync(fileIntIds, folderIntIds, inDto.Share, inDto.Notify, inDto.SharingMessage);
+        var thirdpartyIds = await sharingService.SetSecurityInfoAsync(fileStringIds, folderStringIds, inDto.Share, inDto.Notify, inDto.SharingMessage);
+        
+        foreach (var r in internalIds.Concat(thirdpartyIds))
         {
-            yield return s;
+            yield return await fileShareDtoHelper.Get(r);
         }
     }
 
