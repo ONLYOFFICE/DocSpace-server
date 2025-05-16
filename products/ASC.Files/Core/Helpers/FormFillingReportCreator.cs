@@ -73,11 +73,7 @@ public class FormFillingReportCreator(
         factoryIndexerForm.Refresh();
         var (success, result) = await factoryIndexerForm.TrySelectAsync(r => r.Where(s => s.RoomId, roomId).Where(s => s.OriginalFormId, originalFormId));
 
-        if (success)
-        {
-            return result;
-        }
-        return [];
+        return success ? result : [];
     }
 
     private async Task GetSubmitFormsData<T>(File<T> formsDataFile, int originalFormId, int roomId, int resultFormNumber, string url)

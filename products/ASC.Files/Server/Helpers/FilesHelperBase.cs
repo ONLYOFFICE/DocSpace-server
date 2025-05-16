@@ -85,11 +85,11 @@ public abstract class FilesHelperBase(
         }
         catch (FileNotFoundException e)
         {
-            throw new ItemNotFoundException("File not found", e);
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound, e);
         }
         catch (DirectoryNotFoundException e)
         {
-            throw new ItemNotFoundException("Folder not found", e);
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound, e);
         }
     }
 

@@ -53,55 +53,24 @@ public class WebPlugin
     }
 }
 
-[Singleton]
-public class WebPluginCache
-{
-    private readonly ICache _cache;
-    private readonly ICacheNotify<WebPluginCacheItem> _notify;
-    private readonly TimeSpan _cacheExpiration = TimeSpan.FromDays(1);
-
-    public WebPluginCache(ICacheNotify<WebPluginCacheItem> notify, ICache cache)
-    {
-        _cache = cache;
-        _notify = notify;
-
-        _notify.Subscribe(i => _cache.Remove(i.Key), CacheNotifyAction.Remove);
-    }
-
-    public List<WebPlugin> Get(string key)
-    {
-        return _cache.Get<List<WebPlugin>>(key);
-    }
-
-    public void Insert(string key, object value)
-    {
-        _cache.Insert(key, value, _cacheExpiration);
-    }
-
-    public async Task RemoveAsync(string key)
-    {
-        await _notify.PublishAsync(new WebPluginCacheItem { Key = key }, CacheNotifyAction.Remove);
-
-        _cache.Remove(key);
-    }
-}
-
 [Scope]
 public class WebPluginManager(
     CoreBaseSettings coreBaseSettings,
     SettingsManager settingsManager,
     InstanceCrypto instanceCrypto,
     WebPluginConfigSettings webPluginConfigSettings,
-    WebPluginCache webPluginCache,
     StorageFactory storageFactory,
     AuthContext authContext,
-    ILogger<WebPluginManager> log)
+    ILogger<WebPluginManager> log,
+    IFusionCacheProvider cacheProvider)
 {
     private const string StorageSystemModuleName = "systemwebplugins";
     private const string StorageModuleName = "webplugins";
     private const string ConfigFileName = "config.json";
     private const string PluginFileName = "plugin.js";
     private const string AssetsFolderName = "assets";
+
+    private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
 
     private void DemandWebPlugins(bool upload = false, bool delete = false)
     {
@@ -344,14 +313,14 @@ public class WebPluginManager(
     {
         var key = GetCacheKey(tenantId);
 
-        var webPlugins = webPluginCache.Get(key);
-
-        if (webPlugins == null)
+        var webPlugins = await _cache.GetOrSetAsync<List<WebPlugin>>(key, async (ctx, token) =>
         {
-            webPlugins = await GetWebPluginsFromStorageAsync(tenantId);
+            var webPlugins = await GetWebPluginsFromStorageAsync(tenantId);
 
-            webPluginCache.Insert(key, webPlugins);
-        }
+            ctx.Tags = [CacheExtention.GetWebPluginsTag(tenantId)];
+            return ctx.Modified(webPlugins);
+
+        });
 
         return webPlugins;
     }
@@ -444,9 +413,9 @@ public class WebPluginManager(
         webPlugin.Enabled = enabled;
         webPlugin.Settings = settings;
 
-        var key = GetCacheKey(webPlugin.System ? Tenant.DefaultTenant : tenantId);
+        var tag = CacheExtention.GetWebPluginsTag(webPlugin.System ? Tenant.DefaultTenant : tenantId);
 
-        await webPluginCache.RemoveAsync(key);
+        await _cache.RemoveByTagAsync(tag);
 
         return webPlugin;
     }

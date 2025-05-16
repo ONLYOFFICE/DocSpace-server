@@ -78,9 +78,7 @@ public abstract class FactoryIndexer<T>(ILoggerProvider options,
         var t = serviceProvider.GetService<T>();
         if (!await SupportAsync(t) || !_indexer.CheckExist(t))
         {
-            result = new List<T>();
-
-            return (false, result);
+            return (false, []);
         }
 
         try
@@ -90,9 +88,8 @@ public abstract class FactoryIndexer<T>(ILoggerProvider options,
         catch (Exception e)
         {
             Logger.ErrorSelect(e);
-            result = new List<T>();
 
-            return (false, result);
+            return (false, []);
         }
 
         return (true, result);

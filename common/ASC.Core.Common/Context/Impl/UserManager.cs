@@ -73,14 +73,6 @@ public class UserManager(
     private Tenant Tenant => tenantManager.GetCurrentTenant();
 
 
-    public void ClearCache()
-    {
-        if (userService is ICachedService service)
-        {
-            service.InvalidateCache();
-        }
-    }
-
 
     #region Users
 
@@ -933,7 +925,7 @@ public class UserManager(
     #endregion Groups
 
 
-    private bool IsPropertiesContainsWords(IEnumerable<string> properties, IEnumerable<string> words)
+    private bool IsPropertiesContainsWords(string[] properties, IEnumerable<string> words)
     {
         foreach (var w in words)
         {

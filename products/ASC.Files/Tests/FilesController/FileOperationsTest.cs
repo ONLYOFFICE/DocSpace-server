@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,12 +24,36 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Core.Caching;
+namespace ASC.Files.Tests.FilesController;
 
-[ProtoContract]
-public record QuotaCacheItem
+[Collection("Test Collection")]
+public class FileOperationsTest(
+    FilesApiFactory filesFactory, 
+    WebApplicationFactory<WebApiProgram> apiFactory, 
+    WebApplicationFactory<PeopleProgram> peopleFactory,
+    WebApplicationFactory<FilesServiceProgram> filesServiceProgram) 
+    : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
 {
-    [ProtoMember(1)]
-    public string Key { get; set; }
-}
 
+    
+
+    
+    [Fact]
+    public async Task GetPresignedUri_ValidFile_ReturnsDownloadUrl()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        
+        var file = await CreateFile("file_for_download.docx", FolderType.USER, Initializer.Owner);
+        
+        // Act
+        var downloadUrl = (await _filesFilesApi.GetPresignedUriAsync(file.Id, TestContext.Current.CancellationToken)).Response;
+        
+        // Assert
+        downloadUrl.Should().NotBeNull();
+        downloadUrl.Should().StartWith("http");
+        downloadUrl.Should().Contain("file");
+    }
+    
+
+}

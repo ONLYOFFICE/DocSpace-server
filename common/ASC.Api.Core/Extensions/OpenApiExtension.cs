@@ -308,17 +308,17 @@ public static class OpenApiExtension
             //}
         }
 
-        private void ApplyAuthorizeAttribute(StringBuilder authorizationDescription, IEnumerable<string> policySelector, IEnumerable<string> schemaSelector, IEnumerable<string> rolesSelector)
+        private void ApplyAuthorizeAttribute(StringBuilder authorizationDescription, List<string> policySelector, List<string> schemaSelector, List<string> rolesSelector)
         {
-            if (policySelector.Any())
+            if (policySelector.Count != 0)
             {
                 authorizationDescription.Append($" Policy: {string.Join(", ", policySelector)};");
             }
-            if (schemaSelector.Any())
+            if (schemaSelector.Count != 0)
             {
                 authorizationDescription.Append($" Schema: {string.Join(", ", schemaSelector)};");
             }
-            if (rolesSelector.Any())
+            if (rolesSelector.Count != 0)
             {
                 authorizationDescription.Append($" Roles: {string.Join(", ", rolesSelector)};");
             }

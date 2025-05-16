@@ -263,9 +263,9 @@ public class FileMarkAsReadOperationsManager(
     ExternalShare externalShare,
     IServiceProvider serviceProvider) : FileOperationsManager<FileMarkAsReadOperation>(httpContextAccessor, eventBus, authContext, fileOperationsManagerHolder, externalShare, serviceProvider)
 {
-    public async Task Publish(IEnumerable<JsonElement> folderIds, IEnumerable<JsonElement> fileIds)
+    public async Task Publish(List<JsonElement> folderIds, List<JsonElement> fileIds)
     {
-        if ((folderIds == null || !folderIds.Any()) && (fileIds == null || !fileIds.Any()))
+        if ((folderIds == null || folderIds.Count == 0) && (fileIds == null || fileIds.Count == 0))
         {
             return;
         }
@@ -307,10 +307,10 @@ public class FileDownloadOperationsManager(
     ExternalShare externalShare,
     IServiceProvider serviceProvider) : FileOperationsManager<FileDownloadOperation>(httpContextAccessor, eventBus, authContext, fileOperationsManagerHolder, externalShare, serviceProvider)
 {
-    public async Task Publish(IEnumerable<JsonElement> folders, IEnumerable<FilesDownloadOperationItem<JsonElement>> files, string baseUri)
+    public async Task Publish(List<JsonElement> folders, List<FilesDownloadOperationItem<JsonElement>> files, string baseUri)
     {
         await _fileOperationsManagerHolder.CheckRunning(await GetUserIdAsync(), FileOperationType.Download);
-        if ((folders == null || !folders.Any()) && (files == null || !files.Any()))
+        if ((folders == null || folders.Count == 0) && (files == null || files.Count == 0))
         {
             return;
         }
@@ -354,8 +354,8 @@ public class FileMoveCopyOperationsManager(
     IServiceProvider serviceProvider) : FileOperationsManager<FileMoveCopyOperation>(httpContextAccessor, eventBus, authContext, fileOperationsManagerHolder, externalShare, serviceProvider)
 {
     public async Task Publish(
-        IEnumerable<JsonElement> folderIds,
-        IEnumerable<JsonElement> fileIds,
+        List<JsonElement> folderIds,
+        List<JsonElement> fileIds,
         JsonElement destFolderId,
         bool copy,
         FileConflictResolveType resolveType,
@@ -368,7 +368,7 @@ public class FileMoveCopyOperationsManager(
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
         
-        if ((folderIds == null || !folderIds.Any()) && (fileIds == null || !fileIds.Any()))
+        if ((folderIds == null || folderIds.Count == 0) && (fileIds == null || fileIds.Count == 0))
         {
             return;
         }
@@ -436,10 +436,10 @@ public class FileDuplicateOperationsManager(
     IServiceProvider serviceProvider) : FileOperationsManager<FileDuplicateOperation>(httpContextAccessor, eventBus, authContext, fileOperationsManagerHolder, externalShare, serviceProvider)
 {
     public async Task Publish(
-        IEnumerable<JsonElement> folderIds,
-        IEnumerable<JsonElement> fileIds)
+        List<JsonElement> folderIds,
+        List<JsonElement> fileIds)
     {        
-        if ((folderIds == null || !folderIds.Any()) && (fileIds == null || !fileIds.Any()))
+        if ((folderIds == null || folderIds.Count == 0) && (fileIds == null || fileIds.Count == 0))
         {
             return;
         }
@@ -482,15 +482,15 @@ public class FileDeleteOperationsManager(
     IServiceProvider serviceProvider) : FileOperationsManager<FileDeleteOperation>(httpContextAccessor, eventBus, authContext, fileOperationsManagerHolder, externalShare, serviceProvider)
 {
     public Task Publish<T>(
-        IEnumerable<T> folders, 
-        IEnumerable<T> files,
+        List<T> folders, 
+        List<T> files,
         bool ignoreException, 
         bool holdResult,
         bool immediately,
         bool isEmptyTrash = false,
-        IEnumerable<int> versions = null)
+        List<int> versions = null)
     {        
-        if ((folders == null || !folders.Any()) && (files == null || !files.Any()))
+        if ((folders == null || folders.Count == 0) && (files == null || files.Count == 0))
         {
             return Task.CompletedTask;
         }
@@ -502,15 +502,15 @@ public class FileDeleteOperationsManager(
     }
 
     public Task Publish(
-        IEnumerable<JsonElement> folders, 
-        IEnumerable<JsonElement> files, 
+        List<JsonElement> folders, 
+        List<JsonElement> files, 
         bool ignoreException, 
         bool holdResult,
         bool immediately,
         bool isEmptyTrash = false,
-        IEnumerable<int> versions = null)
+        List<int> versions = null)
     {        
-        if ((folders == null || !folders.Any()) && (files == null || !files.Any()))
+        if ((folders == null || folders.Count == 0) && (files == null || files.Count == 0))
         {
             return Task.CompletedTask;
         }
@@ -528,7 +528,7 @@ public class FileDeleteOperationsManager(
         bool holdResult,
         bool immediately,
         bool isEmptyTrash = false,
-        IEnumerable<int> versions = null)
+        List<int> versions = null)
     {        
         if (folders.Item1.Count == 0 && folders.Item2.Count == 0 && files.Item1.Count == 0 && files.Item2.Count == 0)
         {

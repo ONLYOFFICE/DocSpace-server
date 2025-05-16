@@ -401,6 +401,12 @@ public class GetMemberByEmailRequestDto
     [EmailAddress]
     [StringLength(255)]
     public string Email { get; set; }
+
+    /// <summary>
+    /// Culture
+    /// </summary>
+    [FromQuery(Name = "culture")]
+    public string Culture { get; set; }
 }
 
 /// <summary>

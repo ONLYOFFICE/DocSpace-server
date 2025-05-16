@@ -387,7 +387,7 @@ public abstract class VirtualRoomsController<T>(
     [HttpDelete("{id}")]
     public async Task<FileOperationDto> DeleteRoomAsync(DeleteRoomRequestDto<T> inDto)
     {
-        await fileDeleteOperationsManager.Publish(new List<T> { inDto.Id }, new List<T>(), false, !inDto.DeleteRoom.DeleteAfter, true);
+        await fileDeleteOperationsManager.Publish([inDto.Id], [], false, !inDto.DeleteRoom.DeleteAfter, true);
         
         return await fileOperationDtoHelper.GetAsync((await fileDeleteOperationsManager.GetOperationResults()).FirstOrDefault());
     }
@@ -457,6 +457,15 @@ public abstract class VirtualRoomsController<T>(
         if (inDto.RoomInvitation.Invitations == null || !inDto.RoomInvitation.Invitations.Any())
         {
             return result;
+        }
+
+        if (inDto.RoomInvitation.Invitations.Any(i => !string.IsNullOrEmpty(i.Email)))
+        {
+            var invitationSettings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
+            if (!invitationSettings.AllowInvitingGuests)
+            {
+                throw new SecurityException(Resource.ErrorAccessDenied);
+            }
         }
 
         var room = await _fileStorageService.GetFolderAsync(inDto.Id).NotFoundIfNull("Folder not found");

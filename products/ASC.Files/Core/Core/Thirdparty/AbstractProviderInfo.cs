@@ -98,7 +98,7 @@ internal abstract class AbstractProviderInfo<TFile, TFolder, TItem, TProvider>(D
 
     public Task CacheResetAsync(string id = null, bool? isFile = null)
     {
-        return ProviderInfoHelper.CacheResetAsync(ProviderId, id, isFile);
+        return ProviderInfoHelper.CacheResetAsync(Selector.Id, ProviderId, id, isFile);
     }
 
     public async Task<TFile> GetFileAsync(string fileId)
@@ -122,93 +122,56 @@ internal abstract class AbstractProviderInfo<TFile, TFolder, TItem, TProvider>(D
         return await ProviderInfoHelper.GetFolderAsync(storage, ProviderId, folderId, Selector.Id);
     }
 
-    public async Task<List<TItem>> GetItemsAsync(string folderId)
+    public async Task<List<TItem>> GetItemsAsync(string folderId, Func<TItem, string> idSelector, Func<TItem, bool> isFile)
     {
         var storage = await StorageAsync;
 
-        return await ProviderInfoHelper.GetItemsAsync(storage, ProviderId, folderId, Selector.Id);
+        return await ProviderInfoHelper.GetItemsAsync(storage, ProviderId, folderId, Selector.Id, idSelector, isFile);
     }
 }
 
 [Singleton]
-public class ProviderInfoHelper
+public class ProviderInfoHelper(IFusionCacheProvider cacheProvider)
 {
-    private readonly ICache _cache;
+    private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
     private readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(1);
-    private readonly ConcurrentDictionary<string, object> _cacheKeys;
-    private readonly ICacheNotify<BoxCacheItem> _cacheNotify;
-    private readonly IEnumerable<string> _selectors = Selectors.StoredCache.Select(s => s.Id);
 
-    public ProviderInfoHelper(ICacheNotify<BoxCacheItem> cacheNotify, ICache cache)
+    internal async Task CacheResetAsync(string selector, int thirdId, string id = null, bool? isFile = null)
     {
-        _cache = cache;
-        _cacheKeys = new ConcurrentDictionary<string, object>();
-        _cacheNotify = cacheNotify;
-        foreach (var selector in _selectors)
-        {
-            _cacheNotify.Subscribe(i =>
-            {
-                if (i.ResetAll)
-                {
-                    _cache.Remove(_cacheKeys, new Regex($"^{selector}-" + i.Key + ".*"));
-                    _cache.Remove(_cacheKeys, new Regex($"^{selector}f-" + i.Key + ".*"));
-                    _cache.Remove(_cacheKeys, new Regex($"^{selector}d-" + i.Key + ".*"));
-                }
-
-                if (!i.IsFileExists)
-                {
-                    _cache.Remove($"{selector}-" + i.Key);
-                    _cache.Remove($"{selector}d-" + i.Key);
-                    _cache.Remove($"{selector}-" + i.Key + "-d");
-                    _cache.Remove($"{selector}-" + i.Key + "-f");
-                }
-                else
-                {
-                    if (i.IsFile)
-                    {
-                        _cache.Remove($"{selector}f-" + i.Key);
-                    }
-                    else
-                    {
-                        _cache.Remove($"{selector}d-" + i.Key);
-                    }
-                }
-            }, CacheNotifyAction.Remove);
-        }
-    }
-
-    internal async Task CacheResetAsync(int thirdId, string id = null, bool? isFile = null)
-    {
-        var key = thirdId + "-";
         if (id == null)
         {
-            await _cacheNotify.PublishAsync(new BoxCacheItem { ResetAll = true, Key = key }, CacheNotifyAction.Remove);
+            await _cache.RemoveByTagAsync(CacheExtention.GetProviderTag(selector, thirdId));
         }
         else
         {
-            key += id;
-
-            await _cacheNotify.PublishAsync(new BoxCacheItem { IsFile = isFile ?? false, IsFileExists = isFile.HasValue, Key = key }, CacheNotifyAction.Remove);
+            if (isFile.HasValue)
+            {
+                if (isFile.Value)
+                {
+                    await _cache.RemoveByTagAsync(CacheExtention.GetProviderFileTag(selector, thirdId, id));
+                }
+                else
+                {
+                    await _cache.RemoveByTagAsync(CacheExtention.GetProviderFolderTag(selector, thirdId, id));
+                }
+            }
+            else
+            {
+                await _cache.RemoveByTagAsync(CacheExtention.GetProviderFolderItemsTag(selector, thirdId, id));
+            }
         }
     }
 
     internal async ValueTask<TFile> GetFileAsync<TFile>(IThirdPartyFileStorage<TFile> storage, int id, string fileId, string selector) where TFile : class
     {
         var key = $"{selector}f-" + id + "-" + fileId;
-        var file = _cache.Get<TFile>(key);
-        if (file != null)
+        var file = await _cache.GetOrSetAsync<TFile>(key, async (ctx, token) =>
         {
-            return file;
-        }
+            var file = await storage.GetFileAsync(fileId);
 
-        file = await storage.GetFileAsync(fileId);
-        if (file == null)
-        {
-            return null;
-        }
-
-        _cache.Insert(key, file, DateTime.UtcNow.Add(_cacheExpiration), EvictionCallback);
-        _cacheKeys.TryAdd(key, null);
+            return ctx.Modified(file);
+        }, _cacheExpiration,
+        [CacheExtention.GetProviderTag(selector, id), CacheExtention.GetProviderFileTag(selector, id, fileId)]);
 
         return file;
     }
@@ -223,8 +186,8 @@ public class ProviderInfoHelper
         }
 
         var key = $"{selector}d-" + id + "-" + idSelector(folder);
-        _cache.Insert(key, folder, DateTime.UtcNow.Add(_cacheExpiration), EvictionCallback);
-        _cacheKeys.TryAdd(key, null);
+        await _cache.SetAsync(key, folder, _cacheExpiration,
+            [CacheExtention.GetProviderTag(selector, id), CacheExtention.GetProviderFolderTag(selector, id, idSelector(folder))]);
 
         return folder;
     }
@@ -232,25 +195,20 @@ public class ProviderInfoHelper
     internal async Task<TFolder> GetFolderAsync<TFolder>(IThirdPartyFolderStorage<TFolder> storage, int id, string folderId, string selector) where TFolder : class
     {
         var key = $"{selector}d-" + id + "-" + folderId;
-        var folder = _cache.Get<TFolder>(key);
-        if (folder != null)
-        {
-            return folder;
-        }
 
-        folder = await storage.GetFolderAsync(folderId);
-        if (folder == null)
+        var folder = await _cache.GetOrSetAsync<TFolder>(key, async (ctx, token) =>
         {
-            return null;
-        }
+            var folder = await storage.GetFolderAsync(folderId);
 
-        _cache.Insert(key, folder, DateTime.UtcNow.Add(_cacheExpiration), EvictionCallback);
-        _cacheKeys.TryAdd(key, null);
+            return ctx.Modified(folder);
+        }, _cacheExpiration,
+        [CacheExtention.GetProviderTag(selector, id), CacheExtention.GetProviderFolderTag(selector, id, folderId)]);
 
         return folder;
     }
 
-    internal async Task<List<TItem>> GetItemsAsync<TItem>(IThirdPartyItemStorage<TItem> storage, int id, string folderId, string selector, bool? folder = null) where TItem : class
+    internal async Task<List<TItem>> GetItemsAsync<TItem>(IThirdPartyItemStorage<TItem> storage, int id, string folderId, string selector,
+        Func<TItem, string> idSelector, Func<TItem, bool> isFile, bool? folder = null) where TItem : class
     {
         var key = $"{selector}-" + id + "-" + folderId;
 
@@ -259,31 +217,42 @@ public class ProviderInfoHelper
             key += folder.Value ? "-d" : "-f";
         }
         
-        var items = _cache.Get<List<TItem>>(key);
+        var items = await _cache.GetOrSetAsync<List<TItem>>(key, async (ctx, token) =>
+        {
+            List<TItem> items = null;
+            if (folder != null && storage is IGoogleDriveItemStorage<TItem> googleStorage)
+            {
+                items = await googleStorage.GetItemsAsync(folderId, folder);
+            }
+            else
+            {
+                items = await storage.GetItemsAsync(folderId);
+            }
 
-        if (items != null)
-        {
-            return items;
-        }
+            var tags = new List<string>
+            {
+                CacheExtention.GetProviderTag(selector, id),
+                CacheExtention.GetProviderFolderTag(selector, id, folderId),
+                CacheExtention.GetProviderFolderItemsTag(selector, id, folderId),
+            };
 
-        if (folder != null && storage is IGoogleDriveItemStorage<TItem> googleStorage)
-        {
-            items = await googleStorage.GetItemsAsync(folderId, folder);
-        }
-        else
-        {
-            items = await storage.GetItemsAsync(folderId);
-        }
-            
-        _cache.Insert(key, items, DateTime.UtcNow.Add(_cacheExpiration), EvictionCallback);
-        _cacheKeys.TryAdd(key, null);
+            foreach (var item in items)
+            {
+                if (isFile(item))
+                {
+                    tags.Add(CacheExtention.GetProviderFileTag(selector, id, idSelector(item)));
+                }
+                else
+                {
+                    tags.Add(CacheExtention.GetProviderFolderTag(selector, id, idSelector(item)));
+                }
+            }
+
+            ctx.Tags = tags.ToArray();
+            return ctx.Modified(items);
+        });
 
         return items;
-    }
-
-    private void EvictionCallback(object key, object value, EvictionReason reason, object state)
-    {
-        _cacheKeys.TryRemove(key.ToString(), out _);
     }
 }
 

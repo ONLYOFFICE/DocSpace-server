@@ -269,7 +269,7 @@ public sealed class UserManagerWrapper(
                 if (currentType is EmployeeType.RoomAdmin)
                 {
                     await userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupAdmin.ID, notifyWebSocket: false);
-                    webItemSecurityCache.ClearCache(tenant.Id);
+                    await webItemSecurityCache.ClearCacheAsync(tenant.Id);
                     changed = true;
                 }
                 else if (currentType is EmployeeType.User)
@@ -279,7 +279,7 @@ public sealed class UserManagerWrapper(
                     await countPaidUserChecker.CheckAppend();
                     await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);
                     await userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupAdmin.ID);
-                    webItemSecurityCache.ClearCache(tenant.Id);
+                    await webItemSecurityCache.ClearCacheAsync(tenant.Id);
                     changed = true;
                 }
                 else if (currentType is EmployeeType.Guest)
@@ -289,7 +289,7 @@ public sealed class UserManagerWrapper(
                     await countPaidUserChecker.CheckAppend();
                     await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupGuest.ID);
                     await userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupAdmin.ID);
-                    webItemSecurityCache.ClearCache(tenant.Id);
+                    await webItemSecurityCache.ClearCacheAsync(tenant.Id);
                     changed = true;
                 }
             }
@@ -298,7 +298,7 @@ public sealed class UserManagerWrapper(
                 if (currentType is EmployeeType.DocSpaceAdmin && initiator.IsOwner(tenant))
                 {
                     await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupAdmin.ID);
-                    webItemSecurityCache.ClearCache(tenant.Id);
+                    await webItemSecurityCache.ClearCacheAsync(tenant.Id);
                     changed = true;
                 }
                 else if (currentType is EmployeeType.User)
@@ -307,7 +307,7 @@ public sealed class UserManagerWrapper(
                     
                     await countPaidUserChecker.CheckAppend();
                     await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupUser.ID);
-                    webItemSecurityCache.ClearCache(tenant.Id);
+                    await webItemSecurityCache.ClearCacheAsync(tenant.Id);
                     changed = true;
                 }
                 else if (currentType is EmployeeType.Guest)
@@ -316,7 +316,7 @@ public sealed class UserManagerWrapper(
                     
                     await countPaidUserChecker.CheckAppend();
                     await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupGuest.ID);
-                    webItemSecurityCache.ClearCache(tenant.Id);
+                    await webItemSecurityCache.ClearCacheAsync(tenant.Id);
                     changed = true;
                 }
             }
@@ -324,7 +324,7 @@ public sealed class UserManagerWrapper(
             {
                 await userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupGuest.ID);
                 await userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupUser.ID);
-                webItemSecurityCache.ClearCache(tenant.Id);
+                await webItemSecurityCache.ClearCacheAsync(tenant.Id);
                 changed = true;
             }
         }

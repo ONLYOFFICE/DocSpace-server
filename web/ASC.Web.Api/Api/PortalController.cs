@@ -132,6 +132,13 @@ public class PortalController(
     [HttpGet("users/invite/{employeeType}")]
     public async Task<string> GeInviteLinkAsync(InvitationLinkRequestDto inDto)
     {
+        var invitationSettings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
+
+        if (!invitationSettings.AllowInvitingMembers)
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
         var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
         if ((inDto.EmployeeType == EmployeeType.DocSpaceAdmin && !currentUser.IsOwner(tenantManager.GetCurrentTenant()))

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,12 +24,27 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Core.Caching;
+namespace ASC.Core.Tenants;
 
-[ProtoContract]
-public record UserPhotoCacheItem
+public class TenantUserInvitationSettings : ISettings<TenantUserInvitationSettings>
 {
-    [ProtoMember(1)]
-    public string Key { get; set; }
-}
+    public bool AllowInvitingMembers { get; init; }
+    public bool AllowInvitingGuests { get; init; }
 
+    [JsonIgnore]
+    public Guid ID
+    {
+        get { return new Guid("{FF4F9A9E-0976-478B-8001-18DDE5AF2BD9}"); }
+    }
+
+    public TenantUserInvitationSettings GetDefault()
+    {
+        return new TenantUserInvitationSettings()
+        {
+            AllowInvitingMembers = true,
+            AllowInvitingGuests = true
+        };
+    }
+
+    public DateTime LastModified { get; set; }
+}
