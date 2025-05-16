@@ -24,13 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.ApiModels.RequestDto;
+namespace ASC.Files.Core.Core;
 
-public class GetFillResulteRequestDto
+public enum AdditionalFilterOption
 {
-    /// <summary>
-    /// Filling session id
-    /// </summary>
-    [FromQuery(Name = "fillingSessionId")]
-    public string FillingSessionId { get; set; }
+    [SwaggerEnum("All")]
+    All,
+
+    [SwaggerEnum("My files and folders")]
+    MyFilesAndFolders,
+
+    [SwaggerEnum("Forms with filling role")]
+    FormsWithFillingRole
 }

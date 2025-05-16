@@ -33,6 +33,8 @@ import com.asc.common.core.domain.value.Role;
 import com.asc.common.core.domain.value.TenantId;
 import com.asc.common.core.domain.value.UserId;
 import com.asc.common.core.domain.value.enums.AuthenticationMethod;
+import com.asc.common.service.ports.output.message.publisher.AuthorizationMessagePublisher;
+import com.asc.common.service.transfer.message.ClientRemovedEvent;
 import com.asc.common.service.transfer.response.ClientResponse;
 import com.asc.common.utilities.crypto.EncryptionService;
 import com.asc.registration.core.domain.ClientDomainService;
@@ -65,6 +67,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class ClientUpdateCommandHandler {
+  private final AuthorizationMessagePublisher<ClientRemovedEvent> clientMessagePublisher;
   private final ClientCommandRepository clientCommandRepository;
   private final ClientDataMapper clientDataMapper;
   private final ClientDomainService clientDomainService;
@@ -376,6 +379,9 @@ public class ClientUpdateCommandHandler {
 
     var client = getClient(audit, role, command.getClientId(), command.getTenantId());
     var event = clientDomainService.deleteClient(audit, client);
+    // TODO: Move it later to core application service. Now we depend on getClient check
+    clientMessagePublisher.publish(
+        ClientRemovedEvent.builder().clientId(command.getClientId()).build());
     return clientCommandRepository.deleteByTenantIdAndClientId(
         event, client.getClientTenantInfo().tenantId(), client.getId());
   }
@@ -398,6 +404,72 @@ public class ClientUpdateCommandHandler {
     throw new ClientDomainException(
         String.format(
             "Could not delete client %s due to concurrent access", command.getClientId()));
+  }
+
+  /**
+   * Deletes all clients associated with a specific user and tenant.
+   *
+   * <p>This method removes all client entities created by the specified user within the given
+   * tenant. It employs retry logic with exponential backoff for handling optimistic locking
+   * failures.
+   *
+   * @param command the command containing user and tenant information
+   * @return the number of clients deleted
+   */
+  @Retryable(
+      retryFor = {OptimisticLockingFailureException.class},
+      notRecoverable = {ClientNotFoundException.class},
+      backoff = @Backoff(value = 500, multiplier = 1.65))
+  public int deleteUserClients(DeleteUserClientsCommand command) {
+    log.info("Trying to remove user clients");
+    return clientCommandRepository.deleteAllByTenantIdAndCreatedBy(
+        new TenantId(command.getTenantId()), new UserId(command.getUserId()));
+  }
+
+  /**
+   * Fallback for user clients deletion on optimistic locking failure.
+   *
+   * @param e the optimistic locking exception
+   * @param command the command containing user and tenant information
+   * @throws ClientDomainException always thrown due to concurrent access issues
+   */
+  @Recover
+  public void recoverDeleteUserClients(
+      OptimisticLockingFailureException e, DeleteUserClientsCommand command) {
+    throw new ClientDomainException(
+        String.format(
+            "Could not delete user %s clients due to concurrent access", command.getUserId()));
+  }
+
+  /**
+   * Deletes all clients associated with a specific tenant.
+   *
+   * <p>This method removes all client entities belonging to the specified tenant. It employs retry
+   * logic with exponential backoff for handling optimistic locking failures.
+   *
+   * @param tenantId the tenant identifier
+   * @return the number of clients deleted
+   */
+  @Retryable(
+      retryFor = {OptimisticLockingFailureException.class},
+      notRecoverable = {ClientNotFoundException.class},
+      backoff = @Backoff(value = 500, multiplier = 1.65))
+  public int deleteTenantClients(long tenantId) {
+    log.info("Trying to remove tenant clients");
+    return clientCommandRepository.deleteAllByTenantId(new TenantId(tenantId));
+  }
+
+  /**
+   * Fallback for tenant clients deletion on optimistic locking failure.
+   *
+   * @param e the optimistic locking exception
+   * @param tenantId the tenant identifier
+   * @throws ClientDomainException always thrown due to concurrent access issues
+   */
+  @Recover
+  public void recoverDeleteTenantClients(OptimisticLockingFailureException e, long tenantId) {
+    throw new ClientDomainException(
+        String.format("Could not delete tenant %d clients due to concurrent access", tenantId));
   }
 
   /**

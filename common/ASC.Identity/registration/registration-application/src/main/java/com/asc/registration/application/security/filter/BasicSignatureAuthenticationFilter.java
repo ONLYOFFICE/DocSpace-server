@@ -64,7 +64,7 @@ public class BasicSignatureAuthenticationFilter extends OncePerRequestFilter {
    * Performs filtering of incoming HTTP requests to authenticate requests containing the signature
    * header.
    *
-   * <p>If the {@code x-signature} cookie is present in the request, the token is validated and
+   * <p>If the {@code x-signature} is present in the request, the token is validated and
    * authenticated using the {@link AuthenticationManager}. On successful authentication, the
    * security context is updated with the authenticated token. If authentication fails, the response
    * is set to {@code 403 Forbidden}.
@@ -82,11 +82,12 @@ public class BasicSignatureAuthenticationFilter extends OncePerRequestFilter {
         Arrays.stream(Optional.ofNullable(request.getCookies()).orElse(new Cookie[0]))
             .filter(c -> c.getName().equalsIgnoreCase(SIGNATURE_COOKIE))
             .findFirst()
-            .orElse(null);
-    if (token == null || token.getValue().isBlank()) {
+            .map(Cookie::getValue)
+            .orElseGet(() -> request.getHeader(SIGNATURE_COOKIE));
+
+    if (token == null || token.isBlank()) {
       log.debug(
-          "Authentication signature {} is missing, passing the request down the filter chain",
-          SIGNATURE_COOKIE);
+          "Authentication signature is missing in both cookie and header, passing the request down the filter chain");
       chain.doFilter(request, response);
       return;
     }
@@ -95,7 +96,7 @@ public class BasicSignatureAuthenticationFilter extends OncePerRequestFilter {
       MDC.put("request_uri", request.getRequestURI());
       log.debug("Validating user");
 
-      var authentication = new BasicSignatureToken(token.getValue());
+      var authentication = new BasicSignatureToken(token);
       authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
       var authenticated = authenticationManager.authenticate(authentication);

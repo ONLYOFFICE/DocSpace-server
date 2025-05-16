@@ -46,10 +46,8 @@ public class FileMarkerCache
         return _cache.Get<T>(key);
     }
 
-    public async Task InsertAsync(string key, object value)
+    public void Insert(string key, object value)
     {
-        await _notify.PublishAsync(new FileMarkerCacheItem { Key = key }, CacheNotifyAction.Remove);
-
         _cache.Insert(key, value, _cacheExpiration);
     }
 
@@ -94,7 +92,11 @@ public class FileMarker(
     internal async Task ExecMarkFileAsNewAsync<T>(AsyncTaskData<T> obj, SocketManager socketManager)
     {
         await tenantManager.SetCurrentTenantAsync(obj.TenantId);
-        await authContext.AuthenticateMeWithoutCookieAsync(obj.CurrentAccountId);
+
+        if (obj.CurrentAccountId != ASC.Core.Configuration.Constants.Guest.ID)
+        {
+            await authContext.AuthenticateMeWithoutCookieAsync(obj.CurrentAccountId);
+        }
         
         FileEntry<T> fileEntry;
 
@@ -711,7 +713,7 @@ public class FileMarker(
             var requestTags = tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, await folderDao.GetFolderAsync(rootId));
             var requestTag = await requestTags.FirstOrDefaultAsync(tag => tag.EntryType == FileEntryType.Folder && tag.EntryId.Equals(rootId));
             var count = requestTag?.Count ?? 0;
-            await InsertToCacheAsync(rootId, count);
+            InsertToCache(rootId, count);
 
             return count;
         }
@@ -1218,10 +1220,10 @@ public class FileMarker(
         return MarkResult.Marked;
     }
 
-    private async Task InsertToCacheAsync(object folderId, int count)
+    private void InsertToCache(object folderId, int count)
     {
         var key = string.Format(CacheKeyFormat, authContext.CurrentAccount.ID, folderId);
-        await fileMarkerCache.InsertAsync(key, count.ToString());
+        fileMarkerCache.Insert(key, count.ToString());
     }
 
     private int GetCountFromCache(object folderId)

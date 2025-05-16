@@ -186,7 +186,7 @@ public class SsoHandlerService
                     if (!Equals(userInfo, authenticatedUserInfo))
                     {
                         var loginName = authenticatedUserInfo.DisplayUserName(false, _displayUserSettingsHelper);
-                        _messageService.Send(loginName, MessageAction.Logout);
+                        _messageService.SendLoginMessage(MessageAction.Logout, loginName);
                         await _cookiesManager.ResetUserCookieAsync();
                         _securityContext.Logout();
                     }
@@ -234,7 +234,7 @@ public class SsoHandlerService
                 await _securityContext.AuthenticateMeWithoutCookieAsync(userInfo.Id);
 
                 var loginName = userInfo.DisplayUserName(false, _displayUserSettingsHelper);
-                _messageService.Send(loginName, MessageAction.Logout);
+                _messageService.SendLoginMessage(MessageAction.Logout, loginName);
 
                 await _cookiesManager.ResetUserCookieAsync();
                 _securityContext.Logout();

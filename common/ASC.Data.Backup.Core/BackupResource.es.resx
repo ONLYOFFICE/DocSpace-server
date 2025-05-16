@@ -126,4 +126,13 @@
   <data name="LargeBackup" xml:space="preserve">
     <value>La copia de seguridad es mayor que el tamaño total del portal</value>
   </data>
+  <data name="BackupException" xml:space="preserve">
+    <value>Se ha producido un error al crear la copia de seguridad. Por favor, intente crearla de nuevo o póngase en contacto con el equipo de soporte.</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>Se ha producido un error al restaurar la copia de seguridad. Por favor, intente restaurarla de nuevo o póngase en contacto con el equipo de soporte.</value>
+  </data>
+  <data name="BackupInvalid" xml:space="preserve">
+    <value>El archivo de copia de seguridad no es válido.</value>
+  </data>
 </root>

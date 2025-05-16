@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Common.Identity;
 using ASC.Web.Core.WebZones;
 
 using SecurityContext = ASC.Core.SecurityContext;
@@ -91,7 +92,7 @@ public class RemoveProgressItem : DistributedTaskProgress
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var scopeClass = scope.ServiceProvider.GetService<RemoveProgressItemScope>();
-        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, webItemManagerSecurity,  userFormatter, options) = scopeClass;
+        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, webItemManagerSecurity,  userFormatter, options, client) = scopeClass;
         var logger = options.CreateLogger("ASC.Web");
         await tenantManager.SetCurrentTenantAsync(_tenantId);
         var userName = userFormatter.GetUserName(User);
@@ -113,12 +114,9 @@ public class RemoveProgressItem : DistributedTaskProgress
 
             var wrapper = await GetUsageSpace(webItemManagerSecurity);
 
-            if (!IsGuest)
-            {
-                await fileStorageService.MoveSharedFilesAsync(UserId, _currentUserId);
-                Percentage = 30;
-                await PublishChanges();
-            }
+            await fileStorageService.MoveSharedFilesAsync(UserId, _currentUserId);
+            Percentage = 30;
+            await PublishChanges();
 
             await fileStorageService.DeletePersonalDataAsync(UserId);
 
@@ -140,6 +138,7 @@ public class RemoveProgressItem : DistributedTaskProgress
 
             if (_deleteProfile)
             {
+                await client.DeleteClientsAsync(UserId);
                 await DeleteUserProfile(userManager, userPhotoManager, messageService, userName);
             }
 
@@ -268,7 +267,8 @@ public record RemoveProgressItemScope(
     UserPhotoManager UserPhotoManager,
     WebItemManagerSecurity WebItemManagerSecurity,
     UserFormatter UserFormatter,
-    ILoggerProvider Options);
+    ILoggerProvider Options,
+    IdentityClient Client);
 
 class UsageSpaceWrapper
 {

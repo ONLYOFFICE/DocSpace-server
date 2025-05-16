@@ -126,4 +126,13 @@
   <data name="LargeBackup" xml:space="preserve">
     <value>Backup ist größer als die Gesamtgröße des Portals</value>
   </data>
+  <data name="BackupException" xml:space="preserve">
+    <value>Beim Erstellen der Sicherung ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut oder wenden Sie sich an den Support.</value>
+  </data>
+  <data name="BackupInvalid" xml:space="preserve">
+    <value>Die Sicherungsdatei ist ungültig.</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>Beim Wiederherstellen der Sicherung ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut oder wenden Sie sich an den Support.</value>
+  </data>
 </root>

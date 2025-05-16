@@ -1072,4 +1072,13 @@
   <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
     <value>관리자 수가 제한을 초과했습니다: {0}/{1}.</value>
   </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>허용된 IP 주소를 최소 1개 추가하세요.</value>
+  </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>비영리</value>
+  </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>Webhook URL을 이용할 수 없습니다. HEAD 요청은 200 http 상태에 대한 응답이 아닙니다.</value>
+  </data>
 </root>

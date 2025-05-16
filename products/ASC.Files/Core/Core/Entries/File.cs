@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core;
 
+/// <summary>
+/// The file status.
+/// </summary>
 [Flags]
 public enum FileStatus
 {
@@ -54,9 +57,15 @@ public enum FileStatus
     IsTemplate = 0x40,
 
     [SwaggerEnum(Description = "Is fill form draft")]
-    IsFillFormDraft = 0x80
+    IsFillFormDraft = 0x80,
+
+    [SwaggerEnum(Description = "Is completed form")]
+    IsCompletedForm = 0x100
 }
 
+/// <summary>
+/// The file parameters.
+/// </summary>
 [Transient(GenericArguments = [typeof(int)])]
 [Transient(GenericArguments = [typeof(string)])]
 [DebuggerDisplay("{Title} ({Id} v{Version})")]
@@ -80,19 +89,49 @@ public class File<T> : FileEntry<T>
         FileEntryType = FileEntryType.File;
     }
 
+    public FileStatus FileStatus
+    {
+        get { return _status; }
+        set { _status = value; }
+    }
+    /// <summary>
+    /// The file version.
+    /// </summary>
     public int Version { get; set; }
+
+    /// <summary>
+    /// The file version group.
+    /// </summary>
     public int VersionGroup { get; set; }
+
+    /// <summary>
+    /// The file comment.
+    /// </summary>
     public string Comment { get; set; }
+
+    /// <summary>
+    /// The file pure title.
+    /// </summary>
     public string PureTitle
     {
         get => base.Title;
         set => base.Title = value;
     }
+
+    /// <summary>
+    /// The file content length.
+    /// </summary>
     public long ContentLength { get; set; }
 
+    /// <summary>
+    /// The file content length in the string format.
+    /// </summary>
     [JsonIgnore]
     public string ContentLengthString => FileSizeComment.FilesSizeToString(ContentLength);
 
+    /// <summary>
+    /// The file filter type.
+    /// </summary>
     [JsonIgnore]
     public FilterType FilterType
     {
@@ -121,27 +160,50 @@ public class File<T> : FileEntry<T>
             return FilterType.None;
         }
     }
-
+    /// <summary>
+    /// Returns the file status.
+    /// </summary>
     public async Task<FileStatus> GetFileStatus()
     {
         _status = await FileHelper.GetFileStatus(this, _status);
         return _status;
     }
 
+    /// <summary>
+    /// Sets the file status.
+    /// </summary>
     public void SetFileStatus(FileStatus value) => _status = value;
 
+    /// <summary>
+    /// Sets the file unique ID.
+    /// </summary>
     public override string UniqID => $"file_{Id}";
 
+    /// <summary>
+    /// The file title.
+    /// </summary>
     [JsonIgnore]
     public override string Title => FileHelper.GetTitle(this);
 
-
+    /// <summary>
+    /// The file download URL.
+    /// </summary>
     [JsonIgnore]
     public string DownloadUrl => FileHelper.GetDownloadUrl(this);
 
+    /// <summary>
+    /// Specifies whether the file is locked or not.
+    /// </summary>
     public bool Locked { get; set; }
+    
+    /// <summary>
+    /// The name of the user who locked the file.
+    /// </summary>
     public string LockedBy { get; set; }
 
+    /// <summary>
+    /// Specifies if the file is a form or not.
+    /// </summary>
     public bool IsForm {
         get
         {
@@ -149,11 +211,24 @@ public class File<T> : FileEntry<T>
         }
     }
 
+    /// <summary>
+    /// Specifies if a Custom Filter editing mode is enabled for a file or not.
+    /// </summary>
     public bool CustomFilterEnabled { get; set; }
+
+    /// <summary>
+    /// The name of the user who enabled a Custom Filter editing mode for a file.
+    /// </summary>
     public string CustomFilterEnabledBy { get; set; }
 
+    /// <summary>
+    /// The file category.
+    /// </summary>
     public int Category { get; set; }
 
+    /// <summary>
+    /// Specifies whether the file is new or not.
+    /// </summary>
     [JsonIgnore]
     public override bool IsNew
     {
@@ -171,6 +246,9 @@ public class File<T> : FileEntry<T>
         }
     }
 
+    /// <summary>
+    /// Specifies whether the file is favorite or not.
+    /// </summary>
     [JsonIgnore]
     public bool IsFavorite
     {
@@ -188,6 +266,29 @@ public class File<T> : FileEntry<T>
         }
     }
 
+    /// <summary>
+    /// Specifies whether the form filling is completed.
+    /// </summary>
+    [JsonIgnore]
+    public bool IsCompletedForm
+    {
+        get => (_status & FileStatus.IsCompletedForm) == FileStatus.IsCompletedForm;
+        set
+        {
+            if (value)
+            {
+                _status |= FileStatus.IsCompletedForm;
+            }
+            else
+            {
+                _status &= ~FileStatus.IsCompletedForm;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Specifies whether the file is a template or not.
+    /// </summary>
     [JsonIgnore]
     public bool IsTemplate
     {
@@ -205,11 +306,29 @@ public class File<T> : FileEntry<T>
         }
     }
 
+    /// <summary>
+    /// Specifies whether the file is encrypted or not.
+    /// </summary>
     public bool Encrypted { get; set; }
+
+    /// <summary>
+    /// The file thumbnail status.
+    /// </summary>
     public Thumbnail ThumbnailStatus { get; set; }
+
+    /// <summary>
+    /// The file force save type.
+    /// </summary>
     public ForcesaveType Forcesave { get; set; }
+
+    /// <summary>
+    /// The file converted type.
+    /// </summary>
     public string ConvertedType { get; set; }
 
+    /// <summary>
+    /// The file converted extension.
+    /// </summary>
     [JsonIgnore]
     public string ConvertedExtension
     {
@@ -232,13 +351,34 @@ public class File<T> : FileEntry<T>
         }
     }
     
+    /// <summary>
+    /// The date and time when the file was last opened.
+    /// </summary>
     public DateTime? LastOpened { get; set; }
+
+    /// <summary>
+    /// The file form information.
+    /// </summary>
     public FormInfo<T> FormInfo { get; set; }
 }
 
+/// <summary>
+/// The file form information.
+/// </summary>
 public record FormInfo<T>
 {
+    /// <summary>
+    /// The linked ID of the form.
+    /// </summary>
     public T LinkedId { get; init; }
+
+    /// <summary>
+    /// The form properties.
+    /// </summary>
     public EntryProperties<T> Properties { get; init; }
-    public static  FormInfo<T> Empty => new();
+    
+    /// <summary>
+    /// The empty form information.
+    /// </summary>
+    public static FormInfo<T> Empty => new();
 }

@@ -27,12 +27,12 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// Theme settings request parameters
+/// The theme settings request parameters.
 /// </summary>
 public class DarkThemeSettingsRequestDto
 {
     /// <summary>
-    /// Portal theme
+    /// The portal theme settings type.
     /// </summary>
     public DarkThemeSettingsType Theme { get; set; }
 }

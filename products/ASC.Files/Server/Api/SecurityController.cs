@@ -161,8 +161,9 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     }
 
     /// <summary>
-    /// Gets groups memebers with folder security
+    /// Returns the group memebers with their folder security information.
     /// </summary>
+    /// <short>Get group members with security information</short>
     /// <path>api/2.0/files/folder/{folderId}/group/{groupId}/share</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
@@ -198,7 +199,6 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
         BruteForceLoginManager bruteForceLoginManager,
-        IHttpContextAccessor httpContextAccessor,
         ExternalLinkHelper externalLinkHelper,
         IMapper mapper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
@@ -329,7 +329,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     [HttpPost("share/{key}/password")]
     public async Task<ExternalShareDto> ApplyExternalSharePasswordAsync(ExternalShareRequestDto inDto)
     {
-        var ip = MessageSettings.GetIP(httpContextAccessor.HttpContext?.Request);
+        var ip = MessageSettings.GetIP(Request);
         
         await bruteForceLoginManager.IncrementAsync(inDto.Key, ip, true, FilesCommonResource.ErrorMessage_SharePasswordManyAttempts);
         

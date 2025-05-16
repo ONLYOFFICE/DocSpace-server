@@ -89,7 +89,7 @@ public class CommonMethods(
 
     private async Task<string> CallSendMethod(string requestUriScheme, string apiMethod, HttpMethod httpMethod, Tenant tenant, ConfirmType confirmType, bool skipAndReturnUrl)
     {
-        var validationKey = emailValidationKeyProvider.GetEmailKey(tenant.Id, tenant.OwnerId.ToString() + confirmType);
+        var validationKey = emailValidationKeyProvider.GetEmailKey(tenant.OwnerId.ToString() + confirmType, tenant.Id);
 
         var url = string.Format("{0}{1}{2}{3}{4}?userid={5}&key={6}",
                             requestUriScheme,
@@ -210,6 +210,11 @@ public class CommonMethods(
 
         var tenants = await hostedSolution.FindTenantsAsync(email, passwordHash);
 
+        if (tenants.Count == 0)
+        {
+            throw new Exception("Invalid login or password.");
+        }
+
         return tenants;
     }
 
@@ -286,6 +291,16 @@ public class CommonMethods(
 
     public string GetClientIp()
     {
+        var request = httpContextAccessor.HttpContext?.Request;
+        if (request != null)
+        {
+            var header = request.Headers["X-Forwarded-For"].FirstOrDefault();
+            if (!string.IsNullOrEmpty(header))
+            {
+                return header.Split(',').First();
+            }
+        }
+
         return httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
 
         //TODO: check old version

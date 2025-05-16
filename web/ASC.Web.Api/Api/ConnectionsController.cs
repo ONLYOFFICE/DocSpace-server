@@ -121,7 +121,7 @@ public class ConnectionsController(
 
         async Task<BaseEvent> GetBaseEvent()
         {
-            var request = httpContextAccessor.HttpContext.Request;
+            var request = Request;
             var uaHeader = MessageSettings.GetUAHeader(request);
             var clientInfo = MessageSettings.GetClientInfo(uaHeader);
             var platformAndDevice = MessageSettings.GetPlatformAndDevice(clientInfo);
@@ -141,7 +141,7 @@ public class ConnectionsController(
     }
 
     /// <summary>
-    /// Logs out from all the active connections of the current user and changes their password.
+    /// Logs out from all the active connections for the current user and changes their password.
     /// </summary>
     /// <short>
     /// Log out and change password
@@ -179,7 +179,7 @@ public class ConnectionsController(
     }
 
     /// <summary>
-    /// Logs out from all the active connections of the user with the ID specified in the request.
+    /// Logs out from all the active connections for the user with the ID specified in the request.
     /// </summary>
     /// <short>
     /// Log out for the user by ID
@@ -206,7 +206,7 @@ public class ConnectionsController(
     /// Logs out from all the active connections except the current connection.
     /// </summary>
     /// <short>
-    /// Log out from all connections
+    /// Log out from all connections except the current one
     /// </short>
     /// <path>api/2.0/security/activeconnections/logoutallexceptthis</path>
     [Tags("Security / Active connections")]

@@ -1415,8 +1415,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasKey("Id")
                         .HasName("PRIMARY");
 
-                    b.HasIndex("IsActive")
-                        .HasDatabaseName("is_active");
+                    b.HasIndex("ExpiresAt")
+                        .HasDatabaseName("expires_at");
 
                     b.HasIndex("TenantId", "HashedKey")
                         .HasDatabaseName("hashed_key");
@@ -1492,6 +1492,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Property<int>("AuditEventId")
                         .HasColumnType("int")
                         .HasColumnName("audit_event_id");
+
+                    b.Property<bool>("Corrupted")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("corrupted");
 
                     b.HasKey("EntryId", "EntryType", "AuditEventId")
                         .HasName("PRIMARY");
@@ -5981,8 +5985,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("form_id");
 
                     b.Property<string>("RoleName")
-                        .IsRequired()
-                        .HasColumnType("varchar(255)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar")
                         .HasColumnName("role_name")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -5998,7 +6002,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("opened_at");
 
                     b.Property<string>("RoleColor")
-                        .HasColumnType("char(6)")
+                        .HasMaxLength(6)
+                        .HasColumnType("char")
                         .HasColumnName("role_color")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");

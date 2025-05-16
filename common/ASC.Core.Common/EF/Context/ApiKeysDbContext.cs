@@ -55,6 +55,12 @@ public class ApiKeysDbContext(DbContextOptions<ApiKeysDbContext> options) : Base
     {
         return Queries.GetApiKeyAsync(this, tenantId, keyId);
     }
+    
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    public Task<ApiKey> GetApiKeyAsync(int tenantId, string hashedKey)
+    {
+        return Queries.GetApiKeyByHashedKeyAsync(this, tenantId, hashedKey);
+    }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt])]
     public IAsyncEnumerable<ApiKey> GetAllApiKeyAsync(int tenantId)
@@ -93,6 +99,11 @@ static file class Queries
                 ctx.DbApiKey.FirstOrDefault(r => r.TenantId == tenantId && r.HashedKey == hashedKey && r.IsActive &&
                                                  (r.ExpiresAt == null || r.ExpiresAt > DateTime.UtcNow)));
 
+    public static readonly Func<ApiKeysDbContext, int, string, Task<ApiKey>> GetApiKeyByHashedKeyAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (ApiKeysDbContext ctx, int tenantId, string hashedKey) =>
+                ctx.DbApiKey.FirstOrDefault(r => r.TenantId == tenantId && r.HashedKey == hashedKey));
+    
     public static readonly Func<ApiKeysDbContext, int, Guid, Task<ApiKey>> GetApiKeyAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (ApiKeysDbContext ctx, int tenantId, Guid keyId) =>

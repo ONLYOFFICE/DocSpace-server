@@ -103,4 +103,7 @@
   <data name="ReadyFormFolder" xml:space="preserve">
     <value>Готово</value>
   </data>
+  <data name="RoomTemplates" xml:space="preserve">
+    <value>Шаблоны</value>
+  </data>
 </root>

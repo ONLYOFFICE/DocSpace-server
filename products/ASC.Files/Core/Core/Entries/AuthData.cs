@@ -26,37 +26,40 @@
 
 namespace ASC.Files.Core;
 
+/// <summary>
+/// The authentication data.
+/// </summary>
 [DebuggerDisplay("{Login} {Password} {RawToken} {Url}")]
 public class AuthData(string url = null, string login = null, string password = null, string token = null, string provider = null)
 {
     /// <summary>
-    /// Login
+    /// The authentication login.
     /// </summary>
     public string Login { get; init; } = login ?? string.Empty;
 
     /// <summary>
-    /// Password
+    /// The authentication password.
     /// </summary>
     public string Password { get; init; } = password ?? string.Empty;
 
     /// <summary>
-    /// Raw token
+    /// The authentication raw token.
     /// </summary>
     public string RawToken { get; init; } = token ?? string.Empty;
 
     /// <summary>
-    /// Url
+    /// The authentication URL.
     /// </summary>
     [Url]
     public string Url { get; set; } = url ?? string.Empty;
 
     /// <summary>
-    /// Provider
+    /// The authentication provider.
     /// </summary>
     public string Provider { get; init; } = provider ?? string.Empty;
 
     /// <summary>
-    /// Token
+    /// The authentication token.
     /// </summary>
     public OAuth20Token Token
     {

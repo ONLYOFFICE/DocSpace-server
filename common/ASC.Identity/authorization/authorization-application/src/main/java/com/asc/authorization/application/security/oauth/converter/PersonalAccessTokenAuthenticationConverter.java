@@ -123,8 +123,11 @@ public final class PersonalAccessTokenAuthenticationConverter implements Authent
                     c.getName()
                         .equalsIgnoreCase(securityConfigurationProperties.getSignatureCookie()))
             .findFirst()
-            .orElse(null);
-    if (token == null || token.getValue().isBlank()) {
+            .map(Cookie::getValue)
+            .orElseGet(
+                () -> request.getHeader(securityConfigurationProperties.getSignatureCookie()));
+
+    if (token == null || token.isBlank()) {
       log.error("Signature not found");
       throwError(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT, OAuth2ParameterNames.PASSWORD);
       return null;
@@ -132,7 +135,7 @@ public final class PersonalAccessTokenAuthenticationConverter implements Authent
 
     try (var ignored =
         MDC.putCloseable("client_id", parameters.get(OAuth2ParameterNames.CLIENT_ID).getFirst())) {
-      var signature = signatureService.validate(token.getValue(), BasicSignature.class);
+      var signature = signatureService.validate(token, BasicSignature.class);
       setRequestAttributes(request, signature);
 
       log.debug("Conversion to PersonalAccessTokenAuthenticationToken successful");

@@ -72,6 +72,7 @@ public class AuthenticationController(
     InvitationService invitationService,
     UserSocketManager socketManager,
     LoginProfileTransport loginProfileTransport,
+    AuditEventsRepository auditEventsRepository,
     IMapper mapper)
     : ControllerBase
 {
@@ -124,6 +125,7 @@ public class AuthenticationController(
                 if (await tfaManager.ValidateAuthCodeAsync(user, inDto.Code, true, true))
                 {
                     messageService.Send(MessageAction.UserConnectedTfaApp, MessageTarget.Create(user.Id));
+                    await socketManager.UpdateUserAsync(userManager.GetUsers(authContext.CurrentAccount.ID));
                 }
             }
             else
@@ -154,10 +156,9 @@ public class AuthenticationController(
         }
         catch (Exception ex)
         {
-            messageService.Send(user.DisplayUserName(false, displayUserSettingsHelper), sms
-                                                                          ? MessageAction.LoginFailViaApiSms
-                                                                          : MessageAction.LoginFailViaApiTfa,
-                                MessageTarget.Create(user.Id));
+            messageService.SendLoginMessage(sms ? MessageAction.LoginFailViaApiSms : MessageAction.LoginFailViaApiTfa,
+                                    user.DisplayUserName(false, displayUserSettingsHelper),
+                                    MessageTarget.Create(user.Id));
             throw new AuthenticationException("User authentication failed", ex);
         }
         finally
@@ -223,7 +224,9 @@ public class AuthenticationController(
 
         if (tfaAppAuthSettingsHelper.IsVisibleSettings && await tfaAppAuthSettingsHelper.TfaEnabledForUserAsync(user.Id))
         {
-            if (!await TfaAppUserSettings.EnableForUserAsync(settingsManager, user.Id))
+            var tfaExpired = await TfaAppUserSettings.TfaExpiredAndResetAsync(settingsManager, auditEventsRepository, user.Id);
+            
+            if (tfaExpired || !await TfaAppUserSettings.EnableForUserAsync(settingsManager, user.Id))
             {
                 var (urlActivation, keyActivation) = commonLinkUtility.GetConfirmationUrlAndKey(user.Email, ConfirmType.TfaActivation);
                 await cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, keyActivation, true, $"_{ConfirmType.TfaActivation}");
@@ -272,7 +275,7 @@ public class AuthenticationController(
         }
         catch (Exception ex)
         {
-            messageService.Send(user.DisplayUserName(false, displayUserSettingsHelper), viaEmail ? MessageAction.LoginFailViaApi : MessageAction.LoginFailViaApiSocialAccount);
+            messageService.SendLoginMessage(viaEmail ? MessageAction.LoginFailViaApi : MessageAction.LoginFailViaApiSocialAccount, user.DisplayUserName(false, displayUserSettingsHelper));
             throw new AuthenticationException("User authentication failed", ex);
         }
         finally
@@ -303,7 +306,7 @@ public class AuthenticationController(
 
         var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
         var loginName = user.DisplayUserName(false, displayUserSettingsHelper);
-        messageService.Send(loginName, MessageAction.Logout);
+        messageService.SendLoginMessage(MessageAction.Logout, loginName);
 
         cookiesManager.ClearCookies(CookiesType.AuthKey);
         cookiesManager.ClearCookies(CookiesType.SocketIO);
@@ -438,6 +441,8 @@ public class AuthenticationController(
                                    ? await userManager.GetUserByEmailAsync(email)
                                    : await userManager.GetUsersAsync(new Guid(email));
 
+                    messageService.SendLoginMessage(MessageAction.AuthLinkActivated, email, inDto.ConfirmData.Key);
+
                     if (securityContext.IsAuthenticated && securityContext.CurrentAccount.ID != user.Id)
                     {
                         securityContext.Logout();
@@ -505,17 +510,17 @@ public class AuthenticationController(
         }
         catch (BruteForceCredentialException)
         {
-            messageService.Send(!string.IsNullOrEmpty(inDto.UserName) ? inDto.UserName : AuditResource.EmailNotSpecified, MessageAction.LoginFailBruteForce);
+            messageService.SendLoginMessage(MessageAction.LoginFailBruteForce, !string.IsNullOrEmpty(inDto.UserName) ? inDto.UserName : AuditResource.EmailNotSpecified);
             throw new BruteForceCredentialException(Resource.ErrorTooManyLoginAttempts);
         }
         catch (RecaptchaException)
         {
-            messageService.Send(!string.IsNullOrEmpty(inDto.UserName) ? inDto.UserName : AuditResource.EmailNotSpecified, MessageAction.LoginFailRecaptcha);
+            messageService.SendLoginMessage(MessageAction.LoginFailRecaptcha, !string.IsNullOrEmpty(inDto.UserName) ? inDto.UserName : AuditResource.EmailNotSpecified);
             throw new RecaptchaException(Resource.RecaptchaInvalid);
         }
         catch (Exception ex)
         {
-            messageService.Send(!string.IsNullOrEmpty(inDto.UserName) ? inDto.UserName : AuditResource.EmailNotSpecified, action);
+            messageService.SendLoginMessage(action, !string.IsNullOrEmpty(inDto.UserName) ? inDto.UserName : AuditResource.EmailNotSpecified);
             throw new AuthenticationException("User authentication failed", ex);
         }
         wrapper.UserInfo = user;

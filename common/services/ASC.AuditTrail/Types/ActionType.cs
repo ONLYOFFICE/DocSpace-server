@@ -26,6 +26,9 @@
 
 namespace ASC.AuditTrail.Types;
 
+/// <summary>
+/// The action type.
+/// </summary>
 [EnumExtensions]
 public enum ActionType
 {

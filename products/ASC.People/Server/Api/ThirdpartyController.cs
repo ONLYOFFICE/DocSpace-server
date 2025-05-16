@@ -28,6 +28,9 @@ using Constants = ASC.Core.Configuration.Constants;
 
 namespace ASC.People.Api;
 
+///<summary>
+/// Third-party API.
+///</summary>
 [DefaultRoute("thirdparty")]
 public class ThirdpartyController(
     AccountLinker accountLinker,
@@ -192,24 +195,20 @@ public class ThirdpartyController(
         var employeeType = linkData.EmployeeType;
         var quotaLimit = false;
 
-        UserInfo user;
-        if(!string.IsNullOrEmpty(thirdPartyProfile.EMail) && !string.IsNullOrEmpty(thirdPartyProfile.HashId))
+        var user = await userManager.GetUserByEmailAsync(thirdPartyProfile.EMail);
+        if (user.Id != ASC.Core.Users.Constants.LostUser.Id)
         {
-            user = await userManager.GetUserByEmailAsync(thirdPartyProfile.EMail);
-            if (user.Id != ASC.Core.Users.Constants.LostUser.Id)
+            if (!(await accountLinker.GetLinkedProfilesAsync(user.Id.ToString(), thirdPartyProfile.Provider)).Any())
             {
-                if (!(await accountLinker.GetLinkedProfilesAsync(user.Id.ToString(), thirdPartyProfile.Provider)).Any())
-                {
-                    await accountLinker.AddLinkAsync(user.Id, thirdPartyProfile);
-                }
-
-                await cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id);
+                await accountLinker.AddLinkAsync(user.Id, thirdPartyProfile);
             }
+
+            await cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id);
         }
         else
         {
             Guid userId;
-            
+
             try
             {
                 await securityContext.AuthenticateMeWithoutCookieAsync(Constants.CoreSystem);

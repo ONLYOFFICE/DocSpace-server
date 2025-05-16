@@ -930,4 +930,46 @@
   <data name="UpdateClient" xml:space="preserve">
     <value>{0} 클라이언트가 업데이트되었습니다</value>
   </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>개발자 도구 액세스 설정이 변경되었습니다</value>
+  </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>파일: {0}. 사용자 지정 필터가 비활성화되었습니다</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>파일: {0}. 사용자 지정 필터가 활성화되었습니다</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>파일 [{0}]. 버전이 삭제되었습니다: {1}</value>
+  </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>사용자 API 키가 생성됨: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>사용자 API 키가 삭제되었습니다: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>사용자 API 키가 업데이트되었습니다: {0}</value>
+  </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>사용자 [{0}]. 양식 작성이 완료되었습니다: {1}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>사용자 [{0}]. 양식의 일부가 작성되었습니다: {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>사용자 [{0}]. 양식이 중지되었습니다: {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>사용자 [{0}]. 작성이 시작되었습니다: {1}</value>
+  </data>
+  <data name="WebhookCreated" xml:space="preserve">
+    <value>웹훅이 생성되었습니다: {0}</value>
+  </data>
+  <data name="WebhookDeleted" xml:space="preserve">
+    <value>웹훅이 삭제되었습니다: {0}</value>
+  </data>
+  <data name="WebhookUpdated" xml:space="preserve">
+    <value>웹훅이 업데이트되었습니다: {0}</value>
+  </data>
 </root>

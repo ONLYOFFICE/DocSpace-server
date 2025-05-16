@@ -29,6 +29,7 @@ package com.asc.registration.application.transfer;
 
 import com.asc.common.utilities.validation.URLCollection;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -37,10 +38,10 @@ import java.util.Set;
 import lombok.*;
 
 /**
- * UpdateTenantClientCommandRequest is a data transfer object (DTO) used in the REST layer. It
- * represents a request to update an existing tenant client. This class contains the necessary
- * information to update a client for a tenant. It implements {@link Serializable} to allow
- * instances of this class to be serialized.
+ * UpdateClientRequest is a data transfer object (DTO) used in the REST layer. It represents a
+ * request to update an existing tenant client. This class contains the necessary information to
+ * update a client for a tenant. It implements {@link Serializable} to allow instances of this class
+ * to be serialized.
  *
  * <p>The class is annotated with Lombok annotations to generate boilerplate code:
  *
@@ -63,7 +64,7 @@ import lombok.*;
  * Example usage:
  *
  * <pre>{@code
- * UpdateTenantClientCommandRequest request = UpdateTenantClientCommandRequest.builder()
+ * UpdateClientRequest request = UpdateClientRequest.builder()
  *     .name("Updated Client")
  *     .description("Updated description of the client")
  *     .logo("data:image/png;base64,...")
@@ -79,12 +80,19 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdateTenantClientCommandRequest implements Serializable {
+@Schema(description = "Request to update an existing tenant client")
+public class UpdateClientRequest implements Serializable {
   /** The name of the client. This field must not be blank. */
-  @NotBlank private String name;
+  @Schema(description = "The name of the client", example = "Updated Client")
+  @NotBlank
+  private String name;
 
   /** The description of the client. */
   @Size(max = 255, message = "client description length is expected to be less than 256 characters")
+  @Schema(
+      description = "The description of the client",
+      example = "Updated description of the client",
+      maxLength = 255)
   private String description;
 
   /**
@@ -95,18 +103,28 @@ public class UpdateTenantClientCommandRequest implements Serializable {
   @Pattern(
       regexp = "^data:image\\/(?:png|jpeg|jpg|svg\\+xml);base64,.*.{1,}",
       message = "client logo is expected to be passed as base64")
+  @Schema(
+      description = "The logo of the client in base64 format",
+      example = "data:image/png;base64,...")
   private String logo;
 
   /** Indicates whether PKCE is allowed for the client. */
   @JsonProperty("allow_pkce")
+  @Schema(description = "Indicates whether PKCE is allowed for the client", example = "true")
   private boolean allowPkce;
 
   /** Indicates whether client is accessibly by third-party tenants * */
   @JsonProperty("is_public")
+  @Schema(
+      description = "Indicates whether client is accessible by third-party tenants",
+      example = "false")
   private boolean isPublic;
 
   /** The allowed origins for the client. */
   @JsonProperty("allowed_origins")
   @URLCollection
+  @Schema(
+      description = "The allowed origins for the client",
+      example = "[\"http://allowed.origin\"]")
   private Set<String> allowedOrigins;
 }

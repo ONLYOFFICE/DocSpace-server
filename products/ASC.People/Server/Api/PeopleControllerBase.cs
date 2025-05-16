@@ -26,6 +26,9 @@
 
 namespace ASC.People.Api;
 
+///<summary>
+/// People API.
+///</summary>
 public abstract class PeopleControllerBase(
     UserManager userManager,
     PermissionContext permissionContext,

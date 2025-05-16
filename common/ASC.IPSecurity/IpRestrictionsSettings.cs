@@ -28,10 +28,13 @@ using System.Text.Json.Serialization;
 
 namespace ASC.IPSecurity;
 
+/// <summary>
+/// The IP restriction settings.
+/// </summary>
 public class IPRestrictionsSettings : ISettings<IPRestrictionsSettings>
 {
     /// <summary>
-    /// Specifies if the IP restrictions are enabled or not
+    /// Specifies if the IP restrictions are enabled or not.
     /// </summary>
     public bool Enable { get; init; }
 

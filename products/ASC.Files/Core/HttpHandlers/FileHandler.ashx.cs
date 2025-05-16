@@ -1262,6 +1262,11 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
 
         if (isForm && file.IsForm)
         {
+            var fileDao = daoFactory.GetFileDao<T>();
+            var properties = await fileDao.GetProperties(file.Id) ?? new EntryProperties<T> { FormFilling = new FormFillingProperties<T>() };
+            properties.CopyToFillOut = true;
+            await fileDao.SaveProperties(file.Id, properties);
+
             if (responseMessage)
             {
                 await FormWriteOk(context, folder, file);
@@ -1489,11 +1494,14 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             throw new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMessage_SecurityException);
         }
         TrackerData fileData;
+        
+        var requestAborted = context.RequestAborted;
+
         try
         {
             var receiveStream = context.Request.Body;
             using var readStream = new StreamReader(receiveStream);
-            var body = await readStream.ReadToEndAsync();
+            var body = await readStream.ReadToEndAsync(requestAborted);
 
             logger.DebugDocServiceTrackBody(body);
             if (string.IsNullOrEmpty(body))
@@ -1507,6 +1515,11 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 PropertyNameCaseInsensitive = true
             };
             fileData = JsonSerializer.Deserialize<TrackerData>(body, options);
+        }
+        catch (OperationCanceledException e) 
+        {
+            logger.ErrorDocServiceTrackReadBody(e);
+            throw new HttpException(StatusCodes.Status499ClientClosedRequest, "Client closed the connection prematurely");
         }
         catch (JsonException e)
         {
@@ -1588,11 +1601,11 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         catch (Exception e)
         {
             logger.ErrorDocServiceTrack(e);
-            throw new HttpException((int)HttpStatusCode.BadRequest, e.Message);
+            throw new HttpException((int)HttpStatusCode.BadRequest, e.Message, e);
         }
         result ??= new TrackResponse();
 
-        await context.Response.WriteAsync(TrackResponse.Serialize(result));
+        await context.Response.WriteAsync(TrackResponse.Serialize(result), cancellationToken: requestAborted);
     }
 }
 

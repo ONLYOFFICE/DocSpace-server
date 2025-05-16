@@ -126,4 +126,13 @@
   <data name="LargeBackup" xml:space="preserve">
     <value>备份超过门户空间总限制</value>
   </data>
+  <data name="BackupException" xml:space="preserve">
+    <value>创建备份时发生错误，请重试或联系技术支持。</value>
+  </data>
+  <data name="BackupInvalid" xml:space="preserve">
+    <value>备份文件无效。</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>恢复备份时发生错误，请重试或联系技术支持。</value>
+  </data>
 </root>

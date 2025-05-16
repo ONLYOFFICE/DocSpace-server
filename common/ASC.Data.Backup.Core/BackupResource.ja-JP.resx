@@ -126,4 +126,13 @@
   <data name="LargeBackup" xml:space="preserve">
     <value>バックアップがポータルの合計サイズより大きいです</value>
   </data>
+  <data name="BackupException" xml:space="preserve">
+    <value>バックアップの作成中に問題が発生しました。もう一度作成を試みるか、サポートに連絡してください。</value>
+  </data>
+  <data name="BackupInvalid" xml:space="preserve">
+    <value>バックアップファイルは無効です。</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>バックアップの復元中に問題が発生しました。もう一度復元を試みるか、サポートに連絡してください。</value>
+  </data>
 </root>

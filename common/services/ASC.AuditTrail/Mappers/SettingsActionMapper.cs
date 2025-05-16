@@ -82,6 +82,7 @@ internal class ProductsActionMapper : IModuleActionMapper
                     MessageAction.GreetingSettingsUpdated,MessageAction.TeamTemplateChanged,MessageAction.ColorThemeChanged,
                     MessageAction.OwnerSentPortalDeactivationInstructions, MessageAction.PortalDeactivated, MessageAction.PortalRenamed,
                     MessageAction.SSOEnabled,MessageAction.SSODisabled,MessageAction.PortalAccessSettingsUpdated,
+                    MessageAction.LdapEnabled,MessageAction.LdapDisabled,MessageAction.LdapSync,
                     MessageAction.DocumentServiceLocationSetting, MessageAction.AuthorizationKeysSetting,
                     MessageAction.FullTextSearchSetting, MessageAction.StartTransferSetting,
                     MessageAction.StartBackupSetting,MessageAction.LicenseKeyUploaded, MessageAction.StartStorageEncryption,

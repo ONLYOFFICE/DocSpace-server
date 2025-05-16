@@ -25,47 +25,27 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-package com.asc.registration.application.transfer;
+package com.asc.registration.service.transfer.request.update;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.NotNull;
-import java.io.Serializable;
+import jakarta.validation.constraints.Min;
 import lombok.*;
 
 /**
- * ChangeTenantClientActivationCommandRequest is a data transfer object (DTO) used in the REST
- * layer. It represents a request to change the activation status of a tenant's client. This class
- * contains the necessary information to change the client's activation status. It implements {@link
- * Serializable} to allow instances of this class to be serialized.
+ * Command object for deleting all clients associated with a specific tenant.
  *
- * <p>The class is annotated with Lombok annotations to generate boilerplate code:
- *
- * <ul>
- *   <li>{@link Getter} - Generates getter methods for all fields.
- *   <li>{@link Setter} - Generates setter methods for all fields.
- *   <li>{@link Builder} - Implements the builder pattern for object creation.
- *   <li>{@link NoArgsConstructor} - Generates a no-argument constructor.
- *   <li>{@link AllArgsConstructor} - Generates an all-arguments constructor.
- * </ul>
- *
- * Example usage:
- *
- * <pre>{@code
- * ChangeTenantClientActivationCommandRequest request = ChangeTenantClientActivationCommandRequest.builder()
- *     .enabled(true)
- *     .build();
- * }</pre>
- *
- * @see Serializable
+ * <p>This command contains the tenant identifier used to locate and remove all client records
+ * belonging to that tenant. It is typically used during tenant deprovisioning or cleanup
+ * operations.
  */
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChangeTenantClientActivationCommandRequest implements Serializable {
-  /** Indicates whether the client's activation status is enabled or disabled. */
-  @JsonProperty("status")
-  @NotNull
-  private boolean enabled;
+public class DeleteTenantClientsCommand {
+  /** The ID of the tenant. Must be greater than or equal to 1. */
+  @Min(value = 1, message = "tenant id must be greater than or equal to 1")
+  @JsonProperty("tenant_id")
+  private long tenantId;
 }

@@ -74,8 +74,8 @@ public static class DbApiKeyExtension
             entity.HasIndex(a => new { a.TenantId, a.HashedKey })
                 .HasDatabaseName("hashed_key");
             
-            entity.HasIndex(a => a.IsActive)
-                .HasDatabaseName("is_active");
+            entity.HasIndex(a => a.ExpiresAt)
+                .HasDatabaseName("expires_at");
             
             entity.Property(e => e.Name)
                 .HasColumnName("name")
@@ -146,8 +146,8 @@ public static class DbApiKeyExtension
             entity.HasIndex(a => new { a.TenantId, a.HashedKey })
                 .HasDatabaseName("idx_core_user_api_key_tenant_id_hashed_key");
             
-            entity.HasIndex(a => a.IsActive)
-                .HasDatabaseName("idx_core_user_api_key_is_active");
+            entity.HasIndex(a => a.ExpiresAt)
+                .HasDatabaseName("idx_core_user_api_key_expires_at");
             
             entity.Property(e => e.Name)
                 .HasColumnName("name")

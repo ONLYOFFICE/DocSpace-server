@@ -25,32 +25,27 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-package com.asc.authorization.application.controller.exception.handler;
+package com.asc.registration.service.exception;
 
-import io.github.resilience4j.ratelimiter.RequestNotPermitted;
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
+/**
+ * Exception thrown when a resource (typically a tenant or a user) has exceeded its allowed number
+ * of client registrations.
+ *
+ * <p>This exception is used to enforce resource quotas and prevent abuse or resource exhaustion in
+ * multi-tenant environments. It's typically thrown during client creation operations when a limit
+ * check fails.
+ */
+public class ExceededClientsPerResourceException extends RuntimeException {
 
-/** Global exception handler for handling rate limiter exceptions. */
-@Slf4j
-@ControllerAdvice
-public class RateLimiterExceptionHandler {
+  /** Constructs a new {@code ExceededClientsPerResourceException} with no detail message. */
+  public ExceededClientsPerResourceException() {}
 
   /**
-   * Handles {@link RequestNotPermitted} exceptions, which are thrown when a request is not
-   * permitted by the rate limiter.
+   * Constructs a new {@code ExceededClientsPerResourceException} with the specified detail message.
    *
-   * @param ex the exception that was thrown.
-   * @param request the {@link HttpServletRequest} that resulted in the exception.
-   * @return a {@link ResponseEntity} with status code 429 (Too Many Requests).
+   * @param message the detail message explaining the reason for the exception
    */
-  @ExceptionHandler(value = {RequestNotPermitted.class})
-  public ResponseEntity<?> handleRequestNotPermitted(Throwable ex, HttpServletRequest request) {
-    log.warn("Request not permitted by a rate-limiter", ex);
-    return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
+  public ExceededClientsPerResourceException(String message) {
+    super(message);
   }
 }

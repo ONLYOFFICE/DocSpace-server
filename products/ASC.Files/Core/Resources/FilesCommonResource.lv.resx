@@ -503,4 +503,13 @@ Visaugstākā saderība ar docx, xlsx, pptx.</value>
   <data name="OpenForm" xml:space="preserve">
     <value>Atvērt failu</value>
   </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Nevar dzēst pašreizējo faila versiju</value>
+  </data>
+  <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
+    <value>Dalīties, lai aizpildītu</value>
+  </data>
+  <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
+    <value>Sākt aizpildīšanu</value>
+  </data>
 </root>

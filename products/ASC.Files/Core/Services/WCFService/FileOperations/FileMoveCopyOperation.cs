@@ -41,6 +41,7 @@ public record FileMoveCopyOperationData<T> : FileOperationData<T>
         JsonElement DestFolderId,
         bool Copy,
         FileConflictResolveType ResolveType,
+        bool ToFillOut,
         bool HoldResult = true,
         IDictionary<string, string> Headers = null,
         ExternalSessionSnapshot SessionSnapshot = null) : base(Folders, Files, TenantId, UserId, Headers, SessionSnapshot, HoldResult)
@@ -48,6 +49,7 @@ public record FileMoveCopyOperationData<T> : FileOperationData<T>
         this.DestFolderId = DestFolderId.ToString();
         this.Copy = Copy;
         this.ResolveType = ResolveType;
+        this.ToFillOut = ToFillOut;
     }
 
     [ProtoMember(7)]
@@ -58,6 +60,9 @@ public record FileMoveCopyOperationData<T> : FileOperationData<T>
     
     [ProtoMember(9)]
     public FileConflictResolveType ResolveType { get; init; }
+
+    [ProtoMember(10)]
+    public bool ToFillOut { get; init; }
 }
 
 [Transient]
@@ -104,6 +109,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
     private readonly string _thirdPartyFolderId;
     private readonly bool _copy;
     private readonly FileConflictResolveType _resolveType;
+    private readonly bool _toFillOut;
     private readonly IDictionary<string, StringValues> _headers;
     private readonly Dictionary<T, Folder<T>> _parentRooms = new();
     
@@ -125,6 +131,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
     
         _copy = data.Copy;
         _resolveType = data.ResolveType;
+        _toFillOut = data.ToFillOut;
 
         _headers = data.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value));
         FileOperationType = (_copy ? FileOperationType.Copy : FileOperationType.Move);
@@ -347,7 +354,6 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var fileSecurity = scope.ServiceProvider.GetRequiredService<FileSecurity>();
         var notifyClient = scope.ServiceProvider.GetRequiredService<NotifyClient>();
         var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
-        var fileStorageService = scope.ServiceProvider.GetService<FileStorageService>();
         
         var toFolderId = toFolder.Id;
         var isToFolder = Equals(toFolderId, _daoFolderId);
@@ -679,8 +685,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
                                     newFolder = await folderDao.GetFolderAsync(newFolderId);
                                     var parentFolder = await parentFolderTask;
-
-                                    await fileStorageService.ReOrderAsync(newFolderId, true, true);
+                                    
                                     await filesMessageService.SendMoveMessageAsync(newFolder, parentFolder, toFolder, toFolderParents, true, _headers, [newFolder.Title, toFolder.Title, toFolder.Id.ToString()]);
                                     await webhookManager.PublishAsync(parentFolder.FolderType == FolderType.TRASH ? WebhookTrigger.FolderRestored : WebhookTrigger.FolderMoved, newFolder);
 
@@ -748,7 +753,6 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                             await socketManager.DeleteFolder(folder, action: async () =>
                                             {
                                                 newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
-                                                await fileStorageService.ReOrderAsync(newFolderId, true, true);
                                             });
 
                                             var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountRoomFeature, int>();
@@ -770,7 +774,6 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                     else
                                     {
                                         newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
-                                        await fileStorageService.ReOrderAsync(newFolderId, true, true);
                                     }
                                 }
                                 finally
@@ -870,7 +873,6 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var webhookManager = scope.ServiceProvider.GetService<WebhookManager>();
         var globalStorage = scope.ServiceProvider.GetService<GlobalStore>();
         var fileStorageService = scope.ServiceProvider.GetService<FileStorageService>();
-        var fileChecker = scope.ServiceProvider.GetService<FileChecker>();
         var securityContext = scope.ServiceProvider.GetService<SecurityContext>();
         var cachedFolderDao = scope.ServiceProvider.GetService<ICacheFolderDao<T>>();
 
@@ -937,7 +939,6 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                         || file.RootFolderType == FolderType.Privacy || file.Encrypted
                                        ? null
                                        : await fileDao.GetFileAsync(toFolderId, file.Title);
-                    var fileType = FileUtility.GetFileTypeByFileName(file.Title);
 
                     if (conflict == null)
                     {
@@ -959,7 +960,12 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 await webhookManager.PublishAsync(WebhookTrigger.FileCopied, newFile);
 
                                 needToMark.Add(newFile);
-
+                                if (newFile.IsForm && _toFillOut)
+                                {
+                                    var properties = await fileDao.GetProperties(newFile.Id) ?? new EntryProperties<TTo> { FormFilling = new FormFillingProperties<TTo>() };
+                                    properties.CopyToFillOut = true;
+                                    await fileDao.SaveProperties(newFile.Id, properties);
+                                }
                                 await socketManager.CreateFileAsync(newFile);
 
                                 if (ProcessedFile(fileId))
@@ -1026,7 +1032,12 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                         needToMark.Add(newFile);
                                     }
                                 }
-
+                                if (newFile.IsForm && _toFillOut)
+                                {
+                                    var properties = await fileDao.GetProperties(newFile.Id) ?? new EntryProperties<TTo> { FormFilling = new FormFillingProperties<TTo>() };
+                                    properties.CopyToFillOut = true;
+                                    await fileDao.SaveProperties(newFile.Id, properties);
+                                }
                                 await socketManager.CreateFileAsync(newFile);
 
                                 if (file.IsForm)
@@ -1085,7 +1096,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                             {
                                 Err = FilesCommonResource.ErrorMessage_LockedFile;
                             }
-                            else if (await fileTracker.IsEditingAsync(conflict.Id))
+                            else if (await fileTracker.IsEditingAsync(conflict.Id, false))
                             {
                                 Err = FilesCommonResource.ErrorMessage_SecurityException_UpdateEditingFile;
                             }
@@ -1137,7 +1148,12 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                 await linkDao.DeleteAllLinkAsync(newFile.Id);
 
                                 needToMark.Add(newFile);
-
+                                if (newFile.IsForm && _toFillOut)
+                                {
+                                    var properties = await fileDao.GetProperties(newFile.Id) ?? new EntryProperties<TTo> { FormFilling = new FormFillingProperties<TTo>() };
+                                    properties.CopyToFillOut = true;
+                                    await fileDao.SaveProperties(newFile.Id, properties);
+                                }
                                 await socketManager.CreateFileAsync(newFile);
 
                                 if (copy)
@@ -1221,7 +1237,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
             {
                 return (true, FilesCommonResource.ErrorMessage_LockedFile);
             }
-            if (await fileTracker.IsEditingAsync(file.Id))
+            if (await fileTracker.IsEditingAsync(file.Id, false))
             {
                 return (true, FilesCommonResource.ErrorMessage_SecurityException_UpdateEditingFile);
             }

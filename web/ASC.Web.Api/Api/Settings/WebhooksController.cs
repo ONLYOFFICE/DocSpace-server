@@ -79,7 +79,7 @@ public class WebhooksController(ApiContext context,
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "Tenant webhook with its config parameters", typeof(WebhooksConfigDto))]
     [HttpPost("webhook")]
-    public async Task<WebhooksConfigDto> CreateWebhook(WebhooksConfigRequestsDto inDto)
+    public async Task<WebhooksConfigDto> CreateWebhook(CreateWebhooksConfigRequestsDto inDto)
     {
         _ = await CheckAdminPermissionsAsync();
 
@@ -93,7 +93,7 @@ public class WebhooksController(ApiContext context,
     }
 
     /// <summary>
-    /// Updates the tenant webhook with the parameters specified in the request.
+    /// Updates a tenant webhook with the parameters specified in the request.
     /// </summary>
     /// <short>
     /// Update a webhook
@@ -102,7 +102,7 @@ public class WebhooksController(ApiContext context,
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "Updated tenant webhook with its config parameters", typeof(WebhooksConfigDto))]
     [HttpPut("webhook")]
-    public async Task<WebhooksConfigDto> UpdateWebhook(WebhooksConfigRequestsDto inDto)
+    public async Task<WebhooksConfigDto> UpdateWebhook(UpdateWebhooksConfigRequestsDto inDto)
     {
         await CheckWebhook(inDto.Name, inDto.Uri, inDto.SecretKey, inDto.SSL, false);
 
@@ -141,7 +141,7 @@ public class WebhooksController(ApiContext context,
     }
 
     /// <summary>
-    /// Enable or disable webhook with the parameters specified in the request.
+    /// Enables or disables a tenant webhook with the parameters specified in the request.
     /// </summary>
     /// <short>
     /// Enable a webhook
@@ -150,7 +150,7 @@ public class WebhooksController(ApiContext context,
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "Enable or disable tenant webhook", typeof(WebhooksConfigDto))]
     [HttpPut("webhook/enable")]
-    public async Task<WebhooksConfigDto> EnableWebhook(WebhooksConfigRequestsDto inDto)
+    public async Task<WebhooksConfigDto> EnableWebhook(UpdateWebhooksConfigRequestsDto inDto)
     {
         var existingWebhook = await dbWorker.GetWebhookConfig(tenantManager.GetCurrentTenantId(), inDto.Id);
 
@@ -182,7 +182,7 @@ public class WebhooksController(ApiContext context,
     }
 
     /// <summary>
-    /// Removes the tenant webhook with the ID specified in the request.
+    /// Removes a tenant webhook with the ID specified in the request.
     /// </summary>
     /// <short>
     /// Remove a webhook
@@ -265,7 +265,7 @@ public class WebhooksController(ApiContext context,
             throw new ArgumentException(nameof(inDto.Id));
         }
 
-        var item = await dbWorker.ReadJournal(inDto.Id);
+        var item = await dbWorker.ReadJournal(tenantManager.GetCurrentTenantId(), inDto.Id);
 
         if (item == null)
         {
@@ -300,10 +300,11 @@ public class WebhooksController(ApiContext context,
     public async IAsyncEnumerable<WebhooksLogDto> RetryWebhooks(WebhookRetryRequestsDto inDto)
     {
         var isAdmin = await CheckAdminPermissionsAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
 
         foreach (var id in inDto.Ids)
         {
-            var item = await dbWorker.ReadJournal(id);
+            var item = await dbWorker.ReadJournal(tenantId, id);
 
             if (item == null)
             {
@@ -325,7 +326,7 @@ public class WebhooksController(ApiContext context,
     /// Returns a list of triggers for a webhook.
     /// </summary>
     /// <short>
-    /// Get triggers for a webhook
+    /// Get webhook triggers
     /// </short>
     /// <path>api/2.0/settings/webhook/triggers</path>
     /// <collection>list</collection>

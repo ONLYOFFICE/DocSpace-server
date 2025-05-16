@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Common.Identity;
+
 using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Web.Studio.Core.Notify;
@@ -47,7 +49,9 @@ public class StudioPeriodicNotify(ILoggerProvider log,
         AuditEventsRepository auditEventsRepository,
         LoginEventsRepository loginEventsRepository,
         IFusionCache hybridCache,
-        IEventBus eventBus)
+        IEventBus eventBus,
+        IdentityClient identityClient,
+        SecurityContext securityContext)
 {
     private readonly ILogger _log = log.CreateLogger("ASC.Notify");
 
@@ -309,36 +313,47 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         var lastAuditEvent = await auditEventsRepository.GetLastEventAsync(tenant.Id);
                         var lastAuditEventDate = lastAuditEvent != null ? lastAuditEvent.Date.Date : tenant.CreationDateTime.Date;
 
+                        if (lastAuditEventDate.AddYears(1) > nowDate)
+                        {
+                            continue;
+                        }
+
                         var lastLoginEvent = await loginEventsRepository.GetLastSuccessEventAsync(tenant.Id);
                         var lastLoginEventDate = lastLoginEvent != null ? lastLoginEvent.Date.Date : tenant.CreationDateTime.Date;
 
-                        if ((lastAuditEventDate > lastLoginEventDate ? lastAuditEventDate : lastLoginEventDate).AddYears(1) <= nowDate)
+                        if (lastLoginEventDate.AddYears(1) > nowDate)
                         {
-                            if (nowDate >= startDateToNotifyUnusedPortals && nowDate.Day == tenant.CreationDateTime.Day)
+                            continue;
+                        }
+
+                        if (nowDate >= startDateToNotifyUnusedPortals && nowDate.Day == tenant.CreationDateTime.Day)
+                        {
+                            action = Actions.SaasAdminStartupWarningAfterYearV1;
+                            toowner = true;
+
+                            orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonLeaveFeedback", c);
+                            orangeButtonUrl = c => externalResourceSettingsHelper.Site.GetRegionalFullEntry("registrationcanceled", c);
+
+                            url1 = c => externalResourceSettingsHelper.Common.GetRegionalFullEntry("legalterms", c);
+
+                            topGif = studioNotifyHelper.GetNotificationImageUrl("docspace_deleted.gif");
+
+                            trulyYoursAsTebleRow = true;
+                        }
+
+                        if (nowDate >= startDateToRemoveUnusedPortals && nowDate.AddDays(-7).Day == tenant.CreationDateTime.Day)
+                        {
+                            _log.InformationStartRemovingUnusedFreeTenant(tenant.Id);
+
+                            await securityContext.AuthenticateMeWithoutCookieAsync(tenant.OwnerId);
+                            await identityClient.DeleteTenantClientsAsync(false);
+                            await tenantManager.RemoveTenantAsync(tenant, true);
+
+                            if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
                             {
-                                action = Actions.SaasAdminStartupWarningAfterYearV1;
-                                toowner = true;
-
-                                orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonLeaveFeedback", c);
-                                orangeButtonUrl = c => externalResourceSettingsHelper.Site.GetRegionalFullEntry("registrationcanceled", c);
-
-                                url1 = c => externalResourceSettingsHelper.Common.GetRegionalFullEntry("legalterms", c);
-
-                                topGif = studioNotifyHelper.GetNotificationImageUrl("docspace_deleted.gif");
-
-                                trulyYoursAsTebleRow = true;
+                                await apiSystemHelper.RemoveTenantFromCacheAsync(tenant.GetTenantDomain(coreSettings));
                             }
-
-                            if (nowDate >= startDateToRemoveUnusedPortals && nowDate.AddDays(-7).Day == tenant.CreationDateTime.Day)
-                            {
-                                await tenantManager.RemoveTenantAsync(tenant.Id, true);
-
-                                if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
-                                {
-                                    await apiSystemHelper.RemoveTenantFromCacheAsync(tenant.GetTenantDomain(coreSettings));
-                                }
-                                await eventBus.PublishAsync(new RemovePortalIntegrationEvent(Guid.Empty, tenant.Id));
-                            }
+                            await eventBus.PublishAsync(new RemovePortalIntegrationEvent(Guid.Empty, tenant.Id));
                         }
                     }
 
@@ -420,7 +435,9 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                     }
                     else if (tariff.State == TariffState.NotPaid && dueDateIsNotMax && dueDate.AddMonths(6).AddDays(7) <= nowDate)
                     {
-                        await tenantManager.RemoveTenantAsync(tenant.Id, true);
+                        await securityContext.AuthenticateMeWithoutCookieAsync(tenant.OwnerId);
+                        await identityClient.DeleteTenantClientsAsync(false);
+                        await tenantManager.RemoveTenantAsync(tenant, true);
 
                         if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
                         {

@@ -26,7 +26,13 @@
 
 namespace ASC.Files.Core.Services.OFormService;
 
+/// <summary>
+/// The form request data.
+/// </summary>
 public class OFromRequestData
 {
+    /// <summary>
+    /// The form data.
+    /// </summary>
     public OFromData Data { get; set; }
 }

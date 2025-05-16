@@ -154,9 +154,9 @@ public partial class FilesDbContext
     }
     
     [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultInt])]
-    public  Task<bool> DbFilesAnyAsync(int tenantId, string title, int folderId)
+    public  Task<bool> DbFilesAnyAsync(int tenantId, string title, int category, int folderId)
     {
-        return FileQueries.DbFilesAnyAsync(this, tenantId, title, folderId);
+        return FileQueries.DbFilesAnyAsync(this, tenantId, title, category, folderId);
     }
     
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
@@ -658,12 +658,13 @@ static file class FileQueries
                     .Where(r => r.EntryType == FileEntryType.File)
                     .ExecuteDelete());
 
-    public static readonly Func<FilesDbContext, int, string, int, Task<bool>> DbFilesAnyAsync =
+    public static readonly Func<FilesDbContext, int, string, int, int, Task<bool>> DbFilesAnyAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, string title, int folderId) =>
+            (FilesDbContext ctx, int tenantId, string title, int category, int folderId) =>
                 ctx.Files
                     .Any(r => r.Title == title &&
                               r.ParentId == folderId &&
+                              (category == 0 || r.Category == category) &&
                               r.CurrentVersion &&
                               r.TenantId == tenantId));
 

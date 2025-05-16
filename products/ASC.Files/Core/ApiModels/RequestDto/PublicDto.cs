@@ -26,25 +26,30 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// The public settings of the room template.
+/// </summary>
 public class PublicDto
 {
     /// <summary>
-    /// Template id
+    /// The room template ID.
     /// </summary>
     [FromRoute(Name="id")]
     public required int Id { get; set; }
 }
 
-
+/// <summary>
+/// The public settings of the room template to set.
+/// </summary>
 public class SetPublicDto
 {
     /// <summary>
-    /// Template id
+    /// The room template ID.
     /// </summary>
     public required int Id { get; set; }
 
     /// <summary>
-    /// Public settings
+    /// Specifies whether the room template is public or not.
     /// </summary>
     public bool Public { get; set; }
 }

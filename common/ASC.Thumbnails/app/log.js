@@ -32,6 +32,7 @@ const config = require('../config');
 const fs = require('fs');
 const fileName = config.get("logPath") || path.join(__dirname, "..", "..", "Logs", "web.thumb.%DATE%.log");
 const dirName = path.dirname(fileName);
+let logConsole = config.get("logConsole");
 
 if (!fs.existsSync(dirName)) {
     fs.mkdirSync(dirName);
@@ -48,10 +49,11 @@ const fileTransport = new (winston.transports.DailyRotateFile)(
     maxFiles: '30d'
 });
 
-const transports = [
-    new (winston.transports.Console)(),
-    fileTransport
-];
+const transports = [fileTransport];
+
+if(logConsole) {
+    transports.push(new (winston.transports.Console)());
+}
 
 winston.exceptions.handle(fileTransport);
 

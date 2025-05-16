@@ -1078,4 +1078,7 @@
   <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
     <value>Die Anzahl der Administratoren überschreitet das Limit: {0}/{1}.</value>
   </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>Die Webhook-URL ist nicht verfügbar. Die HEAD-Anforderung ist keine Antwort mit dem HTTP-Status 200.</value>
+  </data>
 </root>

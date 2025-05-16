@@ -25,40 +25,27 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-package com.asc.authorization.application.controller.exception.handler;
+package com.asc.common.service.transfer.message;
 
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataAccessException;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.*;
 
 /**
- * Global exception handler for handling database-related exceptions.
- *
- * <p>This class handles {@link DataAccessException} thrown by any controller and returns a standard
- * HTTP response with an appropriate status code.
+ * Event message class representing notification about tenant clients removal. This class is used
+ * for communication between services when clients associated with a specific tenant are removed.
  */
-@Slf4j
-@ControllerAdvice
-public class DatabaseExceptionHandler {
+@Builder
+@Getter
+@Setter
+@ToString
+@EqualsAndHashCode
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class TenantClientsRemovedEvent {
 
-  /**
-   * Handles {@link DataAccessException} and returns a response with HTTP status 500.
-   *
-   * <p>This method logs the exception and returns a {@link ResponseEntity} with HTTP status {@link
-   * HttpStatus#INTERNAL_SERVER_ERROR}.
-   *
-   * @param ex the {@link DataAccessException} thrown during a database operation
-   * @param request the {@link HttpServletRequest} in which the exception was raised
-   * @return a {@link ResponseEntity} with HTTP status 500 (Internal Server Error)
-   */
-  @ExceptionHandler(DataAccessException.class)
-  public ResponseEntity<?> handleDataAccessException(
-      DataAccessException ex, HttpServletRequest request) {
-    log.error("Could not perform a database operation", ex);
-    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-  }
+  /** The unique identifier of the tenant whose clients were removed. */
+  @JsonProperty(value = "tenant_id", required = true)
+  private long tenantId;
 }

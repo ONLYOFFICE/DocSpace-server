@@ -26,25 +26,28 @@
 
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
+/// <summary>
+/// The request parameters for managing encryption settings.
+/// </summary>
 public class EncryptionSettingsRequestsDto
 {
     /// <summary>
-    /// Password
+    /// The password used for encryption.
     /// </summary>
     public string Password { get; set; }
 
     /// <summary>
-    /// Status
+    /// The current status of encryption.
     /// </summary>
     public EncryprtionStatus Status { get; set; }
 
     /// <summary>
-    /// Notify users
+    /// Specifies whether to notify users about encryption changes.
     /// </summary>
     public bool NotifyUsers { get; set; }
 
     /// <summary>
-    /// Server root path
+    /// The root path of the server where encrypted data is stored.
     /// </summary>
     public string ServerRootPath { get; set; }
 }

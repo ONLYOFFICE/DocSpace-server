@@ -359,7 +359,8 @@ public class FileMoveCopyOperationsManager(
         JsonElement destFolderId,
         bool copy,
         FileConflictResolveType resolveType,
-        bool holdResult, 
+        bool holdResult,
+        bool toFillOut,
         bool content = false)
     {        
         if (resolveType == FileConflictResolveType.Overwrite && await userManager.IsGuestAsync(_authContext.CurrentAccount.ID))
@@ -393,8 +394,8 @@ public class FileMoveCopyOperationsManager(
         op.Init(holdResult, copy);
         var taskId = await _fileOperationsManagerHolder.Publish(op);
         
-        var data = new FileMoveCopyOperationData<int>(folderIntIds, fileIntIds, tenantId, userId, destFolderId, copy, resolveType, holdResult, GetHttpHeaders(), sessionSnapshot); 
-        var thirdPartyData = new FileMoveCopyOperationData<string>(folderStringIds, fileStringIds, tenantId, userId, destFolderId, copy, resolveType, holdResult, GetHttpHeaders(), sessionSnapshot);
+        var data = new FileMoveCopyOperationData<int>(folderIntIds, fileIntIds, tenantId, userId, destFolderId, copy, resolveType, toFillOut, holdResult, GetHttpHeaders(), sessionSnapshot); 
+        var thirdPartyData = new FileMoveCopyOperationData<string>(folderStringIds, fileStringIds, tenantId, userId, destFolderId, copy, resolveType, toFillOut, holdResult, GetHttpHeaders(), sessionSnapshot);
         
         await _eventBus.PublishAsync(new MoveOrCopyIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
         {

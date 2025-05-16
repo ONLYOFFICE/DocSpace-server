@@ -49,7 +49,7 @@ public class FilesControllerInternal(
         hybridCache)
 {
     /// <summary>
-    /// Get the list of actions performed on the file with the specified identifier
+    /// Returns the list of actions performed on the file with the specified identifier.
     /// </summary>
     /// <short>
     /// Get file history
@@ -136,7 +136,8 @@ public abstract class FilesController<T>(
     }
 
     /// <summary>
-    /// Returns a link to download a file with the ID specified in the request.
+    /// Returns a pre-signed URL to download a file with the specified ID.
+    /// This temporary link provides secure access to the file.
     /// </summary>
     /// <short>Get file download link</short>
     /// <path>api/2.0/files/file/{fileId}/presigneduri</path>
@@ -149,7 +150,7 @@ public abstract class FilesController<T>(
     }
 
     /// <summary>
-    /// Checks if the PDF file is form or not.
+    /// Checks if the PDF file is a form or not.
     /// </summary>
     /// <short>Check the PDF file</short>
     /// <path>api/2.0/files/file/{fileId}/isformpdf</path>
@@ -218,7 +219,7 @@ public abstract class FilesController<T>(
     /// <summary>
     /// Creates a text (.txt) file in the selected folder with the title and contents specified in the request.
     /// </summary>
-    /// <short>Create a txt file</short>
+    /// <short>Create a text file</short>
     /// <path>api/2.0/files/{folderId}/text</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
@@ -248,14 +249,18 @@ public abstract class FilesController<T>(
     }
 
     /// <summary>
-    /// Gets fill result
+    /// Retrieves the result of a form-filling session.
     /// </summary>
+    /// <short>
+    /// Get form-filling result
+    /// </short>
     /// <path>api/2.0/files/file/fillresult</path>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Ok", typeof(FillingFormResultDto<int>))]
     [AllowAnonymous]
     [HttpGet("file/fillresult")]
-    public async Task<FillingFormResultDto<T>> GetFillResultAsync(GetFillResulteRequestDto inDto)
+    public async Task<FillingFormResultDto<T>> GetFillResultAsync(GetFillResultRequestDto inDto)
     {
         var completedFormId = await hybridCache.GetOrDefaultAsync<string>(inDto.FillingSessionId);
 
@@ -341,9 +346,8 @@ public abstract class FilesController<T>(
     /// <summary>
     /// Sets the Custom Filter editing mode to a file with the ID specified in the request.
     /// </summary>
-    /// <short>Sets the Custom Filter editing mode</short>
+    /// <short>Set the Custom Filter editing mode</short>
     /// <path>api/2.0/files/file/{fileId}/customfilter</path>
-    /// <collection>list</collection>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File information", typeof(FileDto<int>))]
     [HttpPut("file/{fileId}/customfilter")]
@@ -429,7 +433,10 @@ public abstract class FilesController<T>(
     [HttpPut("{fileId}/update")]
     public async Task<FileDto<T>> UpdateFileStreamFromFormAsync(FileStreamRequestDto<T> inDto)
     {
-        return await filesControllerHelper.UpdateFileStreamAsync(filesControllerHelper.GetFileFromRequest(inDto).OpenReadStream(), inDto.FileId, inDto.FileExtension, inDto.Encrypted, inDto.Forcesave);
+        IEnumerable<IFormFile> files = Request.Form.Files;
+        var file = files.Any() ? files.First() : inDto.File;
+
+        return await filesControllerHelper.UpdateFileStreamAsync(file.OpenReadStream(), inDto.FileId, inDto.FileExtension, inDto.Encrypted, inDto.Forcesave);
     }
 
     /// <summary>
@@ -452,6 +459,7 @@ public abstract class FilesController<T>(
     /// </summary>
     /// <short>Get primary external link</short>
     /// <path>api/2.0/files/file/{id}/link</path>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File security information", typeof(FileShareDto))]
     [SwaggerResponse(404, "Not Found")]
@@ -465,8 +473,11 @@ public abstract class FilesController<T>(
     }
 
     /// <summary>
-    /// Sets order of a file with ID specified in the request
+    /// Sets order of the file with ID specified in the request.
     /// </summary>
+    /// <short>
+    /// Set file order
+    /// </short>
     /// <path>api/2.0/files/{fileId}/order</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Updated file information", typeof(FileDto<int>))]
@@ -481,8 +492,11 @@ public abstract class FilesController<T>(
     }
 
     /// <summary>
-    /// Sets order
+    /// Sets order of the files.
     /// </summary>
+    /// <short>
+    /// Set order of files
+    /// </short>
     /// <path>api/2.0/files/order</path>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
     [Tags("Files / Files")]
@@ -539,9 +553,9 @@ public abstract class FilesController<T>(
     }
 
     /// <summary>
-    /// Saves a file with the identifier specified in the request as a PDF document
+    /// Saves a file with the identifier specified in the request as a PDF document.
     /// </summary>
-    /// <short>Save as pdf</short>
+    /// <short>Save a file as PDF</short>
     /// <path>api/2.0/files/file/{id}/saveaspdf</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
@@ -552,6 +566,11 @@ public abstract class FilesController<T>(
         return await filesControllerHelper.SaveAsPdf(inDto.Id, inDto.File.FolderId, inDto.File.Title);
     }
 
+    /// <summary>
+    /// Saves the form role mapping.
+    /// </summary>
+    /// <short>Save form role mapping</short>
+    /// <path>api/2.0/files/file/{fileId}/formrolemapping</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Updated information about form role mappings", typeof(FormRole))]
     [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
@@ -561,6 +580,12 @@ public abstract class FilesController<T>(
         await fileStorageService.SaveFormRoleMapping(inDto.FormId, inDto.Roles);
     }
 
+    /// <summary>
+    /// Returns all roles for the specified form.
+    /// </summary>
+    /// <short>Get form roles</short>
+    /// <path>api/2.0/files/file/{fileId}/formroles</path>
+    /// <collection>list</collection>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Successfully retrieved all roles for the form", typeof(IEnumerable<FormRole>))]
     [SwaggerResponse(403, "You do not have enough permissions to view the form roles")]
@@ -570,6 +595,11 @@ public abstract class FilesController<T>(
         return fileStorageService.GetAllFormRoles(inDto.FileId);
     }
 
+    /// <summary>
+    /// Performs the specified form filling action.
+    /// </summary>
+    /// <short>Perform form filling action</short>
+    /// <path>api/2.0/files/file/{fileId}/manageformfilling</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Successfully processed the form filling action")]
     [SwaggerResponse(403, "You do not have enough permissions to perform this action")]
@@ -661,7 +691,7 @@ public class FilesControllerCommon(
     /// <summary>
     /// Creates thumbnails for the files with the IDs specified in the request.
     /// </summary>
-    /// <short>Create thumbnails</short>
+    /// <short>Create file thumbnails</short>
     /// <path>api/2.0/files/thumbnails</path>
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>

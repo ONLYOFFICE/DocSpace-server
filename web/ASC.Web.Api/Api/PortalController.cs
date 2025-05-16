@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Common.Identity;
+
 using Microsoft.AspNetCore.RateLimiting;
 
 using Constants = ASC.Core.Users.Constants;
@@ -46,7 +48,7 @@ public class PortalController(
     CommonLinkUtility commonLinkUtility,
     IUrlShortener urlShortener,
     AuthContext authContext,
-        CookiesManager cookiesManager,
+    CookiesManager cookiesManager,
     SecurityContext securityContext,
     SettingsManager settingsManager,
     IMobileAppInstallRegistrator mobileAppInstallRegistrator,
@@ -68,14 +70,14 @@ public class PortalController(
     TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
     ExternalResourceSettingsHelper externalResourceSettingsHelper,
     IMapper mapper,
-    IHttpContextAccessor httpContextAccessor,
     QuotaHelper quotaHelper,
     IEventBus eventBus,
-    CspSettingsHelper cspSettingsHelper)
+    CspSettingsHelper cspSettingsHelper,
+    IdentityClient client)
     : ControllerBase
 {
     /// <summary>
-    /// Returns the current portal.
+    /// Returns the current portal information.
     /// </summary>
     /// <short>
     /// Get a portal
@@ -191,7 +193,7 @@ public class PortalController(
     /// Returns the used space of the current portal.
     /// </summary>
     /// <short>
-    /// Get the used portal space
+    /// Get the portal used space
     /// </short>
     /// <path>api/2.0/portal/usedspace</path>
     [Tags("Portal / Quota")]
@@ -336,10 +338,10 @@ public class PortalController(
     }
 
     /// <summary>
-    /// Returns a thumbnail of the bookmark URL specified in the request.
+    /// Returns a thumbnail for the URL specified in the request.
     /// </summary>
     /// <short>
-    /// Get a bookmark thumbnail
+    /// Get a portal thumbnail
     /// </short>
     /// <path>api/2.0/portal/thumb</path>
     [ApiExplorerSettings(IgnoreApi = true)]
@@ -393,26 +395,10 @@ public class PortalController(
     }
 
     /// <summary>
-    /// Registers the mobile app installation.
+    /// Registers the mobile application installation by its type.
     /// </summary>
     /// <short>
-    /// Register the mobile app installation
-    /// </short>
-    /// <path>api/2.0/portal/mobile/registration</path>
-    [ApiExplorerSettings(IgnoreApi = true)]
-    [Tags("Portal / Settings")]
-    [HttpPost("mobile/registration")]
-    public async Task RegisterMobileAppInstallAsync(MobileAppRequestsDto inDto)
-    {
-        var currentUser = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
-        await mobileAppInstallRegistrator.RegisterInstallAsync(currentUser.Email, inDto.Type);
-    }
-
-    /// <summary>
-    /// Registers the mobile app installation by mobile app type.
-    /// </summary>
-    /// <short>
-    /// Register the mobile app installation by mobile app type
+    /// Register the mobile app installation by its type
     /// </short>
     /// <path>api/2.0/portal/mobile/registration</path>
     [ApiExplorerSettings(IgnoreApi = true)]
@@ -495,7 +481,7 @@ public class PortalController(
             return string.Empty;
         }
 
-        var rewriter = httpContextAccessor.HttpContext.Request.Url();
+        var rewriter = HttpContext.Request.Url();
         var confirmUrl = string.Format("{0}{1}{2}{3}/{4}",
                                 rewriter?.Scheme ?? Uri.UriSchemeHttp,
                                 Uri.SchemeDelimiter,
@@ -532,7 +518,8 @@ public class PortalController(
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
-        await tenantManager.RemoveTenantAsync(tenant.Id);
+        await client.DeleteTenantClientsAsync();
+        await tenantManager.RemoveTenantAsync(tenant);
 
         if (!coreBaseSettings.Standalone)
         {
@@ -662,7 +649,8 @@ public class PortalController(
 
         await DemandPermissionToDeleteTenantAsync(tenant);
 
-        await tenantManager.RemoveTenantAsync(tenant.Id);
+        await client.DeleteTenantClientsAsync();
+        await tenantManager.RemoveTenantAsync(tenant);
 
         if (!coreBaseSettings.Standalone)
         {
@@ -684,7 +672,7 @@ public class PortalController(
     }
 
     /// <summary>
-    /// Sends congratulations to the user after registering the portal.
+    /// Sends congratulations to the user after registering a portal.
     /// </summary>
     /// <short>Send congratulations</short>
     /// <path>api/2.0/portal/sendcongratulations</path>
@@ -725,9 +713,9 @@ public class PortalController(
     }
 
     /// <summary>
-    /// Sends the instructions to remove the current portal.
+    /// Sends the instructions to remove a portal of a user with the ID specified in the request.
     /// </summary>
-    /// <short>Send removal instructions</short>
+    /// <short>Send removal instructions to the user</short>
     /// <path>api/2.0/portal/sendremoveinstructions</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Users")]

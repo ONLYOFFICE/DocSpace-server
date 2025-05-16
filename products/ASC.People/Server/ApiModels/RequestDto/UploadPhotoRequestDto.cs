@@ -26,8 +26,18 @@
 
 namespace ASC.People.ApiModels.RequestDto;
 
+/// <summary>
+/// The request parameters for uploading a photo.
+/// </summary>
 public class UploadPhotoRequestDto
 {
+    /// <summary>
+    /// The list of the files.
+    /// </summary>
     public List<IFormFile> Files { get; set; }
+
+    /// <summary>
+    /// Specifies whether to autosave a photo or not.
+    /// </summary>
     public bool Autosave { get; set; }
 }

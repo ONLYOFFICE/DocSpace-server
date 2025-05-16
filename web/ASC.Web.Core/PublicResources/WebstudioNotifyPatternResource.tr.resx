@@ -1469,10 +1469,10 @@ Bağlantı yalnızca 7 gün boyunca geçerlidir.</value>
     <value>${LetterLogoText}. Şifreleme işlemi tamamlandı</value>
   </data>
   <data name="subject_user_ldap_activation" xml:space="preserve">
-    <value>Davetlisiniz: ${__VirtualRootPath}</value>
+    <value>Davetlisiniz: ${__VirtualRootHost}</value>
   </data>
   <data name="subject_saas_video_guides_v1" xml:space="preserve">
-    <value>Video kılavuzlarıyla ${__VirtualRootHost} DocSpace'de ustalaşın</value>
+    <value>Video kılavuzlarıyla ${LetterLogoText} DocSpace'de ustalaşın</value>
   </data>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>Saygılarımızla, ${LetterLogoText} Ekibi</value>
@@ -1779,11 +1779,13 @@ $TrulyYours</value>
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Merhaba, $UserName!&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Ekibiniz, müşterileriniz, iş ortaklarınız ve daha fazlası ile iş birliğini artırabileceğiniz bir belge merkezi olan *${LetterLogoText} DocSpace'i oluşturdunuz*. Adresi &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Ekibiniz, müşterileriniz, iş ortaklarınız ve daha fazlası ile iş birliğini artırabileceğiniz bir belge merkezi olan *${LetterLogoText} DocSpace'i oluşturdunuz*. Adresi &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
+#if($OrangeButton != "")
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Lütfen e-postanızı onaylayın (bağlantı 7 gün boyunca geçerlidir):&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 44px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
+#end
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;Mevcut tarife planınız STARTUP. Tamamen ücretsizdir ve şunları içerir:&lt;/td&gt;&lt;/tr&gt;
 
@@ -1887,6 +1889,46 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 26px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Yardıma ihtiyacınız varsa &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL1"&gt;Yardım Merkezi&lt;/a&gt; mize göz atın veya &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="${__SupportLink}"&gt;destek ekibi&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace’iniz silinecektir</value>
+  </data>
+  <data name="subject_user_type_changed" xml:space="preserve">
+    <value>DocSpace kullanıcı türünüz değişti</value>
+  </data>
+  <data name="subject_user_role_changed" xml:space="preserve">
+    <value>Bir DocSpace odasındaki rolünüz değişti</value>
+  </data>
+  <data name="pattern_user_type_changed" xml:space="preserve">
+    <value>Merhaba!
+
+DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" içinde size yeni bir kullanıcı türü atandı: ${UserType}.
+
+Kullanıcı türleri ve izinler hakkında daha fazla bilgiyi "Yardım Merkezi":"${HelpCenterUrl}" nde bulabilirsiniz.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_role_changed" xml:space="preserve">
+    <value>Merhaba!
+
+"${RoomTitle}":"${RoomUrl}" adlı DocSpace odasında size yeni bir rol atandı: ${UserRole}.
+
+Oda rolleri ve izinleri hakkında daha fazla bilgiyi "Yardım Merkezi":"${HelpCenterUrl}" nde bulabilirsiniz.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace’iniz &lt;span style="color: #FF6F3D;"&gt;silinecek&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;${LetterLogoText} DocSpace’iniz (${__VirtualRootPath}) &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;bir yıldan uzun süredir etkin değil.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Artık kullanmamaya karar verdiğiniz için, ${LetterLogoText} DocSpace’iniz ve tüm veriler &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Gizlilik Politikamız doğrultusunda&lt;/a&gt; silinecektir.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;Geri bildiriminizi almaktan memnuniyetle duyarız. ${LetterLogoText} DocSpace’i kullanmayı bırakma sebebiniz nedir?&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;${LetterLogoText} DocSpace’inizi kullanmaya devam etmek istiyorsanız, sadece giriş yapıp herhangi bir işlem yapmanız yeterlidir.&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
   </data>

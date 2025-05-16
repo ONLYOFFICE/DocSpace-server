@@ -185,6 +185,11 @@ class CachedTenantService() : ITenantService
         await _service.ValidateDomainAsync(domain);
     }
 
+    public async Task<bool> IsForbiddenDomainAsync(string domain)
+    {
+        return await _service.IsForbiddenDomainAsync(domain);
+    }
+
     public void ValidateTenantName(string name)
     {
         _service.ValidateTenantName(name);
@@ -205,10 +210,10 @@ class CachedTenantService() : ITenantService
         return await _service.GetTenantsAsync(ids);
     }
 
-    public async Task<Tenant> RestoreTenantAsync(int oldId, Tenant newTenant, CoreSettings coreSettings)
+    public async Task<Tenant> RestoreTenantAsync(Tenant oldTenant, Tenant newTenant, CoreSettings coreSettings)
     {
-        newTenant = await _service.RestoreTenantAsync(oldId, newTenant, coreSettings);
-        await _cacheNotifyItem.PublishAsync(new TenantCacheItem { TenantId = oldId }, CacheNotifyAction.InsertOrUpdate);
+        newTenant = await _service.RestoreTenantAsync(oldTenant, newTenant, coreSettings);
+        await _cacheNotifyItem.PublishAsync(new TenantCacheItem { TenantId = oldTenant.Id }, CacheNotifyAction.InsertOrUpdate);
         await _cacheNotifyItem.PublishAsync(new TenantCacheItem { TenantId = newTenant.Id }, CacheNotifyAction.InsertOrUpdate);
         return newTenant;
     }
@@ -301,10 +306,10 @@ class CachedTenantService() : ITenantService
         return tenant;
     }
 
-    public async Task RemoveTenantAsync(int id, bool auto = false)
+    public async Task RemoveTenantAsync(Tenant tenant, bool auto = false)
     {
-        await _service.RemoveTenantAsync(id, auto);
-        await _cacheNotifyItem.PublishAsync(new TenantCacheItem { TenantId = id }, CacheNotifyAction.InsertOrUpdate);
+        await _service.RemoveTenantAsync(tenant, auto);
+        await _cacheNotifyItem.PublishAsync(new TenantCacheItem { TenantId = tenant.Id }, CacheNotifyAction.InsertOrUpdate);
     }
 
     public async Task PermanentlyRemoveTenantAsync(int id)

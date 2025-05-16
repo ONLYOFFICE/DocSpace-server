@@ -58,7 +58,7 @@ public static class SecureHelper
             return false;
         }
         
-        var headers = queryHeaders.Length > 0 ? queryHeaders.Split('&').Select(HttpUtility.UrlDecode) : Array.Empty<string>();
+        var headers = queryHeaders.Length > 0 ? queryHeaders.Split('&').Select(HttpUtility.UrlDecode) : [];
 
         var headerKey = headers.FirstOrDefault(h => h.StartsWith(Constants.SecureKeyHeader))?.
             Replace(Constants.SecureKeyHeader + ':', string.Empty);

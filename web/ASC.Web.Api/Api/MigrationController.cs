@@ -26,6 +26,10 @@
 
 namespace ASC.Api.Migration;
 
+/// <summary>
+/// Migration API.
+/// </summary>
+/// <name>migration</name>
 [DefaultRoute]
 [ApiController]
 [ControllerName("migration")]
@@ -34,14 +38,17 @@ public class MigrationController(
     UserManager userManager,
     AuthContext authContext,
     StudioNotifyService studioNotifyService,
-    IHttpContextAccessor httpContextAccessor,
     MigrationCore migrationCore,
     MigrationLogger migrationLogger) : ControllerBase
 {
     /// <summary>
-    /// Gets migration list
+    /// Returns a list of available migrations.
     /// </summary>
+    /// <short>
+    /// Get migrations
+    /// </short>
     /// <path>api/2.0/migration/list</path>
+    /// <collection>list</collection>
     [Tags("Migration")]
     [SwaggerResponse(200, "Ok", typeof(string[]))]
     [SwaggerResponse(403, "No permissions to perform this action")]
@@ -53,8 +60,11 @@ public class MigrationController(
     }
 
     /// <summary>
-    /// Uploads and inits migration
+    /// Uploads and initializes a migration with a migrator name specified in the request.
     /// </summary>
+    /// <short>
+    /// Upload and initialize migration
+    /// </short>
     /// <path>api/2.0/migration/init/{migratorName}</path>
     [Tags("Migration")]
     [SwaggerResponse(200, "Ok")]
@@ -68,8 +78,11 @@ public class MigrationController(
     }
 
     /// <summary>
-    /// Gets migration status
+    /// Returns the migration status.
     /// </summary>
+    /// <short>
+    /// Get migration status
+    /// </short>
     /// <path>api/2.0/migration/status</path>
     [Tags("Migration")]
     [SwaggerResponse(200, "Ok", typeof(MigrationStatusDto))]
@@ -101,8 +114,11 @@ public class MigrationController(
     }
 
     /// <summary>
-    /// Cancels migration
+    /// Cancels the migration.
     /// </summary>
+    /// <short>
+    /// Cancel migration
+    /// </short>
     /// <path>api/2.0/migration/cancel</path>
     [Tags("Migration")]
     [SwaggerResponse(200, "Ok")]
@@ -116,8 +132,11 @@ public class MigrationController(
     }
 
     /// <summary>
-    /// Clears migration
+    /// Clears the migration.
     /// </summary>
+    /// <short>
+    /// Clear migration
+    /// </short>
     /// <path>api/2.0/migration/clear</path>
     [Tags("Migration")]
     [SwaggerResponse(200, "Ok")]
@@ -131,8 +150,11 @@ public class MigrationController(
     }
 
     /// <summary>
-    /// Migrates
+    /// Starts the migration process.
     /// </summary>
+    /// <short>
+    /// Start migration
+    /// </short>
     /// <path>api/2.0/migration/migrate</path>
     [Tags("Migration")]
     [SwaggerResponse(200, "Ok")]
@@ -146,8 +168,11 @@ public class MigrationController(
     }
 
     /// <summary>
-    /// Gets migration logs
+    /// Returns the migration logs.
     /// </summary>
+    /// <short>
+    /// Get migration logs
+    /// </short>
     /// <path>api/2.0/migration/logs</path>
     [Tags("Migration")]
     [SwaggerResponse(200, "Ok")]
@@ -165,16 +190,19 @@ public class MigrationController(
         migrationLogger.Init(status.LogName);
         await using var stream = await migrationLogger.GetStreamAsync();
 
-        httpContextAccessor.HttpContext.Response.Headers.Append("Content-Disposition", ContentDispositionUtil.GetHeaderValue("migration.log"));
-        httpContextAccessor.HttpContext.Response.ContentType = "text/plain; charset=UTF-8";
-        httpContextAccessor.HttpContext.Response.Headers["Content-Length"] = stream.Length.ToString(CultureInfo.InvariantCulture);
+        Response.Headers.Append("Content-Disposition", ContentDispositionUtil.GetHeaderValue("migration.log"));
+        Response.ContentType = "text/plain; charset=UTF-8";
+        Response.Headers["Content-Length"] = stream.Length.ToString(CultureInfo.InvariantCulture);
 
-        await stream.CopyToAsync(httpContextAccessor.HttpContext.Response.Body);
+        await stream.CopyToAsync(Response.Body);
     }
 
     /// <summary>
-    /// Finishes migration
+    /// Finishes the migration process.
     /// </summary>
+    /// <short>
+    /// Finish migration
+    /// </short>
     /// <path>api/2.0/migration/finish</path>
     [Tags("Migration")]
     [SwaggerResponse(200, "Ok")]

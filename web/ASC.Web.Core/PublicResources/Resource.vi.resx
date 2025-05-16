@@ -1078,4 +1078,7 @@
   <data name="ErrorIpRestriction" xml:space="preserve">
     <value>Thêm ít nhất 1 địa chỉ IP được phép.</value>
   </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>URL Webhook không khả dụng. Yêu cầu HEAD không nhận được mã trạng thái HTTP 200.</value>
+  </data>
 </root>

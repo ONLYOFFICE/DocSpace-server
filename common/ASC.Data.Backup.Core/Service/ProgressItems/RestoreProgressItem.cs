@@ -188,7 +188,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
                     restoredTenant.MappedDomain = tenant.MappedDomain;
                 }
 
-                await _tenantManager.RestoreTenantAsync(tenant.Id, restoredTenant);
+                await _tenantManager.RestoreTenantAsync(tenant, restoredTenant);
                 TenantId = restoredTenant.Id;
 
                 try

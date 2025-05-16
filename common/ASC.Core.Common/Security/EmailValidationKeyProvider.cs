@@ -26,6 +26,9 @@
 
 namespace ASC.Security.Cryptography;
 
+/// <summary>
+/// The confirmation result.
+/// </summary>
 [Scope]
 public class EmailValidationKeyProvider
 {
@@ -84,17 +87,13 @@ public class EmailValidationKeyProvider
         ValidVisitLinkInterval = validVisitLinkInterval;
         _logger = logger;
     }
+    
 
-    public string GetEmailKey(string email)
-    {
-        return GetEmailKey(_tenantManager.GetCurrentTenantId(), email);
-    }
-
-    public string GetEmailKey(int tenantId, string email)
+    public string GetEmailKey(string email, int? tenantId = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(email);
 
-        email = FormatEmail(tenantId, email);
+        email = FormatEmail(tenantId ?? _tenantManager.GetCurrentTenantId(), email);
 
         var ms = (long)(DateTime.UtcNow - _from).TotalMilliseconds;
         var hash = GetMachineHashedData(BitConverter.GetBytes(ms), Encoding.ASCII.GetBytes(email));
@@ -180,43 +179,43 @@ public class EmailValidationKeyProvider
 }
 
 /// <summary>
-/// Confirmation email parameters
+/// The confirmation email parameters.
 /// </summary>
 public class EmailValidationKeyModel
 {
     /// <summary>
-    /// Key
+    /// The email validation key. 
     /// </summary>
     public string Key { get; set; }
 
     /// <summary>
-    /// Employee type
+    /// The user type.
     /// </summary>
     public EmployeeType? EmplType { get; init; }
 
     /// <summary>
-    /// Email
+    /// The email address.
     /// </summary>
     [EmailAddress]
     public string Email { get; init; }
 
     /// <summary>
-    /// User ID
+    /// The user ID.
     /// </summary>
     public Guid? UiD { get; init; }
 
     /// <summary>
-    /// Confirmation email type
+    /// The confirmation email type.
     /// </summary>
     public ConfirmType? Type { get; init; }
 
     /// <summary>
-    /// Access an account for the first time or not
+    /// Specifies whether it is the first time account access or not.
     /// </summary>
     public string First { get; init; }
 
     /// <summary>
-    /// Room ID
+    /// The room ID.
     /// </summary>
     public string RoomId { get; init; }
 

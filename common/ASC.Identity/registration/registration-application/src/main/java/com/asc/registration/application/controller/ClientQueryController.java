@@ -42,7 +42,9 @@ import com.asc.registration.service.transfer.response.PageableModificationRespon
 import com.asc.registration.service.transfer.response.PageableResponse;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -68,8 +70,8 @@ import org.springframework.web.bind.annotation.*;
  * process and respond to client-related queries.
  */
 @Tag(
-    name = "Client Query Controller",
-    description = "Query REST API to Retrieve Client Information")
+    name = "Client Querying",
+    description = "APIs for retrieving OAuth2 client information and user consents")
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -103,27 +105,77 @@ public class ClientQueryController {
   @RateLimiter(name = "globalRateLimiter")
   @GetMapping("/{clientId}")
   @Operation(
-      summary = "Retrieves the details of a specific client",
-      tags = {"ClientQueryController"},
-      security = @SecurityRequirement(name = "ascAuthAdmin"),
+      summary = "Get client details",
+      description =
+          "Retrieves detailed information about a specific OAuth2 client "
+              + "including its name, description, redirect URIs, and scopes.",
+      tags = {"Client Querying"},
+      security = @SecurityRequirement(name = "x-signature"),
       responses = {
-        @ApiResponse(responseCode = "200", description = "Successfully retrieved the client"),
+        @ApiResponse(
+            responseCode = "200",
+            description = "Client details successfully retrieved",
+            content =
+                @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ClientResponse.class),
+                    examples =
+                        @ExampleObject(
+                            value =
+                                """
+                    {
+                      "name": "Example Name",
+                      "description": "Example Description",
+                      "tenant": 1,
+                      "scopes": ["files:read", "files:write"],
+                      "enabled": true,
+                      "client_id": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                      "client_secret": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                      "website_url": "http://example.com",
+                      "terms_url": "http://example.com",
+                      "policy_url": "http://example.com",
+                      "logo": "data:image/png;base64,ivBOR",
+                      "authentication_methods": ["client_secret_post"],
+                      "redirect_uris": ["https://example.com"],
+                      "allowed_origins": ["https://example.com"],
+                      "logout_redirect_uris": ["https://example.com"],
+                      "created_on": "2024-04-04T12:00:00Z",
+                      "created_by": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                      "modified_on": "2024-04-04T12:00:00Z",
+                      "modified_by": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                      "is_public": true
+                    }
+                    """))),
         @ApiResponse(
             responseCode = "400",
-            description = "Bad request",
-            content = {@Content}),
+            description = "Invalid client ID format",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Insufficient permissions to view client",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Client not found",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
         @ApiResponse(
             responseCode = "429",
-            description = "Too many requests",
+            description = "Too many requests - rate limit exceeded",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
         @ApiResponse(
             responseCode = "500",
-            description = "Internal server error",
-            content = @Content)
+            description = "Internal server error occurred",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
       })
   @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
   public ResponseEntity<ClientResponse> getClient(
-      @PathVariable @NotBlank String clientId,
+      @Parameter(
+              description = "ID of the client to retrieve",
+              required = true,
+              example = "6c7cf17b-1bd3-47d5-94c6-be2d3570e168")
+          @PathVariable
+          @NotBlank
+          String clientId,
       @AuthenticationPrincipal BasicSignatureTokenPrincipal principal) {
     try {
       setLoggingParameters(principal);
@@ -152,30 +204,89 @@ public class ClientQueryController {
   @RateLimiter(name = "globalRateLimiter")
   @GetMapping
   @Operation(
-      summary = "Retrieves a pageable list of clients",
-      tags = {"ClientQueryController"},
-      security = @SecurityRequirement(name = "ascAuthAdmin"),
+      summary = "List clients",
+      description =
+          "Retrieves a paginated list of OAuth2 clients. "
+              + "The results can be paginated using the limit parameter and last seen client ID/creation date.",
+      tags = {"Client Querying"},
+      security = @SecurityRequirement(name = "x-signature"),
       responses = {
-        @ApiResponse(responseCode = "200", description = "Successfully retrieved clients"),
+        @ApiResponse(
+            responseCode = "200",
+            description = "Client list successfully retrieved",
+            content =
+                @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = PageableResponse.class),
+                    examples =
+                        @ExampleObject(
+                            value =
+                                """
+                    {
+                      "data": [
+                        {
+                          "name": "Example Name",
+                          "description": "Example Description",
+                          "tenant": 1,
+                          "scopes": ["files:read", "files:write"],
+                          "enabled": true,
+                          "client_id": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                          "client_secret": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                          "website_url": "http://example.com",
+                          "terms_url": "http://example.com",
+                          "policy_url": "http://example.com",
+                          "logo": "data:image/png;base64,ivBOR",
+                          "authentication_methods": ["client_secret_post"],
+                          "redirect_uris": ["https://example.com"],
+                          "allowed_origins": ["https://example.com"],
+                          "logout_redirect_uris": ["https://example.com"],
+                          "created_on": "2024-04-04T12:00:00Z",
+                          "created_by": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                          "modified_on": "2024-04-04T12:00:00Z",
+                          "modified_by": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                          "is_public": true
+                        }
+                      ],
+                      "limit": 50,
+                      "last_client_id": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                      "last_created_on": "2024-04-04T12:00:00Z"
+                    }
+                    """))),
         @ApiResponse(
             responseCode = "400",
-            description = "Bad request",
-            content = {@Content}),
+            description = "Invalid pagination parameters",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Insufficient permissions to list clients",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
         @ApiResponse(
             responseCode = "429",
-            description = "Too many requests",
+            description = "Too many requests - rate limit exceeded",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
         @ApiResponse(
             responseCode = "500",
-            description = "Internal server error",
-            content = @Content)
+            description = "Internal server error occurred",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
       })
   @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
   public ResponseEntity<PageableResponse<ClientResponse>> getClients(
       @AuthenticationPrincipal BasicSignatureTokenPrincipal principal,
-      @RequestParam(value = "limit") @Min(value = 1) @Max(value = 50) int limit,
-      @RequestParam(value = "last_client_id", required = false) String lastClientId,
-      @RequestParam(value = "last_created_on", required = false) ZonedDateTime lastCreatedOn) {
+      @Parameter(description = "Pagination limit", required = true, example = "1")
+          @RequestParam(value = "limit")
+          @Min(value = 1)
+          @Max(value = 50)
+          int limit,
+      @Parameter(
+              description = "ID of the last retrieved client",
+              example = "6c7cf17b-1bd3-47d5-94c6-be2d3570e168")
+          @RequestParam(value = "last_client_id", required = false)
+          String lastClientId,
+      @Parameter(
+              description = "Date of the last retrieved client",
+              example = "2024-04-04T12:00:00Z")
+          @RequestParam(value = "last_created_on", required = false)
+          ZonedDateTime lastCreatedOn) {
     try {
       setLoggingParameters(principal);
       return ResponseEntity.ok(
@@ -204,10 +315,37 @@ public class ClientQueryController {
   @GetMapping("/{clientId}/info")
   @Operation(
       summary = "Retrieves detailed information for a specific client",
-      tags = {"ClientQueryController"},
-      security = @SecurityRequirement(name = "ascAuth"),
+      tags = {"Client Querying"},
+      security = @SecurityRequirement(name = "x-signature"),
       responses = {
-        @ApiResponse(responseCode = "200", description = "Successfully retrieved client info"),
+        @ApiResponse(
+            responseCode = "200",
+            description = "Successfully retrieved client info",
+            content =
+                @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ClientInfoResponse.class),
+                    examples =
+                        @ExampleObject(
+                            value =
+                                """
+                                {
+                                  "name": "Example Name",
+                                  "client_id": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                                  "description": "Example Description",
+                                  "website_url": "http://example.com",
+                                  "terms_url": "http://example.com",
+                                  "policy_url": "http://example.com",
+                                  "logo": "data:image/png;base64,ivBOR",
+                                  "authentication_methods": ["client_secret_post"],
+                                  "scopes": ["files:read", "files:write"],
+                                  "is_public": true,
+                                  "created_on": "2024-04-04T12:00:00Z",
+                                  "created_by": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                                  "modified_on": "2024-04-04T12:00:00Z",
+                                  "modified_by": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
+                                }
+                                """))),
         @ApiResponse(
             responseCode = "400",
             description = "Bad request",
@@ -224,7 +362,13 @@ public class ClientQueryController {
   @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
   public ResponseEntity<ClientInfoResponse> getClientInfo(
       @AuthenticationPrincipal BasicSignatureTokenPrincipal principal,
-      @PathVariable @NotBlank String clientId) {
+      @Parameter(
+              description = "ID of the client to retrieve",
+              required = true,
+              example = "6c7cf17b-1bd3-47d5-94c6-be2d3570e168")
+          @PathVariable
+          @NotBlank
+          String clientId) {
     try {
       setLoggingParameters(principal);
       return ResponseEntity.ok(
@@ -250,11 +394,36 @@ public class ClientQueryController {
   @GetMapping("/{clientId}/public/info")
   @Operation(
       summary = "Handles the GET request for public client information",
-      tags = {"ClientQueryController"},
+      tags = {"Client Querying"},
       responses = {
         @ApiResponse(
             responseCode = "200",
-            description = "Successfully retrieved public client info"),
+            description = "Successfully retrieved client public info",
+            content =
+                @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ClientInfoResponse.class),
+                    examples =
+                        @ExampleObject(
+                            value =
+                                """
+                                {
+                                  "name": "Example Name",
+                                  "client_id": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                                  "description": "Example Description",
+                                  "website_url": "http://example.com",
+                                  "terms_url": "http://example.com",
+                                  "policy_url": "http://example.com",
+                                  "logo": "data:image/png;base64,ivBOR",
+                                  "authentication_methods": ["client_secret_post"],
+                                  "scopes": ["files:read", "files:write"],
+                                  "is_public": true,
+                                  "created_on": "2024-04-04T12:00:00Z",
+                                  "created_by": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                                  "modified_on": "2024-04-04T12:00:00Z",
+                                  "modified_by": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
+                                }
+                                """))),
         @ApiResponse(
             responseCode = "400",
             description = "Bad request",
@@ -269,7 +438,13 @@ public class ClientQueryController {
             content = @Content)
       })
   public ResponseEntity<ClientInfoResponse> getPublicClientInfo(
-      @PathVariable @NotBlank String clientId) {
+      @Parameter(
+              description = "ID of the client to retrieve",
+              required = true,
+              example = "6c7cf17b-1bd3-47d5-94c6-be2d3570e168")
+          @PathVariable
+          @NotBlank
+          String clientId) {
     try {
       return ResponseEntity.ok(clientApplicationService.getClientInfo(clientId));
     } finally {
@@ -290,9 +465,44 @@ public class ClientQueryController {
   @GetMapping("/info")
   @Operation(
       summary = "Retrieves a pageable list of client information",
-      tags = {"ClientQueryController"},
-      security = @SecurityRequirement(name = "ascAuth"),
+      tags = {"Client Querying"},
+      security = @SecurityRequirement(name = "x-signature"),
       responses = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Successfully retrieved clients info",
+            content =
+                @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = PageableResponse.class),
+                    examples =
+                        @ExampleObject(
+                            value =
+                                """
+                                              {
+                                                  data: [
+                                                    {
+                                                        "name": "Example Name",
+                                                        "client_id": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                                                        "description": "Example Description",
+                                                        "website_url": "http://example.com",
+                                                        "terms_url": "http://example.com",
+                                                        "policy_url": "http://example.com",
+                                                        "logo": "data:image/png;base64,ivBOR",
+                                                        "authentication_methods": ["client_secret_post"],
+                                                        "scopes": ["files:read", "files:write"],
+                                                        "is_public": true
+                                                        "created_on": "2024-04-04T12:00:00Z",
+                                                        "created_by": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                                                        "modified_on": "2024-04-04T12:00:00Z",
+                                                        "modified_by": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
+                                                    }
+                                                  ],
+                                                  "limit": 50,
+                                                  "last_client_id": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                                                  "last_created_on": "2024-04-04T12:00:00Z"
+                                              }
+                                              """))),
         @ApiResponse(responseCode = "200", description = "Successfully retrieved clients info"),
         @ApiResponse(
             responseCode = "400",
@@ -310,9 +520,21 @@ public class ClientQueryController {
   @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
   public ResponseEntity<PageableResponse<ClientInfoResponse>> getClientsInfo(
       @AuthenticationPrincipal BasicSignatureTokenPrincipal principal,
-      @RequestParam(value = "limit") @Min(value = 1) @Max(value = 50) int limit,
-      @RequestParam(value = "last_client_id", required = false) String lastClientId,
-      @RequestParam(value = "last_created_on", required = false) ZonedDateTime lastCreatedOn) {
+      @Parameter(description = "Pagination limit", required = true, example = "1")
+          @RequestParam(value = "limit")
+          @Min(value = 1)
+          @Max(value = 50)
+          int limit,
+      @Parameter(
+              description = "ID of the last retrieved client",
+              example = "6c7cf17b-1bd3-47d5-94c6-be2d3570e168")
+          @RequestParam(value = "last_client_id", required = false)
+          String lastClientId,
+      @Parameter(
+              description = "Date of the last retrieved client",
+              example = "2024-04-04T12:00:00Z")
+          @RequestParam(value = "last_created_on", required = false)
+          ZonedDateTime lastCreatedOn) {
     try {
       setLoggingParameters(principal);
       return ResponseEntity.ok(
@@ -343,27 +565,69 @@ public class ClientQueryController {
   @GetMapping("/consents")
   @Operation(
       summary = "Retrieves a pageable list of consents",
-      tags = {"ClientQueryController"},
-      security = @SecurityRequirement(name = "ascAuth"),
+      tags = {"Client Querying"},
+      security = @SecurityRequirement(name = "x-signature"),
       responses = {
-        @ApiResponse(responseCode = "200", description = "Successfully retrieved user consents"),
         @ApiResponse(
-            responseCode = "400",
-            description = "Bad request",
-            content = {@Content}),
-        @ApiResponse(
-            responseCode = "429",
-            description = "Too many requests",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-        @ApiResponse(
-            responseCode = "500",
-            description = "Internal server error",
-            content = @Content)
+            responseCode = "200",
+            description = "Successfully retrieved user consents",
+            content =
+                @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = PageableModificationResponse.class),
+                    examples =
+                        @ExampleObject(
+                            value =
+                                """
+                                    {
+                                        "data": [
+                                            {
+                                                "registered_client_id": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                                                "scopes": [
+                                                    "files:read",
+                                                    "files:write"
+                                                ],
+                                                "modified_at": "2024-04-04T12:00:00Z",
+                                                "client": {
+                                                    "name": "Example Name",
+                                                    "client_id": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                                                    "description": "Example Description",
+                                                    "website_url": "http://example.com",
+                                                    "terms_url": "http://example.com",
+                                                    "policy_url": "http://example.com",
+                                                    "logo": "data:image/png;base64,ivBOR",
+                                                    "authentication_methods": [
+                                                        "client_secret_post"
+                                                    ],
+                                                    "scopes": [
+                                                        "files:read",
+                                                        "files:write"
+                                                    ],
+                                                    "is_public": true,
+                                                    "created_on": "2024-04-04T12:00:00Z",
+                                                    "created_by": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                                                    "modified_on": "2024-04-04T12:00:00Z",
+                                                    "modified_by": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
+                                                }
+                                            }
+                                        ],
+                                        "limit": 50,
+                                        "last_modified_on": "2024-04-04T12:00:00Z"
+                                    }
+                                    """)))
       })
   public ResponseEntity<PageableModificationResponse<ConsentResponse>> getConsents(
       @AuthenticationPrincipal BasicSignatureTokenPrincipal principal,
-      @RequestParam(value = "limit") @Min(value = 1) @Max(value = 50) int limit,
-      @RequestParam(value = "last_modified_on", required = false) ZonedDateTime lastModifiedOn) {
+      @Parameter(description = "Pagination limit", required = true, example = "1")
+          @RequestParam(value = "limit")
+          @Min(value = 1)
+          @Max(value = 50)
+          int limit,
+      @Parameter(
+              description = "Date of the last retrieved consent",
+              example = "2024-04-04T12:00:00Z")
+          @RequestParam(value = "last_modified_on", required = false)
+          ZonedDateTime lastModifiedOn) {
     try {
       return ResponseEntity.ok(
           consentService.getConsents(principal.getUserId(), limit, lastModifiedOn));

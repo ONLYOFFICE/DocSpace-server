@@ -26,6 +26,9 @@
 
 namespace ASC.Common.Threading;
 
+/// <summary>
+/// The status of the distributed task.
+/// </summary>
 public enum DistributedTaskStatus
 {
     [SwaggerEnum("Created")]

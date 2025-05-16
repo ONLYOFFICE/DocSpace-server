@@ -1137,4 +1137,7 @@
   <data name="Tariffs_nonprofit" xml:space="preserve">
     <value>Neprofitabilno</value>
   </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>URL adresa Webhook-a nije dostupna. HEAD zahtev nije vratio HTTP status 200.</value>
+  </data>
 </root>
