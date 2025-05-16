@@ -53,9 +53,9 @@ public static class CacheExtention
         return $"settings-{tenant}-{userId}-{settingName}";
     }
 
-    public static string GetTenantQuotaTag(int tenant)
+    public static string GetTenantQuotaTag(string key)
     {
-        return $"quota-{tenant}";
+        return $"quota-{key}";
     }
 
     public static string GetTenantQuotaRowTag(int tenant, string path)
@@ -78,9 +78,9 @@ public static class CacheExtention
         return $"group-{tenant}-{id}";
     }
 
-    public static string GetGroupRefTag(int tenant, Guid groupId, Guid userId)
+    public static string GetGroupRefTag(int tenant, Guid groupId)
     {
-        return $"ref-{tenant}-{groupId}-{userId}";
+        return $"ref-{tenant}-{groupId}";
     }
 
     public static string GetWebPluginsTag(int tenant)
