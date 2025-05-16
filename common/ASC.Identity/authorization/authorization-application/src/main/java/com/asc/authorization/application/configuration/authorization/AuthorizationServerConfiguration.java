@@ -29,6 +29,7 @@ package com.asc.authorization.application.configuration.authorization;
 
 import com.asc.authorization.application.security.filter.BasicSignatureAuthenticationFilter;
 import com.asc.authorization.application.security.filter.RateLimiterFilter;
+import com.asc.authorization.application.security.oauth.converter.FallbackScopeAuthorizationCodeRequestConverter;
 import com.asc.authorization.application.security.oauth.converter.PersonalAccessTokenAuthenticationConverter;
 import com.asc.authorization.application.security.oauth.provider.PersonalAccessTokenAuthenticationProvider;
 import com.asc.authorization.application.security.oauth.provider.TokenIntrospectionAuthenticationProvider;
@@ -73,6 +74,8 @@ public class AuthorizationServerConfiguration {
   private final RateLimiterFilter rateLimiterFilter;
   private final BasicSignatureAuthenticationFilter authenticationFilter;
 
+  private final FallbackScopeAuthorizationCodeRequestConverter
+      fallbackScopeAuthorizationCodeRequestConverter;
   private final PersonalAccessTokenAuthenticationConverter
       personalAccessTokenAuthenticationConverter;
 
@@ -152,6 +155,7 @@ public class AuthorizationServerConfiguration {
         .authorizationEndpoint(
             e -> {
               e.consentPage(formConfiguration.getConsent());
+              e.authorizationRequestConverter(fallbackScopeAuthorizationCodeRequestConverter);
               e.authenticationProvider(codeAuthenticationProvider);
               e.authorizationResponseHandler(authenticationSuccessHandler);
               e.errorResponseHandler(authenticationFailureHandler);
