@@ -36,7 +36,7 @@ module.exports = (app, config) => {
   const routes = _.values(config.routes);
   const machineKey = config["core"].machinekey
     ? config["core"].machinekey
-    : config.app.machinekey;
+    : config.get("app").machinekey;
 
   const fetchConfig = async (req, res, next) => {
     const foundRoutes =
@@ -61,12 +61,13 @@ module.exports = (app, config) => {
       return res.redirect(urlResolver.getPortal404Url(req));
     }
 
-    const baseUrl = urlResolver.getBaseUrl(req);
+    const baseUrl = urlResolver.getBaseUrl(req).originUrl;
 
     const promise = new Promise(async (resolve) => {
-      var url = urlResolver.getPortalSsoConfigUrl(req);
+      var urls = urlResolver.getPortalSsoConfigUrl(req);
 
-      const response = await fetch(url);
+      let headers = { Origin: urls.originUrl }
+      const response = await fetch(urls.url, headers);
 
       if (!response || response.status === 404) {
         if (response) {

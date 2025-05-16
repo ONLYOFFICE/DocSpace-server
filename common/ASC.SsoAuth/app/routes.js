@@ -457,7 +457,9 @@ module.exports = function (app, config) {
           )
         );
       } else {
-        return res.redirect(urlResolver.getPortalSsoLoginUrl(req, data));
+          var urls = urlResolver.getPortalSsoLoginUrl(req, data);
+          res.set('Origin', urls.originUrl);
+          return res.redirect(urls.url);
       }
     } catch (e) {
       logger.error(`onLoginResponse ${getError(e)}`);
@@ -659,11 +661,12 @@ module.exports = function (app, config) {
         //return res.redirect(urlResolver.getPortal500Url(req));
       }
 
-      const url = urlResolver.getPortalSsoLogoutUrl(req, data);
+      const urls = urlResolver.getPortalSsoLogoutUrl(req, data);
 
       logger.info(`SEND PORTAL LOGOUT`);
 
-      const response = await fetch(url);
+      let headers = { Origin: urls.originUrl }
+      const response = await fetch(urls.url, headers);
 
       logger.info(
         `PORTAL LOGOUT ${
