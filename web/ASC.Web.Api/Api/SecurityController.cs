@@ -431,7 +431,7 @@ public class SecurityController(PermissionContext permissionContext,
     /// Generate JWT token
     /// </short>
     /// <path>api/2.0/security/oauth2/token</path>
-    [ApiExplorerSettings(IgnoreApi = true)]
+    [Tags("Security / OAuth2")]
     [HttpGet("oauth2/token")]
     [SwaggerResponse(200, "Jwt Token", typeof(string))]
     public async Task<string> GenerateJwtToken()
