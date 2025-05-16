@@ -65,9 +65,9 @@ public static class CacheExtention
         return $"settings-{tenant}-{userId}-{settingName}";
     }
 
-    public static string GetTenantQuotaTag(int tenant)
+    public static string GetTenantQuotaTag(string key)
     {
-        return $"quota-{tenant}";
+        return $"quota-{key}";
     }
 
     public static string GetTenantQuotaRowTag(int tenant, string path)
