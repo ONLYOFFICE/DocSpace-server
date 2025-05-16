@@ -227,6 +227,7 @@ public class UpdateUserTypeProgressItem: DistributedTaskProgress
         var toUser = await userManager.GetUsersAsync(ToUser);
 
         await studioNotifyService.SendMsgReassignsCompletedAsync(_currentUserId, _userInfo, toUser);
+        await studioNotifyService.SendMsgUserTypeChangedAsync(_userInfo, _employeeType.ToStringFast());
 
         var fromUserName = _userInfo.DisplayUserName(false, displayUserSettingsHelper);
 
