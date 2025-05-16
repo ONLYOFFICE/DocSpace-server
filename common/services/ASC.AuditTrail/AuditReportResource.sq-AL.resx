@@ -927,4 +927,61 @@
   <data name="UserUpdatedPassword" xml:space="preserve">
     <value>Fjalëkalimi është përditësuar</value>
   </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>Çelësi API i përdoruesit u krijua: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>Çelësi API i përdoruesit u fshi: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>Çelësi API i përdoruesit u përditësua: {0}</value>
+  </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>Lidhja e autorizimit është aktivizuar</value>
+  </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>Cilësimet e aksesit në mjetet e zhvilluesit janë ndryshuar</value>
+  </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>Skedari: {0}. Filtri i personalizuar u çaktivizua</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>Skedari: {0}. Filtri i personalizuar u aktivizua</value>
+  </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>Skedari u ngarkua me mbishkrim: {0}</value>
+  </data>
+  <data name="FolderCopied" xml:space="preserve">
+    <value>Dosjet [{0}]. U kopjua në dosjen: {1}</value>
+  </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>Përdoruesit [{0}]. Plotësuan plotësisht formularin: {1}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>Përdoruesit [{0}]. Plotësuan pjesërisht formularin: {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>Përdoruesit [{0}]. Filluan të plotësojnë: {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>Përdoruesit [{0}]. Ndaluan së plotësuari formularin: {1}</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>Autentifikimi LDAP u çaktivizua</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>Autentifikimi LDAP u aktivizua</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>Sinkronizimi LDAP u përfundua</value>
+  </data>
+  <data name="WebhookCreated" xml:space="preserve">
+    <value>Webhook u krijua: {0}</value>
+  </data>
+  <data name="WebhookDeleted" xml:space="preserve">
+    <value>Webhook u fshi: {0}</value>
+  </data>
+  <data name="WebhookUpdated" xml:space="preserve">
+    <value>Webhook u perditësua: {0}</value>
+  </data>
 </root>

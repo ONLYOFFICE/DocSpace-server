@@ -562,4 +562,13 @@ Përputhshmëria më e lartë me docx, xlsx, pptx.</value>
   <data name="User" xml:space="preserve">
     <value>Përdoruesi</value>
   </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Lidhja për formularin</value>
+  </data>
+  <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
+    <value>Shpërndajeni për plotësim</value>
+  </data>
+  <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
+    <value>Filloni plotësimin</value>
+  </data>
 </root>

@@ -274,4 +274,24 @@ $Message</value>
   <data name="subject_ShareFolder_tg" xml:space="preserve">
     <value>Dokumentet. Lejohet aksesi në dokument : [$DocumentTitle]($DocumentURL)</value>
   </data>
+  <data name="pattern_FormStartedFilling" xml:space="preserve">
+    <value>
+      Njoftim aktiviteti. "$FromUserName":"$FromUserLink" filloi procesin e plotësimit të formularit: "$DocumentTitle":"$DocumentURL" në dhomën: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
+    <value>
+      Njoftim aktiviteti. Formulari "$DocumentTitle":"$DocumentURL" ishte plotësuar plotësisht në dhomën: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_StoppedFormFilling" xml:space="preserve">
+    <value>
+      Njoftim aktiviteti. "$FromUserName":"$FromUserLink" ndaloi plotësimin e formularit: "$DocumentTitle":"$DocumentURL" në dhomën: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_YourTurnFormFilling" xml:space="preserve">
+    <value>
+      Njoftim aktiviteti. Është radha juaj! Plotësimi i formularit është i detyrueshëm: "$DocumentTitle":"$DocumentURL" në dhomë: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
 </root>

@@ -141,4 +141,7 @@
   <data name="UnknownLastName" xml:space="preserve">
     <value>Mbiemri</value>
   </data>
+  <data name="LicenseTypeNotCorrect" xml:space="preserve">
+    <value>Konflikt license. Ju lutem kontrolloni që keni instaluar edicionin e saktë të {0} DocSpace (Enterprise or Developer). Në qoftë se keni ndonjë pyetje, mos hezitoni të kontaktoni menaxherin tuaj të shitjeve.</value>
+  </data>
 </root>

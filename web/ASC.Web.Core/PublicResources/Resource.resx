@@ -1138,7 +1138,7 @@
     <value>Business</value>
   </data>
   <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
-    <value>Webhook URL is not avaliable. HEAD request is not responce 200 http status.</value>
+    <value>Webhook URL is not available. HEAD request is not response 200 http status.</value>
   </data>
   <data name="ErrorGroupNotFound" xml:space="preserve">
     <value>The group could not be found</value>

@@ -1137,4 +1137,10 @@
   <data name="WhatsNewSubscriptionName" xml:space="preserve">
     <value>Çfarë ka të re</value>
   </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>Grupi nuk u gjend</value>
+  </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>URL-ja e Webhook nuk është e disponueshme. Kërkesa HEAD nuk ka kthyer një status 200 http.</value>
+  </data>
 </root>
