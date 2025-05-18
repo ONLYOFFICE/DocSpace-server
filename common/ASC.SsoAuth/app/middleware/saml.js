@@ -61,54 +61,53 @@ module.exports = (app, config) => {
       return res.redirect(urlResolver.getPortal404Url(req));
     }
 
-    const baseUrl = urlResolver.getBaseUrl(req).originUrl;
+    try 
+    {
+        const baseUrl = urlResolver.getBaseUrl(req).originUrl;
+        var urls = urlResolver.getPortalSsoConfigUrl(req);
 
-    const promise = new Promise(async (resolve) => {
-      var urls = urlResolver.getPortalSsoConfigUrl(req);
+        let headers = { Origin: urls.originUrl }
+        const response = await fetch(urls.url, { headers });
 
-      let headers = { Origin: urls.originUrl }
-      const response = await fetch(urls.url, headers);
-
-      if (!response || response.status === 404) {
-        if (response) {
-          logger.error(response.statusText);
+        if (!response || response.status === 404) {
+            if (response) {
+                logger.error(response.statusText);
+            }
+            return res.redirect(urlResolver.getPortal404Url(req));
+        } else if (response.status !== 200) {
+            throw new Error(`Invalid response status ${response.status}`);
         }
-        return resolve(res.redirect(urlResolver.getPortal404Url(req)));
-      } else if (response.status !== 200) {
-        throw new Error(`Invalid response status ${response.status}`);
-      } else if (!response.body) {
-        throw new Error("Empty config response");
-      }
 
-      const text = await response.text();
+        const text = await response.text();
+        if (!text) {
+            throw new Error("Empty config response");
+        }
 
-      const ssoConfig = coder.decodeData(text, machineKey);
+        const ssoConfig = coder.decodeData(text, machineKey);
 
-      const idp = converter.toIdp(ssoConfig);
+        const idp = converter.toIdp(ssoConfig);
 
-      const sp = converter.toSp(ssoConfig, baseUrl);
+        const sp = converter.toSp(ssoConfig, baseUrl);
 
-      const providersInfo = {
-        sp: sp,
-        idp: idp,
-        mapping: ssoConfig.FieldMapping,
-        settings: ssoConfig,
-      };
+        const providersInfo = {
+            sp: sp,
+            idp: idp,
+            mapping: ssoConfig.FieldMapping,
+            settings: ssoConfig,
+        };
 
-      req.providersInfo = providersInfo;
+        req.providersInfo = providersInfo;
 
-      return resolve(next());
-    }).catch((error) => {
-      logger.error(error);
-      return res.redirect(
-        urlResolver.getPortalAuthErrorUrl(
-          req,
-          urlResolver.ErrorMessageKey.SsoError
-        )
-      );
-    });
-
-    return promise;
+        next();
+    } catch (error) {
+        logger.error(error);
+        return res.redirect(
+            urlResolver.getPortalAuthErrorUrl(
+                req,
+                urlResolver.ErrorMessageKey.SsoError
+            )
+        );
+    }
   };
 
   app.use(fetchConfig);

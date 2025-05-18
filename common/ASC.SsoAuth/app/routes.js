@@ -666,7 +666,7 @@ module.exports = function (app, config) {
       logger.info(`SEND PORTAL LOGOUT`);
 
       let headers = { Origin: urls.originUrl }
-      const response = await fetch(urls.url, headers);
+      const response = await fetch(urls.url, { headers });
 
       logger.info(
         `PORTAL LOGOUT ${
