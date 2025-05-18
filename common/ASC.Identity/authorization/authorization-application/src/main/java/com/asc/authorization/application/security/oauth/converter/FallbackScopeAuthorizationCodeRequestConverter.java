@@ -91,14 +91,14 @@ public class FallbackScopeAuthorizationCodeRequestConverter implements Authentic
 
     if (authorizationCodeRequestAuthentication == null) return null;
 
-    var registeredClient =
-        registeredClientRepository.findByClientId(
-            authorizationCodeRequestAuthentication.getClientId());
-
-    if (registeredClient == null) return authorizationCodeRequestAuthentication;
-
     var requestedScopes = new HashSet<>(authorizationCodeRequestAuthentication.getScopes());
-    if (requestedScopes.isEmpty()) requestedScopes.addAll(registeredClient.getScopes());
+    if (requestedScopes.isEmpty()) {
+      var registeredClient =
+          registeredClientRepository.findByClientId(
+              authorizationCodeRequestAuthentication.getClientId());
+      if (registeredClient == null) return authorizationCodeRequestAuthentication;
+      requestedScopes.addAll(registeredClient.getScopes());
+    }
 
     if (authorizationCodeRequestAuthentication.getAuthorizationCode() == null)
       return new OAuth2AuthorizationCodeRequestAuthenticationToken(
