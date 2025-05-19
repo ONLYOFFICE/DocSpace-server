@@ -56,10 +56,9 @@ module.exports = function () {
     }
 
     function getPortalSsoLoginUrl(req, data) {
-        var urls = getPortalSsoHandlerUrl(req);
-        const url = urls.url + "?auth=true&data=" + data;
+        const url = getBaseUrl(req).originUrl + config.get("app").portal.ssoUrl + "?auth=true&data=" + data;
         logger.debug("getPortalSsoLoginUrl: " + url);
-        return { url, originUrl: urls.originUrl }
+        return url;
     }
 
     function getPortalSsoLogoutUrl(req, data) {

@@ -457,9 +457,8 @@ module.exports = function (app, config) {
           )
         );
       } else {
-          var urls = urlResolver.getPortalSsoLoginUrl(req, data);
-          res.set('Origin', urls.originUrl);
-          return res.redirect(urls.url);
+          var url = urlResolver.getPortalSsoLoginUrl(req, data);
+          return res.redirect(url);
       }
     } catch (e) {
       logger.error(`onLoginResponse ${getError(e)}`);
