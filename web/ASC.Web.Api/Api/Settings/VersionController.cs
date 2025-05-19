@@ -43,7 +43,6 @@ public class VersionController(PermissionContext permissionContext,
     /// <short>Get the current build version</short>
     /// <path>api/2.0/settings/version/build</path>
     /// <requiresAuthorization>false</requiresAuthorization>
-    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Versions")]
     [SwaggerResponse(200, "Current product versions", typeof(BuildVersion))]
     [AllowAnonymous]
