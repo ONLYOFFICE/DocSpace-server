@@ -149,8 +149,8 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// Sends a message to the users who are mentioned in the file with the ID specified in the request.
     /// </summary>
     /// <short>Send the mention message</short>
+    /// <path>api/2.0/files/file/{fileId}/sendeditornotify</path>
     /// <collection>list</collection>
-    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "List of access rights information", typeof(List<AceShortWrapper>))]
     [HttpPost("file/{fileId}/sendeditornotify")]
