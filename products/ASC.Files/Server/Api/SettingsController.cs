@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Common.Caching;
+using ASC.Geolocation;
 
 using Module = ASC.Api.Core.Module;
 
@@ -39,7 +40,8 @@ public class SettingsController(
     FileDtoHelper fileDtoHelper,
     TenantManager tenantManager,
     IFusionCacheProvider cacheProvider,
-    SecurityContext securityContext)
+    SecurityContext securityContext,
+    GeolocationHelper geolocationHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
@@ -218,7 +220,7 @@ public class SettingsController(
         tags.Add(CacheExtention.GetSettingsTag(tenant, securityContext.CurrentAccount.ID, nameof(FilesSettings)));
 
         var quota = await tenantManager.GetTenantQuotaAsync(tenant);
-        tags.Add(CacheExtention.GetTenantQuotaTag(quota.TenantId)); 
+        tags.Add(CacheExtention.GetTenantQuotaTag((await geolocationHelper.GetIPGeolocationFromHttpContextAsync()).Key));
         tags.Add(CacheExtention.GetTariffTag(tenant));
         tags.Add(CacheExtention.GetPaymentTag(tenant));
 
