@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Core.Common.Quota.Features;
+using ASC.Geolocation;
 
 namespace ASC.Web.Api.Core;
 
@@ -35,7 +36,8 @@ public class QuotaHelper(
     CoreBaseSettings coreBaseSettings,
     SettingsManager settingsManager,
     UserManager userManager, 
-    AuthContext authContext)
+    AuthContext authContext,
+    GeolocationHelper geolocationHelper)
 {
     public async IAsyncEnumerable<QuotaDto> GetQuotasAsync(List<string> tags)
     {
@@ -48,7 +50,7 @@ public class QuotaHelper(
 
         foreach (var quota in quotaList)
         {
-            tags.Add(CacheExtention.GetTenantQuotaTag(quota.TenantId));
+            tags.Add(CacheExtention.GetTenantQuotaTag((await geolocationHelper.GetIPGeolocationFromHttpContextAsync()).Key));
             yield return await ToQuotaDto(quota, userType, tags);
         }
     }

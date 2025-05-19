@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Geolocation;
+
 namespace ASC.Web.Api.Controllers;
 
 /// <summary>
@@ -41,7 +43,8 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
         ILogger<CapabilitiesController> logger,
         CommonLinkUtility commonLinkUtility,
         IFusionCacheProvider cacheProvider,
-        SecurityContext securityContext)
+        SecurityContext securityContext,
+        GeolocationHelper geolocationHelper)
     : ControllerBase
 {
     private readonly ILogger _log = logger;
@@ -71,7 +74,7 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
         var tenant = tenantManager.GetCurrentTenantId();
 
         var quota = await tenantManager.GetTenantQuotaAsync(tenant);
-        tags.Add(CacheExtention.GetTenantQuotaTag(quota.TenantId));
+        tags.Add(CacheExtention.GetTenantQuotaTag((await geolocationHelper.GetIPGeolocationFromHttpContextAsync()).Key));
         tags.Add(CacheExtention.GetTariffTag(tenant));
         tags.Add(CacheExtention.GetPaymentTag(tenant));
 
