@@ -26,7 +26,7 @@
 
 "use strict";
 
-const config = require("../../config").get(),
+const config = require("../../config"),
     logger = require("../log.js");
     URL = require("url");
 
@@ -36,36 +36,41 @@ module.exports = function () {
     function getBaseUrl(req) {
         const proto = req.headers['x-forwarded-proto']?.split(',').shift();
         const host = req.headers['x-forwarded-host']?.split(',').shift();
+        const originUrl = `${proto}://${host}`;
+        const baseUrl = config.get("API_HOST") || originUrl;
 
-        return `${proto}://${host}`;
+        return { baseUrl, originUrl };
     }
 
     function getPortalSsoHandlerUrl(req) {
-        const url = getBaseUrl(req) + config.app.portal.ssoUrl;
-        return url;
+        var urls = getBaseUrl(req);
+        const url = urls.baseUrl + config.get("app").portal.ssoUrl;
+        return { url, originUrl: urls.originUrl };
     }
 
     function getPortalSsoConfigUrl(req) {
-        const url = getPortalSsoHandlerUrl(req) +
-            "?config=saml";
+        var urls = getPortalSsoHandlerUrl(req);
+        const url = urls.url + "?config=saml";
         logger.debug("getPortalSsoConfigUrl: " + url);
-        return url;
+        return { url, originUrl: urls.originUrl }
     }
 
     function getPortalSsoLoginUrl(req, data) {
-        const url = getPortalSsoHandlerUrl(req) + "?auth=true&data=" + data;
+        var urls = getPortalSsoHandlerUrl(req);
+        const url = urls.url + "?auth=true&data=" + data;
         logger.debug("getPortalSsoLoginUrl: " + url);
-        return url;
+        return { url, originUrl: urls.originUrl }
     }
 
     function getPortalSsoLogoutUrl(req, data) {
-        const url = getPortalSsoHandlerUrl(req) + "?logout=true&data=" + data;
+        var urls = getPortalSsoHandlerUrl(req);
+        const url = urls.url + "?logout=true&data=" + data;
         logger.debug("getPortalSsoLogoutUrl: " + url);
-        return url;
+        return { url, originUrl: urls.originUrl }
     }
 
     function getPortalAuthUrl(req) {
-        const url = getBaseUrl(req) + config.app.portal.authUrl;
+        const url = getBaseUrl(req).originUrl + config.get("app").portal.authUrl;
         logger.debug("getPortalAuthUrl: " + url);
         return url;
     }
@@ -78,19 +83,19 @@ module.exports = function () {
     };
 
     function getPortalAuthErrorUrl(req, errorKey) {
-        const url = getBaseUrl(req) + "/login/error?messageKey=" + errorKey;
+        const url = getBaseUrl(req).originUrl + "/login/error?messageKey=" + errorKey;
         logger.debug("getPortalAuthErrorUrl: " + url);
         return url;
     }
 
     function getPortalErrorUrl(req) {
-        const url = getBaseUrl(req) + "/login/error?messageKey=" + ErrorMessageKey.Error;
+        const url = getBaseUrl(req).originUrl + "/login/error?messageKey=" + ErrorMessageKey.Error;
         logger.debug("getPortal500Url: " + url);
         return url;
     }
 
     function getPortal404Url(req) {
-        const url = getBaseUrl(req) + "/login/error?messageKey=" + ErrorMessageKey.SsoError;
+        const url = getBaseUrl(req).originUrl + "/login/error?messageKey=" + ErrorMessageKey.SsoError;
         logger.debug("getPortal404Url: " + url);
         return url;
     }
