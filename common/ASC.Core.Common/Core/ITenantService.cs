@@ -35,13 +35,13 @@ public interface ITenantService
     Task<IEnumerable<Tenant>> GetTenantsAsync(string login, string passwordHash);
     Task<IEnumerable<TenantVersion>> GetTenantVersionsAsync();
     Task<Tenant> GetTenantAsync(int id);
-    Task<Tenant> RestoreTenantAsync(int oldId, Tenant newTenant, CoreSettings coreSettings);
+    Task<Tenant> RestoreTenantAsync(Tenant oldTenant, Tenant newTenant, CoreSettings coreSettings);
     Task<Tenant> GetTenantAsync(string domain);
     Tenant GetTenant(string domain);
     Tenant GetTenantForStandaloneWithoutAlias(string ip);
     Task<Tenant> GetTenantForStandaloneWithoutAliasAsync(string ip);
     Task<Tenant> SaveTenantAsync(CoreSettings coreSettings, Tenant tenant);
-    Task RemoveTenantAsync(int id, bool auto = false);
+    Task RemoveTenantAsync(Tenant tenant, bool auto = false);
     Task SetTenantSettingsAsync(int tenant, string key, byte[] data);
     Task PermanentlyRemoveTenantAsync(int id);
     Task ValidateDomainAsync(string domain);
