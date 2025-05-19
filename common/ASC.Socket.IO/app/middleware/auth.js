@@ -28,6 +28,7 @@ const request = require("../requestManager.js");
 const check = require("./authService.js");
 const portalManager = require("../portalManager.js");
 const logger = require("../log.js");
+const config = require("../../config");
 
 module.exports = (socket, next) => {
   const req = socket.client.request;
@@ -59,9 +60,14 @@ module.exports = (socket, next) => {
     }
     return;
   }
-
-  const basePath = portalManager(req)?.replace(/\/$/g, "");
+  
   let headers = {};
+  var basePath = portalManager(req)?.replace(/\/$/g, "");
+  const basePathFromConfig = config.get("API_HOST");
+  if (basePathFromConfig) {
+    headers.Origin = basePath;
+    basePath = basePathFromConfig;
+  }
 
   const validateExternalLink = () => {
     return request({

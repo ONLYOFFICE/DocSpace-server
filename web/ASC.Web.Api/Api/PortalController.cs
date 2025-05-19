@@ -526,7 +526,7 @@ public class PortalController(
         }
 
         await client.DeleteTenantClientsAsync();
-        await tenantManager.RemoveTenantAsync(tenant.Id);
+        await tenantManager.RemoveTenantAsync(tenant);
 
         if (!coreBaseSettings.Standalone)
         {
@@ -657,7 +657,7 @@ public class PortalController(
         await DemandPermissionToDeleteTenantAsync(tenant);
 
         await client.DeleteTenantClientsAsync();
-        await tenantManager.RemoveTenantAsync(tenant.Id);
+        await tenantManager.RemoveTenantAsync(tenant);
 
         if (!coreBaseSettings.Standalone)
         {

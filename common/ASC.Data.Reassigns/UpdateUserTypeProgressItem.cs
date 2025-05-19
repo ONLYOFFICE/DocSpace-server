@@ -156,7 +156,7 @@ public class UpdateUserTypeProgressItem: DistributedTaskProgress
                 }
                 if (currentType != _employeeType)
                 {
-                    webItemSecurityCache.ClearCache(_tenantId);
+                    await webItemSecurityCache.ClearCacheAsync(_tenantId);
                     await socketManager.ChangeUserTypeAsync(_userInfo, true);
                 }
             }
@@ -186,7 +186,7 @@ public class UpdateUserTypeProgressItem: DistributedTaskProgress
 
                 if (currentType != _employeeType)
                 {
-                    webItemSecurityCache.ClearCache(_tenantId);
+                    await webItemSecurityCache.ClearCacheAsync(_tenantId);
 
                     var groups = await userManager.GetUserGroupsAsync(User);
 
@@ -228,6 +228,7 @@ public class UpdateUserTypeProgressItem: DistributedTaskProgress
         var toUser = await userManager.GetUsersAsync(ToUser);
 
         await studioNotifyService.SendMsgReassignsCompletedAsync(_currentUserId, _userInfo, toUser);
+        await studioNotifyService.SendMsgUserTypeChangedAsync(_userInfo, _employeeType.ToStringFast());
 
         var fromUserName = _userInfo.DisplayUserName(false, displayUserSettingsHelper);
 

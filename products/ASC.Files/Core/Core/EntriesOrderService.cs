@@ -33,7 +33,6 @@ namespace ASC.Files.Core.Core;
 /// </summary>
 [Scope]
 public class EntriesOrderService(
-    GlobalFolderHelper globalFolderHelper,
     FileSecurity fileSecurity,
     IDaoFactory daoFactory,
     FilesMessageService filesMessageService,
@@ -61,11 +60,6 @@ public class EntriesOrderService(
         if (room == null)
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderNotFound);
-        }
-
-        if (room.RootId is int root && root == await globalFolderHelper.FolderRoomTemplatesAsync)
-        {
-            throw new ItemNotFoundException();
         }
 
         if (!await fileSecurity.CanEditRoomAsync(room))

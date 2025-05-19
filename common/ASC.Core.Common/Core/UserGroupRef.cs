@@ -84,37 +84,4 @@ public class UserGroupRef : IMapFrom<UserGroup>
         profile.CreateMap<UserGroup, UserGroupRef>()
             .ForMember(dest => dest.GroupId, opt => opt.MapFrom(src => src.UserGroupId));
     }
-
-    public static implicit operator UserGroupRef(UserGroupRefCacheItem cache)
-    {
-        var result = new UserGroupRef
-        {
-            UserId = new Guid(cache.UserId),
-            GroupId = new Guid(cache.GroupId)
-        };
-
-        if (UserGroupRefTypeExtensions.TryParse(cache.RefType, out var refType))
-        {
-            result.RefType = refType;
-        }
-
-        result.TenantId = cache.Tenant;
-        result.LastModified = new DateTime(cache.LastModified);
-        result.Removed = cache.Removed;
-
-        return result;
-    }
-
-    public static implicit operator UserGroupRefCacheItem(UserGroupRef cache)
-    {
-        return new UserGroupRefCacheItem
-        {
-            GroupId = cache.GroupId.ToString(),
-            UserId = cache.UserId.ToString(),
-            RefType = cache.RefType.ToString(),
-            LastModified = cache.LastModified.Ticks,
-            Removed = cache.Removed,
-            Tenant = cache.TenantId
-        };
-    }
 }

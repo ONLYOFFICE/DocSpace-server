@@ -816,13 +816,19 @@ public class StudioNotifyService(
                 notifyAction = Actions.SaasAdminActivationV1;
             }
 
-            var userId = u.Id;
-            var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(u.Email, ConfirmType.EmailActivation, null, userId);
-
-            await settingsManager.SaveAsync(new FirstEmailConfirmSettings { IsFirst = true });
-
             var culture = GetCulture(u);
-            var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonConfirm", culture);
+
+            ITagValue orangeButton = new TagValue("OrangeButton", "");
+
+            if (u.ActivationStatus != EmployeeActivationStatus.Activated)
+            {
+                var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(u.Email, ConfirmType.EmailActivation, null, u.Id);
+                var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonConfirm", culture);
+                orangeButton = TagValues.OrangeButton(orangeButtonText, await urlShortener.GetShortenLinkAsync(confirmationUrl));
+
+                await settingsManager.SaveAsync(new FirstEmailConfirmSettings { IsFirst = true });
+            }
+
             var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
             await studioNotifyServiceHelper.SendNoticeToAsync(
@@ -830,7 +836,7 @@ public class StudioNotifyService(
             await studioNotifyHelper.RecipientFromEmailAsync(u.Email, false),
             [EMailSenderName],
             new TagValue(Tags.UserName, u.FirstName.HtmlEncode()),
-            TagValues.OrangeButton(orangeButtonText, await urlShortener.GetShortenLinkAsync(confirmationUrl)),
+            orangeButton,
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
             new TagValue(CommonTags.Footer, footer));

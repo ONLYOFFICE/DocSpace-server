@@ -117,7 +117,7 @@ public class IdentityClient(MachinePseudoKeys machinePseudoKeys,
         }
     }
 
-    public async Task DeleteTenantClientsAsync()
+    public async Task DeleteTenantClientsAsync(bool throwIfNotSuccess = true)
     {
         if (!string.IsNullOrEmpty(Url))
         {
@@ -132,7 +132,7 @@ public class IdentityClient(MachinePseudoKeys machinePseudoKeys,
             request.Headers.Add("x-signature", jwt);
             var response = await httpClient.SendAsync(request);
 
-            if (!response.IsSuccessStatusCode)
+            if (!response.IsSuccessStatusCode && throwIfNotSuccess)
             {
                 throw new InvalidOperationException(response.ReasonPhrase);
             }

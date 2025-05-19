@@ -31,7 +31,6 @@ public class FileStorageService //: IFileStorageService
 (
     GlobalFolderHelper globalFolderHelper,
     AuthContext authContext,
-    UserManager userManager,
     FilesLinkUtility filesLinkUtility,
     BaseCommonLinkUtility baseCommonLinkUtility,
     ILoggerProvider optionMonitor,
@@ -43,7 +42,6 @@ public class FileStorageService //: IFileStorageService
     DocumentServiceConnector documentServiceConnector,
     TenantManager tenantManager,
     EntryStatusManager entryStatusManager,
-    MentionWrapperCreator mentionWrapperCreator,
     FileChecker fileChecker,
     CommonLinkUtility commonLinkUtility,
     ShortUrl shortUrl,

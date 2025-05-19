@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,11 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Web.Core;
-
-[ProtoContract]
-public record MailServiceHelperCache
+namespace ASC.Web.Core.Log;
+internal static partial class ApiSystemHelperLogger
 {
-    [ProtoMember(1)]
-    public string Key { get; set; }
+    [LoggerMessage(LogLevel.Error, "AddTenantToCache {tenantDomain} {tenantRegion} status code: {statusCode}")]
+    public static partial void ErrorAddTenantToCache(this ILogger<ApiSystemHelper> logger, string tenantDomain, string tenantRegion, string statusCode);
+
+    [LoggerMessage(LogLevel.Error, "RemoveTenantFromCache {tenantDomain} status code: {statusCode}")]
+    public static partial void ErrorRemoveTenantFromCache(this ILogger<ApiSystemHelper> logger, string tenantDomain, string statusCode);
 }

@@ -1776,7 +1776,7 @@ public class UserController(
                 {
                     await activeUsersChecker.CheckAppend();
                     await _userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupGuest.ID);
-                    webItemSecurityCache.ClearCache(tenant.Id);
+                    await webItemSecurityCache.ClearCacheAsync(tenant.Id);
                     changed = true;
                 }
             }
@@ -1786,7 +1786,7 @@ public class UserController(
                 {
                     await countPaidUserChecker.CheckAppend();
                     await _userManager.RemoveUserFromGroupAsync(user.Id, Constants.GroupGuest.ID);
-                    webItemSecurityCache.ClearCache(tenant.Id);
+                    await webItemSecurityCache.ClearCacheAsync(tenant.Id);
                     changed = true;
                 }
             }
@@ -1976,6 +1976,7 @@ public class UserController(
                 await socketManager.UpdateUserAsync(user);
             }
             await socketManager.ChangeUserTypeAsync(user, true);
+            await studioNotifyService.SendMsgUserTypeChangedAsync(user, inDto.Type.ToStringFast());
         }
 
         messageService.Send(MessageAction.UsersUpdatedType, MessageTarget.Create(users.Select(x => x.Id)),

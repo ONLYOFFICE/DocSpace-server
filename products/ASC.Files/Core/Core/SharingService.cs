@@ -59,7 +59,9 @@ public class SharingService(
     GlobalStore globalStore,
     FileTrackerHelper fileTracker,
     IServiceProvider serviceProvider,
-    FileShareParamsHelper fileShareParamsHelper)
+    FileShareParamsHelper fileShareParamsHelper,
+    StudioNotifyService studioNotifyService,
+    CommonLinkUtility commonLinkUtility)
 {
     private static readonly FrozenDictionary<SubjectType, FrozenDictionary<EventType, MessageAction>> _roomMessageActions =
         new Dictionary<SubjectType, FrozenDictionary<EventType, MessageAction>> { { SubjectType.InvitationLink, new Dictionary<EventType, MessageAction> { { EventType.Create, MessageAction.RoomInvitationLinkCreated }, { EventType.Update, MessageAction.RoomInvitationLinkUpdated }, { EventType.Remove, MessageAction.RoomInvitationLinkDeleted } }.ToFrozenDictionary() }, { SubjectType.ExternalLink, new Dictionary<EventType, MessageAction> { { EventType.Create, MessageAction.RoomExternalLinkCreated }, { EventType.Update, MessageAction.RoomExternalLinkUpdated }, { EventType.Remove, MessageAction.RoomExternalLinkDeleted } }.ToFrozenDictionary() } }.ToFrozenDictionary();
@@ -164,6 +166,7 @@ public class SharingService(
             {
                 share = FileShare.Editing;
             }
+
             return await SetExternalLinkAsync(
                 entry,
                 Guid.NewGuid(),
@@ -195,20 +198,14 @@ public class SharingService(
         {
             var list = await share.ToAsyncEnumerable().SelectAwait(async s => await fileShareParamsHelper.ToAceObjectAsync(s)).ToListAsync();
 
-            var aceCollection = new AceCollection<T>
-            {
-                Files = fileIds,
-                Folders = folderIds,
-                Aces = list,
-                Message = sharingMessage
-            };
+            var aceCollection = new AceCollection<T> { Files = fileIds, Folders = folderIds, Aces = list, Message = sharingMessage };
 
             await SetAceObjectAsync(aceCollection, notify);
         }
 
         return await GetSharedInfoAsync(fileIds, folderIds);
     }
-    
+
     /// Sets access control entries (ACE) for files and folders asynchronously.
     /// <param name="aceCollection">A collection of ACEs, along with associated files and folders, to be updated.</param>
     /// <param name="notify">A boolean value indicating whether to send notifications for the ACE changes.</param>
@@ -278,6 +275,7 @@ public class SharingService(
                                         case EventType.Update:
                                             await filesMessageService.SendAsync(MessageAction.RoomUpdateAccessForUser, entry, user.Id, ace.Access, pastRecord.Share, true, name);
                                             await notifyClient.SendRoomUpdateAccessForUser(folder, user, ace.Access);
+                                            await studioNotifyService.SendMsgUserRoleChangedAsync(user, folder.Title, commonLinkUtility.GetFullAbsolutePath($"rooms/shared/{folder.Id}"), ace.Access.ToStringFast());
                                             break;
                                     }
                                 }
@@ -523,7 +521,7 @@ public class SharingService(
 
         return (await fileSharing.GetPureSharesAsync(room, [result.Ace.Id]).FirstOrDefaultAsync());
     }
-    
+
     public async IAsyncEnumerable<FileEntry> ChangeOwnerAsync<T>(IEnumerable<T> foldersId, IEnumerable<T> filesId, Guid userId, FileShare newShare = FileShare.RoomManager)
     {
         var userInfo = await userManager.GetUsersAsync(userId);
@@ -683,7 +681,7 @@ public class SharingService(
             yield return newFile;
         }
     }
-    
+
     private async Task<ProcessedItem<T>> SetAceLinkAsync<T>(FileEntry<T> entry, SubjectType subjectType, Guid linkId, FileShare share, FileShareOptions options)
     {
         if (linkId == Guid.Empty)
@@ -697,7 +695,7 @@ public class SharingService(
         {
             var result = await fileSharingAceHelper.SetAceObjectAsync(aces, entry, false, null);
             if (!string.IsNullOrEmpty(result.Warning))
-            { 
+            {
                 throw FileStorageService.GenerateException(new InvalidOperationException(result.Warning), logger, authContext);
             }
 
@@ -710,7 +708,7 @@ public class SharingService(
             throw FileStorageService.GenerateException(e, logger, authContext);
         }
     }
-    
+
     private async Task<FileEntry<T>> GetEntryAsync<T>(T entryId, FileEntryType entryType)
     {
         FileEntry<T> entry = entryType == FileEntryType.Folder
