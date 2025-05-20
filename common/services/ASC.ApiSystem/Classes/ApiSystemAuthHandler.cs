@@ -33,9 +33,8 @@ public class ApiSystemAuthHandler(
     UrlEncoder encoder,
     SecurityContext securityContext,
     CookiesManager cookiesManager,
-    IHttpContextAccessor httpContextAccessor,
     ApiSystemAuthHandlerHelper systemAuthHandlerHelper)
-    : CookieAuthHandler(options, logger, encoder, securityContext, cookiesManager, httpContextAccessor)
+    : CookieAuthHandler(options, logger, encoder, securityContext, cookiesManager)
 {
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {

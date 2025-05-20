@@ -1,4 +1,5 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// common/ASC.Api.Core/Log/HealthCheckLogger.cs
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -8,10 +9,8 @@
 // any third-party rights.
 // 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
-// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
-// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU AGPL
+// version 3 for more details.
 // 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
@@ -24,12 +23,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Core.Caching;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
-[ProtoContract]
-public record TenantSetting
-{
-    [ProtoMember(1)]
-    public string Key { get; set; }
+namespace ASC.Api.Core.Log;
+
+internal static partial class HealthCheckLogger
+{ 
+    [LoggerMessage(LogLevel.Error, "Health check failed. Status: {Status}. Duration: {Duration}ms")]
+    public static partial void ErrorHealthCheckFailed(this ILogger logger, string Status, double Duration);
+
+    [LoggerMessage(LogLevel.Error, "Failed health check: {HealthCheckName}, Status: {Status}, Duration: {Duration}ms, Description: {Description}")]
+    public static partial void ErrorHealthCheckEntry(this ILogger logger, string HealthCheckName, string Status, double Duration, string Description);
 }
-

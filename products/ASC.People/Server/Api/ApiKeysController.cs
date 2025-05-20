@@ -245,9 +245,9 @@ public class ApiKeysController(
         return result;
     }
 
-    private bool IsValidPermission(List<string> permission)
+    private static bool IsValidPermission(List<string> permission)
     {
-        if (permission == null || !permission.Any())
+        if (permission == null || permission.Count == 0)
         {
             return true;
         }

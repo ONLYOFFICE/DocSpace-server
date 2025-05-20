@@ -26,7 +26,11 @@
 
 extern alias ASCWebApi;
 extern alias ASCPeople;
-using ASC.Migrations.Core.Models;
+using Docspace.Client;
+
+using MemberRequestDto = ASCPeople::ASC.People.ApiModels.RequestDto.MemberRequestDto;
+using PasswordHasher = ASC.Security.Cryptography.PasswordHasher;
+using WizardRequestsDto = Docspace.Model.WizardRequestsDto;
 
 namespace ASC.Files.Tests.Data;
 
@@ -36,6 +40,10 @@ public static class Initializer
     
     private static bool _initialized;
     private static HttpClient _apiClient = null!;
+    private static AuthenticationApi _authenticationApi = null!;
+    private static SettingsCommonSettingsApi  _commonSettingsApi = null!;
+    private static PortalUsersApi  _portalUsersApi = null!;
+    private static PeopleProfilesApi  _peopleProfilesApi = null!;
     private static HttpClient _peopleClient = null!;
     private static PasswordHasher _passwordHasher = null!;
     
@@ -51,8 +59,6 @@ public static class Initializer
         .RuleFor(x => x.LastName, f => f.Person.LastName)
         .RuleFor(x => x.Email, f => f.Person.Email)
         .RuleFor(x => x.Password, f => f.Internet.Password(8, 10));
-    
-    private static JsonSerializerOptions JsonRequestSerializerOptions { get; } = new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault };
     
     public static List<KeyValuePair<string, string?>> GetSettings(CustomProviderInfo providerInfo, string redisConnectionString, string rabbitMqConnectionString, string openSearchConnectionString)
     {
@@ -101,13 +107,15 @@ public static class Initializer
             var apiClientStartTask = Task.Run(() =>
             {
                 _apiClient = apiFactory.WithWebHostBuilder(Build).CreateClient();
-                _apiClient.BaseAddress = new Uri(_apiClient.BaseAddress, "api/2.0/");
+                _authenticationApi = new AuthenticationApi(_apiClient, new Configuration { BasePath = _apiClient.BaseAddress!.ToString().TrimEnd('/') });
+                _commonSettingsApi = new SettingsCommonSettingsApi(_apiClient, new Configuration { BasePath = _apiClient.BaseAddress!.ToString().TrimEnd('/') });
+                _portalUsersApi = new PortalUsersApi(_apiClient, new Configuration { BasePath = _apiClient.BaseAddress!.ToString().TrimEnd('/') });
             });
 
             var peopleClientStartTask = Task.Run(() =>
             {
                 _peopleClient = peopleFactory.WithWebHostBuilder(Build).CreateClient();
-                _peopleClient.BaseAddress = new Uri(_peopleClient.BaseAddress, "api/2.0/");
+                _peopleProfilesApi = new PeopleProfilesApi(_peopleClient, new Configuration { BasePath = _peopleClient.BaseAddress!.ToString().TrimEnd('/') });
             });
 
             var filesServiceStartTask = Task.Run(() =>
@@ -116,29 +124,21 @@ public static class Initializer
             });
             
             await Task.WhenAll(apiClientStartTask, peopleClientStartTask, filesServiceStartTask);
+
+            var settings  = (await _commonSettingsApi.GetSettingsAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
             
-            var response = await _apiClient.GetAsync("settings");
-            var settings = await HttpClientHelper.ReadFromJson<SettingsDto>(response);
-            
-            if (!string.IsNullOrEmpty(settings?.WizardToken))
+            if (!string.IsNullOrEmpty(settings.WizardToken))
             {
                 _apiClient.DefaultRequestHeaders.TryAddWithoutValidation("confirm", settings.WizardToken);
 
-                response = await _apiClient.PutAsJsonAsync("settings/wizard/complete", new WizardRequestsDto
-                {
-                    Email = Owner.Email, 
-                    PasswordHash = _passwordHasher.GetClientPassword(Owner.Password)
-                });
+                await _commonSettingsApi.CompleteWizardAsync(new WizardRequestsDto(Owner.Email, _passwordHasher.GetClientPassword(Owner.Password)), TestContext.Current.CancellationToken);
                 
                 _apiClient.DefaultRequestHeaders.Remove("confirm");
-                
-                _ = await HttpClientHelper.ReadFromJson<WizardSettings>(response);
             }
         }
         
         await filesFactory.HttpClient.Authenticate(Owner);
-        
-        _ = await filesFactory.HttpClient.GetAsync("@root");
+        _ = await filesFactory.FilesFoldersApi.GetRootFoldersAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         if (!_initialized)
         {
@@ -161,8 +161,7 @@ public static class Initializer
     {
         await _apiClient.Authenticate(Owner);
 
-        var inviteResponse = await _apiClient.GetAsync($"portal/users/invite/{employeeType}");
-        var shortLink = await HttpClientHelper.ReadFromJson<string>(inviteResponse);
+        var shortLink = (await _portalUsersApi.GeInviteLinkAsync(employeeType, TestContext.Current.CancellationToken)).Response;
         var fullLink = await _apiClient.GetAsync(shortLink);
         var confirmHeader = fullLink.RequestMessage?.RequestUri?.Query.Substring(1);
         if (confirmHeader == null)
@@ -182,7 +181,7 @@ public static class Initializer
         
         var fakeMember = _fakerMember.Generate();
         
-        var createMemberResponse = await _peopleClient.PostAsJsonAsync("people", new MemberRequestDto
+        var createMemberResponse = await _peopleProfilesApi.AddMemberWithHttpInfoAsync(new Docspace.Model.MemberRequestDto
         {
             FromInviteLink = true,
             CultureName = "en-US",
@@ -195,11 +194,11 @@ public static class Initializer
             
             Type = parsedEmployeeType,
             Key = parsedQuery["key"],
-        }, JsonRequestSerializerOptions);
+        }, TestContext.Current.CancellationToken);
         
         _peopleClient.DefaultRequestHeaders.Remove("confirm");
         
-        if (!createMemberResponse.IsSuccessStatusCode)
+        if (createMemberResponse.StatusCode != HttpStatusCode.OK)
         {
             throw new HttpRequestException($"Unable to invite user {employeeType}");
         }
@@ -209,16 +208,13 @@ public static class Initializer
 
     public static async Task Authenticate(this HttpClient client, User user)
     {        
-        if (_apiClient != null)
+        var authMe = await _authenticationApi.AuthenticateMeAsync(new Docspace.Model.AuthRequestsDto
         {
-            var authenticationResponse = await _apiClient.PostAsJsonAsync("authentication", new AuthRequestsDto
-            {
-                UserName = user.Email, 
-                PasswordHash = _passwordHasher.GetClientPassword(user.Password)
-            }, JsonRequestSerializerOptions, TestContext.Current.CancellationToken);
-            var authenticationTokenDto = await HttpClientHelper.ReadFromJson<AuthenticationTokenDto>(authenticationResponse);
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authenticationTokenDto?.Token);
-        }
+            UserName = user.Email,
+            PasswordHash = _passwordHasher.GetClientPassword(user.Password)
+        }, TestContext.Current.CancellationToken);
+        
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authMe.Response.Token);
     }
     
     internal static string Password(

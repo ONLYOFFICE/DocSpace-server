@@ -42,7 +42,11 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         PathProvider pathProvider,
         FileChecker fileChecker,
         FillingFormResultDtoHelper fillingFormResultDtoHelper,
-        WebhookManager webhookManager)
+        WebhookManager webhookManager,
+        IDaoFactory daoFactory,
+        IEventBus eventBus,
+        TenantManager tenantManager,
+        AuthContext authContext)
     : FilesHelperBase(filesSettingsHelper,
             fileUploader,
             socketManager,
@@ -50,7 +54,11 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
             fileStorageService,
             fileChecker,
             httpContextAccessor,
-            webhookManager)
+            webhookManager,
+            daoFactory,
+            eventBus,
+            tenantManager,
+            authContext)
     {
     private readonly ILogger _logger = logger;
 
@@ -184,20 +192,14 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         return null;
     }
 
-    public async IAsyncEnumerable<EditHistoryDto> GetEditHistoryAsync<T>(T fileId)
+    public IAsyncEnumerable<EditHistoryDto> GetEditHistoryAsync<T>(T fileId)
     {
-        await foreach (var f in _fileStorageService.GetEditHistoryAsync(fileId))
-        {
-            yield return new EditHistoryDto(f, apiDateTimeHelper, userManager, displayUserSettingsHelper);
-        }
+        return _fileStorageService.GetEditHistoryAsync(fileId).Select(f => new EditHistoryDto(f, apiDateTimeHelper, userManager, displayUserSettingsHelper));
     }
 
-    public async IAsyncEnumerable<FileDto<T>> GetFileVersionInfoAsync<T>(T fileId)
+    public IAsyncEnumerable<FileDto<T>> GetFileVersionInfoAsync<T>(T fileId)
     {
-        await foreach (var e in _fileStorageService.GetFileHistoryAsync(fileId))
-        {
-            yield return await _fileDtoHelper.GetAsync(e);
-        }
+        return _fileStorageService.GetFileHistoryAsync(fileId).SelectAwait(async e => await _fileDtoHelper.GetAsync(e));
     }
 
     public async Task<FileDto<T>> LockFileAsync<T>(T fileId, bool lockFile)
@@ -214,12 +216,10 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         return await _fileDtoHelper.GetAsync(result);
     }
 
-    public async IAsyncEnumerable<EditHistoryDto> RestoreVersionAsync<T>(T fileId, int version = 0, string url = null)
+    public IAsyncEnumerable<EditHistoryDto> RestoreVersionAsync<T>(T fileId, int version = 0, string url = null)
     {
-        await foreach (var e in _fileStorageService.RestoreVersionAsync(fileId, version, url))
-        {
-            yield return new EditHistoryDto(e, apiDateTimeHelper, userManager, displayUserSettingsHelper);
-        }
+        return _fileStorageService.RestoreVersionAsync(fileId, version, url)
+            .Select(e => new EditHistoryDto(e, apiDateTimeHelper, userManager, displayUserSettingsHelper));
     }
 
     public IAsyncEnumerable<ConversationResultDto> StartConversionAsync<T>(CheckConversionRequestDto<T> cheqConversionRequestDto)
@@ -263,7 +263,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         }
         catch (FileNotFoundException e)
         {
-            throw new ItemNotFoundException("File not found", e);
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound, e);
         }
     }
 
@@ -277,7 +277,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         }
         catch (FileNotFoundException e)
         {
-            throw new ItemNotFoundException("File not found", e);
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound, e);
         }
     }
 

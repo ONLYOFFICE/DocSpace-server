@@ -125,10 +125,7 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
             if(formsData.Any())
             {
                 keys.Add(FilesCommonResource.ResourceManager.GetString("FormNumber", tenantCulture));
-                foreach (var field in formsData.Skip(1))
-                {
-                    keys.Add(field.Key);
-                }
+                keys.AddRange(formsData.Skip(1).Select(field => field.Key));
                 keys.Add(FilesCommonResource.ResourceManager.GetString("Date", tenantCulture));
                 keys.Add(FilesCommonResource.ResourceManager.GetString("LinkToForm", tenantCulture));
 

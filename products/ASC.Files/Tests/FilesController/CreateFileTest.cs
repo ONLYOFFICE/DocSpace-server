@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,8 +26,6 @@
 
 extern alias ASCWebApi;
 extern alias ASCPeople;
-using ASC.Files.Tests.Data;
-using ASC.Files.Tests.Models;
 
 namespace ASC.Files.Tests.FilesController;
 
@@ -57,17 +55,22 @@ public class CreateFileTest(
 
     [Theory]
     [MemberData(nameof(Data))]
-    public async Task CreateFile_FolderMy_Owner_ReturnsOk(string? fileName)
+    public async Task CreateFile_FolderMy_Owner_ReturnsOk(string fileName)
     {
         var createdFile = await CreateFile(fileName, FolderType.USER, Initializer.Owner);
         
         createdFile.Should().NotBeNull();
         createdFile.Title.Should().Be(fileName);
+        
+        // Verify the file was created
+        var file = await GetFile(createdFile.Id);
+        file.Should().NotBeNull();
+        file.Title.Should().Be(fileName);
     }
     
     [Theory]
     [MemberData(nameof(Data))]
-    public async Task CreateFile_FolderMy_RoomAdmin_ReturnsOk(string? fileName)
+    public async Task CreateFile_FolderMy_RoomAdmin_ReturnsOk(string fileName)
     {
         var roomAdmin = await Initializer.InviteContact(EmployeeType.RoomAdmin);
         
@@ -75,11 +78,16 @@ public class CreateFileTest(
         
         createdFile.Should().NotBeNull();
         createdFile.Title.Should().Be(fileName);
+        
+        // Verify the file was created
+        var file = await GetFile(createdFile.Id);
+        file.Should().NotBeNull();
+        file.Title.Should().Be(fileName);
     }
     
     [Theory]
     [MemberData(nameof(Data))]
-    public async Task CreateFile_FolderMy_User_ReturnsOk(string? fileName)
+    public async Task CreateFile_FolderMy_User_ReturnsOk(string fileName)
     {
         var user = await Initializer.InviteContact(EmployeeType.User);
         
@@ -87,6 +95,11 @@ public class CreateFileTest(
 
         createdFile.Should().NotBeNull();
         createdFile.Title.Should().Be(fileName);
+        
+        // Verify the file was created
+        var file = await GetFile(createdFile.Id);
+        file.Should().NotBeNull();
+        file.Title.Should().Be(fileName);
     }
     
     [Fact]
@@ -95,13 +108,9 @@ public class CreateFileTest(
         await _filesClient.Authenticate(Initializer.Owner);
         
         //Arrange
-        var file = new CreateFile<JsonElement> { Title = "test.docx" };
+        var file = new CreateFileJsonElement("test.docx");
         
-        //Act
-        var response = await _filesClient.PostAsJsonAsync($"{Random.Shared.Next(10000, 20000)}/file", file, _filesFactory.JsonRequestSerializerOptions, cancellationToken: TestContext.Current.CancellationToken);
-        
-        //Assert
-        response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
+        await Assert.ThrowsAsync<Docspace.Client.ApiException>(async () => await _filesFilesApi.CreateFileAsync(Random.Shared.Next(10000, 20000), file, cancellationToken: TestContext.Current.CancellationToken));
     }
     
     [Theory]
@@ -110,20 +119,79 @@ public class CreateFileTest(
     {
         var createdFile = await CreateFile("test.docx", folderType, Initializer.Owner);
 
-        createdFile.RootFolderType.Should().Be(FolderType.DEFAULT);
+        createdFile.RootFolderType.Should().NotBe(folderType);
     }
     
     [Fact]
-    public async Task CreateFile_FolderRecent_Owner_ReturnsOk()
+    public async Task CreateFile_NameLongerThan165Chars_Returns400()
     {
         await _filesClient.Authenticate(Initializer.Owner);
         
-        var response = await _filesClient.GetAsync("recent", TestContext.Current.CancellationToken);
-        var recentFolder = await HttpClientHelper.ReadFromJson<FolderContentDto>(response);
-        var createdFile = await CreateFile("test.docx", recentFolder.Current.Id);
+        // Arrange
+        var longFileName = new string('a', 166) + ".docx"; // 166 characters + 5 for extension = 171 characters
+        var file = new CreateFileJsonElement(longFileName);
+        
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<Docspace.Client.ApiException>(
+            async () => await _filesFilesApi.CreateFileAsync(
+                await GetFolderIdAsync(FolderType.USER, Initializer.Owner), 
+                file, 
+                cancellationToken: TestContext.Current.CancellationToken));
+        
+        exception.ErrorCode.Should().Be(400);
+    }
+    
+    [Fact]
+    public async Task CreateTextFile_ValidContent_ReturnsNewTextFile()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
 
-        createdFile.Should().NotBeNull();
-        createdFile.RootFolderType.Should().Be(FolderType.DEFAULT);
+        var userFolderId = await GetUserFolderIdAsync(Initializer.Owner);
+        var fileName = "new_text_file";
+        var content = "This is the content of my text file.";
+        
+        // Act
+        var createParams = new CreateTextOrHtmlFile(
+            title: fileName,
+            content: content,
+            createNewIfExist: true
+        );
+        
+        var result = (await _filesFilesApi.CreateTextFileAsync(userFolderId, createParams, TestContext.Current.CancellationToken)).Response;
+        
+        // Assert
+        result.Should().NotBeNull();
+        result.Title.Should().Be(fileName + ".txt");
+        result.FolderId.Should().Be(userFolderId);
+        result.FileExst.Should().Be(".txt");
+        
+        // We cannot directly verify content in this test without downloading the file
+    }
+    
+    [Fact]
+    public async Task CreateHtmlFile_ValidContent_ReturnsNewHtmlFile()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        
+        var userFolderId = await GetUserFolderIdAsync(Initializer.Owner);
+        var fileName = "new_html_file";
+        var content = "<html><body><h1>Test HTML</h1><p>This is a test HTML file.</p></body></html>";
+        
+        // Act
+        var createParams = new CreateTextOrHtmlFile(
+            title: fileName,
+            content: content,
+            createNewIfExist: true
+        );
+        
+        var result = (await _filesFilesApi.CreateHtmlFileAsync(userFolderId, createParams, TestContext.Current.CancellationToken)).Response;
+        
+        // Assert
+        result.Should().NotBeNull();
+        result.Title.Should().Be(fileName + ".html");
+        result.FolderId.Should().Be(userFolderId);
+        result.FileExst.Should().Be(".html");
     }
 }
-

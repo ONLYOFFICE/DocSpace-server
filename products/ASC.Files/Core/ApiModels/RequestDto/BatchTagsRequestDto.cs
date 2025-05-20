@@ -34,7 +34,7 @@ public class BatchTagsRequestDto
     /// <summary>
     /// The list of tag names.
     /// </summary>
-    public IEnumerable<string> Names { get; set; }
+    public List<string> Names { get; set; }
 }
 
 

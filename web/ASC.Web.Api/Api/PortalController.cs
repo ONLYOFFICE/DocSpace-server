@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Common.Identity;
+
 using Microsoft.AspNetCore.RateLimiting;
 
 using Constants = ASC.Core.Users.Constants;
@@ -46,7 +48,7 @@ public class PortalController(
     CommonLinkUtility commonLinkUtility,
     IUrlShortener urlShortener,
     AuthContext authContext,
-        CookiesManager cookiesManager,
+    CookiesManager cookiesManager,
     SecurityContext securityContext,
     SettingsManager settingsManager,
     IMobileAppInstallRegistrator mobileAppInstallRegistrator,
@@ -68,10 +70,10 @@ public class PortalController(
     TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
     ExternalResourceSettingsHelper externalResourceSettingsHelper,
     IMapper mapper,
-    IHttpContextAccessor httpContextAccessor,
     QuotaHelper quotaHelper,
     IEventBus eventBus,
-    CspSettingsHelper cspSettingsHelper)
+    CspSettingsHelper cspSettingsHelper,
+    IdentityClient client)
     : ControllerBase
 {
     /// <summary>
@@ -130,6 +132,13 @@ public class PortalController(
     [HttpGet("users/invite/{employeeType}")]
     public async Task<string> GeInviteLinkAsync(InvitationLinkRequestDto inDto)
     {
+        var invitationSettings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
+
+        if (!invitationSettings.AllowInvitingMembers)
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
         var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
         if ((inDto.EmployeeType == EmployeeType.DocSpaceAdmin && !currentUser.IsOwner(tenantManager.GetCurrentTenant()))
@@ -479,7 +488,7 @@ public class PortalController(
             return string.Empty;
         }
 
-        var rewriter = httpContextAccessor.HttpContext.Request.Url();
+        var rewriter = HttpContext.Request.Url();
         var confirmUrl = string.Format("{0}{1}{2}{3}/{4}",
                                 rewriter?.Scheme ?? Uri.UriSchemeHttp,
                                 Uri.SchemeDelimiter,
@@ -516,7 +525,8 @@ public class PortalController(
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
-        await tenantManager.RemoveTenantAsync(tenant.Id);
+        await client.DeleteTenantClientsAsync();
+        await tenantManager.RemoveTenantAsync(tenant);
 
         if (!coreBaseSettings.Standalone)
         {
@@ -646,7 +656,8 @@ public class PortalController(
 
         await DemandPermissionToDeleteTenantAsync(tenant);
 
-        await tenantManager.RemoveTenantAsync(tenant.Id);
+        await client.DeleteTenantClientsAsync();
+        await tenantManager.RemoveTenantAsync(tenant);
 
         if (!coreBaseSettings.Standalone)
         {

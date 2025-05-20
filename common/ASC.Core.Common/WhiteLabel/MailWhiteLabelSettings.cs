@@ -63,7 +63,7 @@ public class MailWhiteLabelSettings : ISettings<MailWhiteLabelSettings>
 
     public MailWhiteLabelSettings GetDefault()
     {
-        return new MailWhiteLabelSettings()
+        return new MailWhiteLabelSettings
         {
             FooterEnabled = true,
             FooterSocialEnabled = true

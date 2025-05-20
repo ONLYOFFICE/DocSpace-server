@@ -59,6 +59,11 @@ internal class DropboxDaoBase(
         return path;
     }
 
+    public bool IsFile(Metadata dropboxItem)
+    {
+        return dropboxItem.AsFolder == null;
+    }
+
     public string GetName(Metadata dropboxItem)
     {
         string name = null;
@@ -280,7 +285,7 @@ internal class DropboxDaoBase(
     public async Task<List<Metadata>> GetItemsAsync(string parentId, bool? folder = null)
     {
         var dropboxFolderId = MakeThirdId(parentId);
-        var items = await _providerInfo.GetItemsAsync(dropboxFolderId);
+        var items = await _providerInfo.GetItemsAsync(dropboxFolderId, GetId, IsFile);
 
         if (!folder.HasValue)
         {

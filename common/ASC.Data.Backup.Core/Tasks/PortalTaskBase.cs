@@ -82,12 +82,8 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
         foreach (var module in StorageFactoryConfig.GetModuleList().Where(IsStorageModuleAllowed))
         {
             var store = await StorageFactory.GetStorageAsync(tenantId, module);
-            var domainFolders = new List<string>();
+            var domainFolders = StorageFactoryConfig.GetDomainList(module, false).Select(domain => store.GetRootDirectory(domain)).ToList();
 
-            foreach(var domain in StorageFactoryConfig.GetDomainList(module, false))
-            {
-                domainFolders.Add(store.GetRootDirectory(domain));
-            }
             var files = store.ListFilesRelativeAsync(string.Empty, "\\", "*", true)
                           .Where(path => domainFolders.All(domain => !path.Contains(domain + "/") && !path.Contains(domain + "\\")))
                          .Select(path => new BackupFileInfo(string.Empty, module, path, tenantId));

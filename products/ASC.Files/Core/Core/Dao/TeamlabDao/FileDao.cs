@@ -283,7 +283,6 @@ internal class FileDao(
 
         var q = await GetFilesQueryWithFilters(parentId, orderBy, filterType, subjectGroup, subjectID, searchText, searchInContent, withSubfolders, excludeSubject, roomId, extension, filesDbContext, formsItemDto);
         
-        var tenantId = _tenantManager.GetCurrentTenantId();
         if (containingMyFiles)
         {
             q = ApplyAdditionalFileFilters(q, filesDbContext, parentId, parentType, AdditionalFilterOption.MyFilesAndFolders);
@@ -1217,7 +1216,7 @@ internal class FileDao(
         if (file != null)
         {
             var copy = _serviceProvider.GetService<File<int>>();
-            copy.SetFileStatus(await file.GetFileStatus());
+            copy.SetFileStatus(await file.GetFileStatus() ^ FileStatus.IsEditing ^ FileStatus.IsEditingAlone ^ FileStatus.IsConverting);
             copy.ParentId = toFolderId;
             copy.Title = file.Title;
             copy.ConvertedType = file.ConvertedType;
@@ -1477,13 +1476,14 @@ internal class FileDao(
 
         return formRole;
     }
+    
     public async Task DeleteFormRolesAsync(int formId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var toDeleteRoles = await filesDbContext.DbFilesFormRoleMappingForDeleteAsync(tenantId, formId).ToListAsync();
 
-        if (toDeleteRoles.Any())
+        if (toDeleteRoles.Count != 0)
         {
             filesDbContext.RemoveRange(toDeleteRoles);
             await filesDbContext.SaveChangesAsync();

@@ -120,7 +120,7 @@ public class TextFileUserImporter(Stream stream) : IUserImporter
         return result;
     }
 
-    private int GetFieldsMapping(string firstLine, IEnumerable<PropertyInfo> infos, Dictionary<int, PropertyInfo> mappedProperties)
+    private int GetFieldsMapping(string firstLine, PropertyInfo[] infos, Dictionary<int, PropertyInfo> mappedProperties)
     {
         var fields = firstLine.Split([Separator], StringSplitOptions.RemoveEmptyEntries);
         for (var i = 0; i < fields.Length; i++)

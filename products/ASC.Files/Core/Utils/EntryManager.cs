@@ -157,12 +157,12 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
             return;
         }
 
-        await SetFileStatusAsync(new List<File<T>>(1) { file });
+        await SetFileStatusAsync([file]);
     }
 
-    public async Task SetFileStatusAsync<T>(IEnumerable<File<T>> files)
+    public async Task SetFileStatusAsync<T>(List<File<T>> files)
     {
-        if (!files.Any())
+        if (files.Count == 0)
         {
             return;
         }
@@ -177,9 +177,10 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
 
         var spreadsheets = files.Where(file =>
             file.RootFolderType == FolderType.VirtualRooms &&
-            fileUtility.CanWebCustomFilterEditing(file.Title));
+            fileUtility.CanWebCustomFilterEditing(file.Title))
+            .ToList();
 
-        var customFilterTags = spreadsheets.Any()
+        var customFilterTags = spreadsheets.Count != 0
             ? await tagDao.GetTagsAsync(TagType.CustomFilter, spreadsheets).ToDictionaryAsync(k => k.EntryId, v => v)
             : [];
 
@@ -216,12 +217,12 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
             return;
         }
 
-        await SetIsFavoriteFoldersAsync(new List<Folder<T>>(1) { folder });
+        await SetIsFavoriteFoldersAsync([folder]);
     }
 
-    public async Task SetIsFavoriteFoldersAsync<T>(IEnumerable<Folder<T>> folders)
+    public async Task SetIsFavoriteFoldersAsync<T>(List<Folder<T>> folders)
     {
-        if (!folders.Any())
+        if (folders.Count == 0)
         {
             return;
         }
@@ -236,9 +237,9 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
         }
     }
     
-    public async Task SetFormInfoAsync<T>(IEnumerable<File<T>> files)
+    public async Task SetFormInfoAsync<T>(List<File<T>> files)
     {
-        if (!files.Any())
+        if (files.Count == 0)
         {
             return;
         }
@@ -273,7 +274,7 @@ public class EntryStatusManager(IDaoFactory daoFactory, AuthContext authContext,
         var linkDao = daoFactory.GetLinkDao<T>();
         var fileDao = daoFactory.GetFileDao<T>();
         
-        var ids = pdfs.Select(f => f.Id);
+        var ids = pdfs.Select(f => f.Id).ToList();
         
         var linkedIdsMap = await linkDao.GetLinkedIdsAsync(ids);
         var entryPropertiesMap = await fileDao.GetPropertiesAsync(ids);
@@ -1276,8 +1277,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 {
                     throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
                 }
-                string title;
-                var ext = FileUtility.GetFileExtension(sourceFile.Title);
+
                 var sourceTitle = Path.GetFileNameWithoutExtension(sourceFile.Title);
 
                 linkedFile = serviceProvider.GetService<File<T>>();
@@ -1311,7 +1311,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 }
                 var properties = await fileDao.GetProperties(sourceFile.Id);
                 var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
-                title = $"{user.FirstName} {user.LastName} - {sourceFile.Title}";
+                var title = $"{user.FirstName} {user.LastName} - {sourceFile.Title}";
 
                 var resultFolder = await folderDao.GetFolderAsync(properties.FormFilling.ToFolderId);
 
@@ -1352,7 +1352,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 }
 
                 var aces = await fileSharing.GetSharedInfoAsync(folderIfNew);
-                var users = aces.Where(ace => ace is not { Access: FileShare.FillForms }).Select(ace => ace.Id);
+                var users = aces.Where(ace => ace is not { Access: FileShare.FillForms }).Select(ace => ace.Id).ToList();
 
                 await fileMarker.MarkAsNewAsync(linkedFile, users.Where(x => x != authContext.CurrentAccount.ID).ToList());
                 await socketManager.CreateFileAsync(linkedFile, users);
@@ -2208,7 +2208,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 await fileDao.SaveProperties(result.Id, resProp);
 
                 var aces = await fileSharing.GetSharedInfoAsync(room);
-                var users = aces.Where(ace => ace is not { Access: FileShare.FillForms }).Select(ace => ace.Id);
+                var users = aces.Where(ace => ace is not { Access: FileShare.FillForms }).Select(ace => ace.Id).ToList();
 
                 await fileMarker.MarkAsNewAsync(result, users.Where(x => x != userId).ToList());
                 await socketManager.CreateFileAsync(result, users);
@@ -2277,24 +2277,19 @@ public class EntryManager(IDaoFactory daoFactory,
 
         var records = fileSecurity.GetPureSharesAsync(result, ShareFilterType.Link, null, null);
 
-        var aces = new List<AceWrapper>();
-
-        await foreach(var record in records)
+        var aces = await records.Select(record => new AceWrapper
         {
-            aces.Add(new AceWrapper()
-            {
-                Access = FileShare.Read,
-                Id = record.Subject,
-                SubjectType = record.SubjectType,
-                FileShareOptions = record.Options
-            });
-        };
+            Access = FileShare.Read,
+            Id = record.Subject, 
+            SubjectType = record.SubjectType, 
+            FileShareOptions = record.Options
+        }).ToListAsync();
 
         var current = securityContext.CurrentAccount.ID;
 
         await securityContext.AuthenticateMeWithoutCookieAsync(result.CreateBy);
 
-        var shares = await fileSharingAceHelper.SetAceObjectAsync(aces, result, false, null);
+        await fileSharingAceHelper.SetAceObjectAsync(aces, result, false, null);
 
         if (current == ASC.Core.Configuration.Constants.Guest.ID) 
         {
@@ -2333,11 +2328,10 @@ public class EntryManager(IDaoFactory daoFactory,
                     form.Forcesave = ForcesaveType.None;
                     form.IsCompletedForm = true;
 
-                    File<T> result;
                     if (stream.CanSeek)
                     {
                         form.ContentLength = stream.Length;
-                        result = await fileDao.SaveFileAsync(form, stream, false);
+                         await fileDao.SaveFileAsync(form, stream, false);
                     }
                     else
                     {
@@ -2345,7 +2339,7 @@ public class EntryManager(IDaoFactory daoFactory,
                         try
                         {
                             form.ContentLength = buffered.Length;
-                            result = await fileDao.SaveFileAsync(form, buffered, false);
+                            await fileDao.SaveFileAsync(form, buffered, false);
                         }
                         finally
                         {
@@ -2358,9 +2352,9 @@ public class EntryManager(IDaoFactory daoFactory,
                     await fileTracker.RemoveAsync(form.Id);
                     await socketManager.StopEditAsync(form.Id);
                     await filesMessageService.SendAsync(MessageAction.FormCompletelyFilled, form, MessageInitiator.DocsService, user?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
-                    await notifyClient.SendFormFillingEvent(room, form, allRoles.Select(role => role.UserId), NotifyConstants.EventFormWasCompletelyFilled);
+                    await notifyClient.SendFormFillingEvent(room, form, allRoles.Select(role => role.UserId).ToList(), NotifyConstants.EventFormWasCompletelyFilled);
                 }
-                else if (nextRoleUserIds.Any())
+                else if (nextRoleUserIds.Count != 0)
                 {
                     await filesMessageService.SendAsync(MessageAction.FormPartiallyFilled, form, MessageInitiator.DocsService, user?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
                     await notifyClient.SendFormFillingEvent(room, form, nextRoleUserIds, NotifyConstants.EventYourTurnFormFilling);
@@ -2390,9 +2384,9 @@ public class EntryManager(IDaoFactory daoFactory,
 
     private (int, List<Guid>) GetNextRoleUserIds(List<FormRole> formRoles, FormRole currentRole, Guid userId)
     {
-        if (formRoles == null || !formRoles.Any()) 
+        if (formRoles == null || formRoles.Count == 0) 
         {
-            return (-1, new List<Guid>());
+            return (-1, []);
         }
 
         var allOthersSubmitted = formRoles
@@ -2403,7 +2397,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
         if (!allOthersSubmitted)
         {
-            return (-1, new List<Guid>());
+            return (-1, []);
         }
         var nextSequence = formRoles
             .Where(fr => fr.Sequence > currentRole.Sequence)
@@ -2412,7 +2406,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
         if (nextSequence == 0)
         {
-            return (0, new List<Guid>());
+            return (0, []);
         }
 
         return (nextSequence, formRoles
@@ -2422,9 +2416,9 @@ public class EntryManager(IDaoFactory daoFactory,
             .ToList());
     }
 
-    private async Task SetOriginsAsync<T>(Folder<T> parent, IEnumerable<FileEntry> entries)
+    private async Task SetOriginsAsync<T>(Folder<T> parent, List<FileEntry> entries)
     {
-        if (parent.FolderType != FolderType.TRASH || !entries.Any())
+        if (parent.FolderType != FolderType.TRASH || entries.Count == 0)
         {
             return;
         }

@@ -27,35 +27,24 @@
 namespace ASC.Web.Files.Utils;
 
 [Singleton]
-public class FileMarkerCache
+public class FileMarkerCache(IFusionCacheProvider cacheProvider)
 {
-    private readonly ICache _cache;
-    private readonly ICacheNotify<FileMarkerCacheItem> _notify;
+    private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
     private readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(10);
 
-    public FileMarkerCache(ICacheNotify<FileMarkerCacheItem> notify, ICache cache)
+    public async Task<T> GetAsync<T>(string key) where T : class
     {
-        _cache = cache;
-        _notify = notify;
-
-        _notify.Subscribe(i => _cache.Remove(i.Key), CacheNotifyAction.Remove);
+        return await _cache.GetOrDefaultAsync<T>(key);
     }
 
-    public T Get<T>(string key) where T : class
+    public async Task Insert(string key, object value)
     {
-        return _cache.Get<T>(key);
-    }
-
-    public void Insert(string key, object value)
-    {
-        _cache.Insert(key, value, _cacheExpiration);
+        await _cache.SetAsync(key, value, _cacheExpiration);
     }
 
     public async Task RemoveAsync(string key)
     {
-        await _notify.PublishAsync(new FileMarkerCacheItem { Key = key }, CacheNotifyAction.Remove);
-
-        _cache.Remove(key);
+        await _cache.RemoveAsync(key);
     }
 }
 
@@ -516,12 +505,14 @@ public class FileMarker(
             if (file.IsForm && room.FolderType == FolderType.VirtualDataRoom)
             {
                 var allRoleUserIds = await fileDao.GetFormRoles(file.Id).Where(r => r.UserId != authContext.CurrentAccount.ID).Select(r => r.UserId).ToListAsync();
-                if (allRoleUserIds.Any())
+                if (allRoleUserIds.Count == 0)
                 {
-                    taskData.UserIDs = allRoleUserIds;
-                    var markerHelper = serviceProvider.GetService<FileMarkerHelper<T>>();
-                    await markerHelper.Add(taskData);
+                    return;
                 }
+
+                taskData.UserIDs = allRoleUserIds;
+                var markerHelper = serviceProvider.GetService<FileMarkerHelper<T>>();
+                await markerHelper.Add(taskData);
                 return;
             }
         }
@@ -705,7 +696,7 @@ public class FileMarker(
 
     public async Task<int> GetRootFoldersIdMarkedAsNewAsync<T>(T rootId)
     {
-        var fromCache = GetCountFromCache(rootId);
+        var fromCache = await GetCountFromCacheAsync(rootId);
         if (fromCache == -1)
         {
             var tagDao = daoFactory.GetTagDao<T>();
@@ -713,7 +704,7 @@ public class FileMarker(
             var requestTags = tagDao.GetNewTagsAsync(authContext.CurrentAccount.ID, await folderDao.GetFolderAsync(rootId));
             var requestTag = await requestTags.FirstOrDefaultAsync(tag => tag.EntryType == FileEntryType.Folder && tag.EntryId.Equals(rootId));
             var count = requestTag?.Count ?? 0;
-            InsertToCache(rootId, count);
+            await InsertToCache(rootId, count);
 
             return count;
         }
@@ -899,11 +890,37 @@ public class FileMarker(
             .Distinct()
             .ToList();
         
-        var entryTagsProvider = await filesSettingsHelper.GetEnableThirdParty() 
-            ? await GetEntryTagsAsync<string>(tags.Where(r => r.EntryId is string)) 
+        var enableThirdParty = await filesSettingsHelper.GetEnableThirdParty();
+        List<Tag> tagsProvider = [];
+        List<Tag> tagsInternal = [];
+
+        foreach (var t in tags
+                     .Where(r => (r.EntryType == FileEntryType.Folder && !Equals(r.EntryId, folder.Id)) || r.EntryType == FileEntryType.File)
+                     .Distinct())
+        {
+            switch (t.EntryId)
+            {
+                case string:
+                    {
+                        if (enableThirdParty)
+                        {
+                            tagsProvider.Add(t);
+                        }
+
+                        break;
+                    }
+                case int:
+                    tagsInternal.Add(t);
+                    break;
+            }
+        }
+
+        var entryTagsProvider = enableThirdParty 
+            ? await GetEntryTagsAsync<string>(tagsInternal) 
             : [];
-        
-        var entryTagsInternal = await GetEntryTagsAsync<int>(tags.Where(r => r.EntryId is int));
+
+
+        var entryTagsInternal = await GetEntryTagsAsync<int>(tagsProvider);
 
         foreach (var entryTag in entryTagsInternal)
         {
@@ -977,7 +994,7 @@ public class FileMarker(
         return tree;
     }
     
-    private async Task<Dictionary<FileEntry<T>, Tag>> GetEntryTagsAsync<T>(IEnumerable<Tag> tags)
+    private async Task<Dictionary<FileEntry<T>, Tag>> GetEntryTagsAsync<T>(List<Tag> tags)
     {
         var fileDao = daoFactory.GetFileDao<T>();
         var folderDao = daoFactory.GetFolderDao<T>();
@@ -1220,16 +1237,16 @@ public class FileMarker(
         return MarkResult.Marked;
     }
 
-    private void InsertToCache(object folderId, int count)
+    private async Task InsertToCache(object folderId, int count)
     {
         var key = string.Format(CacheKeyFormat, authContext.CurrentAccount.ID, folderId);
-        fileMarkerCache.Insert(key, count.ToString());
+        await fileMarkerCache.Insert(key, count.ToString());
     }
 
-    private int GetCountFromCache(object folderId)
+    private async Task<int> GetCountFromCacheAsync(object folderId)
     {
         var key = string.Format(CacheKeyFormat, authContext.CurrentAccount.ID, folderId);
-        var count = fileMarkerCache.Get<string>(key);
+        var count = await fileMarkerCache.GetAsync<string>(key);
 
         return count == null ? -1 : int.Parse(count);
     }

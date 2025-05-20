@@ -137,17 +137,17 @@ public class TenantManager(
         return newTenant;
     }
     
-    public async Task<Tenant> RestoreTenantAsync(int oldId, Tenant newTenant)
+    public async Task<Tenant> RestoreTenantAsync(Tenant oldTenant, Tenant newTenant)
     {
-        newTenant = await tenantService.RestoreTenantAsync(oldId, newTenant, coreSettings);
+        newTenant = await tenantService.RestoreTenantAsync(oldTenant, newTenant, coreSettings);
         SetCurrentTenant(newTenant);
 
         return newTenant;
     }
 
-    public async Task RemoveTenantAsync(int tenantId, bool auto = false)
+    public async Task RemoveTenantAsync(Tenant tenant, bool auto = false)
     {
-        await tenantService.RemoveTenantAsync(tenantId, auto);
+        await tenantService.RemoveTenantAsync(tenant, auto);
     }
 
     public Task<Tenant> GetCurrentTenantAsync(bool throwIfNotFound, HttpContext context)
@@ -284,12 +284,12 @@ public class TenantManager(
     }
 
 
-    public async Task<IEnumerable<TenantQuota>> GetTenantQuotasAsync()
+    public async Task<List<TenantQuota>> GetTenantQuotasAsync()
     {
         return await GetTenantQuotasAsync(false);
     }
 
-    public async Task<IEnumerable<TenantQuota>> GetTenantQuotasAsync(bool all)
+    public async Task<List<TenantQuota>> GetTenantQuotasAsync(bool all)
     {
         return (await quotaService.GetTenantQuotasAsync()).Where(q => q.TenantId < 0 && (all || q.Visible)).OrderByDescending(q => q.TenantId).ToList();
     }

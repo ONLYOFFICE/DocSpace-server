@@ -122,6 +122,7 @@ public class Startup
         var connectionMultiplexer = await services.GetRedisConnectionMultiplexerAsync(_configuration, GetType().Namespace);
 
         services.AddHybridCache(connectionMultiplexer)
+                .AddMemoryCache(connectionMultiplexer)
                 .AddEventBus(_configuration)
                 .AddDistributedTaskQueue()
                 .AddCacheNotify(_configuration)

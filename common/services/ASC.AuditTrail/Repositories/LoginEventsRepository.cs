@@ -27,12 +27,13 @@
 namespace ASC.AuditTrail.Repositories;
 
 [Scope]
-public class LoginEventsRepository(TenantManager tenantManager,
+public class LoginEventsRepository(
+    TenantManager tenantManager,
     IDbContextFactory<MessagesContext> dbContextFactory,
     IMapper mapper,
     GeolocationHelper geolocationHelper)
 {
-    public async Task<IEnumerable<LoginEvent>> GetByFilterAsync(
+    public async Task<List<LoginEvent>> GetByFilterAsync(
         Guid? login = null,
         MessageAction? action = null,
         DateTime? fromDate = null,
@@ -92,12 +93,13 @@ public class LoginEventsRepository(TenantManager tenantManager,
             }
         }
 
-        var events = mapper.Map<List<LoginEventQuery>, IEnumerable<LoginEvent>>(await query.ToListAsync());
+        var events = mapper.Map<List<LoginEventQuery>, List<LoginEvent>>(await query.ToListAsync());
 
         foreach (var e in events)
         {
             await geolocationHelper.AddGeolocationAsync(e);
         }
+        
         return events;
     }
 
@@ -105,7 +107,7 @@ public class LoginEventsRepository(TenantManager tenantManager,
     {
         await using var auditTrailContext = await dbContextFactory.CreateDbContextAsync();
 
-        var successLoginEvents = new List<int>() {
+        var successLoginEvents = new List<int> {
             (int)MessageAction.LoginSuccess,
             (int)MessageAction.LoginSuccessViaSocialAccount,
             (int)MessageAction.LoginSuccessViaSms,

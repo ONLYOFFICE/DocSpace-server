@@ -41,7 +41,6 @@ public static class OpenApiExtension
         return services.AddSwaggerGen(c =>
         {
             var assemblyName = Assembly.GetEntryAssembly().FullName.Split(',').First();
-            var docName = assemblyName.Split(".").Last();
             c.ResolveConflictingActions(a => a.First());
             c.CustomOperationIds(r =>
             {
@@ -272,8 +271,7 @@ public static class OpenApiExtension
                 operation.Security.Add(new OpenApiSecurityRequirement
                 {
                     {
-                        new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "ApiKeyBearer" } },
-                        new[] { "read", "write" }
+                        new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "ApiKeyBearer" } }, ["read", "write"]
                     }
                 });
                 operation.Security.Add(new OpenApiSecurityRequirement
@@ -286,15 +284,13 @@ public static class OpenApiExtension
                 operation.Security.Add(new OpenApiSecurityRequirement
                 {
                     {
-                        new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "OAuth2" } },
-                        new[] { "read", "write" }
+                        new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "OAuth2" } }, ["read", "write"]
                     }
                 });
                 operation.Security.Add(new OpenApiSecurityRequirement
                 {
                     {
-                        new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "OpenId" } },
-                        Array.Empty<string>()
+                        new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "OpenId" } }, []
                     }
                 });
 
@@ -312,17 +308,17 @@ public static class OpenApiExtension
             //}
         }
 
-        private void ApplyAuthorizeAttribute(StringBuilder authorizationDescription, IEnumerable<string> policySelector, IEnumerable<string> schemaSelector, IEnumerable<string> rolesSelector)
+        private void ApplyAuthorizeAttribute(StringBuilder authorizationDescription, List<string> policySelector, List<string> schemaSelector, List<string> rolesSelector)
         {
-            if (policySelector.Any())
+            if (policySelector.Count != 0)
             {
                 authorizationDescription.Append($" Policy: {string.Join(", ", policySelector)};");
             }
-            if (schemaSelector.Any())
+            if (schemaSelector.Count != 0)
             {
                 authorizationDescription.Append($" Schema: {string.Join(", ", schemaSelector)};");
             }
-            if (rolesSelector.Any())
+            if (rolesSelector.Count != 0)
             {
                 authorizationDescription.Append($" Roles: {string.Join(", ", rolesSelector)};");
             }

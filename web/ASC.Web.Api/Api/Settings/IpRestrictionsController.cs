@@ -93,7 +93,7 @@ public class IpRestrictionsController(ApiContext apiContext,
         }
 
         var tenant = tenantManager.GetCurrentTenant();
-        var ips = await iPRestrictionsService.SaveAsync(inDto.IpRestrictions, tenant.Id);
+        await iPRestrictionsService.SaveAsync(inDto.IpRestrictions, tenant.Id);
 
         var settings = new IPRestrictionsSettings { Enable = enable };
         await settingsManager.SaveAsync(settings);
@@ -154,7 +154,7 @@ public class IpRestrictionsController(ApiContext apiContext,
         }
 
         var tenant = tenantManager.GetCurrentTenant();
-        var ips = await iPRestrictionsService.SaveAsync(inDto.IpRestrictions, tenant.Id);
+        await iPRestrictionsService.SaveAsync(inDto.IpRestrictions, tenant.Id);
 
         var settings = new IPRestrictionsSettings { Enable = enable };
         await settingsManager.SaveAsync(settings);

@@ -36,10 +36,10 @@ internal class GoogleDriveProviderInfo(DisposableWrapper wrapper, ProviderInfoHe
     public override Selector Selector => Selectors.GoogleDrive;
     public override ProviderFilter ProviderFilter => ProviderFilter.GoogleDrive;
 
-    public async Task<List<DriveFile>> GetItemsAsync(string folderId, bool? folder)
+    public async Task<List<DriveFile>> GetItemsAsync(string folderId, bool? folder, Func<DriveFile, string> getId, Func<DriveFile, bool> isFile)
     {
         var storage = await StorageAsync;
 
-        return await ProviderInfoHelper.GetItemsAsync(storage, ProviderId, folderId, Selector.Id, folder);
+        return await ProviderInfoHelper.GetItemsAsync(storage, ProviderId, folderId, Selector.Id, getId, isFile, folder);
     }
 }

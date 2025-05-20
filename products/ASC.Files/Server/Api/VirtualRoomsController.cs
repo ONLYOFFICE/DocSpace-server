@@ -124,7 +124,7 @@ public class VirtualRoomsInternalController(
         WatermarkRequest watermark = null;
         if (dto.Watermark != null)
         {
-            watermark = new WatermarkRequest()
+            watermark = new WatermarkRequest
             {
                 Additions = dto.Watermark.Additions,
                 Enabled = dto.Watermark.Enabled,
@@ -387,7 +387,7 @@ public abstract class VirtualRoomsController<T>(
     [HttpDelete("{id}")]
     public async Task<FileOperationDto> DeleteRoomAsync(DeleteRoomRequestDto<T> inDto)
     {
-        await fileDeleteOperationsManager.Publish(new List<T> { inDto.Id }, new List<T>(), false, !inDto.DeleteRoom.DeleteAfter, true);
+        await fileDeleteOperationsManager.Publish([inDto.Id], [], false, !inDto.DeleteRoom.DeleteAfter, true);
         
         return await fileOperationDtoHelper.GetAsync((await fileDeleteOperationsManager.GetOperationResults()).FirstOrDefault());
     }
@@ -459,6 +459,15 @@ public abstract class VirtualRoomsController<T>(
             return result;
         }
 
+        if (inDto.RoomInvitation.Invitations.Any(i => !string.IsNullOrEmpty(i.Email)))
+        {
+            var invitationSettings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
+            if (!invitationSettings.AllowInvitingGuests)
+            {
+                throw new SecurityException(Resource.ErrorAccessDenied);
+            }
+        }
+
         var room = await _fileStorageService.GetFolderAsync(inDto.Id).NotFoundIfNull("Folder not found");
 
         if (room.RootId is int root && root == await globalFolderHelper.FolderRoomTemplatesAsync 
@@ -483,7 +492,7 @@ public abstract class VirtualRoomsController<T>(
 
         var aceCollection = new AceCollection<T>
         {
-            Files = Array.Empty<T>(),
+            Files = [],
             Folders = [inDto.Id],
             Aces = wrappers,
             Message = inDto.RoomInvitation.Message
@@ -797,8 +806,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         UserManager userManager,
         IServiceProvider serviceProvider,
         ApiDateTimeHelper apiDateTimeHelper,
-        RoomNewItemsDtoHelper roomNewItemsDtoHelper,
-        IHttpContextAccessor httpContextAccessor)
+        RoomNewItemsDtoHelper roomNewItemsDtoHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -998,7 +1006,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
 
         var taskProgress = await documentBuilderTaskManager.StartTask(task, false);
         
-        var headers = MessageSettings.GetHttpHeaders(httpContextAccessor?.HttpContext?.Request);
+        var headers = MessageSettings.GetHttpHeaders(Request);
         var evt = new RoomIndexExportIntegrationEvent(userId, tenantId, inDto.Id, baseUri, headers: headers != null 
             ? headers.ToDictionary(x => x.Key, x => x.Value.ToString())
             : []);

@@ -30,7 +30,7 @@ public class ScopesAuthorizationHandler : AuthorizationHandler<ScopesRequirement
 {
     protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, ScopesRequirement requirement)
     {
-        if (context.User.Identity != null && !context.User.Identity.IsAuthenticated)
+        if (context.User.Identity is { IsAuthenticated: false })
         {
             return Task.CompletedTask;
         }

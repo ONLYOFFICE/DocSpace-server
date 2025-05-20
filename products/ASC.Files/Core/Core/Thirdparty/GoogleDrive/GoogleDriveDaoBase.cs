@@ -60,6 +60,11 @@ internal class GoogleDriveDaoBase(
         return item.Id;
     }
 
+    public bool isFile(DriveFile item)
+    {
+        return !IsDriveFolder(item);
+    }
+
     public string MakeThirdId(object entryId)
     {
         var id = Convert.ToString(entryId, CultureInfo.InvariantCulture);
@@ -287,10 +292,10 @@ internal class GoogleDriveDaoBase(
         var parentDriveId = MakeThirdId(parentId);
         if (folder == null)
         {
-            return await _providerInfo.GetItemsAsync(parentDriveId);
+            return await _providerInfo.GetItemsAsync(parentDriveId, GetId, isFile);
         }
 
-        return await _providerInfo.GetItemsAsync(parentDriveId, folder);
+        return await _providerInfo.GetItemsAsync(parentDriveId, folder, GetId, isFile);
     }
 
     private sealed class ErrorDriveEntry : DriveFile, IErrorItem

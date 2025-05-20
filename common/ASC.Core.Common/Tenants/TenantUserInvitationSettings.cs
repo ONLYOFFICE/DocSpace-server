@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2024
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,24 +24,27 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Core;
+namespace ASC.Core.Tenants;
 
-[ProtoContract]
-public record AzRecordCache
+public class TenantUserInvitationSettings : ISettings<TenantUserInvitationSettings>
 {
-    [ProtoMember(1)]
-    public string SubjectId { get; set; }
+    public bool AllowInvitingMembers { get; init; }
+    public bool AllowInvitingGuests { get; init; }
 
-    [ProtoMember(2)]
-    public string ActionId { get; set; }
+    [JsonIgnore]
+    public Guid ID
+    {
+        get { return new Guid("{FF4F9A9E-0976-478B-8001-18DDE5AF2BD9}"); }
+    }
 
-    [ProtoMember(3)]
-    public string ObjectId { get; set; }
+    public TenantUserInvitationSettings GetDefault()
+    {
+        return new TenantUserInvitationSettings()
+        {
+            AllowInvitingMembers = true,
+            AllowInvitingGuests = true
+        };
+    }
 
-    [ProtoMember(4)]
-    public string Reaction { get; set; }
-
-    [ProtoMember(5)]
-    public int Tenant { get; set; }
+    public DateTime LastModified { get; set; }
 }
-

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -60,9 +60,9 @@ module.exports = (socket, next) => {
     return;
   }
 
-  var basePath = portalManager(req)?.replace(/\/$/g, "");
   let headers = {};
-  const basePathFromConfig = config.get("basePath");
+  var basePath = portalManager(req)?.replace(/\/$/g, "");
+  const basePathFromConfig = config.get("API_HOST");
   if (basePathFromConfig) {
     headers.Origin = basePath;
     basePath = basePathFromConfig;

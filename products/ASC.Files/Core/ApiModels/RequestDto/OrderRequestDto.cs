@@ -70,7 +70,7 @@ public class OrdersRequestDto<T>
     /// <summary>
     /// The list of items with their ordering information.
     /// </summary>
-    public IEnumerable<OrdersItemRequestDto<T>> Items { get; set; }
+    public List<OrdersItemRequestDto<T>> Items { get; set; }
 }
 
 /// <summary>
@@ -80,6 +80,11 @@ public class OrderRequestDtoConverter : System.Text.Json.Serialization.JsonConve
 {
     public override int Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
+        if (reader.TryGetInt32(out var order))
+        {
+            return order;
+        }
+        
         var orderString = reader.GetString();
         if (!string.IsNullOrEmpty(orderString))
         {

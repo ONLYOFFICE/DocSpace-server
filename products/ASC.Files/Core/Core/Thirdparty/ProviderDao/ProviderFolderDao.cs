@@ -158,6 +158,27 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         }
     }
 
+    public override async Task<int> GetProviderBasedRoomsCountAsync(SearchArea searchArea)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        var q = filesDbContext.ThirdpartyAccount.Where(a => a.TenantId == tenantId
+            && !string.IsNullOrEmpty(a.FolderId)
+            && a.RoomType == FolderType.PublicRoom);
+
+        q = searchArea switch
+        {
+            SearchArea.Active => q.Where(a => a.FolderType == FolderType.VirtualRooms),
+            SearchArea.Archive => q.Where(a => a.FolderType == FolderType.Archive),
+            SearchArea.Templates => q.Where(a => a.FolderType == FolderType.RoomTemplates),
+            _ => q
+        };
+
+        return await q.CountAsync();
+    }
+
     public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, FolderType type)
     {
         return GetFoldersAsync(parentId);

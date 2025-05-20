@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ZiggyCreatures.Caching.Fusion;
+
 namespace ASC.Webhooks.Core;
 
 [Scope]
@@ -100,7 +102,7 @@ public class DbWorker(
         var tenantId = tenantManager.GetCurrentTenantId();
         var key = GetCacheKey(tenantId);
 
-        var result = webhookCache.Get<List<DbWebhooksConfig>>(key);
+        var result = await webhookCache.GetAsync<List<DbWebhooksConfig>>(key);
 
         if (result != null)
         {
@@ -109,7 +111,7 @@ public class DbWorker(
 
         result = await GetWebhookConfigs(true).ToListAsync();
 
-        webhookCache.Insert(key, result);
+        await webhookCache.InsertAsync(key, result);
 
         return result;
     }
@@ -223,11 +225,11 @@ public class DbWorker(
         return await (await GetQueryForJournal(deliveryFrom, deliveryTo, hookUri, configId, eventId, webhookGroupStatus, userId, trigger)).CountAsync();
     }
 
-    public async Task<DbWebhooksLog> ReadJournal(int id)
+    public async Task<DbWebhooksLog> ReadJournal(int tenantId, int id)
     {
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        var fromDb = await webhooksDbContext.WebhooksLogAsync(id);
+        var fromDb = await webhooksDbContext.WebhooksLogAsync(tenantId, id);
 
         if (fromDb != null)
         {
@@ -249,6 +251,7 @@ public class DbWorker(
 
     public async Task<DbWebhooksLog> UpdateWebhookJournal(
         int id,
+        int tenantId,
         int status,
         DateTime? delivery,
         string requestPayload,
@@ -258,7 +261,7 @@ public class DbWorker(
     {
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        var webhook = (await webhooksDbContext.WebhooksLogAsync(id))?.Log;
+        var webhook = (await webhooksDbContext.WebhooksLogAsync(tenantId, id))?.Log;
 
         if (webhook != null)
         {
@@ -390,42 +393,24 @@ public enum WebhookGroupStatus
     Status5xx = 16
 }
 
-[ProtoContract]
-public record WebhookCacheItem
-{
-    [ProtoMember(1)]
-    public string Key { get; set; }
-}
-
 [Singleton]
-public class WebhookCache
+public class WebhookCache(IFusionCacheProvider cacheProvider)
 {
-    private readonly ICache _cache;
-    private readonly ICacheNotify<WebhookCacheItem> _notify;
+    private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
     private readonly TimeSpan _cacheExpiration = TimeSpan.FromHours(1);
 
-    public WebhookCache(ICacheNotify<WebhookCacheItem> notify, ICache cache)
+    public async Task<T> GetAsync<T>(string key) where T : class
     {
-        _cache = cache;
-        _notify = notify;
-
-        _notify.Subscribe(i => _cache.Remove(i.Key), CacheNotifyAction.Remove);
+        return await _cache.GetOrDefaultAsync<T>(key);
     }
 
-    public T Get<T>(string key) where T : class
+    public async Task InsertAsync<T>(string key, T value) where T : class
     {
-        return _cache.Get<T>(key);
-    }
-
-    public void Insert<T>(string key, T value) where T : class
-    {
-        _cache.Insert(key, value, _cacheExpiration);
+        await _cache.SetAsync(key, value, _cacheExpiration);
     }
 
     public async Task ClearAsync(string key)
     {
-        _cache.Remove(key);
-
-        await _notify.PublishAsync(new WebhookCacheItem { Key = key }, CacheNotifyAction.Remove);
+        await _cache.RemoveAsync(key);
     }
 }

@@ -69,7 +69,7 @@ public class GoogleCloudStorage(TempStream tempStream,
             DomainsExpires.Add(string.Empty, moduleConfig.Expires);
 
             DomainsContentAsAttachment = moduleConfig.Domain.Where(x => x.ContentAsAttachment.HasValue).ToDictionary(x => x.Name, y => y.ContentAsAttachment.Value);
-            DomainsContentAsAttachment.Add(string.Empty, moduleConfig.ContentAsAttachment.HasValue ? moduleConfig.ContentAsAttachment.Value : false);
+            DomainsContentAsAttachment.Add(string.Empty, moduleConfig.ContentAsAttachment ?? false);
 
             _domainsAcl = moduleConfig.Domain.ToDictionary(x => x.Name, y => GetGoogleCloudAcl(y.Acl));
             _moduleAcl = GetGoogleCloudAcl(moduleConfig.Acl);
@@ -521,17 +521,7 @@ public class GoogleCloudStorage(TempStream tempStream,
         var objToDel = storage
                           .ListObjectsAsync(_bucket, MakePath(domain, path));
 
-        long result = 0;
-
-        await foreach (var obj in objToDel)
-        {
-            if (obj.Size.HasValue)
-            {
-                result += Convert.ToInt64(obj.Size.Value);
-            }
-        }
-
-        return result;
+        return await objToDel.Where(obj => obj.Size.HasValue).SumAsync(obj => Convert.ToInt64(obj.Size));
     }
 
     public override async Task<long> ResetQuotaAsync(string domain)
@@ -543,15 +533,7 @@ public class GoogleCloudStorage(TempStream tempStream,
 
         if (QuotaController != null)
         {
-            long size = 0;
-
-            await foreach (var obj in objects)
-            {
-                if (obj.Size.HasValue)
-                {
-                    size += Convert.ToInt64(obj.Size.Value);
-                }
-            }
+            var size = await objects.Where(obj => obj.Size.HasValue).SumAsync(obj => Convert.ToInt64(obj.Size));
 
             await QuotaController.QuotaUsedSetAsync(Modulename, domain, DataList.GetData(domain), size);
 
@@ -569,17 +551,7 @@ public class GoogleCloudStorage(TempStream tempStream,
         var objects = storage
                           .ListObjectsAsync(_bucket, MakePath(domain, string.Empty));
 
-        long result = 0;
-
-        await foreach (var obj in objects)
-        {
-            if (obj.Size.HasValue)
-            {
-                result += Convert.ToInt64(obj.Size.Value);
-            }
-        }
-
-        return result;
+        return await objects.Where(obj => obj.Size.HasValue).SumAsync(obj => Convert.ToInt64(obj.Size));
     }
 
     public override async Task<Uri> CopyAsync(string srcDomain, string srcpath, string newDomain, string newPath)
