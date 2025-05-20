@@ -41,7 +41,9 @@ public class FileService(
     ExternalShare externalShare,
     IEventBus eventBus,
     TenantManager tenantManager,
-    BaseCommonLinkUtility baseCommonLinkUtility)
+    BaseCommonLinkUtility baseCommonLinkUtility,
+    IDbContextFactory<UrlShortenerDbContext> dbContextFactory,
+    ShortUrl shortUrl)
 {
     /// <summary>
     /// Retrieves a file with the specified ID and version
@@ -967,7 +969,7 @@ public class FileService(
     {
         if (!authContext.IsAuthenticated && (await externalShare.GetLinkIdAsync()) == Guid.Empty)
         {
-            throw FileStorageService.GenerateException(new SecurityException(FilesCommonResource.ErrorMessage_SecurityException),  logger, authContext);
+            throw OperationService.GenerateException(new SecurityException(FilesCommonResource.ErrorMessage_SecurityException),  logger, authContext);
         }
 
         try
@@ -1071,6 +1073,110 @@ public class FileService(
         }
 
         return users;
+    }
+    
+    public async Task<FileReference> GetReferenceDataAsync<T>(string fileId, string portalName, T sourceFileId, string path, string link)
+    {
+        File<T> file = null;
+        var fileDao = daoFactory.GetFileDao<T>();
+        if (portalName == tenantManager.GetCurrentTenantId().ToString())
+        {
+            file = await fileDao.GetFileAsync((T)Convert.ChangeType(fileId, typeof(T)));
+        }
+
+        if (file == null && !string.IsNullOrEmpty(path) && string.IsNullOrEmpty(link))
+        {
+            var source = await fileDao.GetFileAsync(sourceFileId);
+
+            if (source == null)
+            {
+                return new FileReference { Error = FilesCommonResource.ErrorMessage_FileNotFound };
+            }
+
+            if (!await fileSecurity.CanReadAsync(source))
+            {
+                return new FileReference { Error = FilesCommonResource.ErrorMessage_SecurityException_ReadFile };
+            }
+
+            var folderDao = daoFactory.GetFolderDao<T>();
+            var folder = await folderDao.GetFolderAsync(source.ParentId);
+            if (!await fileSecurity.CanReadAsync(folder))
+            {
+                return new FileReference { Error = FilesCommonResource.ErrorMessage_SecurityException_ReadFolder };
+            }
+
+            var list = fileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, path, null, false);
+            file = await list.FirstOrDefaultAsync(fileItem => fileItem.Title == path);
+        }
+
+        if (file == null && !string.IsNullOrEmpty(link))
+        {
+            if (!link.StartsWith(baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath)))
+            {
+                return new FileReference { Url = link };
+            }
+
+            var start = baseCommonLinkUtility.ServerRootPath + "/s/";
+            if (link.StartsWith(start))
+            {
+                await using var context = await dbContextFactory.CreateDbContextAsync();
+                var decode = shortUrl.Decode(link[start.Length..]);
+                var sl = await context.ShortLinks.FindAsync(decode);
+                if (sl != null)
+                {
+                    link = sl.Link;
+                }
+            }
+
+            var url = new UriBuilder(link);
+            var id = HttpUtility.ParseQueryString(url.Query)[FilesLinkUtility.FileId];
+            if (!string.IsNullOrEmpty(id))
+            {
+                if (fileId is string)
+                {
+                    var dao = daoFactory.GetFileDao<string>();
+                    file = await dao.GetFileAsync(id) as File<T>;
+                }
+                else
+                {
+                    if (int.TryParse(id, out var resultId))
+                    {
+                        var dao = daoFactory.GetFileDao<int>();
+                        file = await dao.GetFileAsync(resultId) as File<T>;
+                    }
+                }
+            }
+        }
+
+        if (file == null)
+        {
+            return new FileReference { Error = FilesCommonResource.ErrorMessage_FileNotFound };
+        }
+
+        if (!await fileSecurity.CanReadAsync(file))
+        {
+            return new FileReference { Error = FilesCommonResource.ErrorMessage_SecurityException_ReadFile };
+        }
+
+        var fileStable = file;
+        if (file.Forcesave != ForcesaveType.None)
+        {
+            fileStable = await fileDao.GetFileStableAsync(file.Id, file.Version);
+        }
+
+        var docKey = await documentServiceHelper.GetDocKeyAsync(fileStable);
+
+        var fileReference = new FileReference
+        {
+            Path = file.Title,
+            ReferenceData = new FileReferenceData { FileKey = file.Id.ToString(), InstanceId = (tenantManager.GetCurrentTenantId()).ToString() },
+            Url = documentServiceConnector.ReplaceCommunityAddress(pathProvider.GetFileStreamUrl(file, lastVersion: true)),
+            FileType = file.ConvertedExtension.Trim('.'),
+            Key = docKey,
+            Link = baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebEditorUrl(file.Id))
+        };
+        fileReference.Token = documentServiceHelper.GetSignature(fileReference);
+        return fileReference;
     }
     
     private async Task<List<MentionWrapper>> InternalSharedUsersAsync<T>(T fileId)

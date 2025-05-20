@@ -254,7 +254,7 @@ public class FormService(
         }
         catch (Exception e)
         {
-            throw FileStorageService.GenerateException(e, logger, authContext);
+            throw OperationService.GenerateException(e, logger, authContext);
         }
     }
 

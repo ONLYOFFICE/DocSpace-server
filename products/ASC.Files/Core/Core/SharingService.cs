@@ -318,7 +318,7 @@ public class SharingService(
             }
             catch (Exception e)
             {
-                throw FileStorageService.GenerateException(e, logger, authContext);
+                throw OperationService.GenerateException(e, logger, authContext);
             }
         }
 
@@ -696,7 +696,7 @@ public class SharingService(
             var result = await fileSharingAceHelper.SetAceObjectAsync(aces, entry, false, null);
             if (!string.IsNullOrEmpty(result.Warning))
             {
-                throw FileStorageService.GenerateException(new InvalidOperationException(result.Warning), logger, authContext);
+                throw OperationService.GenerateException(new InvalidOperationException(result.Warning), logger, authContext);
             }
 
             var processedItem = result.ProcessedItems[0];
@@ -705,7 +705,7 @@ public class SharingService(
         }
         catch (Exception e)
         {
-            throw FileStorageService.GenerateException(e, logger, authContext);
+            throw OperationService.GenerateException(e, logger, authContext);
         }
     }
 

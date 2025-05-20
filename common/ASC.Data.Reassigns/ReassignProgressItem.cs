@@ -243,7 +243,7 @@ public class ReassignProgressItem : DistributedTaskProgress
 public record ReassignProgressItemScope(
     TenantManager TenantManager,
     MessageService MessageService,
-    FileStorageService FileStorageService,
+    OperationService OperationService,
     StudioNotifyService StudioNotifyService,
     SecurityContext SecurityContext,
     UserManager UserManager,

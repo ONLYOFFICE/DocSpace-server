@@ -174,11 +174,11 @@ public class ThirdPartyIntegrationService(
             }
             catch (UnauthorizedAccessException e)
             {                
-                throw FileStorageService.GenerateException(e, logger, authContext, true);
+                throw OperationService.GenerateException(e, logger, authContext, true);
             }
             catch (Exception e)
             {                
-                throw FileStorageService.GenerateException(e.InnerException ?? e, logger, authContext, true);
+                throw OperationService.GenerateException(e.InnerException ?? e, logger, authContext, true);
             }
         }
         else
@@ -286,11 +286,11 @@ public class ThirdPartyIntegrationService(
             }
             catch (UnauthorizedAccessException e)
             {                
-                throw FileStorageService.GenerateException(e, logger, authContext, true);
+                throw OperationService.GenerateException(e, logger, authContext, true);
             }
             catch (Exception e)
             {                
-                throw FileStorageService.GenerateException(e.InnerException ?? e, logger, authContext);
+                throw OperationService.GenerateException(e.InnerException ?? e, logger, authContext);
             }
         }
         else
@@ -391,7 +391,7 @@ public class ThirdPartyIntegrationService(
         }
         catch (Exception e)
         {
-            throw FileStorageService.GenerateException(e, logger, authContext);
+            throw OperationService.GenerateException(e, logger, authContext);
         }
     }
     

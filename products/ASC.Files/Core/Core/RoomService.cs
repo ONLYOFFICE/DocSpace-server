@@ -568,7 +568,7 @@ public class RoomService(
         }
         catch (Exception e)
         {
-            throw FileStorageService.GenerateException(e, logger, authContext);
+            throw OperationService.GenerateException(e, logger, authContext);
         }
     }
 
@@ -601,7 +601,7 @@ public class RoomService(
         }
         catch (Exception e)
         {
-            throw FileStorageService.GenerateException(e, logger, authContext);
+            throw OperationService.GenerateException(e, logger, authContext);
         }
     }
 

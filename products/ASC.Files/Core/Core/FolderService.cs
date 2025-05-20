@@ -123,7 +123,7 @@ public class FolderService(
         }
         catch (Exception e)
         {
-            throw FileStorageService.GenerateException(e, logger, authContext);
+            throw OperationService.GenerateException(e, logger, authContext);
         }
 
         return entries;
@@ -337,10 +337,10 @@ public class FolderService(
         {
             if (parent is { ProviderEntry: true })
             {
-                throw FileStorageService.GenerateException(new Exception(FilesCommonResource.ErrorMessage_SharpBoxException, e), logger, authContext);
+                throw OperationService.GenerateException(new Exception(FilesCommonResource.ErrorMessage_SharpBoxException, e), logger, authContext);
             }
 
-            throw FileStorageService.GenerateException(e, logger, authContext);
+            throw OperationService.GenerateException(e, logger, authContext);
         }
 
         if (!await fileSecurity.CanReadAsync(parent))
@@ -416,10 +416,10 @@ public class FolderService(
         {
             if (parent.ProviderEntry)
             {            
-                throw FileStorageService.GenerateException(new Exception(FilesCommonResource.ErrorMessage_SharpBoxException, e), logger, authContext);
+                throw OperationService.GenerateException(new Exception(FilesCommonResource.ErrorMessage_SharpBoxException, e), logger, authContext);
             }
 
-            throw FileStorageService.GenerateException(e, logger, authContext);
+            throw OperationService.GenerateException(e, logger, authContext);
         }
 
         var breadCrumbsTask = breadCrumbsManager.GetBreadCrumbsAsync(parentId, folderDao);
@@ -521,7 +521,7 @@ public class FolderService(
         }
         catch (Exception e)
         {
-            throw FileStorageService.GenerateException(e, logger, authContext);
+            throw OperationService.GenerateException(e, logger, authContext);
         }
     }
     
@@ -687,7 +687,7 @@ public class FolderService(
         }
         catch (Exception e)
         {
-            throw FileStorageService.GenerateException(e, logger, authContext);
+            throw OperationService.GenerateException(e, logger, authContext);
         }
     }
 }

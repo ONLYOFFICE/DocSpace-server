@@ -30,7 +30,6 @@ namespace ASC.Files.Api;
 public class FoldersControllerInternal(
     BreadCrumbsManager breadCrumbsManager,
     FolderContentDtoHelper folderContentDtoHelper,
-    FileStorageService fileStorageService,
     FileDeleteOperationsManager fileOperationsManager,
     FileOperationDtoHelper fileOperationDtoHelper,
     FolderDtoHelper folderDtoHelper,
@@ -45,7 +44,6 @@ public class FoldersControllerInternal(
     : FoldersController<int>(
         breadCrumbsManager,
         folderContentDtoHelper,
-        fileStorageService,
         fileOperationsManager,
         fileOperationDtoHelper,
         folderDtoHelper,
@@ -94,7 +92,6 @@ public class FoldersControllerInternal(
 public class FoldersControllerThirdparty(
     BreadCrumbsManager breadCrumbsManager,
     FolderContentDtoHelper folderContentDtoHelper,
-    FileStorageService fileStorageService,
     FileDeleteOperationsManager fileOperationsManager,
     FileOperationDtoHelper fileOperationDtoHelper,
     FolderDtoHelper folderDtoHelper,
@@ -106,7 +103,6 @@ public class FoldersControllerThirdparty(
     EntriesOrderService entriesOrderService)
     : FoldersController<string>(breadCrumbsManager,
         folderContentDtoHelper,
-        fileStorageService,
         fileOperationsManager,
         fileOperationDtoHelper,
         folderDtoHelper,
@@ -120,7 +116,6 @@ public class FoldersControllerThirdparty(
 public abstract class FoldersController<T>(
     BreadCrumbsManager breadCrumbsManager,
     FolderContentDtoHelper folderContentDtoHelper,
-    FileStorageService fileStorageService,
     FileDeleteOperationsManager fileOperationsManager,
     FileOperationDtoHelper fileOperationDtoHelper,
     FolderDtoHelper folderDtoHelper,

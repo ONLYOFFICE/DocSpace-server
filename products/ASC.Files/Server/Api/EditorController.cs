@@ -30,7 +30,7 @@ namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
 [DefaultRoute("file")]
-public class EditorControllerInternal(FileStorageService fileStorageService,
+public class EditorControllerInternal(
         DocumentServiceHelper documentServiceHelper,
         EncryptionKeyPairDtoHelper encryptionKeyPairDtoHelper,
         SettingsManager settingsManager,
@@ -44,10 +44,10 @@ public class EditorControllerInternal(FileStorageService fileStorageService,
         DocumentProcessingService documentProcessingService,
         FileService fileService,
         FormService formService)
-        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, securityContext, documentProcessingService, fileService, formService);
+        : EditorController<int>(documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, securityContext, documentProcessingService, fileService, formService);
 
 [DefaultRoute("file")]
-public class EditorControllerThirdparty(FileStorageService fileStorageService,
+public class EditorControllerThirdparty(
         DocumentServiceHelper documentServiceHelper,
         EncryptionKeyPairDtoHelper encryptionKeyPairDtoHelper,
         SettingsManager settingsManager,
@@ -61,10 +61,9 @@ public class EditorControllerThirdparty(FileStorageService fileStorageService,
         DocumentProcessingService documentProcessingService,
         FileService fileService,
         FormService formService)
-        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, securityContext, documentProcessingService, fileService, formService);
+        : EditorController<string>(documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, folderDtoHelper, fileDtoHelper, externalShare, authContext, configurationConverter, securityContext, documentProcessingService, fileService, formService);
 
 public abstract class EditorController<T>(
-    FileStorageService fileStorageService,
     DocumentServiceHelper documentServiceHelper,
     EncryptionKeyPairDtoHelper encryptionKeyPairDtoHelper,
     SettingsManager settingsManager,
@@ -323,7 +322,7 @@ public abstract class EditorController<T>(
     [HttpPost("referencedata")]
     public async Task<FileReference> GetReferenceDataAsync(GetReferenceDataDto<T> inDto)
     {
-        return await fileStorageService.GetReferenceDataAsync(inDto.FileKey, inDto.InstanceId, inDto.SourceFileId, inDto.Path, inDto.Link);
+        return await fileService.GetReferenceDataAsync(inDto.FileKey, inDto.InstanceId, inDto.SourceFileId, inDto.Path, inDto.Link);
     }
 
     /// <summary>
