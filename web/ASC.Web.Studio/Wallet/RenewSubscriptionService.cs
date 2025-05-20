@@ -125,7 +125,7 @@ public class RenewSubscriptionService(
 
             var walletQuotaFeatureName = walletQuota.Features.Split(':').FirstOrDefault(); // wallet quota must contains only one feature
 
-            var nextQuantity = data.NextQuantity.Value;
+            var nextQuantity = data.NextQuantity.HasValue ?  data.NextQuantity.Value : data.Quantity;
 
             var currentQuota = await tenantManager.GetCurrentTenantQuotaAsync(refresh: true);
 
