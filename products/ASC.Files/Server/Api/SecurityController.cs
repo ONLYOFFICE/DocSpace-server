@@ -215,8 +215,7 @@ public class SecurityControllerCommon(
     ExternalLinkHelper externalLinkHelper,
     IMapper mapper,
     SharingService sharingService,
-    FileShareDtoHelper fileShareDtoHelper,
-    FileShareParamsHelper fileShareParamsHelper)
+    FileShareDtoHelper fileShareDtoHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>

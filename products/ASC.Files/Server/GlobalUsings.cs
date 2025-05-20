@@ -24,7 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-global using System.Net;
 global using System.Globalization;
 global using System.Security;
 global using System.Text;
@@ -65,7 +64,6 @@ global using ASC.Files.Core.Security;
 global using ASC.Files.Core.Services.DocumentBuilderService;
 global using ASC.Files.Core.VirtualRooms;
 global using ASC.Files.Extension;
-global using ASC.Files.Helpers;
 global using ASC.Files.Log;
 global using ASC.MessagingSystem;
 global using ASC.MessagingSystem.Core;
@@ -89,7 +87,6 @@ global using ASC.Web.Files.Utils;
 global using ASC.Web.Studio.Core;
 global using ASC.Web.Studio.Core.Notify;
 global using ASC.Web.Studio.Utility;
-global using ASC.Webhooks.Core;
 
 global using Autofac;
 

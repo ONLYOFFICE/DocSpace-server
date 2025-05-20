@@ -50,7 +50,12 @@ public class FileUploader(
     FileChecker fileChecker,
     TempStream tempStream,
     WebhookManager webhookManager,
-    IEventBus eventBus)
+    IEventBus eventBus,
+    ChunkedUploadSessionHelper chunkedUploadSessionHelper,
+    IHttpClientFactory clientFactory,
+    SecurityContext securityContext,
+    FilesSettingsHelper filesSettingsHelper,
+    IHttpContextAccessor httpContextAccessor)
 {
     public async Task<File<T>> InsertFileAsync<T>(T folderId, Stream file, string title, bool createNewIfExist, bool keepConvertStatus = false)
     {
@@ -450,6 +455,136 @@ public class FileUploader(
         return dao.GetTransferredBytesCountAsync(uploadSession);
     }
 
+    public async Task<object> CreateUploadSessionAsync<T>(File<T> file, bool encrypted, ApiDateTime createOn, bool keepVersion = false)
+    {
+        if (filesLinkUtility.IsLocalFileUploader)
+        {
+            var session = await InitiateUploadAsync(file.ParentId, file.Id ?? default, file.Title, file.ContentLength, encrypted, keepVersion, createOn);
+
+            var responseObject = await chunkedUploadSessionHelper.ToResponseObjectAsync(session, true);
+
+            return new
+            {
+                success = true,
+                data = responseObject
+            };
+        }
+
+        var createSessionUrl = await filesLinkUtility.GetInitiateUploadSessionUrlAsync(tenantManager.GetCurrentTenantId(), file.ParentId, file.Id, file.Title, file.ContentLength, encrypted, securityContext);
+
+        var httpClient = clientFactory.CreateClient();
+
+        var request = new HttpRequestMessage
+        {
+            RequestUri = new Uri(createSessionUrl),
+            Method = HttpMethod.Post
+        };
+
+        // hack for uploader.onlyoffice.com in api requests
+        //var rewriterHeader = _httpContextAccessor.HttpContext.Request.Headers[HttpRequestExtensions.UrlRewriterHeader];
+        //if (!string.IsNullOrEmpty(rewriterHeader))
+        //{
+        //    request.Headers.Add(HttpRequestExtensions.UrlRewriterHeader, rewriterHeader.ToString());
+        //}
+
+        using var response = await httpClient.SendAsync(request);
+        var responseAsString = await response.Content.ReadAsStringAsync();
+        var jObject = JObject.Parse(responseAsString); //result is json string
+
+        var result = new
+        {
+            success = jObject["success"].ToString(),
+            data = new
+            {
+                id = jObject["data"]["id"].ToString(),
+                path = jObject["data"]["path"].Values().Select(x => (T)Convert.ChangeType(x, typeof(T))),
+                created = jObject["data"]["created"].Value<DateTime>(),
+                expired = jObject["data"]["expired"].Value<DateTime>(),
+                location = jObject["data"]["location"].ToString(),
+                bytes_uploaded = jObject["data"]["bytes_uploaded"].Value<long>(),
+                bytes_total = jObject["data"]["bytes_total"].Value<long>()
+            }
+        };
+
+        return result;
+    }
+    
+    public async Task<List<string>> CheckUploadAsync<T>(T folderId, IEnumerable<string> filesTitle)
+    {
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var fileDao = daoFactory.GetFileDao<T>();
+        var toFolder = await folderDao.GetFolderAsync(folderId);
+        if (toFolder == null)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+        if (!await fileSecurity.CanCreateAsync(toFolder))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
+        }
+
+        var result = new List<string>();
+
+        foreach (var title in filesTitle)
+        {
+            var file = await fileDao.GetFileAsync(folderId, title);
+            if (file is { Encrypted: false })
+            {
+                result.Add(title);
+            }
+        }
+
+        return result;
+    }
+    
+    public async Task<List<File<T>>> UploadFileAsync<T>(T folderId, UploadRequestDto uploadModel)
+    {
+        if (uploadModel.StoreOriginalFileFlag.HasValue)
+        {
+            await filesSettingsHelper.SetStoreOriginalFiles(uploadModel.StoreOriginalFileFlag.Value);
+        }
+
+        IEnumerable<IFormFile> files = httpContextAccessor.HttpContext?.Request.Form.Files;
+        if (!files.Any())
+        {
+            files = uploadModel.Files;
+        }
+
+        if (files != null && files.Any())
+        {
+            if (files.Count() == 1)
+            {
+                //Only one file. return it
+                var postedFile = files.First();
+
+                return [await InsertFileAsync(folderId, postedFile.OpenReadStream(), postedFile.FileName, uploadModel.CreateNewIfExist, uploadModel.KeepConvertStatus)];
+            }
+
+            //For case with multiple files
+            var result = new List<File<T>>();
+
+            foreach (var postedFile in uploadModel.Files)
+            {
+                result.Add(await InsertFileAsync(folderId, postedFile.OpenReadStream(), postedFile.FileName, uploadModel.CreateNewIfExist, uploadModel.KeepConvertStatus));
+            }
+
+            return result;
+        }
+
+        if (uploadModel.File != null)
+        {
+            var fileName = "file" + MimeMapping.GetExtention(uploadModel.ContentType.MediaType);
+            if (uploadModel.ContentDisposition != null)
+            {
+                fileName = uploadModel.ContentDisposition.FileName;
+            }
+
+            return [await InsertFileAsync(folderId, uploadModel.File.OpenReadStream(), fileName, uploadModel.CreateNewIfExist, uploadModel.KeepConvertStatus)];
+        }
+
+        throw new InvalidOperationException("No input files");
+    }
+    
     private async Task AbortUploadAsync<T>(ChunkedUploadSession<T> uploadSession)
     {
         await daoFactory.GetFileDao<T>().AbortUploadSessionAsync(uploadSession);

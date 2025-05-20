@@ -28,24 +28,27 @@ namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
 public class UploadControllerInternal(
-    UploadControllerHelper filesControllerHelper,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
-    FileUploader fileUploader)
-    : UploadController<int>(filesControllerHelper, folderDtoHelper, fileDtoHelper, fileUploader);
+    FileUploader fileUploader,
+    Global global,
+    IDaoFactory daoFactory)
+    : UploadController<int>(folderDtoHelper, fileDtoHelper, fileUploader, global, daoFactory);
 
 public class UploadControllerThirdparty(
-    UploadControllerHelper filesControllerHelper,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
-    FileUploader fileUploader)
-    : UploadController<string>(filesControllerHelper, folderDtoHelper, fileDtoHelper, fileUploader);
+    FileUploader fileUploader,
+    Global global,
+    IDaoFactory daoFactory)
+    : UploadController<string>(folderDtoHelper, fileDtoHelper, fileUploader, global, daoFactory);
 
 public abstract class UploadController<T>(
-    UploadControllerHelper filesControllerHelper,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
-    FileUploader fileUploader)
+    FileUploader fileUploader,
+    Global global,
+    IDaoFactory daoFactory)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -77,7 +80,10 @@ public abstract class UploadController<T>(
     [HttpPost("{folderId}/upload/create_session")]
     public async Task<object> CreateUploadSessionAsync(SessionRequestDto<T> inDto)
     {
-        return await filesControllerHelper.CreateUploadSessionAsync(inDto.FolderId, inDto.Session.FileName, inDto.Session.FileSize, inDto.Session.RelativePath, inDto.Session.Encrypted, inDto.Session.CreateOn, inDto.Session.CreateNewIfExist);
+        var (folderId, fileName, fileSize, relativePath, encrypted, createOn, createNewIfExist) = (inDto.FolderId, inDto.Session.FileName, inDto.Session.FileSize, inDto.Session.RelativePath, inDto.Session.Encrypted, inDto.Session.CreateOn, inDto.Session.CreateNewIfExist);
+        fileName = await global.GetAvailableTitleAsync(fileName, folderId, daoFactory.GetFileDao<T>().IsExistAsync, FileEntryType.File);
+        var file = await fileUploader.VerifyChunkedUploadAsync(folderId, fileName, fileSize, !createNewIfExist, relativePath);
+        return await fileUploader.CreateUploadSessionAsync(file, encrypted, createOn);
     }
 
     /// <summary>
@@ -106,7 +112,7 @@ public abstract class UploadController<T>(
     {
         var file = await fileUploader.VerifyChunkedUploadForEditing(inDto.FileId, inDto.FileSize);
 
-        return await filesControllerHelper.CreateUploadSessionAsync(file, false, null, true);
+        return await fileUploader.CreateUploadSessionAsync(file, false, null, true);
     }
 
     /// <summary>
@@ -120,7 +126,7 @@ public abstract class UploadController<T>(
     [HttpPost("{folderId}/upload/check")]
     public Task<List<string>> CheckUploadAsync(CheckUploadRequestDto<T> model)
     {
-        return filesControllerHelper.CheckUploadAsync(model.FolderId, model.Check.FilesTitle);
+        return fileUploader.CheckUploadAsync(model.FolderId, model.Check.FilesTitle);
     }
 
     /// <summary>
@@ -154,19 +160,25 @@ public abstract class UploadController<T>(
     /// </remarks>
     /// <path>api/2.0/files/{folderId}/upload</path>
     [Tags("Files / Folders")]
-    [SwaggerResponse(200, "Inserted file", typeof(object))]
+    [SwaggerResponse(200, "Inserted file", typeof(List<FileDto<int>>))]
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [SwaggerResponse(404, "Folder not found")]
     [HttpPost("{folderId}/upload", Order = 1)]
-    public async Task<object> UploadFileAsync(UploadWithFolderRequestDto<T> inDto)
+    public async Task<List<FileDto<T>>> UploadFileAsync(UploadWithFolderRequestDto<T> inDto)
     {
-        return await filesControllerHelper.UploadFileAsync(inDto.FolderId, inDto.UploadData);
+        var files = await fileUploader.UploadFileAsync(inDto.FolderId, inDto.UploadData);
+        var result = new List<FileDto<T>>(files.Count);
+        foreach (var file in files)
+        {
+            result.Add(await _fileDtoHelper.GetAsync(file));
+        }
+
+        return result;
     }
 }
 
 public class UploadControllerCommon(
     GlobalFolderHelper globalFolderHelper,
-    UploadControllerHelper filesControllerHelper,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     FileUploader fileUploader)
@@ -220,15 +232,21 @@ public class UploadControllerCommon(
     /// <path>api/2.0/files/@common/upload</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
-    [SwaggerResponse(200, "Uploaded file(s)", typeof(object))]
+    [SwaggerResponse(200, "Uploaded file(s)", typeof(List<FileDto<int>>))]
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [SwaggerResponse(404, "File not found")]
     [HttpPost("@common/upload")]
-    public async Task<object> UploadFileToCommonAsync([ModelBinder(BinderType = typeof(UploadModelBinder))] UploadRequestDto inDto)
+    public async Task<List<FileDto<int>>> UploadFileToCommonAsync([ModelBinder(BinderType = typeof(UploadModelBinder))] UploadRequestDto inDto)
     {
         inDto.CreateNewIfExist = false;
+        var files = await fileUploader.UploadFileAsync(await globalFolderHelper.FolderCommonAsync, inDto);
+        var result = new List<FileDto<int>>(files.Count);
+        foreach (var file in files)
+        {
+            result.Add(await _fileDtoHelper.GetAsync(file));
+        }
 
-        return await filesControllerHelper.UploadFileAsync(await globalFolderHelper.FolderCommonAsync, inDto);
+        return result;
     }
 
     /// <summary>
@@ -249,10 +267,17 @@ public class UploadControllerCommon(
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [SwaggerResponse(404, "File not found")]
     [HttpPost("@my/upload")]
-    public async Task<object> UploadFileToMyAsync([ModelBinder(BinderType = typeof(UploadModelBinder))] UploadRequestDto inDto)
+    public async Task<List<FileDto<int>>> UploadFileToMyAsync([ModelBinder(BinderType = typeof(UploadModelBinder))] UploadRequestDto inDto)
     {
         inDto.CreateNewIfExist = false;
 
-        return await filesControllerHelper.UploadFileAsync(await globalFolderHelper.FolderMyAsync, inDto);
+        var files = await fileUploader.UploadFileAsync(await globalFolderHelper.FolderMyAsync, inDto);
+        var result = new List<FileDto<int>>(files.Count);
+        foreach (var file in files)
+        {
+            result.Add(await _fileDtoHelper.GetAsync(file));
+        }
+
+        return result;
     }
 }
