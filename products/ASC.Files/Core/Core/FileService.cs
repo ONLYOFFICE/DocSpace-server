@@ -364,6 +364,16 @@ public class FileService(
         return file;
     }
 
+    public async Task<File<T>> CreateFileAsync<T>(T folderId, string title, JsonElement templateId, int formId, bool enableExternalExt = false)
+    {
+        return templateId.ValueKind switch
+        {
+            JsonValueKind.Number => await CreateNewFileAsync(new FileModel<T, int>    { ParentId = folderId, Title = title, TemplateId = templateId.GetInt32() }, enableExternalExt),
+            JsonValueKind.String => await CreateNewFileAsync(new FileModel<T, string> { ParentId = folderId, Title = title, TemplateId = templateId.GetString() }, enableExternalExt),
+            _ => await CreateNewFileAsync(new FileModel<T, int> { ParentId = folderId, Title = title, TemplateId = 0, FormId = formId }, enableExternalExt)
+        };
+    }
+    
     /// <summary>
     /// Updates a file's content with the provided stream
     /// </summary>

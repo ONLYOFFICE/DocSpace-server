@@ -271,18 +271,6 @@ public class FileStorageService //: IFileStorageService
     }
 
     #endregion
-
-
-    public async Task<(List<int>, List<int>)> GetTrashContentAsync()
-    {
-        var folderDao = daoFactory.GetFolderDao<int>();
-        var fileDao = daoFactory.GetFileDao<int>();
-        var trashId = await folderDao.GetFolderIDTrashAsync(true);
-        var foldersIdTask = await folderDao.GetFoldersAsync(trashId).Select(f => f.Id).ToListAsync();
-        var filesIdTask = await fileDao.GetFilesAsync(trashId).ToListAsync();
-
-        return (foldersIdTask, filesIdTask);
-    }
     
     public async Task<FilesStatisticsResultDto> GetFilesUsedSpace()
     {

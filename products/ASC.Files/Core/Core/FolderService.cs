@@ -525,6 +525,17 @@ public class FolderService(
         }
     }
     
+    public async Task<(List<int>, List<int>)> GetTrashContentAsync()
+    {
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var fileDao = daoFactory.GetFileDao<int>();
+        var trashId = await folderDao.GetFolderIDTrashAsync(true);
+        var foldersIdTask = await folderDao.GetFoldersAsync(trashId).Select(f => f.Id).ToListAsync();
+        var filesIdTask = await fileDao.GetFilesAsync(trashId).ToListAsync();
+
+        return (foldersIdTask, filesIdTask);
+    }
+    
     internal async Task<Folder<T>> InternalCreateFolderAsync<T>(T parentId, string title, FolderType folderType = FolderType.DEFAULT, bool privacy = false, bool? indexing = false, long? quota = TenantEntityQuotaSettings.DefaultQuotaValue, RoomDataLifetime lifetime = null, bool? denyDownload = false, WatermarkRequestDto watermark = null, string color = null, string cover = null, IEnumerable<string> names = null, LogoRequest logo = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(title);

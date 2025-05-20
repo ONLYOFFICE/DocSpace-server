@@ -49,8 +49,71 @@ public class FileUploader(
     SocketManager socketManager,
     FileChecker fileChecker,
     TempStream tempStream,
-    WebhookManager webhookManager)
+    WebhookManager webhookManager,
+    IEventBus eventBus)
 {
+    public async Task<File<T>> InsertFileAsync<T>(T folderId, Stream file, string title, bool createNewIfExist, bool keepConvertStatus = false)
+    {
+        try
+        {
+            var resultFile = await ExecAsync(folderId, title, file.Length, file, !createNewIfExist, !keepConvertStatus);
+
+            await socketManager.CreateFileAsync(resultFile);
+
+            await webhookManager.PublishAsync(WebhookTrigger.FileUploaded, resultFile);
+
+            var folderDao = daoFactory.GetFolderDao<T>();
+            var room = await folderDao.GetParentFoldersAsync(folderId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+            if (room != null)
+            {
+                var data = room.Id is int rId && resultFile.Id is int fId
+                    ? new RoomNotifyIntegrationData<int> { RoomId = rId, FileId = fId }
+                    : null;
+
+                var thirdPartyData = room.Id is string srId && resultFile.Id is string sfId
+                    ? new RoomNotifyIntegrationData<string> { RoomId = srId, FileId = sfId }
+                    : null;
+
+                var evt = new RoomNotifyIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenant().Id)
+                {
+                    Data = data,
+                    ThirdPartyData = thirdPartyData
+                };
+
+                await eventBus.PublishAsync(evt);
+            }
+
+            return resultFile;
+        }
+        catch (FileNotFoundException e)
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound, e);
+        }
+        catch (DirectoryNotFoundException e)
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound, e);
+        }
+    }
+    
+    public async Task<File<T>> CreateTextFileAsync<T>(T folderId, string title, string content, bool updateIfExist)
+    {
+        //Try detect content
+        var extension = ".txt";
+        if (!string.IsNullOrEmpty(content) && Regex.IsMatch(content, @"<([^\s>]*)(\s[^<]*)>"))
+        {
+            extension = ".html";
+        }
+
+        return await ExecAsync(folderId, title, extension, content, updateIfExist);
+    }
+    
+    public async Task<File<T>> ExecAsync<T>(T folderId, string title, string extension, string content, bool updateIfExist)
+    {
+        title = title.EndsWith(extension, StringComparison.OrdinalIgnoreCase) ? title : (title + extension);
+        using var memStream = new MemoryStream(Encoding.UTF8.GetBytes(content));
+        return await ExecAsync(folderId, title, memStream.Length, memStream, updateIfExist);
+    }
+    
     public async Task<File<T>> ExecAsync<T>(T folderId, string title, long contentLength, Stream data, bool createNewIfExist, bool deleteConvertStatus = true)
     {
         if (contentLength <= 0)
@@ -78,7 +141,7 @@ public class FileUploader(
         return file;
     }
 
-    public async Task<File<T>> VerifyFileUploadAsync<T>(T folderId, string fileName, bool updateIfExists, string relativePath = null)
+    private async Task<File<T>> VerifyFileUploadAsync<T>(T folderId, string fileName, bool updateIfExists, string relativePath = null)
     {
         fileName = Global.ReplaceInvalidCharsAndTruncate(fileName);
 
@@ -112,7 +175,7 @@ public class FileUploader(
         return newFile;
     }
 
-    public async Task<File<T>> VerifyFileUploadAsync<T>(T folderId, string fileName, long fileSize, bool updateIfExists)
+    private async Task<File<T>> VerifyFileUploadAsync<T>(T folderId, string fileName, long fileSize, bool updateIfExists)
     {
         if (fileSize <= 0)
         {

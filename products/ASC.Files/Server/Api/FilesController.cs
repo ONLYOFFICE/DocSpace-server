@@ -29,7 +29,6 @@ namespace ASC.Files.Api;
 [ConstraintRoute("int")]
 public class FilesControllerInternal(
     DocumentProcessingService documentProcessingService,
-    FilesControllerHelper filesControllerHelper,
     SharingService sharingService,
     FileDeleteOperationsManager fileOperationsManager,
     FileOperationDtoHelper fileOperationDtoHelper,
@@ -45,10 +44,14 @@ public class FilesControllerInternal(
     EntriesOrderService entriesOrderService,
     FileService fileService,
     FillingFormResultDtoHelper fillingFormResultDtoHelper,
-    FormService formService)
+    FormService formService,
+    FileChecker fileChecker,
+    PathProvider pathProvider,
+    ILogger<FilesController<int>> logger,
+    FileUploader fileUploader,
+    FileConverter fileConverter)
     : FilesController<int>(
         documentProcessingService,
-        filesControllerHelper,
         sharingService,
         fileOperationsManager,
         fileOperationDtoHelper,
@@ -63,7 +66,12 @@ public class FilesControllerInternal(
         entriesOrderService,
         fileService,
         fillingFormResultDtoHelper,
-        formService)
+        formService, 
+        fileChecker, 
+        pathProvider,
+        logger,
+        fileUploader,
+        fileConverter)
 {
     /// <summary>
     /// Returns the list of actions performed on the file with the specified identifier.
@@ -86,7 +94,6 @@ public class FilesControllerInternal(
 
 public class FilesControllerThirdparty(
     DocumentProcessingService documentProcessingService,
-    FilesControllerHelper filesControllerHelper,
     SharingService sharingService,
     FileDeleteOperationsManager fileOperationsManager,
     FileOperationDtoHelper fileOperationDtoHelper,
@@ -101,10 +108,14 @@ public class FilesControllerThirdparty(
     EntriesOrderService entriesOrderService,
     FileService fileService,
     FillingFormResultDtoHelper fillingFormResultDtoHelper,
-    FormService formService)
+    FormService formService,
+    FileChecker fileChecker,
+    PathProvider pathProvider,
+    ILogger<FilesController<string>> logger,
+    FileUploader fileUploader,
+    FileConverter fileConverter)
     : FilesController<string>(
         documentProcessingService,
-        filesControllerHelper,
         sharingService,
         fileOperationsManager,
         fileOperationDtoHelper,
@@ -119,11 +130,15 @@ public class FilesControllerThirdparty(
         entriesOrderService,
         fileService,
         fillingFormResultDtoHelper,
-        formService);
+        formService, 
+        fileChecker, 
+        pathProvider,
+        logger,
+        fileUploader,
+        fileConverter);
 
 public abstract class FilesController<T>(
     DocumentProcessingService documentProcessingService,
-    FilesControllerHelper filesControllerHelper,
     SharingService sharingService,
     FileDeleteOperationsManager fileOperationsManager,
     FileOperationDtoHelper fileOperationDtoHelper,
@@ -138,7 +153,12 @@ public abstract class FilesController<T>(
     EntriesOrderService entriesOrderService,
     FileService fileService,
     FillingFormResultDtoHelper fillingFormResultDtoHelper,
-    FormService formService)
+    FormService formService,
+    FileChecker fileChecker,
+    PathProvider pathProvider,
+    ILogger<FilesController<T>> logger,
+    FileUploader fileUploader,
+    FileConverter fileConverter)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -151,9 +171,15 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "Updated information about file versions", typeof(IAsyncEnumerable<FileDto<int>>))]
     [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
     [HttpPut("file/{fileId}/history")]
-    public IAsyncEnumerable<FileDto<T>> ChangeHistoryAsync(ChangeHistoryRequestDto<T> inDto)
+    public async IAsyncEnumerable<FileDto<T>> ChangeHistoryAsync(ChangeHistoryRequestDto<T> inDto)
     {
-        return filesControllerHelper.ChangeHistoryAsync(inDto.FileId, inDto.File.Version, inDto.File.ContinueVersion);
+        var pair = await fileService.CompleteVersionAsync(inDto.FileId, inDto.File.Version, inDto.File.ContinueVersion);
+        var history = pair.Value;
+
+        await foreach (var e in history)
+        {
+            yield return await _fileDtoHelper.GetAsync(e);
+        }
     }
 
     /// <summary>
@@ -167,7 +193,7 @@ public abstract class FilesController<T>(
     [HttpGet("file/{fileId}/checkconversion")]
     public IAsyncEnumerable<ConversationResultDto> CheckConversionAsync(CheckConversionStatusRequestDto<T> inDto)
     {
-        return filesControllerHelper.CheckConversionAsync(new CheckConversionRequestDto<T>
+        return CheckConversionAsync(new CheckConversionRequestDto<T>
         {
             FileId = inDto.FileId,
             StartConvert = inDto.Start
@@ -184,8 +210,9 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "File download link", typeof(string))]
     [HttpGet("file/{fileId}/presigneduri")]
     public async Task<string> GetPresignedUri(FileIdRequestDto<T> inDto)
-    {
-        return await filesControllerHelper.GetPresignedUri(inDto.FileId);
+    {        
+        var file = await fileService.GetFileAsync(inDto.FileId, -1);
+        return pathProvider.GetFileStreamUrl(file);
     }
 
     /// <summary>
@@ -198,7 +225,14 @@ public abstract class FilesController<T>(
     [HttpGet("file/{fileId}/isformpdf")]
     public async Task<bool> isFormPDF(FileIdRequestDto<T> inDto)
     {
-        return await filesControllerHelper.isFormPDF(inDto.FileId);
+        var file = await fileService.GetFileAsync(inDto.FileId, -1);
+        var fileType = FileUtility.GetFileTypeByFileName(file.Title);
+
+        if (fileType == FileType.Pdf)
+        {
+            return await fileChecker.CheckExtendedPDF(file);
+        }
+        return false;
     }
 
     /// <summary>
@@ -216,15 +250,32 @@ public abstract class FilesController<T>(
     {
         if (inDto.File.DestFolderId.ValueKind == JsonValueKind.Number)
         {
-            return await filesControllerHelper.CopyFileAsAsync(inDto.FileId, inDto.File.DestFolderId.GetInt32(), inDto.File.DestTitle, inDto.File.Password, inDto.File.ToForm);
+            return await _fileDtoHelper.GetAsync(await CopyFileAsAsync(inDto.FileId, inDto.File.DestFolderId.GetInt32(), inDto.File.DestTitle, inDto.File.Password, inDto.File.ToForm));
         }
 
         if (inDto.File.DestFolderId.ValueKind == JsonValueKind.String)
         {
-            return await filesControllerHelper.CopyFileAsAsync(inDto.FileId, inDto.File.DestFolderId.GetString(), inDto.File.DestTitle, inDto.File.Password, inDto.File.ToForm);
+            return await _fileDtoHelper.GetAsync(await CopyFileAsAsync(inDto.FileId, inDto.File.DestFolderId.GetString(), inDto.File.DestTitle, inDto.File.Password, inDto.File.ToForm));
         }
 
         return null;
+        
+        async Task<File<TTemplate>> CopyFileAsAsync<TTemplate>(T fileId, TTemplate destFolderId, string destTitle, string password = null, bool toForm = false)
+        {
+            var file = await fileService.GetFileAsync(fileId, -1);
+            var ext = FileUtility.GetFileExtension(file.Title);
+            var destExt = FileUtility.GetFileExtension(destTitle);
+
+            if (ext == destExt)
+            {
+                var newFile = await fileService.CreateNewFileAsync(new FileModel<TTemplate, T> { ParentId = destFolderId, Title = destTitle, TemplateId = fileId }, true);
+
+                return newFile;
+            }
+
+            await using var fileStream = await fileConverter.ExecAsync(file, destExt, password, toForm);
+            return await fileUploader.InsertFileAsync(destFolderId, fileStream, destTitle, true);
+        }
     }
 
     /// <summary>
@@ -238,7 +289,8 @@ public abstract class FilesController<T>(
     [HttpPost("{folderId}/file")]
     public async Task<FileDto<T>> CreateFileAsync(CreateFileRequestDto<T> inDto)
     {
-        return await filesControllerHelper.CreateFileAsync(inDto.FolderId, inDto.File.Title, inDto.File.TemplateId, inDto.File.FormId, inDto.File.EnableExternalExt);
+        var file = await fileService.CreateFileAsync(inDto.FolderId, inDto.File.Title, inDto.File.TemplateId, inDto.File.FormId, inDto.File.EnableExternalExt);
+        return await _fileDtoHelper.GetAsync(file);
     }
 
     /// <summary>
@@ -252,7 +304,8 @@ public abstract class FilesController<T>(
     [HttpPost("{folderId}/html")]
     public async Task<FileDto<T>> CreateHtmlFileAsync(CreateTextOrHtmlFileRequestDto<T> inDto)
     {
-        return await filesControllerHelper.CreateHtmlFileAsync(inDto.FolderId, inDto.File.Title, inDto.File.Content, !inDto.File.CreateNewIfExist);
+        var file = await fileUploader.ExecAsync(inDto.FolderId, inDto.File.Title, ".html", inDto.File.Content, !inDto.File.CreateNewIfExist);
+        return await _fileDtoHelper.GetAsync(file);
     }
 
     /// <summary>
@@ -265,7 +318,8 @@ public abstract class FilesController<T>(
     [HttpPost("{folderId}/text")]
     public async Task<FileDto<T>> CreateTextFileAsync(CreateTextOrHtmlFileRequestDto<T> inDto)
     {
-        return await filesControllerHelper.CreateTextFileAsync(inDto.FolderId, inDto.File.Title, inDto.File.Content, !inDto.File.CreateNewIfExist);
+        var file = await fileUploader.CreateTextFileAsync(inDto.FolderId, inDto.File.Title, inDto.File.Content, !inDto.File.CreateNewIfExist);
+        return await _fileDtoHelper.GetAsync(file);
     }
 
     /// <summary>
@@ -349,7 +403,10 @@ public abstract class FilesController<T>(
     [HttpGet("file/{fileId}")]
     public async Task<FileDto<T>> GetFileInfoAsync(FileInfoRequestDto<T> inDto)
     {
-        return await filesControllerHelper.GetFileInfoAsync(inDto.FileId, inDto.Version);
+        var file = await fileService.GetFileAsync(inDto.FileId, inDto.Version);
+        file = file.NotFoundIfNull("File not found");
+
+        return await _fileDtoHelper.GetAsync(file);
     }
 
 
@@ -430,8 +487,9 @@ public abstract class FilesController<T>(
     {
         inDto.CheckConversion ??= new CheckConversionRequestDto<T>();
         inDto.CheckConversion.FileId = inDto.FileId;
+        inDto.CheckConversion.StartConvert = true;
 
-        return filesControllerHelper.StartConversionAsync(inDto.CheckConversion);
+        return CheckConversionAsync(inDto.CheckConversion);
     }
 
     /// <summary>
@@ -460,7 +518,23 @@ public abstract class FilesController<T>(
     [HttpPut("file/{fileId}")]
     public async Task<FileDto<T>> UpdateFileAsync(UpdateFileRequestDto<T> inDto)
     {
-        return await filesControllerHelper.UpdateFileAsync(inDto.FileId, inDto.File.Title, inDto.File.LastVersion);
+        var (fileId, title, lastVersion) = (inDto.FileId, inDto.File.Title, inDto.File.LastVersion);
+        File<T> file = null;
+
+        if (!string.IsNullOrEmpty(title))
+        {
+            file = await fileService.FileRenameAsync(fileId, title);
+        }
+
+        if (lastVersion <= 0)
+        {        
+            return await _fileDtoHelper.GetAsync(file);
+        }
+
+        var result = await fileService.UpdateToVersionAsync(fileId, lastVersion);
+        file = result.Key;
+
+        return await _fileDtoHelper.GetAsync(file);
     }
 
     /// <summary>
@@ -479,7 +553,16 @@ public abstract class FilesController<T>(
         IEnumerable<IFormFile> files = Request.Form.Files;
         var file = files.Any() ? files.First() : inDto.File;
 
-        return await filesControllerHelper.UpdateFileStreamAsync(file.OpenReadStream(), inDto.FileId, inDto.FileExtension, inDto.Encrypted, inDto.Forcesave);
+        try
+        {
+            var resultFile = await fileService.UpdateFileStreamAsync(inDto.FileId, file.OpenReadStream(), inDto.FileExtension, inDto.Encrypted, inDto.Forcesave);
+
+            return await _fileDtoHelper.GetAsync(resultFile);
+        }
+        catch (FileNotFoundException e)
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound, e);
+        }
     }
 
     /// <summary>
@@ -657,14 +740,54 @@ public abstract class FilesController<T>(
     {
         await formService.ManageFormFilling(inDto.FormId, inDto.Action);
     }
+    
+    private async IAsyncEnumerable<ConversationResultDto> CheckConversionAsync(CheckConversionRequestDto<T> checkConversionRequestDto)
+    {
+        var checkConversation = documentProcessingService.CheckConversionAsync([checkConversionRequestDto], checkConversionRequestDto.Sync);
+
+        await foreach (var r in checkConversation)
+        {
+            var o = new ConversationResultDto
+            {
+                Id = r.Id,
+                Error = r.Error,
+                OperationType = r.OperationType,
+                Processed = r.Processed,
+                Progress = r.Progress,
+                Source = r.Source
+            };
+
+            if (!string.IsNullOrEmpty(r.Result))
+            {
+                try
+                {
+                    var options = new JsonSerializerOptions
+                    {
+                        AllowTrailingCommas = true,
+                        PropertyNameCaseInsensitive = true
+                    };
+
+                    var jResult = JsonSerializer.Deserialize<FileJsonSerializerData<T>>(r.Result, options);
+                    o.File = await GetFileInfoAsync(new FileInfoRequestDto<T> { FileId = jResult.Id, Version = jResult.Version});
+                }
+                catch (Exception e)
+                {
+                    o.File = r.Result;
+                    logger.ErrorCheckConversion(e);
+                }
+            }
+
+            yield return o;
+        }
+    }
 }
 
 public class FilesControllerCommon(
-        GlobalFolderHelper globalFolderHelper,
-        FileService fileService,
-        FilesControllerHelper filesControllerHelperInternal,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
+    GlobalFolderHelper globalFolderHelper,
+    FileService fileService,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper,
+    FileUploader fileUploader)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -677,8 +800,9 @@ public class FilesControllerCommon(
     [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
     [HttpPost("@my/file")]
     public async Task<FileDto<int>> CreateFileMyDocumentsAsync(CreateFile<JsonElement> inDto)
-    {
-        return await filesControllerHelperInternal.CreateFileAsync(await globalFolderHelper.FolderMyAsync, inDto.Title, inDto.TemplateId, inDto.FormId, inDto.EnableExternalExt);
+    {        
+        var file = await fileService.CreateFileAsync(await globalFolderHelper.FolderMyAsync, inDto.Title, inDto.TemplateId, inDto.FormId, inDto.EnableExternalExt);
+        return await _fileDtoHelper.GetAsync(file);
     }
 
     /// <summary>
@@ -692,8 +816,9 @@ public class FilesControllerCommon(
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [HttpPost("@common/html")]
     public async Task<FileDto<int>> CreateHtmlFileInCommonAsync(CreateTextOrHtmlFile inDto)
-    {
-        return await filesControllerHelperInternal.CreateHtmlFileAsync(await globalFolderHelper.FolderCommonAsync, inDto.Title, inDto.Content, !inDto.CreateNewIfExist);
+    {        
+        var file = await fileUploader.ExecAsync(await globalFolderHelper.FolderCommonAsync, inDto.Title, ".html", inDto.Content, !inDto.CreateNewIfExist);
+        return await _fileDtoHelper.GetAsync(file);
     }
 
     /// <summary>
@@ -706,8 +831,9 @@ public class FilesControllerCommon(
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [HttpPost("@my/html")]
     public async Task<FileDto<int>> CreateHtmlFileInMyAsync(CreateTextOrHtmlFile inDto)
-    {
-        return await filesControllerHelperInternal.CreateHtmlFileAsync(await globalFolderHelper.FolderMyAsync, inDto.Title, inDto.Content, !inDto.CreateNewIfExist);
+    { 
+        var file = await fileUploader.ExecAsync(await globalFolderHelper.FolderMyAsync, inDto.Title, ".html", inDto.Content, !inDto.CreateNewIfExist);
+        return await _fileDtoHelper.GetAsync(file);
     }
 
     /// <summary>
@@ -721,7 +847,8 @@ public class FilesControllerCommon(
     [HttpPost("@common/text")]
     public async Task<FileDto<int>> CreateTextFileInCommonAsync(CreateTextOrHtmlFile inDto)
     {
-        return await filesControllerHelperInternal.CreateTextFileAsync(await globalFolderHelper.FolderCommonAsync, inDto.Title, inDto.Content, !inDto.CreateNewIfExist);
+        var file = await fileUploader.CreateTextFileAsync(await globalFolderHelper.FolderCommonAsync, inDto.Title, inDto.Content, !inDto.CreateNewIfExist);
+        return await _fileDtoHelper.GetAsync(file);
     }
 
     /// <summary>
@@ -734,7 +861,8 @@ public class FilesControllerCommon(
     [HttpPost("@my/text")]
     public async Task<FileDto<int>> CreateTextFileInMyAsync(CreateTextOrHtmlFile inDto)
     {
-        return await filesControllerHelperInternal.CreateTextFileAsync(await globalFolderHelper.FolderMyAsync, inDto.Title, inDto.Content, !inDto.CreateNewIfExist);
+        var file = await fileUploader.CreateTextFileAsync(await globalFolderHelper.FolderMyAsync, inDto.Title, inDto.Content, !inDto.CreateNewIfExist);
+        return await _fileDtoHelper.GetAsync(file);
     }
 
     /// <summary>

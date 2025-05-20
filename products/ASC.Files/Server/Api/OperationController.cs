@@ -32,12 +32,13 @@ public class OperationController(
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     FileStorageService fileStorageService,
-    FileDownloadOperationsManager fileDownloadOperationsManager, 
-    FileMoveCopyOperationsManager fileMoveCopyOperationsManager, 
-    FileDeleteOperationsManager fileDeleteOperationsManager, 
-    FileMarkAsReadOperationsManager fileMarkAsReadOperationsManager, 
-    FileDuplicateOperationsManager fileDuplicateOperationsManager, 
-    CommonLinkUtility commonLinkUtility)
+    FileDownloadOperationsManager fileDownloadOperationsManager,
+    FileMoveCopyOperationsManager fileMoveCopyOperationsManager,
+    FileDeleteOperationsManager fileDeleteOperationsManager,
+    FileMarkAsReadOperationsManager fileMarkAsReadOperationsManager,
+    FileDuplicateOperationsManager fileDuplicateOperationsManager,
+    CommonLinkUtility commonLinkUtility,
+    FolderService folderService)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -135,7 +136,7 @@ public class OperationController(
     [HttpPut("emptytrash")]
     public async IAsyncEnumerable<FileOperationDto> EmptyTrashAsync()
     {
-        var (foldersId, filesId) = await fileStorageService.GetTrashContentAsync();
+        var (foldersId, filesId) = await folderService.GetTrashContentAsync();
         
         await fileDeleteOperationsManager.Publish(foldersId, filesId, false, true, false, true);
 

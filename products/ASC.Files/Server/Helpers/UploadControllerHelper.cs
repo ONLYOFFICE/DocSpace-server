@@ -30,9 +30,7 @@ namespace ASC.Files.Helpers;
 public class UploadControllerHelper(
     FilesSettingsHelper filesSettingsHelper,
     FileUploader fileUploader,
-    SocketManager socketManager,
     FileDtoHelper fileDtoHelper,
-    FileStorageService fileStorageService,
     IHttpContextAccessor httpContextAccessor,
     FilesLinkUtility filesLinkUtility,
     ChunkedUploadSessionHelper chunkedUploadSessionHelper,
@@ -41,38 +39,12 @@ public class UploadControllerHelper(
     SecurityContext securityContext,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
-    FileChecker fileChecker,
-    WebhookManager webhookManager,
-    IEventBus eventBus,
-    AuthContext authContext,
-    Global global,
-    FileService fileService)
-    : FilesHelperBase(
-        filesSettingsHelper,
-        fileUploader,
-        socketManager,
-        fileDtoHelper,
-        fileStorageService,
-        fileChecker,
-        httpContextAccessor,
-        webhookManager,
-        daoFactory,
-        eventBus,
-        tenantManager,
-        authContext,
-        fileService)
-    {
-    public async Task<object> CreateEditSessionAsync<T>(T fileId, long fileSize)
-    {
-        var file = await _fileUploader.VerifyChunkedUploadForEditing(fileId, fileSize);
-
-        return await CreateUploadSessionAsync(file, false, null, true);
-    }
-
+    Global global)
+{
     public async Task<List<string>> CheckUploadAsync<T>(T folderId, IEnumerable<string> filesTitle)
     {
-        var folderDao = _daoFactory.GetFolderDao<T>();
-        var fileDao = _daoFactory.GetFileDao<T>();
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var fileDao = daoFactory.GetFileDao<T>();
         var toFolder = await folderDao.GetFolderAsync(folderId);
         if (toFolder == null)
         {
@@ -99,16 +71,16 @@ public class UploadControllerHelper(
 
     public async Task<object> CreateUploadSessionAsync<T>(T folderId, string fileName, long fileSize, string relativePath, bool encrypted, ApiDateTime createOn, bool createNewIfExist, bool keepVersion = false)
     {
-        fileName = await global.GetAvailableTitleAsync(fileName, folderId, _daoFactory.GetFileDao<T>().IsExistAsync, FileEntryType.File);
-        var file = await _fileUploader.VerifyChunkedUploadAsync(folderId, fileName, fileSize, !createNewIfExist, relativePath);
+        fileName = await global.GetAvailableTitleAsync(fileName, folderId, daoFactory.GetFileDao<T>().IsExistAsync, FileEntryType.File);
+        var file = await fileUploader.VerifyChunkedUploadAsync(folderId, fileName, fileSize, !createNewIfExist, relativePath);
         return await CreateUploadSessionAsync(file, encrypted, createOn, keepVersion);
     }
 
-    private async Task<object> CreateUploadSessionAsync<T>(File<T> file, bool encrypted, ApiDateTime createOn, bool keepVersion = false)
+    public async Task<object> CreateUploadSessionAsync<T>(File<T> file, bool encrypted, ApiDateTime createOn, bool keepVersion = false)
     {
         if (filesLinkUtility.IsLocalFileUploader)
         {
-            var session = await _fileUploader.InitiateUploadAsync(file.ParentId, file.Id ?? default, file.Title, file.ContentLength, encrypted, keepVersion, createOn);
+            var session = await fileUploader.InitiateUploadAsync(file.ParentId, file.Id ?? default, file.Title, file.ContentLength, encrypted, keepVersion, createOn);
 
             var responseObject = await chunkedUploadSessionHelper.ToResponseObjectAsync(session, true);
 
@@ -119,7 +91,7 @@ public class UploadControllerHelper(
             };
         }
 
-        var createSessionUrl = await filesLinkUtility.GetInitiateUploadSessionUrlAsync(_tenantManager.GetCurrentTenantId(), file.ParentId, file.Id, file.Title, file.ContentLength, encrypted, securityContext);
+        var createSessionUrl = await filesLinkUtility.GetInitiateUploadSessionUrlAsync(tenantManager.GetCurrentTenantId(), file.ParentId, file.Id, file.Title, file.ContentLength, encrypted, securityContext);
 
         var httpClient = httpClientFactory.CreateClient();
 
@@ -162,10 +134,10 @@ public class UploadControllerHelper(
     {
         if (uploadModel.StoreOriginalFileFlag.HasValue)
         {
-            await _filesSettingsHelper.SetStoreOriginalFiles(uploadModel.StoreOriginalFileFlag.Value);
+            await filesSettingsHelper.SetStoreOriginalFiles(uploadModel.StoreOriginalFileFlag.Value);
         }
 
-        IEnumerable<IFormFile> files = _httpContextAccessor.HttpContext?.Request.Form.Files;
+        IEnumerable<IFormFile> files = httpContextAccessor.HttpContext?.Request.Form.Files;
         if (!files.Any())
         {
             files = uploadModel.Files;
@@ -178,7 +150,7 @@ public class UploadControllerHelper(
                 //Only one file. return it
                 var postedFile = files.First();
 
-                return await InsertFileAsync(folderId, postedFile.OpenReadStream(), postedFile.FileName, uploadModel.CreateNewIfExist, uploadModel.KeepConvertStatus);
+                return await fileUploader.InsertFileAsync(folderId, postedFile.OpenReadStream(), postedFile.FileName, uploadModel.CreateNewIfExist, uploadModel.KeepConvertStatus);
             }
 
             //For case with multiple files
@@ -186,7 +158,7 @@ public class UploadControllerHelper(
 
             foreach (var postedFile in uploadModel.Files)
             {
-                result.Add(await InsertFileAsync(folderId, postedFile.OpenReadStream(), postedFile.FileName, uploadModel.CreateNewIfExist, uploadModel.KeepConvertStatus));
+                result.Add(await fileUploader.InsertFileAsync(folderId, postedFile.OpenReadStream(), postedFile.FileName, uploadModel.CreateNewIfExist, uploadModel.KeepConvertStatus));
             }
 
             return result;
@@ -202,7 +174,7 @@ public class UploadControllerHelper(
 
             return new List<FileDto<T>>
             {
-                await InsertFileAsync(folderId, uploadModel.File.OpenReadStream(), fileName, uploadModel.CreateNewIfExist, uploadModel.KeepConvertStatus)
+                await fileDtoHelper.GetAsync(await fileUploader.InsertFileAsync(folderId, uploadModel.File.OpenReadStream(), fileName, uploadModel.CreateNewIfExist, uploadModel.KeepConvertStatus))
             };
         }
 
