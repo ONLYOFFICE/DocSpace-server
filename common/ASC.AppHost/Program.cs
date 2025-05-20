@@ -81,21 +81,34 @@ builder.Eventing.Subscribe(rabbitMq.Resource, (Func<ConnectionStringAvailableEve
 
 var redis = builder
     .AddRedis("cache")
+    .WithPassword(null)
     .WithLifetime(ContainerLifetime.Persistent);
 //.WithRedisInsight();
 
 string? redisHost = null;
 string? redisPort = null;
+string? redisPassword = null;
+
 builder.Eventing.Subscribe(redis.Resource, (Func<ConnectionStringAvailableEvent, CancellationToken, Task>)(async (_, ct) =>
 {
     var connectionString = await redis.Resource.ConnectionStringExpression.GetValueAsync(ct).ConfigureAwait(false);
     if (connectionString != null)
     {
-        var splitted = connectionString.Split(':');
+        var hostAndPassword = connectionString.Split(',');
+        var splitted = hostAndPassword[0].Split(':');
         if (splitted.Length == 2)
         {
             redisHost = splitted[0];
             redisPort = splitted[1];
+        }
+
+        if (hostAndPassword.Length > 1)
+        {        
+            var splittedHostAndPassword = hostAndPassword[1].Split('=');
+            if (splittedHostAndPassword.Length == 2)
+            {
+                redisPassword = splittedHostAndPassword[1];
+            }
         }
     }
 }));
@@ -271,8 +284,6 @@ foreach (var d in dict)
 openResty
     .WithArgs("/bin/sh", "-c", $"envsubst '{string.Join(',', dict.Select(r=> $"${r.Key}"))}' < /etc/nginx/templates/upstream-aspire.conf.template > /etc/nginx/includes/onlyoffice-upstream.conf && /usr/local/openresty/bin/openresty -g 'daemon off;'");
 
-
-
 await builder.Build().RunAsync();
 
 return;
@@ -292,7 +303,7 @@ void AddProjectDocker<TProject>(int projectPort, bool includeHealthCheck = true)
 
     var name = typeof(TProject).Name;
     var resourceBuilder = builder.AddDockerfile(GetProjectName<TProject>(), projectBasePath, stage: "base");
-    AddBaseConfig(resourceBuilder, includeHealthCheck);
+
 
     var dllPath = "/app/bin/Debug/";
     if (Directory.Exists(Path.Combine(projectBasePath, "bin", "Debug", "net9.0")))
@@ -318,7 +329,7 @@ void AddProjectDocker<TProject>(int projectPort, bool includeHealthCheck = true)
             .WithHttpEndpoint(projectPort, projectPort);
     }
 
-
+    AddBaseConfig(resourceBuilder, includeHealthCheck);
     resourceBuilder.WithEnvironment("OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES", "true");
     resourceBuilder.WithEnvironment("OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES", "true");
     resourceBuilder.WithEnvironment("OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY", "in_memory");
@@ -363,10 +374,17 @@ void AddBaseConfig<T>(IResourceBuilder<T> resourceBuilder, bool includeHealthChe
         .WithEnvironment("RabbitMQ:UserName", () => rabbitMqUri != null ? $"{rabbitMqUri.UserInfo.Split(':')[0]}" : "")
         .WithEnvironment("RabbitMQ:Password", () => rabbitMqUri != null ? $"{rabbitMqUri.UserInfo.Split(':')[1]}" : "")
         .WithEnvironment("RabbitMQ:VirtualHost", () => rabbitMqUri != null ? $"{rabbitMqUri.PathAndQuery}" : "");
-    
+
     resourceBuilder
         .WithEnvironment("Redis:Hosts:0:Host", () => (isDocker ? SubstituteLocalhost(redisHost) : redisHost) ?? string.Empty)
         .WithEnvironment("Redis:Hosts:0:Port", () => redisPort ?? string.Empty);
+
+    if (!string.IsNullOrEmpty(redisPassword))
+    {
+        resourceBuilder
+            .WithEnvironment("Redis:Password", () => (isDocker ? SubstituteLocalhost(redisHost) : redisHost) ?? string.Empty);
+    }
+    
     
     AddWaitFor(resourceBuilder);
 }
@@ -410,6 +428,11 @@ void AddIdentityEnv<T>(IResourceBuilder<T> resourceBuilder) where T : ContainerR
         .WithEnvironment("REDIS_HOST", () => SubstituteLocalhost(redisHost) ?? string.Empty)
         .WithEnvironment("REDIS_PORT", () => redisPort ?? string.Empty);
 
+    if (!string.IsNullOrEmpty(redisPassword))
+    {
+        resourceBuilder.WithEnvironment("REDIS_PASSWORD", () => redisPassword ?? string.Empty);
+    }
+    
     AddWaitFor(resourceBuilder, includeEditors: false);
 }
 
