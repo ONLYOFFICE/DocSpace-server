@@ -150,7 +150,7 @@ $Message</value>
     <value>$ToUserName ju përmendi ju në dokumentin $DocumentTitle</value>
   </data>
   <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
-    <value>Një dosje të re "$FolderTitle" është krijuar në dhomën"$RoomTitle"</value>
+    <value>Një dosje të re "$FolderTitle" është krijuar në dhomën "$RoomTitle"</value>
   </data>
   <data name="pattern_FormReceived" xml:space="preserve">
     <value>h1. Formulari $Mesazh është plotësuar
@@ -197,7 +197,7 @@ $__AuthorName fshiu një dhomë: $RoomTitle"</value>
   <data name="pattern_ShareDocument" xml:space="preserve">
     <value>h1. Lejohet aksesi në dokument: "$DocumentTitle":"$DocumentURL"
 
-$__DateTime "$__AuthorName":"$__AuthorUrl" ju dha akses në dokumentin "$DocumentTitle":"$DocumentURL"me të drejtat e mëposhtme të hyrjes: "$AccessRights". 
+$__DateTime "$__AuthorName":"$__AuthorUrl" ju dha akses në dokumentin "$DocumentTitle":"$DocumentURL" me të drejtat e mëposhtme të hyrjes: "$AccessRights". 
 
 $Message</value>
   </data>
