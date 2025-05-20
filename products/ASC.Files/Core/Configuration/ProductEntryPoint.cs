@@ -285,13 +285,20 @@ public class ProductEntryPoint : Product
                 result.TryAdd(record.EntryId, false);
             }
         }
+        var virtualRoomsFolderId = await _globalFolder.GetFolderVirtualRoomsAsync(_daoFactory);
+        var myRooms = await folderDao.GetRoomsAsync(null, null, null, userId, null, false, false, false, ProviderFilter.None, SubjectFilter.Owner, null, new List<int> { virtualRoomsFolderId }).ToListAsync();
+
+        foreach (var room in myRooms)
+        {
+            var roomId = room.Id.ToString();
+            result.TryAdd(roomId, true);
+        }
 
         if (!isDocSpaceAdmin)
         {
             return result;
         }
 
-        var virtualRoomsFolderId = await _globalFolder.GetFolderVirtualRoomsAsync(_daoFactory);
         var archiveFolderId = await _globalFolder.GetFolderArchiveAsync(_daoFactory);
 
         var rooms = await folderDao.GetRoomsAsync(new List<int> { virtualRoomsFolderId, archiveFolderId }, null, null, Guid.Empty, null, false, false, false, ProviderFilter.None, SubjectFilter.Owner, null).ToListAsync();
@@ -299,11 +306,7 @@ public class ProductEntryPoint : Product
         foreach (var room in rooms)
         {
             var roomId = room.Id.ToString();
-
-            if (!result.ContainsKey(roomId))
-            {
-                result.TryAdd(roomId, true);
-            }
+            result.TryAdd(roomId, true);
         }
 
         return result;
