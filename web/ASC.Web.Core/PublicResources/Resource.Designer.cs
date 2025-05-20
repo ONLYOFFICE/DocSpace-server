@@ -2040,7 +2040,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Webhook URL is not avaliable. HEAD request is not responce 200 http status..
+        ///   Looks up a localized string similar to Webhook URL is not available. HEAD request is not response 200 http status..
         /// </summary>
         public static string ErrorWebhookUrlNotAvaliable {
             get {

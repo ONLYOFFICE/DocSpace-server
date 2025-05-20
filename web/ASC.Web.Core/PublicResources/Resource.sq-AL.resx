@@ -1,0 +1,1146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ActivateMobilePhoneEmptyCode" xml:space="preserve">
+    <value>Fusha e kodit të verifikimit nuk mund të jetë bosh</value>
+  </data>
+  <data name="ActivateMobilePhoneEmptyPhoneNumber" xml:space="preserve">
+    <value>Futni numrin e telefonit celular</value>
+  </data>
+  <data name="ActivateTfaAppEmptyCode" xml:space="preserve">
+    <value>Fusha e kodit të verifikimit nuk mund të jetë bosh</value>
+  </data>
+  <data name="AdministratorNotifySenderTypeName" xml:space="preserve">
+    <value>Njoftimet e administratorit</value>
+  </data>
+  <data name="AdminMessageSent" xml:space="preserve">
+    <value>Mesazhi juaj u dërgua me sukses. Do të kontaktoheni nga administratori i portalit.</value>
+  </data>
+  <data name="ButtonSmsEnable" xml:space="preserve">
+    <value>Mes SMS</value>
+  </data>
+  <data name="ButtonTfaAppEnable" xml:space="preserve">
+    <value>Nga aplikacioni i autentifikimit</value>
+  </data>
+  <data name="ChangePortalOwnerMsg" xml:space="preserve">
+    <value>Një lidhje për të konfirumuar operacionin është dërguar në :email (adresa e emailit të pronarit të portalit).</value>
+  </data>
+  <data name="Consumersacesskey" xml:space="preserve">
+    <value>S3 çelësiaksesit</value>
+  </data>
+  <data name="ConsumersapiKey" xml:space="preserve">
+    <value>Çelësi i api-t i Rackspace</value>
+  </data>
+  <data name="ConsumersAppleId" xml:space="preserve">
+    <value>Apple ID</value>
+  </data>
+  <data name="ConsumersappleIdClientId" xml:space="preserve">
+    <value>ID-ja e klientit të aplikacionit</value>
+  </data>
+  <data name="ConsumersAppleIdDescription" xml:space="preserve">
+    <value>Aktivizoni aplikacionin të identifikohet në portal duke përdorur një llogari Apple ID.</value>
+  </data>
+  <data name="ConsumersAppleIdInstruction" xml:space="preserve">
+    <value>Aktivizoni këtë aplikacion për të lejuar përdoruesit tuaj të identifikohen në {LogoText} duke përdorur Apple ID. {0}Shkoni te portali i zhvilluesve të Apple dhe krijoni një integrim të ri të aplikacionit {LogoText}. Futni të dhënat:</value>
+  </data>
+  <data name="ConsumersappleIdKeyId" xml:space="preserve">
+    <value>Një identifikues çelësi me 10 karaktere i krijuar për “Hyni me çelësin privat Apple”</value>
+  </data>
+  <data name="ConsumersappleIdPrivateKey" xml:space="preserve">
+    <value>Çelësi privat i shkarkuar nga Apple Developer</value>
+  </data>
+  <data name="ConsumersappleIdTeamId" xml:space="preserve">
+    <value>ID-ja e ekipit të llogarisë së zhvilluesit me 10 karaktere</value>
+  </data>
+  <data name="ConsumersauthPwd" xml:space="preserve">
+    <value>Zgjidhni authPwd</value>
+  </data>
+  <data name="ConsumersauthUser" xml:space="preserve">
+    <value>Zgjidhni përdoruesin e autorit</value>
+  </data>
+  <data name="ConsumersBitly" xml:space="preserve">
+    <value>Bitly</value>
+  </data>
+  <data name="ConsumersbitlyClientId" xml:space="preserve">
+    <value>Identifikohuni</value>
+  </data>
+  <data name="ConsumersbitlyClientSecret" xml:space="preserve">
+    <value>Çelësi i api-t</value>
+  </data>
+  <data name="ConsumersBitlyDescription" xml:space="preserve">
+    <value>Aktivizoni këtë aplikacion për të shkurtuar lidhjet e ftesave të portalit dhe lidhjet e përbashkëta në modulin Dokumentet me shërbimin Bitly.</value>
+  </data>
+  <data name="ConsumersBitlyInstruction" xml:space="preserve">
+    <value>Aktivizoni këtë aplikacion për të shkurtuar lidhjet e ftesës dhe dokumentit. {0}Shtoni hyrjen tuaj në Bitly dhe çelësin API më poshtë:</value>
+  </data>
+  <data name="ConsumersBox" xml:space="preserve">
+    <value>Box</value>
+  </data>
+  <data name="ConsumersboxClientId" xml:space="preserve">
+    <value>ID e Box</value>
+  </data>
+  <data name="ConsumersboxClientSecret" xml:space="preserve">
+    <value>Çelësi i Box</value>
+  </data>
+  <data name="ConsumersBoxDescription" xml:space="preserve">
+    <value>Aktivizoni aplikacionin për të menaxhuar skedarët dhe dosjet e Box.</value>
+  </data>
+  <data name="ConsumersBoxInstruction" xml:space="preserve">
+    <value>Aktivizoni këtë aplikacion për të lidhur llogarinë tënde Box me modulin Dokumentet. Ju do të jeni në gjendje të menaxhoni, modifikoni dhe ndani skedarë nga Box me përdoruesit e {LogoText}. {0}Identifikohuni në llogarinë tënde në faqen e zhvilluesve të Box dhe krijoni një aplikacion të ri për integrimin e {LogoText}. Futni të dhënat që keni marrë më poshtë:</value>
+  </data>
+  <data name="ConsumersClickatell" xml:space="preserve">
+    <value>Clickatell</value>
+  </data>
+  <data name="ConsumersclickatellapiKey" xml:space="preserve">
+    <value>Çelësi api</value>
+  </data>
+  <data name="ConsumersClickatellDescription" xml:space="preserve">
+    <value>Aktivizoni për vertetimin me dy faktorë nëpërmjet Clicatellit.</value>
+  </data>
+  <data name="ConsumersClickatellInstruction" xml:space="preserve">
+    <value>Përdoreni këtë aplikacion për të aktivizuar vërtetimin me dy faktorë me shërbimin Clickatell. {0}Identifikohuni në llogarinë tënde të platformës SMS dhe krijoni një integrim të ri për {LogoText}. Kopjoni një Çelësapi dhe futeni atë më poshtë:</value>
+  </data>
+  <data name="ConsumersDocuSign" xml:space="preserve">
+    <value>DocuSign</value>
+  </data>
+  <data name="ConsumersdocuSignClientId" xml:space="preserve">
+    <value>DocuSign</value>
+  </data>
+  <data name="ConsumersdocuSignClientSecret" xml:space="preserve">
+    <value>Sekreti i DocuSign</value>
+  </data>
+  <data name="ConsumersDocuSignDescription" xml:space="preserve">
+    <value>Aktivizoni aplikacionin të nënshkruajë dokumentet tuaja në mënyrë dixhitale me DocuSign.</value>
+  </data>
+  <data name="ConsumersdocuSignHost" xml:space="preserve">
+    <value>Pika përfundimtare e vërtetimit të DocuSign</value>
+  </data>
+  <data name="ConsumersDocuSignInstruction" xml:space="preserve">
+    <value>Aktivizoni këtë aplikacion që të nënshkruajë dokumente në mënyrë dixhitale duke përdorur DocuSign. {0}Shkoni te paneli i administratorit të DocuSign dhe shtoni integrimin {LogoText}. Shtoni të dhënat që keni marrë më poshtë:</value>
+  </data>
+  <data name="ConsumersDropBox" xml:space="preserve">
+    <value>DropBox</value>
+  </data>
+  <data name="ConsumersDropBoxDescription" xml:space="preserve">
+    <value>Aktivizoni aplikacionin për të menaxhuar skedarët dhe dosjet e Dropbox.</value>
+  </data>
+  <data name="ConsumersDropBoxInstruction" xml:space="preserve">
+    <value>Aktivizoni këtë aplikacion për të lidhur llogarinë tuaj Dropbox me modulin Documents. Ju do të jeni në gjendje të menaxhoni, modifikoni dhe ndani skedarë nga Dropbox me përdoruesit e {LogoText}. {0}Identifikohu në llogarinë tënde në faqen e internetit të Zhvilluesve të Dropbox dhe krijoni një aplikacion të ri për integrimin e {LogoText}. Shtoni të dhënat që keni marrë më poshtë:</value>
+  </data>
+  <data name="ConsumersDropBoxKey" xml:space="preserve">
+    <value>DropBox ID</value>
+  </data>
+  <data name="ConsumersDropBoxSecret" xml:space="preserve">
+    <value>Çelësi DropBox</value>
+  </data>
+  <data name="ConsumersEasyBib" xml:space="preserve">
+    <value>EasyBib</value>
+  </data>
+  <data name="ConsumerseasyBibappkey" xml:space="preserve">
+    <value>Çelësi app</value>
+  </data>
+  <data name="ConsumersEasyBibDescription" xml:space="preserve">
+    <value>Aktivizoni këtë aplikacion për të krijuar lista bibliografike në dokumente me EasyBib.</value>
+  </data>
+  <data name="ConsumersEasyBibInstruction" xml:space="preserve">
+    <value>Aktivizoni këtë aplikacion për të krijuar bibliografi në redaktorët e {LogoText}. {0}Shkoni te faqja e regjistrimit në EasyBib dhe plotësoni formularin për të shtuar integrimin {LogoText}. Pasi të merrni një çelës aplikacioni, ngjiteni atë më poshtë:</value>
+  </data>
+  <data name="ConsumersFacebook" xml:space="preserve">
+    <value>Facebook</value>
+  </data>
+  <data name="ConsumersfacebookAccessToken_Default" xml:space="preserve">
+    <value>App Token</value>
+  </data>
+  <data name="ConsumersfacebookClientId" xml:space="preserve">
+    <value>ID e Facebook-ut</value>
+  </data>
+  <data name="ConsumersfacebookClientSecret" xml:space="preserve">
+    <value>Çelësi i Facebook-ut</value>
+  </data>
+  <data name="ConsumersFacebookDescription" xml:space="preserve">
+    <value>Aktivizoni aplikacionin të identifikohet në portal duke përdorur një llogari në Facebook.</value>
+  </data>
+  <data name="ConsumersFacebookInstruction" xml:space="preserve">
+    <value>Aktivizoni këtë aplikacion për të lejuar përdoruesit tuaj të identifikohen në {LogoText} duke përdorur Facebook dhe të lidhni llogaritë e klientëve të tyre në Facebook me modulin CRM. {0}Shkoni te portali i zhvilluesve të Facebook dhe krijoni një integrim të ri aplikacioni {LogoText}. Shtoni të dhënat që keni marrë më poshtë:</value>
+  </data>
+  <data name="ConsumersFirebase" xml:space="preserve">
+    <value>Firebase</value>
+  </data>
+  <data name="Consumersfirebase_apiKey" xml:space="preserve">
+    <value>Çelësi i API në faqen e internetit</value>
+  </data>
+  <data name="Consumersfirebase_authorization" xml:space="preserve">
+    <value>Çelësi i serverit</value>
+  </data>
+  <data name="Consumersfirebase_messagingSenderId" xml:space="preserve">
+    <value>ID-ja e dërguesit</value>
+  </data>
+  <data name="Consumersfirebase_projectId" xml:space="preserve">
+    <value>ID-ja e projektit</value>
+  </data>
+  <data name="ConsumersFirebaseDescription" xml:space="preserve">
+    <value>Aktivizoni këtë aplikacion për të marrë njoftime për mesazhet që ju dërgohen me mesazhet e resë së Firebase.</value>
+  </data>
+  <data name="ConsumersFirebaseInstruction" xml:space="preserve">
+    <value>Aktivizoni këtë aplikacionin për të lejuar përdoruesit të marrin njoftime për mesazhet dhe jashtë linje. {0}Shkoni te konsola e Firebase dhe shtoni një projekt të ri për integrimin e {LogoText}. Futni të dhënat që keni marrë më poshtë:</value>
+  </data>
+  <data name="ConsumersGoogle" xml:space="preserve">
+    <value>Google</value>
+  </data>
+  <data name="ConsumersgoogleClientId" xml:space="preserve">
+    <value>ID-ja e Google</value>
+  </data>
+  <data name="ConsumersgoogleClientSecret" xml:space="preserve">
+    <value>Çelësi i Google</value>
+  </data>
+  <data name="ConsumersGoogleCloud" xml:space="preserve">
+    <value>Ruajtja në Re e Google</value>
+  </data>
+  <data name="ConsumersGoogleCloudbucket" xml:space="preserve">
+    <value>Kovë</value>
+  </data>
+  <data name="ConsumersGoogleCloudbucketDescription" xml:space="preserve">
+    <value>Futni emrin e kovës të Resë së Google për ruajtjen e kopjeve rezervë.</value>
+  </data>
+  <data name="ConsumersGoogleCloudDescription" xml:space="preserve">
+    <value>Lidhni shërbimin e ruajtjes në Re të Google për të rezervuar dhe ruajtur të dhënat nga portali juaj.</value>
+  </data>
+  <data name="ConsumersGoogleCloudInstruction" xml:space="preserve">
+    <value>Lidhni shërbimin e ruajtjes në re të Google {0} Shkoni te Konsola e Platformës së Resë të Google dhe krijoni një llogari të re shërbimi për {LogoText}. Ngjitni të dhënat që keni marrë më poshtë:</value>
+  </data>
+  <data name="ConsumersGoogleCloudjson" xml:space="preserve">
+    <value>GoogleCloud json</value>
+  </data>
+  <data name="ConsumersGoogleDescription" xml:space="preserve">
+    <value>Lidhni projektin për t’u identifikuar në portal duke përdorur një llogari Google dhe për të menaxhuar skedarët dhe dosjet e Diskut të Google.</value>
+  </data>
+  <data name="ConsumersGoogleInstruction" xml:space="preserve">
+    <value>Aktivizoni këtë aplikacion për të lidhur llogarinë tënde të Google Drive me modulin e Dokumenteve. Do të mundni të menaxhoni, modifikoni dhe ndani skedarët nga Google Drive me përdoruesit e {LogoText}. {0}Shkoni te tastiera e API-ve të Google dhe krijoni një projekt të ri për integrimin e {LogoText}. Futni të dhënat që keni marrë më poshtë:</value>
+  </data>
+  <data name="ConsumersLinkedIn" xml:space="preserve">
+    <value>LinkedIn</value>
+  </data>
+  <data name="ConsumersLinkedInDescription" xml:space="preserve">
+    <value>Aktivizoni aplikacionin të identifikohet në portal duke përdorur një llogari në LinkedIn.</value>
+  </data>
+  <data name="ConsumersLinkedInInstruction" xml:space="preserve">
+    <value>Aktivizoni këtë aplikacion për të lejuar përdoruesit tuaj të identifikohen në {LogoText} duke përdorur llogaritë e tyre në LinkedIn {0}Shkoni në faqen e internetit të Zhvilluesve të LinkedIn dhe krijoni një të re. Shtoni të dhënat që keni marrë më poshtë:</value>
+  </data>
+  <data name="ConsumersLinkedInKey" xml:space="preserve">
+    <value>ID-ja e LinkedIn</value>
+  </data>
+  <data name="ConsumersLinkedInSecret" xml:space="preserve">
+    <value>Çelësi i LinkedIn</value>
+  </data>
+  <data name="ConsumersMailru" xml:space="preserve">
+    <value>Mail.ru</value>
+  </data>
+  <data name="ConsumersMailruClientId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="ConsumersMailruClientSecret" xml:space="preserve">
+    <value>Çelësi sekret</value>
+  </data>
+  <data name="ConsumersMailruDescription" xml:space="preserve">
+    <value>Aktivizoni aplikacionin të hyjë në portal duke përdorur një llogari Mail.ru.</value>
+  </data>
+  <data name="ConsumersMailruInstruction" xml:space="preserve">
+    <value>Kur të shtoni aplikacionin Mail.ru, mund të aktivizoni hyrjen në portal duke përdorur llogarinë Mail.ru në faqen e profilit tuaj.</value>
+  </data>
+  <data name="ConsumersMicrosoft" xml:space="preserve">
+    <value>Microsoft</value>
+  </data>
+  <data name="ConsumersmicrosoftClientId" xml:space="preserve">
+    <value>ID-ja e klientit të aplikacionit</value>
+  </data>
+  <data name="ConsumersmicrosoftClientSecret" xml:space="preserve">
+    <value>Sekreti i klientit</value>
+  </data>
+  <data name="ConsumersMicrosoftDescription" xml:space="preserve">
+    <value>Aktivizoni aplikacionin të identifikohet në portal duke përdorur një llogari të Microsoft.</value>
+  </data>
+  <data name="ConsumersMicrosoftInstruction" xml:space="preserve">
+    <value>Aktivizoni këtë aplikacion për të lejuar përdoruesit tuaj të identifikohen në {LogoText} duke përdorur Microsoft. {0}Shkoni te Microsoft Ayure dhe krijoni një aplikacion të ri me integrim {LogoText}. Shtoni të dhënat që keni marrë më poshtë:</value>
+  </data>
+  <data name="ConsumersRackspace" xml:space="preserve">
+    <value>Ruatja në renë kompjuterike të Rackspace</value>
+  </data>
+  <data name="ConsumersRackspaceDescription" xml:space="preserve">
+    <value>Lidhni shërbimin e Ruajtjes në renë kompjuterike të Rackspace për të rezervuar dhe ruajtur të dhënat nga portali juaj.</value>
+  </data>
+  <data name="ConsumersRackspaceInstruction" xml:space="preserve">
+    <value>Lidhni shërbimin e ruajtjes në renë kompjuterike të Rackspace për të rezervuar dhe ruajtur të dhënat nga portali juaj {0}Në cilësimet e sigurisë së panelit të kontrollit të resë së Rackspace, klikoni lidhjen shfaq pranë tastit të API-së Rackspace. Ngjitni të dhënat që keni marrë më poshtë:</value>
+  </data>
+  <data name="ConsumersRackspaceprivate_container" xml:space="preserve">
+    <value>Kontejner privat</value>
+  </data>
+  <data name="ConsumersRackspaceprivate_containerDescription" xml:space="preserve">
+    <value>Futni adresën URL të kontejnerit privat të Rackspace për ruajtjen e kopjeve rezervë.</value>
+  </data>
+  <data name="ConsumersRackspacepublic_container" xml:space="preserve">
+    <value>Kontejner publik</value>
+  </data>
+  <data name="ConsumersRackspacepublic_containerDescription" xml:space="preserve">
+    <value>Futni adresën URL të kontejnerit publik Rackspace për ruajtjen e kopjeve rezervë.</value>
+  </data>
+  <data name="ConsumersRackspaceregion" xml:space="preserve">
+    <value>Rajon</value>
+  </data>
+  <data name="ConsumersRackspaceregionDescription" xml:space="preserve">
+    <value>Futni rajonin ku ndodhen kontejnerët tuaj Rackspace.</value>
+  </data>
+  <data name="ConsumersS3" xml:space="preserve">
+    <value>Amazon AWS S3</value>
+  </data>
+  <data name="ConsumersS3bucket" xml:space="preserve">
+    <value>Kovë</value>
+  </data>
+  <data name="ConsumersS3bucketDescription" xml:space="preserve">
+    <value>Futni emrin unik të kovës së Amazon-it për ruajtjen e kopjeve rezervë.</value>
+  </data>
+  <data name="ConsumersS3Description" xml:space="preserve">
+    <value>Lidhni Amazon AWS S3 për të rezervuar dhe ruajtur të dhënat nga portali juaj.</value>
+  </data>
+  <data name="ConsumersS3Instruction" xml:space="preserve">
+    <value>Lidhni Amayon AWS S3 për të rezervuar dhe ruajtur të dhënat nga portali juaj {0}Shkoni te paneli i menaxhimit AWS dhe krijoni çelësat e aksesit për {LogoText}. Ngjitni  të dhënat që keni marrë më poshtë:</value>
+  </data>
+  <data name="ConsumersS3region" xml:space="preserve">
+    <value>Rajon</value>
+  </data>
+  <data name="ConsumersS3regionDescription" xml:space="preserve">
+    <value>Futni rajonin AWS ku banon kova juaj e Amazonit.</value>
+  </data>
+  <data name="Consumerssecretaccesskey" xml:space="preserve">
+    <value>Çelësi i hyrjes sekrete S3</value>
+  </data>
+  <data name="ConsumersSelectel" xml:space="preserve">
+    <value>Ruatja në renë kompljuterine të Selectel</value>
+  </data>
+  <data name="ConsumersSelectelauthPwd" xml:space="preserve">
+    <value>Fjalëkalimi për të hyrë në hapësirën ruajtëse</value>
+  </data>
+  <data name="ConsumersSelectelauthUser" xml:space="preserve">
+    <value>Përdoruesi i Auth</value>
+  </data>
+  <data name="ConsumersSelectelDescription" xml:space="preserve">
+    <value>Lidhni shërbimin e ruajtjes në re të Selectel për të rezervuar dhe ruajtur të dhënat nga portali juaj.</value>
+  </data>
+  <data name="ConsumersSelectelInstruction" xml:space="preserve">
+    <value>Lidhni shërbimin e ruajtjes në re të Selectel për të rezervuar dhe ruajtur të dhënat nga portali juaj. {0}Merrni të dhënat Lexim/Shkruani për kontejnerët ku planifikoni të ruani kopjet rezervë dhe ngjisni më poshtë:</value>
+  </data>
+  <data name="ConsumersSelectelprivate_container" xml:space="preserve">
+    <value>Kontejner privat</value>
+  </data>
+  <data name="ConsumersSelectelprivate_containerDescription" xml:space="preserve">
+    <value>Futni emrin e kontejnerit privat Selectel për ruajtjen e kopjeve rezervë.</value>
+  </data>
+  <data name="ConsumersSelectelpublic_container" xml:space="preserve">
+    <value>Kontejner publik</value>
+  </data>
+  <data name="ConsumersSelectelpublic_containerDescription" xml:space="preserve">
+    <value>Futni emrin e kontejnerit publik Selectel për ruajtjen e kopjeve rezervë.</value>
+  </data>
+  <data name="ConsumersSkyDrive" xml:space="preserve">
+    <value>OneDrive</value>
+  </data>
+  <data name="Consumersskydriveappkey" xml:space="preserve">
+    <value>ID e aplikacionit</value>
+  </data>
+  <data name="Consumersskydriveappsecret" xml:space="preserve">
+    <value>Sekreti i klientit</value>
+  </data>
+  <data name="ConsumersSkyDriveDescription" xml:space="preserve">
+    <value>Aktivizoni aplikacionin të menaxhojë skedarët dhe dosjet e OneDrive.</value>
+  </data>
+  <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
+    <value>Aktivizoni këtë aplikacion për të lidhur llogarinë tuaj OneDrive me modulin e Dokumenteve. Ju do të jeni në gjendje të menaxhoni, modifikoni dhe ndani skedarët nga OneDrive me përdoruesit e {LogoText}. {0}Identifikohu në llogarinë tënde të Microsoft Azure dhe krijoni aplikacionin e ri për integrimin {LogoText}. Futni të dhënat që keni marrë më poshtë:</value>
+  </data>
+  <data name="ConsumersSmsc" xml:space="preserve">
+    <value>Qendra e SMS-ve</value>
+  </data>
+  <data name="ConsumersSmscDescription" xml:space="preserve">
+    <value>Aktivizoni aplikacionin për vërtetimin me dy faktorë përmes Qendrës SMS.</value>
+  </data>
+  <data name="ConsumersSmscInstruction" xml:space="preserve">
+    <value>Përdoreni këtë aplikacion për të aktivizuar vërtetimin me dy faktorë me shërbimin e Qendrës se SMS-ve. {0}Shtoni hyrjen në llogarinë tuaj smsc dhe fjalëkalimin tuaj (ose fjalëkalimin MD5 hash) me shkronja të vogla:</value>
+  </data>
+  <data name="Consumerssmsclogin" xml:space="preserve">
+    <value>Identifikohuni</value>
+  </data>
+  <data name="Consumerssmscpsw" xml:space="preserve">
+    <value>Fjalëkalimi ose fjalëkalimi MD5 hash me shkronja të vogla</value>
+  </data>
+  <data name="ConsumersTelegram" xml:space="preserve">
+    <value>Telegram</value>
+  </data>
+  <data name="ConsumersTelegramBotName" xml:space="preserve">
+    <value>Emri i përdoruesit të robotit</value>
+  </data>
+  <data name="ConsumersTelegramBotToken" xml:space="preserve">
+    <value>Shtrirja e robotit</value>
+  </data>
+  <data name="ConsumersTelegramDescription" xml:space="preserve">
+    <value>Lidhni llogarinë Telegram për të marrë njoftimet e portalit përmes Telegram-it.</value>
+  </data>
+  <data name="ConsumersTelegramInstruction" xml:space="preserve">
+    <value>Për të marrë njoftimet e portalit përmes Telegramit, aktivizoni Telegram bot. Mund të krijoni një bot të ri duke përdorur BotFatjer në Telegram për Desktop. Për të përdorur këtë bot, përdoruesit e portalit duhet të aktivizojnë njoftimet e Telegramit në faqen e tyre të profilit. {0}Ngjitni emrin e përdoruesit të robotit dhe kodin që keni marrë në fushat me poshtë.</value>
+  </data>
+  <data name="ConsumersTwilio" xml:space="preserve">
+    <value>Twilio</value>
+  </data>
+  <data name="ConsumerstwilioAccountSid" xml:space="preserve">
+    <value>Llogaria Sid</value>
+  </data>
+  <data name="ConsumerstwilioAuthToken" xml:space="preserve">
+    <value>Shtrirja e Auth</value>
+  </data>
+  <data name="ConsumersTwilioDescription" xml:space="preserve">
+    <value>Aktivizoni këtë aplikacion pët të thirrur kontakte CRM me Twilio.</value>
+  </data>
+  <data name="ConsumersTwilioInstruction" xml:space="preserve">
+    <value>Aktivizoni këtë aplikacion për të lejuar përdoruesit tuaj të telefonojnë kontaktet e tyre nga moduli CRM duke përdorur Twilio. {0}Shkoni te konsulta e Twilio dhe ngjitni të dhënat e mëposhtme:</value>
+  </data>
+  <data name="Consumerstwiliosender" xml:space="preserve">
+    <value>Numri i telefonit nga Twilio (kërkohet për autorizim SMS)</value>
+  </data>
+  <data name="ConsumersTwitter" xml:space="preserve">
+    <value>Twitter</value>
+  </data>
+  <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
+    <value>ID-ja e klientit</value>
+  </data>
+  <data name="ConsumerstwitterAccessTokenSecret_Default" xml:space="preserve">
+    <value>Sekreti i klientit</value>
+  </data>
+  <data name="ConsumersTwitterDescription" xml:space="preserve">
+    <value>Aktivizoni aplikacionin të identifikohet në portal duke përdorur një llogari Twitter.</value>
+  </data>
+  <data name="ConsumersTwitterInstruction" xml:space="preserve">
+    <value>Aktivizoni këtë aplikacion për të lejuar përdoruesit tuaj të identifikohen ne {LogoText} duke përdorur Twitter-in e tyre dhe të lidhin llogaritë e tyre në Twitter të klientëve të tyre me modulin CRM. {0}Shkoni te portali i zhvilluesve të Twitter dhe krijoni një aplikacion të ri me integrim {LogoText}. Shtoni të dhënat që keni marrë më poshtë:</value>
+  </data>
+  <data name="ConsumersTwitterKey" xml:space="preserve">
+    <value>Çelësi API</value>
+  </data>
+  <data name="ConsumersTwitterSecret" xml:space="preserve">
+    <value>Sekreti kryesor i API-së</value>
+  </data>
+  <data name="Consumersusername" xml:space="preserve">
+    <value>Emri i përdoruesit të Rackspace</value>
+  </data>
+  <data name="ConsumersVk" xml:space="preserve">
+    <value>VK</value>
+  </data>
+  <data name="ConsumersVkClientId" xml:space="preserve">
+    <value>ID-ja e aplikacionit</value>
+  </data>
+  <data name="ConsumersVkClientSecret" xml:space="preserve">
+    <value>Çelësi i sigurt</value>
+  </data>
+  <data name="ConsumersVkDescription" xml:space="preserve">
+    <value>Aktivizoni aplikacionin të hyjë në portal duke përdorur një llogari VK.</value>
+  </data>
+  <data name="ConsumersVkInstruction" xml:space="preserve">
+    <value>Kur të shtoni aplikacionin VK, mund të aktivizoni hyrjen në portal duke përdorur llogarinë VK në faqen e profilit tuaj.</value>
+  </data>
+  <data name="ConsumersWordpress" xml:space="preserve">
+    <value>WordPress</value>
+  </data>
+  <data name="ConsumersWordpressDescription" xml:space="preserve">
+    <value>Aktivizoni aplikacionin të publikojë dokumente drejtpërdrejt në WordPress.</value>
+  </data>
+  <data name="ConsumersWordpressInstruction" xml:space="preserve">
+    <value>Aktivizoni aplikacionin të publikojë me lehtësi dokumente në faqen tuaj të internetit të WordPress. {0}Në faqen e zhvilluesit të WordPress, krijoni një aplikacion të ri për integrimin e {LogoText}. Shtoni të dhënat që keni marrë më poshtë:</value>
+  </data>
+  <data name="ConsumerswpClientId" xml:space="preserve">
+    <value>Çelësi WordPress</value>
+  </data>
+  <data name="ConsumerswpClientSecret" xml:space="preserve">
+    <value>Sekreti WordPress</value>
+  </data>
+  <data name="ConsumersYahoo" xml:space="preserve">
+    <value>Yahoo</value>
+  </data>
+  <data name="ConsumersyahooClientId" xml:space="preserve">
+    <value>ID-ja e klientit</value>
+  </data>
+  <data name="ConsumersyahooClientSecret" xml:space="preserve">
+    <value>Sekreti i klientit</value>
+  </data>
+  <data name="ConsumersYahooDescription" xml:space="preserve">
+    <value>Aktivizoni aplikacionin për të importuar përdorues nga shërbimi Yahoo.</value>
+  </data>
+  <data name="ConsumersYahooInstruction" xml:space="preserve">
+    <value>Aktivizoni këtë aplikacion për të shtuar përdorues të rinj të portalit nga lista juaj e kontakteve në Yahoo.{0}Shkoni te faqja Krijoni aplikacionin në rrjetin e zhvilluesve të Yahoo dhe krijoni një aplikacion të ri për integrimin e {LogoText}. Shtoni të dhënat që keni marrë më poshtë:</value>
+  </data>
+  <data name="ConsumersYandex" xml:space="preserve">
+    <value>Yandex</value>
+  </data>
+  <data name="ConsumersYandexClientId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="ConsumersYandexClientSecret" xml:space="preserve">
+    <value>Fjalëkalimi</value>
+  </data>
+  <data name="ConsumersYandexDescription" xml:space="preserve">
+    <value>Aktivizoni aplikacionin të hyjë në portal duke përdorur një llogari Yandex.</value>
+  </data>
+  <data name="ConsumersYandexInstruction" xml:space="preserve">
+    <value>Kur shtoni aplikacionin Yandex, mund tl aktivizoni hyrjen në portal duke përdorur llogarinë Yandex në faqen e profilit tuaj.</value>
+  </data>
+  <data name="ConsumersZoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientId" xml:space="preserve">
+    <value>ID-ja e klientit në Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientSecret" xml:space="preserve">
+    <value>Sekreti i klientit në Zoom</value>
+  </data>
+  <data name="ConsumersZoomDescription" xml:space="preserve">
+    <value>Aktivizoni aplikacionin të identifikohet në portal duke përdorur një llogari në Zoom.</value>
+  </data>
+  <data name="ConsumersZoomInstruction" xml:space="preserve">
+    <value>Aktivizoni këtë aplikacion për të lejuar përdoruesit tuaj të identifikohen në {LogoText} duke përdorur llogaritë e tyre në Zoom.{0}Shkoni te faqja e internetit të zhvilluesve të Zoom-it dhe krijoni një aplikacion të ri me integrim {LogoText}. Shtoni të dhënat që keni marrë më poshtë:</value>
+  </data>
+  <data name="CouldNotRecoverPasswordForLdapUser" xml:space="preserve">
+    <value>Operacioni i rikuperimit të fjalëkalimit është i ndaluar për një përdorues LDAP</value>
+  </data>
+  <data name="CouldNotRecoverPasswordForSsoUser" xml:space="preserve">
+    <value>Operacioni i rikuperimit të fjalëkalimit është i ndaluar për një përdorues SSO</value>
+  </data>
+  <data name="CustomNamingPeopleSchema" xml:space="preserve">
+    <value>I personalizuar</value>
+  </data>
+  <data name="EmailAndPasswordIncorrectAmiId" xml:space="preserve">
+    <value>Instancë e gabuar e ID.</value>
+  </data>
+  <data name="EmailAndPasswordIncorrectEmail" xml:space="preserve">
+    <value>Adresa e gabuar e email-it</value>
+  </data>
+  <data name="ErrorAccessDenied" xml:space="preserve">
+    <value>Nuk keni lene për të kryer këtë veprim</value>
+  </data>
+  <data name="ErrorAccessRestricted" xml:space="preserve">
+    <value>Aksesi në portal është i kufizuar.</value>
+  </data>
+  <data name="ErrorBadKeys" xml:space="preserve">
+    <value>Çelësat e këqij</value>
+  </data>
+  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
+    <value>Hapësira e fundit e aksesit të plotë nuk mund të fshihet</value>
+  </data>
+  <data name="ErrorDisabledProfile" xml:space="preserve">
+    <value>Profili juaj është pezulluar</value>
+  </data>
+  <data name="ErrorEmailAlreadyExists" xml:space="preserve">
+    <value>{!User} me këtë email është i regjistruar tashmë</value>
+  </data>
+  <data name="ErrorEmailDomainNotAllowed" xml:space="preserve">
+    <value>Email-et nga ky domen nuk lejohen për regjistrim</value>
+  </data>
+  <data name="ErrorEmailEmpty" xml:space="preserve">
+    <value>Fusha e email-it është bosh</value>
+  </data>
+  <data name="ErrorEmailLinked" xml:space="preserve">
+    <value>Ky email i është bashkangjitur përdoruesit {0} si ofrues i palës së tretë</value>
+  </data>
+  <data name="ErrorEmailsAreTheSame" xml:space="preserve">
+    <value>Email-i aktual dhe ai i ri janë të njëjta</value>
+  </data>
+  <data name="ErrorEmptyFields" xml:space="preserve">
+    <value>Ju lutem plotësoni të gjitha fushta</value>
+  </data>
+  <data name="ErrorEmptyMessage" xml:space="preserve">
+    <value>Teksti i mesazhit është bosh</value>
+  </data>
+  <data name="ErrorEmptyUploadFileSelected" xml:space="preserve">
+    <value>Skedari i ngarkuar nuk mund të gjendej</value>
+  </data>
+  <data name="ErrorFileNotImage" xml:space="preserve">
+    <value>Lloji i skedarit të imazhit i panjohur</value>
+  </data>
+  <data name="ErrorImageSize" xml:space="preserve">
+    <value>Madhësia e imazhit tejkalon parametrat e lejuar</value>
+  </data>
+  <data name="ErrorImageWeightLimit" xml:space="preserve">
+    <value>Madhësia e skedarit të imazhit është shumë i madh</value>
+  </data>
+  <data name="ErrorIncorrectUserName" xml:space="preserve">
+    <value>Emri ose mbiemri i pasaktë</value>
+  </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Kufiri i ftesës është tejkaluar</value>
+  </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Shtoni të paktën 1 adresë IP të lejuar.</value>
+  </data>
+  <data name="ErrorIpSecurity" xml:space="preserve">
+    <value>Aksesi në portal është i kufizuar</value>
+  </data>
+  <data name="ErrorNotAllowedOption" xml:space="preserve">
+    <value>Plani juaj i çmimeve nuk e mbështet këtë opsion</value>
+  </data>
+  <data name="ErrorNotCorrectEmail" xml:space="preserve">
+    <value>Email i pasaktë</value>
+  </data>
+  <data name="ErrorNotCorrectTrustedDomain" xml:space="preserve">
+    <value>Emër i pavlefshëm domeni</value>
+  </data>
+  <data name="ErrorPasswordEmpty" xml:space="preserve">
+    <value>Fjalëkalimi është bosh.</value>
+  </data>
+  <data name="ErrorPasswordLength" xml:space="preserve">
+    <value>nga {0} në {1} karaktere</value>
+  </data>
+  <data name="ErrorPasswordMessage" xml:space="preserve">
+    <value>Fjalëkalimi duhet të përmbajë</value>
+  </data>
+  <data name="ErrorPasswordNoDigits" xml:space="preserve">
+    <value>shfira</value>
+  </data>
+  <data name="ErrorPasswordNoSpaces" xml:space="preserve">
+    <value>pa hapësira</value>
+  </data>
+  <data name="ErrorPasswordNoSpecialSymbols" xml:space="preserve">
+    <value>karaktere speciale</value>
+  </data>
+  <data name="ErrorPasswordNoUpperCase" xml:space="preserve">
+    <value>shkronja të mëdha</value>
+  </data>
+  <data name="ErrorPasswordOnlyLatinLetters" xml:space="preserve">
+    <value>vetëm shkronja latine</value>
+  </data>
+  <data name="ErrorRequestLimitExceeded" xml:space="preserve">
+    <value>Kufiri i kërkesës është tejkaluar</value>
+  </data>
+  <data name="ErrorTenantTooShort" xml:space="preserve">
+    <value>Domeni i qiramarrësit nuk mund të jetë bosh.</value>
+  </data>
+  <data name="ErrorTenantTooShortFormat" xml:space="preserve">
+    <value>Emri i domenit duhet të jetë ndërmjet {0} dhe {1} karaktere i gjatë.</value>
+  </data>
+  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
+    <value>Shume përpjekje për hyrje. Ju lutem provoni përsëri më vonë</value>
+  </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Shtoni të paktën 1 domen të besuar.</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Përdoruesi është çaktivizuar</value>
+  </data>
+  <data name="ErrorUserNotFound" xml:space="preserve">
+    <value>Përdoruesi nuk mund të gjendej</value>
+  </data>
+  <data name="ErrorUserNotFoundByEmail" xml:space="preserve">
+    <value>Përdoruesi me email "{0}" nuk mund të gjendej</value>
+  </data>
+  <data name="ErrorWebPluginArchive" xml:space="preserve">
+    <value>Arkivi i gabuar i shtojcave</value>
+  </data>
+  <data name="ErrorWebPluginExist" xml:space="preserve">
+    <value>Shtojca tashmë ekziston</value>
+  </data>
+  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
+    <value>Zgjatja e gabuar e skedarit</value>
+  </data>
+  <data name="ErrorWebPluginFileSize" xml:space="preserve">
+    <value>Madhësia e skedarit e kalon kufirin</value>
+  </data>
+  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
+    <value>Ndryshimet në shtojcat e sistemit janë të ndaluara</value>
+  </data>
+  <data name="ErrorWebPluginName" xml:space="preserve">
+    <value>Emri i gabuar i shtojcës</value>
+  </data>
+  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
+    <value>Nuk ka skedar hyrës</value>
+  </data>
+  <data name="ErrorWebPluginNotFound" xml:space="preserve">
+    <value>Shtojca nuk u gjet</value>
+  </data>
+  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
+    <value>Shumë skedarë hyrës</value>
+  </data>
+  <data name="EuServerRegion" xml:space="preserve">
+    <value>Rrajoni i BE-së (Frankfurt)</value>
+  </data>
+  <data name="FileSizeMaxExceed" xml:space="preserve">
+    <value>Madhësia maksimale e skedarit është tejkaluar</value>
+  </data>
+  <data name="FileSizeNote" xml:space="preserve">
+    <value>Shënim: madhësia e skedarit nuk mund të kalojë {1}{0}{2}</value>
+  </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>bytes,KB,MB,GB,TB</value>
+  </data>
+  <data name="FinishInviteJoinEmailMessage" xml:space="preserve">
+    <value>Lidhja për të konfirmuar llogarinë tuaj është dërguar në email-in e specifikuar</value>
+  </data>
+  <data name="FirstName" xml:space="preserve">
+    <value>Emri</value>
+  </data>
+  <data name="LastName" xml:space="preserve">
+    <value>Mbiemri</value>
+  </data>
+  <data name="LdapSettingsConnectError" xml:space="preserve">
+    <value>Gabim lidhjeje</value>
+  </data>
+  <data name="LdapSettingsErrorCantCreateUsers" xml:space="preserve">
+    <value>Përdoruesit nuk mund të krijoheshin, të dhënat e marra janë të pasakta.</value>
+  </data>
+  <data name="LdapSettingsErrorCantGetLdapSettings" xml:space="preserve">
+    <value>Serveri nuk mund të merrte cilësimet.</value>
+  </data>
+  <data name="LdapSettingsErrorCantSaveLdapSettings" xml:space="preserve">
+    <value>Serveri nuk mund të ruante cilësimet.</value>
+  </data>
+  <data name="LdapSettingsErrorCredentialsNotValid" xml:space="preserve">
+    <value>Identifikimi ose fjalëkalimi i gabuar.</value>
+  </data>
+  <data name="LdapSettingsErrorDomainNotFound" xml:space="preserve">
+    <value>Domeni LDAP nuk u gjet.</value>
+  </data>
+  <data name="LdapSettingsErrorGroupsNotFound" xml:space="preserve">
+    <value>Nuk u gjet asnjë grup.</value>
+  </data>
+  <data name="LdapSettingsErrorIncorrectLdapFilter" xml:space="preserve">
+    <value>Vlera e pavlefshme e flitrit të përdoruesit.</value>
+  </data>
+  <data name="LdapSettingsErrorLostRights" xml:space="preserve">
+    <value>Ju u përpoqët që t’i hiqnit vetes të drejtat e administratorit. Të drejtat e tua të administratorit nuk u prekën.</value>
+  </data>
+  <data name="LdapSettingsErrorRemovedYourself" xml:space="preserve">
+    <value>Llogaria juaj nuk është e lodhur me drejtorinë LDAP dhe fjalëkalimi juaj LDAP nuk është më aktiv. Ju lutem ndryshoni ose vendosni fjalëkalimin në llogarinë tuaj në faqen e cilësimeve të profilit.</value>
+  </data>
+  <data name="LdapSettingsErrorUnknownError" xml:space="preserve">
+    <value>Gabim i panjohur.</value>
+  </data>
+  <data name="LdapSettingsErrorUsersNotFound" xml:space="preserve">
+    <value>Nuk u gjet asnjë përdorues.</value>
+  </data>
+  <data name="LdapSettingsErrorWrongGroupAttribute" xml:space="preserve">
+    <value>Nuk mund të merrej atributi i grupit për një ose disa grupe.</value>
+  </data>
+  <data name="LdapSettingsErrorWrongGroupFilter" xml:space="preserve">
+    <value>Filtri i gabuar i grupit.</value>
+  </data>
+  <data name="LdapSettingsErrorWrongGroupNameAttribute" xml:space="preserve">
+    <value>Nuk mund të merrej atributi i emrit të grupit për një ose disa grupe.</value>
+  </data>
+  <data name="LdapSettingsErrorWrongLoginAttribute" xml:space="preserve">
+    <value>Nuk mund të merrej atributi i hyrjes për një ose disa përdorues.</value>
+  </data>
+  <data name="LdapSettingsErrorWrongServerOrPort" xml:space="preserve">
+    <value>Nuk mund të lidhet me serverin LDAP. Ju lutem kontrolloni nëse adresa e serverit dhe numri i portit janë të sakta.</value>
+  </data>
+  <data name="LdapSettingsErrorWrongUserAttribute" xml:space="preserve">
+    <value>Nuk munt të merrej atributi i përdoruesit për një ose disa përdorues.</value>
+  </data>
+  <data name="LdapSettingsInternalServerError" xml:space="preserve">
+    <value>Gabim i brendshëm i serverit.</value>
+  </data>
+  <data name="LdapSettingsModifyLdapUsers" xml:space="preserve">
+    <value>Modifikimi i përdoruesve LDAP në përdoruesin e zakonshëm të portalit</value>
+  </data>
+  <data name="LdapSettingsStatusAddingGroupUser" xml:space="preserve">
+    <value>duke shtuar përdorues</value>
+  </data>
+  <data name="LdapSettingsStatusCertificateVerification" xml:space="preserve">
+    <value>Verifikimi i çertifikatës</value>
+  </data>
+  <data name="LdapSettingsStatusCheckingLdapSettings" xml:space="preserve">
+    <value>Po kontrrollohen cilësimet e mbështetjes LDAP</value>
+  </data>
+  <data name="LdapSettingsStatusDisconnecting" xml:space="preserve">
+    <value>LDAP po shkëputet</value>
+  </data>
+  <data name="LdapSettingsStatusGettingGroupsFromLdap" xml:space="preserve">
+    <value>Marrja e listës së grupeve nga serveri LDAP</value>
+  </data>
+  <data name="LdapSettingsStatusGettingUsersFromLdap" xml:space="preserve">
+    <value>Marsla e listës së përdoruesit nga serveri LDAP</value>
+  </data>
+  <data name="LdapSettingsStatusGivingRights" xml:space="preserve">
+    <value>Vendosja e përdoruesit {0} si {1} administrator</value>
+  </data>
+  <data name="LdapSettingsStatusLoadingBaseInfo" xml:space="preserve">
+    <value>Po ngarkohet informacioni i bazës LDAP</value>
+  </data>
+  <data name="LdapSettingsStatusRemovingGroupUser" xml:space="preserve">
+    <value>duke u fshirë përdoruesi</value>
+  </data>
+  <data name="LdapSettingsStatusRemovingOldGroups" xml:space="preserve">
+    <value>Fshirja e grupeve të vjetruara që janë ngarkuar më herët nëpërmjet LDAP</value>
+  </data>
+  <data name="LdapSettingsStatusRemovingOldRights" xml:space="preserve">
+    <value>Fshirja e të drejtave të vjetëruara të aksesit që janë ngarkuar më herët nëpërmjet LDAP</value>
+  </data>
+  <data name="LdapSettingsStatusRemovingOldUsers" xml:space="preserve">
+    <value>Çaktivizimi i profileve të vjetëruara të përdoruesve që janë ngarkuar më herët nëpërmjet LDAP</value>
+  </data>
+  <data name="LdapSettingsStatusSavingGroups" xml:space="preserve">
+    <value>Ruajtja grupet</value>
+  </data>
+  <data name="LdapSettingsStatusSavingSettings" xml:space="preserve">
+    <value>Ruajtja e cilësimeve</value>
+  </data>
+  <data name="LdapSettingsStatusSavingUserPhoto" xml:space="preserve">
+    <value>Ruajtja e fotos</value>
+  </data>
+  <data name="LdapSettingsStatusSavingUsers" xml:space="preserve">
+    <value>Ruajtja e përdoruesve</value>
+  </data>
+  <data name="LdapSettingsStatusSyncingUsers" xml:space="preserve">
+    <value>Sinkronizimi i përdoruesve</value>
+  </data>
+  <data name="LdapSettingsStatusUpdatingAccessRights" xml:space="preserve">
+    <value>Përditësimi i të drejtave të aksesit të përdoruesve</value>
+  </data>
+  <data name="LdapSettingsStatusUpdatingUserPhotos" xml:space="preserve">
+    <value>Përditësimi i fotove të përdoruesve</value>
+  </data>
+  <data name="LdapSettingsStrongAuthRequired" xml:space="preserve">
+    <value>Kërkohet një lloj vërtetimi më i sigurt. Ju lutem përdorni lidhje të koduar ose aktivizoni vërtetimin e thjeshtë në server.</value>
+  </data>
+  <data name="LdapSettingsTenantQuotaSettled" xml:space="preserve">
+    <value>Kufiri aktual i përdoruesit të planit të çmimeve është arritur</value>
+  </data>
+  <data name="LdapSettingsTlsNotSupported" xml:space="preserve">
+    <value>StartTLS nuk mbështetet për serverin aktual LDAP.</value>
+  </data>
+  <data name="LdapSettingsTooManyOperations" xml:space="preserve">
+    <value>Shumë operacione LDAP.</value>
+  </data>
+  <data name="LdapSettingsWrongSidAttribute" xml:space="preserve">
+    <value>ID-ja unike për objektet e përdoruesit/grupit nuk mund të merret. Si parazgjedhje, sistemi do të përpiqet të përputhet me një nga identifikuesit e mëposhtëm: entryUUID, nsuniqueid, GUID, objectSid. Nëse asnjë nga atributet nuk korrespondon me serverin tuaj LDAP, ju lutemi specifikoni atributin e nevojshëm në cilësimin Iddap.unique.id të skedarit web.appsettings.config.</value>
+  </data>
+  <data name="LicenseError" xml:space="preserve">
+    <value>Licensa nuk është e saktë</value>
+  </data>
+  <data name="LicenseErrorExpired" xml:space="preserve">
+    <value>Licenca nuk është e vlefshme për këtë version portal.</value>
+  </data>
+  <data name="LicenseErrorPortal" xml:space="preserve">
+    <value>Numri i portaleve e kalon atë të lejuar nga licensa</value>
+  </data>
+  <data name="LicenseErrorQuota" xml:space="preserve">
+    <value>Numri i përdoruesve tejkalon atë të lejuar nga licensa</value>
+  </data>
+  <data name="LicenseUploaded" xml:space="preserve">
+    <value>Ngarkuar me sukses</value>
+  </data>
+  <data name="LicenseUploadedOverdue" xml:space="preserve">
+    <value>Ngarkuar me sukses. {0}Mbështetja dhe përditësimet nuk ofrohen për licensë që nga data {2}.{1}</value>
+  </data>
+  <data name="LicenseUploadedOverdueSupport" xml:space="preserve">
+    <value>Ngarkuar me sukses. {0}Mbështetja nuk ofrohet për këtë licensë që prej {2}.{1}</value>
+  </data>
+  <data name="MessageEmailChangeInstuctionsSentOnEmail" xml:space="preserve">
+    <value>Udhëzimet për ndryshimin e email-it janë dërguar me sukses</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>Udhëzimi për ndryshimin e fjalëkalimit është dërguar në adresën e email-it {0}.</value>
+  </data>
+  <data name="MessageYourPasswordSendedToEmail" xml:space="preserve">
+    <value>Nëse ekziston një përdorues me email-in {0}, udhëzimi për ndryshimin e fjalëkalimit është dërguar në këtë adresë email-i.</value>
+  </data>
+  <data name="MobilePhoneMustErase" xml:space="preserve">
+    <value>Për të ndryshuar numrin, duhet të fshini numrin tuaj aktual të telefonit</value>
+  </data>
+  <data name="OrgServerRegion" xml:space="preserve">
+    <value>Rajoni ORG</value>
+  </data>
+  <data name="Owner" xml:space="preserve">
+    <value>Pronari</value>
+  </data>
+  <data name="PortalName" xml:space="preserve">
+    <value>Hapësirë reje kompjuterike për dokumentet e zyrës suaj</value>
+  </data>
+  <data name="PortalSecurity" xml:space="preserve">
+    <value>Aksesi në portal</value>
+  </data>
+  <data name="QuotaGreaterPortalError" xml:space="preserve">
+    <value>Vendosja e kuotës së memories dështoi – kuota e memories që keni vendosur është më e madhe se kuota e portaleve.</value>
+  </data>
+  <data name="ReassignDataRemoveUserError" xml:space="preserve">
+    <value>Procesi i ricaktimit të të dhënave për {0} nuk është i plotë.</value>
+  </data>
+  <data name="RecaptchaInvalid" xml:space="preserve">
+    <value>Recaptcha e pavlefshme</value>
+  </data>
+  <data name="RoomFreeSpaceException" xml:space="preserve">
+    <value>Kuota e hapësirës së dhomës u tejkalua</value>
+  </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>Vendosja e kuotës për dhomë dështoi. Vlera e futur është më e madhe se ruajtja totale e DocSpace.</value>
+  </data>
+  <data name="SgServerRegion" xml:space="preserve">
+    <value>Azia Paqësori (Singapori)</value>
+  </data>
+  <data name="SmsAuthenticationMessageError" xml:space="preserve">
+    <value>Kodi i pasaktë</value>
+  </data>
+  <data name="SmsAuthenticationMessageToUser" xml:space="preserve">
+    <value>Kodi: {0}</value>
+  </data>
+  <data name="SmsAuthenticationTimeout" xml:space="preserve">
+    <value>Koha për të përdorur kodin ka skaduar. Kërkoni një mesazh të ri me tekst.</value>
+  </data>
+  <data name="SmsNotAvailable" xml:space="preserve">
+    <value>Cilësimet e SMS nuk janë të disponueshme</value>
+  </data>
+  <data name="SmsTooMuchError" xml:space="preserve">
+    <value>Ju keni dërguar shumë mesazhe me tekst. Ju lutemi provoni përsëri më vonë.</value>
+  </data>
+  <data name="SsoSettingsCantSaveSettings" xml:space="preserve">
+    <value>Cilësimet nuk mund të ruheshi</value>
+  </data>
+  <data name="SsoSettingsCouldNotBeNull" xml:space="preserve">
+    <value>Cilësimet nuk mund të ishin të pavlefshme</value>
+  </data>
+  <data name="SsoSettingsInvalidBinding" xml:space="preserve">
+    <value>Lidhje e pavlefshme: {0}</value>
+  </data>
+  <data name="SsoSettingsInvalidEntityId" xml:space="preserve">
+    <value>ID e pavlefshme e entitetit</value>
+  </data>
+  <data name="SsoSettingsInvalidMapping" xml:space="preserve">
+    <value>Hartë e pavlefshme e fushave</value>
+  </data>
+  <data name="SuccessfullySaveGreetingSettingsMessage" xml:space="preserve">
+    <value>Cilësimet e faqes së mirëseardhjes janë ruajtur me sukses</value>
+  </data>
+  <data name="SuccessfullySaveSettingsMessage" xml:space="preserve">
+    <value>Cilësimet janë përditësuar me sukses</value>
+  </data>
+  <data name="SuccessfullySentNotificationDeleteUserInfoMessage" xml:space="preserve">
+    <value>Udhëzimet për të çaktivizuar profilin tuaj janë dërguar në adresën e email-it {0}</value>
+  </data>
+  <data name="Tariffs_admin" xml:space="preserve">
+    <value>Business</value>
+  </data>
+  <data name="Tariffs_adminyear" xml:space="preserve">
+    <value>Business</value>
+  </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>Jofitimprurëse</value>
+  </data>
+  <data name="Tariffs_startup" xml:space="preserve">
+    <value>Fillimi</value>
+  </data>
+  <data name="TariffsFeature_audit" xml:space="preserve">
+    <value>Ndjekja e hyrjeve dhe veprimeve të përdoruesve</value>
+  </data>
+  <data name="TariffsFeature_customization" xml:space="preserve">
+    <value>Branding &amp; personalizim</value>
+  </data>
+  <data name="TariffsFeature_file_size" xml:space="preserve">
+    <value>Madhësia maksimale e skedarit</value>
+  </data>
+  <data name="TariffsFeature_file_size_exception" xml:space="preserve">
+    <value>Madhësia e skedarit nuk duhet të kalojë {0}</value>
+  </data>
+  <data name="TariffsFeature_manager_exception" xml:space="preserve">
+    <value>Numri i administratorëve nuk duhet të kalojë {0}</value>
+  </data>
+  <data name="TariffsFeature_manager_price_count" xml:space="preserve">
+    <value>Numri i administratorëve</value>
+  </data>
+  <data name="TariffsFeature_restore" xml:space="preserve">
+    <value>Rezervimi dhe rikuperimi automatik</value>
+  </data>
+  <data name="TariffsFeature_room" xml:space="preserve">
+    <value>Numri i pakufizuar i dhomave aktive</value>
+  </data>
+  <data name="TariffsFeature_room_exception" xml:space="preserve">
+    <value>Numri i dhomave nuk duhet të kalojë {0}</value>
+  </data>
+  <data name="TariffsFeature_sso" xml:space="preserve">
+    <value>SSO</value>
+  </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>Kuotat e magazinimit dhe statistikave</value>
+  </data>
+  <data name="TariffsFeature_thirdparty" xml:space="preserve">
+    <value>Integrimet e palëve të treta</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} për administrator dhe aftësia për të shtuar hapësirë sipas kërkesës</value>
+  </data>
+  <data name="TariffsFeature_total_size_exception" xml:space="preserve">
+    <value>Madhësia e hapësirës së përdorur nuk duhet të kalojë {0}</value>
+  </data>
+  <data name="TariffsFeature_total_size_price_count" xml:space="preserve">
+    <value>Hapësirë ruajtjes</value>
+  </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Administratorët e shtuar:</value>
+  </data>
+  <data name="TariffsFeature_used_room" xml:space="preserve">
+    <value>Dhomat:</value>
+  </data>
+  <data name="TariffsFeature_used_total_size" xml:space="preserve">
+    <value>Hapësira e ruajtjes së përdorur:</value>
+  </data>
+  <data name="TariffsFeature_used_usersInRoom" xml:space="preserve">
+    <value>Përdoruesit në dhomë:</value>
+  </data>
+  <data name="TariffsFeature_users" xml:space="preserve">
+    <value>Numri i pakufizuar i përdoruesve</value>
+  </data>
+  <data name="TariffsFeature_users_exception" xml:space="preserve">
+    <value>Numri i përdoruesve nuk duhet të kalojë {0}</value>
+  </data>
+  <data name="TariffsFeature_usersInRoom" xml:space="preserve">
+    <value>Përdoruesit në dhomë</value>
+  </data>
+  <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
+    <value>Numri i përdoruesve në dhomë nuk duhet të kalojë {0}</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Numri i administratorëve e kalon kufirin: {0}/{1}.</value>
+  </data>
+  <data name="TfaAppAuthMessageError" xml:space="preserve">
+    <value>Kodi i pasaktë</value>
+  </data>
+  <data name="TfaAppNotAvailable" xml:space="preserve">
+    <value>Cilësimet e aplikacionit TFA nuk disponohen</value>
+  </data>
+  <data name="TfaTooMuchError" xml:space="preserve">
+    <value>Ju keni dërguar shumë mesazhe me tekst. Ju lutemi provoni përsëri më vonë.</value>
+  </data>
+  <data name="UserFreeSpaceException" xml:space="preserve">
+    <value>Kuota e hapësirës së përdoruesit është tejkaluar</value>
+  </data>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>Vendosja e kuotës për përdorues dështoi. Vlera e futur është me e madhe se ruajtja totale e DocSpace.</value>
+  </data>
+  <data name="UsServerRegion" xml:space="preserve">
+    <value>Rajoni perëndimor i SHBA-së (Oregon)</value>
+  </data>
+  <data name="WhatsNewSubscriptionName" xml:space="preserve">
+    <value>Çfarë ka të re</value>
+  </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>Grupi nuk u gjend</value>
+  </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>URL-ja e Webhook nuk është e disponueshme. Kërkesa HEAD nuk ka kthyer një status 200 http.</value>
+  </data>
+</root>
