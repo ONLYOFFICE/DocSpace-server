@@ -536,6 +536,12 @@ public class FolderService(
         return (foldersIdTask, filesIdTask);
     }
     
+    public async Task<FilesStatisticsResultDto> GetFilesUsedSpace()
+    {
+        var folderDao = daoFactory.GetFolderDao<int>();
+        return await folderDao.GetFilesUsedSpace();
+    }
+    
     internal async Task<Folder<T>> InternalCreateFolderAsync<T>(T parentId, string title, FolderType folderType = FolderType.DEFAULT, bool privacy = false, bool? indexing = false, long? quota = TenantEntityQuotaSettings.DefaultQuotaValue, RoomDataLifetime lifetime = null, bool? denyDownload = false, WatermarkRequestDto watermark = null, string color = null, string cover = null, IEnumerable<string> names = null, LogoRequest logo = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(title);

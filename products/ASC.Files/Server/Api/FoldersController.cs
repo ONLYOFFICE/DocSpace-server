@@ -314,7 +314,7 @@ public abstract class FoldersController<T>(
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        return await fileStorageService.GetFilesUsedSpace();
+        return await folderService.GetFilesUsedSpace();
     }
 
     /// <summary>

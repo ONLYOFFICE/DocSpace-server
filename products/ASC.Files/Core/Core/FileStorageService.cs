@@ -272,11 +272,6 @@ public class FileStorageService //: IFileStorageService
 
     #endregion
     
-    public async Task<FilesStatisticsResultDto> GetFilesUsedSpace()
-    {
-        var folderDao = daoFactory.GetFolderDao<int>();
-        return await folderDao.GetFilesUsedSpace();
-    }
     
     public async Task<FileReference> GetReferenceDataAsync<T>(string fileId, string portalName, T sourceFileId, string path, string link)
     {
@@ -402,12 +397,4 @@ public class FileStorageService //: IFileStorageService
 
         return new InvalidOperationException(error.Message, error);
     }
-}
-
-public class FileModel<T, TTempate>
-{
-    public T ParentId { get; init; }
-    public string Title { get; set; }
-    public TTempate TemplateId { get; init; }
-    public int FormId { get; init; }
 }

@@ -1147,3 +1147,11 @@ public class FileService(
         return (await tempStream.CloneMemoryStream(memoryStream, 300), await tempStream.CloneMemoryStream(memoryStream));
     }
 }
+
+public class FileModel<T, TTempate>
+{
+    public T ParentId { get; init; }
+    public string Title { get; set; }
+    public TTempate TemplateId { get; init; }
+    public int FormId { get; init; }
+}
