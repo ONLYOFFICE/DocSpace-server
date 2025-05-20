@@ -152,7 +152,8 @@ if (isDocker)
         .WithEnvironment("basePath", $"http://{openRestyContainer}:{restyPort.ToString()}")
         .WithReference(redis, "redis")
         .WithHttpEndpoint(socketIoPort, socketIoPort, isProxied: false)
-        .WithHttpHealthCheck("/health");
+        .WithHttpHealthCheck("/health")
+        .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
     AddBaseBind(socketIoResourceBuilder);
 
@@ -162,7 +163,8 @@ if (isDocker)
         .WithEnvironment("log:name", "ssoAuth")
         .WithEnvironment("app:appsettings", "/buildtools/config")
         .WithHttpEndpoint(ssoAuthPort, ssoAuthPort, isProxied: false)
-        .WithHttpHealthCheck("/health");
+        .WithHttpHealthCheck("/health")
+        .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
     AddBaseBind(ssoAuthResourceBuilder);
 
@@ -171,7 +173,8 @@ if (isDocker)
         .WithImageTag("dev")
         .WithEnvironment("log:name", "webDav")
         .WithHttpEndpoint(webDavPort, webDavPort, isProxied: false)
-        .WithHttpHealthCheck("/health");
+        .WithHttpHealthCheck("/health")
+        .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
     AddBaseBind(webDavResourceBuilder);
 }
@@ -192,15 +195,18 @@ else
     builder.AddNpmApp(ascSocketio, "../ASC.Socket.IO/", "start:build")
         .WithReference(redis, "redis")
         .WithHttpEndpoint(targetPort: socketIoPort)
-        .WithHttpHealthCheck("/health");
+        .WithHttpHealthCheck("/health")
+        .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
     
     builder.AddNpmApp("asc-ssoAuth", "../ASC.SSoAuth/", "start:build")
         .WithHttpEndpoint(targetPort: 9834)
-        .WithHttpHealthCheck("/health");
+        .WithHttpHealthCheck("/health")
+        .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
     
     builder.AddNpmApp("asc-webDav", "../ASC.WebDav/", "start:build")
         .WithHttpEndpoint(targetPort: 1900)
-        .WithHttpHealthCheck("/health");
+        .WithHttpHealthCheck("/health")
+        .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 }
 
 var ascIdentityRegistration = "asc-identity-registration";
@@ -216,7 +222,8 @@ var registrationBuilder = builder
     .WithEnvironment("SPRING_APPLICATION_NAME", "ASC.Identity.Registration")
     .WithEnvironment("GRPC_CLIENT_AUTHORIZATION_ADDRESS", $"static://{ascIdentityAuthorization}:9999")
     .WithHttpEndpoint(identityRegistrationPort, identityRegistrationPort, isProxied: false)
-    .WithBuildArg("MODULE", "registration/registration-container");
+    .WithBuildArg("MODULE", "registration/registration-container")
+    .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
 AddIdentityEnv(registrationBuilder);
 
@@ -230,7 +237,8 @@ var authorizationBuilder = builder
     .WithEnvironment("SPRING_APPLICATION_NAME", "ASC.Identity.Authorization")
     .WithEnvironment("GRPC_CLIENT_AUTHORIZATION_ADDRESS", $"static://{ascIdentityRegistration}:8888")
     .WithHttpEndpoint(identityAuthorizationPort, identityAuthorizationPort, isProxied: false)
-    .WithBuildArg("MODULE", "authorization/authorization-container");
+    .WithBuildArg("MODULE", "authorization/authorization-container")
+    .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
 AddIdentityEnv(authorizationBuilder);
 
@@ -304,11 +312,11 @@ void AddProjectDocker<TProject>(int projectPort, bool includeHealthCheck = true)
     var name = typeof(TProject).Name;
     var resourceBuilder = builder.AddDockerfile(GetProjectName<TProject>(), projectBasePath, stage: "base");
 
-
+    var netVersion = $"net{Environment.Version.Major}.{Environment.Version.Minor}";
     var dllPath = "/app/bin/Debug/";
-    if (Directory.Exists(Path.Combine(projectBasePath, "bin", "Debug", "net9.0")))
+    if (Directory.Exists(Path.Combine(projectBasePath, "bin", "Debug", netVersion)))
     {
-        dllPath += "net9.0/";
+        dllPath += $"{netVersion}/";
     }
 
     resourceBuilder
@@ -326,7 +334,8 @@ void AddProjectDocker<TProject>(int projectPort, bool includeHealthCheck = true)
     {
         resourceBuilder
             .WithEnvironment("ASPNETCORE_HTTP_PORTS", projectPort.ToString())
-            .WithHttpEndpoint(projectPort, projectPort);
+            .WithHttpEndpoint(projectPort, projectPort)
+            .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
     }
 
     AddBaseConfig(resourceBuilder, includeHealthCheck);
