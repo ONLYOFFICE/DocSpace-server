@@ -286,12 +286,12 @@ public class TenantManager(
 
     public async Task<List<TenantQuota>> GetTenantQuotasAsync()
     {
-        return await GetTenantQuotasAsync(false);
+        return await GetTenantQuotasAsync(false, false);
     }
 
-    public async Task<List<TenantQuota>> GetTenantQuotasAsync(bool all)
+    public async Task<List<TenantQuota>> GetTenantQuotasAsync(bool all, bool wallet)
     {
-        return (await quotaService.GetTenantQuotasAsync()).Where(q => q.TenantId < 0 && (all || q.Visible)).OrderByDescending(q => q.TenantId).ToList();
+        return (await quotaService.GetTenantQuotasAsync()).Where(q => q.TenantId < 0 && (all || q.Visible) && q.Wallet == wallet).OrderByDescending(q => q.TenantId).ToList();
     }
 
     public async Task<TenantQuota> GetCurrentTenantQuotaAsync(bool refresh = false)
@@ -309,11 +309,12 @@ public class TenantManager(
             TenantQuota currentQuota = null;
             foreach (var tariffRow in tariff.Quotas)
             {
-                var qty = tariffRow.Quantity;
-
                 var quota = await quotaService.GetTenantQuotaAsync(tariffRow.Id);
 
-                quota *= qty;
+                quota *= tariffRow.Quantity;
+
+                quota.DueDate = tariffRow.DueDate;
+
                 currentQuota += quota;
             }
 
@@ -325,20 +326,23 @@ public class TenantManager(
 
     public async Task<IDictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync()
     {
-        var quotas = await GetTenantQuotasAsync(false);
-        var productIds = quotas
-            .Select(p => p.ProductId)
-            .Where(id => !string.IsNullOrEmpty(id))
-            .Distinct()
-            .ToArray();
-        
+        var quotas = (await GetTenantQuotasAsync(false, false))
+            .Where(q => !string.IsNullOrEmpty(q.ProductId))
+            .DistinctBy(q => q.ProductId)
+            .ToList();
+
         var tenant = GetCurrentTenant(false);
-        var prices = await tariffService.GetProductPriceInfoAsync(tenant?.PartnerId, productIds);
+
+        var prices = await tariffService.GetProductPriceInfoAsync(tenant?.PartnerId, false, quotas.Where(p => !p.Wallet).Select(p => p.ProductId).ToArray());
         var result = prices.ToDictionary(price => quotas.First(quota => quota.ProductId == price.Key).Name, price => price.Value);
-        return result;
+
+        var walletPrices = await tariffService.GetProductPriceInfoAsync(tenant?.PartnerId, true, quotas.Where(p => p.Wallet).Select(p => p.ProductId).ToArray());
+        var walletResult = walletPrices.ToDictionary(price => quotas.First(quota => quota.ProductId == price.Key).Name, price => price.Value);
+
+        return result.Concat(walletResult).ToDictionary(k => k.Key, v => v.Value);
     }
 
-    public Dictionary<string, decimal> GetProductPriceInfo(string productId)
+    public Dictionary<string, decimal> GetProductPriceInfo(string productId, bool wallet)
     {
         if (string.IsNullOrEmpty(productId))
         {
@@ -346,7 +350,7 @@ public class TenantManager(
         }
 
         var tenant = GetCurrentTenant(false);
-        var prices = tariffService.GetProductPriceInfoAsync(tenant?.PartnerId, productId).Result;
+        var prices = tariffService.GetProductPriceInfoAsync(tenant?.PartnerId, wallet, [productId]).Result;
         return prices.TryGetValue(productId, out var price) ? price : null;
     }
 

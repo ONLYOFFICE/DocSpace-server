@@ -50,13 +50,16 @@ public class BackupService(
     public async Task DeleteBackupAsync(Guid backupId)
     {
         var backupRecord = await backupRepository.GetBackupRecordAsync(backupId);
-        if(backupRecord.TenantId == -1)
+        if (backupRecord.TenantId == -1)
         {
             await tenantExtra.DemandAccessSpacePermissionAsync();
         }
-        if (backupRecord.TenantId != tenantManager.GetCurrentTenantId())
+        else
         {
-            return;
+            if (backupRecord.TenantId != tenantManager.GetCurrentTenantId())
+            {
+                return;
+            }
         }
         await backupRepository.DeleteBackupRecordAsync(backupRecord.Id);
 

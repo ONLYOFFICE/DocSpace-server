@@ -114,6 +114,9 @@
     <EmbeddedResource Update="PublicResources\NamingPeopleResource.sl.resx">
       <DependentUpon>NamingPeopleResource.resx</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Update="PublicResources\NamingPeopleResource.sq-AL.resx">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Update="PublicResources\NamingPeopleResource.sr-Cyrl-RS.resx">
       <DependentUpon>NamingPeopleResource.resx</DependentUpon>
     </EmbeddedResource>
@@ -209,6 +212,9 @@
       <DependentUpon>Resource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="PublicResources\Resource.sl.resx">
+      <DependentUpon>Resource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="PublicResources\Resource.sq-AL.resx">
       <DependentUpon>Resource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="PublicResources\Resource.sr-Cyrl-RS.resx">
@@ -308,6 +314,9 @@
     <EmbeddedResource Update="PublicResources\UserControlsCommonResource.sl.resx">
       <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Update="PublicResources\UserControlsCommonResource.sq-AL.resx">
+      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Update="PublicResources\UserControlsCommonResource.sr-Cyrl-RS.resx">
       <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
     </EmbeddedResource>
@@ -394,6 +403,9 @@
       <DependentUpon>WebstudioNotifyPatternResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="PublicResources\WebstudioNotifyPatternResource.sk.resx">
+      <DependentUpon>WebstudioNotifyPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="PublicResources\WebstudioNotifyPatternResource.sq-AL.resx">
       <DependentUpon>WebstudioNotifyPatternResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="PublicResources\WebstudioNotifyPatternResource.sr-Cyrl-RS.resx">
@@ -515,6 +527,9 @@
       <DependentUpon>CustomModeResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="PublicResources\CustomModeResource.sl.resx">
+      <DependentUpon>CustomModeResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="PublicResources\CustomModeResource.sq-AL.resx">
       <DependentUpon>CustomModeResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="PublicResources\CustomModeResource.sr-Cyrl-RS.resx">

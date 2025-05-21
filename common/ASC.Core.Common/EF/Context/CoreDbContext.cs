@@ -32,6 +32,7 @@ public partial class CoreDbContext(DbContextOptions<CoreDbContext> options) : Ba
     public DbSet<DbTariffRow> TariffRows { get; set; }
     public DbSet<DbQuota> Quotas { get; set; }
     public DbSet<DbQuotaRow> QuotaRows { get; set; }
+    public DbSet<DbTenant> Tenants { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

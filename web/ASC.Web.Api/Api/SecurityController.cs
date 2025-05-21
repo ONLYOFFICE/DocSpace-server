@@ -26,6 +26,7 @@
 
 using ASC.Api.Core.Cors.Enums;
 using ASC.Core.Common.Identity;
+using ASC.Files.Core.Utils;
 
 using Microsoft.AspNetCore.Cors;
 
@@ -44,8 +45,8 @@ public class SecurityController(PermissionContext permissionContext,
         MessageService messageService,
         LoginEventsRepository loginEventsRepository,
         AuditEventsRepository auditEventsRepository,
-        AuditReportCreator auditReportCreator,
-        AuditReportUploader auditReportSaver,
+        CsvFileHelper csvFileHelper,
+        CsvFileUploader csvFileUploader,
         SettingsManager settingsManager,
         AuditActionMapper auditActionMapper,
         CoreBaseSettings coreBaseSettings,
@@ -250,8 +251,8 @@ public class SecurityController(PermissionContext permissionContext,
         var reportName = string.Format(AuditReportResource.LoginHistoryReportName + ".csv", from.ToShortDateString(), to.ToShortDateString());
         var events = await loginEventsRepository.GetByFilterAsync(fromDate: from, to: to);
 
-        await using var stream = auditReportCreator.CreateCsvReport(events);
-        var result = await auditReportSaver.UploadCsvReport(stream, reportName);
+        await using var stream = csvFileHelper.CreateFile(events, new BaseEventMap<LoginEvent>());
+        var result = await csvFileUploader.UploadFile(stream, reportName);
 
         messageService.Send(MessageAction.LoginHistoryReportDownloaded);
         return result;
@@ -286,8 +287,8 @@ public class SecurityController(PermissionContext permissionContext,
 
         var events = await auditEventsRepository.GetByFilterAsync(from: from, to: to);
 
-        await using var stream = auditReportCreator.CreateCsvReport(events);
-        var result = await auditReportSaver.UploadCsvReport(stream, reportName);
+        await using var stream = csvFileHelper.CreateFile(events, new BaseEventMap<AuditEvent>());
+        var result = await csvFileUploader.UploadFile(stream, reportName);
 
         messageService.Send(MessageAction.AuditTrailReportDownloaded);
         return result;
