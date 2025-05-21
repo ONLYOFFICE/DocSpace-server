@@ -676,10 +676,15 @@ public class TariffService(
         return inserted;
     }
 
-    public async Task<bool> UpdateNextQuantityAsync(int tenant, Tariff tariffInfo, int quotaId, int nextQuantity)
+    public async Task<bool> UpdateNextQuantityAsync(int tenant, Tariff tariffInfo, int quotaId, int? nextQuantity)
     {
         try
         {
+            if (nextQuantity.HasValue && nextQuantity.Value < 0)
+            {
+                return false;
+            }
+
             var currentTariff = await GetBillingInfoAsync(tenant);
 
             await using var dbContext = await coreDbContextManager.CreateDbContextAsync();

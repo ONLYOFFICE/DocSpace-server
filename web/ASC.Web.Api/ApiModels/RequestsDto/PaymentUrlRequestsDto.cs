@@ -53,6 +53,17 @@ public class QuantityRequestDto
     /// The mapping of item identifiers with their respective quantities in the payment.
     /// </summary>
     public Dictionary<string, int> Quantity { get; set; }
+}
+
+/// <summary>
+/// The request parameters for the wallet payment quantity specifications.
+/// </summary>
+public class WalletQuantityRequestDto
+{
+    /// <summary>
+    /// The mapping of item identifiers with their respective quantities in the payment.
+    /// </summary>
+    public Dictionary<string, int?> Quantity { get; set; }
 
     /// <summary>
     /// The type of action performed on a quantity of product.
