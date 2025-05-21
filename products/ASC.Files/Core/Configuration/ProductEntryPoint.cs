@@ -286,27 +286,28 @@ public class ProductEntryPoint : Product
             }
         }
         var virtualRoomsFolderId = await _globalFolder.GetFolderVirtualRoomsAsync(_daoFactory);
-        var myRooms = await folderDao.GetRoomsAsync(null, null, null, userId, null, false, false, false, ProviderFilter.None, SubjectFilter.Owner, null, new List<int> { virtualRoomsFolderId }).ToListAsync();
-
-        foreach (var room in myRooms)
-        {
-            var roomId = room.Id.ToString();
-            result.TryAdd(roomId, true);
-        }
 
         if (!isDocSpaceAdmin)
         {
-            return result;
+            var myRooms = await folderDao.GetRoomsAsync(null, null, null, userId, null, false, false, false, ProviderFilter.None, SubjectFilter.Owner, null, new List<int> { virtualRoomsFolderId }).ToListAsync();
+
+            foreach (var room in myRooms)
+            {
+                var roomId = room.Id.ToString();
+                result.TryAdd(roomId, true);
+            }
         }
-
-        var archiveFolderId = await _globalFolder.GetFolderArchiveAsync(_daoFactory);
-
-        var rooms = await folderDao.GetRoomsAsync(new List<int> { virtualRoomsFolderId, archiveFolderId }, null, null, Guid.Empty, null, false, false, false, ProviderFilter.None, SubjectFilter.Owner, null).ToListAsync();
-
-        foreach (var room in rooms)
+        else
         {
-            var roomId = room.Id.ToString();
-            result.TryAdd(roomId, true);
+            var archiveFolderId = await _globalFolder.GetFolderArchiveAsync(_daoFactory);
+
+            var rooms = await folderDao.GetRoomsAsync(new List<int> { virtualRoomsFolderId, archiveFolderId }, null, null, Guid.Empty, null, false, false, false, ProviderFilter.None, SubjectFilter.Owner, null).ToListAsync();
+
+            foreach (var room in rooms)
+            {
+                var roomId = room.Id.ToString();
+                result.TryAdd(roomId, true);
+            }
         }
 
         return result;
