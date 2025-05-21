@@ -1215,8 +1215,11 @@ internal class FileDao(
         var file = await GetFileAsync(fileId);
         if (file != null)
         {
+            var status = await file.GetFileStatus();
+            var flagsToRemove = FileStatus.IsEditing | FileStatus.IsEditingAlone | FileStatus.IsConverting;
+
             var copy = _serviceProvider.GetService<File<int>>();
-            copy.SetFileStatus(await file.GetFileStatus() ^ FileStatus.IsEditing ^ FileStatus.IsEditingAlone ^ FileStatus.IsConverting);
+            copy.SetFileStatus(status & ~flagsToRemove);
             copy.ParentId = toFolderId;
             copy.Title = file.Title;
             copy.ConvertedType = file.ConvertedType;
