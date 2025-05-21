@@ -41,7 +41,7 @@ public class RoomTemplatesController(IEventBus eventBus,
     /// </summary>
     /// <short>Start creating room template</short>
     /// <path>api/2.0/files/roomtemplate</path>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [SwaggerResponse(200, "Status", typeof(RoomTemplateStatusDto))]
     [HttpPost("")]
     public async Task<RoomTemplateStatusDto> CreateTemplateAsync(RoomTemplateDto dto)
@@ -99,7 +99,7 @@ public class RoomTemplatesController(IEventBus eventBus,
     /// </summary>
     /// <short>Get status of room template creation</short>
     /// <path>api/2.0/files/roomtemplate/status</path>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [SwaggerResponse(200, "Status", typeof(RoomTemplateStatusDto))]
     [HttpGet("status")]
     public async Task<RoomTemplateStatusDto> GetTemplateCreatingStatus()
@@ -132,7 +132,7 @@ public class RoomTemplatesController(IEventBus eventBus,
     /// </summary>
     /// <short>Get public settings</short>
     /// <path>api/2.0/files/roomtemplate/{id}/public</path>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [HttpGet("{id}/public")]
     public async Task<bool> IsPublic(PublicDto inDto)
     {
@@ -145,7 +145,7 @@ public class RoomTemplatesController(IEventBus eventBus,
     /// </summary>
     /// <short>Set public settings</short>
     /// <path>api/2.0/files/roomtemplate/public</path>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [HttpPut("public")]
     public async Task SetPublic(SetPublicDto inDto)
     {
