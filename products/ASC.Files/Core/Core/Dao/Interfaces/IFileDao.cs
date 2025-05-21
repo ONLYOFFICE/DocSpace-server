@@ -330,6 +330,16 @@ public interface IFileDao<T>
     /// <returns></returns>
     Task DeleteFormRolesAsync(T formId);
 
+    /// <summary>
+    /// Updates category and forcesave
+    /// </summary>
+    /// <param name="fileId"></param>
+    /// <param name="fileVersion"></param>
+    /// <param name="category"></param>
+    /// <param name="forcesave"></param>
+    /// <returns></returns>
+    Task<int> UpdateCategoryAsync(T fileId, int fileVersion, int category, ForcesaveType forcesave = ForcesaveType.None);
+
     string GetUniqFilePath(File<T> file, string fileTitle);
 
     #region chunking

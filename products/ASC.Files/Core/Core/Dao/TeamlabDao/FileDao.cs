@@ -1490,6 +1490,16 @@ internal class FileDao(
         }
     }
 
+    public async Task<int> UpdateCategoryAsync(int fileId, int fileVersion, int category, ForcesaveType forcesave = ForcesaveType.None)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await filesDbContext.UpdateDbFilesCategoryForcesaveAsync(tenantId, fileId, fileVersion, category, forcesave);
+
+        return category;
+    }
+
     #region chunking
 
     public async Task<ChunkedUploadSession<int>> CreateUploadSessionAsync(File<int> file, long contentLength)

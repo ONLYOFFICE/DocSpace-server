@@ -825,6 +825,10 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     {
         return Task.CompletedTask;
     }
+    public Task<int> UpdateCategoryAsync(string fileId, int fileVersion, int category, ForcesaveType forcesave)
+    {
+        return Task.FromResult(0);
+    }
 }
 
 static file class Queries
