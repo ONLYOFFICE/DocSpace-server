@@ -82,7 +82,8 @@ public class UserController(
     UserSocketManager socketManager,
     GlobalFolderHelper globalFolderHelper,
     UserWebhookManager webhookManager,
-    IdentityClient client)
+    IdentityClient client,
+    GroupFullDtoHelper groupFullDtoHelper)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
 {
     /// <summary>
@@ -571,6 +572,7 @@ public class UserController(
         await CheckReassignProcessAsync([user.Id]);
 
         var userName = user.DisplayUserName(false, displayUserSettingsHelper);
+        var groups = await userManager.GetUserGroupsAsync(user.Id);
 
         await client.DeleteClientsAsync(user.Id);
         await _userPhotoManager.RemovePhotoAsync(user.Id);
@@ -587,6 +589,12 @@ public class UserController(
         else
         {
             await socketManager.DeleteUserAsync(user.Id);
+            foreach (var group in groups)
+            {
+                var groupInfo = await userManager.GetGroupInfoAsync(group.ID);
+                var groupDto = await groupFullDtoHelper.Get(groupInfo, true);
+                await socketManager.UpdateGroupAsync(groupDto);
+            }
         }
 
         await webhookManager.PublishAsync(WebhookTrigger.UserDeleted, user);

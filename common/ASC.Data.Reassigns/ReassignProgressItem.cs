@@ -26,6 +26,7 @@
 
 using ASC.Api.Core.Webhook;
 using ASC.Core.Common.Identity;
+using ASC.People.ApiModels.ResponseDto;
 using ASC.Webhooks.Core;
 
 using SecurityContext = ASC.Core.SecurityContext;
@@ -84,7 +85,7 @@ public class ReassignProgressItem : DistributedTaskProgress
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var scopeClass = scope.ServiceProvider.GetService<ReassignProgressItemScope>();
-        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, displayUserSettingsHelper, options, socketManager, webhookManager, client) = scopeClass;
+        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, displayUserSettingsHelper, options, socketManager, webhookManager, client, groupFullDtoHelper) = scopeClass;
         var logger = options.CreateLogger("ASC.Web");
         await tenantManager.SetCurrentTenantAsync(_tenantId);
 
@@ -133,7 +134,7 @@ public class ReassignProgressItem : DistributedTaskProgress
             if (_deleteProfile)
             {
                 await client.DeleteClientsAsync(FromUser);
-                await DeleteUserProfile(userManager, userPhotoManager, messageService, displayUserSettingsHelper, socketManager, webhookManager);
+                await DeleteUserProfile(userManager, userPhotoManager, messageService, displayUserSettingsHelper, socketManager, webhookManager, groupFullDtoHelper);
             }
 
             await SetPercentageAndCheckCancellationAsync(100, false);
@@ -208,11 +209,12 @@ public class ReassignProgressItem : DistributedTaskProgress
         await studioNotifyService.SendMsgReassignsFailedAsync(_currentUserId, fromUser, toUser, errorMessage);
     }
 
-    private async Task DeleteUserProfile(UserManager userManager, UserPhotoManager userPhotoManager, MessageService messageService, DisplayUserSettingsHelper displayUserSettingsHelper, UserSocketManager socketManager, UserWebhookManager webhookManager)
+    private async Task DeleteUserProfile(UserManager userManager, UserPhotoManager userPhotoManager, MessageService messageService, DisplayUserSettingsHelper displayUserSettingsHelper, UserSocketManager socketManager, UserWebhookManager webhookManager, GroupFullDtoHelper groupFullDtoHelper)
     {
         var user = await userManager.GetUsersAsync(FromUser);
         var isGuest = await userManager.IsGuestAsync(FromUser);
         var userName = user.DisplayUserName(false, displayUserSettingsHelper);
+        var groups = await userManager.GetUserGroupsAsync(user.Id);
 
         await userPhotoManager.RemovePhotoAsync(user.Id);
         await userManager.DeleteUserAsync(user.Id);
@@ -224,6 +226,12 @@ public class ReassignProgressItem : DistributedTaskProgress
         else
         {
             await socketManager.DeleteUserAsync(user.Id);
+            foreach (var group in groups)
+            {
+                var groupInfo = await userManager.GetGroupInfoAsync(group.ID);
+                var groupDto = await groupFullDtoHelper.Get(groupInfo, true);
+                await socketManager.UpdateGroupAsync(groupDto);
+            }
         }
         if (_httpHeaders != null)
         {
@@ -251,4 +259,5 @@ public record ReassignProgressItemScope(
     ILoggerProvider Options,
     UserSocketManager SocketManager,
     UserWebhookManager WebhookManager,
-    IdentityClient Client);
+    IdentityClient Client,
+    GroupFullDtoHelper groupFullDtoHelper);

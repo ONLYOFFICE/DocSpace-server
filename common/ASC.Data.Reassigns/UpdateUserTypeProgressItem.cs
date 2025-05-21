@@ -26,6 +26,7 @@
 
 using ASC.Api.Core.Webhook;
 using ASC.Core.Common;
+using ASC.People.ApiModels.ResponseDto;
 using ASC.Webhooks.Core;
 
 using SecurityContext = ASC.Core.SecurityContext;
@@ -74,7 +75,7 @@ public class UpdateUserTypeProgressItem: DistributedTaskProgress
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var scopeClass = scope.ServiceProvider.GetService<ChangeUserTypeProgressItemScope>();
-        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, _, displayUserSettingsHelper, options, webItemSecurityCache, distributedLockProvider, socketManager, webhookManager, userFormatter, daoFactory) = scopeClass;
+        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, displayUserSettingsHelper, options, webItemSecurityCache, distributedLockProvider, socketManager, webhookManager, userFormatter, daoFactory, groupFullDtoHelper) = scopeClass;
         var logger = options.CreateLogger("ASC.Web");
         await tenantManager.SetCurrentTenantAsync(_tenantId);
         _userInfo = await userManager.GetUsersAsync(User);
@@ -99,7 +100,7 @@ public class UpdateUserTypeProgressItem: DistributedTaskProgress
                 await SetPercentageAndCheckCancellationAsync(60, true);
             }
 
-            await UpdateUserTypeAsync(userManager, webItemSecurityCache, distributedLockProvider, socketManager, daoFactory);
+            await UpdateUserTypeAsync(userManager, webItemSecurityCache, distributedLockProvider, socketManager, daoFactory, groupFullDtoHelper);
 
             await SetPercentageAndCheckCancellationAsync(100, false);
 
@@ -126,7 +127,7 @@ public class UpdateUserTypeProgressItem: DistributedTaskProgress
         }
     }
 
-    private async Task UpdateUserTypeAsync(UserManager userManager, WebItemSecurityCache webItemSecurityCache, IDistributedLockProvider distributedLockProvider, UserSocketManager socketManager, IDaoFactory daoFactory)
+    private async Task UpdateUserTypeAsync(UserManager userManager, WebItemSecurityCache webItemSecurityCache, IDistributedLockProvider distributedLockProvider, UserSocketManager socketManager, IDaoFactory daoFactory, GroupFullDtoHelper groupFullDtoHelper)
     {
         var currentType = await userManager.GetUserTypeAsync(_userInfo);
         var lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(_tenantId));
@@ -192,6 +193,10 @@ public class UpdateUserTypeProgressItem: DistributedTaskProgress
                     foreach (var group in groups)
                     {
                         await userManager.RemoveUserFromGroupAsync(User, group.ID);
+
+                        var groupInfo = await userManager.GetGroupInfoAsync(group.ID);
+                        var groupDto = await groupFullDtoHelper.Get(groupInfo, true);
+                        await socketManager.UpdateGroupAsync(groupDto);
                     }
 
                     var folderDao = daoFactory.GetFolderDao<int>();
@@ -252,7 +257,6 @@ public record ChangeUserTypeProgressItemScope(
     StudioNotifyService StudioNotifyService,
     SecurityContext SecurityContext,
     UserManager UserManager,
-    UserPhotoManager UserPhotoManager,
     DisplayUserSettingsHelper DisplayUserSettingsHelper,
     ILoggerProvider Options,
     WebItemSecurityCache WebItemSecurityCache,
@@ -260,4 +264,5 @@ public record ChangeUserTypeProgressItemScope(
     UserSocketManager SocketManager,
     UserWebhookManager WebhookManager,
     UserFormatter UserFormatter,
-    IDaoFactory DaoFactory);
+    IDaoFactory DaoFactory,
+    GroupFullDtoHelper groupFullDtoHelper);
