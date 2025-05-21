@@ -26,6 +26,9 @@
 
 using System.Text.Json;
 
+using InfluxDB.Client.Api.Service;
+using static ASC.Data.Backup.BackupAjaxHandler;
+
 namespace ASC.Data.Backup.Services;
 
 [Scope]
@@ -202,6 +205,8 @@ public class BackupService(
 
     public async Task<BackupProgress> GetBackupProgress(int tenantId)
     {
+        await DemandPermissionsBackupAsync();
+
         return await backupWorker.GetBackupProgressAsync(tenantId);
     }
 
@@ -254,7 +259,42 @@ public class BackupService(
         await backupRepository.DeleteBackupScheduleAsync(tenantId);
     }
 
-    public async Task<ScheduleResponse> GetScheduleAsync(int tenantId, bool? dump)
+    public async Task<ScheduleDto> GetScheduleAsync(bool? dump)
+    {
+        await DemandPermissionsBackupAsync();
+        ScheduleResponse response = null;
+        if (dump.HasValue && dump.Value)
+        {
+            response = await InnerGetScheduleAsync(-1, dump);
+        }
+        else
+        {
+            response = await InnerGetScheduleAsync(tenantManager.GetCurrentTenantId(), dump);
+        }
+        if (response == null)
+        {
+            return null;
+        }
+
+        var schedule = new ScheduleDto
+        {
+            StorageType = response.StorageType,
+            StorageParams = response.StorageParams ?? new Dictionary<string, string>(),
+            CronParams = new CronParams(response.Cron),
+            BackupsStored = response.NumberOfBackupsStored.NullIfDefault(),
+            LastBackupTime = response.LastBackupTime,
+            Dump = response.Dump
+        };
+
+        if (response.StorageType != BackupStorageType.ThirdPartyConsumer)
+        {
+            schedule.StorageParams["folderId"] = response.StorageBasePath;
+        }
+
+        return schedule;
+    }
+
+    private async Task<ScheduleResponse> InnerGetScheduleAsync(int tenantId, bool? dump)
     {
         var schedule = await backupRepository.GetBackupScheduleAsync(tenantId, dump);
         if (schedule != null)
@@ -286,4 +326,41 @@ public class BackupService(
         }
     }
 
+}
+
+/// <summary>
+/// The backup schedule parameters.
+/// </summary>
+public class ScheduleDto
+{
+    /// <summary>
+    /// The backup storage type.
+    /// </summary>
+    public BackupStorageType StorageType { get; set; }
+
+    /// <summary>
+    /// The backup storage parameters.
+    /// </summary>
+    public Dictionary<string, string> StorageParams { get; set; }
+
+    /// <summary>
+    /// The backup cron parameters.
+    /// </summary>
+    public CronParams CronParams { get; init; }
+
+    /// <summary>
+    /// The maximum number of the stored backup copies.
+    /// </summary>
+    public int? BackupsStored { get; init; }
+
+    /// <summary>
+    /// The date and time when the last backup was reated.
+    /// </summary>
+    public DateTime LastBackupTime { get; set; }
+
+    /// <summary>
+    /// Specifies if a dump will be created or not.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
+    public bool Dump { get; set; }
 }

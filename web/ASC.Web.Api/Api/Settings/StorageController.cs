@@ -26,6 +26,7 @@
 
 using Amazon;
 
+using ASC.Data.Backup.Services;
 using ASC.Data.Storage.Encryption.IntegrationEvents.Events;
 
 namespace ASC.Web.Api.Controllers.Settings;
@@ -48,7 +49,7 @@ public class StorageController(ILoggerProvider option,
         IFusionCache fusionCache,
         IEventBus eventBus,
         EncryptionSettingsHelper encryptionSettingsHelper,
-        BackupAjaxHandler backupAjaxHandler,
+        BackupService backupService,
         ICacheNotify<DeleteSchedule> cacheDeleteSchedule,
         EncryptionWorker encryptionWorker,
         IHttpContextAccessor httpContextAccessor, 
@@ -171,7 +172,7 @@ public class StorageController(ILoggerProvider option,
 
         foreach (var tenant in tenants)
         {
-            var progress = await backupAjaxHandler.GetBackupProgressAsync(tenant.Id);
+            var progress = await backupService.GetBackupProgressAsync(tenant.Id);
             if (progress is { IsCompleted: false })
             {
                 throw new Exception();
@@ -487,7 +488,7 @@ public class StorageController(ILoggerProvider option,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var schedule = await backupAjaxHandler.GetScheduleAsync(dto.Dump);
+        var schedule = await backupService.GetScheduleAsync(dto.Dump);
         var current = new StorageSettings();
 
         if (schedule is { StorageType: BackupStorageType.ThirdPartyConsumer })

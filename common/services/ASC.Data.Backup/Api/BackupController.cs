@@ -59,10 +59,10 @@ public class BackupController(
     /// <short>Get the backup schedule</short>
     /// <path>api/2.0/backup/getbackupschedule</path>
     [Tags("Backup")]
-    [SwaggerResponse(200, "Backup schedule", typeof(BackupAjaxHandler.Schedule))]
+    [SwaggerResponse(200, "Backup schedule", typeof(ScheduleDto))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("getbackupschedule")]
-    public async Task<BackupAjaxHandler.Schedule> GetBackupSchedule(DumpDto dto)
+    public async Task<ScheduleDto> GetBackupSchedule(DumpDto dto)
     {
         if (dto.Dump)
         {
