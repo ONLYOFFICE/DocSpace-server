@@ -136,7 +136,7 @@ public class EmailValidationKeyProvider
         ArgumentNullException.ThrowIfNull(key);
 
         email = FormatEmail(tenantId, email);
-        var parts = key.Split(['.'], StringSplitOptions.RemoveEmptyEntries);
+        var parts = key.Split('.', StringSplitOptions.RemoveEmptyEntries);
         if (parts.Length != 2)
         {
             return ValidationResult.Invalid;
