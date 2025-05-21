@@ -48,46 +48,6 @@ public class BackupAjaxHandler(
 
     #region Backup
 
-    public async Task<string> StartBackupAsync(BackupStorageType storageType, Dictionary<string, string> storageParams, string serverBaseUri, bool dump, bool enqueueTask = true, string taskId = null)
-    {
-        await DemandPermissionsBackupAsync();
-
-        if (!coreBaseSettings.Standalone && dump)
-        {
-            throw new ArgumentException("backup can not start as dump");
-        }
-
-        var backupRequest = new StartBackupRequest
-        {
-            TenantId = GetCurrentTenantIdAsync(),
-            UserId = authContext.CurrentAccount.ID,
-            StorageType = storageType,
-            StorageParams = storageParams,
-            Dump = dump,
-            ServerBaseUri = serverBaseUri
-        };
-
-        switch (storageType)
-        {
-            case BackupStorageType.ThridpartyDocuments:
-            case BackupStorageType.Documents:
-                backupRequest.StorageBasePath = storageParams["folderId"];
-                break;
-            case BackupStorageType.Local:
-                if (!coreBaseSettings.Standalone)
-                {
-                    throw new Exception("Access denied");
-                }
-
-                backupRequest.StorageBasePath = storageParams["filePath"];
-                break;
-        }
-
-        messageService.Send(MessageAction.StartBackupSetting);
-
-        return await backupService.StartBackupAsync(backupRequest, enqueueTask, taskId);
-    }
-
     public async Task<BackupProgress> GetBackupProgressAsync(bool dump)
     {
         await DemandPermissionsBackupAsync();

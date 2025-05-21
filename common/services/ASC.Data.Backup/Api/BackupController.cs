@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Api.Core.Convention;
+using ASC.Data.Backup.Services;
 
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -46,7 +47,8 @@ public class BackupController(
     TenantExtra tenantExtra,
     IEventBus eventBus,
     CommonLinkUtility commonLinkUtility,
-    CoreSettings coreSettings)
+    CoreSettings coreSettings,
+    BackupService backupService)
     : ControllerBase
 {
     private Guid CurrentUserId => authContext.CurrentAccount.ID;
@@ -199,7 +201,7 @@ public class BackupController(
             ? commonLinkUtility.GetFullAbsolutePath("")
             : null;
         
-        var taskId = await backupAjaxHandler.StartBackupAsync(storageType, storageParams, serverBaseUri, inDto.Dump, false);
+        var taskId = await backupService.StartBackupAsync(storageType, storageParams, serverBaseUri, inDto.Dump, false);
         var tenantId = tenantManager.GetCurrentTenantId();
         
         await eventBus.PublishAsync(new BackupRequestIntegrationEvent(

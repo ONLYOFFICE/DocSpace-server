@@ -35,11 +35,50 @@ public class BackupService(
         BackupWorker backupWorker,
         BackupRepository backupRepository,
         TenantExtra tenantExtra,
-        TenantManager tenantManager)
+        TenantManager tenantManager,
+        MessageService messageService,
+        CoreBaseSettings coreBaseSettings,
+        AuthContext authContext,
+        PermissionContext permissionContext)
     {
-    public async Task<string> StartBackupAsync(StartBackupRequest request, bool enqueueTask = true, string taskId = null)
+    public async Task<string> StartBackupAsync(BackupStorageType storageType, Dictionary<string, string> storageParams, string serverBaseUri, bool dump, bool enqueueTask = true, string taskId = null)
     {
-        var progress = await backupWorker.StartBackupAsync(request, enqueueTask, taskId);
+        await DemandPermissionsBackupAsync();
+
+        if (!coreBaseSettings.Standalone && dump)
+        {
+            throw new ArgumentException("backup can not start as dump");
+        }
+
+        var backupRequest = new StartBackupRequest
+        {
+            TenantId = tenantManager.GetCurrentTenantId(),
+            UserId = authContext.CurrentAccount.ID,
+            StorageType = storageType,
+            StorageParams = storageParams,
+            Dump = dump,
+            ServerBaseUri = serverBaseUri
+        };
+
+        switch (storageType)
+        {
+            case BackupStorageType.ThridpartyDocuments:
+            case BackupStorageType.Documents:
+                backupRequest.StorageBasePath = storageParams["folderId"];
+                break;
+            case BackupStorageType.Local:
+                if (!coreBaseSettings.Standalone)
+                {
+                    throw new Exception("Access denied");
+                }
+
+                backupRequest.StorageBasePath = storageParams["filePath"];
+                break;
+        }
+
+        messageService.Send(MessageAction.StartBackupSetting);
+
+        var progress = await backupWorker.StartBackupAsync(backupRequest, enqueueTask, taskId);
         if (!string.IsNullOrEmpty(progress.Error))
         {
             throw new FaultException();
@@ -236,4 +275,15 @@ public class BackupService(
 
         return null;
     }
+
+    private async Task DemandPermissionsBackupAsync()
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        if (!coreBaseSettings.Standalone && !SetupInfo.IsVisibleSettings(nameof(ManagementType.Backup)))
+        {
+            throw new BillingException(Resource.ErrorNotAllowedOption);
+        }
+    }
+
 }
