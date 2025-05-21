@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Core.Common.Identity;
+using ASC.Core.Users;
 
 namespace ASC.People.Api;
 
@@ -1930,7 +1931,7 @@ public class UserController(
                 await socketManager.UpdateUserAsync(user);
             }
             await socketManager.ChangeUserTypeAsync(user, true);
-            await studioNotifyService.SendMsgUserTypeChangedAsync(user, inDto.Type.ToStringFast());
+            await studioNotifyService.SendMsgUserTypeChangedAsync(user, FilesCommonResource.ResourceManager.GetString("RoleEnum_" + inDto.Type.ToStringFast()));
         }
 
         messageService.Send(MessageAction.UsersUpdatedType, MessageTarget.Create(users.Select(x => x.Id)),

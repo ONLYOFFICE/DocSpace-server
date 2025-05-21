@@ -26,8 +26,11 @@
 
 using ASC.Api.Core.Webhook;
 using ASC.Core.Common;
+using ASC.Files.Core.Resources;
 using ASC.People.ApiModels.ResponseDto;
 using ASC.Webhooks.Core;
+
+using Microsoft.OpenApi.Extensions;
 
 using SecurityContext = ASC.Core.SecurityContext;
 
@@ -232,7 +235,7 @@ public class UpdateUserTypeProgressItem: DistributedTaskProgress
         var toUser = await userManager.GetUsersAsync(ToUser);
 
         await studioNotifyService.SendMsgReassignsCompletedAsync(_currentUserId, _userInfo, toUser);
-        await studioNotifyService.SendMsgUserTypeChangedAsync(_userInfo, _employeeType.ToStringFast());
+        await studioNotifyService.SendMsgUserTypeChangedAsync(_userInfo, FilesCommonResource.ResourceManager.GetString("RoleEnum_" + _employeeType.ToStringFast()));
 
         var fromUserName = _userInfo.DisplayUserName(false, displayUserSettingsHelper);
 
