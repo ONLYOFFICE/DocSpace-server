@@ -122,7 +122,7 @@ public class EncryptionSettingsHelper(CoreConfiguration coreConfiguration, Insta
             return new EncryptionSettings();
         }
 
-        var parts = value.Split(['#'], StringSplitOptions.None);
+        var parts = value.Split('#');
 
         var password = string.IsNullOrEmpty(parts[0]) ? string.Empty : await instanceCrypto.DecryptAsync(parts[0]);
         var status = int.Parse(parts[1]);
