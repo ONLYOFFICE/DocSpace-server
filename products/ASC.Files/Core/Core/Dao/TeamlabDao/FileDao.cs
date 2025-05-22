@@ -2327,7 +2327,7 @@ internal class FileDao(
             extension = [""];
         }
         
-        if (withSubfolders && (searchByExtension || filterType != FilterType.None || subjectID != Guid.Empty))
+        if (withSubfolders && (searchByText || searchByExtension || filterType != FilterType.None || subjectID != Guid.Empty))
         {
             q = GetFileQuery(filesDbContext, r => r.CurrentVersion)
                 .Join(filesDbContext.Tree, r => r.ParentId, a => a.FolderId, (file, tree) => new { file, tree })
