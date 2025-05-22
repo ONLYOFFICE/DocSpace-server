@@ -49,14 +49,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Tests.Factory;
+
 namespace ASC.Files.Tests.FilesController;
 
 [Collection("Test Collection")]
 public class DeleteFileTest(
     FilesApiFactory filesFactory, 
     WepApiFactory apiFactory, 
-    WebApplicationFactory<PeopleProgram> peopleFactory,
-    WebApplicationFactory<FilesServiceProgram> filesServiceProgram) 
+    PeopleFactory peopleFactory,
+    FilesServiceFactory filesServiceProgram) 
     : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
 {
     [Fact]

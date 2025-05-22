@@ -26,6 +26,8 @@
 
 extern alias ASCWebApi;
 extern alias ASCPeople;
+using ASC.Files.Tests.Factory;
+
 using MemberRequestDto = ASCPeople::ASC.People.ApiModels.RequestDto.MemberRequestDto;
 using PasswordHasher = ASC.Security.Cryptography.PasswordHasher;
 using WizardRequestsDto = Docspace.Model.WizardRequestsDto;
@@ -37,11 +39,12 @@ public static class Initializer
     public static readonly User Owner = new("test@example.com", "11111111");
     
     private static bool _initialized;
-    private static PeopleProfilesApi  _peopleProfilesApi = null!;
-    private static HttpClient _peopleClient = null!;
+
     private static PasswordHasher _passwordHasher = null!;
     private static readonly Lock _locker = new();
     private static WepApiFactory _apiFactory = null!;
+    private static PeopleFactory _peopleFactory = null!;
+    private static FilesServiceFactory _filesServiceFactory = null!;
     private static readonly string _basePath = Path.GetFullPath(Path.Combine("..", "..", "..", "..", "..", "..", ".."));
     private static readonly List<KeyValuePair<string, string?>> _settings =
     [
@@ -104,27 +107,16 @@ public static class Initializer
     public static async Task InitializeAsync(
         FilesApiFactory filesFactory,
         WepApiFactory apiFactory,
-        WebApplicationFactory<PeopleProgram> peopleFactory,
-        WebApplicationFactory<FilesServiceProgram> filesServiceFactory)
+        PeopleFactory peopleFactory,
+        FilesServiceFactory filesServiceFactory)
     {
         _passwordHasher = filesFactory.Services.GetRequiredService<PasswordHasher>();
         
         if (!_initialized)
-        {
+        {        
             _apiFactory = apiFactory;
-            var peopleClientStartTask = Task.Run(() =>
-            {
-                _peopleClient = peopleFactory.WithWebHostBuilder(Build).CreateClient();
-                _peopleProfilesApi = new PeopleProfilesApi(_peopleClient, new Configuration { BasePath = _peopleClient.BaseAddress!.ToString().TrimEnd('/') });
-            });
-
-            var filesServiceStartTask = Task.Run(() =>
-            {
-                _ = filesServiceFactory.WithWebHostBuilder(Build).CreateClient();
-            });
-            
-            await Task.WhenAll(peopleClientStartTask, filesServiceStartTask);
-
+            _peopleFactory = peopleFactory;
+            _filesServiceFactory = filesServiceFactory;
             var settings  = (await apiFactory.CommonSettingsApi.GetSettingsAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
             
             if (!string.IsNullOrEmpty(settings.WizardToken))
@@ -146,18 +138,6 @@ public static class Initializer
         }
 
         _initialized = true;
-        return;
-
-        void Build(IWebHostBuilder builder)
-        {
-            if (GlobalSettings != null)
-            {
-                foreach (var setting in GlobalSettings)
-                {
-                    builder.UseSetting(setting.Key, setting.Value);
-                }
-            }
-        }
     }
     
     internal static async Task<User> InviteContact(EmployeeType employeeType)
@@ -173,8 +153,8 @@ public static class Initializer
 
         }
         
-        await _peopleClient.Authenticate(Owner);
-        _peopleClient.DefaultRequestHeaders.TryAddWithoutValidation("confirm", confirmHeader);
+        await _peopleFactory.HttpClient.Authenticate(Owner);
+        _peopleFactory.HttpClient.DefaultRequestHeaders.TryAddWithoutValidation("confirm", confirmHeader);
         
         var parsedQuery = HttpUtility.ParseQueryString(confirmHeader);
         if(!Enum.TryParse(parsedQuery["emplType"], out EmployeeType parsedEmployeeType))
@@ -184,7 +164,7 @@ public static class Initializer
         
         var fakeMember = _fakerMember.Generate();
         
-        var createMemberResponse = await _peopleProfilesApi.AddMemberWithHttpInfoAsync(new Docspace.Model.MemberRequestDto
+        var createMemberResponse = await _peopleFactory.PeopleProfilesApi.AddMemberWithHttpInfoAsync(new Docspace.Model.MemberRequestDto
         {
             FromInviteLink = true,
             CultureName = "en-US",
@@ -199,7 +179,7 @@ public static class Initializer
             Key = parsedQuery["key"],
         }, TestContext.Current.CancellationToken);
         
-        _peopleClient.DefaultRequestHeaders.Remove("confirm");
+        _peopleFactory.HttpClient.DefaultRequestHeaders.Remove("confirm");
         
         if (createMemberResponse.StatusCode != HttpStatusCode.OK)
         {

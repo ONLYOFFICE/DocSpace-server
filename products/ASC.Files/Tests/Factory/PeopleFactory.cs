@@ -24,18 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-extern alias ASCWebApi;
+extern alias ASCPeople;
 
-namespace ASC.Files.Tests;
+namespace ASC.Files.Tests.Factory;
 
-public class WepApiFactory : WebApplicationFactory<WebApiProgram>, IAsyncLifetime
+public class PeopleFactory : WebApplicationFactory<PeopleProgram>, IAsyncLifetime
 {
     public HttpClient HttpClient { get; private set; } = null!;
-    public SettingsQuotaApi SettingsQuotaApi { get; private set; } = null!;
-    public AuthenticationApi AuthenticationApi { get; private set; } = null!;
-    public SettingsCommonSettingsApi CommonSettingsApi { get; private set; } = null!;
-    public PortalUsersApi PortalUsersApi { get; private set; } = null!;
-
+    public PeopleProfilesApi  PeopleProfilesApi { get; private set; } = null!;
+    
     protected override IHost CreateHost(IHostBuilder builder)
     {
         builder.ConfigureHostConfiguration(configBuilder =>
@@ -51,10 +48,7 @@ public class WepApiFactory : WebApplicationFactory<WebApiProgram>, IAsyncLifetim
         HttpClient = CreateClient();
 
         var configuration = new Configuration { BasePath = HttpClient.BaseAddress!.ToString().TrimEnd('/') };
-        SettingsQuotaApi = new SettingsQuotaApi(HttpClient, configuration);
-        AuthenticationApi = new AuthenticationApi(HttpClient, configuration);
-        CommonSettingsApi = new SettingsCommonSettingsApi(HttpClient, configuration);
-        PortalUsersApi = new PortalUsersApi(HttpClient, configuration);
+        PeopleProfilesApi = new PeopleProfilesApi(HttpClient, configuration);
 
         return ValueTask.CompletedTask;
     }

@@ -26,6 +26,7 @@
 
 extern alias ASCWebApi;
 extern alias ASCPeople;
+using ASC.Files.Tests.Factory;
 
 namespace ASC.Files.Tests.FilesController;
 
@@ -33,8 +34,8 @@ namespace ASC.Files.Tests.FilesController;
 public class CreateFolderTest(
     FilesApiFactory filesFactory, 
     WepApiFactory apiFactory, 
-    WebApplicationFactory<PeopleProgram> peopleFactory,
-    WebApplicationFactory<FilesServiceProgram> filesServiceProgram) 
+    PeopleFactory peopleFactory,
+    FilesServiceFactory filesServiceProgram) 
     : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
 {
     public static TheoryData<string> FolderNames =>

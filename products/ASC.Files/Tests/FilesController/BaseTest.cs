@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Tests.Factory;
+
 using User = ASC.Files.Tests.Data.User;
 
 namespace ASC.Files.Tests.FilesController;
@@ -32,8 +34,8 @@ namespace ASC.Files.Tests.FilesController;
 public class BaseTest(
     FilesApiFactory filesFactory, 
     WepApiFactory apiFactory, 
-    WebApplicationFactory<PeopleProgram> peopleFactory,
-    WebApplicationFactory<FilesServiceProgram> filesServiceProgram
+    PeopleFactory peopleFactory,
+    FilesServiceFactory filesServiceProgram
     ) : IAsyncLifetime
 {
     protected readonly HttpClient _filesClient = filesFactory.HttpClient;

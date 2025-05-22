@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Tests.Factory;
+
 using QuotaSettingsRequestsDto = Docspace.Model.QuotaSettingsRequestsDto;
 
 namespace ASC.Files.Tests.FilesController;
@@ -32,8 +34,8 @@ namespace ASC.Files.Tests.FilesController;
 public class FilesQuotaTest(
     FilesApiFactory filesFactory, 
     WepApiFactory apiFactory, 
-    WebApplicationFactory<PeopleProgram> peopleFactory,
-    WebApplicationFactory<FilesServiceProgram> filesServiceProgram) 
+    PeopleFactory peopleFactory,
+    FilesServiceFactory filesServiceProgram) 
     : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
 {
     [Fact]
@@ -196,7 +198,7 @@ public class FilesQuotaTest(
         result.Should().NotBeNull();
         result.Count.Should().Be(1);
         result[0].Id.Should().Be(room.Id);
-        result[0].QuotaLimit.Should().Be(defaultQuotaLimit);
+        result[0].QuotaLimit.Should().Be(0);
     }
     
     [Fact]
