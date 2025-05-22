@@ -57,7 +57,7 @@ public class IdentityClient(MachinePseudoKeys machinePseudoKeys,
         var currentUserId = securityContext.CurrentAccount.ID;
         var userInfo = await userManager.GetUsersAsync(currentUserId);
 
-        var type = userId == Guid.Empty ? await userManager.GetUserTypeAsync(currentUserId) : await userManager.GetUserTypeAsync(userId);
+        var type = await userManager.GetUserTypeAsync(currentUserId);
         var isAdmin = type is EmployeeType.DocSpaceAdmin;
         var isGuest = type is EmployeeType.Guest;
         userId = userId == Guid.Empty ? currentUserId : userId;
