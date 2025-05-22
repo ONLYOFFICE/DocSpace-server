@@ -138,7 +138,10 @@ public class BackupService(
 
     public async Task DeleteAllBackupsAsync(bool dump)
     {
+        await DemandPermissionsBackupAsync();
+
         var tenantId = dump ? -1 : tenantManager.GetCurrentTenantId();
+
         foreach (var backupRecord in await backupRepository.GetBackupRecordsByTenantIdAsync(tenantId))
         {
             try
@@ -185,7 +188,10 @@ public class BackupService(
 
     public async Task<List<BackupHistoryRecord>> GetBackupHistoryAsync(bool dump)
     {
+        await DemandPermissionsBackupAsync();
+
         var tenantId = dump ? -1 : tenantManager.GetCurrentTenantId();
+
         var backupHistory = new List<BackupHistoryRecord>();
         foreach (var record in await backupRepository.GetBackupRecordsByTenantIdAsync(tenantId))
         {
@@ -362,8 +368,11 @@ public class BackupService(
             });
     }
 
-    public async Task DeleteScheduleAsync(int tenantId)
+    public async Task DeleteScheduleAsync(bool dump)
     {
+        await DemandPermissionsBackupAsync();
+
+        var tenantId = dump ? -1 : tenantManager.GetCurrentTenantId();
         await backupRepository.DeleteBackupScheduleAsync(tenantId);
     }
 

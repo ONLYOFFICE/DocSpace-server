@@ -46,34 +46,6 @@ public class BackupAjaxHandler(
     private const string BackupTempModule = "backup_temp";
     private const string BackupFileName = "backup";
 
-    #region Backup
-
-    public async Task DeleteScheduleAsync(bool dump)
-    {
-        await DemandPermissionsBackupAsync();
-
-        if (dump)
-        {
-            await backupService.DeleteScheduleAsync(-1);
-        }
-        else 
-        {
-            await backupService.DeleteScheduleAsync(GetCurrentTenantIdAsync());
-        }
-    }
-
-    private async Task DemandPermissionsBackupAsync()
-    {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-
-        if (!coreBaseSettings.Standalone && !SetupInfo.IsVisibleSettings(nameof(ManagementType.Backup)))
-        {
-            throw new BillingException(Resource.ErrorNotAllowedOption);
-        }
-    }
-
-    #endregion
-
     #region restore
 
     public async Task<string> StartRestoreAsync(string backupId,

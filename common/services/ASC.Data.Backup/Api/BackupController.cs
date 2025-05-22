@@ -135,7 +135,7 @@ public class BackupController(
         {
             await tenantExtra.DemandAccessSpacePermissionAsync();
         }
-        await backupAjaxHandler.DeleteScheduleAsync(dto.Dump);
+        await backupService.DeleteScheduleAsync(dto.Dump);
 
         return true;
     }
