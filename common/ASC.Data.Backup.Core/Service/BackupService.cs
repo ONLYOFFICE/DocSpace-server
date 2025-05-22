@@ -27,7 +27,6 @@
 using System.Security;
 using System.Text.Json;
 
-using ASC.Files.Core.Data;
 using ASC.Files.Core.Security;
 
 using static ASC.Data.Backup.BackupAjaxHandler;
@@ -92,6 +91,22 @@ public class BackupService(
             throw new FaultException();
         }
         return progress.TaskId;
+    }
+
+    public async Task CheckAccessToFolderAsync<T>(T folderId)
+    {
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var folder = await folderDao.GetFolderAsync(folderId);
+
+        if (folder == null)
+        {
+            throw new DirectoryNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
+        if (folder.FolderType == FolderType.VirtualRooms || folder.FolderType == FolderType.RoomTemplates || folder.FolderType == FolderType.Archive || !await fileSecurity.CanCreateAsync(folder))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
+        }
     }
 
     public async Task DeleteBackupAsync(Guid backupId)
@@ -286,18 +301,64 @@ public class BackupService(
         return backupWorker.TempFolder;
     }
 
-    public async Task CreateScheduleAsync(CreateScheduleRequest request)
+    public async Task CreateScheduleAsync(BackupStorageType storageType, Dictionary<string, string> storageParams, int backupsStored, CronParams cronParams, bool dump)
     {
+        await DemandPermissionsBackupAsync();
+        await DemandPermissionsAutoBackupAsync();
+
+        if (!SetupInfo.IsVisibleSettings("AutoBackup"))
+        {
+            throw new InvalidOperationException(Resource.ErrorNotAllowedOption);
+        }
+
+        if (!coreBaseSettings.Standalone && dump)
+        {
+            throw new ArgumentException("backup can not start as dump");
+        }
+
+        ValidateCronSettings(cronParams);
+
+        var scheduleRequest = new CreateScheduleRequest
+        {
+            TenantId = dump ? -1 : tenantManager.GetCurrentTenantId(),
+            Cron = cronParams.ToString(),
+            NumberOfBackupsStored = backupsStored,
+            StorageType = storageType,
+            StorageParams = storageParams,
+            Dump = dump
+        };
+
+        if (dump)
+        {
+            scheduleRequest.StorageParams.Add("tenantId", tenantManager.GetCurrentTenantId().ToString());
+        }
+
+        switch (storageType)
+        {
+            case BackupStorageType.ThridpartyDocuments:
+            case BackupStorageType.Documents:
+                scheduleRequest.StorageBasePath = storageParams["folderId"];
+                break;
+            case BackupStorageType.Local:
+                if (!coreBaseSettings.Standalone)
+                {
+                    throw new Exception("Access denied");
+                }
+
+                scheduleRequest.StorageBasePath = storageParams["filePath"];
+                break;
+        }
+
         await backupRepository.SaveBackupScheduleAsync(
             new BackupSchedule
             {
-                TenantId = request.TenantId,
-                Cron = request.Cron,
-                BackupsStored = request.NumberOfBackupsStored,
-                StorageType = request.StorageType,
-                StorageBasePath = request.StorageBasePath,
-                StorageParams = JsonSerializer.Serialize(request.StorageParams),
-                Dump = request.Dump
+                TenantId = scheduleRequest.TenantId,
+                Cron = scheduleRequest.Cron,
+                BackupsStored = scheduleRequest.NumberOfBackupsStored,
+                StorageType = scheduleRequest.StorageType,
+                StorageBasePath = scheduleRequest.StorageBasePath,
+                StorageParams = JsonSerializer.Serialize(scheduleRequest.StorageParams),
+                Dump = scheduleRequest.Dump
             });
     }
 
@@ -363,6 +424,11 @@ public class BackupService(
         return null;
     }
 
+    private static void ValidateCronSettings(CronParams cronParams)
+    {
+        new CronExpression(cronParams.ToString());
+    }
+
     private async Task DemandPermissionsBackupAsync()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
@@ -373,6 +439,15 @@ public class BackupService(
         }
     }
 
+    private async Task DemandPermissionsAutoBackupAsync()
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        if (!SetupInfo.IsVisibleSettings("AutoBackup") || !(await tenantManager.GetTenantQuotaAsync(tenantManager.GetCurrentTenantId())).AutoBackupRestore)
+        {
+            throw new BillingException(Resource.ErrorNotAllowedOption);
+        }
+    }
 }
 
 /// <summary>

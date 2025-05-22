@@ -109,14 +109,14 @@ public class BackupController(
 
             if (int.TryParse(storageParams["folderId"], out var fId))
             {
-                await backupAjaxHandler.CheckAccessToFolderAsync(fId);
+                await backupService.CheckAccessToFolderAsync(fId);
             }
             else
             {
-                await backupAjaxHandler.CheckAccessToFolderAsync(storageParams["folderId"]);
+                await backupService.CheckAccessToFolderAsync(storageParams["folderId"]);
             }
         }
-        await backupAjaxHandler.CreateScheduleAsync(storageType, storageParams, backupStored, cron, inDto.Dump);
+        await backupService.CreateScheduleAsync(storageType, storageParams, backupStored, cron, inDto.Dump);
         return true;
     }
 
@@ -184,11 +184,11 @@ public class BackupController(
 
             if (int.TryParse(storageParams["folderId"], out var fId))
             {
-                await backupAjaxHandler.CheckAccessToFolderAsync(fId);
+                await backupService.CheckAccessToFolderAsync(fId);
             }
             else
             {
-                await backupAjaxHandler.CheckAccessToFolderAsync(storageParams["folderId"]);
+                await backupService.CheckAccessToFolderAsync(storageParams["folderId"]);
             }
         }
         if (storageType is BackupStorageType.ThirdPartyConsumer)
