@@ -512,6 +512,11 @@ internal class ProviderFileDao(
         return Task.CompletedTask;
     }
 
+    public Task<int> UpdateCategoryAsync(string fileId, int fileVersion, int category, ForcesaveType forcesave)
+    {
+        return Task.FromResult(0);
+    }
+
     #region chunking
 
     public async Task<ChunkedUploadSession<string>> CreateUploadSessionAsync(File<string> file, long contentLength)
