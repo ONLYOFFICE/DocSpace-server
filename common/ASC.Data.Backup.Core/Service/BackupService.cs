@@ -91,6 +91,8 @@ public class BackupService(
 
     public async Task DeleteBackupAsync(Guid backupId)
     {
+        await DemandPermissionsBackupAsync();
+
         var backupRecord = await backupRepository.GetBackupRecordAsync(backupId);
         if (backupRecord.TenantId == -1)
         {
@@ -112,6 +114,20 @@ public class BackupService(
         }
 
         await storage.DeleteAsync(backupRecord.StoragePath);
+    }
+
+    public async Task DeleteAllBackupsAsync(bool dump)
+    {
+        await DemandPermissionsBackupAsync();
+
+        if (dump)
+        {
+            await DeleteAllBackupsAsync(-1);
+        }
+        else
+        {
+            await DeleteAllBackupsAsync(tenantManager.GetCurrentTenantId());
+        }
     }
 
     public async Task DeleteAllBackupsAsync(int tenantId)

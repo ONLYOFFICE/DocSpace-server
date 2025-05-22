@@ -48,27 +48,6 @@ public class BackupAjaxHandler(
 
     #region Backup
 
-    public async Task DeleteBackupAsync(Guid id)
-    {
-        await DemandPermissionsBackupAsync();
-
-        await backupService.DeleteBackupAsync(id);
-    }
-
-    public async Task DeleteAllBackupsAsync(bool dump)
-    {
-        await DemandPermissionsBackupAsync();
-
-        if (dump)
-        {
-            await backupService.DeleteAllBackupsAsync(-1);
-        }
-        else
-        {
-            await backupService.DeleteAllBackupsAsync(GetCurrentTenantIdAsync());
-        }
-    }
-
     public async Task<List<BackupHistoryRecord>> GetBackupHistoryAsync(bool dump)
     {
         await DemandPermissionsBackupAsync();

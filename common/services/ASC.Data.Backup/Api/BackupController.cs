@@ -266,7 +266,7 @@ public class BackupController(
     [HttpDelete("deletebackup/{id:guid}")]
     public async Task<bool> DeleteBackup([FromRoute] DeleteBackupDto inDto)
     {
-        await backupAjaxHandler.DeleteBackupAsync(inDto.BackupId);
+        await backupService.DeleteBackupAsync(inDto.BackupId);
         return true;
     }
 
@@ -285,7 +285,7 @@ public class BackupController(
         {
             await tenantExtra.DemandAccessSpacePermissionAsync();
         }
-        await backupAjaxHandler.DeleteAllBackupsAsync(dto.Dump);
+        await backupService.DeleteAllBackupsAsync(dto.Dump);
         return true;
     }
 
