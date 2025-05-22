@@ -68,7 +68,7 @@ public class BackupController(
         {
             await tenantExtra.DemandAccessSpacePermissionAsync();
         }
-        return await backupAjaxHandler.GetScheduleAsync(dto.Dump);
+        return await backupService.GetScheduleAsync(dto.Dump);
     }
 
     /// <summary>
@@ -214,7 +214,7 @@ public class BackupController(
              serverBaseUri: serverBaseUri
         ));
 
-        return await backupAjaxHandler.GetBackupProgressAsync(inDto.Dump);
+        return await backupService.GetBackupProgressAsync(inDto.Dump);
     }
 
     /// <summary>
@@ -233,7 +233,7 @@ public class BackupController(
         {
             await tenantExtra.DemandAccessSpacePermissionAsync();
         }
-        return await backupAjaxHandler.GetBackupProgressAsync(dto.Dump);
+        return await backupService.GetBackupProgressAsync(dto.Dump);
     }
 
     /// <summary>

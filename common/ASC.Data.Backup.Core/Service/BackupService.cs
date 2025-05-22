@@ -203,7 +203,21 @@ public class BackupService(
         return progress.TaskId;
     }
 
-    public async Task<BackupProgress> GetBackupProgress(int tenantId)
+    public async Task<BackupProgress> GetBackupProgressAsync(bool dump)
+    {
+        await DemandPermissionsBackupAsync();
+
+        if (dump)
+        {
+            return await GetDumpBackupProgress();
+        }
+        else
+        {
+            return await GetBackupProgressAsync(tenantManager.GetCurrentTenantId());
+        }
+    }
+
+    public async Task<BackupProgress> GetBackupProgressAsync(int tenantId)
     {
         await DemandPermissionsBackupAsync();
 

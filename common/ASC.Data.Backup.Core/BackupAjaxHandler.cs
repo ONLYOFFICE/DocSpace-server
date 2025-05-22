@@ -48,20 +48,6 @@ public class BackupAjaxHandler(
 
     #region Backup
 
-    public async Task<BackupProgress> GetBackupProgressAsync(bool dump)
-    {
-        await DemandPermissionsBackupAsync();
-
-        if (dump)
-        {
-            return await backupService.GetDumpBackupProgress();
-        }
-        else
-        {
-            return await backupService.GetBackupProgress(GetCurrentTenantIdAsync());
-        }
-    }
-
     public async Task DeleteBackupAsync(Guid id)
     {
         await DemandPermissionsBackupAsync();
