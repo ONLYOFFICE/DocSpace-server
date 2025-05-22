@@ -252,7 +252,7 @@ public class BackupController(
         {
             await tenantExtra.DemandAccessSpacePermissionAsync();
         }
-        return await backupAjaxHandler.GetBackupHistoryAsync(dto.Dump);
+        return await backupService.GetBackupHistoryAsync(dto.Dump);
     }
 
     /// <summary>
@@ -323,11 +323,11 @@ public class BackupController(
         {
             if (int.TryParse(storageParams["filePath"], out var fId))
             {
-                await backupAjaxHandler.CheckAccessToFileAsync(fId);
+                await backupService.CheckAccessToFileAsync(fId);
             }
             else
             {
-                await backupAjaxHandler.CheckAccessToFileAsync(storageParams["filePath"]);
+                await backupService.CheckAccessToFileAsync(storageParams["filePath"]);
             }
         }
         if (storageType is BackupStorageType.ThirdPartyConsumer)

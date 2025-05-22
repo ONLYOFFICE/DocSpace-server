@@ -24,9 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Security;
 using System.Text.Json;
 
-using InfluxDB.Client.Api.Service;
+using ASC.Files.Core.Data;
+using ASC.Files.Core.Security;
+
 using static ASC.Data.Backup.BackupAjaxHandler;
 
 namespace ASC.Data.Backup.Services;
@@ -42,7 +45,9 @@ public class BackupService(
         MessageService messageService,
         CoreBaseSettings coreBaseSettings,
         AuthContext authContext,
-        PermissionContext permissionContext)
+        PermissionContext permissionContext,
+        IDaoFactory daoFactory,
+        FileSecurity fileSecurity)
     {
     public async Task<string> StartBackupAsync(BackupStorageType storageType, Dictionary<string, string> storageParams, string serverBaseUri, bool dump, bool enqueueTask = true, string taskId = null)
     {
@@ -118,20 +123,7 @@ public class BackupService(
 
     public async Task DeleteAllBackupsAsync(bool dump)
     {
-        await DemandPermissionsBackupAsync();
-
-        if (dump)
-        {
-            await DeleteAllBackupsAsync(-1);
-        }
-        else
-        {
-            await DeleteAllBackupsAsync(tenantManager.GetCurrentTenantId());
-        }
-    }
-
-    public async Task DeleteAllBackupsAsync(int tenantId)
-    {
+        var tenantId = dump ? -1 : tenantManager.GetCurrentTenantId();
         foreach (var backupRecord in await backupRepository.GetBackupRecordsByTenantIdAsync(tenantId))
         {
             try
@@ -152,8 +144,33 @@ public class BackupService(
         }
     }
 
-    public async Task<List<BackupHistoryRecord>> GetBackupHistoryAsync(int tenantId)
+    public async Task CheckAccessToFileAsync<T>(T fileId)
     {
+        var fileDao = daoFactory.GetFileDao<T>();
+        var file = await fileDao.GetFileAsync(fileId);
+
+        if (file == null)
+        {
+            throw new DirectoryNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var folder = await folderDao.GetFolderAsync(file.ParentId);
+
+        if (folder == null)
+        {
+            throw new DirectoryNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
+        if (folder.FolderType == FolderType.VirtualRooms || folder.FolderType == FolderType.RoomTemplates || folder.FolderType == FolderType.Archive || !await fileSecurity.CanCreateAsync(folder))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
+        }
+    }
+
+    public async Task<List<BackupHistoryRecord>> GetBackupHistoryAsync(bool dump)
+    {
+        var tenantId = dump ? -1 : tenantManager.GetCurrentTenantId();
         var backupHistory = new List<BackupHistoryRecord>();
         foreach (var record in await backupRepository.GetBackupRecordsByTenantIdAsync(tenantId))
         {
