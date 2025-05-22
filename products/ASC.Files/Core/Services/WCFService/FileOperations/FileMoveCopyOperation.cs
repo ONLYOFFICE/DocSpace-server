@@ -940,7 +940,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                        ? null
                                        : await fileDao.GetFileAsync(toFolderId, file.Title);
 
-                    if (conflict == null)
+                    if (conflict == null || conflict.Category != file.Category)
                     {
                         File<TTo> newFile = null;
                         if (copy)
