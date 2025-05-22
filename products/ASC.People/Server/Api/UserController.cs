@@ -1554,15 +1554,19 @@ public class UserController(
             {
                 continue;
             }
-            var userType = await _userManager.GetUserTypeAsync(u.Id); 
 
-            switch (userType)
+            if (currentUser.Id != u.Id)
             {
-                case EmployeeType.RoomAdmin when currentUserType is not EmployeeType.DocSpaceAdmin:
-                case EmployeeType.DocSpaceAdmin when !currentUser.IsOwner(tenant):
-                    continue;
+                var userType = await _userManager.GetUserTypeAsync(u.Id);
+
+                switch (userType)
+                {
+                    case EmployeeType.RoomAdmin when currentUserType is not EmployeeType.DocSpaceAdmin:
+                    case EmployeeType.DocSpaceAdmin when !currentUser.IsOwner(tenant):
+                        continue;
+                }
             }
-            
+
             u.ActivationStatus = inDto.ActivationStatus;
             await _userManager.UpdateUserInfoAsync(u);
 
