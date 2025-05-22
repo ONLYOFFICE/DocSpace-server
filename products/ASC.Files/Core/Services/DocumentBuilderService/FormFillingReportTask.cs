@@ -82,16 +82,6 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
             await fileDao.SaveProperties(_data.OriginalFormId, origProperties);
         }
 
-        var filesMessageService = serviceProvider.GetService<FilesMessageService>();
-        
-        var headers = _data.Headers != null 
-            ? _data.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value)) 
-            : [];
-        
-        var room = await daoFactory.GetFolderDao<int>().GetFolderAsync(_data.RoomId);
-        
-        await filesMessageService.SendAsync(MessageAction.RoomIndexExportSaved, room, headers: headers);
-
         return resultFile;
     }
 
