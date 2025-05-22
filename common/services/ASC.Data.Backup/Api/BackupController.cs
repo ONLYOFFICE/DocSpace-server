@@ -335,7 +335,7 @@ public class BackupController(
             storageParams.TryAdd("subdir", "backup");
         }
 
-        var taskId = await backupAjaxHandler.StartRestoreAsync(inDto.BackupId, storageType, storageParams, inDto.Notify, serverBaseUri, inDto.Dump, false);
+        var taskId = await backupService.StartRestoreAsync(inDto.BackupId, storageType, storageParams, inDto.Notify, serverBaseUri, inDto.Dump, false);
         await eventBus.PublishAsync(new BackupRestoreRequestIntegrationEvent(
                              tenantId: tenantId,
                              createBy: CurrentUserId,

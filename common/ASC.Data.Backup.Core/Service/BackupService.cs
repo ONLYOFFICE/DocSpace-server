@@ -27,7 +27,10 @@
 using System.Security;
 using System.Text.Json;
 
+using ASC.Data.Storage;
 using ASC.Files.Core.Security;
+
+using InfluxDB.Client.Api.Service;
 
 using static ASC.Data.Backup.BackupAjaxHandler;
 
@@ -46,8 +49,12 @@ public class BackupService(
         AuthContext authContext,
         PermissionContext permissionContext,
         IDaoFactory daoFactory,
-        FileSecurity fileSecurity)
+        FileSecurity fileSecurity,
+        StorageFactory storageFactory)
     {
+    private const string BackupTempModule = "backup_temp";
+    private const string BackupFileName = "backup";
+
     public async Task<string> StartBackupAsync(BackupStorageType storageType, Dictionary<string, string> storageParams, string serverBaseUri, bool dump, bool enqueueTask = true, string taskId = null)
     {
         await DemandPermissionsBackupAsync();
@@ -229,8 +236,43 @@ public class BackupService(
         }
     }
 
-    public async Task<string> StartRestoreAsync(StartRestoreRequest request, bool enqueueTask = true, string taskId = null)
+    public async Task<string> StartRestoreAsync(string backupId,
+        BackupStorageType storageType,
+        Dictionary<string, string> storageParams,
+        bool notify,
+        string serverBaseUri,
+        bool dump,
+        bool enqueueTask = true,
+        string taskId = null)
     {
+        await DemandPermissionsRestoreAsync();
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var request = new StartRestoreRequest
+        {
+            TenantId = tenantId,
+            NotifyAfterCompletion = notify,
+            StorageParams = storageParams,
+            ServerBaseUri = serverBaseUri,
+            Dump = dump
+        };
+
+        if (Guid.TryParse(backupId, out var guidBackupId))
+        {
+            request.BackupId = guidBackupId;
+        }
+        else
+        {
+            request.StorageType = storageType;
+            request.FilePathOrId = storageParams["filePath"];
+
+            if (request.StorageType == BackupStorageType.Local && enqueueTask)
+            {
+                var path = await GetTmpFilePathAsync(tenantId);
+                path = File.Exists(path + ".tar.gz") ? path + ".tar.gz" : path + ".tar";
+                request.FilePathOrId = path;
+            }
+        }
+
         if (request.StorageType == BackupStorageType.Local && (string.IsNullOrEmpty(request.FilePathOrId) || !File.Exists(request.FilePathOrId)) && enqueueTask)
         {
             throw new FileNotFoundException();
@@ -376,6 +418,26 @@ public class BackupService(
         await backupRepository.DeleteBackupScheduleAsync(tenantId);
     }
 
+    public async Task DeleteScheduleAsync(int tenantId)
+    {
+        await DemandPermissionsBackupAsync();
+
+        await backupRepository.DeleteBackupScheduleAsync(tenantId);
+    }
+
+    public async Task<string> GetTmpFilePathAsync(int tenantId)
+    {
+        var discStore = await storageFactory.GetStorageAsync(tenantManager.GetCurrentTenantId(), BackupTempModule, (IQuotaController)null) as DiscDataStore;
+        var folder = discStore.GetPhysicalPath("", "");
+
+        if (!Directory.Exists(folder))
+        {
+            Directory.CreateDirectory(folder);
+        }
+
+        return Path.Combine(folder, $"{tenantId}-{BackupFileName}");
+    }
+
     public async Task<ScheduleDto> GetScheduleAsync(bool? dump)
     {
         await DemandPermissionsBackupAsync();
@@ -453,6 +515,22 @@ public class BackupService(
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         if (!SetupInfo.IsVisibleSettings("AutoBackup") || !(await tenantManager.GetTenantQuotaAsync(tenantManager.GetCurrentTenantId())).AutoBackupRestore)
+        {
+            throw new BillingException(Resource.ErrorNotAllowedOption);
+        }
+    }
+
+    public async Task DemandPermissionsRestoreAsync()
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        var quota = await tenantManager.GetTenantQuotaAsync(tenantManager.GetCurrentTenantId());
+        if (!SetupInfo.IsVisibleSettings("Restore") || (!coreBaseSettings.Standalone && !quota.AutoBackupRestore))
+        {
+            throw new BillingException(Resource.ErrorNotAllowedOption);
+        }
+
+        if (!coreBaseSettings.Standalone && (!SetupInfo.IsVisibleSettings("Restore") || !quota.AutoBackupRestore))
         {
             throw new BillingException(Resource.ErrorNotAllowedOption);
         }

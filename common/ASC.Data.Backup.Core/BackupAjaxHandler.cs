@@ -47,47 +47,6 @@ public class BackupAjaxHandler(
     private const string BackupFileName = "backup";
 
     #region restore
-
-    public async Task<string> StartRestoreAsync(string backupId,
-        BackupStorageType storageType,
-        Dictionary<string, string> storageParams, 
-        bool notify,
-        string serverBaseUri,
-        bool dump,
-        bool enqueueTask = true, 
-        string taskId = null)
-    {
-        await DemandPermissionsRestoreAsync();
-        var tenantId = GetCurrentTenantIdAsync();
-        var restoreRequest = new StartRestoreRequest
-        {
-            TenantId = tenantId,
-            NotifyAfterCompletion = notify,
-            StorageParams = storageParams,
-            ServerBaseUri = serverBaseUri,
-            Dump =  dump
-        };
-
-        if (Guid.TryParse(backupId, out var guidBackupId))
-        {
-            restoreRequest.BackupId = guidBackupId;
-        }
-        else
-        {
-            restoreRequest.StorageType = storageType;
-            restoreRequest.FilePathOrId = storageParams["filePath"];
-
-            if (restoreRequest.StorageType == BackupStorageType.Local && enqueueTask)
-            {
-                var path = await GetTmpFilePathAsync(tenantId);
-                path = File.Exists(path + ".tar.gz") ? path + ".tar.gz" : path + ".tar";
-                restoreRequest.FilePathOrId = path;
-            }
-        }
-
-        return await backupService.StartRestoreAsync(restoreRequest, enqueueTask, taskId);
-    }
-
     public async Task<BackupProgress> GetRestoreProgressAsync(bool? dump)
     {
         if (!coreBaseSettings.Standalone)
@@ -192,19 +151,6 @@ public class BackupAjaxHandler(
     private int GetCurrentTenantIdAsync()
     {
         return tenantManager.GetCurrentTenantId();
-    }
-
-    public async Task<string> GetTmpFilePathAsync(int tenantId)
-    {
-        var discStore = await storageFactory.GetStorageAsync(tenantManager.GetCurrentTenantId(), BackupTempModule, (IQuotaController)null) as DiscDataStore;
-        var folder = discStore.GetPhysicalPath("", "");
-
-        if (!Directory.Exists(folder))
-        {
-            Directory.CreateDirectory(folder);
-        }
-
-        return Path.Combine(folder, $"{tenantId}-{BackupFileName}");
     }
 
     /// <summary>
