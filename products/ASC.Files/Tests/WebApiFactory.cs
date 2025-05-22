@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,36 +24,38 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Tests.FilesController;
+extern alias ASCWebApi;
 
-[Collection("Test Collection")]
-public class FileOperationsTest(
-    FilesApiFactory filesFactory, 
-    WepApiFactory apiFactory, 
-    WebApplicationFactory<PeopleProgram> peopleFactory,
-    WebApplicationFactory<FilesServiceProgram> filesServiceProgram) 
-    : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
+namespace ASC.Files.Tests;
+
+public class WepApiFactory : WebApplicationFactory<WebApiProgram>, IAsyncLifetime
 {
+    public HttpClient HttpClient { get; private set; } = null!;
+    public SettingsQuotaApi SettingsQuotaApi { get; private set; } = null!;
+    public AuthenticationApi AuthenticationApi { get; private set; } = null!;
+    public SettingsCommonSettingsApi CommonSettingsApi { get; private set; } = null!;
+    public PortalUsersApi PortalUsersApi { get; private set; } = null!;
 
-    
-
-    
-    [Fact]
-    public async Task GetPresignedUri_ValidFile_ReturnsDownloadUrl()
+    protected override IHost CreateHost(IHostBuilder builder)
     {
-        // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        
-        var file = await CreateFile("file_for_download.docx", FolderType.USER, Initializer.Owner);
-        
-        // Act
-        var downloadUrl = (await _filesFilesApi.GetPresignedUriAsync(file.Id, TestContext.Current.CancellationToken)).Response;
-        
-        // Assert
-        downloadUrl.Should().NotBeNull();
-        downloadUrl.Should().StartWith("http");
-        downloadUrl.Should().Contain("file");
-    }
-    
+        builder.ConfigureHostConfiguration(configBuilder =>
+        {
+            configBuilder.AddInMemoryCollection(Initializer.GlobalSettings);
+        });
 
+        return base.CreateHost(builder);
+    }
+
+    public ValueTask InitializeAsync()
+    {
+        HttpClient = CreateClient();
+
+        var configuration = new Configuration { BasePath = HttpClient.BaseAddress!.ToString().TrimEnd('/') };
+        SettingsQuotaApi = new SettingsQuotaApi(HttpClient, configuration);
+        AuthenticationApi = new AuthenticationApi(HttpClient, configuration);
+        CommonSettingsApi = new SettingsCommonSettingsApi(HttpClient, configuration);
+        PortalUsersApi = new PortalUsersApi(HttpClient, configuration);
+
+        return ValueTask.CompletedTask;
+    }
 }

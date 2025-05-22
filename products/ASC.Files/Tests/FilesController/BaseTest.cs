@@ -24,12 +24,14 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using User = ASC.Files.Tests.Data.User;
+
 namespace ASC.Files.Tests.FilesController;
 
 [Collection("Test Collection")]
 public class BaseTest(
     FilesApiFactory filesFactory, 
-    WebApplicationFactory<WebApiProgram> apiFactory, 
+    WepApiFactory apiFactory, 
     WebApplicationFactory<PeopleProgram> peopleFactory,
     WebApplicationFactory<FilesServiceProgram> filesServiceProgram
     ) : IAsyncLifetime
@@ -40,6 +42,8 @@ public class BaseTest(
     protected readonly FilesOperationsApi _filesOperationsApi = filesFactory.FilesOperationsApi;
     protected readonly FilesRoomsApi _filesRoomsApi = filesFactory.FilesRoomsApi;
     protected readonly FilesSettingsApi _filesSettingsApi = filesFactory.FilesSettingsApi;
+    protected readonly FilesQuotaApi _filesQuotaApi = filesFactory.FilesQuotaApi;
+    protected readonly SettingsQuotaApi _settingsQuotaApi = apiFactory.SettingsQuotaApi;
     private readonly Func<Task> _resetDatabase = filesFactory.ResetDatabaseAsync;
 
     public async ValueTask InitializeAsync()

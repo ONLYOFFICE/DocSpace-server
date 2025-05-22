@@ -24,14 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Docspace.Client;
-
 namespace ASC.Files.Tests.FilesController;
 
 [Collection("Test Collection")]
 public class FileHistoryTest(
     FilesApiFactory filesFactory, 
-    WebApplicationFactory<WebApiProgram> apiFactory, 
+    WepApiFactory apiFactory, 
     WebApplicationFactory<PeopleProgram> peopleFactory,
     WebApplicationFactory<FilesServiceProgram> filesServiceProgram) 
     : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)

@@ -25,15 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 extern alias ASCFiles;
-using ASC.Core.Common.EF;
-
-using Docspace.Client;
-
-using DotNet.Testcontainers.Builders;
-
-using Npgsql;
-
-using Testcontainers.PostgreSql;
 
 namespace ASC.Files.Tests;
 
@@ -68,6 +59,8 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
     public FilesOperationsApi FilesOperationsApi { get; private set;} = null!;
     public FilesRoomsApi FilesRoomsApi { get; private set;} = null!;
     public FilesSettingsApi FilesSettingsApi { get; private set;} = null!;
+    public FilesQuotaApi  FilesQuotaApi { get; private set;} = null!;
+    public SettingsQuotaApi  SettingsQuotaApi { get; private set;} = null!;
 
     public readonly CustomProviderInfo ProviderInfo;
     
@@ -146,7 +139,8 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
     {
         builder.ConfigureHostConfiguration(configBuilder =>
         {
-            configBuilder.AddInMemoryCollection(Initializer.GetSettings(ProviderInfo, RedisConnectionString, RabbitMqConnectionString, OpenSearchConnectionString)); 
+            Initializer.InitSettings(ProviderInfo, RedisConnectionString, RabbitMqConnectionString, OpenSearchConnectionString);
+            configBuilder.AddInMemoryCollection(Initializer.GlobalSettings);
         });
         
         return base.CreateHost(builder);
@@ -186,11 +180,14 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
         _dbconnection =  ProviderInfo.Provider == Provider.MySql ?  new MySqlConnection(_mySqlContainer.GetConnectionString()) : new NpgsqlConnection(_postgresSqlContainer.GetConnectionString());
 
         HttpClient = CreateClient();
-        FilesFoldersApi = new FilesFoldersApi(HttpClient, new Configuration { BasePath = HttpClient.BaseAddress!.ToString().TrimEnd('/') });
-        FilesFilesApi = new FilesFilesApi(HttpClient, new Configuration { BasePath = HttpClient.BaseAddress!.ToString().TrimEnd('/') });
-        FilesOperationsApi = new FilesOperationsApi(HttpClient, new Configuration { BasePath = HttpClient.BaseAddress!.ToString().TrimEnd('/') });
-        FilesRoomsApi = new FilesRoomsApi(HttpClient, new Configuration { BasePath = HttpClient.BaseAddress!.ToString().TrimEnd('/') });
-        FilesSettingsApi = new FilesSettingsApi(HttpClient, new Configuration { BasePath = HttpClient.BaseAddress!.ToString().TrimEnd('/') });
+        var configuration = new Configuration { BasePath = HttpClient.BaseAddress!.ToString().TrimEnd('/') };
+        FilesFoldersApi = new FilesFoldersApi(HttpClient, configuration);
+        FilesFilesApi = new FilesFilesApi(HttpClient, configuration);
+        FilesOperationsApi = new FilesOperationsApi(HttpClient, configuration);
+        FilesRoomsApi = new FilesRoomsApi(HttpClient, configuration);
+        FilesSettingsApi = new FilesSettingsApi(HttpClient, configuration);
+        FilesQuotaApi = new FilesQuotaApi(HttpClient, configuration);
+        SettingsQuotaApi = new SettingsQuotaApi(HttpClient, configuration);
         
         var tablesToIgnore = _tablesToIgnore.Select(t => new Table(t)).ToList();
         tablesToIgnore.AddRange(_tablesToBackup.Select(r=> new Table(MakeCopyTableName(r))));

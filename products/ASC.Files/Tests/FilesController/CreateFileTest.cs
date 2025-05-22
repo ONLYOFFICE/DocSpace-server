@@ -32,7 +32,7 @@ namespace ASC.Files.Tests.FilesController;
 [Collection("Test Collection")]
 public class CreateFileTest(
     FilesApiFactory filesFactory, 
-    WebApplicationFactory<WebApiProgram> apiFactory, 
+    WepApiFactory apiFactory, 
     WebApplicationFactory<PeopleProgram> peopleFactory,
     WebApplicationFactory<FilesServiceProgram> filesServiceProgram) 
     : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)

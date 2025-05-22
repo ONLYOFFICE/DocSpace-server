@@ -33,7 +33,7 @@ namespace ASC.Files.Tests;
 [CollectionDefinition("Test Collection")]
 public class SharedTestCollection : 
     ICollectionFixture<FilesApiFactory>, 
-    ICollectionFixture<WebApplicationFactory<WebApiProgram>>, 
+    ICollectionFixture<WepApiFactory>, 
     ICollectionFixture<WebApplicationFactory<PeopleProgram>>,
     ICollectionFixture<WebApplicationFactory<FilesServiceProgram>>
     ;
