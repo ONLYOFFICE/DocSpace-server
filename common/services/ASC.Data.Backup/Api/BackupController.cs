@@ -349,7 +349,7 @@ public class BackupController(
                         ));
 
 
-        return await backupAjaxHandler.GetRestoreProgressAsync(inDto.Dump);
+        return await backupService.GetRestoreProgressAsync(inDto.Dump);
     }
 
     /// <summary>
@@ -365,7 +365,7 @@ public class BackupController(
     [AllowNotPayment]
     public async Task<BackupProgress> GetRestoreProgressAsync(RestoreDto dto)
     {
-        return await backupAjaxHandler.GetRestoreProgressAsync(dto.Dump);
+        return await backupService.GetRestoreProgressAsync(dto.Dump);
     }
 
     /// <summary>

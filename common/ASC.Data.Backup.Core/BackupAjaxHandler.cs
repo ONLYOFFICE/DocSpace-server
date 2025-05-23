@@ -47,31 +47,6 @@ public class BackupAjaxHandler(
     private const string BackupFileName = "backup";
 
     #region restore
-    public async Task<BackupProgress> GetRestoreProgressAsync(bool? dump)
-    {
-        if (!coreBaseSettings.Standalone)
-        {
-            dump = false;
-        }
-
-        if (dump.HasValue) 
-        {
-            if (dump.Value)
-            {
-                return await backupService.GetDumpRestoreProgressAsync();
-            }
-            else
-            {
-                var tenant = tenantManager.GetCurrentTenant();
-                return await backupService.GetRestoreProgressAsync(tenant.Id);
-            }
-        }
-        else
-        {
-            var tenant = tenantManager.GetCurrentTenant();
-            return await backupService.GetAnyRestoreProgressAsync(tenant.Id);
-        }
-    }
 
     public async Task DemandPermissionsRestoreAsync()
     {

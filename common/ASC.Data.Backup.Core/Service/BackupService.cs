@@ -27,10 +27,7 @@
 using System.Security;
 using System.Text.Json;
 
-using ASC.Data.Storage;
 using ASC.Files.Core.Security;
-
-using InfluxDB.Client.Api.Service;
 
 using static ASC.Data.Backup.BackupAjaxHandler;
 
@@ -330,18 +327,30 @@ public class BackupService(
         return await backupWorker.GetTransferProgressAsync(tenantId);
     }
 
-    public async Task<BackupProgress> GetRestoreProgressAsync(int tenantId)
+    public async Task<BackupProgress> GetRestoreProgressAsync(bool? dump)
     {
-        return await backupWorker.GetRestoreProgressAsync(tenantId);
-    }
-    public async Task<BackupProgress> GetAnyRestoreProgressAsync(int tenantId)
-    {
-        return await backupWorker.GetAnyRestoreProgressAsync(tenantId);
-    }
+        if (!coreBaseSettings.Standalone)
+        {
+            dump = false;
+        }
 
-    public async Task<BackupProgress> GetDumpRestoreProgressAsync()
-    {
-        return await backupWorker.GetDumpRestoreProgressAsync();
+        if (dump.HasValue)
+        {
+            if (dump.Value)
+            {
+                return await backupWorker.GetDumpRestoreProgressAsync();
+            }
+            else
+            {
+                var tenantId = tenantManager.GetCurrentTenantId();
+                return await backupWorker.GetRestoreProgressAsync(tenantId);
+            }
+        }
+        else
+        {
+            var tenantId = tenantManager.GetCurrentTenantId();
+            return await backupWorker.GetAnyRestoreProgressAsync(tenantId);
+        }
     }
 
     public string GetTmpFolder()
