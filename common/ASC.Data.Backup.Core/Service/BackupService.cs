@@ -29,8 +29,6 @@ using System.Text.Json;
 
 using ASC.Files.Core.Security;
 
-using static ASC.Data.Backup.BackupAjaxHandler;
-
 namespace ASC.Data.Backup.Services;
 
 [Scope]
@@ -581,4 +579,73 @@ public class ScheduleDto
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool Dump { get; set; }
+}
+
+/// <summary>
+/// The backup cron parameters.
+/// </summary>
+public class CronParams
+{
+    /// <summary>
+    /// The backup period type.
+    /// </summary>
+    public BackupPeriod Period { get; init; }
+
+    /// <summary>
+    /// The time of the day to start the backup process.
+    /// </summary>
+    public int Hour { get; init; }
+
+    /// <summary>
+    /// The day of the week to start the backup process.
+    /// </summary>
+    public int Day { get; init; }
+
+    public CronParams() { }
+
+    public CronParams(string cronString)
+    {
+        var tokens = cronString.Split(' ');
+        Hour = Convert.ToInt32(tokens[2]);
+        if (tokens[3] != "?")
+        {
+            Period = BackupPeriod.EveryMonth;
+            Day = Convert.ToInt32(tokens[3]);
+        }
+        else if (tokens[5] != "*")
+        {
+            Period = BackupPeriod.EveryWeek;
+            Day = Convert.ToInt32(tokens[5]);
+        }
+        else
+        {
+            Period = BackupPeriod.EveryDay;
+        }
+    }
+
+    public override string ToString()
+    {
+        return Period switch
+        {
+            BackupPeriod.EveryDay => string.Format("0 0 {0} ? * *", Hour),
+            BackupPeriod.EveryMonth => string.Format("0 0 {0} {1} * ?", Hour, Day),
+            BackupPeriod.EveryWeek => string.Format("0 0 {0} ? * {1}", Hour, Day),
+            _ => base.ToString()
+        };
+    }
+}
+
+/// <summary>
+/// The backup period type.
+/// </summary>
+public enum BackupPeriod
+{
+    [SwaggerEnum(Description = "Every day")]
+    EveryDay = 0,
+
+    [SwaggerEnum(Description = "Every week")]
+    EveryWeek = 1,
+
+    [SwaggerEnum(Description = "Every month")]
+    EveryMonth = 2
 }

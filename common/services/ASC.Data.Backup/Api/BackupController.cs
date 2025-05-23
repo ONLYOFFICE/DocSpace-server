@@ -40,7 +40,6 @@ namespace ASC.Data.Backup.Controllers;
 [ApiController]
 [ControllerName("backup")]
 public class BackupController(
-    BackupAjaxHandler backupAjaxHandler,
     TenantManager tenantManager,
     AuthContext authContext,
     CoreBaseSettings coreBaseSettings,
@@ -308,7 +307,7 @@ public class BackupController(
             await tenantExtra.DemandAccessSpacePermissionAsync();
         }
 
-        await backupAjaxHandler.DemandPermissionsRestoreAsync();
+        await backupService.DemandPermissionsRestoreAsync();
 
         var storageParams = inDto.StorageParams == null ? new Dictionary<string, string>() : inDto.StorageParams.ToDictionary(r => r.Key.ToString(), r => r.Value.ToString());
 
@@ -379,6 +378,6 @@ public class BackupController(
     [SwaggerResponse(200, "Path to the temporary folder with the stored backup", typeof(object))]
     public object GetTempPath()
     {
-        return backupAjaxHandler.GetTmpFolder();
+        return backupService.GetTmpFolder();
     }
 }

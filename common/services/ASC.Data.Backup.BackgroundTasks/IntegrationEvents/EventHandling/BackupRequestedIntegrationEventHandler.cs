@@ -32,7 +32,6 @@ namespace ASC.Data.Backup.IntegrationEvents.EventHandling;
 
 [Scope]
 public class BackupRequestedIntegrationEventHandler(
-        BackupAjaxHandler backupAjaxHandler,
         ILogger<BackupRequestedIntegrationEventHandler> logger,
         TenantManager tenantManager,
         SecurityContext securityContext,

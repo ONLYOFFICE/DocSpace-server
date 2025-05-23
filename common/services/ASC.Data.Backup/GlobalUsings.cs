@@ -51,5 +51,3 @@ global using Microsoft.AspNetCore.Http.Features;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.Server.Kestrel.Core;
 global using Microsoft.Extensions.Hosting.WindowsServices;
-
-global using static ASC.Data.Backup.BackupAjaxHandler;
