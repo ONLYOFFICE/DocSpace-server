@@ -71,7 +71,7 @@ public class FormFilesTest(
             // If the file is properly recognized as a form, we can check its roles
             roles.Should().NotBeNull();
         }
-        catch (Docspace.Client.ApiException ex)
+        catch (ApiException ex)
         {
             // For a non-form file or if form functionality is not fully set up in test environment
             // API might return an error - this is expected
@@ -98,7 +98,7 @@ public class FormFilesTest(
             // If the file is properly recognized as a form draft, we'll get a session ID
             result.Should().NotBeNull();
         }
-        catch (Docspace.Client.ApiException ex)
+        catch (ApiException ex)
         {
             // For a non-form file or if form functionality is not fully set up in test environment
             // API might return an error - this is expected
@@ -127,7 +127,7 @@ public class FormFilesTest(
             var updatedFile = await GetFile(file.Id);
             updatedFile.Should().NotBeNull();
         }
-        catch (Docspace.Client.ApiException ex)
+        catch (ApiException ex)
         {
             // For a non-form file or if form functionality is not fully set up in test environment
             // API might return an error - this is expected

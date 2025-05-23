@@ -169,7 +169,7 @@ public class FileOrderTest(
         var orderRequest = new OrdersRequestDtoInteger(orderItems);
         
         // Act & Assert
-        await Assert.ThrowsAsync<Docspace.Client.ApiException>(
+        await Assert.ThrowsAsync<ApiException>(
             async () => await _filesFilesApi.SetFilesOrderAsync(
                 orderRequest, 
                 TestContext.Current.CancellationToken));

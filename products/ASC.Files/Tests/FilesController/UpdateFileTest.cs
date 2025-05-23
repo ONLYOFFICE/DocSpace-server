@@ -67,7 +67,7 @@ public class UpdateFileTest(
         var updateParams = new UpdateFile { Title = longFileName };
         
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<Docspace.Client.ApiException>(
+        var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesFilesApi.UpdateFileAsync(
                 createdFile.Id, 
                 updateParams, 
@@ -85,7 +85,7 @@ public class UpdateFileTest(
         var createdFile = await CreateFile("file_to_lock.docx", FolderType.USER, Initializer.Owner);
         
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<Docspace.Client.ApiException>(
+        var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesFilesApi.LockFileAsync(createdFile.Id, new LockFileParameters(true), TestContext.Current.CancellationToken));
         
         exception.ErrorCode.Should().Be(403);

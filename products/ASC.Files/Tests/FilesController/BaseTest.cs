@@ -110,7 +110,7 @@ public class BaseTest(
     {
         await _filesClient.Authenticate(user);
         
-        return (await _filesRoomsApi.CreateRoomAsync(new CreateRoomRequestDto(roomTitle, indexing: true, roomType: RoomType.VirtualDataRoom), TestContext.Current.CancellationToken)).Response;
+        return (await _filesRoomsApi.CreateRoomAsync(new CreateRoomRequestDto(roomTitle, roomType: RoomType.VirtualDataRoom), TestContext.Current.CancellationToken)).Response;
     }
     protected async Task<List<FileOperationDto>?> WaitLongOperation()
     {

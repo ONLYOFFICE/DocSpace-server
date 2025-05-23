@@ -76,7 +76,7 @@ public class DeleteFileTest(
         fileToDelete.Should().NotContain(x => !string.IsNullOrEmpty(x.Error));
         
         // Verify file no longer exists or has been moved to trash
-        await Assert.ThrowsAsync<Docspace.Client.ApiException>(async () => 
+        await Assert.ThrowsAsync<ApiException>(async () => 
             await _filesFilesApi.GetFileInfoAsync(createdFile.Id, cancellationToken: TestContext.Current.CancellationToken));
     }
     

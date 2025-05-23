@@ -81,7 +81,7 @@ public class FileSharingTest(
         // Act
         var linkParams = new FileLinkRequest(access: fileShare);
 
-        await Assert.ThrowsAsync<Docspace.Client.ApiException>(async () => 
+        await Assert.ThrowsAsync<ApiException>(async () => 
             await _filesFilesApi.CreatePrimaryExternalLinkAsync(file.Id, linkParams, TestContext.Current.CancellationToken));
     }
     

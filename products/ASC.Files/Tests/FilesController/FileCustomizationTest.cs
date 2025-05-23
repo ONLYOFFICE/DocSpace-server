@@ -46,7 +46,7 @@ public class FileCustomizationTest(
         
         // Act
         var customFilterParams = new CustomFilterParameters(enabled: true);
-        await Assert.ThrowsAsync<Docspace.Client.ApiException>(
+        await Assert.ThrowsAsync<ApiException>(
             async () => await _filesFilesApi.SetCustomFilterTagAsync(file.Id, customFilterParams, TestContext.Current.CancellationToken));
     }
     

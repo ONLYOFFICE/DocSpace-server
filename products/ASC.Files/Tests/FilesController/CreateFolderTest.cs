@@ -105,7 +105,7 @@ public class CreateFolderTest(
         var folderRequest = new CreateFolder("Test Folder");
         
         // Act & Assert
-        await Assert.ThrowsAsync<Docspace.Client.ApiException>(
+        await Assert.ThrowsAsync<ApiException>(
             async () => await _filesFoldersApi.CreateFolderAsync(
                 Random.Shared.Next(10000, 20000), 
                 folderRequest, 
@@ -116,7 +116,7 @@ public class CreateFolderTest(
     [MemberData(nameof(SystemFolderTypesData))]
     public async Task CreateFolder_InSystemFolder_Owner_ReturnsOk(FolderType folderType)
     {
-        var exception = await Assert.ThrowsAsync<Docspace.Client.ApiException>(async () => await CreateFolder("Test System Folder", folderType, Initializer.Owner));
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await CreateFolder("Test System Folder", folderType, Initializer.Owner));
 
         exception.ErrorCode.Should().Be(403);
     }
@@ -131,7 +131,7 @@ public class CreateFolderTest(
         var folderRequest = new CreateFolder(longFolderName);
         
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<Docspace.Client.ApiException>(
+        var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesFoldersApi.CreateFolderAsync(
                 await GetFolderIdAsync(FolderType.USER, Initializer.Owner), 
                 folderRequest, 

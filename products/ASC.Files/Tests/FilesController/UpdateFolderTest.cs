@@ -67,7 +67,7 @@ public class UpdateFolderTest(
         var updateParams = new CreateFolder(longFolderName);
         
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<Docspace.Client.ApiException>(
+        var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesFoldersApi.RenameFolderAsync(
                 createdFolder.Id, 
                 updateParams, 
@@ -99,7 +99,7 @@ public class UpdateFolderTest(
         results.Should().NotContain(x => !string.IsNullOrEmpty(x.Error));
         
         // Verify folder no longer exists or has been moved to trash
-        await Assert.ThrowsAsync<Docspace.Client.ApiException>(async () => 
+        await Assert.ThrowsAsync<ApiException>(async () => 
             await _filesFoldersApi.GetFolderInfoAsync(folder.Id, TestContext.Current.CancellationToken));
     }
     

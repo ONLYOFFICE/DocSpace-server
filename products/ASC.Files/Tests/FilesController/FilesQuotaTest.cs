@@ -236,4 +236,84 @@ public class FilesQuotaTest(
         resetResult[0].Id.Should().Be(room.Id);
         resetResult[0].QuotaLimit.Should().Be(defaultQuotaLimit);
     }
+    
+    [Fact]
+    public async Task CreateFile_InRoomWithDefaultBigQuota_SuccessfullyUploads()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        
+        var defaultQuotaLimit = 1073741824; // 1 GB
+        await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(new QuotaSettingsRequestsDto(true, new QuotaSettingsRequestsDtoDefaultQuota(defaultQuotaLimit)), TestContext.Current.CancellationToken);
+        
+        // Create a room
+        var roomTitle = "Room for Quota Test " + Guid.NewGuid().ToString()[..8];
+        var createdRoom = (await _filesRoomsApi.CreateRoomAsync(
+            new CreateRoomRequestDto(roomTitle, roomType: RoomType.VirtualDataRoom), 
+            TestContext.Current.CancellationToken)).Response;
+        
+        const string fileName = "Test Document.docx";
+        _ = await CreateFile(fileName, createdRoom.Id);
+        
+        // Verify a file exists in the room's contents
+        var roomFiles = (await _filesFoldersApi.GetFolderByFolderIdAsync(
+            createdRoom.Id,
+            cancellationToken: TestContext.Current.CancellationToken)).Response;
+            
+        roomFiles.Should().NotBeNull();
+        roomFiles.Files.Should().NotBeEmpty();
+        roomFiles.Files.Should().Contain(f => f.Title == fileName);
+    }
+    
+    [Fact]
+    public async Task CreateFile_InRoomWithSmallerQuota_SuccessfullyUploads()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        
+        var defaultQuotaLimit = 1073741824; // 1 GB
+        await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(new QuotaSettingsRequestsDto(true, new QuotaSettingsRequestsDtoDefaultQuota(defaultQuotaLimit)), TestContext.Current.CancellationToken);
+       
+        // Set a smaller quota for the room (100 KB)
+        var smallQuotaLimit = 102400; // 100 KB
+        
+        // Create a room
+        var roomTitle = "Room for Quota Test " + Guid.NewGuid().ToString()[..8];
+        var createdRoom = (await _filesRoomsApi.CreateRoomAsync(
+            new CreateRoomRequestDto(roomTitle, roomType: RoomType.VirtualDataRoom, quota: smallQuotaLimit), 
+            TestContext.Current.CancellationToken)).Response;
+        
+        const string fileName = "Test Document.docx";
+        _ = await CreateFile(fileName, createdRoom.Id);
+        
+        // Verify a file exists in the room's contents
+        var roomFiles = (await _filesFoldersApi.GetFolderByFolderIdAsync(
+            createdRoom.Id,
+            cancellationToken: TestContext.Current.CancellationToken)).Response;
+            
+        roomFiles.Should().NotBeNull();
+        roomFiles.Files.Should().NotBeEmpty();
+        roomFiles.Files.Should().Contain(f => f.Title == fileName);
+    }
+    
+    [Fact]
+    public async Task CreateFile_InRoomWithSmallerQuotaThenFileSize_ReturnsFail()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        
+        var defaultQuotaLimit = 1073741824; // 1 GB
+        await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(new QuotaSettingsRequestsDto(true, new QuotaSettingsRequestsDtoDefaultQuota(defaultQuotaLimit)), TestContext.Current.CancellationToken);
+       
+        // Set a smaller quota for the room (1 B)
+        var minimalQuotaLimit = 1; // 1 B
+        
+        // Create a room
+        var roomTitle = "Room for Quota Test " + Guid.NewGuid().ToString()[..8];
+        var createdRoom = (await _filesRoomsApi.CreateRoomAsync(
+            new CreateRoomRequestDto(roomTitle, roomType: RoomType.VirtualDataRoom, quota: minimalQuotaLimit), 
+            TestContext.Current.CancellationToken)).Response;
+        
+        await Assert.ThrowsAsync<ApiException>(async () => await CreateFile("Test Document.docx", createdRoom.Id));
+    }
 }
