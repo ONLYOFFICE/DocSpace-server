@@ -24,17 +24,25 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-extern alias ASCWebApi;
-extern alias ASCPeople;
 extern alias ASCFilesService;
-using ASC.Files.Tests.Factory;
 
-namespace ASC.Files.Tests;
+namespace ASC.Files.Tests.Factory;
 
-[CollectionDefinition("Test Collection")]
-public class SharedTestCollection : 
-    ICollectionFixture<FilesApiFactory>, 
-    ICollectionFixture<WepApiFactory>, 
-    ICollectionFixture<PeopleFactory>,
-    ICollectionFixture<FilesServiceFactory>
-    ;
+public class FilesServiceFactory : WebApplicationFactory<FilesServiceProgram>, IAsyncLifetime
+{    
+    protected override IHost CreateHost(IHostBuilder builder)
+    {
+        builder.ConfigureHostConfiguration(configBuilder =>
+        {
+            configBuilder.AddInMemoryCollection(Initializer.GlobalSettings);
+        });
+
+        return base.CreateHost(builder);
+    }
+
+    public ValueTask InitializeAsync()
+    {
+        _ = CreateClient();
+        return ValueTask.CompletedTask;
+    }
+}
