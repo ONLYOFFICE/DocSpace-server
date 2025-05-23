@@ -30,7 +30,6 @@ namespace ASC.Web.Api.Controllers;
 /// Third-party API.
 ///</summary>
 ///<name>thirdparty</name>
-[ApiExplorerSettings(IgnoreApi = true)]
 [Scope]
 [DefaultRoute]
 [ApiController]
@@ -84,6 +83,7 @@ public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper) : Contr
     /// </summary>
     /// <short>Get the confirmation code</short>
     /// <path>api/2.0/thirdparty/{provider}/code</path>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("ThirdParty")]
     [SwaggerResponse(200, "Confirmation code", typeof(object))]
     [SwaggerResponse(400, "Error")]

@@ -60,7 +60,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     public async Task<Folder<string>> GetFolderAsync(string folderId)
     {
         var folder = dao.ToFolder(await dao.GetFolderAsync(folderId));
-        if (folder == null)
+        if (folder == null || !string.IsNullOrEmpty(folder.Error))
         {
             if (dao.IsRoom(folderId))
             {

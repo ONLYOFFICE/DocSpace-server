@@ -36,7 +36,7 @@ public class RemovePortalWorker(
 
     public async Task StartAsync(int tenantId)
     {
-        await using (await distributedLockProvider.TryAcquireLockAsync($"lock_removePortal"))
+        await using (await distributedLockProvider.TryAcquireLockAsync($"lock_removePortal_{tenantId}"))
         {
             var item = (await _queue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenantId);
 

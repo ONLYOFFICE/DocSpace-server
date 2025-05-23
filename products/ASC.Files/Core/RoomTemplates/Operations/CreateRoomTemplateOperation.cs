@@ -127,7 +127,16 @@ public class CreateRoomTemplateOperation : DistributedTaskProgress
             }
             if (_groups != null)
             {
-                wrappers = _groups.Select(e => new AceWrapper { Id = e, Access = FileShare.Read, SubjectType = SubjectType.Group }).ToList();
+                var groupWrappers = _groups.Select(e => new AceWrapper { Id = e, Access = FileShare.Read, SubjectType = SubjectType.Group }).ToList();
+
+                if (wrappers == null)
+                {
+                    wrappers = groupWrappers;
+                }
+                else
+                {
+                    wrappers.AddRange(groupWrappers);
+                }
             }
 
             if (wrappers != null)
