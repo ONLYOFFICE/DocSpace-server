@@ -77,7 +77,7 @@ public class TenantManager(
         return tenantService.GetTenantAsync(tenantId);
     }
 
-    public async Task<Tenant> GetTenantAsync(string domain)
+    public async Task<Tenant> GetTenantAsync(string domain, bool firstIfNotFoundForStandalone = true)
     {
         if (string.IsNullOrEmpty(domain))
         {
@@ -99,10 +99,10 @@ public class TenantManager(
                 t = await tenantService.GetTenantAsync(domain[..(domain.Length - baseUrl.Length - 1)]);
             }
         }
-        
+         
         t ??= await tenantService.GetTenantAsync(domain);
-        
-        if (t == null && coreBaseSettings.Standalone && !isAlias)
+         
+        if (t == null && coreBaseSettings.Standalone && !isAlias && firstIfNotFoundForStandalone)
         {
             t = await tenantService.GetTenantForStandaloneWithoutAliasAsync(domain);
         }
@@ -229,7 +229,7 @@ public class TenantManager(
         if (!string.IsNullOrEmpty(origin))
         {
             var originUri = new Uri(origin);
-            tenant = await GetTenantAsync(originUri.Host);
+            tenant = await GetTenantAsync(originUri.Host, firstIfNotFoundForStandalone: false);
         }
 
         return tenant;
