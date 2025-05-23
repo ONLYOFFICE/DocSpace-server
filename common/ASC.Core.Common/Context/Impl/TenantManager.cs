@@ -220,6 +220,21 @@ public class TenantManager(
         return null;
     }
 
+    private async Task<Tenant> GetTenantByOrigin(HttpContext context)
+    {
+        Tenant tenant = null;
+
+        string origin = context.Request.Headers.Origin;
+
+        if (!string.IsNullOrEmpty(origin))
+        {
+            var originUri = new Uri(origin);
+            tenant = await GetTenantAsync(originUri.Host);
+        }
+
+        return tenant;
+    }
+
     public void SetCurrentTenant(Tenant tenant)
     {
         if (tenant != null)
@@ -241,21 +256,19 @@ public class TenantManager(
         Tenant tenant = null;
         if (context != null)
         {
-
-            tenant = await GetTenantAsync(context.Request.Url().Host);
-
-            if (tenant == null)
+            if (coreBaseSettings.Standalone)
             {
-                string origin = context.Request.Headers.Origin;
+                tenant = await GetTenantByOrigin(context);
+            }
 
-                if (!string.IsNullOrEmpty(origin))
-                {
-                    var originUri = new Uri(origin);
-                    tenant = await GetTenantAsync(originUri.Host);
-                }
+            tenant = tenant ?? await GetTenantAsync(context.Request.Url().Host);
+
+            if (tenant == null && !coreBaseSettings.Standalone)
+            {
+                tenant = await GetTenantByOrigin(context);
             }
         }
-        
+
         SetCurrentTenant(tenant);
     }
 
