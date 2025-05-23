@@ -396,7 +396,7 @@ public class PaymentController(
     [SwaggerResponse(200, "Payment information about the current portal quota", typeof(QuotaDto))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("quota")]
-    public async Task<QuotaDto> GetQuotaAsync(PaymentInformationRequestDto inDto)
+    public async Task<QuotaDto> GetQuotaInformationAsync(PaymentInformationRequestDto inDto)
     {
         if (await userManager.IsGuestAsync(securityContext.CurrentAccount.ID))
         {

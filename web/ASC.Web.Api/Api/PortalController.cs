@@ -87,7 +87,7 @@ public class PortalController(
     [SwaggerResponse(200, "Current portal information", typeof(TenantDto))]
     [AllowNotPayment]
     [HttpGet("")]
-    public async Task<TenantDto> Get()
+    public async Task<TenantDto> GetPortalInformation()
     {
         var tenant = tenantManager.GetCurrentTenant();   
 
