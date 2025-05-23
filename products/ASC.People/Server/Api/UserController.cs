@@ -25,7 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Core.Common.Identity;
-using ASC.Core.Users;
 
 namespace ASC.People.Api;
 
@@ -573,7 +572,7 @@ public class UserController(
         await CheckReassignProcessAsync([user.Id]);
 
         var userName = user.DisplayUserName(false, displayUserSettingsHelper);
-        var groups = await userManager.GetUserGroupsAsync(user.Id);
+        var groups = await _userManager.GetUserGroupsAsync(user.Id);
 
         await client.DeleteClientsAsync(user.Id);
         await _userPhotoManager.RemovePhotoAsync(user.Id);
@@ -592,7 +591,7 @@ public class UserController(
             await socketManager.DeleteUserAsync(user.Id);
             foreach (var group in groups)
             {
-                var groupInfo = await userManager.GetGroupInfoAsync(group.ID);
+                var groupInfo = await _userManager.GetGroupInfoAsync(group.ID);
                 var groupDto = await groupFullDtoHelper.Get(groupInfo, true);
                 await socketManager.UpdateGroupAsync(groupDto);
             }
