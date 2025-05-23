@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,47 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Web.Core.RemovePortal;
-
-[Singleton]
-public class RemovePortalWorker(
-    IDistributedTaskQueueFactory queueFactory,
-    IServiceProvider serviceProvider,
-    IDistributedLockProvider distributedLockProvider)
+namespace ASC.Web.Core.Log;
+internal static partial class ApiSystemHelperLogger
 {
-    private readonly DistributedTaskQueue<RemovePortalOperation> _queue = queueFactory.CreateQueue<RemovePortalOperation>();
+    [LoggerMessage(LogLevel.Error, "AddTenantToCache {tenantDomain} {tenantRegion} status code: {statusCode}")]
+    public static partial void ErrorAddTenantToCache(this ILogger<ApiSystemHelper> logger, string tenantDomain, string tenantRegion, string statusCode);
 
-    public async Task StartAsync(int tenantId)
-    {
-        await using (await distributedLockProvider.TryAcquireLockAsync($"lock_removePortal_{tenantId}"))
-        {
-            var item = (await _queue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenantId);
-
-            if (item is { IsCompleted: true })
-            {
-                await _queue.DequeueTask(item.Id);
-                item = null;
-            }
-            if (item == null)
-            {
-                item = serviceProvider.GetService<RemovePortalOperation>();
-
-                item.Init(tenantId);
-
-                await _queue.EnqueueTask(item);
-            }
-
-            await item.PublishChanges();
-        }
-    }
-
-    public async Task Stop()
-    {
-        var tasks = await _queue.GetAllTasks(DistributedTaskQueue<RemovePortalOperation>.INSTANCE_ID);
-
-        foreach (var t in tasks)
-        {
-            await _queue.DequeueTask(t.Id);
-        }
-    }
+    [LoggerMessage(LogLevel.Error, "RemoveTenantFromCache {tenantDomain} status code: {statusCode}")]
+    public static partial void ErrorRemoveTenantFromCache(this ILogger<ApiSystemHelper> logger, string tenantDomain, string statusCode);
 }

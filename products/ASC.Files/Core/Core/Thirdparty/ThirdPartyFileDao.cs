@@ -197,11 +197,19 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
             yield break;
         }
 
-        //Get only files
-        var filesWait = await Dao.GetItemsAsync(parentId, false);
-        var files = filesWait.Select(item => Dao.ToFile(item as TFile)).ToAsyncEnumerable();
+        List<TItem> filesWait;
 
-        //Filter
+        try
+        {
+            filesWait = await Dao.GetItemsAsync(parentId, false);
+        }
+        catch
+        {
+            filesWait = []; 
+        }
+        
+        var files = filesWait.Select(item => Dao.ToFile(item as TFile)).ToAsyncEnumerable();
+        
         if (subjectID != Guid.Empty)
         {
             files = files.WhereAwait(async x => subjectGroup

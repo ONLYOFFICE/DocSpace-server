@@ -1280,8 +1280,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                             _ => false
                         };
                     }
-
-                    if (fileFolder is { FolderType: FolderType.FillingFormsRoom })
+                    else
                     {
                         switch (action)
                         {

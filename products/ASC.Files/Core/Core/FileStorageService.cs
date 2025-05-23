@@ -3783,6 +3783,10 @@ public class FileStorageService //: IFileStorageService
                                         case EventType.Update:
                                             await filesMessageService.SendAsync(MessageAction.RoomUpdateAccessForUser, entry, user.Id, ace.Access, pastRecord.Share, true, name);
                                             await notifyClient.SendRoomUpdateAccessForUser(folder, user, ace.Access);
+                                            
+                                            var role = FileShareExtensions.GetAccessString(ace.Access, true);
+                                            var url = commonLinkUtility.GetFullAbsolutePath($"rooms/shared/{folder.Id}");
+                                            await studioNotifyService.SendMsgUserRoleChangedAsync(user, folder.Title, url, role);
                                             break;
                                     }
                                 }

@@ -119,7 +119,7 @@ static file class Queries
     public static readonly Func<TenantDbContext, int, Task<DbTenant>> TenantAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (TenantDbContext ctx, int tenantId) =>
-                ctx.Tenants.FirstOrDefault(r => r.Id == tenantId));
+                ctx.Tenants.AsTracking().FirstOrDefault(r => r.Id == tenantId));
 
     public static readonly Func<TenantDbContext, int, Task<string>> GetAliasAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

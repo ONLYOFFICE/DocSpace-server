@@ -1205,6 +1205,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Guest.
+        /// </summary>
+        public static string RoleEnum_Guest {
+            get {
+                return ResourceManager.GetString("RoleEnum_Guest", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Viewer.
         /// </summary>
         public static string RoleEnum_Read {
@@ -1219,6 +1228,15 @@ namespace ASC.Files.Core.Resources {
         public static string RoleEnum_Review {
             get {
                 return ResourceManager.GetString("RoleEnum_Review", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Room Admin.
+        /// </summary>
+        public static string RoleEnum_RoomAdmin {
+            get {
+                return ResourceManager.GetString("RoleEnum_RoomAdmin", resourceCulture);
             }
         }
         

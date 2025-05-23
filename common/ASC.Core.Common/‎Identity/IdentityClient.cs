@@ -57,7 +57,7 @@ public class IdentityClient(MachinePseudoKeys machinePseudoKeys,
         var currentUserId = securityContext.CurrentAccount.ID;
         var userInfo = await userManager.GetUsersAsync(currentUserId);
 
-        var type = userId == Guid.Empty ? await userManager.GetUserTypeAsync(currentUserId) : await userManager.GetUserTypeAsync(userId);
+        var type = await userManager.GetUserTypeAsync(currentUserId);
         var isAdmin = type is EmployeeType.DocSpaceAdmin;
         var isGuest = type is EmployeeType.Guest;
         userId = userId == Guid.Empty ? currentUserId : userId;
@@ -117,7 +117,7 @@ public class IdentityClient(MachinePseudoKeys machinePseudoKeys,
         }
     }
 
-    public async Task DeleteTenantClientsAsync()
+    public async Task DeleteTenantClientsAsync(bool throwIfNotSuccess = true)
     {
         if (!string.IsNullOrEmpty(Url))
         {
@@ -132,7 +132,7 @@ public class IdentityClient(MachinePseudoKeys machinePseudoKeys,
             request.Headers.Add("x-signature", jwt);
             var response = await httpClient.SendAsync(request);
 
-            if (!response.IsSuccessStatusCode)
+            if (!response.IsSuccessStatusCode && throwIfNotSuccess)
             {
                 throw new InvalidOperationException(response.ReasonPhrase);
             }

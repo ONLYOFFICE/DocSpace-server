@@ -641,6 +641,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         {
             result.CanEdit = true;
             result.CanFill = false;
+            result.EditorType = editorType;
         }
         return result;
     }

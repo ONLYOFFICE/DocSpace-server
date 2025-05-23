@@ -77,17 +77,6 @@ public class UserSocketManager(ITariffService tariffService,
     public async Task DeleteUserAsync(Guid userId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
-        var userInfo = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
-        var dto = await employeeFullDtoHelper.GetFullAsync(userInfo);
-        if (dto.Groups != null)
-        {
-            foreach (var group in dto.Groups)
-            {
-                var groupInfo = await userManager.GetGroupInfoAsync(group.Id);
-                var groupDto = await groupFullDtoHelper.Get(groupInfo, true);
-                await UpdateGroupAsync(groupDto);
-            }
-        }
         await MakeRequest("delete-user", new { tenantId, userId });
     }
 

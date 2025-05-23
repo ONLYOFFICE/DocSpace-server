@@ -84,7 +84,8 @@ public class UserController(
     UserSocketManager socketManager,
     GlobalFolderHelper globalFolderHelper,
     UserWebhookManager webhookManager,
-    IdentityClient client)
+    IdentityClient client,
+    GroupFullDtoHelper groupFullDtoHelper)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
 {
     /// <summary>
@@ -614,6 +615,7 @@ public class UserController(
         await CheckReassignProcessAsync([user.Id]);
 
         var userName = user.DisplayUserName(false, displayUserSettingsHelper);
+        var groups = await _userManager.GetUserGroupsAsync(user.Id);
 
         await client.DeleteClientsAsync(user.Id);
         await _userPhotoManager.RemovePhotoAsync(user.Id);
@@ -630,6 +632,12 @@ public class UserController(
         else
         {
             await socketManager.DeleteUserAsync(user.Id);
+            foreach (var group in groups)
+            {
+                var groupInfo = await _userManager.GetGroupInfoAsync(group.ID);
+                var groupDto = await groupFullDtoHelper.Get(groupInfo, true);
+                await socketManager.UpdateGroupAsync(groupDto);
+            }
         }
 
         await webhookManager.PublishAsync(WebhookTrigger.UserDeleted, user);
@@ -1590,15 +1598,19 @@ public class UserController(
             {
                 continue;
             }
-            var userType = await _userManager.GetUserTypeAsync(u.Id); 
 
-            switch (userType)
+            if (currentUser.Id != u.Id)
             {
-                case EmployeeType.RoomAdmin when currentUserType is not EmployeeType.DocSpaceAdmin:
-                case EmployeeType.DocSpaceAdmin when !currentUser.IsOwner(tenant):
-                    continue;
+                var userType = await _userManager.GetUserTypeAsync(u.Id);
+
+                switch (userType)
+                {
+                    case EmployeeType.RoomAdmin when currentUserType is not EmployeeType.DocSpaceAdmin:
+                    case EmployeeType.DocSpaceAdmin when !currentUser.IsOwner(tenant):
+                        continue;
+                }
             }
-            
+
             u.ActivationStatus = inDto.ActivationStatus;
             await _userManager.UpdateUserInfoAsync(u);
 
@@ -1976,6 +1988,7 @@ public class UserController(
                 await socketManager.UpdateUserAsync(user);
             }
             await socketManager.ChangeUserTypeAsync(user, true);
+            await studioNotifyService.SendMsgUserTypeChangedAsync(user, FilesCommonResource.ResourceManager.GetString("RoleEnum_" + inDto.Type.ToStringFast()));
         }
 
         messageService.Send(MessageAction.UsersUpdatedType, MessageTarget.Create(users.Select(x => x.Id)),

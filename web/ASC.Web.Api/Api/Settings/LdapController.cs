@@ -161,7 +161,6 @@ public class LdapController(
     /// Synchronize with LDAP server
     /// </short>
     /// <path>api/2.0/settings/ldap/sync</path>
-    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
     [SwaggerResponse(200, "LDAP operation status", typeof(LdapStatusDto))]
     [HttpGet("sync")]

@@ -243,7 +243,6 @@ public class StorageController(ILoggerProvider option,
     /// </summary>
     /// <short>Get the storage encryption settings</short>
     /// <path>api/2.0/settings/encryption/settings</path>
-    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Encryption")]
     [SwaggerResponse(200, "Storage encryption settings", typeof(EncryptionSettings))]
     [SwaggerResponse(403, "No permissions to perform this action")]

@@ -32,7 +32,6 @@ namespace ASC.Web.Api.Controllers;
 /// Portal information access.
 ///</summary>
 ///<name>portal</name>
-[ApiExplorerSettings(IgnoreApi = true)]
 [Scope]
 [DefaultRoute("payment")]
 [ApiController]
