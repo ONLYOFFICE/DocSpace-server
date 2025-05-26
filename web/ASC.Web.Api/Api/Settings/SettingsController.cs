@@ -108,7 +108,7 @@ public partial class SettingsController(MessageService messageService,
             EnableAdmMess = studioAdminMessageSettings.Enable || await tenantExtra.IsNotPaidAsync(),
             CookieSettingsEnabled = tenantCookieSettings.Enabled,
             UserNameRegex = userFormatter.UserNameRegex.ToString(),
-            DisplayAbout = (!coreBaseSettings.Standalone && !coreBaseSettings.CustomMode) || !quota.Branding || (quota.Branding && !companyWhiteLabelSettings.HideAbout),
+            DisplayAbout = (!coreBaseSettings.Standalone && !coreBaseSettings.CustomMode) || !quota.Branding || !companyWhiteLabelSettings.HideAbout,
             DeepLink = new DeepLinkDto
             {
                 AndroidPackageName = configuration["deeplink:androidpackagename"] ?? "",
