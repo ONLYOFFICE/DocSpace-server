@@ -194,7 +194,7 @@ else
     AddProjectWithDefaultConfiguration<ASC_Web_Studio>();
 
     builder.AddNpmApp(ascSocketio, "../ASC.Socket.IO/", "start:build")
-        .WithEnvironment("Redis:Hosts:0:Host", () => SubstituteLocalhost(redisHost) ?? string.Empty)
+        .WithEnvironment("Redis:Hosts:0:Host", () => redisHost ?? string.Empty)
         .WithEnvironment("Redis:Hosts:0:Port", () => redisPort ?? string.Empty)
         .WithHttpEndpoint(targetPort: socketIoPort)
         .WithHttpHealthCheck("/health")
@@ -300,7 +300,19 @@ return;
 
 void AddProjectWithDefaultConfiguration<TProject>(bool includeHealthCheck = true) where TProject : IProjectMetadata, new()
 {
-    var project = builder.AddProject<TProject>(GetProjectName<TProject>());
+    var project = builder
+        .AddProject<TProject>(GetProjectName<TProject>())
+        .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
+
+    if (int.TryParse(builder.Configuration["Replicas"], out var replicas) && replicas > 1)
+    {
+        project.WithReplicas(replicas);
+    }
+    else
+    {
+        project.WithEnvironment("core:hosting:singletonMode", true.ToString());
+    }
+    
     AddBaseConfig(project, includeHealthCheck);
 }
 
@@ -327,6 +339,7 @@ void AddProjectDocker<TProject>(int projectPort, bool includeHealthCheck = true)
         .WithEnvironment("log:name", $"/{name.ToLower()["asc-".Length..].Replace('_', '.')}")
         .WithEnvironment("$STORAGE_ROOT", "/data")
         .WithEnvironment("web:hub:internal", $"http://{ascSocketio}:9899")
+        .WithEnvironment("core:hosting:singletonMode", true.ToString())
         .WithArgs($"{dllPath}{name.Replace('_', '.')}.dll")
         .WithEntrypoint("dotnet");
 
