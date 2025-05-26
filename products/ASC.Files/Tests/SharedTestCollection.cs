@@ -27,13 +27,14 @@
 extern alias ASCWebApi;
 extern alias ASCPeople;
 extern alias ASCFilesService;
+using ASC.Files.Tests.Factory;
 
 namespace ASC.Files.Tests;
 
 [CollectionDefinition("Test Collection")]
 public class SharedTestCollection : 
     ICollectionFixture<FilesApiFactory>, 
-    ICollectionFixture<WebApplicationFactory<WebApiProgram>>, 
-    ICollectionFixture<WebApplicationFactory<PeopleProgram>>,
-    ICollectionFixture<WebApplicationFactory<FilesServiceProgram>>
+    ICollectionFixture<WepApiFactory>, 
+    ICollectionFixture<PeopleFactory>,
+    ICollectionFixture<FilesServiceFactory>
     ;

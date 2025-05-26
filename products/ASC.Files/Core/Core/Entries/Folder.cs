@@ -93,6 +93,7 @@ public enum FolderType
 
     [SwaggerEnum(Description = "Form filling folder done")]
     FormFillingFolderDone = 27,
+    
     [SwaggerEnum(Description = "Form filling folder in progress")]
     FormFillingFolderInProgress = 28,
 
@@ -100,7 +101,10 @@ public enum FolderType
     VirtualDataRoom = 29,
         
     [SwaggerEnum(Description = "Room templates folder")]
-    RoomTemplates = 30
+    RoomTemplates = 30,
+
+    [SwaggerEnum(Description = "AI room")]
+    AiRoom = 31
 }
 
 /// <summary>

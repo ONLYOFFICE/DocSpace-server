@@ -549,8 +549,8 @@ public class StudioPeriodicNotify(ILoggerProvider log,
         {
             try
             {
-                var defaultRebranding = await tenantLogoManager.IsDefaultLogoSettingsAsync();
                 await tenantManager.SetCurrentTenantAsync(tenant.Id);
+                var defaultRebranding = await tenantLogoManager.IsDefaultLogoSettingsAsync();
                 var client = workContext.RegisterClient(serviceProvider, studioNotifyHelper.NotifySource);
 
                 var tariff = await tariffService.GetTariffAsync(tenant.Id);

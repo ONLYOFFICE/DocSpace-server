@@ -63,8 +63,7 @@ class CachedQuotaService() : IQuotaService
             quotas = await _service.GetTenantQuotasAsync();
             if (_quotaCacheEnabled)
             {
-                var tags = quotas.Select(quota => CacheExtention.GetTenantQuotaTag(quota.TenantId)).ToList();
-                await _cache.SetAsync(cacheKey, quotas, _cacheExpiration, tags: tags);
+                await _cache.SetAsync(cacheKey, quotas, _cacheExpiration, [CacheExtention.GetTenantQuotaTag((await _geolocationHelper.GetIPGeolocationFromHttpContextAsync()).Key)]);
             }
         }
 
@@ -80,7 +79,7 @@ class CachedQuotaService() : IQuotaService
     {
         var q = await _service.SaveTenantQuotaAsync(quota);
 
-        var tag = CacheExtention.GetTenantQuotaTag(quota.TenantId);
+        var tag = CacheExtention.GetTenantQuotaTag((await _geolocationHelper.GetIPGeolocationFromHttpContextAsync()).Key);
         await _cache.RemoveByTagAsync(tag);
 
         return q;

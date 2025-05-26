@@ -80,6 +80,11 @@ public class QuotaDto
     /// The tenant custom quota.
     /// </summary>
     public TenantQuotaSettings TenantCustomQuota { get; set; }
+
+    /// <summary>
+    /// The due date.
+    /// </summary>
+    public DateTime? DueDate { get; set; }
 }
 
 /// <summary>
@@ -151,6 +156,11 @@ public class PriceDto
     /// The currency symbol.
     /// </summary>
     public string CurrencySymbol { get; set; }
+
+    /// <summary>
+    /// The three-character ISO 4217 currency symbol.
+    /// </summary>
+    public string ISOCurrencySymbol { get; set; }
 }
 
 /// <summary>

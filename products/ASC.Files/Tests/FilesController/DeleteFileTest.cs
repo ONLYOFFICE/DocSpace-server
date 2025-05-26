@@ -49,14 +49,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Tests.Factory;
+
 namespace ASC.Files.Tests.FilesController;
 
 [Collection("Test Collection")]
 public class DeleteFileTest(
     FilesApiFactory filesFactory, 
-    WebApplicationFactory<WebApiProgram> apiFactory, 
-    WebApplicationFactory<PeopleProgram> peopleFactory,
-    WebApplicationFactory<FilesServiceProgram> filesServiceProgram) 
+    WepApiFactory apiFactory, 
+    PeopleFactory peopleFactory,
+    FilesServiceFactory filesServiceProgram) 
     : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
 {
     [Fact]
@@ -74,7 +76,7 @@ public class DeleteFileTest(
         fileToDelete.Should().NotContain(x => !string.IsNullOrEmpty(x.Error));
         
         // Verify file no longer exists or has been moved to trash
-        await Assert.ThrowsAsync<Docspace.Client.ApiException>(async () => 
+        await Assert.ThrowsAsync<ApiException>(async () => 
             await _filesFilesApi.GetFileInfoAsync(createdFile.Id, cancellationToken: TestContext.Current.CancellationToken));
     }
     

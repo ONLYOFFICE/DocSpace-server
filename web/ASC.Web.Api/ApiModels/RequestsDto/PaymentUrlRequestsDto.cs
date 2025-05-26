@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using static ASC.Core.Billing.BillingClient;
+
 namespace ASC.Web.Api.Models;
 
 /// <summary>
@@ -51,4 +53,37 @@ public class QuantityRequestDto
     /// The mapping of item identifiers with their respective quantities in the payment.
     /// </summary>
     public Dictionary<string, int> Quantity { get; set; }
+
+    /// <summary>
+    /// The type of action performed on a quantity of product.
+    /// </summary>
+    public ProductQuantityType ProductQuantityType { get; set; }
+}
+
+/// <summary>
+/// Chechout setup URL request parameters
+/// </summary>
+public class ChechoutSetupUrlRequestsDto
+{
+    /// <summary>
+    /// Back URL
+    /// </summary>
+    [FromQuery]
+    public string BackUrl { get; set; }
+}
+
+/// <summary>
+/// Put money on deposit request parameters
+/// </summary>
+public class TopUpDepositRequestDto
+{
+    /// <summary>
+    /// Amount
+    /// </summary>
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// Currency
+    /// </summary>
+    public string Currency { get; set; }
 }

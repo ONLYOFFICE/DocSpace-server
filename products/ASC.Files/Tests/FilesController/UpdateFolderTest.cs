@@ -24,14 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Tests.Factory;
+
 namespace ASC.Files.Tests.FilesController;
 
 [Collection("Test Collection")]
 public class UpdateFolderTest(
     FilesApiFactory filesFactory, 
-    WebApplicationFactory<WebApiProgram> apiFactory, 
-    WebApplicationFactory<PeopleProgram> peopleFactory,
-    WebApplicationFactory<FilesServiceProgram> filesServiceProgram) 
+    WepApiFactory apiFactory, 
+    PeopleFactory peopleFactory,
+    FilesServiceFactory filesServiceProgram) 
     : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
 {
     [Fact]
@@ -65,7 +67,7 @@ public class UpdateFolderTest(
         var updateParams = new CreateFolder(longFolderName);
         
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<Docspace.Client.ApiException>(
+        var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesFoldersApi.RenameFolderAsync(
                 createdFolder.Id, 
                 updateParams, 
@@ -97,7 +99,7 @@ public class UpdateFolderTest(
         results.Should().NotContain(x => !string.IsNullOrEmpty(x.Error));
         
         // Verify folder no longer exists or has been moved to trash
-        await Assert.ThrowsAsync<Docspace.Client.ApiException>(async () => 
+        await Assert.ThrowsAsync<ApiException>(async () => 
             await _filesFoldersApi.GetFolderInfoAsync(folder.Id, TestContext.Current.CancellationToken));
     }
     

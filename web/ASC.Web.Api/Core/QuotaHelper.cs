@@ -37,9 +37,9 @@ public class QuotaHelper(
     UserManager userManager, 
     AuthContext authContext)
 {
-    public async IAsyncEnumerable<QuotaDto> GetQuotasAsync()
+    public async IAsyncEnumerable<QuotaDto> GetQuotasAsync(bool wallet = false)
     {
-        var quotaList = await tenantManager.GetTenantQuotasAsync(false);
+        var quotaList = await tenantManager.GetTenantQuotasAsync(false, wallet);
         var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
         
         foreach (var quota in quotaList)
@@ -71,10 +71,12 @@ public class QuotaHelper(
             Price = new PriceDto
             {
                 Value = quota.Price,
-                CurrencySymbol = quota.PriceCurrencySymbol
+                CurrencySymbol = quota.PriceCurrencySymbol,
+                ISOCurrencySymbol = quota.PriceISOCurrencySymbol
             },
 
-            Features = features
+            Features = features,
+            DueDate = quota.DueDate
         };
 
         if (coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Statistic)
@@ -109,19 +111,26 @@ public class QuotaHelper(
                             {
                                 return false;
                             }
-                            
+
+                            if (quota.Wallet && !quota.Features.Contains(r.Name))
+                            {
+                                return false;
+                            }
+
                             return r.Visible;
                         })
                     .OrderBy(r => r.Order))
         {
+            var featureName = $"{feature.Name}{(quota.Wallet ? "_wallet" : "")}";
+
             var result = new TenantQuotaFeatureDto
             {
-                Title = Resource.ResourceManager.GetString($"TariffsFeature_{feature.Name}")
+                Title = Resource.ResourceManager.GetString($"TariffsFeature_{featureName}")
             };
 
             if (feature.Paid)
             {
-                result.PriceTitle = Resource.ResourceManager.GetString($"TariffsFeature_{feature.Name}_price_count");
+                result.PriceTitle = Resource.ResourceManager.GetString($"TariffsFeature_{featureName}_price_count");
             }
 
             result.Id = feature.Name;
@@ -162,7 +171,7 @@ public class QuotaHelper(
                     result.Used = new FeatureUsedDto
                     {
                         Value = isUsedAvailable ? used : null,
-                        Title = Resource.ResourceManager.GetString($"TariffsFeature_used_{feature.Name}")
+                        Title = Resource.ResourceManager.GetString($"TariffsFeature_used_{featureName}")
                     };
                 }
             }

@@ -53,7 +53,7 @@ public class UrlShortRewriter
         }
         else
         {
-            throw new ArgumentException("Bad Request");
+            httpContext.Response.Redirect($"{httpContext.Request.Scheme}://{httpContext.Request.Host}");
         }
     }
 }
