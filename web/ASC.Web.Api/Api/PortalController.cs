@@ -518,12 +518,14 @@ public class PortalController(
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
+        var tenantDomain = tenant.GetTenantDomain(coreSettings);
+
         await client.DeleteTenantClientsAsync();
         await tenantManager.RemoveTenantAsync(tenant);
 
         if (!coreBaseSettings.Standalone)
         {
-            await apiSystemHelper.RemoveTenantFromCacheAsync(tenant.GetTenantDomain(coreSettings));
+            await apiSystemHelper.RemoveTenantFromCacheAsync(tenantDomain);
         }
 
         try
@@ -649,12 +651,14 @@ public class PortalController(
 
         await DemandPermissionToDeleteTenantAsync(tenant);
 
+        var tenantDomain = tenant.GetTenantDomain(coreSettings);
+
         await client.DeleteTenantClientsAsync();
         await tenantManager.RemoveTenantAsync(tenant);
 
         if (!coreBaseSettings.Standalone)
         {
-            await apiSystemHelper.RemoveTenantFromCacheAsync(tenant.GetTenantDomain(coreSettings));
+            await apiSystemHelper.RemoveTenantFromCacheAsync(tenantDomain);
         }
 
         var owner = await userManager.GetUsersAsync(tenant.OwnerId);

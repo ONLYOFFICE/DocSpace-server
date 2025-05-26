@@ -63,6 +63,9 @@ internal static partial class StudioPeriodicNotifyLogger
     [LoggerMessage(LogLevel.Information, "Total send count: {sendCount}")]
     public static partial void InformationTotalSendCount(this ILogger logger, int sendCount);
 
-    [LoggerMessage(LogLevel.Information, "Start removing unused free tenant: {tenantId}")]
-    public static partial void InformationStartRemovingUnusedFreeTenant(this ILogger logger, int tenantId);
+    [LoggerMessage(LogLevel.Information, "Start removing unused free tenant: {tenantId} {tenantDomain}")]
+    public static partial void InformationStartRemovingUnusedFreeTenant(this ILogger logger, int tenantId, string tenantDomain);
+
+    [LoggerMessage(LogLevel.Information, "Start removing unused paid tenant: {tenantId} {tenantDomain}")]
+    public static partial void InformationStartRemovingUnusedPaidTenant(this ILogger logger, int tenantId, string tenantDomain);
 }
