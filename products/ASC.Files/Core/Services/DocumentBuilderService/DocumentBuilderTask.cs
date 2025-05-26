@@ -86,7 +86,6 @@ public abstract class DocumentBuilderTask<TId, TData> : DistributedTaskProgress
                 var securityContext = scope.ServiceProvider.GetService<SecurityContext>();
                 await securityContext.AuthenticateMeWithoutCookieAsync(_userId);
             }
-
             var filesLinkUtility = scope.ServiceProvider.GetService<FilesLinkUtility>();
             logger = scope.ServiceProvider.GetService<ILogger<DocumentBuilderTask<TId, TData>>>();
 
