@@ -150,7 +150,8 @@ if (isDocker)
         .WithImageTag("dev")
         .WithEnvironment("log:name", "socketIO")   
         .WithEnvironment("basePath", $"http://{openRestyContainer}:{restyPort.ToString()}")
-        .WithReference(redis, "redis")
+        .WithEnvironment("Redis:Hosts:0:Host", () => SubstituteLocalhost(redisHost) ?? string.Empty)
+        .WithEnvironment("Redis:Hosts:0:Port", () => redisPort ?? string.Empty)
         .WithHttpEndpoint(socketIoPort, socketIoPort, isProxied: false)
         .WithHttpHealthCheck("/health")
         .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
@@ -193,7 +194,8 @@ else
     AddProjectWithDefaultConfiguration<ASC_Web_Studio>();
 
     builder.AddNpmApp(ascSocketio, "../ASC.Socket.IO/", "start:build")
-        .WithReference(redis, "redis")
+        .WithEnvironment("Redis:Hosts:0:Host", () => SubstituteLocalhost(redisHost) ?? string.Empty)
+        .WithEnvironment("Redis:Hosts:0:Port", () => redisPort ?? string.Empty)
         .WithHttpEndpoint(targetPort: socketIoPort)
         .WithHttpHealthCheck("/health")
         .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
