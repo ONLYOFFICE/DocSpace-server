@@ -279,7 +279,6 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     /// <short>Get user access rights by file ID</short>
     /// <path>api/2.0/files/file/{fileId}/sharedusers</path>
     /// <collection>list</collection>
-    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "List of users with their access rights to the file", typeof(List<MentionWrapper>))]
     [HttpGet("{fileId}/sharedusers")]
@@ -437,7 +436,6 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     /// <short>Get the document service URL</short>
     /// <path>api/2.0/files/docservice</path>
     /// <requiresAuthorization>false</requiresAuthorization>
-    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "The document service URL with the editor version specified", typeof(DocServiceUrlDto))]
     [AllowAnonymous]

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,30 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AuditTrail;
+namespace ASC.Core.Billing;
 
-[Scope]
-public class AuditReportUploader(GlobalFolderHelper globalFolderHelper,
-    ILogger<AuditReportUploader> logger,
-    FileUploader fileUploader,
-    FilesLinkUtility filesLinkUtility,
-    CommonLinkUtility commonLinkUtility)
+internal class AccountingConfiguration
 {
-    public async Task<string> UploadCsvReport(Stream stream, string reportName)
-    {
-        try
-        {
-            var file = await fileUploader.ExecAsync(await globalFolderHelper.FolderMyAsync, reportName, stream.Length, stream, true);
-            var fileUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebEditorUrl(file.Id));
-
-            fileUrl += $"&options={{\"codePage\":{Encoding.UTF8.CodePage}}}";
-
-            return fileUrl;
-        }
-        catch (Exception ex)
-        {
-            logger.ErrorWhileUploading(ex);
-            throw;
-        }
-    }
+    public string Url { get; set; }
+    public string Key { get; set; }
+    public string Secret { get; set; }
 }

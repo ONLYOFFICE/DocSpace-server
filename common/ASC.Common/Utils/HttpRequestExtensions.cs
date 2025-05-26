@@ -34,20 +34,6 @@ public static class HttpRequestExtensions
     {
         var url = request != null ? new Uri(request.GetDisplayUrl()) : null;
 
-        if (request != null && request.Headers.TryGetValue(HeaderNames.Origin, out var originHeader))
-        {
-            if (Uri.TryCreate(originHeader, UriKind.Absolute, out var urlOrigin))
-            {
-                var result = new UriBuilder(url)
-                {
-                    Scheme = urlOrigin.Scheme,
-                    Host = urlOrigin.Host,
-                    Port = urlOrigin.Port
-                };
-                return result.Uri;
-            }
-        }
-
         if (!string.IsNullOrEmpty(url?.Query))
         {
             var queryParams = HttpUtility.ParseQueryString(url.Query);

@@ -24,14 +24,18 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Tests.Factory;
+
+using User = ASC.Files.Tests.Data.User;
+
 namespace ASC.Files.Tests.FilesController;
 
 [Collection("Test Collection")]
 public class BaseTest(
     FilesApiFactory filesFactory, 
-    WebApplicationFactory<WebApiProgram> apiFactory, 
-    WebApplicationFactory<PeopleProgram> peopleFactory,
-    WebApplicationFactory<FilesServiceProgram> filesServiceProgram
+    WepApiFactory apiFactory, 
+    PeopleFactory peopleFactory,
+    FilesServiceFactory filesServiceProgram
     ) : IAsyncLifetime
 {
     protected readonly HttpClient _filesClient = filesFactory.HttpClient;
@@ -40,6 +44,8 @@ public class BaseTest(
     protected readonly FilesOperationsApi _filesOperationsApi = filesFactory.FilesOperationsApi;
     protected readonly FilesRoomsApi _filesRoomsApi = filesFactory.FilesRoomsApi;
     protected readonly FilesSettingsApi _filesSettingsApi = filesFactory.FilesSettingsApi;
+    protected readonly FilesQuotaApi _filesQuotaApi = filesFactory.FilesQuotaApi;
+    protected readonly SettingsQuotaApi _settingsQuotaApi = apiFactory.SettingsQuotaApi;
     private readonly Func<Task> _resetDatabase = filesFactory.ResetDatabaseAsync;
 
     public async ValueTask InitializeAsync()
@@ -104,7 +110,7 @@ public class BaseTest(
     {
         await _filesClient.Authenticate(user);
         
-        return (await _filesRoomsApi.CreateRoomAsync(new CreateRoomRequestDto(roomTitle, indexing: true, roomType: RoomType.VirtualDataRoom), TestContext.Current.CancellationToken)).Response;
+        return (await _filesRoomsApi.CreateRoomAsync(new CreateRoomRequestDto(roomTitle, roomType: RoomType.VirtualDataRoom), TestContext.Current.CancellationToken)).Response;
     }
     protected async Task<List<FileOperationDto>?> WaitLongOperation()
     {

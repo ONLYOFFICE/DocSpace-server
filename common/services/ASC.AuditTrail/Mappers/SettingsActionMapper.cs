@@ -93,12 +93,13 @@ internal class ProductsActionMapper : IModuleActionMapper
                     MessageAction.CustomQuotaPerRoomDefault, MessageAction.CustomQuotaPerRoomChanged, MessageAction.CustomQuotaPerRoomDisabled, MessageAction.CustomQuotaPerUserDefault, MessageAction.CustomQuotaPerUserChanged, MessageAction.CustomQuotaPerUserDisabled,
                     MessageAction.DevToolsAccessSettingsChanged,
                     MessageAction.WebhookUpdated,
-                    MessageAction.ApiKeyUpdated
+                    MessageAction.ApiKeyUpdated,
+                    MessageAction.CustomerWalletToppedUp, MessageAction.CustomerWalletTopUpSettingsUpdated, MessageAction.CustomerSubscriptionUpdated
                 ]
             },
             {
                 ActionType.Create, [
-                    MessageAction.AdministratorAdded, MessageAction.ProductAddedAdministrator, MessageAction.WebhookCreated, MessageAction.ApiKeyCreated
+                    MessageAction.AdministratorAdded, MessageAction.ProductAddedAdministrator, MessageAction.WebhookCreated, MessageAction.ApiKeyCreated, MessageAction.CustomerOperationPerformed
                 ]
             },
             {
@@ -118,7 +119,7 @@ internal class ProductsActionMapper : IModuleActionMapper
             },
             {
                 ActionType.Download, [
-                    MessageAction.LoginHistoryReportDownloaded, MessageAction.AuditTrailReportDownloaded
+                    MessageAction.LoginHistoryReportDownloaded, MessageAction.AuditTrailReportDownloaded, MessageAction.CustomerOperationsReportDownloaded
                 ]
             }
         };

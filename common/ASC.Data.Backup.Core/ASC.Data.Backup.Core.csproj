@@ -99,6 +99,9 @@
     <EmbeddedResource Update="BackupResource.sl.resx">
       <DependentUpon>BackupResource.resx</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Update="BackupResource.sq-AL.resx">
+      <DependentUpon>BackupResource.resx</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Update="BackupResource.sr-Cyrl-RS.resx">
       <DependentUpon>BackupResource.resx</DependentUpon>
     </EmbeddedResource>

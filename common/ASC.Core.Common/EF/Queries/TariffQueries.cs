@@ -24,6 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Linq;
+
+using Microsoft.EntityFrameworkCore.Internal;
+
 namespace ASC.Core.Common.EF;
 
 public partial class CoreDbContext
@@ -62,8 +66,10 @@ static file class Queries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (CoreDbContext ctx, int tenantId, int id) =>
                 ctx.TariffRows
-                    .Where(r => r.TariffId == id && r.TenantId == tenantId)
-                    .Select(r => new Billing.Quota(r.Quota, r.Quantity)));
+                    .Join(ctx.Quotas, tr => tr.Quota, q => q.TenantId, (tariffRow, quota) => new { tariffRow, quota })
+                    .Where(r => r.tariffRow.TariffId == id && r.tariffRow.TenantId == tenantId)
+                    .OrderBy(r => r.quota.Wallet)
+                    .Select(r => new Billing.Quota(r.tariffRow.Quota, r.tariffRow.Quantity, r.quota.Wallet, r.tariffRow.DueDate, r.tariffRow.NextQuantity)));
 
     public static readonly Func<CoreDbContext, int, Task<int>> DeleteTariffs =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((CoreDbContext ctx, int tenantId) => 

@@ -24,9 +24,14 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AuditTrail.Log;
-internal static partial class AuditReportCreatorLogger
-{
-    [LoggerMessage(LogLevel.Error, "Error while creating login report:")]
-    public static partial void ErrorWhileCreating(this ILogger<AuditReportCreator> logger, Exception exception);
-}
+extern alias ASCWebApi;
+extern alias ASCPeople;
+using ASC.People.Tests.Factory;
+
+namespace ASC.People.Tests;
+
+[CollectionDefinition("Test Collection")]
+public class SharedTestCollection :     
+    ICollectionFixture<PeopleFactory>,
+    ICollectionFixture<WepApiFactory>
+    ;

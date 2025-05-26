@@ -32,11 +32,11 @@ namespace ASC.Data.Backup.IntegrationEvents.EventHandling;
 
 [Scope]
 public class BackupRequestedIntegrationEventHandler(
-        BackupAjaxHandler backupAjaxHandler,
         ILogger<BackupRequestedIntegrationEventHandler> logger,
         TenantManager tenantManager,
         SecurityContext securityContext,
-        BackupWorker backupWorker)
+        BackupWorker backupWorker,
+        BackupService backupService)
     : IIntegrationEventHandler<BackupRequestIntegrationEvent>
 {
     public async Task Handle(BackupRequestIntegrationEvent @event)
@@ -68,7 +68,7 @@ public class BackupRequestedIntegrationEventHandler(
             }
             else
             {
-                await backupAjaxHandler.StartBackupAsync(@event.StorageType, @event.StorageParams, @event.ServerBaseUri, @event.Dump, true, @event.TaskId);
+                await backupService.StartBackupAsync(@event.StorageType, @event.StorageParams, @event.ServerBaseUri, @event.Dump, true, @event.TaskId);
             }
         }
     }

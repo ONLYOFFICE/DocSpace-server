@@ -24,14 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Tests.Factory;
+
 namespace ASC.Files.Tests.FilesController;
 
 [Collection("Test Collection")]
 public class FormFilesTest(
     FilesApiFactory filesFactory,
-    WebApplicationFactory<WebApiProgram> apiFactory,
-    WebApplicationFactory<PeopleProgram> peopleFactory,
-    WebApplicationFactory<FilesServiceProgram> filesServiceProgram)
+    WepApiFactory apiFactory,
+    PeopleFactory peopleFactory,
+    FilesServiceFactory filesServiceProgram)
     : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
 {
     [Fact]
@@ -69,7 +71,7 @@ public class FormFilesTest(
             // If the file is properly recognized as a form, we can check its roles
             roles.Should().NotBeNull();
         }
-        catch (Docspace.Client.ApiException ex)
+        catch (ApiException ex)
         {
             // For a non-form file or if form functionality is not fully set up in test environment
             // API might return an error - this is expected
@@ -96,7 +98,7 @@ public class FormFilesTest(
             // If the file is properly recognized as a form draft, we'll get a session ID
             result.Should().NotBeNull();
         }
-        catch (Docspace.Client.ApiException ex)
+        catch (ApiException ex)
         {
             // For a non-form file or if form functionality is not fully set up in test environment
             // API might return an error - this is expected
@@ -125,7 +127,7 @@ public class FormFilesTest(
             var updatedFile = await GetFile(file.Id);
             updatedFile.Should().NotBeNull();
         }
-        catch (Docspace.Client.ApiException ex)
+        catch (ApiException ex)
         {
             // For a non-form file or if form functionality is not fully set up in test environment
             // API might return an error - this is expected

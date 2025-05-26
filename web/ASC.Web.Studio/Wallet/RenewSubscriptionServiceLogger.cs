@@ -24,37 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Globalization;
-using System.Text;
+namespace ASC.Web.Studio.Wallet;
 
-using CsvHelper;
-
-namespace ASC.AuditTrail;
-
-[Scope]
-public class AuditReportCreator(ILogger<AuditReportCreator> logger)
+internal static partial class RenewSubscriptionServiceLogger
 {
-    public Stream CreateCsvReport<TEvent>(IEnumerable<TEvent> events) where TEvent : BaseEvent
-    {
-        try
-        {
-            var stream = new MemoryStream();
-            var writer = new StreamWriter(stream, Encoding.UTF8);
-            var csv = new CsvWriter(writer, CultureInfo.CurrentCulture);
+    [LoggerMessage(LogLevel.Information, "Found {count} wallet quotas close to expiration")]
+    public static partial void InfoRenewSubscriptionServiceFound(this ILogger<RenewSubscriptionService> logger, int count);
 
-            csv.Context.RegisterClassMap(new BaseEventMap<TEvent>());
+    [LoggerMessage(LogLevel.Information, "Subscription renewed: tenant {tenantId}, {description}")]
+    public static partial void InfoRenewSubscriptionServiceDone(this ILogger<RenewSubscriptionService> logger, int tenantId, string description);
 
-            csv.WriteHeader<TEvent>();
-            csv.NextRecord();
-            csv.WriteRecords(events);
-            writer.Flush();
-
-            return stream;
-        }
-        catch (Exception ex)
-        {
-            logger.ErrorWhileCreating(ex);
-            throw;
-        }
-    }
+    [LoggerMessage(LogLevel.Error, "Subscription renewal failed: tenant {tenantId}")]
+    public static partial void ErrorRenewSubscriptionServiceFail(this ILogger<RenewSubscriptionService> logger, int tenantId);
 }

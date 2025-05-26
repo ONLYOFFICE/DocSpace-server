@@ -67,6 +67,11 @@ public class TenantQuota : IMapFrom<DbQuota>
     public string PriceCurrencySymbol { get; set; }
 
     /// <summary>
+    /// The tenant price three-character ISO 4217 currency symbol.
+    /// </summary>
+    public string PriceISOCurrencySymbol { get; set; }
+
+    /// <summary>
     /// The tenant product ID.
     /// </summary>
     public string ProductId { get; set; }
@@ -75,6 +80,16 @@ public class TenantQuota : IMapFrom<DbQuota>
     /// Specifies if the tenant quota is visible or not.
     /// </summary>
     public bool Visible { get; set; }
+
+    /// <summary>
+    /// Specifies if the tenant quota applies to the wallet or not
+    /// </summary>
+    public bool Wallet { get; set; }
+
+    /// <summary>
+    /// The quota due date.
+    /// </summary>
+    public DateTime? DueDate { get; set; }
 
     [JsonIgnore]
     public IReadOnlyList<TenantQuotaFeature> TenantQuotaFeatures { get; private set; }
@@ -434,6 +449,8 @@ public class TenantQuota : IMapFrom<DbQuota>
         Visible = quota.Visible;
         MaxFileSize = quota.MaxFileSize;
         Features = quota.Features;
+        Wallet = quota.Wallet;
+        DueDate = quota.DueDate;
     }
 
     public override int GetHashCode()
@@ -475,10 +492,28 @@ public class TenantQuota : IMapFrom<DbQuota>
             return quota;
         }
 
+        if (quota.Wallet && quota.DueDate.HasValue && quota.DueDate.Value < DateTime.UtcNow)
+        {
+            return old;
+        }
+
         var newQuota = new TenantQuota(old);
-        newQuota.Price += quota.Price;
-        newQuota.Visible &= quota.Visible;
         newQuota.ProductId = "";
+
+        if (quota.Wallet)
+        {
+            if (quota.DueDate.HasValue)
+            {
+                newQuota.DueDate = newQuota.DueDate.HasValue
+                    ? DateTime.Compare(newQuota.DueDate.Value, quota.DueDate.Value) < 0 ? newQuota.DueDate.Value : quota.DueDate.Value
+                    : quota.DueDate.Value;
+            }
+        }
+        else
+        {
+            newQuota.Price += quota.Price;
+            newQuota.Visible &= quota.Visible;
+        }
 
         foreach (var f in newQuota.TenantQuotaFeatures)
         {
