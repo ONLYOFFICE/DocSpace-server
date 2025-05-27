@@ -165,7 +165,7 @@ public class SecurityController(PermissionContext permissionContext,
 
         await DemandAuditPermissionAsync();
 
-        return (await auditEventsRepository.GetByFilterAsync(inDto.UserId, inDto.ProductType, inDto.ModuleType, inDto.ActionType, inDto.Action, inDto.EntryType, inDto.Target, inDto.From, inDto.To, startIndex, limit)).Select(x => new AuditEventDto(x, auditActionMapper, apiDateTimeHelper));
+        return (await auditEventsRepository.GetByFilterAsync(inDto.UserId, inDto.LocationType, inDto.ActionType, inDto.Action, inDto.EntryType, inDto.Target, inDto.From, inDto.To, startIndex, limit)).Select(x => new AuditEventDto(x, auditActionMapper, apiDateTimeHelper));
     }
 
     /// <summary>
@@ -187,7 +187,7 @@ public class SecurityController(PermissionContext permissionContext,
             Actions = MessageActionExtensions.GetNames(),
             ActionTypes = ActionTypeExtensions.GetNames(),
             ProductTypes = ProductTypeExtensions.GetNames(),
-            ModuleTypes = ModuleTypeExtensions.GetNames(),
+            ModuleTypes = LocationTypeExtensions.GetNames(),
             EntryTypes = EntryTypeExtensions.GetNames()
         };
     }
@@ -212,10 +212,10 @@ public class SecurityController(PermissionContext permissionContext,
             {
                 ProductType = r.Product.ToStringFast(),
                 Modules = r.Mappers
-                .Where(m => !inDto.ModuleType.HasValue || m.Module == inDto.ModuleType.Value)
+                .Where(m => !inDto.LocationType.HasValue || m.Location == inDto.LocationType.Value)
                 .Select(x => new
                 {
-                    ModuleType = x.Module.ToStringFast(),
+                    ModuleType = x.Location.ToStringFast(),
                     Actions = x.Actions.Select(a => new
                     {
                         MessageAction = a.Key.ToString(),

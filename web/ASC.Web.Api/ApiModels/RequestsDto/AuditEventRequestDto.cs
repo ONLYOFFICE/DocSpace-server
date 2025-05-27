@@ -38,16 +38,10 @@ public class AuditEventRequestDto
     public Guid UserId { get; set; }
 
     /// <summary>
-    /// The type of product related to the audit event.
-    /// </summary>
-    [FromQuery(Name = "productType")]
-    public ProductType ProductType { get; set; }
-
-    /// <summary>
-    /// The module within the product where the audit event occurred.
+    /// The location where the audit event occurred.
     /// </summary>
     [FromQuery(Name = "moduleType")]
-    public ModuleType ModuleType { get; set; }
+    public LocationType LocationType { get; set; }
 
     /// <summary>
     /// The type of action performed in the audit event (e.g., Create, Update, Delete).

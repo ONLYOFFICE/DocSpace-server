@@ -144,8 +144,7 @@ internal class EventTypeConverter(
             }
 
             result.ActionTypeText = actionMapper.GetActionTypeText(map);
-            result.Product = actionMapper.GetProductText(map);
-            result.Module = actionMapper.GetModuleText(map);
+            result.Location = actionMapper.GetLocationText(map);
         }
         
         result.Date = tenantUtil.DateTimeFromUtc(result.Date);
@@ -173,7 +172,7 @@ internal class EventTypeConverter(
 
         if (string.IsNullOrEmpty(result.Context))
         {
-            result.Context = result.Module;
+            result.Context = result.Location;
         }
 
         return result;

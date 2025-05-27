@@ -999,4 +999,7 @@
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Customer subscription updated</value>
   </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Location</value>
+  </data>
 </root>

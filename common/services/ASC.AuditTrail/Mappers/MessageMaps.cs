@@ -30,7 +30,7 @@ public class MessageMaps
 {
     public ActionType ActionType { get; }
     public ProductType ProductType { get; protected set; }
-    public ModuleType ModuleType { get; }
+    public LocationType LocationType { get; }
     public EntryType EntryType1 { get; }
     public EntryType EntryType2 { get; }
 
@@ -40,7 +40,7 @@ public class MessageMaps
     public MessageMaps(string actionTextResourceName,
         ActionType? actionType = null,
         ProductType? productType = null,
-        ModuleType? moduleType = null,
+        LocationType? moduleType = null,
         EntryType? entryType1 = null,
         EntryType? entryType2 = null)
     {
@@ -58,7 +58,7 @@ public class MessageMaps
 
         if (moduleType.HasValue)
         {
-            ModuleType = moduleType.Value;
+            LocationType = moduleType.Value;
         }
 
         if (entryType1.HasValue)
@@ -108,11 +108,11 @@ public class MessageMaps
         }
     }
 
-    public string GetModuleText()
+    public string GetLocationText()
     {
         try
         {
-            return AuditReportResource.ResourceManager.GetString(ModuleType + "Module");
+            return AuditReportResource.ResourceManager.GetString(LocationType + "Module");
         }
         catch
         {
@@ -124,7 +124,7 @@ public class MessageMaps
 internal class MessageMapsDictionary() : IDictionary<MessageAction, MessageMaps>
 {
     private readonly ProductType _productType;
-    private readonly ModuleType _moduleType;
+    private readonly LocationType _moduleType;
     private IDictionary<MessageAction, MessageMaps> Actions { get; } = new Dictionary<MessageAction, MessageMaps>();
 
     public ICollection<MessageAction> Keys
@@ -171,7 +171,7 @@ internal class MessageMapsDictionary() : IDictionary<MessageAction, MessageMaps>
         }
     }
 
-    public MessageMapsDictionary(ProductType productType, ModuleType moduleType) : this()
+    public MessageMapsDictionary(ProductType productType, LocationType moduleType) : this()
     {
         _productType = productType;
         _moduleType = moduleType;
@@ -249,7 +249,7 @@ internal class MessageMapsDictionary() : IDictionary<MessageAction, MessageMaps>
         EntryType? entryType1 = null,
         EntryType? entryType2 = null,
         ProductType? productType = null,
-        ModuleType? moduleType = null)
+        LocationType? moduleType = null)
     {
         var map = new MessageMaps(action.ToStringFast(), actionType, productType ?? _productType, moduleType ?? _moduleType, entryType1, entryType2);
         Actions.Add(new KeyValuePair<MessageAction, MessageMaps>(action, map));

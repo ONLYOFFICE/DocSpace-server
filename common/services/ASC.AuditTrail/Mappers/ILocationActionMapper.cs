@@ -24,98 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AuditTrail.Types;
+namespace ASC.AuditTrail.Mappers;
 
-/// <summary>
-/// The module type.
-/// </summary>
-[EnumExtensions]
-public enum ModuleType
+public interface ILocationActionMapper
 {
-    [SwaggerEnum("None")]
-    None,
-
-    [SwaggerEnum("Files")]
-    Files,
-
-    [SwaggerEnum("Folders")]
-    Folders,
-
-    [SwaggerEnum("Documents settings")]
-    DocumentsSettings,
-
-    [SwaggerEnum("Companies")]
-    Companies,
-
-    [SwaggerEnum("Persons")]
-    Persons,
-
-    [SwaggerEnum("Contacts")]
-    Contacts,
-
-    [SwaggerEnum("Crm tasks")]
-    CrmTasks,
-
-    [SwaggerEnum("Opportunities")]
-    Opportunities,
-
-    [SwaggerEnum("Invoices")]
-    Invoices,
-
-    [SwaggerEnum("Cases")]
-    Cases,
-
-    [SwaggerEnum("Common crm settings")]
-    CommonCrmSettings,
-
-    [SwaggerEnum("Contacts settings")]
-    ContactsSettings,
-
-    [SwaggerEnum("Contact types")]
-    ContactTypes,
-
-    [SwaggerEnum("Invoice settings")]
-    InvoiceSettings,
-
-    [SwaggerEnum("Other crm settings")]
-    OtherCrmSettings,
-
-    [SwaggerEnum("Users")]
-    Users,
-
-    [SwaggerEnum("Groups")]
-    Groups,
-
-    [SwaggerEnum("Projects")]
-    Projects,
-
-    [SwaggerEnum("Milestones")]
-    Milestones,
-
-    [SwaggerEnum("Tasks")]
-    Tasks,
-
-    [SwaggerEnum("Discussions")]
-    Discussions,
-
-    [SwaggerEnum("Time tracking")]
-    TimeTracking,
-
-    [SwaggerEnum("Reports")]
-    Reports,
-
-    [SwaggerEnum("Projects settings")]
-    ProjectsSettings,
-
-    [SwaggerEnum("General")]
-    General,
-
-    [SwaggerEnum("Products")]
-    Products,
-
-    [SwaggerEnum("Rooms")]
-    Rooms,
-    
-    [SwaggerEnum("OAuth")]
-    OAuth
+    LocationType Location { get; }
+    IDictionary<MessageAction, MessageMaps> Actions { get; }
 }
