@@ -121,7 +121,19 @@ public class ApiContext : ICloneable
         }
 
         Count = _maxCount;
-        var query = _httpContextAccessor.HttpContext.Request.Query;
+
+        IQueryCollection query;
+
+        try
+        {
+            query = _httpContextAccessor.HttpContext.Request.Query;
+        }
+        catch (Exception)
+        {
+            //Access to disposed context
+            return;
+        }
+
         //Try parse values
         var count = query.GetRequestValue("count");
         if (!string.IsNullOrEmpty(count) && ulong.TryParse(count, out var countParsed))
