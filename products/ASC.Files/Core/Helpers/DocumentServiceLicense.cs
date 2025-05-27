@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Polly;
+
 namespace ASC.Files.Core.Helpers;
 
 [Scope]
@@ -75,44 +77,58 @@ public class DocumentServiceLicense(ICache cache,
 
     public async Task<(bool, string)> ValidateLicense(License license)
     {
-        var attempt = 0;
-
-        while (attempt <= 3)
+        try
         {
-            await Task.Delay((int)(Math.Pow(2, attempt) * 1000));
+            var retryPolicy = Policy.Handle<Exception>()
+                .WaitAndRetryAsync(
+                    3,
+                    retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
+                    onRetry: (response, delay, retryAttempt, context) =>
+                    {
+                        context["retryAttempt"] = retryAttempt;
+                    });
 
-            var commandResponse = await GetDocumentServiceLicenseAsync(false);
-
-            if (commandResponse == null)
+            var response = await retryPolicy.ExecuteAsync(async (context) =>
             {
-                return (true, null);
-            }
+                var retryAttempt = (int)context["retryAttempt"];
 
-            if (commandResponse.Error != ErrorTypes.NoError)
-            {
-                return (false, commandResponse.ErrorString);
-            }
+                var commandResponse = await GetDocumentServiceLicenseAsync(false);
 
-            if (commandResponse.License.ResourceKey == license.ResourceKey ||
-                commandResponse.License.CustomerId == license.CustomerId)
-            {
-                if (commandResponse.Server == null)
+                if (commandResponse == null)
                 {
-                    return (false, "Server is null");
+                    return (true, null);
                 }
 
-                return commandResponse.Server.ResultType == CommandResponse.ServerInfo.ResultTypes.Success ||
-                    commandResponse.Server.ResultType == CommandResponse.ServerInfo.ResultTypes.SuccessLimit
-                    ? (true, null)
-                    : (false, $"ResultType is {commandResponse.Server.ResultType}");
-            }
-            else
-            {
-                attempt += 1;
-            }
-        }
+                if (commandResponse.Error != ErrorTypes.NoError)
+                {
+                    return (false, commandResponse.ErrorString);
+                }
 
-        return (false,  $"{attempt} failed attempts");
+                if (commandResponse.License.ResourceKey == license.ResourceKey ||
+                    commandResponse.License.CustomerId == license.CustomerId)
+                {
+                    if (commandResponse.Server == null)
+                    {
+                        return (false, "Server is null");
+                    }
+
+                    return commandResponse.Server.ResultType == CommandResponse.ServerInfo.ResultTypes.Success ||
+                        commandResponse.Server.ResultType == CommandResponse.ServerInfo.ResultTypes.SuccessLimit
+                        ? (true, null)
+                        : (false, $"ResultType is {commandResponse.Server.ResultType}");
+                }
+
+                throw new Exception($"{retryAttempt} failed attempts");
+
+            }, new Polly.Context { { "retryAttempt", 0 } });
+
+            return response;
+
+        }
+        catch (Exception ex)
+        {
+            return (false, ex.Message);
+        }
     }
 
     public async Task<(Dictionary<string, DateTime>, License)> GetLicenseQuotaAsync()
