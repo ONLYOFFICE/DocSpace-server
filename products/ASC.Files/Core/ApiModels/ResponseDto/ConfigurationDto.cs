@@ -554,7 +554,7 @@ public class CustomizationConfigConverter<T>(
 
         var result = new CustomizationConfigDto
         {
-            About = source.About,
+            About = await source.IsAboutPageVisible(),
             Customer = coreBaseSettings.Standalone ? await customerConfigConverter.Convert(source.Customer) : null,
             Feedback = await source.GetFeedback(),
             Forcesave = source.GetForceSave(file),

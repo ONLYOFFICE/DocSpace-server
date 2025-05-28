@@ -37,6 +37,7 @@ public class CompanyWhiteLabelSettingsConverter(CompanyWhiteLabelSettingsHelper 
             Address = source.Address,
             CompanyName = source.CompanyName,
             Email = source.Email,
+            HideAbout = source.HideAbout,
             IsDefault = companyWhiteLabelSettingsHelper.IsDefault(source),
             IsLicensor = source.IsLicensor,
             Phone = source.Phone,
