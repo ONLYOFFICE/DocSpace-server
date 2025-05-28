@@ -161,7 +161,7 @@ public class RenewSubscriptionService(
 
             var tariffService = scope.ServiceProvider.GetRequiredService<ITariffService>();
 
-            var result = await tariffService.PaymentChangeAsync(data.TenantId, quantity, BillingClient.ProductQuantityType.Renew);
+            var result = await tariffService.PaymentChangeAsync(data.TenantId, quantity, ProductQuantityType.Renew);
             if (result)
             {
                 var newTariff = await tariffService.GetTariffAsync(data.TenantId, refresh: false);

@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using static ASC.Core.Billing.BillingClient;
-
 namespace ASC.Core.Billing;
 
 [Singleton]
@@ -259,14 +257,8 @@ public class TariffService(
         return tariff;
     }
 
-    public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType)
+    private async Task<IEnumerable<string>> CheckQuotaAndGetProductIds(int tenantId, Dictionary<string, int> quantity)
     {
-        if (quantity == null || quantity.Count == 0
-            || !billingClient.Configured)
-        {
-            return false;
-        }
-
         var allQuotas = (await quotaService.GetTenantQuotasAsync()).Where(q => !string.IsNullOrEmpty(q.ProductId)).ToList();
         var newQuotas = quantity.Keys.Select(name => allQuotas.Find(q => q.Name == name)).ToList();
 
@@ -314,6 +306,18 @@ public class TariffService(
 
         var productIds = newQuotas.Select(q => q.ProductId);
 
+        return productIds;
+    }
+
+    public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType)
+    {
+        if (quantity == null || quantity.Count == 0 || !billingClient.Configured)
+        {
+            return false;
+        }
+
+        var productIds = await CheckQuotaAndGetProductIds(tenantId, quantity);
+
         try
         {
             var changed = await billingClient.ChangePaymentAsync(await coreSettings.GetKeyAsync(tenantId), productIds.ToArray(), quantity.Values.ToArray(), productQuantityType);
@@ -335,6 +339,28 @@ public class TariffService(
         return true;
     }
 
+    public async Task<PaymentCalculation> PaymentCalculateAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType)
+    {
+        if (quantity == null || quantity.Count == 0 || !billingClient.Configured)
+        {
+            return null;
+        }
+
+        var productIds = await CheckQuotaAndGetProductIds(tenantId, quantity);
+
+        try
+        {
+            var response = await billingClient.CalculatePaymentAsync(await coreSettings.GetKeyAsync(tenantId), productIds.ToArray(), quantity.Values.ToArray(), productQuantityType);
+
+            return response;
+        }
+        catch (Exception error)
+        {
+            logger.ErrorWithException(error);
+
+            return null;
+        }
+    }
 
     public async Task SetTariffAsync(int tenantId, Tariff tariff, List<TenantQuota> quotas = null)
     {

@@ -171,7 +171,7 @@ public class PaymentController(
             return false;
         }
 
-        var result = await tariffService.PaymentChangeAsync(tenant.Id, inDto.Quantity, BillingClient.ProductQuantityType.Set);
+        var result = await tariffService.PaymentChangeAsync(tenant.Id, inDto.Quantity, ProductQuantityType.Set);
 
         if (result)
         {
@@ -199,7 +199,7 @@ public class PaymentController(
             return false;
         }
 
-        if (inDto.ProductQuantityType is BillingClient.ProductQuantityType.Renew or BillingClient.ProductQuantityType.Sub)
+        if (inDto.ProductQuantityType is ProductQuantityType.Renew or ProductQuantityType.Sub)
         {
             return false;
         }
@@ -231,7 +231,7 @@ public class PaymentController(
             return false;
         }
 
-        if (inDto.ProductQuantityType is BillingClient.ProductQuantityType.Set)
+        if (inDto.ProductQuantityType is ProductQuantityType.Set)
         {
             var tariff = await tariffService.GetTariffAsync(tenant.Id);
 
@@ -279,6 +279,81 @@ public class PaymentController(
         {
             messageService.Send(MessageAction.CustomerSubscriptionUpdated, $"{productName} {productQty}");
         }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Calculate amount of the wallet payment with the parameters specified in the request.
+    /// </summary>
+    /// <short>
+    /// Calculate amount of the wallet payment
+    /// </short>
+    /// <path>api/2.0/portal/payment/calculatewallet</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "Payment calculation", typeof(PaymentCalculation))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpPut("calculatewallet")]
+    public async Task<PaymentCalculation> PaymentCalculateWalletAsync(WalletQuantityRequestDto inDto)
+    {
+        if (!tariffService.IsConfigured())
+        {
+            return null;
+        }
+
+        if (inDto.ProductQuantityType is not ProductQuantityType.Add)
+        {
+            return null;
+        }
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var hasCustomer = await HasCustomer(tenant);
+        if (!hasCustomer)
+        {
+            return null;
+        }
+
+        // TODO: Temporary restriction.
+        // Possibility to buy only one product per transaction.
+        // Wallet tariffs are always available for purchase.
+        if (inDto.Quantity.Count != 1)
+        {
+            return null;
+        }
+
+        var product = inDto.Quantity.First();
+        var productName = product.Key;
+        var productQty = product.Value;
+        var quota = (await quotaService.GetTenantQuotasAsync())
+            .FirstOrDefault(q => !string.IsNullOrEmpty(q.ProductId) && q.Name == productName);
+
+        if (quota == null || !quota.Wallet)
+        {
+            return null;
+        }
+
+        if (!productQty.HasValue || productQty <= 0)
+        {
+            return null;
+        }
+
+        var balance = await tariffService.GetCustomerBalanceAsync(tenant.Id);
+        if (balance == null)
+        {
+            return null;
+        }
+
+        // TODO: support other currencies
+        var subAccount = balance.SubAccounts.FirstOrDefault(x => x.Currency == "USD");
+        if (subAccount == null)
+        {
+            return null;
+        }
+
+        var quantity = new Dictionary<string, int> { { productName, productQty.Value } };
+
+        var result = await tariffService.PaymentCalculateAsync(tenant.Id, quantity, inDto.ProductQuantityType);
 
         return result;
     }
