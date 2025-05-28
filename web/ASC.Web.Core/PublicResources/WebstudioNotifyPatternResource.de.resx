@@ -1072,9 +1072,6 @@ Dieser Link ist nur 7 Tage gültig.</value>
   <data name="subject_saas_user_activation_v1" xml:space="preserve">
     <value>${LetterLogoText} DocSpace beitreten</value>
   </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Ihr ${LetterLogoText} DocSpace-Abonnement läuft in Kürze ab</value>
-  </data>
   <data name="subject_send_whats_new" xml:space="preserve">
     <value>Neues in Ihrem Portal ${__VirtualRootHost} für $Datum</value>
   </data>
@@ -1171,17 +1168,6 @@ Stellen Sie sicher, dass Sie Ihr Business-Abonnement bezahlen, bevor die Nachfri
 
 $OrangeButton
 
-$TrulyYours</value>
-  </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Hallo, $UserName!
- 
-Bitte beachten Sie, dass Ihr ${LetterLogoText} DocSpace-Abonnement in drei Tagen ausläuft. Danach wird die Karenzfrist von $PaymentDelay Tagen aktiviert.
- 
-Wir empfehlen Ihnen, Ihr Business-Abonnement jetzt zu bezahlen und weiterhin alle Vorteile Ihres ${LetterLogoText} DocSpace zu nutzen.
- 
-$OrangeButton
- 
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">

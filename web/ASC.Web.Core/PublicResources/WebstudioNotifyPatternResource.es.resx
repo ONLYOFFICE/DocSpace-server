@@ -1298,17 +1298,6 @@ $OrangeButton
  
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>¡Hola, $UserName!
-
-Por favor, tenga en cuenta que su suscripción a ${LetterLogoText} DocSpace expira en tres días. Después de eso, el período de gracia de $PaymentDelay días se activará.
-
-Recomendamos que pague su suscripción Business ahora para poder seguir usando todas las ventajas de su ${LetterLogoText} DocSpace.
-
-$OrangeButton
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>¡Hola, $UserName!
 
@@ -1431,9 +1420,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>El periodo de gracia para su ${LetterLogoText} DocSpace está activado</value>
-  </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Su suscripción a ${LetterLogoText} DocSpace está a punto de expirar</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>El periodo de gracia para su ${LetterLogoText} DocSpace ha expirado</value>

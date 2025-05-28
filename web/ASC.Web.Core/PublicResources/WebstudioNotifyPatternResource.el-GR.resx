@@ -601,17 +601,6 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Καλησπέρα, $UserName!
-
-Λάβετε υπόψη ότι η συνδρομή σας στο DocSpace του ${LetterLogoText} λήγει σε τρεις ημέρες. Μετά από αυτό, θα ενεργοποιηθεί η περίοδος χάριτος των $PaymentDelay ημερών.
-
-Σας συνιστούμε να πληρώσετε την Επαγγελματική συνδρομή σας τώρα και να συνεχίσετε να χρησιμοποιείτε όλα τα οφέλη του DocSpace σας στο ${LetterLogoText}.
-
-$OrangeButton
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Καλησπέρα, $UserName!
 
@@ -791,9 +780,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
     <value>Το ${LetterLogoText} DocSpace σας θα διαγραφεί</value>
-  </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Η συνδρομή σας στο ${LetterLogoText} DocSpace πρόκειται να λήξει</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Η περίοδος χάριτος για το ${LetterLogoText} DocSpace έληξε</value>

@@ -885,17 +885,6 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>尊敬的$UserName！
-
-您好！请注意，您的 ${LetterLogoText} 协作空间订阅将在三天后到期。之后，$PaymentDelay 天的宽限期将被激活。
-
-我们建议您即刻支付专业版订阅费用，以继续畅享 ${LetterLogoText} 协作空间的所有福利。
-
-$OrangeButton
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>尊敬的$UserName！
 
@@ -1427,9 +1416,6 @@ $OrangeButton
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
     <value>${LetterLogoText} 协作空间宽限期将于明日到期</value>
-  </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>您的 ${LetterLogoText} 协作空间订阅即将到期</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}。邮箱创建</value>

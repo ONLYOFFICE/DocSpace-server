@@ -1320,17 +1320,6 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Здравствуйте, $UserName!
- 
-Обратите внимание, что срок действия вашей подписки на ${LetterLogoText} DocSpace истекает через три дня. После этого будет активирован льготный период на $PaymentDelay дней.
- 
-Мы рекомендуем оплатить подписку на тарифный план Business прямо сейчас и продолжать использовать все преимущества вашего ${LetterLogoText} DocSpace.
- 
-$OrangeButton
- 
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Здравствуйте, $UserName!
  
@@ -1396,9 +1385,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Льготный период для ${LetterLogoText} DocSpace активирован</value>
-  </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Срок действия вашей подписки ${LetterLogoText} DocSpace истекает</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Льготный период для вашего ${LetterLogoText} DocSpace истек</value>

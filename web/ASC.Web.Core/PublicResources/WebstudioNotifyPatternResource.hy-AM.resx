@@ -426,9 +426,6 @@
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Ձեր ${LetterLogoText} DocSpace-ի համար արտոնյալ ժամանակահատվածն ակտիվացված է</value>
   </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Ձեր ${LetterLogoText} DocSpace բաժանորդագրության ժամկետը շուտով կլրանա</value>
-  </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Ձեր ${LetterLogoText} DocSpace-ի արտոնյալ ժամկետը սպառվել է</value>
   </data>
@@ -1438,17 +1435,6 @@ $TrulyYours</value>
 Խնդրում ենք նկատի ունենալ, որ ձեր ${LetterLogoText} DocSpace-ի համար $PaymentDelay‎ օրերի արտոնյալ ժամկետն ակտիվացված է:
 
 Համոզվեք, որ վճարեք ձեր բիզնեսի բաժանորդագրությունը մինչև արտոնյալ ժամկետի ավարտը: Այսպիսով, դուք կկարողանաք հետագայում օգտագործել ձեր ${LetterLogoText} DocSpace-ի բոլոր առավելությունները:
-
-$OrangeButton
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Բարև, $UserName:
-
-Խնդրում ենք հաշվի առնել, որ ձեր ${LetterLogoText} DocSpace բաժանորդագրության ժամկետը լրանում է երեք օրից: Դրանից հետո կակտիվանա $PaymentDelay օրերի արտոնյալ ժամկետը։
-
-Մենք խորհուրդ ենք տալիս վճարել ձեր Business բաժանորդագրությունը հիմա և շարունակել օգտագործել ձեր ${LetterLogoText} DocSpace-ի բոլոր առավելությունները:
 
 $OrangeButton
 

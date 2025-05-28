@@ -1145,17 +1145,6 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Salve, $UserName!
-
-Tieni presente che il tuo abbonamento a ${LetterLogoText} DocSpace scade tra tre giorni. Successivamente, verrà attivato il periodo di grazia di $PaymentDelay giorni.
-
-Ti consigliamo di pagare ora il tuo abbonamento Business e di continuare a utilizzare tutti i vantaggi del tuo spazio documenti di ${LetterLogoText}.
-
-$OrangeButton
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Salve, $UserName!
 
@@ -1458,9 +1447,6 @@ Il tuo portale è di nuovo disponibile.</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Periodo di grazia è stato attivato per il tuo ${LetterLogoText} DocSpace</value>
-  </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Il tuo abbonamento a ${LetterLogoText} DocSpace sta per scadere</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Il periodo di grazia per il tuo ${LetterLogoText} DocSpace è scaduto</value>

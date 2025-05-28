@@ -426,9 +426,6 @@
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Grejs period za vaš ${LetterLogoText} DocSpace aktiviran</value>
   </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Vaša ${LetterLogoText} DocSpace pretplata uskoro ističe</value>
-  </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Grejs period za vaš ${LetterLogoText} DocSpace je istekao</value>
   </data>
@@ -901,18 +898,6 @@ $TrulyYours</value>
 Uzmite u obzir da je grejs period od $PaymentDelay dana za vaš ${LetterLogoText} DocSpace aktiviran.
 
 Obavezno platite svoju Poslovnu pretplatu pre isteka grejs perioda. Tako ćete moći dalje da koristite sve prednosti vašeg ${LetterLogoText} DocSpace-a.
-
-$OrangeButton
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Zdravo, $UserName!
-
-Imajte u vidu da vaša ${LetterLogoText} DocSpace pretplata ističe za tri dana. Nakon toga, grejs period od $PaymentDelay dana će biti aktiviran.
-
-Preporučujemo da sada platite svoju Poslovnu pretplatu i nastavite da koristite sve prednosti svog ${LetterLogoText} DocSpace-a.
-
 
 $OrangeButton
 
