@@ -30,12 +30,11 @@ public class LoginEvent : BaseEvent, IMapFrom<LoginEventQuery>
 {
     public string Login { get; set; }
     public int Action { get; set; }
-
-    public override void Mapping(Profile profile)
-    {
-        profile.CreateMap<DbLoginEvent, LoginEvent>();
-
-        profile.CreateMap<LoginEventQuery, LoginEvent>()
-            .ConvertUsing<EventTypeConverter>();
+    
+    
+    void IMapFrom<LoginEventQuery>.ConfigureMapping(TypeAdapterConfig config)
+    {        
+        config.NewConfig<LoginEventQuery, LoginEvent>()
+            .AfterMapping((src, dst) => MapContext.Current.GetService<EventTypeConverter>().Convert(src, dst));
     }
 }

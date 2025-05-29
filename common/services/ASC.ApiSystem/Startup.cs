@@ -28,6 +28,9 @@ using System.Threading.Channels;
 
 using ASC.Core.Notify.Socket;
 
+using Mapster;
+using Mapster.Utils;
+
 namespace ASC.ApiSystem;
 
 public class Startup
@@ -130,8 +133,13 @@ public class Startup
 
         services.RegisterFeature();
         services.RegisterQuotaFeature();
-
-        services.AddAutoMapper(BaseStartup.GetAutoMapperProfileAssemblies());
+        
+        var autoMapperProfileAssemblies = BaseStartup.GetAutoMapperProfileAssemblies().ToArray();
+        TypeAdapterConfig.GlobalSettings.Scan(autoMapperProfileAssemblies);
+        foreach (var autoMapperProfileAssembly in autoMapperProfileAssemblies)
+        {
+            TypeAdapterConfig.GlobalSettings.ScanInheritedTypes(autoMapperProfileAssembly);
+        }
         
         if (_configuration.GetValue<bool>("openApi:enable"))
         {

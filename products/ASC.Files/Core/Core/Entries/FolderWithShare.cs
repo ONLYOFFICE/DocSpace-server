@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Profile = AutoMapper.Profile;
-
 namespace ASC.Files.Core.Core.Entries;
 
 /// <summary>
@@ -42,13 +40,13 @@ public class FolderWithShare : IMapFrom<DbFolderQueryWithSecurity>
     /// The short record of the folder sharing settings.
     /// </summary>
     public SmallShareRecord ShareRecord { get; set; }
-
-    public void Mapping(Profile profile)
+    
+    public void ConfigureMapping(TypeAdapterConfig config)
     {
-        profile.CreateMap<DbFolderQueryWithSecurity, FolderWithShare>()
-            .ForMember(r => r.Folder, r => r.MapFrom(s => s.DbFolderQuery))
-            .ForMember(r => r.ShareRecord, r => r.MapFrom(s => s.Security));
-
-        profile.CreateMap<DbFilesSecurity, SmallShareRecord>();
+        config.NewConfig<DbFolderQueryWithSecurity, FolderWithShare>()
+            .Map(a => a.Folder, r => r.DbFolderQuery.Adapt<Folder<int>>())
+            .Map(a => a.ShareRecord, r => r.Security.Adapt<SmallShareRecord>())
+            ;
+        config.NewConfig<DbFilesSecurity, SmallShareRecord>();
     }
 }

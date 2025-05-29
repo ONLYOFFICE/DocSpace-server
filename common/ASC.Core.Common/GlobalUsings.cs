@@ -126,10 +126,13 @@ global using ASC.Security.Cryptography;
 global using ASC.Web.Core.WhiteLabel;
 global using ASC.Web.Studio.Utility;
 global using Autofac;
-global using AutoMapper;
-global using AutoMapper.QueryableExtensions;
 global using Google.Apis.Auth.OAuth2;
 global using MailKit.Security;
+
+global using Mapster;
+
+global using MapsterMapper;
+
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.AspNetCore.WebUtilities;
 global using Microsoft.EntityFrameworkCore;

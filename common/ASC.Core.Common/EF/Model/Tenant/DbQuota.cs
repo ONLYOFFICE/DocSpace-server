@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Profile = AutoMapper.Profile;
-
 namespace ASC.Core.Common.EF;
 
 public class DbQuota : BaseEntity, IMapFrom<TenantQuota>
@@ -44,11 +42,6 @@ public class DbQuota : BaseEntity, IMapFrom<TenantQuota>
     public override object[] GetKeys()
     {
         return [TenantId];
-    }
-
-    public void Mapping(Profile profile)
-    {
-        profile.CreateMap<TenantQuota, DbQuota>();
     }
 }
 public static class DbQuotaExtension

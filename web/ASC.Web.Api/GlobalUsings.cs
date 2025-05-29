@@ -124,7 +124,6 @@ global using ASC.Web.Api.ApiModels.RequestsDto;
 global using ASC.Web.Api.ApiModels.ResponseDto;
 global using ASC.Web.Api.Core;
 global using ASC.Web.Api.Log;
-global using ASC.Web.Api.Mapping;
 global using ASC.Web.Api.Models;
 global using ASC.Web.Api.Routing;
 global using ASC.Web.Core;
@@ -156,13 +155,16 @@ global using ASC.Webhooks.Core.EF.Model;
 
 global using Autofac;
 
-global using AutoMapper;
 
 global using CsvHelper.Configuration;
 
 global using Google.Authenticator;
 
 global using MailKit.Security;
+
+global using Mapster;
+
+global using MapsterMapper;
 
 global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Mvc;

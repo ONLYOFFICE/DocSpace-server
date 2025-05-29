@@ -45,10 +45,10 @@ public class MailWhiteLabelSettingsDto : IMapFrom<MailWhiteLabelSettings>
     /// Specifies if the mail white label settings are default or not.
     ///</summary>
     public bool IsDefault { get; set; }
-
-    public void Mapping(Profile profile)
+    
+    public void ConfigureMapping(TypeAdapterConfig config)
     {
-        profile.CreateMap<MailWhiteLabelSettings, MailWhiteLabelSettingsDto>()
-            .ConvertUsing<MailWhiteLabelSettingsConverter>();
+        config.NewConfig<MailWhiteLabelSettings, MailWhiteLabelSettingsDto>()
+            .AfterMapping((src, dest) => dest.IsDefault = src.IsDefault());
     }
 }

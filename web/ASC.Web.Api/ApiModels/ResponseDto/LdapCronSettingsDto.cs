@@ -35,8 +35,4 @@ public class LdapCronSettingsDto : IMapFrom<LdapCronSettings>
     /// The LDAP cron settings expression.
     /// </summary>
     public string Cron { get; set; }
-    public void Mapping(Profile profile)
-    {
-        profile.CreateMap<LdapCronSettings, LdapCronSettingsDto>();
-    }
 }

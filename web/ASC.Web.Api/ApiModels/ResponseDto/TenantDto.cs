@@ -150,11 +150,11 @@ public class TenantDto : IMapFrom<Tenant>
     /// The tenant AWS region.
     /// </summary>
     public string Region { get; set; }
-
-    public void Mapping(Profile profile)
+    
+    public void ConfigureMapping(TypeAdapterConfig config)
     {
-        profile.CreateMap<Tenant, TenantDto>()
-            .ForMember(r => r.TenantId, opt => opt.MapFrom(src => src.Id))
-            .ForMember(r => r.TenantAlias, opt => opt.MapFrom(src => src.Alias));
+        config.NewConfig<Tenant, TenantDto>()
+            .Map(r => r.TenantId, dest => dest.Id)
+            .Map(r => r.TenantAlias, src => src.Alias);
     }
 }

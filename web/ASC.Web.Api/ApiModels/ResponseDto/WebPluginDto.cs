@@ -105,10 +105,10 @@ public class WebPluginDto: IMapFrom<WebPlugin>
     /// The web plugin settings.
     /// </summary>
     public string Settings { get; set; }
-
-    public void Mapping(Profile profile)
+    
+    public void ConfigureMapping(TypeAdapterConfig config)
     {
-        profile.CreateMap<Guid, EmployeeDto>().ConvertUsing<WebPluginMappingConverter>();
-        profile.CreateMap<WebPlugin, WebPluginDto>();
+        config.NewConfig<WebPlugin, WebPluginDto>()
+            .AfterMappingAsync(async (src, dest) =>  dest.CreateBy = await MapContext.Current.GetService<EmployeeDtoHelper>().GetAsync(src.CreateBy));
     }
 }

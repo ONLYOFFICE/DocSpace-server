@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Profile = AutoMapper.Profile;
-
 namespace ASC.Notify.Messages;
 
 [ProtoContract]
@@ -72,11 +70,13 @@ public class NotifyMessage : IMapFrom<NotifyQueue>
 
     [ProtoMember(14)]
     public string Data { get; set; }
-
-    public void Mapping(Profile profile)
+    
+    public void ConfigureMapping(TypeAdapterConfig config)
     {
-        profile.CreateMap<NotifyQueue, NotifyMessage>()
-               .ForMember(dest => dest.Attachments, opt => opt.Ignore())
-               .ReverseMap();
+        config.NewConfig<NotifyQueue, NotifyMessage>()
+            .Ignore(r => r.Attachments)
+            .TwoWays();
+        
     }
+
 }

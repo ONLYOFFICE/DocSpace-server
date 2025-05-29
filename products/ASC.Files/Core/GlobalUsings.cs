@@ -174,8 +174,6 @@ global using ASC.Web.Studio.Core.Notify;
 global using ASC.Web.Studio.Utility;
 global using ASC.Webhooks.Core;
 
-global using AutoMapper;
-
 global using Box.V2;
 global using Box.V2.Auth;
 global using Box.V2.Config;
@@ -202,6 +200,10 @@ global using ICSharpCode.SharpZipLib.Zip;
 global using Joonasw.AspNetCore.SecurityHeaders.Csp.Builder;
 
 global using JWT.Exceptions;
+
+global using Mapster;
+
+global using MapsterMapper;
 
 global using Microsoft.AspNetCore.Builder;
 global using Microsoft.AspNetCore.Http;

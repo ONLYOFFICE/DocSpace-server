@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Profile = AutoMapper.Profile;
-
 namespace ASC.MessagingSystem.EF.Model;
 
 public class DbAuditEvent : MessageEvent, IMapFrom<EventMessage>
@@ -38,12 +36,11 @@ public class DbAuditEvent : MessageEvent, IMapFrom<EventMessage>
 
     public DbTenant Tenant { get; set; }
     public List<DbFilesAuditReference> FilesReferences { get; set; }
-
-    public void Mapping(Profile profile)
-    {
-        profile.CreateMap<MessageEvent, DbAuditEvent>();
-        profile.CreateMap<EventMessage, DbAuditEvent>()
-            .ConvertUsing<EventTypeConverter>();
+    
+    public void ConfigureMapping(TypeAdapterConfig config)
+    {        
+        config.NewConfig<EventMessage, DbAuditEvent>()
+            .AfterMapping((src, dst) => MapContext.Current.GetService<EventTypeConverter>().Convert(src, dst));
     }
 }
 

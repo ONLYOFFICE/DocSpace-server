@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Profile = AutoMapper.Profile;
-
 namespace ASC.Core;
 
 public class Group : IMapFrom<DbGroup>
@@ -53,13 +51,12 @@ public class Group : IMapFrom<DbGroup>
     {
         return obj is Group g && g.Id == Id;
     }
-
-    public void Mapping(Profile profile)
+    
+    public void ConfigureMapping(TypeAdapterConfig config)
     {
-        profile.CreateMap<DbGroup, Group>()
-            .ForMember(src => src.CategoryId, opt => opt.NullSubstitute(Guid.Empty))
-            .ForMember(src => src.ParentId, opt => opt.NullSubstitute(Guid.Empty));
-
-        profile.CreateMap<GroupInfo, Group>();
+        config.NewConfig<DbGroup, Group>()
+            .Map(src => src.CategoryId, opt => opt.CategoryId ?? Guid.Empty)
+            .Map(src => src.ParentId, opt => opt.ParentId ?? Guid.Empty);
+        config.NewConfig<GroupInfo, Group>();
     }
 }

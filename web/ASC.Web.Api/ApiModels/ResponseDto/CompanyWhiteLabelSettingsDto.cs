@@ -71,10 +71,10 @@ public class CompanyWhiteLabelSettingsDto: IMapFrom<CompanyWhiteLabelSettings>
     /// Specifies if these settings are default or not.
     /// </summary>
     public bool IsDefault { get; set; }
-
-    public void Mapping(Profile profile)
+    
+    public void ConfigureMapping(TypeAdapterConfig config)
     {
-        profile.CreateMap<CompanyWhiteLabelSettings, CompanyWhiteLabelSettingsDto>()
-            .ConvertUsing<CompanyWhiteLabelSettingsConverter>();
+        config.NewConfig<CompanyWhiteLabelSettings, CompanyWhiteLabelSettingsDto>()
+            .AfterMapping((src, dest) => dest.IsDefault = MapContext.Current.GetService<CompanyWhiteLabelSettingsHelper>().IsDefault(src));
     }
 }

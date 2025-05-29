@@ -34,7 +34,7 @@ public class IPRestrictionsRepository(IDbContextFactory<TenantDbContext> dbConte
         await using var tenantDbContext = await dbContextManager.CreateDbContextAsync(cancellationToken);
         return await tenantDbContext.TenantIpRestrictions
             .Where(r => r.TenantId == tenant)
-            .ProjectTo<IPRestriction>(mapper.ConfigurationProvider)
+            .ProjectToType<IPRestriction>(mapper.Config)
             .ToListAsync(cancellationToken: cancellationToken);
     }
 

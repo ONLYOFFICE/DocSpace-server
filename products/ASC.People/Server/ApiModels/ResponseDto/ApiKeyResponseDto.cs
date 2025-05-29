@@ -24,11 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Common.Mapping;
-using ASC.Core.Common.EF.Model;
-
-using AutoMapper;
-
 namespace ASC.People.ApiModels.ResponseDto;
 
 /// <summary>
@@ -86,35 +81,21 @@ public class ApiKeyResponseDto : IMapFrom<ApiKey>
     /// </summary>
     public bool IsActive { get; set; } = true;
     
-    public void Mapping(Profile profile)
+    public void ConfigureMapping(TypeAdapterConfig config)
     {
-        profile.CreateMap<ApiKey, ApiKeyResponseDto>()
-            .ConvertUsing<ApiKeyConverter>();
+        config.NewConfig<ApiKey, ApiKeyResponseDto>()
+            .AfterMappingAsync(async (src, dest) => await MapContext.Current.GetService<ApiKeyConverter>().Convert(src, dest));
     }
 }
 
 [Scope]
-public class ApiKeyConverter(ApiDateTimeHelper apiDateTimeHelper,
-                             EmployeeDtoHelper employeeWrapperHelper): ITypeConverter<ApiKey, ApiKeyResponseDto>
+public class ApiKeyConverter(ApiDateTimeHelper apiDateTimeHelper, EmployeeDtoHelper employeeWrapperHelper)
 {
-    public ApiKeyResponseDto Convert(ApiKey source, ApiKeyResponseDto destination, ResolutionContext context)
+    public async Task Convert(ApiKey source, ApiKeyResponseDto dest)
     {
-        if (source.Id == Guid.Empty) return new ApiKeyResponseDto();
-              
-        var result = new ApiKeyResponseDto
-        {
-            Id = source.Id,
-            Name = source.Name,
-            Key = source.Key,
-            KeyPostfix = source.KeyPostfix,
-            Permissions = source.Permissions,
-            LastUsed = source.LastUsed.HasValue ? apiDateTimeHelper.Get(source.LastUsed.Value) : null,
-            CreateOn = apiDateTimeHelper.Get(source.CreateOn),
-            CreateBy =  employeeWrapperHelper.GetAsync(source.CreateBy).GetAwaiter().GetResult(),
-            ExpiresAt = source.ExpiresAt.HasValue ? apiDateTimeHelper.Get(source.ExpiresAt.Value) : null,
-            IsActive = source.IsActive,
-        };
-
-        return result;
+        dest.LastUsed = source.LastUsed.HasValue ? apiDateTimeHelper.Get(source.LastUsed.Value) : null;
+        dest.CreateOn = apiDateTimeHelper.Get(source.CreateOn);
+        dest.CreateBy =  await employeeWrapperHelper.GetAsync(source.CreateBy);
+        dest.ExpiresAt = source.ExpiresAt.HasValue ? apiDateTimeHelper.Get(source.ExpiresAt.Value) : null;
     }
 }

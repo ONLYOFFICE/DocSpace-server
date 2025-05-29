@@ -43,7 +43,6 @@ public class Startup : BaseWorkerStartup
         await base.ConfigureServices(builder);
 
         services.AddHttpClient();
-        services.AddAutoMapper(GetAutoMapperProfileAssemblies());//toDo
         services.AddHostedService<ServiceLauncher>();
         services.AddScoped<IWebItem, ProductEntryPoint>();
         services.AddBaseDbContextPool<FilesDbContext>();

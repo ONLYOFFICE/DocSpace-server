@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Profile = AutoMapper.Profile;
-
 namespace ASC.Core.Common.EF.Model;
 
 /// <summary>
@@ -153,24 +151,24 @@ public class DbTenant : IMapFrom<Tenant>
     /// The database tenant partner parameters.
     /// </summary>
     public DbTenantPartner Partner { get; set; }
-
-    public void Mapping(Profile profile)
+    
+    public void ConfigureMapping(TypeAdapterConfig config)
     {
-        profile.CreateMap<Tenant, DbTenant>()
-            .ForMember(dest => dest.TrustedDomainsEnabled, opt => opt.MapFrom(dest => dest.TrustedDomainsType))
-            .ForMember(dest => dest.TrustedDomainsRaw, opt => opt.MapFrom(dest => dest.GetTrustedDomains()))
-            .ForMember(dest => dest.Alias, opt => opt.MapFrom(dest => dest.Alias.ToLowerInvariant()))
-            .ForMember(dest => dest.LastModified, opt => opt.MapFrom(dest => DateTime.UtcNow))
-            .ForMember(dest => dest.Name, opt => opt.MapFrom(dest => dest.Name ?? ""))
-            .ForMember(dest => dest.Name, opt => opt.MapFrom(dest => dest.Name ?? ""))
-            .ForMember(dest => dest.Partner, opt => opt.MapFrom(dest => new DbTenantPartner
+        config.NewConfig<Tenant, DbTenant>() 
+            .Map(dest => dest.TrustedDomainsEnabled, dest => dest.TrustedDomainsType)
+            .Map(dest => dest.TrustedDomainsRaw, dest => dest.GetTrustedDomains())
+            .Map(dest => dest.Alias, dest => dest.Alias.ToLowerInvariant())
+            .Map(dest => dest.LastModified, dest => DateTime.UtcNow)
+            .Map(dest => dest.Name, dest => dest.Name ?? "")
+            .Map(dest => dest.Name, dest => dest.Name ?? "")
+            .Map(dest => dest.Partner, dest => new DbTenantPartner
             {
                 TenantId = dest.Id,
                 AffiliateId = dest.AffiliateId,
                 PartnerId = dest.PartnerId,
                 Campaign = dest.Campaign
-            }))
-            .ForMember(dest => dest.MappedDomain, opt => opt.MapFrom(dest => !string.IsNullOrEmpty(dest.MappedDomain) ? dest.MappedDomain.ToLowerInvariant() : null));
+            })
+            .Map(dest => dest.MappedDomain, dest => !string.IsNullOrEmpty(dest.MappedDomain) ? dest.MappedDomain.ToLowerInvariant() : null);
     }
 }
 

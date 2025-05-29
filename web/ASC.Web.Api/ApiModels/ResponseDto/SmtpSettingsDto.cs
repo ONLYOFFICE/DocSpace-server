@@ -94,9 +94,4 @@ public class SmtpSettingsDto : IMapFrom<SmtpSettings>
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool IsDefaultSettings { get; set; }
-
-    public void Mapping(Profile profile)
-    {
-        profile.CreateMap<SmtpSettings, SmtpSettingsDto>();
-    }
 }

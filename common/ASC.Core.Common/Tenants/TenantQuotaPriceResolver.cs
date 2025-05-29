@@ -27,9 +27,30 @@
 namespace ASC.Core.Tenants;
 
 [Scope]
-internal class TenantQuotaPriceResolver(TenantManager tenantManager, RegionHelper regionHelper) : IValueResolver<DbQuota, TenantQuota, decimal>
+internal class TenantQuotaPriceResolver(TenantManager tenantManager, RegionHelper regionHelper)
 {
-    public decimal Resolve(DbQuota source, TenantQuota destination, decimal destMember, ResolutionContext context)
+    public string ResolvePriceCurrencySymbol(DbQuota source)
+    {
+        var (_, currencySymbol, _) = Resolve(source);
+
+        return currencySymbol;
+    }
+    
+    public string ResolveISOCurrencySymbol(DbQuota source)
+    {
+        var (_, _, isoCurrencySymbol) = Resolve(source);
+
+        return isoCurrencySymbol;
+    }
+    
+    public decimal ResolvePrice(DbQuota source)
+    {
+        var (price, _, _) = Resolve(source);
+
+        return price;
+    }
+    
+    private (decimal, string, string) Resolve(DbQuota source)
     {
         var priceInfo = tenantManager.GetProductPriceInfo(source.ProductId, source.Wallet);
 
@@ -39,15 +60,11 @@ internal class TenantQuotaPriceResolver(TenantManager tenantManager, RegionHelpe
 
             if (priceInfo.TryGetValue(currentRegion.ISOCurrencySymbol, out var resolve))
             {
-                destination.PriceCurrencySymbol = currentRegion.CurrencySymbol;
-                destination.PriceISOCurrencySymbol = currentRegion.ISOCurrencySymbol;
-                return resolve;
+                return (resolve, currentRegion.CurrencySymbol, currentRegion.ISOCurrencySymbol);
             }
         }
 
         var defaultRegion = regionHelper.GetDefaultRegionInfo();
-        destination.PriceCurrencySymbol = defaultRegion.CurrencySymbol;
-        destination.PriceISOCurrencySymbol = defaultRegion.ISOCurrencySymbol;
-        return source.Price;
+        return (source.Price, defaultRegion.CurrencySymbol, defaultRegion.ISOCurrencySymbol);
     }
 }

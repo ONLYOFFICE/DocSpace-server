@@ -69,7 +69,7 @@ global using ASC.Web.Studio.Utility;
 
 global using Autofac;
 
-global using AutoMapper;
+global using MapsterMapper;
 
 global using Microsoft.AspNetCore.Builder;
 global using Microsoft.EntityFrameworkCore;

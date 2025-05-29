@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Profile = AutoMapper.Profile;
-
 namespace ASC.Core.Tenants;
 
 /// <summary>
@@ -581,10 +579,12 @@ public class TenantQuota : IMapFrom<DbQuota>
         return newQuota;
     }
 
-    public void Mapping(Profile profile)
+    public void ConfigureMapping(TypeAdapterConfig config)
     {
-        profile.CreateMap<DbQuota, TenantQuota>()
-            .ForMember(dest => dest.Price, o => o.MapFrom<TenantQuotaPriceResolver>());
+        config.NewConfig<DbQuota, TenantQuota>()
+            .Map(dest => dest.Price, o => MapContext.Current.GetService<TenantQuotaPriceResolver>().ResolvePrice(o))
+            .Map(dest => dest.PriceCurrencySymbol, o => MapContext.Current.GetService<TenantQuotaPriceResolver>().ResolvePriceCurrencySymbol(o))
+            .Map(dest => dest.PriceISOCurrencySymbol, o => MapContext.Current.GetService<TenantQuotaPriceResolver>().ResolveISOCurrencySymbol(o));
     }
 
     public TenantQuotaFeature<T> GetFeature<T>(string name)

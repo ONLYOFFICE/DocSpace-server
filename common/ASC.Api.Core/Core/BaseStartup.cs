@@ -479,7 +479,12 @@ public abstract class BaseStartup
         services.AddApiKeyBearerAuthentication()
                 .AddJwtBearerAuthentication();
 
-        services.AddAutoMapper(GetAutoMapperProfileAssemblies());
+        var autoMapperProfileAssemblies = GetAutoMapperProfileAssemblies().ToArray();
+        TypeAdapterConfig.GlobalSettings.Scan(autoMapperProfileAssemblies);
+        foreach (var autoMapperProfileAssembly in autoMapperProfileAssemblies)
+        {
+            TypeAdapterConfig.GlobalSettings.ScanInheritedTypes(autoMapperProfileAssembly);
+        }
 
         services.AddBillingHttpClient();
         services.AddAccountingHttpClient();
@@ -500,7 +505,6 @@ public abstract class BaseStartup
             .AddStartupTask<WarmupServicesStartupTask>()
             .AddStartupTask<WarmupProtobufStartupTask>()
             .AddStartupTask<WarmupBaseDbContextStartupTask>()
-            .AddStartupTask<WarmupMappingStartupTask>()
             .TryAddSingleton(services);
         
         services.AddTransient<DistributedTaskProgress>();

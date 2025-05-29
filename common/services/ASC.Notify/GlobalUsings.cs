@@ -25,6 +25,8 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 global using System.Reflection;
+global using System.Text.Json;
+
 global using ASC.Api.Core;
 global using ASC.Api.Core.Extensions;
 global using ASC.Common;
@@ -51,7 +53,9 @@ global using ASC.Notify.Services;
 global using ASC.Web.Core.WhiteLabel;
 global using ASC.Web.Studio.Core.Notify;
 global using Autofac;
-global using AutoMapper;
+
+global using MapsterMapper;
+
 global using Microsoft.AspNetCore.Builder;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Hosting.WindowsServices;

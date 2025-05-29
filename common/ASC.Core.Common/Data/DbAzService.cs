@@ -41,7 +41,7 @@ class DbAzService(IDbContextFactory<UserDbContext> dbContextFactory, IMapper map
         var tenantAces = await
             userDbContext.Acl
             .Where(r => r.TenantId == tenant)
-            .ProjectTo<AzRecord>(mapper.ConfigurationProvider)
+            .ProjectToType<AzRecord>(mapper.Config)
             .ToListAsync();
 
         // remove excaped rows

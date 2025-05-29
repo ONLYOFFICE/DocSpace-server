@@ -73,7 +73,7 @@ public class DbTenantService(
             q = q.Where(r => r.LastModified >= from);
         }
 
-        return await q.ProjectTo<Tenant>(mapper.ConfigurationProvider).ToListAsync();
+        return await q.ProjectToType<Tenant>(mapper.Config).ToListAsync();
     }
     
     public async Task<IEnumerable<Tenant>> GetTenantsAsync(List<int> ids)
@@ -82,7 +82,7 @@ public class DbTenantService(
 
         return await tenantDbContext.Tenants
             .Where(r => ids.Contains(r.Id) && r.Status == TenantStatus.Active)
-            .ProjectTo<Tenant>(mapper.ConfigurationProvider)
+            .ProjectToType<Tenant>(mapper.Config)
             .ToListAsync();
     }
 
@@ -116,7 +116,7 @@ public class DbTenantService(
             var q = Query()
                 .Where(r => login.Contains('@') ? r.User.Email == login : r.User.Id.ToString() == login);
 
-            return await q.ProjectTo<Tenant>(mapper.ConfigurationProvider).ToListAsync();
+            return await q.ProjectToType<Tenant>(mapper.Config).ToListAsync();
         }
 
         if (Guid.TryParse(login, out var userId))
@@ -126,7 +126,7 @@ public class DbTenantService(
                 .Where(r => r.User.Id == userId)
                 .Where(r => r.UserSecurity.PwdHash == pwdHash);
 
-            return await q.ProjectTo<Tenant>(mapper.ConfigurationProvider).ToListAsync();
+            return await q.ProjectToType<Tenant>(mapper.Config).ToListAsync();
         }
         else
         {
@@ -142,7 +142,7 @@ public class DbTenantService(
             var q = Query()
                 .Where(r => passwordHashs.Any(p => r.UserSecurity.PwdHash == p) && r.DbTenant.Status == TenantStatus.Active);
 
-            return await q.ProjectTo<Tenant>(mapper.ConfigurationProvider).ToListAsync();
+            return await q.ProjectToType<Tenant>(mapper.Config).ToListAsync();
         }
     }
 
@@ -164,7 +164,7 @@ public class DbTenantService(
         await using var tenantDbContext = await dbContextFactory.CreateDbContextAsync();
         return await tenantDbContext.Tenants
             .Where(r => r.Id == id)
-            .ProjectTo<Tenant>(mapper.ConfigurationProvider)
+            .ProjectToType<Tenant>(mapper.Config)
             .SingleOrDefaultAsync();
     }
     
@@ -191,7 +191,7 @@ public class DbTenantService(
             .Where(r => r.Alias == domain || r.MappedDomain == domain)
             .OrderBy(a => a.Status == TenantStatus.Restoring ? TenantStatus.Active : a.Status)
             .ThenByDescending(a => a.Status == TenantStatus.Restoring ? 0 : a.Id)
-            .ProjectTo<Tenant>(mapper.ConfigurationProvider)
+            .ProjectToType<Tenant>(mapper.Config)
             .FirstOrDefault();
     }
 
@@ -203,7 +203,7 @@ public class DbTenantService(
              .Where(t => t.Id != -1)
             .OrderBy(a => a.Status)
             .ThenBy(a => a.Id)
-            .ProjectTo<Tenant>(mapper.ConfigurationProvider)
+            .ProjectToType<Tenant>(mapper.Config)
             .FirstOrDefault();
     }
 
@@ -216,7 +216,7 @@ public class DbTenantService(
             .Where(t => t.Status != TenantStatus.Suspended && t.Status != TenantStatus.RemovePending)
             .OrderBy(a => a.Status)
             .ThenBy(a => a.Id)
-            .ProjectTo<Tenant>(mapper.ConfigurationProvider)
+            .ProjectToType<Tenant>(mapper.Config)
             .FirstOrDefaultAsync();
     }
 

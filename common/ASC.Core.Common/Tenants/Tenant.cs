@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Profile = AutoMapper.Profile;
-
 namespace ASC.Core.Tenants;
 
 /// <summary>
@@ -213,18 +211,18 @@ public class Tenant : IMapFrom<DbTenant>
         return Alias;
     }
     
-    public void Mapping(Profile profile)
+    public void ConfigureMapping(TypeAdapterConfig config)
     {
-        profile.CreateMap<DbTenant, Tenant>()
-            .ForMember(r => r.TrustedDomainsType, opt => opt.MapFrom(src => src.TrustedDomainsEnabled))
-            .ForMember(r => r.AffiliateId, opt => opt.MapFrom(src => src.Partner.AffiliateId))
-            .ForMember(r => r.PartnerId, opt => opt.MapFrom(src => src.Partner.PartnerId))
-            .ForMember(r => r.Campaign, opt => opt.MapFrom(src => src.Partner.Campaign));
-
-        profile.CreateMap<TenantUserSecurity, Tenant>()
-            .IncludeMembers(src => src.DbTenant);
+        config.NewConfig<DbTenant, Tenant>()
+            .Map(r => r.TrustedDomainsType, src => src.TrustedDomainsEnabled)
+            .Map(r => r.AffiliateId, src => src.Partner.AffiliateId)
+            .Map(r => r.PartnerId, src => src.Partner.PartnerId)
+            .Map(r => r.Campaign, src => src.Partner.Campaign);
+        
+        config.NewConfig<TenantUserSecurity, Tenant>()
+            .ConstructUsing(((security, tenant) => security.DbTenant.Adapt<Tenant>()));
     }
-
+    
     internal string GetTrustedDomains()
     {
         TrustedDomains.RemoveAll(string.IsNullOrEmpty);

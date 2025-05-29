@@ -147,10 +147,4 @@ public class LdapRequestsDto : IMapFrom<LdapSettings>
     /// The default user type assigned to the imported LDAP users.
     /// </summary>
     public EmployeeType UsersType { get; set; }
-
-    public void Mapping(Profile profile)
-    {
-        profile.CreateMap<LdapRequestsDto, LdapSettings>();
-    }
-
 }

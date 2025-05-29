@@ -143,11 +143,10 @@ public class LdapSettingsDto : IMapFrom<LdapSettings>
     /// Specifies if the default LDAP settings are used or not.
     /// </summary>
     public bool IsDefault { get; set; }
-
-    public void Mapping(Profile profile)
+    
+    public void ConfigureMapping(TypeAdapterConfig config)
     {
-        profile.CreateMap<LdapSettings, LdapSettingsDto>()
-            .ForMember(dest => dest.Server, opt => opt.MapFrom(src => src.Server.Replace("LDAP://", "")));
+        config.NewConfig<LdapSettings, LdapSettingsDto>()
+            .Map(dest => dest.Server, src => src.Server.Replace("LDAP://", ""));
     }
-
 }

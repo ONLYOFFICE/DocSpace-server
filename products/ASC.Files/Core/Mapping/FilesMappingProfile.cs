@@ -24,52 +24,50 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Profile = AutoMapper.Profile;
-
 namespace ASC.Files.Core.Mapping;
 
-public class FilesMappingProfile : Profile
+public class FilesMapping : IRegister
 {
-    public FilesMappingProfile()
+    public void Register(TypeAdapterConfig config)
     {
-        CreateMap<DbFile, File<int>>();
+        config.NewConfig<DbFile, File<int>>();
 
-        CreateMap<DbFileQuery, File<int>>()
-                .ForMember(r => r.CreateOn, r => r.ConvertUsing<TenantDateTimeConverter, DateTime>(s => s.File.CreateOn))
-                .ForMember(r => r.ModifiedOn, r => r.ConvertUsing<TenantDateTimeConverter, DateTime>(s => s.File.ModifiedOn))
-                .ForMember(r => r.LastOpened, r => r.ConvertUsing<TenantDateTimeConverter, DateTime?>(s => s.LastOpened))
-                .ForMember(r => r.ShareRecord, r => r.MapFrom(f => f.SharedRecord))
-                .IncludeMembers(r => r.File)
-                .ConstructUsingServiceLocator();
+        config.NewConfig<DbFileQuery, File<int>>()
+            .AfterMapping((source, dest) => dest.CreateOn = MapContext.Current.GetService<TenantDateTimeConverter>().Convert(source.File.CreateOn))
+            .AfterMapping((source, dest) => dest.ModifiedOn = MapContext.Current.GetService<TenantDateTimeConverter>().Convert(source.File.ModifiedOn))
+            .AfterMapping((source, dest) => dest.LastOpened = MapContext.Current.GetService<TenantDateTimeConverter>().Convert(source.LastOpened))
+            .Map(r => r.ShareRecord, f => f.SharedRecord)
+            .Map(dest => dest, src => src.File)
+            .ConstructUsing(src => MapContext.Current.GetService<File<int>>());
 
-        CreateMap<DbFolder, Folder<int>>();
+        config.NewConfig<DbFolder, Folder<int>>();
 
-        CreateMap<DbFolderQuery, Folder<int>>()
-            .IncludeMembers(r => r.Folder)
-            .ForMember(r => r.CreateOn, r => r.ConvertUsing<TenantDateTimeConverter, DateTime>(s => s.Folder.CreateOn))
-            .ForMember(r => r.ModifiedOn, r => r.ConvertUsing<TenantDateTimeConverter, DateTime>(s => s.Folder.ModifiedOn))
-            .AfterMap<FilesMappingAction>()
-            .ConstructUsingServiceLocator();
+        config.NewConfig<DbFolderQuery, Folder<int>>()
+            .AfterMapping((source, dest) => dest.CreateOn = MapContext.Current.GetService<TenantDateTimeConverter>().Convert(source.Folder.CreateOn))
+            .AfterMapping((source, dest) => dest.ModifiedOn = MapContext.Current.GetService<TenantDateTimeConverter>().Convert(source.Folder.ModifiedOn))
+            .AfterMapping(dest => MapContext.Current.GetService<FilesMappingAction>().Process(dest))
+            .Map(dest => dest, src => src.Folder)
+            .ConstructUsing(src => MapContext.Current.GetService<Folder<int>>());
 
-        CreateMap<FileShareRecord<int>, DbFilesSecurity>()
-            .ForMember(dest=> dest.EntryId, cfg => cfg.MapFrom(src => src.EntryId.ToString()))
-            .ForMember(dest => dest.TimeStamp, cfg => cfg.MapFrom(_ => DateTime.UtcNow))
-            .BeforeMap<FilesMappingAction>();
+        config.NewConfig<FileShareRecord<int>, DbFilesSecurity>()
+            .Map(dest => dest.EntryId, src => src.EntryId.ToString())
+            .Map(dest => dest.TimeStamp, _ => DateTime.UtcNow)
+            .BeforeMapping((source, dest) => MapContext.Current.GetService<FilesMappingAction>().Process(source, dest));
         
-        CreateMap<FileShareRecord<string>, DbFilesSecurity>()
-            .ForMember(dest => dest.TimeStamp, cfg => cfg.MapFrom(_ => DateTime.UtcNow))
-            .BeforeMap<FilesMappingAction>();
+        config.NewConfig<FileShareRecord<string>, DbFilesSecurity>()
+            .Map(dest => dest.TimeStamp, _ => DateTime.UtcNow)
+            .BeforeMapping((source, dest) => MapContext.Current.GetService<FilesMappingAction>().Process(source, dest));
         
-        CreateMap<DbFilesSecurity, FileShareRecord<int>>()
-            .ForMember(dest => dest.EntryId, cfg => cfg.MapFrom(src => Convert.ToInt32(src.EntryId)));
+        config.NewConfig<DbFilesSecurity, FileShareRecord<int>>()
+            .Map(dest => dest.EntryId, src => Convert.ToInt32(src.EntryId));
         
-        CreateMap<DbFilesSecurity, FileShareRecord<string>>();
+        config.NewConfig<DbFilesSecurity, FileShareRecord<string>>();
         
-        CreateMap<SecurityTreeRecord, FileShareRecord<int>>()
-            .ForMember(dest=> dest.EntryId, cfg => cfg.MapFrom(src => Convert.ToInt32(src.EntryId)));
+        config.NewConfig<SecurityTreeRecord, FileShareRecord<int>>()
+            .Map(dest => dest.EntryId, src => Convert.ToInt32(src.EntryId));
         
-        CreateMap<SecurityTreeRecord, FileShareRecord<string>>();
+        config.NewConfig<SecurityTreeRecord, FileShareRecord<string>>();
 
-        CreateMap<DbFilesFormRoleMapping, FormRole>();
+        config.NewConfig<DbFilesFormRoleMapping, FormRole>();
     }
 }

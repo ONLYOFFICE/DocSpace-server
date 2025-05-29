@@ -65,10 +65,11 @@ public class AdditionalWhiteLabelSettingsDto: IMapFrom<AdditionalWhiteLabelSetti
     /// Specifies if the additional white label settings are default or not.
     /// </summary>
     public bool IsDefault { get; set; }
-
-    public void Mapping(Profile profile)
+    
+    public void ConfigureMapping(TypeAdapterConfig config)
     {
-        profile.CreateMap<AdditionalWhiteLabelSettings, AdditionalWhiteLabelSettingsDto>()
-            .ConvertUsing<AdditionalWhiteLabelSettingsConverter>();
+        config.NewConfig<AdditionalWhiteLabelSettings, AdditionalWhiteLabelSettingsDto>()
+            .AfterMapping((src, dest) => dest.IsDefault = MapContext.Current.GetService<AdditionalWhiteLabelSettingsHelper>().IsDefault(src));
     }
+    
 }

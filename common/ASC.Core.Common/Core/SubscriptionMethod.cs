@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Profile = AutoMapper.Profile;
-
 namespace ASC.Core;
 
 [ProtoContract]
@@ -69,10 +67,10 @@ public class SubscriptionMethod : IMapFrom<DbSubscriptionMethod>
             RecipientId = cache.Recipient
         };
     }
-
-    public void Mapping(Profile profile)
+    
+    public void ConfigureMapping(TypeAdapterConfig config)
     {
-        profile.CreateMap<DbSubscriptionMethod, SubscriptionMethod>()
-            .ForMember(dest => dest.Methods, opt => opt.MapFrom(src => src.Sender.Split(_separator, StringSplitOptions.RemoveEmptyEntries)));
+        config.NewConfig<DbSubscriptionMethod, SubscriptionMethod>()
+            .Map(r => r.Methods, r => r.Sender.Split(_separator, StringSplitOptions.RemoveEmptyEntries));
     }
 }

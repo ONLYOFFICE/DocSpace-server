@@ -113,6 +113,6 @@ class DbQuotaService(IDbContextFactory<CoreDbContext> dbContextManager, IMapper 
             q = q.Where(r => r.TenantId == tenantId);
         }
 
-        return await q.ProjectTo<TenantQuotaRow>(mapper.ConfigurationProvider).ToListAsync();
+        return await q.ProjectToType<TenantQuotaRow>(mapper.Config).ToListAsync();
     }
 }

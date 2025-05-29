@@ -123,6 +123,9 @@ global using Confluent.Kafka;
 
 global using HealthChecks.UI.Client;
 
+global using Mapster;
+global using Mapster.Utils;
+
 global using Medallion.Threading.Redis;
 global using Medallion.Threading.ZooKeeper;
 

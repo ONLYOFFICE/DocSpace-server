@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Profile = AutoMapper.Profile;
-
 namespace ASC.MessagingSystem.EF.Model;
 
 public class DbLoginEvent : MessageEvent, IMapFrom<EventMessage>
@@ -37,12 +35,11 @@ public class DbLoginEvent : MessageEvent, IMapFrom<EventMessage>
     public string DescriptionRaw { get; set; }
 
     public DbTenant Tenant { get; set; }
-
-    public void Mapping(Profile profile)
-    {
-        profile.CreateMap<MessageEvent, DbLoginEvent>();
-        profile.CreateMap<EventMessage, DbLoginEvent>()
-            .ConvertUsing<EventTypeConverter>();
+    
+    public void ConfigureMapping(TypeAdapterConfig config)
+    {        
+        config.NewConfig<EventMessage, DbLoginEvent>()
+            .AfterMapping((src, dst) => MapContext.Current.GetService<EventTypeConverter>().Convert(src, dst));
     }
 }
 

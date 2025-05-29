@@ -27,28 +27,26 @@
 namespace ASC.MessagingSystem.Mapping;
 
 [Scope]
-public class BaseEventTypeIpResolver : IValueResolver<DbLoginEvent, BaseEvent, string>
+public class BaseEventTypeIpResolver
 {
-    public string Resolve(DbLoginEvent source, BaseEvent destination, string destMember, ResolutionContext context)
+    public void Resolve(DbLoginEvent source, BaseEvent dest)
     {
         if (!string.IsNullOrEmpty(source.Ip))
         {
             var ipSplited = source.Ip.Split(':');
             if (ipSplited.Length > 1)
             {
-                return ipSplited[0];
+                dest.IP = ipSplited[0];
             }
         }
-
-        return source.Ip;
     }
 }
 
 [Scope]
-public class BaseEventTypeDateResolver(TenantUtil tenantUtil) : IValueResolver<DbLoginEvent, BaseEvent, DateTime>
+public class BaseEventTypeDateResolver(TenantUtil tenantUtil)
 {
-    public DateTime Resolve(DbLoginEvent source, BaseEvent destination, DateTime destMember, ResolutionContext context)
+    public void Resolve(DbLoginEvent source, BaseEvent dest)
     {
-        return tenantUtil.DateTimeFromUtc(source.Date);
+        dest.Date = tenantUtil.DateTimeFromUtc(source.Date);
     }
 }

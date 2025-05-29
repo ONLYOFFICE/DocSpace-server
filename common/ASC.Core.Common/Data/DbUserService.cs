@@ -41,7 +41,7 @@ public class EFUserService(
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
         return await GetGroupQuery(userDbContext, tenant)
             .Where(r => r.Id == id)
-            .ProjectTo<Group>(mapper.ConfigurationProvider)
+            .ProjectToType<Group>(mapper.Config)
             .FirstOrDefaultAsync();
     }
 
@@ -49,7 +49,7 @@ public class EFUserService(
     {
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
         return await GetGroupQuery(userDbContext, tenant)
-            .ProjectTo<Group>(mapper.ConfigurationProvider)
+            .ProjectToType<Group>(mapper.Config)
             .ToListAsync();
     }
 
@@ -117,7 +117,7 @@ public class EFUserService(
             q = q.Take(count);
         }
 
-        await foreach (var group in q.ProjectTo<Group>(mapper.ConfigurationProvider).ToAsyncEnumerable())
+        await foreach (var group in q.ProjectToType<Group>(mapper.Config).ToAsyncEnumerable())
         {
             yield return group;
         }
@@ -153,7 +153,7 @@ public class EFUserService(
         using var userDbContext = dbContextFactory.CreateDbContext();
         return GetUserQuery(userDbContext, tenant)
             .Where(r => r.Id == id)
-            .ProjectTo<UserInfo>(mapper.ConfigurationProvider)
+            .ProjectToType<UserInfo>(mapper.Config)
             .FirstOrDefault();
     }
 
@@ -194,7 +194,7 @@ public class EFUserService(
             }
 
             return await q.Select(r => r.User)
-                .ProjectTo<UserInfo>(mapper.ConfigurationProvider)
+                .ProjectToType<UserInfo>(mapper.Config)
                 .FirstOrDefaultAsync();
         }
         else
@@ -203,7 +203,7 @@ public class EFUserService(
                 .Where(r => !r.Removed)
                 .Where(r => r.Email == login);
 
-            var users = await q.ProjectTo<UserInfo>(mapper.ConfigurationProvider).ToListAsync();
+            var users = await q.ProjectToType<UserInfo>(mapper.Config).ToListAsync();
             foreach (var user in users)
             {
                 var pwdHash = GetPasswordHash(user.Id, passwordHash);
@@ -228,7 +228,7 @@ public class EFUserService(
             .Where(r => userIds.Contains(r.Id))
             .Where(r => !r.Removed);
 
-        return await q.ProjectTo<UserInfo>(mapper.ConfigurationProvider).ToListAsync();
+        return await q.ProjectToType<UserInfo>(mapper.Config).ToListAsync();
     }
 
     public async Task<UserGroupRef> GetUserGroupRefAsync(int tenant, Guid groupId, UserGroupRefType refType)
@@ -247,8 +247,7 @@ public class EFUserService(
             q = q.Where(r => r.TenantId == tenant);
         }
 
-        return q.Where(r => r.UserGroupId == groupId && r.RefType == refType && !r.Removed)
-            .ProjectTo<UserGroupRef>(mapper.ConfigurationProvider);
+        return q.Where(r => r.UserGroupId == groupId && r.RefType == refType && !r.Removed).ProjectToType<UserGroupRef>(mapper.Config);
     }
 
     public async Task<IDictionary<string, UserGroupRef>> GetUserGroupRefsAsync(int tenant)
@@ -989,7 +988,7 @@ public class EFUserService(
             return await q.Select(exp).FirstOrDefaultAsync();
         }
 
-        return await q.ProjectTo<UserInfo>(mapper.ConfigurationProvider).FirstOrDefaultAsync();
+        return await q.ProjectToType<UserInfo>(mapper.Config).FirstOrDefaultAsync();
     }
 
     public async Task<IEnumerable<string>> GetDavUserEmailsAsync(int tenant)

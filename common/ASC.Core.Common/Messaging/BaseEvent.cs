@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Profile = AutoMapper.Profile;
-
 namespace ASC.AuditTrail.Models;
 
 public class BaseEvent : IMapFrom<DbLoginEvent>
@@ -62,13 +60,12 @@ public class BaseEvent : IMapFrom<DbLoginEvent>
 
     [Event("ActionCol")]
     public string ActionText { get; set; }
-
-    public virtual void Mapping(Profile profile)
+    
+    public void ConfigureMapping(TypeAdapterConfig config)
     {
-        profile.CreateMap<DbLoginEvent, BaseEvent>()
-            .ForMember(r => r.IP, opt => opt.MapFrom<BaseEventTypeIpResolver>())
-            .ForMember(r => r.Date, opt => opt.MapFrom<BaseEventTypeDateResolver>())
-            ;
+        config.NewConfig<DbLoginEvent, BaseEvent>()
+            .AfterMapping((source, dest) => MapContext.Current.GetService<BaseEventTypeIpResolver>().Resolve(source, dest))
+            .AfterMapping((source, dest) => MapContext.Current.GetService<BaseEventTypeDateResolver>().Resolve(source, dest));
     }
 }
 

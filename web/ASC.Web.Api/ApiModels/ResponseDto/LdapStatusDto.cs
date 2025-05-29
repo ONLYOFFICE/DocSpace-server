@@ -75,9 +75,4 @@ public class LdapStatusDto : IMapFrom<LdapOperationStatus>
     /// The LDAP operation type.
     /// </summary>
     public string OperationType { get; set; }
-
-    public void Mapping(Profile profile)
-    {
-        profile.CreateMap<LdapOperationStatus, LdapStatusDto>();
-    }
 }

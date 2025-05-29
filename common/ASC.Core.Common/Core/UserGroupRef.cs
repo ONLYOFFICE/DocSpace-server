@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Profile = AutoMapper.Profile;
-
 namespace ASC.Core;
 
 [DebuggerDisplay("{UserId} - {GroupId}")]
@@ -78,10 +76,10 @@ public class UserGroupRef : IMapFrom<UserGroup>
     {
         return obj is UserGroupRef r && r.TenantId == TenantId && r.UserId == UserId && r.GroupId == GroupId && r.RefType == RefType;
     }
-
-    public void Mapping(Profile profile)
+    
+    public void ConfigureMapping(TypeAdapterConfig config)
     {
-        profile.CreateMap<UserGroup, UserGroupRef>()
-            .ForMember(dest => dest.GroupId, opt => opt.MapFrom(src => src.UserGroupId));
+        config.NewConfig<UserGroup, UserGroupRef>()
+            .Map(dest => dest.GroupId, opt => opt.UserGroupId);
     }
 }
