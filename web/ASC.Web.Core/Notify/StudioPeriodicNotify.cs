@@ -382,7 +382,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                     #region grace period activation
 
-                    else if (dueDateIsNotMax && dueDate == nowDate)
+                    else if (dueDateIsNotMax && dueDate.AddDays(1) == nowDate && delayDueDateIsNotMax)
                     {
                         action = Actions.SaasOwnerPaymentWarningGracePeriodActivation;
                         toowner = true;

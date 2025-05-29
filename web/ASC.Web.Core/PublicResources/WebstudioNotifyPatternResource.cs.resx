@@ -877,17 +877,6 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Dobrý den, $UserName!
-
-Vezměte prosím na vědomí, že vaše předplatné služby ${LetterLogoText} DocSpace vyprší za tři dny. Poté bude aktivována doba odkladu $PaymentDelay dnů.
-
-Doporučujeme vám zaplatit předplatné Business nyní a nadále využívat všechny výhody vašeho ${LetterLogoText} DocSpace.
-
-$OrangeButton
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Dobrý den, $UserName!
 
@@ -1389,9 +1378,6 @@ Odkaz je platný pouze 7 dní.</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Odkladná lhůta pro aktivaci služby ${LetterLogoText} DocSpace</value>
-  </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Vaše předplatné služby ${LetterLogoText} DocSpace brzy vyprší</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Doba odkladu pro váš ${LetterLogoText} DocSpace vypršela</value>

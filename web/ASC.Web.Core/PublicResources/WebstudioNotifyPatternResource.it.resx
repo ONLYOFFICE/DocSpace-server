@@ -1145,17 +1145,6 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Salve, $UserName!
-
-Tieni presente che il tuo abbonamento a ${LetterLogoText} DocSpace scade tra tre giorni. Successivamente, verrà attivato il periodo di grazia di $PaymentDelay giorni.
-
-Ti consigliamo di pagare ora il tuo abbonamento Business e di continuare a utilizzare tutti i vantaggi del tuo spazio documenti di ${LetterLogoText}.
-
-$OrangeButton
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Salve, $UserName!
 
@@ -1458,9 +1447,6 @@ Il tuo portale è di nuovo disponibile.</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Periodo di grazia è stato attivato per il tuo ${LetterLogoText} DocSpace</value>
-  </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Il tuo abbonamento a ${LetterLogoText} DocSpace sta per scadere</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Il periodo di grazia per il tuo ${LetterLogoText} DocSpace è scaduto</value>
@@ -1936,5 +1922,19 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Se desideri continuare a utilizzare il tuo DocSpace ${LetterLogoText}, accedi ed esegui qualsiasi azione.&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Ciao, $UserName!
+
+Ti informiamo che il pagamento del tuo abbonamento verrà addebitato automaticamente sul tuo account tra 3 giorni.
+
+Per garantire una transazione senza problemi, assicurati che ci siano fondi a sufficienza nel metodo di pagamento selezionato.
+
+Per qualsiasi domanda o se hai bisogno di assistenza, non esitare a contattare il nostro "team di supporto":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Pagamento imminente dell’abbonamento per il tuo ${LetterLogoText} DocSpace</value>
   </data>
 </root>
