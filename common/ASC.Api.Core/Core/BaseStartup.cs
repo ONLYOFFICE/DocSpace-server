@@ -479,13 +479,12 @@ public abstract class BaseStartup
         services.AddApiKeyBearerAuthentication()
                 .AddJwtBearerAuthentication();
 
-        var autoMapperProfileAssemblies = GetAutoMapperProfileAssemblies().ToArray();
-        TypeAdapterConfig.GlobalSettings.Scan(autoMapperProfileAssemblies);
-        foreach (var autoMapperProfileAssembly in autoMapperProfileAssemblies)
-        {
-            TypeAdapterConfig.GlobalSettings.ScanInheritedTypes(autoMapperProfileAssembly);
-        }
+        TypeAdapterConfig.GlobalSettings.Scan(GetAutoMapperProfileAssemblies().ToArray());
 
+        var config = TypeAdapterConfig.GlobalSettings;
+        services.AddSingleton(config);
+        services.AddScoped<IMapper, ServiceMapper>();
+        
         services.AddBillingHttpClient();
         services.AddAccountingHttpClient();
 

@@ -70,14 +70,13 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
 
 
         services.RegisterFeature();
-
-        var autoMapperProfileAssemblies = GetAutoMapperProfileAssemblies().ToArray();
-        TypeAdapterConfig.GlobalSettings.Scan(autoMapperProfileAssemblies);
-        foreach (var autoMapperProfileAssembly in autoMapperProfileAssemblies)
-        {
-            TypeAdapterConfig.GlobalSettings.ScanInheritedTypes(autoMapperProfileAssembly);
-        }
-
+        
+        TypeAdapterConfig.GlobalSettings.Scan(GetAutoMapperProfileAssemblies().ToArray());
+       
+        var config = TypeAdapterConfig.GlobalSettings;
+        services.AddSingleton(config);
+        services.AddScoped<IMapper, ServiceMapper>();
+        
         if (!HostEnvironment.IsDevelopment())
         {
             services.AddStartupTask<WarmupServicesStartupTask>().TryAddSingleton(services);
@@ -94,7 +93,6 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
                 .AddCacheNotify(Configuration)
                 .AddHttpClient()
                 .AddDistributedLock(Configuration);
-
 
         DIHelper.Configure(services);
         DIHelper.Scan();

@@ -24,13 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Threading.Channels;
-
-using ASC.Core.Notify.Socket;
-
-using Mapster;
-using Mapster.Utils;
-
 namespace ASC.ApiSystem;
 
 public class Startup
@@ -130,16 +123,16 @@ public class Startup
                 .AddDistributedTaskQueue()
                 .AddCacheNotify(_configuration)
                 .AddDistributedLock(_configuration);
+        
 
+        
         services.RegisterFeature();
         services.RegisterQuotaFeature();
         
-        var autoMapperProfileAssemblies = BaseStartup.GetAutoMapperProfileAssemblies().ToArray();
-        TypeAdapterConfig.GlobalSettings.Scan(autoMapperProfileAssemblies);
-        foreach (var autoMapperProfileAssembly in autoMapperProfileAssemblies)
-        {
-            TypeAdapterConfig.GlobalSettings.ScanInheritedTypes(autoMapperProfileAssembly);
-        }
+        TypeAdapterConfig.GlobalSettings.Scan(BaseStartup.GetAutoMapperProfileAssemblies().ToArray());
+        var config = TypeAdapterConfig.GlobalSettings;
+        services.AddSingleton(config);
+        services.AddScoped<IMapper, ServiceMapper>();
         
         if (_configuration.GetValue<bool>("openApi:enable"))
         {
