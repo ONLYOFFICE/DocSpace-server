@@ -38,7 +38,7 @@ public class MessageEvent : IMapFrom<EventMessage>
     public DateTime Date { get; set; }
     public int TenantId { get; set; }
     public Guid? UserId { get; set; }
-    [MaxLength(1000)]
+    [MaxLength(300)]
     public string Page { get; set; }
     public int? Action { get; set; }
 }

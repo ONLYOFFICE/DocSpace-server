@@ -6719,7 +6719,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("Page")
-                        .HasMaxLength(1000)
+                        .HasMaxLength(300)
                         .HasColumnType("varchar")
                         .HasColumnName("page")
                         .UseCollation("utf8_general_ci")
@@ -6807,7 +6807,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("Page")
-                        .HasMaxLength(1000)
+                        .HasMaxLength(300)
                         .HasColumnType("varchar")
                         .HasColumnName("page")
                         .UseCollation("utf8_general_ci")
