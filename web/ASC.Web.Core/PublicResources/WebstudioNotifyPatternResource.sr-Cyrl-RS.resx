@@ -1980,4 +1980,18 @@ $TrulyYours</value>
   <data name="subject_user_type_changed" xml:space="preserve">
     <value>Ваш тип корисника у DocSpace -у је промењен</value>
   </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Здраво, $UserName!
+
+Обавештавамо вас да ће уплата за вашу претплату бити аутоматски наплаћена са вашег рачуна за 3 дана.
+
+Како би трансакција протекла без проблема, молимо вас да проверите да ли на одабраној платној методи имате довољно средстава.
+
+Уколико имате било каква питања или вам је потребна помоћ, слободно контактирајте наш "тим за подршку":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Предстојећа уплата претплате за ваш ${LetterLogoText} DocSpace</value>
+  </data>
 </root>

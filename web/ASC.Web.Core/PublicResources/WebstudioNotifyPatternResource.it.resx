@@ -1923,4 +1923,18 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Ciao, $UserName!
+
+Ti informiamo che il pagamento del tuo abbonamento verrà addebitato automaticamente sul tuo account tra 3 giorni.
+
+Per garantire una transazione senza problemi, assicurati che ci siano fondi a sufficienza nel metodo di pagamento selezionato.
+
+Per qualsiasi domanda o se hai bisogno di assistenza, non esitare a contattare il nostro "team di supporto":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Pagamento imminente dell’abbonamento per il tuo ${LetterLogoText} DocSpace</value>
+  </data>
 </root>

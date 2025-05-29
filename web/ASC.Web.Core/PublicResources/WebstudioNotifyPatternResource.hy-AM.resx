@@ -1983,4 +1983,18 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Ողջույն, $UserName!
+
+Տեղեկացնում ենք, որ ձեր բաժանորդագրության վճարը ավտոմատ կերպով կգանձվի ձեր հաշվից 3 օրվա ընթացքում։
+
+Գործարքի սահուն ընթացքն ապահովելու համար, խնդրում ենք հաստատել, որ ձեր վճարման հաշվին կան բավարար միջոցներ։
+
+Եթե ունեք որևէ հարց կամ օգնության կարիք, կարող եք կապվել մեր "աջակցության թիմի":"${__SupportLink}" հետ՝:
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Ձեր ${LetterLogoText} DocSpace-ի բաժանորդագրության առաջիկա վճարումը</value>
+  </data>
 </root>

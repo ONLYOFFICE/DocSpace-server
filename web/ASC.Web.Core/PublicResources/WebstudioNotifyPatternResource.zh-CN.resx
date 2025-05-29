@@ -1946,4 +1946,18 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>您好, $UserName!
+
+请注意，您的订阅费用将在3天内自动从账户中扣除。
+
+为确保扣款顺利，请确认您的付款方式中有足够金额。
+
+如有任何疑问或需要帮助，请随时联系我们的"支持团队":"${__SupportLink}"。
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>您的 ${LetterLogoText} 协作空间即将支付的订阅费用</value>
+  </data>
 </root>

@@ -1923,4 +1923,18 @@ $TrulyYours</value>
   <data name="subject_user_type_changed" xml:space="preserve">
     <value>Votre type d'utilisateur DocSpace a changé</value>
   </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Bonjour, $UserName!
+
+Nous vous informons que votre abonnement sera automatiquement débité de votre compte dans 3 jours.
+
+Pour garantir le bon déroulement de la transaction, veuillez vous assurer que les sommes disponibles dans votre mode de paiement sont suffisantes.
+
+Si vous avez des questions ou si vous avez besoin d'aide, n'hésitez pas à contacter notre "équipe d'assistance":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Paiement à venir de l'abonnement pour votre ${LetterLogoText} DocSpace</value>
+  </data>
 </root>
