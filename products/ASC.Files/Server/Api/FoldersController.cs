@@ -30,6 +30,8 @@ using ASC.AuditTrail.Models.Mappings;
 using ASC.Core.Common;
 using ASC.Files.Core.Utils;
 
+using FirebaseAdmin.Auth.Multitenancy;
+
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
@@ -46,7 +48,10 @@ public class FoldersControllerInternal(
     HistoryApiHelper historyApiHelper,
     FormFillingReportCreator formFillingReportCreator,
     CsvFileHelper csvFileHelper,
-    CsvFileUploader csvFileUploader)
+    CsvFileUploader csvFileUploader,
+    TenantManager tenantManager,
+    CoreBaseSettings coreBaseSettings
+    )
     : FoldersController<int>(
         breadCrumbsManager,
         folderContentDtoHelper,
@@ -90,6 +95,13 @@ public class FoldersControllerInternal(
     [HttpPost("folder/{folderId:int}/log/report")]
     public async Task<string> CreateReportFolderHistoryAsync(int folderId)
     {
+        if (!coreBaseSettings.Standalone
+            && (!SetupInfo.IsVisibleSettings(ManagementType.LoginHistory.ToStringFast())
+        || !(await tenantManager.GetCurrentTenantQuotaAsync()).Audit))
+        {
+            throw new BillingException(Resource.ErrorNotAllowedOption);
+        }
+
         var history = await historyApiHelper.GetFolderEventsAsync(folderId);
 
         await using var stream = csvFileHelper.CreateFile(history, new BaseEventMap<AuditEvent>());
