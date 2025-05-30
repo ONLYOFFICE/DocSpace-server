@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Service.Services.Thumbnail;
-
 namespace ASC.Files.Service.Services;
 
 [Singleton]
@@ -67,15 +65,11 @@ public class FrozenThumbnailProcessingService(
                 var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
                 await tenantManager.SetCurrentTenantAsync(group.Key);
                 
-                var commonLinkUtility = scope.ServiceProvider.GetService<CommonLinkUtility>();
-                var baseUri = commonLinkUtility.GetFullAbsolutePath(string.Empty);
-                commonLinkUtility.ServerUri = baseUri;
-                
                 var thumbnailBuilderService = scope.ServiceProvider.GetRequiredService<Builder<int>>();
 
                 foreach (var file in group)
                 {
-                    await thumbnailBuilderService.BuildThumbnail(new FileData<int>(file.TenantId, file.CreateBy, file.Id, baseUri, TariffState.NotPaid));
+                    await thumbnailBuilderService.BuildThumbnail(new FileData<int>(file.TenantId, file.CreateBy, file.Id, string.Empty, TariffState.NotPaid));
                 }
             }
         }
@@ -85,7 +79,7 @@ public class FrozenThumbnailProcessingService(
         }
     }
 
-    protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.Parse(configuration.GetValue<string>("files:thumbWatch:period") ?? "0:15:0");
+    protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.Parse(configuration.GetValue<string>("files:frozenThumbProcess:period") ?? "0:15:0");
 }
 
 static file class Queries
