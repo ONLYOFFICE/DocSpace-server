@@ -68,7 +68,8 @@ internal class FileDao(
     FileSharing fileSharing,
     FilesMessageService filesMessageService,
     QuotaSocketManager quotaSocketManager,
-    CustomQuota customQuota)
+    CustomQuota customQuota,
+    DisplayUserSettingsHelper displayUserSettingsHelper)
     : AbstractDao(dbContextManager,
               userManager,
               tenantManager,
@@ -427,11 +428,11 @@ internal class FileDao(
                     {
                         if (roomQuotaLimit - currentRoom.Counter < file.ContentLength)
                         {
-                            throw FileSizeComment.GetRoomFreeSpaceException(roomQuotaLimit);
+                                throw FileSizeComment.GetRoomFreeSpaceException(roomQuotaLimit);
+                            }
                         }
                     }
                 }
-            }
             else if (user != null)
             {
                 var quotaUserSettings = await _settingsManager.LoadAsync<TenantUserQuotaSettings>();
@@ -447,7 +448,12 @@ internal class FileDao(
 
                         if (userQuotaLimit - userUsedSpace < file.ContentLength)
                         {
-                            throw FileSizeComment.GetUserFreeSpaceException(userQuotaLimit);
+                            if ((userQuotaLimit * 2 < userUsedSpace + file.ContentLength) || userQuotaLimit < userUsedSpace)
+                            {
+                                await filesMessageService.SendAsync(MessageAction.FileNotSavedDueToUserQuota, file, MessageInitiator.DocsService, user.DisplayUserName(false, displayUserSettingsHelper), file.Title);
+                                throw FileSizeComment.GetUserFreeSpaceException(userQuotaLimit);
+                            }
+                            await filesMessageService.SendAsync(MessageAction.FileSavedButUserQuotaExceeded, file, MessageInitiator.DocsService, user.DisplayUserName(false, displayUserSettingsHelper), file.Title);
                         }
                     }
                 }
@@ -2700,7 +2706,8 @@ internal class CacheFileDao(ILogger<FileDao> logger,
     FileSharing fileSharing,
     FilesMessageService filesMessageService,
     QuotaSocketManager quotaSocketManager,
-    CustomQuota customQuota)
+    CustomQuota customQuota,
+    DisplayUserSettingsHelper displayUserSettingsHelper)
     : FileDao(
         logger,
     factoryIndexer,
@@ -2740,7 +2747,8 @@ internal class CacheFileDao(ILogger<FileDao> logger,
     fileSharing,
     filesMessageService,
     quotaSocketManager,
-    customQuota), ICacheFileDao<int>
+    customQuota,
+    displayUserSettingsHelper), ICacheFileDao<int>
 {
 
     private readonly ConcurrentDictionary<int, IEnumerable<FormRole>> _cache = new();

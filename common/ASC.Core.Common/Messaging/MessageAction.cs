@@ -593,6 +593,12 @@ public enum MessageAction
     [SwaggerEnum("Form stopped")]
     FormStopped = 5153,
 
+    [SwaggerEnum("File saved, user quota exceeded")]
+    FileSavedButUserQuotaExceeded = 5201,
+
+    [SwaggerEnum("File not saved due to user quota exceeded")]
+    FileNotSavedDueToUserQuota = 5202,
+
     #endregion
 
     #region Settings

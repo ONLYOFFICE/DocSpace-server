@@ -999,4 +999,10 @@
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Customer subscription updated</value>
   </data>
+  <data name="FileSavedButUserQuotaExceeded" xml:space="preserve">
+    <value>Users [{0}]. File updated: {1}, exceeding the storage quota.</value>
+  </data>
+  <data name="FileNotSavedDueToUserQuota" xml:space="preserve">
+    <value>Users [{0}]. File not saved: {1} – storage quota for user exceeded.</value>
+  </data>
 </root>

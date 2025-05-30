@@ -113,7 +113,10 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
         { (int)MessageAction.RoomColorChanged, _roomLogoChangedInterpreter },
         { (int)MessageAction.RoomCoverChanged, _roomLogoChangedInterpreter },
         { (int)MessageAction.RoomIndexExportSaved, new RoomIndexExportSavedInterpreter() },
-        { (int)MessageAction.RoomInviteResend, new RoomInviteResendInterpreter() }
+        { (int)MessageAction.RoomInviteResend, new RoomInviteResendInterpreter() },
+        { (int)MessageAction.FileSavedButUserQuotaExceeded, _userFileUpdatedInterpreter },
+        { (int)MessageAction.FileNotSavedDueToUserQuota, _userFileUpdatedInterpreter }
+
     }.ToFrozenDictionary();
     
     public ValueTask<HistoryEntry> ToHistoryAsync(DbAuditEvent @event, DbFilesAuditReference reference)
