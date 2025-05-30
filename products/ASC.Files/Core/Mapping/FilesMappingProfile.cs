@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Folder = DocuSign.eSign.Model.Folder;
-
 namespace ASC.Files.Core.Mapping;
 
 public class FilesMapping : IRegister
@@ -33,12 +31,14 @@ public class FilesMapping : IRegister
     public void Register(TypeAdapterConfig config)
     {
         config.NewConfig<DbFile, File<int>>()
+            .IgnoreNullValues(true)
             .Map(dst => dst.PureTitle, src => src.Title)
             .ConstructUsing(src => MapContext.Current.GetService<File<int>>());
 
         config.NewConfig<DbFileQuery, File<int>>()
             .AfterMapping((source, dest) =>
-            {
+            {                
+                source.File.Adapt(dest);
                 var tenantDateTimeConverter = MapContext.Current.GetService<TenantDateTimeConverter>();
                 if (tenantDateTimeConverter != null)
                 {
@@ -48,25 +48,24 @@ public class FilesMapping : IRegister
                 }
             })
             .Map(r => r.ShareRecord, f => f.SharedRecord.Adapt<FileShareRecord<int>>())
-            .Map(dest => dest, src => src.File.Adapt<File<int>>())
             .ConstructUsing(src =>  MapContext.Current.GetService<File<int>>());
 
-        config.NewConfig<DbFolder, Folder<int>>()
-            .ConstructUsing(src => MapContext.Current.GetService<Folder<int>>());
-
-        config.NewConfig<DbFolderQuery, Folder<int>>()            
+        config.NewConfig<DbFolder, Folder<int>>().IgnoreNullValues(true);
+        
+        config.NewConfig<DbFolderQuery, Folder<int>>()              
             .AfterMapping((source, dest) =>
             {
+                source.Folder.Adapt(dest, config);
                 var tenantDateTimeConverter = MapContext.Current.GetService<TenantDateTimeConverter>();
                 if (tenantDateTimeConverter != null)
                 {
                     dest.CreateOn = tenantDateTimeConverter.Convert(source.Folder.CreateOn);
                     dest.ModifiedOn = tenantDateTimeConverter.Convert(source.Folder.ModifiedOn);
                 }
+
+                MapContext.Current.GetService<FilesMappingAction>().Process(dest);
             })
-            .AfterMapping(dest => MapContext.Current.GetService<FilesMappingAction>().Process(dest))
-            .Map(dest => dest, src => src.Folder.Adapt<Folder<int>>())
-            .ConstructUsing(src => MapContext.Current.GetService<Folder<int>>());;
+            .ConstructUsing(src => MapContext.Current.GetService<Folder<int>>());
 
         config.NewConfig<FileShareRecord<int>, DbFilesSecurity>()
             .Map(dest => dest.EntryId, src => src.EntryId.ToString())

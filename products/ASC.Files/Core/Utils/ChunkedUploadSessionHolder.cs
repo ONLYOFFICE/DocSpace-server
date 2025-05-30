@@ -31,8 +31,7 @@ public class ChunkedUploadSessionHolder(
     IServiceProvider serviceProvider,
     GlobalStore globalStore,
     SetupInfo setupInfo,
-    IFusionCache cache,
-    FileHelper fileHelper)
+    IFusionCache cache)
 {
     
     private CommonChunkedUploadSessionHolder _holder;
