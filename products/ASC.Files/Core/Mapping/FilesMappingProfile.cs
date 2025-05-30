@@ -30,24 +30,27 @@ public class FilesMapping : IRegister
 {
     public void Register(TypeAdapterConfig config)
     {
-        config.NewConfig<DbFile, File<int>>();
+        config.NewConfig<DbFile, File<int>>()
+            .Map(dst => dst.PureTitle, src => src.Title)
+            .ConstructUsing(src => MapContext.Current.GetService<File<int>>());
 
         config.NewConfig<DbFileQuery, File<int>>()
             .AfterMapping((source, dest) => dest.CreateOn = MapContext.Current.GetService<TenantDateTimeConverter>().Convert(source.File.CreateOn))
             .AfterMapping((source, dest) => dest.ModifiedOn = MapContext.Current.GetService<TenantDateTimeConverter>().Convert(source.File.ModifiedOn))
             .AfterMapping((source, dest) => dest.LastOpened = MapContext.Current.GetService<TenantDateTimeConverter>().Convert(source.LastOpened))
-            .Map(r => r.ShareRecord, f => f.SharedRecord)
-            .Map(dest => dest, src => src.File)
-            .ConstructUsing(src => MapContext.Current.GetService<File<int>>());
+            .Map(r => r.ShareRecord, f => f.SharedRecord.Adapt<FileShareRecord<int>>())
+            .Map(dest => dest, src => src.File.Adapt<File<int>>())
+            .ConstructUsing(src =>  MapContext.Current.GetService<File<int>>());
 
-        config.NewConfig<DbFolder, Folder<int>>();
+        config.NewConfig<DbFolder, Folder<int>>()
+            .ConstructUsing(src => MapContext.Current.GetService<Folder<int>>());
 
         config.NewConfig<DbFolderQuery, Folder<int>>()
             .AfterMapping((source, dest) => dest.CreateOn = MapContext.Current.GetService<TenantDateTimeConverter>().Convert(source.Folder.CreateOn))
             .AfterMapping((source, dest) => dest.ModifiedOn = MapContext.Current.GetService<TenantDateTimeConverter>().Convert(source.Folder.ModifiedOn))
             .AfterMapping(dest => MapContext.Current.GetService<FilesMappingAction>().Process(dest))
-            .Map(dest => dest, src => src.Folder)
-            .ConstructUsing(src => MapContext.Current.GetService<Folder<int>>());
+            .Map(dest => dest, src => src.Folder.Adapt<Folder<int>>())
+            .ConstructUsing(src => MapContext.Current.GetService<Folder<int>>());;
 
         config.NewConfig<FileShareRecord<int>, DbFilesSecurity>()
             .Map(dest => dest.EntryId, src => src.EntryId.ToString())

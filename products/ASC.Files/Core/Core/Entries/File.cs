@@ -72,17 +72,8 @@ public enum FileStatus
 public class File<T> : FileEntry<T>
 {
     private FileStatus _status;
-
-    public File()
-    {
-        Version = 1;
-        VersionGroup = 1;
-        FileEntryType = FileEntryType.File;
-    }
-
-    public File(
-        FileHelper fileHelper,
-        Global global, SecurityContext securityContext) : base(fileHelper, global, securityContext)
+    
+    public File(IServiceProvider provider) : base(provider)
     {
         Version = 1;
         VersionGroup = 1;
@@ -165,7 +156,7 @@ public class File<T> : FileEntry<T>
     /// </summary>
     public async Task<FileStatus> GetFileStatus()
     {
-        _status = await FileHelper.GetFileStatus(this, _status);
+        _status = await ServiceProvider.GetService<FileHelper>().GetFileStatus(this, _status);
         return _status;
     }
 
@@ -183,13 +174,13 @@ public class File<T> : FileEntry<T>
     /// The file title.
     /// </summary>
     [JsonIgnore]
-    public override string Title => FileHelper.GetTitle(this);
+    public override string Title => ServiceProvider.GetService<FileHelper>().GetTitle(this);
 
     /// <summary>
     /// The file download URL.
     /// </summary>
     [JsonIgnore]
-    public string DownloadUrl => FileHelper.GetDownloadUrl(this);
+    public string DownloadUrl => ServiceProvider.GetService<FileHelper>().GetDownloadUrl(this);
 
     /// <summary>
     /// Specifies whether the file is locked or not.

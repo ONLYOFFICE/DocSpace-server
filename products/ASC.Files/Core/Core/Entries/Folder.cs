@@ -264,17 +264,8 @@ public class Folder<T> : FileEntry<T>, IFolder
     /// Specifies if the folder provider is mapped or not.
     /// </summary>
     public bool ProviderMapped { get; set; }
-
-    public Folder()
-    {
-        Title = string.Empty;
-        FileEntryType = FileEntryType.Folder;
-    }
-
-    public Folder(
-        FileHelper fileHelper,
-        Global global,
-        SecurityContext securityContext) : base(fileHelper, global, securityContext)
+    
+    public Folder(IServiceProvider serviceProvider) : base(serviceProvider)
     {
         Title = string.Empty;
         FileEntryType = FileEntryType.Folder;
