@@ -123,7 +123,7 @@ public class PaymentController(
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("update")]
-    public async Task<bool> PaymentUpdateAsync(QuantityRequestDto inDto)
+    public async Task<bool> UpdatePaymentAsync(QuantityRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
         {
@@ -192,7 +192,7 @@ public class PaymentController(
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("updatewallet")]
-    public async Task<bool> PaymentUpdateWalletAsync(WalletQuantityRequestDto inDto)
+    public async Task<bool> UpdateWalletPaymentAsync(WalletQuantityRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
         {
@@ -294,7 +294,7 @@ public class PaymentController(
     [SwaggerResponse(200, "Payment calculation", typeof(PaymentCalculation))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("calculatewallet")]
-    public async Task<PaymentCalculation> PaymentCalculateWalletAsync(WalletQuantityRequestDto inDto)
+    public async Task<PaymentCalculation> CalculateWalletPaymentAsync(WalletQuantityRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
         {
@@ -400,7 +400,7 @@ public class PaymentController(
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "List of available portal prices", typeof(object))]
     [HttpGet("prices")]
-    public async Task<object> GetPricesAsync()
+    public async Task<object> GetPortalPricesAsync()
     {
         var currency = await regionHelper.GetCurrencyFromRequestAsync();
         var result = (await tenantManager.GetProductPriceInfoAsync())
@@ -420,7 +420,7 @@ public class PaymentController(
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "List of available portal currencies", typeof(IAsyncEnumerable<CurrenciesDto>))]
     [HttpGet("currencies")]
-    public async IAsyncEnumerable<CurrenciesDto> GetCurrenciesAsync()
+    public async IAsyncEnumerable<CurrenciesDto> GetPaymentCurrenciesAsync()
     {
         var defaultRegion = regionHelper.GetDefaultRegionInfo();
         var currentRegion = await regionHelper.GetCurrentRegionInfoAsync();
@@ -444,7 +444,7 @@ public class PaymentController(
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "List of available portal quotas", typeof(IEnumerable<QuotaDto>))]
     [HttpGet("quotas")]
-    public async Task<IEnumerable<QuotaDto>> GetQuotasAsync(QuotasRequestDto inDto)
+    public async Task<IEnumerable<QuotaDto>> GetPaymentQuotasAsync(QuotasRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -471,7 +471,7 @@ public class PaymentController(
     [SwaggerResponse(200, "Payment information about the current portal quota", typeof(QuotaDto))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("quota")]
-    public async Task<QuotaDto> GetQuotaInformationAsync(PaymentInformationRequestDto inDto)
+    public async Task<QuotaDto> GetQuotaPaymentInformationAsync(PaymentInformationRequestDto inDto)
     {
         if (await userManager.IsGuestAsync(securityContext.CurrentAccount.ID))
         {
@@ -493,7 +493,7 @@ public class PaymentController(
     [SwaggerResponse(400, "Incorrect email or message text is empty")]
     [SwaggerResponse(429, "Request limit is exceeded")]
     [HttpPost("request")]
-    public async Task SendSalesRequestAsync(SalesRequestsDto inDto)
+    public async Task SendPaymentRequestAsync(SalesRequestsDto inDto)
     {
         if (!inDto.Email.TestEmailRegex())
         {
@@ -513,17 +513,17 @@ public class PaymentController(
 
 
     /// <summary>
-    /// Returns the URL to the chechout setup page.
+    /// Returns the URL to the checkout setup page.
     /// </summary>
     /// <short>
-    /// Get the chechout setup page URL
+    /// Get the checkout setup page URL
     /// </short>
     /// <path>api/2.0/portal/payment/chechoutsetupurl</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The URL to the chechout setup page", typeof(Uri))]
+    [SwaggerResponse(200, "The URL to the checkout setup page", typeof(Uri))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("chechoutsetupurl")]
-    public async Task<Uri> GetChechoutSetupUrlAsync(ChechoutSetupUrlRequestsDto inDto)
+    public async Task<Uri> GetCheckoutSetupUrlAsync(CheckoutSetupUrlRequestsDto inDto)
     {
         await DemandAdminAsync();
 

@@ -180,7 +180,7 @@ public class SecurityController(PermissionContext permissionContext,
     [SwaggerResponse(200, "Audit trail types", typeof(object))]
     [AllowAnonymous]
     [HttpGet("audit/types")]
-    public object GetTypes()
+    public object GetAuditTrailTypes()
     {
         return new
         {
@@ -204,7 +204,7 @@ public class SecurityController(PermissionContext permissionContext,
     [SwaggerResponse(200, "Audit trail mappers", typeof(object))]
     [AllowAnonymous]
     [HttpGet("audit/mappers")]
-    public object GetMappers(AuditTrailTypesRequestDto inDto)
+    public object GetAuditTrailMappers(AuditTrailTypesRequestDto inDto)
     {
         return auditActionMapper.Mappers
             .Where(r => !inDto.ProductType.HasValue || r.Product == inDto.ProductType.Value)
@@ -360,7 +360,7 @@ public class SecurityController(PermissionContext permissionContext,
     [SwaggerResponse(400, "Exception in Domains")]
     [EnableCors(PolicyName = CorsPoliciesEnums.AllowAllCorsPolicyName )]
     [HttpPost("csp")]
-    public async Task<CspDto> Csp(CspRequestsDto request)
+    public async Task<CspDto> ConfigureCsp(CspRequestsDto request)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -407,7 +407,7 @@ public class SecurityController(PermissionContext permissionContext,
     [AllowAnonymous]
     [EnableCors(PolicyName = CorsPoliciesEnums.AllowAllCorsPolicyName)]
     [HttpGet("csp")]
-    public async Task<CspDto> GetCsp()
+    public async Task<CspDto> GetCspSettings()
     {
         //await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         

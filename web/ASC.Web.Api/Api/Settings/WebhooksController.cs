@@ -226,7 +226,7 @@ public class WebhooksController(ApiContext context,
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "Logs of the webhook activities", typeof(IAsyncEnumerable<WebhooksLogDto>))]
     [HttpGet("webhooks/log")]
-    public async IAsyncEnumerable<WebhooksLogDto> GetJournal(WebhookLogsRequestDto inDto)
+    public async IAsyncEnumerable<WebhooksLogDto> GetWebhooksLogs(WebhookLogsRequestDto inDto)
     {
         if (!await CheckAdminPermissionsAsync())
         {
@@ -333,7 +333,7 @@ public class WebhooksController(ApiContext context,
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "List of triggers for a webhook", typeof(Dictionary<string, int>))]
     [HttpGet("webhook/triggers")]
-    public Dictionary<string, int> Triggers()
+    public Dictionary<string, int> GetWebhookTriggers()
     {
         return Enum.GetValues<WebhookTrigger>().ToDictionary(item => item.ToCustomString(), item => (int)item);
     }

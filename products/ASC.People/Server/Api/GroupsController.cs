@@ -118,7 +118,7 @@ public class GroupController(
     [Tags("Group")]
     [SwaggerResponse(200, "List of groups", typeof(IEnumerable<GroupSummaryDto>))]
     [HttpGet("user/{userid:guid}")]
-    public async Task<IEnumerable<GroupSummaryDto>> GetByUserIdAsync(GetGroupByUserIdRequestDto inDto)
+    public async Task<IEnumerable<GroupSummaryDto>> GetGroupByUserIdAsync(GetGroupByUserIdRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_ReadGroups);
         var groups = await userManager.GetUserGroupsAsync(inDto.UserId);
@@ -329,7 +329,7 @@ public class GroupController(
     [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
     [SwaggerResponse(404, "User not found")]
     [HttpPut("{id:guid}/manager")]
-    public async Task<GroupDto> SetManagerAsync(SetManagerRequestDto inDto)
+    public async Task<GroupDto> SetGroupManagerAsync(SetManagerRequestDto inDto)
     {
         var group = await GetGroupInfoAsync(inDto.Id);
         

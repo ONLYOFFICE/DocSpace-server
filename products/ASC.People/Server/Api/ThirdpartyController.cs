@@ -69,7 +69,7 @@ public class ThirdpartyController(
     [SwaggerResponse(200, "List of third-party accounts", typeof(ICollection<AccountInfoDto>))]
     [AllowAnonymous, AllowNotPayment]
     [HttpGet("providers")]
-    public async Task<ICollection<AccountInfoDto>> GetAuthProvidersAsync(AuthProvidersRequestDto inDto)
+    public async Task<ICollection<AccountInfoDto>> GetThirdPartyAuthProvidersAsync(AuthProvidersRequestDto inDto)
     {
         var infos = new List<AccountInfoDto>();
         var linkedAccounts = new List<LoginProfile>();
@@ -119,7 +119,7 @@ public class ThirdpartyController(
     [SwaggerResponse(200, "Ok")]
     [SwaggerResponse(405, "Error not allowed option")]
     [HttpPut("linkaccount")]
-    public async Task LinkAccountAsync(LinkAccountRequestDto inDto)
+    public async Task LinkThirdPartyAccountAsync(LinkAccountRequestDto inDto)
     {
         var profile = await loginProfileTransport.FromTransport(inDto.SerializedProfile);
 
@@ -157,7 +157,7 @@ public class ThirdpartyController(
     [SwaggerResponse(403, "The invitation link is invalid or its validity has expired")]
     [AllowAnonymous]
     [HttpPost("signup")]
-    public async Task SignupAccountAsync(SignupAccountRequestDto inDto)
+    public async Task SignupThirdPartyAccountAsync(SignupAccountRequestDto inDto)
     {
         var passwordHash = inDto.PasswordHash;
         var mustChangePassword = false;
@@ -272,7 +272,7 @@ public class ThirdpartyController(
     /// <path>api/2.0/people/thirdparty/unlinkaccount</path>
     [Tags("People / Third-party accounts")]
     [HttpDelete("unlinkaccount")]
-    public async Task UnlinkAccountAsync(UnlinkAccountRequestDto inDto)
+    public async Task UnlinkThirdPartyAccountAsync(UnlinkAccountRequestDto inDto)
     {
         await accountLinker.RemoveProviderAsync(securityContext.CurrentAccount.ID.ToString(), inDto.Provider);
 

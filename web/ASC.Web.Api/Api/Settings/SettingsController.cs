@@ -86,7 +86,7 @@ public partial class SettingsController(MessageService messageService,
     [SwaggerResponse(200, "Settings", typeof(SettingsDto))]
     [HttpGet("")]
     [AllowNotPayment, AllowSuspended, AllowAnonymous]
-    public async Task<SettingsDto> GetSettingsAsync(PortalSettingsrequestDto inDto)
+    public async Task<SettingsDto> GetPortalSettingsAsync(PortalSettingsrequestDto inDto)
     {
         var studioAdminMessageSettings = await settingsManager.LoadAsync<StudioAdminMessageSettings>();
         var tenantCookieSettings = await settingsManager.LoadAsync<TenantCookieSettings>();
@@ -426,7 +426,7 @@ public partial class SettingsController(MessageService messageService,
     [SwaggerResponse(200, "Deep link configuration updated", typeof(TenantDeepLinkSettings))]
     [SwaggerResponse(400, "Invalid deep link configuration")]
     [HttpPost("deeplink")]
-    public async Task<TenantDeepLinkSettings> SaveConfigureDeepLinkAsync(DeepLinkConfigurationRequestsDto inDto)
+    public async Task<TenantDeepLinkSettings> ConfigureDeepLinkAsync(DeepLinkConfigurationRequestsDto inDto)
     {
         await DemandStatisticPermissionAsync();
         if (!Enum.IsDefined(typeof(DeepLinkHandlingMode), inDto.DeepLinkSettings.HandlingMode))
@@ -452,7 +452,7 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Ok", typeof(TenantDeepLinkSettings))]
     [HttpGet("deeplink")]
-    public async Task<TenantDeepLinkSettings> GettDeepLinkSettings()
+    public async Task<TenantDeepLinkSettings> GetDeepLinkSettings()
     {
         var result = await settingsManager.LoadAsync<TenantDeepLinkSettings>(HttpContext.GetIfModifiedSince());
         
@@ -541,7 +541,7 @@ public partial class SettingsController(MessageService messageService,
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard,Administrators")]
     [HttpGet("timezones")]
     [AllowNotPayment]
-    public async Task<List<TimezonesRequestsDto>> GetTimeZonesAsyncAsync()
+    public async Task<List<TimezonesRequestsDto>> GetTimeZonesAsync()
     {
         await ApiContext.AuthByClaimAsync();
         var timeZones = TimeZoneInfo.GetSystemTimeZones().ToList();
@@ -575,7 +575,7 @@ public partial class SettingsController(MessageService messageService,
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard")]
     [HttpGet("machine")]
     [AllowNotPayment]
-    public object GetMachineName()
+    public object GetPortalHostname()
     {
         return Request.Host.Value;
     }
@@ -642,7 +642,7 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Portal logo image URL", typeof(string))]
     [HttpGet("logo")]
-    public async Task<string> GetLogoAsync()
+    public async Task<string> GetPortalLogoAsync()
     {        
         var result = await settingsManager.LoadAsync<TenantInfoSettings>(HttpContext.GetIfModifiedSince());
         
@@ -704,7 +704,7 @@ public partial class SettingsController(MessageService messageService,
     [SwaggerResponse(200, "Settings of the portal themes", typeof(CustomColorThemesSettingsDto))]
     [AllowAnonymous, AllowNotPayment, AllowSuspended]
     [HttpGet("colortheme")]
-    public async Task<CustomColorThemesSettingsDto> GetColorThemeAsync()
+    public async Task<CustomColorThemesSettingsDto> GetPortalColorThemeAsync()
     {
         var settings = await settingsManager.LoadAsync<CustomColorThemesSettings>(HttpContext.GetIfModifiedSince());
         
@@ -719,7 +719,7 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Portal theme settings", typeof(CustomColorThemesSettingsDto))]
     [HttpPut("colortheme")]
-    public async Task<CustomColorThemesSettingsDto> SaveColorThemeAsync(CustomColorThemesSettingsRequestsDto inDto)
+    public async Task<CustomColorThemesSettingsDto> SavePortalColorThemeAsync(CustomColorThemesSettingsRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var settings = await settingsManager.LoadAsync<CustomColorThemesSettings>();
@@ -791,7 +791,7 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Portal theme settings: custom color theme settings, selected or not, limit", typeof(CustomColorThemesSettingsDto))]
     [HttpDelete("colortheme")]
-    public async Task<CustomColorThemesSettingsDto> DeleteColorThemeAsync(DeleteColorThemeRequestDto inDto)
+    public async Task<CustomColorThemesSettingsDto> DeletePortalColorThemeAsync(DeleteColorThemeRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -1070,7 +1070,7 @@ public partial class SettingsController(MessageService messageService,
     [SwaggerResponse(200, "Payment settings: sales email, feedback and support URL, link to pay for a portal, Standalone or not, current license, maximum quota quantity", typeof(PaymentSettingsDto))]
     [AllowNotPayment]
     [HttpGet("payment")]
-    public async Task<PaymentSettingsDto> PaymentSettingsAsync()
+    public async Task<PaymentSettingsDto> GetPaymentSettingsAsync()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var currentQuota = await tenantManager.GetCurrentTenantQuotaAsync();

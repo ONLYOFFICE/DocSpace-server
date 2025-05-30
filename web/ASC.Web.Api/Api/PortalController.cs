@@ -115,7 +115,7 @@ public class PortalController(
     [Tags("Portal / Users")]
     [SwaggerResponse(200, "User information", typeof(UserInfo))]
     [HttpGet("users/{userID:guid}")]
-    public async Task<UserInfo> GetUserAsync(UserIDRequestDto inDto)
+    public async Task<UserInfo> GetUserByIdAsync(UserIDRequestDto inDto)
     {
         return await userManager.GetUsersAsync(inDto.Id);
     }
@@ -130,7 +130,7 @@ public class PortalController(
     [Tags("Portal / Users")]
     [SwaggerResponse(200, "Invitation link", typeof(string))]
     [HttpGet("users/invite/{employeeType}")]
-    public async Task<string> GeInviteLinkAsync(InvitationLinkRequestDto inDto)
+    public async Task<string> GetInvitationLinkAsync(InvitationLinkRequestDto inDto)
     {
         var invitationSettings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
 
@@ -206,7 +206,7 @@ public class PortalController(
     [Tags("Portal / Quota")]
     [SwaggerResponse(200, "Used portal space", typeof(double))]
     [HttpGet("usedspace")]
-    public async Task<double> GetUsedSpaceAsync()
+    public async Task<double> GetPortalUsedSpaceAsync()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var tenant = tenantManager.GetCurrentTenant();
@@ -227,7 +227,7 @@ public class PortalController(
     [Tags("Portal / Users")]
     [SwaggerResponse(200, "Number of portal users", typeof(long))]
     [HttpGet("userscount")]
-    public async Task<long> GetUsersCountAsync()
+    public async Task<long> GetPortalUsersCountAsync()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         return (await userManager.GetUserNamesAsync(EmployeeStatus.Active)).Length;
@@ -244,7 +244,7 @@ public class PortalController(
     [SwaggerResponse(200, "Current portal tariff", typeof(Tariff))]
     [AllowNotPayment]
     [HttpGet("tariff")]
-    public async Task<TariffDto> GetTariffAsync(CurrentPortalTariffRequestDto inDto)
+    public async Task<TariffDto> GetPortalTariffAsync(CurrentPortalTariffRequestDto inDto)
     {
         var tenant = tenantManager.GetCurrentTenant();
         var source = await tariffService.GetTariffAsync(tenant.Id, refresh: inDto.Refresh);
@@ -288,7 +288,7 @@ public class PortalController(
     [SwaggerResponse(403, "No permissions to perform this action")]
     [AllowNotPayment]
     [HttpGet("quota")]
-    public async Task<TenantQuota> GetQuotaAsync()
+    public async Task<TenantQuota> GetPortalQuotaAsync()
     {        
         if (await userManager.IsGuestAsync(securityContext.CurrentAccount.ID))
         {
@@ -318,8 +318,8 @@ public class PortalController(
     [HttpGet("quota/right")]
     public async Task<TenantQuota> GetRightQuotaAsync()
     {
-        var usedSpace = await GetUsedSpaceAsync();
-        var needUsersCount = await GetUsersCountAsync();
+        var usedSpace = await GetPortalUsedSpaceAsync();
+        var needUsersCount = await GetPortalUsersCountAsync();
 
         return (await tenantManager.GetTenantQuotasAsync()).OrderBy(r => r.Price)
                             .FirstOrDefault(quota =>
@@ -339,7 +339,7 @@ public class PortalController(
     [Tags("Portal / Settings")]
     [SwaggerResponse(200, "Portal path", typeof(object))]
     [HttpGet("path")]
-    public object GetFullAbsolutePath(PortalPathRequestDto inDto)
+    public object GetPortalPath(PortalPathRequestDto inDto)
     {
         return commonLinkUtility.GetFullAbsolutePath(inDto.VirtualPath);
     }
@@ -387,7 +387,7 @@ public class PortalController(
     /// <path>api/2.0/portal/present/mark</path>
     [Tags("Portal / Users")]
     [HttpPost("present/mark")]
-    public async Task MarkPresentAsReadedAsync()
+    public async Task MarkGiftMessageAsReadAsync()
     {
         try
         {

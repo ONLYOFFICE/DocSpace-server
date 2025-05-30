@@ -419,7 +419,7 @@ public class StorageController(ILoggerProvider option,
     [SwaggerResponse(400, "Module")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("storage/cdn")]
-    public async Task<CdnStorageSettings> UpdateCdnAsync(StorageRequestsDto inDto)
+    public async Task<CdnStorageSettings> UpdateCdnStorageAsync(StorageRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 

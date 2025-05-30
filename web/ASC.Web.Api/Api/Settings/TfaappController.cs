@@ -139,7 +139,7 @@ public class TfaappController(
     [Tags("Settings / TFA settings")]
     [SwaggerResponse(200, "Confirmation email URL", typeof(string))]
     [HttpGet("tfaapp/confirm")]
-    public async Task<string> TfaConfirmUrlAsync()
+    public async Task<string> GetTfaConfirmUrlAsync()
     {
         var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
@@ -177,7 +177,7 @@ public class TfaappController(
     [SwaggerResponse(200, "True if the operation is successful", typeof(bool))]
     [SwaggerResponse(405, "SMS settings are not available/TFA application settings are not available")]
     [HttpPut("tfaapp")]
-    public async Task<bool> TfaSettingsAsync(TfaRequestsDto inDto)
+    public async Task<bool> UpdateTfaSettingsAsync(TfaRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -278,9 +278,9 @@ public class TfaappController(
     [HttpPut("tfaappwithlink")]
     public async Task<string> TfaSettingsLink(TfaRequestsDto inDto)
     {
-        if (await TfaSettingsAsync(inDto))
+        if (await UpdateTfaSettingsAsync(inDto))
         {
-            return await TfaConfirmUrlAsync();
+            return await GetTfaConfirmUrlAsync();
         }
 
         return string.Empty;
@@ -326,7 +326,7 @@ public class TfaappController(
     [SwaggerResponse(200, "List of TFA application codes", typeof(IEnumerable<object>))]
     [SwaggerResponse(405, "TFA application settings are not available")]
     [HttpGet("tfaappcodes")]
-    public async Task<IEnumerable<object>> TfaAppGetCodesAsync()
+    public async Task<IEnumerable<object>> GetTfaAppCodesAsync()
     {
         var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
@@ -355,7 +355,7 @@ public class TfaappController(
     [SwaggerResponse(200, "New backup codes", typeof(IEnumerable<object>))]
     [SwaggerResponse(405, "TFA application settings are not available")]
     [HttpPut("tfaappnewcodes")]
-    public async Task<IEnumerable<object>> TfaAppRequestNewCodesAsync()
+    public async Task<IEnumerable<object>> UpdateTfaAppCodesAsync()
     {
         var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 

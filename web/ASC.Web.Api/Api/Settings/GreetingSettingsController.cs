@@ -60,7 +60,7 @@ public class GreetingSettingsController(TenantInfoSettingsHelper tenantInfoSetti
     [Tags("Settings / Greeting settings")]
     [SwaggerResponse(200, "Boolean value: true if the greeting settings of the current portal are set to default", typeof(bool))]
     [HttpGet("isdefault")]
-    public bool IsDefault()
+    public bool IsDefaultGreetingSettings()
     {
         var tenant = tenantManager.GetCurrentTenant();
         return tenant.Name == "";

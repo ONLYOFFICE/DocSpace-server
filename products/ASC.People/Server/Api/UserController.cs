@@ -751,7 +751,7 @@ public class UserController(
     [SwaggerResponse(404, "User not found")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("guests/{userid:guid}/share")]
-    public async Task<string> GetGuestShareLinkAsync(GuestShareRequestDto inDto)
+    public async Task<string> GetGuestSharingLinkAsync(GuestShareRequestDto inDto)
     {
         var targetUser = await _userManager.GetUsersAsync(inDto.UserId);
 
@@ -841,7 +841,7 @@ public class UserController(
     [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("status/{status}/search")]
-    public async IAsyncEnumerable<EmployeeFullDto> GetAdvanced(AdvancedSearchDto inDto)
+    public async IAsyncEnumerable<EmployeeFullDto> SearchUsersByStatus(AdvancedSearchDto inDto)
     {
         if (!await _userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID))
         {
@@ -900,7 +900,7 @@ public class UserController(
     [AllowNotPayment]
     [HttpGet("email")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,GuestShareLink,Everyone")]
-    public async Task<EmployeeFullDto> GetByEmailAsync(GetMemberByEmailRequestDto inDto)
+    public async Task<EmployeeFullDto> GetProfileByEmailAsync(GetMemberByEmailRequestDto inDto)
     {
         var cultureInfo = string.IsNullOrEmpty(inDto.Culture) ? null : new CultureInfo(inDto.Culture);
 
@@ -945,7 +945,7 @@ public class UserController(
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,Everyone")]
     [HttpGet("{userid}", Order = 1)]
-    public async Task<EmployeeFullDto> GetById(GetMemberByIdRequestDto inDto)
+    public async Task<EmployeeFullDto> GetProfileByUserId(GetMemberByIdRequestDto inDto)
     {
         var isInvite = _httpContextAccessor.HttpContext!.User.Claims
                .Any(role => role.Type == ClaimTypes.Role && ConfirmTypeExtensions.TryParse(role.Value, out var confirmType) && confirmType == ConfirmType.LinkInvite);
@@ -1014,7 +1014,7 @@ public class UserController(
             InvitedByMe = false,
             InviterId = null
         };
-        return GetFullByFilter(filter);
+        return SearchUsersByExtendedFilter(filter);
     }
 
     /// <summary>
@@ -1029,7 +1029,7 @@ public class UserController(
     [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("filter")]
-    public async IAsyncEnumerable<EmployeeFullDto> GetFullByFilter(SimpleByFilterRequestDto inDto)
+    public async IAsyncEnumerable<EmployeeFullDto> SearchUsersByExtendedFilter(SimpleByFilterRequestDto inDto)
     {
         var filter = new UserFilter
         {
@@ -1083,7 +1083,7 @@ public class UserController(
     [Tags("People / Search")]
     [SwaggerResponse(200, "List of users", typeof(IAsyncEnumerable<EmployeeDto>))]
     [HttpGet("search")]
-    public IAsyncEnumerable<EmployeeDto> GetPeopleSearch(GetPeopleByQueryRequestDto inDto)
+    public IAsyncEnumerable<EmployeeDto> SearchUsersByQuery(GetPeopleByQueryRequestDto inDto)
     {
         var query = new GetMemberByQueryRequestDto { Query = inDto.Query };
         return GetSearch(query);
@@ -1373,7 +1373,7 @@ public class UserController(
     [Tags("People / Theme")]
     [SwaggerResponse(200, "Theme", typeof(DarkThemeSettings))]
     [HttpGet("theme")]
-    public async Task<DarkThemeSettings> GetThemeAsync()
+    public async Task<DarkThemeSettings> GetPortalThemeAsync()
     {
         return await settingsManager.LoadForCurrentUserAsync<DarkThemeSettings>();
     }
@@ -1388,7 +1388,7 @@ public class UserController(
     [Tags("People / Theme")]
     [SwaggerResponse(200, "Theme", typeof(DarkThemeSettings))]
     [HttpPut("theme")]
-    public async Task<DarkThemeSettings> ChangeThemeAsync(DarkThemeSettingsRequestDto inDto)
+    public async Task<DarkThemeSettings> ChangePortalThemeAsync(DarkThemeSettingsRequestDto inDto)
     {
         var darkThemeSettings = new DarkThemeSettings
         {
@@ -1411,7 +1411,7 @@ public class UserController(
     [SwaggerResponse(200, "Detailed information about my profile", typeof(EmployeeFullDto))]
     [AllowNotPayment]
     [HttpGet("@self")]
-    public async Task<EmployeeFullDto> SelfAsync()
+    public async Task<EmployeeFullDto> GetSelfProfileAsync()
     {
         var user = await _userManager.GetUserAsync(securityContext.CurrentAccount.ID, EmployeeFullDtoHelper.GetExpression(_apiContext));
 
@@ -1582,7 +1582,7 @@ public class UserController(
     [AllowNotPayment]
     [HttpPut("activationstatus/{activationstatus}")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Activation,Everyone")]
-    public async IAsyncEnumerable<EmployeeFullDto> UpdateEmployeeActivationStatus(UpdateMemberActivationStatusRequestDto inDto)
+    public async IAsyncEnumerable<EmployeeFullDto> UpdateUserActivationStatus(UpdateMemberActivationStatusRequestDto inDto)
     {
         await _apiContext.AuthByClaimAsync();
         
@@ -2011,7 +2011,7 @@ public class UserController(
     [SwaggerResponse(200, "Update type progress", typeof(TaskProgressResponseDto))]
     [SwaggerResponse(400, "Can not update user type")]
     [HttpPost("type")]
-    public async Task<TaskProgressResponseDto> StartUpdateUserTypeAsync(StartUpdateUserTypeDto inDto)
+    public async Task<TaskProgressResponseDto> StarUserTypetUpdateAsync(StartUpdateUserTypeDto inDto)
     {
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(inDto.Type), Constants.Action_AddRemoveUser);
 
@@ -2070,7 +2070,7 @@ public class UserController(
     [Tags("People / User type")]
     [SwaggerResponse(200, "Update type progress", typeof(TaskProgressResponseDto))]
     [HttpGet("type/progress/{userid:guid}")]
-    public async Task<TaskProgressResponseDto> GetChangeTypeProgressAsync(UserIdRequestDto inDto)
+    public async Task<TaskProgressResponseDto> GetUserTypeUpdateProgress(UserIdRequestDto inDto)
     {
         await _permissionContext.DemandPermissionsAsync(Constants.Action_AddRemoveUser);
 
@@ -2088,7 +2088,7 @@ public class UserController(
     [Tags("People / User type")]
     [SwaggerResponse(200, "Update type progress", typeof(TaskProgressResponseDto))]
     [HttpPut("type/terminate")]
-    public async Task<TaskProgressResponseDto> TerminateChangeTypeAsync(TerminateRequestDto inDto)
+    public async Task<TaskProgressResponseDto> TerminateUserTypeUpdate(TerminateRequestDto inDto)
     {
         await _permissionContext.DemandPermissionsAsync(Constants.Action_AddRemoveUser);
 

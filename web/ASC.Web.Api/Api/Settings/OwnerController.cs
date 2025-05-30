@@ -99,7 +99,7 @@ public class OwnerController(
     [SwaggerResponse(409, "")]
     [HttpPut("")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalOwnerChange")]
-    public async Task OwnerAsync(OwnerIdSettingsRequestDto inDto)
+    public async Task UpdatePortalOwnerAsync(OwnerIdSettingsRequestDto inDto)
     {
         var newOwner = Constants.LostUser;
         try
