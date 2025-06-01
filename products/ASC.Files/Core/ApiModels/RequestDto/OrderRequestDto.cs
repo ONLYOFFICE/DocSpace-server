@@ -80,18 +80,21 @@ public class OrderRequestDtoConverter : System.Text.Json.Serialization.JsonConve
 {
     public override int Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        if (reader.TryGetInt32(out var order))
+        if (reader.TokenType == JsonTokenType.Number && reader.TryGetInt32(out var order))
         {
             return order;
         }
-        
-        var orderString = reader.GetString();
-        if (!string.IsNullOrEmpty(orderString))
+
+        if (reader.TokenType == JsonTokenType.String)
         {
-            var path = orderString.Split('.');
-            if (int.TryParse(path.Last(), out var pathOrder))
+            var orderString = reader.GetString();
+            if (!string.IsNullOrEmpty(orderString))
             {
-                return pathOrder;
+                var path = orderString.Split('.');
+                if (int.TryParse(path.Last(), out var pathOrder))
+                {
+                    return pathOrder;
+                }
             }
         }
 
