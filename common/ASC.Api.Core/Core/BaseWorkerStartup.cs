@@ -71,8 +71,13 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
 
         services.RegisterFeature();
         
-        TypeAdapterConfig.GlobalSettings.Scan(GetAutoMapperProfileAssemblies().ToArray());
-       
+        var assemblies = GetAutoMapperProfileAssemblies().ToArray();
+        TypeAdapterConfig.GlobalSettings.Scan(assemblies);
+        foreach (var assembly in assemblies)
+        {
+            TypeAdapterConfig.GlobalSettings.ScanInheritedTypes(assembly);
+        }
+        
         var config = TypeAdapterConfig.GlobalSettings;
         services.AddSingleton(config);
         services.AddScoped<IMapper, ServiceMapper>();

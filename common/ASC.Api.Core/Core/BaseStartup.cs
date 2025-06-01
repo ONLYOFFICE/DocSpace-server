@@ -479,9 +479,15 @@ public abstract class BaseStartup
         services.AddApiKeyBearerAuthentication()
                 .AddJwtBearerAuthentication();
 
-        TypeAdapterConfig.GlobalSettings.Scan(GetAutoMapperProfileAssemblies().ToArray());
+        var assemblies = GetAutoMapperProfileAssemblies().ToArray();
+        TypeAdapterConfig.GlobalSettings.Scan(assemblies);
+        foreach (var assembly in assemblies)
+        {
+            TypeAdapterConfig.GlobalSettings.ScanInheritedTypes(assembly);
+        }
 
         var config = TypeAdapterConfig.GlobalSettings;
+        config.Default.Settings.NameMatchingStrategy = NameMatchingStrategy.IgnoreCase;
         services.AddSingleton(config);
         services.AddScoped<IMapper, ServiceMapper>();
         

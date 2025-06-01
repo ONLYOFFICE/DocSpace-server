@@ -87,5 +87,8 @@ public class FilesMapping : IRegister
         config.NewConfig<SecurityTreeRecord, FileShareRecord<string>>();
 
         config.NewConfig<DbFilesFormRoleMapping, FormRole>();
+
+        config.NewConfig<RoomDataLifetime, DbRoomDataLifetime>().TwoWays();
+        config.NewConfig<WatermarkSettings, DbRoomWatermark>().TwoWays();
     }
 }

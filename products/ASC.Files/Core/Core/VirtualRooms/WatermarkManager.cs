@@ -51,7 +51,7 @@ public enum WatermarkAdditions
 /// <summary>
 /// The watermark settings information.
 /// </summary>
-public class WatermarkSettings : IMapFrom<DbRoomWatermark>, IMapFrom<WatermarkRequestDto>
+public class WatermarkSettings : IMapFrom<WatermarkRequestDto>
 {
     /// <summary>
     /// The watermark text.

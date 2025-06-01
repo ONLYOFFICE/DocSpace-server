@@ -29,7 +29,7 @@ namespace ASC.Files.Core.VirtualRooms;
 /// <summary>
 /// The room data lifetime information.
 /// </summary>
-public class RoomDataLifetime : IMapFrom<DbRoomDataLifetime>, IMapFrom<RoomDataLifetimeDto>
+public class RoomDataLifetime :  IMapFrom<RoomDataLifetimeDto>
 {
     /// <summary>
     /// Specifies whether to delete the room data lifetime permanently or not.
