@@ -1043,27 +1043,21 @@ public class TariffService(
             return result;
         }
 
-        try
+        var retryPolicy = Policy
+            .HandleResult<bool>(result => result == false)
+            .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
+
+        var updated = await retryPolicy.ExecuteAsync(async () =>
         {
-            var retryPolicy = Policy.Handle<Exception>()
-                .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
+            var newBalance = await GetCustomerBalanceAsync(tenantId, true);
+            var newBalanceAmount = newBalance?.SubAccounts?.FirstOrDefault(x => x.Currency == currency)?.Amount;
 
-            await retryPolicy.ExecuteAsync(async () =>
-            {
-                var newBalance = await GetCustomerBalanceAsync(tenantId, true);
-                var newBalanceAmount = newBalance?.SubAccounts?.FirstOrDefault(x => x.Currency == currency)?.Amount;
+            return oldBalanceAmount != newBalanceAmount;
+        });
 
-                if (oldBalanceAmount != newBalanceAmount)
-                {
-                    return;
-                }
-
-                throw new Exception("Balance value is not updated after replenishment");
-            });
-        }
-        catch (Exception ex)
+        if (!updated)
         {
-            logger.ErrorBilling(tenantId.ToString(), ex.Message);
+            logger.ErrorBilling(tenantId.ToString(), "Balance value is not updated after replenishment");
             await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
         }
 
