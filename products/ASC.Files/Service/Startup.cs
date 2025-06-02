@@ -75,6 +75,7 @@ public class Startup : BaseWorkerStartup
             services.AddActivePassiveHostedService<AutoDeactivateExpiredApiKeysService>(Configuration);
             services.AddActivePassiveHostedService<DeleteExpiredService>(Configuration);
             services.AddActivePassiveHostedService<CleanupLifetimeExpiredService>(Configuration);
+            services.AddActivePassiveHostedService<FrozenThumbnailProcessingService>(Configuration);
 
             services.AddSingleton(typeof(INotifyQueueManager<>), typeof(RoomNotifyQueueManager<>));
 
