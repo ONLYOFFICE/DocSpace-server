@@ -78,7 +78,7 @@ public class ApiKeysController(
             apiKey.Permissions,
             expiresAt);
         
-        var apiKeyResponseDto = mapper.Map<ApiKeyResponseDto>(result.keyData);
+        var apiKeyResponseDto = await mapper.From(result.keyData).AdaptToTypeAsync<ApiKeyResponseDto>();
 
         messageService.Send(MessageAction.ApiKeyCreated, MessageTarget.Create(apiKeyResponseDto.Id), apiKeyResponseDto.Key);
 
@@ -136,7 +136,7 @@ public class ApiKeysController(
 
         await foreach (var apiKey in result)
         {
-            yield return mapper.Map<ApiKeyResponseDto>(apiKey);
+            yield return await mapper.From(apiKey).AdaptToTypeAsync<ApiKeyResponseDto>();
         }
     }
 
@@ -157,8 +157,7 @@ public class ApiKeysController(
         var token = httpContextAccessor?.HttpContext?.Request.Headers.Authorization.ToString()["Bearer ".Length..];
 
         var apiKey = await apiKeyManager.GetApiKeyAsync(token);
-        
-        return mapper.Map<ApiKeyResponseDto>(apiKey);
+        return await mapper.From(apiKey).AdaptToTypeAsync<ApiKeyResponseDto>();
     }
     
     

@@ -74,7 +74,7 @@ public class WebPluginsController(
 
         await ChangeCspSettings(webPlugin, webPlugin.Enabled);
 
-        var outDto = mapper.Map<WebPlugin, WebPluginDto>(webPlugin);
+        var outDto = await mapper.From(webPlugin).AdaptToTypeAsync<WebPluginDto>();
 
         return outDto;
     }
@@ -97,7 +97,11 @@ public class WebPluginsController(
 
         var webPlugins = await webPluginManager.GetWebPluginsAsync(tenant.Id);
 
-        var outDto = mapper.Map<List<WebPlugin>, List<WebPluginDto>>(webPlugins);
+        List<WebPluginDto> outDto = [];
+        foreach (var webPlugin in webPlugins)
+        {
+            outDto.Add(await mapper.From(webPlugin).AdaptToTypeAsync<WebPluginDto>());
+        }
 
         if (inDto.Enabled.HasValue)
         {
@@ -124,7 +128,7 @@ public class WebPluginsController(
 
         var webPlugin = await webPluginManager.GetWebPluginByNameAsync(tenant.Id, inDto.Name);
 
-        var outDto = mapper.Map<WebPlugin, WebPluginDto>(webPlugin);
+        var outDto = await mapper.From(webPlugin).AdaptToTypeAsync<WebPluginDto>();
 
         return outDto;
     }
