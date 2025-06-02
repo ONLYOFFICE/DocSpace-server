@@ -102,7 +102,9 @@ public class HistoryService(
         MessageAction.FormCompletelyFilled,
         MessageAction.FormStopped,
         MessageAction.FileSavedButUserQuotaExceeded,
-        MessageAction.FileNotSavedDueToUserQuota
+        MessageAction.FileNotSavedDueToUserQuota,
+        MessageAction.FileSavedButRoomQuotaExceeded,
+        MessageAction.FileNotSavedDueToRoomQuota
     ];
 
     private static HashSet<int> FilterFolderActions => [
@@ -122,9 +124,7 @@ public class HistoryService(
         (int)MessageAction.FormStartedToFill,
         (int)MessageAction.FormPartiallyFilled,
         (int)MessageAction.FormCompletelyFilled,
-        (int)MessageAction.FormStopped,
-        (int)MessageAction.FileSavedButUserQuotaExceeded,
-        (int)MessageAction.FileNotSavedDueToUserQuota
+        (int)MessageAction.FormStopped
     ];
     
     public async IAsyncEnumerable<HistoryEntry> GetHistoryAsync(

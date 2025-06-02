@@ -1000,9 +1000,15 @@
     <value>Customer subscription updated</value>
   </data>
   <data name="FileSavedButUserQuotaExceeded" xml:space="preserve">
-    <value>Users [{0}]. File updated: {1}, exceeding the storage quota.</value>
+    <value>Users [{0}]. File updated: {1}, exceeding the user storage quota.</value>
   </data>
   <data name="FileNotSavedDueToUserQuota" xml:space="preserve">
     <value>Users [{0}]. File not saved: {1} – storage quota for user exceeded.</value>
+  </data>
+  <data name="FileSavedButRoomQuotaExceeded" xml:space="preserve">
+    <value>Rooms [{0}]. File updated: {1}, exceeding the room storage quota.</value>
+  </data>
+  <data name="FileNotSavedDueToRoomQuota" xml:space="preserve">
+    <value>Rooms [{0}]. File not saved: {1} – storage quota for room exceeded.</value>
   </data>
 </root>

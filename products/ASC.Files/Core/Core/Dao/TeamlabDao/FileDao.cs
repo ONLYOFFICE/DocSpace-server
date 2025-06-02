@@ -428,11 +428,17 @@ internal class FileDao(
                     {
                         if (roomQuotaLimit - currentRoom.Counter < file.ContentLength)
                         {
+                            if ((roomQuotaLimit * 2 < currentRoom.Counter + file.ContentLength) || roomQuotaLimit < currentRoom.Counter)
+                            {
+                                await filesMessageService.SendAsync(MessageAction.FileNotSavedDueToRoomQuota, file, MessageInitiator.DocsService, currentRoom.Title, file.Title);
                                 throw FileSizeComment.GetRoomFreeSpaceException(roomQuotaLimit);
                             }
+                            await filesMessageService.SendAsync(MessageAction.FileSavedButRoomQuotaExceeded, file, MessageInitiator.DocsService, currentRoom.Title, file.Title);
+
                         }
                     }
                 }
+            }
             else if (user != null)
             {
                 var quotaUserSettings = await _settingsManager.LoadAsync<TenantUserQuotaSettings>();

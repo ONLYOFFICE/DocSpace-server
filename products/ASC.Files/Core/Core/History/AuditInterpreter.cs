@@ -115,7 +115,9 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
         { (int)MessageAction.RoomIndexExportSaved, new RoomIndexExportSavedInterpreter() },
         { (int)MessageAction.RoomInviteResend, new RoomInviteResendInterpreter() },
         { (int)MessageAction.FileSavedButUserQuotaExceeded, _userFileUpdatedInterpreter },
-        { (int)MessageAction.FileNotSavedDueToUserQuota, _userFileUpdatedInterpreter }
+        { (int)MessageAction.FileNotSavedDueToUserQuota, _userFileUpdatedInterpreter },
+        { (int)MessageAction.FileSavedButRoomQuotaExceeded, _userFileUpdatedInterpreter },
+        { (int)MessageAction.FileNotSavedDueToRoomQuota, _userFileUpdatedInterpreter }
 
     }.ToFrozenDictionary();
     

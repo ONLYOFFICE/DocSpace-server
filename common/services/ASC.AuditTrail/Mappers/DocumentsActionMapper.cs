@@ -60,6 +60,7 @@ internal class FilesActionMapper : IModuleActionMapper
                             MessageAction.FileLocked, MessageAction.FileUnlocked, MessageAction.FileOpenedForChange, MessageAction.FileMarkedAsFavorite,
                             MessageAction.FormStartedToFill, MessageAction.FormPartiallyFilled, MessageAction.FormCompletelyFilled, MessageAction.FormStopped,
                             MessageAction.FileSavedButUserQuotaExceeded, MessageAction.FileNotSavedDueToUserQuota,
+                            MessageAction.FileSavedButRoomQuotaExceeded, MessageAction.FileNotSavedDueToRoomQuota,
                             MessageAction.FileRemovedFromFavorite, MessageAction.FileMarkedAsRead, MessageAction.FileReaded, MessageAction.FormSubmit, MessageAction.FormOpenedForFilling,
                             MessageAction.FileIndexChanged, MessageAction.FolderIndexReordered, MessageAction.FileCustomFilterEnabled, MessageAction.FileCustomFilterDisabled
                         ]

@@ -599,6 +599,12 @@ public enum MessageAction
     [SwaggerEnum("File not saved due to user quota exceeded")]
     FileNotSavedDueToUserQuota = 5202,
 
+    [SwaggerEnum("File saved, room quota exceeded")]
+    FileSavedButRoomQuotaExceeded = 5203,
+
+    [SwaggerEnum("File not saved due to room quota exceeded")]
+    FileNotSavedDueToRoomQuota = 5204,
+
     #endregion
 
     #region Settings
