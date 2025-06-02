@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Billing;
+
 using Polly;
 
 namespace ASC.Files.Core.Helpers;
@@ -75,60 +77,44 @@ public class DocumentServiceLicense(ICache cache,
         return commandResponse;
     }
 
-    public async Task<(bool, string)> ValidateLicense(License license)
+    public async Task<LicenseValidationResult> ValidateLicense(License license)
     {
-        try
-        {
-            var retryPolicy = Policy.Handle<Exception>()
-                .WaitAndRetryAsync(
-                    3,
-                    retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
-                    onRetry: (response, delay, retryAttempt, context) =>
-                    {
-                        context["retryAttempt"] = retryAttempt;
-                    });
+        var retryPolicy = Policy
+            .HandleResult<LicenseValidationResult>(result => result == null)
+            .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
 
-            var response = await retryPolicy.ExecuteAsync(async (context) =>
+        var response = await retryPolicy.ExecuteAsync(async () =>
+        {
+            var commandResponse = await GetDocumentServiceLicenseAsync(false);
+
+            if (commandResponse == null)
             {
-                var retryAttempt = (int)context["retryAttempt"];
+                return new LicenseValidationResult(true, null);
+            }
 
-                var commandResponse = await GetDocumentServiceLicenseAsync(false);
+            if (commandResponse.Error != ErrorTypes.NoError)
+            {
+                return new LicenseValidationResult(false, commandResponse.ErrorString);
+            }
 
-                if (commandResponse == null)
+            if (commandResponse.License.ResourceKey == license.ResourceKey ||
+                commandResponse.License.CustomerId == license.CustomerId)
+            {
+                if (commandResponse.Server == null)
                 {
-                    return (true, null);
+                    return new LicenseValidationResult(false, "Server is null");
                 }
 
-                if (commandResponse.Error != ErrorTypes.NoError)
-                {
-                    return (false, commandResponse.ErrorString);
-                }
+                return commandResponse.Server.ResultType == CommandResponse.ServerInfo.ResultTypes.Success ||
+                    commandResponse.Server.ResultType == CommandResponse.ServerInfo.ResultTypes.SuccessLimit
+                    ? new LicenseValidationResult(true, null)
+                    : new LicenseValidationResult(false, $"ResultType is {commandResponse.Server.ResultType}");
+            }
 
-                if (commandResponse.License.ResourceKey == license.ResourceKey ||
-                    commandResponse.License.CustomerId == license.CustomerId)
-                {
-                    if (commandResponse.Server == null)
-                    {
-                        return (false, "Server is null");
-                    }
+            return null;
+        });
 
-                    return commandResponse.Server.ResultType == CommandResponse.ServerInfo.ResultTypes.Success ||
-                        commandResponse.Server.ResultType == CommandResponse.ServerInfo.ResultTypes.SuccessLimit
-                        ? (true, null)
-                        : (false, $"ResultType is {commandResponse.Server.ResultType}");
-                }
-
-                throw new Exception($"{retryAttempt} failed attempts");
-
-            }, new Polly.Context { { "retryAttempt", 0 } });
-
-            return response;
-
-        }
-        catch (Exception ex)
-        {
-            return (false, ex.Message);
-        }
+        return response ?? new LicenseValidationResult(false, "Failure after several attempts");
     }
 
     public async Task<(Dictionary<string, DateTime>, License)> GetLicenseQuotaAsync()
