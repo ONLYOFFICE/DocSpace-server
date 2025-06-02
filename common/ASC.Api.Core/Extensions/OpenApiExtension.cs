@@ -44,9 +44,9 @@ public static class OpenApiExtension
             c.ResolveConflictingActions(a => a.First());
             c.CustomOperationIds(r =>
             {
-                var actionName = r.ActionDescriptor.RouteValues["action"];
-
-                return (char.ToLower(actionName[0]) + actionName.Substring(1));
+                return r.ActionDescriptor.RouteValues.TryGetValue("action", out var actionName)
+                    ? char.ToLower(actionName[0]) + actionName.Substring(1)
+                    : string.Empty;
             });
 
             c.CustomSchemaIds(CustomSchemaId);
