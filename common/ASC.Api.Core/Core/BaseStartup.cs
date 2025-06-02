@@ -510,6 +510,7 @@ public abstract class BaseStartup
             .AddStartupTask<WarmupServicesStartupTask>()
             .AddStartupTask<WarmupProtobufStartupTask>()
             .AddStartupTask<WarmupBaseDbContextStartupTask>()
+            .AddStartupTask<WarmupMappingStartupTask>()
             .TryAddSingleton(services);
         
         services.AddTransient<DistributedTaskProgress>();

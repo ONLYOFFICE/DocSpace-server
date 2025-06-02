@@ -71,6 +71,7 @@ public class SubscriptionMethod : IMapFrom<DbSubscriptionMethod>
     public void ConfigureMapping(TypeAdapterConfig config)
     {
         config.NewConfig<DbSubscriptionMethod, SubscriptionMethod>()
-            .Map(r => r.Methods, r => r.Sender.Split(_separator, StringSplitOptions.RemoveEmptyEntries));
+            .Map(r => r.Methods, r => r.Sender.Split(_separator, StringSplitOptions.RemoveEmptyEntries))
+            .Map(r=> r.Tenant, r => r.TenantId);
     }
 }

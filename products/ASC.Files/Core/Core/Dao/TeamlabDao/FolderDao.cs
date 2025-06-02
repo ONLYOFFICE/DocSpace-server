@@ -1968,12 +1968,6 @@ public class DbFolderQuery
     public int Order { get; set; }
 }
 
-public class DbFolderQueryWithSecurity
-{
-    public DbFolderQuery DbFolderQuery { get; init; }
-    public DbFilesSecurity Security { get; init; }
-}
-
 public class ParentIdTitlePair
 {
     public int ParentId { get; init; }

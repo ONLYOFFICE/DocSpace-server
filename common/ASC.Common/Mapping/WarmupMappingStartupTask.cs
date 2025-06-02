@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,18 +24,14 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Core;
+namespace ASC.Common.Mapping;
 
-public partial class SubscriptionRecord : IMapFrom<Subscription>
+public class WarmupMappingStartupTask(ILogger<WarmupMappingStartupTask> logger) : IStartupTask
 {
-    public void ConfigureMapping(TypeAdapterConfig config)
+    public Task ExecuteAsync(CancellationToken cancellationToken = default)
     {
-        config.NewConfig<Subscription, SubscriptionRecord>()
-            .Map(dest => dest.RecipientId, opt => opt.Recipient)
-            .Map(dest => dest.Subscribed, opt => !opt.Unsubscribed)
-            .Map(dest => dest.ActionId, opt => opt.Action)
-            .Map(dest => dest.ObjectId, opt => opt.Object)
-            .Map(dest => dest.SourceId, opt => opt.Source)
-            .Map(dest => dest.Tenant, r => r.TenantId);
+        TypeAdapterConfig.GlobalSettings.Compile();
+        
+        return Task.CompletedTask;
     }
 }

@@ -50,7 +50,9 @@ public class FilesMapping : IRegister
             .Map(r => r.ShareRecord, f => f.SharedRecord.Adapt<FileShareRecord<int>>())
             .ConstructUsing(src =>  MapContext.Current.GetService<File<int>>());
 
-        config.NewConfig<DbFolder, Folder<int>>().IgnoreNullValues(true);
+        config.NewConfig<DbFolder, Folder<int>>()
+            .IgnoreNullValues(true)
+            .ConstructUsing(src => MapContext.Current.GetService<Folder<int>>());
         
         config.NewConfig<DbFolderQuery, Folder<int>>()              
             .AfterMapping((source, dest) =>
