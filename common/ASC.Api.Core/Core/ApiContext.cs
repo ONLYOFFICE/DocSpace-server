@@ -115,13 +115,30 @@ public class ApiContext : ICloneable
     {
         _securityContext = securityContext;
         _httpContextAccessor = httpContextAccessor;
-        if (httpContextAccessor.HttpContext == null)
+        if (httpContextAccessor.HttpContext?.Request == null)
         {
             return;
         }
 
         Count = _maxCount;
-        var query = _httpContextAccessor.HttpContext.Request.Query;
+
+        IQueryCollection query;
+
+        try
+        {
+            query = _httpContextAccessor.HttpContext.Request?.Query;
+        }
+        catch (Exception)
+        {
+            //Access to disposed context
+            return;
+        }
+
+        if (query == null)
+        {
+            return;
+        }
+
         //Try parse values
         var count = query.GetRequestValue("count");
         if (!string.IsNullOrEmpty(count) && ulong.TryParse(count, out var countParsed))

@@ -868,17 +868,6 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Witaj, $UserName!
-
-Przypominamy, że Twoja subskrypcja ${LetterLogoText} DocSpace wygaśnie za trzy dni. Po tym czasie zostanie aktywowany okres prolongaty o długości $PaymentDelay dni.
-
-Zachęcamy do opłacenia swojego planu Biznes już teraz, aby kontynuować korzystanie ze wszystkich zalet oferowanych przez Twoje konto ${LetterLogoText} DocSpace.
-
-$OrangeButton
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Witaj, $UserName!
 
@@ -953,9 +942,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>Witaj w ${LetterLogoText} DocSpace!</value>
-  </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Twoja subskrypcja ${LetterLogoText} DocSpace wkrótce wygaśnie</value>
   </data>
   <data name="subject_enterprise_user_welcome_v1" xml:space="preserve">
     <value>Witaj w ${LetterLogoText} DocSpace!</value>

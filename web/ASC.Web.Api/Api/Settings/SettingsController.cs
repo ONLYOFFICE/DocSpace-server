@@ -1220,7 +1220,7 @@ public partial class SettingsController(MessageService messageService,
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Updated user invitation settings", typeof(TenantUserInvitationSettingsDto))]
     [HttpPut("invitationsettings")]
-    public async Task<TenantUserInvitationSettingsDto> UpdateLoginSettingsAsync(TenantUserInvitationSettingsRequestDto inDto)
+    public async Task<TenantUserInvitationSettingsDto> UpdateInvitationSettingsAsync(TenantUserInvitationSettingsRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 

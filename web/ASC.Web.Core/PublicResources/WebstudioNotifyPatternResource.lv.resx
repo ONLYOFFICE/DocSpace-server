@@ -911,17 +911,6 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Sveiki, $UserName!
-
-Ņemiet vērā, ka jūsu ${LetterLogoText} DocSpace abonementa derīguma termiņš beigsies pēc trim dienām. Pēc tam tiks aktivizēts $PaymentDelay dienas (-u) pagarinājuma periods.
-
-Mēs iesakām samaksāt jūsu Business abonementu tagad un turpināt izmantot visas jūsu ${LetterLogoText} DocSpace priekšrocības.
-
-$OrangeButton
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Sveiki, $UserName!
 
@@ -1122,9 +1111,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Pagarinājuma periods jūsu ${LetterLogoText} DocSpace ir aktivizēts</value>
-  </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Jūsu ${LetterLogoText} DocSpace abonementa derīgums drīz beigsies</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Pagarinājuma periods jūsu ${LetterLogoText} DocSpace ir beidzies</value>

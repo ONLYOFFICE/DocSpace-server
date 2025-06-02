@@ -399,9 +399,6 @@
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Грејс период за ваш ${LetterLogoText} DocSpace активиран</value>
   </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Ваша ${LetterLogoText} DocSpace претплата ускоро истиче</value>
-  </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Грејс период за ваш ${LetterLogoText} DocSpace је истекао</value>
   </data>
@@ -1243,17 +1240,6 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Здраво, $UserName!
-
-Имајте у виду да ваша ${LetterLogoText} DocSpace претплата истиче за три дана. Након тога, грејс период од $PaymentDelay дана ц́е бити активиран.
-
-Препоручујемо да сада платите своју Пословну претплату и наставите да користите све предности свог ${LetterLogoText} DocSpace-а.
-
-$OrangeButton
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Здраво, $UserName!
 
@@ -1993,5 +1979,19 @@ $TrulyYours</value>
   </data>
   <data name="subject_user_type_changed" xml:space="preserve">
     <value>Ваш тип корисника у DocSpace -у је промењен</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Здраво, $UserName!
+
+Обавештавамо вас да ће уплата за вашу претплату бити аутоматски наплаћена са вашег рачуна за 3 дана.
+
+Како би трансакција протекла без проблема, молимо вас да проверите да ли на одабраној платној методи имате довољно средстава.
+
+Уколико имате било каква питања или вам је потребна помоћ, слободно контактирајте наш "тим за подршку":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Предстојећа уплата претплате за ваш ${LetterLogoText} DocSpace</value>
   </data>
 </root>

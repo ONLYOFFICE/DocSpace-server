@@ -60,7 +60,7 @@ public abstract class FilesHelperBase(
 
             await webhookManager.PublishAsync(WebhookTrigger.FileUploaded, resultFile);
 
-            var folderDao = _daoFactory.GetFolderDao<T>();
+            var folderDao = _daoFactory.GetCacheFolderDao<T>();
             var room = await folderDao.GetParentFoldersAsync(folderId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
             if (room != null)
             {

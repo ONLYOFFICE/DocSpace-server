@@ -760,13 +760,18 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                         }
                                         else if (toFolder.FolderType == FolderType.Archive)
                                         {
-                                            var whoCanRead = await fileSecurity.WhoCanReadAsync(folder, true);
+                                            var userIDs = (await fileSecurity.WhoCanReadAsync(folder, true)).ToList();
+
+                                            if (folder.CreateBy != securityContext.CurrentAccount.ID)
+                                            {
+                                                userIDs.Add(folder.CreateBy);
+                                            }
                                             await socketManager.DeleteFolder(folder, action: async () =>
                                             {
                                                 newFolderId = await FolderDao.MoveFolderAsync(folder.Id, toFolderId, CancellationToken);
                                             });
 
-                                            await notifyClient.SendRoomMovedArchiveAsync(folder, whoCanRead, securityContext.CurrentAccount.ID);
+                                            await notifyClient.SendRoomMovedArchiveAsync(folder, userIDs, securityContext.CurrentAccount.ID);
                                             var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountRoomFeature, int>();
                                             _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
                                         }

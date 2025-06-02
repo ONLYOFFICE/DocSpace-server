@@ -451,17 +451,6 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Stimate, $UserName!
-
-Vă rugăm să țineți cont de faptul că abonamentul dumneavoastră ${LetterLogoText} DocSpace expiră în trei zile. După aceea, o perioadă de grație de $PaymentDelay zile va fi activată.
-
-Vă recomandăm să plătiți abonamentul dvs Business acum pentru a utiliza în continuare toate beneficiile oferite de ${LetterLogoText} DocSpace.
-
-$OrangeButton
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Stimate, $UserName!
 
@@ -878,9 +867,6 @@ Echipă de Asistență ${LetterLogoText}
   </data>
   <data name="subject_user_ldap_activation" xml:space="preserve">
     <value>Sunteţi invitat să vă asociaţi ${__VirtualRootHost}</value>
-  </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Abonamentul dvs ${LetterLogoText} DocSpace va expira în curînd</value>
   </data>
   <data name="subject_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
     <value>Spațiul dvs ${LetterLogoText} DocSpace va fi șters</value>
@@ -1996,5 +1982,19 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Dacă doriți să folosiți ${LetterLogoText} DocSpace mai departe, trebuie pur și simplu să-l accesați și să efectuați orice acțiune.&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Stimate, $UserName!
+
+Vă reamintim că abonamentul dvs va fi facturat și plătit automat din contul dvs la 3 zile.
+
+Pentru a vă asigura că totul decurge fără probleme, verificați dacă dispuneți de suficiente fonduri disponibile conform metodei de plată selectate.
+
+Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne contactați la "support team":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Următoarea dată de facturare a abonamentului dvs ${LetterLogoText} DocSpace</value>
   </data>
 </root>

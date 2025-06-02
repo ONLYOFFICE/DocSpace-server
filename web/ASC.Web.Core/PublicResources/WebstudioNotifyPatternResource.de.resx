@@ -1072,9 +1072,6 @@ Dieser Link ist nur 7 Tage gültig.</value>
   <data name="subject_saas_user_activation_v1" xml:space="preserve">
     <value>${LetterLogoText} DocSpace beitreten</value>
   </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Ihr ${LetterLogoText} DocSpace-Abonnement läuft in Kürze ab</value>
-  </data>
   <data name="subject_send_whats_new" xml:space="preserve">
     <value>Neues in Ihrem Portal ${__VirtualRootHost} für $Datum</value>
   </data>
@@ -1171,17 +1168,6 @@ Stellen Sie sicher, dass Sie Ihr Business-Abonnement bezahlen, bevor die Nachfri
 
 $OrangeButton
 
-$TrulyYours</value>
-  </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Hallo, $UserName!
- 
-Bitte beachten Sie, dass Ihr ${LetterLogoText} DocSpace-Abonnement in drei Tagen ausläuft. Danach wird die Karenzfrist von $PaymentDelay Tagen aktiviert.
- 
-Wir empfehlen Ihnen, Ihr Business-Abonnement jetzt zu bezahlen und weiterhin alle Vorteile Ihres ${LetterLogoText} DocSpace zu nutzen.
- 
-$OrangeButton
- 
 $TrulyYours</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
@@ -1936,5 +1922,19 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Wenn Sie Ihren ${LetterLogoText} DocSpace weiterhin nutzen möchten, geben Sie ihn einfach ein und führen Sie eine beliebige Aktion aus.&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Hallo, $UserName!
+
+Wir möchten Sie darüber informieren, dass Ihre Abonnementzahlung in 3 Tagen automatisch von Ihrem Konto abgebucht wird.
+
+Um eine reibungslose Transaktion zu gewährleisten, bestätigen Sie bitte, dass für Ihre Zahlungsmethode ausreichend Guthaben verfügbar ist.
+
+Wenn Sie Fragen haben oder Hilfe benötigen, können Sie sich jederzeit an unser "Support-Team":"${__SupportLink}" wenden.
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Bevorstehende Abonnementzahlung für Ihren ${LetterLogoText} DocSpace</value>
   </data>
 </root>

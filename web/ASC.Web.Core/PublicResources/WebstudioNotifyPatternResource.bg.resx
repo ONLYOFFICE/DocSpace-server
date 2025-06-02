@@ -1003,17 +1003,6 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Здравей, $UserName!
-
-Моля, имайте предвид, че вашият абонамент за ${LetterLogoText} DocSpace изтича след три дни. След това гратисният период от $PaymentDelay дни ще бъде активиран.
-
-Препоръчваме да платите бизнес абонамента си сега и да продължите да използвате всички предимства на вашия ${LetterLogoText} DocSpace.
-
-$OrangeButton
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Здравей, $UserName!
 
@@ -1100,9 +1089,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Гратисния период за вашия ${LetterLogoText} DocSpace е активиран</value>
-  </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Вашият абонамент за ${LetterLogoText} DocSpace е на път да изтече</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
     <value>Гратисния период за вашия ${LetterLogoText} DocSpace изтича утре</value>

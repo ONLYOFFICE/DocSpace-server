@@ -142,14 +142,6 @@ public class BillingClient
         return await RequestAsync("Deposit", portalId, [Tuple.Create("Amount", amount.ToString(CultureInfo.InvariantCulture)), Tuple.Create("Currency", currency)]);
     }
 
-    public enum ProductQuantityType
-    {
-        Set = 0,
-        Add = 1,
-        Sub = 2,
-        Renew = 3
-    }
-
     public async Task<bool> ChangePaymentAsync(string portalId, IEnumerable<string> products, IEnumerable<int> quantity, ProductQuantityType productQuantityType)
     {
         var parameters = products.Select(p => Tuple.Create("ProductId", p))
@@ -161,6 +153,20 @@ public class BillingClient
         var changed = JsonSerializer.Deserialize<bool>(result);
 
         return changed;
+    }
+
+    public async Task<PaymentCalculation> CalculatePaymentAsync(string portalId, IEnumerable<string> products, IEnumerable<int> quantity, ProductQuantityType productQuantityType)
+    {
+        var parameters = products.Select(p => Tuple.Create("ProductId", p))
+            .Concat(quantity.Select(q => Tuple.Create("ProductQty", q.ToString())))
+            .Concat([Tuple.Create("ProductQuantityType", ((int)productQuantityType).ToString())])
+            .ToArray();
+
+        var result = await RequestAsync("CalculateSubscription", portalId, parameters);
+
+        var response = JsonSerializer.Deserialize<PaymentCalculation>(result);
+
+        return response;
     }
 
     public async Task<IDictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, bool wallet, string[] productIds)

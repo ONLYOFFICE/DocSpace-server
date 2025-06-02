@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,21 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.MessagingSystem.EF.Model;
+namespace ASC.Core.Billing;
 
-public class MessageEvent : IMapFrom<EventMessage>
+/// <summary>
+/// The product quantity type.
+/// </summary>
+public enum ProductQuantityType
 {
-    public int Id { get; set; }
-    [MaxLength(50)]
-    public string Ip { get; set; }
-    [MaxLength(200)]
-    public string Browser { get; set; }
-    [MaxLength(200)]
-    public string Platform { get; set; }
-    public DateTime Date { get; set; }
-    public int TenantId { get; set; }
-    public Guid? UserId { get; set; }
-    [MaxLength(4096)]
-    public string Page { get; set; }
-    public int? Action { get; set; }
+    Set = 0,
+    Add = 1,
+    Sub = 2,
+    Renew = 3
 }

@@ -130,7 +130,76 @@ public class PaymentController(
             return false;
         }
 
-        if (inDto.ProductQuantityType is BillingClient.ProductQuantityType.Renew or BillingClient.ProductQuantityType.Sub)
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var hasCustomer = await HasCustomer(tenant);
+        if (!hasCustomer)
+        {
+            return false;
+        }
+
+        // TODO: Temporary restriction.
+        // Possibility to buy only one product per transaction.
+        // For the current paid tariff only quota change is available.
+        if (inDto.Quantity.Count != 1)
+        {
+            return false;
+        }
+
+        var product = inDto.Quantity.First();
+        var productName = product.Key;
+        var productQty = product.Value;
+        var quota = (await quotaService.GetTenantQuotasAsync())
+            .FirstOrDefault(q => !string.IsNullOrEmpty(q.ProductId) && q.Name == productName);
+
+        if (quota == null || quota.Wallet)
+        {
+            return false;
+        }
+
+        var currentQuota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
+
+        if (currentQuota.Price > 0 && currentQuota.Name != productName)
+        {
+            return false;
+        }
+
+        var tariff = await tariffService.GetTariffAsync(tenant.Id);
+
+        if (tariff.Quotas.Any(q => q.Id == quota.TenantId && q.Quantity == productQty))
+        {
+            return false;
+        }
+
+        var result = await tariffService.PaymentChangeAsync(tenant.Id, inDto.Quantity, ProductQuantityType.Set);
+
+        if (result)
+        {
+            messageService.Send(MessageAction.CustomerSubscriptionUpdated, $"{productName} {productQty}");
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Updates the wallet payment quantity with the parameters specified in the request.
+    /// </summary>
+    /// <short>
+    /// Update the wallet payment quantity
+    /// </short>
+    /// <path>api/2.0/portal/payment/updatewallet</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpPut("updatewallet")]
+    public async Task<bool> PaymentUpdateWalletAsync(WalletQuantityRequestDto inDto)
+    {
+        if (!tariffService.IsConfigured())
+        {
+            return false;
+        }
+
+        if (inDto.ProductQuantityType is ProductQuantityType.Renew or ProductQuantityType.Sub)
         {
             return false;
         }
@@ -146,7 +215,6 @@ public class PaymentController(
         // TODO: Temporary restriction.
         // Possibility to buy only one product per transaction.
         // Wallet tariffs are always available for purchase.
-        // For the current paid tariff only quota change is available.
         if (inDto.Quantity.Count != 1)
         {
             return false;
@@ -158,76 +226,134 @@ public class PaymentController(
         var quota = (await quotaService.GetTenantQuotasAsync())
             .FirstOrDefault(q => !string.IsNullOrEmpty(q.ProductId) && q.Name == productName);
 
-        if (quota == null)
+        if (quota == null || !quota.Wallet)
         {
             return false;
         }
 
-        var tariff = await tariffService.GetTariffAsync(tenant.Id);
-
-        if (inDto.ProductQuantityType == BillingClient.ProductQuantityType.Set && !quota.Wallet)
+        if (inDto.ProductQuantityType is ProductQuantityType.Set)
         {
-            if (tariff.Quotas.Any(q => q.Id == quota.TenantId && q.Quantity == productQty))
+            var tariff = await tariffService.GetTariffAsync(tenant.Id);
+
+            // saving null value is equivalent to resetting to default
+            var updated = await tariffService.UpdateNextQuantityAsync(tenant.Id, tariff, quota.TenantId, productQty);
+
+            if (updated)
             {
-                return false;
+                messageService.Send(MessageAction.CustomerSubscriptionUpdated, $"{productName} {productQty}");
             }
+
+            return updated;
         }
 
-        if (quota.Wallet)
+        // inDto.ProductQuantityType === ProductQuantityType.Add
+
+        if (!productQty.HasValue || productQty <= 0)
         {
-            if (inDto.ProductQuantityType is BillingClient.ProductQuantityType.Add)
-            {
-                var balance = await tariffService.GetCustomerBalanceAsync(tenant.Id);
-                if (balance == null)
-                {
-                    return false;
-                }
-
-                //TODO: support other currencies
-                var subAccount = balance.SubAccounts.FirstOrDefault(x => x.Currency == "USD");
-                if (subAccount == null)
-                {
-                    return false;
-                }
-
-                if (subAccount.Amount < productQty * quota.Price)
-                {
-                    return false;
-                }
-            }
-            else if (inDto.ProductQuantityType is BillingClient.ProductQuantityType.Set)
-            {
-                var updated = await tariffService.UpdateNextQuantityAsync(tenant.Id, tariff, quota.TenantId, productQty);
-
-                if (updated)
-                {
-                    messageService.Send(MessageAction.CustomerSubscriptionUpdated, $"{productName} {productQty}");
-                }
-
-                return updated;
-            }
-        }
-        else
-        {
-            if (inDto.ProductQuantityType is BillingClient.ProductQuantityType.Add)
-            {
-                return false;
-            }
-
-            var currentQuota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
-
-            if (currentQuota.Price > 0 && currentQuota.Name != productName)
-            {
-                return false;
-            }
+            return false;
         }
 
-        var result = await tariffService.PaymentChangeAsync(tenant.Id, inDto.Quantity, inDto.ProductQuantityType);
+        var balance = await tariffService.GetCustomerBalanceAsync(tenant.Id);
+        if (balance == null)
+        {
+            return false;
+        }
+
+        // TODO: support other currencies
+        var subAccount = balance.SubAccounts.FirstOrDefault(x => x.Currency == "USD");
+        if (subAccount == null)
+        {
+            return false;
+        }
+
+        if (subAccount.Amount < productQty * quota.Price)
+        {
+            return false;
+        }
+
+        var quantity = new Dictionary<string, int> { { productName, productQty.Value } };
+
+        var result = await tariffService.PaymentChangeAsync(tenant.Id, quantity, inDto.ProductQuantityType);
 
         if (result)
         {
             messageService.Send(MessageAction.CustomerSubscriptionUpdated, $"{productName} {productQty}");
         }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Calculate amount of the wallet payment with the parameters specified in the request.
+    /// </summary>
+    /// <short>
+    /// Calculate amount of the wallet payment
+    /// </short>
+    /// <path>api/2.0/portal/payment/calculatewallet</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "Payment calculation", typeof(PaymentCalculation))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpPut("calculatewallet")]
+    public async Task<PaymentCalculation> PaymentCalculateWalletAsync(WalletQuantityRequestDto inDto)
+    {
+        if (!tariffService.IsConfigured())
+        {
+            return null;
+        }
+
+        if (inDto.ProductQuantityType is not ProductQuantityType.Add)
+        {
+            return null;
+        }
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var hasCustomer = await HasCustomer(tenant);
+        if (!hasCustomer)
+        {
+            return null;
+        }
+
+        // TODO: Temporary restriction.
+        // Possibility to buy only one product per transaction.
+        // Wallet tariffs are always available for purchase.
+        if (inDto.Quantity.Count != 1)
+        {
+            return null;
+        }
+
+        var product = inDto.Quantity.First();
+        var productName = product.Key;
+        var productQty = product.Value;
+        var quota = (await quotaService.GetTenantQuotasAsync())
+            .FirstOrDefault(q => !string.IsNullOrEmpty(q.ProductId) && q.Name == productName);
+
+        if (quota == null || !quota.Wallet)
+        {
+            return null;
+        }
+
+        if (!productQty.HasValue || productQty <= 0)
+        {
+            return null;
+        }
+
+        var balance = await tariffService.GetCustomerBalanceAsync(tenant.Id);
+        if (balance == null)
+        {
+            return null;
+        }
+
+        // TODO: support other currencies
+        var subAccount = balance.SubAccounts.FirstOrDefault(x => x.Currency == "USD");
+        if (subAccount == null)
+        {
+            return null;
+        }
+
+        var quantity = new Dictionary<string, int> { { productName, productQty.Value } };
+
+        var result = await tariffService.PaymentCalculateAsync(tenant.Id, quantity, inDto.ProductQuantityType);
 
         return result;
     }
@@ -345,7 +471,7 @@ public class PaymentController(
     [SwaggerResponse(200, "Payment information about the current portal quota", typeof(QuotaDto))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("quota")]
-    public async Task<QuotaDto> GetQuotaAsync(PaymentInformationRequestDto inDto)
+    public async Task<QuotaDto> GetQuotaInformationAsync(PaymentInformationRequestDto inDto)
     {
         if (await userManager.IsGuestAsync(securityContext.CurrentAccount.ID))
         {

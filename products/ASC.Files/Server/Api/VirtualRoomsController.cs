@@ -70,7 +70,7 @@ public class VirtualRoomsInternalController(
     /// </summary>
     /// <short>Create a room</short>
     /// <path>api/2.0/files/rooms</path>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
     [HttpPost("")]
     public async Task<FolderDto<int>> CreateRoomAsync(CreateRoomRequestDto inDto)
@@ -91,7 +91,7 @@ public class VirtualRoomsInternalController(
     /// </summary>
     /// <short>Create a room from the template</short>
     /// <path>api/2.0/files/rooms/fromTemplate</path>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [SwaggerResponse(200, "Status", typeof(RoomFromTemplateStatusDto))]
     [HttpPost("fromTemplate")]
     public async Task<RoomFromTemplateStatusDto> CreateRoomFromTemplateAsync(CreateRoomFromTemplateDto dto)
@@ -178,7 +178,7 @@ public class VirtualRoomsInternalController(
     /// </summary>
     /// <short>Get the room creation progress</short>
     /// <path>api/2.0/files/rooms/fromTemplate/status</path>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [SwaggerResponse(200, "Status", typeof(RoomFromTemplateStatusDto))]
     [HttpGet("fromTemplate/status")]
     public async Task<RoomFromTemplateStatusDto> GetRoomCreatingStatus()
@@ -245,7 +245,7 @@ public class VirtualRoomsThirdPartyController(
     /// </summary>
     /// <short>Create a third-party room</short>
     /// <path>api/2.0/files/rooms/thirdparty/{id}</path>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<string>))]
     [HttpPost("thirdparty/{id}")]
     public async Task<FolderDto<string>> CreateRoomThirdPartyAsync(CreateThirdPartyRoomRequestDto inDto)
@@ -286,7 +286,7 @@ public abstract class VirtualRoomsController<T>(
     /// <short>Get room information</short>
     /// <path>api/2.0/files/rooms/{id}</path>
     /// <requiresAuthorization>false</requiresAuthorization>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
     [AllowAnonymous]
     [HttpGet("{id}")]
@@ -302,7 +302,7 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Update a room</short>
     /// <path>api/2.0/files/rooms/{id}</path>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [SwaggerResponse(200, "Updated room information", typeof(FolderDto<int>))]
     [HttpPut("{id}")]
     public async Task<FolderDto<T>> UpdateRoomAsync(UpdateRoomRequestDto<T> inDto)
@@ -382,7 +382,7 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Remove a room</short>
     /// <path>api/2.0/files/rooms/{id}</path>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [SwaggerResponse(200, "File operation", typeof(FileOperationDto))]
     [HttpDelete("{id}")]
     public async Task<FileOperationDto> DeleteRoomAsync(DeleteRoomRequestDto<T> inDto)
@@ -397,7 +397,7 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Archive a room</short>
     /// <path>api/2.0/files/rooms/{id}/archive</path>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [SwaggerResponse(200, "File operation", typeof(FileOperationDto))]
     [HttpPut("{id}/archive")]
     public async Task<FileOperationDto> ArchiveRoomAsync(ArchiveRoomRequestDto<T> inDto)
@@ -421,7 +421,7 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Unarchive a room</short>
     /// <path>api/2.0/files/rooms/{id}/unarchive</path>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [SwaggerResponse(200, "File operation", typeof(FileOperationDto))]
     [HttpPut("{id}/unarchive")]
     public async Task<FileOperationDto> UnarchiveRoomAsync(ArchiveRoomRequestDto<T> inDto)
@@ -444,7 +444,7 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Set the room access rights</short>
     /// <path>api/2.0/files/rooms/{id}/share</path>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [SwaggerResponse(200, "Room security information", typeof(RoomSecurityDto))]
     [HttpPut("{id}/share")]
     [EnableRateLimiting(RateLimiterPolicy.EmailInvitationApi)]
@@ -512,7 +512,7 @@ public abstract class VirtualRoomsController<T>(
     /// <short>Get the room access rights</short>
     /// <path>api/2.0/files/rooms/{id}/share</path>
     /// <collection>list</collection>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [SwaggerResponse(200, "Security information of room files", typeof(IAsyncEnumerable<FileShareDto>))]
     [HttpGet("{id}/share")]
     public async IAsyncEnumerable<FileShareDto> GetRoomSecurityInfoAsync(RoomSecurityInfoRequestDto<T> inDto)
@@ -535,7 +535,7 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Set the room external or invitation link</short>
     /// <path>api/2.0/files/rooms/{id}/links</path>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [SwaggerResponse(200, "Room security information", typeof(FileShareDto))]
     [HttpPut("{id}/links")]
     public async Task<FileShareDto> SetLinkAsync(RoomLinkRequestDto<T> inDto)
@@ -557,7 +557,7 @@ public abstract class VirtualRoomsController<T>(
     /// <short>Get the room links</short>
     /// <path>api/2.0/files/rooms/{id}/links</path>
     /// <collection>list</collection>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [SwaggerResponse(200, "Room security information", typeof(IAsyncEnumerable<FileShareDto>))]
     [HttpGet("{id}/links")]
     public async IAsyncEnumerable<FileShareDto> GetRoomLinksAsync(GetRoomLinksRequestDto<T> inDto)
@@ -586,7 +586,7 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Get the room primary external link</short>
     /// <path>api/2.0/files/rooms/{id}/link</path>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [SwaggerResponse(200, "Room security information", typeof(FileShareDto))]
     [SwaggerResponse(404, "Not Found")]
     [HttpGet("{id}/link")]
@@ -602,7 +602,7 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Add the room tags</short>
     /// <path>api/2.0/files/rooms/{id}/tags</path>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
     [SwaggerResponse(403, "You don't have permission to edit the room")]
     [HttpPut("{id}/tags")]
@@ -618,7 +618,7 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Remove the room tags</short>
     /// <path>api/2.0/files/rooms/{id}/tags</path>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
     [SwaggerResponse(403, "You don't have permission to edit the room")]
     [HttpDelete("{id}/tags")]
@@ -635,7 +635,7 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Create a room logo</short>
     /// <path>api/2.0/files/rooms/{id}/logo</path>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
     [SwaggerResponse(404, "The required room was not found")]
     [HttpPost("{id}/logo")]
@@ -653,7 +653,7 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Change the room cover</short>
     /// <path>api/2.0/files/rooms/{id}/cover</path>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [SwaggerResponse(200, "Room cover", typeof(FolderDto<int>))]
     [SwaggerResponse(403, "You don't have permission to change cover")]
     [SwaggerResponse(404, "The required room was not found")]
@@ -673,7 +673,7 @@ public abstract class VirtualRoomsController<T>(
     /// <short>Get covers</short>
     /// <path>api/2.0/files/rooms/covers</path>
     /// <collection>list</collection>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [SwaggerResponse(200, "Gets room cover", typeof(IAsyncEnumerable<CoversResultDto>))]
     [HttpGet("covers")]
     public async IAsyncEnumerable<CoversResultDto> GetCovers()
@@ -689,7 +689,7 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Remove a room logo</short>
     /// <path>api/2.0/files/rooms/{id}/logo</path>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
     [HttpDelete("{id}/logo")]
     public async Task<FolderDto<T>> DeleteRoomLogoAsync(RoomIdRequestDto<T> inDto)
@@ -706,7 +706,7 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Pin a room</short>
     /// <path>api/2.0/files/rooms/{id}/pin</path>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
     [HttpPut("{id}/pin")]
     public async Task<FolderDto<T>> PinRoomAsync(RoomIdRequestDto<T> inDto)
@@ -721,7 +721,7 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Unpin a room</short>
     /// <path>api/2.0/files/rooms/{id}/unpin</path>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
     [HttpPut("{id}/unpin")]
     public async Task<FolderDto<T>> UnpinRoomAsync(RoomIdRequestDto<T> inDto)
@@ -736,7 +736,7 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Resend the room invitations</short>
     /// <path>api/2.0/files/rooms/{id}/resend</path>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [HttpPost("{id}/resend")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task ResendEmailInvitationsAsync(UserInvitationRequestDto<T> inDto)
@@ -749,7 +749,7 @@ public abstract class VirtualRoomsController<T>(
     /// </summary>
     /// <short>Reorder the room</short>
     /// <path>api/2.0/files/rooms/{id}/reorder</path>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
     [HttpPut("{id}/reorder")]
     public async Task<FolderDto<T>> ReorderAsync(RoomIdRequestDto<T> inDto)
@@ -766,7 +766,7 @@ public abstract class VirtualRoomsController<T>(
     /// <short>Get the new room items</short>
     /// <path>api/2.0/files/rooms/{id}/news</path>
     /// <collection>list</collection>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [SwaggerResponse(200, "List of file entry information", typeof(List<NewItemsDto<FileEntryDto>>))]
     [HttpGet("{id}/news")]
     public async Task<List<NewItemsDto<FileEntryDto>>> GetNewRoomItemsAsync(RoomIdRequestDto<T> inDto)
@@ -814,7 +814,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     /// </summary>
     /// <short>Get rooms</short>
     /// <path>api/2.0/files/rooms</path>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [SwaggerResponse(200, "Returns the contents of the \"Rooms\" section", typeof(FolderContentDto<int>))]
     [SwaggerResponse(403, "You don't have enough permission to view the room content")]
     [HttpGet("rooms")]
@@ -875,7 +875,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     /// </summary>
     /// <short>Create a tag</short>
     /// <path>api/2.0/files/tags</path>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [SwaggerResponse(200, "New tag name", typeof(object))]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [HttpPost("tags")]
@@ -891,7 +891,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     /// <short>Get tags</short>
     /// <path>api/2.0/files/tags</path>
     /// <collection>list</collection>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [SwaggerResponse(200, "List of tag names", typeof(IAsyncEnumerable<object>))]
     [HttpGet("tags")]
     public async IAsyncEnumerable<object> GetTagsInfoAsync()
@@ -910,7 +910,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     /// </summary>
     /// <short>Delete tags</short>
     /// <path>api/2.0/files/tags</path>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [SwaggerResponse(200, "Ok")]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [HttpDelete("tags")]
@@ -924,7 +924,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     /// </summary>
     /// <short>Upload a room logo image</short>
     /// <path>api/2.0/files/logos</path>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [SwaggerResponse(200, "Upload result", typeof(UploadResultDto))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("logos")]
@@ -968,7 +968,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     /// <short>Start the room index export</short>
     /// <path>api/2.0/files/rooms/{id}/indexexport</path>
     /// <exception cref="NotSupportedException"></exception>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [SwaggerResponse(200, "Ok", typeof(DocumentBuilderTaskDto))]
     [SwaggerResponse(501, "Folder indexing is turned off")]
     [HttpPost("rooms/{id:int}/indexexport")]
@@ -1021,7 +1021,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     /// </summary>
     /// <short>Get the room index export</short>
     /// <path>api/2.0/files/rooms/indexexport</path>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [SwaggerResponse(200, "Ok", typeof(DocumentBuilderTaskDto))]
     [HttpGet("rooms/indexexport")]
     public async Task<DocumentBuilderTaskDto> GetRoomIndexExport()
@@ -1039,7 +1039,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     /// </summary>
     /// <short>Terminate the room index export</short>
     /// <path>api/2.0/files/rooms/indexexport</path>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [SwaggerResponse(200, "Ok")]
     [HttpDelete("rooms/indexexport")]
     public async Task TerminateRoomIndexExport()
@@ -1057,7 +1057,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     /// </summary>
     /// <short>Get the room new items</short>
     /// <path>api/2.0/files/rooms/news</path>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [SwaggerResponse(200, "List of new items", typeof(List<NewItemsDto<RoomNewItemsDto>>))]
     [HttpGet("rooms/news")]
     public async Task<List<NewItemsDto<RoomNewItemsDto>>> GetRoomsNewItems()
