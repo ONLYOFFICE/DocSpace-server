@@ -41,6 +41,7 @@ public class Startup : BaseStartup
     public override async Task ConfigureServices(WebApplicationBuilder builder)
     {
         var services = builder.Services;
+        
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
         services.AddMemoryCache();

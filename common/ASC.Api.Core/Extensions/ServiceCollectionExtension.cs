@@ -245,7 +245,7 @@ public static class ServiceCollectionExtension
 
         var rabbitMqConfiguration = configuration.GetSection("RabbitMQ").Get<RabbitMQSettings>();
         var activeMqConfiguration = configuration.GetSection("ActiveMQ").Get<ActiveMQSettings>();
-
+        
         if (rabbitMqConfiguration != null)
         {
             services.AddSingleton<IRabbitMQPersistentConnection>(sp =>
@@ -405,7 +405,7 @@ public static class ServiceCollectionExtension
     public static async Task<IConnectionMultiplexer> GetRedisConnectionMultiplexerAsync(this IServiceCollection services, IConfiguration configuration, string clientName)
     {
         var redisConfiguration = configuration.GetSection("Redis").Get<RedisConfiguration>();
-
+        
         if (redisConfiguration == null)
         {
             return null;
