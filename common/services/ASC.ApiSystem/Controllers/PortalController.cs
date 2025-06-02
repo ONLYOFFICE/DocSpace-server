@@ -26,9 +26,14 @@
 
 using System.Text.Json;
 
+using ASC.Core.Common;
 using ASC.FederatedLogin;
 using ASC.FederatedLogin.Profile;
+using ASC.Files.Core.Helpers;
+using ASC.Files.Core.Utils;
 using ASC.Web.Api.Core;
+
+using CsvHelper.Configuration;
 
 namespace ASC.ApiSystem.Controllers;
 
@@ -55,7 +60,10 @@ public class PortalController(
         QuotaUsageManager quotaUsageManager,
         PasswordSettingsManager passwordSettingsManager,
         LoginProfileTransport loginProfileTransport,
-        AccountLinker accountLinker)
+        AccountLinker accountLinker,
+        DocumentServiceLicense documentServiceLicense,
+        CsvFileHelper csvFileHelper,
+        CsvFileUploader csvFileUploader)
     : ControllerBase
 {
     #region For TEST api
@@ -936,6 +944,119 @@ public class PortalController(
                 message = ex.Message,
                 stacktrace = ex.StackTrace
             });
+        }
+    }
+
+
+    /// <summary>
+    /// Returns an Document Server license quota.
+    /// </summary>
+    /// <short>
+    /// Get an Document Server license quota
+    /// </short>
+    /// <path>apisystem/portal/licensequota</path>
+    [Tags("Portal")]
+    [SwaggerResponse(200, "Ok", typeof(IActionResult))]
+    [HttpGet("licensequota")]
+    [AllowCrossSiteJson]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
+    public async Task<IActionResult> GetDocumentServerLicenseQuotaAsync()
+    {
+        if (!coreBaseSettings.Standalone)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new
+            {
+                error = "error",
+                message = "Method for server edition only."
+            });
+        }
+
+        var (userQuota, license) = await documentServiceLicense.GetLicenseQuotaAsync();
+
+        return Ok(new
+        {
+            userQuota,
+            license
+        });
+    }
+
+    /// <summary>
+    /// Generates the Document Server license quota report.
+    /// </summary>
+    /// <short>
+    /// Generate the Document Server license quota report
+    /// </short>
+    /// <path>api/2.0/portal/quota/licensequota/report</path>
+    [Tags("Portal")]
+    [SwaggerResponse(200, "URL to the xlsx report file", typeof(IActionResult))]
+    [HttpPost("licensequota/report")]
+    [AllowCrossSiteJson]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
+    public async Task<IActionResult> CreateDocumentServerLicenseQuotaReport()
+    {
+        if (!coreBaseSettings.Standalone)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new
+            {
+                error = "error",
+                message = "Method for server edition only."
+            });
+        }
+
+        var reportName = string.Format(Resource.DocumentServerLicenseQuotaReportName + ".csv", DateTime.UtcNow.ToShortDateString());
+
+        var (userQuota, _) = await documentServiceLicense.GetLicenseQuotaAsync();
+
+        if (userQuota == null)
+        {
+            Ok(null);
+        }
+
+        var userIds = userQuota
+            .Select(row => Guid.TryParse(row.Key, out var guid) ? (Guid?)guid : null)
+            .Where(g => g.HasValue)
+            .Select(g => g.Value);
+
+        var users = await hostedSolution.FindUsersAsync(userIds);
+
+        var csvRows = new List<DocumentServerLicenseQuotaRow>();
+
+        foreach (var row in userQuota)
+        {
+            var user = users.FirstOrDefault(u => u.Id.ToString() == row.Key);
+            if (user != null)
+            {
+                csvRows.Add(new DocumentServerLicenseQuotaRow(user.Id.ToString(), user.FirstName, user.LastName, user.Email, row.Value));
+            }
+            else
+            {
+                csvRows.Add(new DocumentServerLicenseQuotaRow(row.Key, null, null, null, row.Value));
+            }
+        }
+
+        await using var stream = csvFileHelper.CreateFile(csvRows, new DocumentServerLicenseQuotaRowMap());
+
+        var result = await csvFileUploader.UploadFile(stream, reportName);
+
+        return Ok(new
+        {
+            result
+        });
+    }
+
+    private record DocumentServerLicenseQuotaRow(string Id, string FirstName, string LastName, string Email, DateTime Date);
+
+    private class DocumentServerLicenseQuotaRowMap : ClassMap<DocumentServerLicenseQuotaRow>
+    {
+        public DocumentServerLicenseQuotaRowMap()
+        {
+            Map(item => item.Date).TypeConverter<CsvFileHelper.CsvDateTimeConverter>();
+
+            Map(item => item.Id).Name(Resource.DocumentServerLicenseQuotaId);
+            Map(item => item.FirstName).Name(Resource.DocumentServerLicenseQuotaFirstName);
+            Map(item => item.LastName).Name(Resource.DocumentServerLicenseQuotaLastName);
+            Map(item => item.Email).Name(Resource.DocumentServerLicenseQuotaEmail);
+            Map(item => item.Date).Name(Resource.DocumentServerLicenseQuotaDate);
         }
     }
 

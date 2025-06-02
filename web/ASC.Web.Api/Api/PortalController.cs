@@ -328,7 +328,6 @@ public class PortalController(
                                             && !quota.Year);
     }
 
-
     /// <summary>
     /// Returns the full absolute path to the current portal.
     /// </summary>
