@@ -115,7 +115,7 @@ public class ApiContext : ICloneable
     {
         _securityContext = securityContext;
         _httpContextAccessor = httpContextAccessor;
-        if (httpContextAccessor.HttpContext == null)
+        if (httpContextAccessor.HttpContext?.Request == null)
         {
             return;
         }
@@ -126,11 +126,16 @@ public class ApiContext : ICloneable
 
         try
         {
-            query = _httpContextAccessor.HttpContext.Request.Query;
+            query = _httpContextAccessor.HttpContext.Request?.Query;
         }
         catch (Exception)
         {
             //Access to disposed context
+            return;
+        }
+
+        if (query == null)
+        {
             return;
         }
 
