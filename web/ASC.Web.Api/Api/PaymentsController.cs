@@ -52,6 +52,7 @@ public class PaymentController(
     PermissionContext permissionContext,
     TenantUtil tenantUtil,
     TempStream tempStream,
+    DocumentServiceLicense documentServiceLicense,
     CsvFileHelper csvFileHelper,
     CsvFileUploader csvFileUploader)
     : ControllerBase
@@ -921,6 +922,33 @@ public class PaymentController(
 
         return settings;
     }
+
+    /// <summary>
+    /// Returns an Document Server license quota.
+    /// </summary>
+    /// <short>
+    /// Get an Document Server license quota
+    /// </short>
+    /// <path>api/2.0/portal/payment/licensequota</path>
+    [Tags("Portal / Quota")]
+    [SwaggerResponse(200, "Document Server license quota", typeof(DocumentServerLicenseQuotaDto))]
+    [AllowNotPayment]
+    [HttpGet("licensequota")]
+    public async Task<DocumentServerLicenseQuotaDto> GetDocumentServerLicenseQuotaAsync()
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        var docServiceQuota = await documentServiceLicense.GetLicenseQuotaAsync();
+
+        var result = new DocumentServerLicenseQuotaDto
+        {
+            UserQuota = docServiceQuota.Item1,
+            License = docServiceQuota.Item2
+        };
+
+        return result;
+    }
+
 
     private async Task<bool> HasCustomer(Tenant tenant)
     {
