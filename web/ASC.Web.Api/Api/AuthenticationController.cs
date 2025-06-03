@@ -62,7 +62,6 @@ public class AuthenticationController(
     TimeZoneConverter timeZoneConverter,
     SmsKeyStorage smsKeyStorage,
     CommonLinkUtility commonLinkUtility,
-    ApiContext apiContext,
     AuthContext authContext,
     CookieStorage cookieStorage,
     QuotaSocketManager quotaSocketManager,
@@ -377,7 +376,7 @@ public class AuthenticationController(
     [HttpPost("setphone")]
     public async Task<AuthenticationTokenDto> SaveMobilePhoneAsync(MobileRequestsDto inDto)
     {
-        await apiContext.AuthByClaimAsync();
+        await securityContext.AuthByClaimAsync();
         var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
         inDto.MobilePhone = await smsManager.SaveMobilePhoneAsync(user, inDto.MobilePhone);
         messageService.Send(MessageAction.UserUpdatedMobileNumber, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper), inDto.MobilePhone);

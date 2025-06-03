@@ -217,7 +217,7 @@ public class UserController(
     [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,Everyone")]
     public async Task<EmployeeFullDto> AddMember(MemberRequestDto inDto)
     {
-        await _apiContext.AuthByClaimAsync();
+        await securityContext.AuthByClaimAsync();
         var model = emailValidationKeyModelHelper.GetModel();
         var linkData = inDto.FromInviteLink ? await invitationService.GetLinkDataAsync(inDto.Key, inDto.Email, model.Type, inDto.Type, model.UiD) : null;
         if (linkData is { IsCorrect: false })
@@ -504,7 +504,7 @@ public class UserController(
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PasswordChange,EmailChange,Activation,EmailActivation,Everyone")]
     public async Task<EmployeeFullDto> ChangeUserPassword(MemberBaseByIdRequestDto inDto)
     {
-        await _apiContext.AuthByClaimAsync();
+        await securityContext.AuthByClaimAsync();
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(inDto.UserId), Constants.Action_EditUser);
         if (inDto.UserId == Guid.Empty)
         {
@@ -660,7 +660,7 @@ public class UserController(
     [Authorize(AuthenticationSchemes = "confirm", Roles = "ProfileRemove")]
     public async Task<EmployeeFullDto> DeleteProfile()
     {
-        await _apiContext.AuthByClaimAsync();
+        await securityContext.AuthByClaimAsync();
 
         if (_userManager.IsSystemUser(securityContext.CurrentAccount.ID))
         {
@@ -797,7 +797,7 @@ public class UserController(
     [HttpPost("guests/share/approve")]
     public async Task<EmployeeFullDto> ApproveGuestShareLinkAsync(EmailMemberRequestDto inDto)
     {
-        await _apiContext.AuthByClaimAsync();
+        await securityContext.AuthByClaimAsync();
 
         var targetUser = await _userManager.GetUserByEmailAsync(inDto.Email);
 
@@ -950,7 +950,7 @@ public class UserController(
         var isInvite = _httpContextAccessor.HttpContext!.User.Claims
                .Any(role => role.Type == ClaimTypes.Role && ConfirmTypeExtensions.TryParse(role.Value, out var confirmType) && confirmType == ConfirmType.LinkInvite);
 
-        await _apiContext.AuthByClaimAsync();
+        await securityContext.AuthByClaimAsync();
 
         var user = await _userManager.GetUserByUserNameAsync(inDto.UserId);
         if (user.Id == Constants.LostUser.Id)
@@ -1586,7 +1586,7 @@ public class UserController(
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Activation,Everyone")]
     public async IAsyncEnumerable<EmployeeFullDto> UpdateEmployeeActivationStatus(UpdateMemberActivationStatusRequestDto inDto)
     {
-        await _apiContext.AuthByClaimAsync();
+        await securityContext.AuthByClaimAsync();
         
         var tenant = tenantManager.GetCurrentTenant();
         var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
