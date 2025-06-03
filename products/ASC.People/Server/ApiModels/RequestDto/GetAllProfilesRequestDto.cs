@@ -58,4 +58,14 @@ public class GetAllProfilesRequestDto
     /// </summary>
     [FromQuery(Name = "sortBy")]
     public string SortBy { get; set; }
+
+    /// <summary>
+    /// The character or string used to separate multiple filter values in a filtering query.
+    /// </summary>
+    /// <remarks>
+    /// This property defines the delimiter applied when multiple filter criteria are provided.
+    /// It allows the request to parse and handle multiple filtering values effectively.
+    /// </remarks>
+    [FromQuery(Name = "filterSeparator")]
+    public string FilterSeparator { get; set; }
 }

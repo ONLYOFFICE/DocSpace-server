@@ -59,9 +59,7 @@ public class ApiContext : ICloneable
     /// Like ...&amp;sortOrder=descending&amp;...
     /// </summary>
     public bool SortDescending { get; set; }
-
     
-    public string FilterSeparator { get; set; }
 
     private static readonly int _maxCount = 1000;
 
@@ -114,7 +112,6 @@ public class ApiContext : ICloneable
 
         FilterValue = query.GetRequestValue("filterValue");
         Fields = query.GetRequestArray("fields");
-        FilterSeparator = query.GetRequestValue("filterSeparator");
     }
     
     public ApiContext SetDataFiltered()

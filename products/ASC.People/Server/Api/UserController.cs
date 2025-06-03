@@ -889,8 +889,8 @@ public class UserController(
             FilterBy = inDto.FilterBy,
             Count = inDto.Count,
             StartIndex = inDto.StartIndex,
-            SortBy = inDto.SortBy
-
+            SortBy = inDto.SortBy,
+            FilterSeparator = inDto.FilterSeparator
         };
         return GetByStatus(status);
     }
@@ -1023,7 +1023,8 @@ public class UserController(
             InviterId = null,
             Count = inDto.Count,
             StartIndex = inDto.StartIndex,
-            SortBy = inDto.SortBy
+            SortBy = inDto.SortBy,
+            FilterSeparator = inDto.FilterSeparator
         };
         return GetFullByFilter(filter);
     }
@@ -1060,7 +1061,8 @@ public class UserController(
             InviterId = inDto.InviterId,
             Count = inDto.Count,
             StartIndex = inDto.StartIndex,
-            SortBy = inDto.SortBy
+            SortBy = inDto.SortBy,
+            FilterSeparator = inDto.FilterSeparator
         };
         
         var users = GetByFilterAsync(filter);
@@ -1164,7 +1166,10 @@ public class UserController(
             Area = inDto.Area,
             InvitedByMe = inDto.InvitedByMe,
             InviterId = inDto.InviterId,
-            SortBy = inDto.SortBy
+            Count = inDto.Count,
+            StartIndex = inDto.StartIndex,
+            SortBy = inDto.SortBy,
+            FilterSeparator = inDto.FilterSeparator
         };
         
         var users = GetByFilterAsync(filter);
@@ -2414,7 +2419,7 @@ public class UserController(
             filter.InvitedByMe,
             filter.InviterId,
             _apiContext.FilterValue,
-            _apiContext.FilterSeparator,
+            filter.FilterSeparator,
             filter.WithoutGroup ?? false,
             filter.SortBy,
             !_apiContext.SortDescending,
@@ -2578,7 +2583,7 @@ public class UserControllerAdditional<T>(
         var offset = inDto.StartIndex;
         var count = inDto.Count;
         var filterValue = apiContext.FilterValue;
-        var filterSeparator = apiContext.FilterSeparator;
+        var filterSeparator = inDto.FilterSeparator;
 
         var securityDao = daoFactory.GetSecurityDao<T>();
 

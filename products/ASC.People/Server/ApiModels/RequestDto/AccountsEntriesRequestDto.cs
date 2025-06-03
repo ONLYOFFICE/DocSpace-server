@@ -96,4 +96,10 @@ public class AccountsEntriesRequestDto<T>
     /// </summary>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
+
+    /// <summary>
+    /// Specifies the separator used in filter expressions.
+    /// </summary>
+    [FromQuery(Name = "filterSeparator")]
+    public string FilterSeparator { get; set; }
 }

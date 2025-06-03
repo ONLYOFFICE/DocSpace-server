@@ -60,4 +60,10 @@ public class GetByStatusRequestDto
     /// </summary>
     [FromQuery(Name = "sortBy")]
     public string SortBy { get; set; }
+
+    /// <summary>
+    /// Represents the separator used to split multiple filter criteria in a query string.
+    /// </summary>
+    [FromQuery(Name = "filterSeparator")]
+    public string FilterSeparator { get; set; }
 }

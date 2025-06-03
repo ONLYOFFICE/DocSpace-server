@@ -132,4 +132,7 @@ public class SimpleByFilterRequestDto
     /// </summary>
     [FromQuery(Name = "sortBy")]
     public string SortBy { get; set; }
+    
+    [FromQuery(Name = "filterSeparator")]
+    public string FilterSeparator { get; set; }
 }
