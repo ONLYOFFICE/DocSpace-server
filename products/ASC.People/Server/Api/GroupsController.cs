@@ -71,7 +71,7 @@ public class GroupController(
         var memberId = inDto.UserId ?? Guid.Empty;
         var asManager = inDto.Manager ?? false;
 
-        if (!GroupSortTypeExtensions.TryParse(apiContext.SortBy, true, out var sortBy))
+        if (!GroupSortTypeExtensions.TryParse(inDto.SortBy, true, out var sortBy))
         {
             sortBy = GroupSortType.Title;
         }

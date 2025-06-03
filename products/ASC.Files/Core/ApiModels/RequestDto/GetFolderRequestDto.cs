@@ -102,6 +102,12 @@ public class GetFolderRequestDto<T>
     /// </summary>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
+
+    /// <summary>
+    /// Specifies the property used for sorting the folder request results.
+    /// </summary>
+    [FromQuery(Name = "sortBy")]
+    public string SortBy { get; set; }
 }
 
 /// <summary>
@@ -132,6 +138,12 @@ public class GetCommonFolderRequestDto
     /// </summary>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
+
+    /// <summary>
+    /// Specifies the field by which the folder content should be sorted.
+    /// </summary>
+    [FromQuery(Name = "sortBy")]
+    public string SortBy { get; set; }
 }
 
 /// <summary>
@@ -168,6 +180,12 @@ public class GetMyTrashFolderRequestDto
     /// </summary>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
+
+    /// <summary>
+    /// The property used to specify the sorting criteria for folder contents.
+    /// </summary>
+    [FromQuery(Name = "sortBy")]
+    public string SortBy { get; set; }
 }
 
 /// <summary>
@@ -204,6 +222,9 @@ public class GetRootFolderRequestDto
     /// </summary>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
+    
+    [FromQuery(Name = "sortBy")]
+    public string SortBy { get; set; }
 }
 
 /// <summary>
@@ -246,10 +267,22 @@ public class GetRecentFolderRequestDto
     /// </summary>
     [FromQuery(Name = "extension")]
     public string[] Extension { get; set; }
-    
+
+    /// <summary>
+    /// The maximum number of items to return.
+    /// </summary>
     [FromQuery(Name = "count")]
     public int Count { get; set; } = 50;
-    
+
+    /// <summary>
+    /// The starting position of the results to be returned in the query response.
+    /// </summary>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
+
+    /// <summary>
+    /// Specifies the sorting criteria for the folder request.
+    /// </summary>
+    [FromQuery(Name = "sortBy")]
+    public string SortBy { get; set; }
 }

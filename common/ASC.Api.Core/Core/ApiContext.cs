@@ -48,12 +48,7 @@ public class ApiContext : ICloneable
     /// Don't forget to call _context.SetDataPaginated() to prevent SmartList from filtering response if you fetch data from DB with TOP &amp; COUNT
     /// </remarks>
     public long Count { get; init; }
-
-    /// <summary>
-    /// Gets field to sort by from request parameter "sortBy"
-    /// </summary>
-    public string SortBy { get; set; }
-
+    
     /// <summary>
     /// Gets value to filter from request parameter "filterValue"
     /// </summary>
@@ -117,7 +112,6 @@ public class ApiContext : ICloneable
             SortDescending = true;
         }
 
-        SortBy = query.GetRequestValue("sortBy");
         FilterValue = query.GetRequestValue("filterValue");
         Fields = query.GetRequestArray("fields");
         FilterSeparator = query.GetRequestValue("filterSeparator");

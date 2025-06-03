@@ -834,7 +834,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
             : null;
 
         OrderBy orderBy = null;
-        if (SortedByTypeExtensions.TryParse(apiContext.SortBy, true, out var sortBy))
+        if (SortedByTypeExtensions.TryParse(inDto.SortBy, true, out var sortBy))
         {
             orderBy = new OrderBy(sortBy, !apiContext.SortDescending);
         }

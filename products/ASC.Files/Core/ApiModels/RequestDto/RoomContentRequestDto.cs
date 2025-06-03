@@ -90,10 +90,22 @@ public class RoomContentRequestDto
     /// </summary>
     [FromQuery(Name = "storageFilter")]
     public StorageFilter? StorageFilter { get; set; }
-    
+
+    /// <summary>
+    /// Specifies the maximum number of items to retrieve.
+    /// </summary>
     [FromQuery(Name = "count")]
     public int Count { get; set; } = 50;
-    
+
+    /// <summary>
+    /// The index from which to start retrieving the room content.
+    /// </summary>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
+
+    /// <summary>
+    /// Specifies the field by which the room content should be sorted.
+    /// </summary>
+    [FromQuery(Name = "sortBy")]
+    public string SortBy { get; set; }
 }

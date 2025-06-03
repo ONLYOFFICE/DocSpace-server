@@ -52,4 +52,10 @@ public class GetAllProfilesRequestDto
     /// </summary>
     [FromQuery(Name = "filterBy")]
     public string FilterBy { get; set; }
+    
+    /// <summary>
+    /// Specifies the property or field name by which the results should be sorted.
+    /// </summary>
+    [FromQuery(Name = "sortBy")]
+    public string SortBy { get; set; }
 }

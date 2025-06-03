@@ -888,7 +888,8 @@ public class UserController(
             Status = EmployeeStatus.Active,
             FilterBy = inDto.FilterBy,
             Count = inDto.Count,
-            StartIndex = inDto.StartIndex
+            StartIndex = inDto.StartIndex,
+            SortBy = inDto.SortBy
 
         };
         return GetByStatus(status);
@@ -1021,7 +1022,8 @@ public class UserController(
             InvitedByMe = false,
             InviterId = null,
             Count = inDto.Count,
-            StartIndex = inDto.StartIndex
+            StartIndex = inDto.StartIndex,
+            SortBy = inDto.SortBy
         };
         return GetFullByFilter(filter);
     }
@@ -1057,7 +1059,8 @@ public class UserController(
             InvitedByMe = inDto.InvitedByMe,
             InviterId = inDto.InviterId,
             Count = inDto.Count,
-            StartIndex = inDto.StartIndex
+            StartIndex = inDto.StartIndex,
+            SortBy = inDto.SortBy
         };
         
         var users = GetByFilterAsync(filter);
@@ -1160,7 +1163,8 @@ public class UserController(
             ExcludeGroup = inDto.ExcludeGroup,
             Area = inDto.Area,
             InvitedByMe = inDto.InvitedByMe,
-            InviterId = inDto.InviterId
+            InviterId = inDto.InviterId,
+            SortBy = inDto.SortBy
         };
         
         var users = GetByFilterAsync(filter);
@@ -2412,7 +2416,7 @@ public class UserController(
             _apiContext.FilterValue,
             _apiContext.FilterSeparator,
             filter.WithoutGroup ?? false,
-            _apiContext.SortBy,
+            filter.SortBy,
             !_apiContext.SortDescending,
             isDocSpaceAdmin,
             filter.Count,

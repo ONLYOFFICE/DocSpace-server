@@ -49,10 +49,15 @@ public class GetByStatusRequestDto
     [FromQuery(Name = "count")]
     public int Count { get; set; } = 50;
 
-
     /// <summary>
     /// The starting index for retrieving data in a paginated request.
     /// </summary>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
+    
+    /// <summary>
+    /// Specifies the property or field name by which the results should be sorted.
+    /// </summary>
+    [FromQuery(Name = "sortBy")]
+    public string SortBy { get; set; }
 }

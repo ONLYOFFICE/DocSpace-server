@@ -54,4 +54,10 @@ public class GeneralInformationRequestDto
     /// </summary>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
+
+    /// <summary>
+    /// Specifies the property used to sort the query results.
+    /// </summary>
+    [FromQuery(Name = "sortBy")]
+    public string SortBy { get; set; }
 }

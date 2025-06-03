@@ -44,4 +44,5 @@ public record UserFilter
     public Guid? InviterId { get; set; }
     public int Count { get; set; } = 50;
     public int StartIndex { get; set; }
+    public string SortBy { get; set; }
 }
