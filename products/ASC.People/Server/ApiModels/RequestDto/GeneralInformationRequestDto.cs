@@ -42,4 +42,16 @@ public class GeneralInformationRequestDto
     /// </summary>
     [FromQuery(Name = "manager")]
     public bool? Manager { get; set; }
+    
+    /// <summary>
+    /// The number of records to retrieve.
+    /// </summary>
+    [FromQuery(Name = "count")]
+    public int Count { get; set; } = 50;
+
+    /// <summary>
+    /// The starting index for paginated results.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
 }

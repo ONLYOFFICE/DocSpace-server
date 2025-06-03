@@ -43,4 +43,16 @@ public class GetGroupsWithSharedRequestDto<T>
     /// </summary>
     [FromQuery(Name = "excludeShared")]
     public bool? ExcludeShared { get; set; }
+
+    /// <summary>
+    /// The number of groups to retrieve in the request.
+    /// </summary>
+    [FromQuery(Name = "count")]
+    public int Count { get; set; } = 50;
+
+    /// <summary>
+    /// The starting index from which to begin retrieving groups with their sharing settings.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
 }

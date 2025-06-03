@@ -114,4 +114,16 @@ public class SimpleByFilterRequestDto
     /// </summary>
     [FromQuery(Name = "area")]
     public Area Area { get; set; } = Area.All;
+
+    /// <summary>
+    /// The maximum number of items to be retrieved in the response.
+    /// </summary>
+    [FromQuery(Name = "count")]
+    public int Count { get; set; } = 50;
+
+    /// <summary>
+    /// The zero-based index of the first item to be retrieved in a filtered result set.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
 }

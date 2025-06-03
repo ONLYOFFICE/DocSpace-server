@@ -64,8 +64,8 @@ public class GroupController(
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_ReadGroups);
         
-        var offset = Convert.ToInt32(apiContext.StartIndex);
-        var count = Convert.ToInt32(apiContext.Count);
+        var offset = inDto.StartIndex;
+        var count = inDto.Count;
         var text = apiContext.FilterValue;
 
         var memberId = inDto.UserId ?? Guid.Empty;
@@ -454,8 +454,8 @@ public class GroupControllerAdditional<T>(
             throw new SecurityException();
         }
         
-        var offset = Convert.ToInt32(apiContext.StartIndex);
-        var count = Convert.ToInt32(apiContext.Count);
+        var offset = inDto.StartIndex;
+        var count = inDto.Count;
         var text = apiContext.FilterValue;
         
         var securityDao = daoFactory.GetSecurityDao<T>();

@@ -1046,7 +1046,9 @@ public class UserController(
             ExcludeGroup = inDto.ExcludeGroup,
             Area = inDto.Area,
             InvitedByMe = inDto.InvitedByMe,
-            InviterId = inDto.InviterId
+            InviterId = inDto.InviterId,
+            Count = inDto.Count,
+            StartIndex = inDto.StartIndex
         };
         
         var users = GetByFilterAsync(filter);
@@ -2404,8 +2406,8 @@ public class UserController(
             _apiContext.SortBy,
             !_apiContext.SortDescending,
             isDocSpaceAdmin,
-            _apiContext.Count,
-            _apiContext.StartIndex);
+            filter.Count,
+            filter.StartIndex);
 
         var totalCountTask = _userManager.GetUsersCountAsync(queryFilter);
         var users = _userManager.GetUsers(queryFilter);
@@ -2560,8 +2562,8 @@ public class UserControllerAdditional<T>(
 
         var includeStrangers = await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID);
         
-        var offset = Convert.ToInt32(apiContext.StartIndex);
-        var count = Convert.ToInt32(apiContext.Count);
+        var offset = inDto.StartIndex;
+        var count = inDto.Count;
         var filterValue = apiContext.FilterValue;
         var filterSeparator = apiContext.FilterSeparator;
 

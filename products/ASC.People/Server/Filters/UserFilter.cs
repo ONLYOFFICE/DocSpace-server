@@ -42,4 +42,6 @@ public record UserFilter
     public Area Area { get; set; } = Area.All;
     public bool? InvitedByMe { get; set; }
     public Guid? InviterId { get; set; }
+    public int Count { get; set; } = 50;
+    public int StartIndex { get; set; }
 }

@@ -79,8 +79,8 @@ public class AccountsController<T>(
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
         
-        var offset = Convert.ToInt32(apiContext.StartIndex);
-        var count = Convert.ToInt32(apiContext.Count);
+        var offset = inDto.StartIndex;
+        var count = inDto.Count;
         var text = apiContext.FilterValue;
         var separator = apiContext.FilterSeparator;
 
