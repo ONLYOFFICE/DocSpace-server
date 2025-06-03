@@ -850,7 +850,7 @@ public class UserController(
 
         var list = (await _userManager.GetUsersAsync(inDto.Status)).ToAsyncEnumerable();
 
-        if ("group".Equals(_apiContext.FilterBy, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(_apiContext.FilterValue))
+        if ("group".Equals(inDto.FilterBy, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(_apiContext.FilterValue))
         {
             var groupId = new Guid(_apiContext.FilterValue);
             //Filter by group
@@ -881,9 +881,16 @@ public class UserController(
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [HttpGet]
-    public IAsyncEnumerable<EmployeeFullDto> GetAllProfiles()
+    public IAsyncEnumerable<EmployeeFullDto> GetAllProfiles(GetAllProfilesRequestDto inDto)
     {
-        var status = new GetByStatusRequestDto { Status = EmployeeStatus.Active };
+        var status = new GetByStatusRequestDto
+        {
+            Status = EmployeeStatus.Active,
+            FilterBy = inDto.FilterBy,
+            Count = inDto.Count,
+            StartIndex = inDto.StartIndex
+
+        };
         return GetByStatus(status);
     }
 
@@ -999,7 +1006,7 @@ public class UserController(
     public IAsyncEnumerable<EmployeeFullDto> GetByStatus(GetByStatusRequestDto inDto)
     {
         Guid? groupId = null;
-        if ("group".Equals(_apiContext.FilterBy, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(_apiContext.FilterValue))
+        if ("group".Equals(inDto.FilterBy, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(_apiContext.FilterValue))
         {
             groupId = new Guid(_apiContext.FilterValue);
             _apiContext.SetDataFiltered();
@@ -1012,7 +1019,9 @@ public class UserController(
             WithoutGroup = false,
             ExcludeGroup = false,
             InvitedByMe = false,
-            InviterId = null
+            InviterId = null,
+            Count = inDto.Count,
+            StartIndex = inDto.StartIndex
         };
         return GetFullByFilter(filter);
     }
@@ -1109,7 +1118,7 @@ public class UserController(
         }
 
         var groupId = Guid.Empty;
-        if ("group".Equals(_apiContext.FilterBy, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(_apiContext.FilterValue))
+        if ("group".Equals(inDto.FilterBy, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(_apiContext.FilterValue))
         {
             groupId = new Guid(_apiContext.FilterValue);
         }

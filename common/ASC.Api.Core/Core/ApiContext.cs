@@ -55,11 +55,6 @@ public class ApiContext : ICloneable
     public string SortBy { get; set; }
 
     /// <summary>
-    /// Gets field to filter from request parameter "filterBy"
-    /// </summary>
-    public string FilterBy { get; set; }
-
-    /// <summary>
     /// Gets value to filter from request parameter "filterValue"
     /// </summary>
     public string FilterValue { get; set; }
@@ -123,7 +118,6 @@ public class ApiContext : ICloneable
         }
 
         SortBy = query.GetRequestValue("sortBy");
-        FilterBy = query.GetRequestValue("filterBy");
         FilterValue = query.GetRequestValue("filterValue");
         Fields = query.GetRequestArray("fields");
         FilterSeparator = query.GetRequestValue("filterSeparator");
@@ -131,7 +125,6 @@ public class ApiContext : ICloneable
     
     public ApiContext SetDataFiltered()
     {
-        FilterBy = string.Empty;
         FilterValue = string.Empty;
 
         return this;

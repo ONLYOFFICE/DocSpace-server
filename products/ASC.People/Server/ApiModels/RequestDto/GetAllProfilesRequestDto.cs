@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,32 +27,29 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters for getting profiles by the user status.
+/// Represents a data transfer object used for requesting a list of profiles.
 /// </summary>
-public class GetByStatusRequestDto
+/// <remarks>
+/// The request allows for pagination and filtering by specific criteria.
+/// Use the available properties to customize the parameters of the request.
+/// </remarks>
+public class GetAllProfilesRequestDto
 {
     /// <summary>
-    /// The user status.
-    /// </summary>
-    [FromRoute(Name = "status")]
-    public required EmployeeStatus Status {  get; set; }
-
-    /// <summary>
-    /// Specifies the criteria used to filter the profiles in the request.
-    /// </summary>
-    [FromQuery(Name = "filterBy")]
-    public string FilterBy { get; set; }
-    
-    /// <summary>
-    /// The maximum number of user profiles to retrieve.
+    /// The maximum number of items to be retrieved in the response.
     /// </summary>
     [FromQuery(Name = "count")]
     public int Count { get; set; } = 50;
 
-
     /// <summary>
-    /// The starting index for retrieving data in a paginated request.
+    /// The zero-based index of the first item to be retrieved in a filtered result set.
     /// </summary>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
+
+    /// <summary>
+    /// Specifies the filter criteria for user-related queries.
+    /// </summary>
+    [FromQuery(Name = "filterBy")]
+    public string FilterBy { get; set; }
 }
