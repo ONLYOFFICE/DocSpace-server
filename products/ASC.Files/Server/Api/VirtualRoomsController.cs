@@ -517,8 +517,8 @@ public abstract class VirtualRoomsController<T>(
     [HttpGet("{id}/share")]
     public async IAsyncEnumerable<FileShareDto> GetRoomSecurityInfoAsync(RoomSecurityInfoRequestDto<T> inDto)
     {
-        var offset = Convert.ToInt32(apiContext.StartIndex);
-        var count = Convert.ToInt32(apiContext.Count);
+        var offset = inDto.StartIndex;
+        var count = inDto.Count;
         var text = apiContext.FilterValue;
 
         var totalCountTask = await _fileStorageService.GetPureSharesCountAsync(inDto.Id, FileEntryType.Folder, inDto.FilterType, text);
@@ -839,8 +839,8 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
             orderBy = new OrderBy(sortBy, !apiContext.SortDescending);
         }
 
-        var startIndex = Convert.ToInt32(apiContext.StartIndex);
-        var count = Convert.ToInt32(apiContext.Count);
+        var startIndex = inDto.StartIndex;
+        var count = inDto.Count;
         var filterValue = apiContext.FilterValue;
 
         var content = await fileStorageService.GetFolderItemsAsync(
@@ -894,15 +894,9 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     [Tags("Rooms")]
     [SwaggerResponse(200, "List of tag names", typeof(IAsyncEnumerable<object>))]
     [HttpGet("tags")]
-    public async IAsyncEnumerable<object> GetTagsInfoAsync()
+    public IAsyncEnumerable<object> GetTagsInfoAsync(GetTagsInfoRequestDto inDto)
     {
-        var from = Convert.ToInt32(apiContext.StartIndex);
-        var count = Convert.ToInt32(apiContext.Count);
-
-        await foreach (var tag in customTagsService.GetTagsInfoAsync<int>(apiContext.FilterValue, TagType.Custom, from, count))
-        {
-            yield return tag;
-        }
+        return customTagsService.GetTagsInfoAsync<int>(apiContext.FilterValue, TagType.Custom, inDto.StartIndex, inDto.Count);
     }
 
     /// <summary>

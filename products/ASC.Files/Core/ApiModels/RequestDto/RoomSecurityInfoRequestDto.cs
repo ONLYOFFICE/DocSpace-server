@@ -42,4 +42,10 @@ public class RoomSecurityInfoRequestDto<T>
     /// </summary>
     [FromQuery(Name = "filterType")]
     public ShareFilterType FilterType { get; set; } = ShareFilterType.UserOrGroup;
+    
+    [FromQuery(Name = "count")]
+    public int Count { get; set; } = 50;
+    
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
 }

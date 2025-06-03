@@ -90,6 +90,18 @@ public class GetFolderRequestDto<T>
     /// </summary>
     [FromQuery(Name = "formsItemType")]
     public string FormsItemType{ get; set; }
+    
+    /// <summary>
+    /// The maximum number of items to retrieve in the request.
+    /// </summary>
+    [FromQuery(Name = "count")]
+    public int Count { get; set; } = 50;
+
+    /// <summary>
+    /// The zero-based index of the first item to retrieve in a paginated request.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
 }
 
 /// <summary>
@@ -108,6 +120,18 @@ public class GetCommonFolderRequestDto
     /// </summary>
     [FromQuery(Name = "filterType")]
     public FilterType? FilterType { get; set; }
+
+    /// <summary>
+    /// The maximum number of items to retrieve in the request.
+    /// </summary>
+    [FromQuery(Name = "count")]
+    public int Count { get; set; } = 50;
+
+    /// <summary>
+    /// The zero-based index of the first item to retrieve in a paginated list.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
 }
 
 /// <summary>
@@ -132,6 +156,18 @@ public class GetMyTrashFolderRequestDto
     /// </summary>
     [FromQuery(Name = "applyFilterOption")]
     public ApplyFilterOption? ApplyFilterOption { get; set; }
+
+    /// <summary>
+    /// The maximum number of items to retrieve in the response.
+    /// </summary>
+    [FromQuery(Name = "count")]
+    public int Count { get; set; } = 50;
+
+    /// <summary>
+    /// The starting position of the items to be retrieved.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
 }
 
 /// <summary>
@@ -156,6 +192,18 @@ public class GetRootFolderRequestDto
     /// </summary>
     [FromQuery(Name = "withoutTrash")]
     public bool? WithoutTrash { get; set; }
+    
+    /// <summary>
+    /// The maximum number of items to retrieve in the response.
+    /// </summary>
+    [FromQuery(Name = "count")]
+    public int Count { get; set; } = 50;
+
+    /// <summary>
+    /// The starting position of the items to be retrieved.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
 }
 
 /// <summary>
@@ -198,4 +246,10 @@ public class GetRecentFolderRequestDto
     /// </summary>
     [FromQuery(Name = "extension")]
     public string[] Extension { get; set; }
+    
+    [FromQuery(Name = "count")]
+    public int Count { get; set; } = 50;
+    
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
 }

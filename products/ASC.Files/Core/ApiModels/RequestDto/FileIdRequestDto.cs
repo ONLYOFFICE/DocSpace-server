@@ -48,6 +48,18 @@ public class FilePrimaryIdRequestDto<T>
     /// </summary>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
+
+    /// <summary>
+    /// The number of items to retrieve in the request.
+    /// </summary>
+    [FromQuery(Name = "count")]
+    public int Count { get; set; } = 50;
+
+    /// <summary>
+    /// The starting index for the query results.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
 }
 
 /// <summary>

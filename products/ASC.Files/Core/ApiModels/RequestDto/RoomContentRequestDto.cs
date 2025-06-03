@@ -90,4 +90,10 @@ public class RoomContentRequestDto
     /// </summary>
     [FromQuery(Name = "storageFilter")]
     public StorageFilter? StorageFilter { get; set; }
+    
+    [FromQuery(Name = "count")]
+    public int Count { get; set; } = 50;
+    
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
 }

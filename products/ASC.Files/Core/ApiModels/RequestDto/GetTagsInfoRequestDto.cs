@@ -26,34 +26,11 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
-/// <summary>
-/// The group member security request generic parameters.
-/// </summary>
-public class GroupMemberSecurityRequestDto<T>
+public class GetTagsInfoRequestDto
 {
-    /// <summary>
-    /// The folder ID.
-    /// </summary>
-    [FromRoute(Name = "folderId")]
-    public required T FolderId { get; set; }
-
-    /// <summary>
-    /// The group ID.
-    /// </summary>
-    [FromRoute(Name = "groupId")]
-    public required Guid GroupId { get; set; }
-
-
-    /// <summary>
-    /// The number of items to be retrieved in the current query.
-    /// </summary>
     [FromQuery(Name = "count")]
     public int Count { get; set; } = 50;
 
-
-    /// <summary>
-    /// The starting index for the query result set.
-    /// </summary>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
 }

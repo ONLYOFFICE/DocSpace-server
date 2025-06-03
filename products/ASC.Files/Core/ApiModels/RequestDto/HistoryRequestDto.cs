@@ -48,6 +48,18 @@ public class HistoryRequestDto
     /// </summary>
     [FromQuery(Name = "toDate")]
     public ApiDateTime ToDate { get; set; }
+
+    /// <summary>
+    /// The number of history entries to retrieve for the file log.
+    /// </summary>
+    [FromQuery(Name = "count")]
+    public int Count { get; set; } = 50;
+
+    /// <summary>
+    /// The starting index for retrieving a subset of file history entries.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
 }
 
 /// <summary>
@@ -72,4 +84,16 @@ public class HistoryFolderRequestDto
     /// </summary>
     [FromQuery(Name = "toDate")]
     public ApiDateTime ToDate { get; set; }
+
+    /// <summary>
+    /// The number of records to retrieve for the folder history.
+    /// </summary>
+    [FromQuery(Name = "count")]
+    public int Count { get; set; } = 50;
+
+    /// <summary>
+    /// The starting index from which the history records are retrieved in the request.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
 }
