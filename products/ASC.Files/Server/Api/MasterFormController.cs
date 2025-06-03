@@ -53,7 +53,7 @@ public abstract class MasterFormController<T>(FileStorageService fileStorageServ
     [SwaggerResponse(403, "You don't have enough permission to view the file")]
     [AllowAnonymous]
     [HttpPost("masterform/{fileId}/checkfillformdraft")]
-    public async Task<string> CheckFillFormDraftAsync(CheckFillFormDraftRequestDto<T> inDto)
+    public async Task<string> CheckFillFormDraft(CheckFillFormDraftRequestDto<T> inDto)
     {
         return await fileStorageService.CheckFillFormDraftAsync(inDto.FileId, inDto.File.Version,!inDto.File.RequestEmbedded, inDto.File.RequestView);
     }

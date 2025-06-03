@@ -70,7 +70,7 @@ public class AccountsController<T>(
     [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<object>))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("room/{id}/search")]
-    public async IAsyncEnumerable<object> GetAccountsEntriesWithSharedAsync(AccountsEntriesRequestDto<T> inDto)
+    public async IAsyncEnumerable<object> GetAccountsEntriesWithShared(AccountsEntriesRequestDto<T> inDto)
     {
         var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(inDto.Id)).NotFoundIfNull();
 

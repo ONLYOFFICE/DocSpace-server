@@ -57,7 +57,7 @@ public class LicenseController(ILoggerProvider option,
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpGet("refresh")]
     [AllowNotPayment]
-    public async Task<bool> RefreshLicenseAsync()
+    public async Task<bool> RefreshLicense()
     {
         if (!tenantExtra.Enterprise)
         {
@@ -79,7 +79,7 @@ public class LicenseController(ILoggerProvider option,
     [SwaggerResponse(200, "Message about the result of activating license", typeof(string))]
     [AllowNotPayment]
     [HttpPost("accept")]
-    public async Task<string> AcceptLicenseAsync()
+    public async Task<string> AcceptLicense()
     {
         if (!tenantExtra.Enterprise)
         {
@@ -131,7 +131,7 @@ public class LicenseController(ILoggerProvider option,
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("trial")]
-    public async Task<bool> ActivateTrialAsync()
+    public async Task<bool> ActivateTrialLicense()
     {
         if (!coreBaseSettings.Standalone)
         {
@@ -200,7 +200,7 @@ public class LicenseController(ILoggerProvider option,
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("required")]
-    public async Task<bool> RequestLicense()
+    public async Task<bool> GetIsLicenseRequired()
     {
         return await firstTimeTenantSettings.GetRequestLicense();
     }
@@ -221,7 +221,7 @@ public class LicenseController(ILoggerProvider option,
     [AllowNotPayment]
     [HttpPost("")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard, Administrators")]
-    public async Task<string> UploadLicenseAsync([FromForm] UploadLicenseRequestsDto inDto)
+    public async Task<string> UploadLicense([FromForm] UploadLicenseRequestsDto inDto)
     {
         try
         {

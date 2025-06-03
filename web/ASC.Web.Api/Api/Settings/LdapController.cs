@@ -54,7 +54,7 @@ public class LdapController(
     [Tags("Settings / LDAP")]
     [SwaggerResponse(200, "LDAP settings", typeof(LdapSettingsDto))]
     [HttpGet("")]
-    public async Task<LdapSettingsDto> GetLdapSettingsAsync()
+    public async Task<LdapSettingsDto> GetLdapSettings()
     {
         await CheckLdapPermissionsAsync();
 
@@ -97,7 +97,7 @@ public class LdapController(
     [Tags("Settings / LDAP")]
     [SwaggerResponse(200, "LDAP cron settings", typeof(LdapCronSettingsDto))]
     [HttpGet("cron")]
-    public async Task<LdapCronSettingsDto> GetLdapCronSettingsAsync()
+    public async Task<LdapCronSettingsDto> GetLdapCronSettings()
     {
         await CheckLdapPermissionsAsync();
 
@@ -121,7 +121,7 @@ public class LdapController(
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
     [HttpPost("cron")]
-    public async Task SetLdapCronSettingsAsync(LdapCronRequestDto inDto)
+    public async Task SetLdapCronSettings(LdapCronRequestDto inDto)
     {
         await CheckLdapPermissionsAsync();
 
@@ -164,7 +164,7 @@ public class LdapController(
     [Tags("Settings / LDAP")]
     [SwaggerResponse(200, "LDAP operation status", typeof(LdapStatusDto))]
     [HttpGet("sync")]
-    public async Task<LdapStatusDto> SyncLdapAsync()
+    public async Task<LdapStatusDto> SyncLdap()
     {
         await CheckLdapPermissionsAsync();
 
@@ -214,7 +214,7 @@ public class LdapController(
     [Tags("Settings / LDAP")]
     [SwaggerResponse(200, "LDAP operation status", typeof(LdapStatusDto))]
     [HttpPost("")]
-    public async Task<LdapStatusDto> SaveLdapSettingsAsync(LdapRequestsDto inDto)
+    public async Task<LdapStatusDto> SaveLdapSettings(LdapRequestsDto inDto)
     {
         var ldapSettings = mapper.Map<LdapRequestsDto, LdapSettings>(inDto);
 
@@ -222,7 +222,7 @@ public class LdapController(
 
         if (!ldapSettings.EnableLdapAuthentication)
         {
-            await SetLdapCronSettingsAsync(null);
+            await SetLdapCronSettings(null);
         }
 
         var userId = authContext.CurrentAccount.ID.ToString();
@@ -245,7 +245,7 @@ public class LdapController(
     [Tags("Settings / LDAP")]
     [SwaggerResponse(200, "LDAP operation status", typeof(LdapStatusDto))]
     [HttpPost("save/test")]
-    public async Task<LdapStatusDto> TestLdapSaveAsync(LdapSettings inDto)
+    public async Task<LdapStatusDto> TestLdapSave(LdapSettings inDto)
     {
         await CheckLdapPermissionsAsync();
 
@@ -269,7 +269,7 @@ public class LdapController(
     [Tags("Settings / LDAP")]
     [SwaggerResponse(200, "LDAP operation status", typeof(LdapStatusDto))]
     [HttpGet("status")]
-    public async Task<LdapStatusDto> GetLdapOperationStatusAsync()
+    public async Task<LdapStatusDto> GetLdapOperationStatus()
     {
         await CheckLdapPermissionsAsync();
 
@@ -291,7 +291,7 @@ public class LdapController(
     [Tags("Settings / LDAP")]
     [SwaggerResponse(200, "LDAP default settings: enable LDAP authentication or not, start TLS or not, enable SSL or not, send welcome email or not, server name, user name, port number, user filter, login attribute, LDAP settings mapping, access rights, user is a group member or not, group name, user attribute, group filter, group attribute, group name attribute, authentication is enabled or not, login, password, accept certificate or not", typeof(LdapSettingsDto))]
     [HttpGet("default")]
-    public async Task<LdapSettingsDto> GetDefaultLdapSettingsAsync()
+    public async Task<LdapSettingsDto> GetDefaultLdapSettings()
     {
         await CheckLdapPermissionsAsync();
 
