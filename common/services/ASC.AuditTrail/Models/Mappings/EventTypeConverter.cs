@@ -41,6 +41,11 @@ internal class EventTypeConverter(
 {
     public LoginEvent Convert(LoginEventQuery source, LoginEvent destination, ResolutionContext context)
     {
+        if (source?.Event == null)
+        {
+            return null;
+        }
+
         var result = context.Mapper.Map<LoginEvent>(source.Event);
 
         if (source.Event.DescriptionRaw != null)
@@ -83,6 +88,11 @@ internal class EventTypeConverter(
 
     public AuditEvent Convert(AuditEventQuery source, AuditEvent destination, ResolutionContext context)
     {
+        if (source?.Event == null)
+        {
+            return null;
+        }
+
         var target = source.Event.Target;
         source.Event.Target = null;
         var result = context.Mapper.Map<AuditEvent>(source.Event);

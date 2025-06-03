@@ -27,9 +27,20 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
+/// The base operation request parameters.
+/// </summary>
+public abstract class FileOperationRequestBaseDto
+{
+    /// <summary>
+    /// Specifies whether to return only the current operation
+    /// </summary>
+    public bool ReturnSingleOperation { get; set; }
+}
+
+/// <summary>
 /// The base batch request parameters.
 /// </summary>
-public class BaseBatchRequestDto
+public class BaseBatchRequestDto : FileOperationRequestBaseDto
 {
     /// <summary>
     /// The list of folder IDs of the base batch request.
@@ -45,7 +56,7 @@ public class BaseBatchRequestDto
 /// <summary>
 /// The request parameters for downloading files.
 /// </summary>
-public class DownloadRequestDto
+public class DownloadRequestDto : FileOperationRequestBaseDto
 {
     /// <summary>
     /// The list of folder IDs to be downloaded.
@@ -87,7 +98,7 @@ public class DownloadRequestItemDto
 /// <summary>
 /// The request parameters for deleting files.
 /// </summary>
-public class DeleteBatchRequestDto
+public class DeleteBatchRequestDto : FileOperationRequestBaseDto
 {
     /// <summary>
     /// The list of folder IDs to be deleted.
@@ -113,7 +124,7 @@ public class DeleteBatchRequestDto
 /// <summary>
 /// The request parameters for deleting file versions.
 /// </summary>
-public class DeleteVersionBatchRequestDto
+public class DeleteVersionBatchRequestDto : FileOperationRequestBaseDto
 {
     /// <summary>
     /// Specifies whether to delete a file after the editing session is finished or not.
@@ -168,7 +179,7 @@ public class DeleteRequestDto<T>
 /// <summary>
 /// The request parameters for copying/moving files.
 /// </summary>
-public class BatchRequestDto
+public class BatchRequestDto : FileOperationRequestBaseDto
 {
     /// <summary>
     /// The list of folder IDs to be copied/moved.
@@ -207,9 +218,33 @@ public class BatchRequestDto
 }
 
 /// <summary>
+/// The request parameters for emptying the trash.
+/// </summary>
+public class EmptyTrashRequestDto
+{
+    /// <summary>
+    /// Specifies whether to return only the current operation
+    /// </summary>
+    [FromQuery]
+    public bool Single { get; set; }
+}
+
+/// <summary>
+/// The request parameters for retrieving the status of a file operation.
+/// </summary>
+public class FileOperationResultRequestBaseDto
+{
+    /// <summary>
+    /// The ID of the file operation.
+    /// </summary>
+    [FromQuery(Name = "id")]
+    public string Id { get; set; }
+}
+
+/// <summary>
 /// The data transfer object containing the operation type for which statuses are retrieved.
 /// </summary>
-public class FileOperationResultRequestDto
+public class FileOperationResultRequestDto : FileOperationResultRequestBaseDto
 {
     /// <summary>
     /// Specifies the type of file operation to be retrieved.

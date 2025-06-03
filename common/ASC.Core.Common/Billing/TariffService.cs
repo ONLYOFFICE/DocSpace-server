@@ -1064,24 +1064,28 @@ public class TariffService(
 
         var result = await billingClient.TopUpDepositAsync(portalId, amount, currency);
 
-        var attempt = 0;
-
-        while (waitForChanges && attempt <= 3)
+        if (!waitForChanges)
         {
-            await Task.Delay((int)(Math.Pow(2, attempt) * 1000));
+            return result;
+        }
 
+        var retryPolicy = Policy
+            .HandleResult<bool>(result => result == false)
+            .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
+
+        var updated = await retryPolicy.ExecuteAsync(async () =>
+        {
             var newBalance = await GetCustomerBalanceAsync(tenantId, true);
             var newBalanceAmount = newBalance?.SubAccounts?.FirstOrDefault(x => x.Currency == currency)?.Amount;
 
-            if (oldBalanceAmount != newBalanceAmount)
-            {
-                return result;
-            }
+            return oldBalanceAmount != newBalanceAmount;
+        });
 
-            attempt += 1;
+        if (!updated)
+        {
+            logger.ErrorBilling(tenantId.ToString(), "Balance value is not updated after replenishment");
+            await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
         }
-
-        await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
 
         return result;
     }

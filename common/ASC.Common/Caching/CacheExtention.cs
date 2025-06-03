@@ -78,14 +78,14 @@ public static class CacheExtention
         return $"group-{tenant}-{id}";
     }
 
-    public static string GetGroupRefTag(int tenant, Guid groupId)
+    public static string GetGroupRefsTag(int tenant)
     {
-        return $"ref-{tenant}-{groupId}";
+        return $"refs-{tenant}";
     }
 
     public static string GetWebPluginsTag(int tenant)
     {
-        return $"ref-{tenant}";
+        return $"webplugin-{tenant}";
     } 
     
     public static string GetProviderFileTag(string selector, int id, string fileId)
