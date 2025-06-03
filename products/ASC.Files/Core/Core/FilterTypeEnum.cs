@@ -83,8 +83,5 @@ public enum FilterType
     [EnumMember] Pdf = 22,
     [SwaggerEnum("Pdf form")]
     [EnumMember] PdfForm = 23,
-    [EnumMember] VirtualDataRooms = 24,
-    
-    [SwaggerEnum("AI rooms")]
-    [EnumMember] AiRooms = 25
+    [EnumMember] VirtualDataRooms = 24
 }
