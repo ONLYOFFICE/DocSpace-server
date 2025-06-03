@@ -354,7 +354,6 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
         var fileSecurity = scope.ServiceProvider.GetRequiredService<FileSecurity>();
         var notifyClient = scope.ServiceProvider.GetRequiredService<NotifyClient>();
         var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
-        var fileStorageService = scope.ServiceProvider.GetService<FileStorageService>();
         
         var toFolderId = toFolder.Id;
         var isToFolder = Equals(toFolderId, _daoFolderId);
@@ -941,7 +940,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                                        ? null
                                        : await fileDao.GetFileAsync(toFolderId, file.Title);
 
-                    if (conflict == null)
+                    if (conflict == null || conflict.Category != file.Category)
                     {
                         File<TTo> newFile = null;
                         if (copy)

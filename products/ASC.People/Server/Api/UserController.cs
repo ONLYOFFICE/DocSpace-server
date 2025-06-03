@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Common.Identity;
+
 namespace ASC.People.Api;
 
 ///<summary>
@@ -79,7 +81,9 @@ public class UserController(
     CountPaidUserStatistic countPaidUserStatistic,
     UserSocketManager socketManager,
     GlobalFolderHelper globalFolderHelper,
-    UserWebhookManager webhookManager)
+    UserWebhookManager webhookManager,
+    IdentityClient client,
+    GroupFullDtoHelper groupFullDtoHelper)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
 {
     /// <summary>
@@ -568,6 +572,9 @@ public class UserController(
         await CheckReassignProcessAsync([user.Id]);
 
         var userName = user.DisplayUserName(false, displayUserSettingsHelper);
+        var groups = await _userManager.GetUserGroupsAsync(user.Id);
+
+        await client.DeleteClientsAsync(user.Id);
         await _userPhotoManager.RemovePhotoAsync(user.Id);
         await _userManager.DeleteUserAsync(user.Id);
         await fileSecurity.RemoveSubjectAsync(user.Id, true);
@@ -582,6 +589,12 @@ public class UserController(
         else
         {
             await socketManager.DeleteUserAsync(user.Id);
+            foreach (var group in groups)
+            {
+                var groupInfo = await _userManager.GetGroupInfoAsync(group.ID);
+                var groupDto = await groupFullDtoHelper.Get(groupInfo, true);
+                await socketManager.UpdateGroupAsync(groupDto);
+            }
         }
 
         await webhookManager.PublishAsync(WebhookTrigger.UserDeleted, user);
@@ -1145,6 +1158,7 @@ public class UserController(
             
             var isGuest = userType == EmployeeType.Guest;
 
+            await client.DeleteClientsAsync(user.Id);
             await _userPhotoManager.RemovePhotoAsync(user.Id);
             await _userManager.DeleteUserAsync(user.Id);
             await fileSecurity.RemoveSubjectAsync(user.Id, true);
@@ -1539,15 +1553,19 @@ public class UserController(
             {
                 continue;
             }
-            var userType = await _userManager.GetUserTypeAsync(u.Id); 
 
-            switch (userType)
+            if (currentUser.Id != u.Id)
             {
-                case EmployeeType.RoomAdmin when currentUserType is not EmployeeType.DocSpaceAdmin:
-                case EmployeeType.DocSpaceAdmin when !currentUser.IsOwner(tenant):
-                    continue;
+                var userType = await _userManager.GetUserTypeAsync(u.Id);
+
+                switch (userType)
+                {
+                    case EmployeeType.RoomAdmin when currentUserType is not EmployeeType.DocSpaceAdmin:
+                    case EmployeeType.DocSpaceAdmin when !currentUser.IsOwner(tenant):
+                        continue;
+                }
             }
-            
+
             u.ActivationStatus = inDto.ActivationStatus;
             await _userManager.UpdateUserInfoAsync(u);
 
@@ -1916,6 +1934,7 @@ public class UserController(
                 await socketManager.UpdateUserAsync(user);
             }
             await socketManager.ChangeUserTypeAsync(user, true);
+            await studioNotifyService.SendMsgUserTypeChangedAsync(user, FilesCommonResource.ResourceManager.GetString("RoleEnum_" + inDto.Type.ToStringFast()));
         }
 
         messageService.Send(MessageAction.UsersUpdatedType, MessageTarget.Create(users.Select(x => x.Id)),
@@ -2110,7 +2129,7 @@ public class UserController(
             var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenant.Id, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
             var quotaUserSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
             _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(tenant.Id, customQuota.GetFeature<UserCustomQuotaFeature>().Name, quotaUserSettings.EnableQuota, userUsedSpace, quota, [user.Id]);
-
+            await socketManager.UpdateUserAsync(user);
             yield return await employeeFullDtoHelper.GetFullAsync(user);
         }
 

@@ -72,7 +72,7 @@ public class LowerCaseNamingPolicy : JsonNamingPolicy
         name.ToLower();
 }
 [Scope]
-public class PushSenderSinkMessageCreator(UserManager userManager, TenantManager tenantManager) : SinkMessageCreator
+public class PushSenderSinkMessageCreator(UserManager userManager, TenantManager tenantManager, CoreSettings coreSettings) : SinkMessageCreator
 {
     public override async Task<NotifyMessage> CreateNotifyMessage(INoticeMessage message, string senderName)
     {
@@ -98,7 +98,7 @@ public class PushSenderSinkMessageCreator(UserManager userManager, TenantManager
         var notifyData = new NotifyData
         {
             Email = user.Email,
-            Portal = (tenantManager.GetCurrentTenant()).TrustedDomains.FirstOrDefault(),
+            Portal = tenant.GetTenantDomain(coreSettings, true),
             OriginalUrl = originalUrl is { Value: not null } ? originalUrl.Value.ToString() : "",
             Folder = new NotifyFolderData
             {

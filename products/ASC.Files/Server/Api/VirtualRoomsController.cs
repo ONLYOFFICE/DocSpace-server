@@ -109,6 +109,34 @@ public class VirtualRoomsInternalController(
             };
         }
 
+        RoomLifetime lifetime = null;
+        if (dto.Lifetime != null)
+        {
+            lifetime = new RoomLifetime
+            {
+                DeletePermanently = dto.Lifetime.DeletePermanently,
+                Enabled = dto.Lifetime.Enabled,
+                Period = dto.Lifetime.Period,
+                Value = dto.Lifetime.Value
+            };
+        }
+
+        WatermarkRequest watermark = null;
+        if (dto.Watermark != null)
+        {
+            watermark = new WatermarkRequest
+            {
+                Additions = dto.Watermark.Additions,
+                Enabled = dto.Watermark.Enabled,
+                ImageHeight = dto.Watermark.ImageHeight,
+                ImageWidth = dto.Watermark.ImageWidth,
+                ImageScale = dto.Watermark.ImageScale,
+                ImageUrl = dto.Watermark.ImageUrl,
+                Rotate = dto.Watermark.Rotate,
+                Text = dto.Watermark.Text
+            };
+        }
+
         var taskId = await roomTemplatesWorker.StartCreateRoomAsync(tenantManager.GetCurrentTenantId(), authContext.CurrentAccount.ID,
           dto.TemplateId,
           dto.Title,
@@ -118,6 +146,11 @@ public class VirtualRoomsInternalController(
           dto.Cover,
           dto.Color,
           dto.Quota,
+          dto.Indexing,
+          dto.DenyDownload,
+          lifetime,
+          watermark,
+          dto.Private,
           false);
 
         await eventBus.PublishAsync(new CreateRoomFromTemplateIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId())
@@ -130,6 +163,11 @@ public class VirtualRoomsInternalController(
             Cover = dto.Cover,
             Color = dto.Color,
             Quota = dto.Quota,
+            Indexing = dto.Indexing,
+            DenyDownload = dto.DenyDownload,
+            Lifetime = lifetime,
+            Watermark = watermark,
+            Private = dto.Private,
             TaskId = taskId
         });
         return await GetRoomCreatingStatus();
@@ -445,7 +483,7 @@ public abstract class VirtualRoomsController<T>(
 
         var aceCollection = new AceCollection<T>
         {
-            Files = Array.Empty<T>(),
+            Files = [],
             Folders = [inDto.Id],
             Aces = wrappers,
             Message = inDto.RoomInvitation.Message
@@ -759,8 +797,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         UserManager userManager,
         IServiceProvider serviceProvider,
         ApiDateTimeHelper apiDateTimeHelper,
-        RoomNewItemsDtoHelper roomNewItemsDtoHelper,
-        IHttpContextAccessor httpContextAccessor)
+        RoomNewItemsDtoHelper roomNewItemsDtoHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -960,7 +997,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
 
         var taskProgress = await documentBuilderTaskManager.StartTask(task, false);
         
-        var headers = MessageSettings.GetHttpHeaders(httpContextAccessor?.HttpContext?.Request);
+        var headers = MessageSettings.GetHttpHeaders(Request);
         var evt = new RoomIndexExportIntegrationEvent(userId, tenantId, inDto.Id, baseUri, headers: headers != null 
             ? headers.ToDictionary(x => x.Key, x => x.Value.ToString())
             : []);

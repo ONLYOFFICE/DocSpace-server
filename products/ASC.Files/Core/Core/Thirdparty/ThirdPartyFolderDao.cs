@@ -60,7 +60,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
     public async Task<Folder<string>> GetFolderAsync(string folderId)
     {
         var folder = dao.ToFolder(await dao.GetFolderAsync(folderId));
-        if (folder == null)
+        if (folder == null || !string.IsNullOrEmpty(folder.Error))
         {
             if (dao.IsRoom(folderId))
             {
@@ -625,6 +625,11 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         return AsyncEnumerable.Empty<Folder<string>>();
     }
 
+    public Task<int> GetProviderBasedRoomsCountAsync(SearchArea searchArea)
+    {
+        return Task.FromResult(0);
+    }
+
     public Task<Folder<string>> GetRootFolderAsync(string folderId)
     {
         return dao.GetRootFolderAsync();
@@ -655,7 +660,8 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         throw new NotImplementedException();
     }
 
-    public Task<int> GetFoldersCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool withSubfolders = false, bool excludeSubject = false, string roomId = null)
+    public Task<int> GetFoldersCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool withSubfolders = false, bool excludeSubject = false, string roomId = null,
+        FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All)
     {
         throw new NotImplementedException();
     }

@@ -151,7 +151,6 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     /// <short>Send the mention message</short>
     /// <path>api/2.0/files/file/{fileId}/sendeditornotify</path>
     /// <collection>list</collection>
-    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "List of access rights information", typeof(List<AceShortWrapper>))]
     [HttpPost("file/{fileId}/sendeditornotify")]
@@ -199,7 +198,6 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
         BruteForceLoginManager bruteForceLoginManager,
-        IHttpContextAccessor httpContextAccessor,
         ExternalLinkHelper externalLinkHelper,
         IMapper mapper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
@@ -210,7 +208,6 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <short>Change the file owner</short>
     /// <path>api/2.0/files/owner</path>
     /// <collection>list</collection>
-    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "File entry information", typeof(IAsyncEnumerable<FileEntryDto>))]
     [HttpPost("owner")]
@@ -304,7 +301,6 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <short>Get the external data</short>
     /// <path>api/2.0/files/share/{key}</path>
     /// <requiresAuthorization>false</requiresAuthorization>
-    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "External data", typeof(ExternalShareDto))]
     [AllowAnonymous]
@@ -322,7 +318,6 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <short>Apply external data password</short>
     /// <path>api/2.0/files/share/{key}/password</path>
     /// <requiresAuthorization>false</requiresAuthorization>
-    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "External data", typeof(ExternalShareDto))]
     [SwaggerResponse(429, "Too many requests")]
@@ -330,7 +325,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     [HttpPost("share/{key}/password")]
     public async Task<ExternalShareDto> ApplyExternalSharePasswordAsync(ExternalShareRequestDto inDto)
     {
-        var ip = MessageSettings.GetIP(httpContextAccessor.HttpContext?.Request);
+        var ip = MessageSettings.GetIP(Request);
         
         await bruteForceLoginManager.IncrementAsync(inDto.Key, ip, true, FilesCommonResource.ErrorMessage_SharePasswordManyAttempts);
         

@@ -433,7 +433,10 @@ public abstract class FilesController<T>(
     [HttpPut("{fileId}/update")]
     public async Task<FileDto<T>> UpdateFileStreamFromFormAsync(FileStreamRequestDto<T> inDto)
     {
-        return await filesControllerHelper.UpdateFileStreamAsync(filesControllerHelper.GetFileFromRequest(inDto).OpenReadStream(), inDto.FileId, inDto.FileExtension, inDto.Encrypted, inDto.Forcesave);
+        IEnumerable<IFormFile> files = Request.Form.Files;
+        var file = files.Any() ? files.First() : inDto.File;
+
+        return await filesControllerHelper.UpdateFileStreamAsync(file.OpenReadStream(), inDto.FileId, inDto.FileExtension, inDto.Encrypted, inDto.Forcesave);
     }
 
     /// <summary>

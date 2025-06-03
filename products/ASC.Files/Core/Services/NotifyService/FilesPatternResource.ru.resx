@@ -180,7 +180,7 @@ $OrangeButton</value>
     <value>В комнате "$RoomTitle" создан новый документ "$DocumentTitle"</value>
   </data>
   <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
-    <value>В комнату "$RoomTitle" ($Count) загружены новые файлы</value>
+    <value>В комнату "$RoomTitle" загружены новые файлы ($Count)</value>
   </data>
   <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
     <value>В комнату "$RoomTitle" загружен новый файл "$DocumentTitle"</value>

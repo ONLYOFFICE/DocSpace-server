@@ -261,4 +261,42 @@ public interface ClientApplicationService {
    */
   int deleteClient(
       @Valid Audit audit, @NotNull Role role, @Valid DeleteTenantClientCommand command);
+
+  /**
+   * Deletes all clients owned by a specific user.
+   *
+   * <p>This operation is typically used during user deprovisioning to ensure proper cleanup of
+   * user-related resources. The deletion is performed based on the user identifier provided in the
+   * command.
+   *
+   * <p>Access control:
+   *
+   * <ul>
+   *   <li>This operation is typically restricted to administrative or system-level processes.
+   * </ul>
+   *
+   * @param command a {@link DeleteUserClientsCommand} containing the user and tenant identifiers
+   *     for clients to be deleted.
+   * @return the number of clients successfully deleted.
+   */
+  int deleteUserClients(@Valid DeleteUserClientsCommand command);
+
+  /**
+   * Deletes all clients associated with a specific tenant.
+   *
+   * <p>This operation is typically used during tenant deprovisioning to ensure proper cleanup of
+   * tenant-related resources. The deletion is performed based on the tenant identifier provided in
+   * the command.
+   *
+   * <p>Access control:
+   *
+   * <ul>
+   *   <li>This operation is typically restricted to administrative or system-level processes.
+   * </ul>
+   *
+   * @param command a {@link DeleteTenantClientsCommand} containing the tenant identifier for
+   *     clients to be deleted.
+   * @return the number of clients successfully deleted.
+   */
+  int deleteTenantClients(@Valid DeleteTenantClientsCommand command);
 }

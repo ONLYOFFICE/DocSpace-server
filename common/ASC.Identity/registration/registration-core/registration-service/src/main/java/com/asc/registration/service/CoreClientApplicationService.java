@@ -30,6 +30,9 @@ package com.asc.registration.service;
 import com.asc.common.core.domain.entity.Audit;
 import com.asc.common.core.domain.value.ClientId;
 import com.asc.common.core.domain.value.Role;
+import com.asc.common.service.ports.output.message.publisher.AuthorizationMessagePublisher;
+import com.asc.common.service.transfer.message.TenantClientsRemovedEvent;
+import com.asc.common.service.transfer.message.UserClientsRemovedEvent;
 import com.asc.common.service.transfer.response.ClientResponse;
 import com.asc.registration.service.ports.input.service.ClientApplicationService;
 import com.asc.registration.service.transfer.request.create.CreateTenantClientCommand;
@@ -55,6 +58,9 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 @RequiredArgsConstructor
 public class CoreClientApplicationService implements ClientApplicationService {
+  private final AuthorizationMessagePublisher<TenantClientsRemovedEvent>
+      tenantClientsMessagePublisher;
+  private final AuthorizationMessagePublisher<UserClientsRemovedEvent> userClientsMessagePublisher;
   private final ClientCreateCommandHandler clientCreateCommandHandler;
   private final ClientUpdateCommandHandler clientUpdateCommandHandler;
   private final ClientQueryHandler clientQueryHandler;
@@ -190,5 +196,29 @@ public class CoreClientApplicationService implements ClientApplicationService {
    */
   public int deleteClient(Audit audit, Role role, DeleteTenantClientCommand command) {
     return clientUpdateCommandHandler.deleteClient(audit, role, command);
+  }
+
+  /**
+   * Deletes all clients created by a specific user within a tenant.
+   *
+   * @param command The command containing the tenant ID and user ID.
+   * @return The number of clients deleted.
+   */
+  public int deleteUserClients(DeleteUserClientsCommand command) {
+    userClientsMessagePublisher.publish(
+        UserClientsRemovedEvent.builder().userId(command.getUserId()).build());
+    return clientUpdateCommandHandler.deleteUserClients(command);
+  }
+
+  /**
+   * Deletes all clients associated with a specific tenant.
+   *
+   * @param command The command containing the tenant ID.
+   * @return The number of clients deleted.
+   */
+  public int deleteTenantClients(DeleteTenantClientsCommand command) {
+    tenantClientsMessagePublisher.publish(
+        TenantClientsRemovedEvent.builder().tenantId(command.getTenantId()).build());
+    return clientUpdateCommandHandler.deleteTenantClients(command.getTenantId());
   }
 }

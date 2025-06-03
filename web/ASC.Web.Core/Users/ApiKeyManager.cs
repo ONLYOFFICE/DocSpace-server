@@ -76,7 +76,7 @@ public class ApiKeyManager(
             HashedKey = hashedKey,
             CreateBy = currentUserId,
             CreateOn = DateTime.UtcNow,
-            Permissions = permissions ?? new List<string>(),
+            Permissions = permissions ?? [],
             ExpiresAt = expiresIn.HasValue ? DateTime.UtcNow.Add(expiresIn.Value) : null,
             TenantId = tenantManager.GetCurrentTenantId(),
             IsActive = true
@@ -98,6 +98,16 @@ public class ApiKeyManager(
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
         return await context.GetApiKeyAsync(tenantId, keyId);
+    }
+    
+    public async Task<ApiKey> GetApiKeyAsync(string apiKey)
+    {
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var hashedKey = HashApiKey(apiKey);
+        
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        return await context.GetApiKeyAsync(tenantId, hashedKey);
     }
 
     public async Task<ApiKey> ValidateApiKeyAsync(string apiKey)

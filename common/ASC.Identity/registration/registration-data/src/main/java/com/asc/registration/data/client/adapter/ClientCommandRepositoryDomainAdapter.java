@@ -30,8 +30,7 @@ package com.asc.registration.data.client.adapter;
 import com.asc.common.core.domain.event.DomainEventPublisher;
 import com.asc.common.core.domain.value.ClientId;
 import com.asc.common.core.domain.value.TenantId;
-import com.asc.common.service.ports.output.message.publisher.AuthorizationMessagePublisher;
-import com.asc.common.service.transfer.message.ClientRemovedEvent;
+import com.asc.common.core.domain.value.UserId;
 import com.asc.registration.core.domain.entity.Client;
 import com.asc.registration.core.domain.event.ClientEvent;
 import com.asc.registration.data.client.mapper.ClientDataAccessMapper;
@@ -59,7 +58,6 @@ public class ClientCommandRepositoryDomainAdapter implements ClientCommandReposi
 
   private final JpaClientRepository jpaClientRepository;
   private final ClientDataAccessMapper clientDataAccessMapper;
-  private final AuthorizationMessagePublisher<ClientRemovedEvent> authorizationMessagePublisher;
   private final DomainEventPublisher<ClientEvent> messagePublisher;
 
   /**
@@ -194,10 +192,49 @@ public class ClientCommandRepositoryDomainAdapter implements ClientCommandReposi
   public int deleteByTenantIdAndClientId(ClientEvent event, TenantId tenantId, ClientId clientId) {
     log.debug("Persisting invalidated marker");
 
-    authorizationMessagePublisher.publish(
-        ClientRemovedEvent.builder().clientId(clientId.getValue().toString()).build());
     messagePublisher.publish(event);
     return jpaClientRepository.deleteByClientIdAndTenantId(
         clientId.getValue().toString(), tenantId.getValue());
+  }
+
+  /**
+   * Deletes all clients created by a specific user within a tenant.
+   *
+   * <p>This method removes all client entities associated with the specified tenant ID and creator
+   * user ID from the database in a single transaction.
+   *
+   * @param tenantId the tenant ID to filter clients by
+   * @param userId the creator's user ID to filter clients by
+   * @return the number of clients deleted
+   */
+  @Transactional(
+      timeout = 2,
+      rollbackFor = {Exception.class})
+  public int deleteAllByTenantIdAndCreatedBy(TenantId tenantId, UserId userId) {
+    log.debug(
+        "Deleting all clients for current user {} and tenant {}",
+        userId.getValue(),
+        tenantId.getValue());
+
+    return jpaClientRepository.deleteAllByTenantIdAndCreatedBy(
+        tenantId.getValue(), userId.getValue());
+  }
+
+  /**
+   * Deletes all clients associated with a specific tenant.
+   *
+   * <p>This method removes all client entities belonging to the specified tenant ID from the
+   * database in a single transaction.
+   *
+   * @param tenantId the tenant ID to filter clients by
+   * @return the number of clients deleted
+   */
+  @Transactional(
+      timeout = 2,
+      rollbackFor = {Exception.class})
+  public int deleteAllByTenantId(TenantId tenantId) {
+    log.debug("Deleting all clients for current tenant {}", tenantId.getValue());
+
+    return jpaClientRepository.deleteAllByTenantId(tenantId.getValue());
   }
 }

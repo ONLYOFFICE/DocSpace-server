@@ -33,12 +33,10 @@ namespace ASC.Api.Migration;
 [DefaultRoute]
 [ApiController]
 [ControllerName("migration")]
-[ApiExplorerSettings(IgnoreApi = true)]
 public class MigrationController(
     UserManager userManager,
     AuthContext authContext,
     StudioNotifyService studioNotifyService,
-    IHttpContextAccessor httpContextAccessor,
     MigrationCore migrationCore,
     MigrationLogger migrationLogger) : ControllerBase
 {
@@ -191,11 +189,11 @@ public class MigrationController(
         migrationLogger.Init(status.LogName);
         await using var stream = await migrationLogger.GetStreamAsync();
 
-        httpContextAccessor.HttpContext.Response.Headers.Append("Content-Disposition", ContentDispositionUtil.GetHeaderValue("migration.log"));
-        httpContextAccessor.HttpContext.Response.ContentType = "text/plain; charset=UTF-8";
-        httpContextAccessor.HttpContext.Response.Headers["Content-Length"] = stream.Length.ToString(CultureInfo.InvariantCulture);
+        Response.Headers.Append("Content-Disposition", ContentDispositionUtil.GetHeaderValue("migration.log"));
+        Response.ContentType = "text/plain; charset=UTF-8";
+        Response.Headers["Content-Length"] = stream.Length.ToString(CultureInfo.InvariantCulture);
 
-        await stream.CopyToAsync(httpContextAccessor.HttpContext.Response.Body);
+        await stream.CopyToAsync(Response.Body);
     }
 
     /// <summary>

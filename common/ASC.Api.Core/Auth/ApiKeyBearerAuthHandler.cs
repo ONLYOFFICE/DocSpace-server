@@ -34,13 +34,12 @@ public class ApiKeyBearerAuthHandler(
     ILoggerFactory logger,
     UrlEncoder encoder,
     ApiKeyManager apiKeyManager,
-    SecurityContext securityContext,
-    IHttpContextAccessor httpContextAccessor
+    SecurityContext securityContext
     ) : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
 {
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        var token = httpContextAccessor?.HttpContext?.Request.Headers.Authorization.ToString();
+        var token = Request.Headers.Authorization.ToString();
 
         if (string.IsNullOrEmpty(token))
         {

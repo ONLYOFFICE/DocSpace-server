@@ -197,11 +197,19 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
             yield break;
         }
 
-        //Get only files
-        var filesWait = await Dao.GetItemsAsync(parentId, false);
-        var files = filesWait.Select(item => Dao.ToFile(item as TFile)).ToAsyncEnumerable();
+        List<TItem> filesWait;
 
-        //Filter
+        try
+        {
+            filesWait = await Dao.GetItemsAsync(parentId, false);
+        }
+        catch
+        {
+            filesWait = []; 
+        }
+        
+        var files = filesWait.Select(item => Dao.ToFile(item as TFile)).ToAsyncEnumerable();
+        
         if (subjectID != Guid.Empty)
         {
             files = files.WhereAwait(async x => subjectGroup
@@ -381,6 +389,11 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         var item = await Dao.GetItemsAsync(folderId, false);
 
         return item.Exists(i => Dao.GetName(i).Equals(title, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+    public async Task<bool> IsExistAsync(string title, int category, string folderId)
+    {
+        return await IsExistAsync(title, folderId);
     }
 
     public Task<File<string>> ReplaceFileVersionAsync(File<string> file, Stream fileStream)
@@ -753,7 +766,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     }
 
     public Task<int> GetFilesCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, bool withSubfolders = false,
-        bool excludeSubject = false, string roomId = null, FormsItemDto formsItemDto = null)
+        bool excludeSubject = false, string roomId = null, FormsItemDto formsItemDto = null, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All)
     {
         throw new NotImplementedException();
     }

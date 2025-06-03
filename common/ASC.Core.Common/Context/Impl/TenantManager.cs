@@ -77,7 +77,7 @@ public class TenantManager(
         return tenantService.GetTenantAsync(tenantId);
     }
 
-    public async Task<Tenant> GetTenantAsync(string domain)
+    public async Task<Tenant> GetTenantAsync(string domain, bool firstIfNotFoundForStandalone = true)
     {
         if (string.IsNullOrEmpty(domain))
         {
@@ -99,10 +99,10 @@ public class TenantManager(
                 t = await tenantService.GetTenantAsync(domain[..(domain.Length - baseUrl.Length - 1)]);
             }
         }
-        
+         
         t ??= await tenantService.GetTenantAsync(domain);
-        
-        if (t == null && coreBaseSettings.Standalone && !isAlias)
+         
+        if (t == null && coreBaseSettings.Standalone && !isAlias && firstIfNotFoundForStandalone)
         {
             t = await tenantService.GetTenantForStandaloneWithoutAliasAsync(domain);
         }
@@ -137,17 +137,17 @@ public class TenantManager(
         return newTenant;
     }
     
-    public async Task<Tenant> RestoreTenantAsync(int oldId, Tenant newTenant)
+    public async Task<Tenant> RestoreTenantAsync(Tenant oldTenant, Tenant newTenant)
     {
-        newTenant = await tenantService.RestoreTenantAsync(oldId, newTenant, coreSettings);
+        newTenant = await tenantService.RestoreTenantAsync(oldTenant, newTenant, coreSettings);
         SetCurrentTenant(newTenant);
 
         return newTenant;
     }
 
-    public async Task RemoveTenantAsync(int tenantId, bool auto = false)
+    public async Task RemoveTenantAsync(Tenant tenant, bool auto = false)
     {
-        await tenantService.RemoveTenantAsync(tenantId, auto);
+        await tenantService.RemoveTenantAsync(tenant, auto);
     }
 
     public Task<Tenant> GetCurrentTenantAsync(bool throwIfNotFound, HttpContext context)
@@ -220,6 +220,21 @@ public class TenantManager(
         return null;
     }
 
+    private async Task<Tenant> GetTenantByOrigin(HttpContext context)
+    {
+        Tenant tenant = null;
+
+        string origin = context.Request.Headers.Origin;
+
+        if (!string.IsNullOrEmpty(origin))
+        {
+            var originUri = new Uri(origin);
+            tenant = await GetTenantAsync(originUri.Host, firstIfNotFoundForStandalone: false);
+        }
+
+        return tenant;
+    }
+
     public void SetCurrentTenant(Tenant tenant)
     {
         if (tenant != null)
@@ -241,21 +256,19 @@ public class TenantManager(
         Tenant tenant = null;
         if (context != null)
         {
-
-            tenant = await GetTenantAsync(context.Request.Url().Host);
-
-            if (tenant == null)
+            if (coreBaseSettings.Standalone)
             {
-                string origin = context.Request.Headers.Origin;
+                tenant = await GetTenantByOrigin(context);
+            }
 
-                if (!string.IsNullOrEmpty(origin))
-                {
-                    var originUri = new Uri(origin);
-                    tenant = await GetTenantAsync(originUri.Host);
-                }
+            tenant = tenant ?? await GetTenantAsync(context.Request.Url().Host);
+
+            if (tenant == null && !coreBaseSettings.Standalone)
+            {
+                tenant = await GetTenantByOrigin(context);
             }
         }
-        
+
         SetCurrentTenant(tenant);
     }
 

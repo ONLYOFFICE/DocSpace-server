@@ -73,7 +73,7 @@ public class WebPluginCache
         return _cache.Get<List<WebPlugin>>(key);
     }
 
-    public void InsertAsync(string key, object value)
+    public void Insert(string key, object value)
     {
         _cache.Insert(key, value, _cacheExpiration);
     }
@@ -350,7 +350,7 @@ public class WebPluginManager(
         {
             webPlugins = await GetWebPluginsFromStorageAsync(tenantId);
 
-            webPluginCache.InsertAsync(key, webPlugins);
+            webPluginCache.Insert(key, webPlugins);
         }
 
         return webPlugins;
