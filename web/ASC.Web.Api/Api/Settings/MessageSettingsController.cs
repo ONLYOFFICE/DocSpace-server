@@ -28,21 +28,20 @@ using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Web.Api.Controllers.Settings;
 
-public class MessageSettingsController(MessageService messageService,
-        StudioNotifyService studioNotifyService,
-        ApiContext apiContext,
-        UserManager userManager,
-        TenantExtra tenantExtra,
-        PermissionContext permissionContext,
-        SettingsManager settingsManager,
-        WebItemManager webItemManager,
-        CustomNamingPeople customNamingPeople,
-        IFusionCache fusionCache,
-        IHttpContextAccessor httpContextAccessor,
-        TenantManager tenantManager,
-        CookiesManager cookiesManager,
-        CountPaidUserChecker countPaidUserChecker)
-    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
+public class MessageSettingsController(
+    MessageService messageService,
+    StudioNotifyService studioNotifyService,
+    UserManager userManager,
+    TenantExtra tenantExtra,
+    PermissionContext permissionContext,
+    SettingsManager settingsManager,
+    WebItemManager webItemManager,
+    CustomNamingPeople customNamingPeople,
+    IFusionCache fusionCache,
+    TenantManager tenantManager,
+    CookiesManager cookiesManager,
+    CountPaidUserChecker countPaidUserChecker)
+    : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <summary>
     /// Displays the contact form on the "Sign In" page, allowing users to send a message to the DocSpace administrator in case they encounter any issues while accessing DocSpace.

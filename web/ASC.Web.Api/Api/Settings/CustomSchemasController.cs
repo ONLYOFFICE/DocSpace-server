@@ -28,15 +28,14 @@ namespace ASC.Web.Api.Controllers.Settings;
 
 [DefaultRoute("customschemas")]
 [ApiExplorerSettings(IgnoreApi = true)]
-public class CustomSchemasController(MessageService messageService,
-        ApiContext apiContext,
-        TenantManager tenantManager,
-        PermissionContext permissionContext,
-        WebItemManager webItemManager,
-        CustomNamingPeople customNamingPeople,
-        IFusionCache fusionCache,
-        IHttpContextAccessor httpContextAccessor)
-    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
+public class CustomSchemasController(
+    MessageService messageService,
+    TenantManager tenantManager,
+    PermissionContext permissionContext,
+    WebItemManager webItemManager,
+    CustomNamingPeople customNamingPeople,
+    IFusionCache fusionCache)
+    : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <summary>
     /// Returns all portal team templates that allow users to name their organization (or group), add members, and define their activities within the portal.

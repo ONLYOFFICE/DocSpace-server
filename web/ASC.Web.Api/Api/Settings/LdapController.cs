@@ -29,7 +29,6 @@ namespace ASC.Web.Api.Controllers.Settings;
 [ApiExplorerSettings(IgnoreApi = true)]
 [DefaultRoute("ldap")]
 public class LdapController(
-    ApiContext apiContext,
     WebItemManager webItemManager,
     IFusionCache fusionCache,
     SettingsManager settingsManager,
@@ -39,9 +38,8 @@ public class LdapController(
     AuthContext authContext,
     PermissionContext permissionContext,
     CoreBaseSettings coreBaseSettings,
-    IHttpContextAccessor httpContextAccessor,
     IMapper mapper)
-    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <summary>
     /// Returns the current portal LDAP settings.

@@ -28,18 +28,17 @@ namespace ASC.Web.Api.Controllers.Settings;
 
 [DefaultRoute("tips")]
 [ApiExplorerSettings(IgnoreApi = true)]
-public class TipsController(ILoggerProvider option,
-        ApiContext apiContext,
-        AuthContext authContext,
-        StudioNotifyHelper studioNotifyHelper,
-        SettingsManager settingsManager,
-        WebItemManager webItemManager,
-        SetupInfo setupInfo,
-        IFusionCache fusionCache,
-        IHttpClientFactory clientFactory,
-        TenantManager tenantManager,
-        IHttpContextAccessor httpContextAccessor)
-    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
+public class TipsController(
+    ILoggerProvider option,
+    AuthContext authContext,
+    StudioNotifyHelper studioNotifyHelper,
+    SettingsManager settingsManager,
+    WebItemManager webItemManager,
+    SetupInfo setupInfo,
+    IFusionCache fusionCache,
+    IHttpClientFactory clientFactory,
+    TenantManager tenantManager)
+    : BaseSettingsController(fusionCache, webItemManager)
 {
     private readonly ILogger _log = option.CreateLogger("ASC.Api");
 

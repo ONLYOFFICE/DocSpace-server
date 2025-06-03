@@ -27,18 +27,17 @@
 namespace ASC.Web.Api.Controllers.Settings;
 
 [DefaultRoute("ssov2")]
-public class SsoController(TenantManager tenantManager,
-        ApiContext apiContext,
-        WebItemManager webItemManager,
-        IFusionCache fusionCache,
-        IHttpContextAccessor httpContextAccessor,
-        SettingsManager settingsManager,
-        PermissionContext permissionContext,
-        CoreBaseSettings coreBaseSettings,
-        UserManager userManager,
-        MessageService messageService,
-        AuthContext authContext)
-    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
+public class SsoController(
+    TenantManager tenantManager,
+    WebItemManager webItemManager,
+    IFusionCache fusionCache,
+    SettingsManager settingsManager,
+    PermissionContext permissionContext,
+    CoreBaseSettings coreBaseSettings,
+    UserManager userManager,
+    MessageService messageService,
+    AuthContext authContext)
+    : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <summary>
     /// Returns the current portal SSO settings.

@@ -54,4 +54,16 @@ public class LoginEventRequestDto
     /// </summary>
     [FromQuery(Name = "to")]
     public ApiDateTime To { get; set; }
+
+    /// <summary>
+    /// The number of login events to retrieve in the query.
+    /// </summary>
+    [FromQuery(Name = "count")]
+    public int Count { get; set; } = 50;
+    
+    /// <summary>
+    /// The starting index for fetching a subset of login events from the query results.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
 }

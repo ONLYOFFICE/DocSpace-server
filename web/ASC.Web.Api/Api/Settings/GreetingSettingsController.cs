@@ -27,16 +27,15 @@
 namespace ASC.Web.Api.Controllers.Settings;
 
 [DefaultRoute("greetingsettings")]
-public class GreetingSettingsController(TenantInfoSettingsHelper tenantInfoSettingsHelper,
-        MessageService messageService,
-        ApiContext apiContext,
-        TenantManager tenantManager,
-        PermissionContext permissionContext,
-        WebItemManager webItemManager,
-        IFusionCache fusionCache,
-        CoreBaseSettings coreBaseSettings,
-        IHttpContextAccessor httpContextAccessor)
-    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
+public class GreetingSettingsController(
+    TenantInfoSettingsHelper tenantInfoSettingsHelper,
+    MessageService messageService,
+    TenantManager tenantManager,
+    PermissionContext permissionContext,
+    WebItemManager webItemManager,
+    IFusionCache fusionCache,
+    CoreBaseSettings coreBaseSettings)
+    : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <summary>
     /// Returns the greeting settings for the current portal.

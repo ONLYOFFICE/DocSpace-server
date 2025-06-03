@@ -40,20 +40,20 @@ namespace ASC.Web.Api.Controllers;
 [DefaultRoute]
 [ApiController]
 [ControllerName("security")]
-public class SecurityController(PermissionContext permissionContext,
-        TenantManager tenantManager,
-        MessageService messageService,
-        LoginEventsRepository loginEventsRepository,
-        AuditEventsRepository auditEventsRepository,
-        CsvFileHelper csvFileHelper,
-        CsvFileUploader csvFileUploader,
-        SettingsManager settingsManager,
-        AuditActionMapper auditActionMapper,
-        CoreBaseSettings coreBaseSettings,
-        ApiContext apiContext,
-        CspSettingsHelper cspSettingsHelper, 
-        ApiDateTimeHelper apiDateTimeHelper,
-        IdentityClient identityClient)
+public class SecurityController(
+    PermissionContext permissionContext,
+    TenantManager tenantManager,
+    MessageService messageService,
+    LoginEventsRepository loginEventsRepository,
+    AuditEventsRepository auditEventsRepository,
+    CsvFileHelper csvFileHelper,
+    CsvFileUploader csvFileUploader,
+    SettingsManager settingsManager,
+    AuditActionMapper auditActionMapper,
+    CoreBaseSettings coreBaseSettings,
+    CspSettingsHelper cspSettingsHelper, 
+    ApiDateTimeHelper apiDateTimeHelper,
+    IdentityClient identityClient)
     : ControllerBase
 {
     /// <summary>
@@ -120,10 +120,6 @@ public class SecurityController(PermissionContext permissionContext,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var startIndex = (int)apiContext.StartIndex;
-        var limit = (int)apiContext.Count;
-        apiContext.SetDataPaginated();
-
         inDto.Action = inDto.Action == 0 ? MessageAction.None : inDto.Action;
 
         if (!(await tenantManager.GetCurrentTenantQuotaAsync()).Audit || !SetupInfo.IsVisibleSettings(ManagementType.LoginHistory.ToStringFast()))
@@ -133,7 +129,7 @@ public class SecurityController(PermissionContext permissionContext,
 
         await DemandAuditPermissionAsync();
 
-        return (await loginEventsRepository.GetByFilterAsync(inDto.UserId, inDto.Action, inDto.From, inDto.To, startIndex, limit)).Select(x => new LoginEventDto(x, apiDateTimeHelper));
+        return (await loginEventsRepository.GetByFilterAsync(inDto.UserId, inDto.Action, inDto.From, inDto.To, inDto.StartIndex, inDto.Count)).Select(x => new LoginEventDto(x, apiDateTimeHelper));
     }
 
     /// <summary>
@@ -152,10 +148,6 @@ public class SecurityController(PermissionContext permissionContext,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var startIndex = (int)apiContext.StartIndex;
-        var limit = (int)apiContext.Count;
-        apiContext.SetDataPaginated();
-
         inDto.Action = inDto.Action == 0 ? MessageAction.None : inDto.Action;
 
         if (!(await tenantManager.GetCurrentTenantQuotaAsync()).Audit || !SetupInfo.IsVisibleSettings(ManagementType.LoginHistory.ToStringFast()))
@@ -165,7 +157,7 @@ public class SecurityController(PermissionContext permissionContext,
 
         await DemandAuditPermissionAsync();
 
-        return (await auditEventsRepository.GetByFilterAsync(inDto.UserId, inDto.ProductType, inDto.ModuleType, inDto.ActionType, inDto.Action, inDto.EntryType, inDto.Target, inDto.From, inDto.To, startIndex, limit)).Select(x => new AuditEventDto(x, auditActionMapper, apiDateTimeHelper));
+        return (await auditEventsRepository.GetByFilterAsync(inDto.UserId, inDto.ProductType, inDto.ModuleType, inDto.ActionType, inDto.Action, inDto.EntryType, inDto.Target, inDto.From, inDto.To, inDto.StartIndex, inDto.Count)).Select(x => new AuditEventDto(x, auditActionMapper, apiDateTimeHelper));
     }
 
     /// <summary>

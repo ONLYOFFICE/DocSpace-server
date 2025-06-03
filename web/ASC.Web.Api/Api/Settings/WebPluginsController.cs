@@ -28,16 +28,14 @@ namespace ASC.Web.Api.Controllers.Settings;
 
 [DefaultRoute("webplugins")]
 public class WebPluginsController(
-    ApiContext apiContext,
     IFusionCache fusionCache,
     WebItemManager webItemManager,
-    IHttpContextAccessor httpContextAccessor,
     PermissionContext permissionContext,
     WebPluginManager webPluginManager,
     TenantManager tenantManager,
     CspSettingsHelper cspSettingsHelper,
     IMapper mapper)
-    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <summary>
     /// Adds a web plugin from a file to the current portal.

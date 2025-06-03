@@ -27,15 +27,14 @@
 namespace ASC.Web.Api.Controllers.Settings;
 
 [DefaultRoute("customnavigation")]
-public class CustomNavigationController(MessageService messageService,
-        ApiContext apiContext,
-        PermissionContext permissionContext,
-        SettingsManager settingsManager,
-        WebItemManager webItemManager,
-        StorageHelper storageHelper,
-        IFusionCache fusionCache,
-        IHttpContextAccessor httpContextAccessor)
-    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
+public class CustomNavigationController(
+    MessageService messageService,
+    PermissionContext permissionContext,
+    SettingsManager settingsManager,
+    WebItemManager webItemManager,
+    StorageHelper storageHelper,
+    IFusionCache fusionCache)
+    : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <summary>
     /// Returns a list of the custom navigation items.

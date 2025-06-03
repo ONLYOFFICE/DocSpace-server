@@ -27,15 +27,14 @@
 namespace ASC.Web.Api.Controllers.Settings;
 
 [DefaultRoute("iprestrictions")]
-public class IpRestrictionsController(ApiContext apiContext,
-        PermissionContext permissionContext,
-        SettingsManager settingsManager,
-        WebItemManager webItemManager,
-        IPRestrictionsService iPRestrictionsService,
-        IFusionCache fusionCache,
-        TenantManager tenantManager,
-        IHttpContextAccessor httpContextAccessor)
-    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
+public class IpRestrictionsController(
+    PermissionContext permissionContext,
+    SettingsManager settingsManager,
+    WebItemManager webItemManager,
+    IPRestrictionsService iPRestrictionsService,
+    IFusionCache fusionCache,
+    TenantManager tenantManager)
+    : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <summary>
     /// Returns the IP portal restrictions.
