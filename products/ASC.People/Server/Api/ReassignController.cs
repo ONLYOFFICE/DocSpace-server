@@ -49,7 +49,7 @@ public class ReassignController(
     [Tags("People / User data")]
     [SwaggerResponse(200, "Reassignment progress", typeof(TaskProgressResponseDto))]
     [HttpGet("progress/{userid:guid}")]
-    public async Task<TaskProgressResponseDto> GetReassignProgressAsync(UserIdRequestDto inDto)
+    public async Task<TaskProgressResponseDto> GetReassignProgress(UserIdRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
 
@@ -68,7 +68,7 @@ public class ReassignController(
     [SwaggerResponse(200, "Reassignment progress", typeof(TaskProgressResponseDto))]
     [SwaggerResponse(400, "Can not reassign data to user or from user")]
     [HttpPost("start")]
-    public async Task<TaskProgressResponseDto> StartReassignAsync(StartReassignRequestDto inDto)
+    public async Task<TaskProgressResponseDto> StartReassign(StartReassignRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
 
@@ -110,7 +110,7 @@ public class ReassignController(
     [Tags("People / User data")]
     [SwaggerResponse(200, "Reassignment progress", typeof(TaskProgressResponseDto))]
     [HttpPut("terminate")]
-    public async Task<TaskProgressResponseDto> TerminateReassignAsync(TerminateRequestDto inDto)
+    public async Task<TaskProgressResponseDto> TerminateReassign(TerminateRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
 
@@ -136,7 +136,7 @@ public class ReassignController(
     [Tags("People / User data")]
     [SwaggerResponse(200, "Boolean value: true if neccessary reassign", typeof(bool))]
     [HttpGet("necessary")]
-    public async Task<bool> NecessaryReassignAsync([FromQuery] NecessaryReassignDto inDto)
+    public async Task<bool> NecessaryReassign([FromQuery] NecessaryReassignDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(new UserSecurityProvider(inDto.Type), Constants.Action_AddRemoveUser);
 

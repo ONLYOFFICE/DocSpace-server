@@ -57,7 +57,7 @@ public class OwnerController(
     [SwaggerResponse(200, "Message about changing the portal owner", typeof(OwnerChangeInstructionsDto))]
     [SwaggerResponse(403, "Collaborator can not be an owner")]
     [HttpPost("")]
-    public async Task<OwnerChangeInstructionsDto> SendOwnerChangeInstructionsAsync(OwnerIdSettingsRequestDto inDto)
+    public async Task<OwnerChangeInstructionsDto> SendOwnerChangeInstructions(OwnerIdSettingsRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -99,7 +99,7 @@ public class OwnerController(
     [SwaggerResponse(409, "")]
     [HttpPut("")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalOwnerChange")]
-    public async Task OwnerAsync(OwnerIdSettingsRequestDto inDto)
+    public async Task UpdatePortalOwner(OwnerIdSettingsRequestDto inDto)
     {
         var newOwner = Constants.LostUser;
         try

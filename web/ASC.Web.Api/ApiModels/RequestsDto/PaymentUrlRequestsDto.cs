@@ -72,7 +72,7 @@ public class WalletQuantityRequestDto
 /// <summary>
 /// Chechout setup URL request parameters
 /// </summary>
-public class ChechoutSetupUrlRequestsDto
+public class CheckoutSetupUrlRequestsDto
 {
     /// <summary>
     /// Back URL

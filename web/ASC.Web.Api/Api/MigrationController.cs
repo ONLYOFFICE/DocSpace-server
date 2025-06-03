@@ -52,7 +52,7 @@ public class MigrationController(
     [SwaggerResponse(200, "Ok", typeof(string[]))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("list")]
-    public async Task<string[]> List()
+    public async Task<string[]> ListMigrations()
     {
         await DemandPermissionAsync();
         return migrationCore.GetAvailableMigrations();
@@ -69,7 +69,7 @@ public class MigrationController(
     [SwaggerResponse(200, "Ok")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("init/{migratorName}")]
-    public async Task UploadAndInitAsync(MigratorNameRequestDto inDto)
+    public async Task UploadAndInitializeMigration(MigratorNameRequestDto inDto)
     {
         await DemandPermissionAsync();
 
@@ -87,7 +87,7 @@ public class MigrationController(
     [SwaggerResponse(200, "Ok", typeof(MigrationStatusDto))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("status")]
-    public async Task<MigrationStatusDto> Status()
+    public async Task<MigrationStatusDto> GetMigrationStatus()
     {
         await DemandPermissionAsync();
         try
@@ -123,7 +123,7 @@ public class MigrationController(
     [SwaggerResponse(200, "Ok")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("cancel")]
-    public async Task CancelAsync()
+    public async Task CancelMigration()
     {
         await DemandPermissionAsync();
 
@@ -141,7 +141,7 @@ public class MigrationController(
     [SwaggerResponse(200, "Ok")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("clear")]
-    public async Task ClearAsync()
+    public async Task ClearMigration()
     {
         await DemandPermissionAsync();
 
@@ -159,7 +159,7 @@ public class MigrationController(
     [SwaggerResponse(200, "Ok")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("migrate")]
-    public async Task MigrateAsync(MigrationApiInfo info)
+    public async Task StartMigration(MigrationApiInfo info)
     {
         await DemandPermissionAsync();
 
@@ -177,7 +177,7 @@ public class MigrationController(
     [SwaggerResponse(200, "Ok")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("logs")]
-    public async Task LogsAsync()
+    public async Task GetMigrationLogs()
     {
         await DemandPermissionAsync();
 
@@ -207,7 +207,7 @@ public class MigrationController(
     [SwaggerResponse(200, "Ok")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("finish")]
-    public async Task FinishAsync(FinishDto inDto)
+    public async Task FinishMigration(FinishDto inDto)
     {
         await DemandPermissionAsync();
 

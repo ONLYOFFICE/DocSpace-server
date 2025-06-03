@@ -94,7 +94,7 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     [SwaggerResponse(200, "Encryption key pair: private key, public key, user ID", typeof(EncryptionKeyPairDto))]
     [SwaggerResponse(403, "You don't have enough permission to this operation")]
     [HttpGet("keys")]
-    public async Task<EncryptionKeyPairDto> GetKeysAsync()
+    public async Task<EncryptionKeyPairDto> GetKeys()
     {
         await permissionContext.DemandPermissionsAsync(new UserSecurityProvider(authContext.CurrentAccount.ID), Constants.Action_EditUser);
 
@@ -116,7 +116,7 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     [Tags("Files / Private room")]
     [SwaggerResponse(200, "Boolean value: true - the Private Room settings are enabled, false - the Private Room settings are disabled", typeof(bool))]
     [HttpGet("")]
-    public async Task<bool> PrivacyRoomAsync()
+    public async Task<bool> GetPrivacyRoom()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -133,7 +133,7 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     [SwaggerResponse(200, "Boolean value: true - the key pair is set", typeof(PrivacyRoomKeysResponse))]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [HttpPut("keys")]
-    public async Task<PrivacyRoomKeysResponse> SetKeysAsync(PrivacyRoomRequestDto inDto)
+    public async Task<PrivacyRoomKeysResponse> SetKeys(PrivacyRoomRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(new UserSecurityProvider(authContext.CurrentAccount.ID), Constants.Action_EditUser);
 
@@ -168,7 +168,7 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     [SwaggerResponse(200, "Boolean value: true - the Private Room settings are enabled, false - the Private Room settings are disabled", typeof(bool))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpPut("")]
-    public async Task<bool> SetPrivacyRoomAsync(PrivacyRoomEnableRequestDto inDto)
+    public async Task<bool> SetPrivacyRoom(PrivacyRoomEnableRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 

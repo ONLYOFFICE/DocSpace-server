@@ -58,7 +58,7 @@ public class WhitelabelController(
     [SwaggerResponse(200, "Boolean value: true if the operation is sucessful", typeof(bool))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("whitelabel/logos/save")]
-    public async Task<bool> SaveWhiteLabelSettingsAsync(WhiteLabelRequestsDto inDto, [FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
+    public async Task<bool> SaveWhiteLabelSettings(WhiteLabelRequestsDto inDto, [FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -129,7 +129,7 @@ public class WhitelabelController(
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(409, "No input files")]
     [HttpPost("whitelabel/logos/savefromfiles")]
-    public async Task<bool> SaveWhiteLabelSettingsFromFilesAsync([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
+    public async Task<bool> SaveWhiteLabelSettingsFromFiles([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -215,7 +215,7 @@ public class WhitelabelController(
     [SwaggerResponse(200, "White label logos", typeof(IAsyncEnumerable<WhiteLabelItemDto>))]
     [AllowNotPayment, AllowAnonymous, AllowSuspended]
     [HttpGet("whitelabel/logos")]
-    public async IAsyncEnumerable<WhiteLabelItemDto> GetWhiteLabelLogosAsync([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
+    public async IAsyncEnumerable<WhiteLabelItemDto> GetWhiteLabelLogos([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
     {
         var isDefault = inQueryDto is { IsDefault: not null } && inQueryDto.IsDefault.Value;
 
@@ -323,7 +323,7 @@ public class WhitelabelController(
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("whitelabel/logos/restore")]
-    public async Task<bool> RestoreWhiteLabelLogosAsync([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
+    public async Task<bool> RestoreWhiteLabelLogos([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -381,7 +381,7 @@ public class WhitelabelController(
     [SwaggerResponse(200, "Boolean value: true if the operation is sucessful", typeof(bool))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("whitelabel/logotext/save")]
-    public async Task<bool> SaveWhiteLabelLogoTextAsync(WhiteLabelRequestsDto inDto, [FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
+    public async Task<bool> SaveWhiteLabelLogoText(WhiteLabelRequestsDto inDto, [FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -420,7 +420,7 @@ public class WhitelabelController(
     [SwaggerResponse(200, "Logo text", typeof(string))]
     [AllowNotPayment]
     [HttpGet("whitelabel/logotext")]
-    public async Task<string> GetWhiteLabelLogoTextAsync([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
+    public async Task<string> GetWhiteLabelLogoText([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -468,7 +468,7 @@ public class WhitelabelController(
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("whitelabel/logotext/restore")]
-    public async Task<bool> RestoreWhiteLabelLogoTextAsync([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
+    public async Task<bool> RestoreWhiteLabelLogoText([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -505,7 +505,7 @@ public class WhitelabelController(
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "List of company white label settings", typeof(List<CompanyWhiteLabelSettings>))]
     [HttpGet("companywhitelabel")]
-    public async Task<List<CompanyWhiteLabelSettings>> GetLicensorDataAsync()
+    public async Task<List<CompanyWhiteLabelSettings>> GetLicensorData()
     {
         var result = new List<CompanyWhiteLabelSettings>();
 
@@ -531,7 +531,7 @@ public class WhitelabelController(
     [SwaggerResponse(400, "Argument is empty or invalid")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("rebranding/company")]
-    public async Task<bool> SaveCompanyWhiteLabelSettingsAsync(CompanyWhiteLabelSettingsWrapper wrapper)
+    public async Task<bool> SaveCompanyWhiteLabelSettings(CompanyWhiteLabelSettingsWrapper wrapper)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -567,7 +567,7 @@ public class WhitelabelController(
     [SwaggerResponse(200, "Company white label settings", typeof(CompanyWhiteLabelSettingsDto))]
     [AllowNotPayment]
     [HttpGet("rebranding/company")]
-    public async Task<CompanyWhiteLabelSettingsDto> GetCompanyWhiteLabelSettingsAsync()
+    public async Task<CompanyWhiteLabelSettingsDto> GetCompanyWhiteLabelSettings()
     {
         var settings = await settingsManager.LoadForDefaultTenantAsync<CompanyWhiteLabelSettings>(HttpContext.GetIfModifiedSince());
         
@@ -583,7 +583,7 @@ public class WhitelabelController(
     [SwaggerResponse(200, "Default company white label settings", typeof(CompanyWhiteLabelSettings))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpDelete("rebranding/company")]
-    public async Task<CompanyWhiteLabelSettings> DeleteCompanyWhiteLabelSettingsAsync()
+    public async Task<CompanyWhiteLabelSettings> DeleteCompanyWhiteLabelSettings()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -610,7 +610,7 @@ public class WhitelabelController(
     [SwaggerResponse(400, "Settings is empty")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("rebranding/additional")]
-    public async Task<bool> SaveAdditionalWhiteLabelSettingsAsync(AdditionalWhiteLabelSettingsWrapper wrapper)
+    public async Task<bool> SaveAdditionalWhiteLabelSettings(AdditionalWhiteLabelSettingsWrapper wrapper)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -632,7 +632,7 @@ public class WhitelabelController(
     [SwaggerResponse(200, "Additional white label settings", typeof(AdditionalWhiteLabelSettingsDto))]
     [AllowNotPayment]
     [HttpGet("rebranding/additional")]
-    public async Task<AdditionalWhiteLabelSettingsDto> GetAdditionalWhiteLabelSettingsAsync()
+    public async Task<AdditionalWhiteLabelSettingsDto> GetAdditionalWhiteLabelSettings()
     {
         var settings = await settingsManager.LoadForDefaultTenantAsync<AdditionalWhiteLabelSettings>();
 
@@ -648,7 +648,7 @@ public class WhitelabelController(
     [SwaggerResponse(200, "Default additional white label settings", typeof(AdditionalWhiteLabelSettings))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpDelete("rebranding/additional")]
-    public async Task<AdditionalWhiteLabelSettings> DeleteAdditionalWhiteLabelSettingsAsync()
+    public async Task<AdditionalWhiteLabelSettings> DeleteAdditionalWhiteLabelSettings()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -676,7 +676,7 @@ public class WhitelabelController(
     [SwaggerResponse(403, "No permissions to perform this action")]
     [Tags("Settings / Rebranding")]
     [HttpPost("rebranding/mail")]
-    public async Task<bool> SaveMailWhiteLabelSettingsAsync(MailWhiteLabelSettingsWrapper wrapper)
+    public async Task<bool> SaveMailWhiteLabelSettings(MailWhiteLabelSettingsWrapper wrapper)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -698,7 +698,7 @@ public class WhitelabelController(
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "Mail white label settings", typeof(MailWhiteLabelSettingsDto))]
     [HttpGet("rebranding/mail")]
-    public async Task<MailWhiteLabelSettingsDto> GetMailWhiteLabelSettingsAsync()
+    public async Task<MailWhiteLabelSettingsDto> GetMailWhiteLabelSettings()
     {
         var settings = await settingsManager.LoadForDefaultTenantAsync<MailWhiteLabelSettings>();
 
@@ -715,7 +715,7 @@ public class WhitelabelController(
     [SwaggerResponse(200, "Default mail white label settings", typeof(MailWhiteLabelSettings))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpDelete("rebranding/mail")]
-    public async Task<MailWhiteLabelSettings> DeleteMailWhiteLabelSettingsAsync()
+    public async Task<MailWhiteLabelSettings> DeleteMailWhiteLabelSettings()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -738,7 +738,7 @@ public class WhitelabelController(
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "Boolean value: true if the white label is enabled", typeof(bool))]
     [HttpGet("enablewhitelabel")]
-    public async Task<bool> GetEnableWhitelabelAsync()
+    public async Task<bool> GetEnableWhitelabel()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
