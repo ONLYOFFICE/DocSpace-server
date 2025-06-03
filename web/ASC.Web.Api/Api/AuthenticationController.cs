@@ -183,7 +183,7 @@ public class AuthenticationController(
     [SwaggerResponse(429, "Too many login attempts. Please try again later")]
     [AllowNotPayment, AllowAnonymous]
     [HttpPost]
-    public async Task<AuthenticationTokenDto> AuthenticateMeAsync(AuthRequestsDto inDto)
+    public async Task<AuthenticationTokenDto> AuthenticateMe(AuthRequestsDto inDto)
     {
         var wrapper = await GetUserAsync(inDto);
         var viaEmail = wrapper.ViaEmail;
@@ -296,7 +296,7 @@ public class AuthenticationController(
     [SwaggerResponse(200, "Ok", typeof(string))]
     [AllowNotPayment, AllowAnonymous]
     [HttpPost("logout")]
-    public async Task<string> LogoutAsync()
+    public async Task<string> Logout()
     {
         var cookie = cookiesManager.GetCookies(CookiesType.AuthKey);
         var loginEventId = cookieStorage.GetLoginEventIdFromCookie(cookie);
@@ -375,7 +375,7 @@ public class AuthenticationController(
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PhoneActivation")]
     [HttpPost("setphone")]
-    public async Task<AuthenticationTokenDto> SaveMobilePhoneAsync(MobileRequestsDto inDto)
+    public async Task<AuthenticationTokenDto> SaveMobilePhone(MobileRequestsDto inDto)
     {
         await apiContext.AuthByClaimAsync();
         var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
@@ -404,7 +404,7 @@ public class AuthenticationController(
     [SwaggerResponse(429, "Too many login attempts. Please try again later")]
     [AllowNotPayment, AllowAnonymous]
     [HttpPost("sendsms")]
-    public async Task<AuthenticationTokenDto> SendSmsCodeAsync(AuthRequestsDto inDto)
+    public async Task<AuthenticationTokenDto> SendSmsCode(AuthRequestsDto inDto)
     {
         var user = (await GetUserAsync(inDto)).UserInfo;
         await smsManager.PutAuthCodeAsync(user, true);

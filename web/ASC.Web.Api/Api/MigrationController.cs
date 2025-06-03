@@ -69,7 +69,7 @@ public class MigrationController(
     [SwaggerResponse(200, "Ok")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("init/{migratorName}")]
-    public async Task UploadAndInitializeMigrationAsync(MigratorNameRequestDto inDto)
+    public async Task UploadAndInitializeMigration(MigratorNameRequestDto inDto)
     {
         await DemandPermissionAsync();
 
@@ -123,7 +123,7 @@ public class MigrationController(
     [SwaggerResponse(200, "Ok")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("cancel")]
-    public async Task CancelMigrationAsync()
+    public async Task CancelMigration()
     {
         await DemandPermissionAsync();
 
@@ -141,7 +141,7 @@ public class MigrationController(
     [SwaggerResponse(200, "Ok")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("clear")]
-    public async Task ClearMigrationAsync()
+    public async Task ClearMigration()
     {
         await DemandPermissionAsync();
 
@@ -159,7 +159,7 @@ public class MigrationController(
     [SwaggerResponse(200, "Ok")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("migrate")]
-    public async Task StartMigrationAsync(MigrationApiInfo info)
+    public async Task StartMigration(MigrationApiInfo info)
     {
         await DemandPermissionAsync();
 
@@ -177,7 +177,7 @@ public class MigrationController(
     [SwaggerResponse(200, "Ok")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("logs")]
-    public async Task GetMigrationLogsAsync()
+    public async Task GetMigrationLogs()
     {
         await DemandPermissionAsync();
 
@@ -207,7 +207,7 @@ public class MigrationController(
     [SwaggerResponse(200, "Ok")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("finish")]
-    public async Task FinishMigrationAsync(FinishDto inDto)
+    public async Task FinishMigration(FinishDto inDto)
     {
         await DemandPermissionAsync();
 

@@ -46,7 +46,7 @@ public class IpRestrictionsController(ApiContext apiContext,
     [Tags("Settings / IP restrictions")]
     [SwaggerResponse(200, "List of IP restrictions parameters", typeof(IEnumerable<IPRestriction>))]
     [HttpGet("")]
-    public async Task<IEnumerable<IPRestriction>> GetIpRestrictionsAsync()
+    public async Task<IEnumerable<IPRestriction>> GetIpRestrictions()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         
@@ -65,7 +65,7 @@ public class IpRestrictionsController(ApiContext apiContext,
     [Tags("Settings / IP restrictions")]
     [SwaggerResponse(200, "Updated IP restriction settings", typeof(IpRestrictionsDto))]
     [HttpPut("")]
-    public async Task<IpRestrictionsDto> SaveIpRestrictionsAsync(IpRestrictionsDto inDto)
+    public async Task<IpRestrictionsDto> SaveIpRestrictions(IpRestrictionsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -109,7 +109,7 @@ public class IpRestrictionsController(ApiContext apiContext,
     [Tags("Settings / IP restrictions")]
     [SwaggerResponse(200, "IP restriction settings", typeof(IPRestrictionsSettings))]
     [HttpGet("settings")]
-    public async Task<IPRestrictionsSettings> ReadIpRestrictionsSettingsAsync()
+    public async Task<IPRestrictionsSettings> ReadIpRestrictionsSettings()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         
@@ -126,7 +126,7 @@ public class IpRestrictionsController(ApiContext apiContext,
     [Tags("Settings / IP restrictions")]
     [SwaggerResponse(200, "Updated IP restriction settings", typeof(IpRestrictionsDto))]
     [HttpPut("settings")]
-    public async Task<IpRestrictionsDto> UpdateIpRestrictionsSettingsAsync(IpRestrictionsDto inDto)
+    public async Task<IpRestrictionsDto> UpdateIpRestrictionsSettings(IpRestrictionsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 

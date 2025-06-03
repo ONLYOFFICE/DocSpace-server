@@ -133,7 +133,7 @@ public class OperationController(
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "List of file operations", typeof(IAsyncEnumerable<FileOperationDto>))]
     [HttpPut("emptytrash")]
-    public async IAsyncEnumerable<FileOperationDto> EmptyTrashAsync()
+    public async IAsyncEnumerable<FileOperationDto> EmptyTrash()
     {
         var (foldersId, filesId) = await fileStorageService.GetTrashContentAsync();
         
@@ -266,7 +266,7 @@ public class OperationController(
     [SwaggerResponse(200, "Result", typeof(CheckDestFolderDto))]
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [HttpGet("checkdestfolder")]
-    public async Task<CheckDestFolderDto> MoveOrCopyDestFolderCheckAsync([ModelBinder(BinderType = typeof(BatchModelBinder))] BatchRequestDto inDto)
+    public async Task<CheckDestFolderDto> CheckMoveOrCopyDestFolder([ModelBinder(BinderType = typeof(BatchModelBinder))] BatchRequestDto inDto)
     {
         List<object> checkedFiles;
 
@@ -312,7 +312,7 @@ public class OperationController(
     [SwaggerResponse(200, "List of file entry information", typeof(IAsyncEnumerable<FileEntryDto>))]
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [HttpGet("move")]
-    public async IAsyncEnumerable<FileEntryDto> MoveOrCopyBatchCheckAsync([ModelBinder(BinderType = typeof(BatchModelBinder))] BatchRequestDto inDto)
+    public async IAsyncEnumerable<FileEntryDto> CheckMoveOrCopyBatchItems([ModelBinder(BinderType = typeof(BatchModelBinder))] BatchRequestDto inDto)
     {
         List<object> checkedFiles;
         List<object> checkedFolders;

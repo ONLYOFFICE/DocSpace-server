@@ -68,7 +68,7 @@ public class SecurityController(PermissionContext permissionContext,
     [SwaggerResponse(200, "List of login events", typeof(IEnumerable<LoginEventDto>))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("audit/login/last")]
-    public async Task<IEnumerable<LoginEventDto>> GetLastLoginEventsAsync()
+    public async Task<IEnumerable<LoginEventDto>> GetLastLoginEvents()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -89,7 +89,7 @@ public class SecurityController(PermissionContext permissionContext,
     [SwaggerResponse(200, "List of audit trail data", typeof(IEnumerable<AuditEventDto>))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("audit/events/last")]
-    public async Task<IEnumerable<AuditEventDto>> GetLastAuditEventsAsync()
+    public async Task<IEnumerable<AuditEventDto>> GetLastAuditEvents()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -116,7 +116,7 @@ public class SecurityController(PermissionContext permissionContext,
     [SwaggerResponse(200, "List of filtered login events", typeof(IEnumerable<LoginEventDto>))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("audit/login/filter")]
-    public async Task<IEnumerable<LoginEventDto>> GetLoginEventsByFilterAsync(LoginEventRequestDto inDto)
+    public async Task<IEnumerable<LoginEventDto>> GetLoginEventsByFilter(LoginEventRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -128,7 +128,7 @@ public class SecurityController(PermissionContext permissionContext,
 
         if (!(await tenantManager.GetCurrentTenantQuotaAsync()).Audit || !SetupInfo.IsVisibleSettings(ManagementType.LoginHistory.ToStringFast()))
         {
-            return await GetLastLoginEventsAsync();
+            return await GetLastLoginEvents();
         }
 
         await DemandAuditPermissionAsync();
@@ -148,7 +148,7 @@ public class SecurityController(PermissionContext permissionContext,
     [SwaggerResponse(200, "List of filtered audit trail data", typeof(IEnumerable<AuditEventDto>))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("audit/events/filter")]
-    public async Task<IEnumerable<AuditEventDto>> GetAuditEventsByFilterAsync(AuditEventRequestDto inDto)
+    public async Task<IEnumerable<AuditEventDto>> GetAuditEventsByFilter(AuditEventRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -160,7 +160,7 @@ public class SecurityController(PermissionContext permissionContext,
 
         if (!(await tenantManager.GetCurrentTenantQuotaAsync()).Audit || !SetupInfo.IsVisibleSettings(ManagementType.LoginHistory.ToStringFast()))
         {
-            return await GetLastAuditEventsAsync();
+            return await GetLastAuditEvents();
         }
 
         await DemandAuditPermissionAsync();
@@ -305,7 +305,7 @@ public class SecurityController(PermissionContext permissionContext,
     [SwaggerResponse(200, "Audit settings", typeof(TenantAuditSettings))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("audit/settings/lifetime")]
-    public async Task<TenantAuditSettings> GetAuditSettingsAsync()
+    public async Task<TenantAuditSettings> GetAuditSettings()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 

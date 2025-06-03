@@ -45,7 +45,7 @@ public class NotificationController(
     [Tags("Settings / Notifications")]
     [SwaggerResponse(200, "Notification settings", typeof(NotificationSettingsDto))]
     [HttpGet("{type}")]
-    public async Task<NotificationSettingsDto> GetNotificationSettingsAsync(NotificationTypeRequestsDto inDto)
+    public async Task<NotificationSettingsDto> GetNotificationSettings(NotificationTypeRequestsDto inDto)
     {
         var isEnabled = await notificationControllerHelper.GetNotificationStatusAsync(inDto.Type);
 
@@ -60,7 +60,7 @@ public class NotificationController(
     [Tags("Settings / Notifications")]
     [SwaggerResponse(200, "Notification settings", typeof(NotificationSettingsDto))]
     [HttpPost("")]
-    public async Task<NotificationSettingsDto> SetNotificationSettingsAsync(NotificationSettingsRequestsDto inDto)
+    public async Task<NotificationSettingsDto> SetNotificationSettings(NotificationSettingsRequestsDto inDto)
     {
         await notificationControllerHelper.SetNotificationStatusAsync(inDto.Type, inDto.IsEnabled);
 

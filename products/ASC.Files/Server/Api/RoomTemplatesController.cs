@@ -44,7 +44,7 @@ public class RoomTemplatesController(IEventBus eventBus,
     [Tags("Rooms")]
     [SwaggerResponse(200, "Status", typeof(RoomTemplateStatusDto))]
     [HttpPost("")]
-    public async Task<RoomTemplateStatusDto> CreateTemplateAsync(RoomTemplateDto dto)
+    public async Task<RoomTemplateStatusDto> CreateRoomTemplate(RoomTemplateDto dto)
     {
         LogoSettings logo = null;
         if (dto.Logo != null)
@@ -91,7 +91,7 @@ public class RoomTemplatesController(IEventBus eventBus,
             Color = dto.Color,
             Quota = dto.Quota
         });
-        return await GetTemplateCreatingStatus();
+        return await GetRoomTemplateCreatingStatus();
     }
 
     /// <summary>
@@ -102,7 +102,7 @@ public class RoomTemplatesController(IEventBus eventBus,
     [Tags("Rooms")]
     [SwaggerResponse(200, "Status", typeof(RoomTemplateStatusDto))]
     [HttpGet("status")]
-    public async Task<RoomTemplateStatusDto> GetTemplateCreatingStatus()
+    public async Task<RoomTemplateStatusDto> GetRoomTemplateCreatingStatus()
     {
         try
         {
@@ -134,7 +134,7 @@ public class RoomTemplatesController(IEventBus eventBus,
     /// <path>api/2.0/files/roomtemplate/{id}/public</path>
     [Tags("Rooms")]
     [HttpGet("{id}/public")]
-    public async Task<bool> IsPublic(PublicDto inDto)
+    public async Task<bool> GetPublicSettings(PublicDto inDto)
     {
         return await fileStorageService.IsPublicAsync(inDto.Id);
     }
@@ -147,7 +147,7 @@ public class RoomTemplatesController(IEventBus eventBus,
     /// <path>api/2.0/files/roomtemplate/public</path>
     [Tags("Rooms")]
     [HttpPut("public")]
-    public async Task SetPublic(SetPublicDto inDto)
+    public async Task SetPublicSettings(SetPublicDto inDto)
     {
         var shared = fileStorageService.GetPureSharesAsync(inDto.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "", 0, -1);
 

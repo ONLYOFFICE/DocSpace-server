@@ -81,7 +81,7 @@ public class BackupController(
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [SwaggerResponse(404, "The required folder was not found")]
     [HttpPost("createbackupschedule")]
-    public async Task<bool> CreateBackupScheduleAsync(BackupScheduleDto inDto)
+    public async Task<bool> CreateBackupSchedule(BackupScheduleDto inDto)
     {
         if (inDto.Dump) 
         {
@@ -151,7 +151,7 @@ public class BackupController(
     [SwaggerResponse(404, "The required folder was not found")]
     [AllowNotPayment]
     [HttpPost("startbackup")]
-    public async Task<BackupProgress> StartBackupAsync(BackupDto inDto)
+    public async Task<BackupProgress> StartBackup(BackupDto inDto)
     {
         if (inDto.Dump)
         {
@@ -225,7 +225,7 @@ public class BackupController(
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [AllowNotPayment]
     [HttpGet("getbackupprogress")]
-    public async Task<BackupProgress> GetBackupProgressAsync(DumpDto dto)
+    public async Task<BackupProgress> GetBackupProgress(DumpDto dto)
     {
         if (dto.Dump)
         {
@@ -299,7 +299,7 @@ public class BackupController(
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [SwaggerResponse(404, "The required file or folder was not found")]
     [HttpPost("startrestore")]
-    public async Task<BackupProgress> StartBackupRestoreAsync(BackupRestoreDto inDto)
+    public async Task<BackupProgress> StartBackupRestore(BackupRestoreDto inDto)
     {
         if (inDto.Dump)
         {
@@ -361,7 +361,7 @@ public class BackupController(
     [HttpGet("getrestoreprogress")]  //NOTE: this method doesn't check payment!!!
     [AllowAnonymous]
     [AllowNotPayment]
-    public async Task<BackupProgress> GetRestoreProgressAsync(RestoreDto dto)
+    public async Task<BackupProgress> GetRestoreProgress(RestoreDto dto)
     {
         return await backupAjaxHandler.GetRestoreProgressAsync(dto.Dump);
     }
