@@ -58,7 +58,7 @@ public static class AuthorizationExtension
             return scopes;
         }
 
-        return null;
+        return AuthConstants.Claim_ScopeRootWrite.Value;
     }
 
     public static IServiceCollection AddJwtBearerAuthentication(this IServiceCollection services)
