@@ -95,7 +95,8 @@ public class GetFolderRequestDto<T>
     /// The maximum number of items to retrieve in the request.
     /// </summary>
     [FromQuery(Name = "count")]
-    public int Count { get; set; } = 50;
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
 
     /// <summary>
     /// The zero-based index of the first item to retrieve in a paginated request.
@@ -143,7 +144,8 @@ public class GetCommonFolderRequestDto
     /// The maximum number of items to retrieve in the request.
     /// </summary>
     [FromQuery(Name = "count")]
-    public int Count { get; set; } = 50;
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
 
     /// <summary>
     /// The zero-based index of the first item to retrieve in a paginated list.
@@ -194,7 +196,8 @@ public class GetMyTrashFolderRequestDto
     /// The maximum number of items to retrieve in the response.
     /// </summary>
     [FromQuery(Name = "count")]
-    public int Count { get; set; } = 50;
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
 
     /// <summary>
     /// The starting position of the items to be retrieved.
@@ -248,7 +251,8 @@ public class GetRootFolderRequestDto
     /// The maximum number of items to retrieve in the response.
     /// </summary>
     [FromQuery(Name = "count")]
-    public int Count { get; set; } = 50;
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
 
     /// <summary>
     /// The starting position of the items to be retrieved.
@@ -317,7 +321,8 @@ public class GetRecentFolderRequestDto
     /// The maximum number of items to return.
     /// </summary>
     [FromQuery(Name = "count")]
-    public int Count { get; set; } = 50;
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
 
     /// <summary>
     /// The starting position of the results to be returned in the query response.

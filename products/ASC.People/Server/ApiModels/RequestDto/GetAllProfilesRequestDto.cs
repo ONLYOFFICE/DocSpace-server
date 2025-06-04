@@ -39,7 +39,8 @@ public class GetAllProfilesRequestDto
     /// The maximum number of items to be retrieved in the response.
     /// </summary>
     [FromQuery(Name = "count")]
-    public int Count { get; set; } = 50;
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
 
     /// <summary>
     /// The zero-based index of the first item to be retrieved in a filtered result set.

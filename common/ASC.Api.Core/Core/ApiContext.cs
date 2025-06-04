@@ -31,29 +31,10 @@ public class ApiContext : ICloneable
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
     public string[] Fields { get; set; }
-    public long? TotalCount
-    {
-        set
-        {
-            _httpContextAccessor.HttpContext?.Items.TryAdd(nameof(TotalCount),  value);
-        }
-    }
     
-    /// <summary>
-    /// Gets count to get item from collection. Request parameter "count"
-    /// </summary>
-    /// <remarks>
-    /// Don't forget to call _context.SetDataPaginated() to prevent SmartList from filtering response if you fetch data from DB with TOP &amp; COUNT
-    /// </remarks>
-    public long Count { get; init; }
-    
-    
-    private static readonly int _maxCount = 1000;
+    public const int MaxCount = 1000;
+    public const int DefaultCount = 1000;
 
-    public ApiContext()
-    {
-        
-    }
     
     public ApiContext(IHttpContextAccessor httpContextAccessor)
     {
@@ -63,7 +44,6 @@ public class ApiContext : ICloneable
             return;
         }
 
-        Count = _maxCount;
 
         IQueryCollection query;
 
@@ -81,28 +61,21 @@ public class ApiContext : ICloneable
         {
             return;
         }
-
-        //Try parse values
-        var count = query.GetRequestValue("count");
-        if (!string.IsNullOrEmpty(count) && ulong.TryParse(count, out var countParsed))
-        {
-            //Count specified and valid
-            Count = Math.Min((long)countParsed, _maxCount);
-        }
+        
         
         Fields = query.GetRequestArray("fields");
     }
 
     public ApiContext SetTotalCount(long totalCollectionCount)
     {
-        TotalCount = totalCollectionCount;
+        _httpContextAccessor.HttpContext?.Items.TryAdd("TotalCount",  totalCollectionCount);
 
         return this;
     }
 
     public ApiContext SetCount(int count)
     {
-        _httpContextAccessor.HttpContext?.Items.TryAdd(nameof(Count), count);
+        _httpContextAccessor.HttpContext?.Items.TryAdd("Count", count);
 
         return this;
     }

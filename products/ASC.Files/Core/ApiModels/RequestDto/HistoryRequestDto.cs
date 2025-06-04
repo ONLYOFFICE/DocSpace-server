@@ -53,7 +53,8 @@ public class HistoryRequestDto
     /// The number of history entries to retrieve for the file log.
     /// </summary>
     [FromQuery(Name = "count")]
-    public int Count { get; set; } = 50;
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
 
     /// <summary>
     /// The starting index for retrieving a subset of file history entries.
@@ -89,7 +90,8 @@ public class HistoryFolderRequestDto
     /// The number of records to retrieve for the folder history.
     /// </summary>
     [FromQuery(Name = "count")]
-    public int Count { get; set; } = 50;
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
 
     /// <summary>
     /// The starting index from which the history records are retrieved in the request.

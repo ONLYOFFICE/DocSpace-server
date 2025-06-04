@@ -42,9 +42,13 @@ public class RoomSecurityInfoRequestDto<T>
     /// </summary>
     [FromQuery(Name = "filterType")]
     public ShareFilterType FilterType { get; set; } = ShareFilterType.UserOrGroup;
-    
+
+    /// <summary>
+    /// The number of items to be retrieved or processed.
+    /// </summary>
     [FromQuery(Name = "count")]
-    public int Count { get; set; } = 50;
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
 
     /// <summary>
     /// The starting index of the items to retrieve in a paginated request.

@@ -795,7 +795,6 @@ public abstract class VirtualRoomsController<T>(
 public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         FolderContentDtoHelper folderContentDtoHelper,
         GlobalFolderHelper globalFolderHelper,
-        ApiContext apiContext,
         CustomTagsService customTagsService,
         RoomLogoManager roomLogoManager,
         FolderDtoHelper folderDtoHelper,

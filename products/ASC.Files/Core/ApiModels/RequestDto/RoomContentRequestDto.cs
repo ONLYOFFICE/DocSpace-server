@@ -95,7 +95,8 @@ public class RoomContentRequestDto
     /// Specifies the maximum number of items to retrieve.
     /// </summary>
     [FromQuery(Name = "count")]
-    public int Count { get; set; } = 50;
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
 
     /// <summary>
     /// The index from which to start retrieving the room content.

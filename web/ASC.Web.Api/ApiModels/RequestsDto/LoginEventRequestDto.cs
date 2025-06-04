@@ -59,7 +59,8 @@ public class LoginEventRequestDto
     /// The number of login events to retrieve in the query.
     /// </summary>
     [FromQuery(Name = "count")]
-    public int Count { get; set; } = 50;
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
     
     /// <summary>
     /// The starting index for fetching a subset of login events from the query results.

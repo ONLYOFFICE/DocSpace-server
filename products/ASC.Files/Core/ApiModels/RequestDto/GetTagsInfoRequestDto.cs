@@ -30,9 +30,9 @@ public class GetTagsInfoRequestDto
 {
     /// Gets or sets the number of tag results to retrieve.
     /// This property specifies the maximum amount of tag data to be included in the result set.
-    /// By default, it is set to 50. It is used for limiting the pagination size when querying tag information.
     [FromQuery(Name = "count")]
-    public int Count { get; set; } = 50;
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
 
     /// Represents the starting index from which the tags' information will be retrieved.
     /// This property is used to define the offset for pagination when retrieving a list of tags. It determines

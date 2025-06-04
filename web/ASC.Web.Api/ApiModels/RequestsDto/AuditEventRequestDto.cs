@@ -89,7 +89,8 @@ public class AuditEventRequestDto
     /// The maximum number of audit event records to retrieve.
     /// </summary>
     [FromQuery(Name = "count")]
-    public int Count { get; set; } = 50;
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
 
     /// <summary>
     /// The index of the first audit event record to retrieve in a paged query.

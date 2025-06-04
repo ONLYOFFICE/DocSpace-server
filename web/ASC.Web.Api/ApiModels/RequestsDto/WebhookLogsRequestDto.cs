@@ -83,7 +83,8 @@ public class WebhookLogsRequestDto
     /// The maximum number of webhook log records to return in the query response.
     /// </summary>
     [FromQuery(Name = "count")]
-    public int Count { get; set; } = 50;
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
 
     /// <summary>
     /// Specifies the starting index for retrieving webhook logs.

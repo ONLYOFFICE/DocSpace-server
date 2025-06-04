@@ -53,7 +53,8 @@ public class FilePrimaryIdRequestDto<T>
     /// The number of items to retrieve in the request.
     /// </summary>
     [FromQuery(Name = "count")]
-    public int Count { get; set; } = 50;
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
 
     /// <summary>
     /// The starting index for the query results.
