@@ -890,8 +890,10 @@ public class UserController(
             Count = inDto.Count,
             StartIndex = inDto.StartIndex,
             SortBy = inDto.SortBy,
+            SortOrder = inDto.SortOrder,
             FilterSeparator = inDto.FilterSeparator
         };
+        
         return GetByStatus(status);
     }
 
@@ -1024,8 +1026,10 @@ public class UserController(
             Count = inDto.Count,
             StartIndex = inDto.StartIndex,
             SortBy = inDto.SortBy,
+            SortOrder = inDto.SortOrder,
             FilterSeparator = inDto.FilterSeparator
         };
+        
         return GetFullByFilter(filter);
     }
 
@@ -1062,6 +1066,7 @@ public class UserController(
             Count = inDto.Count,
             StartIndex = inDto.StartIndex,
             SortBy = inDto.SortBy,
+            SortOrder = inDto.SortOrder,
             FilterSeparator = inDto.FilterSeparator
         };
         
@@ -1169,6 +1174,7 @@ public class UserController(
             Count = inDto.Count,
             StartIndex = inDto.StartIndex,
             SortBy = inDto.SortBy,
+            SortOrder = inDto.SortOrder,
             FilterSeparator = inDto.FilterSeparator
         };
         
@@ -2422,7 +2428,7 @@ public class UserController(
             filter.FilterSeparator,
             filter.WithoutGroup ?? false,
             filter.SortBy,
-            !_apiContext.SortDescending,
+            filter.SortOrder == SortOrder.Ascending,
             isDocSpaceAdmin,
             filter.Count,
             filter.StartIndex);

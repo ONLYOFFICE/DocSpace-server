@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,46 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.People.ApiModels.RequestDto;
+namespace ASC.Api.Core.Core;
 
-/// <summary>
-/// The general information request parameters.
-/// </summary>
-public class GeneralInformationRequestDto
+public enum SortOrder
 {
-    /// <summary>
-    /// The user ID.
-    /// </summary>
-    [FromQuery(Name = "userId")]
-    public Guid? UserId { get; set; }
-
-    /// <summary>
-    /// Specifies if the user is a manager or not.
-    /// </summary>
-    [FromQuery(Name = "manager")]
-    public bool? Manager { get; set; }
-    
-    /// <summary>
-    /// The number of records to retrieve.
-    /// </summary>
-    [FromQuery(Name = "count")]
-    public int Count { get; set; } = 50;
-
-    /// <summary>
-    /// The starting index for paginated results.
-    /// </summary>
-    [FromQuery(Name = "startIndex")]
-    public int StartIndex { get; set; }
-
-    /// <summary>
-    /// Specifies the property used to sort the query results.
-    /// </summary>
-    [FromQuery(Name = "sortBy")]
-    public string SortBy { get; set; }
-
-    /// <summary>
-    /// The order in which the results are sorted.
-    /// </summary>
-    [FromQuery(Name = "sortOrder")]
-    public SortOrder SortOrder { get; set; }
+    Ascending,
+    Descending
 }

@@ -60,6 +60,12 @@ public class GetAllProfilesRequestDto
     public string SortBy { get; set; }
 
     /// <summary>
+    /// The order in which the results are sorted.
+    /// </summary>
+    [FromQuery(Name = "sortOrder")]
+    public SortOrder SortOrder { get; set; }
+    
+    /// <summary>
     /// The character or string used to separate multiple filter values in a filtering query.
     /// </summary>
     /// <remarks>

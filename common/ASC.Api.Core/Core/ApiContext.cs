@@ -53,14 +53,7 @@ public class ApiContext : ICloneable
     /// Gets value to filter from request parameter "filterValue"
     /// </summary>
     public string FilterValue { get; set; }
-
-    /// <summary>
-    /// Sort direction. From request parameter "sortOrder" can be "descending" or "ascending"
-    /// Like ...&amp;sortOrder=descending&amp;...
-    /// </summary>
-    public bool SortDescending { get; set; }
     
-
     private static readonly int _maxCount = 1000;
 
     public ApiContext()
@@ -103,13 +96,6 @@ public class ApiContext : ICloneable
             Count = Math.Min((long)countParsed, _maxCount);
         }
         
-
-        var sortOrder = query.GetRequestValue("sortOrder");
-        if ("descending".Equals(sortOrder))
-        {
-            SortDescending = true;
-        }
-
         FilterValue = query.GetRequestValue("filterValue");
         Fields = query.GetRequestArray("fields");
     }

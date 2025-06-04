@@ -102,10 +102,16 @@ public class RoomContentRequestDto
     /// </summary>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
-
+    
     /// <summary>
     /// Specifies the field by which the room content should be sorted.
     /// </summary>
     [FromQuery(Name = "sortBy")]
     public string SortBy { get; set; }
+    
+    /// <summary>
+    /// The order in which the results are sorted.
+    /// </summary>
+    [FromQuery(Name = "sortOrder")]
+    public ASC.Api.Core.Core.SortOrder SortOrder { get; set; }
 }

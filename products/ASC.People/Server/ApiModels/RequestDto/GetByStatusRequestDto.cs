@@ -62,6 +62,12 @@ public class GetByStatusRequestDto
     public string SortBy { get; set; }
 
     /// <summary>
+    /// The order in which the results are sorted.
+    /// </summary>
+    [FromQuery(Name = "sortOrder")]
+    public SortOrder SortOrder { get; set; }
+    
+    /// <summary>
     /// Represents the separator used to split multiple filter criteria in a query string.
     /// </summary>
     [FromQuery(Name = "filterSeparator")]

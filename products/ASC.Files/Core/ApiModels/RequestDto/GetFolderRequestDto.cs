@@ -108,6 +108,12 @@ public class GetFolderRequestDto<T>
     /// </summary>
     [FromQuery(Name = "sortBy")]
     public string SortBy { get; set; }
+    
+    /// <summary>
+    /// The order in which the results are sorted.
+    /// </summary>
+    [FromQuery(Name = "sortOrder")]
+    public SortOrder SortOrder { get; set; }
 }
 
 /// <summary>
@@ -144,6 +150,12 @@ public class GetCommonFolderRequestDto
     /// </summary>
     [FromQuery(Name = "sortBy")]
     public string SortBy { get; set; }
+    
+    /// <summary>
+    /// The order in which the results are sorted.
+    /// </summary>
+    [FromQuery(Name = "sortOrder")]
+    public SortOrder SortOrder { get; set; }
 }
 
 /// <summary>
@@ -186,6 +198,12 @@ public class GetMyTrashFolderRequestDto
     /// </summary>
     [FromQuery(Name = "sortBy")]
     public string SortBy { get; set; }
+    
+    /// <summary>
+    /// The order in which the results are sorted.
+    /// </summary>
+    [FromQuery(Name = "sortOrder")]
+    public SortOrder SortOrder { get; set; }
 }
 
 /// <summary>
@@ -225,6 +243,12 @@ public class GetRootFolderRequestDto
     
     [FromQuery(Name = "sortBy")]
     public string SortBy { get; set; }
+    
+    /// <summary>
+    /// The order in which the results are sorted.
+    /// </summary>
+    [FromQuery(Name = "sortOrder")]
+    public SortOrder SortOrder { get; set; }
 }
 
 /// <summary>
@@ -285,4 +309,10 @@ public class GetRecentFolderRequestDto
     /// </summary>
     [FromQuery(Name = "sortBy")]
     public string SortBy { get; set; }
+    
+    /// <summary>
+    /// The order in which the results are sorted.
+    /// </summary>
+    [FromQuery(Name = "sortOrder")]
+    public SortOrder SortOrder { get; set; }
 }

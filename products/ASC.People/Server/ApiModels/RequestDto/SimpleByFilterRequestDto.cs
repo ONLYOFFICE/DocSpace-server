@@ -133,6 +133,15 @@ public class SimpleByFilterRequestDto
     [FromQuery(Name = "sortBy")]
     public string SortBy { get; set; }
     
+    /// <summary>
+    /// The order in which the results are sorted.
+    /// </summary>
+    [FromQuery(Name = "sortOrder")]
+    public SortOrder SortOrder { get; set; }
+
+    /// <summary>
+    /// Represents the separator used to split filter criteria in query parameters.
+    /// </summary>
     [FromQuery(Name = "filterSeparator")]
     public string FilterSeparator { get; set; }
 }

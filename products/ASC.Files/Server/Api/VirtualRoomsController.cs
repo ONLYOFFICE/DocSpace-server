@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
@@ -836,7 +837,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         OrderBy orderBy = null;
         if (SortedByTypeExtensions.TryParse(inDto.SortBy, true, out var sortBy))
         {
-            orderBy = new OrderBy(sortBy, !apiContext.SortDescending);
+            orderBy = new OrderBy(sortBy, inDto.SortOrder == SortOrder.Ascending);
         }
 
         var startIndex = inDto.StartIndex;
