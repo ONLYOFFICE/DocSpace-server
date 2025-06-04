@@ -55,4 +55,10 @@ public class GetGroupsWithSharedRequestDto<T>
     /// </summary>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
+
+    /// <summary>
+    /// The text used as a filter for retrieving groups with their sharing settings.
+    /// </summary>
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
 }

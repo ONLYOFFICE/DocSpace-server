@@ -74,4 +74,10 @@ public class GetAllProfilesRequestDto
     /// </remarks>
     [FromQuery(Name = "filterSeparator")]
     public string FilterSeparator { get; set; }
+
+    /// <summary>
+    /// The text value used as an additional filter criterion for profiles retrieval.
+    /// </summary>
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
 }

@@ -85,4 +85,10 @@ public class AdvancedSearchDto
     /// </summary>
     [FromQuery(Name = "filterBy")]
     public string FilterBy { get; set; }
+
+    /// <summary>
+    /// The value used to filter the search query.
+    /// </summary>
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
 }

@@ -66,4 +66,10 @@ public class GeneralInformationRequestDto
     /// </summary>
     [FromQuery(Name = "sortOrder")]
     public SortOrder SortOrder { get; set; }
+
+    /// <summary>
+    /// The text used for filtering or searching group data.
+    /// </summary>
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
 }

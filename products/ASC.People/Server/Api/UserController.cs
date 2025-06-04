@@ -850,12 +850,11 @@ public class UserController(
 
         var list = (await _userManager.GetUsersAsync(inDto.Status)).ToAsyncEnumerable();
 
-        if ("group".Equals(inDto.FilterBy, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(_apiContext.FilterValue))
+        if ("group".Equals(inDto.FilterBy, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(inDto.Text))
         {
-            var groupId = new Guid(_apiContext.FilterValue);
+            var groupId = new Guid(inDto.Text);
             //Filter by group
             list = list.WhereAwait(async x => await _userManager.IsUserInGroupAsync(x.Id, groupId));
-            _apiContext.SetDataFiltered();
         }
 
         list = list.Where(x => x.FirstName != null && x.FirstName.Contains(inDto.Query, StringComparison.OrdinalIgnoreCase) || 
@@ -891,7 +890,8 @@ public class UserController(
             StartIndex = inDto.StartIndex,
             SortBy = inDto.SortBy,
             SortOrder = inDto.SortOrder,
-            FilterSeparator = inDto.FilterSeparator
+            FilterSeparator = inDto.FilterSeparator,
+            Text = inDto.Text
         };
         
         return GetByStatus(status);
@@ -1009,10 +1009,9 @@ public class UserController(
     public IAsyncEnumerable<EmployeeFullDto> GetByStatus(GetByStatusRequestDto inDto)
     {
         Guid? groupId = null;
-        if ("group".Equals(inDto.FilterBy, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(_apiContext.FilterValue))
+        if ("group".Equals(inDto.FilterBy, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(inDto.Text))
         {
-            groupId = new Guid(_apiContext.FilterValue);
-            _apiContext.SetDataFiltered();
+            groupId = new Guid(inDto.Text);
         }
 
         var filter = new SimpleByFilterRequestDto
@@ -1027,7 +1026,8 @@ public class UserController(
             StartIndex = inDto.StartIndex,
             SortBy = inDto.SortBy,
             SortOrder = inDto.SortOrder,
-            FilterSeparator = inDto.FilterSeparator
+            FilterSeparator = inDto.FilterSeparator,
+            Text = inDto.Text
         };
         
         return GetFullByFilter(filter);
@@ -1067,7 +1067,8 @@ public class UserController(
             StartIndex = inDto.StartIndex,
             SortBy = inDto.SortBy,
             SortOrder = inDto.SortOrder,
-            FilterSeparator = inDto.FilterSeparator
+            FilterSeparator = inDto.FilterSeparator,
+            Text = inDto.Text
         };
         
         var users = GetByFilterAsync(filter);
@@ -1128,9 +1129,9 @@ public class UserController(
         }
 
         var groupId = Guid.Empty;
-        if ("group".Equals(inDto.FilterBy, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(_apiContext.FilterValue))
+        if ("group".Equals(inDto.FilterBy, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(inDto.Text))
         {
-            groupId = new Guid(_apiContext.FilterValue);
+            groupId = new Guid(inDto.Text);
         }
 
         var users = await _userManager.SearchAsync(inDto.Query, EmployeeStatus.Active, groupId);
@@ -1175,7 +1176,8 @@ public class UserController(
             StartIndex = inDto.StartIndex,
             SortBy = inDto.SortBy,
             SortOrder = inDto.SortOrder,
-            FilterSeparator = inDto.FilterSeparator
+            FilterSeparator = inDto.FilterSeparator,
+            Text = inDto.Text
         };
         
         var users = GetByFilterAsync(filter);
@@ -2413,7 +2415,8 @@ public class UserController(
         }
         
         
-        var queryFilter = new UserQueryFilter(isDocSpaceAdmin,
+        var queryFilter = new UserQueryFilter(
+            isDocSpaceAdmin,
             filter.EmployeeStatus,
             includeGroups,
             excludeGroups,
@@ -2424,7 +2427,7 @@ public class UserController(
             filter.Area,
             filter.InvitedByMe,
             filter.InviterId,
-            _apiContext.FilterValue,
+            filter.Text,
             filter.FilterSeparator,
             filter.WithoutGroup ?? false,
             filter.SortBy,
@@ -2588,7 +2591,7 @@ public class UserControllerAdditional<T>(
         
         var offset = inDto.StartIndex;
         var count = inDto.Count;
-        var filterValue = apiContext.FilterValue;
+        var filterValue = inDto.Text;
         var filterSeparator = inDto.FilterSeparator;
 
         var securityDao = daoFactory.GetSecurityDao<T>();

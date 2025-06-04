@@ -81,7 +81,7 @@ public class AccountsController<T>(
         
         var offset = inDto.StartIndex;
         var count = inDto.Count;
-        var text = apiContext.FilterValue;
+        var text = inDto.Text;
         var separator = inDto.FilterSeparator;
 
         var includeStrangers = await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID);

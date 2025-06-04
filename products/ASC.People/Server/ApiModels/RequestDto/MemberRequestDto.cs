@@ -425,6 +425,12 @@ public class GetMemberByQueryRequestDto
     /// </summary>
     [FromQuery(Name = "filterBy")]
     public string FilterBy { get; set; }
+
+    /// <summary>
+    /// The value used for filtering users, allowing additional constraints for the query.
+    /// </summary>
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
 }
 
 /// <summary>

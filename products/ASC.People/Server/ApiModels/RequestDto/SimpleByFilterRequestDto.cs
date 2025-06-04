@@ -144,4 +144,10 @@ public class SimpleByFilterRequestDto
     /// </summary>
     [FromQuery(Name = "filterSeparator")]
     public string FilterSeparator { get; set; }
+
+    /// <summary>
+    /// The search text used to filter results based on user input.
+    /// </summary>
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
 }

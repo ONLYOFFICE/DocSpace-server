@@ -114,4 +114,10 @@ public class RoomContentRequestDto
     /// </summary>
     [FromQuery(Name = "sortOrder")]
     public ASC.Api.Core.Core.SortOrder SortOrder { get; set; }
+
+    /// <summary>
+    /// The text filter value used to refine search or query operations.
+    /// </summary>
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
 }

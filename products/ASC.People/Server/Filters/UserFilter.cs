@@ -47,4 +47,5 @@ public record UserFilter
     public string SortBy { get; set; }
     public SortOrder SortOrder { get; set; }
     public string FilterSeparator { get; set; }
+    public string Text { get; set; }
 }

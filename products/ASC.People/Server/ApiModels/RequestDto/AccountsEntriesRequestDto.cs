@@ -102,4 +102,10 @@ public class AccountsEntriesRequestDto<T>
     /// </summary>
     [FromQuery(Name = "filterSeparator")]
     public string FilterSeparator { get; set; }
+
+    /// <summary>
+    /// The text filter applied to the accounts search query.
+    /// </summary>
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
 }

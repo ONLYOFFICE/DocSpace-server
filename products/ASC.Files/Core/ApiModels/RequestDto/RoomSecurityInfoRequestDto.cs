@@ -45,7 +45,16 @@ public class RoomSecurityInfoRequestDto<T>
     
     [FromQuery(Name = "count")]
     public int Count { get; set; } = 50;
-    
+
+    /// <summary>
+    /// The starting index of the items to retrieve in a paginated request.
+    /// </summary>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
+
+    /// <summary>
+    /// The text filter value used for filtering room security information.
+    /// </summary>
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
 }

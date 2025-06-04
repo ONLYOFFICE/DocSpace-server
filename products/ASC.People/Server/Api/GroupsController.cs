@@ -66,7 +66,7 @@ public class GroupController(
         
         var offset = inDto.StartIndex;
         var count = inDto.Count;
-        var text = apiContext.FilterValue;
+        var text = inDto.Text;
 
         var memberId = inDto.UserId ?? Guid.Empty;
         var asManager = inDto.Manager ?? false;
@@ -456,7 +456,7 @@ public class GroupControllerAdditional<T>(
         
         var offset = inDto.StartIndex;
         var count = inDto.Count;
-        var text = apiContext.FilterValue;
+        var text = inDto.Text;
         
         var securityDao = daoFactory.GetSecurityDao<T>();
 

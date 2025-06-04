@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using SecurityContext = ASC.Core.SecurityContext;
-
 namespace ASC.Api.Core;
 
 [Scope]
@@ -49,10 +47,6 @@ public class ApiContext : ICloneable
     /// </remarks>
     public long Count { get; init; }
     
-    /// <summary>
-    /// Gets value to filter from request parameter "filterValue"
-    /// </summary>
-    public string FilterValue { get; set; }
     
     private static readonly int _maxCount = 1000;
 
@@ -96,15 +90,7 @@ public class ApiContext : ICloneable
             Count = Math.Min((long)countParsed, _maxCount);
         }
         
-        FilterValue = query.GetRequestValue("filterValue");
         Fields = query.GetRequestArray("fields");
-    }
-    
-    public ApiContext SetDataFiltered()
-    {
-        FilterValue = string.Empty;
-
-        return this;
     }
 
     public ApiContext SetTotalCount(long totalCollectionCount)

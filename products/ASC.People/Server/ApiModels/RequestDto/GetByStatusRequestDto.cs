@@ -72,4 +72,10 @@ public class GetByStatusRequestDto
     /// </summary>
     [FromQuery(Name = "filterSeparator")]
     public string FilterSeparator { get; set; }
+
+    /// <summary>
+    /// A string value representing additional filter criteria used in query parameters.
+    /// </summary>
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
 }

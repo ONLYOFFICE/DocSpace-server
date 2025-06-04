@@ -106,4 +106,10 @@ public class UsersWithRoomSharedRequestDto<T>
     /// </remarks>
     [FromQuery(Name = "filterSeparator")]
     public string FilterSeparator { get; set; }
+
+    /// <summary>
+    /// The filter text value used for searching or filtering user results.
+    /// </summary>
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
 }

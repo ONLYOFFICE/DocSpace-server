@@ -114,6 +114,12 @@ public class GetFolderRequestDto<T>
     /// </summary>
     [FromQuery(Name = "sortOrder")]
     public SortOrder SortOrder { get; set; }
+
+    /// <summary>
+    /// The text value used as a filter parameter for folder content queries.
+    /// </summary>
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
 }
 
 /// <summary>
@@ -156,6 +162,9 @@ public class GetCommonFolderRequestDto
     /// </summary>
     [FromQuery(Name = "sortOrder")]
     public SortOrder SortOrder { get; set; }
+    
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
 }
 
 /// <summary>
@@ -204,6 +213,12 @@ public class GetMyTrashFolderRequestDto
     /// </summary>
     [FromQuery(Name = "sortOrder")]
     public SortOrder SortOrder { get; set; }
+
+    /// <summary>
+    /// The text used for filtering or searching folder contents.
+    /// </summary>
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
 }
 
 /// <summary>
@@ -249,6 +264,12 @@ public class GetRootFolderRequestDto
     /// </summary>
     [FromQuery(Name = "sortOrder")]
     public SortOrder SortOrder { get; set; }
+
+    /// <summary>
+    /// The text used as a filter for searching or retrieving folder contents.
+    /// </summary>
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
 }
 
 /// <summary>
@@ -315,4 +336,10 @@ public class GetRecentFolderRequestDto
     /// </summary>
     [FromQuery(Name = "sortOrder")]
     public SortOrder SortOrder { get; set; }
+
+    /// <summary>
+    /// The text used for filtering or searching folder contents.
+    /// </summary>
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
 }

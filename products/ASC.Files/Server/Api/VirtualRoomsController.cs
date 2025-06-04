@@ -520,7 +520,7 @@ public abstract class VirtualRoomsController<T>(
     {
         var offset = inDto.StartIndex;
         var count = inDto.Count;
-        var text = apiContext.FilterValue;
+        var text = inDto.Text;
 
         var totalCountTask = await _fileStorageService.GetPureSharesCountAsync(inDto.Id, FileEntryType.Folder, inDto.FilterType, text);
         apiContext.SetCount(Math.Min(totalCountTask - offset, count)).SetTotalCount(totalCountTask);
@@ -842,7 +842,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
 
         var startIndex = inDto.StartIndex;
         var count = inDto.Count;
-        var filterValue = apiContext.FilterValue;
+        var filterValue = inDto.Text;
 
         var content = await fileStorageService.GetFolderItemsAsync(
             parentId,
@@ -897,7 +897,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     [HttpGet("tags")]
     public IAsyncEnumerable<object> GetTagsInfoAsync(GetTagsInfoRequestDto inDto)
     {
-        return customTagsService.GetTagsInfoAsync<int>(apiContext.FilterValue, TagType.Custom, inDto.StartIndex, inDto.Count);
+        return customTagsService.GetTagsInfoAsync<int>(inDto.Text, TagType.Custom, inDto.StartIndex, inDto.Count);
     }
 
     /// <summary>
