@@ -27,55 +27,22 @@
 namespace ASC.Api.Core;
 
 [Scope]
-public class ApiContext : ICloneable
+public class ApiContext(IHttpContextAccessor httpContextAccessor) : ICloneable
 {
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    public string[] Fields { get; set; }
-    
     public const int MaxCount = 1000;
     public const int DefaultCount = 1000;
 
-    
-    public ApiContext(IHttpContextAccessor httpContextAccessor)
-    {
-        _httpContextAccessor = httpContextAccessor;
-        if (httpContextAccessor.HttpContext?.Request == null)
-        {
-            return;
-        }
-
-
-        IQueryCollection query;
-
-        try
-        {
-            query = _httpContextAccessor.HttpContext.Request?.Query;
-        }
-        catch (Exception)
-        {
-            //Access to disposed context
-            return;
-        }
-
-        if (query == null)
-        {
-            return;
-        }
-        
-        
-        Fields = query.GetRequestArray("fields");
-    }
 
     public ApiContext SetTotalCount(long totalCollectionCount)
     {
-        _httpContextAccessor.HttpContext?.Items.TryAdd("TotalCount",  totalCollectionCount);
+        httpContextAccessor.HttpContext?.Items.TryAdd("TotalCount",  totalCollectionCount);
 
         return this;
     }
 
     public ApiContext SetCount(int count)
     {
-        _httpContextAccessor.HttpContext?.Items.TryAdd("Count", count);
+        httpContextAccessor.HttpContext?.Items.TryAdd("Count", count);
 
         return this;
     }
@@ -88,7 +55,7 @@ public class ApiContext : ICloneable
 
 public static class QueryExtension
 {
-    internal static string[] GetRequestArray(this IQueryCollection query, string key)
+    private static string[] GetRequestArray(this IQueryCollection query, string key)
     {
         if (query != null)
         {
@@ -122,15 +89,5 @@ public static class QueryExtension
         var reqArray = query.GetRequestArray(key);
 
         return reqArray?.FirstOrDefault();
-    }
-}
-
-public static class ApiContextExtension
-{
-    public static bool Check(this ApiContext context, string field)
-    {
-        return context?.Fields == null
-            || (context.Fields != null
-            && context.Fields.Contains(field, StringComparer.InvariantCultureIgnoreCase));
     }
 }

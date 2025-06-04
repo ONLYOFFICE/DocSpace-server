@@ -155,36 +155,13 @@ public class EmployeeDtoHelper(
 
         var cacheKey = Math.Abs(userInfo.LastModified.GetHashCode());
 
-        if (_httpContext.Check("avatarSmall"))
-        {
-            result.AvatarSmall = await _userPhotoManager.GetSmallPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
-        }
-        
-        if (_httpContext.Check("avatarOriginal"))
-        {
-            result.AvatarOriginal = await _userPhotoManager.GetPhotoAbsoluteWebPath(userInfo.Id) + $"?hash={cacheKey}";
-        }
-
-        if (_httpContext.Check("avatarMax"))
-        {
-            result.AvatarMax = await _userPhotoManager.GetMaxPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
-        }
-
-        if (_httpContext.Check("avatarMedium"))
-        {
-            result.AvatarMedium = await _userPhotoManager.GetMediumPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
-        }
-
-        if (_httpContext.Check("avatar"))
-        {
-            result.Avatar = await _userPhotoManager.GetBigPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
-        }
-
-        if (result.Id != Guid.Empty)
-        {
-            var profileUrl = await commonLinkUtility.GetUserProfileAsync(userInfo.Id);
-            result.ProfileUrl = commonLinkUtility.GetFullAbsolutePath(profileUrl);
-        }
+        result.AvatarSmall = await _userPhotoManager.GetSmallPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
+        result.AvatarOriginal = await _userPhotoManager.GetPhotoAbsoluteWebPath(userInfo.Id) + $"?hash={cacheKey}";
+        result.AvatarMax = await _userPhotoManager.GetMaxPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
+        result.AvatarMedium = await _userPhotoManager.GetMediumPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
+        result.Avatar = await _userPhotoManager.GetBigPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
+        var profileUrl = await commonLinkUtility.GetUserProfileAsync(userInfo.Id);
+        result.ProfileUrl = commonLinkUtility.GetFullAbsolutePath(profileUrl);
 
         return result;
     }

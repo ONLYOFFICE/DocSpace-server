@@ -1441,7 +1441,7 @@ public class UserController(
     [HttpGet("@self")]
     public async Task<EmployeeFullDto> SelfAsync()
     {
-        var user = await _userManager.GetUserAsync(securityContext.CurrentAccount.ID, EmployeeFullDtoHelper.GetExpression(_apiContext));
+        var user = await _userManager.GetUserAsync(securityContext.CurrentAccount.ID, null);
 
         var result = await employeeFullDtoHelper.GetFullAsync(user);
 
