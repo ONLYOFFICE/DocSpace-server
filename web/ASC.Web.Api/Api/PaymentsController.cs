@@ -594,6 +594,11 @@ public class PaymentController(
     [HttpPost("deposit")]
     public async Task<string> TopUpDeposit(TopUpDepositRequestDto inDto)
     {
+        if (inDto.Amount <= 0)
+        {
+            return null;
+        }
+
         if (!tariffService.IsConfigured())
         {
             return null;
