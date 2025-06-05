@@ -24,52 +24,50 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Security.Cryptography;
-
 namespace ASC.Web.Api.Controllers.Settings;
 
-public partial class SettingsController(MessageService messageService,
-        ApiContext apiContext,
-        UserManager userManager,
-        TenantManager tenantManager,
-        TenantExtra tenantExtra,
-        AuthContext authContext,
-        PermissionContext permissionContext,
-        SettingsManager settingsManager,
-        WebItemManager webItemManager,
-        WebItemManagerSecurity webItemManagerSecurity,
-        TenantInfoSettingsHelper tenantInfoSettingsHelper,
-        CoreSettings coreSettings,
-        CoreBaseSettings coreBaseSettings,
-        CommonLinkUtility commonLinkUtility,
-        IConfiguration configuration,
-        SetupInfo setupInfo,
-        ExternalResourceSettings externalResourceSettings,
-        ExternalResourceSettingsHelper externalResourceSettingsHelper,
-        GeolocationHelper geolocationHelper,
-        ConsumerFactory consumerFactory,
-        TimeZoneConverter timeZoneConverter,
-        CustomNamingPeople customNamingPeople,
-        IFusionCache fusionCache,
-        ProviderManager providerManager,
-        FirstTimeTenantSettings firstTimeTenantSettings,
-        TelegramHelper telegramHelper,
-        PasswordHasher passwordHasher,
-        IHttpContextAccessor httpContextAccessor,
-        DnsSettings dnsSettings,
-        CustomColorThemesSettingsHelper customColorThemesSettingsHelper,
-        UserInvitationLimitHelper userInvitationLimitHelper,
-        QuotaUsageManager quotaUsageManager,
-        TenantDomainValidator tenantDomainValidator,
-        TenantLogoManager tenantLogoManager,
-        ExternalShare externalShare,
-        IMapper mapper,
-        UserFormatter userFormatter,
-        IDistributedLockProvider distributedLockProvider,
-        UsersQuotaSyncOperation usersQuotaSyncOperation,
-        CustomQuota customQuota,
-        QuotaSocketManager quotaSocketManager)
-    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
+public partial class SettingsController(
+    MessageService messageService,
+    SecurityContext securityContext,
+    UserManager userManager,
+    TenantManager tenantManager,
+    TenantExtra tenantExtra,
+    AuthContext authContext,
+    PermissionContext permissionContext,
+    SettingsManager settingsManager,
+    WebItemManager webItemManager,
+    WebItemManagerSecurity webItemManagerSecurity,
+    TenantInfoSettingsHelper tenantInfoSettingsHelper,
+    CoreSettings coreSettings,
+    CoreBaseSettings coreBaseSettings,
+    CommonLinkUtility commonLinkUtility,
+    IConfiguration configuration,
+    SetupInfo setupInfo,
+    ExternalResourceSettings externalResourceSettings,
+    ExternalResourceSettingsHelper externalResourceSettingsHelper,
+    GeolocationHelper geolocationHelper,
+    ConsumerFactory consumerFactory,
+    TimeZoneConverter timeZoneConverter,
+    CustomNamingPeople customNamingPeople,
+    IFusionCache fusionCache,
+    ProviderManager providerManager,
+    FirstTimeTenantSettings firstTimeTenantSettings,
+    TelegramHelper telegramHelper,
+    PasswordHasher passwordHasher,
+    DnsSettings dnsSettings,
+    CustomColorThemesSettingsHelper customColorThemesSettingsHelper,
+    UserInvitationLimitHelper userInvitationLimitHelper,
+    QuotaUsageManager quotaUsageManager,
+    TenantDomainValidator tenantDomainValidator,
+    TenantLogoManager tenantLogoManager,
+    ExternalShare externalShare,
+    IMapper mapper,
+    UserFormatter userFormatter,
+    IDistributedLockProvider distributedLockProvider,
+    UsersQuotaSyncOperation usersQuotaSyncOperation,
+    CustomQuota customQuota,
+    QuotaSocketManager quotaSocketManager)
+    : BaseSettingsController(fusionCache, webItemManager)
 {
     [GeneratedRegex("^[a-z0-9]([a-z0-9-.]){1,253}[a-z0-9]$")]
     private static partial Regex EmailDomainRegex();
@@ -543,7 +541,7 @@ public partial class SettingsController(MessageService messageService,
     [AllowNotPayment]
     public async Task<List<TimezonesRequestsDto>> GetTimeZones()
     {
-        await ApiContext.AuthByClaimAsync();
+        await securityContext.AuthByClaimAsync();
         var timeZones = TimeZoneInfo.GetSystemTimeZones().ToList();
 
         if (timeZones.All(tz => tz.Id != "UTC"))
@@ -663,7 +661,7 @@ public partial class SettingsController(MessageService messageService,
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard")]
     public async Task<WizardSettings> CompleteWizard(WizardRequestsDto inDto)
     {
-        await ApiContext.AuthByClaimAsync();
+        await securityContext.AuthByClaimAsync();
 
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 

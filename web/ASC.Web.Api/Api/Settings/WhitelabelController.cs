@@ -27,7 +27,6 @@
 namespace ASC.Web.Api.Controllers.Settings;
 
 public class WhitelabelController(
-    ApiContext apiContext,
     PermissionContext permissionContext,
     SettingsManager settingsManager,
     WebItemManager webItemManager,
@@ -37,13 +36,12 @@ public class WhitelabelController(
     CoreBaseSettings coreBaseSettings,
     CommonLinkUtility commonLinkUtility,
     IFusionCache fusionCache,
-    IHttpContextAccessor httpContextAccessor,
     IMapper mapper,
     CompanyWhiteLabelSettingsHelper companyWhiteLabelSettingsHelper,
     TenantManager tenantManager,
     TenantExtra tenantExtra,
     StorageFactory storageFactory)
-    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(fusionCache, webItemManager)
 {
     #region Logos
 

@@ -90,6 +90,37 @@ public class GetFolderRequestDto<T>
     /// </summary>
     [FromQuery(Name = "formsItemType")]
     public string FormsItemType{ get; set; }
+    
+    /// <summary>
+    /// The maximum number of items to retrieve in the request.
+    /// </summary>
+    [FromQuery(Name = "count")]
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
+
+    /// <summary>
+    /// The zero-based index of the first item to retrieve in a paginated request.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
+
+    /// <summary>
+    /// Specifies the property used for sorting the folder request results.
+    /// </summary>
+    [FromQuery(Name = "sortBy")]
+    public string SortBy { get; set; }
+    
+    /// <summary>
+    /// The order in which the results are sorted.
+    /// </summary>
+    [FromQuery(Name = "sortOrder")]
+    public SortOrder SortOrder { get; set; }
+
+    /// <summary>
+    /// The text value used as a filter parameter for folder content queries.
+    /// </summary>
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
 }
 
 /// <summary>
@@ -108,6 +139,37 @@ public class GetCommonFolderRequestDto
     /// </summary>
     [FromQuery(Name = "filterType")]
     public FilterType? FilterType { get; set; }
+
+    /// <summary>
+    /// The maximum number of items to retrieve in the request.
+    /// </summary>
+    [FromQuery(Name = "count")]
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
+
+    /// <summary>
+    /// The zero-based index of the first item to retrieve in a paginated list.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
+
+    /// <summary>
+    /// Specifies the field by which the folder content should be sorted.
+    /// </summary>
+    [FromQuery(Name = "sortBy")]
+    public string SortBy { get; set; }
+    
+    /// <summary>
+    /// The order in which the results are sorted.
+    /// </summary>
+    [FromQuery(Name = "sortOrder")]
+    public SortOrder SortOrder { get; set; }
+
+    /// <summary>
+    /// The text used as a filter or search criterion for folder content queries.
+    /// </summary>
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
 }
 
 /// <summary>
@@ -132,6 +194,37 @@ public class GetMyTrashFolderRequestDto
     /// </summary>
     [FromQuery(Name = "applyFilterOption")]
     public ApplyFilterOption? ApplyFilterOption { get; set; }
+
+    /// <summary>
+    /// The maximum number of items to retrieve in the response.
+    /// </summary>
+    [FromQuery(Name = "count")]
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
+
+    /// <summary>
+    /// The starting position of the items to be retrieved.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
+
+    /// <summary>
+    /// The property used to specify the sorting criteria for folder contents.
+    /// </summary>
+    [FromQuery(Name = "sortBy")]
+    public string SortBy { get; set; }
+    
+    /// <summary>
+    /// The order in which the results are sorted.
+    /// </summary>
+    [FromQuery(Name = "sortOrder")]
+    public SortOrder SortOrder { get; set; }
+
+    /// <summary>
+    /// The text used for filtering or searching folder contents.
+    /// </summary>
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
 }
 
 /// <summary>
@@ -156,6 +249,37 @@ public class GetRootFolderRequestDto
     /// </summary>
     [FromQuery(Name = "withoutTrash")]
     public bool? WithoutTrash { get; set; }
+    
+    /// <summary>
+    /// The maximum number of items to retrieve in the response.
+    /// </summary>
+    [FromQuery(Name = "count")]
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
+
+    /// <summary>
+    /// The starting position of the items to be retrieved.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
+
+    /// <summary>
+    /// Specifies the field by which the folder content should be sorted.
+    /// </summary>
+    [FromQuery(Name = "sortBy")]
+    public string SortBy { get; set; }
+    
+    /// <summary>
+    /// The order in which the results are sorted.
+    /// </summary>
+    [FromQuery(Name = "sortOrder")]
+    public SortOrder SortOrder { get; set; }
+
+    /// <summary>
+    /// The text used as a filter for searching or retrieving folder contents.
+    /// </summary>
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
 }
 
 /// <summary>
@@ -198,4 +322,35 @@ public class GetRecentFolderRequestDto
     /// </summary>
     [FromQuery(Name = "extension")]
     public string[] Extension { get; set; }
+
+    /// <summary>
+    /// The maximum number of items to return.
+    /// </summary>
+    [FromQuery(Name = "count")]
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
+
+    /// <summary>
+    /// The starting position of the results to be returned in the query response.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
+
+    /// <summary>
+    /// Specifies the sorting criteria for the folder request.
+    /// </summary>
+    [FromQuery(Name = "sortBy")]
+    public string SortBy { get; set; }
+    
+    /// <summary>
+    /// The order in which the results are sorted.
+    /// </summary>
+    [FromQuery(Name = "sortOrder")]
+    public SortOrder SortOrder { get; set; }
+
+    /// <summary>
+    /// The text used for filtering or searching folder contents.
+    /// </summary>
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
 }

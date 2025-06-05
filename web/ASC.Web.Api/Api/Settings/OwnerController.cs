@@ -33,7 +33,6 @@ public class OwnerController(
     MessageService messageService,
     CommonLinkUtility commonLinkUtility,
     StudioNotifyService studioNotifyService,
-    ApiContext apiContext,
     UserManager userManager,
     TenantManager tenantManager,
     AuthContext authContext,
@@ -41,10 +40,9 @@ public class OwnerController(
     WebItemManager webItemManager,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     IFusionCache fusionCache,
-    IHttpContextAccessor httpContextAccessor,
     IUrlShortener urlShortener,
     UserManagerWrapper userManagerWrapper)
-    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <summary>
     /// Sends the instructions to change the DocSpace owner.

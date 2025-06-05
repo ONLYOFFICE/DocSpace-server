@@ -64,14 +64,14 @@ public class GroupController(
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_ReadGroups);
         
-        var offset = Convert.ToInt32(apiContext.StartIndex);
-        var count = Convert.ToInt32(apiContext.Count);
-        var text = apiContext.FilterValue;
+        var offset = inDto.StartIndex;
+        var count = inDto.Count;
+        var text = inDto.Text;
 
         var memberId = inDto.UserId ?? Guid.Empty;
         var asManager = inDto.Manager ?? false;
 
-        if (!GroupSortTypeExtensions.TryParse(apiContext.SortBy, true, out var sortBy))
+        if (!GroupSortTypeExtensions.TryParse(inDto.SortBy, true, out var sortBy))
         {
             sortBy = GroupSortType.Title;
         }
@@ -80,7 +80,7 @@ public class GroupController(
 
         apiContext.SetCount(Math.Min(Math.Max(totalCount - offset, 0), count)).SetTotalCount(totalCount);
 
-        await foreach (var g in userManager.GetGroupsAsync(text, memberId, asManager, sortBy, !apiContext.SortDescending, offset, count))
+        await foreach (var g in userManager.GetGroupsAsync(text, memberId, asManager, sortBy, inDto.SortOrder == SortOrder.Ascending, offset, count))
         {
             yield return await groupFullDtoHelper.Get(g, false);
         }
@@ -454,9 +454,9 @@ public class GroupControllerAdditional<T>(
             throw new SecurityException();
         }
         
-        var offset = Convert.ToInt32(apiContext.StartIndex);
-        var count = Convert.ToInt32(apiContext.Count);
-        var text = apiContext.FilterValue;
+        var offset = inDto.StartIndex;
+        var count = inDto.Count;
+        var text = inDto.Text;
         
         var securityDao = daoFactory.GetSecurityDao<T>();
 

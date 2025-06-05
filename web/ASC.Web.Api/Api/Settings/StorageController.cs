@@ -30,31 +30,30 @@ using ASC.Data.Storage.Encryption.IntegrationEvents.Events;
 
 namespace ASC.Web.Api.Controllers.Settings;
 
-public class StorageController(ILoggerProvider option,
-        ServiceClient serviceClient,
-        MessageService messageService,
-        SecurityContext securityContext,
-        StudioNotifyService studioNotifyService,
-        ApiContext apiContext,
-        TenantManager tenantManager,
-        PermissionContext permissionContext,
-        SettingsManager settingsManager,
-        WebItemManager webItemManager,
-        CoreBaseSettings coreBaseSettings,
-        CommonLinkUtility commonLinkUtility,
-        StorageSettingsHelper storageSettingsHelper,
-        IWebHostEnvironment webHostEnvironment,
-        ConsumerFactory consumerFactory,
-        IFusionCache fusionCache,
-        IEventBus eventBus,
-        EncryptionSettingsHelper encryptionSettingsHelper,
-        BackupAjaxHandler backupAjaxHandler,
-        ICacheNotify<DeleteSchedule> cacheDeleteSchedule,
-        EncryptionWorker encryptionWorker,
-        IHttpContextAccessor httpContextAccessor, 
-        IDistributedLockProvider distributedLockProvider,
-        TenantExtra tenantExtra)
-    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
+public class StorageController(
+    ILoggerProvider option,
+    ServiceClient serviceClient,
+    MessageService messageService,
+    SecurityContext securityContext,
+    StudioNotifyService studioNotifyService,
+    TenantManager tenantManager,
+    PermissionContext permissionContext,
+    SettingsManager settingsManager,
+    WebItemManager webItemManager,
+    CoreBaseSettings coreBaseSettings,
+    CommonLinkUtility commonLinkUtility,
+    StorageSettingsHelper storageSettingsHelper,
+    IWebHostEnvironment webHostEnvironment,
+    ConsumerFactory consumerFactory,
+    IFusionCache fusionCache,
+    IEventBus eventBus,
+    EncryptionSettingsHelper encryptionSettingsHelper,
+    BackupAjaxHandler backupAjaxHandler,
+    ICacheNotify<DeleteSchedule> cacheDeleteSchedule,
+    EncryptionWorker encryptionWorker,
+    IDistributedLockProvider distributedLockProvider,
+    TenantExtra tenantExtra)
+    : BaseSettingsController(fusionCache, webItemManager)
 {
     private readonly ILogger _log = option.CreateLogger("ASC.Api");
 

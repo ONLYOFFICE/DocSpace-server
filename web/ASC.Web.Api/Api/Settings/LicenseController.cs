@@ -27,24 +27,24 @@
 namespace ASC.Web.Api.Controllers.Settings;
 
 [DefaultRoute("license")]
-public class LicenseController(ILoggerProvider option,
-        MessageService messageService,
-        ApiContext apiContext,
-        UserManager userManager,
-        TenantManager tenantManager,
-        TenantLogoManager tenantLogoManager,
-        TenantExtra tenantExtra,
-        AuthContext authContext,
-        LicenseReader licenseReader,
-        SettingsManager settingsManager,
-        WebItemManager webItemManager,
-        CoreBaseSettings coreBaseSettings,
-        IFusionCache fusionCache,
-        FirstTimeTenantSettings firstTimeTenantSettings,
-        ITariffService tariffService,
-        IHttpContextAccessor httpContextAccessor,
-        DocumentServiceLicense documentServiceLicense)
-    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
+public class LicenseController(
+    ILoggerProvider option,
+    MessageService messageService,
+    SecurityContext securityContext,
+    UserManager userManager,
+    TenantManager tenantManager,
+    TenantLogoManager tenantLogoManager,
+    TenantExtra tenantExtra,
+    AuthContext authContext,
+    LicenseReader licenseReader,
+    SettingsManager settingsManager,
+    WebItemManager webItemManager,
+    CoreBaseSettings coreBaseSettings,
+    IFusionCache fusionCache,
+    FirstTimeTenantSettings firstTimeTenantSettings,
+    ITariffService tariffService,
+    DocumentServiceLicense documentServiceLicense)
+    : BaseSettingsController(fusionCache, webItemManager)
 {
     private readonly ILogger _log = option.CreateLogger("ASC.Api");
 
@@ -225,7 +225,7 @@ public class LicenseController(ILoggerProvider option,
     {
         try
         {
-            await ApiContext.AuthByClaimAsync();
+            await securityContext.AuthByClaimAsync();
             if (!authContext.IsAuthenticated && (await settingsManager.LoadAsync<WizardSettings>()).Completed)
             {
                 throw new SecurityException(Resource.PortalSecurity);

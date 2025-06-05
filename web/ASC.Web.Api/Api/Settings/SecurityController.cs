@@ -33,7 +33,6 @@ public class SecurityController(
     TenantExtra tenantExtra,
     CoreBaseSettings coreBaseSettings,
     MessageService messageService,
-    ApiContext apiContext,
     UserManager userManager,
     AuthContext authContext,
     WebItemSecurity webItemSecurity,
@@ -45,10 +44,9 @@ public class SecurityController(
     EmployeeDtoHelper employeeWrapperHelper,
     IFusionCache fusionCache,
     IMapper mapper,
-    IHttpContextAccessor httpContextAccessor,
     PasswordSettingsConverter passwordSettingsConverter,
     PasswordSettingsManager passwordSettingsManager)
-    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <summary>
     /// Returns the security settings for the modules specified in the request.

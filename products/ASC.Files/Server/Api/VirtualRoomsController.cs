@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
@@ -517,9 +518,9 @@ public abstract class VirtualRoomsController<T>(
     [HttpGet("{id}/share")]
     public async IAsyncEnumerable<FileShareDto> GetRoomSecurityInfo(RoomSecurityInfoRequestDto<T> inDto)
     {
-        var offset = Convert.ToInt32(apiContext.StartIndex);
-        var count = Convert.ToInt32(apiContext.Count);
-        var text = apiContext.FilterValue;
+        var offset = inDto.StartIndex;
+        var count = inDto.Count;
+        var text = inDto.Text;
 
         var totalCountTask = await _fileStorageService.GetPureSharesCountAsync(inDto.Id, FileEntryType.Folder, inDto.FilterType, text);
         apiContext.SetCount(Math.Min(totalCountTask - offset, count)).SetTotalCount(totalCountTask);
@@ -794,7 +795,6 @@ public abstract class VirtualRoomsController<T>(
 public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         FolderContentDtoHelper folderContentDtoHelper,
         GlobalFolderHelper globalFolderHelper,
-        ApiContext apiContext,
         CustomTagsService customTagsService,
         RoomLogoManager roomLogoManager,
         FolderDtoHelper folderDtoHelper,
@@ -834,14 +834,14 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
             : null;
 
         OrderBy orderBy = null;
-        if (SortedByTypeExtensions.TryParse(apiContext.SortBy, true, out var sortBy))
+        if (SortedByTypeExtensions.TryParse(inDto.SortBy, true, out var sortBy))
         {
-            orderBy = new OrderBy(sortBy, !apiContext.SortDescending);
+            orderBy = new OrderBy(sortBy, inDto.SortOrder == SortOrder.Ascending);
         }
 
-        var startIndex = Convert.ToInt32(apiContext.StartIndex);
-        var count = Convert.ToInt32(apiContext.Count);
-        var filterValue = apiContext.FilterValue;
+        var startIndex = inDto.StartIndex;
+        var count = inDto.Count;
+        var filterValue = inDto.Text;
 
         var content = await fileStorageService.GetFolderItemsAsync(
             parentId,
@@ -894,15 +894,9 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     [Tags("Rooms")]
     [SwaggerResponse(200, "List of tag names", typeof(IAsyncEnumerable<object>))]
     [HttpGet("tags")]
-    public async IAsyncEnumerable<object> GetRoomTagsInfo()
+    public IAsyncEnumerable<object> GetRoomTagsInfo(GetTagsInfoRequestDto inDto)
     {
-        var from = Convert.ToInt32(apiContext.StartIndex);
-        var count = Convert.ToInt32(apiContext.Count);
-
-        await foreach (var tag in customTagsService.GetTagsInfoAsync<int>(apiContext.FilterValue, TagType.Custom, from, count))
-        {
-            yield return tag;
-        }
+        return customTagsService.GetTagsInfoAsync<int>(inDto.Text, TagType.Custom, inDto.StartIndex, inDto.Count);
     }
 
     /// <summary>
