@@ -39,7 +39,7 @@ public class DynamicIgnoreResolver(IHttpContextAccessor httpContextAccessor) : D
             foreach (var propertyInfo in jsonTypeInfo.Properties)
             {
                 propertyInfo.ShouldSerialize = (obj, value) =>
-                {                    
+                {
                     if(options.DefaultIgnoreCondition == JsonIgnoreCondition.WhenWritingNull && value == null)
                     {
                         return false;
@@ -53,7 +53,11 @@ public class DynamicIgnoreResolver(IHttpContextAccessor httpContextAccessor) : D
                     var fields = httpContextAccessor.HttpContext?.Request.Query.GetRequestArray("fields");
                     if(fields is { Length: > 0 })
                     {
-                        return fields.Contains(propertyInfo.Name);
+                        return fields.Any(r =>
+                        {
+                            var splitter = r.Split('.');
+                            return splitter.Any(s => s.Trim() == propertyInfo.Name);
+                        });
                     }
 
                     return true;
