@@ -55,7 +55,7 @@ public class ApiContext(IHttpContextAccessor httpContextAccessor) : ICloneable
 
 public static class QueryExtension
 {
-    private static string[] GetRequestArray(this IQueryCollection query, string key)
+    public static string[] GetRequestArray(this IQueryCollection query, string key)
     {
         if (query != null)
         {

@@ -352,16 +352,12 @@ public abstract class BaseStartup
 
         DIHelper.Configure(services);
 
-        Action<JsonOptions> jsonOptions = options =>
-        {
-            options.JsonSerializerOptions.WriteIndented = false;
-            options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-            options.JsonSerializerOptions.NumberHandling = JsonNumberHandling.AllowReadingFromString;
-        };
 
-        services.AddControllers().AddJsonOptions(jsonOptions);
+        
+        services.ConfigureOptions<ConfigureJsonOptions>();
 
-        services.AddSingleton(jsonOptions);
+        services.AddControllers();
+
         
         DIHelper.Scan();
 
