@@ -101,7 +101,7 @@ public class WebPluginManager(
 
     private static async Task<string> GetPluginUrlTemplateAsync(IDataStore storage)
     {
-        var uri = await storage.GetUriAsync(Path.Combine("{0}", PluginFileName));
+        var uri = await storage.GetUriAsync(Path.Combine("{0}", PluginFileName + "?hash={1}"));
 
         return uri?.ToString() ?? string.Empty;
     }
@@ -195,7 +195,7 @@ public class WebPluginManager(
 
         var urlTemplate = await GetPluginUrlTemplateAsync(storage);
 
-        webPlugin.Url = string.Format(urlTemplate, webPlugin.Name);
+        webPlugin.Url = string.Format(urlTemplate, webPlugin.Name, webPlugin.Version);
 
         webPlugin = await UpdateWebPluginAsync(tenantId, webPlugin, true, null);
 
@@ -356,7 +356,7 @@ public class WebPluginManager(
 
                 webPlugin.System = system;
 
-                webPlugin.Url = string.Format(urlTemplate, webPlugin.Name);
+                webPlugin.Url = string.Format(urlTemplate, webPlugin.Name, webPlugin.Version);
 
                 webPlugins.Add(webPlugin);
             }
