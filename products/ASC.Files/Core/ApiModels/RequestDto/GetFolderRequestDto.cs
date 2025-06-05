@@ -164,7 +164,10 @@ public class GetCommonFolderRequestDto
     /// </summary>
     [FromQuery(Name = "sortOrder")]
     public SortOrder SortOrder { get; set; }
-    
+
+    /// <summary>
+    /// The text used as a filter or search criterion for folder content queries.
+    /// </summary>
     [FromQuery(Name = "filterValue")]
     public string Text { get; set; }
 }
@@ -259,7 +262,10 @@ public class GetRootFolderRequestDto
     /// </summary>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
-    
+
+    /// <summary>
+    /// Specifies the field by which the folder content should be sorted.
+    /// </summary>
     [FromQuery(Name = "sortBy")]
     public string SortBy { get; set; }
     

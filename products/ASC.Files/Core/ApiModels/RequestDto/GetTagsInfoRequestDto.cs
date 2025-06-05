@@ -28,15 +28,19 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class GetTagsInfoRequestDto
 {
+    /// <summary>
     /// Gets or sets the number of tag results to retrieve.
     /// This property specifies the maximum amount of tag data to be included in the result set.
+    /// </summary>
     [FromQuery(Name = "count")]
     [Range(1, ApiContext.MaxCount)]
     public int Count { get; set; } = ApiContext.DefaultCount;
-
+    
+    /// <summary>
     /// Represents the starting index from which the tags' information will be retrieved.
     /// This property is used to define the offset for pagination when retrieving a list of tags. It determines
     /// the point in the data set from which the retrieval begins.
+    /// </summary>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
 
