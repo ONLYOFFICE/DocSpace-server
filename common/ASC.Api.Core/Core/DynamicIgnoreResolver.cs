@@ -68,7 +68,6 @@ public class DynamicIgnoreResolver(IHttpContextAccessor httpContextAccessor) : D
 public class ConfigureJsonOptions(IHttpContextAccessor httpContextAccessor)
     : IConfigureOptions<JsonOptions>
 {
-    // ***Method never called***
     public void Configure(JsonOptions options)
     {            
         options.JsonSerializerOptions.WriteIndented = false;

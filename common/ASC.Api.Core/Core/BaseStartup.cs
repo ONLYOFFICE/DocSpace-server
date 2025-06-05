@@ -351,13 +351,10 @@ public abstract class BaseStartup
         }
 
         DIHelper.Configure(services);
-
-
         
         services.ConfigureOptions<ConfigureJsonOptions>();
 
         services.AddControllers();
-
         
         DIHelper.Scan();
 
