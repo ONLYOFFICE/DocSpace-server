@@ -160,8 +160,12 @@ public class EmployeeDtoHelper(
         result.AvatarMax = await _userPhotoManager.GetMaxPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
         result.AvatarMedium = await _userPhotoManager.GetMediumPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
         result.Avatar = await _userPhotoManager.GetBigPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
-        var profileUrl = await commonLinkUtility.GetUserProfileAsync(userInfo.Id);
-        result.ProfileUrl = commonLinkUtility.GetFullAbsolutePath(profileUrl);
+        
+        if (result.Id != Guid.Empty)
+        {
+            var profileUrl = await commonLinkUtility.GetUserProfileAsync(userInfo.Id);
+            result.ProfileUrl = commonLinkUtility.GetFullAbsolutePath(profileUrl);
+        }
 
         return result;
     }
