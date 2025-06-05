@@ -24,17 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-
-namespace ASC.TelegramService;
+namespace ASC.TelegramService.Services;
 
 [Singleton]
-public class TelegramHandler(IDistributedCache distributedCache,
-                       CommandModule command,
-                       ILogger<TelegramHandler> logger,
+public class TelegramHandlerService(IDistributedCache distributedCache,
+                       CommandExecutionService command,
+                       ILogger<TelegramHandlerService> logger,
                        IServiceScopeFactory scopeFactory)
 {
     private readonly Dictionary<int, TenantTgClient> _clients = [];
-    private readonly ILogger<TelegramHandler> _log = logger;
+    private readonly ILogger<TelegramHandlerService> _log = logger;
 
     public async Task SendMessage(NotifyMessage msg)
     {

@@ -26,36 +26,15 @@
 
 using ASC.TelegramService.Services;
 
-namespace ASC.TelegramService.IntegrationEvents.EventHandling;
-
-[Scope]
-public class TelegramSendMessageRequestedIntegrationEventHandler : IIntegrationEventHandler<NotifySendTelegramMessageRequestedIntegrationEvent>
+namespace ASC.TelegramService.Log;
+internal static partial class TelegramHandlerServiceLogger
 {
-    private readonly ILogger _logger;
-    private readonly TelegramHandlerService _telegramHandler;
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Couldn't find telegramId for user '{reciever}'")]
+    public static partial void DebugCouldntFind(this ILogger<TelegramHandlerService> logger, string reciever);
 
-    private TelegramSendMessageRequestedIntegrationEventHandler() : base()
-    {
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Couldn't send message for user '{reciever}'")]
+    public static partial void DebugCouldntSend(this ILogger<TelegramHandlerService> logger, string reciever, Exception exception);
 
-    }
-
-    public TelegramSendMessageRequestedIntegrationEventHandler(
-        ILogger<TelegramSendMessageRequestedIntegrationEventHandler> logger,
-        TelegramHandlerService telegramHandler
-      )
-    {
-        _logger = logger;
-        _telegramHandler = telegramHandler;
-    }
-
-    public async Task Handle(NotifySendTelegramMessageRequestedIntegrationEvent @event)
-    {
-        CustomSynchronizationContext.CreateContext();
-        using (_logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
-        {
-            _logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
-
-            await _telegramHandler.SendMessage(@event.NotifyMessage);
-        }
-    }
+    [LoggerMessage(Level = LogLevel.Debug, Message = "TelegramListenerService background task is stopping.'")]
+    public static partial void DebugTelegramStopping(this ILogger<TelegramHandlerService> logger);
 }

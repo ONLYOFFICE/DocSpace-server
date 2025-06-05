@@ -24,19 +24,19 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.TelegramService;
+namespace ASC.TelegramService.Services;
 
 [Singleton]
 public class TelegramListenerService(
     ICacheNotify<RegisterUserProto> cacheRegisterUser,
     ICacheNotify<CreateClientProto> cacheCreateClient,
-    ILogger<TelegramHandler> logger,
-    TelegramHandler telegramHandler,
+    ILogger<TelegramHandlerService> logger,
+    TelegramHandlerService telegramHandler,
     ICacheNotify<DisableClientProto> cacheDisableClient,
     TenantManager tenantManager,
     ConsumerFactory consumerFactory) : BackgroundService
 {
-    private readonly ILogger<TelegramHandler> _logger = logger;
+    private readonly ILogger<TelegramHandlerService> _logger = logger;
     private readonly TelegramLoginProvider _telegramLoginProvider = consumerFactory.Get<TelegramLoginProvider>();
     private CancellationToken _stoppingToken;
 

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2010-2022
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,38 +24,21 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.TelegramService.Services;
-
-namespace ASC.TelegramService.IntegrationEvents.EventHandling;
-
-[Scope]
-public class TelegramSendMessageRequestedIntegrationEventHandler : IIntegrationEventHandler<NotifySendTelegramMessageRequestedIntegrationEvent>
+namespace ASC.TelegramService.Core
 {
-    private readonly ILogger _logger;
-    private readonly TelegramHandlerService _telegramHandler;
-
-    private TelegramSendMessageRequestedIntegrationEventHandler() : base()
+    public abstract class ParamParser(Type type)
     {
+        protected Type _type = type;
 
+        public abstract object FromString(string arg);
+        public abstract string ToString(object arg);
     }
 
-    public TelegramSendMessageRequestedIntegrationEventHandler(
-        ILogger<TelegramSendMessageRequestedIntegrationEventHandler> logger,
-        TelegramHandlerService telegramHandler
-      )
+    public abstract class ParamParser<T> : ParamParser
     {
-        _logger = logger;
-        _telegramHandler = telegramHandler;
-    }
+        protected ParamParser() : base(typeof(T)) { }
 
-    public async Task Handle(NotifySendTelegramMessageRequestedIntegrationEvent @event)
-    {
-        CustomSynchronizationContext.CreateContext();
-        using (_logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
-        {
-            _logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
-
-            await _telegramHandler.SendMessage(@event.NotifyMessage);
-        }
+        public abstract override object FromString(string arg);
+        public abstract override string ToString(object arg);
     }
 }

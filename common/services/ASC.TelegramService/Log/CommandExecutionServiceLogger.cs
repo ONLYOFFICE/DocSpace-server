@@ -26,36 +26,9 @@
 
 using ASC.TelegramService.Services;
 
-namespace ASC.TelegramService.IntegrationEvents.EventHandling;
-
-[Scope]
-public class TelegramSendMessageRequestedIntegrationEventHandler : IIntegrationEventHandler<NotifySendTelegramMessageRequestedIntegrationEvent>
+namespace ASC.TelegramService.Log;
+internal static partial class CommandExecutionServiceLogger
 {
-    private readonly ILogger _logger;
-    private readonly TelegramHandlerService _telegramHandler;
-
-    private TelegramSendMessageRequestedIntegrationEventHandler() : base()
-    {
-
-    }
-
-    public TelegramSendMessageRequestedIntegrationEventHandler(
-        ILogger<TelegramSendMessageRequestedIntegrationEventHandler> logger,
-        TelegramHandlerService telegramHandler
-      )
-    {
-        _logger = logger;
-        _telegramHandler = telegramHandler;
-    }
-
-    public async Task Handle(NotifySendTelegramMessageRequestedIntegrationEvent @event)
-    {
-        CustomSynchronizationContext.CreateContext();
-        using (_logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
-        {
-            _logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
-
-            await _telegramHandler.SendMessage(@event.NotifyMessage);
-        }
-    }
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Couldn't handle ({text}) message")]
+    public static partial void DebugCouldntHandle(this ILogger<CommandExecutionService> logger, string text, Exception exception);
 }
