@@ -27,28 +27,14 @@
 
 namespace ASC.TelegramService;
 
-[Singletone(Additional = typeof(TelegramHandlerExtension))]
-public class TelegramHandler
+[Singleton]
+public class TelegramHandler(IDistributedCache distributedCache,
+                       CommandModule command,
+                       ILogger<TelegramHandler> logger,
+                       IServiceScopeFactory scopeFactory)
 {
-    private readonly Dictionary<int, TenantTgClient> _clients;
-    private readonly CommandModule _command;
-    private readonly ILogger<TelegramHandler> _log;
-    private readonly IServiceScopeFactory _scopeFactory;
-    private readonly IDistributedCache _distributedCache;
-
-    public TelegramHandler(IDistributedCache distributedCache,
-                           CommandModule command,
-                           ILogger<TelegramHandler> logger,
-                           IServiceScopeFactory scopeFactory)
-    {
-        _command = command;
-        _log = logger;
-        _scopeFactory = scopeFactory;
-        _clients = new Dictionary<int, TenantTgClient>();
-        _distributedCache = distributedCache;
-
-        ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12 | SecurityProtocolType.Tls13;
-    }
+    private readonly Dictionary<int, TenantTgClient> _clients = [];
+    private readonly ILogger<TelegramHandler> _log = logger;
 
     public async Task SendMessage(NotifyMessage msg)
     {
@@ -57,15 +43,15 @@ public class TelegramHandler
             return;
         }
 
-        if (!_clients.ContainsKey(msg.TenantId))
+        if (!_clients.TryGetValue(msg.TenantId, out var value))
         {
             return;
         }
 
-        var scope = _scopeFactory.CreateScope();
+        var scope = scopeFactory.CreateScope();
         var telegramDao = scope.ServiceProvider.GetService<TelegramDao>();
 
-        var client = _clients[msg.TenantId].Client;
+        var client = value.Client;
 
         try
         {
@@ -77,9 +63,9 @@ public class TelegramHandler
                 return;
             }
 
-            var chat = await client.GetChatAsync(tgUser.TelegramUserId);
+            var chat = await client.GetChat(tgUser.TelegramUserId);
 
-            await client.SendTextMessageAsync(chat, msg.Content, ParseMode.MarkdownV2);
+            _ = await client.SendMessage(chat, msg.Content, ParseMode.MarkdownV2);
         }
         catch (Exception e)
         {
@@ -89,12 +75,10 @@ public class TelegramHandler
 
     public void DisableClient(int tenantId)
     {
-        if (!_clients.ContainsKey(tenantId))
+        if (!_clients.TryGetValue(tenantId, out var client))
         {
             return;
         }
-
-        var client = _clients[tenantId];
 
         if (client.CancellationTokenSource != null)
         {
@@ -106,9 +90,9 @@ public class TelegramHandler
         _clients.Remove(tenantId);
     }
 
-    public void CreateOrUpdateClientForTenant(int tenantId, string token, int tokenLifespan, string proxy, bool startTelegramService, CancellationToken stoppingToken, bool force = false)
+    public async Task CreateOrUpdateClientForTenant(int tenantId, string token, int tokenLifespan, string proxy, bool startTelegramService, CancellationToken stoppingToken, bool force = false)
     {
-        var scope = _scopeFactory.CreateScope();
+        var scope = scopeFactory.CreateScope();
         var telegramHelper = scope.ServiceProvider.GetService<TelegramHelper>();
         var newClient = telegramHelper.InitClient(token, proxy);
 
@@ -120,7 +104,7 @@ public class TelegramHandler
             {
                 if (startTelegramService)
                 {
-                    if (!telegramHelper.TestingClient(newClient))
+                    if (!await telegramHelper.TestingClient(newClient))
                     {
                         return;
                     }
@@ -133,24 +117,21 @@ public class TelegramHandler
                     client.CancellationTokenSource = null;
                 }
 
-                BindClient(newClient, tenantId, stoppingToken);
-
                 client.Client = newClient;
                 client.Token = token;
                 client.Proxy = proxy;
+                BindClient(newClient, tenantId, stoppingToken);
             }
         }
         else
         {
             if (!force && startTelegramService)
             {
-                if (!telegramHelper.TestingClient(newClient))
+                if (!await telegramHelper.TestingClient(newClient))
                 {
                     return;
                 }
             }
-
-            BindClient(newClient, tenantId, stoppingToken);
 
             _clients.Add(tenantId, new TenantTgClient()
             {
@@ -160,20 +141,21 @@ public class TelegramHandler
                 TenantId = tenantId,
                 TokenLifeSpan = tokenLifespan
             });
+            BindClient(newClient, tenantId, stoppingToken);
         }
     }
 
     public void RegisterUser(string userId, int tenantId, string token)
     {
-        if (!_clients.ContainsKey(tenantId))
+        if (!_clients.TryGetValue(tenantId, out var value))
         {
             return;
         }
 
         var userKey = UserKey(userId, tenantId);
-        var dateExpires = DateTimeOffset.Now.AddMinutes(_clients[tenantId].TokenLifeSpan);
+        var dateExpires = DateTimeOffset.Now.AddMinutes(value.TokenLifeSpan);
 
-        _distributedCache.SetString(token, userKey, new DistributedCacheEntryOptions
+        distributedCache.SetString(token, userKey, new DistributedCacheEntryOptions
         {
             AbsoluteExpiration = dateExpires
         });
@@ -187,12 +169,13 @@ public class TelegramHandler
 
         var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken);
 
-        client.StartReceiving(updateHandler: (botClient, exception, cancellationToken) => HandleUpdateAsync(botClient, exception, cancellationToken, tenantId),
-                              pollingErrorHandler: HandleErrorAsync,
+        client.StartReceiving(
+            updateHandler: (botClient, update, cancellationToken) => HandleUpdateAsync(botClient, update, tenantId, cancellationToken),
+            errorHandler: HandleErrorAsync,
                               cancellationToken: linkedCts.Token);
     }
 
-    async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken, int tenantId)
+    private async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, int tenantId, CancellationToken cancellationToken)
     {
         if (update.Type != UpdateType.Message)
         {
@@ -204,42 +187,26 @@ public class TelegramHandler
             return;
         }
 
-        if (String.IsNullOrEmpty(update.Message.Text) || update.Message.Text[0] != '/')
+        if (string.IsNullOrEmpty(update.Message.Text) || update.Message.Text[0] != '/')
         {
             return;
         }
 
-        await _command.HandleCommand(update.Message, botClient, tenantId);
+        await command.HandleCommand(update.Message, botClient, tenantId, cancellationToken);
     }
 
     Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
     {
-        String errorMessage;
-
-        if (exception is ApiRequestException)
-        {
-            errorMessage = String.Format("Telegram API Error:\n[{0}]\n{1}", ((ApiRequestException)exception).ErrorCode, ((ApiRequestException)exception).Message);
-        }
-        else
-        {
-            errorMessage = exception.ToString();
-        }
-
+        var errorMessage = exception is ApiRequestException apiException
+            ? string.Format("Telegram API Error:\n[{0}]\n{1}", apiException.ErrorCode, apiException.Message)
+            : exception.ToString();
         _log.Error(errorMessage);
 
         return Task.CompletedTask;
     }
 
-    private string UserKey(string userId, int tenantId)
+    private static string UserKey(string userId, int tenantId)
     {
         return string.Format("{0}:{1}", userId, tenantId);
-    }
-}
-
-public static class TelegramHandlerExtension
-{
-    public static void Register(DIHelper services)
-    {
-        services.TryAdd<TelegramHelper>();
     }
 }

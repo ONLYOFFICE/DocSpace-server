@@ -26,35 +26,34 @@
 
 namespace ASC.TelegramService.Core;
 
-public class TelegramCommand
+public class TelegramCommand(Message msg, string cmdName, string[] args = null)
 {
-    public string CommandName { get; private set; }
-    public string[] Args { get; private set; }
-    public Message Message { get; private set; }
+    public string CommandName { get; private set; } = cmdName;
+    public string[] Args { get; private set; } = args;
+    public Message Message { get; private set; } = msg;
     public User User { get { return Message.From; } }
     public Chat Chat { get { return Message.Chat; } }
-
-    public TelegramCommand(Message msg, string cmdName, string[] args = null)
-    {
-        Message = msg;
-        CommandName = cmdName;
-        Args = args;
-    }
 }
 
-[Singletone]
-public class CommandModule
+[Singleton]
+public partial class CommandModule
 {
-    private readonly Regex _cmdReg = new Regex(@"^\/([^\s]+)\s?(.*)");
-    private readonly Regex _argsReg = new Regex(@"[^""\s]\S*|"".+?""");
+    [GeneratedRegex(@"^\/([^\s]+)\s?(.*)")]
+    private static partial Regex CmdRegex();
+    private readonly Regex _cmdReg = CmdRegex();
 
-    private readonly Dictionary<string, MethodInfo> _commands = new Dictionary<string, MethodInfo>();
-    private readonly Dictionary<string, Type> _contexts = new Dictionary<string, Type>();
-    private readonly Dictionary<Type, ParamParser> _parsers = new Dictionary<Type, ParamParser>();
+    [GeneratedRegex(@"[^""\s]\S*|"".+?""")]
+    private static partial Regex ArgsRegex();
+    private readonly Regex _argsReg = ArgsRegex();
+
+    private readonly Dictionary<string, MethodInfo> _commands = [];
+    private readonly Dictionary<string, Type> _contexts = [];
+    private readonly Dictionary<Type, ParamParser> _parsers = [];
 
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<CommandModule> _log;
 
+    // ToDo: refactor
     public CommandModule(ILogger<CommandModule> logger, IServiceScopeFactory scopeFactory)
     {
         _scopeFactory = scopeFactory;
@@ -129,7 +128,7 @@ public class CommandModule
         return parsedParams.ToArray();
     }
 
-    public async Task HandleCommand(Message msg, ITelegramBotClient client, int tenantId)
+    public async Task HandleCommand(Message msg, ITelegramBotClient client, int tenantId, CancellationToken cancellationToken)
     {
         try
         {
@@ -164,18 +163,13 @@ public abstract class CommandContext
 
     protected async Task ReplyAsync(string message)
     {
-        await Client.SendTextMessageAsync(Context.Chat, message);
+        _ = await Client.SendMessage(Context.Chat, message);
     }
 }
 
-public abstract class ParamParser
+public abstract class ParamParser(Type type)
 {
-    protected Type _type;
-
-    protected ParamParser(Type type)
-    {
-        _type = type;
-    }
+    protected Type _type = type;
 
     public abstract object FromString(string arg);
     public abstract string ToString(object arg);

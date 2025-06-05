@@ -29,11 +29,12 @@ namespace ASC.TelegramService.Extension;
 public static class ConfigurationManagerExtension
 {
     public static ConfigurationManager AddTelegramConfiguration(
-    this ConfigurationManager config,
-    IHostEnvironment env)
+        this ConfigurationManager config,
+        IHostEnvironment env)
     {
-        config.AddJsonFile("notify.json", optional: false, reloadOnChange: true)
-       .AddJsonFile($"notify.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
+        config
+            .AddJsonFile("notify.json", optional: false, reloadOnChange: true)
+            .AddJsonFile($"notify.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
 
         return config;
     }

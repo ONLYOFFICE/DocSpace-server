@@ -26,35 +26,19 @@
 
 namespace ASC.TelegramService;
 
-[Singletone]
-public class TelegramListenerService : BackgroundService
+[Singleton]
+public class TelegramListenerService(
+    ICacheNotify<RegisterUserProto> cacheRegisterUser,
+    ICacheNotify<CreateClientProto> cacheCreateClient,
+    ILogger<TelegramHandler> logger,
+    TelegramHandler telegramHandler,
+    ICacheNotify<DisableClientProto> cacheDisableClient,
+    TenantManager tenantManager,
+    ConsumerFactory consumerFactory) : BackgroundService
 {
-    private readonly ILogger<TelegramHandler> _logger;
-    private readonly ICacheNotify<RegisterUserProto> _cacheRegisterUser;
-    private readonly ICacheNotify<CreateClientProto> _cacheCreateClient;
-    private readonly ICacheNotify<DisableClientProto> _cacheDisableClient;
-    private readonly TelegramHandler _telegramHandler;
-    private readonly TenantManager _tenantManager;
-    private readonly TelegramLoginProvider _telegramLoginProvider;
+    private readonly ILogger<TelegramHandler> _logger = logger;
+    private readonly TelegramLoginProvider _telegramLoginProvider = consumerFactory.Get<TelegramLoginProvider>();
     private CancellationToken _stoppingToken;
-
-    public TelegramListenerService(
-        ICacheNotify<RegisterUserProto> cacheRegisterUser,
-        ICacheNotify<CreateClientProto> cacheCreateClient,
-        ILogger<TelegramHandler> logger,
-        TelegramHandler telegramHandler,
-        ICacheNotify<DisableClientProto> cacheDisableClient,
-        TenantManager tenantManager,
-        ConsumerFactory consumerFactory)
-    {
-        _cacheRegisterUser = cacheRegisterUser;
-        _cacheCreateClient = cacheCreateClient;
-        _cacheDisableClient = cacheDisableClient;
-        _telegramLoginProvider = consumerFactory.Get<TelegramLoginProvider>();
-        _tenantManager = tenantManager;
-        _telegramHandler = telegramHandler;
-        _logger = logger;
-    }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -62,46 +46,46 @@ public class TelegramListenerService : BackgroundService
 
         await CreateClientsAsync();
 
-        _cacheRegisterUser.Subscribe(n => RegisterUser(n), CacheNotifyAction.Insert);
-        _cacheCreateClient.Subscribe(n => CreateOrUpdateClient(n), CacheNotifyAction.Insert);
-        _cacheDisableClient.Subscribe(n => DisableClient(n), CacheNotifyAction.Insert);
+        cacheRegisterUser.Subscribe(RegisterUser, CacheNotifyAction.Insert);
+        cacheCreateClient.Subscribe(CreateOrUpdateClient, CacheNotifyAction.Insert);
+        cacheDisableClient.Subscribe(DisableClient, CacheNotifyAction.Insert);
 
         stoppingToken.Register(() =>
         {
             _logger.DebugTelegramStopping();
 
-            _cacheRegisterUser.Unsubscribe(CacheNotifyAction.Insert);
-            _cacheCreateClient.Unsubscribe(CacheNotifyAction.Insert);
-            _cacheDisableClient.Unsubscribe(CacheNotifyAction.Insert);
+            cacheRegisterUser.Unsubscribe(CacheNotifyAction.Insert);
+            cacheCreateClient.Unsubscribe(CacheNotifyAction.Insert);
+            cacheDisableClient.Unsubscribe(CacheNotifyAction.Insert);
         });
     }
 
     private void DisableClient(DisableClientProto n)
     {
-        _telegramHandler.DisableClient(n.TenantId);
+        telegramHandler.DisableClient(n.TenantId);
     }
 
     private void RegisterUser(RegisterUserProto registerUserProto)
     {
-        _telegramHandler.RegisterUser(registerUserProto.UserId, registerUserProto.TenantId, registerUserProto.Token);
+        telegramHandler.RegisterUser(registerUserProto.UserId, registerUserProto.TenantId, registerUserProto.Token);
     }
 
-    private void CreateOrUpdateClient(CreateClientProto createClientProto)
+    private async void CreateOrUpdateClient(CreateClientProto createClientProto)
     {
-        _telegramHandler.CreateOrUpdateClientForTenant(createClientProto.TenantId, createClientProto.Token, createClientProto.TokenLifespan, createClientProto.Proxy, false, _stoppingToken);
+        await telegramHandler.CreateOrUpdateClientForTenant(createClientProto.TenantId, createClientProto.Token, createClientProto.TokenLifespan, createClientProto.Proxy, false, _stoppingToken);
     }
 
     private async Task CreateClientsAsync()
     {
-        var tenants = await _tenantManager.GetTenantsAsync();
+        var tenants = await tenantManager.GetTenantsAsync();
 
         foreach (var tenant in tenants)
         {
-            _tenantManager.SetCurrentTenant(tenant);
+            tenantManager.SetCurrentTenant(tenant);
 
             if (_telegramLoginProvider.IsEnabled())
             {
-                _telegramHandler.CreateOrUpdateClientForTenant(tenant.Id, _telegramLoginProvider.TelegramBotToken, _telegramLoginProvider.TelegramAuthTokenLifespan, _telegramLoginProvider.TelegramProxy, true, _stoppingToken, true);
+                await telegramHandler.CreateOrUpdateClientForTenant(tenant.Id, _telegramLoginProvider.TelegramBotToken, _telegramLoginProvider.TelegramAuthTokenLifespan, _telegramLoginProvider.TelegramProxy, true, _stoppingToken, true);
             }
         }
     }
