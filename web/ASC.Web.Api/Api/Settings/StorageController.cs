@@ -67,7 +67,7 @@ public class StorageController(
     [SwaggerResponse(200, "List of storages with the following parameters", typeof(List<StorageDto>))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("storage")]
-    public async Task<List<StorageDto>> GetAllStoragesAsync()
+    public async Task<List<StorageDto>> GetAllStorages()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -92,7 +92,7 @@ public class StorageController(
     [SwaggerResponse(200, "Storage progress", typeof(double))]
     [AllowNotPayment]
     [HttpGet("storage/progress")]
-    public async Task<double> GetStorageProgressAsync()
+    public async Task<double> GetStorageProgress()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -116,7 +116,7 @@ public class StorageController(
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(405, "Method not allowed")]
     [HttpPost("encryption/start")]
-    public async Task<bool> StartStorageEncryptionAsync(StorageEncryptionRequestsDto inDto)
+    public async Task<bool> StartStorageEncryption(StorageEncryptionRequestsDto inDto)
     {
         if (coreBaseSettings.CustomMode)
         {
@@ -152,14 +152,14 @@ public class StorageController(
 
         await tenantExtra.DemandAccessSpacePermissionAsync();
 
-        var storages = await GetAllStoragesAsync();
+        var storages = await GetAllStorages();
 
         if (storages.Exists(s => s.Current))
         {
             throw new NotSupportedException();
         }
 
-        var cdnStorages = await GetAllCdnStoragesAsync();
+        var cdnStorages = await GetAllCdnStorages();
 
         if (cdnStorages.Exists(s => s.Current))
         {
@@ -247,7 +247,7 @@ public class StorageController(
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(405, "Method not allowed")]
     [HttpGet("encryption/settings")]
-    public async Task<EncryptionSettings> GetStorageEncryptionSettingsAsync()
+    public async Task<EncryptionSettings> GetStorageEncryptionSettings()
     {
         try
         {
@@ -317,7 +317,7 @@ public class StorageController(
     [SwaggerResponse(400, "Module")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("storage")]
-    public async Task<StorageSettings> UpdateStorageAsync(StorageRequestsDto inDto)
+    public async Task<StorageSettings> UpdateStorage(StorageRequestsDto inDto)
     {
         try
         {
@@ -359,7 +359,7 @@ public class StorageController(
     [SwaggerResponse(200, "Ok")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpDelete("storage")]
-    public async Task ResetStorageToDefaultAsync()
+    public async Task ResetStorageToDefault()
     {
         try
         {
@@ -392,7 +392,7 @@ public class StorageController(
     [SwaggerResponse(200, "List of the CDN storages with the following parameters", typeof(List<StorageDto>))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("storage/cdn")]
-    public async Task<List<StorageDto>> GetAllCdnStoragesAsync()
+    public async Task<List<StorageDto>> GetAllCdnStorages()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -418,7 +418,7 @@ public class StorageController(
     [SwaggerResponse(400, "Module")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("storage/cdn")]
-    public async Task<CdnStorageSettings> UpdateCdnAsync(StorageRequestsDto inDto)
+    public async Task<CdnStorageSettings> UpdateCdnStorage(StorageRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -462,7 +462,7 @@ public class StorageController(
     [SwaggerResponse(200, "Ok")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpDelete("storage/cdn")]
-    public async Task ResetCdnToDefaultAsync()
+    public async Task ResetCdnToDefault()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 

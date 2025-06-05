@@ -45,7 +45,7 @@ public class CustomNavigationController(
     [Tags("Settings / Custom Navigation")]
     [SwaggerResponse(200, "List of the custom navigation items", typeof(List<CustomNavigationItem>))]
     [HttpGet("getall")]
-    public async Task<List<CustomNavigationItem>> GetCustomNavigationItemsAsync()
+    public async Task<List<CustomNavigationItem>> GetCustomNavigationItems()
     {
         return (await settingsManager.LoadAsync<CustomNavigationSettings>()).Items;
     }
@@ -71,7 +71,7 @@ public class CustomNavigationController(
     [Tags("Settings / Custom Navigation")]
     [SwaggerResponse(200, "Custom navigation item", typeof(CustomNavigationItem))]
     [HttpGet("get/{id:guid}")]
-    public async Task<CustomNavigationItem> GetCustomNavigationItemAsync(IdRequestDto<Guid> inDto)
+    public async Task<CustomNavigationItem> GetCustomNavigationItem(IdRequestDto<Guid> inDto)
     {
         return (await settingsManager.LoadAsync<CustomNavigationSettings>()).Items.Find(item => item.Id == inDto.Id);
     }

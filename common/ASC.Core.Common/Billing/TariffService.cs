@@ -1100,7 +1100,7 @@ public class TariffService(
 
         if (balance != null)
         {
-            return balance;
+            return balance.AccountNumber == 0 ? null : balance;
         }
 
         await using (await distributedLockProvider.TryAcquireLockAsync($"{cacheKey}_lock"))
@@ -1109,7 +1109,7 @@ public class TariffService(
 
             if (balance != null)
             {
-                return balance;
+                return balance.AccountNumber == 0 ? null : balance;
             }
 
             if (accountingClient.Configured)
@@ -1123,6 +1123,7 @@ public class TariffService(
                 catch (Exception error)
                 {
                     LogError(error, tenantId.ToString());
+                    await hybridCache.SetAsync(cacheKey, new Balance(0, null), TimeSpan.FromMinutes(10));
                 }
             }
         }

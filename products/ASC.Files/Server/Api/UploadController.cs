@@ -71,7 +71,7 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     [SwaggerResponse(200, "Information about created session", typeof(object))]
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [HttpPost("{folderId}/upload/create_session")]
-    public async Task<object> CreateUploadSessionAsync(SessionRequestDto<T> inDto)
+    public async Task<object> CreateUploadSession(SessionRequestDto<T> inDto)
     {
         return await filesControllerHelper.CreateUploadSessionAsync(inDto.FolderId, inDto.Session.FileName, inDto.Session.FileSize, inDto.Session.RelativePath, inDto.Session.Encrypted, inDto.Session.CreateOn, inDto.Session.CreateNewIfExist);
     }
@@ -127,7 +127,7 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [SwaggerResponse(404, "Folder not found")]
     [HttpPost("{folderId}/insert", Order = 1)]
-    public async Task<FileDto<T>> InsertFileAsync(InsertWithFileRequestDto<T> inDto)
+    public async Task<FileDto<T>> InsertFile(InsertWithFileRequestDto<T> inDto)
     {
         return await filesControllerHelper.InsertFileAsync(inDto.FolderId, inDto.InsertFile.Stream, inDto.InsertFile.Title, inDto.InsertFile.CreateNewIfExist, inDto.InsertFile.KeepConvertStatus);
     }
@@ -151,7 +151,7 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [SwaggerResponse(404, "Folder not found")]
     [HttpPost("{folderId}/upload", Order = 1)]
-    public async Task<object> UploadFileAsync(UploadWithFolderRequestDto<T> inDto)
+    public async Task<object> UploadFile(UploadWithFolderRequestDto<T> inDto)
     {
         return await filesControllerHelper.UploadFileAsync(inDto.FolderId, inDto.UploadData);
     }
@@ -174,7 +174,7 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [SwaggerResponse(404, "Folder not found")]
     [HttpPost("@common/insert")]
-    public async Task<FileDto<int>> InsertFileToCommonFromBodyAsync([FromForm][ModelBinder(BinderType = typeof(InsertFileModelBinder))] InsertFileRequestDto inDto)
+    public async Task<FileDto<int>> InsertFileToCommonFromBody([FromForm][ModelBinder(BinderType = typeof(InsertFileModelBinder))] InsertFileRequestDto inDto)
     {
         return await filesControllerHelper.InsertFileAsync(await globalFolderHelper.FolderCommonAsync, inDto.Stream, inDto.Title, inDto.CreateNewIfExist, inDto.KeepConvertStatus);
     }
@@ -189,7 +189,7 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [SwaggerResponse(404, "Folder not found")]
     [HttpPost("@my/insert")]
-    public async Task<FileDto<int>> InsertFileToMyFromBodyAsync([FromForm][ModelBinder(BinderType = typeof(InsertFileModelBinder))] InsertFileRequestDto inDto)
+    public async Task<FileDto<int>> InsertFileToMyFromBody([FromForm][ModelBinder(BinderType = typeof(InsertFileModelBinder))] InsertFileRequestDto inDto)
     {
         return await filesControllerHelper.InsertFileAsync(await globalFolderHelper.FolderMyAsync, inDto.Stream, inDto.Title, inDto.CreateNewIfExist, inDto.KeepConvertStatus);
     }
@@ -213,7 +213,7 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [SwaggerResponse(404, "File not found")]
     [HttpPost("@common/upload")]
-    public async Task<object> UploadFileToCommonAsync([ModelBinder(BinderType = typeof(UploadModelBinder))] UploadRequestDto inDto)
+    public async Task<object> UploadFileToCommon([ModelBinder(BinderType = typeof(UploadModelBinder))] UploadRequestDto inDto)
     {
         inDto.CreateNewIfExist = false;
 
@@ -238,7 +238,7 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [SwaggerResponse(404, "File not found")]
     [HttpPost("@my/upload")]
-    public async Task<object> UploadFileToMyAsync([ModelBinder(BinderType = typeof(UploadModelBinder))] UploadRequestDto inDto)
+    public async Task<object> UploadFileToMy([ModelBinder(BinderType = typeof(UploadModelBinder))] UploadRequestDto inDto)
     {
         inDto.CreateNewIfExist = false;
 

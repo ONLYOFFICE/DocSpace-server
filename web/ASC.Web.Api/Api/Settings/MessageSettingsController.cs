@@ -53,7 +53,7 @@ public class MessageSettingsController(
     [Tags("Settings / Messages")]
     [SwaggerResponse(200, "Message about the result of saving new settings", typeof(string))]
     [HttpPost("messagesettings")]
-    public async Task<string> EnableAdminMessageSettingsAsync(TurnOnAdminMessageSettingsRequestDto inDto)
+    public async Task<string> EnableAdminMessageSettings(TurnOnAdminMessageSettingsRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -126,7 +126,7 @@ public class MessageSettingsController(
     [SwaggerResponse(429, "Request limit is exceeded")]
     [AllowAnonymous, AllowNotPayment]
     [HttpPost("sendadmmail")]
-    public async Task<string> SendAdmMailAsync(AdminMessageSettingsRequestsDto inDto)
+    public async Task<string> SendAdminMail(AdminMessageSettingsRequestsDto inDto)
     {
         var studioAdminMessageSettings = await settingsManager.LoadAsync<StudioAdminMessageSettings>();
         var enableAdmMess = studioAdminMessageSettings.Enable || (await tenantExtra.IsNotPaidAsync());

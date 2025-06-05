@@ -68,7 +68,7 @@ public class SecurityController(
     [SwaggerResponse(200, "List of login events", typeof(IEnumerable<LoginEventDto>))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("audit/login/last")]
-    public async Task<IEnumerable<LoginEventDto>> GetLastLoginEventsAsync()
+    public async Task<IEnumerable<LoginEventDto>> GetLastLoginEvents()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -89,7 +89,7 @@ public class SecurityController(
     [SwaggerResponse(200, "List of audit trail data", typeof(IEnumerable<AuditEventDto>))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("audit/events/last")]
-    public async Task<IEnumerable<AuditEventDto>> GetLastAuditEventsAsync()
+    public async Task<IEnumerable<AuditEventDto>> GetLastAuditEvents()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -116,7 +116,7 @@ public class SecurityController(
     [SwaggerResponse(200, "List of filtered login events", typeof(IEnumerable<LoginEventDto>))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("audit/login/filter")]
-    public async Task<IEnumerable<LoginEventDto>> GetLoginEventsByFilterAsync(LoginEventRequestDto inDto)
+    public async Task<IEnumerable<LoginEventDto>> GetLoginEventsByFilter(LoginEventRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -124,7 +124,7 @@ public class SecurityController(
 
         if (!(await tenantManager.GetCurrentTenantQuotaAsync()).Audit || !SetupInfo.IsVisibleSettings(ManagementType.LoginHistory.ToStringFast()))
         {
-            return await GetLastLoginEventsAsync();
+            return await GetLastLoginEvents();
         }
 
         await DemandAuditPermissionAsync();
@@ -144,7 +144,7 @@ public class SecurityController(
     [SwaggerResponse(200, "List of filtered audit trail data", typeof(IEnumerable<AuditEventDto>))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("audit/events/filter")]
-    public async Task<IEnumerable<AuditEventDto>> GetAuditEventsByFilterAsync(AuditEventRequestDto inDto)
+    public async Task<IEnumerable<AuditEventDto>> GetAuditEventsByFilter(AuditEventRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -152,7 +152,7 @@ public class SecurityController(
 
         if (!(await tenantManager.GetCurrentTenantQuotaAsync()).Audit || !SetupInfo.IsVisibleSettings(ManagementType.LoginHistory.ToStringFast()))
         {
-            return await GetLastAuditEventsAsync();
+            return await GetLastAuditEvents();
         }
 
         await DemandAuditPermissionAsync();
@@ -172,7 +172,7 @@ public class SecurityController(
     [SwaggerResponse(200, "Audit trail types", typeof(object))]
     [AllowAnonymous]
     [HttpGet("audit/types")]
-    public object GetTypes()
+    public object GetAuditTrailTypes()
     {
         return new
         {
@@ -196,7 +196,7 @@ public class SecurityController(
     [SwaggerResponse(200, "Audit trail mappers", typeof(object))]
     [AllowAnonymous]
     [HttpGet("audit/mappers")]
-    public object GetMappers(AuditTrailTypesRequestDto inDto)
+    public object GetAuditTrailMappers(AuditTrailTypesRequestDto inDto)
     {
         return auditActionMapper.Mappers
             .Where(r => !inDto.ProductType.HasValue || r.Product == inDto.ProductType.Value)
@@ -297,7 +297,7 @@ public class SecurityController(
     [SwaggerResponse(200, "Audit settings", typeof(TenantAuditSettings))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("audit/settings/lifetime")]
-    public async Task<TenantAuditSettings> GetAuditSettingsAsync()
+    public async Task<TenantAuditSettings> GetAuditSettings()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -352,7 +352,7 @@ public class SecurityController(
     [SwaggerResponse(400, "Exception in Domains")]
     [EnableCors(PolicyName = CorsPoliciesEnums.AllowAllCorsPolicyName )]
     [HttpPost("csp")]
-    public async Task<CspDto> Csp(CspRequestsDto request)
+    public async Task<CspDto> ConfigureCsp(CspRequestsDto request)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -399,7 +399,7 @@ public class SecurityController(
     [AllowAnonymous]
     [EnableCors(PolicyName = CorsPoliciesEnums.AllowAllCorsPolicyName)]
     [HttpGet("csp")]
-    public async Task<CspDto> GetCsp()
+    public async Task<CspDto> GetCspSettings()
     {
         //await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         

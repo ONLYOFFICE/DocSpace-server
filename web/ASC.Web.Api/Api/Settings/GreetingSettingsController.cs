@@ -59,7 +59,7 @@ public class GreetingSettingsController(
     [Tags("Settings / Greeting settings")]
     [SwaggerResponse(200, "Boolean value: true if the greeting settings of the current portal are set to default", typeof(bool))]
     [HttpGet("isdefault")]
-    public bool IsDefault()
+    public bool GetIsDefaultGreetingSettings()
     {
         var tenant = tenantManager.GetCurrentTenant();
         return tenant.Name == "";
@@ -73,7 +73,7 @@ public class GreetingSettingsController(
     [Tags("Settings / Greeting settings")]
     [SwaggerResponse(200, "Message about saving greeting settings successfully", typeof(string))]
     [HttpPost("")]
-    public async Task<string> SaveGreetingSettingsAsync(GreetingSettingsRequestsDto inDto)
+    public async Task<string> SaveGreetingSettings(GreetingSettingsRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -104,7 +104,7 @@ public class GreetingSettingsController(
     [Tags("Settings / Greeting settings")]
     [SwaggerResponse(200, "Greeting settings: tenant name", typeof(string))]
     [HttpPost("restore")]
-    public async Task<string> RestoreGreetingSettingsAsync()
+    public async Task<string> RestoreGreetingSettings()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 

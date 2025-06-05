@@ -54,7 +54,7 @@ public class SmtpSettingsController(
     [SwaggerResponse(200, "SMTP settings", typeof(SmtpSettingsDto))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("")]
-    public async Task<SmtpSettingsDto> GetSmtpSettingsAsync()
+    public async Task<SmtpSettingsDto> GetSmtpSettings()
     {
         await CheckSmtpPermissionsAsync();
 
@@ -82,7 +82,7 @@ public class SmtpSettingsController(
     [SwaggerResponse(200, "SMTP settings", typeof(SmtpSettingsDto))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpPost("")]
-    public async Task<SmtpSettingsDto> SaveSmtpSettingsAsync(SmtpSettingsDto inDto)
+    public async Task<SmtpSettingsDto> SaveSmtpSettings(SmtpSettingsDto inDto)
     {
         ArgumentNullException.ThrowIfNull(inDto);
         
@@ -133,7 +133,7 @@ public class SmtpSettingsController(
     [SwaggerResponse(200, "Default SMTP settings", typeof(SmtpSettingsDto))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpDelete("")]
-    public async Task<SmtpSettingsDto> ResetSmtpSettingsAsync()
+    public async Task<SmtpSettingsDto> ResetSmtpSettings()
     {
         await CheckSmtpPermissionsAsync();
 

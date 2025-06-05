@@ -94,7 +94,7 @@ public class SsoController(
     [Tags("Settings / SSO")]
     [SwaggerResponse(200, "Default SSO settings", typeof(SsoSettingsV2))]
     [HttpGet("default")]
-    public async Task<SsoSettingsV2> GetDefaultSsoSettingsV2Async()
+    public async Task<SsoSettingsV2> GetDefaultSsoSettingsV2()
     {
         await CheckSsoPermissionsAsync();
         return settingsManager.GetDefault<SsoSettingsV2>();
@@ -134,7 +134,7 @@ public class SsoController(
     [SwaggerResponse(200, "SSO settings", typeof(SsoSettingsV2))]
     [SwaggerResponse(400, "Settings could not be null")]
     [HttpPost("")]
-    public async Task<SsoSettingsV2> SaveSsoSettingsV2Async(SsoSettingsRequestsDto inDto)
+    public async Task<SsoSettingsV2> SaveSsoSettingsV2(SsoSettingsRequestsDto inDto)
     {
         await CheckSsoPermissionsAsync();
 
@@ -222,7 +222,7 @@ public class SsoController(
     [Tags("Settings / SSO")]
     [SwaggerResponse(200, "Default SSO settings", typeof(SsoSettingsV2))]
     [HttpDelete("")]
-    public async Task<SsoSettingsV2> ResetSsoSettingsV2Async()
+    public async Task<SsoSettingsV2> ResetSsoSettingsV2()
     {
         await CheckSsoPermissionsAsync();
 

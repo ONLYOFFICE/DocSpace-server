@@ -43,7 +43,7 @@ public class PushController(
     [Tags("Security / Firebase")]
     [SwaggerResponse(200, "FireBase user", typeof(FireBaseUser))]
     [HttpPost("docregisterdevice")]
-    public async Task<FireBaseUser> DocRegisterPusnNotificationDeviceAsync(FirebaseRequestsDto inDto)
+    public async Task<FireBaseUser> DocRegisterPusnNotificationDevice(FirebaseRequestsDto inDto)
     {
         return await firebaseHelper.RegisterUserDeviceAsync(inDto.FirebaseDeviceToken, inDto.IsSubscribed, PushConstants.PushDocAppName);
     }
@@ -56,7 +56,7 @@ public class PushController(
     [Tags("Security / Firebase")]
     [SwaggerResponse(200, "FireBase user", typeof(FireBaseUser))]
     [HttpPut("docsubscribe")]
-    public async Task<FireBaseUser> SubscribeDocumentsPushNotificationAsync(FirebaseRequestsDto inDto)
+    public async Task<FireBaseUser> SubscribeDocumentsPushNotification(FirebaseRequestsDto inDto)
     {
         return await firebaseHelper.UpdateUserAsync(inDto.FirebaseDeviceToken, inDto.IsSubscribed, PushConstants.PushDocAppName);
     }
