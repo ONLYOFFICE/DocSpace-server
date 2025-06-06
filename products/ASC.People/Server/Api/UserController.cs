@@ -499,6 +499,7 @@ public class UserController(
     [SwaggerResponse(400, "Incorrect email")]
     [SwaggerResponse(403, "The invitation link is invalid or its validity has expired")]
     [SwaggerResponse(404, "User not found")]
+    [AllowNotPayment]
     [HttpPut("{userid:guid}/password")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PasswordChange,EmailChange,Activation,EmailActivation,Everyone")]
