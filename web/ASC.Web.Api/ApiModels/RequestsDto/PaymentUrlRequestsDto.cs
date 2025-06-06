@@ -89,7 +89,7 @@ public class TopUpDepositRequestDto
     /// <summary>
     /// Amount
     /// </summary>
-    public decimal Amount { get; set; }
+    public int Amount { get; set; }
 
     /// <summary>
     /// Currency
