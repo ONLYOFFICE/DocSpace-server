@@ -108,13 +108,10 @@ public class DynamicIgnoreConverter<T>(IHttpContextAccessor httpContextAccessor,
                             if (propType.GetInterfaces().Any(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
                             {
                                 var firstValue = ((IEnumerable)propertyValue).Cast<object>().FirstOrDefault();
-                                if (firstValue != null)
-                                {
-                                    propType = firstValue.GetType();
-                                }
+                                propType = firstValue?.GetType();
                             }
 
-                            if (propType.IsClass && propType != typeof(string))
+                            if (propType is { IsClass: true } && propType != typeof(string))
                             {
                                 var converterType = typeof(DynamicIgnoreConverter<>).MakeGenericType(propType);
 
