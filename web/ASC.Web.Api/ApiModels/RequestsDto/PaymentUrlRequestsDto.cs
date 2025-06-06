@@ -89,7 +89,7 @@ public class TopUpDepositRequestDto
     /// <summary>
     /// Amount
     /// </summary>
-    [Range(1, 65535)]
+    [Range(1, 999999)]
     public int Amount { get; set; }
 
     /// <summary>
