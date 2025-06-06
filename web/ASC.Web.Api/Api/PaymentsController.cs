@@ -138,6 +138,8 @@ public class PaymentController(
             return false;
         }
 
+        await DemandPayerAsync(tenant);
+
         // TODO: Temporary restriction.
         // Possibility to buy only one product per transaction.
         // For the current paid tariff only quota change is available.
@@ -211,6 +213,8 @@ public class PaymentController(
         {
             return false;
         }
+
+        await DemandPayerAsync(tenant);
 
         // TODO: Temporary restriction.
         // Possibility to buy only one product per transaction.
@@ -314,6 +318,8 @@ public class PaymentController(
         {
             return null;
         }
+
+        await DemandPayerAsync(tenant);
 
         // TODO: Temporary restriction.
         // Possibility to buy only one product per transaction.
