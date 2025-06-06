@@ -773,6 +773,7 @@ public class PortalController(
     [SwaggerResponse(200, "Ok", typeof(IActionResult))]
     [HttpPost("validateportalname")]
     [AllowCrossSiteJson]
+    [AllowAnonymous]
     public async ValueTask<IActionResult> CheckExistingNamePortalAsync(TenantModel model)
     {
         if (model == null)
@@ -883,6 +884,7 @@ public class PortalController(
     [SwaggerResponse(200, "Ok", typeof(IActionResult))]
     [HttpPost("signin")]
     [AllowCrossSiteJson]
+    [AllowAnonymous]
     public async Task<IActionResult> SignInToPortalAsync(TenantModel model)
     {
         try
