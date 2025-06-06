@@ -107,18 +107,15 @@ public class DynamicIgnoreConverter<T>(IHttpContextAccessor httpContextAccessor,
                         {
                             if (propType.GetInterfaces().Any(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
                             {
-                                var firstValue = ((IEnumerable)propertyValue).Cast<object>().FirstOrDefault();
-                                propType = firstValue?.GetType();
+                                var types = ((IEnumerable)propertyValue).Cast<object>().Select(r=> r.GetType()).Distinct();
+                                foreach (var type in types)
+                                {
+                                    newOptions = JsonSerializerOptions(type, newFullPropertyName, newOptions);
+                                }
                             }
-
-                            if (propType is { IsClass: true } && propType != typeof(string))
+                            else
                             {
-                                var converterType = typeof(DynamicIgnoreConverter<>).MakeGenericType(propType);
-
-                                var converter = Activator.CreateInstance(converterType, httpContextAccessor, depth + 1, newFullPropertyName);
-
-                                newOptions = new JsonSerializerOptions(options);
-                                newOptions.Converters.Add((JsonConverter)converter);
+                                newOptions = JsonSerializerOptions(propType, newFullPropertyName, newOptions);
                             }
                         }
                     }
@@ -139,6 +136,21 @@ public class DynamicIgnoreConverter<T>(IHttpContextAccessor httpContextAccessor,
         }
 
         writer.WriteEndObject();
+
+        JsonSerializerOptions JsonSerializerOptions(Type propType, string newFullPropertyName, JsonSerializerOptions newOptions)
+        {
+            if (propType is { IsClass: true } && propType != typeof(string))
+            {
+                var converterType = typeof(DynamicIgnoreConverter<>).MakeGenericType(propType);
+
+                var converter = Activator.CreateInstance(converterType, httpContextAccessor, depth + 1, newFullPropertyName);
+
+                newOptions = new JsonSerializerOptions(options);
+                newOptions.Converters.Add((JsonConverter)converter);
+            }
+
+            return newOptions;
+        }
     }
 }
 
