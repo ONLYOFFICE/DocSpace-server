@@ -145,7 +145,7 @@ public class DynamicIgnoreConverter<T>(IHttpContextAccessor httpContextAccessor,
 
                 var converter = Activator.CreateInstance(converterType, httpContextAccessor, depth + 1, newFullPropertyName);
 
-                newOptions = new JsonSerializerOptions(options);
+                newOptions = new JsonSerializerOptions(newOptions);
                 newOptions.Converters.Add((JsonConverter)converter);
             }
 
