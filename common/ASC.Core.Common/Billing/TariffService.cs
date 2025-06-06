@@ -309,7 +309,7 @@ public class TariffService(
         return productIds;
     }
 
-    public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType)
+    public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency)
     {
         if (quantity == null || quantity.Count == 0 || !billingClient.Configured)
         {
@@ -320,7 +320,7 @@ public class TariffService(
 
         try
         {
-            var changed = await billingClient.ChangePaymentAsync(await coreSettings.GetKeyAsync(tenantId), productIds.ToArray(), quantity.Values.ToArray(), productQuantityType);
+            var changed = await billingClient.ChangePaymentAsync(await coreSettings.GetKeyAsync(tenantId), productIds.ToArray(), quantity.Values.ToArray(), productQuantityType, currency);
 
             if (!changed)
             {
@@ -339,7 +339,7 @@ public class TariffService(
         return true;
     }
 
-    public async Task<PaymentCalculation> PaymentCalculateAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType)
+    public async Task<PaymentCalculation> PaymentCalculateAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency)
     {
         if (quantity == null || quantity.Count == 0 || !billingClient.Configured)
         {
@@ -350,7 +350,7 @@ public class TariffService(
 
         try
         {
-            var response = await billingClient.CalculatePaymentAsync(await coreSettings.GetKeyAsync(tenantId), productIds.ToArray(), quantity.Values.ToArray(), productQuantityType);
+            var response = await billingClient.CalculatePaymentAsync(await coreSettings.GetKeyAsync(tenantId), productIds.ToArray(), quantity.Values.ToArray(), productQuantityType, currency);
 
             return response;
         }
