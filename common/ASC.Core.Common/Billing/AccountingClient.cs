@@ -57,7 +57,10 @@ public class AccountingClient
         _httpClientFactory = httpClientFactory;
 
         _configuration.Url = (_configuration.Url ?? "").Trim().TrimEnd('/');
-        if (!string.IsNullOrEmpty(_configuration.Url))
+
+        _configuration.Currencies = _configuration.Currencies == null || _configuration.Currencies.Count == 0 ? ["USD"] : _configuration.Currencies;
+
+        if (!string.IsNullOrEmpty(_configuration.Url)) 
         {
             Configured = true;
         }
@@ -129,6 +132,11 @@ public class AccountingClient
     public async Task<List<Currency>> GetAllCurrenciesAsync()
     {
         return await RequestAsync<List<Currency>>(HttpMethod.Get, "/currency/all", null);
+    }
+
+    public List<string> GetSupportedCurrencies()
+    {
+        return _configuration.Currencies;
     }
 
 

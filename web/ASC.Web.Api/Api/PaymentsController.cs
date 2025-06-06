@@ -260,7 +260,8 @@ public class PaymentController(
         }
 
         // TODO: support other currencies
-        var subAccount = balance.SubAccounts.FirstOrDefault(x => x.Currency == "USD");
+        var defaultCurrency = tariffService.GetSupportedAccountingCurrencies().First();
+        var subAccount = balance.SubAccounts.FirstOrDefault(x => x.Currency == defaultCurrency);
         if (subAccount == null)
         {
             return false;
@@ -345,7 +346,8 @@ public class PaymentController(
         }
 
         // TODO: support other currencies
-        var subAccount = balance.SubAccounts.FirstOrDefault(x => x.Currency == "USD");
+        var defaultCurrency = tariffService.GetSupportedAccountingCurrencies().First();
+        var subAccount = balance.SubAccounts.FirstOrDefault(x => x.Currency == defaultCurrency);
         if (subAccount == null)
         {
             return null;
@@ -604,6 +606,12 @@ public class PaymentController(
             return null;
         }
 
+        var supportedCurrencies = tariffService.GetSupportedAccountingCurrencies();
+        if (!supportedCurrencies.Contains(inDto.Currency))
+        {
+            return null;
+        }
+
         var tenant = tenantManager.GetCurrentTenant();
 
         var hasCustomer = await HasCustomer(tenant);
@@ -850,7 +858,7 @@ public class PaymentController(
     [SwaggerResponse(200, "The list of currencies", typeof(List<Currency>))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("accounting/currencies")]
-    public async Task<List<Currency>> GetAllCurrencies()
+    public async Task<List<Currency>> GetAccountingCurrencies()
     {
         if (!tariffService.IsConfigured())
         {
@@ -859,8 +867,11 @@ public class PaymentController(
 
         await DemandAdminAsync();
 
-        var result = await tariffService.GetAllCurrenciesAsync();
-        return result;
+        var supportedCurrencies = tariffService.GetSupportedAccountingCurrencies();
+
+        var allCurrencies = await tariffService.GetAllAccountingCurrenciesAsync();
+
+        return allCurrencies.Where(x=> supportedCurrencies.Contains(x.Code)).ToList();
     }
 
     /// <summary>

@@ -31,4 +31,5 @@ internal class AccountingConfiguration
     public string Url { get; set; }
     public string Key { get; set; }
     public string Secret { get; set; }
+    public List<string> Currencies { get; set; }
 }

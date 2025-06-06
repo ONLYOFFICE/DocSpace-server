@@ -1159,9 +1159,14 @@ public class TariffService(
         }
     }
 
-    public async Task<List<Currency>> GetAllCurrenciesAsync()
+    public async Task<List<Currency>> GetAllAccountingCurrenciesAsync()
     {
         return await accountingClient.GetAllCurrenciesAsync();
+    }
+
+    public List<string> GetSupportedAccountingCurrencies()
+    {
+        return accountingClient.GetSupportedCurrencies();
     }
 
     #endregion
