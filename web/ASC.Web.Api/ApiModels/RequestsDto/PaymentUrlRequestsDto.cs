@@ -89,10 +89,11 @@ public class TopUpDepositRequestDto
     /// <summary>
     /// Amount
     /// </summary>
+    [Range(1, 65535)]
     public int Amount { get; set; }
 
     /// <summary>
-    /// Currency
+    /// The three-character ISO 4217 currency symbol
     /// </summary>
     public string Currency { get; set; }
 }
