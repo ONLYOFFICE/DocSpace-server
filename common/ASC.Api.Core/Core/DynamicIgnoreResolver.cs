@@ -24,59 +24,134 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Text.Json.Serialization.Metadata;
+using System.Collections;
 
 namespace ASC.Api.Core.Core;
 
-public class DynamicIgnoreResolver(IHttpContextAccessor httpContextAccessor) : DefaultJsonTypeInfoResolver
+public class DynamicIgnoreConverter<T>(IHttpContextAccessor httpContextAccessor, int depth = 0, string fullPropertyName = "") : JsonConverter<T>
 {
-    public override JsonTypeInfo GetTypeInfo(Type type, JsonSerializerOptions options)
+    public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        var jsonTypeInfo = base.GetTypeInfo(type, options);
+        return JsonSerializer.Deserialize<T>(ref reader, options);
+    }
 
-        if (jsonTypeInfo.Kind == JsonTypeInfoKind.Object)
+    public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
+    {
+        WriteAsync(writer, value, options).GetAwaiter().GetResult();
+    }
+
+    private async Task WriteAsync(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
+    {
+        writer.WriteStartObject();
+
+        var properties = typeof(T).GetProperties();
+        foreach (var property in properties)
         {
-            foreach (var propertyInfo in jsonTypeInfo.Properties)
+            var propertyValue = property.GetValue(value);
+            var propertyName = options.PropertyNamingPolicy?.ConvertName(property.Name) ?? property.Name;
+
+            if (options.DefaultIgnoreCondition == JsonIgnoreCondition.WhenWritingNull && propertyValue == null)
             {
-                propertyInfo.ShouldSerialize = (obj, value) =>
+                continue;
+            }
+
+            var shouldSerialize = true;
+            var newOptions = options;
+            var newFullPropertyName = fullPropertyName;
+            
+            if (propertyValue != null)
+            {
+                var fields = httpContextAccessor.HttpContext?.Request.Query.GetRequestArray("fields");
+                if (fields is { Length: > 0 })
                 {
-                    if(options.DefaultIgnoreCondition == JsonIgnoreCondition.WhenWritingNull && value == null)
+                    if (depth > 0)
                     {
-                        return false;
-                    }
-                    
-                    if (obj is SuccessApiResponse or ErrorApiResponse or Link)
-                    {
-                        return true;
-                    }
-                    
-                    var fields = httpContextAccessor.HttpContext?.Request.Query.GetRequestArray("fields");
-                    if(fields is { Length: > 0 })
-                    {
-                        return fields.Any(r =>
+                        shouldSerialize = fields.Any(r =>
                         {
-                            var splitter = r.Split('.');
-                            return splitter.Any(s => s.Trim() == propertyInfo.Name);
+                            bool result;
+                            if (r.Contains('.'))
+                            {
+                                var checkName = depth == 1 ? propertyName : $"{fullPropertyName}.{propertyName}";
+                                result = r == checkName;
+                                if (!result)
+                                {
+                                    result = r == fullPropertyName;
+                                }
+                                if (!result)
+                                {
+                                    result = r.StartsWith(checkName + ".");
+                                }
+
+                                if (result)
+                                {
+                                    newFullPropertyName = checkName;
+                                }
+                                
+                                return result;
+                            }
+
+                            result = r == (depth == 1 ? propertyName : fullPropertyName);
+                            if (result && depth == 1)
+                            {
+                                newFullPropertyName = propertyName;
+                            }
+                            return result;
                         });
                     }
 
-                    return true;
-                };
+                    var responsePropertyName = propertyName.Equals(nameof(SuccessApiResponse.Response), StringComparison.InvariantCultureIgnoreCase);
+                    if (shouldSerialize && (depth == 0 && responsePropertyName || depth > 0))
+                    {
+                        var propType = propertyValue.GetType();
+                        if (propType.IsClass && propType != typeof(string))
+                        {
+                            if (propType.GetInterfaces().Any(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
+                            {
+                                var firstValue = ((IEnumerable)propertyValue).Cast<object>().FirstOrDefault();
+                                if (firstValue != null)
+                                {
+                                    propType = firstValue.GetType();
+                                }
+                            }
+
+                            if (propType.IsClass && propType != typeof(string))
+                            {
+                                var converterType = typeof(DynamicIgnoreConverter<>).MakeGenericType(propType);
+
+                                var converter = Activator.CreateInstance(converterType, httpContextAccessor, depth + 1, newFullPropertyName);
+
+                                newOptions = new JsonSerializerOptions(options);
+                                newOptions.Converters.Add((JsonConverter)converter);
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (shouldSerialize)
+            {
+                writer.WritePropertyName(propertyName);
+
+                using var stream = new MemoryStream();
+                await JsonSerializer.SerializeAsync(stream, propertyValue, property.PropertyType, newOptions);
+
+                var jsonBytes = stream.ToArray();
+                var jsonString = Encoding.UTF8.GetString(jsonBytes);
+                writer.WriteRawValue(jsonString);
             }
         }
 
-        return jsonTypeInfo;
+        writer.WriteEndObject();
     }
 }
 
-public class ConfigureJsonOptions(IHttpContextAccessor httpContextAccessor)
-    : IConfigureOptions<JsonOptions>
+public class ConfigureJsonOptions(IHttpContextAccessor httpContextAccessor) : IConfigureOptions<JsonOptions>
 {
     public void Configure(JsonOptions options)
-    {            
+    {
         options.JsonSerializerOptions.WriteIndented = false;
         options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
         options.JsonSerializerOptions.NumberHandling = JsonNumberHandling.AllowReadingFromString;
-        options.JsonSerializerOptions.TypeInfoResolver = new DynamicIgnoreResolver(httpContextAccessor);
+        options.JsonSerializerOptions.Converters.Add(new DynamicIgnoreConverter<SuccessApiResponse>(httpContextAccessor));
     }
 }
