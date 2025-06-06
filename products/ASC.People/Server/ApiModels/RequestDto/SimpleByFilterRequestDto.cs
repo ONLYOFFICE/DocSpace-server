@@ -114,4 +114,41 @@ public class SimpleByFilterRequestDto
     /// </summary>
     [FromQuery(Name = "area")]
     public Area Area { get; set; } = Area.All;
+
+    /// <summary>
+    /// The maximum number of items to be retrieved in the response.
+    /// </summary>
+    [FromQuery(Name = "count")]
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
+
+    /// <summary>
+    /// The zero-based index of the first item to be retrieved in a filtered result set.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
+
+    /// <summary>
+    /// Specifies the property or field name by which the results should be sorted.
+    /// </summary>
+    [FromQuery(Name = "sortBy")]
+    public string SortBy { get; set; }
+    
+    /// <summary>
+    /// The order in which the results are sorted.
+    /// </summary>
+    [FromQuery(Name = "sortOrder")]
+    public SortOrder SortOrder { get; set; }
+
+    /// <summary>
+    /// Represents the separator used to split filter criteria in query parameters.
+    /// </summary>
+    [FromQuery(Name = "filterSeparator")]
+    public string FilterSeparator { get; set; }
+
+    /// <summary>
+    /// The search text used to filter results based on user input.
+    /// </summary>
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
 }

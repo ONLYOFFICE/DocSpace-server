@@ -84,4 +84,17 @@ public class AuditEventRequestDto
     /// </summary>
     [FromQuery(Name = "to")]
     public ApiDateTime To { get; set; }
+
+    /// <summary>
+    /// The maximum number of audit event records to retrieve.
+    /// </summary>
+    [FromQuery(Name = "count")]
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
+
+    /// <summary>
+    /// The index of the first audit event record to retrieve in a paged query.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
 }

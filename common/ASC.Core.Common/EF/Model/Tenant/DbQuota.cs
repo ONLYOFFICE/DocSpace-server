@@ -167,7 +167,7 @@ public static class DbQuotaExtension
                     Name = "storage",
                     Description = null,
                     Features = "total_size:1073741824",
-                    Price = 0.0322m,
+                    Price = 0.14m,
                     ProductId = "1011",
                     Visible = true,
                     Wallet = true

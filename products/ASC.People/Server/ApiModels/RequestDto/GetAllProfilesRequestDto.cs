@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,39 +26,58 @@
 
 namespace ASC.People.ApiModels.RequestDto;
 
-
 /// <summary>
-/// The request parameters for getting groups with their sharing settings.
+/// Represents a data transfer object used for requesting a list of profiles.
 /// </summary>
-public class GetGroupsWithSharedRequestDto<T>
+/// <remarks>
+/// The request allows for pagination and filtering by specific criteria.
+/// Use the available properties to customize the parameters of the request.
+/// </remarks>
+public class GetAllProfilesRequestDto
 {
     /// <summary>
-    /// The group ID.
-    /// </summary>
-    [FromRoute(Name = "id")]
-    public required T Id { get; set; }
-
-    /// <summary>
-    /// Specifies whether to exclude the group sharing settings from the response.
-    /// </summary>
-    [FromQuery(Name = "excludeShared")]
-    public bool? ExcludeShared { get; set; }
-
-    /// <summary>
-    /// The number of groups to retrieve in the request.
+    /// The maximum number of items to be retrieved in the response.
     /// </summary>
     [FromQuery(Name = "count")]
     [Range(1, ApiContext.MaxCount)]
     public int Count { get; set; } = ApiContext.DefaultCount;
 
     /// <summary>
-    /// The starting index from which to begin retrieving groups with their sharing settings.
+    /// The zero-based index of the first item to be retrieved in a filtered result set.
     /// </summary>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
 
     /// <summary>
-    /// The text used as a filter for retrieving groups with their sharing settings.
+    /// Specifies the filter criteria for user-related queries.
+    /// </summary>
+    [FromQuery(Name = "filterBy")]
+    public string FilterBy { get; set; }
+    
+    /// <summary>
+    /// Specifies the property or field name by which the results should be sorted.
+    /// </summary>
+    [FromQuery(Name = "sortBy")]
+    public string SortBy { get; set; }
+
+    /// <summary>
+    /// The order in which the results are sorted.
+    /// </summary>
+    [FromQuery(Name = "sortOrder")]
+    public SortOrder SortOrder { get; set; }
+    
+    /// <summary>
+    /// The character or string used to separate multiple filter values in a filtering query.
+    /// </summary>
+    /// <remarks>
+    /// This property defines the delimiter applied when multiple filter criteria are provided.
+    /// It allows the request to parse and handle multiple filtering values effectively.
+    /// </remarks>
+    [FromQuery(Name = "filterSeparator")]
+    public string FilterSeparator { get; set; }
+
+    /// <summary>
+    /// The text value used as an additional filter criterion for profiles retrieval.
     /// </summary>
     [FromQuery(Name = "filterValue")]
     public string Text { get; set; }

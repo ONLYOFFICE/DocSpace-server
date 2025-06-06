@@ -27,24 +27,24 @@
 namespace ASC.Web.Api.Controllers.Settings;
 
 [DefaultRoute("license")]
-public class LicenseController(ILoggerProvider option,
-        MessageService messageService,
-        ApiContext apiContext,
-        UserManager userManager,
-        TenantManager tenantManager,
-        TenantLogoManager tenantLogoManager,
-        TenantExtra tenantExtra,
-        AuthContext authContext,
-        LicenseReader licenseReader,
-        SettingsManager settingsManager,
-        WebItemManager webItemManager,
-        CoreBaseSettings coreBaseSettings,
-        IFusionCache fusionCache,
-        FirstTimeTenantSettings firstTimeTenantSettings,
-        ITariffService tariffService,
-        IHttpContextAccessor httpContextAccessor,
-        DocumentServiceLicense documentServiceLicense)
-    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
+public class LicenseController(
+    ILoggerProvider option,
+    MessageService messageService,
+    SecurityContext securityContext,
+    UserManager userManager,
+    TenantManager tenantManager,
+    TenantLogoManager tenantLogoManager,
+    TenantExtra tenantExtra,
+    AuthContext authContext,
+    LicenseReader licenseReader,
+    SettingsManager settingsManager,
+    WebItemManager webItemManager,
+    CoreBaseSettings coreBaseSettings,
+    IFusionCache fusionCache,
+    FirstTimeTenantSettings firstTimeTenantSettings,
+    ITariffService tariffService,
+    DocumentServiceLicense documentServiceLicense)
+    : BaseSettingsController(fusionCache, webItemManager)
 {
     private readonly ILogger _log = option.CreateLogger("ASC.Api");
 
@@ -57,7 +57,7 @@ public class LicenseController(ILoggerProvider option,
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpGet("refresh")]
     [AllowNotPayment]
-    public async Task<bool> RefreshLicenseAsync()
+    public async Task<bool> RefreshLicense()
     {
         if (!tenantExtra.Enterprise)
         {
@@ -79,7 +79,7 @@ public class LicenseController(ILoggerProvider option,
     [SwaggerResponse(200, "Message about the result of activating license", typeof(string))]
     [AllowNotPayment]
     [HttpPost("accept")]
-    public async Task<string> AcceptLicenseAsync()
+    public async Task<string> AcceptLicense()
     {
         if (!tenantExtra.Enterprise)
         {
@@ -131,7 +131,7 @@ public class LicenseController(ILoggerProvider option,
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("trial")]
-    public async Task<bool> ActivateTrialAsync()
+    public async Task<bool> ActivateTrialLicense()
     {
         if (!coreBaseSettings.Standalone)
         {
@@ -200,7 +200,7 @@ public class LicenseController(ILoggerProvider option,
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("required")]
-    public async Task<bool> RequestLicense()
+    public async Task<bool> GetIsLicenseRequired()
     {
         return await firstTimeTenantSettings.GetRequestLicense();
     }
@@ -221,11 +221,11 @@ public class LicenseController(ILoggerProvider option,
     [AllowNotPayment]
     [HttpPost("")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard, Administrators")]
-    public async Task<string> UploadLicenseAsync([FromForm] UploadLicenseRequestsDto inDto)
+    public async Task<string> UploadLicense([FromForm] UploadLicenseRequestsDto inDto)
     {
         try
         {
-            await ApiContext.AuthByClaimAsync();
+            await securityContext.AuthByClaimAsync();
             if (!authContext.IsAuthenticated && (await settingsManager.LoadAsync<WizardSettings>()).Completed)
             {
                 throw new SecurityException(Resource.PortalSecurity);

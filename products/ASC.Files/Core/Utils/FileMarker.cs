@@ -1000,8 +1000,8 @@ public class FileMarker(
         var folderDao = daoFactory.GetFolderDao<T>();
         var entryTags = new Dictionary<FileEntry<T>, Tag>();
 
-        var filesTags = tags.Where(t => t.EntryType == FileEntryType.File).ToDictionary(t => (T)t.EntryId);
-        var foldersTags = tags.Where(t => t.EntryType == FileEntryType.Folder).ToDictionary(t => (T)t.EntryId);
+        var filesTags = tags.Where(t => t.EntryType == FileEntryType.File).ToDictionary(t => (T)Convert.ChangeType(t.EntryId, typeof(T)));
+        var foldersTags = tags.Where(t => t.EntryType == FileEntryType.Folder).ToDictionary(t => (T)Convert.ChangeType(t.EntryId, typeof(T)));
 
         var files = await fileDao.GetFilesAsync(filesTags.Keys).ToListAsync();
         var folders = await folderDao.GetFoldersAsync(foldersTags.Keys).ToListAsync();

@@ -84,4 +84,29 @@ public class AccountsEntriesRequestDto<T>
     /// </summary>
     [FromQuery(Name = "employeeTypes")]
     public IEnumerable<EmployeeType> EmployeeTypes { get; set; } = new List<EmployeeType>();
+    
+    /// <summary>
+    /// The number of items to retrieve in a request.
+    /// </summary>
+    [FromQuery(Name = "count")]
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
+
+    /// <summary>
+    /// The starting index for the query results.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
+
+    /// <summary>
+    /// Specifies the separator used in filter expressions.
+    /// </summary>
+    [FromQuery(Name = "filterSeparator")]
+    public string FilterSeparator { get; set; }
+
+    /// <summary>
+    /// The text filter applied to the accounts search query.
+    /// </summary>
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
 }

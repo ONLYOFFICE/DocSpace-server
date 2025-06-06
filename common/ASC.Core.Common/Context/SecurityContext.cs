@@ -254,7 +254,16 @@ public class SecurityContext(
 
         authContext.Principal = new CustomClaimsPrincipal(new ClaimsIdentity(account, claims), account);
     }
-
+    
+    public async Task AuthByClaimAsync()
+    {
+        var id = httpContextAccessor.HttpContext?.User.Claims.FirstOrDefault(r => r.Type == ClaimTypes.Sid);
+        if (Guid.TryParse(id?.Value, out var userId))
+        {
+            await AuthenticateMeWithoutCookieAsync(userId);
+        }
+    }
+    
     public async Task AuthenticateMeWithoutCookieAsync(Guid userId, List<Claim> additionalClaims = null)
     {
         await AuthenticateMeWithoutCookieAsync(tenantManager.GetCurrentTenantId(), userId, additionalClaims);

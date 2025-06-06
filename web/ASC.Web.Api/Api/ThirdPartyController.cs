@@ -45,7 +45,7 @@ public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper) : Contr
     [Tags("ThirdParty")]
     [SwaggerResponse(200, "Code request", typeof(object))]
     [HttpGet("{provider}")]
-    public object Get(ConfirmationCodeUrlRequestDto inDto)
+    public object GetThirdPartyCode(ConfirmationCodeUrlRequestDto inDto)
     {
         var desktop = HttpContext.Request.Query["desktop"] == "true";
         var additionals = new Dictionary<string, string>();
@@ -88,7 +88,7 @@ public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper) : Contr
     [SwaggerResponse(200, "Confirmation code", typeof(object))]
     [SwaggerResponse(400, "Error")]
     [HttpGet("{provider}/code")]
-    public object GetCode(ConfirmationCodeRequestDto inDto)
+    public object GetThirdPartyProviderCode(ConfirmationCodeRequestDto inDto)
     {
         try
         {

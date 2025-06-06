@@ -142,11 +142,12 @@ public class BillingClient
         return await RequestAsync("Deposit", portalId, [Tuple.Create("Amount", amount.ToString(CultureInfo.InvariantCulture)), Tuple.Create("Currency", currency)]);
     }
 
-    public async Task<bool> ChangePaymentAsync(string portalId, IEnumerable<string> products, IEnumerable<int> quantity, ProductQuantityType productQuantityType)
+    public async Task<bool> ChangePaymentAsync(string portalId, IEnumerable<string> products, IEnumerable<int> quantity, ProductQuantityType productQuantityType, string currency)
     {
         var parameters = products.Select(p => Tuple.Create("ProductId", p))
             .Concat(quantity.Select(q => Tuple.Create("ProductQty", q.ToString())))
             .Concat([Tuple.Create("ProductQuantityType", ((int)productQuantityType).ToString())])
+            .Concat([Tuple.Create("Currency", currency)])
             .ToArray();
 
         var result = await RequestAsync("ChangeSubscription", portalId, parameters);
@@ -155,11 +156,12 @@ public class BillingClient
         return changed;
     }
 
-    public async Task<PaymentCalculation> CalculatePaymentAsync(string portalId, IEnumerable<string> products, IEnumerable<int> quantity, ProductQuantityType productQuantityType)
+    public async Task<PaymentCalculation> CalculatePaymentAsync(string portalId, IEnumerable<string> products, IEnumerable<int> quantity, ProductQuantityType productQuantityType, string currency)
     {
         var parameters = products.Select(p => Tuple.Create("ProductId", p))
             .Concat(quantity.Select(q => Tuple.Create("ProductQty", q.ToString())))
             .Concat([Tuple.Create("ProductQuantityType", ((int)productQuantityType).ToString())])
+            .Concat([Tuple.Create("Currency", currency)])
             .ToArray();
 
         var result = await RequestAsync("CalculateSubscription", portalId, parameters);

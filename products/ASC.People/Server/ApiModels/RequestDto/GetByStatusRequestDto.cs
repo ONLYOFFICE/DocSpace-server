@@ -36,4 +36,47 @@ public class GetByStatusRequestDto
     /// </summary>
     [FromRoute(Name = "status")]
     public required EmployeeStatus Status {  get; set; }
+
+    /// <summary>
+    /// Specifies the criteria used to filter the profiles in the request.
+    /// </summary>
+    [FromQuery(Name = "filterBy")]
+    public string FilterBy { get; set; }
+    
+    /// <summary>
+    /// The maximum number of user profiles to retrieve.
+    /// </summary>
+    [FromQuery(Name = "count")]
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
+
+    /// <summary>
+    /// The starting index for retrieving data in a paginated request.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
+    
+    /// <summary>
+    /// Specifies the property or field name by which the results should be sorted.
+    /// </summary>
+    [FromQuery(Name = "sortBy")]
+    public string SortBy { get; set; }
+
+    /// <summary>
+    /// The order in which the results are sorted.
+    /// </summary>
+    [FromQuery(Name = "sortOrder")]
+    public SortOrder SortOrder { get; set; }
+    
+    /// <summary>
+    /// Represents the separator used to split multiple filter criteria in a query string.
+    /// </summary>
+    [FromQuery(Name = "filterSeparator")]
+    public string FilterSeparator { get; set; }
+
+    /// <summary>
+    /// A string value representing additional filter criteria used in query parameters.
+    /// </summary>
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
 }

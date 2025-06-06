@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,41 +24,29 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.People.ApiModels.RequestDto;
+namespace ASC.Files.Core.ApiModels.RequestDto;
 
-
-/// <summary>
-/// The request parameters for getting groups with their sharing settings.
-/// </summary>
-public class GetGroupsWithSharedRequestDto<T>
+public class GetTagsInfoRequestDto
 {
     /// <summary>
-    /// The group ID.
-    /// </summary>
-    [FromRoute(Name = "id")]
-    public required T Id { get; set; }
-
-    /// <summary>
-    /// Specifies whether to exclude the group sharing settings from the response.
-    /// </summary>
-    [FromQuery(Name = "excludeShared")]
-    public bool? ExcludeShared { get; set; }
-
-    /// <summary>
-    /// The number of groups to retrieve in the request.
+    /// Gets or sets the number of tag results to retrieve.
+    /// This property specifies the maximum amount of tag data to be included in the result set.
     /// </summary>
     [FromQuery(Name = "count")]
     [Range(1, ApiContext.MaxCount)]
     public int Count { get; set; } = ApiContext.DefaultCount;
-
+    
     /// <summary>
-    /// The starting index from which to begin retrieving groups with their sharing settings.
+    /// Represents the starting index from which the tags' information will be retrieved.
+    /// This property is used to define the offset for pagination when retrieving a list of tags. It determines
+    /// the point in the data set from which the retrieval begins.
     /// </summary>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
 
     /// <summary>
-    /// The text used as a filter for retrieving groups with their sharing settings.
+    /// Gets or sets the text value used for searching tags.
+    /// This property is typically used as a filter value when retrieving tag information.
     /// </summary>
     [FromQuery(Name = "filterValue")]
     public string Text { get; set; }

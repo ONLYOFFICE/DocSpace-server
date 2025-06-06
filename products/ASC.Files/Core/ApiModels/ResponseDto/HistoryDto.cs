@@ -95,21 +95,18 @@ public class HistoryApiHelper(
     FileSecurity fileSecurity,
     TenantUtil tenantUtil)
 {
-    public IAsyncEnumerable<HistoryDto> GetFileHistoryAsync(int fileId, ApiDateTime fromDate, ApiDateTime toDate)
+    public IAsyncEnumerable<HistoryDto> GetFileHistoryAsync(int fileId, ApiDateTime fromDate, ApiDateTime toDate, int offset, int count)
     {
-        return GetEntryHistoryAsync(fileId, FileEntryType.File, fromDate, toDate);
+        return GetEntryHistoryAsync(fileId, FileEntryType.File, fromDate, toDate,offset,count);
     }
 
-    public IAsyncEnumerable<HistoryDto> GetFolderHistoryAsync(int folderId, ApiDateTime fromDate, ApiDateTime toDate)
+    public IAsyncEnumerable<HistoryDto> GetFolderHistoryAsync(int folderId, ApiDateTime fromDate, ApiDateTime toDate, int offset, int count)
     {
-        return GetEntryHistoryAsync(folderId, FileEntryType.Folder, fromDate, toDate);
+        return GetEntryHistoryAsync(folderId, FileEntryType.Folder, fromDate, toDate, offset, count);
     }
     
-    private async IAsyncEnumerable<HistoryDto> GetEntryHistoryAsync(int entryId, FileEntryType entryType, ApiDateTime fromDate, ApiDateTime toDate)
+    private async IAsyncEnumerable<HistoryDto> GetEntryHistoryAsync(int entryId, FileEntryType entryType, ApiDateTime fromDate, ApiDateTime toDate, int offset, int count)
     {
-        var offset = Convert.ToInt32(apiContext.StartIndex);
-        var count = Convert.ToInt32(apiContext.Count);
-        
         var fromDateUtc = fromDate != null 
             ? tenantUtil.DateTimeToUtc(fromDate) 
             : (DateTime?)null;

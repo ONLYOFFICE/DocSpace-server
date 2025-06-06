@@ -81,7 +81,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     [SwaggerResponse(400, "No file id or folder id toFolderId determine provider")]
     [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
     [HttpPut("{fileId}/saveediting")]
-    public async Task<FileDto<T>> SaveEditingFromFormAsync(SaveEditingRequestDto<T> inDto)
+    public async Task<FileDto<T>> SaveEditingFileFromForm(SaveEditingRequestDto<T> inDto)
     {
         return await _fileDtoHelper.GetAsync(await fileStorageService.SaveEditingAsync(inDto.FileId, inDto.FileExtension, inDto.DownloadUri, inDto.File?.OpenReadStream(), inDto.Forcesave));
     }
@@ -97,7 +97,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     [SwaggerResponse(403, "You don't have enough permission to view the file")]
     [AllowAnonymous]
     [HttpPost("{fileId}/startedit")]
-    public async Task<string> StartEditAsync(StartEditRequestDto<T> inDto)
+    public async Task<string> StartEditFile(StartEditRequestDto<T> inDto)
     {
         return await fileStorageService.StartEditAsync(inDto.FileId, inDto.File.EditingAlone);
     }
@@ -111,7 +111,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     [SwaggerResponse(200, "File information", typeof(FileDto<int>))]
     [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
     [HttpPut("{fileId}/startfilling")]
-    public async Task<FileDto<T>> StartFillingAsync(StartFillingRequestDto<T> inDto)
+    public async Task<FileDto<T>> StartFillingFile(StartFillingRequestDto<T> inDto)
     {
         var file = await fileStorageService.StartFillingAsync(inDto.FileId);
 
@@ -129,7 +129,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [AllowAnonymous]
     [HttpGet("{fileId}/trackeditfile")]
-    public async Task<KeyValuePair<bool, string>> TrackEditFileAsync(TrackEditFileRequestDto<T> inDto)
+    public async Task<KeyValuePair<bool, string>> TrackEditFile(TrackEditFileRequestDto<T> inDto)
     {
         return await fileStorageService.TrackEditFileAsync(inDto.FileId, inDto.TabId, inDto.DocKeyForTrack, inDto.IsFinish);
     }
@@ -146,7 +146,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("{fileId}/openedit")]
-    public async Task<ConfigurationDto<T>> OpenEditAsync(OpenEditRequestDto<T> inDto)
+    public async Task<ConfigurationDto<T>> OpenEditFile(OpenEditRequestDto<T> inDto)
     {
         var (file, lastVersion) = await documentServiceHelper.GetCurFileInfoAsync(inDto.FileId, inDto.Version);
         FormOpenSetup<T> formOpenSetup = null;
@@ -268,7 +268,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File download link", typeof(DocumentService.FileLink))]
     [HttpGet("{fileId}/presigned")]
-    public async Task<DocumentService.FileLink> GetPresignedFileUriAsync(FileIdRequestDto<T> inDto)
+    public async Task<DocumentService.FileLink> GetPresignedFileUri(FileIdRequestDto<T> inDto)
     {
         return await fileStorageService.GetPresignedUriAsync(inDto.FileId);
     }
@@ -282,7 +282,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "List of users with their access rights to the file", typeof(List<MentionWrapper>))]
     [HttpGet("{fileId}/sharedusers")]
-    public async Task<List<MentionWrapper>> SharedUsers(FileIdRequestDto<T> inDto)
+    public async Task<List<MentionWrapper>> GetSharedUsers(FileIdRequestDto<T> inDto)
     {
         return await fileStorageService.SharedUsersAsync(inDto.FileId);
     }
@@ -310,7 +310,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File reference data", typeof(FileReference))]
     [HttpPost("referencedata")]
-    public async Task<FileReference> GetReferenceDataAsync(GetReferenceDataDto<T> inDto)
+    public async Task<FileReference> GetReferenceData(GetReferenceDataDto<T> inDto)
     {
         return await fileStorageService.GetReferenceDataAsync(inDto.FileKey, inDto.InstanceId, inDto.SourceFileId, inDto.Path, inDto.Link);
     }
@@ -324,7 +324,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
     [Tags("Files / Files")]
     [SwaggerResponse(200, "List of users with their access rights to the protected file", typeof(List<MentionWrapper>))]
     [HttpGet("{fileId}/protectusers")]
-    public async Task<List<MentionWrapper>> ProtectUsers(FileIdRequestDto<T> inDto)
+    public async Task<List<MentionWrapper>> GetProtectedFileUsers(FileIdRequestDto<T> inDto)
     {
         return await fileStorageService.ProtectUsersAsync(inDto.FileId);
     }
@@ -410,7 +410,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
             throw new Exception("Unable to establish a connection with the Document Server.");
         }
         var version = new DocServiceUrlRequestDto { Version = false };
-        return await GetDocServiceUrlAsync(version);
+        return await GetDocServiceUrl(version);
 
         bool ValidateUrl(string url)
         {
@@ -440,7 +440,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     [SwaggerResponse(200, "The document service URL with the editor version specified", typeof(DocServiceUrlDto))]
     [AllowAnonymous]
     [HttpGet("docservice")]
-    public async Task<DocServiceUrlDto> GetDocServiceUrlAsync(DocServiceUrlRequestDto inDto)
+    public async Task<DocServiceUrlDto> GetDocServiceUrl(DocServiceUrlRequestDto inDto)
     {
         var url = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.DocServiceApiUrl);
 

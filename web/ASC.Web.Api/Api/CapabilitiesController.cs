@@ -56,7 +56,7 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
     [SwaggerResponse(200, "Portal capabilities", typeof(CapabilitiesDto))]
     [HttpGet] //NOTE: this method doesn't requires auth!!!  //NOTE: this method doesn't check payment!!!
     [AllowNotPayment]
-    public async Task<CapabilitiesDto> GetPortalCapabilitiesAsync()
+    public async Task<CapabilitiesDto> GetPortalCapabilities()
     {
         var quota = await tenantManager.GetTenantQuotaAsync(tenantManager.GetCurrentTenantId());
         var result = new CapabilitiesDto

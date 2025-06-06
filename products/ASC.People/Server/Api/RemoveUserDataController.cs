@@ -48,7 +48,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     [Tags("People / User data")]
     [SwaggerResponse(200, "Deletion progress", typeof(TaskProgressResponseDto))]
     [HttpGet("remove/progress/{userid:guid}")]
-    public async Task<TaskProgressResponseDto> GetRemoveProgressAsync(UserIdRequestDto inDto)
+    public async Task<TaskProgressResponseDto> GetRemoveProgress(UserIdRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
 
@@ -70,7 +70,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("self/delete")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
-    public async Task<string> SendInstructionsToDeleteAsync()
+    public async Task<string> SendInstructionsToDelete()
     {
         var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
         var tenant = tenantManager.GetCurrentTenant();
@@ -97,7 +97,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "User not found")]
     [HttpPost("remove/start")]
-    public async Task<TaskProgressResponseDto> StartRemoveAsync(TerminateRequestDto inDto)
+    public async Task<TaskProgressResponseDto> StartRemove(TerminateRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
 
@@ -140,7 +140,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// <path>api/2.0/people/remove/terminate</path>
     [Tags("People / User data")]
     [HttpPut("remove/terminate")]
-    public async Task TerminateRemoveAsync(TerminateRequestDto inDto)
+    public async Task TerminateRemove(TerminateRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
 
@@ -157,7 +157,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     [SwaggerResponse(200, "delete personal progress", typeof(TaskProgressResponseDto))]
     [SwaggerResponse(400, "Access denied")]
     [HttpPost("delete/personal/start")]
-    public async Task<TaskProgressResponseDto> StartDeletePersonalFolderAsync()
+    public async Task<TaskProgressResponseDto> StartDeletePersonalFolder()
     {
         var currentUser = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
         var userType = await userManager.GetUserTypeAsync(currentUser);
@@ -182,7 +182,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     [Tags("People / User data")]
     [SwaggerResponse(200, "Deletion progress", typeof(TaskProgressResponseDto))]
     [HttpGet("delete/personal/progress")]
-    public async Task<TaskProgressResponseDto> GetDeletePersonalFolderProgressAsync()
+    public async Task<TaskProgressResponseDto> GetDeletePersonalFolderProgress()
     {
         var tenant = tenantManager.GetCurrentTenant();
         var progressItem = await queueDeletePersonalFolder.GetProgressItemStatus(tenant.Id, securityContext.CurrentAccount.ID);
