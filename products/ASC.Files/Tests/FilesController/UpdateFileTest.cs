@@ -145,7 +145,7 @@ public class UpdateFileTest(
         
         // Act
         var commentParams = new UpdateComment(1, newComment);
-        var result = (await _filesOperationsApi.UpdateCommentAsync(file.Id, commentParams, TestContext.Current.CancellationToken)).Response;
+        var result = (await _filesOperationsApi.UpdateFileCommentAsync(file.Id, commentParams, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         result.Should().NotBeNull();
