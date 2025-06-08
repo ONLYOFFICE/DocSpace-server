@@ -159,7 +159,9 @@ Një formular i ri "$DocumentTitle":"$DocumentURL" është plotësuar në dhomë
 
 Parashtruesi i formularit: "$FromUserName":"$FromUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_FormSubmitted" xml:space="preserve">
     <value>h1. Ju keni plotësuar formularin $Message
@@ -168,7 +170,9 @@ Ju keni plotësuar formularin "$DocumentTitle":"$DocumentURL" në dhomë "$RoomT
 
 Manaxheri: "$ToUserName":"$ToUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_FormSubmitted_push" xml:space="preserve">
     <value>Formulari "$DocumentTitle" është plotësuar në dhomën "$RoomTitle"</value>
