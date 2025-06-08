@@ -125,7 +125,7 @@ public class FileSharingTest(
         await _filesFilesApi.SetExternalLinkAsync(file.Id, additionalLinkParams, TestContext.Current.CancellationToken);
         
         // Act
-        var links = (await _filesFilesApi.GetLinksAsync(file.Id, TestContext.Current.CancellationToken)).Response;
+        var links = (await _filesFilesApi.GetFileLinksAsync(file.Id, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         links.Should().NotBeNull();

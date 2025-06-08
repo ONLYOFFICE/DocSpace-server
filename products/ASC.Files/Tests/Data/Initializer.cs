@@ -125,7 +125,7 @@ public static class Initializer
             
             await Task.WhenAll(apiClientStartTask, peopleClientStartTask, filesServiceStartTask);
 
-            var settings  = (await _commonSettingsApi.GetSettingsAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
+            var settings  = (await _commonSettingsApi.GetPortalSettingsAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
             
             if (!string.IsNullOrEmpty(settings.WizardToken))
             {
@@ -161,7 +161,7 @@ public static class Initializer
     {
         await _apiClient.Authenticate(Owner);
 
-        var shortLink = (await _portalUsersApi.GeInviteLinkAsync(employeeType, TestContext.Current.CancellationToken)).Response;
+        var shortLink = (await _portalUsersApi.GetInvitationLinkAsync(employeeType, TestContext.Current.CancellationToken)).Response;
         var fullLink = await _apiClient.GetAsync(shortLink);
         var confirmHeader = fullLink.RequestMessage?.RequestUri?.Query.Substring(1);
         if (confirmHeader == null)
