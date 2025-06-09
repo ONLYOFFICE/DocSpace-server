@@ -30,7 +30,7 @@
     <PackageReference Include="Google.Api.Gax.Rest" Version="4.11.0" />
     <PackageReference Include="Google.Apis.Auth" Version="1.69.0" />
     <PackageReference Include="Google.Apis.Core" Version="1.69.0" />
-    <PackageReference Include="Google.Apis.Storage.v1" Version="1.69.0.3793" />
+    <PackageReference Include="Google.Apis.Storage.v1" Version="1.69.0.3796" />
     <PackageReference Include="Google.Cloud.Storage.V1" Version="4.13.0" />
     <PackageReference Include="Rackspace" Version="1.0.0" />
     <PackageReference Include="SharpZipLib" Version="2.4.3" />
