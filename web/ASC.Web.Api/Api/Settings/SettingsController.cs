@@ -84,7 +84,7 @@ public partial class SettingsController(
     [SwaggerResponse(200, "Settings", typeof(SettingsDto))]
     [HttpGet("")]
     [AllowNotPayment, AllowSuspended, AllowAnonymous]
-    public async Task<SettingsDto> GetPortalSettings(PortalSettingsrequestDto inDto)
+    public async Task<SettingsDto> GetPortalSettings(PortalSettingsRequestDto inDto)
     {
         var studioAdminMessageSettings = await settingsManager.LoadAsync<StudioAdminMessageSettings>();
         var tenantCookieSettings = await settingsManager.LoadAsync<TenantCookieSettings>();
