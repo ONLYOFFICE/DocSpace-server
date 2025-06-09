@@ -636,7 +636,9 @@ Konfigurimi i aplikacionit të vërtetuesit që përdorni për të hyrë në por
 
 Ju lutemi, klikoni butonin më poshtë për të shkuar në faqen e hyrjes së portalit dhe për të konfigururar aplikacionin e vërtetuesit:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.Ndyshimi i pronarit të portalit "${__VirtualRootPath}":"${__VirtualRootPath}"

@@ -159,7 +159,9 @@ Um novo formulário "$DocumentTitle":"$DocumentURL" está preenchido na sala "$R
 
 Remetente do formulário: "$FromUserName":"$FromUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_FormSubmitted" xml:space="preserve">
     <value>h1. Você preencheu o formulário $Message
@@ -168,7 +170,9 @@ Você preencheu o formulário "$DocumentTitle":"$DocumentURL" na sala "$RoomTitl
 
 Administrador: "$ToUserName":"$ToUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
     <value>Notificação do DocSpace. O formulário está preenchido</value>

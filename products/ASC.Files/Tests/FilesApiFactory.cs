@@ -66,7 +66,7 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
     public FilesFoldersApi FilesFoldersApi { get; private set;} = null!;
     public FilesFilesApi FilesFilesApi { get; private set;} = null!;
     public FilesOperationsApi FilesOperationsApi { get; private set;} = null!;
-    public FilesRoomsApi FilesRoomsApi { get; private set;} = null!;
+    public RoomsApi RoomsApi { get; private set;} = null!;
     public FilesSettingsApi FilesSettingsApi { get; private set;} = null!;
 
     public readonly CustomProviderInfo ProviderInfo;
@@ -189,7 +189,7 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
         FilesFoldersApi = new FilesFoldersApi(HttpClient, new Configuration { BasePath = HttpClient.BaseAddress!.ToString().TrimEnd('/') });
         FilesFilesApi = new FilesFilesApi(HttpClient, new Configuration { BasePath = HttpClient.BaseAddress!.ToString().TrimEnd('/') });
         FilesOperationsApi = new FilesOperationsApi(HttpClient, new Configuration { BasePath = HttpClient.BaseAddress!.ToString().TrimEnd('/') });
-        FilesRoomsApi = new FilesRoomsApi(HttpClient, new Configuration { BasePath = HttpClient.BaseAddress!.ToString().TrimEnd('/') });
+        RoomsApi = new RoomsApi(HttpClient, new Configuration { BasePath = HttpClient.BaseAddress!.ToString().TrimEnd('/') });
         FilesSettingsApi = new FilesSettingsApi(HttpClient, new Configuration { BasePath = HttpClient.BaseAddress!.ToString().TrimEnd('/') });
         
         var tablesToIgnore = _tablesToIgnore.Select(t => new Table(t)).ToList();

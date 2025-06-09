@@ -201,7 +201,9 @@ $OrangeButton
 
 Пожалуйста, нажмите кнопку ниже, чтобы перейти на страницу входа на портал и настроить приложение для аутентификации:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.Смена владельца портала "${__VirtualRootPath}":"${__VirtualRootPath}"

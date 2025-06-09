@@ -105,20 +105,24 @@ public class DynamicIgnoreConverter<T>(IHttpContextAccessor httpContextAccessor,
                         var propType = propertyValue.GetType();
                         if (propType.IsClass && propType != typeof(string))
                         {
-                            if (propType.GetInterfaces().Any(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
+                            var interfaces = propType.GetInterfaces();
+                            var asyncEnumerableInterface = interfaces.FirstOrDefault(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IAsyncEnumerable<>));
+                            var enumerableInterfaces = interfaces.FirstOrDefault(t => t.IsGenericType && (t.GetGenericTypeDefinition() == typeof(IEnumerable<>)));
+                            if (enumerableInterfaces != null)
                             {
-                                var firstValue = ((IEnumerable)propertyValue).Cast<object>().FirstOrDefault();
-                                propType = firstValue?.GetType();
+                                var types = ((IEnumerable)propertyValue).Cast<object>().Select(r=> r.GetType()).Distinct();
+                                foreach (var type in types)
+                                {
+                                    newOptions = JsonSerializerOptions(type, newFullPropertyName, newOptions);
+                                }
+                            } else if (asyncEnumerableInterface != null)
+                            {   
+                                var elementType = asyncEnumerableInterface.GetGenericArguments()[0];
+                                newOptions = JsonSerializerOptions(elementType, newFullPropertyName, newOptions);
                             }
-
-                            if (propType is { IsClass: true } && propType != typeof(string))
+                            else
                             {
-                                var converterType = typeof(DynamicIgnoreConverter<>).MakeGenericType(propType);
-
-                                var converter = Activator.CreateInstance(converterType, httpContextAccessor, depth + 1, newFullPropertyName);
-
-                                newOptions = new JsonSerializerOptions(options);
-                                newOptions.Converters.Add((JsonConverter)converter);
+                                newOptions = JsonSerializerOptions(propType, newFullPropertyName, newOptions);
                             }
                         }
                     }
@@ -139,6 +143,21 @@ public class DynamicIgnoreConverter<T>(IHttpContextAccessor httpContextAccessor,
         }
 
         writer.WriteEndObject();
+
+        JsonSerializerOptions JsonSerializerOptions(Type propType, string newFullPropertyName, JsonSerializerOptions newOptions)
+        {
+            if (propType is { IsClass: true } && propType != typeof(string))
+            {
+                var converterType = typeof(DynamicIgnoreConverter<>).MakeGenericType(propType);
+
+                var converter = Activator.CreateInstance(converterType, httpContextAccessor, depth + 1, newFullPropertyName);
+
+                newOptions = new JsonSerializerOptions(newOptions);
+                newOptions.Converters.Add((JsonConverter)converter);
+            }
+
+            return newOptions;
+        }
     }
 }
 

@@ -249,7 +249,9 @@ The configuration of the authenticator app that you use to enter the ${LetterLog
 
 Please click the button below to go to the portal login page and configure the authenticator application:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.Change of "${__VirtualRootPath}":"${__VirtualRootPath}" portal owner

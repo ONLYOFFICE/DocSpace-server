@@ -949,7 +949,9 @@ ${LetterLogoText}-portaaliin kirjautumiseen käyttämäsi todennussovelluksen as
 
 Ole hyvä ja klikkaa alla olevaa painiketta mennäksesi portaalin sisäänkirjautumissivulle ja määritä todennussovellus:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1. Portaalin "${__VirtualRootPath}":"${__VirtualRootPath}" omistajan muutos

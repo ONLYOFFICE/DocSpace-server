@@ -85,7 +85,7 @@ public class FileOrderTest(
         
         // Act
         var orderParams = new OrderRequestDto(newOrder);
-        var result = (await _filesFilesApi.SetOrderFileAsync(file.Id, orderParams, TestContext.Current.CancellationToken)).Response;
+        var result = (await _filesFilesApi.SetFileOrderAsync(file.Id, orderParams, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         result.Should().NotBeNull();

@@ -198,7 +198,9 @@ A configuração do aplicativo autenticador que você usa para entrar no portal 
 
 Clique no botão abaixo para ir para a página de login do portal e configurar o aplicativo autenticador:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.Alteração do proprietário do portal "${__VirtualRootPath}":"${__VirtualRootPath}"

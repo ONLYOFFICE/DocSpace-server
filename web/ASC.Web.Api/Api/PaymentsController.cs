@@ -762,6 +762,15 @@ public class PaymentController(
         var utcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate);
         var utcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate);
         var result = await tariffService.GetCustomerOperationsAsync(tenant.Id, utcStartDate, utcEndDate, inDto.Credit, inDto.Withdrawal, inDto.Offset, inDto.Limit);
+
+        if (result?.Collection != null)
+        {
+            for (var i = 0; i < result.Collection.Count; i++)
+            {
+                result.Collection[i] = result.Collection[i] with { Description = GetServiceDesc(result.Collection[i].Service) };
+            }
+        }
+
         return result;
     }
 
@@ -823,6 +832,17 @@ public class PaymentController(
         {
             var report = await tariffService.GetCustomerOperationsAsync(tenantId, utcStartDate, utcEndDate, credit, withdrawal, offset, limit);
 
+            if (report?.Collection == null)
+            {
+                yield return null;
+                break;
+            }
+
+            for (var i = 0; i < report.Collection.Count; i++)
+            {
+                report.Collection[i] = report.Collection[i] with { Description = GetServiceDesc(report.Collection[i].Service) };
+            }
+
             yield return report.Collection;
 
             if (report.CurrentPage == report.TotalPage)
@@ -834,6 +854,11 @@ public class PaymentController(
         }
     }
 
+    private static string GetServiceDesc(string serviceName)
+    {
+        return Resource.ResourceManager.GetString("AccountingCustomerOperationServiceDesc_" + (serviceName ?? "top-up"));
+    }
+
     internal class OperationMap : ClassMap<Operation>
     {
         public OperationMap()
@@ -841,6 +866,7 @@ public class PaymentController(
             Map(item => item.Date).TypeConverter<CsvFileHelper.CsvDateTimeConverter>();
 
             Map(item => item.Date).Name(Resource.AccountingCustomerOperationDate);
+            Map(item => item.Description).Name(Resource.AccountingCustomerOperationDescription);
             Map(item => item.Service).Name(Resource.AccountingCustomerOperationService);
             Map(item => item.ServiceUnit).Name(Resource.AccountingCustomerOperationServiceUnit);
             Map(item => item.Quantity).Name(Resource.AccountingCustomerOperationQuantity);
