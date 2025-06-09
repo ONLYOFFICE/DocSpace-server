@@ -763,9 +763,12 @@ public class PaymentController(
         var utcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate);
         var result = await tariffService.GetCustomerOperationsAsync(tenant.Id, utcStartDate, utcEndDate, inDto.Credit, inDto.Withdrawal, inDto.Offset, inDto.Limit);
 
-        for (var i = 0; i < result.Collection.Count; i++)
+        if (result?.Collection != null)
         {
-            result.Collection[i] = result.Collection[i] with { Description = GetServiceDesc(result.Collection[i].Service) };
+            for (var i = 0; i < result.Collection.Count; i++)
+            {
+                result.Collection[i] = result.Collection[i] with { Description = GetServiceDesc(result.Collection[i].Service) };
+            }
         }
 
         return result;
@@ -828,6 +831,12 @@ public class PaymentController(
         while (true)
         {
             var report = await tariffService.GetCustomerOperationsAsync(tenantId, utcStartDate, utcEndDate, credit, withdrawal, offset, limit);
+
+            if (report?.Collection == null)
+            {
+                yield return null;
+                break;
+            }
 
             for (var i = 0; i < report.Collection.Count; i++)
             {
