@@ -51,7 +51,7 @@ public class TagsApiTest(
         tag.Should().NotBeNull();
         
         // Verify tag exists in system
-        var tagsInfo = (await _roomsApi.GetRoomTagsInfoAsync(TestContext.Current.CancellationToken)).Response;
+        var tagsInfo = (await _roomsApi.GetRoomTagsInfoAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
         tagsInfo.Should().Contain(t => t.ToString() == tagName);
     }
     
@@ -68,7 +68,7 @@ public class TagsApiTest(
         await _roomsApi.CreateRoomTagAsync(createTagRequest, TestContext.Current.CancellationToken);
         
         // Act
-        var tags = (await _roomsApi.GetRoomTagsInfoAsync(TestContext.Current.CancellationToken)).Response;
+        var tags = (await _roomsApi.GetRoomTagsInfoAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
         
         // Assert
         tags.Should().NotBeNull();
@@ -97,7 +97,7 @@ public class TagsApiTest(
         await _roomsApi.DeleteCustomTagsAsync(deleteRequest, TestContext.Current.CancellationToken);
         
         // Assert - Verify tag is gone
-        var tagsAfterDelete = (await _roomsApi.GetRoomTagsInfoAsync(TestContext.Current.CancellationToken)).Response;
+        var tagsAfterDelete = (await _roomsApi.GetRoomTagsInfoAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
         tagsAfterDelete.Should().NotContain(t => t.ToString() == tagName);
     }
     
@@ -120,7 +120,7 @@ public class TagsApiTest(
         var tag = (await _roomsApi.CreateRoomTagAsync(createTagRequest, TestContext.Current.CancellationToken)).Response;
         
         // Verify tag exists
-        var tagsAfterCreate = (await _roomsApi.GetRoomTagsInfoAsync(TestContext.Current.CancellationToken)).Response;
+        var tagsAfterCreate = (await _roomsApi.GetRoomTagsInfoAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
         tagsAfterCreate.Should().Contain(t => t.ToString() == tagName);
         
         // 2. Add tag to a room
@@ -150,7 +150,7 @@ public class TagsApiTest(
         await _roomsApi.DeleteCustomTagsAsync(deleteTagRequest, TestContext.Current.CancellationToken);
         
         // Verify tag is gone
-        var tagsAfterDelete = (await _roomsApi.GetRoomTagsInfoAsync(TestContext.Current.CancellationToken)).Response;
+        var tagsAfterDelete = (await _roomsApi.GetRoomTagsInfoAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
         tagsAfterDelete.Should().NotContain(t => t.ToString() == tagName);
     }
 }
