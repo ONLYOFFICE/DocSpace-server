@@ -400,19 +400,21 @@ public class PortalController(
             }
         }
 
-        if (string.IsNullOrEmpty(model.FirstName) && string.IsNullOrEmpty(model.LastName))
-        {
-            model.FirstName = "Administrator";
-        }
-
         model.FirstName = (model.FirstName ?? "").Trim();
         model.LastName = (model.LastName ?? "").Trim();
 
-        if (!CheckValidName(model.FirstName + model.LastName, out var error))
-        {
-            sw.Stop();
+        var fullName = model.FirstName + model.LastName;
+        object error = null;
 
-            return BadRequest(error);
+        if (string.IsNullOrEmpty(fullName) || !CheckValidName(fullName, out error))
+        {
+            model.FirstName = "Administrator";
+            model.LastName = "";
+
+            if (error != null)
+            {
+                option.LogDebug("CheckValidName failed: {0}; Elapsed ms.: {1}", fullName, sw.ElapsedMilliseconds);
+            }
         }
 
         var emailPart = Regex.Replace(model.Email.Split('@')[0], @"[^a-z0-9\-]", "", RegexOptions.IgnoreCase).Trim('-');
