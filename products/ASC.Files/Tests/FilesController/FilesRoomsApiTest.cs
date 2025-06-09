@@ -139,7 +139,7 @@ public class FilesRoomsApiTest(
         taggedRoom.Should().NotBeNull();
         
         // Verify tags were added
-        var tagsInfo = (await _roomsApi.GetRoomTagsInfoAsync(TestContext.Current.CancellationToken)).Response;
+        var tagsInfo = (await _roomsApi.GetRoomTagsInfoAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
         tagsInfo.Should().NotBeEmpty();
         tagsInfo.Should().Contain(t => t.ToString() == tagName);
     }
