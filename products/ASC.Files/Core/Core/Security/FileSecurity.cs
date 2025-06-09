@@ -1674,11 +1674,24 @@ public class FileSecurity(IDaoFactory daoFactory,
                     case FolderType.USER:
                         return false;
                     default:
-                        if (e.Access is FileShare.RoomManager or FileShare.ContentCreator)
+                        if (isDocSpaceAdmin)
                         {
                             return true;
                         }
+                        
+                        if (e.Access is FileShare.RoomManager)
+                        {
+                            return true;
+                        }
+                        
+                        if (e.Access is FileShare.ContentCreator)
+                        {
+                            var tagDao = daoFactory.GetTagDao<T>();
+                            var tagLocked = await tagDao.GetTagsAsync(file.Id, FileEntryType.File, TagType.Locked).FirstOrDefaultAsync();
 
+                            return tagLocked == null || tagLocked.Owner == authContext.CurrentAccount.ID;
+                        }
+                        
                         break;
                 }
 
