@@ -67,6 +67,7 @@ public class PortalController(
     [ApiExplorerSettings(IgnoreApi = true)]
     [SwaggerResponse(200, "Portal api works")]
     [HttpGet("test")]
+    [AllowAnonymous]
     public IActionResult Check()
     {
         return Ok(new
