@@ -115,6 +115,19 @@ public class TopUpWalletService(
             var amount = settings.UpToBalance - truncated;
             _ = await tariffService.TopUpDepositAsync(data.TenantId, amount, settings.Currency, true);
 
+            var payerId = (await tariffService.GetCustomerInfoAsync(data.TenantId)).Email;
+            if (!string.IsNullOrEmpty(payerId))
+            {
+                var userManager = scope.ServiceProvider.GetRequiredService<UserManager>();
+                var payer = await userManager.GetUserByEmailAsync(payerId);
+
+                if (payer.Id != ASC.Core.Users.Constants.LostUser.Id)
+                {
+                    var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
+                    await securityContext.AuthenticateMeWithoutCookieAsync(data.TenantId, payer.Id);
+                }
+            }
+
             var messageService = scope.ServiceProvider.GetRequiredService<MessageService>();
             var description = $"{amount} {settings.Currency}";
             messageService.Send(MessageInitiator.System, MessageAction.CustomerWalletToppedUp, description);
