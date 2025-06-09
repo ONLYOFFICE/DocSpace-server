@@ -23,6 +23,7 @@
         <PackageReference Include="Respawn" Version="6.2.1" />
         <PackageReference Include="Testcontainers" Version="4.5.0" />
         <PackageReference Include="Testcontainers.MySql" Version="4.5.0" />
+        <PackageReference Include="Testcontainers.OpenSearch" Version="4.5.0" />
         <PackageReference Include="Testcontainers.PostgreSql" Version="4.5.0" />
         <PackageReference Include="Testcontainers.RabbitMq" Version="4.5.0" />
         <PackageReference Include="Testcontainers.Redis" Version="4.5.0" />

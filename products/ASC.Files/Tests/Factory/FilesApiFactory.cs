@@ -25,21 +25,17 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 extern alias ASCFiles;
+using Testcontainers.OpenSearch;
 
 namespace ASC.Files.Tests.Factory;
 
 public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetime
 {
-    class FakePass { public string Password { get; set; } }
-    
-    private static readonly Faker<FakePass> _fakerPassword = new Faker<FakePass>()
-        .RuleFor(x => x.Password, f => f.Internet.Password(10, 12, true, true, true));
-    
     private readonly MySqlContainer _mySqlContainer;
     private readonly PostgreSqlContainer _postgresSqlContainer;
     private readonly RedisContainer _redisContainer;
     private readonly RabbitMqContainer _rabbitMqContainer;
-    private readonly IContainer _openSearchContainer;
+    private readonly OpenSearchContainer _openSearchContainer;
     private readonly CustomProviderInfo _providerInfo;
     private DbConnection _dbconnection = null!;
     private Respawner _respawner = null!;
@@ -103,13 +99,9 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
             Tag = "2.18.0"
         };
         
-        _openSearchContainer = new ContainerBuilder()
+        _openSearchContainer = new OpenSearchBuilder()
             .WithImage($"{openSearchContainer.Image}:{openSearchContainer.Tag}")
-            .WithPortBinding(9200, true)
-            .WithEnvironment("OPENSEARCH_INITIAL_ADMIN_PASSWORD", _fakerPassword.Generate().Password)
-            .WithEnvironment("discovery.type", "single-node")
-            .WithEnvironment("plugins.security.disabled", "true")
-            .WithWaitStrategy(Wait.ForUnixContainer().UntilHttpRequestIsSucceeded(r => r.ForPort(9200)))
+            .WithSecurityEnabled(false)
             .Build();
 
         var mysqlContainer = containers.FirstOrDefault(r => r.Name == "mysql") ?? new Container

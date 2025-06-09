@@ -27,15 +27,12 @@
 extern alias ASCPeople;
 using ASC.People.Tests.Data;
 
+using Testcontainers.OpenSearch;
+
 namespace ASC.People.Tests.Factory;
 
 public class PeopleFactory: WebApplicationFactory<PeopleProgram>, IAsyncLifetime
 {
-    class FakePass { public string Password { get; set; } }
-    
-    private static readonly Faker<FakePass> _fakerPassword = new Faker<FakePass>()
-        .RuleFor(x => x.Password, f => f.Internet.Password(10, 12, true, true, true));
-    
     private readonly MySqlContainer _mySqlContainer;
     private readonly PostgreSqlContainer _postgresSqlContainer;
     private readonly RedisContainer _redisContainer;
@@ -98,13 +95,9 @@ public class PeopleFactory: WebApplicationFactory<PeopleProgram>, IAsyncLifetime
             Tag = "2.18.0"
         };
         
-        _openSearchContainer = new ContainerBuilder()
+        _openSearchContainer = new OpenSearchBuilder()
             .WithImage($"{openSearchContainer.Image}:{openSearchContainer.Tag}")
-            .WithPortBinding(9200, true)
-            .WithEnvironment("OPENSEARCH_INITIAL_ADMIN_PASSWORD", _fakerPassword.Generate().Password)
-            .WithEnvironment("discovery.type", "single-node")
-            .WithEnvironment("plugins.security.disabled", "true")
-            .WithWaitStrategy(Wait.ForUnixContainer().UntilHttpRequestIsSucceeded(r => r.ForPort(9200)))
+            .WithSecurityEnabled(false)
             .Build();
 
         var mysqlContainer = containers.FirstOrDefault(r => r.Name == "mysql") ?? new Container
