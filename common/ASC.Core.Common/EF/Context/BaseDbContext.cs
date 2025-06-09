@@ -57,7 +57,6 @@ public class InstallerOptionsAction(string region, string nameConnectionString)
         {
             case Provider.MySql:
                 optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-                optionsBuilder.ReplaceService<IMigrationsSqlGenerator, CustomMySqlMigrationsSqlGenerator>();
                 optionsBuilder.UseMySql(connectionString.ConnectionString, ServerVersion.AutoDetect(connectionString.ConnectionString), providerOptions =>
                 {
                     if (!string.IsNullOrEmpty(migrateAssembly))
