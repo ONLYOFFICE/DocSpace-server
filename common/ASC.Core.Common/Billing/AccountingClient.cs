@@ -241,7 +241,7 @@ public record Session(int SessionId, decimal ReservedAmount, string Currency);
 
 public record Report(List<Operation> Collection, int Offset, int Limit, int TotalQuantity, int TotalPage, int CurrentPage);
 
-public record Operation(DateTime Date, string Service, string ServiceUnit, int Quantity, string Currency, decimal Credit, decimal Withdrawal);
+public record Operation(DateTime Date, string Service, string Description, string ServiceUnit, int Quantity, string Currency, decimal Credit, decimal Withdrawal);
 
 public record Currency(int Id, string Code);
 
