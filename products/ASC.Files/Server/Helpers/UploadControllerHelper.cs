@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Web.Core.WhiteLabel;
+
 namespace ASC.Files.Helpers;
 
 [Scope]
@@ -45,6 +47,7 @@ public class UploadControllerHelper(
     WebhookManager webhookManager,
     IEventBus eventBus,
     AuthContext authContext,
+    TenantLogoManager tenantLogoManager,
     Global global)
     : FilesHelperBase(
         filesSettingsHelper,
@@ -59,7 +62,7 @@ public class UploadControllerHelper(
         eventBus,
         tenantManager,
         authContext)
-    {
+{
     public async Task<object> CreateEditSessionAsync<T>(T fileId, long fileSize)
     {
         var file = await _fileUploader.VerifyChunkedUploadForEditing(fileId, fileSize);
@@ -79,6 +82,12 @@ public class UploadControllerHelper(
         if (!await fileSecurity.CanCreateAsync(toFolder))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
+        }
+        if (toFolder.RootFolderType == FolderType.RoomTemplates && filesTitle.Any(r => FileUtility.GetFileExtension(r) != ".pdf"))
+        { 
+            var logoText = await tenantLogoManager.GetLogoTextAsync();
+
+            throw new Exception(string.Format(FilesCommonResource.ErrorMessage_UploadToFormRoom, logoText));
         }
 
         var result = new List<string>();
