@@ -1674,11 +1674,6 @@ public class FileSecurity(IDaoFactory daoFactory,
                     case FolderType.USER:
                         return false;
                     default:
-                        if (isDocSpaceAdmin)
-                        {
-                            return true;
-                        }
-                        
                         if (e.Access is FileShare.RoomManager)
                         {
                             return true;
