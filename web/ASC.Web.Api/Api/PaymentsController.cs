@@ -765,9 +765,9 @@ public class PaymentController(
 
         if (result?.Collection != null)
         {
-            for (var i = 0; i < result.Collection.Count; i++)
+            foreach (var operation in result.Collection)
             {
-                result.Collection[i] = result.Collection[i] with { Description = GetServiceDesc(result.Collection[i].Service) };
+                operation.Description = GetServiceDesc(operation.Service);
             }
         }
 
@@ -784,7 +784,7 @@ public class PaymentController(
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "URL to the csv report file", typeof(string))]
     [HttpPost("customer/operationsreport")]
-    public async Task<string> CreateCustomerOperationsReport(CustomerOperationsReportDto inDto)
+    public async Task<string> CreateCustomerOperationsReport(CustomerOperationsReportRequestDto inDto)
     {
         await DemandAdminAsync();
 
@@ -801,7 +801,7 @@ public class PaymentController(
             return null;
         }
 
-        inDto = inDto ?? new CustomerOperationsReportDto();
+        inDto = inDto ?? new CustomerOperationsReportRequestDto();
 
         var utcStartDate = inDto.StartDate != null ? tenantUtil.DateTimeToUtc(inDto.StartDate.Value) : tenant.CreationDateTime;
         var utcEndDate = inDto.EndDate != null ? tenantUtil.DateTimeToUtc(inDto.EndDate.Value) : DateTime.UtcNow;
@@ -838,9 +838,9 @@ public class PaymentController(
                 break;
             }
 
-            for (var i = 0; i < report.Collection.Count; i++)
+            foreach (var operation in report.Collection)
             {
-                report.Collection[i] = report.Collection[i] with { Description = GetServiceDesc(report.Collection[i].Service) };
+                operation.Description = GetServiceDesc(operation.Service);
             }
 
             yield return report.Collection;
