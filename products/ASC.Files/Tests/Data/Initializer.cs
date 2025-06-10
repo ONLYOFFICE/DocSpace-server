@@ -203,7 +203,10 @@ public static class Initializer
             throw new HttpRequestException($"Unable to invite user {employeeType}");
         }
 
-        return new User(fakeMember.Email, fakeMember.Password);
+        return new User(fakeMember.Email, fakeMember.Password)
+        {
+            Id = createMemberResponse.Data.Response.Id
+        };
     }
 
     public static async Task Authenticate(this HttpClient client, User user)
