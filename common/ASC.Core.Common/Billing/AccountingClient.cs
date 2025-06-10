@@ -26,8 +26,6 @@
 
 using System.Collections.Specialized;
 
-using Polly.Extensions.Http;
-
 namespace ASC.Core.Billing;
 
 [Singleton]
@@ -39,6 +37,7 @@ public class AccountingClient
     private readonly IHttpClientFactory _httpClientFactory;
 
     internal const string HttpClientName = "accountingHttpClient";
+    internal const string ResiliencePipelineName = "accountingResiliencePipeline";
 
     private readonly JsonSerializerOptions _deserializationOptions = new()
     {
@@ -252,10 +251,19 @@ public static class AccountingHttplClientExtension
     {
         services.AddHttpClient(AccountingClient.HttpClientName)
             .SetHandlerLifetime(TimeSpan.FromMinutes(5))
-            .AddPolicyHandler((_, _) => HttpPolicyExtensions.HandleTransientHttpError()
-                .OrResult(x => !x.IsSuccessStatusCode)
-                .WaitAndRetryAsync(2, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));
-
+            .AddResilienceHandler(AccountingClient.ResiliencePipelineName, builder =>
+            {
+                builder.AddRetry(new RetryStrategyOptions<HttpResponseMessage>
+                {
+                    MaxRetryAttempts = 3,
+                    Delay = TimeSpan.FromSeconds(1),
+                    BackoffType = DelayBackoffType.Exponential,
+                    ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
+                        .Handle<HttpRequestException>()
+                        .Handle<TaskCanceledException>()
+                        .HandleResult(response => !response.IsSuccessStatusCode),
+                });
+            });
     }
 }
 

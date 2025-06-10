@@ -65,4 +65,4 @@ global using Microsoft.Extensions.Hosting.WindowsServices;
 global using Microsoft.Extensions.Logging;
 
 global using Polly;
-global using Polly.Extensions.Http;
+global using Polly.Retry;

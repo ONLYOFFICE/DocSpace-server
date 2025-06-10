@@ -24,11 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Polly;
-using Polly.Contrib.WaitAndRetry;
-using Polly.Extensions.Http;
-using Polly.Timeout;
-
 namespace ASC.Files.Core.Helpers;
 
 /// <summary>
@@ -42,6 +37,11 @@ public static class DocumentService
     /// The custom SSL verification client.
     /// </summary>
     public const string CustomSslVerificationClient = "CustomSSLVerificationClient";
+
+    /// <summary>
+    /// The document service resilience pipeline name.
+    /// </summary>
+    public const string ResiliencePipelineName = "DocumentServiceResiliencePipeline";
 
     /// <summary>
     /// Gets the HTTP client name.
@@ -1044,14 +1044,24 @@ public static class DocumentServiceHttpClientExtension
         var httpClientTimeout = Convert.ToInt32(configuration["files:docservice:timeout"] ?? "100000");
         var policyTimeout = httpClientTimeout / 1000;
         var retryCount = Convert.ToInt32(configuration["files:docservice:try"] ?? "6");
-        var delay = Backoff.DecorrelatedJitterBackoffV2(medianFirstRetryDelay: TimeSpan.FromSeconds(1), retryCount: retryCount);
 
         services.AddHttpClient(GetHttpClientName(sslVerification: true))
                 .SetHandlerLifetime(TimeSpan.FromMinutes(5))
-                .AddPolicyHandler(Policy.TimeoutAsync<HttpResponseMessage>(policyTimeout))
-                .AddPolicyHandler((_, _) => HttpPolicyExtensions.HandleTransientHttpError()
-                                                                .Or<TimeoutRejectedException>()
-                                                                .WaitAndRetryAsync(delay));
+                .AddResilienceHandler(ResiliencePipelineName, builder =>
+                {
+                    builder.AddTimeout(TimeSpan.FromSeconds(policyTimeout));
+
+                    builder.AddRetry(new RetryStrategyOptions<HttpResponseMessage>
+                    {
+                        MaxRetryAttempts = retryCount,
+                        Delay = TimeSpan.FromSeconds(1),
+                        BackoffType = DelayBackoffType.Constant,
+                        ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
+                            .Handle<HttpRequestException>()
+                            .Handle<TaskCanceledException>()
+                            .HandleResult(response => !response.IsSuccessStatusCode),
+                    });
+                });
 
         services.AddHttpClient(GetHttpClientName(sslVerification: false))
                 .SetHandlerLifetime(TimeSpan.FromMinutes(5))
@@ -1062,10 +1072,21 @@ public static class DocumentServiceHttpClientExtension
                         ServerCertificateCustomValidationCallback = (_, _, _, _) => true
                     };
                 })
-                .AddPolicyHandler(Policy.TimeoutAsync<HttpResponseMessage>(policyTimeout))
-                .AddPolicyHandler((_, _) => HttpPolicyExtensions.HandleTransientHttpError()
-                                                                .Or<TimeoutRejectedException>()
-                                                                .WaitAndRetryAsync(delay));
+                .AddResilienceHandler(ResiliencePipelineName, builder =>
+                {
+                    builder.AddTimeout(TimeSpan.FromSeconds(policyTimeout));
+
+                    builder.AddRetry(new RetryStrategyOptions<HttpResponseMessage>
+                    {
+                        MaxRetryAttempts = retryCount,
+                        Delay = TimeSpan.FromSeconds(1),
+                        BackoffType = DelayBackoffType.Constant,
+                        ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
+                            .Handle<HttpRequestException>()
+                            .Handle<TaskCanceledException>()
+                            .HandleResult(response => !response.IsSuccessStatusCode),
+                    });
+                });
 
         services.AddHttpClient(CustomSslVerificationClient)
                 .ConfigurePrimaryHttpMessageHandler(_ =>

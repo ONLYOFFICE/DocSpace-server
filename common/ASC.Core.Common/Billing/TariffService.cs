@@ -1069,11 +1069,17 @@ public class TariffService(
             return result;
         }
 
-        var retryPolicy = Policy
-            .HandleResult<bool>(result => result == false)
-            .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
+        var builder = new ResiliencePipelineBuilder<bool>();
 
-        var updated = await retryPolicy.ExecuteAsync(async () =>
+        var pipeline = builder.AddRetry(new RetryStrategyOptions<bool>()
+        {
+            MaxRetryAttempts = 3,
+            Delay = TimeSpan.FromSeconds(1),
+            BackoffType = DelayBackoffType.Exponential,
+            ShouldHandle = new PredicateBuilder<bool>().HandleResult(result => result == false)
+        }).Build();
+
+        var updated = await pipeline.ExecuteAsync(async (_) =>
         {
             var newBalance = await GetCustomerBalanceAsync(tenantId, true);
             var newBalanceAmount = newBalance?.SubAccounts?.FirstOrDefault(x => x.Currency == currency)?.Amount;

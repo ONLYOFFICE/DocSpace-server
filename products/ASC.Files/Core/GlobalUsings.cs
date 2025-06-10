@@ -225,6 +225,9 @@ global using Newtonsoft.Json.Linq;
 
 global using OpenSearch.Client;
 
+global using Polly;
+global using Polly.Retry;
+
 global using ProtoBuf;
 
 global using WebDav;

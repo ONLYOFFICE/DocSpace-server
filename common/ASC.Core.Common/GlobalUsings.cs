@@ -151,6 +151,7 @@ global using NetEscapades.EnumGenerators;
 global using NVelocity;
 global using NVelocity.App.Events;
 global using Polly;
+global using Polly.Retry;
 global using Pomelo.EntityFrameworkCore.MySql.Infrastructure.Internal;
 global using Pomelo.EntityFrameworkCore.MySql.Migrations;
 global using ProtoBuf;

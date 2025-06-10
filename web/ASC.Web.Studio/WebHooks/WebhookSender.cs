@@ -88,27 +88,46 @@ public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory s
 
             var clientName = entry.Config.SSL ? WEBHOOK : WEBHOOK_SKIP_SSL;
             var httpClient = clientFactory.CreateClient(clientName);
-            var policy = HttpPolicyExtensions.HandleTransientHttpError()
-                                              .OrResult(x => !x.IsSuccessStatusCode)
-                                              .WaitAndRetryAsync(settings.RepeatCount ?? 5,
-                                                                 retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
-                                                                 onRetry: (response, delay, retryCount, context) =>
-                                                                 {
-                                                                     context["retryCount"] = retryCount;
-                                                                     context["errorMessage"] = response.Exception?.Message;
-                                                                 });
+
+            var builder = new ResiliencePipelineBuilder<HttpResponseMessage>();
+
+            var retryCountPropKey = new ResiliencePropertyKey<int>("retryCount");
+            var errorMessagePropKey = new ResiliencePropertyKey<string>("errorMessage");
+
+            var pipeline = builder.AddRetry(new RetryStrategyOptions<HttpResponseMessage>
+            {
+                MaxRetryAttempts = settings.RepeatCount ?? 5,
+                Delay = TimeSpan.FromSeconds(1),
+                BackoffType = DelayBackoffType.Exponential,
+                ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
+                        .Handle<HttpRequestException>()
+                        .Handle<TaskCanceledException>()
+                        .HandleResult(response => !response.IsSuccessStatusCode),
+                OnRetry = args =>
+                {
+                    args.Context.Properties.Set(retryCountPropKey, args.AttemptNumber);
+                    args.Context.Properties.Set(errorMessagePropKey, args.Outcome.Exception?.Message);
+                    return ValueTask.CompletedTask;
+                }
+            }).Build();
+
+            var context = ResilienceContextPool.Shared.Get(cancellationToken);
+
             try
             {
-                var response = await policy.ExecuteAsync(async (context) =>
+                context.Properties.Set(retryCountPropKey, 0);
+                context.Properties.Set(errorMessagePropKey, "");
+
+                var response = await pipeline.ExecuteAsync(async (context) =>
                 {
                     var request = new HttpRequestMessage(HttpMethod.Post, entry.Config.Uri);
 
-                    var retryCount = (int)context["retryCount"];
+                    var retryCount = context.Properties.GetValue(retryCountPropKey, 0);
 
                     if (retryCount > 0)
                     {
                         webhookPayload.Webhook.LastFailureOn = webhookPayload.Webhook.RetryOn ?? requestDate;
-                        webhookPayload.Webhook.LastFailureContent = (string)context["errorMessage"];
+                        webhookPayload.Webhook.LastFailureContent = context.Properties.GetValue(errorMessagePropKey, "");
                         webhookPayload.Webhook.LastSuccessOn = entry.Config.LastSuccessOn;
 
                         webhookPayload.Webhook.RetryCount = retryCount;
@@ -129,7 +148,7 @@ public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory s
                     response.EnsureSuccessStatusCode();
 
                     return response;
-                }, new Context { { "retryCount", 0 }, { "errorMessage", "" } });
+                }, context);
 
                 status = (int)response.StatusCode;
                 responseHeaders = JsonSerializer.Serialize(response.Headers.ToDictionary(r => r.Key, v => v.Value), _jsonSerializerOptions);
@@ -176,6 +195,10 @@ public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory s
 
                 status = (int)HttpStatusCode.InternalServerError;
                 logger.ErrorWithException(e);
+            }
+            finally
+            {
+                ResilienceContextPool.Shared.Return(context);
             }
 
             var configDisabled = !entry.Config.Enabled;

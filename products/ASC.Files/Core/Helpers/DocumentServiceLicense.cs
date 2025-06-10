@@ -26,8 +26,6 @@
 
 using ASC.Core.Billing;
 
-using Polly;
-
 namespace ASC.Files.Core.Helpers;
 
 [Scope]
@@ -79,11 +77,17 @@ public class DocumentServiceLicense(ICache cache,
 
     public async Task<LicenseValidationResult> ValidateLicense(License license)
     {
-        var retryPolicy = Policy
-            .HandleResult<LicenseValidationResult>(result => result == null)
-            .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
+        var builder = new ResiliencePipelineBuilder<LicenseValidationResult>();
 
-        var response = await retryPolicy.ExecuteAsync(async () =>
+        var pipeline = builder.AddRetry(new RetryStrategyOptions<LicenseValidationResult>()
+        {
+            MaxRetryAttempts = 3,
+            Delay = TimeSpan.FromSeconds(1),
+            BackoffType = DelayBackoffType.Exponential,
+            ShouldHandle = new PredicateBuilder<LicenseValidationResult>().HandleResult(result => result == null)
+        }).Build();
+
+        var response = await pipeline.ExecuteAsync(async (_) =>
         {
             var commandResponse = await GetDocumentServiceLicenseAsync(false);
 
