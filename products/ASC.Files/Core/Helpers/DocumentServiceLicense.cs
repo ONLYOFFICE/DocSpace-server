@@ -24,12 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Core.Billing;
-
 namespace ASC.Files.Core.Helpers;
 
 [Scope]
 public class DocumentServiceLicense(ICache cache,
+    ResiliencePipelineProvider<string> resiliencePipelineProvider,
     CoreBaseSettings coreBaseSettings,
     FilesLinkUtility filesLinkUtility,
     IHttpClientFactory clientFactory)
@@ -77,15 +76,7 @@ public class DocumentServiceLicense(ICache cache,
 
     public async Task<LicenseValidationResult> ValidateLicense(License license)
     {
-        var builder = new ResiliencePipelineBuilder<LicenseValidationResult>();
-
-        var pipeline = builder.AddRetry(new RetryStrategyOptions<LicenseValidationResult>()
-        {
-            MaxRetryAttempts = 3,
-            Delay = TimeSpan.FromSeconds(1),
-            BackoffType = DelayBackoffType.Exponential,
-            ShouldHandle = new PredicateBuilder<LicenseValidationResult>().HandleResult(result => result == null)
-        }).Build();
+        var pipeline = resiliencePipelineProvider.GetPipeline<LicenseValidationResult>(LicenseResiliencePipelineName);
 
         var response = await pipeline.ExecuteAsync(async (_) =>
         {

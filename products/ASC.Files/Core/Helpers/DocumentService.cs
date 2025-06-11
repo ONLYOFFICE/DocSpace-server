@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Polly.Contrib.WaitAndRetry;
-
 namespace ASC.Files.Core.Helpers;
 
 /// <summary>
@@ -44,6 +42,11 @@ public static class DocumentService
     /// The document service resilience pipeline name.
     /// </summary>
     public const string ResiliencePipelineName = "DocumentServiceResiliencePipeline";
+
+    /// <summary>
+    /// The document service license resilience pipeline name.
+    /// </summary>
+    public const string LicenseResiliencePipelineName = "DocumentServiceLicenseResiliencePipeline";
 
     /// <summary>
     /// Gets the HTTP client name.
@@ -1107,5 +1110,16 @@ public static class DocumentServiceHttpClientExtension
                         ServerCertificateCustomValidationCallback = (_, _, _, _) => true
                     };
                 });
+
+        services.AddResiliencePipeline<string, LicenseValidationResult>(LicenseResiliencePipelineName, pipelineBuilder =>
+        {
+            pipelineBuilder.AddRetry(new RetryStrategyOptions<LicenseValidationResult>()
+            {
+                MaxRetryAttempts = 3,
+                Delay = TimeSpan.FromSeconds(1),
+                BackoffType = DelayBackoffType.Exponential,
+                ShouldHandle = new PredicateBuilder<LicenseValidationResult>().HandleResult(result => result == null)
+            });
+        });
     }
 }
