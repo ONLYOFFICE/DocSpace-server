@@ -197,7 +197,6 @@ public class MigrationContext : DbContext
             .AddIdentityConsentScope()
             .AddIdentityScope()
             .AddIdentityShedlock()
-            .AddUserRelation()
-            .AddDbFunctions();
+            .AddUserRelation();
     }
 }
