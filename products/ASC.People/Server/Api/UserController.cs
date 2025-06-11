@@ -760,24 +760,19 @@ public class UserController(
         {
             throw new ItemNotFoundException("User not found");
         }
-
-        var targetUserType = await _userManager.GetUserTypeAsync(targetUser);
-
-        if (targetUserType is not EmployeeType.Guest)
-        {
-            throw new SecurityException(Resource.ErrorAccessDenied);
-        }
-
+        
         var currentUserId = authContext.CurrentAccount.ID;
         var currentUser = await _userManager.GetUsersAsync(currentUserId);
+        var targetUserType = await _userManager.GetUserTypeAsync(targetUser);
 
-        if (!await _userManager.CanUserViewAnotherUserAsync(currentUser, targetUser))
+        if (targetUserType is not EmployeeType.Guest || 
+            await _userManager.GetUserTypeAsync(currentUser) is EmployeeType.Guest || 
+            !await _userManager.CanUserViewAnotherUserAsync(currentUser, targetUser))
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
-        var link = commonLinkUtility.GetConfirmationEmailUrl(targetUser.Email, ConfirmType.GuestShareLink,
-                $"{currentUserId}{inDto.UserId}", currentUserId);
+        var link = commonLinkUtility.GetConfirmationEmailUrl(targetUser.Email, ConfirmType.GuestShareLink, $"{currentUserId}{inDto.UserId}", currentUserId);
 
         return await urlShortener.GetShortenLinkAsync(link);
     }
