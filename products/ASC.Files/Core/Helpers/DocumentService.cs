@@ -1065,7 +1065,7 @@ public static class DocumentServiceHttpClientExtension
 
                         DelayGenerator = (args) =>
                         {
-                            return ValueTask.FromResult<TimeSpan?>(delay[args.AttemptNumber - 1]);
+                            return ValueTask.FromResult<TimeSpan?>(delay[args.AttemptNumber]);
                         }
                     });
                 });
@@ -1094,7 +1094,7 @@ public static class DocumentServiceHttpClientExtension
 
                         DelayGenerator = (args) =>
                         {
-                            return ValueTask.FromResult<TimeSpan?>(delay[args.AttemptNumber - 1]);
+                            return ValueTask.FromResult<TimeSpan?>(delay[args.AttemptNumber]);
                         }
                     });
                 });
