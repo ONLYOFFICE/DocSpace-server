@@ -423,6 +423,9 @@ public class FileMoveCopyOperationsManager(
             folderForContentIds.Clear();
 
             using var scope = _serviceProvider.CreateScope();
+            
+            var scopedTenantManager = scope.ServiceProvider.GetService<TenantManager>();
+            scopedTenantManager.SetCurrentTenant(new Tenant(tenantId, String.Empty));
             var daoFactory = scope.ServiceProvider.GetService<IDaoFactory>();
             var fileDao = daoFactory.GetFileDao<T1>();
             var folderDao = daoFactory.GetFolderDao<T1>();
