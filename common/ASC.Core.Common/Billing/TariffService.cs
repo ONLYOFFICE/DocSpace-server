@@ -66,6 +66,7 @@ public class TariffService(
     BillingClient billingClient,
     AccountingClient accountingClient,
     IServiceProvider serviceProvider,
+    ResiliencePipelineProvider<string> resiliencePipelineProvider,
     TenantExtraConfig tenantExtraConfig)
     : ITariffService
 {
@@ -1069,15 +1070,7 @@ public class TariffService(
             return result;
         }
 
-        var builder = new ResiliencePipelineBuilder<bool>();
-
-        var pipeline = builder.AddRetry(new RetryStrategyOptions<bool>()
-        {
-            MaxRetryAttempts = 3,
-            Delay = TimeSpan.FromSeconds(1),
-            BackoffType = DelayBackoffType.Exponential,
-            ShouldHandle = new PredicateBuilder<bool>().HandleResult(result => result == false)
-        }).Build();
+        var pipeline = resiliencePipelineProvider.GetPipeline<bool>(AccountingClient.BalanceResiliencePipelineName);
 
         var updated = await pipeline.ExecuteAsync(async (_) =>
         {

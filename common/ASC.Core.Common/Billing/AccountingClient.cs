@@ -38,6 +38,7 @@ public class AccountingClient
 
     internal const string HttpClientName = "accountingHttpClient";
     internal const string ResiliencePipelineName = "accountingResiliencePipeline";
+    internal const string BalanceResiliencePipelineName = "balanceResiliencePipeline";
 
     private readonly JsonSerializerOptions _deserializationOptions = new()
     {
@@ -264,6 +265,17 @@ public static class AccountingHttplClientExtension
                         .HandleResult(response => !response.IsSuccessStatusCode),
                 });
             });
+
+        services.AddResiliencePipeline<string, bool>(AccountingClient.BalanceResiliencePipelineName, pipelineBuilder =>
+        {
+            pipelineBuilder.AddRetry(new RetryStrategyOptions<bool>()
+            {
+                MaxRetryAttempts = 3,
+                Delay = TimeSpan.FromSeconds(1),
+                BackoffType = DelayBackoffType.Exponential,
+                ShouldHandle = new PredicateBuilder<bool>().HandleResult(result => result == false)
+            });
+        });
     }
 }
 

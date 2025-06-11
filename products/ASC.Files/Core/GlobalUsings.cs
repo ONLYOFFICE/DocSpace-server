@@ -228,8 +228,8 @@ global using OpenSearch.Client;
 
 global using Polly;
 global using Polly.Contrib.WaitAndRetry;
-global using Polly.Retry;
 global using Polly.Registry;
+global using Polly.Retry;
 
 global using ProtoBuf;
 
