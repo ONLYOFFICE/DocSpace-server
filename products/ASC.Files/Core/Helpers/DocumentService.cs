@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Polly.Contrib.WaitAndRetry;
+
 namespace ASC.Files.Core.Helpers;
 
 /// <summary>
@@ -1044,6 +1046,7 @@ public static class DocumentServiceHttpClientExtension
         var httpClientTimeout = Convert.ToInt32(configuration["files:docservice:timeout"] ?? "100000");
         var policyTimeout = httpClientTimeout / 1000;
         var retryCount = Convert.ToInt32(configuration["files:docservice:try"] ?? "6");
+        var delay = Backoff.DecorrelatedJitterBackoffV2(medianFirstRetryDelay: TimeSpan.FromSeconds(1), retryCount: retryCount).ToArray();
 
         services.AddHttpClient(GetHttpClientName(sslVerification: true))
                 .SetHandlerLifetime(TimeSpan.FromMinutes(5))
@@ -1054,12 +1057,16 @@ public static class DocumentServiceHttpClientExtension
                     builder.AddRetry(new RetryStrategyOptions<HttpResponseMessage>
                     {
                         MaxRetryAttempts = retryCount,
-                        Delay = TimeSpan.FromSeconds(1),
-                        BackoffType = DelayBackoffType.Constant,
+
                         ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
                             .Handle<HttpRequestException>()
                             .Handle<TaskCanceledException>()
                             .HandleResult(response => !response.IsSuccessStatusCode),
+
+                        DelayGenerator = (args) =>
+                        {
+                            return ValueTask.FromResult<TimeSpan?>(delay[args.AttemptNumber - 1]);
+                        }
                     });
                 });
 
@@ -1079,12 +1086,16 @@ public static class DocumentServiceHttpClientExtension
                     builder.AddRetry(new RetryStrategyOptions<HttpResponseMessage>
                     {
                         MaxRetryAttempts = retryCount,
-                        Delay = TimeSpan.FromSeconds(1),
-                        BackoffType = DelayBackoffType.Constant,
+
                         ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
                             .Handle<HttpRequestException>()
                             .Handle<TaskCanceledException>()
                             .HandleResult(response => !response.IsSuccessStatusCode),
+
+                        DelayGenerator = (args) =>
+                        {
+                            return ValueTask.FromResult<TimeSpan?>(delay[args.AttemptNumber - 1]);
+                        }
                     });
                 });
 
