@@ -57,7 +57,6 @@ public partial class SettingsController(
     DnsSettings dnsSettings,
     CustomColorThemesSettingsHelper customColorThemesSettingsHelper,
     UserInvitationLimitHelper userInvitationLimitHelper,
-    QuotaUsageManager quotaUsageManager,
     TenantDomainValidator tenantDomainValidator,
     TenantLogoManager tenantLogoManager,
     ExternalShare externalShare,
@@ -260,22 +259,7 @@ public partial class SettingsController(
 
         return Resource.SuccessfullySaveSettingsMessage;
     }
-
-    /// <summary>
-    /// Returns the quota used space for the portal.
-    /// </summary>
-    /// <short>
-    /// Get the space usage
-    /// </short>
-    /// <path>api/2.0/settings/quota</path>
-    [ApiExplorerSettings(IgnoreApi = true)]
-    [Tags("Settings / Quota")]
-    [SwaggerResponse(200, "Space usage and limits for upload", typeof(QuotaUsageDto))]
-    [HttpGet("quota")]
-    public async Task<QuotaUsageDto> GetQuotaUsed()
-    {
-        return await quotaUsageManager.Get();
-    }
+    
 
     /// <summary>
     /// Saves the user quota settings specified in the request to the current portal.
