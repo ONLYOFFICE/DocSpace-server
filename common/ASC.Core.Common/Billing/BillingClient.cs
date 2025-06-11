@@ -295,7 +295,7 @@ public static class BillingHttplClientExtension
     {
         services.AddHttpClient(BillingClient.HttpClientName)
             .SetHandlerLifetime(TimeSpan.FromMinutes(5))
-            .AddResilienceHandler(AccountingClient.ResiliencePipelineName, builder =>
+            .AddResilienceHandler(BillingClient.ResiliencePipelineName, builder =>
             {
                 builder.AddRetry(new RetryStrategyOptions<HttpResponseMessage>
                 {
