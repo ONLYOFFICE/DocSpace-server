@@ -255,7 +255,7 @@ public static class AccountingHttplClientExtension
             {
                 builder.AddRetry(new RetryStrategyOptions<HttpResponseMessage>
                 {
-                    MaxRetryAttempts = 3,
+                    MaxRetryAttempts = 2,
                     Delay = TimeSpan.FromSeconds(1),
                     BackoffType = DelayBackoffType.Exponential,
                     ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
