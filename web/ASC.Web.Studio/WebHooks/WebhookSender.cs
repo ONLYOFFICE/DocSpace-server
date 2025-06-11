@@ -105,7 +105,7 @@ public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory s
                         .HandleResult(response => !response.IsSuccessStatusCode),
                 OnRetry = args =>
                 {
-                    args.Context.Properties.Set(retryCountPropKey, args.AttemptNumber);
+                    args.Context.Properties.Set(retryCountPropKey, args.AttemptNumber + 1);
                     args.Context.Properties.Set(errorMessagePropKey, args.Outcome.Exception?.Message);
                     return ValueTask.CompletedTask;
                 }
