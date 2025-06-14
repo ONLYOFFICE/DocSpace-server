@@ -359,7 +359,6 @@ public class FileMoveCopyOperationsManager(
     IEventBus eventBus,
     AuthContext authContext,
     TenantManager tenantManager,
-    UserManager userManager,
     FileOperationsManagerHolder<FileMoveCopyOperation> fileOperationsManagerHolder,
     ExternalShare externalShare,
     IServiceProvider serviceProvider) : FileOperationsManager<FileMoveCopyOperation>(httpContextAccessor, eventBus, authContext, fileOperationsManagerHolder, externalShare, serviceProvider)
@@ -374,10 +373,6 @@ public class FileMoveCopyOperationsManager(
         bool toFillOut,
         bool content = false)
     {        
-        if (resolveType == FileConflictResolveType.Overwrite && await userManager.IsGuestAsync(_authContext.CurrentAccount.ID))
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
-        }
         
         if ((folderIds == null || folderIds.Count == 0) && (fileIds == null || fileIds.Count == 0))
         {
