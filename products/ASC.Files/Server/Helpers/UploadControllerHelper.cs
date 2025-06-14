@@ -47,8 +47,7 @@ public class UploadControllerHelper(
     WebhookManager webhookManager,
     IEventBus eventBus,
     AuthContext authContext,
-    TenantLogoManager tenantLogoManager,
-    Global global)
+    TenantLogoManager tenantLogoManager)
     : FilesHelperBase(
         filesSettingsHelper,
         fileUploader,
