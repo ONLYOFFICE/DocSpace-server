@@ -2109,8 +2109,6 @@ public class EntryManager(IDaoFactory daoFactory,
         properties.FormFilling.ResultsFolderId = resultsFolderId;
         properties.FormFilling.StartFilling = true;
 
-        properties.FormFilling.ResultsFileID = await CreateFillResultsFile(resultsFolderId, createBy, sourceTitle, fileDao);
-
         await fileDao.SaveProperties(sourceFileId, properties);
 
         return properties;
