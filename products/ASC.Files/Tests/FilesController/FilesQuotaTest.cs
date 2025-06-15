@@ -248,7 +248,7 @@ public class FilesQuotaTest(
         
         // Create a room
         var roomTitle = "Room for Quota Test " + Guid.NewGuid().ToString()[..8];
-        var createdRoom = (await _filesRoomsApi.CreateRoomAsync(
+        var createdRoom = (await _roomsApi.CreateRoomAsync(
             new CreateRoomRequestDto(roomTitle, roomType: RoomType.VirtualDataRoom), 
             TestContext.Current.CancellationToken)).Response;
         
@@ -279,7 +279,7 @@ public class FilesQuotaTest(
         
         // Create a room
         var roomTitle = "Room for Quota Test " + Guid.NewGuid().ToString()[..8];
-        var createdRoom = (await _filesRoomsApi.CreateRoomAsync(
+        var createdRoom = (await _roomsApi.CreateRoomAsync(
             new CreateRoomRequestDto(roomTitle, roomType: RoomType.VirtualDataRoom, quota: smallQuotaLimit), 
             TestContext.Current.CancellationToken)).Response;
         
@@ -310,7 +310,7 @@ public class FilesQuotaTest(
         
         // Create a room
         var roomTitle = "Room for Quota Test " + Guid.NewGuid().ToString()[..8];
-        var createdRoom = (await _filesRoomsApi.CreateRoomAsync(
+        var createdRoom = (await _roomsApi.CreateRoomAsync(
             new CreateRoomRequestDto(roomTitle, roomType: RoomType.VirtualDataRoom, quota: minimalQuotaLimit), 
             TestContext.Current.CancellationToken)).Response;
         

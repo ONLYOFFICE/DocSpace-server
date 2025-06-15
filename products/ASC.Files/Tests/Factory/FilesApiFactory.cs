@@ -46,7 +46,7 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
     public FilesFoldersApi FilesFoldersApi { get; private set;} = null!;
     public FilesFilesApi FilesFilesApi { get; private set;} = null!;
     public FilesOperationsApi FilesOperationsApi { get; private set;} = null!;
-    public FilesRoomsApi FilesRoomsApi { get; private set;} = null!;
+    public RoomsApi RoomsApi { get; private set;} = null!;
     public FilesSettingsApi FilesSettingsApi { get; private set;} = null!;
     public FilesQuotaApi  FilesQuotaApi { get; private set;} = null!;
     public SettingsQuotaApi  SettingsQuotaApi { get; private set;} = null!;
@@ -167,7 +167,7 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
         FilesFoldersApi = new FilesFoldersApi(HttpClient, configuration);
         FilesFilesApi = new FilesFilesApi(HttpClient, configuration);
         FilesOperationsApi = new FilesOperationsApi(HttpClient, configuration);
-        FilesRoomsApi = new FilesRoomsApi(HttpClient, configuration);
+        RoomsApi = new RoomsApi(HttpClient, configuration);
         FilesSettingsApi = new FilesSettingsApi(HttpClient, configuration);
         FilesQuotaApi = new FilesQuotaApi(HttpClient, configuration);
         SettingsQuotaApi = new SettingsQuotaApi(HttpClient, configuration);

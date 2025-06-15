@@ -229,7 +229,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                     return;
             }
         }
-        catch (System.Text.Json.JsonException)
+        catch (JsonException)
         {
             throw;
         }

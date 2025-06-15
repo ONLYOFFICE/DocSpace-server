@@ -163,7 +163,9 @@ $OrangeButton
 
 Моля, кликнете върху бутона по-долу, за да отидете на страницата за вход в портала и да конфигурирате приложението за удостоверяване:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.Промяна на собственика на портала "${__VirtualRootPath}":"${__VirtualRootPath}"

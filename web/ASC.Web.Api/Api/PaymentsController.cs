@@ -762,6 +762,15 @@ public class PaymentController(
         var utcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate);
         var utcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate);
         var result = await tariffService.GetCustomerOperationsAsync(tenant.Id, utcStartDate, utcEndDate, inDto.Credit, inDto.Withdrawal, inDto.Offset, inDto.Limit);
+
+        if (result?.Collection != null)
+        {
+            foreach (var operation in result.Collection)
+            {
+                operation.Description = GetServiceDesc(operation.Service);
+            }
+        }
+
         return result;
     }
 
@@ -775,7 +784,7 @@ public class PaymentController(
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "URL to the csv report file", typeof(string))]
     [HttpPost("customer/operationsreport")]
-    public async Task<string> CreateCustomerOperationsReport(CustomerOperationsReportDto inDto)
+    public async Task<string> CreateCustomerOperationsReport(CustomerOperationsReportRequestDto inDto)
     {
         await DemandAdminAsync();
 
@@ -792,7 +801,7 @@ public class PaymentController(
             return null;
         }
 
-        inDto = inDto ?? new CustomerOperationsReportDto();
+        inDto = inDto ?? new CustomerOperationsReportRequestDto();
 
         var utcStartDate = inDto.StartDate != null ? tenantUtil.DateTimeToUtc(inDto.StartDate.Value) : tenant.CreationDateTime;
         var utcEndDate = inDto.EndDate != null ? tenantUtil.DateTimeToUtc(inDto.EndDate.Value) : DateTime.UtcNow;
@@ -823,6 +832,17 @@ public class PaymentController(
         {
             var report = await tariffService.GetCustomerOperationsAsync(tenantId, utcStartDate, utcEndDate, credit, withdrawal, offset, limit);
 
+            if (report?.Collection == null)
+            {
+                yield return null;
+                break;
+            }
+
+            foreach (var operation in report.Collection)
+            {
+                operation.Description = GetServiceDesc(operation.Service);
+            }
+
             yield return report.Collection;
 
             if (report.CurrentPage == report.TotalPage)
@@ -834,6 +854,11 @@ public class PaymentController(
         }
     }
 
+    private static string GetServiceDesc(string serviceName)
+    {
+        return Resource.ResourceManager.GetString("AccountingCustomerOperationServiceDesc_" + (serviceName ?? "top-up"));
+    }
+
     internal class OperationMap : ClassMap<Operation>
     {
         public OperationMap()
@@ -841,6 +866,7 @@ public class PaymentController(
             Map(item => item.Date).TypeConverter<CsvFileHelper.CsvDateTimeConverter>();
 
             Map(item => item.Date).Name(Resource.AccountingCustomerOperationDate);
+            Map(item => item.Description).Name(Resource.AccountingCustomerOperationDescription);
             Map(item => item.Service).Name(Resource.AccountingCustomerOperationService);
             Map(item => item.ServiceUnit).Name(Resource.AccountingCustomerOperationServiceUnit);
             Map(item => item.Quantity).Name(Resource.AccountingCustomerOperationQuantity);

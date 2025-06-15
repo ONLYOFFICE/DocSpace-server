@@ -187,7 +187,9 @@ La configurazione dell'app di autenticazione che utilizzi per accedere al portal
 
 Clicca sul pulsante in basso per accedere alla pagina di accesso al portale e configurare l'applicazione di autenticazione:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.Cambio del "${__VirtualRootPath}":"${__VirtualRootPath}" proprietario del portale
