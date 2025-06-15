@@ -44,14 +44,14 @@ public class TagsApiTest(
         var createTagRequest = new CreateTagRequestDto(tagName);
         
         // Act
-        var tag = (await _filesRoomsApi.CreateTagAsync(createTagRequest, TestContext.Current.CancellationToken)).Response;
+        var tag = (await _roomsApi.CreateRoomTagAsync(createTagRequest, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         tag.Should().NotBeNull();
         tag.Should().NotBeNull();
         
         // Verify tag exists in system
-        var tagsInfo = (await _filesRoomsApi.GetTagsInfoAsync(TestContext.Current.CancellationToken)).Response;
+        var tagsInfo = (await _roomsApi.GetRoomTagsInfoAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
         tagsInfo.Should().Contain(t => t.ToString() == tagName);
     }
     
@@ -65,10 +65,10 @@ public class TagsApiTest(
         var tagName = "ListableTag" + Guid.NewGuid().ToString()[..5];
         var createTagRequest = new CreateTagRequestDto(tagName);
         
-        await _filesRoomsApi.CreateTagAsync(createTagRequest, TestContext.Current.CancellationToken);
+        await _roomsApi.CreateRoomTagAsync(createTagRequest, TestContext.Current.CancellationToken);
         
         // Act
-        var tags = (await _filesRoomsApi.GetTagsInfoAsync(TestContext.Current.CancellationToken)).Response;
+        var tags = (await _roomsApi.GetRoomTagsInfoAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
         
         // Assert
         tags.Should().NotBeNull();
@@ -86,7 +86,7 @@ public class TagsApiTest(
         var tagName = "DeletableTag" + Guid.NewGuid().ToString()[..5];
         var createTagRequest = new CreateTagRequestDto(tagName);
         
-        var tag = (await _filesRoomsApi.CreateTagAsync(createTagRequest, TestContext.Current.CancellationToken)).Response;
+        var tag = (await _roomsApi.CreateRoomTagAsync(createTagRequest, TestContext.Current.CancellationToken)).Response;
         
         // Act
         var deleteRequest = new BatchTagsRequestDto
@@ -94,10 +94,10 @@ public class TagsApiTest(
             Names = [tag.ToString()!]
         };
         
-        await _filesRoomsApi.DeleteCustomTagsAsync(deleteRequest, TestContext.Current.CancellationToken);
+        await _roomsApi.DeleteCustomTagsAsync(deleteRequest, TestContext.Current.CancellationToken);
         
         // Assert - Verify tag is gone
-        var tagsAfterDelete = (await _filesRoomsApi.GetTagsInfoAsync(TestContext.Current.CancellationToken)).Response;
+        var tagsAfterDelete = (await _roomsApi.GetRoomTagsInfoAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
         tagsAfterDelete.Should().NotContain(t => t.ToString() == tagName);
     }
     
@@ -109,7 +109,7 @@ public class TagsApiTest(
         
         // Create a room
         var roomTitle = "Room for Tags " + Guid.NewGuid().ToString()[..8];
-        var room = (await _filesRoomsApi.CreateRoomAsync(
+        var room = (await _roomsApi.CreateRoomAsync(
             new CreateRoomRequestDto(roomTitle, indexing: true, roomType: RoomType.CustomRoom), 
             TestContext.Current.CancellationToken)).Response;
             
@@ -117,10 +117,10 @@ public class TagsApiTest(
         var tagName = "LifecycleTag" + Guid.NewGuid().ToString()[..5];
         var createTagRequest = new CreateTagRequestDto(tagName);
         
-        var tag = (await _filesRoomsApi.CreateTagAsync(createTagRequest, TestContext.Current.CancellationToken)).Response;
+        var tag = (await _roomsApi.CreateRoomTagAsync(createTagRequest, TestContext.Current.CancellationToken)).Response;
         
         // Verify tag exists
-        var tagsAfterCreate = (await _filesRoomsApi.GetTagsInfoAsync(TestContext.Current.CancellationToken)).Response;
+        var tagsAfterCreate = (await _roomsApi.GetRoomTagsInfoAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
         tagsAfterCreate.Should().Contain(t => t.ToString() == tagName);
         
         // 2. Add tag to a room
@@ -129,7 +129,7 @@ public class TagsApiTest(
             Names = [tag.ToString()!]
         };
         
-        var roomWithTag = (await _filesRoomsApi.AddTagsAsync(room.Id, addTagsRequest, TestContext.Current.CancellationToken)).Response;
+        var roomWithTag = (await _roomsApi.AddRoomTagsAsync(room.Id, addTagsRequest, TestContext.Current.CancellationToken)).Response;
         roomWithTag.Should().NotBeNull();
         
         // 3. Delete tag from the room
@@ -138,7 +138,7 @@ public class TagsApiTest(
             Names = [tag.ToString()!]
         };
         
-        var roomWithoutTag = (await _filesRoomsApi.DeleteTagsAsync(room.Id, deleteFromRoomRequest, TestContext.Current.CancellationToken)).Response;
+        var roomWithoutTag = (await _roomsApi.DeleteRoomTagsAsync(room.Id, deleteFromRoomRequest, TestContext.Current.CancellationToken)).Response;
         roomWithoutTag.Should().NotBeNull();
         
         // 4. Delete tag completely
@@ -147,10 +147,10 @@ public class TagsApiTest(
             Names = [tag.ToString()!]
         };
         
-        await _filesRoomsApi.DeleteCustomTagsAsync(deleteTagRequest, TestContext.Current.CancellationToken);
+        await _roomsApi.DeleteCustomTagsAsync(deleteTagRequest, TestContext.Current.CancellationToken);
         
         // Verify tag is gone
-        var tagsAfterDelete = (await _filesRoomsApi.GetTagsInfoAsync(TestContext.Current.CancellationToken)).Response;
+        var tagsAfterDelete = (await _roomsApi.GetRoomTagsInfoAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
         tagsAfterDelete.Should().NotContain(t => t.ToString() == tagName);
     }
 }

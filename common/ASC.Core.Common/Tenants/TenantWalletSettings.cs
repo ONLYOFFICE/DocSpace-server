@@ -59,7 +59,7 @@ public class TenantWalletSettings : ISettings<TenantWalletSettings>
     public int UpToBalance { get; set; }
 
     /// <summary>
-    /// Currency
+    /// The three-character ISO 4217 currency symbol.
     /// </summary>
     public string Currency { get; set; }
 

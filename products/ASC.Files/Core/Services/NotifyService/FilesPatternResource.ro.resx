@@ -159,7 +159,9 @@ Un formular nou "$DocumentTitle":"$DocumentURL" este completat în sala "$RoomTi
  
 Expeditorul formularului: "$FromUserName":"$FromUserLink"
  
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_FormSubmitted" xml:space="preserve">
     <value>h1. Dumneavoastră ați completat formularul $Message
@@ -168,7 +170,9 @@ Dumneavoastră ați completat formularul "$DocumentTitle":"$DocumentURL" în sal
  
 Manager: "$ToUserName":"$ToUserLink"
  
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
     <value>Notificare DocSpace. Formularul este completat</value>

@@ -24,52 +24,49 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Security.Cryptography;
-
 namespace ASC.Web.Api.Controllers.Settings;
 
-public partial class SettingsController(MessageService messageService,
-        ApiContext apiContext,
-        UserManager userManager,
-        TenantManager tenantManager,
-        TenantExtra tenantExtra,
-        AuthContext authContext,
-        PermissionContext permissionContext,
-        SettingsManager settingsManager,
-        WebItemManager webItemManager,
-        WebItemManagerSecurity webItemManagerSecurity,
-        TenantInfoSettingsHelper tenantInfoSettingsHelper,
-        CoreSettings coreSettings,
-        CoreBaseSettings coreBaseSettings,
-        CommonLinkUtility commonLinkUtility,
-        IConfiguration configuration,
-        SetupInfo setupInfo,
-        ExternalResourceSettings externalResourceSettings,
-        ExternalResourceSettingsHelper externalResourceSettingsHelper,
-        GeolocationHelper geolocationHelper,
-        ConsumerFactory consumerFactory,
-        TimeZoneConverter timeZoneConverter,
-        CustomNamingPeople customNamingPeople,
-        IFusionCache fusionCache,
-        ProviderManager providerManager,
-        FirstTimeTenantSettings firstTimeTenantSettings,
-        TelegramHelper telegramHelper,
-        PasswordHasher passwordHasher,
-        IHttpContextAccessor httpContextAccessor,
-        DnsSettings dnsSettings,
-        CustomColorThemesSettingsHelper customColorThemesSettingsHelper,
-        UserInvitationLimitHelper userInvitationLimitHelper,
-        QuotaUsageManager quotaUsageManager,
-        TenantDomainValidator tenantDomainValidator,
-        TenantLogoManager tenantLogoManager,
-        ExternalShare externalShare,
-        IMapper mapper,
-        UserFormatter userFormatter,
-        IDistributedLockProvider distributedLockProvider,
-        UsersQuotaSyncOperation usersQuotaSyncOperation,
-        CustomQuota customQuota,
-        QuotaSocketManager quotaSocketManager)
-    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
+public partial class SettingsController(
+    MessageService messageService,
+    SecurityContext securityContext,
+    UserManager userManager,
+    TenantManager tenantManager,
+    TenantExtra tenantExtra,
+    AuthContext authContext,
+    PermissionContext permissionContext,
+    SettingsManager settingsManager,
+    WebItemManager webItemManager,
+    WebItemManagerSecurity webItemManagerSecurity,
+    TenantInfoSettingsHelper tenantInfoSettingsHelper,
+    CoreSettings coreSettings,
+    CoreBaseSettings coreBaseSettings,
+    CommonLinkUtility commonLinkUtility,
+    IConfiguration configuration,
+    SetupInfo setupInfo,
+    ExternalResourceSettings externalResourceSettings,
+    ExternalResourceSettingsHelper externalResourceSettingsHelper,
+    GeolocationHelper geolocationHelper,
+    ConsumerFactory consumerFactory,
+    TimeZoneConverter timeZoneConverter,
+    CustomNamingPeople customNamingPeople,
+    IFusionCache fusionCache,
+    ProviderManager providerManager,
+    FirstTimeTenantSettings firstTimeTenantSettings,
+    TelegramHelper telegramHelper,
+    PasswordHasher passwordHasher,
+    DnsSettings dnsSettings,
+    CustomColorThemesSettingsHelper customColorThemesSettingsHelper,
+    UserInvitationLimitHelper userInvitationLimitHelper,
+    TenantDomainValidator tenantDomainValidator,
+    TenantLogoManager tenantLogoManager,
+    ExternalShare externalShare,
+    IMapper mapper,
+    UserFormatter userFormatter,
+    IDistributedLockProvider distributedLockProvider,
+    UsersQuotaSyncOperation usersQuotaSyncOperation,
+    CustomQuota customQuota,
+    QuotaSocketManager quotaSocketManager)
+    : BaseSettingsController(fusionCache, webItemManager)
 {
     [GeneratedRegex("^[a-z0-9]([a-z0-9-.]){1,253}[a-z0-9]$")]
     private static partial Regex EmailDomainRegex();
@@ -86,7 +83,7 @@ public partial class SettingsController(MessageService messageService,
     [SwaggerResponse(200, "Settings", typeof(SettingsDto))]
     [HttpGet("")]
     [AllowNotPayment, AllowSuspended, AllowAnonymous]
-    public async Task<SettingsDto> GetPortalSettings(PortalSettingsrequestDto inDto)
+    public async Task<SettingsDto> GetPortalSettings(PortalSettingsRequestDto inDto)
     {
         var studioAdminMessageSettings = await settingsManager.LoadAsync<StudioAdminMessageSettings>();
         var tenantCookieSettings = await settingsManager.LoadAsync<TenantCookieSettings>();
@@ -262,22 +259,7 @@ public partial class SettingsController(MessageService messageService,
 
         return Resource.SuccessfullySaveSettingsMessage;
     }
-
-    /// <summary>
-    /// Returns the quota used space for the portal.
-    /// </summary>
-    /// <short>
-    /// Get the space usage
-    /// </short>
-    /// <path>api/2.0/settings/quota</path>
-    [ApiExplorerSettings(IgnoreApi = true)]
-    [Tags("Settings / Quota")]
-    [SwaggerResponse(200, "Space usage and limits for upload", typeof(QuotaUsageDto))]
-    [HttpGet("quota")]
-    public async Task<QuotaUsageDto> GetQuotaUsed()
-    {
-        return await quotaUsageManager.Get();
-    }
+    
 
     /// <summary>
     /// Saves the user quota settings specified in the request to the current portal.
@@ -543,7 +525,7 @@ public partial class SettingsController(MessageService messageService,
     [AllowNotPayment]
     public async Task<List<TimezonesRequestsDto>> GetTimeZones()
     {
-        await ApiContext.AuthByClaimAsync();
+        await securityContext.AuthByClaimAsync();
         var timeZones = TimeZoneInfo.GetSystemTimeZones().ToList();
 
         if (timeZones.All(tz => tz.Id != "UTC"))
@@ -663,7 +645,7 @@ public partial class SettingsController(MessageService messageService,
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard")]
     public async Task<WizardSettings> CompleteWizard(WizardRequestsDto inDto)
     {
-        await ApiContext.AuthByClaimAsync();
+        await securityContext.AuthByClaimAsync();
 
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 

@@ -159,7 +159,9 @@ Een nieuw formulier "$DocumentTitle":"$DocumentURL" is ingevuld in de kamer "$Ro
 
 Indiener van formulier: "$FromUserName":"$FromUserLink".
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_FormSubmitted" xml:space="preserve">
     <value>h1. U heeft het formulier ingevuld $Message
@@ -168,7 +170,9 @@ U heeft het formulier "$DocumentTitle":"$DocumentURL" ingevuld in de kamer "$Roo
 
 Beheerder: "$ToUserName":"$ToUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
     <value>DocSpace melding. Het formulier is ingevuld</value>

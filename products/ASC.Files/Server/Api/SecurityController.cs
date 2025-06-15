@@ -161,15 +161,16 @@ public abstract class SecurityController<T>(FileStorageService fileStorageServic
     [HttpGet("folder/{folderId}/group/{groupId:guid}/share")]
     public async IAsyncEnumerable<GroupMemberSecurityRequestDto> GetGroupsMembersWithFolderSecurity(GroupMemberSecurityRequestDto<T> inDto)
     {
-        var offset = Convert.ToInt32(apiContext.StartIndex);
-        var count = Convert.ToInt32(apiContext.Count);
-
+        var offset = inDto.StartIndex;
+        var count = inDto.Count;
+        var text = inDto.Text;
+        
         var folder = await daoFactory.GetFolderDao<T>().GetFolderAsync(inDto.FolderId);
-        var totalCount = await fileSharing.GetGroupMembersCountAsync(folder, inDto.GroupId, apiContext.FilterValue);
+        var totalCount = await fileSharing.GetGroupMembersCountAsync(folder, inDto.GroupId, text);
 
         apiContext.SetCount(Math.Min(Math.Max(totalCount - offset, 0), count)).SetTotalCount(totalCount);
 
-        await foreach (var memberSecurity in fileSharing.GetGroupMembersAsync(folder, inDto.GroupId, apiContext.FilterValue, offset, count))
+        await foreach (var memberSecurity in fileSharing.GetGroupMembersAsync(folder, inDto.GroupId, text, offset, count))
         {
             yield return new GroupMemberSecurityRequestDto
             {

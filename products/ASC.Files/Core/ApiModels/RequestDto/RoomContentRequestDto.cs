@@ -90,4 +90,35 @@ public class RoomContentRequestDto
     /// </summary>
     [FromQuery(Name = "storageFilter")]
     public StorageFilter? StorageFilter { get; set; }
+
+    /// <summary>
+    /// Specifies the maximum number of items to retrieve.
+    /// </summary>
+    [FromQuery(Name = "count")]
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
+
+    /// <summary>
+    /// The index from which to start retrieving the room content.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
+    
+    /// <summary>
+    /// Specifies the field by which the room content should be sorted.
+    /// </summary>
+    [FromQuery(Name = "sortBy")]
+    public string SortBy { get; set; }
+    
+    /// <summary>
+    /// The order in which the results are sorted.
+    /// </summary>
+    [FromQuery(Name = "sortOrder")]
+    public SortOrder SortOrder { get; set; }
+
+    /// <summary>
+    /// The text filter value used to refine search or query operations.
+    /// </summary>
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
 }

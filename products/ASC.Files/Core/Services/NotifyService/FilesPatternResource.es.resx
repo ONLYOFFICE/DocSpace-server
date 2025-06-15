@@ -159,7 +159,9 @@ El nuevo formulario "$DocumentTitle":"$DocumentURL" está rellenado en la sala "
  
 Remitente del formulario: "$FromUserName":"$FromUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_FormSubmitted" xml:space="preserve">
     <value>h1. Ha rellenado el formulario $Message
@@ -168,7 +170,9 @@ Ha rellenado el formulario "$DocumentTitle":"$DocumentURL" en la sala "$RoomTitl
  
 Responsable: "$ToUserName":"$ToUserLink"
  
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
     <value>Notificación de DocSpace. El formulario está rellenado</value>

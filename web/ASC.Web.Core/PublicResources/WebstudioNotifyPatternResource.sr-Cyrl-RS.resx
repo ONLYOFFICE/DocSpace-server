@@ -566,7 +566,9 @@ $OrangeButton
 
 Кликните на дугме испод да бисте отишли на страницу за пријаву на портал и конфигурисали апликацију за аутентификацију:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.Промена "${__VirtualRootPath}":"${__VirtualRootPath}" власника портала

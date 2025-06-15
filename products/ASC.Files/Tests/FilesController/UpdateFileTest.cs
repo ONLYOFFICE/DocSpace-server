@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using FileShare = Docspace.Model.FileShare;
+
 namespace ASC.Files.Tests.FilesController;
 
 [Collection("Test Collection")]
@@ -34,6 +36,18 @@ public class UpdateFileTest(
     WebApplicationFactory<FilesServiceProgram> filesServiceProgram) 
     : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
 {
+    public static TheoryData<FileShare> SharesWithRightsToLock =>
+    [
+        FileShare.RoomManager,
+        FileShare.ContentCreator
+    ];
+    public static TheoryData<FileShare> SharesWithoutRightsToLock =>
+    [
+        FileShare.Editing,
+        FileShare.FillForms,
+        FileShare.Read
+    ];
+    
     [Fact]
     public async Task RenameFile_ValidTitle_ReturnsUpdatedFile()
     {
@@ -108,21 +122,150 @@ public class UpdateFileTest(
         // Verify the file is locked
         var fileInfo = await GetFile(createdFile.Id);
         fileInfo.Locked.Should().BeTrue();
+        
+        // Act
+        result = (await _filesFilesApi.LockFileAsync(createdFile.Id, new LockFileParameters(), TestContext.Current.CancellationToken)).Response;
+        
+        // Assert
+        result.Should().NotBeNull();
+        result.Id.Should().Be(createdFile.Id);
+        
+        // Verify the file is unlocked
+        fileInfo = await GetFile(createdFile.Id);
+        fileInfo.Locked.Should().BeNull();
     }
     
-    [Fact]
-    public async Task UnlockFile_LockedFile_ReturnsSuccess()
+    [Theory]
+    [MemberData(nameof(SharesWithRightsToLock))]
+    public async Task LockFile_ReturnsSuccess(FileShare fileShare)
     {
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         
         var createdRoom = await CreateVirtualRoom("room_to_lock", Initializer.Owner);
-        var createdFile = await CreateFile("file_to_unlock.docx", createdRoom.Id);
+        var roomAdmin = await Initializer.InviteContact(EmployeeType.RoomAdmin);
         
-        // Lock the file first
-        await _filesFilesApi.LockFileAsync(createdFile.Id, new LockFileParameters(true), TestContext.Current.CancellationToken);
+        await _roomsApi.SetRoomSecurityAsync(createdRoom.Id, new RoomInvitationRequest
+        {
+            Invitations =
+            [
+                new RoomInvitation { Id = roomAdmin.Id, Access = fileShare }
+            ]
+        }, TestContext.Current.CancellationToken);
+        
+        await _filesClient.Authenticate(roomAdmin);
+        var createdFile = await CreateFile("file_to_lock.docx", createdRoom.Id);
         
         // Act
+        var result = (await _filesFilesApi.LockFileAsync(createdFile.Id, new LockFileParameters(true), TestContext.Current.CancellationToken)).Response;
+        
+        // Assert
+        result.Should().NotBeNull();
+        result.Id.Should().Be(createdFile.Id);
+        
+        // Verify the file is locked
+        var fileInfo = await GetFile(createdFile.Id);
+        fileInfo.Locked.Should().BeTrue();
+        
+        // Act
+        result = (await _filesFilesApi.LockFileAsync(createdFile.Id, new LockFileParameters(), TestContext.Current.CancellationToken)).Response;
+        
+        // Assert
+        result.Should().NotBeNull();
+        result.Id.Should().Be(createdFile.Id);
+        
+        // Verify the file is unlocked
+        fileInfo = await GetFile(createdFile.Id);
+        fileInfo.Locked.Should().BeNull();
+    }
+    
+    [Theory]
+    [MemberData(nameof(SharesWithoutRightsToLock))]
+    public async Task LockFile_Returns403(FileShare fileShare)
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        
+        var createdRoom = await CreateVirtualRoom("room_to_lock", Initializer.Owner);
+        var roomAdmin = await Initializer.InviteContact(EmployeeType.RoomAdmin);
+        
+        await _roomsApi.SetRoomSecurityAsync(createdRoom.Id, new RoomInvitationRequest
+        {
+            Invitations =
+            [
+                new RoomInvitation { Id = roomAdmin.Id, Access = fileShare }
+            ]
+        }, TestContext.Current.CancellationToken);
+        
+        await _filesClient.Authenticate(roomAdmin);
+        var createdFile = await CreateFile("file_to_lock.docx", createdRoom.Id);
+        
+        var exception = await Assert.ThrowsAsync<Docspace.Client.ApiException>(
+            async () => await _filesFilesApi.LockFileAsync(createdFile.Id, new LockFileParameters(true), TestContext.Current.CancellationToken));
+        
+        exception.ErrorCode.Should().Be(403);
+    }
+    
+    [Fact]
+    public async Task LockFileContentCreator_DifferentOwner_Returns403()
+    {
+        await _filesClient.Authenticate(Initializer.Owner);
+        
+        var createdRoom = await CreateVirtualRoom("room_to_lock", Initializer.Owner);
+        var roomAdmin1 = await Initializer.InviteContact(EmployeeType.RoomAdmin);
+        var roomAdmin2 = await Initializer.InviteContact(EmployeeType.RoomAdmin);
+        
+        await _roomsApi.SetRoomSecurityAsync(createdRoom.Id, new RoomInvitationRequest
+        {
+            Invitations =
+            [
+                new RoomInvitation { Id = roomAdmin1.Id, Access = FileShare.ContentCreator },
+                new RoomInvitation { Id = roomAdmin2.Id, Access = FileShare.ContentCreator }
+            ]
+        }, TestContext.Current.CancellationToken);
+        
+        await _filesClient.Authenticate(roomAdmin1);
+        
+        var createdFile = await CreateFile("file_to_lock.docx", createdRoom.Id);
+
+        await _filesFilesApi.LockFileAsync(createdFile.Id, new LockFileParameters(true), TestContext.Current.CancellationToken);
+        
+        await _filesClient.Authenticate(roomAdmin2);
+
+        var exception = await Assert.ThrowsAsync<Docspace.Client.ApiException>(
+            async () => await _filesFilesApi.LockFileAsync(createdFile.Id, new LockFileParameters(), TestContext.Current.CancellationToken));
+        
+        exception.ErrorCode.Should().Be(403);
+    }
+    
+    [Fact]
+    public async Task LockFileRoomManager_DifferentOwner_ReturnsSuccess()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        
+        var createdRoom = await CreateVirtualRoom("room_to_lock", Initializer.Owner);
+        var roomAdmin1 = await Initializer.InviteContact(EmployeeType.RoomAdmin);
+        var roomAdmin2 = await Initializer.InviteContact(EmployeeType.RoomAdmin);
+        
+        await _roomsApi.SetRoomSecurityAsync(createdRoom.Id, new RoomInvitationRequest
+        {
+            Invitations =
+            [
+                new RoomInvitation { Id = roomAdmin1.Id, Access = FileShare.RoomManager },
+                new RoomInvitation { Id = roomAdmin2.Id, Access = FileShare.RoomManager }
+            ]
+        }, TestContext.Current.CancellationToken);
+        
+        await _filesClient.Authenticate(roomAdmin1);
+        
+        var createdFile = await CreateFile("file_to_lock.docx", createdRoom.Id);
+        
+        // Act
+        await _filesFilesApi.LockFileAsync(createdFile.Id, new LockFileParameters(true), TestContext.Current.CancellationToken);
+        
+        await _filesClient.Authenticate(roomAdmin2);
+        
         var result = (await _filesFilesApi.LockFileAsync(createdFile.Id, new LockFileParameters(), TestContext.Current.CancellationToken)).Response;
         
         // Assert
@@ -145,7 +288,7 @@ public class UpdateFileTest(
         
         // Act
         var commentParams = new UpdateComment(1, newComment);
-        var result = (await _filesOperationsApi.UpdateCommentAsync(file.Id, commentParams, TestContext.Current.CancellationToken)).Response;
+        var result = (await _filesOperationsApi.UpdateFileCommentAsync(file.Id, commentParams, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         result.Should().NotBeNull();

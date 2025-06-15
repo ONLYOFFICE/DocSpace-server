@@ -63,7 +63,7 @@ public class FilesControllerInternal(
     [HttpGet("file/{fileId:int}/log")]
     public IAsyncEnumerable<HistoryDto> GetFileHistory(HistoryRequestDto inDto)
     {
-        return historyApiHelper.GetFileHistoryAsync(inDto.FileId, inDto.FromDate, inDto.ToDate);
+        return historyApiHelper.GetFileHistoryAsync(inDto.FileId, inDto.FromDate, inDto.ToDate, inDto.StartIndex, inDto.Count);
     }
 }
 
@@ -518,8 +518,8 @@ public abstract class FilesController<T>(
     [HttpGet("file/{id}/links")]
     public async IAsyncEnumerable<FileShareDto> GetFileLinks(FilePrimaryIdRequestDto<T> inDto)
     {
-        var offset = Convert.ToInt32(apiContext.StartIndex);
-        var count = Convert.ToInt32(apiContext.Count);
+        var offset = inDto.StartIndex;
+        var count = inDto.Count;
 
         var totalCount = await fileStorageService.GetPureSharesCountAsync(inDto.Id, FileEntryType.File, ShareFilterType.ExternalLink, null);
 

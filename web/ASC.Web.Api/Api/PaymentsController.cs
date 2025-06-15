@@ -138,6 +138,8 @@ public class PaymentController(
             return false;
         }
 
+        await DemandPayerAsync(tenant);
+
         // TODO: Temporary restriction.
         // Possibility to buy only one product per transaction.
         // For the current paid tariff only quota change is available.
@@ -171,7 +173,9 @@ public class PaymentController(
             return false;
         }
 
-        var result = await tariffService.PaymentChangeAsync(tenant.Id, inDto.Quantity, ProductQuantityType.Set);
+        var currency = await regionHelper.GetCurrencyFromRequestAsync();
+
+        var result = await tariffService.PaymentChangeAsync(tenant.Id, inDto.Quantity, ProductQuantityType.Set, currency);
 
         if (result)
         {
@@ -211,6 +215,8 @@ public class PaymentController(
         {
             return false;
         }
+
+        await DemandPayerAsync(tenant);
 
         // TODO: Temporary restriction.
         // Possibility to buy only one product per transaction.
@@ -260,7 +266,8 @@ public class PaymentController(
         }
 
         // TODO: support other currencies
-        var subAccount = balance.SubAccounts.FirstOrDefault(x => x.Currency == "USD");
+        var defaultCurrency = tariffService.GetSupportedAccountingCurrencies().First();
+        var subAccount = balance.SubAccounts.FirstOrDefault(x => x.Currency == defaultCurrency);
         if (subAccount == null)
         {
             return false;
@@ -273,7 +280,7 @@ public class PaymentController(
 
         var quantity = new Dictionary<string, int> { { productName, productQty.Value } };
 
-        var result = await tariffService.PaymentChangeAsync(tenant.Id, quantity, inDto.ProductQuantityType);
+        var result = await tariffService.PaymentChangeAsync(tenant.Id, quantity, inDto.ProductQuantityType, defaultCurrency);
 
         if (result)
         {
@@ -314,6 +321,8 @@ public class PaymentController(
             return null;
         }
 
+        await DemandPayerAsync(tenant);
+
         // TODO: Temporary restriction.
         // Possibility to buy only one product per transaction.
         // Wallet tariffs are always available for purchase.
@@ -345,7 +354,8 @@ public class PaymentController(
         }
 
         // TODO: support other currencies
-        var subAccount = balance.SubAccounts.FirstOrDefault(x => x.Currency == "USD");
+        var defaultCurrency = tariffService.GetSupportedAccountingCurrencies().First();
+        var subAccount = balance.SubAccounts.FirstOrDefault(x => x.Currency == defaultCurrency);
         if (subAccount == null)
         {
             return null;
@@ -353,7 +363,7 @@ public class PaymentController(
 
         var quantity = new Dictionary<string, int> { { productName, productQty.Value } };
 
-        var result = await tariffService.PaymentCalculateAsync(tenant.Id, quantity, inDto.ProductQuantityType);
+        var result = await tariffService.PaymentCalculateAsync(tenant.Id, quantity, inDto.ProductQuantityType, defaultCurrency);
 
         return result;
     }
@@ -599,6 +609,12 @@ public class PaymentController(
             return null;
         }
 
+        var supportedCurrencies = tariffService.GetSupportedAccountingCurrencies();
+        if (!supportedCurrencies.Contains(inDto.Currency))
+        {
+            return null;
+        }
+
         var tenant = tenantManager.GetCurrentTenant();
 
         var hasCustomer = await HasCustomer(tenant);
@@ -746,6 +762,15 @@ public class PaymentController(
         var utcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate);
         var utcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate);
         var result = await tariffService.GetCustomerOperationsAsync(tenant.Id, utcStartDate, utcEndDate, inDto.Credit, inDto.Withdrawal, inDto.Offset, inDto.Limit);
+
+        if (result?.Collection != null)
+        {
+            foreach (var operation in result.Collection)
+            {
+                operation.Description = GetServiceDesc(operation.Service);
+            }
+        }
+
         return result;
     }
 
@@ -759,7 +784,7 @@ public class PaymentController(
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "URL to the csv report file", typeof(string))]
     [HttpPost("customer/operationsreport")]
-    public async Task<string> CreateCustomerOperationsReport(CustomerOperationsReportDto inDto)
+    public async Task<string> CreateCustomerOperationsReport(CustomerOperationsReportRequestDto inDto)
     {
         await DemandAdminAsync();
 
@@ -776,7 +801,7 @@ public class PaymentController(
             return null;
         }
 
-        inDto = inDto ?? new CustomerOperationsReportDto();
+        inDto = inDto ?? new CustomerOperationsReportRequestDto();
 
         var utcStartDate = inDto.StartDate != null ? tenantUtil.DateTimeToUtc(inDto.StartDate.Value) : tenant.CreationDateTime;
         var utcEndDate = inDto.EndDate != null ? tenantUtil.DateTimeToUtc(inDto.EndDate.Value) : DateTime.UtcNow;
@@ -807,6 +832,17 @@ public class PaymentController(
         {
             var report = await tariffService.GetCustomerOperationsAsync(tenantId, utcStartDate, utcEndDate, credit, withdrawal, offset, limit);
 
+            if (report?.Collection == null)
+            {
+                yield return null;
+                break;
+            }
+
+            foreach (var operation in report.Collection)
+            {
+                operation.Description = GetServiceDesc(operation.Service);
+            }
+
             yield return report.Collection;
 
             if (report.CurrentPage == report.TotalPage)
@@ -818,6 +854,11 @@ public class PaymentController(
         }
     }
 
+    private static string GetServiceDesc(string serviceName)
+    {
+        return Resource.ResourceManager.GetString("AccountingCustomerOperationServiceDesc_" + (serviceName ?? "top-up"));
+    }
+
     internal class OperationMap : ClassMap<Operation>
     {
         public OperationMap()
@@ -825,6 +866,7 @@ public class PaymentController(
             Map(item => item.Date).TypeConverter<CsvFileHelper.CsvDateTimeConverter>();
 
             Map(item => item.Date).Name(Resource.AccountingCustomerOperationDate);
+            Map(item => item.Description).Name(Resource.AccountingCustomerOperationDescription);
             Map(item => item.Service).Name(Resource.AccountingCustomerOperationService);
             Map(item => item.ServiceUnit).Name(Resource.AccountingCustomerOperationServiceUnit);
             Map(item => item.Quantity).Name(Resource.AccountingCustomerOperationQuantity);
@@ -845,7 +887,7 @@ public class PaymentController(
     [SwaggerResponse(200, "The list of currencies", typeof(List<Currency>))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("accounting/currencies")]
-    public async Task<List<Currency>> GetAllCurrencies()
+    public async Task<List<Currency>> GetAccountingCurrencies()
     {
         if (!tariffService.IsConfigured())
         {
@@ -854,8 +896,11 @@ public class PaymentController(
 
         await DemandAdminAsync();
 
-        var result = await tariffService.GetAllCurrenciesAsync();
-        return result;
+        var supportedCurrencies = tariffService.GetSupportedAccountingCurrencies();
+
+        var allCurrencies = await tariffService.GetAllAccountingCurrenciesAsync();
+
+        return allCurrencies.Where(x=> supportedCurrencies.Contains(x.Code)).ToList();
     }
 
     /// <summary>

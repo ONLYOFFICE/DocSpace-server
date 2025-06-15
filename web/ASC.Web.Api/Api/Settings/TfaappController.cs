@@ -31,7 +31,6 @@ namespace ASC.Web.Api.Controllers.Settings;
 public class TfaappController(
     MessageService messageService,
     StudioNotifyService studioNotifyService,
-    ApiContext apiContext,
     UserManager userManager,
     AuthContext authContext,
     CookiesManager cookiesManager,
@@ -48,11 +47,10 @@ public class TfaappController(
     InstanceCrypto instanceCrypto,
     Signature signature,
     SecurityContext securityContext,
-    IHttpContextAccessor httpContextAccessor,
     TenantManager tenantManager,
     AuditEventsRepository auditEventsRepository,
     UserSocketManager userSocketManager)
-    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <summary>
     /// Returns the current two-factor authentication settings.
@@ -117,7 +115,7 @@ public class TfaappController(
     [Authorize(AuthenticationSchemes = "confirm", Roles = "TfaActivation,TfaAuth,Everyone")]
     public async Task<bool> TfaValidateAuthCode(TfaValidateRequestsDto inDto)
     {
-        await ApiContext.AuthByClaimAsync();
+        await securityContext.AuthByClaimAsync();
         var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
         securityContext.Logout();
 
@@ -298,7 +296,7 @@ public class TfaappController(
     [Authorize(AuthenticationSchemes = "confirm", Roles = "TfaActivation")]
     public async Task<SetupCode> TfaAppGenerateSetupCode()
     {
-        await ApiContext.AuthByClaimAsync();
+        await securityContext.AuthByClaimAsync();
         var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
         if (!tfaAppAuthSettingsHelper.IsVisibleSettings ||
@@ -407,7 +405,7 @@ public class TfaappController(
             throw new Exception(Resource.TfaAppNotAvailable);
         }
 
-        if (await userManager.IsOutsiderAsync(user))
+        if (await userManager.IsOutsiderAsync(user) || user.Status == EmployeeStatus.Terminated)
         {
             throw new NotSupportedException("Not available.");
         }

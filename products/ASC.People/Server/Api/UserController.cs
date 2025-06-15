@@ -217,7 +217,7 @@ public class UserController(
     [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,Everyone")]
     public async Task<EmployeeFullDto> AddMember(MemberRequestDto inDto)
     {
-        await _apiContext.AuthByClaimAsync();
+        await securityContext.AuthByClaimAsync();
         var model = emailValidationKeyModelHelper.GetModel();
         var linkData = inDto.FromInviteLink ? await invitationService.GetLinkDataAsync(inDto.Key, inDto.Email, model.Type, inDto.Type, model.UiD) : null;
         if (linkData is { IsCorrect: false })
@@ -499,12 +499,13 @@ public class UserController(
     [SwaggerResponse(400, "Incorrect email")]
     [SwaggerResponse(403, "The invitation link is invalid or its validity has expired")]
     [SwaggerResponse(404, "User not found")]
+    [AllowNotPayment]
     [HttpPut("{userid:guid}/password")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PasswordChange,EmailChange,Activation,EmailActivation,Everyone")]
     public async Task<EmployeeFullDto> ChangeUserPassword(MemberBaseByIdRequestDto inDto)
     {
-        await _apiContext.AuthByClaimAsync();
+        await securityContext.AuthByClaimAsync();
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(inDto.UserId), Constants.Action_EditUser);
         if (inDto.UserId == Guid.Empty)
         {
@@ -660,7 +661,7 @@ public class UserController(
     [Authorize(AuthenticationSchemes = "confirm", Roles = "ProfileRemove")]
     public async Task<EmployeeFullDto> DeleteProfile()
     {
-        await _apiContext.AuthByClaimAsync();
+        await securityContext.AuthByClaimAsync();
 
         if (_userManager.IsSystemUser(securityContext.CurrentAccount.ID))
         {
@@ -759,24 +760,19 @@ public class UserController(
         {
             throw new ItemNotFoundException("User not found");
         }
-
-        var targetUserType = await _userManager.GetUserTypeAsync(targetUser);
-
-        if (targetUserType is not EmployeeType.Guest)
-        {
-            throw new SecurityException(Resource.ErrorAccessDenied);
-        }
-
+        
         var currentUserId = authContext.CurrentAccount.ID;
         var currentUser = await _userManager.GetUsersAsync(currentUserId);
+        var targetUserType = await _userManager.GetUserTypeAsync(targetUser);
 
-        if (!await _userManager.CanUserViewAnotherUserAsync(currentUser, targetUser))
+        if (targetUserType is not EmployeeType.Guest || 
+            await _userManager.GetUserTypeAsync(currentUser) is EmployeeType.Guest || 
+            !await _userManager.CanUserViewAnotherUserAsync(currentUser, targetUser))
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
-        var link = commonLinkUtility.GetConfirmationEmailUrl(targetUser.Email, ConfirmType.GuestShareLink,
-                $"{currentUserId}{inDto.UserId}", currentUserId);
+        var link = commonLinkUtility.GetConfirmationEmailUrl(targetUser.Email, ConfirmType.GuestShareLink, $"{currentUserId}{inDto.UserId}", currentUserId);
 
         return await urlShortener.GetShortenLinkAsync(link);
     }
@@ -797,7 +793,7 @@ public class UserController(
     [HttpPost("guests/share/approve")]
     public async Task<EmployeeFullDto> ApproveGuestShareLink(EmailMemberRequestDto inDto)
     {
-        await _apiContext.AuthByClaimAsync();
+        await securityContext.AuthByClaimAsync();
 
         var targetUser = await _userManager.GetUserByEmailAsync(inDto.Email);
 
@@ -850,12 +846,11 @@ public class UserController(
 
         var list = (await _userManager.GetUsersAsync(inDto.Status)).ToAsyncEnumerable();
 
-        if ("group".Equals(_apiContext.FilterBy, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(_apiContext.FilterValue))
+        if ("group".Equals(inDto.FilterBy, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(inDto.Text))
         {
-            var groupId = new Guid(_apiContext.FilterValue);
+            var groupId = new Guid(inDto.Text);
             //Filter by group
             list = list.WhereAwait(async x => await _userManager.IsUserInGroupAsync(x.Id, groupId));
-            _apiContext.SetDataFiltered();
         }
 
         list = list.Where(x => x.FirstName != null && x.FirstName.Contains(inDto.Query, StringComparison.OrdinalIgnoreCase) || 
@@ -881,9 +876,20 @@ public class UserController(
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [HttpGet]
-    public IAsyncEnumerable<EmployeeFullDto> GetAllProfiles()
+    public IAsyncEnumerable<EmployeeFullDto> GetAllProfiles(GetAllProfilesRequestDto inDto)
     {
-        var status = new GetByStatusRequestDto { Status = EmployeeStatus.Active };
+        var status = new GetByStatusRequestDto
+        {
+            Status = EmployeeStatus.Active,
+            FilterBy = inDto.FilterBy,
+            Count = inDto.Count,
+            StartIndex = inDto.StartIndex,
+            SortBy = inDto.SortBy,
+            SortOrder = inDto.SortOrder,
+            FilterSeparator = inDto.FilterSeparator,
+            Text = inDto.Text
+        };
+        
         return GetByStatus(status);
     }
 
@@ -950,7 +956,7 @@ public class UserController(
         var isInvite = _httpContextAccessor.HttpContext!.User.Claims
                .Any(role => role.Type == ClaimTypes.Role && ConfirmTypeExtensions.TryParse(role.Value, out var confirmType) && confirmType == ConfirmType.LinkInvite);
 
-        await _apiContext.AuthByClaimAsync();
+        await securityContext.AuthByClaimAsync();
 
         var user = await _userManager.GetUserByUserNameAsync(inDto.UserId);
         if (user.Id == Constants.LostUser.Id)
@@ -999,10 +1005,9 @@ public class UserController(
     public IAsyncEnumerable<EmployeeFullDto> GetByStatus(GetByStatusRequestDto inDto)
     {
         Guid? groupId = null;
-        if ("group".Equals(_apiContext.FilterBy, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(_apiContext.FilterValue))
+        if ("group".Equals(inDto.FilterBy, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(inDto.Text))
         {
-            groupId = new Guid(_apiContext.FilterValue);
-            _apiContext.SetDataFiltered();
+            groupId = new Guid(inDto.Text);
         }
 
         var filter = new SimpleByFilterRequestDto
@@ -1012,7 +1017,13 @@ public class UserController(
             WithoutGroup = false,
             ExcludeGroup = false,
             InvitedByMe = false,
-            InviterId = null
+            InviterId = null,
+            Count = inDto.Count,
+            StartIndex = inDto.StartIndex,
+            SortBy = inDto.SortBy,
+            SortOrder = inDto.SortOrder,
+            FilterSeparator = inDto.FilterSeparator,
+            Text = inDto.Text
         };
         return SearchUsersByExtendedFilter(filter);
     }
@@ -1046,7 +1057,13 @@ public class UserController(
             ExcludeGroup = inDto.ExcludeGroup,
             Area = inDto.Area,
             InvitedByMe = inDto.InvitedByMe,
-            InviterId = inDto.InviterId
+            InviterId = inDto.InviterId,
+            Count = inDto.Count,
+            StartIndex = inDto.StartIndex,
+            SortBy = inDto.SortBy,
+            SortOrder = inDto.SortOrder,
+            FilterSeparator = inDto.FilterSeparator,
+            Text = inDto.Text
         };
         
         var users = GetByFilterAsync(filter);
@@ -1107,9 +1124,9 @@ public class UserController(
         }
 
         var groupId = Guid.Empty;
-        if ("group".Equals(_apiContext.FilterBy, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(_apiContext.FilterValue))
+        if ("group".Equals(inDto.FilterBy, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(inDto.Text))
         {
-            groupId = new Guid(_apiContext.FilterValue);
+            groupId = new Guid(inDto.Text);
         }
 
         var users = await _userManager.SearchAsync(inDto.Query, EmployeeStatus.Active, groupId);
@@ -1149,7 +1166,13 @@ public class UserController(
             ExcludeGroup = inDto.ExcludeGroup,
             Area = inDto.Area,
             InvitedByMe = inDto.InvitedByMe,
-            InviterId = inDto.InviterId
+            InviterId = inDto.InviterId,
+            Count = inDto.Count,
+            StartIndex = inDto.StartIndex,
+            SortBy = inDto.SortBy,
+            SortOrder = inDto.SortOrder,
+            FilterSeparator = inDto.FilterSeparator,
+            Text = inDto.Text
         };
         
         var users = GetByFilterAsync(filter);
@@ -1413,7 +1436,7 @@ public class UserController(
     [HttpGet("@self")]
     public async Task<EmployeeFullDto> GetSelfProfile()
     {
-        var user = await _userManager.GetUserAsync(securityContext.CurrentAccount.ID, EmployeeFullDtoHelper.GetExpression(_apiContext));
+        var user = await _userManager.GetUserAsync(securityContext.CurrentAccount.ID, null);
 
         var result = await employeeFullDtoHelper.GetFullAsync(user);
 
@@ -1474,7 +1497,7 @@ public class UserController(
         var viewerIsAdmin = await _userManager.IsDocSpaceAdminAsync(viewer);
         var user = await _userManager.GetUsersAsync(userid);
 
-        if (_userManager.IsSystemUser(user.Id) || user.Status == EmployeeStatus.Terminated)
+        if (_userManager.IsSystemUser(user.Id) || user.Status == EmployeeStatus.Terminated || user.Status ==  EmployeeStatus.Pending)
         {
             throw new Exception(Resource.ErrorUserNotFound);
         }
@@ -1584,7 +1607,7 @@ public class UserController(
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Activation,Everyone")]
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserActivationStatus(UpdateMemberActivationStatusRequestDto inDto)
     {
-        await _apiContext.AuthByClaimAsync();
+        await securityContext.AuthByClaimAsync();
         
         var tenant = tenantManager.GetCurrentTenant();
         var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
@@ -2387,7 +2410,8 @@ public class UserController(
         }
         
         
-        var queryFilter = new UserQueryFilter(isDocSpaceAdmin,
+        var queryFilter = new UserQueryFilter(
+            isDocSpaceAdmin,
             filter.EmployeeStatus,
             includeGroups,
             excludeGroups,
@@ -2398,14 +2422,14 @@ public class UserController(
             filter.Area,
             filter.InvitedByMe,
             filter.InviterId,
-            _apiContext.FilterValue,
-            _apiContext.FilterSeparator,
+            filter.Text,
+            filter.FilterSeparator,
             filter.WithoutGroup ?? false,
-            _apiContext.SortBy,
-            !_apiContext.SortDescending,
+            filter.SortBy,
+            filter.SortOrder == SortOrder.Ascending,
             isDocSpaceAdmin,
-            _apiContext.Count,
-            _apiContext.StartIndex);
+            filter.Count,
+            filter.StartIndex);
 
         var totalCountTask = _userManager.GetUsersCountAsync(queryFilter);
         var users = _userManager.GetUsers(queryFilter);
@@ -2560,10 +2584,10 @@ public class UserControllerAdditional<T>(
 
         var includeStrangers = await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID);
         
-        var offset = Convert.ToInt32(apiContext.StartIndex);
-        var count = Convert.ToInt32(apiContext.Count);
-        var filterValue = apiContext.FilterValue;
-        var filterSeparator = apiContext.FilterSeparator;
+        var offset = inDto.StartIndex;
+        var count = inDto.Count;
+        var filterValue = inDto.Text;
+        var filterSeparator = inDto.FilterSeparator;
 
         var securityDao = daoFactory.GetSecurityDao<T>();
 

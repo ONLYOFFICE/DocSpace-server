@@ -1008,7 +1008,9 @@ Konfigurace aplikace autentizátoru, kterou používáte pro vstup do portálu $
 
 Kliknutím na tlačítko níže přejdete na přihlašovací stránku portálu a nakonfigurujete aplikaci autentizátoru:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
     <value>h1. Připojte se k &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace

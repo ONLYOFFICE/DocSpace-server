@@ -944,7 +944,9 @@ ${LetterLogoText} 포털에 입장하는 데 사용하는 인증 앱의 구성�
 
 아래 버튼을 클릭하여 포털 로그인 페이지로 이동하고 인증 애플리케이션을 구성하세요.
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" 포털 소유자 변경

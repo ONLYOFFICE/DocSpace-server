@@ -28,14 +28,13 @@ namespace ASC.Web.Api.Controllers.Settings;
 
 [ApiExplorerSettings(IgnoreApi = true)]
 [DefaultRoute("version")]
-public class VersionController(PermissionContext permissionContext,
-        ApiContext apiContext,
-        TenantManager tenantManager,
-        WebItemManager webItemManager,
-        BuildVersion buildVersion,
-        IFusionCache fusionCache,
-        IHttpContextAccessor httpContextAccessor)
-    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
+public class VersionController(
+    PermissionContext permissionContext,
+    TenantManager tenantManager,
+    WebItemManager webItemManager,
+    BuildVersion buildVersion,
+    IFusionCache fusionCache)
+    : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <summary>
     /// Returns the current portal build version.
