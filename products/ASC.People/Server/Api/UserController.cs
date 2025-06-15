@@ -2252,7 +2252,7 @@ public class UserController(
             var userQuotaData = await settingsManager.LoadAsync<UserQuotaSettings>(user);
             var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota;
             _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(tenant.Id, customQuota.GetFeature<UserCustomQuotaFeature>().Name, quotaUserSettings.EnableQuota, userUsedSpace, userQuotaLimit, [user.Id]);
-
+            await socketManager.UpdateUserAsync(user);
             yield return await employeeFullDtoHelper.GetFullAsync(user);
         }
 
