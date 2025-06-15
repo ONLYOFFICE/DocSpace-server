@@ -187,5 +187,29 @@ module.exports = (files) => {
     res.end();
   });
 
+  router.post("/user_quota_exceeded/:userId", (req, res) => {
+    files.userQuotaExceeded({
+      userId: req.params.userId,
+      ...req.body
+    });
+    res.end();
+  });
+
+  router.post("/room_quota_exceeded/:roomId", (req, res) => {
+    files.roomQuotaExceeded({
+      roomId: req.params.roomId,
+      ...req.body
+    });
+    res.end();
+  });
+
+  router.post("/tenant_quota_exceeded/:tenantId", (req, res) => {
+    files.tenantQuotaExceeded({
+      tenantId: req.params.tenantId,
+      ...req.body
+    });
+    res.end();
+  });
+
   return router;
 };

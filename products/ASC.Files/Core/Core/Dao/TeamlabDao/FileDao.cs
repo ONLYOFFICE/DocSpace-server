@@ -433,6 +433,7 @@ internal class FileDao(
                                 await filesMessageService.SendAsync(MessageAction.FileNotSavedDueToRoomQuota, file, MessageInitiator.DocsService, currentRoom.Title, file.Title);
                                 throw FileSizeComment.GetRoomFreeSpaceException(roomQuotaLimit);
                             }
+                            await quotaSocketManager.RoomQuotaExceededAsync(roomId);
                             await filesMessageService.SendAsync(MessageAction.FileSavedButRoomQuotaExceeded, file, MessageInitiator.DocsService, currentRoom.Title, file.Title);
 
                         }
@@ -459,6 +460,7 @@ internal class FileDao(
                                 await filesMessageService.SendAsync(MessageAction.FileNotSavedDueToUserQuota, file, MessageInitiator.DocsService, user.DisplayUserName(false, displayUserSettingsHelper), file.Title);
                                 throw FileSizeComment.GetUserFreeSpaceException(userQuotaLimit);
                             }
+                            await quotaSocketManager.UserQuotaExceededAsync(file.CreateBy);
                             await filesMessageService.SendAsync(MessageAction.FileSavedButUserQuotaExceeded, file, MessageInitiator.DocsService, user.DisplayUserName(false, displayUserSettingsHelper), file.Title);
                         }
                     }

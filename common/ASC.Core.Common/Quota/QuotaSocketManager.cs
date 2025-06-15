@@ -77,6 +77,31 @@ public class QuotaSocketManager(
         await MakeRequest("encryption-progress", new { room = "storage-encryption", percentage, error }, tenantId: -1);
     }
 
+    public async Task UserQuotaExceededAsync(Guid userId)
+    {
+        var room = GetQuotaRoom();
+        var eventKey = $"user_quota_exceeded/{userId.ToString()}";
+
+        await MakeRequest(eventKey, new { room });
+    }
+
+    public async Task RoomQuotaExceededAsync(int roomId)
+    {
+        var room = GetQuotaRoom();
+        var eventKey = $"room_quota_exceeded/{roomId.ToString()}";
+
+        await MakeRequest(eventKey, new { room });
+    }
+
+    public async Task TenantQuotaExceededAsync()
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        var room = $"{tenantId}-quota";
+        var eventKey = $"tenant_quota_exceeded/{tenantId.ToString()}";
+
+        await MakeRequest(eventKey, new { room });
+    }
+
     private string GetQuotaRoom()
     {
         var tenantId = _tenantManager.GetCurrentTenantId();

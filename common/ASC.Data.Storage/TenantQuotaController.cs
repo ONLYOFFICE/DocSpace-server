@@ -27,7 +27,7 @@
 namespace ASC.Data.Storage;
 
 [Transient]
-public class TenantQuotaController(TenantManager tenantManager, AuthContext authContext, SettingsManager settingsManager,
+public class TenantQuotaController(TenantManager tenantManager, AuthContext authContext, SettingsManager settingsManager, QuotaSocketManager quotaSocketManager,
         TenantQuotaFeatureChecker<MaxFileSizeFeature, long> maxFileSizeChecker,
         TenantQuotaFeatureChecker<MaxTotalSizeFeature, long> maxTotalSizeChecker)
     : IQuotaController
@@ -156,7 +156,11 @@ public class TenantQuotaController(TenantManager tenantManager, AuthContext auth
         {
             if (tenantQuotaSetting.Quota < CurrentSize + size)
             {
-                throw new TenantQuotaException(maxTotalSizeChecker.GetExceptionMessage(tenantQuotaSetting.Quota));
+                if ((tenantQuotaSetting.Quota * 2 < CurrentSize + size) || tenantQuotaSetting.Quota < CurrentSize)
+                {
+                    throw new TenantQuotaException(maxTotalSizeChecker.GetExceptionMessage(tenantQuotaSetting.Quota));
+                }
+                await quotaSocketManager.TenantQuotaExceededAsync();
             }
         }
     }

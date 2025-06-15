@@ -525,6 +525,21 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:encryption-progress", { percentage, error });
   }
 
+  function userQuotaExceeded(data) {
+    logger.info(`user quota exceeded. tenant: ${tenantId()}, user: ${data.userId}`);
+    filesIO.to(room).emit(`s:user_quota_exceeded_${data.userId}`, { });
+  }
+
+  function roomQuotaExceeded(data) {
+    logger.info(`room quota exceeded. tenant: ${tenantId()}, room: ${data.roomId}`);
+    filesIO.to(room).emit(`s:room_quota_exceeded_${data.roomId}`, { });
+  }
+
+  function tenantQuotaExceeded(data) {
+    logger.info(`tenant quota exceeded. tenant: ${tenantId()}`);
+    filesIO.to(room).emit(`s:tenant_quota_exceeded_${data.tenantId}`, { });
+  }
+
   return {
     startEdit,
     stopEdit,
@@ -557,6 +572,9 @@ module.exports = (io) => {
     restoreProgress,
     endBackup,
     endRestore,
-    encryptionProgress
+    encryptionProgress,
+    userQuotaExceeded,
+    roomQuotaExceeded,
+    tenantQuotaExceeded
   };
 };

@@ -47,7 +47,8 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         AuthContext authContext,
         SecurityContext securityContext,
         SettingsManager settingsManager,
-        IQuotaService quotaService)
+        IQuotaService quotaService,
+        TenantManager tenantManager)
     {
 
     public async Task<(File<T> File, bool LastVersion)> GetCurFileInfoAsync<T>(T fileId, int version)
@@ -93,8 +94,19 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         return await GetParamsAsync(file, lastVersion, true, true, editPossible, tryEdit, tryCoAuthoring, fillFormsPossible);
     }
 
-    public async Task<bool> CheckCustomQuota<T>(Folder<T> rootFolder, File<T> file)
+    public async Task<bool> CheckCustomQuota<T>(Folder<T> rootFolder)
     {
+        var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
+        if (tenantQuotaSetting.EnableQuota)
+        {
+            var usedSize = (await tenantManager.FindTenantQuotaRowsAsync(tenantManager.GetCurrentTenant().Id))
+               .Where(r => !string.IsNullOrEmpty(r.Tag) && new Guid(r.Tag) != Guid.Empty)
+               .Sum(r => r.Counter);
+            if (tenantQuotaSetting.Quota < usedSize)
+            {
+                return false;
+            }
+        }
         if (DocSpaceHelper.IsRoom(rootFolder.FolderType))
         {
             var quotaRoomSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
