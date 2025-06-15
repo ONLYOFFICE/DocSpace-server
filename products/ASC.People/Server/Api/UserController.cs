@@ -118,7 +118,7 @@ public class UserController(
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Newly added user with the detailed information", typeof(EmployeeFullDto))]
     [HttpPost("active")]
-    public async Task<EmployeeFullDto> AddMemberAsActivatedAsync(MemberRequestDto inDto)
+    public async Task<EmployeeFullDto> AddMemberAsActivated(MemberRequestDto inDto)
     {
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(inDto.Type), Constants.Action_AddRemoveUser);
 
@@ -217,7 +217,7 @@ public class UserController(
     [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,Everyone")]
     public async Task<EmployeeFullDto> AddMember(MemberRequestDto inDto)
     {
-        await _apiContext.AuthByClaimAsync();
+        await securityContext.AuthByClaimAsync();
         var model = emailValidationKeyModelHelper.GetModel();
         var linkData = inDto.FromInviteLink ? await invitationService.GetLinkDataAsync(inDto.Key, inDto.Email, model.Type, inDto.Type, model.UiD) : null;
         if (linkData is { IsCorrect: false })
@@ -390,7 +390,7 @@ public class UserController(
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("invite")]
     [EnableRateLimiting(RateLimiterPolicy.EmailInvitationApi)]
-    public async Task<List<EmployeeDto>> InviteUsersAsync(InviteUsersRequestDto inDto)
+    public async Task<List<EmployeeDto>> InviteUsers(InviteUsersRequestDto inDto)
     {
         ArgumentNullException.ThrowIfNull(inDto);
 
@@ -499,12 +499,13 @@ public class UserController(
     [SwaggerResponse(400, "Incorrect email")]
     [SwaggerResponse(403, "The invitation link is invalid or its validity has expired")]
     [SwaggerResponse(404, "User not found")]
+    [AllowNotPayment]
     [HttpPut("{userid:guid}/password")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PasswordChange,EmailChange,Activation,EmailActivation,Everyone")]
     public async Task<EmployeeFullDto> ChangeUserPassword(MemberBaseByIdRequestDto inDto)
     {
-        await _apiContext.AuthByClaimAsync();
+        await securityContext.AuthByClaimAsync();
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(inDto.UserId), Constants.Action_EditUser);
         if (inDto.UserId == Guid.Empty)
         {
@@ -587,7 +588,7 @@ public class UserController(
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "User not found")]
     [HttpDelete("{userid}")]
-    public async Task<EmployeeFullDto> DeleteMemberAsync(GetMemberByIdRequestDto inDto)
+    public async Task<EmployeeFullDto> DeleteMember(GetMemberByIdRequestDto inDto)
     {
         await _permissionContext.DemandPermissionsAsync(Constants.Action_AddRemoveUser);
 
@@ -660,7 +661,7 @@ public class UserController(
     [Authorize(AuthenticationSchemes = "confirm", Roles = "ProfileRemove")]
     public async Task<EmployeeFullDto> DeleteProfile()
     {
-        await _apiContext.AuthByClaimAsync();
+        await securityContext.AuthByClaimAsync();
 
         if (_userManager.IsSystemUser(securityContext.CurrentAccount.ID))
         {
@@ -709,7 +710,7 @@ public class UserController(
     [SwaggerResponse(403, "No permissions to perform this action")]
     [Tags("People / Guests")]
     [HttpDelete("guests")]
-    public async Task DeleteGuestsAsync(UpdateMembersRequestDto inDto)
+    public async Task DeleteGuests(UpdateMembersRequestDto inDto)
     {
         var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
         
@@ -751,7 +752,7 @@ public class UserController(
     [SwaggerResponse(404, "User not found")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("guests/{userid:guid}/share")]
-    public async Task<string> GetGuestShareLinkAsync(GuestShareRequestDto inDto)
+    public async Task<string> GetGuestSharingLink(GuestShareRequestDto inDto)
     {
         var targetUser = await _userManager.GetUsersAsync(inDto.UserId);
 
@@ -759,24 +760,19 @@ public class UserController(
         {
             throw new ItemNotFoundException("User not found");
         }
-
-        var targetUserType = await _userManager.GetUserTypeAsync(targetUser);
-
-        if (targetUserType is not EmployeeType.Guest)
-        {
-            throw new SecurityException(Resource.ErrorAccessDenied);
-        }
-
+        
         var currentUserId = authContext.CurrentAccount.ID;
         var currentUser = await _userManager.GetUsersAsync(currentUserId);
+        var targetUserType = await _userManager.GetUserTypeAsync(targetUser);
 
-        if (!await _userManager.CanUserViewAnotherUserAsync(currentUser, targetUser))
+        if (targetUserType is not EmployeeType.Guest || 
+            await _userManager.GetUserTypeAsync(currentUser) is EmployeeType.Guest || 
+            !await _userManager.CanUserViewAnotherUserAsync(currentUser, targetUser))
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
-        var link = commonLinkUtility.GetConfirmationEmailUrl(targetUser.Email, ConfirmType.GuestShareLink,
-                $"{currentUserId}{inDto.UserId}", currentUserId);
+        var link = commonLinkUtility.GetConfirmationEmailUrl(targetUser.Email, ConfirmType.GuestShareLink, $"{currentUserId}{inDto.UserId}", currentUserId);
 
         return await urlShortener.GetShortenLinkAsync(link);
     }
@@ -795,9 +791,9 @@ public class UserController(
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "GuestShareLink")]
     [HttpPost("guests/share/approve")]
-    public async Task<EmployeeFullDto> ApproveGuestShareLinkAsync(EmailMemberRequestDto inDto)
+    public async Task<EmployeeFullDto> ApproveGuestShareLink(EmailMemberRequestDto inDto)
     {
-        await _apiContext.AuthByClaimAsync();
+        await securityContext.AuthByClaimAsync();
 
         var targetUser = await _userManager.GetUserByEmailAsync(inDto.Email);
 
@@ -841,7 +837,7 @@ public class UserController(
     [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("status/{status}/search")]
-    public async IAsyncEnumerable<EmployeeFullDto> GetAdvanced(AdvancedSearchDto inDto)
+    public async IAsyncEnumerable<EmployeeFullDto> SearchUsersByStatus(AdvancedSearchDto inDto)
     {
         if (!await _userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID))
         {
@@ -850,12 +846,11 @@ public class UserController(
 
         var list = (await _userManager.GetUsersAsync(inDto.Status)).ToAsyncEnumerable();
 
-        if ("group".Equals(_apiContext.FilterBy, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(_apiContext.FilterValue))
+        if ("group".Equals(inDto.FilterBy, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(inDto.Text))
         {
-            var groupId = new Guid(_apiContext.FilterValue);
+            var groupId = new Guid(inDto.Text);
             //Filter by group
             list = list.WhereAwait(async x => await _userManager.IsUserInGroupAsync(x.Id, groupId));
-            _apiContext.SetDataFiltered();
         }
 
         list = list.Where(x => x.FirstName != null && x.FirstName.Contains(inDto.Query, StringComparison.OrdinalIgnoreCase) || 
@@ -881,9 +876,20 @@ public class UserController(
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [HttpGet]
-    public IAsyncEnumerable<EmployeeFullDto> GetAllProfiles()
+    public IAsyncEnumerable<EmployeeFullDto> GetAllProfiles(GetAllProfilesRequestDto inDto)
     {
-        var status = new GetByStatusRequestDto { Status = EmployeeStatus.Active };
+        var status = new GetByStatusRequestDto
+        {
+            Status = EmployeeStatus.Active,
+            FilterBy = inDto.FilterBy,
+            Count = inDto.Count,
+            StartIndex = inDto.StartIndex,
+            SortBy = inDto.SortBy,
+            SortOrder = inDto.SortOrder,
+            FilterSeparator = inDto.FilterSeparator,
+            Text = inDto.Text
+        };
+        
         return GetByStatus(status);
     }
 
@@ -900,7 +906,7 @@ public class UserController(
     [AllowNotPayment]
     [HttpGet("email")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,GuestShareLink,Everyone")]
-    public async Task<EmployeeFullDto> GetByEmailAsync(GetMemberByEmailRequestDto inDto)
+    public async Task<EmployeeFullDto> GetProfileByEmail(GetMemberByEmailRequestDto inDto)
     {
         var cultureInfo = string.IsNullOrEmpty(inDto.Culture) ? null : new CultureInfo(inDto.Culture);
 
@@ -945,12 +951,12 @@ public class UserController(
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,Everyone")]
     [HttpGet("{userid}", Order = 1)]
-    public async Task<EmployeeFullDto> GetById(GetMemberByIdRequestDto inDto)
+    public async Task<EmployeeFullDto> GetProfileByUserId(GetMemberByIdRequestDto inDto)
     {
         var isInvite = _httpContextAccessor.HttpContext!.User.Claims
                .Any(role => role.Type == ClaimTypes.Role && ConfirmTypeExtensions.TryParse(role.Value, out var confirmType) && confirmType == ConfirmType.LinkInvite);
 
-        await _apiContext.AuthByClaimAsync();
+        await securityContext.AuthByClaimAsync();
 
         var user = await _userManager.GetUserByUserNameAsync(inDto.UserId);
         if (user.Id == Constants.LostUser.Id)
@@ -999,10 +1005,9 @@ public class UserController(
     public IAsyncEnumerable<EmployeeFullDto> GetByStatus(GetByStatusRequestDto inDto)
     {
         Guid? groupId = null;
-        if ("group".Equals(_apiContext.FilterBy, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(_apiContext.FilterValue))
+        if ("group".Equals(inDto.FilterBy, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(inDto.Text))
         {
-            groupId = new Guid(_apiContext.FilterValue);
-            _apiContext.SetDataFiltered();
+            groupId = new Guid(inDto.Text);
         }
 
         var filter = new SimpleByFilterRequestDto
@@ -1012,9 +1017,15 @@ public class UserController(
             WithoutGroup = false,
             ExcludeGroup = false,
             InvitedByMe = false,
-            InviterId = null
+            InviterId = null,
+            Count = inDto.Count,
+            StartIndex = inDto.StartIndex,
+            SortBy = inDto.SortBy,
+            SortOrder = inDto.SortOrder,
+            FilterSeparator = inDto.FilterSeparator,
+            Text = inDto.Text
         };
-        return GetFullByFilter(filter);
+        return SearchUsersByExtendedFilter(filter);
     }
 
     /// <summary>
@@ -1029,7 +1040,7 @@ public class UserController(
     [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("filter")]
-    public async IAsyncEnumerable<EmployeeFullDto> GetFullByFilter(SimpleByFilterRequestDto inDto)
+    public async IAsyncEnumerable<EmployeeFullDto> SearchUsersByExtendedFilter(SimpleByFilterRequestDto inDto)
     {
         var filter = new UserFilter
         {
@@ -1046,7 +1057,13 @@ public class UserController(
             ExcludeGroup = inDto.ExcludeGroup,
             Area = inDto.Area,
             InvitedByMe = inDto.InvitedByMe,
-            InviterId = inDto.InviterId
+            InviterId = inDto.InviterId,
+            Count = inDto.Count,
+            StartIndex = inDto.StartIndex,
+            SortBy = inDto.SortBy,
+            SortOrder = inDto.SortOrder,
+            FilterSeparator = inDto.FilterSeparator,
+            Text = inDto.Text
         };
         
         var users = GetByFilterAsync(filter);
@@ -1083,7 +1100,7 @@ public class UserController(
     [Tags("People / Search")]
     [SwaggerResponse(200, "List of users", typeof(IAsyncEnumerable<EmployeeDto>))]
     [HttpGet("search")]
-    public IAsyncEnumerable<EmployeeDto> GetPeopleSearch(GetPeopleByQueryRequestDto inDto)
+    public IAsyncEnumerable<EmployeeDto> SearchUsersByQuery(GetPeopleByQueryRequestDto inDto)
     {
         var query = new GetMemberByQueryRequestDto { Query = inDto.Query };
         return GetSearch(query);
@@ -1107,9 +1124,9 @@ public class UserController(
         }
 
         var groupId = Guid.Empty;
-        if ("group".Equals(_apiContext.FilterBy, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(_apiContext.FilterValue))
+        if ("group".Equals(inDto.FilterBy, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(inDto.Text))
         {
-            groupId = new Guid(_apiContext.FilterValue);
+            groupId = new Guid(inDto.Text);
         }
 
         var users = await _userManager.SearchAsync(inDto.Query, EmployeeStatus.Active, groupId);
@@ -1149,7 +1166,13 @@ public class UserController(
             ExcludeGroup = inDto.ExcludeGroup,
             Area = inDto.Area,
             InvitedByMe = inDto.InvitedByMe,
-            InviterId = inDto.InviterId
+            InviterId = inDto.InviterId,
+            Count = inDto.Count,
+            StartIndex = inDto.StartIndex,
+            SortBy = inDto.SortBy,
+            SortOrder = inDto.SortOrder,
+            FilterSeparator = inDto.FilterSeparator,
+            Text = inDto.Text
         };
         
         var users = GetByFilterAsync(filter);
@@ -1234,7 +1257,7 @@ public class UserController(
     [AllowNotPayment]
     [HttpPut("invite")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
-    public async IAsyncEnumerable<EmployeeFullDto> ResendUserInvitesAsync(UpdateMembersRequestDto inDto)
+    public async IAsyncEnumerable<EmployeeFullDto> ResendUserInvites(UpdateMembersRequestDto inDto)
     {
         List<UserInfo> users;
 
@@ -1373,7 +1396,7 @@ public class UserController(
     [Tags("People / Theme")]
     [SwaggerResponse(200, "Theme", typeof(DarkThemeSettings))]
     [HttpGet("theme")]
-    public async Task<DarkThemeSettings> GetThemeAsync()
+    public async Task<DarkThemeSettings> GetPortalTheme()
     {
         return await settingsManager.LoadForCurrentUserAsync<DarkThemeSettings>();
     }
@@ -1388,7 +1411,7 @@ public class UserController(
     [Tags("People / Theme")]
     [SwaggerResponse(200, "Theme", typeof(DarkThemeSettings))]
     [HttpPut("theme")]
-    public async Task<DarkThemeSettings> ChangeThemeAsync(DarkThemeSettingsRequestDto inDto)
+    public async Task<DarkThemeSettings> ChangePortalTheme(DarkThemeSettingsRequestDto inDto)
     {
         var darkThemeSettings = new DarkThemeSettings
         {
@@ -1411,9 +1434,9 @@ public class UserController(
     [SwaggerResponse(200, "Detailed information about my profile", typeof(EmployeeFullDto))]
     [AllowNotPayment]
     [HttpGet("@self")]
-    public async Task<EmployeeFullDto> SelfAsync()
+    public async Task<EmployeeFullDto> GetSelfProfile()
     {
-        var user = await _userManager.GetUserAsync(securityContext.CurrentAccount.ID, EmployeeFullDtoHelper.GetExpression(_apiContext));
+        var user = await _userManager.GetUserAsync(securityContext.CurrentAccount.ID, null);
 
         var result = await employeeFullDtoHelper.GetFullAsync(user);
 
@@ -1449,7 +1472,7 @@ public class UserController(
     [AllowNotPayment]
     [HttpPost("email")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
-    public async Task<string> SendEmailChangeInstructionsAsync(UpdateMemberRequestDto inDto)
+    public async Task<string> SendEmailChangeInstructions(UpdateMemberRequestDto inDto)
     {
         Guid.TryParse(inDto.UserId, out var userid);
 
@@ -1474,7 +1497,7 @@ public class UserController(
         var viewerIsAdmin = await _userManager.IsDocSpaceAdminAsync(viewer);
         var user = await _userManager.GetUsersAsync(userid);
 
-        if (_userManager.IsSystemUser(user.Id) || user.Status == EmployeeStatus.Terminated)
+        if (_userManager.IsSystemUser(user.Id) || user.Status == EmployeeStatus.Terminated || user.Status ==  EmployeeStatus.Pending)
         {
             throw new Exception(Resource.ErrorUserNotFound);
         }
@@ -1548,7 +1571,7 @@ public class UserController(
     [AllowAnonymous]
     [HttpPost("password")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
-    public async Task<string> SendUserPasswordAsync(EmailMemberRequestDto inDto)
+    public async Task<string> SendUserPassword(EmailMemberRequestDto inDto)
     {
         if (authContext.IsAuthenticated)
         {
@@ -1582,9 +1605,9 @@ public class UserController(
     [AllowNotPayment]
     [HttpPut("activationstatus/{activationstatus}")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Activation,Everyone")]
-    public async IAsyncEnumerable<EmployeeFullDto> UpdateEmployeeActivationStatus(UpdateMemberActivationStatusRequestDto inDto)
+    public async IAsyncEnumerable<EmployeeFullDto> UpdateUserActivationStatus(UpdateMemberActivationStatusRequestDto inDto)
     {
-        await _apiContext.AuthByClaimAsync();
+        await securityContext.AuthByClaimAsync();
         
         var tenant = tenantManager.GetCurrentTenant();
         var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
@@ -1954,7 +1977,7 @@ public class UserController(
     [Tags("People / User type")]
     [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [HttpPut("type/{type}")]
-    public async IAsyncEnumerable<EmployeeFullDto> UpdateUserTypeAsync(UpdateMemberTypeRequestDto inDto)
+    public async IAsyncEnumerable<EmployeeFullDto> UpdateUserType(UpdateMemberTypeRequestDto inDto)
     {
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(inDto.Type), Constants.Action_AddRemoveUser);
 
@@ -2011,7 +2034,7 @@ public class UserController(
     [SwaggerResponse(200, "Update type progress", typeof(TaskProgressResponseDto))]
     [SwaggerResponse(400, "Can not update user type")]
     [HttpPost("type")]
-    public async Task<TaskProgressResponseDto> StartUpdateUserTypeAsync(StartUpdateUserTypeDto inDto)
+    public async Task<TaskProgressResponseDto> StarUserTypetUpdate(StartUpdateUserTypeDto inDto)
     {
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(inDto.Type), Constants.Action_AddRemoveUser);
 
@@ -2070,7 +2093,7 @@ public class UserController(
     [Tags("People / User type")]
     [SwaggerResponse(200, "Update type progress", typeof(TaskProgressResponseDto))]
     [HttpGet("type/progress/{userid:guid}")]
-    public async Task<TaskProgressResponseDto> GetChangeTypeProgressAsync(UserIdRequestDto inDto)
+    public async Task<TaskProgressResponseDto> GetUserTypeUpdateProgress(UserIdRequestDto inDto)
     {
         await _permissionContext.DemandPermissionsAsync(Constants.Action_AddRemoveUser);
 
@@ -2088,7 +2111,7 @@ public class UserController(
     [Tags("People / User type")]
     [SwaggerResponse(200, "Update type progress", typeof(TaskProgressResponseDto))]
     [HttpPut("type/terminate")]
-    public async Task<TaskProgressResponseDto> TerminateChangeTypeAsync(TerminateRequestDto inDto)
+    public async Task<TaskProgressResponseDto> TerminateUserTypeUpdate(TerminateRequestDto inDto)
     {
         await _permissionContext.DemandPermissionsAsync(Constants.Action_AddRemoveUser);
 
@@ -2116,7 +2139,7 @@ public class UserController(
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("People / Quota")]
     [HttpGet("recalculatequota")]
-    public async Task RecalculateQuotaAsync()
+    public async Task RecalculateQuota()
     {
         await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         await usersQuotaSyncOperation.RecalculateQuota(tenantManager.GetCurrentTenant());
@@ -2133,7 +2156,7 @@ public class UserController(
     [Tags("People / Quota")]
     [SwaggerResponse(200, "Task progress", typeof(TaskProgressDto))]
     [HttpGet("checkrecalculatequota")]
-    public async Task<TaskProgressDto> CheckRecalculateQuotaAsync()
+    public async Task<TaskProgressDto> CheckRecalculateQuota()
     {
         await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         return await usersQuotaSyncOperation.CheckRecalculateQuota(tenantManager.GetCurrentTenant());
@@ -2151,7 +2174,7 @@ public class UserController(
     [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [SwaggerResponse(402, "Failed to set quota per user. The entered value is greater than the total DocSpace storage")]
     [HttpPut("userquota")]
-    public async IAsyncEnumerable<EmployeeFullDto> UpdateUserQuotaAsync(UpdateMembersQuotaRequestDto inDto)
+    public async IAsyncEnumerable<EmployeeFullDto> UpdateUserQuota(UpdateMembersQuotaRequestDto inDto)
     {
         if (!inDto.Quota.TryGetInt64(out var quota))
         {
@@ -2387,7 +2410,8 @@ public class UserController(
         }
         
         
-        var queryFilter = new UserQueryFilter(isDocSpaceAdmin,
+        var queryFilter = new UserQueryFilter(
+            isDocSpaceAdmin,
             filter.EmployeeStatus,
             includeGroups,
             excludeGroups,
@@ -2398,14 +2422,14 @@ public class UserController(
             filter.Area,
             filter.InvitedByMe,
             filter.InviterId,
-            _apiContext.FilterValue,
-            _apiContext.FilterSeparator,
+            filter.Text,
+            filter.FilterSeparator,
             filter.WithoutGroup ?? false,
-            _apiContext.SortBy,
-            !_apiContext.SortDescending,
+            filter.SortBy,
+            filter.SortOrder == SortOrder.Ascending,
             isDocSpaceAdmin,
-            _apiContext.Count,
-            _apiContext.StartIndex);
+            filter.Count,
+            filter.StartIndex);
 
         var totalCountTask = _userManager.GetUsersCountAsync(queryFilter);
         var users = _userManager.GetUsers(queryFilter);
@@ -2549,7 +2573,7 @@ public class UserControllerAdditional<T>(
     [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("room/{id}")]
-    public async IAsyncEnumerable<EmployeeFullDto> GetUsersWithRoomSharedAsync(UsersWithRoomSharedRequestDto<T> inDto)
+    public async IAsyncEnumerable<EmployeeFullDto> GetUsersWithRoomShared(UsersWithRoomSharedRequestDto<T> inDto)
     {
         var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(inDto.Id)).NotFoundIfNull();
 
@@ -2560,10 +2584,10 @@ public class UserControllerAdditional<T>(
 
         var includeStrangers = await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID);
         
-        var offset = Convert.ToInt32(apiContext.StartIndex);
-        var count = Convert.ToInt32(apiContext.Count);
-        var filterValue = apiContext.FilterValue;
-        var filterSeparator = apiContext.FilterSeparator;
+        var offset = inDto.StartIndex;
+        var count = inDto.Count;
+        var filterValue = inDto.Text;
+        var filterSeparator = inDto.FilterSeparator;
 
         var securityDao = daoFactory.GetSecurityDao<T>();
 

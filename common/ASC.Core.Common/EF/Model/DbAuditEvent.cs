@@ -31,7 +31,6 @@ public class DbAuditEvent : MessageEvent, IMapFrom<EventMessage>
     [MaxLength(200)]
     public string Initiator { get; set; }
     public string Target { get; set; }
-    [MaxLength(20000)]
     public string DescriptionRaw { get; set; }
 
     public DbTenant Tenant { get; set; }
@@ -89,7 +88,7 @@ public static class AuditEventExtension
 
             entity.Property(e => e.DescriptionRaw)
                 .HasColumnName("description")
-                .HasColumnType("varchar")
+                .HasColumnType("text")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -162,7 +161,7 @@ public static class AuditEventExtension
 
             entity.Property(e => e.DescriptionRaw)
                 .HasColumnName("description")
-                .HasColumnType("varchar");
+                .HasColumnType("text");
 
             entity.Property(e => e.Initiator)
                 .HasColumnName("initiator")

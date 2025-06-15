@@ -118,7 +118,7 @@ public class PhotoController(
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "User not found")]
     [HttpDelete("{userid}/photo")]
-    public async Task<ThumbnailsDataDto> DeleteMemberPhotoAsync(GetUserPhotoRequestDto inDto)
+    public async Task<ThumbnailsDataDto> DeleteMemberPhoto(GetUserPhotoRequestDto inDto)
     {
         var user = await GetUserInfoAsync(inDto.UserId);
 

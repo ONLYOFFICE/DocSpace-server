@@ -885,17 +885,6 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>尊敬的$UserName！
-
-您好！请注意，您的 ${LetterLogoText} 协作空间订阅将在三天后到期。之后，$PaymentDelay 天的宽限期将被激活。
-
-我们建议您即刻支付专业版订阅费用，以继续畅享 ${LetterLogoText} 协作空间的所有福利。
-
-$OrangeButton
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>尊敬的$UserName！
 
@@ -1018,7 +1007,9 @@ $OrangeButton
 
 请点击下方的按钮前往门户登录页面并配置身份验证器应用程序：
  
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
     <value>h1. 加入 &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;协作空间
@@ -1427,9 +1418,6 @@ $OrangeButton
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
     <value>${LetterLogoText} 协作空间宽限期将于明日到期</value>
-  </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>您的 ${LetterLogoText} 协作空间订阅即将到期</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}。邮箱创建</value>
@@ -1959,5 +1947,19 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;如需继续使用您的${LetterLogoText}协作空间，请输入您的信息并进行任意操作即可保留。&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>您好, $UserName!
+
+请注意，您的订阅费用将在3天内自动从账户中扣除。
+
+为确保扣款顺利，请确认您的付款方式中有足够金额。
+
+如有任何疑问或需要帮助，请随时联系我们的 "支持团队":"${__SupportLink}"。
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>您的 ${LetterLogoText} 协作空间即将支付的订阅费用</value>
   </data>
 </root>

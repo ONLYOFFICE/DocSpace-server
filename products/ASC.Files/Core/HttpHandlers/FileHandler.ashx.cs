@@ -91,7 +91,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             await context.Response.WriteAsync(Resource.ErrorIpSecurity);
             return;
         }
-        
+
         try
         {
             switch ((context.Request.Query[FilesLinkUtility.Action].FirstOrDefault() ?? "").ToLower())
@@ -138,7 +138,6 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                 default:
                     throw new HttpException((int)HttpStatusCode.BadRequest, FilesCommonResource.ErrorMessage_BadRequest);
             }
-
         }
         catch (InvalidOperationException e)
         {
@@ -1219,7 +1218,9 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
     private async Task CreateFile<T>(HttpContext context, T folderId, bool isForm)
     {
         var responseMessage = context.Request.Query["response"] == "message";
-
+        var fileUri = context.Request.Query[FilesLinkUtility.FileUri];
+        var fileTitle = context.Request.Query[FilesLinkUtility.FileTitle];
+        
         var folderDao = daoFactory.GetFolderDao<T>();
         var folder = await folderDao.GetFolderAsync(folderId);
 
@@ -1229,14 +1230,13 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         }
 
         var canCreate = await fileSecurity.CanCreateAsync(folder);
-        if (!canCreate)
+        if (!canCreate || (folder.RootFolderType == FolderType.RoomTemplates && FileUtility.GetFileExtension(fileTitle) != ".pdf"))
         {
             throw new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
-
+        
         File<T> file;
-        var fileUri = context.Request.Query[FilesLinkUtility.FileUri];
-        var fileTitle = context.Request.Query[FilesLinkUtility.FileTitle];
+        
         try
         {
             if (!string.IsNullOrEmpty(fileUri))

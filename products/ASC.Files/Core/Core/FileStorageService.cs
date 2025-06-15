@@ -459,8 +459,14 @@ public class FileStorageService //: IFileStorageService
         var room = await folderDao.GetParentFoldersAsync(folder.Id).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
         if (room != null && !DocSpaceHelper.FormsFillingSystemFolders.Contains(folder.FolderType))
         {
-            var whoCanRead = await fileSecurity.WhoCanReadAsync(room, true);
-            await notifyClient.SendFolderCreatedInRoom(room, whoCanRead, folder, authContext.CurrentAccount.ID);
+            var userIDs = (await fileSecurity.WhoCanReadAsync(room, true)).ToList();
+
+            if (room.CreateBy != authContext.CurrentAccount.ID)
+            {
+                userIDs.Add(room.CreateBy);
+            }
+
+            await notifyClient.SendFolderCreatedInRoom(room, userIDs, folder, authContext.CurrentAccount.ID);
         }
 
         await filesMessageService.SendAsync(MessageAction.FolderCreated, folder, folder.Title);
@@ -1592,8 +1598,14 @@ public class FileStorageService //: IFileStorageService
         await socketManager.CreateFileAsync(file);
         if (room != null && !DocSpaceHelper.FormsFillingSystemFolders.Contains(folder.FolderType))
         {
-            var whoCanRead = await fileSecurity.WhoCanReadAsync(room, true);
-            await notifyClient.SendDocumentCreatedInRoom(room, whoCanRead, file, authContext.CurrentAccount.ID);
+            var userIDs = (await fileSecurity.WhoCanReadAsync(room, true)).ToList();
+
+            if (room.CreateBy != authContext.CurrentAccount.ID)
+            {
+                userIDs.Add(room.CreateBy);
+            }
+
+            await notifyClient.SendDocumentCreatedInRoom(room, userIDs, file, authContext.CurrentAccount.ID);
         }
 
         return file;
@@ -1954,18 +1966,7 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ViewTrashItem);
         }
 
-        var tags = tagDao.GetTagsAsync(file.Id, FileEntryType.File, TagType.Locked);
-        var tagLocked = await tags.FirstOrDefaultAsync();
-
-        if (tagLocked != null)
-        {
-            if (tagLocked.Owner != authContext.CurrentAccount.ID
-                && file.Access != FileShare.RoomManager
-                && !await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
-            {
-                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_LockedFile);
-            }
-        }
+        var tagLocked = await tagDao.GetTagsAsync(file.Id, FileEntryType.File, TagType.Locked).FirstOrDefaultAsync();
 
         if (lockfile)
         {
@@ -2413,13 +2414,13 @@ public class FileStorageService //: IFileStorageService
     {
         return providerDao.GetProvidersInfoAsync().Select(r => new ThirdPartyParams
         {
-            CustomerTitle = r.CustomerTitle,
-            Corporate = r.RootFolderType == FolderType.COMMON,
-            RoomsStorage = r.RootFolderType is FolderType.VirtualRooms or FolderType.RoomTemplates or FolderType.Archive,
-            ProviderId = r.ProviderId,
-            ProviderKey = r.ProviderKey
+                CustomerTitle = r.CustomerTitle,
+                Corporate = r.RootFolderType == FolderType.COMMON,
+                RoomsStorage = r.RootFolderType is FolderType.VirtualRooms or FolderType.RoomTemplates or FolderType.Archive,
+                ProviderId = r.ProviderId,
+                ProviderKey = r.ProviderKey
         });
-    }
+        }
 
     public async ValueTask<Folder<string>> GetBackupThirdPartyAsync()
     {

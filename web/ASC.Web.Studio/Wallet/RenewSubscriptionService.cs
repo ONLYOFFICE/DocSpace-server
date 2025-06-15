@@ -161,7 +161,10 @@ public class RenewSubscriptionService(
 
             var tariffService = scope.ServiceProvider.GetRequiredService<ITariffService>();
 
-            var result = await tariffService.PaymentChangeAsync(data.TenantId, quantity, BillingClient.ProductQuantityType.Renew);
+            // TODO: support other currencies
+            var defaultCurrency = tariffService.GetSupportedAccountingCurrencies().First();
+
+            var result = await tariffService.PaymentChangeAsync(data.TenantId, quantity, ProductQuantityType.Renew, defaultCurrency);
             if (result)
             {
                 var newTariff = await tariffService.GetTariffAsync(data.TenantId, refresh: false);

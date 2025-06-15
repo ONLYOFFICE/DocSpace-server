@@ -43,7 +43,7 @@ public class FileOrderTest(
         await _filesClient.Authenticate(Initializer.Owner);
         
         // Create a test room and multiple files
-        var virtualRoom = (await _filesRoomsApi.CreateRoomAsync(new CreateRoomRequestDto("ordering_test_folder", indexing: true, roomType: RoomType.VirtualDataRoom), TestContext.Current.CancellationToken)).Response;
+        var virtualRoom = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("ordering_test_folder", indexing: true, roomType: RoomType.VirtualDataRoom), TestContext.Current.CancellationToken)).Response;
         var file1 = await CreateFile("file1.docx", virtualRoom.Id);
         var file2 = await CreateFile("file2.docx", virtualRoom.Id);
         var file3 = await CreateFile("file3.docx", virtualRoom.Id);
@@ -81,13 +81,13 @@ public class FileOrderTest(
     {
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
-        var virtualRoom = (await _filesRoomsApi.CreateRoomAsync(new CreateRoomRequestDto("ordering_test_folder", indexing: true, roomType: RoomType.VirtualDataRoom), TestContext.Current.CancellationToken)).Response;
+        var virtualRoom = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("ordering_test_folder", indexing: true, roomType: RoomType.VirtualDataRoom), TestContext.Current.CancellationToken)).Response;
         var file = await CreateFile("file_to_order.docx", virtualRoom.Id);
         var newOrder = 10; // Arbitrary order number
         
         // Act
         var orderParams = new OrderRequestDto(newOrder);
-        var result = (await _filesFilesApi.SetOrderFileAsync(file.Id, orderParams, TestContext.Current.CancellationToken)).Response;
+        var result = (await _filesFilesApi.SetFileOrderAsync(file.Id, orderParams, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         result.Should().NotBeNull();
@@ -111,7 +111,7 @@ public class FileOrderTest(
         await _filesClient.Authenticate(Initializer.Owner);
         
         // Create a test folder with mixed content (files and subfolders)
-        var virtualRoom = (await _filesRoomsApi.CreateRoomAsync(new CreateRoomRequestDto("ordering_test_folder", indexing: true, roomType: RoomType.VirtualDataRoom), TestContext.Current.CancellationToken)).Response;
+        var virtualRoom = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("ordering_test_folder", indexing: true, roomType: RoomType.VirtualDataRoom), TestContext.Current.CancellationToken)).Response;
         var subfolder1 = await CreateFolder("subfolder1", virtualRoom.Id);
         var file1 = await CreateFile("file1.docx", virtualRoom.Id);
         var subfolder2 = await CreateFolder("subfolder2", virtualRoom.Id);
@@ -155,7 +155,7 @@ public class FileOrderTest(
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         
-        var virtualRoom = (await _filesRoomsApi.CreateRoomAsync(new CreateRoomRequestDto("ordering_test_folder", indexing: true, roomType: RoomType.VirtualDataRoom), TestContext.Current.CancellationToken)).Response;
+        var virtualRoom = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("ordering_test_folder", indexing: true, roomType: RoomType.VirtualDataRoom), TestContext.Current.CancellationToken)).Response;
         
         // Create a valid file
         var validFile = await CreateFile("valid_file.docx", virtualRoom.Id);

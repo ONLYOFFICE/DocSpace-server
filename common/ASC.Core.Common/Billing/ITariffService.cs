@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using static ASC.Core.Billing.BillingClient;
-
 namespace ASC.Core.Billing;
 
 public interface ITariffService
@@ -34,11 +32,12 @@ public interface ITariffService
     Task<IEnumerable<PaymentInfo>> GetPaymentsAsync(int tenantId);
     Task<Tariff> GetTariffAsync(int tenantId, bool withRequestToPaymentSystem = true, bool refresh = false);
     Task<Uri> GetShoppingUriAsync(int tenant, string affiliateId, string partnerId, string currency = null, string language = null, string customerEmail = null, Dictionary<string, int> quantity = null, string backUrl = null, bool checkoutSetup = false);
-    Task<bool> UpdateNextQuantityAsync(int tenant, Tariff tariffInfo, int quotaId, int nextQuantity);
+    Task<bool> UpdateNextQuantityAsync(int tenant, Tariff tariffInfo, int quotaId, int? nextQuantity);
     Task DeleteDefaultBillingInfoAsync();
     Task SetTariffAsync(int tenantId, Tariff tariff, List<TenantQuota> quotas = null);
     Task<Uri> GetAccountLinkAsync(int tenant, string backUrl);
-    Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType);
+    Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency);
+    Task<PaymentCalculation> PaymentCalculateAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency);
     int GetPaymentDelay();
     Task<Tariff> GetBillingInfoAsync(int? tenant = null, int? id = null);
     bool IsConfigured();
@@ -49,5 +48,6 @@ public interface ITariffService
     Task<Session> OpenCustomerSessionAsync(int tenantId, int serviceAccount, string externalRef, int quantity);
     Task<bool> PerformCustomerOperationAsync(int tenantId, int serviceAccount, int sessionId, int quantity);
     Task<Report> GetCustomerOperationsAsync(int tenantId, DateTime utcStartDate, DateTime utcEndDate, bool? credit, bool? withdrawal, int? offset, int? limit);
-    Task<List<Currency>> GetAllCurrenciesAsync();
+    Task<List<Currency>> GetAllAccountingCurrenciesAsync();
+    List<string> GetSupportedAccountingCurrencies();
 }

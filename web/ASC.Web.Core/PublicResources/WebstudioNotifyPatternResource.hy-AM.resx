@@ -426,9 +426,6 @@
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Ձեր ${LetterLogoText} DocSpace-ի համար արտոնյալ ժամանակահատվածն ակտիվացված է</value>
   </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Ձեր ${LetterLogoText} DocSpace բաժանորդագրության ժամկետը շուտով կլրանա</value>
-  </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Ձեր ${LetterLogoText} DocSpace-ի արտոնյալ ժամկետը սպառվել է</value>
   </data>
@@ -528,7 +525,9 @@ Authenticator հավելվածի կազմաձևումը, որն օգտագործ
 
 Խնդրում ենք սեղմել ստորև բերված կոճակը՝ պորտալի մուտքի էջ գնալու և իսկորոշիչի հավելվածը կարգավորելու համար.
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_change_password_v115" xml:space="preserve">
     <value>Ցանկանու՞մ եք փոխել ձեր ${LetterLogoText} հաշվի գաղտնաբառը: Հաստատելու համար սեղմեք ստորև բերված կոճակը:
@@ -1443,17 +1442,6 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Բարև, $UserName:
-
-Խնդրում ենք հաշվի առնել, որ ձեր ${LetterLogoText} DocSpace բաժանորդագրության ժամկետը լրանում է երեք օրից: Դրանից հետո կակտիվանա $PaymentDelay օրերի արտոնյալ ժամկետը։
-
-Մենք խորհուրդ ենք տալիս վճարել ձեր Business բաժանորդագրությունը հիմա և շարունակել օգտագործել ձեր ${LetterLogoText} DocSpace-ի բոլոր առավելությունները:
-
-$OrangeButton
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Բարև, $UserName:
 
@@ -1996,5 +1984,19 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Եթե ցանկանում եք շարունակել օգտագործել ձեր ${LetterLogoText} DocSpace-ը, պարզապես մուտք գործեք այն և կատարեք ցանկացած գործողություն։&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Ողջույն, $UserName!
+
+Տեղեկացնում ենք, որ ձեր բաժանորդագրության վճարը ավտոմատ կերպով կգանձվի ձեր հաշվից 3 օրվա ընթացքում։
+
+Գործարքի սահուն ընթացքն ապահովելու համար, խնդրում ենք հաստատել, որ ձեր վճարման հաշվին կան բավարար միջոցներ։
+
+Եթե ունեք որևէ հարց կամ օգնության կարիք, կարող եք կապվել մեր "աջակցության թիմի":"${__SupportLink}" հետ՝:
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Ձեր ${LetterLogoText} DocSpace-ի բաժանորդագրության առաջիկա վճարումը</value>
   </data>
 </root>

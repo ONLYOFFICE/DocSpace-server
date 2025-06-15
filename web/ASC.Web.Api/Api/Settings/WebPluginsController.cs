@@ -28,16 +28,14 @@ namespace ASC.Web.Api.Controllers.Settings;
 
 [DefaultRoute("webplugins")]
 public class WebPluginsController(
-    ApiContext apiContext,
     IFusionCache fusionCache,
     WebItemManager webItemManager,
-    IHttpContextAccessor httpContextAccessor,
     PermissionContext permissionContext,
     WebPluginManager webPluginManager,
     TenantManager tenantManager,
     CspSettingsHelper cspSettingsHelper,
     IMapper mapper)
-    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <summary>
     /// Adds a web plugin from a file to the current portal.
@@ -91,7 +89,7 @@ public class WebPluginsController(
     [SwaggerResponse(200, "Web plugin", typeof(IEnumerable<WebPluginDto>))]
     [SwaggerResponse(403, "Plugins disabled")]
     [HttpGet("")]
-    public async Task<IEnumerable<WebPluginDto>> GetWebPluginsAsync(GetWebPluginsRequestDto inDto)
+    public async Task<IEnumerable<WebPluginDto>> GetWebPlugins(GetWebPluginsRequestDto inDto)
     {
         var tenant = tenantManager.GetCurrentTenant();
 
@@ -122,7 +120,7 @@ public class WebPluginsController(
     [SwaggerResponse(200, "Web plugin", typeof(WebPluginDto))]
     [SwaggerResponse(403, "Plugins disabled")]
     [HttpGet("{name}")]
-    public async Task<WebPluginDto> GetWebPluginAsync(WebPluginNameRequestDto inDto)
+    public async Task<WebPluginDto> GetWebPlugin(WebPluginNameRequestDto inDto)
     {
         var tenant = tenantManager.GetCurrentTenant();
 
@@ -144,7 +142,7 @@ public class WebPluginsController(
     [SwaggerResponse(200, "Ok")]
     [SwaggerResponse(403, "Plugins disabled")]
     [HttpPut("{name}")]
-    public async Task UpdateWebPluginAsync(WebPluginRequestsDto inDto)
+    public async Task UpdateWebPlugin(WebPluginRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -166,7 +164,7 @@ public class WebPluginsController(
     [SwaggerResponse(200, "Ok")]
     [SwaggerResponse(403, "Plugins disabled")]
     [HttpDelete("{name}")]
-    public async Task DeleteWebPluginAsync(WebPluginNameRequestDto inDto)
+    public async Task DeleteWebPlugin(WebPluginNameRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 

@@ -83,7 +83,7 @@ public class FileHistoryTest(
         
         // Act
         var changeHistoryParams = new ChangeHistory(latestVersion, true);
-        var result = (await _filesFilesApi.ChangeHistoryAsync(file.Id, changeHistoryParams, TestContext.Current.CancellationToken)).Response;
+        var result = (await _filesFilesApi.ChangeVersionHistoryAsync(file.Id, changeHistoryParams, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         result.Should().NotBeNull();
@@ -132,6 +132,6 @@ public class FileHistoryTest(
         var fileName = "updated_file.docx";
         
         var fileData = new FileParameter(fileName, contentType, stream);
-        await _filesFilesApi.SaveEditingFromFormAsync(fileId, file: new FileParameter(fileName, contentType, stream), cancellationToken: TestContext.Current.CancellationToken);
+        await _filesFilesApi.SaveEditingFileFromFormAsync(fileId, file: new FileParameter(fileName, contentType, stream), cancellationToken: TestContext.Current.CancellationToken);
     }
 }

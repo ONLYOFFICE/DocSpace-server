@@ -145,31 +145,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                     { SubjectType.Group, [FileShare.ContentCreator, FileShare.Editing, FileShare.Read, FileShare.FillForms, FileShare.None] },
                     { SubjectType.InvitationLink, [FileShare.ContentCreator, FileShare.Editing, FileShare.Read, FileShare.FillForms, FileShare.None] }
                 }.ToFrozenDictionary()
-            },
-            {
-                FolderType.AiRoom, new Dictionary<SubjectType, HashSet<FileShare>>
-                {
-                    {
-                        SubjectType.User, [
-                            FileShare.RoomManager, FileShare.ContentCreator, FileShare.Editing, FileShare.Review,
-                            FileShare.Comment, FileShare.Read, FileShare.None
-                        ]
-                    },
-                    {
-                        SubjectType.Group, [
-                            FileShare.ContentCreator, FileShare.Editing, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.None
-                        ]
-                    },
-                    {
-                        SubjectType.InvitationLink, [
-                            FileShare.ContentCreator, FileShare.Editing, FileShare.Review,
-                            FileShare.Comment, FileShare.Read, FileShare.None
-                        ]
-                    },
-                    { SubjectType.ExternalLink, [FileShare.Editing, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.None] },
-                    { SubjectType.PrimaryExternalLink, [FileShare.Editing, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.None] }
-                }.ToFrozenDictionary()
-            },
+            }
         }.ToFrozenDictionary();
 
     public static readonly FrozenDictionary<EmployeeType, HashSet<FileShare>> AvailableUserAccesses = new Dictionary<EmployeeType, HashSet<FileShare>>
@@ -833,7 +809,6 @@ public class FileSecurity(IDaoFactory daoFactory,
             FolderType.EditingRoom => FileShare.ContentCreator,
             FolderType.PublicRoom => FileShare.ContentCreator,
             FolderType.VirtualDataRoom => FileShare.ContentCreator,
-            FolderType.AiRoom => FileShare.ContentCreator,
             _ => FileShare.None
         };
     }
@@ -1699,11 +1674,19 @@ public class FileSecurity(IDaoFactory daoFactory,
                     case FolderType.USER:
                         return false;
                     default:
-                        if (e.Access is FileShare.RoomManager or FileShare.ContentCreator)
+                        if (e.Access is FileShare.RoomManager)
                         {
                             return true;
                         }
+                        
+                        if (e.Access is FileShare.ContentCreator)
+                        {
+                            var tagDao = daoFactory.GetTagDao<T>();
+                            var tagLocked = await tagDao.GetTagsAsync(file.Id, FileEntryType.File, TagType.Locked).FirstOrDefaultAsync();
 
+                            return tagLocked == null || tagLocked.Owner == authContext.CurrentAccount.ID;
+                        }
+                        
                         break;
                 }
 

@@ -39,9 +39,9 @@ public class Startup : BaseWorkerStartup
 
     public override async Task ConfigureServices(WebApplicationBuilder builder)
     {
-        var services = builder.Services;
         await base.ConfigureServices(builder);
 
+        var services = builder.Services;
         services.AddHttpClient();
         services.AddHostedService<ServiceLauncher>();
         services.AddScoped<IWebItem, ProductEntryPoint>();

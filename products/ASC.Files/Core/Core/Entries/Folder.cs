@@ -101,10 +101,7 @@ public enum FolderType
     VirtualDataRoom = 29,
         
     [SwaggerEnum(Description = "Room templates folder")]
-    RoomTemplates = 30,
-
-    [SwaggerEnum(Description = "AI room")]
-    AiRoom = 31
+    RoomTemplates = 30
 }
 
 /// <summary>

@@ -57,7 +57,10 @@ public class AccountingClient
         _httpClientFactory = httpClientFactory;
 
         _configuration.Url = (_configuration.Url ?? "").Trim().TrimEnd('/');
-        if (!string.IsNullOrEmpty(_configuration.Url))
+
+        _configuration.Currencies = _configuration.Currencies == null || _configuration.Currencies.Count == 0 ? ["USD"] : _configuration.Currencies;
+
+        if (!string.IsNullOrEmpty(_configuration.Url)) 
         {
             Configured = true;
         }
@@ -129,6 +132,11 @@ public class AccountingClient
     public async Task<List<Currency>> GetAllCurrenciesAsync()
     {
         return await RequestAsync<List<Currency>>(HttpMethod.Get, "/currency/all", null);
+    }
+
+    public List<string> GetSupportedCurrencies()
+    {
+        return _configuration.Currencies;
     }
 
 
@@ -215,28 +223,177 @@ public class AccountingClient
     }
 }
 
-
+/// <summary>
+/// The payment method status.
+/// </summary>
 public enum PaymentMethodStatus
 {
+    [SwaggerEnum("None")]
     None,
+    [SwaggerEnum("Set")]
     Set,
+    [SwaggerEnum("Expired")]
     Expired
 }
 
-public record CustomerInfo(string PortalId, PaymentMethodStatus PaymentMethodStatus, string Email);
+/// <summary>
+/// The customer information.
+/// </summary>
+public class CustomerInfo
+{
+    /// <summary>
+    /// The portal ID.
+    /// </summary>
+    public string PortalId { get; init; }
 
-public record Balance(int AccountNumber, List<SubAccount> SubAccounts);
+    /// <summary>
+    /// The customer's payment method.
+    /// </summary>
+    public PaymentMethodStatus PaymentMethodStatus { get; init; }
 
-public record SubAccount(string Currency, decimal Amount);
+    /// <summary>
+    /// The email address of the customer.
+    /// </summary>
+    public string Email { get; init; }
+}
 
-public record Session(int SessionId, decimal ReservedAmount, string Currency);
+/// <summary>
+/// Represents a balance with an account number and a list of sub-accounts.
+/// </summary>
+public class Balance
+{
+    /// <summary>
+    /// The account number.
+    /// </summary>
+    public int AccountNumber { get; init; }
+    /// <summary>
+    /// A list of sub-accounts.
+    /// </summary>
+    public List<SubAccount> SubAccounts { get; init; }
+}
 
-public record Report(List<Operation> Collection, int Offset, int Limit, int TotalQuantity, int TotalPage, int CurrentPage);
+/// <summary>
+/// Represents a sub-account with a specific currency and amount.
+/// </summary>
+public class SubAccount
+{
+    /// <summary>
+    /// The three-character ISO 4217 currency symbol of the sub-account.
+    /// </summary>
+    public string Currency { get; init; }
+    /// <summary>
+    /// The amount of the sub-account.
+    /// </summary>
+    public decimal Amount { get; init; }
+}
 
-public record Operation(DateTime Date, string Service, string ServiceUnit, int Quantity, string Currency, decimal Credit, decimal Withdrawal);
+/// <summary>
+/// Represents a session with reserved amount and currency.
+/// </summary>
+public class Session
+{
+    /// <summary>
+    /// Unique identifier of the session.
+    /// </summary>
+    public int SessionId { get; init; }
 
-public record Currency(int Id, string Code);
+    /// <summary>
+    /// Amount reserved for the session.
+    /// </summary>
+    public decimal ReservedAmount { get; init; }
 
+    /// <summary>
+    /// The three-character ISO 4217 currency symbol of the reserved amount.
+    /// </summary>
+    public string Currency { get; init; }
+}
+
+
+/// <summary>
+/// Represents a report containing a collection of operations.
+/// </summary>
+public class Report
+{
+    /// <summary>
+    /// Collection of operations.
+    /// </summary>
+    public List<Operation> Collection { get; set; }
+    /// <summary>
+    /// Offset of the report data.
+    /// </summary>
+    public int Offset { get; set; }
+    /// <summary>
+    /// Limit of the report data.
+    /// </summary>
+    public int Limit { get; set; }
+    /// <summary>
+    /// Total quantity of operations in the report.
+    /// </summary>
+    public int TotalQuantity { get; set; }
+    /// <summary>
+    /// Total number of pages in the report.
+    /// </summary>
+    public int TotalPage { get; set; }
+    /// <summary>
+    /// Current page number of the report.
+    /// </summary>
+    public int CurrentPage { get; set; }
+}
+
+/// <summary>
+/// Represents an operation.
+/// </summary>
+public class Operation
+{
+    /// <summary>
+    /// Date of the operation.
+    /// </summary>
+    public DateTime Date { get; set; }
+    /// <summary>
+    /// Service related to the operation.
+    /// </summary>
+    public string Service { get; set; }
+    /// <summary>
+    /// Brief description of the operation.
+    /// </summary>
+    public string Description { get; set; }
+    /// <summary>
+    /// Unit of the service.
+    /// </summary>
+    public string ServiceUnit { get; set; }
+    /// <summary>
+    /// Quantity of the service used.
+    /// </summary>
+    public int Quantity { get; set; }
+    /// <summary>
+    /// The three-character ISO 4217 currency symbol of the operation.
+    /// </summary>
+    public string Currency { get; set; }
+    /// <summary>
+    /// Credit amount of the operation.
+    /// </summary>
+    public decimal Credit { get; set; }
+    /// <summary>
+    /// Withdrawal amount of the operation.
+    /// </summary>
+    public decimal Withdrawal { get; set; }
+}
+
+/// <summary>
+/// Represents a currency.
+/// </summary>
+public class Currency
+{
+    /// <summary>
+    /// Unique identifier of the currency.
+    /// </summary>
+    public int Id { get; init; }
+
+    /// <summary>
+    /// The three-character ISO 4217 currency symbol.
+    /// </summary>
+    public string Code { get; init; }
+}
 
 public static class AccountingHttplClientExtension
 {

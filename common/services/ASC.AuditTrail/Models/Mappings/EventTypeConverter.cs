@@ -37,6 +37,11 @@ internal class EventTypeConverter(
 {
     public void Convert(LoginEventQuery source, LoginEvent dest)
     {
+        if (source?.Event == null)
+        {
+            return;
+        }        
+        
         if (source.Event.DescriptionRaw != null)
         {
             dest.Description = JsonSerializer.Deserialize<IList<string>>(source.Event.DescriptionRaw);
@@ -75,6 +80,11 @@ internal class EventTypeConverter(
 
     public void Convert(AuditEventQuery source, AuditEvent dest)
     {
+        if (source?.Event == null)
+        {
+            return;
+        }
+
         var target = source.Event.Target;
         source.Event.Target = null;
 

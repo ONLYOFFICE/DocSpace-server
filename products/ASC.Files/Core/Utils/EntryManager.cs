@@ -1425,6 +1425,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
         var fileDao = daoFactory.GetFileDao<T>();
         var file = await fileDao.GetFileAsync(fileId);
+        var fileForceSave = file.Forcesave;
 
         if (file == null)
         {
@@ -1583,6 +1584,13 @@ public class EntryManager(IDaoFactory daoFactory,
                     return await SubmitVDRFormAsync(rootFolder, file, fileDao, tmpStream);
                 }
             }
+
+            if(file.IsForm && file.IsCompletedForm && fileForceSave != ForcesaveType.None)
+            {
+                await fileDao.UpdateCategoryAsync(file.Id, file.Version, (int)FilterType.Pdf, ForcesaveType.None);
+                return file;
+            }
+
             file.ContentLength = tmpStream.Length;
             file.Comment = string.IsNullOrEmpty(comment) ? null : comment;
             if (replaceVersion)
@@ -2157,6 +2165,7 @@ public class EntryManager(IDaoFactory daoFactory,
             pdfFile.ParentId = origProperties.FormFilling.ResultsFolderId;
             pdfFile.Comment = string.IsNullOrEmpty(comment) ? null : comment;
             pdfFile.Category = (int)FilterType.Pdf;
+            pdfFile.IsCompletedForm = true;
 
             File<T> result;
             if (tmpStream.CanSeek)
@@ -2279,10 +2288,10 @@ public class EntryManager(IDaoFactory daoFactory,
 
         var aces = await records.Select(record => new AceWrapper
         {
-            Access = FileShare.Read,
+                Access = FileShare.Read,
             Id = record.Subject, 
             SubjectType = record.SubjectType, 
-            FileShareOptions = record.Options
+                FileShareOptions = record.Options
         }).ToListAsync();
 
         var current = securityContext.CurrentAccount.ID;
@@ -2324,8 +2333,6 @@ public class EntryManager(IDaoFactory daoFactory,
                 var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
                 if (nextRoleSequence == 0)
                 {
-                    form.Category = (int)FilterType.Pdf;
-                    form.Forcesave = ForcesaveType.None;
                     form.IsCompletedForm = true;
 
                     if (stream.CanSeek)

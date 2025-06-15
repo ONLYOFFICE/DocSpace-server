@@ -432,9 +432,6 @@
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>فترة السماح ل ${LetterLogoText} DocSpace الخاص بك تنشيط</value>
   </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>اشتراك ${LetterLogoText} DocSpace على وشك الانتهاء</value>
-  </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>انتهت صلاحية فترة السماح ل ${LetterLogoText} DocSpace الخاص بك</value>
   </data>
@@ -605,7 +602,9 @@ $OrangeButton
 
 يرجى النقر فوق الزر أدناه للانتقال إلى صفحة تسجيل الدخول إلى البوابة وتكوين تطبيق المصادقة:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.تغيير مالك البوابة الإلكترونية "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -1470,17 +1469,6 @@ $TrulyYours</value>
 يرجى الأخذ في الاعتبار أنه تم تنشيط فترة السماح البالغة $PaymentDelay أيام ل ${LetterLogoText} DocSpace.
 
 تأكد من دفع اشتراكك في الأعمال قبل استحقاق فترة السماح. وبالتالي، ستتمكن من استخدام جميع مزايا ${LetterLogoText} DocSpace الخاصة بك.
-
-$OrangeButton
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>مرحبا، $UserName!
-
-يرجى الأخذ في الاعتبار أن اشتراك ${LetterLogoText} DocSpace الخاص بك ينتهي في غضون ثلاثة أيام. بعد ذلك ، سيتم تنشيط فترة السماح البالغة $PaymentDelay يوما.
-
-نوصي بدفع اشتراك الأعمال الخاص بك الآن والاستمرار في استخدام جميع مزايا ${LetterLogoText} DocSpace الخاص بك.
 
 $OrangeButton
 

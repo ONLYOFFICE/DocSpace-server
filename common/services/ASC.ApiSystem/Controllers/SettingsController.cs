@@ -47,6 +47,7 @@ public class SettingsController(CommonMethods commonMethods,
     [ApiExplorerSettings(IgnoreApi = true)]
     [SwaggerResponse(200, "Settings api works")]
     [HttpGet("test")]
+    [AllowAnonymous]
     public IActionResult Check()
     {
         return Ok(new

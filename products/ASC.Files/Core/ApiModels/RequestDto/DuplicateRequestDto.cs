@@ -29,7 +29,7 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// <summary>
 /// The duplicate request parameters.
 /// </summary>
-public class DuplicateRequestDto
+public class DuplicateRequestDto : FileOperationRequestBaseDto
 {
     /// <summary>
     /// The list of folder IDs.

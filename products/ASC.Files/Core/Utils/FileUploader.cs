@@ -78,7 +78,7 @@ public class FileUploader(
         return file;
     }
 
-    public async Task<File<T>> VerifyFileUploadAsync<T>(T folderId, string fileName, bool updateIfExists, string relativePath = null)
+    private async Task<File<T>> VerifyFileUploadAsync<T>(T folderId, string fileName, bool updateIfExists, string relativePath = null)
     {
         fileName = Global.ReplaceInvalidCharsAndTruncate(fileName);
 
@@ -105,6 +105,11 @@ public class FileUploader(
             return file;
         }
 
+        if (!updateIfExists && file != null)
+        {
+            fileName =  await global.GetAvailableTitleAsync(fileName, folderId, fileDao.IsExistAsync, FileEntryType.File);
+        }
+        
         var newFile = serviceProvider.GetService<File<T>>();
         newFile.ParentId = folderId;
         newFile.Title = fileName;
@@ -112,7 +117,7 @@ public class FileUploader(
         return newFile;
     }
 
-    public async Task<File<T>> VerifyFileUploadAsync<T>(T folderId, string fileName, long fileSize, bool updateIfExists)
+    private async Task<File<T>> VerifyFileUploadAsync<T>(T folderId, string fileName, long fileSize, bool updateIfExists)
     {
         if (fileSize <= 0)
         {

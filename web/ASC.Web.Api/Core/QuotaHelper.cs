@@ -177,7 +177,7 @@ public class QuotaHelper(
             }
             else
             {
-                var img = assembly.GetManifestResourceStream($"{assembly.GetName().Name}.img.{feature.Name}.svg");
+                var img = assembly.GetManifestResourceStream($"{assembly.GetName().Name}.img.{featureName}.svg");
 
                 if (availableFeature && img != null)
                 {

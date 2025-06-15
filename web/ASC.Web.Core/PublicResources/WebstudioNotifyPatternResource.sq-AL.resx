@@ -504,9 +504,6 @@
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Periudha e hirit për ${LetterLogoText} DocSpace tuaj u aktivizua</value>
   </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Abonimi juaj në ${LetterLogoText} DocSpace është fati të skadojë</value>
-  </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Periudha e hirit për ${LetterLogoText} DocSpace tuaj ka skaduar</value>
   </data>
@@ -639,7 +636,9 @@ Konfigurimi i aplikacionit të vërtetuesit që përdorni për të hyrë në por
 
 Ju lutemi, klikoni butonin më poshtë për të shkuar në faqen e hyrjes së portalit dhe për të konfigururar aplikacionin e vërtetuesit:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.Ndyshimi i pronarit të portalit "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -1259,15 +1258,6 @@ $TrulyYours</value>
 Ju lutem, kini parasysh që periudha e hirit prej $PaymentDelay‎ ditësh për ${LetterLogoText} DocSpace tuaj është aktivizuar.
 
 Sigurohuni që të paguani abonimin tuaj të Biznesit përpara afatit të periudhës së hirit. KËshtu, ju do të jeni në gjendje të përdorni më tej të gjitha përfitimet e ${LetterLogoText} DocSpace tuaj.
-
-$OrangeButton
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Ju lutem, kini parasysh se abonimi juaj në ${LetterLogoText} DocSpace skadon për tre ditë. Pas kësaj, periudha e hirit prej $PaymentDelay ditësh do të aktivizohet.
-
-Ne ju rekomandojmë të paguar tani abonimin tuaj të Biznesit dhe të vazhdoni të përdorni të gjitha përfitimet e ${LetterLogoText} DocSpace.
 
 $OrangeButton
 

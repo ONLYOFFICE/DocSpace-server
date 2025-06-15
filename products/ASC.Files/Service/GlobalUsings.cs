@@ -58,6 +58,7 @@ global using ASC.Files.Core.VirtualRooms;
 global using ASC.Files.Service;
 global using ASC.Files.Service.Extension;
 global using ASC.Files.Service.Log;
+global using ASC.Files.Service.Services.Thumbnail;
 global using ASC.Files.ThumbnailBuilder;
 global using ASC.Web.Core;
 global using ASC.Web.Files.Classes;

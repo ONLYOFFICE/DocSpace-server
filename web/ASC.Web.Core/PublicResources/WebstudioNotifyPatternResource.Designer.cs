@@ -635,7 +635,9 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///Please click the button below to go to the portal login page and configure the authenticator application:
         ///
-        ///$OrangeButton.
+        ///$OrangeButton
+        ///
+        ///&amp;nbsp;.
         /// </summary>
         public static string pattern_change_tfa {
             get {
@@ -1788,11 +1790,11 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///Please take into consideration that your ${LetterLogoText} DocSpace subscription expires in three days. After that, the grace period of $PaymentDelay days will be activated.
+        ///We’re reaching out to inform you that your subscription payment will be automatically debited from your account in 3 days.
         ///
-        ///We recommend paying your Business subscription now and continue to use all the benefits of your ${LetterLogoText} DocSpace.
+        ///To ensure a smooth transaction, please confirm that sufficient funds are available in your payment method.
         ///
-        ///$OrangeButton
+        ///If you have any questions or need assistance, feel free to reach out to our &quot;support team&quot;:&quot;${__SupportLink}&quot;.
         ///
         ///$TrulyYours.
         /// </summary>
@@ -2821,7 +2823,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your ${LetterLogoText} DocSpace subscription is about to expire.
+        ///   Looks up a localized string similar to Upcoming subscription payment for your ${LetterLogoText} DocSpace.
         /// </summary>
         public static string subject_saas_owner_payment_warning_grace_period_before_activation {
             get {

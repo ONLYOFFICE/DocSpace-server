@@ -58,7 +58,7 @@ public static class AuthorizationExtension
             return scopes;
         }
 
-        return null;
+        return AuthConstants.Claim_ScopeRootWrite.Value;
     }
 
     public static IServiceCollection AddJwtBearerAuthentication(this IServiceCollection services)
@@ -91,12 +91,14 @@ public static class AuthorizationExtension
         builder.Add(endpointBuilder =>
         {
             var httpMethodMetadata = endpointBuilder.Metadata.OfType<HttpMethodMetadata>().FirstOrDefault();
+            var allowAnonymousAttribute = endpointBuilder.Metadata.OfType<AllowAnonymousAttribute>().FirstOrDefault();
             var authorizeAttribute = endpointBuilder.Metadata.OfType<AuthorizeAttribute>().FirstOrDefault();
+
             var httpMethod = httpMethodMetadata?.HttpMethods.FirstOrDefault();
 
             var authorizePolicy = GetAuthorizePolicy(((RouteEndpointBuilder)endpointBuilder).RoutePattern.RawText, httpMethod);
 
-            if (authorizeAttribute == null && authorizePolicy != null)
+            if (allowAnonymousAttribute == null && authorizeAttribute == null && authorizePolicy != null)
             {
                 authorizeAttribute = new AuthorizeAttribute(authorizePolicy);
 

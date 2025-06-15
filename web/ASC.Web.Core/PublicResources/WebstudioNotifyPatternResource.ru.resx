@@ -201,7 +201,9 @@ $OrangeButton
 
 Пожалуйста, нажмите кнопку ниже, чтобы перейти на страницу входа на портал и настроить приложение для аутентификации:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.Смена владельца портала "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -1320,17 +1322,6 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Здравствуйте, $UserName!
- 
-Обратите внимание, что срок действия вашей подписки на ${LetterLogoText} DocSpace истекает через три дня. После этого будет активирован льготный период на $PaymentDelay дней.
- 
-Мы рекомендуем оплатить подписку на тарифный план Business прямо сейчас и продолжать использовать все преимущества вашего ${LetterLogoText} DocSpace.
- 
-$OrangeButton
- 
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Здравствуйте, $UserName!
  
@@ -1396,9 +1387,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Льготный период для ${LetterLogoText} DocSpace активирован</value>
-  </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Срок действия вашей подписки ${LetterLogoText} DocSpace истекает</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Льготный период для вашего ${LetterLogoText} DocSpace истек</value>
@@ -1937,5 +1925,19 @@ $TrulyYours</value>
   </data>
   <data name="subject_user_type_changed" xml:space="preserve">
     <value>Ваш тип пользователя DocSpace изменился</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Здравствуйте, $UserName!
+
+Сообщаем вам, что платеж за подписку будет автоматически списан с вашего счета через 3 дня.
+
+Пожалуйста, убедитесь в том, что на вашем счете достаточно средств для совершения операции.
+
+Если у вас есть какие-либо вопросы, вы всегда можете написать нам по адресу "службы поддержки":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Предстоящий платеж за подписку на ваш ${LetterLogoText} DocSpace</value>
   </data>
 </root>

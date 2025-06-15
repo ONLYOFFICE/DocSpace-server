@@ -42,4 +42,23 @@ public class GroupMemberSecurityRequestDto<T>
     /// </summary>
     [FromRoute(Name = "groupId")]
     public required Guid GroupId { get; set; }
+    
+    /// <summary>
+    /// The number of items to be retrieved in the current query.
+    /// </summary>
+    [FromQuery(Name = "count")]
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
+    
+    /// <summary>
+    /// The starting index for the query result set.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
+
+    /// <summary>
+    /// The filter value used for searching or querying group members based on text input.
+    /// </summary>
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
 }

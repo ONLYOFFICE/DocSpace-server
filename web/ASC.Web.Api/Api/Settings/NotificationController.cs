@@ -28,14 +28,12 @@ namespace ASC.Web.Api.Controllers.Settings;
 
 [DefaultRoute("notification")]
 public class NotificationController(
-    ApiContext apiContext,
     IFusionCache fusionCache,
     WebItemManager webItemManager,
     NotificationControllerHelper notificationControllerHelper,
     RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
-    IMapper mapper,
-    IHttpContextAccessor httpContextAccessor)
-: BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
+    IMapper mapper)
+: BaseSettingsController(fusionCache, webItemManager)
 {
     /// <summary>
     /// Checks if the notification type specified in the request is enabled or not.
@@ -45,7 +43,7 @@ public class NotificationController(
     [Tags("Settings / Notifications")]
     [SwaggerResponse(200, "Notification settings", typeof(NotificationSettingsDto))]
     [HttpGet("{type}")]
-    public async Task<NotificationSettingsDto> GetNotificationSettingsAsync(NotificationTypeRequestsDto inDto)
+    public async Task<NotificationSettingsDto> GetNotificationSettings(NotificationTypeRequestsDto inDto)
     {
         var isEnabled = await notificationControllerHelper.GetNotificationStatusAsync(inDto.Type);
 
@@ -60,7 +58,7 @@ public class NotificationController(
     [Tags("Settings / Notifications")]
     [SwaggerResponse(200, "Notification settings", typeof(NotificationSettingsDto))]
     [HttpPost("")]
-    public async Task<NotificationSettingsDto> SetSettingsAsync(NotificationSettingsRequestsDto inDto)
+    public async Task<NotificationSettingsDto> SetNotificationSettings(NotificationSettingsRequestsDto inDto)
     {
         await notificationControllerHelper.SetNotificationStatusAsync(inDto.Type, inDto.IsEnabled);
 

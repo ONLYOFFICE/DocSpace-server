@@ -259,7 +259,11 @@ public class DistributedTaskQueueService<T>(
 
     private static async Task OnCompleted(Task task, DistributedTask distributedTask)
     {
-        distributedTask.Status = DistributedTaskStatus.Completed;
+        if (distributedTask.Status is not (DistributedTaskStatus.Failted or DistributedTaskStatus.Canceled))
+        {
+            distributedTask.Status = DistributedTaskStatus.Completed;
+        }
+
         if (task.Exception != null)
         {
             distributedTask.Exception = task.Exception;

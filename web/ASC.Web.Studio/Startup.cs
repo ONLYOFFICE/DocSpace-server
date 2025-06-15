@@ -79,9 +79,9 @@ public class Startup : BaseStartup
 
     public override async Task ConfigureServices(WebApplicationBuilder builder)
     {
-        var services = builder.Services;
         await base.ConfigureServices(builder);
 
+        var services = builder.Services;
         services.AddMemoryCache();
         services.AddBaseDbContextPool<FilesDbContext>();
         services.RegisterQuotaFeature();

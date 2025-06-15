@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using static ASC.Core.Billing.BillingClient;
-
 namespace ASC.Core.Billing;
 
 [Singleton]
@@ -259,14 +257,8 @@ public class TariffService(
         return tariff;
     }
 
-    public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType)
+    private async Task<IEnumerable<string>> CheckQuotaAndGetProductIds(int tenantId, Dictionary<string, int> quantity)
     {
-        if (quantity == null || quantity.Count == 0
-            || !billingClient.Configured)
-        {
-            return false;
-        }
-
         var allQuotas = (await quotaService.GetTenantQuotasAsync()).Where(q => !string.IsNullOrEmpty(q.ProductId)).ToList();
         var newQuotas = quantity.Keys.Select(name => allQuotas.Find(q => q.Name == name)).ToList();
 
@@ -314,9 +306,21 @@ public class TariffService(
 
         var productIds = newQuotas.Select(q => q.ProductId);
 
+        return productIds;
+    }
+
+    public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency)
+    {
+        if (quantity == null || quantity.Count == 0 || !billingClient.Configured)
+        {
+            return false;
+        }
+
+        var productIds = await CheckQuotaAndGetProductIds(tenantId, quantity);
+
         try
         {
-            var changed = await billingClient.ChangePaymentAsync(await coreSettings.GetKeyAsync(tenantId), productIds.ToArray(), quantity.Values.ToArray(), productQuantityType);
+            var changed = await billingClient.ChangePaymentAsync(await coreSettings.GetKeyAsync(tenantId), productIds.ToArray(), quantity.Values.ToArray(), productQuantityType, currency);
 
             if (!changed)
             {
@@ -335,6 +339,28 @@ public class TariffService(
         return true;
     }
 
+    public async Task<PaymentCalculation> PaymentCalculateAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency)
+    {
+        if (quantity == null || quantity.Count == 0 || !billingClient.Configured)
+        {
+            return null;
+        }
+
+        var productIds = await CheckQuotaAndGetProductIds(tenantId, quantity);
+
+        try
+        {
+            var response = await billingClient.CalculatePaymentAsync(await coreSettings.GetKeyAsync(tenantId), productIds.ToArray(), quantity.Values.ToArray(), productQuantityType, currency);
+
+            return response;
+        }
+        catch (Exception error)
+        {
+            logger.ErrorWithException(error);
+
+            return null;
+        }
+    }
 
     public async Task SetTariffAsync(int tenantId, Tariff tariff, List<TenantQuota> quotas = null)
     {
@@ -676,10 +702,15 @@ public class TariffService(
         return inserted;
     }
 
-    public async Task<bool> UpdateNextQuantityAsync(int tenant, Tariff tariffInfo, int quotaId, int nextQuantity)
+    public async Task<bool> UpdateNextQuantityAsync(int tenant, Tariff tariffInfo, int quotaId, int? nextQuantity)
     {
         try
         {
+            if (nextQuantity.HasValue && nextQuantity.Value < 0)
+            {
+                return false;
+            }
+
             var currentTariff = await GetBillingInfoAsync(tenant);
 
             await using var dbContext = await coreDbContextManager.CreateDbContextAsync();
@@ -1008,7 +1039,7 @@ public class TariffService(
                 }
                 catch (Exception error)
                 {
-                    customerInfo = new CustomerInfo(null, PaymentMethodStatus.None, null);
+                    customerInfo = new CustomerInfo();
                     LogError(error, tenantId.ToString());
                 }
 
@@ -1033,24 +1064,28 @@ public class TariffService(
 
         var result = await billingClient.TopUpDepositAsync(portalId, amount, currency);
 
-        var attempt = 0;
-
-        while (waitForChanges && attempt <= 3)
+        if (!waitForChanges)
         {
-            await Task.Delay((int)(Math.Pow(2, attempt) * 1000));
+            return result;
+        }
 
+        var retryPolicy = Policy
+            .HandleResult<bool>(result => result == false)
+            .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
+
+        var updated = await retryPolicy.ExecuteAsync(async () =>
+        {
             var newBalance = await GetCustomerBalanceAsync(tenantId, true);
             var newBalanceAmount = newBalance?.SubAccounts?.FirstOrDefault(x => x.Currency == currency)?.Amount;
 
-            if (oldBalanceAmount != newBalanceAmount)
-            {
-                return result;
-            }
+            return oldBalanceAmount != newBalanceAmount;
+        });
 
-            attempt += 1;
+        if (!updated)
+        {
+            logger.ErrorBilling(tenantId.ToString(), "Balance value is not updated after replenishment");
+            await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
         }
-
-        await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
 
         return result;
     }
@@ -1065,7 +1100,7 @@ public class TariffService(
 
         if (balance != null)
         {
-            return balance;
+            return balance.AccountNumber == 0 ? null : balance;
         }
 
         await using (await distributedLockProvider.TryAcquireLockAsync($"{cacheKey}_lock"))
@@ -1074,7 +1109,7 @@ public class TariffService(
 
             if (balance != null)
             {
-                return balance;
+                return balance.AccountNumber == 0 ? null : balance;
             }
 
             if (accountingClient.Configured)
@@ -1088,6 +1123,7 @@ public class TariffService(
                 catch (Exception error)
                 {
                     LogError(error, tenantId.ToString());
+                    await hybridCache.SetAsync(cacheKey, new Balance(), TimeSpan.FromMinutes(10));
                 }
             }
         }
@@ -1123,9 +1159,14 @@ public class TariffService(
         }
     }
 
-    public async Task<List<Currency>> GetAllCurrenciesAsync()
+    public async Task<List<Currency>> GetAllAccountingCurrenciesAsync()
     {
         return await accountingClient.GetAllCurrenciesAsync();
+    }
+
+    public List<string> GetSupportedAccountingCurrencies()
+    {
+        return accountingClient.GetSupportedCurrencies();
     }
 
     #endregion

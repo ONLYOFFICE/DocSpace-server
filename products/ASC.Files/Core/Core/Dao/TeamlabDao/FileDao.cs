@@ -1493,6 +1493,16 @@ internal class FileDao(
         }
     }
 
+    public async Task<int> UpdateCategoryAsync(int fileId, int fileVersion, int category, ForcesaveType forcesave = ForcesaveType.None)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await filesDbContext.UpdateDbFilesCategoryForcesaveAsync(tenantId, fileId, fileVersion, category, forcesave);
+
+        return category;
+    }
+
     #region chunking
 
     public async Task<ChunkedUploadSession<int>> CreateUploadSessionAsync(File<int> file, long contentLength)
@@ -1871,7 +1881,11 @@ internal class FileDao(
             {
                 SortedByType.Author => orderBy.IsAsc ? q.OrderBy(r => r.Entry.CreateBy) : q.OrderByDescending(r => r.Entry.CreateBy),
                 SortedByType.Size => orderBy.IsAsc ? q.OrderBy(r => r.Entry.ContentLength) : q.OrderByDescending(r => r.Entry.ContentLength),
-                SortedByType.AZ => orderBy.IsAsc ? q.OrderBy(r => r.Entry.Title) : q.OrderByDescending(r => r.Entry.Title),
+                SortedByType.AZ => orderBy.IsAsc 
+                    ? q.OrderBy(r => Convert.ToInt32(DbFunctionsExtension.SubstringIndex(r.Entry.Title, '.', 1)))
+                        .ThenBy(r => r.Entry.Title)
+                    : q.OrderByDescending(r => Convert.ToInt32(DbFunctionsExtension.SubstringIndex(r.Entry.Title, '.', 1)))
+                        .ThenByDescending(r => r.Entry.Title),
                 SortedByType.DateAndTime => orderBy.IsAsc ? q.OrderBy(r => r.Entry.ModifiedOn) : q.OrderByDescending(r => r.Entry.ModifiedOn),
                 SortedByType.DateAndTimeCreation => orderBy.IsAsc ? q.OrderBy(r => r.Entry.CreateOn) : q.OrderByDescending(r => r.Entry.CreateOn),
                 SortedByType.Type => orderBy.IsAsc
@@ -2391,7 +2405,11 @@ internal class FileDao(
             {
                 SortedByType.Author => orderBy.IsAsc ? q.OrderBy(r => r.CreateBy) : q.OrderByDescending(r => r.CreateBy),
                 SortedByType.Size => orderBy.IsAsc ? q.OrderBy(r => r.ContentLength) : q.OrderByDescending(r => r.ContentLength),
-                SortedByType.AZ => orderBy.IsAsc ? q.OrderBy(r => r.Title) : q.OrderByDescending(r => r.Title),
+                SortedByType.AZ => orderBy.IsAsc 
+                    ? q.OrderBy(r => Convert.ToInt32(DbFunctionsExtension.SubstringIndex(r.Title, '.', 1)))
+                        .ThenBy(r => r.Title)
+                    : q.OrderByDescending(r => Convert.ToInt32(DbFunctionsExtension.SubstringIndex(r.Title, '.', 1)))
+                        .ThenByDescending(r => r.Title),
                 SortedByType.DateAndTime => orderBy.IsAsc ? q.OrderBy(r => r.ModifiedOn) : q.OrderByDescending(r => r.ModifiedOn),
                 SortedByType.DateAndTimeCreation => orderBy.IsAsc ? q.OrderBy(r => r.CreateOn) : q.OrderByDescending(r => r.CreateOn),
                 SortedByType.Type => orderBy.IsAsc

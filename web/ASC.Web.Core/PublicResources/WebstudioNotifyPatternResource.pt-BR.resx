@@ -198,7 +198,9 @@ A configuração do aplicativo autenticador que você usa para entrar no portal 
 
 Clique no botão abaixo para ir para a página de login do portal e configurar o aplicativo autenticador:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.Alteração do proprietário do portal "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -1330,17 +1332,6 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Olá, $UserName!
-
-Leve em consideração que sua assinatura do ${LetterLogoText} DocSpace expira em três dias. Depois disso, o período de carência de $PaymentDelay dias será ativado.
-
-Recomendamos pagar sua assinatura Business agora e continuar a usar todos os benefícios de seu ${LetterLogoText} DocSpace.
-
-$OrangeButton
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Olá, $UserName!
 
@@ -1460,9 +1451,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Período de carência para seu ${LetterLogoText} DocSpace ativado</value>
-  </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Sua assinatura do ${LetterLogoText} DocSpace está prestes a expirar</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>O período de carência para o seu ${LetterLogoText} DocSpace expirou</value>
@@ -1942,5 +1930,19 @@ $TrulyYours</value>
   </data>
   <data name="subject_user_type_changed" xml:space="preserve">
     <value>Seu tipo de usuário do DocSpace foi alterado</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Próximo pagamento de assinatura para seu ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Olá, $UserName!
+
+Estamos entrando em contato para informar que o pagamento da sua assinatura será debitado automaticamente da sua conta em 3 dias.
+
+Para garantir uma transação tranquila, confirme se há fundos suficientes disponíveis no seu método de pagamento.
+
+Caso tenha alguma dúvida ou precise de ajuda, sinta-se à vontade para entrar em contato com nossa "equipe de suporte":"${__SupportLink}".
+
+$TrulyYours</value>
   </data>
 </root>

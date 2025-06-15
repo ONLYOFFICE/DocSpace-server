@@ -451,17 +451,6 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Pozdravljeni, $UserName!
-
-Upoštevajte, da vaša naročnina na ${LetterLogoText} DocSpace poteče čez tri dni. Nato bo aktivirano obdobje odloga $PaymentDelay dni.
-
-Priporočamo, da že zdaj plačate poslovno naročnino in še naprej uporabljate vse prednosti vašega ${LetterLogoText} DocSpace.
-
-$OrangeButton
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Pozdravljeni, $UserName!
 
@@ -807,9 +796,6 @@ $TrulyYours</value>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Aktivirano je podaljšano obdobje za vaš ${LetterLogoText} DocSpace</value>
   </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Preteklo je podaljšano obdobje za vaš ${LetterLogoText} DocSpace</value>
-  </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Preteklo je podaljšano obdobje za vaš ${LetterLogoText} DocSpace</value>
   </data>
@@ -923,7 +909,9 @@ Konfiguracija aplikacije za avtentikacijo, ki jo uporabljate za vstop na portal 
 
 Kliknite spodnji gumb, da odprete stran za prijavo v portal in konfigurirate aplikacijo za avtentikacijo:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.Sprememba "${__VirtualRootPath}":"${__VirtualRootPath}" lastnika portala

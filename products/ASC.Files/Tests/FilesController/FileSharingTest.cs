@@ -99,7 +99,7 @@ public class FileSharingTest(
         await _filesFilesApi.CreatePrimaryExternalLinkAsync(file.Id, linkParams, TestContext.Current.CancellationToken);
         
         // Act
-        var result = (await _filesFilesApi.GetFilePrimaryExternalLinkAsync(file.Id, TestContext.Current.CancellationToken)).Response;
+        var result = (await _filesFilesApi.GetFilePrimaryExternalLinkAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         
         // Assert
         result.Should().NotBeNull();
@@ -127,7 +127,7 @@ public class FileSharingTest(
         await _filesFilesApi.SetExternalLinkAsync(file.Id, additionalLinkParams, TestContext.Current.CancellationToken);
         
         // Act
-        var links = (await _filesFilesApi.GetLinksAsync(file.Id, TestContext.Current.CancellationToken)).Response;
+        var links = (await _filesFilesApi.GetFileLinksAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         
         // Assert
         links.Should().NotBeNull();

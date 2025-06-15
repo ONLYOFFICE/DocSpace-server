@@ -76,7 +76,7 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
         { "Files / Folders", "Operations for working with folders." },
         { "Files / Operations", "Operations for performing actions on files and folders." },
         { "Files / Quota", "Operations for working with room quota limit." },
-        { "Files / Rooms", "Operations for working with rooms." },
+        { "Rooms", "Operations for working with rooms." },
         { "Files / Settings", "Operations for working with file settings." },
         { "Files / Third-party integration", "Operations for working with third-party integrations." },
         { "Files / Sharing", "Operations for working with sharing."},

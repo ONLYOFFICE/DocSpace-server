@@ -41,10 +41,10 @@ public class RoomTemplatesController(IEventBus eventBus,
     /// </summary>
     /// <short>Start creating room template</short>
     /// <path>api/2.0/files/roomtemplate</path>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [SwaggerResponse(200, "Status", typeof(RoomTemplateStatusDto))]
     [HttpPost("")]
-    public async Task<RoomTemplateStatusDto> CreateTemplateAsync(RoomTemplateDto dto)
+    public async Task<RoomTemplateStatusDto> CreateRoomTemplate(RoomTemplateDto dto)
     {
         LogoSettings logo = null;
         if (dto.Logo != null)
@@ -91,7 +91,7 @@ public class RoomTemplatesController(IEventBus eventBus,
             Color = dto.Color,
             Quota = dto.Quota
         });
-        return await GetTemplateCreatingStatus();
+        return await GetRoomTemplateCreatingStatus();
     }
 
     /// <summary>
@@ -99,10 +99,10 @@ public class RoomTemplatesController(IEventBus eventBus,
     /// </summary>
     /// <short>Get status of room template creation</short>
     /// <path>api/2.0/files/roomtemplate/status</path>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [SwaggerResponse(200, "Status", typeof(RoomTemplateStatusDto))]
     [HttpGet("status")]
-    public async Task<RoomTemplateStatusDto> GetTemplateCreatingStatus()
+    public async Task<RoomTemplateStatusDto> GetRoomTemplateCreatingStatus()
     {
         try
         {
@@ -132,9 +132,9 @@ public class RoomTemplatesController(IEventBus eventBus,
     /// </summary>
     /// <short>Get public settings</short>
     /// <path>api/2.0/files/roomtemplate/{id}/public</path>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [HttpGet("{id}/public")]
-    public async Task<bool> IsPublic(PublicDto inDto)
+    public async Task<bool> GetPublicSettings(PublicDto inDto)
     {
         return await fileStorageService.IsPublicAsync(inDto.Id);
     }
@@ -145,9 +145,9 @@ public class RoomTemplatesController(IEventBus eventBus,
     /// </summary>
     /// <short>Set public settings</short>
     /// <path>api/2.0/files/roomtemplate/public</path>
-    [Tags("Files / Rooms")]
+    [Tags("Rooms")]
     [HttpPut("public")]
-    public async Task SetPublic(SetPublicDto inDto)
+    public async Task SetPublicSettings(SetPublicDto inDto)
     {
         var shared = fileStorageService.GetPureSharesAsync(inDto.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "", 0, -1);
 

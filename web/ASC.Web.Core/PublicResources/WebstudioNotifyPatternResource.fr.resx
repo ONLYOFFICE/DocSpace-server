@@ -200,7 +200,9 @@ Les paramètres de l'application d'authentification que vous utilisez pour accé
 
 Cliquez sur ce lien pour passer à la page de connexion du portail et configurer l'application d'authentification :
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.Changement du propriétaire du portail "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -1285,17 +1287,6 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Bonjour, $UserName !
-
-Veuillez prendre en considération que votre abonnement ${LetterLogoText} DocSpace expire dans trois jours. Après cela, le délai de grâce de $PaymentDelay days sera activé.
-
-Nous vous recommandons de payer votre abonnement Business maintenant et de continuer à utiliser tous les avantages de votre ${LetterLogoText} DocSpace.
-
-$OrangeButton
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Bonjour, $UserName !
 
@@ -1404,9 +1395,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_room_invite" xml:space="preserve">
     <value>Rejoindre ${LetterLogoText} DocSpace</value>
-  </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Votre abonnement ${LetterLogoText} DocSpace va expirer</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Période de grâce pour votre ${LetterLogoText} DocSpace a expiré</value>
@@ -1936,5 +1924,19 @@ $TrulyYours</value>
   </data>
   <data name="subject_user_type_changed" xml:space="preserve">
     <value>Votre type d'utilisateur DocSpace a changé</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Bonjour, $UserName!
+
+Nous vous informons que votre abonnement sera automatiquement débité de votre compte dans 3 jours.
+
+Pour garantir le bon déroulement de la transaction, veuillez vous assurer que les sommes disponibles dans votre mode de paiement sont suffisantes.
+
+Si vous avez des questions ou si vous avez besoin d'aide, n'hésitez pas à contacter notre "équipe d'assistance":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Paiement à venir de l'abonnement pour votre ${LetterLogoText} DocSpace</value>
   </data>
 </root>

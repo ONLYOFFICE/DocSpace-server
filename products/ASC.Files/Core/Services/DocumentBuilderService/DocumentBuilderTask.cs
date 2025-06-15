@@ -81,10 +81,14 @@ public abstract class DocumentBuilderTask<TId, TData> : DistributedTaskProgress
             var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
             await tenantManager.SetCurrentTenantAsync(_tenantId);
 
+            var securityContext = scope.ServiceProvider.GetService<SecurityContext>();
             if (_userId != ASC.Core.Configuration.Constants.Guest.ID)
             {
-                var securityContext = scope.ServiceProvider.GetService<SecurityContext>();
                 await securityContext.AuthenticateMeWithoutCookieAsync(_userId);
+            }
+            else
+            {
+                securityContext.Logout();
             }
             var filesLinkUtility = scope.ServiceProvider.GetService<FilesLinkUtility>();
             logger = scope.ServiceProvider.GetService<ILogger<DocumentBuilderTask<TId, TData>>>();

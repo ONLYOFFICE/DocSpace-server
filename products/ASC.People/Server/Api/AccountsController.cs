@@ -70,7 +70,7 @@ public class AccountsController<T>(
     [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<object>))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("room/{id}/search")]
-    public async IAsyncEnumerable<object> GetAccountsEntriesWithSharedAsync(AccountsEntriesRequestDto<T> inDto)
+    public async IAsyncEnumerable<object> GetAccountsEntriesWithShared(AccountsEntriesRequestDto<T> inDto)
     {
         var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(inDto.Id)).NotFoundIfNull();
 
@@ -79,10 +79,10 @@ public class AccountsController<T>(
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
         
-        var offset = Convert.ToInt32(apiContext.StartIndex);
-        var count = Convert.ToInt32(apiContext.Count);
-        var text = apiContext.FilterValue;
-        var separator = apiContext.FilterSeparator;
+        var offset = inDto.StartIndex;
+        var count = inDto.Count;
+        var text = inDto.Text;
+        var separator = inDto.FilterSeparator;
 
         var includeStrangers = await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID);
 

@@ -897,17 +897,6 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Xin chào $UserName!
-
-Xin vui lòng lưu ý rằng gói đăng ký ${LetterLogoText} DocSpace của bạn sẽ hết hạn sau ba ngày. Sau đó, thời gian ân hạn của $PaymentDelay ngày sẽ được kích hoạt.
-
-Chúng tôi mong bạn thanh toán gói dịch vụ Business của bạn ngay và tiếp tục sử dụng tất cả các quyền lợi của ${LetterLogoText} DocSpace.
-
-$OrangeButton
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Xin chào $UserName!
 
@@ -1039,9 +1028,6 @@ $TrulyYours</value>
   </data>
   <data name="ButtonChangePassword" xml:space="preserve">
     <value>Thay đổi mật khẩu</value>
-  </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Đăng ký gói dịch vụ ${LetterLogoText} DocSpace của bạn sắp hết hạn</value>
   </data>
   <data name="ButtonChangePhone" xml:space="preserve">
     <value>Thay đổi số điện thoại di động</value>
@@ -1440,7 +1426,9 @@ Cấu hình của ứng dụng xác thực mà bạn sử dụng để vào ${Le
 
 Vui lòng nhấp vào nút bên dưới để truy cập trang đăng nhập cổng thông tin và định cấu hình ứng dụng xác thực:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>Có phải bạn muốn thay đổi email cho tài khoản ${LetterLogoText} của mình?

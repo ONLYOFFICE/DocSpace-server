@@ -249,7 +249,9 @@ The configuration of the authenticator app that you use to enter the ${LetterLog
 
 Please click the button below to go to the portal login page and configure the authenticator application:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.Change of "${__VirtualRootPath}":"${__VirtualRootPath}" portal owner
@@ -1847,11 +1849,11 @@ $TrulyYours</value>
   <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Hello, $UserName!
 
-Please take into consideration that your ${LetterLogoText} DocSpace subscription expires in three days. After that, the grace period of $PaymentDelay days will be activated.
+We’re reaching out to inform you that your subscription payment will be automatically debited from your account in 3 days.
 
-We recommend paying your Business subscription now and continue to use all the benefits of your ${LetterLogoText} DocSpace.
+To ensure a smooth transaction, please confirm that sufficient funds are available in your payment method.
 
-$OrangeButton
+If you have any questions or need assistance, feel free to reach out to our "support team":"${__SupportLink}".
 
 $TrulyYours</value>
   </data>
@@ -1881,7 +1883,7 @@ $TrulyYours</value>
     <value>Grace period for your ${LetterLogoText} DocSpace activated</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Your ${LetterLogoText} DocSpace subscription is about to expire</value>
+    <value>Upcoming subscription payment for your ${LetterLogoText} DocSpace</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Grace period for your ${LetterLogoText} DocSpace expired</value>

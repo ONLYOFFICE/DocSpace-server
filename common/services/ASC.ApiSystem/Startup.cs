@@ -49,13 +49,13 @@ public class Startup
     }
 
     public async Task ConfigureServices(WebApplicationBuilder builder)
-    {        
-        var services = builder.Services;
+    {
         if (_configuration.GetValue<bool>("openTelemetry:enable"))
         {
             builder.ConfigureOpenTelemetry();
         }
         
+        var services = builder.Services;
         services.AddCustomHealthCheck(_configuration);
         services.AddHttpContextAccessor();
         services.AddMemoryCache();
