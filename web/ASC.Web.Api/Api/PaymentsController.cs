@@ -26,6 +26,8 @@
 
 using ASC.Files.Core.Utils;
 
+using Microsoft.AspNetCore.RateLimiting;
+
 namespace ASC.Web.Api.Controllers;
 
 ///<summary>
@@ -123,6 +125,7 @@ public class PaymentController(
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("update")]
+    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task<bool> UpdatePayment(QuantityRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
@@ -196,6 +199,7 @@ public class PaymentController(
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("updatewallet")]
+    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task<bool> UpdateWalletPayment(WalletQuantityRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
@@ -602,6 +606,7 @@ public class PaymentController(
     [SwaggerResponse(200, "Success status", typeof(string))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("deposit")]
+    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task<string> TopUpDeposit(TopUpDepositRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
