@@ -159,7 +159,9 @@ Yeni "$DocumentTitle":"$DocumentURL" forması "$RoomTitle":"$RoomURL" otağında
 
 Formu əlavə edən: "$FromUserName":"$FromUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_FormSubmitted" xml:space="preserve">
     <value>h1. $Message formasını doldurmusunuz
@@ -168,7 +170,9 @@ Siz "$RoomTitle":"$RoomURL" otağında "$DocumentTitle":"$DocumentURL" formasın
 
 Administrator: "$ToUserName":"$ToUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
     <value>DocSpace bildirişi. Forma dolduruldu</value>

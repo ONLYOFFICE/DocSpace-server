@@ -159,7 +159,9 @@ $Message</value>
 
 Άτομο που υπέβαλε τη φόρμα: "$FromUserName":"$FromUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_FormSubmitted" xml:space="preserve">
     <value>h1. Συμπληρώσατε τη φόρμα $Message
@@ -168,7 +170,9 @@ $OrangeButton</value>
 
 Διαχειριστής: "$ToUserName":"$ToUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
     <value>Ειδοποίηση DocSpace. Η φόρμα έχει συμπληρωθεί</value>

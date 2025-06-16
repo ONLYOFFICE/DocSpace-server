@@ -1155,7 +1155,9 @@ $OrangeButton
 
 Натисніть кнопку нижче, щоб перейти на сторінку входу до порталу й настроїти застосунок для аутентифікації:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
     <value>h1. Приєднайтеся до &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace

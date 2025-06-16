@@ -86,9 +86,12 @@ public class CsvFileHelper(ILogger<CsvFileHelper> logger)
 
             await csv.NextRecordAsync();
 
-            await foreach (var records in partialRecords.WithCancellation(cancellationToken))
+            if (partialRecords != null)
             {
-                await csv.WriteRecordsAsync(records, cancellationToken);
+                await foreach (var records in partialRecords.WithCancellation(cancellationToken))
+                {
+                    await csv.WriteRecordsAsync(records, cancellationToken);
+                }
             }
 
             writer.Flush();

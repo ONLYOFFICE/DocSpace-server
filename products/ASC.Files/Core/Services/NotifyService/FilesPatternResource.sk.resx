@@ -159,7 +159,9 @@ Nový formulár "$DocumentTitle":"$DocumentURL" bol vyplnený v miestnosti "$Roo
 
 Formulár vyplnil: "$FromUserName":"$FromUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_FormSubmitted" xml:space="preserve">
     <value>h1. Vyplnili ste formulár $Message
@@ -168,7 +170,9 @@ Vyplnili ste formulár "$DocumentTitle":"$DocumentURL" v miestnosti "$RoomTitle"
 
 Manažér: "$ToUserName":"$ToUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
     <value>Oznámenie DocSpace. Formulár je vyplnený</value>

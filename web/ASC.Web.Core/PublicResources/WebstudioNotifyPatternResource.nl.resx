@@ -1091,7 +1091,9 @@ De configuratie van de authenticator app die u gebruikt om de ${LetterLogoText} 
 
 Klik op de knop hieronder om naar de aanmeldingspagina van het portaal te gaan en de authenticator app te configureren:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
     <value>h1. Aanmelden bij &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace

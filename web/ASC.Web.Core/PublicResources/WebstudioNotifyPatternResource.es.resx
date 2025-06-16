@@ -200,7 +200,9 @@ La configuración de la aplicación de autenticación que se utiliza para entrar
 
 Por favor, haga clic en el botón de abajo para ir a la página de inicio de sesión del portal y configurar la aplicación de autenticación:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.Cambio de Propietario de Portal "${__VirtualRootPath}":"${__VirtualRootPath}"

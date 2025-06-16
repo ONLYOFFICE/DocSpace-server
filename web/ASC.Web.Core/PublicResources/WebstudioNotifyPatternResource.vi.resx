@@ -1426,7 +1426,9 @@ Cấu hình của ứng dụng xác thực mà bạn sử dụng để vào ${Le
 
 Vui lòng nhấp vào nút bên dưới để truy cập trang đăng nhập cổng thông tin và định cấu hình ứng dụng xác thực:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>Có phải bạn muốn thay đổi email cho tài khoản ${LetterLogoText} của mình?

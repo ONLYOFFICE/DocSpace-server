@@ -602,7 +602,9 @@ $OrangeButton
 
 يرجى النقر فوق الزر أدناه للانتقال إلى صفحة تسجيل الدخول إلى البوابة وتكوين تطبيق المصادقة:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.تغيير مالك البوابة الإلكترونية "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"

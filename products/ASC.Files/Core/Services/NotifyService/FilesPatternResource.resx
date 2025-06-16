@@ -163,7 +163,9 @@ A new form "$DocumentTitle":"$DocumentURL" is filled out in the room "$RoomTitle
 
 Form submitter: "$FromUserName":"$FromUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_FormSubmitted" xml:space="preserve">
     <value>h1. You filled out the form $Message
@@ -172,7 +174,9 @@ You filled out the form "$DocumentTitle":"$DocumentURL" in the room "$RoomTitle"
 
 Manager: "$ToUserName":"$ToUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
     <value>DocSpace notification. The form is filled out</value>

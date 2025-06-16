@@ -114,7 +114,7 @@ public class CustomerOperationsRequestDto
 /// <summary>
 /// Parameters of the request for generating the report on client operations
 /// </summary>
-public class CustomerOperationsReportDto
+public class CustomerOperationsReportRequestDto
 {
     /// <summary>
     /// Start date

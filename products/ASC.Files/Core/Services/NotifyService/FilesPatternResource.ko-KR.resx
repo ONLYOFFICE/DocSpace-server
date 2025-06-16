@@ -159,7 +159,9 @@ $__AuthorName님이 방을 삭제했습니다: $RoomTitle</value>
 
 양식 제출자: "$FromUserName":"$FromUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_FormSubmitted" xml:space="preserve">
     <value>h1. $Message 양식을 작성하셨습니다
@@ -168,7 +170,9 @@ $OrangeButton</value>
 
 관리자: "$ToUserName":"$ToUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
     <value>DocSpace 알림. 양식이 작성되었습니다</value>

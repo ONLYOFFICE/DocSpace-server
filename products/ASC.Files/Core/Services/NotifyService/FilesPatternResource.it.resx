@@ -159,7 +159,9 @@ Un nuovo modulo "$DocumentTitle":"$DocumentURL" è stato compilato nella stanza 
 
 Mittente del modulo: "$FromUserName":"$FromUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_FormSubmitted" xml:space="preserve">
     <value>h1. Hai compilato il modulo $Message
@@ -168,7 +170,9 @@ Hai compilato il modulo "$DocumentTitle":"$DocumentURL" nella stanza "$RoomTitle
 
 Responsabile: "$ToUserName":"$ToUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
     <value>Notifica di DocSpace. Il modulo è compilato</value>

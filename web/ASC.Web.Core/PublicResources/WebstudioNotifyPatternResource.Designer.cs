@@ -635,7 +635,9 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///Please click the button below to go to the portal login page and configure the authenticator application:
         ///
-        ///$OrangeButton.
+        ///$OrangeButton
+        ///
+        ///&amp;nbsp;.
         /// </summary>
         public static string pattern_change_tfa {
             get {

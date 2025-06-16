@@ -159,7 +159,9 @@ Một biểu mẫu mới "$DocumentTitle":"$DocumentURL" đã được điền t
 
 Người gửi biểu mẫu: "$FromUserName":"$FromUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_FormSubmitted" xml:space="preserve">
     <value>h1. Bạn đã điền vào biểu mẫu $Message
@@ -168,7 +170,9 @@ Bạn đã điền vào biểu mẫu "$DocumentTitle":"$DocumentURL" trong phòn
 
 Người quản lý: "$ToUserName":"$ToUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
     <value>Thông báo DocSpace. Biểu mẫu đã được điền</value>

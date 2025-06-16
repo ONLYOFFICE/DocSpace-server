@@ -226,8 +226,14 @@ public class WebItemSecurity(
         }
 
         if (administrator)
-        {
-            var tenantId = tenantManager.GetCurrentTenantId();
+        {            
+            var tenant = tenantManager.GetCurrentTenant();
+            var tenantId = tenant.Id;
+            
+            if (productId == Constants.GroupAdmin.ID && tenant.OwnerId != authContext.CurrentAccount.ID)
+            {
+                throw new SecurityException(Resource.ErrorAccessDenied);
+            }
 
             await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenantId)))
             {

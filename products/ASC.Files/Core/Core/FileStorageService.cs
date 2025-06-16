@@ -1966,18 +1966,7 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ViewTrashItem);
         }
 
-        var tags = tagDao.GetTagsAsync(file.Id, FileEntryType.File, TagType.Locked);
-        var tagLocked = await tags.FirstOrDefaultAsync();
-
-        if (tagLocked != null)
-        {
-            if (tagLocked.Owner != authContext.CurrentAccount.ID
-                && file.Access != FileShare.RoomManager
-                && !await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
-            {
-                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_LockedFile);
-            }
-        }
+        var tagLocked = await tagDao.GetTagsAsync(file.Id, FileEntryType.File, TagType.Locked).FirstOrDefaultAsync();
 
         if (lockfile)
         {

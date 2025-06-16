@@ -70,7 +70,7 @@ public enum FileShare
     ContentCreator
 }
 
-public class FileShareConverter : System.Text.Json.Serialization.JsonConverter<FileShare>
+public class FileShareConverter : JsonConverter<FileShare>
 {
     public override FileShare Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {

@@ -1177,7 +1177,9 @@ Autentificētāja lietotnes konfigurācija, ko izmantojat, lai ieietu ${LetterLo
 
 Noklikšķiniet uz tālāk redzamās pogas, lai pārietu uz portāla pieteikšanās lapu un konfigurētu autentificētāja lietojumprogrammu:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
     <value>h1. Pievienojieties &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace

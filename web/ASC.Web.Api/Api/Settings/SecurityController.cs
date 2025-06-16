@@ -339,6 +339,7 @@ public class SecurityController(
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "Object with the user security information: product ID, user ID, administrator or not", typeof(ProductAdministratorDto))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(403, "Only portal owner can set user as administrator")]
     [HttpPut("administrator")]
     public async Task<ProductAdministratorDto> SetProductAdministrator(SecurityRequestsDto inDto)
     {

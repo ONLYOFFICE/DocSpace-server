@@ -159,7 +159,9 @@ Uusi lomake "$DocumentTitle":"$DocumentURL" on täytetty huoneessa "$RoomTitle":
 
 Lomakkeen lähettäjä: "$FromUserName":"$FromUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_FormSubmitted" xml:space="preserve">
     <value>h1. Olet täyttänyt lomakkeen $Message
@@ -168,7 +170,9 @@ Olet täyttänyt lomakkeen "$DocumentTitle":"$DocumentURL" huoneessa "$RoomTitle
 
 Johto: "$ToUserName":"$ToUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
     <value>DocSpace-ilmoitus. Lomake on täytetty</value>

@@ -59,14 +59,14 @@ public class AutoDeactivateExpiredApiKeysService(
 static file class Queries
 {
     public static readonly Func<ApiKeysDbContext, IAsyncEnumerable<ApiKey>> GetExpiredApiKeys =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+        EF.CompileAsyncQuery(
             (ApiKeysDbContext ctx) =>
                 ctx.DbApiKey.Where(r => r.ExpiresAt != null && r.ExpiresAt.Value.Date == DateTime.UtcNow.Date)
                     .AsQueryable()
         );
     
     public static readonly Func<ApiKeysDbContext, Task<int>> DeactiveExpiredApiKeys =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+        EF.CompileAsyncQuery(
             (ApiKeysDbContext ctx) =>
                 ctx.DbApiKey.Where(r => r.ExpiresAt < DateTime.UtcNow && r.IsActive)
                     .ExecuteUpdate(x => x.SetProperty(r => r.IsActive, false))

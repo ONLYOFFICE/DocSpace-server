@@ -1456,7 +1456,9 @@ Konfigurácia aplikácie autentifikátora, ktorú používate na vstup do portá
 
 Kliknite na tlačidlo nižšie, aby ste prešli na stránku prihlásenia do portálu a nakonfigurovali aplikáciu autentifikátora:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="subject_saas_video_guides_v1" xml:space="preserve">
     <value>Zvládnite ${LetterLogoText} DocSpace s videonávodmi</value>

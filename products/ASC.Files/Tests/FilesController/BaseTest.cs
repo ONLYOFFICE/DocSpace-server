@@ -42,7 +42,7 @@ public class BaseTest(
     protected readonly FilesFoldersApi _filesFoldersApi = filesFactory.FilesFoldersApi;
     protected readonly FilesFilesApi _filesFilesApi = filesFactory.FilesFilesApi;
     protected readonly FilesOperationsApi _filesOperationsApi = filesFactory.FilesOperationsApi;
-    protected readonly FilesRoomsApi _filesRoomsApi = filesFactory.FilesRoomsApi;
+    protected readonly RoomsApi _roomsApi = filesFactory.RoomsApi;
     protected readonly FilesSettingsApi _filesSettingsApi = filesFactory.FilesSettingsApi;
     protected readonly FilesQuotaApi _filesQuotaApi = filesFactory.FilesQuotaApi;
     protected readonly SettingsQuotaApi _settingsQuotaApi = apiFactory.SettingsQuotaApi;
@@ -110,7 +110,7 @@ public class BaseTest(
     {
         await _filesClient.Authenticate(user);
         
-        return (await _filesRoomsApi.CreateRoomAsync(new CreateRoomRequestDto(roomTitle, roomType: RoomType.VirtualDataRoom), TestContext.Current.CancellationToken)).Response;
+        return (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto(roomTitle, indexing: true, roomType: RoomType.VirtualDataRoom), TestContext.Current.CancellationToken)).Response;
     }
     protected async Task<List<FileOperationDto>?> WaitLongOperation()
     {
@@ -118,7 +118,7 @@ public class BaseTest(
 
         while (true)
         {
-            statuses = (await _filesOperationsApi.GetOperationStatusesAsync(TestContext.Current.CancellationToken)).Response;
+            statuses = (await _filesOperationsApi.GetOperationStatusesAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
 
             if (statuses.TrueForAll(r => r.Finished) || TestContext.Current.CancellationToken.IsCancellationRequested)
             {

@@ -77,7 +77,7 @@ public class PortalMobileAppRequestDto
 /// <summary>
 /// The request parameters for the portal security and configuration settings.
 /// </summary>
-public class PortalSettingsrequestDto
+public class PortalSettingsRequestDto
 {
     /// <summary>
     /// Specifies whether to include the password hashing configuration in the response.

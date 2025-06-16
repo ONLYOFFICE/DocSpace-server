@@ -1007,7 +1007,9 @@ $OrangeButton
 
 请点击下方的按钮前往门户登录页面并配置身份验证器应用程序：
  
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
     <value>h1. 加入 &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;协作空间

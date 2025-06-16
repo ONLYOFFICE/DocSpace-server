@@ -43,7 +43,7 @@ public static class NotifyConstants
         sb.Append(@"<tr border=""0"" cellspacing=""0"" cellpadding=""0"">");
         sb.Append(@"<td style=""width: 180px;""></td>");
         sb.Append("<!--[if mso]>");
-        sb.Append(@"<td class=""body-text"" border=""0"" style=""margin: 0; padding: 0; text-align: center; width: 230px;"">");
+        sb.Append(@"<td class=""body-text"" border=""0"" style=""margin: 0; padding: 0; text-align: center; width: 230px; white-space: nowrap;"">");
         sb.Append($@"<v:roundrect xmlns:v=""urn:schemas-microsoft-com:vml"" xmlns:w=""urn:schemas-microsoft-com:office:word"" href=""{btnUrl}"" style=""v-text-anchor: middle; box-sizing: border-box; font-weight: 600; font-size: 12px; height: 56px; text-decoration: none; width: 230px;"" arcsize=""5%"" strokecolor=""#FF6F3D"" fillcolor=""#FF6F3D"" alt=""{btnText}"" target=""_blank"">");
         sb.Append("<w:anchorlock/>");
         sb.Append($@"<center class=""fol"" style=""color:#ffffff; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-weight: 600; font-size: 12px; letter-spacing: 0.04em; text-align: center; text-decoration: none; text-transform: uppercase; white-space: nowrap;"">{btnText}</center>");
@@ -51,7 +51,7 @@ public static class NotifyConstants
         sb.Append("</td>");
         sb.Append("<![endif]-->");
         sb.Append("<!--[if !mso]> <!-->");
-        sb.Append("<td>");
+        sb.Append("<td style=\"text-align: center; white-space: nowrap;\">");
         sb.Append($@"<a class=""fol"" href=""{btnUrl}"" style=""background-color:#FF6F3D; border:1px solid #FF6F3D; border-radius: 3px; color:#ffffff; display: inline-block; font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 12px; font-weight: 600; padding-top: 15px; padding-right: 83px; padding-bottom: 15px; padding-left: 83px; text-align: center; text-decoration: none; text-transform: uppercase; -webkit-text-size-adjust: none; mso-hide: all; white-space: nowrap; letter-spacing: 0.04em;"" alt=""{btnText}"" target=""_blank"">{btnText}</a>");
         sb.Append("</td>");
         sb.Append("<!-- <![endif]-->");

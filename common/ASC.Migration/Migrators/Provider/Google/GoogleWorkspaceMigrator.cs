@@ -156,7 +156,7 @@ public class GoogleWorkspaceMigrator : Migrator
                         {
                             continue;
                         }
-                        if (!ascUser.Equals(ASC.Core.Users.Constants.LostUser))
+                        if (!ascUser.Equals(Constants.LostUser))
                         {
                             if (!MigrationInfo.ExistUsers.TryAdd(user.Info.Email, user))
                             {

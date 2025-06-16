@@ -909,7 +909,9 @@ Konfiguracija aplikacije za avtentikacijo, ki jo uporabljate za vstop na portal 
 
 Kliknite spodnji gumb, da odprete stran za prijavo v portal in konfigurirate aplikacijo za avtentikacijo:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.Sprememba "${__VirtualRootPath}":"${__VirtualRootPath}" lastnika portala

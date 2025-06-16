@@ -1017,7 +1017,9 @@ ${LetterLogoText} portalına girmek için kullandığınız kimlik doğrulama uy
 
 Portal oturum açma sayfasına gitmek ve kimlik doğrulayıcı uygulamasını yapılandırmak için lütfen aşağıdaki butona tıklayın:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
     <value>h1. &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace’e katılın

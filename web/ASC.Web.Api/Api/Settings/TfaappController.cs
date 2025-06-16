@@ -405,7 +405,7 @@ public class TfaappController(
             throw new Exception(Resource.TfaAppNotAvailable);
         }
 
-        if (await userManager.IsOutsiderAsync(user))
+        if (await userManager.IsOutsiderAsync(user) || user.Status == EmployeeStatus.Terminated)
         {
             throw new NotSupportedException("Not available.");
         }

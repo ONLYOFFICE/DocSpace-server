@@ -200,7 +200,9 @@ Die Konfiguration der Authentifizierungs-App, mit der Sie sich bei ${LetterLogoT
 
 Klicken Sie auf die Schaltfläche unten, um zur Portal-Anmeldeseite zu wechseln und die Authentifizierungs-App zu konfigurieren:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.Änderung des "${__VirtualRootPath}":"${__VirtualRootPath}" Portalbesitzers

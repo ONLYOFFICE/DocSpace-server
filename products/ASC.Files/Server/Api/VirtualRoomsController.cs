@@ -549,7 +549,19 @@ public abstract class VirtualRoomsController<T>(
             _ => throw new InvalidOperationException()
         };
 
-        return linkAce is not null ? await fileShareDtoHelper.Get(linkAce) : null;
+        if (linkAce == null)
+        {
+            return null;
+        }
+        
+        var result =  await fileShareDtoHelper.Get(linkAce);
+
+        if (inDto.RoomLink.LinkId != Guid.Empty && linkAce.Id != inDto.RoomLink.LinkId && result.SharedTo is FileShareLink link)
+        {
+            link.RequestToken = null;
+        }
+        
+        return result;
     }
 
     /// <summary>

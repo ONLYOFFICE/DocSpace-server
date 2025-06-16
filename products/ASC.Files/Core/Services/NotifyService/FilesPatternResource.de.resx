@@ -159,7 +159,9 @@ Ein neues Formular "$DocumentTitle":"$DocumentURL" ist im Raum "$RoomTitle":"$Ro
  
 Einreicher des Formulars: "$FromUserName":"$FromUserLink"
  
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_FormSubmitted" xml:space="preserve">
     <value>h1. Sie haben das Formular $Message ausgefüllt
@@ -168,7 +170,9 @@ Sie haben das Formular "$DocumentTitle":"$DocumentURL" im Raum "$RoomTitle":"$Ro
  
 Manager: "$ToUserName":"$ToUserLink"
  
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
     <value>DocSpace-Benachrichtigung. Das Formular ist ausgefüllt</value>

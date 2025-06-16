@@ -111,8 +111,22 @@ public class TopUpWalletService(
                 return;
             }
 
-            var amount = settings.UpToBalance - subAccount.Amount;
+            var truncated = Math.Truncate(subAccount.Amount * 100) / 100; // Truncate to 2 decimal places
+            var amount = settings.UpToBalance - truncated;
             _ = await tariffService.TopUpDepositAsync(data.TenantId, amount, settings.Currency, true);
+
+            var payerId = (await tariffService.GetCustomerInfoAsync(data.TenantId)).Email;
+            if (!string.IsNullOrEmpty(payerId))
+            {
+                var userManager = scope.ServiceProvider.GetRequiredService<UserManager>();
+                var payer = await userManager.GetUserByEmailAsync(payerId);
+
+                if (payer.Id != ASC.Core.Users.Constants.LostUser.Id)
+                {
+                    var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
+                    await securityContext.AuthenticateMeWithoutCookieAsync(data.TenantId, payer.Id);
+                }
+            }
 
             var messageService = scope.ServiceProvider.GetRequiredService<MessageService>();
             var description = $"{amount} {settings.Currency}";

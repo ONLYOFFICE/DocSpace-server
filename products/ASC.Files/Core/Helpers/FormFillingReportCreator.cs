@@ -120,7 +120,7 @@ public class FormFillingReportCreator(
         }
     }
 
-    public class BoolToStringConverter : System.Text.Json.Serialization.JsonConverter<string>
+    public class BoolToStringConverter : JsonConverter<string>
     {
         public override string Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
@@ -129,7 +129,7 @@ public class FormFillingReportCreator(
                 JsonTokenType.True => "true",
                 JsonTokenType.False => "false",
                 JsonTokenType.String => reader.GetString(),
-                _ => throw new System.Text.Json.JsonException("Unexpected token type")
+                _ => throw new JsonException("Unexpected token type")
             };
         }
 

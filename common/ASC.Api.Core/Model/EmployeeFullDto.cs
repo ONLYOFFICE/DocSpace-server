@@ -404,7 +404,8 @@ public class EmployeeFullDtoHelper(
             result.ListAdminModules = listAdminModules;
         }
         
-
+        result.RegistrationDate = apiDateTimeHelper.Get(userInfo.CreateDate);
+        
         if (!isDocSpaceAdmin)
         {
             return result;
@@ -414,8 +415,6 @@ public class EmployeeFullDtoHelper(
         {
             result.CreatedBy = await GetAsync(await _userManager.GetUsersAsync(userInfo.CreatedBy.Value));
         }
-            
-        result.RegistrationDate = apiDateTimeHelper.Get(userInfo.CreateDate);
 
         if (await tfaAppAuthSettingsHelper.GetEnable())
         {

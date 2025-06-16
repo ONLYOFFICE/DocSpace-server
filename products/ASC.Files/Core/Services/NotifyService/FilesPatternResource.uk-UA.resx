@@ -159,7 +159,9 @@ $__AuthorName видалив(ла) кімнату $RoomTitle</value>
 
 Відправник форми: "$FromUserName":"$FromUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_FormSubmitted" xml:space="preserve">
     <value>h1. Ви заповнили форму $Message
@@ -168,7 +170,9 @@ $OrangeButton</value>
 
 Менеджер: "$ToUserName":"$ToUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
     <value>Сповіщення DocSpace. Форму заповнено</value>

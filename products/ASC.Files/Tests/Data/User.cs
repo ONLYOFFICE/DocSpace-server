@@ -26,4 +26,7 @@
 
 namespace ASC.Files.Tests.Data;
 
-public record User(string Email, string Password);
+public record User(string Email, string Password)
+{
+    public Guid Id { get; set; }
+}

@@ -558,7 +558,9 @@ Konfiguracija aplikacije za autentifikaciju koju koristite za ulazak na portal $
 
 Kliknite na dugme ispod da biste otišli na stranicu za prijavu na portal i konfigurisali aplikaciju za autentifikaciju:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.Promena "${__VirtualRootPath}":"${__VirtualRootPath}" vlasnika portala

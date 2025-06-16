@@ -159,7 +159,9 @@ $__AuthorName さんが次のルームを削除しました：$RoomTitle</value>
  
 フォーム記入者： "$FromUserName":"$FromUserLink"
  
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_FormSubmitted" xml:space="preserve">
     <value>h1. 「$Message」フォームが記入されました
@@ -168,7 +170,9 @@ $OrangeButton</value>
  
 マネージャー："$ToUserName":"$ToUserLink"
  
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
     <value>DocSpaceからの通知。フォームが記入されました</value>

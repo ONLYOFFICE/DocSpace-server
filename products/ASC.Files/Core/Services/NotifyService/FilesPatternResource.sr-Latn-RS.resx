@@ -218,7 +218,9 @@ Novi formular "$DocumentTitle":"$DocumentURL" je popunjen u prostoriji "$RoomTit
  
 Podnosilac formulara: "$FromUserName":"$FromUserLink"
  
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_FormSubmitted" xml:space="preserve">
     <value>h1. Popunili ste formular $Message
@@ -227,7 +229,9 @@ Popunili ste formular "$DocumentTitle":"$DocumentURL" u prostoriji "$RoomTitle":
  
 Menadžer: "$ToUserName":"$ToUserLink"
  
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
     <value>DocSpace notifikacija. Formular je popunjen</value>

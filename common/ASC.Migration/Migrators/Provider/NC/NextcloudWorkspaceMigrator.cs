@@ -191,7 +191,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                             {
                                 continue;
                             }
-                            if (!ascUser.Equals(ASC.Core.Users.Constants.LostUser))
+                            if (!ascUser.Equals(Constants.LostUser))
                             {
                                 MigrationInfo.ExistUsers.Add(user.Key, user.Value);
                             }

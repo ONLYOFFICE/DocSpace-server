@@ -218,7 +218,9 @@ $Message</value>
 
 Подносилац формулара: "$FromUserName":"$FromUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_FormSubmitted" xml:space="preserve">
     <value>h1. Попунили сте формулар $Message
@@ -227,7 +229,9 @@ $OrangeButton</value>
 
 Менаџер: "$ToUserName":"$ToUserLink"
  
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
     <value>DocSpace нотификација. Формулар је попуњен</value>
