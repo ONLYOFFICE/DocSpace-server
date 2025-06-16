@@ -200,7 +200,9 @@ Les paramètres de l'application d'authentification que vous utilisez pour accé
 
 Cliquez sur ce lien pour passer à la page de connexion du portail et configurer l'application d'authentification :
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.Changement du propriétaire du portail "${__VirtualRootPath}":"${__VirtualRootPath}"

@@ -156,7 +156,9 @@ Izpolnili ste obrazec "$DocumentTitle":"$DocumentURL" v sobi "$RoomTitle":"$Room
 
 Upravnik: "$ToUserName":"$ToUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="button_CheckReadyForms" xml:space="preserve">
     <value>Preveri pripravljene obrazce</value>
@@ -171,7 +173,9 @@ Nov obrazec "$DocumentTitle":"$DocumentURL" je izpolnjen v sobi "$RoomTitle":"$R
 
 Pošiljatelj obrazca: "$FromUserName":"$FromUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="subject_FormSubmitted" xml:space="preserve">
     <value>DocSpace obvestilo. Obrazec je izpolnjen</value>

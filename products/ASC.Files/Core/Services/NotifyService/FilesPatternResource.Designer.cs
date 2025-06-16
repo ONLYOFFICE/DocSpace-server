@@ -156,7 +156,9 @@ namespace ASC.Files.Core.Services.NotifyService {
         ///
         ///Form submitter: &quot;$FromUserName&quot;:&quot;$FromUserLink&quot;
         ///
-        ///$OrangeButton.
+        ///$OrangeButton
+        ///
+        ///&amp;nbsp;.
         /// </summary>
         public static string pattern_FormReceived {
             get {
@@ -182,7 +184,9 @@ namespace ASC.Files.Core.Services.NotifyService {
         ///
         ///Manager: &quot;$ToUserName&quot;:&quot;$ToUserLink&quot;
         ///
-        ///$OrangeButton.
+        ///$OrangeButton
+        ///
+        ///&amp;nbsp;.
         /// </summary>
         public static string pattern_FormSubmitted {
             get {

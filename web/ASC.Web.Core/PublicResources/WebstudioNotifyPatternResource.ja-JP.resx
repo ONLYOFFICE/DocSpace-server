@@ -747,7 +747,9 @@ ${LetterLogoText}ポータルにログインするために使用している認
 
 以下のボタンをクリックして、ポータルログインページに移動し、認証アプリを設定してください：
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}"ポータル所有者変更

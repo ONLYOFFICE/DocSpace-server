@@ -949,7 +949,9 @@ Configurația aplicației de autentificare pe care o utilizați pentru a accesa 
 
 Faceți clic pe butonul de mai jos pentru a accesa pagina de conectare la portal și pentru a configura aplicația de autentificare:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.Schimbarea proprietarului de portal "${__VirtualRootPath}":"${__VirtualRootPath}"

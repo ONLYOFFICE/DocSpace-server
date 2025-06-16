@@ -1040,7 +1040,7 @@ public class TariffService(
                 }
                 catch (Exception error)
                 {
-                    customerInfo = new CustomerInfo(null, PaymentMethodStatus.None, null);
+                    customerInfo = new CustomerInfo();
                     LogError(error, tenantId.ToString());
                 }
 
@@ -1122,7 +1122,7 @@ public class TariffService(
                 catch (Exception error)
                 {
                     LogError(error, tenantId.ToString());
-                    await hybridCache.SetAsync(cacheKey, new Balance(0, null), TimeSpan.FromMinutes(10));
+                    await hybridCache.SetAsync(cacheKey, new Balance(), TimeSpan.FromMinutes(10));
                 }
             }
         }

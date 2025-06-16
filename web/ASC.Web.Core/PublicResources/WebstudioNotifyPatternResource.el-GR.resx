@@ -939,7 +939,9 @@ $OrangeButton
 
 Κάντε κλικ στο παρακάτω κουμπί για να μεταβείτε στη σελίδα εισόδου στην πύλη και να διαμορφώσετε την εφαρμογή αυθεντικοποίησης:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.Αλλαγή του ιδιοκτήτης της πύλης "${__VirtualRootPath}":"${__VirtualRootPath}"
