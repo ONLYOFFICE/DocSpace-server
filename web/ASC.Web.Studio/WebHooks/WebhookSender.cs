@@ -31,7 +31,12 @@ using ASC.MessagingSystem.EF.Model;
 namespace ASC.Webhooks;
 
 [Singleton]
-public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory scopeFactory, IHttpClientFactory clientFactory, Settings settings)
+public class WebhookSender(
+    ILogger<WebhookSender> logger,
+    IServiceScopeFactory scopeFactory,
+    IHttpClientFactory clientFactory,
+    ResiliencePipelineProvider<string> resiliencePipelineProvider,
+    Settings settings)
 {
     private readonly JsonSerializerOptions _jsonSerializerOptions = new()
     {
@@ -42,8 +47,12 @@ public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory s
 
     private const string SignatureHeader = "x-docspace-signature-256";
 
-    public const string WEBHOOK = "webhook";
-    public const string WEBHOOK_SKIP_SSL = "webhookSkipSSL";
+    public const string WebhookClientName = "webhookClientName ";
+    public const string WebhookClientNameSkipSSL = "webhookClientNameSkipSSL";
+    public const string WebhookPipelineName = "webhookResiliencePipeline";
+
+    public static ResiliencePropertyKey<int> RetryCountPropKey = new("retryCount");
+    public static ResiliencePropertyKey<string> ErrorMessagePropKey = new("errorMessage");
 
     public async Task Send(WebhookRequestIntegrationEvent webhookRequest, CancellationToken cancellationToken)
     {
@@ -86,48 +95,28 @@ public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory s
             string requestPayload = JsonSerializer.Serialize(webhookPayload, _jsonSerializerOptions);
             string requestHeaders = null;
 
-            var clientName = entry.Config.SSL ? WEBHOOK : WEBHOOK_SKIP_SSL;
+            var clientName = entry.Config.SSL ? WebhookClientName : WebhookClientNameSkipSSL;
             var httpClient = clientFactory.CreateClient(clientName);
-
-            var builder = new ResiliencePipelineBuilder<HttpResponseMessage>();
-
-            var retryCountPropKey = new ResiliencePropertyKey<int>("retryCount");
-            var errorMessagePropKey = new ResiliencePropertyKey<string>("errorMessage");
-
-            var pipeline = builder.AddRetry(new RetryStrategyOptions<HttpResponseMessage>
-            {
-                MaxRetryAttempts = settings.RepeatCount ?? 5,
-                Delay = TimeSpan.FromSeconds(1),
-                BackoffType = DelayBackoffType.Exponential,
-                ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
-                        .Handle<HttpRequestException>()
-                        .Handle<TaskCanceledException>()
-                        .HandleResult(response => !response.IsSuccessStatusCode),
-                OnRetry = args =>
-                {
-                    args.Context.Properties.Set(retryCountPropKey, args.AttemptNumber + 1);
-                    args.Context.Properties.Set(errorMessagePropKey, args.Outcome.Exception?.Message);
-                    return ValueTask.CompletedTask;
-                }
-            }).Build();
 
             var context = ResilienceContextPool.Shared.Get(cancellationToken);
 
             try
             {
-                context.Properties.Set(retryCountPropKey, 0);
-                context.Properties.Set(errorMessagePropKey, "");
+                context.Properties.Set(RetryCountPropKey, 0);
+                context.Properties.Set(ErrorMessagePropKey, "");
+
+                var pipeline = resiliencePipelineProvider.GetPipeline<HttpResponseMessage>(WebhookPipelineName);
 
                 var response = await pipeline.ExecuteAsync(async (context) =>
                 {
                     var request = new HttpRequestMessage(HttpMethod.Post, entry.Config.Uri);
 
-                    var retryCount = context.Properties.GetValue(retryCountPropKey, 0);
+                    var retryCount = context.Properties.GetValue(RetryCountPropKey, 0);
 
                     if (retryCount > 0)
                     {
                         webhookPayload.Webhook.LastFailureOn = webhookPayload.Webhook.RetryOn ?? requestDate;
-                        webhookPayload.Webhook.LastFailureContent = context.Properties.GetValue(errorMessagePropKey, "");
+                        webhookPayload.Webhook.LastFailureContent = context.Properties.GetValue(ErrorMessagePropKey, "");
                         webhookPayload.Webhook.LastSuccessOn = entry.Config.LastSuccessOn;
 
                         webhookPayload.Webhook.RetryCount = retryCount;
@@ -229,4 +218,47 @@ public class WebhookSender(ILogger<WebhookSender> logger, IServiceScopeFactory s
 
         return Convert.ToHexString(hash);
     }
-  }
+}
+
+
+public static class WebhookSenderExtension
+{
+    public static void AddWebhookSenderHttpClient(this IServiceCollection services, IConfiguration configuration)
+    {
+        var lifeTime = TimeSpan.FromMinutes(5);
+        var repeatCount = Convert.ToInt32(configuration["webhooks:repeatcount"] ?? "5");
+
+        services.AddHttpClient(WebhookSender.WebhookClientName)
+            .SetHandlerLifetime(lifeTime);
+
+        services.AddHttpClient(WebhookSender.WebhookClientNameSkipSSL)
+            .SetHandlerLifetime(lifeTime)
+            .ConfigurePrimaryHttpMessageHandler(_ =>
+            {
+                return new HttpClientHandler
+                {
+                    ServerCertificateCustomValidationCallback = (_, _, _, _) => true
+                };
+            });
+
+        services.AddResiliencePipeline<string, HttpResponseMessage>(WebhookSender.WebhookPipelineName, pipelineBuilder =>
+        {
+            pipelineBuilder.AddRetry(new RetryStrategyOptions<HttpResponseMessage>
+            {
+                MaxRetryAttempts = repeatCount,
+                Delay = TimeSpan.FromSeconds(1),
+                BackoffType = DelayBackoffType.Exponential,
+                ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
+                        .Handle<HttpRequestException>()
+                        .Handle<TaskCanceledException>()
+                        .HandleResult(response => !response.IsSuccessStatusCode),
+                OnRetry = args =>
+                {
+                    args.Context.Properties.Set(WebhookSender.RetryCountPropKey, args.AttemptNumber + 1);
+                    args.Context.Properties.Set(WebhookSender.ErrorMessagePropKey, args.Outcome.Exception?.Message);
+                    return ValueTask.CompletedTask;
+                }
+            });
+        });
+    }
+}
