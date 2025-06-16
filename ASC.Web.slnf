@@ -3,6 +3,8 @@
     "path": "ASC.Web.sln",
     "projects": [
       "common\\ASC.ActiveDirectory\\ASC.ActiveDirectory.csproj",
+      "common\\ASC.AI.Core\\ASC.AI.Core.csproj",
+      "common\\ASC.AI\\ASC.AI.csproj",
       "common\\ASC.Api.Core\\ASC.Api.Core.csproj",
       "common\\ASC.AppHost\\ASC.AppHost.csproj",
       "common\\ASC.Common\\ASC.Common.csproj",
