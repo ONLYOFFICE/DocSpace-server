@@ -24,52 +24,94 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ModelContextProtocol.Client;
-
 namespace ASC.AI.Core.Chat;
 
 [Scope]
 public class ChatCompletionService(
+    AuthContext authContext,
     ChatHistory chatHistory,
     ExecutionContextProvider contextProvider, 
-    IHttpClientFactory httpClientFactory)
+    IHttpClientFactory httpClientFactory,
+    IDaoFactory daoFactory,
+    FileSecurity fileSecurity)
 {
-    public Task<ChatCompletionGenerator> StartNewChatSessionAsync(int roomId, string message)
+    private static readonly ChatMessage _systemMessage = new(ChatRole.System, "You are a helpful assistant."); // TODO: move to prompt file
+    
+    public async Task<ChatCompletionGenerator> StartNewChatSessionAsync(int roomId, string message)
     {
-        return StartChatSessionInternalAsync(Guid.NewGuid(), message);
+        await ChekRoomAsync(roomId);
+        
+        var clientTask = CreateClientAsync();
+
+        var userMessage = new ChatMessage(ChatRole.User, message);
+        var chat = await chatHistory.AddChatAsync(roomId, authContext.CurrentAccount.ID, userMessage);
+        
+        var messages = new List<ChatMessage>
+        {
+            _systemMessage,
+            userMessage
+        };
+        
+        return new ChatCompletionGenerator(chat.Id, chatHistory, await clientTask, messages);
     }
 
-    public Task<ChatCompletionGenerator> StartChatSessionAsync(Guid chatId, string message)
+    public async Task<ChatCompletionGenerator> StartChatSessionAsync(Guid chatId, string message)
     {
-        return StartChatSessionInternalAsync(chatId, message);
+        var chat = await chatHistory.GetChatAsync(chatId);
+        if (chat == null)
+        {
+            throw new ItemNotFoundException("Chat not found");
+        }
+        
+        if (chat.UserId != authContext.CurrentAccount.ID)
+        {
+            throw new SecurityException("Access denied");
+        }
+
+        await ChekRoomAsync(chat.RoomId);
+        var clientTask = CreateClientAsync();
+
+        var history = await chatHistory.GetMessagesAsync(chatId).ToListAsync();
+        var userMessage = new ChatMessage(ChatRole.User, message);
+        
+        await chatHistory.UpdateChatAsync(chatId, userMessage);
+
+        var messages = new List<ChatMessage> { _systemMessage };
+        messages.AddRange(history);
+        messages.Add(userMessage);
+
+        return new ChatCompletionGenerator(chatId, chatHistory, await clientTask, messages);
     }
-    
-    private async Task<ChatCompletionGenerator> StartChatSessionInternalAsync(Guid chatId, string message)
+
+    private async Task<IChatClient> CreateClientAsync()
     {
         var context = await contextProvider.GetExecutionContextAsync();
-
-        var client = new ChatClientBuilder(new OpenAIClient(
-                new ApiKeyCredential(context.Key),
-                new OpenAIClientOptions
-                { 
-                    Endpoint = context.Endpoint,
-                    Transport = new HttpClientPipelineTransport(httpClientFactory.CreateClient())
-                })
+        
+        return new ChatClientBuilder(new OpenAIClient(
+                    new ApiKeyCredential(context.Key),
+                    new OpenAIClientOptions
+                    { 
+                        Endpoint = context.Endpoint,
+                        Transport = new HttpClientPipelineTransport(httpClientFactory.CreateClient())
+                    })
                 .GetChatClient(context.Model)
                 .AsIChatClient())
             .UseFunctionInvocation()
             .Build();
-
-        var history = await chatHistory.GetMessagesAsync(chatId).ToListAsync();
-
-        var messages = new List<ChatMessage>
+    }
+    
+    private async Task ChekRoomAsync(int roomId)
+    {
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var room = await folderDao.GetFolderAsync(roomId);
+        if (room == null)
         {
-            new(ChatRole.System, "You are a helpful assistant.")
-        };
-        
-        messages.AddRange(history);
-        messages.Add(new ChatMessage(ChatRole.User, message));
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
 
-        return new ChatCompletionGenerator(chatId, chatHistory, client, messages);
+        if (!await fileSecurity.CanReadAsync(room))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFolder);
+        }
     }
 }

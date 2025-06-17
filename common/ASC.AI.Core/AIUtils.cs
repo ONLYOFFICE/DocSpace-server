@@ -30,6 +30,7 @@ public static class AiUtils
 {
     public static readonly JsonSerializerOptions SerializerOptions = new()
     {
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
+        AllowOutOfOrderMetadataProperties = true
     };
 }

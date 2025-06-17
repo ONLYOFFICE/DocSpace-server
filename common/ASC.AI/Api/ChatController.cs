@@ -24,16 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.AI.Core.Chat;
-using ASC.AI.Models.RequestDto;
-using ASC.Common;
-
-using Microsoft.AspNetCore.Authorization;
-
 namespace ASC.AI.Api;
 
 [Scope]
-[AllowAnonymous]
+[DefaultRoute]
+[ApiController]
+[ControllerName("ai")]
 public class ChatController(ChatCompletionService chatCompletionService) : ControllerBase
 {
     [HttpPost("rooms/{roomId}/chats")]

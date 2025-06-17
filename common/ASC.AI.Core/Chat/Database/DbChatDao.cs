@@ -24,17 +24,19 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.AI.Core.Chat.Database.Models;
+using Message = ASC.AI.Core.Chat.Models.Message;
 
 namespace ASC.AI.Core.Chat.Database;
 
 [Scope]
 public class DbChatDao(IDbContextFactory<ChatDbContext> dbContextFactory, IMapper mapper)
 {
-    public async Task AddChatAsync(Guid chatId, int roomId, Guid userId, Message message)
+    public async Task<Chat> AddChatAsync(int roomId, Guid userId, string title, Message message)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
+        
+        DbChat chat = null!;
 
         await strategy.ExecuteAsync(async () =>
         {
@@ -42,26 +44,58 @@ public class DbChatDao(IDbContextFactory<ChatDbContext> dbContextFactory, IMappe
             await using var transaction = await context.Database.BeginTransactionAsync();
             
             var now = DateTime.UtcNow;
+            var id = Guid.NewGuid();
 
-            var session = new DbChat
+            chat = new DbChat
             {
-                Id = chatId,
+                Id = id,
                 RoomId = roomId, 
                 UserId = userId,
-                Title = message.Content[..Math.Min(message.Content.Length, 60)],
+                Title = title,
                 CreatedOn = now,
                 ModifiedOn = now
             };
                 
-            await context.Chats.AddAsync(session);
+            await context.Chats.AddAsync(chat);
 
             var dbChatMessage = new DbChatMessage
             {
-                ChatId = chatId, 
+                ChatId = id,
+                Role = message.Role,
                 Content = message.Content
             };
 
             await context.Messages.AddAsync(dbChatMessage);
+            
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
+        });
+        
+        return mapper.Map<Chat>(chat);
+    }
+
+    public async Task UpdateChatAsync(Guid chatId, Message message)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        var strategy = dbContext.Database.CreateExecutionStrategy();
+
+        await strategy.ExecuteAsync(async () =>
+        { 
+            await using var context = await dbContextFactory.CreateDbContextAsync();
+            await using var transaction = await context.Database.BeginTransactionAsync();
+
+            await context.Chats.Where(c => c.Id == chatId)
+                .ExecuteUpdateAsync(x =>
+                    x.SetProperty(y => y.ModifiedOn, DateTime.UtcNow));
+            
+            var dbMessage = new DbChatMessage
+            {
+                ChatId = chatId, 
+                Role = message.Role, 
+                Content = message.Content
+            };
+            
+            await context.Messages.AddAsync(dbMessage);
             
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
@@ -84,6 +118,14 @@ public class DbChatDao(IDbContextFactory<ChatDbContext> dbContextFactory, IMappe
             
             await context.SaveChangesAsync();
         });
+    }
+
+    public async Task<Chat?> GetChatAsync(Guid chatId)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        var chat = await dbContext.Chats.FindAsync(chatId);
+        
+        return chat == null ? null : mapper.Map<Chat>(chat);
     }
 
     public async IAsyncEnumerable<Chat> GetChatsAsync(int roomId, Guid userId, int offset, int limit)

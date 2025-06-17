@@ -34,6 +34,13 @@ public class ChatCompletionGenerator(
     List<ChatMessage> messages, 
     List<AITool>? tools = null)
 {
+    private static readonly JsonSerializerOptions _serializerOptions = new()
+    {
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
+    };
+    
     public async IAsyncEnumerable<ChatCompletion> GenerateCompletionAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         ChatOptions? options = null;
@@ -50,72 +57,43 @@ public class ChatCompletionGenerator(
         
         var responses = new List<ChatResponseUpdate>();
 
-        try
+        await foreach (var response in client.GetStreamingResponseAsync(messages, options, cancellationToken: cancellationToken))
         {
-            await foreach (var response in client.GetStreamingResponseAsync(messages, options, cancellationToken: cancellationToken))
-            {
-                responses.Add(response);
+            responses.Add(response);
 
-                foreach (var content in response.Contents)
+            foreach (var content in response.Contents)
+            {
+                switch (content)
                 {
-                    switch (content)
-                    {
-                        case TextContent textContent:
-                            yield return new ChatCompletion
-                            {
-                                Type = EventType.NewToken, 
-                                Content = textContent.Text
-                            };
-                            break;
-                        case FunctionCallContent functionCall:
-                            yield return new ChatCompletion
-                            {
-                                Type = EventType.ToolCall,
-                                Content = JsonSerializer.Serialize(functionCall, AiUtils.SerializerOptions)
-                            };
-                            break;
-                        case FunctionResultContent functionResult:
-                            yield return new ChatCompletion
-                            {
-                                Type = EventType.ToolResult,
-                                Content = JsonSerializer.Serialize(functionResult, AiUtils.SerializerOptions)
-                            };
-                            break;
-                    }
+                    case TextContent textContent:
+                        yield return new ChatCompletion
+                        {
+                            Type = EventType.NewToken, 
+                            Content = JsonSerializer.Serialize(textContent, _serializerOptions)
+                        };
+                        break;
+                    case FunctionCallContent functionCall:
+                        yield return new ChatCompletion
+                        {
+                            Type = EventType.ToolCall,
+                            Content = JsonSerializer.Serialize(functionCall, _serializerOptions)
+                        };
+                        break;
+                    case FunctionResultContent functionResult:
+                        yield return new ChatCompletion
+                        {
+                            Type = EventType.ToolResult,
+                            Content = JsonSerializer.Serialize(functionResult, _serializerOptions)
+                        };
+                        break;
                 }
             }
         }
-        finally
+            
+        var chatResponse = responses.ToChatResponse();
+        if (chatResponse.Messages.Count > 0)
         {
-            var chatResponse = responses.ToChatResponse();
-            if (chatResponse.Messages.Count > 0)
-            {
-                await chatHistory.AddMessagesAsync(chatId, chatResponse.Messages);
-            }
+            await chatHistory.AddMessagesAsync(chatId, chatResponse.Messages);
         }
     }
-}
-
-public enum EventType
-{
-    NewToken,
-    ToolCall,
-    ToolResult,
-}
-
-public record ChatCompletion
-{
-    public EventType Type { get; init; }
-    public required string Content { get; init; }
-}
-
-public static class EventTypeExtensions
-{
-    public static string ToText(this EventType type) => type switch
-    {
-        EventType.NewToken => "new_token",
-        EventType.ToolCall => "tool_call",
-        EventType.ToolResult => "tool_result",
-        _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
-    };
 }

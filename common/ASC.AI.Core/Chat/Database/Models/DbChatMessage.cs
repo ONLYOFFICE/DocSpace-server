@@ -65,7 +65,10 @@ public static class DbChatMessageExtensions
                 .ValueGeneratedOnAdd();
 
             entity.Property(e => e.ChatId)
-                .HasColumnName("chat_id");
+                .HasColumnName("chat_id")
+                .HasColumnType("char(36)")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
             
             entity.Property(e => e.Role).HasColumnName("role");
 

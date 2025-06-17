@@ -24,31 +24,57 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.AI.Core.Chat.Database;
-
 namespace ASC.AI.Core.Chat;
 
 [Scope]
 public class ChatHistory(DbChatDao chatDao)
 {
-    public async Task AddMessagesAsync(Guid chatId, IEnumerable<ChatMessage> chatMessages)
+    public Task<Database.Chat> AddChatAsync(int roomId, Guid userId, ChatMessage message)
+    {
+        var title = message.Text.Trim()[..Math.Min(message.Text.Length, 60)].Trim();
+        
+        return chatDao.AddChatAsync(roomId, userId, title,
+            new Message 
+            { 
+                Role = Role.User, 
+                Content = JsonSerializer.Serialize(message.Contents, AiUtils.SerializerOptions) 
+            });
+    }
+
+    public Task UpdateChatAsync(Guid chatId, ChatMessage message)
+    {
+        return chatDao.UpdateChatAsync(chatId,
+            new Message 
+            { 
+                Role = Role.User, 
+                Content = JsonSerializer.Serialize(message.Contents, AiUtils.SerializerOptions) 
+            });
+    }
+
+    public Task<Database.Chat?> GetChatAsync(Guid chatId)
+    {
+        return chatDao.GetChatAsync(chatId);
+    }
+    
+    public Task AddMessagesAsync(Guid chatId, IEnumerable<ChatMessage> chatMessages)
     {
         var messages = chatMessages.Select(msg => 
             new Message 
             { 
                 Role = msg.Role.ToRole(), 
-                Content = JsonSerializer.Serialize(msg, AiUtils.SerializerOptions) 
+                Content = JsonSerializer.Serialize(msg.Contents, AiUtils.SerializerOptions) 
             })
             .ToList();
 
-        await chatDao.AddMessagesAsync(chatId, messages);
+        return chatDao.AddMessagesAsync(chatId, messages);
     }
 
     public async IAsyncEnumerable<ChatMessage> GetMessagesAsync(Guid chatId)
     {
         await foreach (var msg in chatDao.GetMessagesAsync(chatId))
         {
-            yield return new ChatMessage(msg.Role.ToChatRole(), JsonSerializer.Deserialize<List<AIContent>>(msg.Content));
+            yield return new ChatMessage(msg.Role.ToChatRole(), 
+                JsonSerializer.Deserialize<List<AIContent>>(msg.Content, AiUtils.SerializerOptions));
         }
     }
 }

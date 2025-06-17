@@ -24,10 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Text;
-
-using ASC.Api.Core;
-
 namespace ASC.AI;
 
 public class Startup : BaseStartup
@@ -49,5 +45,10 @@ public class Startup : BaseStartup
         services.AddMemoryCache();
 
         await base.ConfigureServices(builder);
+
+        services.AddBaseDbContextPool<ChatDbContext>();
+        services.AddBaseDbContextPool<FilesDbContext>();
+        
+        services.RegisterQuotaFeature();
     }
 }

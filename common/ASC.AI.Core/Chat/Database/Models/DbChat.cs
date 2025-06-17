@@ -38,7 +38,7 @@ public class DbChat : BaseEntity
     public required string Title { get; set; }
     public DateTime CreatedOn { get; set; }
     public DateTime ModifiedOn { get; set; }
-    
+
     public List<DbChatMessage> Messages { get; set; }
     
     public override object[] GetKeys()
@@ -66,12 +66,12 @@ public static class DbChatSessionExtensions
             
             entity.HasKey(e => e.Id)
                 .HasName("PRIMARY");
-
-            entity.HasKey(e => new { e.RoomId, e.UserId })
-                .HasName("idx_room_id_user_id");
             
             entity.Property(e => e.Id)
-                .HasColumnName("id");
+                .HasColumnName("id")
+                .HasColumnType("char(36)")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
             
             entity.Property(e => e.RoomId)
                 .HasColumnName("room_id");
@@ -84,7 +84,7 @@ public static class DbChatSessionExtensions
             
             entity.Property(e => e.UserId)
                 .HasColumnName("user_id")
-                .HasColumnType("char(38)")
+                .HasColumnType("char(36)")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
 
@@ -95,6 +95,9 @@ public static class DbChatSessionExtensions
             entity.Property(e => e.ModifiedOn)
                 .HasColumnName("modified_on")
                 .HasColumnType("datetime");
+            
+            entity.HasIndex(e => new { e.RoomId, e.UserId })
+                .HasDatabaseName("idx_room_id_user_id");
         });
     }
 }

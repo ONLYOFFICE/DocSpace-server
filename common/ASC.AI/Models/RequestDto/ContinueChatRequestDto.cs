@@ -30,11 +30,12 @@ public class ContinueChatRequestDto
 {
     [FromRoute(Name = "chatId")]
     public required Guid ChatId { get; set; }
+    
+    [FromBody]
     public required ContinueChatBody Body { get; set; }
 }
 
 public class ContinueChatBody
 {
-    [FromBody]
     public required string Message { get; set; }
 }

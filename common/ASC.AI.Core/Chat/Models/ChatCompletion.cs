@@ -24,18 +24,28 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Models.RequestDto;
+namespace ASC.AI.Core.Chat.Models;
 
-public class StartNewChatRequestDto
+public enum EventType
 {
-    [FromRoute(Name = "roomId")]
-    public required int RoomId { get; set; }
-    
-    [FromBody]
-    public required StartNewChatBody Body { get; set; }
+    NewToken,
+    ToolCall,
+    ToolResult,
 }
 
-public class StartNewChatBody
+public record ChatCompletion
 {
-    public required string Message { get; set; }
+    public EventType Type { get; init; }
+    public required string Content { get; init; }
+}
+
+public static class EventTypeExtensions
+{
+    public static string ToText(this EventType type) => type switch
+    {
+        EventType.NewToken => "new_token",
+        EventType.ToolCall => "tool_call",
+        EventType.ToolResult => "tool_result",
+        _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
+    };
 }
