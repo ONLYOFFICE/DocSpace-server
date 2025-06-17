@@ -37,14 +37,12 @@ global using ASC.Core.Common.Settings;
 global using ASC.Core.Tenants;
 global using ASC.IPSecurity.Log;
 
-global using Mapster;
-
-global using MapsterMapper;
-
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.AspNetCore.Http.Extensions;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.Logging;
+
+global using Riok.Mapperly.Abstractions;
 
 global using ZiggyCreatures.Caching.Fusion;

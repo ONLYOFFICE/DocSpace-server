@@ -27,14 +27,14 @@
 namespace ASC.IPSecurity;
 
 [Scope]
-public class IPRestrictionsRepository(IDbContextFactory<TenantDbContext> dbContextManager, IMapper mapper)
+public class IPRestrictionsRepository(IDbContextFactory<TenantDbContext> dbContextManager)
 {
     public async Task<List<IPRestriction>> GetAsync(int tenant, CancellationToken cancellationToken)
     {
         await using var tenantDbContext = await dbContextManager.CreateDbContextAsync(cancellationToken);
         return await tenantDbContext.TenantIpRestrictions
             .Where(r => r.TenantId == tenant)
-            .ProjectToType<IPRestriction>(mapper.Config)
+            .Project()
             .ToListAsync(cancellationToken: cancellationToken);
     }
 

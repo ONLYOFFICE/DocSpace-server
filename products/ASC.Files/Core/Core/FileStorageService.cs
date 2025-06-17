@@ -95,7 +95,6 @@ public class FileStorageService //: IFileStorageService
     IDbContextFactory<UrlShortenerDbContext> dbContextFactory,
     WatermarkManager watermarkManager,
     CustomTagsService customTagsService,
-    IMapper mapper,
     ICacheNotify<ClearMyFolderItem> notifyMyFolder,
     FormRoleDtoHelper formRoleDtoHelper,
     WebhookManager webhookManager)
@@ -1020,13 +1019,13 @@ public class FileStorageService //: IFileStorageService
 
             if (watermarkChanged)
             {
-                watermark = mapper.Map<WatermarkRequestDto, WatermarkSettings>(updateData.Watermark);
+                watermark = updateData.Watermark.Map();
                 watermark.ImageUrl = await watermarkManager.GetWatermarkImageUrlAsync(folder, watermark.ImageUrl);
             }
 
             if (lifetimeChanged)
             {
-                lifetime = mapper.Map<RoomDataLifetimeDto, RoomDataLifetime>(updateData.Lifetime);
+                lifetime = updateData.Lifetime.Map();
                 lifetime.StartDate = DateTime.UtcNow;
             }
 

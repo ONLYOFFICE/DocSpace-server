@@ -32,7 +32,6 @@ using ASC.Common.Mapping;
 using ASC.MessagingSystem;
 using Flurl.Util;
 
-using ILogger = Microsoft.Extensions.Logging.ILogger;
 using IPNetwork = Microsoft.AspNetCore.HttpOverrides.IPNetwork;
 
 namespace ASC.Api.Core;
@@ -471,18 +470,6 @@ public abstract class BaseStartup
 
         services.AddApiKeyBearerAuthentication()
                 .AddJwtBearerAuthentication();
-
-        var assemblies = GetAutoMapperProfileAssemblies().ToArray();
-        TypeAdapterConfig.GlobalSettings.Scan(assemblies);
-        foreach (var assembly in assemblies)
-        {
-            TypeAdapterConfig.GlobalSettings.ScanInheritedTypes(assembly);
-        }
-
-        var config = TypeAdapterConfig.GlobalSettings;
-        config.Default.Settings.NameMatchingStrategy = NameMatchingStrategy.IgnoreCase;
-        services.AddSingleton(config);
-        services.AddScoped<IMapper, ServiceMapper>();
         
         services.AddBillingHttpClient();
         services.AddAccountingHttpClient();
@@ -503,7 +490,6 @@ public abstract class BaseStartup
             .AddStartupTask<WarmupServicesStartupTask>()
             .AddStartupTask<WarmupProtobufStartupTask>()
             .AddStartupTask<WarmupBaseDbContextStartupTask>()
-            .AddStartupTask<WarmupMappingStartupTask>()
             .TryAddSingleton(services);
         
         services.AddTransient<DistributedTaskProgress>();

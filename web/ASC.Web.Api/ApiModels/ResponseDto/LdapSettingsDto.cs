@@ -29,7 +29,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// <summary>
 /// The LDAP settings parameters.
 /// </summary>
-public class LdapSettingsDto : IMapFrom<LdapSettings>
+public class LdapSettingsDto
 {
     /// <summary>
     /// Specifies whether the LDAP authentication is active in the system.
@@ -143,10 +143,17 @@ public class LdapSettingsDto : IMapFrom<LdapSettings>
     /// Specifies if the default LDAP settings are used or not.
     /// </summary>
     public bool IsDefault { get; set; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class LdapSettingsDtoMapper
+{
+    [MapProperty(nameof(LdapSettings.Server), nameof(LdapSettingsDto.Server), Use = nameof(MapServer))]
+    public static partial LdapSettingsDto MapToSettingsDto(this LdapSettings source);
     
-    public void ConfigureMapping(TypeAdapterConfig config)
+    [UserMapping(Default = false)]
+    private static string MapServer(string source)
     {
-        config.NewConfig<LdapSettings, LdapSettingsDto>()
-            .Map(dest => dest.Server, src => src.Server.Replace("LDAP://", ""));
+        return source.Replace("LDAP://", "");
     }
 }

@@ -29,7 +29,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// <summary>
 /// The status parameters of the synchronization with LDAP server.
 /// </summary>
-public class LdapStatusDto : IMapFrom<LdapOperationStatus>
+public class LdapStatusDto
 {
     /// <summary>
     /// Specifies if the LDAP synchronization is completed or not.
@@ -75,4 +75,10 @@ public class LdapStatusDto : IMapFrom<LdapOperationStatus>
     /// The LDAP operation type.
     /// </summary>
     public string OperationType { get; set; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class LdapStatusDtoMapper
+{       
+    public static partial LdapStatusDto MapToDto(this LdapOperationStatus source);
 }

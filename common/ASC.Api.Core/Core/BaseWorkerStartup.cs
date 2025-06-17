@@ -71,17 +71,6 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
 
         services.RegisterFeature();
         
-        var assemblies = GetAutoMapperProfileAssemblies().ToArray();
-        TypeAdapterConfig.GlobalSettings.Scan(assemblies);
-        foreach (var assembly in assemblies)
-        {
-            TypeAdapterConfig.GlobalSettings.ScanInheritedTypes(assembly);
-        }
-        
-        var config = TypeAdapterConfig.GlobalSettings;
-        services.AddSingleton(config);
-        services.AddScoped<IMapper, ServiceMapper>();
-        
         if (!HostEnvironment.IsDevelopment())
         {
             services.AddStartupTask<WarmupServicesStartupTask>().TryAddSingleton(services);

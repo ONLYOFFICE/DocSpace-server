@@ -36,8 +36,8 @@ public class ApiKeysController(
     UserManager userManager,
     MessageService messageService,
     SettingsManager settingsManager,
-    IHttpContextAccessor httpContextAccessor,
-    IMapper mapper) : ControllerBase
+    ApiKeyMapper mapper,
+    IHttpContextAccessor httpContextAccessor) : ControllerBase
 {
     /// <summary>
     ///  Creates a user API key with the parameters specified in the request.
@@ -78,7 +78,7 @@ public class ApiKeysController(
             apiKey.Permissions,
             expiresAt);
         
-        var apiKeyResponseDto = await mapper.From(result.keyData).AdaptToTypeAsync<ApiKeyResponseDto>();
+        var apiKeyResponseDto = await mapper.MapManual(result.keyData);
 
         messageService.Send(MessageAction.ApiKeyCreated, MessageTarget.Create(apiKeyResponseDto.Id), apiKeyResponseDto.Key);
 
@@ -136,7 +136,7 @@ public class ApiKeysController(
 
         await foreach (var apiKey in result)
         {
-            yield return await mapper.From(apiKey).AdaptToTypeAsync<ApiKeyResponseDto>();
+            yield return await mapper.MapManual(apiKey);
         }
     }
 
@@ -157,7 +157,7 @@ public class ApiKeysController(
         var token = httpContextAccessor?.HttpContext?.Request.Headers.Authorization.ToString()["Bearer ".Length..];
 
         var apiKey = await apiKeyManager.GetApiKeyAsync(token);
-        return await mapper.From(apiKey).AdaptToTypeAsync<ApiKeyResponseDto>();
+        return await mapper.MapManual(apiKey);
     }
     
     

@@ -45,10 +45,8 @@ global using ASC.MessagingSystem.EF.Context;
 global using ASC.MessagingSystem.EF.Model;
 global using CsvHelper.Configuration;
 
-global using Mapster;
-
-global using MapsterMapper;
-
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Logging;
 global using NetEscapades.EnumGenerators;
+
+global using Riok.Mapperly.Abstractions;

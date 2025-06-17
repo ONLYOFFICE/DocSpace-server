@@ -100,6 +100,7 @@ global using ASC.FederatedLogin;
 global using ASC.FederatedLogin.Helpers;
 global using ASC.FederatedLogin.LoginProviders;
 global using ASC.FederatedLogin.Profile;
+global using ASC.Files.Core.ApiModels.RequestDto;
 global using ASC.Files.Core.Core;
 global using ASC.Files.Core.EF;
 global using ASC.Files.Core.Helpers;
@@ -155,16 +156,11 @@ global using ASC.Webhooks.Core.EF.Model;
 
 global using Autofac;
 
-
 global using CsvHelper.Configuration;
 
 global using Google.Authenticator;
 
 global using MailKit.Security;
-
-global using Mapster;
-
-global using MapsterMapper;
 
 global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Mvc;
@@ -173,6 +169,8 @@ global using Microsoft.Extensions.Caching.Memory;
 global using Microsoft.Extensions.Hosting.WindowsServices;
 
 global using MimeKit;
+
+global using Riok.Mapperly.Abstractions;
 
 global using Swashbuckle.AspNetCore.Annotations;
 

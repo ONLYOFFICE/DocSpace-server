@@ -30,8 +30,8 @@ namespace ASC.AuditTrail.Repositories;
 public class LoginEventsRepository(
     TenantManager tenantManager,
     IDbContextFactory<MessagesContext> dbContextFactory,
-    IMapper mapper,
-    GeolocationHelper geolocationHelper)
+    GeolocationHelper geolocationHelper,
+    LoginEventMapper eventMapper)
 {
     public async Task<List<LoginEvent>> GetByFilterAsync(
         Guid? login = null,
@@ -93,7 +93,7 @@ public class LoginEventsRepository(
             }
         }
 
-        var events = mapper.Map<List<LoginEventQuery>, List<LoginEvent>>(await query.ToListAsync());
+        var events = eventMapper.ToLoginEvents(await query.ToListAsync());
 
         foreach (var e in events)
         {

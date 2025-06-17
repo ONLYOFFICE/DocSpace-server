@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.Mapping;
+
 using User = ASC.Core.Common.EF.User;
 
 namespace ASC.Files.Core.Data;
@@ -40,7 +42,7 @@ internal abstract class SecurityBaseDao<T>(
     SettingsManager settingsManager,
     AuthContext authContext,
     IServiceProvider serviceProvider,
-    IMapper mapper,
+    SecurityTreeRecordMapper mapper,
     IDistributedLockProvider distributedLockProvider)
     : AbstractDao(dbContextFactory,
         userManager,
@@ -148,7 +150,7 @@ internal abstract class SecurityBaseDao<T>(
         }
         else
         {
-            var toInsert = mapper.Map<FileShareRecord<T>, DbFilesSecurity>(r);
+            var toInsert = mapper.MapFileShareRecordToDbFilesSecurity(r);
             toInsert.EntryId = await mapping.MappingIdAsync(r.EntryId, true);
 
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
@@ -617,7 +619,7 @@ internal abstract class SecurityBaseDao<T>(
         {
             yield return new GroupInfoWithShared
             { 
-                GroupInfo = mapper.Map<DbGroup, GroupInfo>(r.Group),
+                GroupInfo = r.Group.MapToGroupInfo(),
                 Shared = r.Shared 
             };
         }
@@ -691,7 +693,7 @@ internal abstract class SecurityBaseDao<T>(
 
         await foreach (var r in q1.ToAsyncEnumerable())
         {
-            yield return new UserInfoWithShared { UserInfo = mapper.Map<User, UserInfo>(r.User), Shared = r.Shared };
+            yield return new UserInfoWithShared { UserInfo = r.User.Map(), Shared = r.Shared };
         }
     }
 
@@ -1034,14 +1036,14 @@ internal abstract class SecurityBaseDao<T>(
 
     private async Task<FileShareRecord<T>> ToFileShareRecordAsync(DbFilesSecurity r)
     {
-        var result = mapper.Map<DbFilesSecurity, FileShareRecord<T>>(r);
+        var result = mapper.MapDbFilesSecurityToDbFilesSecurity<T>(r);
         result.EntryId = (T)Convert.ChangeType(await daoFactory.GetMapping<T>().MappingIdAsync(result.EntryId), typeof(T));
         return result;
     }
 
     protected FileShareRecord<T> ToFileShareRecord(SecurityTreeRecord r)
     {
-        var result = mapper.Map<SecurityTreeRecord, FileShareRecord<T>>(r);
+        var result = mapper.MapSecurityTreeRecordToFileShareRecord<T>(r);
 
         if (r.FolderId != 0)
         {
@@ -1129,7 +1131,7 @@ internal class SecurityDao(
         SettingsManager settingsManager,
         AuthContext authContext,
         IServiceProvider serviceProvider,
-        IMapper mapper,
+        SecurityTreeRecordMapper mapper,
         IDistributedLockProvider distributedLockProvider)
     : SecurityBaseDao<int>(daoFactory, userManager, dbContextFactory, tenantManager, tenantUtil, setupInfo, maxTotalSizeStatistic, settingsManager, authContext, serviceProvider, mapper, distributedLockProvider), ISecurityDao<int>
 {
@@ -1238,7 +1240,7 @@ internal class ThirdPartySecurityDao(
         SettingsManager settingsManager,
         AuthContext authContext,
         IServiceProvider serviceProvider,
-        IMapper mapper,
+        SecurityTreeRecordMapper mapper,
         SelectorFactory selectorFactory,
         IDistributedLockProvider distributedLockProvider)
     : SecurityBaseDao<string>(daoFactory, userManager, dbContextFactory, tenantManager, tenantUtil, setupInfo, maxTotalSizeStatistic, settingsManager, authContext, serviceProvider, mapper, distributedLockProvider), ISecurityDao<string>
@@ -1339,7 +1341,7 @@ internal class ThirdPartySecurityDao(
         }
     }
 } 
-internal class SecurityTreeRecord
+public class SecurityTreeRecord
 {
     public int TenantId { get; set; }
     public string EntryId { get; set; }
@@ -1353,6 +1355,89 @@ internal class SecurityTreeRecord
     public int FolderId { get; init; }
     public int ParentId { get; set; }
     public int Level { get; set; }
+}
+
+[Scope]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public partial class SecurityTreeRecordMapper(FilesMappingAction filesMappingAction)
+{
+    private partial FileShareRecord<string> MapToThirdParty(SecurityTreeRecord source);
+    private partial FileShareRecord<int> MapToInternal(SecurityTreeRecord source);
+    
+    public FileShareRecord<T> MapSecurityTreeRecordToFileShareRecord<T>(SecurityTreeRecord securityTreeRecord)
+    {
+        if (typeof(T) == typeof(int))
+        {
+            return (FileShareRecord<T>)Convert.ChangeType(MapToInternal(securityTreeRecord), typeof(FileShareRecord<T>));
+        }
+
+        if (typeof(T) == typeof(string))
+        {
+            return (FileShareRecord<T>)Convert.ChangeType(MapToThirdParty(securityTreeRecord), typeof(FileShareRecord<T>));
+        }
+
+        return null;
+    }
+
+    private partial FileShareRecord<string> MapToThirdParty(DbFilesSecurity source);
+    public partial FileShareRecord<int> MapToInternal(DbFilesSecurity source);
+    
+    public FileShareRecord<T> MapDbFilesSecurityToDbFilesSecurity<T>(DbFilesSecurity filesSecurity)
+    {
+        if (typeof(T) == typeof(int))
+        {
+            return (FileShareRecord<T>)Convert.ChangeType(MapToInternal(filesSecurity), typeof(FileShareRecord<T>));
+        }
+
+        if (typeof(T) == typeof(string))
+        {
+            return (FileShareRecord<T>)Convert.ChangeType(MapToThirdParty(filesSecurity), typeof(FileShareRecord<T>));
+        }
+        return null;
+    }
+    
+    [MapValue(nameof(DbFilesSecurity.TimeStamp), Use = nameof(GetForSecurity))]
+    private partial DbFilesSecurity MapFromThirdParty(FileShareRecord<string> source);
+    
+    [MapValue(nameof(DbFilesSecurity.TimeStamp), Use = nameof(GetForSecurity))]
+    private partial DbFilesSecurity MapFromInternal(FileShareRecord<int> source);
+    
+
+    public DbFilesSecurity MapFileShareRecordToDbFilesSecurity<T>(FileShareRecord<T> fileShareRecord)
+    {
+        if (fileShareRecord is FileShareRecord<int> internalFileShareRecord)
+        {
+            return MapFileShareRecordInternalToDbFilesSecurity(internalFileShareRecord);
+        }
+
+        if (fileShareRecord is FileShareRecord<string> thirdPartyFileShareRecord)
+        {
+            return MapFileShareRecordThirdPartyToDbFilesSecurity(thirdPartyFileShareRecord);
+        }
+
+        return null;
+    }
+    
+    [UserMapping(Default = true)]
+    private DbFilesSecurity MapFileShareRecordInternalToDbFilesSecurity(FileShareRecord<int> fileShareRecord)
+    {
+        var result = MapFromInternal(fileShareRecord);
+        filesMappingAction.Process(fileShareRecord, result);
+        return result;
+    }
+    
+    [UserMapping(Default = true)]
+    private DbFilesSecurity MapFileShareRecordThirdPartyToDbFilesSecurity(FileShareRecord<string> fileShareRecord)
+    {
+        var result = MapFromThirdParty(fileShareRecord);
+        filesMappingAction.Process(fileShareRecord, result);
+        return result;
+    }
+    
+    private static DateTime GetForSecurity()
+    {
+        return DateTime.UtcNow;
+    }
 }
 
 public class SecurityUserRecord

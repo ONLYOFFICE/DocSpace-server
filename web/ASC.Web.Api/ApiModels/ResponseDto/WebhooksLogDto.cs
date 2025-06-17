@@ -29,7 +29,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// <summary>
 /// The webhook log parameters.
 /// </summary>
-public class WebhooksLogDto : IMapFrom<DbWebhooksLog>
+public class WebhooksLogDto
 {
     /// <summary>
     /// The webhook log ID.
@@ -90,24 +90,13 @@ public class WebhooksLogDto : IMapFrom<DbWebhooksLog>
     /// The webhook delivery time.
     /// </summary>
     public DateTime? Delivery { get; set; }
-    
-    public void ConfigureMapping(TypeAdapterConfig config)
-    {
-        config.NewConfig<DbWebhooksLog, WebhooksLogDto>()
-            .AfterMapping((src, dest) => MapContext.Current.GetService<WebhooksLogConverter>().Convert(src, dest));
-    }
 }
 
 [Scope]
-public class WebhooksLogConverter(TenantUtil tenantUtil)
-{
-    public void Convert(DbWebhooksLog source, WebhooksLogDto dest)
-    {
-        dest.CreationTime = tenantUtil.DateTimeFromUtc(source.CreationTime);
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public partial class WebhooksLogDtoMapper(TenantUtil tenantUtil)
+{ 
+    public partial WebhooksLogDto Map(DbWebhooksLog source);
 
-        if (source.Delivery.HasValue)
-        {
-            dest.Delivery = tenantUtil.DateTimeFromUtc(source.Delivery.Value);
-        }
-    }
+    private DateTime MapDateToUtc(DateTime source) => tenantUtil.DateTimeToUtc(source);
 }

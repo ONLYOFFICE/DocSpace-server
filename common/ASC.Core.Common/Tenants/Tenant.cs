@@ -30,7 +30,7 @@ namespace ASC.Core.Tenants;
 /// The tenant parameters.
 /// </summary>
 [ProtoContract]
-public class Tenant : IMapFrom<DbTenant>
+public class Tenant
 {
     public const int DefaultTenant = -1;
 
@@ -211,18 +211,6 @@ public class Tenant : IMapFrom<DbTenant>
         return Alias;
     }
     
-    public void ConfigureMapping(TypeAdapterConfig config)
-    {
-        config.NewConfig<DbTenant, Tenant>()
-            .Map(r => r.TrustedDomainsType, src => src.TrustedDomainsEnabled)
-            .Map(r => r.AffiliateId, src => src.Partner.AffiliateId)
-            .Map(r => r.PartnerId, src => src.Partner.PartnerId)
-            .Map(r => r.Campaign, src => src.Partner.Campaign);
-        
-        config.NewConfig<TenantUserSecurity, Tenant>()
-            .ConstructUsing(((security, tenant) => security.DbTenant.Adapt<Tenant>()));
-    }
-    
     internal string GetTrustedDomains()
     {
         TrustedDomains.RemoveAll(string.IsNullOrEmpty);
@@ -245,4 +233,18 @@ public class Tenant : IMapFrom<DbTenant>
             TrustedDomains.AddRange(trustedDomains.Split(['|'], StringSplitOptions.RemoveEmptyEntries));
         }
     }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class TenantMapper
+{
+    [MapProperty(nameof(DbTenant.TrustedDomainsEnabled), nameof(Tenant.TrustedDomainsType))]
+    [MapNestedProperties(nameof(DbTenant.Partner))]
+    public static partial Tenant Map(this DbTenant source);
+    
+    [MapNestedProperties(nameof(TenantUserSecurity.DbTenant))]
+    public static partial Tenant Map(this TenantUserSecurity source);
+    
+    public static partial IQueryable<Tenant> Project(this IQueryable<DbTenant> source);
+    public static partial IQueryable<Tenant> Project(this IQueryable<TenantUserSecurity> source);
 }

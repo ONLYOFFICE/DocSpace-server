@@ -26,7 +26,7 @@
 
 namespace ASC.Core;
 
-public class Group : IMapFrom<DbGroup>
+public class Group
 {
     public Guid Id { get; set; }
     public Guid ParentId { get; set; }
@@ -51,12 +51,17 @@ public class Group : IMapFrom<DbGroup>
     {
         return obj is Group g && g.Id == Id;
     }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class GroupMapper
+{    
+    public static partial Group Map(this DbGroup source);
+    public static partial IQueryable<Group> Project(this IQueryable<DbGroup> source);
+    public static partial DbGroup Map(this Group source);
+    public static partial Group Map(this GroupInfo source);
+    public static partial GroupInfo MapToGroupInfo(this DbGroup source);
     
-    public void ConfigureMapping(TypeAdapterConfig config)
-    {
-        config.NewConfig<DbGroup, Group>()
-            .Map(src => src.CategoryId, opt => opt.CategoryId ?? Guid.Empty)
-            .Map(src => src.ParentId, opt => opt.ParentId ?? Guid.Empty);
-        config.NewConfig<GroupInfo, Group>();
-    }
+    // Handle nullable Guid mapping
+    private static Guid MapNullableGuid(Guid? source) => source ?? Guid.Empty;
 }

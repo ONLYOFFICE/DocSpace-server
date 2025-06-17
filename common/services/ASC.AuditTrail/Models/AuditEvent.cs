@@ -26,7 +26,7 @@
 
 namespace ASC.AuditTrail.Models;
 
-public class AuditEvent : BaseEvent, IMapFrom<AuditEventQuery>, IMapFrom<DbAuditEvent>
+public class AuditEvent : BaseEvent
 {
     public string Initiator { get; set; }
 
@@ -45,10 +45,21 @@ public class AuditEvent : BaseEvent, IMapFrom<AuditEventQuery>, IMapFrom<DbAudit
     [Event("TargetIdCol", 34)]
     public MessageTarget Target { get; set; }
     public string Context { get; set; }
+}
+
+[Scope]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public partial class AuditEventMapper(EventTypeConverter eventTypeConverter)
+{
+    public partial List<AuditEvent> ToAuditEvents(List<AuditEventQuery> auditEventQuery);
     
-    void IMapFrom<AuditEventQuery>.ConfigureMapping(TypeAdapterConfig config)
-    {        
-        config.NewConfig<AuditEventQuery, AuditEvent>()
-            .AfterMapping((src, dst) => MapContext.Current.GetService<EventTypeConverter>().Convert(src, dst));
+    [MapperIgnoreSource(nameof(DbAuditEvent.Target))]
+    private partial AuditEvent ToAuditEvent(DbAuditEvent auditEventQuery);
+
+    private AuditEvent ToAuditEvent(AuditEventQuery auditEventQuery)
+    {
+        var result = ToAuditEvent(auditEventQuery.Event);
+        eventTypeConverter.Convert(auditEventQuery, result);
+        return result;   
     }
 }

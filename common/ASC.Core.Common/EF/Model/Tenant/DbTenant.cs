@@ -29,7 +29,7 @@ namespace ASC.Core.Common.EF.Model;
 /// <summary>
 /// The database tenant parameters.
 /// </summary>
-public class DbTenant : IMapFrom<Tenant>
+public class DbTenant
 {
     /// <summary>
     /// The tenant ID.
@@ -151,24 +151,50 @@ public class DbTenant : IMapFrom<Tenant>
     /// The database tenant partner parameters.
     /// </summary>
     public DbTenantPartner Partner { get; set; }
-    
-    public void ConfigureMapping(TypeAdapterConfig config)
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class DbTenantMapper
+{
+    [MapPropertyFromSource(nameof(Tenant.TrustedDomainsRaw), Use = nameof(GetTrustedDomains))]
+    [MapValue(nameof(Tenant.LastModified), Use = nameof(MapLastModified))]
+    [MapProperty(nameof(Tenant.TrustedDomainsType), nameof(DbTenant.TrustedDomainsEnabled))]
+    [MapProperty(nameof(Tenant.Alias), nameof(DbTenant.Alias), Use = nameof(MapAlias))]
+    [MapProperty(nameof(Tenant.Name), nameof(DbTenant.Name), Use = nameof(MapName))]
+    [MapProperty(nameof(Tenant.MappedDomain), nameof(DbTenant.MappedDomain), Use = nameof(MapMappedDomain))]
+    [MapProperty(nameof(Tenant.Id), [nameof(DbTenant.Partner), nameof(DbTenantPartner.TenantId)])]
+    [MapProperty(nameof(Tenant.AffiliateId), [nameof(DbTenant.Partner), nameof(DbTenantPartner.AffiliateId)])]
+    [MapProperty(nameof(Tenant.PartnerId), [nameof(DbTenant.Partner), nameof(DbTenantPartner.PartnerId)])]
+    [MapProperty(nameof(Tenant.Campaign), [nameof(DbTenant.Partner), nameof(DbTenantPartner.Campaign)])]
+    public static partial DbTenant Map(this Tenant source);
+
+    [UserMapping(Default = false)]
+    public static string MapAlias(string alias)
     {
-        config.NewConfig<Tenant, DbTenant>() 
-            .Map(dest => dest.TrustedDomainsEnabled, dest => dest.TrustedDomainsType)
-            .Map(dest => dest.TrustedDomainsRaw, dest => dest.GetTrustedDomains())
-            .Map(dest => dest.Alias, dest => dest.Alias.ToLowerInvariant())
-            .Map(dest => dest.LastModified, dest => DateTime.UtcNow)
-            .Map(dest => dest.Name, dest => dest.Name ?? "")
-            .Map(dest => dest.Name, dest => dest.Name ?? "")
-            .Map(dest => dest.Partner, dest => new DbTenantPartner
-            {
-                TenantId = dest.Id,
-                AffiliateId = dest.AffiliateId,
-                PartnerId = dest.PartnerId,
-                Campaign = dest.Campaign
-            })
-            .Map(dest => dest.MappedDomain, dest => !string.IsNullOrEmpty(dest.MappedDomain) ? dest.MappedDomain.ToLowerInvariant() : null);
+        return alias.ToLower();
+    }
+    
+    public static DateTime MapLastModified()
+    {
+        return DateTime.UtcNow;
+    }
+    
+    [UserMapping(Default = false)]
+    public static string GetTrustedDomains(Tenant source)
+    {
+        return source.GetTrustedDomains();
+    }
+    
+    [UserMapping(Default = false)]
+    public static string MapName(string name)
+    {
+        return name ?? "";
+    }
+    
+    [UserMapping(Default = false)]
+    public static string MapMappedDomain(string mappedDomain)
+    {
+        return !string.IsNullOrEmpty(mappedDomain) ? mappedDomain.ToLowerInvariant() : null;
     }
 }
 

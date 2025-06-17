@@ -30,7 +30,7 @@ using JsonSerializer = System.Text.Json.JsonSerializer;
 namespace ASC.AuditTrail.Models.Mappings;
 
 [Scope]
-internal class EventTypeConverter(
+public class EventTypeConverter(
     UserFormatter userFormatter,
     AuditActionMapper actionMapper,
     TenantUtil tenantUtil)

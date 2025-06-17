@@ -129,10 +129,6 @@ global using Autofac;
 global using Google.Apis.Auth.OAuth2;
 global using MailKit.Security;
 
-global using Mapster;
-
-global using MapsterMapper;
-
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.AspNetCore.WebUtilities;
 global using Microsoft.EntityFrameworkCore;
@@ -157,6 +153,9 @@ global using Polly;
 global using Pomelo.EntityFrameworkCore.MySql.Infrastructure.Internal;
 global using Pomelo.EntityFrameworkCore.MySql.Migrations;
 global using ProtoBuf;
+
+global using Riok.Mapperly.Abstractions;
+
 global using Telegram.Bot;
 global using Textile;
 global using Textile.Blocks;

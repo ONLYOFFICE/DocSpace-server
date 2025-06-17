@@ -26,7 +26,7 @@
 
 namespace ASC.MessagingSystem.EF.Model;
 
-public class DbAuditEvent : MessageEvent, IMapFrom<EventMessage>
+public class DbAuditEvent : MessageEvent
 {
     [MaxLength(200)]
     public string Initiator { get; set; }
@@ -35,11 +35,19 @@ public class DbAuditEvent : MessageEvent, IMapFrom<EventMessage>
 
     public DbTenant Tenant { get; set; }
     public List<DbFilesAuditReference> FilesReferences { get; set; }
-    
-    public void ConfigureMapping(TypeAdapterConfig config)
-    {        
-        config.NewConfig<EventMessage, DbAuditEvent>()
-            .AfterMapping((src, dst) => MapContext.Current.GetService<EventTypeConverter>().Convert(src, dst));
+}
+
+[Scope]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public partial class DbAuditEventMapper(EventTypeConverter converter)
+{
+    private partial DbAuditEvent Map(EventMessage source);
+
+    public DbAuditEvent MapManual(EventMessage source)
+    {
+        var result = Map(source);
+        converter.Convert(source, result);
+        return result;
     }
 }
 

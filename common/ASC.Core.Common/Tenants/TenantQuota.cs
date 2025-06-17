@@ -30,7 +30,7 @@ namespace ASC.Core.Tenants;
 /// The current tenant quota.
 /// </summary>
 [DebuggerDisplay("{TenantId} {Name}")]
-public class TenantQuota : IMapFrom<DbQuota>
+public class TenantQuota
 {
     public static readonly TenantQuota Default = new(Tenant.DefaultTenant)
     {
@@ -579,14 +579,6 @@ public class TenantQuota : IMapFrom<DbQuota>
         return newQuota;
     }
 
-    public void ConfigureMapping(TypeAdapterConfig config)
-    {
-        config.NewConfig<DbQuota, TenantQuota>()
-            .Map(dest => dest.Price, o => MapContext.Current.GetService<TenantQuotaPriceResolver>().ResolvePrice(o))
-            .Map(dest => dest.PriceCurrencySymbol, o => MapContext.Current.GetService<TenantQuotaPriceResolver>().ResolvePriceCurrencySymbol(o))
-            .Map(dest => dest.PriceISOCurrencySymbol, o => MapContext.Current.GetService<TenantQuotaPriceResolver>().ResolveISOCurrencySymbol(o));
-    }
-
     public TenantQuotaFeature<T> GetFeature<T>(string name)
     {
         return TenantQuotaFeatures.OfType<TenantQuotaFeature<T>>().FirstOrDefault(f => string.Equals(f.Name.Split(':')[0], $"{name}", StringComparison.OrdinalIgnoreCase));
@@ -611,5 +603,66 @@ public class TenantQuota : IMapFrom<DbQuota>
         {
             _featuresList.Add(value is bool ? $"{name}" : $"{name}:{value}");
         }
+    }
+}
+
+[Scope]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public partial class TenantQuotaMapper(IServiceProvider provider)
+{ 
+    private partial TenantQuota Map(DbQuota source);
+    public partial List<TenantQuota> Map(List<DbQuota> source);
+    public partial DbQuota Map(TenantQuota source);
+    
+    [UserMapping(Default = true)]
+    public TenantQuota MapDbQuotaToTenantQuota(DbQuota quota)
+    {
+        var dto = Map(quota);
+        dto.Price = ResolvePrice(quota);
+        dto.PriceCurrencySymbol = ResolvePriceCurrencySymbol(quota);
+        dto.PriceISOCurrencySymbol = ResolveISOCurrencySymbol(quota);
+        return dto;
+    }
+    
+    private string ResolvePriceCurrencySymbol(DbQuota source)
+    {
+        var (_, currencySymbol, _) = Resolve(source);
+
+        return currencySymbol;
+    }
+    
+    private string ResolveISOCurrencySymbol(DbQuota source)
+    {
+        var (_, _, isoCurrencySymbol) = Resolve(source);
+
+        return isoCurrencySymbol;
+    }
+    
+    private decimal ResolvePrice(DbQuota source)
+    {
+        var (price, _, _) = Resolve(source);
+
+        return price;
+    }
+    
+    private (decimal, string, string) Resolve(DbQuota source)
+    {
+        var tenantManager = provider.GetService<TenantManager>();
+        var regionHelper = provider.GetService<RegionHelper>();
+        
+        var priceInfo = tenantManager.GetProductPriceInfo(source.ProductId, source.Wallet);
+
+        if (priceInfo != null)
+        {
+            var currentRegion = regionHelper.GetCurrentRegionInfoAsync(new Dictionary<string, Dictionary<string, decimal>> { { source.ProductId, priceInfo } }).Result;
+
+            if (priceInfo.TryGetValue(currentRegion.ISOCurrencySymbol, out var resolve))
+            {
+                return (resolve, currentRegion.CurrencySymbol, currentRegion.ISOCurrencySymbol);
+            }
+        }
+
+        var defaultRegion = regionHelper.GetDefaultRegionInfo();
+        return (source.Price, defaultRegion.CurrencySymbol, defaultRegion.ISOCurrencySymbol);
     }
 }

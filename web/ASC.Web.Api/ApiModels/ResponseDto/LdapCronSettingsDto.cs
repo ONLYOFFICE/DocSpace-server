@@ -29,10 +29,16 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// <summary>
 /// The LDAP cron settings.
 /// </summary>
-public class LdapCronSettingsDto : IMapFrom<LdapCronSettings>
+public class LdapCronSettingsDto
 {
     /// <summary>
     /// The LDAP cron settings expression.
     /// </summary>
     public string Cron { get; set; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class LdapCronSettingsDtoMapper
+{       
+    public static partial LdapCronSettingsDto MapToDto(this LdapCronSettings source);
 }

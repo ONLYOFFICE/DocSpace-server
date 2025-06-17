@@ -71,8 +71,7 @@ public class AuthenticationController(
     InvitationService invitationService,
     UserSocketManager socketManager,
     LoginProfileTransport loginProfileTransport,
-    AuditEventsRepository auditEventsRepository,
-    IMapper mapper)
+    AuditEventsRepository auditEventsRepository)
     : ControllerBase
 {
     /// <summary>
@@ -358,7 +357,7 @@ public class AuthenticationController(
 
         var result = await invitationService.ConfirmAsync(inDto.Key, inDto.Email, inDto.EmplType ?? default, inDto.RoomId, inDto.UiD);
 
-        return mapper.Map<Validation, ConfirmDto>(result);
+        return result.Map();
     }
 
     /// <summary>

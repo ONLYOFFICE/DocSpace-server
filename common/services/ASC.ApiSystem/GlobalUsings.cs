@@ -73,10 +73,6 @@ global using ASC.Webhooks.Core.EF.Context;
 
 global using HealthChecks.UI.Client;
 
-global using Mapster;
-
-global using MapsterMapper;
-
 global using Microsoft.AspNetCore.Authentication;
 global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Diagnostics.HealthChecks;

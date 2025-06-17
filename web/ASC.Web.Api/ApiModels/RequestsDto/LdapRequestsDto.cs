@@ -29,7 +29,7 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 /// <summary>
 /// The parameters for configuring LDAP (Lightweight Directory Access Protocol) integration settings.
 /// </summary>
-public class LdapRequestsDto : IMapFrom<LdapSettings>
+public class LdapRequestsDto
 {
     /// <summary>
     /// Specifies whether the LDAP authentication is active in the system.
@@ -147,4 +147,10 @@ public class LdapRequestsDto : IMapFrom<LdapSettings>
     /// The default user type assigned to the imported LDAP users.
     /// </summary>
     public EmployeeType UsersType { get; set; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class LdapRequestsMapper
+{
+    public static partial LdapSettings MapToSettings(this LdapRequestsDto source);
 }

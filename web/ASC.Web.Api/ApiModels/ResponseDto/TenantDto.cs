@@ -29,7 +29,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// <summary>
 /// The tenant parameters.
 /// </summary>
-public class TenantDto : IMapFrom<Tenant>
+public class TenantDto
 {
     /// <summary>
     /// The affiliate ID.
@@ -150,11 +150,13 @@ public class TenantDto : IMapFrom<Tenant>
     /// The tenant AWS region.
     /// </summary>
     public string Region { get; set; }
-    
-    public void ConfigureMapping(TypeAdapterConfig config)
-    {
-        config.NewConfig<Tenant, TenantDto>()
-            .Map(r => r.TenantId, dest => dest.Id)
-            .Map(r => r.TenantAlias, src => src.Alias);
-    }
+}
+
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class TenantDtoMapper
+{       
+    [MapProperty(nameof(Tenant.Id), nameof(TenantDto.TenantId))]
+    [MapProperty(nameof(Tenant.Alias), nameof(TenantDto.TenantAlias))]
+    public static partial TenantDto MapToDto(this Tenant source);
 }

@@ -31,7 +31,7 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 /// <summary>
 /// The external sharing information and validation data.
 /// </summary>
-public class ExternalShareDto : IMapFrom<ValidationInfo>
+public class ExternalShareDto
 {
     /// <summary>
     /// The external data status.
@@ -77,4 +77,10 @@ public class ExternalShareDto : IMapFrom<ValidationInfo>
     /// Specifies whether the user is authenticated or not.
     /// </summary>
     public bool IsAuthenticated { get; set; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class ExternalShareDtoMapper
+{
+    public static partial ExternalShareDto Map(this ValidationInfo source);
 }

@@ -29,7 +29,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// <summary>
 /// The mail white label settings parameters.
 /// </summary>
-public class MailWhiteLabelSettingsDto : IMapFrom<MailWhiteLabelSettings>
+public class MailWhiteLabelSettingsDto
 {
     ///<summary>
     /// Specifies if the mail footer is enabled or not.
@@ -45,10 +45,16 @@ public class MailWhiteLabelSettingsDto : IMapFrom<MailWhiteLabelSettings>
     /// Specifies if the mail white label settings are default or not.
     ///</summary>
     public bool IsDefault { get; set; }
-    
-    public void ConfigureMapping(TypeAdapterConfig config)
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class MailWhiteLabelSettingsDtoMapper
+{
+    [MapPropertyFromSource(nameof(MailWhiteLabelSettingsDto.IsDefault), Use = nameof(MapManual))]
+    public static partial MailWhiteLabelSettingsDto MapToDto(this MailWhiteLabelSettings source);
+
+    private static bool MapManual(MailWhiteLabelSettings source)
     {
-        config.NewConfig<MailWhiteLabelSettings, MailWhiteLabelSettingsDto>()
-            .AfterMapping((src, dest) => dest.IsDefault = src.IsDefault());
-    }
+        return source.IsDefault();
+    } 
 }

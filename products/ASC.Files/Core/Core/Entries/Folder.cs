@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.Mapping;
+
 namespace ASC.Files.Core;
 
 /// <summary>
@@ -277,4 +279,31 @@ public class Folder<T> : FileEntry<T>, IFolder
     /// Specifies if the folder is root or not.
     /// </summary>
     public bool IsRoot => FolderType == RootFolderType;
+}
+
+[Scope]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public partial class FolderMapper(IServiceProvider serviceProvider, TenantDateTimeConverter tenantDateTimeConverter, FilesMappingAction filesMappingAction)
+{
+    private partial Folder<int> Map(DbFolderQuery source);
+    private partial void ApplyChanges(DbFolder source, Folder<int> target);
+    
+    [UserMapping(Default = true)]
+    public Folder<int> MapDbFolderQueryToDbFolderInternal(DbFolderQuery dbFolderQuery)
+    {
+        if (dbFolderQuery == null)
+        {
+            return null;
+        }
+        
+        var result = Map(dbFolderQuery);
+        ApplyChanges(dbFolderQuery.Folder, result);
+        result.CreateOn = tenantDateTimeConverter.Convert(dbFolderQuery.Folder.CreateOn);
+        result.ModifiedOn = tenantDateTimeConverter.Convert(dbFolderQuery.Folder.ModifiedOn);
+        filesMappingAction.Process(result);
+        return result;
+    }
+    
+    [ObjectFactory]
+    private Folder<int> CreateFolder() => serviceProvider.GetService<Folder<int>>();
 }

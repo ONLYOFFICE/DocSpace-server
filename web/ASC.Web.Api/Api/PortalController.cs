@@ -69,7 +69,6 @@ public class PortalController(
     StudioSmsNotificationSettingsHelper studioSmsNotificationSettingsHelper,
     TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
     ExternalResourceSettingsHelper externalResourceSettingsHelper,
-    IMapper mapper,
     QuotaHelper quotaHelper,
     IEventBus eventBus,
     CspSettingsHelper cspSettingsHelper,
@@ -96,7 +95,7 @@ public class PortalController(
             return new TenantDto { TenantId = tenant.Id };
         }
 
-        var dto =  mapper.Map<TenantDto>(tenant);
+        var dto = tenant.MapToDto();
 
         if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
         {

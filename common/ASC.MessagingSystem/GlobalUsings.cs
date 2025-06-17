@@ -46,8 +46,6 @@ global using ASC.MessagingSystem.EF.Model;
 global using ASC.MessagingSystem.Log;
 global using ASC.Security.Cryptography;
 
-global using MapsterMapper;
-
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Configuration;

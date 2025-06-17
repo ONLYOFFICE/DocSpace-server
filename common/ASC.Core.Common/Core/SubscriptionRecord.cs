@@ -26,16 +26,23 @@
 
 namespace ASC.Core;
 
-public partial class SubscriptionRecord : IMapFrom<Subscription>
+public partial class SubscriptionRecord;
+
+[Mapper]
+public static partial class SubscriptionRecordMapper
 {
-    public void ConfigureMapping(TypeAdapterConfig config)
+    [MapperIgnoreSource(nameof(Subscription.Tenant))]
+    [MapProperty(nameof(Subscription.TenantId), nameof(SubscriptionRecord.Tenant))]
+    [MapProperty(nameof(Subscription.Recipient), nameof(SubscriptionRecord.RecipientId))]
+    [MapProperty(nameof(Subscription.Action), nameof(SubscriptionRecord.ActionId))]
+    [MapProperty(nameof(Subscription.Object), nameof(SubscriptionRecord.ObjectId))]
+    [MapProperty(nameof(Subscription.Source), nameof(SubscriptionRecord.SourceId))]
+    [MapProperty(nameof(Subscription.TenantId), nameof(SubscriptionRecord.Tenant))]
+    [MapProperty(nameof(Subscription.Unsubscribed), nameof(SubscriptionRecord.Subscribed), Use = nameof(MapSubscribedToUnsubscribed))]
+    public static partial SubscriptionRecord Map(this Subscription source);
+    
+    public static bool MapSubscribedToUnsubscribed(bool unsubscribed)
     {
-        config.NewConfig<Subscription, SubscriptionRecord>()
-            .Map(dest => dest.RecipientId, opt => opt.Recipient)
-            .Map(dest => dest.Subscribed, opt => !opt.Unsubscribed)
-            .Map(dest => dest.ActionId, opt => opt.Action)
-            .Map(dest => dest.ObjectId, opt => opt.Object)
-            .Map(dest => dest.SourceId, opt => opt.Source)
-            .Map(dest => dest.Tenant, r => r.TenantId);
+        return !unsubscribed;
     }
 }

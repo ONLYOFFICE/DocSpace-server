@@ -63,8 +63,6 @@ global using Confluent.Kafka;
 global using JWT;
 global using JWT.Algorithms;
 
-global using Mapster;
-
 global using Medallion.Threading;
 global using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 global using Microsoft.AspNetCore.Http;

@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Mapster.Utils;
-
 namespace ASC.ApiSystem;
 
 public class Startup
@@ -130,17 +128,6 @@ public class Startup
         
         services.RegisterFeature();
         services.RegisterQuotaFeature();
-        
-        var assemblies = BaseStartup.GetAutoMapperProfileAssemblies().ToArray();
-        TypeAdapterConfig.GlobalSettings.Scan(assemblies);
-        foreach (var assembly in assemblies)
-        {
-            TypeAdapterConfig.GlobalSettings.ScanInheritedTypes(assembly);
-        }
-        
-        var config = TypeAdapterConfig.GlobalSettings;
-        services.AddSingleton(config);
-        services.AddScoped<IMapper, ServiceMapper>();
         
         if (_configuration.GetValue<bool>("openApi:enable"))
         {

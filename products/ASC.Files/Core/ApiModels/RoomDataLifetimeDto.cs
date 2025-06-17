@@ -29,7 +29,7 @@ namespace ASC.Files.Core.ApiModels;
 /// <summary>
 /// The room data lifetime information.
 /// </summary>
-public class RoomDataLifetimeDto : IMapFrom<RoomDataLifetime>
+public class RoomDataLifetimeDto
 {
     /// <summary>
     /// Specifies whether to permanently delete the room data or not.
@@ -52,4 +52,10 @@ public class RoomDataLifetimeDto : IMapFrom<RoomDataLifetime>
     /// Specifies whether the room data lifetime setting is enabled or not.
     /// </summary>
     public bool? Enabled { get; set; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class RoomDataLifetimeDtoMapper
+{       
+    public static partial RoomDataLifetimeDto MapToDto(this RoomDataLifetime source);
 }

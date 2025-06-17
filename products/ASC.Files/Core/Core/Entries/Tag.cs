@@ -73,7 +73,7 @@ public enum TagType
 /// The tag information.
 /// </summary>
 [DebuggerDisplay("{Name} ({Id}) entry {EntryType} ({EntryId})")]
-public sealed class Tag : IMapFrom<DbFilesTag>
+public sealed class Tag
 {
     /// <summary>
     /// The tag name.
@@ -203,10 +203,12 @@ public sealed class Tag : IMapFrom<DbFilesTag>
     {
         return (Id + EntryType + EntryId.ToString()).GetHashCode();
     }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class TagMapper
+{       
+    public static partial Tag Map(this DbFilesTag source);
     
-    public void ConfigureMapping(TypeAdapterConfig config)
-    {
-        config.NewConfig<DbFilesTag, Tag>();
-        config.NewConfig<DbFilesTagLink, Tag>();
-    }
+    public static partial void ApplyUpdate(DbFilesTagLink link, Tag tag);
 }

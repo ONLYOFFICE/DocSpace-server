@@ -43,7 +43,6 @@ public class SecurityController(
     DisplayUserSettingsHelper displayUserSettingsHelper,
     EmployeeDtoHelper employeeWrapperHelper,
     IFusionCache fusionCache,
-    IMapper mapper,
     PasswordSettingsConverter passwordSettingsConverter,
     PasswordSettingsManager passwordSettingsManager)
     : BaseSettingsController(fusionCache, webItemManager)
@@ -399,7 +398,7 @@ public class SecurityController(
 
         await settingsManager.SaveAsync(settings);
 
-        return mapper.Map<LoginSettings, LoginSettingsDto>(settings);
+        return settings.Map();
     }
 
     /// <summary>
@@ -418,7 +417,7 @@ public class SecurityController(
 
         var settings = await settingsManager.LoadAsync<LoginSettings>(HttpContext.GetIfModifiedSince());
         
-        return HttpContext.TryGetFromCache(settings.LastModified) ? null :  mapper.Map<LoginSettings, LoginSettingsDto>(settings);
+        return HttpContext.TryGetFromCache(settings.LastModified) ? null :  settings.Map();
     }
 
     /// <summary>
@@ -439,6 +438,6 @@ public class SecurityController(
         
         await settingsManager.SaveAsync(defaultSettings);
 
-        return mapper.Map<LoginSettings, LoginSettingsDto>(defaultSettings);
+        return defaultSettings.Map();
     }
 }

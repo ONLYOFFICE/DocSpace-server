@@ -30,7 +30,7 @@ namespace ASC.AuditTrail.Repositories;
 public class AuditEventsRepository(AuditActionMapper auditActionMapper,
         TenantManager tenantManager,
         IDbContextFactory<MessagesContext> dbContextFactory,
-        IMapper mapper,
+        AuditEventMapper mapper,
         GeolocationHelper geolocationHelper)
     {
     public async Task<IEnumerable<AuditEvent>> GetByFilterAsync(
@@ -195,7 +195,7 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
             }).FirstOrDefault()
         });
         
-        var events = mapper.Map<List<AuditEventQuery>, List<AuditEvent>>(await q2.ToListAsync());
+        var events = mapper.ToAuditEvents(await q2.ToListAsync());
         
         foreach (var e in events)
         {

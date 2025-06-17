@@ -135,6 +135,7 @@ global using ASC.Files.Thirdparty.GoogleDrive;
 global using ASC.Files.Thirdparty.OneDrive;
 global using ASC.Files.Thirdparty.SharePoint;
 global using ASC.Files.ThumbnailBuilder;
+global using ASC.IPSecurity;
 global using ASC.MessagingSystem;
 global using ASC.MessagingSystem.Core;
 global using ASC.MessagingSystem.EF.Model;
@@ -201,10 +202,6 @@ global using Joonasw.AspNetCore.SecurityHeaders.Csp.Builder;
 
 global using JWT.Exceptions;
 
-global using Mapster;
-
-global using MapsterMapper;
-
 global using Microsoft.AspNetCore.Builder;
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.AspNetCore.Mvc;
@@ -228,6 +225,8 @@ global using Newtonsoft.Json.Linq;
 global using OpenSearch.Client;
 
 global using ProtoBuf;
+
+global using Riok.Mapperly.Abstractions;
 
 global using WebDav;
 

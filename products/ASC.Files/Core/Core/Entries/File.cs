@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.Mapping;
+
 namespace ASC.Files.Core;
 
 /// <summary>
@@ -372,4 +374,34 @@ public record FormInfo<T>
     /// The empty form information.
     /// </summary>
     public static FormInfo<T> Empty => new();
+}
+
+[Scope]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public partial class FileMapper(IServiceProvider serviceProvider, TenantDateTimeConverter tenantDateTimeConverter, SecurityTreeRecordMapper treeRecordMapper)
+{
+    private partial File<int> Map(DbFileQuery source);
+    
+    [MapProperty(nameof(DbFile.Title), nameof(File<int>.PureTitle))]
+    private partial void ApplyChanges(DbFile source, File<int> target);
+    
+    [UserMapping(Default = true)]
+    public File<int> MapDbFileQueryToDbFileInternal(DbFileQuery dbFileQuery)
+    {
+        if (dbFileQuery == null)
+        {
+            return null;
+        }
+        
+        var result = Map(dbFileQuery);
+        ApplyChanges(dbFileQuery.File, result);
+        result.CreateOn = tenantDateTimeConverter.Convert(dbFileQuery.File.CreateOn);
+        result.ModifiedOn = tenantDateTimeConverter.Convert(dbFileQuery.File.ModifiedOn);
+        result.LastOpened = tenantDateTimeConverter.Convert(dbFileQuery.LastOpened);
+        result.ShareRecord = treeRecordMapper.MapToInternal(dbFileQuery.SharedRecord);
+        return result;
+    }
+    
+    [ObjectFactory]
+    private File<int> CreateFile() => serviceProvider.GetService<File<int>>();
 }

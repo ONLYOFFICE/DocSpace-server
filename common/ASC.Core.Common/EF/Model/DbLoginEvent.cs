@@ -26,7 +26,7 @@
 
 namespace ASC.MessagingSystem.EF.Model;
 
-public class DbLoginEvent : MessageEvent, IMapFrom<EventMessage>
+public class DbLoginEvent : MessageEvent
 {
     [MaxLength(200)]
     public string Login { get; set; }
@@ -35,11 +35,19 @@ public class DbLoginEvent : MessageEvent, IMapFrom<EventMessage>
     public string DescriptionRaw { get; set; }
 
     public DbTenant Tenant { get; set; }
-    
-    public void ConfigureMapping(TypeAdapterConfig config)
-    {        
-        config.NewConfig<EventMessage, DbLoginEvent>()
-            .AfterMapping((src, dst) => MapContext.Current.GetService<EventTypeConverter>().Convert(src, dst));
+}
+
+[Scope]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public partial class DbLoginEventMapper(EventTypeConverter converter)
+{
+    private partial DbLoginEvent Map(EventMessage source);
+
+    public DbLoginEvent MapManual(EventMessage source)
+    {
+        var result = Map(source);
+        converter.Convert(source, result);
+        return result;
     }
 }
 

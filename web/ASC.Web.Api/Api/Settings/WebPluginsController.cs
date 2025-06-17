@@ -34,7 +34,7 @@ public class WebPluginsController(
     WebPluginManager webPluginManager,
     TenantManager tenantManager,
     CspSettingsHelper cspSettingsHelper,
-    IMapper mapper)
+    WebPluginMapper mapper)
     : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <summary>
@@ -72,7 +72,7 @@ public class WebPluginsController(
 
         await ChangeCspSettings(webPlugin, webPlugin.Enabled);
 
-        var outDto = await mapper.From(webPlugin).AdaptToTypeAsync<WebPluginDto>();
+        var outDto = await mapper.ToDtoManual(webPlugin);
 
         return outDto;
     }
@@ -98,7 +98,7 @@ public class WebPluginsController(
         List<WebPluginDto> outDto = [];
         foreach (var webPlugin in webPlugins)
         {
-            outDto.Add(await mapper.From(webPlugin).AdaptToTypeAsync<WebPluginDto>());
+            outDto.Add(await mapper.ToDtoManual(webPlugin));
         }
 
         if (inDto.Enabled.HasValue)
@@ -126,7 +126,7 @@ public class WebPluginsController(
 
         var webPlugin = await webPluginManager.GetWebPluginByNameAsync(tenant.Id, inDto.Name);
 
-        var outDto = await mapper.From(webPlugin).AdaptToTypeAsync<WebPluginDto>();
+        var outDto = await mapper.ToDtoManual(webPlugin);
 
         return outDto;
     }

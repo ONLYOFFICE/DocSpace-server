@@ -54,8 +54,6 @@ global using ASC.Web.Core.WhiteLabel;
 global using ASC.Web.Studio.Core.Notify;
 global using Autofac;
 
-global using MapsterMapper;
-
 global using Microsoft.AspNetCore.Builder;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Hosting.WindowsServices;

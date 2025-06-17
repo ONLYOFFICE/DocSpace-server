@@ -26,7 +26,7 @@
 
 namespace ASC.AuditTrail.Models;
 
-public class BaseEvent : IMapFrom<DbLoginEvent>
+public class BaseEvent
 {
     public int Id { get; set; }
     public int TenantId { get; set; }
@@ -60,12 +60,35 @@ public class BaseEvent : IMapFrom<DbLoginEvent>
 
     [Event("ActionCol")]
     public string ActionText { get; set; }
-    
-    public void ConfigureMapping(TypeAdapterConfig config)
-    {
-        config.NewConfig<DbLoginEvent, BaseEvent>()
-            .AfterMapping((source, dest) => MapContext.Current.GetService<BaseEventTypeIpResolver>().Resolve(source, dest))
-            .AfterMapping((source, dest) => MapContext.Current.GetService<BaseEventTypeDateResolver>().Resolve(source, dest));
-    }
 }
 
+[Scope]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public partial class BaseEventMapper(TenantUtil tenantUtil)
+{   
+    [MapPropertyFromSource(nameof(BaseEvent.IP), Use = nameof(Resolve))]
+    [MapPropertyFromSource(nameof(BaseEvent.Date), Use = nameof(ResolveDate))]
+    public partial BaseEvent Map(DbLoginEvent source);
+    public partial List<BaseEvent> Map(List<DbLoginEvent> source);
+    
+    [UserMapping(Default = false)]
+    private static string Resolve(DbLoginEvent source)
+    {
+        if (!string.IsNullOrEmpty(source.Ip))
+        {
+            var ipSplited = source.Ip.Split(':');
+            if (ipSplited.Length > 1)
+            {
+                return ipSplited[0];
+            }
+        }
+
+        return null;
+    }
+    
+    [UserMapping(Default = false)]
+    private DateTime ResolveDate(DbLoginEvent source)
+    {
+        return tenantUtil.DateTimeFromUtc(source.Date);
+    }
+}

@@ -24,12 +24,14 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using EnumMappingStrategy = Riok.Mapperly.Abstractions.EnumMappingStrategy;
+
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
 /// The web plugin information.
 /// </summary>
-public class WebPluginDto: IMapFrom<WebPlugin>
+public class WebPluginDto
 {
     /// <summary>
     /// The web plugin name.
@@ -105,10 +107,22 @@ public class WebPluginDto: IMapFrom<WebPlugin>
     /// The web plugin settings.
     /// </summary>
     public string Settings { get; set; }
-    
-    public void ConfigureMapping(TypeAdapterConfig config)
+}
+
+[Scope]
+[Mapper(EnumMappingStrategy = EnumMappingStrategy.ByName, EnumMappingIgnoreCase = true)]
+public partial class WebPluginMapper(EmployeeDtoHelper employeeDtoHelper)
+{
+    [MapperIgnoreTarget(nameof(WebPluginDto.CreateBy))]
+    [MapperIgnoreSource(nameof(WebPlugin.CreateBy))]
+    [MapperIgnoreSource(nameof(WebPlugin.CspDomains))]
+    private partial WebPluginDto ToDto(WebPlugin webPlugin);
+
+    public async Task<WebPluginDto> ToDtoManual(WebPlugin source)
     {
-        config.NewConfig<WebPlugin, WebPluginDto>()
-            .AfterMappingAsync(async (src, dest) =>  dest.CreateBy = await MapContext.Current.GetService<EmployeeDtoHelper>().GetAsync(src.CreateBy));
+        var dto = ToDto(source);
+        dto.CreateBy = await employeeDtoHelper.GetAsync(source.CreateBy);//TODO
+
+        return dto;
     }
 }

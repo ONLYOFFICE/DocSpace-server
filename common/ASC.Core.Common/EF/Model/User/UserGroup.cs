@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Common.EF;
 
-public class UserGroup : BaseEntity, IMapFrom<UserGroupRef>
+public class UserGroup : BaseEntity
 {
     public int TenantId { get; set; }
     public Guid Userid { get; set; }
@@ -41,12 +41,13 @@ public class UserGroup : BaseEntity, IMapFrom<UserGroupRef>
     {
         return [TenantId, Userid, UserGroupId, RefType];
     }
-    
-    public void ConfigureMapping(TypeAdapterConfig config)
-    {
-        config.NewConfig<UserGroupRef, UserGroup>()
-            .Map(r => r.UserGroupId, r => r.GroupId);
-    }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class UserGroupMapper
+{    
+    [MapProperty(nameof(UserGroupRef.GroupId), nameof(UserGroup.UserGroupId))]
+    public static partial UserGroup Map(this UserGroupRef source);
 }
 
 public static class DbUserGroupExtension

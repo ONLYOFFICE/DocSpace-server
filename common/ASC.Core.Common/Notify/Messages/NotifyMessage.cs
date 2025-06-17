@@ -27,7 +27,7 @@
 namespace ASC.Notify.Messages;
 
 [ProtoContract]
-public class NotifyMessage : IMapFrom<NotifyQueue>
+public class NotifyMessage
 {
     [ProtoMember(1)]
     public string Sender { get; set; }
@@ -70,13 +70,16 @@ public class NotifyMessage : IMapFrom<NotifyQueue>
 
     [ProtoMember(14)]
     public string Data { get; set; }
-    
-    public void ConfigureMapping(TypeAdapterConfig config)
-    {
-        config.NewConfig<NotifyQueue, NotifyMessage>()
-            .Ignore(r => r.Attachments)
-            .TwoWays();
-        
-    }
+}
 
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class NotifyMessageMapper
+{
+    [MapperIgnoreSource(nameof(NotifyQueue.Attachments))]
+    [MapperIgnoreTarget(nameof(NotifyQueue.Attachments))]
+    public static partial NotifyMessage Map(this NotifyQueue source);
+    
+    [MapperIgnoreSource(nameof(NotifyQueue.Attachments))]
+    [MapperIgnoreTarget(nameof(NotifyQueue.Attachments))]
+    public static partial NotifyQueue Map(this NotifyMessage source);
 }
