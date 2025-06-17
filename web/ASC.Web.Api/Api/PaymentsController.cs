@@ -861,6 +861,12 @@ public class PaymentController(
 
     private static string GetServiceDesc(string serviceName)
     {
+        // for testing purposes
+        if (serviceName != null && serviceName.StartsWith("disk-storage"))
+        {
+            serviceName = "disk-storage";
+        }
+
         return Resource.ResourceManager.GetString("AccountingCustomerOperationServiceDesc_" + (serviceName ?? "top-up"));
     }
 
