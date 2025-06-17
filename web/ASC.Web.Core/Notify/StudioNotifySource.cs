@@ -158,7 +158,10 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
                 Actions.DeveloperAdminPaymentWarningGracePeriodExpiration,
 
                 Actions.UserTypeChanged,
-                Actions.UserRoleChanged
+                Actions.UserRoleChanged,
+
+                Actions.TopUpWalletError,
+                Actions.RenewSubscriptionError
             );
     }
 

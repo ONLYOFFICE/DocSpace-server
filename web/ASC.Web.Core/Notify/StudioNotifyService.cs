@@ -1021,6 +1021,60 @@ public class StudioNotifyService(
 
     #endregion
 
+
+    #region Wallet
+
+    public async Task SendTopUpWalletErrorAsync(UserInfo payer, UserInfo owner)
+    {
+        foreach (var user in new UserInfo[] { payer, owner })
+        {
+            if (user == null)
+            {
+                continue;
+            }
+
+            var culture = GetCulture(user);
+            var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGoToWalletSettings", GetCulture(user));
+            var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
+
+            await studioNotifyServiceHelper.SendNoticeToAsync(
+            Actions.TopUpWalletError,
+            await studioNotifyHelper.RecipientFromEmailAsync(user.Email, false),
+            [EMailSenderName],
+            new TagValue(Tags.UserName, user.FirstName.HtmlEncode()),
+            new TagValue(CommonTags.Culture, user.GetCulture().Name),
+            TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~/portal-settings/payments/wallet")),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours));
+        }
+    }
+
+    public async Task SendRenewSubscriptionErrorAsync(UserInfo payer, UserInfo owner)
+    {
+        foreach (var user in new UserInfo[] { payer, owner })
+        {
+            if (user == null)
+            {
+                continue;
+            }
+
+            var culture = GetCulture(user);
+            var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGoToServices", culture);
+            var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
+
+            await studioNotifyServiceHelper.SendNoticeToAsync(
+            Actions.RenewSubscriptionError,
+            await studioNotifyHelper.RecipientFromEmailAsync(user.Email, false),
+            [EMailSenderName],
+            new TagValue(Tags.UserName, user.FirstName.HtmlEncode()),
+            new TagValue(CommonTags.Culture, culture.Name),
+            TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~/portal-settings/services")),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours));
+        }
+    }
+
+    #endregion
+
+
     #region Migration Personal to Docspace
 
     public async Task MigrationPersonalToDocspaceAsync(UserInfo userInfo)

@@ -158,4 +158,7 @@ public static class Actions
 
     public static readonly INotifyAction UserTypeChanged = new NotifyAction("user_type_changed");
     public static readonly INotifyAction UserRoleChanged = new NotifyAction("user_role_changed");
+
+    public static readonly INotifyAction TopUpWalletError = new NotifyAction("top_up_wallet_error");
+    public static readonly INotifyAction RenewSubscriptionError = new NotifyAction("renew_subscription_error");
 }
