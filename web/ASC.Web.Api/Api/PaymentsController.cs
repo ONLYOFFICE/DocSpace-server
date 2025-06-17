@@ -632,7 +632,9 @@ public class PaymentController(
 
         var result = await tariffService.TopUpDepositAsync(tenant.Id, inDto.Amount, inDto.Currency, true);
 
-        messageService.Send(MessageAction.CustomerWalletToppedUp);
+        var description = $"{inDto.Amount} {inDto.Currency}";
+
+        messageService.Send(MessageAction.CustomerWalletToppedUp, description);
 
         return result;
     }
