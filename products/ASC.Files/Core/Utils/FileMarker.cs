@@ -916,11 +916,11 @@ public class FileMarker(
         }
 
         var entryTagsProvider = enableThirdParty 
-            ? await GetEntryTagsAsync<string>(tagsInternal) 
+            ? await GetEntryTagsAsync<string>(tagsProvider) 
             : [];
 
 
-        var entryTagsInternal = await GetEntryTagsAsync<int>(tagsProvider);
+        var entryTagsInternal = await GetEntryTagsAsync<int>(tagsInternal);
 
         foreach (var entryTag in entryTagsInternal)
         {
