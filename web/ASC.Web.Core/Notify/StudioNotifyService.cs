@@ -1026,13 +1026,12 @@ public class StudioNotifyService(
 
     public async Task SendTopUpWalletErrorAsync(UserInfo payer, UserInfo owner)
     {
-        foreach (var user in new UserInfo[] { payer, owner })
-        {
-            if (user == null)
-            {
-                continue;
-            }
+        var users = (new UserInfo[] { payer, owner })
+            .Where(user => user != null && !string.IsNullOrEmpty(user.Email))
+            .DistinctBy(user => user.Email);
 
+        foreach (var user in users)
+        {
             var culture = GetCulture(user);
             var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGoToWalletSettings", GetCulture(user));
             var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
@@ -1050,13 +1049,12 @@ public class StudioNotifyService(
 
     public async Task SendRenewSubscriptionErrorAsync(UserInfo payer, UserInfo owner)
     {
-        foreach (var user in new UserInfo[] { payer, owner })
-        {
-            if (user == null)
-            {
-                continue;
-            }
+        var users = (new UserInfo[] { payer, owner })
+            .Where(user => user != null && !string.IsNullOrEmpty(user.Email))
+            .DistinctBy(user => user.Email);
 
+        foreach (var user in users)
+        {
             var culture = GetCulture(user);
             var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGoToServices", culture);
             var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);

@@ -127,23 +127,13 @@ public class TopUpWalletService(
             if (!string.IsNullOrEmpty(payerEmail))
             {
                 payer = await userManager.GetUserByEmailAsync(payerEmail);
-                if (payer.Id != ASC.Core.Users.Constants.LostUser.Id)
-                {
-                    await securityContext.AuthenticateMeWithoutCookieAsync(data.TenantId, payer.Id);
-                }
-                else
-                {
-                    payer = new UserInfo()
-                    {
-                        Email = payerEmail,
-                        FirstName = "",
-                        CultureName = tenant.GetCulture().Name,
-                        TenantId = tenant.Id
-                    };
-                }
             }
 
-            if (!securityContext.IsAuthenticated)
+            if (payer != null && payer.Id != ASC.Core.Users.Constants.LostUser.Id)
+            {
+                await securityContext.AuthenticateMeWithoutCookieAsync(data.TenantId, payer.Id);
+            }
+            else
             {
                 await securityContext.AuthenticateMeWithoutCookieAsync(data.TenantId, owner.Id);
             }
