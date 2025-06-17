@@ -1063,7 +1063,7 @@ public class TariffService(
         return customerInfo;
     }
 
-    public async Task<string> TopUpDepositAsync(int tenantId, decimal amount, string currency, bool waitForChanges = false)
+    public async Task<bool> TopUpDepositAsync(int tenantId, decimal amount, string currency, bool waitForChanges = false)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
 
@@ -1077,7 +1077,7 @@ public class TariffService(
 
         var result = await billingClient.TopUpDepositAsync(portalId, amount, currency);
 
-        if (!waitForChanges)
+        if (!result || !waitForChanges)
         {
             return result;
         }

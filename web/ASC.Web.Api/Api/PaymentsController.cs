@@ -603,21 +603,21 @@ public class PaymentController(
     /// </short>
     /// <path>api/2.0/portal/payment/deposit</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "Success status", typeof(string))]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("deposit")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
-    public async Task<string> TopUpDeposit(TopUpDepositRequestDto inDto)
+    public async Task<bool> TopUpDeposit(TopUpDepositRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
         {
-            return null;
+            return false;
         }
 
         var supportedCurrencies = tariffService.GetSupportedAccountingCurrencies();
         if (!supportedCurrencies.Contains(inDto.Currency))
         {
-            return null;
+            return false;
         }
 
         var tenant = tenantManager.GetCurrentTenant();
@@ -625,16 +625,18 @@ public class PaymentController(
         var hasCustomer = await HasCustomer(tenant);
         if (!hasCustomer)
         {
-            return null;
+            return false;
         }
 
         await DemandPayerAsync(tenant);
 
         var result = await tariffService.TopUpDepositAsync(tenant.Id, inDto.Amount, inDto.Currency, true);
 
-        var description = $"{inDto.Amount} {inDto.Currency}";
-
-        messageService.Send(MessageAction.CustomerWalletToppedUp, description);
+        if (result)
+        {
+            var description = $"{inDto.Amount} {inDto.Currency}";
+            messageService.Send(MessageAction.CustomerWalletToppedUp, description);
+        }
 
         return result;
     }

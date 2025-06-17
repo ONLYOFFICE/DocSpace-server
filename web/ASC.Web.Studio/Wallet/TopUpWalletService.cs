@@ -113,7 +113,13 @@ public class TopUpWalletService(
 
             var truncated = Math.Truncate(subAccount.Amount * 100) / 100; // Truncate to 2 decimal places
             var amount = settings.UpToBalance - truncated;
-            _ = await tariffService.TopUpDepositAsync(data.TenantId, amount, settings.Currency, true);
+            var result = await tariffService.TopUpDepositAsync(data.TenantId, amount, settings.Currency, true);
+
+            if (!result)
+            {
+                logger.ErrorTopUpWalletServiceFail(data.TenantId);
+                return;
+            }
 
             var payerId = (await tariffService.GetCustomerInfoAsync(data.TenantId)).Email;
             if (!string.IsNullOrEmpty(payerId))
