@@ -322,7 +322,7 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Customer subscription updated.
+        ///   Looks up a localized string similar to Customer subscription updated: {0}.
         /// </summary>
         public static string CustomerSubscriptionUpdated {
             get {
@@ -331,7 +331,7 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Customer wallet topped up.
+        ///   Looks up a localized string similar to Customer wallet topped up: {0}.
         /// </summary>
         public static string CustomerWalletToppedUp {
             get {

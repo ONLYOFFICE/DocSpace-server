@@ -169,7 +169,20 @@ public class RenewSubscriptionService(
             {
                 var newTariff = await tariffService.GetTariffAsync(data.TenantId, refresh: false);
 
-                var description = $"{walletQuota.Name} {data.Quantity}";
+                var payerId = (await tariffService.GetCustomerInfoAsync(data.TenantId)).Email;
+                if (!string.IsNullOrEmpty(payerId))
+                {
+                    var userManager = scope.ServiceProvider.GetRequiredService<UserManager>();
+                    var payer = await userManager.GetUserByEmailAsync(payerId);
+
+                    if (payer.Id != ASC.Core.Users.Constants.LostUser.Id)
+                    {
+                        var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
+                        await securityContext.AuthenticateMeWithoutCookieAsync(data.TenantId, payer.Id);
+                    }
+                }
+
+                var description = $"{walletQuota.Name} {nextQuantity}";
                 var messageService = scope.ServiceProvider.GetRequiredService<MessageService>();
                 messageService.Send(MessageInitiator.System, MessageAction.CustomerSubscriptionUpdated, description);
 

@@ -131,6 +131,12 @@ public class Quota : IEquatable<Quota>
     [ProtoMember(5)]
     public int? NextQuantity { get; set; }
 
+    /// <summary>
+    /// The quota state.
+    /// </summary>
+    [ProtoMember(6)]
+    public QuotaState? State { get; set; }
+
     public Quota()
     {
     }
@@ -148,10 +154,27 @@ public class Quota : IEquatable<Quota>
         Wallet = wallet;
         DueDate = dueDate;
         NextQuantity = nextQuantity;
+
+        if (dueDate.HasValue)
+        {
+            State = dueDate < DateTime.UtcNow ? QuotaState.Overdue : QuotaState.Active;
+        }
     }
 
     public bool Equals(Quota other)
     {
         return other != null && other.Id == Id && other.Quantity == Quantity && other.Wallet == Wallet && other.DueDate == DueDate && other.NextQuantity == NextQuantity;
     }
+}
+
+/// <summary>
+/// The quota state.
+/// </summary>
+public enum QuotaState
+{
+    [SwaggerEnum("Active")]
+    Active,
+
+    [SwaggerEnum("Overdue")]
+    Overdue
 }

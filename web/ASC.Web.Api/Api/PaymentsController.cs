@@ -26,6 +26,8 @@
 
 using ASC.Files.Core.Utils;
 
+using Microsoft.AspNetCore.RateLimiting;
+
 namespace ASC.Web.Api.Controllers;
 
 ///<summary>
@@ -123,6 +125,7 @@ public class PaymentController(
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("update")]
+    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task<bool> UpdatePayment(QuantityRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
@@ -196,6 +199,7 @@ public class PaymentController(
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("updatewallet")]
+    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task<bool> UpdateWalletPayment(WalletQuantityRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
@@ -599,20 +603,21 @@ public class PaymentController(
     /// </short>
     /// <path>api/2.0/portal/payment/deposit</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "Success status", typeof(string))]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("deposit")]
-    public async Task<string> TopUpDeposit(TopUpDepositRequestDto inDto)
+    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
+    public async Task<bool> TopUpDeposit(TopUpDepositRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
         {
-            return null;
+            return false;
         }
 
         var supportedCurrencies = tariffService.GetSupportedAccountingCurrencies();
         if (!supportedCurrencies.Contains(inDto.Currency))
         {
-            return null;
+            return false;
         }
 
         var tenant = tenantManager.GetCurrentTenant();
@@ -620,14 +625,18 @@ public class PaymentController(
         var hasCustomer = await HasCustomer(tenant);
         if (!hasCustomer)
         {
-            return null;
+            return false;
         }
 
         await DemandPayerAsync(tenant);
 
         var result = await tariffService.TopUpDepositAsync(tenant.Id, inDto.Amount, inDto.Currency, true);
 
-        messageService.Send(MessageAction.CustomerWalletToppedUp);
+        if (result)
+        {
+            var description = $"{inDto.Amount} {inDto.Currency}";
+            messageService.Send(MessageAction.CustomerWalletToppedUp, description);
+        }
 
         return result;
     }
@@ -856,6 +865,12 @@ public class PaymentController(
 
     private static string GetServiceDesc(string serviceName)
     {
+        // for testing purposes
+        if (serviceName != null && serviceName.StartsWith("disk-storage"))
+        {
+            serviceName = "disk-storage";
+        }
+
         return Resource.ResourceManager.GetString("AccountingCustomerOperationServiceDesc_" + (serviceName ?? "top-up"));
     }
 
