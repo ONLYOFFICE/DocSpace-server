@@ -75,6 +75,12 @@ public class Tariff
     [ProtoMember(7)]
     public List<Quota> Quotas { get; set; }
 
+    /// <summary>
+    /// The list of overdue tariff quotas.
+    /// </summary>
+    [ProtoMember(7)]
+    public List<Quota> OverdueQuotas { get; set; }
+
     public override int GetHashCode()
     {
         return DueDate.GetHashCode();

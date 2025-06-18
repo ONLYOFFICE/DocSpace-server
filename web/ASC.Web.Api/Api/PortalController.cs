@@ -270,7 +270,7 @@ public class PortalController(
             result.Developer = tenantExtra.Developer;
             result.CustomerId = source.CustomerId;
             result.LicenseDate = source.LicenseDate;
-            result.Quotas = source.Quotas;
+            result.Quotas = source.Quotas.Concat(source.OverdueQuotas ?? []).ToList();
         }
         
         return result;

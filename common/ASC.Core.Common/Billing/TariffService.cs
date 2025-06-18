@@ -171,6 +171,8 @@ public class TariffService(
                             }
                         }
 
+                        asynctariff.OverdueQuotas = tariff.OverdueQuotas;
+
                         TenantQuota updatedQuota = null;
 
                         foreach (var quota in asynctariff.Quotas)
@@ -635,9 +637,21 @@ public class TariffService(
         tariff.Id = r.Id;
         tariff.DueDate = r.Stamp.Year < 9999 ? r.Stamp : DateTime.MaxValue;
         tariff.CustomerId = r.CustomerId;
-        tariff.Quotas = await coreDbContext.QuotasAsync(r.TenantId, r.Id)
-            .Where(q => !q.State.HasValue || q.State.Value == QuotaState.Active)
-            .ToListAsync();
+
+        var quotas = await coreDbContext.QuotasAsync(r.TenantId, r.Id).ToListAsync();
+
+        foreach (var q in quotas)
+        {
+            if (q.State.HasValue && q.State.Value == QuotaState.Overdue)
+            {
+                tariff.OverdueQuotas ??= [];
+                tariff.OverdueQuotas.Add(q);
+            }
+            else
+            {
+                tariff.Quotas.Add(q);
+            }
+        }
 
         if (tariff.Quotas.All(q => q.Wallet))
         {
