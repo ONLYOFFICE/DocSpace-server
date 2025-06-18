@@ -135,7 +135,13 @@ public class Quota : IEquatable<Quota>
     /// The quota state.
     /// </summary>
     [ProtoMember(6)]
-    public QuotaState? State { get; set; }
+    public QuotaState? State
+    {
+        get
+        {
+            return DueDate.HasValue ? DueDate.Value < DateTime.UtcNow ? QuotaState.Overdue : QuotaState.Active : null;
+        }
+    }
 
     public Quota()
     {
@@ -154,11 +160,6 @@ public class Quota : IEquatable<Quota>
         Wallet = wallet;
         DueDate = dueDate;
         NextQuantity = nextQuantity;
-
-        if (dueDate.HasValue)
-        {
-            State = dueDate < DateTime.UtcNow ? QuotaState.Overdue : QuotaState.Active;
-        }
     }
 
     public bool Equals(Quota other)
