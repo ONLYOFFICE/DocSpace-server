@@ -484,7 +484,7 @@ internal class FolderDao(
 
             await filesDbContext.SaveChangesAsync();
 
-            if (folder.FolderType is FolderType.DEFAULT or FolderType.BUNCH)
+            if (folder.FolderType is FolderType.DEFAULT or FolderType.BUNCH || DocSpaceHelper.IsRoom(folder.FolderType))
             {
                 _ = factoryIndexer.IndexAsync(toUpdate);
             }
@@ -527,7 +527,7 @@ internal class FolderDao(
             newFolder = entityEntry.Entity;
             await filesDbContext.SaveChangesAsync();
 
-            if (folder.FolderType is FolderType.DEFAULT or FolderType.BUNCH)
+            if (folder.FolderType is FolderType.DEFAULT or FolderType.BUNCH || DocSpaceHelper.IsRoom(folder.FolderType))
             {
                 _ = factoryIndexer.IndexAsync(newFolder);
             }
