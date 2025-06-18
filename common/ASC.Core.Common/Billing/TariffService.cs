@@ -161,7 +161,14 @@ public class TariffService(
 
                         if (asynctariff.Quotas.All(q => q.Wallet))
                         {
-                            await AddInitialQuotaAsync(asynctariff, tenantId);
+                            if (tariff.Id != 0 && tariff.State >= TariffState.Paid && !await IsFreeTariffAsync(tariff))
+                            {
+                                throw new BillingNotFoundException($"Payment {tariff.Id} not found. Only wallet payments available");
+                            }
+                            else
+                            {
+                                await AddInitialQuotaAsync(asynctariff, tenantId);
+                            }
                         }
 
                         TenantQuota updatedQuota = null;
@@ -322,14 +329,14 @@ public class TariffService(
         return productIds;
     }
 
-    public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency)
+    public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency, bool checkQuota)
     {
         if (quantity == null || quantity.Count == 0 || !billingClient.Configured)
         {
             return false;
         }
 
-        var productIds = await CheckQuotaAndGetProductIds(tenantId, quantity);
+        var productIds = checkQuota ? await CheckQuotaAndGetProductIds(tenantId, quantity) : await GetProductIds(quantity);
 
         try
         {
@@ -628,7 +635,9 @@ public class TariffService(
         tariff.Id = r.Id;
         tariff.DueDate = r.Stamp.Year < 9999 ? r.Stamp : DateTime.MaxValue;
         tariff.CustomerId = r.CustomerId;
-        tariff.Quotas = await coreDbContext.QuotasAsync(r.TenantId, r.Id).ToListAsync();
+        tariff.Quotas = await coreDbContext.QuotasAsync(r.TenantId, r.Id)
+            .Where(q => !q.State.HasValue || q.State.Value == QuotaState.Active)
+            .ToListAsync();
 
         if (tariff.Quotas.All(q => q.Wallet))
         {

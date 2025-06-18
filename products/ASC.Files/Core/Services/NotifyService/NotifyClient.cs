@@ -112,7 +112,7 @@ public class NotifyClient(WorkContext notifyContext,
 
         var url = fileEntry.FileEntryType == FileEntryType.File
                       ? filesLinkUtility.GetFileWebPreviewUrl(fileUtility, fileEntry.Title, fileEntry.Id)
-                      : await pathProvider.GetFolderUrlAsync((Folder<T>)fileEntry);
+                      : pathProvider.GetFolderUrl((Folder<T>)fileEntry);
 
         Folder<T> folder;
 

@@ -47,13 +47,10 @@ public class RenewSubscriptionService(
         IServiceScopeFactory scopeFactory,
         ILogger<RenewSubscriptionService> logger,
         IConfiguration configuration,
-        IFusionCache hybridCache,
-        NotifyConfiguration notifyConfiguration)
+        IFusionCache hybridCache)
     : ActivePassiveBackgroundService<RenewSubscriptionService>(logger, scopeFactory)
 {
     private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
-
-    private bool _configured;
 
     private const string CacheKey = "renewsubscriptionservice_lastrun";
 
@@ -67,12 +64,6 @@ public class RenewSubscriptionService(
     {
         try
         {
-            if (!_configured)
-            {
-                notifyConfiguration.Configure();
-                _configured = true;
-            }
-
             if (_closeToExpirationWalletQuotas != null && _closeToExpirationWalletQuotas.Count > 0)
             {
                 var expiredWalletQuotas = _closeToExpirationWalletQuotas.Where(x => x.DueDate < DateTime.UtcNow).ToList();
@@ -197,7 +188,7 @@ public class RenewSubscriptionService(
             // TODO: support other currencies
             var defaultCurrency = tariffService.GetSupportedAccountingCurrencies().First();
 
-            var result = await tariffService.PaymentChangeAsync(data.TenantId, quantity, ProductQuantityType.Renew, defaultCurrency);
+            var result = await tariffService.PaymentChangeAsync(data.TenantId, quantity, ProductQuantityType.Renew, defaultCurrency, false);
 
             if (result)
             {
@@ -205,7 +196,7 @@ public class RenewSubscriptionService(
 
                 var description = $"{walletQuota.Name} {nextQuantity}";
                 var messageService = scope.ServiceProvider.GetRequiredService<MessageService>();
-                messageService.Send(MessageInitiator.System, MessageAction.CustomerSubscriptionUpdated, description);
+                messageService.Send(MessageInitiator.PaymentService, MessageAction.CustomerSubscriptionUpdated, description);
 
                 logger.InfoRenewSubscriptionServiceDone(data.TenantId, description);
 

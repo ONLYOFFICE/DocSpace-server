@@ -43,13 +43,10 @@ namespace ASC.Web.Studio.Wallet;
 public class TopUpWalletService(
         IServiceScopeFactory scopeFactory,
         ILogger<TopUpWalletService> logger,
-        IConfiguration configuration,
-        NotifyConfiguration notifyConfiguration)
+        IConfiguration configuration)
     : ActivePassiveBackgroundService<TopUpWalletService>(logger, scopeFactory)
 {
     private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
-
-    private bool _configured;
 
     protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.Parse(configuration["core:accounting:topupperiod"] ?? "0:5:0", CultureInfo.InvariantCulture);
 
@@ -64,12 +61,6 @@ public class TopUpWalletService(
     {
         try
         {
-            if (!_configured)
-            {
-                notifyConfiguration.Configure();
-                _configured = true;
-            }
-
             List<TenantWalletSettingsData> activeTenants;
 
             await using (var scope = _scopeFactory.CreateAsyncScope())
@@ -160,7 +151,7 @@ public class TopUpWalletService(
             {
                 var messageService = scope.ServiceProvider.GetRequiredService<MessageService>();
                 var description = $"{amount} {settings.Currency}";
-                messageService.Send(MessageInitiator.System, MessageAction.CustomerWalletToppedUp, description);
+                messageService.Send(MessageInitiator.PaymentService, MessageAction.CustomerWalletToppedUp, description);
 
                 logger.InfoTopUpWalletServiceDone(data.TenantId, description);
 
