@@ -29,8 +29,8 @@ namespace ASC.Api.Core;
 [Scope]
 public class ApiContext(IHttpContextAccessor httpContextAccessor) : ICloneable
 {
-    public const int MaxCount = 1000;
-    public const int DefaultCount = 1000;
+    public const int MaxCount = 100;
+    public const int DefaultCount = 100;
 
 
     public ApiContext SetTotalCount(long totalCollectionCount)

@@ -264,9 +264,13 @@ public class TariffService(
 
         var tariff = await GetTariffAsync(tenantId);
 
+        var quotas = tariff.Quotas
+            .Where(quota => !quota.DueDate.HasValue || quota.DueDate.Value > DateTime.UtcNow)
+            .ToList();
+
         // update the quantity of present quotas
         TenantQuota updatedQuota = null;
-        foreach (var tariffRow in tariff.Quotas)
+        foreach (var tariffRow in quotas)
         {
             var quotaId = tariffRow.Id;
             var qty = tariffRow.Quantity;
@@ -287,7 +291,7 @@ public class TariffService(
         }
 
         // add new quotas
-        var addedQuotas = newQuotas.Where(q => !tariff.Quotas.Exists(t => t.Id == q.TenantId));
+        var addedQuotas = newQuotas.Where(q => !quotas.Exists(t => t.Id == q.TenantId));
         foreach (var addedQuota in addedQuotas)
         {
             var qty = quantity[addedQuota.Name];
@@ -309,6 +313,15 @@ public class TariffService(
         return productIds;
     }
 
+    private async Task<IEnumerable<string>> GetProductIds(Dictionary<string, int> quantity)
+    {
+        var productIds = (await quotaService.GetTenantQuotasAsync())
+            .Where(q => !string.IsNullOrEmpty(q.ProductId) && quantity.ContainsKey(q.Name))
+            .Select(q => q.ProductId);
+
+        return productIds;
+    }
+
     public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency)
     {
         if (quantity == null || quantity.Count == 0 || !billingClient.Configured)
@@ -320,7 +333,7 @@ public class TariffService(
 
         try
         {
-            var changed = await billingClient.ChangePaymentAsync(await coreSettings.GetKeyAsync(tenantId), productIds.ToArray(), quantity.Values.ToArray(), productQuantityType, currency);
+            var changed = await billingClient.ChangePaymentAsync(await coreSettings.GetKeyAsync(tenantId), productIds, quantity.Values, productQuantityType, currency);
 
             if (!changed)
             {
@@ -346,11 +359,11 @@ public class TariffService(
             return null;
         }
 
-        var productIds = await CheckQuotaAndGetProductIds(tenantId, quantity);
+        var productIds = await GetProductIds(quantity);
 
         try
         {
-            var response = await billingClient.CalculatePaymentAsync(await coreSettings.GetKeyAsync(tenantId), productIds.ToArray(), quantity.Values.ToArray(), productQuantityType, currency);
+            var response = await billingClient.CalculatePaymentAsync(await coreSettings.GetKeyAsync(tenantId), productIds, quantity.Values, productQuantityType, currency);
 
             return response;
         }
@@ -1050,7 +1063,7 @@ public class TariffService(
         return customerInfo;
     }
 
-    public async Task<string> TopUpDepositAsync(int tenantId, decimal amount, string currency, bool waitForChanges = false)
+    public async Task<bool> TopUpDepositAsync(int tenantId, decimal amount, string currency, bool waitForChanges = false)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
 
@@ -1064,7 +1077,7 @@ public class TariffService(
 
         var result = await billingClient.TopUpDepositAsync(portalId, amount, currency);
 
-        if (!waitForChanges)
+        if (!result || !waitForChanges)
         {
             return result;
         }

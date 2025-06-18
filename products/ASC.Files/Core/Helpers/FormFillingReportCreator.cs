@@ -73,7 +73,22 @@ public class FormFillingReportCreator(
         factoryIndexerForm.Refresh();
         var (success, result) = await factoryIndexerForm.TrySelectAsync(r => r.Where(s => s.RoomId, roomId).Where(s => s.OriginalFormId, originalFormId));
 
-        return success ? result : [];
+        if (success)
+        {
+            var sortedResult = result
+                .Select(item =>
+                {
+                    var formValue = item.FormsData?.FirstOrDefault(f => f.Key == "FormNumber").Value;
+                    int.TryParse(formValue, out var number);
+                    return (item, number);
+                })
+            .OrderBy(x => x.number)
+            .Select(x => x.item)
+            .ToList();
+
+            return sortedResult;
+        }
+        return [];
     }
 
     private async Task GetSubmitFormsData<T>(File<T> formsDataFile, int originalFormId, int roomId, int resultFormNumber, string url)

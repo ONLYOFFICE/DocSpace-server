@@ -2109,8 +2109,6 @@ public class EntryManager(IDaoFactory daoFactory,
         properties.FormFilling.ResultsFolderId = resultsFolderId;
         properties.FormFilling.StartFilling = true;
 
-        properties.FormFilling.ResultsFileID = await CreateFillResultsFile(resultsFolderId, createBy, sourceTitle, fileDao);
-
         await fileDao.SaveProperties(sourceFileId, properties);
 
         return properties;
@@ -2319,6 +2317,14 @@ public class EntryManager(IDaoFactory daoFactory,
         var currentStep = GetCurrentFillingStep(allRoles);
         if (currentStep != -1)
         {
+            var properties = await fileDao.GetProperties(form.Id);
+            var formFilling = properties?.FormFilling;
+            var isFillingStoped = formFilling?.FillingStopedDate != null && !DateTime.MinValue.Equals(formFilling?.FillingStopedDate);
+            if (isFillingStoped)
+            {
+                throw new InvalidOperationException(Resource.ErrorNotAllowedOption);
+            }
+
             var myRole = GetCurrentUserRole(allRoles, securityContext.CurrentAccount.ID);
             if (myRole != null && currentStep == myRole.Sequence)
             {

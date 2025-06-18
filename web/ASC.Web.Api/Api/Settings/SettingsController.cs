@@ -412,7 +412,7 @@ public partial class SettingsController(
     [HttpPost("deeplink")]
     public async Task<TenantDeepLinkSettings> ConfigureDeepLink(DeepLinkConfigurationRequestsDto inDto)
     {
-        await DemandStatisticPermissionAsync();
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         if (!Enum.IsDefined(typeof(DeepLinkHandlingMode), inDto.DeepLinkSettings.HandlingMode))
         {
             throw new ArgumentException(nameof(inDto.DeepLinkSettings.HandlingMode));
