@@ -329,14 +329,14 @@ public class TariffService(
         return productIds;
     }
 
-    public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency)
+    public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency, bool checkQuota)
     {
         if (quantity == null || quantity.Count == 0 || !billingClient.Configured)
         {
             return false;
         }
 
-        var productIds = await CheckQuotaAndGetProductIds(tenantId, quantity);
+        var productIds = checkQuota ? await CheckQuotaAndGetProductIds(tenantId, quantity) : await GetProductIds(quantity);
 
         try
         {

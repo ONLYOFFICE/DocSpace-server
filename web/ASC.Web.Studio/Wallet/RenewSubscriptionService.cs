@@ -188,7 +188,7 @@ public class RenewSubscriptionService(
             // TODO: support other currencies
             var defaultCurrency = tariffService.GetSupportedAccountingCurrencies().First();
 
-            var result = await tariffService.PaymentChangeAsync(data.TenantId, quantity, ProductQuantityType.Renew, defaultCurrency);
+            var result = await tariffService.PaymentChangeAsync(data.TenantId, quantity, ProductQuantityType.Renew, defaultCurrency, false);
 
             if (result)
             {
