@@ -125,7 +125,7 @@ public class PaymentController(
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("update")]
-    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
+    [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<bool> UpdatePayment(QuantityRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
@@ -199,7 +199,7 @@ public class PaymentController(
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("updatewallet")]
-    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
+    [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<bool> UpdateWalletPayment(WalletQuantityRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
@@ -601,7 +601,7 @@ public class PaymentController(
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("deposit")]
-    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
+    [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<bool> TopUpDeposit(TopUpDepositRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
