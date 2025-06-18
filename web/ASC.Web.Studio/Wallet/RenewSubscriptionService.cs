@@ -47,13 +47,10 @@ public class RenewSubscriptionService(
         IServiceScopeFactory scopeFactory,
         ILogger<RenewSubscriptionService> logger,
         IConfiguration configuration,
-        IFusionCache hybridCache,
-        NotifyConfiguration notifyConfiguration)
+        IFusionCache hybridCache)
     : ActivePassiveBackgroundService<RenewSubscriptionService>(logger, scopeFactory)
 {
     private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
-
-    private bool _configured;
 
     private const string CacheKey = "renewsubscriptionservice_lastrun";
 
@@ -67,12 +64,6 @@ public class RenewSubscriptionService(
     {
         try
         {
-            if (!_configured)
-            {
-                notifyConfiguration.Configure();
-                _configured = true;
-            }
-
             if (_closeToExpirationWalletQuotas != null && _closeToExpirationWalletQuotas.Count > 0)
             {
                 var expiredWalletQuotas = _closeToExpirationWalletQuotas.Where(x => x.DueDate < DateTime.UtcNow).ToList();
