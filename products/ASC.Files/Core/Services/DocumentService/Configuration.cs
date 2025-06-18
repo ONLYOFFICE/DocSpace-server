@@ -129,7 +129,8 @@ public class Configuration<T>(
         { FileType.Document, "word" },
         { FileType.Spreadsheet, "cell" },
         { FileType.Presentation, "slide" },
-        { FileType.Pdf, "pdf" }
+        { FileType.Pdf, "pdf" },
+        { FileType.Diagram, "diagram" }
     };
 
     /// <summary>
