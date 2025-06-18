@@ -853,7 +853,9 @@ public class CustomizationConfig<T>(
     CustomerConfig customerConfig,
     LogoConfig logoConfig,
     FileSharing fileSharing,
-    CommonLinkUtility commonLinkUtility)
+    CommonLinkUtility commonLinkUtility,
+    ExternalShare externalShare,
+    ExternalLinkHelper externalLinkHelper)
 {
     [JsonIgnore]
     public string GobackUrl;
@@ -895,11 +897,7 @@ public class CustomizationConfig<T>(
         {
             return null;
         }
-
-        if (!authContext.IsAuthenticated)
-        {
-            return null;
-        }
+        
         if (GobackUrl != null)
         {
             return new GobackConfig
@@ -907,11 +905,28 @@ public class CustomizationConfig<T>(
                 Url = GobackUrl
             };
         }
-
+        
+        Folder<T> parent;
         var folderDao = daoFactory.GetFolderDao<T>();
+        
+        if (!authContext.IsAuthenticated)
+        {
+            var (shareRight, key) = await CheckLinkAsync(file);
+            
+            if (shareRight != FileShare.Restrict && !string.IsNullOrEmpty(key))
+            {           
+                parent = await folderDao.GetFolderAsync(file.ParentId);
+                return new GobackConfig
+                {
+                    Url = await pathProvider.GetFolderUrlByIdAsync(parent, key)
+                };
+            }
+        }
+        
         try
         {
-            var parent = await folderDao.GetFolderAsync(file.ParentId);
+
+            parent = await folderDao.GetFolderAsync(file.ParentId);
             if (file.RootFolderType == FolderType.USER && 
                 !Equals(file.RootId, await globalFolderHelper.FolderMyAsync) && 
                 !await fileSecurity.CanReadAsync(parent))
@@ -920,7 +935,7 @@ public class CustomizationConfig<T>(
                 {
                     return new GobackConfig
                     {
-                        Url = await pathProvider.GetFolderUrlByIdAsync(await globalFolderHelper.FolderShareAsync)
+                        Url = await pathProvider.GetFolderUrlByIdAsync(await globalFolderHelper.FolderRecentAsync)
                     };
                 }
 
@@ -936,7 +951,7 @@ public class CustomizationConfig<T>(
 
             return new GobackConfig
             {
-                Url = await pathProvider.GetFolderUrlAsync(parent)
+                Url =  pathProvider.GetFolderUrl(parent)
             };
         }
         catch (Exception)
@@ -952,7 +967,7 @@ public class CustomizationConfig<T>(
     {
         return authContext.IsAuthenticated
                && !file.Encrypted
-               && await FileSharing.CanSetAccessAsync(file);
+               && await fileSharing.CanSetAccessAsync(file);
     }
 
     public string GetReviewDisplay(bool modeWrite)
@@ -969,8 +984,30 @@ public class CustomizationConfig<T>(
             ResultMessage = ""
         };
     }
+    
+    private async Task<(FileShare, string)> CheckLinkAsync(File<T> file)
+    {
+        var linkRight = FileShare.Restrict;
 
-    private FileSharing FileSharing { get; } = fileSharing;
+        var key = externalShare.GetKey();
+        if (string.IsNullOrEmpty(key))
+        {
+            return (linkRight, key);
+        }
+
+        var result = await externalLinkHelper.ValidateAsync(key);
+        if (result.Access == FileShare.Restrict)
+        {
+            return (linkRight, key);
+        }
+
+        if (file != null && await fileSecurity.CanDownloadAsync(file))
+        {
+            linkRight = result.Access;
+        }
+
+        return (linkRight, key);
+    }
 }
 
 /// <summary>
