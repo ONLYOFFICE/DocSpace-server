@@ -205,7 +205,7 @@ public class RenewSubscriptionService(
 
                 var description = $"{walletQuota.Name} {nextQuantity}";
                 var messageService = scope.ServiceProvider.GetRequiredService<MessageService>();
-                messageService.Send(MessageInitiator.System, MessageAction.CustomerSubscriptionUpdated, description);
+                messageService.Send(MessageInitiator.PaymentService, MessageAction.CustomerSubscriptionUpdated, description);
 
                 logger.InfoRenewSubscriptionServiceDone(data.TenantId, description);
 

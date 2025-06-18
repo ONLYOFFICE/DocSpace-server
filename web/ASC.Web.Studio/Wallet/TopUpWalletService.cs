@@ -160,7 +160,7 @@ public class TopUpWalletService(
             {
                 var messageService = scope.ServiceProvider.GetRequiredService<MessageService>();
                 var description = $"{amount} {settings.Currency}";
-                messageService.Send(MessageInitiator.System, MessageAction.CustomerWalletToppedUp, description);
+                messageService.Send(MessageInitiator.PaymentService, MessageAction.CustomerWalletToppedUp, description);
 
                 logger.InfoTopUpWalletServiceDone(data.TenantId, description);
 
