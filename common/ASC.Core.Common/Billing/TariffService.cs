@@ -171,7 +171,10 @@ public class TariffService(
                             }
                         }
 
-                        asynctariff.OverdueQuotas = tariff.OverdueQuotas;
+                        if (asynctariff.Id == tariff.Id)
+                        {
+                            asynctariff.OverdueQuotas = tariff.OverdueQuotas;
+                        }
 
                         TenantQuota updatedQuota = null;
 
