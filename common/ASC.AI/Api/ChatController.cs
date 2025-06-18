@@ -30,12 +30,16 @@ namespace ASC.AI.Api;
 [DefaultRoute]
 [ApiController]
 [ControllerName("ai")]
-public class ChatController(ChatCompletionService chatCompletionService) : ControllerBase
+public class ChatController(
+    ChatCompletionRunner chatCompletionRunner, 
+    ChatService chatService,
+    EmployeeDtoHelper employeeDtoHelper,
+    ApiDateTimeHelper apiDateTimeHelper) : ControllerBase
 {
     [HttpPost("rooms/{roomId}/chats")]
     public async Task<IActionResult> StartNewChatAsync(StartNewChatRequestDto inDto)
     {
-        var generator = await chatCompletionService.StartNewChatSessionAsync(inDto.RoomId, inDto.Body.Message);
+        var generator = await chatCompletionRunner.StartNewChatAsync(inDto.RoomId, inDto.Body.Message);
         
         Response.Headers.ContentType = "text/event-stream";
 
@@ -51,7 +55,7 @@ public class ChatController(ChatCompletionService chatCompletionService) : Contr
     [HttpPost("chats/{chatId}/messages")]
     public async Task<IActionResult> ContinueChatAsync(ContinueChatRequestDto inDto)
     {
-        var generator = await chatCompletionService.StartChatSessionAsync(inDto.ChatId, inDto.Body.Message);
+        var generator = await chatCompletionRunner.StartChatAsync(inDto.ChatId, inDto.Body.Message);
         
         Response.Headers.ContentType = "text/event-stream";
 
@@ -62,5 +66,37 @@ public class ChatController(ChatCompletionService chatCompletionService) : Contr
         }
         
         return Ok();
+    }
+
+    [HttpPut("chats/{chatId}")]
+    public async Task<ChatDto> RenameChatAsync(RenameChatRequestDto inDto)
+    {
+        var chat = await chatService.RenameChatAsync(inDto.ChatId, inDto.Body.Name);
+        
+        return await chat.ToDtoAsync(employeeDtoHelper, apiDateTimeHelper);
+    }
+
+    [HttpGet("rooms/{roomId}/chats")]
+    public async Task<List<ChatDto>> GetChatsAsync(GetChatsRequestDto inDto)
+    {
+        var chats = chatService.GetChatsAsync(inDto.RoomId, inDto.StartIndex, inDto.Count);
+
+        return await chats.SelectAwait(async x => await x.ToDtoAsync(employeeDtoHelper, apiDateTimeHelper))
+            .ToListAsync();
+    }
+    
+    [HttpGet("chats/{chatId}/messages")]
+    public async Task<List<MessageDto>> GetMessagesAsync(GetMessagesRequestDto inDto)
+    {
+        var messages = chatService.GetMessagesAsync(inDto.ChatId, inDto.StartIndex, inDto.Count);
+        
+        return await messages.Select(x => x.ToMessageDto(apiDateTimeHelper)).ToListAsync();
+    }
+
+    [HttpDelete("chats/{chatId}")]
+    public async Task<NoContentResult> DeleteChatAsync(DeleteChatRequestDto inDto)
+    {
+        await chatService.DeleteChatAsync(inDto.ChatId);
+        return NoContent();
     }
 }

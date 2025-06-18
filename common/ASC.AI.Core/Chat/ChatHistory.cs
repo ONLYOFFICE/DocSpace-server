@@ -29,42 +29,82 @@ namespace ASC.AI.Core.Chat;
 [Scope]
 public class ChatHistory(DbChatDao chatDao)
 {
-    public Task<Database.Chat> AddChatAsync(int roomId, Guid userId, ChatMessage message)
+    public Task<Models.Chat> AddChatAsync(int roomId, Guid userId, ChatMessage message)
     {
-        var title = message.Text.Trim()[..Math.Min(message.Text.Length, 60)].Trim();
+        const string suffix = "...";
+        const int maxTitleLength = 255;
         
+        var title = message.Text.Trim();
+        if (title.Length > maxTitleLength)
+        {
+            title = title[..(maxTitleLength - suffix.Length)].TrimEnd() + suffix;
+        }
+
         return chatDao.AddChatAsync(roomId, userId, title,
-            new Message 
-            { 
-                Role = Role.User, 
-                Content = JsonSerializer.Serialize(message.Contents, AiUtils.SerializerOptions) 
-            });
+            new Message(MessageType.UserMessage, [new TextMessageContent(message.Text)], DateTime.UtcNow));
     }
 
     public Task UpdateChatAsync(Guid chatId, ChatMessage message)
     {
-        return chatDao.UpdateChatAsync(chatId,
-            new Message 
-            { 
-                Role = Role.User, 
-                Content = JsonSerializer.Serialize(message.Contents, AiUtils.SerializerOptions) 
-            });
+        return chatDao.UpdateChatAsync(chatId, new Message(MessageType.UserMessage, 
+            [new TextMessageContent(message.Text)], DateTime.UtcNow));
     }
 
-    public Task<Database.Chat?> GetChatAsync(Guid chatId)
+    public Task<Models.Chat?> GetChatAsync(Guid chatId)
     {
         return chatDao.GetChatAsync(chatId);
     }
     
     public Task AddMessagesAsync(Guid chatId, IEnumerable<ChatMessage> chatMessages)
     {
-        var messages = chatMessages.Select(msg => 
-            new Message 
-            { 
-                Role = msg.Role.ToRole(), 
-                Content = JsonSerializer.Serialize(msg.Contents, AiUtils.SerializerOptions) 
-            })
-            .ToList();
+        var messages = new List<Message>();
+        var toolCalls = new Dictionary<string, ToolCallMessageContent>();
+        
+        foreach (var message in chatMessages)
+        {
+            var contents = new List<MessageContent>();
+            var type = message.Role.ToMessageType();
+            
+            foreach (var content in message.Contents)
+            {
+                switch (content)
+                {
+                    case TextContent textContent:
+                        {
+                            contents.Add(new TextMessageContent(textContent.Text));
+                            continue;
+                        }
+                    case FunctionCallContent functionCallContent:
+                        {
+                            var toolCall = new ToolCallMessageContent(
+                                functionCallContent.CallId, functionCallContent.Name, functionCallContent.Arguments);
+                    
+                            toolCalls.Add(functionCallContent.CallId, toolCall);
+                            continue;
+                        }
+                    case FunctionResultContent functionResultContent:
+                        {
+                            type = MessageType.ToolCall;
+                            var tool = toolCalls.GetValueOrDefault(functionResultContent.CallId);
+                            if (tool == null)
+                            {
+                                continue;
+                            }
+                    
+                            tool.Result = functionResultContent.Result;
+                            contents.Add(tool);
+                            continue;
+                        }
+                }
+            }
+
+            if (contents.Count == 0)
+            {
+                continue;
+            }
+            
+            messages.Add(new Message(type, contents, DateTime.UtcNow));
+        }
 
         return chatDao.AddMessagesAsync(chatId, messages);
     }
@@ -73,8 +113,40 @@ public class ChatHistory(DbChatDao chatDao)
     {
         await foreach (var msg in chatDao.GetMessagesAsync(chatId))
         {
-            yield return new ChatMessage(msg.Role.ToChatRole(), 
-                JsonSerializer.Deserialize<List<AIContent>>(msg.Content, AiUtils.SerializerOptions));
+            var aiContents = new List<AIContent>();
+            var functionResults = new List<AIContent>();
+            
+            foreach (var content in msg.Contents)
+            {
+                switch (content)
+                {
+                    case TextMessageContent textContent:
+                        var text = new TextContent(textContent.Text);
+                        aiContents.Add(text);
+                        continue;
+                    case ToolCallMessageContent toolContent:
+                        var functionCall = new FunctionCallContent(toolContent.CallId, toolContent.Name, toolContent.Arguments);
+                        aiContents.Add(functionCall);
+                        
+                        if (toolContent.Result != null)
+                        {
+                            functionResults.Add(new FunctionResultContent(toolContent.CallId, toolContent.Result));
+                        }
+                        continue;
+                }
+            }
+
+            var message = new ChatMessage { Role = msg.MessageType.ToChatRole(), Contents = aiContents };
+            yield return message;
+
+            if (functionResults.Count == 0)
+            {
+                continue;
+            }
+            
+            var resultMessage = new ChatMessage { Role = ChatRole.Assistant, Contents = functionResults };
+            
+            yield return resultMessage;
         }
     }
 }

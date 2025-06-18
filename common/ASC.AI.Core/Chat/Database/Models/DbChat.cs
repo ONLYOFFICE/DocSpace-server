@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.ComponentModel.DataAnnotations;
-
 namespace ASC.AI.Core.Chat.Database.Models;
 
 public class DbChat : BaseEntity
@@ -34,7 +32,7 @@ public class DbChat : BaseEntity
     public int RoomId { get; set; }
     public Guid UserId { get; set; }
     
-    [MaxLength(60)]
+    [MaxLength(255)]
     public required string Title { get; set; }
     public DateTime CreatedOn { get; set; }
     public DateTime ModifiedOn { get; set; }
@@ -78,7 +76,7 @@ public static class DbChatSessionExtensions
             
             entity.Property(e => e.Title)
                 .HasColumnName("title")
-                .HasColumnType("varchar(60)")
+                .HasColumnType("varchar(255)")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
             
@@ -96,8 +94,8 @@ public static class DbChatSessionExtensions
                 .HasColumnName("modified_on")
                 .HasColumnType("datetime");
             
-            entity.HasIndex(e => new { e.RoomId, e.UserId })
-                .HasDatabaseName("idx_room_id_user_id");
+            entity.HasIndex(e => new { e.RoomId, e.UserId, e.ModifiedOn })
+                .HasDatabaseName("idx_room_id_user_id_modified_on");
         });
     }
 }

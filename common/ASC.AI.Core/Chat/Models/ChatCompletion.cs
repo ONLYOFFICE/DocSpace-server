@@ -26,26 +26,8 @@
 
 namespace ASC.AI.Core.Chat.Models;
 
-public enum EventType
+public class ChatCompletion(EventType type, string content)
 {
-    NewToken,
-    ToolCall,
-    ToolResult,
-}
-
-public record ChatCompletion
-{
-    public EventType Type { get; init; }
-    public required string Content { get; init; }
-}
-
-public static class EventTypeExtensions
-{
-    public static string ToText(this EventType type) => type switch
-    {
-        EventType.NewToken => "new_token",
-        EventType.ToolCall => "tool_call",
-        EventType.ToolResult => "tool_result",
-        _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
-    };
+    public EventType Type { get; } = type;
+    public string Content { get; } = content;
 }

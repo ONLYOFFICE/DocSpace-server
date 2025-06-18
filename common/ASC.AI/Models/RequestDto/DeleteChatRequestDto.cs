@@ -24,14 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Chat.Database;
+namespace ASC.AI.Models.RequestDto;
 
-public class Chat : IMapFrom<DbChat>
+public class DeleteChatRequestDto
 {
-    public Guid Id { get; init; }
-    public Guid UserId { get; init; }
-    public int RoomId { get; init; }
-    public required string Title { get; init; }
-    public DateTime CreatedOn { get; init; }
-    public DateTime ModifiedOn { get; init; }
+    [FromRoute(Name = "chatId")]
+    public Guid ChatId { get; set; }
 }

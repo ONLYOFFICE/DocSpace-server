@@ -25,7 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 
-namespace ASC.AI.Core.Chat;
+namespace ASC.AI.Core.Chat.Completion;
 
 public class ChatCompletionGenerator(
     Guid chatId,
@@ -57,43 +57,40 @@ public class ChatCompletionGenerator(
         
         var responses = new List<ChatResponseUpdate>();
 
-        await foreach (var response in client.GetStreamingResponseAsync(messages, options, cancellationToken: cancellationToken))
+        try
         {
-            responses.Add(response);
-
-            foreach (var content in response.Contents)
+            await foreach (var response in client.GetStreamingResponseAsync(messages, options,
+                               cancellationToken: cancellationToken))
             {
-                switch (content)
+                responses.Add(response);
+
+                foreach (var content in response.Contents)
                 {
-                    case TextContent textContent:
-                        yield return new ChatCompletion
-                        {
-                            Type = EventType.NewToken, 
-                            Content = JsonSerializer.Serialize(textContent, _serializerOptions)
-                        };
-                        break;
-                    case FunctionCallContent functionCall:
-                        yield return new ChatCompletion
-                        {
-                            Type = EventType.ToolCall,
-                            Content = JsonSerializer.Serialize(functionCall, _serializerOptions)
-                        };
-                        break;
-                    case FunctionResultContent functionResult:
-                        yield return new ChatCompletion
-                        {
-                            Type = EventType.ToolResult,
-                            Content = JsonSerializer.Serialize(functionResult, _serializerOptions)
-                        };
-                        break;
+                    switch (content)
+                    {
+                        case TextContent textContent:
+                            yield return new ChatCompletion(EventType.NewToken,
+                                JsonSerializer.Serialize(textContent, _serializerOptions));
+                            break;
+                        case FunctionCallContent functionCall:
+                            yield return new ChatCompletion(EventType.ToolCall,
+                                JsonSerializer.Serialize(functionCall, _serializerOptions));
+                            break;
+                        case FunctionResultContent functionResult:
+                            yield return new ChatCompletion(EventType.ToolResult,
+                                JsonSerializer.Serialize(functionResult, _serializerOptions));
+                            break;
+                    }
                 }
             }
         }
-            
-        var chatResponse = responses.ToChatResponse();
-        if (chatResponse.Messages.Count > 0)
+        finally
         {
-            await chatHistory.AddMessagesAsync(chatId, chatResponse.Messages);
+            var chatResponse = responses.ToChatResponse();
+            if (chatResponse.Messages.Count > 0)
+            {
+                await chatHistory.AddMessagesAsync(chatId, chatResponse.Messages);
+            }
         }
     }
 }

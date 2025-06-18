@@ -24,32 +24,20 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-global using ASC.AI.Core.Chat.Database;
-global using ASC.AI.Core.Chat.Database.Models;
-global using ASC.AI.Core.Chat.Models;
-global using ASC.AI.Core.Common;
-global using ASC.Common;
-global using ASC.Common.Mapping;
-global using ASC.Common.Web;
-global using ASC.Core;
-global using ASC.Core.Common.EF;
-global using ASC.Core.Common.EF.Model;
-global using ASC.Files.Core;
-global using ASC.Files.Core.Resources;
-global using ASC.Files.Core.Security;
+namespace ASC.AI.Models.ResponseDto;
 
-global using AutoMapper;
+public class MessageDto(MessageType messageType, IEnumerable<MessageContent> contents, ApiDateTime createdOn)
+{
+    public MessageType MessageType { get; } = messageType;
+    public IEnumerable<MessageContent> Contents { get; } = contents;
+    public ApiDateTime CreatedOn { get; } = createdOn;
+}
 
-global using Microsoft.EntityFrameworkCore;
-global using Microsoft.Extensions.AI;
-
-global using OpenAI;
-
-global using System.ClientModel;
-global using System.ClientModel.Primitives;
-global using System.ComponentModel.DataAnnotations;
-global using System.Runtime.CompilerServices;
-global using System.Security;
-global using System.Text.Encodings.Web;
-global using System.Text.Json;
-global using System.Text.Json.Serialization;
+public static class MessageDtoExtensions
+{
+    public static MessageDto ToMessageDto(this Message message, ApiDateTimeHelper dateTimeHelper)
+    {
+        var createdOn = dateTimeHelper.Get(message.CreatedOn);
+        return new MessageDto(message.MessageType, message.Contents, createdOn);
+    }
+}

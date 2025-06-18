@@ -11,8 +11,4 @@
       <ProjectReference Include="..\ASC.Api.Core\ASC.Api.Core.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Models\ResponseDto\" />
-    </ItemGroup>
-
 </Project>

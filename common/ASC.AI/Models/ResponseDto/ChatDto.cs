@@ -24,32 +24,26 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-global using ASC.AI.Core.Chat.Database;
-global using ASC.AI.Core.Chat.Database.Models;
-global using ASC.AI.Core.Chat.Models;
-global using ASC.AI.Core.Common;
-global using ASC.Common;
-global using ASC.Common.Mapping;
-global using ASC.Common.Web;
-global using ASC.Core;
-global using ASC.Core.Common.EF;
-global using ASC.Core.Common.EF.Model;
-global using ASC.Files.Core;
-global using ASC.Files.Core.Resources;
-global using ASC.Files.Core.Security;
+namespace ASC.AI.Models.ResponseDto;
 
-global using AutoMapper;
+public record ChatDto(Guid Id, string Title, ApiDateTime CreatedOn, ApiDateTime ModifiedOn, EmployeeDto CreatedBy)
+{
+    public Guid Id { get; } = Id;
+    public string Title { get; } = Title;
+    public ApiDateTime CreatedOn { get; } = CreatedOn;
+    public ApiDateTime ModifiedOn { get; } = ModifiedOn;
+    public EmployeeDto CreatedBy { get; } = CreatedBy;
+}
 
-global using Microsoft.EntityFrameworkCore;
-global using Microsoft.Extensions.AI;
+public static class ChatDtoExtensions
+{
+    public static async Task<ChatDto> ToDtoAsync(this Chat chat, EmployeeDtoHelper employeeDtoHelper,
+        ApiDateTimeHelper dateTimeHelper)
+    {
+        var createdOn = dateTimeHelper.Get(chat.CreatedOn);
+        var modifiedOn = dateTimeHelper.Get(chat.ModifiedOn);
+        var employeeDto = await employeeDtoHelper.GetAsync(chat.UserId);
 
-global using OpenAI;
-
-global using System.ClientModel;
-global using System.ClientModel.Primitives;
-global using System.ComponentModel.DataAnnotations;
-global using System.Runtime.CompilerServices;
-global using System.Security;
-global using System.Text.Encodings.Web;
-global using System.Text.Json;
-global using System.Text.Json.Serialization;
+        return new ChatDto(chat.Id, chat.Title, createdOn, modifiedOn, employeeDto);
+    }
+}

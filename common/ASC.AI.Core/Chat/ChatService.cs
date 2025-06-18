@@ -27,37 +27,15 @@
 namespace ASC.AI.Core.Chat;
 
 [Scope]
-public class ChatCompletionService(
+public class ChatService(
+    DbChatDao chatDao, 
     AuthContext authContext,
-    ChatHistory chatHistory,
-    ExecutionContextProvider contextProvider, 
-    IHttpClientFactory httpClientFactory,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity)
 {
-    private static readonly ChatMessage _systemMessage = new(ChatRole.System, "You are a helpful assistant."); // TODO: move to prompt file
-    
-    public async Task<ChatCompletionGenerator> StartNewChatSessionAsync(int roomId, string message)
+    public async Task<Models.Chat> RenameChatAsync(Guid chatId, string title)
     {
-        await ChekRoomAsync(roomId);
-        
-        var clientTask = CreateClientAsync();
-
-        var userMessage = new ChatMessage(ChatRole.User, message);
-        var chat = await chatHistory.AddChatAsync(roomId, authContext.CurrentAccount.ID, userMessage);
-        
-        var messages = new List<ChatMessage>
-        {
-            _systemMessage,
-            userMessage
-        };
-        
-        return new ChatCompletionGenerator(chat.Id, chatHistory, await clientTask, messages);
-    }
-
-    public async Task<ChatCompletionGenerator> StartChatSessionAsync(Guid chatId, string message)
-    {
-        var chat = await chatHistory.GetChatAsync(chatId);
+        var chat = await chatDao.GetChatAsync(chatId);
         if (chat == null)
         {
             throw new ItemNotFoundException("Chat not found");
@@ -67,43 +45,19 @@ public class ChatCompletionService(
         {
             throw new SecurityException("Access denied");
         }
-
-        await ChekRoomAsync(chat.RoomId);
-        var clientTask = CreateClientAsync();
-
-        var history = await chatHistory.GetMessagesAsync(chatId).ToListAsync();
-        var userMessage = new ChatMessage(ChatRole.User, message);
         
-        await chatHistory.UpdateChatAsync(chatId, userMessage);
-
-        var messages = new List<ChatMessage> { _systemMessage };
-        messages.AddRange(history);
-        messages.Add(userMessage);
-
-        return new ChatCompletionGenerator(chatId, chatHistory, await clientTask, messages);
-    }
-
-    private async Task<IChatClient> CreateClientAsync()
-    {
-        var context = await contextProvider.GetExecutionContextAsync();
+        chat.Title = title;
+        chat.ModifiedOn = DateTime.UtcNow;
+        await chatDao.UpdateChatAsync(chat);
         
-        return new ChatClientBuilder(new OpenAIClient(
-                    new ApiKeyCredential(context.Key),
-                    new OpenAIClientOptions
-                    { 
-                        Endpoint = context.Endpoint,
-                        Transport = new HttpClientPipelineTransport(httpClientFactory.CreateClient())
-                    })
-                .GetChatClient(context.Model)
-                .AsIChatClient())
-            .UseFunctionInvocation()
-            .Build();
+        return chat; 
     }
     
-    private async Task ChekRoomAsync(int roomId)
+    public async IAsyncEnumerable<Models.Chat> GetChatsAsync(int roomId, int offset, int limit)
     {
         var folderDao = daoFactory.GetFolderDao<int>();
         var room = await folderDao.GetFolderAsync(roomId);
+
         if (room == null)
         {
             throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
@@ -113,5 +67,42 @@ public class ChatCompletionService(
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFolder);
         }
+
+        await foreach (var chat in chatDao.GetChatsAsync(roomId, authContext.CurrentAccount.ID, offset, limit))
+        {
+            yield return chat;
+        }
+    }
+
+    public async IAsyncEnumerable<Message> GetMessagesAsync(Guid chatId, int offset, int limit)
+    {
+        var chat = await GetChatAsync(chatId);
+
+        await foreach (var message in chatDao.GetMessagesAsync(chat.Id, offset, limit))
+        {
+            yield return message;
+        }
+    }
+
+    public async Task DeleteChatAsync(Guid chatId)
+    {
+        var chat = await GetChatAsync(chatId);
+        await chatDao.DeleteChatsAsync([chat.Id]);
+    }
+
+    private async Task<Models.Chat> GetChatAsync(Guid chatId)
+    {
+        var chat = await chatDao.GetChatAsync(chatId);
+        if (chat == null)
+        {
+            throw new ItemNotFoundException("Chat not found");
+        }
+
+        if (chat.UserId != authContext.CurrentAccount.ID)
+        {
+            throw new SecurityException("Access denied");
+        }
+
+        return chat;
     }
 }

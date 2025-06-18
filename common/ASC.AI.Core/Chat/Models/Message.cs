@@ -26,8 +26,9 @@
 
 namespace ASC.AI.Core.Chat.Models;
 
-public class Message : IMapFrom<DbChatMessage>
+public class Message(MessageType messageType, List<MessageContent> contents, DateTime createdOn)
 {
-    public Role Role { get; init; }
-    public required string Content { get; init; }
+    public MessageType MessageType { get; } = messageType;
+    public List<MessageContent> Contents { get; } = contents;
+    public DateTime CreatedOn { get; } = createdOn;
 }

@@ -30,8 +30,10 @@ public class DbChatMessage : BaseEntity
 {
     public int Id { get; set; }
     public Guid ChatId { get; set; }
-    public Role Role { get; set; }
+    public MessageType MessageType { get; set; }
     public required string Content { get; set; }
+    public DateTime CreatedOn { get; set; }
+    
     public DbChat Chat { get; set; }
     
     public override object[] GetKeys()
@@ -70,13 +72,18 @@ public static class DbChatMessageExtensions
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
             
-            entity.Property(e => e.Role).HasColumnName("role");
+            entity.Property(e => e.MessageType)
+                .HasColumnName("role");
 
             entity.Property(e => e.Content)
                 .HasColumnName("content")
                 .HasColumnType("json")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
+            
+            entity.Property(e => e.CreatedOn)
+                .HasColumnName("created_on")
+                .HasColumnType("datetime");
         });
     }
 }

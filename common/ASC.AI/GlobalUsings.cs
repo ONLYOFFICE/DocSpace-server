@@ -28,14 +28,18 @@ global using ASC.Api.Core;
 global using ASC.Api.Core.Convention;
 global using ASC.AI.Core.Chat;
 global using ASC.AI.Core.Chat.Database;
+global using ASC.AI.Core.Chat.Completion;
 global using ASC.AI.Core.Chat.Models;
+global using ASC.AI.Models.ResponseDto;
 global using ASC.AI.Models.RequestDto;
 global using ASC.Common;
 global using ASC.Core.Common.EF;
 global using ASC.Files.Core.Core;
 global using ASC.Files.Core.EF;
+global using ASC.Web.Api.Models;
 global using ASC.Web.Api.Routing;
 
 global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.Extensions.AI;
 
 global using System.Text;

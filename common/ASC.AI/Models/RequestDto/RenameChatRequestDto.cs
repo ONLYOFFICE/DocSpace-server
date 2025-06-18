@@ -24,45 +24,21 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Chat.Models;
+using System.ComponentModel.DataAnnotations;
 
-public enum Role
+namespace ASC.AI.Models.RequestDto;
+
+public class RenameChatRequestDto
 {
-    User,
-    Assistant,
-    Tool
+    [FromRoute(Name = "chatId")]
+    public required Guid ChatId { get; set; }
+    
+    [FromBody]
+    public required RenameChatBody Body { get; set; }
 }
 
-public static class RoleExtensions
+public class RenameChatBody
 {
-    public static ChatRole ToChatRole(this Role role)
-    {
-        return role switch
-        {
-            Role.User => ChatRole.User,
-            Role.Assistant => ChatRole.Assistant,
-            Role.Tool => ChatRole.Tool,
-            _ => throw new ArgumentOutOfRangeException(nameof(role))
-        };
-    }
-
-    public static Role ToRole(this ChatRole role)
-    {
-        if (role == ChatRole.User)
-        {
-            return Role.User;
-        }
-
-        if (role == ChatRole.Assistant)
-        {
-            return Role.Assistant;
-        }
-
-        if (role == ChatRole.Tool)
-        {
-            return Role.Tool;
-        }
-        
-        throw new ArgumentOutOfRangeException(nameof(role));
-    }
+    [MaxLength(255)]
+    public required string Name { get; set; }
 }

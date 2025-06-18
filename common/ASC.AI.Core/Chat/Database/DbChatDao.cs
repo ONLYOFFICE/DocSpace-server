@@ -31,7 +31,7 @@ namespace ASC.AI.Core.Chat.Database;
 [Scope]
 public class DbChatDao(IDbContextFactory<ChatDbContext> dbContextFactory, IMapper mapper)
 {
-    public async Task<Chat> AddChatAsync(int roomId, Guid userId, string title, Message message)
+    public async Task<Chat.Models.Chat> AddChatAsync(int roomId, Guid userId, string title, Message message)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
@@ -61,8 +61,9 @@ public class DbChatDao(IDbContextFactory<ChatDbContext> dbContextFactory, IMappe
             var dbChatMessage = new DbChatMessage
             {
                 ChatId = id,
-                Role = message.Role,
-                Content = message.Content
+                MessageType = message.MessageType,
+                Content = JsonSerializer.Serialize(message.Contents, AiUtils.SerializerOptions),
+                CreatedOn = now
             };
 
             await context.Messages.AddAsync(dbChatMessage);
@@ -71,7 +72,7 @@ public class DbChatDao(IDbContextFactory<ChatDbContext> dbContextFactory, IMappe
             await transaction.CommitAsync();
         });
         
-        return mapper.Map<Chat>(chat);
+        return mapper.Map<Chat.Models.Chat>(chat);
     }
 
     public async Task UpdateChatAsync(Guid chatId, Message message)
@@ -91,8 +92,9 @@ public class DbChatDao(IDbContextFactory<ChatDbContext> dbContextFactory, IMappe
             var dbMessage = new DbChatMessage
             {
                 ChatId = chatId, 
-                Role = message.Role, 
-                Content = message.Content
+                MessageType = message.MessageType, 
+                Content = JsonSerializer.Serialize(message.Contents, AiUtils.SerializerOptions),
+                CreatedOn = DateTime.UtcNow
             };
             
             await context.Messages.AddAsync(dbMessage);
@@ -102,7 +104,7 @@ public class DbChatDao(IDbContextFactory<ChatDbContext> dbContextFactory, IMappe
         });
     }
 
-    public async Task UpdateChatAsync(Chat chat)
+    public async Task UpdateChatAsync(Chat.Models.Chat chat)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
@@ -113,22 +115,22 @@ public class DbChatDao(IDbContextFactory<ChatDbContext> dbContextFactory, IMappe
 
             await context.Chats.Where(c => c.Id == chat.Id)
                 .ExecuteUpdateAsync(x => 
-                    x.SetProperty(y => y.ModifiedOn, DateTime.UtcNow)
+                    x.SetProperty(y => y.ModifiedOn, chat.ModifiedOn)
                         .SetProperty(y => y.Title, chat.Title));
             
             await context.SaveChangesAsync();
         });
     }
 
-    public async Task<Chat?> GetChatAsync(Guid chatId)
+    public async Task<Chat.Models.Chat?> GetChatAsync(Guid chatId)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var chat = await dbContext.Chats.FindAsync(chatId);
         
-        return chat == null ? null : mapper.Map<Chat>(chat);
+        return chat == null ? null : mapper.Map<Chat.Models.Chat>(chat);
     }
 
-    public async IAsyncEnumerable<Chat> GetChatsAsync(int roomId, Guid userId, int offset, int limit)
+    public async IAsyncEnumerable<Chat.Models.Chat> GetChatsAsync(int roomId, Guid userId, int offset, int limit)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var query = dbContext.Chats
@@ -140,7 +142,7 @@ public class DbChatDao(IDbContextFactory<ChatDbContext> dbContextFactory, IMappe
 
         await foreach (var chat in query)
         {
-            yield return mapper.Map<Chat>(chat);
+            yield return mapper.Map<Chat.Models.Chat>(chat);
         }
     }
 
@@ -161,16 +163,20 @@ public class DbChatDao(IDbContextFactory<ChatDbContext> dbContextFactory, IMappe
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
+        
+        var now = DateTime.UtcNow;
 
         await strategy.ExecuteAsync(async () =>
         {
             await using var context = await dbContextFactory.CreateDbContextAsync();
+            
             var dbMessages = messages.Select(msg => 
                 new DbChatMessage 
                 { 
                     ChatId = chatId,
-                    Role = msg.Role,
-                    Content = msg.Content 
+                    MessageType = msg.MessageType,
+                    Content = JsonSerializer.Serialize(msg.Contents, AiUtils.SerializerOptions),
+                    CreatedOn = now
                 });
 
             await context.Messages.AddRangeAsync(dbMessages);
@@ -198,7 +204,10 @@ public class DbChatDao(IDbContextFactory<ChatDbContext> dbContextFactory, IMappe
 
         await foreach (var msg in query.AsAsyncEnumerable())
         {
-            yield return mapper.Map<Message>(msg);
+            yield return new Message(
+                msg.MessageType, 
+                JsonSerializer.Deserialize<List<MessageContent>>(msg.Content, AiUtils.SerializerOptions)!,
+                msg.CreatedOn);
         }
     }
 }
