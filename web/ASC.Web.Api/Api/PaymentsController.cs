@@ -277,11 +277,6 @@ public class PaymentController(
             return false;
         }
 
-        if (subAccount.Amount < productQty * quota.Price)
-        {
-            return false;
-        }
-
         var quantity = new Dictionary<string, int> { { productName, productQty.Value } };
 
         var result = await tariffService.PaymentChangeAsync(tenant.Id, quantity, inDto.ProductQuantityType, defaultCurrency);
