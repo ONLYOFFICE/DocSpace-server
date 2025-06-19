@@ -223,6 +223,9 @@ public class RenewSubscriptionService(
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
             var tenant = await tenantManager.SetCurrentTenantAsync(tenantId);
 
+            var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
+            await securityContext.AuthenticateMeWithoutCookieAsync(tenantId, owner.Id);
+
             var studioNotifyService = scope.ServiceProvider.GetRequiredService<StudioNotifyService>();
             await studioNotifyService.SendRenewSubscriptionErrorAsync(payer, owner);
         }
