@@ -241,10 +241,15 @@ public class PaymentController(
             return false;
         }
 
+        var tariff = await tariffService.GetTariffAsync(tenant.Id);
+
+        if (tariff.State > TariffState.Paid)
+        {
+            return false;
+        }
+
         if (inDto.ProductQuantityType is ProductQuantityType.Set)
         {
-            var tariff = await tariffService.GetTariffAsync(tenant.Id);
-
             // saving null value is equivalent to resetting to default
             var updated = await tariffService.UpdateNextQuantityAsync(tenant.Id, tariff, quota.TenantId, productQty);
 

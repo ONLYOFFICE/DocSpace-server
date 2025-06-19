@@ -126,17 +126,24 @@ public class RenewSubscriptionService(
                 return;
             }
 
+            var tariffService = scope.ServiceProvider.GetRequiredService<ITariffService>();
+            var currentTariff = await tariffService.GetTariffAsync(data.TenantId, refresh: false);
+
+            if (currentTariff.State > TariffState.Paid)
+            {
+                return;
+            }
+
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager>();
             owner = await userManager.GetUsersAsync(tenant.OwnerId);
-
-            var tariffService = scope.ServiceProvider.GetRequiredService<ITariffService>();
-            var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
 
             var payerEmail = (await tariffService.GetCustomerInfoAsync(data.TenantId)).Email;
             if (!string.IsNullOrEmpty(payerEmail))
             {
                 payer = await userManager.GetUserByEmailAsync(payerEmail);
             }
+
+            var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
 
             if (payer != null && payer.Id != ASC.Core.Users.Constants.LostUser.Id)
             {
