@@ -918,7 +918,7 @@ public class CustomizationConfig<T>(
                 parent = await folderDao.GetFolderAsync(file.ParentId);
                 return new GobackConfig
                 {
-                    Url = await pathProvider.GetFolderUrlByIdAsync(parent, key)
+                    Url = pathProvider.GetFolderUrl(parent, key)
                 };
             }
         }
