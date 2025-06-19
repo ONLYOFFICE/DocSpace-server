@@ -33,7 +33,7 @@ public class ChatService(
     IDaoFactory daoFactory,
     FileSecurity fileSecurity)
 {
-    public async Task<Models.Chat> RenameChatAsync(Guid chatId, string title)
+    public async Task<ChatSession> RenameChatAsync(Guid chatId, string title)
     {
         var chat = await chatDao.GetChatAsync(chatId);
         if (chat == null)
@@ -53,7 +53,7 @@ public class ChatService(
         return chat; 
     }
     
-    public async IAsyncEnumerable<Models.Chat> GetChatsAsync(int roomId, int offset, int limit)
+    public async IAsyncEnumerable<ChatSession> GetChatsAsync(int roomId, int offset, int limit)
     {
         var folderDao = daoFactory.GetFolderDao<int>();
         var room = await folderDao.GetFolderAsync(roomId);
@@ -90,7 +90,7 @@ public class ChatService(
         await chatDao.DeleteChatsAsync([chat.Id]);
     }
 
-    private async Task<Models.Chat> GetChatAsync(Guid chatId)
+    private async Task<ChatSession> GetChatAsync(Guid chatId)
     {
         var chat = await chatDao.GetChatAsync(chatId);
         if (chat == null)

@@ -25,9 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 
-using ASC.AI.Core.Chat.Database.Models;
-using ASC.Core.Common.EF.Model;
-
 namespace ASC.AI.Core.Chat.Database;
 
 public class ChatDbContext(DbContextOptions<ChatDbContext> options) : BaseDbContext(options)
@@ -39,7 +36,7 @@ public class ChatDbContext(DbContextOptions<ChatDbContext> options) : BaseDbCont
     {
         ModelBuilderWrapper
             .From(modelBuilder, Database)
-            .AddDbChatSession()
+            .AddDbChat()
             .AddDbChatMessages();
     }
 }

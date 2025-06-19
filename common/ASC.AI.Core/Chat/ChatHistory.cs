@@ -29,7 +29,7 @@ namespace ASC.AI.Core.Chat;
 [Scope]
 public class ChatHistory(DbChatDao chatDao)
 {
-    public Task<Models.Chat> AddChatAsync(int roomId, Guid userId, ChatMessage message)
+    public Task<ChatSession> AddChatAsync(int roomId, Guid userId, ChatMessage message)
     {
         const string suffix = "...";
         const int maxTitleLength = 255;
@@ -50,7 +50,7 @@ public class ChatHistory(DbChatDao chatDao)
             [new TextMessageContent(message.Text)], DateTime.UtcNow));
     }
 
-    public Task<Models.Chat?> GetChatAsync(Guid chatId)
+    public Task<ChatSession?> GetChatAsync(Guid chatId)
     {
         return chatDao.GetChatAsync(chatId);
     }

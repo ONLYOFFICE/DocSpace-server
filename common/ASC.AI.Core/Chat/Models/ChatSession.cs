@@ -26,43 +26,12 @@
 
 namespace ASC.AI.Core.Chat.Models;
 
-public enum MessageType
+public class ChatSession : IMapFrom<DbChat>
 {
-    UserMessage,
-    AssistantMessage,
-    ToolCall
-}
-
-public static class MessageTypeExtensions
-{
-    public static ChatRole ToChatRole(this MessageType messageType)
-    {
-        return messageType switch
-        {
-            MessageType.UserMessage => ChatRole.User,
-            MessageType.AssistantMessage => ChatRole.Assistant,
-            MessageType.ToolCall => ChatRole.Tool,
-            _ => throw new ArgumentOutOfRangeException(nameof(messageType))
-        };
-    }
-
-    public static MessageType ToMessageType(this ChatRole role)
-    {
-        if (role == ChatRole.User)
-        {
-            return MessageType.UserMessage;
-        }
-
-        if (role == ChatRole.Assistant)
-        {
-            return MessageType.AssistantMessage;
-        }
-
-        if (role == ChatRole.Tool)
-        {
-            return MessageType.ToolCall;
-        }
-        
-        throw new ArgumentOutOfRangeException(nameof(role));
-    }
+    public Guid Id { get; init; }
+    public Guid UserId { get; init; }
+    public int RoomId { get; init; }
+    public required string Title { get; set; }
+    public DateTime CreatedOn { get; init; }
+    public DateTime ModifiedOn { get; set; }
 }

@@ -37,13 +37,13 @@ public record ChatDto(Guid Id, string Title, ApiDateTime CreatedOn, ApiDateTime 
 
 public static class ChatDtoExtensions
 {
-    public static async Task<ChatDto> ToDtoAsync(this Chat chat, EmployeeDtoHelper employeeDtoHelper,
+    public static async Task<ChatDto> ToDtoAsync(this ChatSession chatSession, EmployeeDtoHelper employeeDtoHelper,
         ApiDateTimeHelper dateTimeHelper)
     {
-        var createdOn = dateTimeHelper.Get(chat.CreatedOn);
-        var modifiedOn = dateTimeHelper.Get(chat.ModifiedOn);
-        var employeeDto = await employeeDtoHelper.GetAsync(chat.UserId);
+        var createdOn = dateTimeHelper.Get(chatSession.CreatedOn);
+        var modifiedOn = dateTimeHelper.Get(chatSession.ModifiedOn);
+        var employeeDto = await employeeDtoHelper.GetAsync(chatSession.UserId);
 
-        return new ChatDto(chat.Id, chat.Title, createdOn, modifiedOn, employeeDto);
+        return new ChatDto(chatSession.Id, chatSession.Title, createdOn, modifiedOn, employeeDto);
     }
 }

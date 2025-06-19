@@ -24,14 +24,38 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Chat.Models;
+namespace ASC.AI.Core.Chat.Extensions;
 
-public class Chat : IMapFrom<DbChat>
+public static class MessageTypeExtensions
 {
-    public Guid Id { get; init; }
-    public Guid UserId { get; init; }
-    public int RoomId { get; init; }
-    public required string Title { get; set; }
-    public DateTime CreatedOn { get; init; }
-    public DateTime ModifiedOn { get; set; }
+    public static ChatRole ToChatRole(this MessageType messageType)
+    {
+        return messageType switch
+        {
+            MessageType.UserMessage => ChatRole.User,
+            MessageType.AssistantMessage => ChatRole.Assistant,
+            MessageType.ToolCall => ChatRole.Tool,
+            _ => throw new ArgumentOutOfRangeException(nameof(messageType))
+        };
+    }
+
+    public static MessageType ToMessageType(this ChatRole role)
+    {
+        if (role == ChatRole.User)
+        {
+            return MessageType.UserMessage;
+        }
+
+        if (role == ChatRole.Assistant)
+        {
+            return MessageType.AssistantMessage;
+        }
+
+        if (role == ChatRole.Tool)
+        {
+            return MessageType.ToolCall;
+        }
+        
+        throw new ArgumentOutOfRangeException(nameof(role));
+    }
 }

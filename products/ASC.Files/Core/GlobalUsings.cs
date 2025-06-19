@@ -73,6 +73,7 @@ global using ASC.Core;
 global using ASC.Core.ChunkedUploader;
 global using ASC.Core.Common;
 global using ASC.Core.Common.Configuration;
+global using ASC.Core.Common.EF.Model.Chat;
 global using ASC.Files.Core.RoomTemplates.Events;
 
 global using ASC.Files.Core.RoomTemplates.Operations;

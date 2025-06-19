@@ -24,7 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Chat.Database.Models;
+namespace ASC.Core.Common.EF.Model.Chat;
 
 public class DbChat : BaseEntity
 {
@@ -47,7 +47,7 @@ public class DbChat : BaseEntity
 
 public static class DbChatSessionExtensions
 {
-    public static ModelBuilderWrapper AddDbChatSession(this ModelBuilderWrapper modelBuilder)
+    public static ModelBuilderWrapper AddDbChat(this ModelBuilderWrapper modelBuilder)
     {
         modelBuilder.Entity<DbChat>().Navigation(x => x.Messages).AutoInclude(false);
         modelBuilder.Add(MySqlAddDbChatSession, Provider.MySql);

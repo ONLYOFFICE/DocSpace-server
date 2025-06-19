@@ -117,6 +117,12 @@ public partial class FilesDbContext
     {
         return AbstractQueries.MarkAuditReferencesAsCorruptedAsync(this, eventsIds);
     }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    public Task DeleteChatsAsync(int folderId)
+    {
+        return AbstractQueries.DeleteChatsAsync(this, folderId);
+    }
 }
 
 static file class AbstractQueries
@@ -252,4 +258,10 @@ static file class AbstractQueries
                     .ExecuteUpdate(x => 
                         x.SetProperty(y => y.Corrupted, a => true))
         );
+
+    public static readonly Func<FilesDbContext, int, Task> DeleteChatsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int folderId) =>
+            ctx.Chats
+                .Where(x => x.RoomId == folderId)
+                .ExecuteDelete());
 }
