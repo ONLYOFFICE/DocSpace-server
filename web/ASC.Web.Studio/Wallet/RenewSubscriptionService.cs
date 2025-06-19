@@ -55,7 +55,6 @@ public class RenewSubscriptionService(
     private const string CacheKey = "renewsubscriptionservice_lastrun";
 
     private Dictionary<int, TenantQuota> _walletQuotas;
-    private List<DbTariffRow> _closeToExpirationWalletQuotas;
 
     protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.Parse(configuration["core:accounting:renewperiod"] ?? "0:1:0", CultureInfo.InvariantCulture);
 
@@ -64,20 +63,6 @@ public class RenewSubscriptionService(
     {
         try
         {
-            if (_closeToExpirationWalletQuotas != null && _closeToExpirationWalletQuotas.Count > 0)
-            {
-                var expiredWalletQuotas = _closeToExpirationWalletQuotas.Where(x => x.DueDate < DateTime.UtcNow).ToList();
-
-                foreach (var expiredWalletQuota in expiredWalletQuotas)
-                {
-                    await RenewSubscriptionAsync(expiredWalletQuota);
-                }
-            }
-
-            var now = DateTime.UtcNow;
-            var from = await hybridCache.GetOrDefaultAsync(CacheKey, now, token: stoppingToken);
-            var to = now.Add(ExecuteTaskPeriod * 3);
-
             await using (var scope = _scopeFactory.CreateAsyncScope())
             {
                 await using var coreDbContext = await scope.ServiceProvider.GetRequiredService<IDbContextFactory<CoreDbContext>>().CreateDbContextAsync(stoppingToken);
@@ -89,15 +74,24 @@ public class RenewSubscriptionService(
                     _walletQuotas = tenantQuotas.Where(x => x.Wallet).ToDictionary(x => x.TenantId, x => x);
                 }
 
-                _closeToExpirationWalletQuotas = await Queries.GetWalletQuotasCloseToExpirationAsync(coreDbContext, _walletQuotas.Keys.ToArray(), from, to).ToListAsync(stoppingToken);
-            }
+                var now = DateTime.UtcNow;
 
-            if (_closeToExpirationWalletQuotas.Count > 0)
-            {
-                logger.InfoRenewSubscriptionServiceFound(_closeToExpirationWalletQuotas.Count);
-            }
+                var from = await hybridCache.GetOrDefaultAsync(CacheKey, now, token: stoppingToken);
 
-            await hybridCache.SetAsync(CacheKey, now, token: stoppingToken);
+                var expiredWalletQuotas = await Queries.GetWalletQuotasByDueDateAsync(coreDbContext, _walletQuotas.Keys.ToArray(), from, now).ToListAsync(stoppingToken);
+
+                await hybridCache.SetAsync(CacheKey, now, token: stoppingToken);
+
+                if (expiredWalletQuotas.Count > 0)
+                {
+                    logger.InfoRenewSubscriptionServiceFound(expiredWalletQuotas.Count);
+
+                    foreach (var expiredWalletQuota in expiredWalletQuotas)
+                    {
+                        await RenewSubscriptionAsync(expiredWalletQuota);
+                    }
+                }
+            }
         }
         catch (Exception e)
         {
@@ -242,7 +236,7 @@ public class RenewSubscriptionService(
 static file class Queries
 {
     public static readonly Func<CoreDbContext, int[], DateTime, DateTime, IAsyncEnumerable<DbTariffRow>>
-        GetWalletQuotasCloseToExpirationAsync = EF.CompileAsyncQuery(
+        GetWalletQuotasByDueDateAsync = EF.CompileAsyncQuery(
             (CoreDbContext ctx, int[] quotas, DateTime from, DateTime to) =>
                 ctx.TariffRows
                     .Join(
