@@ -628,6 +628,12 @@ public class PaymentController(
             return false;
         }
 
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo == null || customerInfo.PaymentMethodStatus != PaymentMethodStatus.Set)
+        {
+            return false;
+        }
+
         await DemandPayerAsync(tenant);
 
         var result = await tariffService.TopUpDepositAsync(tenant.Id, inDto.Amount, inDto.Currency, true);
