@@ -850,6 +850,12 @@ public class PaymentController(
             foreach (var operation in report.Collection)
             {
                 operation.Description = GetServiceDesc(operation.Service);
+                operation.Date = tenantUtil.DateTimeFromUtc(operation.Date);
+
+                if (string.IsNullOrEmpty(operation.Service))
+                {
+                    operation.Quantity = 0;
+                }
             }
 
             yield return report.Collection;
