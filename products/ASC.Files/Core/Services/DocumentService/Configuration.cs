@@ -908,11 +908,10 @@ public class CustomizationConfig<T>(
         
         Folder<T> parent;
         var folderDao = daoFactory.GetFolderDao<T>();
+        var (shareRight, key) = await CheckLinkAsync(file);
         
         if (!authContext.IsAuthenticated)
         {
-            var (shareRight, key) = await CheckLinkAsync(file);
-            
             if (shareRight != FileShare.Restrict && !string.IsNullOrEmpty(key))
             {           
                 parent = await folderDao.GetFolderAsync(file.ParentId);
@@ -935,7 +934,7 @@ public class CustomizationConfig<T>(
                 {
                     return new GobackConfig
                     {
-                        Url = await pathProvider.GetFolderUrlByIdAsync(await globalFolderHelper.FolderRecentAsync)
+                        Url = await pathProvider.GetFolderUrlByIdAsync(await globalFolderHelper.FolderRecentAsync, key)
                     };
                 }
 
@@ -951,7 +950,7 @@ public class CustomizationConfig<T>(
 
             return new GobackConfig
             {
-                Url =  pathProvider.GetFolderUrl(parent)
+                Url =  pathProvider.GetFolderUrl(parent, key)
             };
         }
         catch (Exception)
