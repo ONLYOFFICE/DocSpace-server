@@ -1101,7 +1101,16 @@ public class TariffService(
             oldBalanceAmount = oldBalance?.SubAccounts?.FirstOrDefault(x => x.Currency == currency)?.Amount;
         }
 
-        var result = await billingClient.TopUpDepositAsync(portalId, amount, currency);
+        var result = false;
+
+        try
+        {
+            result = await billingClient.TopUpDepositAsync(portalId, amount, currency);
+        }
+        catch (Exception error)
+        {
+            logger.ErrorWithException(error);
+        }
 
         if (!result || !waitForChanges)
         {
