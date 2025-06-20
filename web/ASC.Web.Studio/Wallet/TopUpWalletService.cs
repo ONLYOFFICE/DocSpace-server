@@ -91,6 +91,7 @@ public class TopUpWalletService(
     {
         UserInfo payer = null;
         UserInfo owner = null;
+        TenantWalletSettings settings = null;
 
         try
         {
@@ -103,7 +104,7 @@ public class TopUpWalletService(
                 return;
             }
 
-            var settings = JsonSerializer.Deserialize<TenantWalletSettings>(data.Setting, _options);
+            settings = JsonSerializer.Deserialize<TenantWalletSettings>(data.Setting, _options);
             if (!settings.Enabled)
             {
                 return;
@@ -158,26 +159,16 @@ public class TopUpWalletService(
 
                 return;
             }
-            else
-            {
-                var messageService = scope.ServiceProvider.GetRequiredService<MessageService>();
-                var settingsManager = scope.ServiceProvider.GetRequiredService<SettingsManager>();
-
-                settings.Enabled = false;
-                await settingsManager.SaveAsync(settings);
-
-                messageService.Send(MessageInitiator.PaymentService, MessageAction.CustomerWalletTopUpSettingsUpdated);
-            }
         }
         catch (Exception ex)
         {
             logger.ErrorWithException(ex);
         }
 
-        await SendTopUpWalletErrorAsync(data.TenantId, payer, owner);
+        await SendTopUpWalletErrorAsync(data.TenantId, payer, owner, settings);
     }
 
-    private async Task SendTopUpWalletErrorAsync(int tenantId, UserInfo payer, UserInfo owner)
+    private async Task SendTopUpWalletErrorAsync(int tenantId, UserInfo payer, UserInfo owner, TenantWalletSettings settings)
     {
         try
         {
@@ -193,6 +184,15 @@ public class TopUpWalletService(
 
             var studioNotifyService = scope.ServiceProvider.GetRequiredService<StudioNotifyService>();
             await studioNotifyService.SendTopUpWalletErrorAsync(payer, owner);
+
+            var messageService = scope.ServiceProvider.GetRequiredService<MessageService>();
+            var settingsManager = scope.ServiceProvider.GetRequiredService<SettingsManager>();
+
+            settings ??= new TenantWalletSettings();
+            settings.Enabled = false;
+            await settingsManager.SaveAsync(settings, tenantId);
+
+            messageService.Send(MessageInitiator.PaymentService, MessageAction.CustomerWalletTopUpSettingsUpdated);
         }
         catch (Exception ex)
         {
