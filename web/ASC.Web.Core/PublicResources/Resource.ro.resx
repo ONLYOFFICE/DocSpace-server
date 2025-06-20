@@ -1140,4 +1140,40 @@
   <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
     <value>Adresa URL a Webhook-ului nu este disponibilă. Lipsește codul 200 de răspuns de stare HTTP la solicitarea HEAD.</value>
   </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>Sold de credit</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>Monedă</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>Dată și oră</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>Cantitate</value>
+  </data>
+  <data name="AccountingCustomerOperationService" xml:space="preserve">
+    <value>Denumire serviciu</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>Unitate de măsură</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>Raportul privind operaţiunile de client  ({0}-{1})</value>
+  </data>
+  <data name="AccountingCustomerOperationWithdrawal" xml:space="preserve">
+    <value>Retragere</value>
+  </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>Imposibil de găsit grupul</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>Spațiu de stocare suplimentar</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>Setați cantitatea de spaţiu de stocare de care aveţi nevoie.</value>
+  </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
+    <value>Spaţiul de stocare utilizat:</value>
+  </data>
 </root>

@@ -512,4 +512,10 @@ Compatibilitate garantată 100% cu formatele MS Office.</value>
   <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
     <value>Începe completarea</value>
   </data>
+  <data name="RoleEnum_Guest" xml:space="preserve">
+    <value>Invitat</value>
+  </data>
+  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
+    <value>Administrator de sală</value>
+  </data>
 </root>

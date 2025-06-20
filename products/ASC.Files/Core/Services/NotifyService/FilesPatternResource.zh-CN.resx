@@ -236,4 +236,7 @@ $OrangeButton
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
     <value>协作空间通知。</value>
   </data>
+  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
+    <value>您已被邀请加入房间“$RoomTitle”</value>
+  </data>
 </root>
