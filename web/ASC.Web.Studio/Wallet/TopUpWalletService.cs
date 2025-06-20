@@ -30,6 +30,7 @@ using ASC.Core;
 using ASC.Core.Billing;
 using ASC.Core.Common.EF.Context;
 using ASC.Core.Common.Hosting;
+using ASC.Core.Common.Settings;
 using ASC.Core.Tenants;
 using ASC.Core.Users;
 using ASC.MessagingSystem.Core;
@@ -156,6 +157,16 @@ public class TopUpWalletService(
                 logger.InfoTopUpWalletServiceDone(data.TenantId, description);
 
                 return;
+            }
+            else
+            {
+                var messageService = scope.ServiceProvider.GetRequiredService<MessageService>();
+                var settingsManager = scope.ServiceProvider.GetRequiredService<SettingsManager>();
+
+                settings.Enabled = false;
+                await settingsManager.SaveAsync(settings);
+
+                messageService.Send(MessageInitiator.PaymentService, MessageAction.CustomerWalletTopUpSettingsUpdated);
             }
         }
         catch (Exception ex)
