@@ -241,10 +241,15 @@ public class PaymentController(
             return false;
         }
 
+        var tariff = await tariffService.GetTariffAsync(tenant.Id);
+
+        if (tariff.State > TariffState.Paid)
+        {
+            return false;
+        }
+
         if (inDto.ProductQuantityType is ProductQuantityType.Set)
         {
-            var tariff = await tariffService.GetTariffAsync(tenant.Id);
-
             // saving null value is equivalent to resetting to default
             var updated = await tariffService.UpdateNextQuantityAsync(tenant.Id, tariff, quota.TenantId, productQty);
 
@@ -623,6 +628,12 @@ public class PaymentController(
             return false;
         }
 
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo == null || customerInfo.PaymentMethodStatus != PaymentMethodStatus.Set)
+        {
+            return false;
+        }
+
         await DemandPayerAsync(tenant);
 
         var result = await tariffService.TopUpDepositAsync(tenant.Id, inDto.Amount, inDto.Currency, true);
@@ -845,6 +856,12 @@ public class PaymentController(
             foreach (var operation in report.Collection)
             {
                 operation.Description = GetServiceDesc(operation.Service);
+                operation.Date = tenantUtil.DateTimeFromUtc(operation.Date);
+
+                if (string.IsNullOrEmpty(operation.Service))
+                {
+                    operation.Quantity = 0;
+                }
             }
 
             yield return report.Collection;

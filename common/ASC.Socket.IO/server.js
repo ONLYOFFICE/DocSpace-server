@@ -82,7 +82,12 @@ const session = expressSession({
   name: "socketio.sid",
 });
 
-app.use(logger("dev", { stream: winston.stream }));
+app.use(logger("tiny", { 
+  stream: winston.stream,
+  skip: function (req, res) { 
+    return req.url.endsWith("/health"); 
+  }
+}));
 app.use(session);
 
 const httpServer = createServer(app);

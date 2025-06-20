@@ -30,6 +30,7 @@ using ASC.Core;
 using ASC.Core.Billing;
 using ASC.Core.Common.EF.Context;
 using ASC.Core.Common.Hosting;
+using ASC.Core.Common.Settings;
 using ASC.Core.Tenants;
 using ASC.Core.Users;
 using ASC.MessagingSystem.Core;
@@ -157,6 +158,16 @@ public class TopUpWalletService(
 
                 return;
             }
+            else
+            {
+                var messageService = scope.ServiceProvider.GetRequiredService<MessageService>();
+                var settingsManager = scope.ServiceProvider.GetRequiredService<SettingsManager>();
+
+                settings.Enabled = false;
+                await settingsManager.SaveAsync(settings);
+
+                messageService.Send(MessageInitiator.PaymentService, MessageAction.CustomerWalletTopUpSettingsUpdated);
+            }
         }
         catch (Exception ex)
         {
@@ -176,6 +187,9 @@ public class TopUpWalletService(
 
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
             var tenant = await tenantManager.SetCurrentTenantAsync(tenantId);
+
+            var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
+            await securityContext.AuthenticateMeWithoutCookieAsync(tenantId, owner.Id);
 
             var studioNotifyService = scope.ServiceProvider.GetRequiredService<StudioNotifyService>();
             await studioNotifyService.SendTopUpWalletErrorAsync(payer, owner);

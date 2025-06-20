@@ -70,13 +70,17 @@ public class PathProvider(WebImageSupplier webImageSupplier,
         switch (folder.RootFolderType)
         {
             case FolderType.USER:
-                result = commonLinkUtility.GetFullAbsolutePath(string.Format($"{filesLinkUtility.FilesBaseAbsolutePath}rooms/personal/filter?folder={urlPathEncode}"));
+                result = string.Format($"personal/filter?folder={urlPathEncode}");
                 break;
             case FolderType.Recent:
-                result =  commonLinkUtility.GetFullAbsolutePath(string.Format($"{filesLinkUtility.FilesBaseAbsolutePath}rooms/personal/filter?folder=recent"));
+                result =  string.Format($"personal/filter?folder=recent");
+                break;
+            case FolderType.Archive:
+                result = string.Format($"archived/filter?folder={urlPathEncode}");
                 break;
             case FolderType.VirtualRooms:
-                result = string.Format($"{filesLinkUtility.FilesBaseAbsolutePath}rooms/shared/{urlPathEncode}/filter?folder={urlPathEncode}");
+            case FolderType.RoomTemplates:
+                result = string.Format($"shared/{urlPathEncode}/filter?folder={urlPathEncode}");
                 break;
         }
 
@@ -85,7 +89,7 @@ public class PathProvider(WebImageSupplier webImageSupplier,
             result += $"&key={key}";
         }
         
-        return commonLinkUtility.GetFullAbsolutePath(result);
+        return commonLinkUtility.GetFullAbsolutePath(string.Format($"{filesLinkUtility.FilesBaseAbsolutePath}rooms/{result}"));
     }
 
     public async Task<string> GetFolderUrlByIdAsync<T>(T folderId, string key = null)
