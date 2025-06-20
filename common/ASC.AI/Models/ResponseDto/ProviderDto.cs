@@ -24,21 +24,30 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+namespace ASC.AI.Models.ResponseDto;
 
-namespace ASC.AI.Core.Chat.Database;
-
-public class ChatDbContext(DbContextOptions<ChatDbContext> options) : BaseDbContext(options)
+public class ProviderDto
 {
-    public DbSet<DbChat> Chats { get; set; }
-    public DbSet<DbChatMessage> Messages { get; set; }
-    
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    public int Id { get; init; }
+    public required string Title { get; init; }
+    public ProviderType Type { get; init; }
+    public string? Url { get; init; }
+    public required ApiDateTime CreatedOn { get; init; }
+    public required ApiDateTime ModifiedOn { get; init; }
+}
+
+public static class ProviderDtoExtensions
+{
+    public static ProviderDto ToDto(this AiProvider provider, ApiDateTimeHelper apiDateTimeHelper)
     {
-        ModelBuilderWrapper
-            .From(modelBuilder, Database)
-            .AddDbTenant()
-            .AddDbChat()
-            .AddDbChatMessages()
-            .AddDbFunctions();
+        return new ProviderDto
+        {
+            Id = provider.Id, 
+            Title = provider.Title, 
+            Url = provider.Url?.ToString(),
+            Type = provider.Type,
+            CreatedOn = apiDateTimeHelper.Get(provider.CreatedOn),
+            ModifiedOn = apiDateTimeHelper.Get(provider.ModifiedOn)
+        };
     }
 }

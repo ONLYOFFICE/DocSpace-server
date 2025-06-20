@@ -24,21 +24,27 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+namespace ASC.AI.Core.Settings;
 
-namespace ASC.AI.Core.Chat.Database;
-
-public class ChatDbContext(DbContextOptions<ChatDbContext> options) : BaseDbContext(options)
+[Singleton]
+public class ProviderSettings
 {
-    public DbSet<DbChat> Chats { get; set; }
-    public DbSet<DbChatMessage> Messages { get; set; }
-    
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    private readonly FrozenDictionary<ProviderType, ProviderSettingsData> _settings;
+
+    public ProviderSettings(IConfiguration configuration)
     {
-        ModelBuilderWrapper
-            .From(modelBuilder, Database)
-            .AddDbTenant()
-            .AddDbChat()
-            .AddDbChatMessages()
-            .AddDbFunctions();
+        var section = configuration.GetSection("ai:providers");
+        var providers = section.Get<List<ProviderSettingsData>>() ?? [];
+        _settings = providers.ToFrozenDictionary(p => p.Type);
+    }
+
+    public ProviderSettingsData? Get(ProviderType type)
+    {
+        return _settings.GetValueOrDefault(type);
+    }
+
+    public IEnumerable<ProviderSettingsData> Get()
+    {
+        return _settings.Values;
     }
 }

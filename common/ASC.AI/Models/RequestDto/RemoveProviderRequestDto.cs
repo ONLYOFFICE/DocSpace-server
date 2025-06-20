@@ -24,21 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+namespace ASC.AI.Models.RequestDto;
 
-namespace ASC.AI.Core.Chat.Database;
-
-public class ChatDbContext(DbContextOptions<ChatDbContext> options) : BaseDbContext(options)
+public class RemoveProviderRequestDto
 {
-    public DbSet<DbChat> Chats { get; set; }
-    public DbSet<DbChatMessage> Messages { get; set; }
-    
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        ModelBuilderWrapper
-            .From(modelBuilder, Database)
-            .AddDbTenant()
-            .AddDbChat()
-            .AddDbChatMessages()
-            .AddDbFunctions();
-    }
+    public required IEnumerable<int> Ids { get; set; }
 }

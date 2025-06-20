@@ -28,6 +28,10 @@ global using ASC.AI.Core.Chat.Database;
 global using ASC.AI.Core.Chat.Extensions;
 global using ASC.AI.Core.Chat.Models;
 global using ASC.AI.Core.Common;
+global using ASC.AI.Core.Common.Models;
+global using ASC.AI.Core.Common.Database;
+global using ASC.AI.Core.Common.Database.Models;
+global using ASC.AI.Core.Settings;
 
 global using ASC.Common;
 global using ASC.Common.Mapping;
@@ -37,20 +41,26 @@ global using ASC.Core;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Model;
 global using ASC.Core.Common.EF.Model.Chat;
+global using ASC.Core.Users;
 
 global using ASC.Files.Core;
 global using ASC.Files.Core.Resources;
 global using ASC.Files.Core.Security;
 
+global using ASC.Security.Cryptography;
+
 global using AutoMapper;
 
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.AI;
+global using Microsoft.Extensions.Configuration;
 
 global using OpenAI;
 
 global using System.ClientModel;
 global using System.ClientModel.Primitives;
+global using System.Collections.Frozen;
+global using System.ComponentModel.DataAnnotations;
 global using System.Runtime.CompilerServices;
 global using System.Security;
 global using System.Text.Encodings.Web;

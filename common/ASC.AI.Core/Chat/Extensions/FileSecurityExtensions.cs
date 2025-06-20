@@ -24,21 +24,17 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+namespace ASC.AI.Core.Chat.Extensions;
 
-namespace ASC.AI.Core.Chat.Database;
-
-public class ChatDbContext(DbContextOptions<ChatDbContext> options) : BaseDbContext(options)
+public static class FileSecurityExtensions
 {
-    public DbSet<DbChat> Chats { get; set; }
-    public DbSet<DbChatMessage> Messages { get; set; }
-    
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    public static async Task<bool> CanUseChatsAsync<T>(this FileSecurity fileSecurity, Folder<T> room)
     {
-        ModelBuilderWrapper
-            .From(modelBuilder, Database)
-            .AddDbTenant()
-            .AddDbChat()
-            .AddDbChatMessages()
-            .AddDbFunctions();
+        if (!await fileSecurity.CanCreateAsync(room))
+        {
+            return false;
+        }
+
+        return room.ShareRecord is not { IsLink: true };
     }
 }

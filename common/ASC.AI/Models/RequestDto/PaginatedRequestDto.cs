@@ -26,7 +26,7 @@
 
 namespace ASC.AI.Models.RequestDto;
 
-public abstract class PaginatedRequestDto
+public class PaginatedRequestDto
 {
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; } = 0;

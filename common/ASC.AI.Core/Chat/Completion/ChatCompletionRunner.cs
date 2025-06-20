@@ -111,7 +111,7 @@ public class ChatCompletionRunner(
             throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
-        if (!await fileSecurity.CanReadAsync(room))
+        if (!await fileSecurity.CanUseChatsAsync(room))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFolder);
         }

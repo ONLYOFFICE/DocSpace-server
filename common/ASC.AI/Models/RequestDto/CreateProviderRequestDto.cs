@@ -24,21 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+namespace ASC.AI.Models.RequestDto;
 
-namespace ASC.AI.Core.Chat.Database;
-
-public class ChatDbContext(DbContextOptions<ChatDbContext> options) : BaseDbContext(options)
+public class CreateProviderRequestDto
 {
-    public DbSet<DbChat> Chats { get; set; }
-    public DbSet<DbChatMessage> Messages { get; set; }
-    
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        ModelBuilderWrapper
-            .From(modelBuilder, Database)
-            .AddDbTenant()
-            .AddDbChat()
-            .AddDbChatMessages()
-            .AddDbFunctions();
-    }
+    public ProviderType Type { get; set; }
+    public string? Title { get; set; }
+    public string? Url { get; set; }
+    public required string Key { get; set; }
 }

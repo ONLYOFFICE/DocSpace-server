@@ -24,22 +24,21 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Core.Common.EF.Model.Chat;
+namespace ASC.AI.Core.Common.Database.Models;
 
-public class DbChat : BaseEntity
+public class DbAiProvider : BaseEntity
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
     public int TenantId { get; set; }
-    public int RoomId { get; set; }
-    public Guid UserId { get; set; }
-    
+    public ProviderType Type { get; set; }
     [MaxLength(255)]
-    public required string Title { get; set; }
+    public string Title { get; set; }
+    public string? Url { get; set; }
+    public string Key { get; set; }
     public DateTime CreatedOn { get; set; }
     public DateTime ModifiedOn { get; set; }
-
+    
     public DbTenant Tenant { get; set; }
-    public List<DbChatMessage> Messages { get; set; }
     
     public override object[] GetKeys()
     {
@@ -47,52 +46,54 @@ public class DbChat : BaseEntity
     }
 }
 
-public static class DbChatSessionExtensions
+public static class ModelsProviderExtension
 {
-    public static ModelBuilderWrapper AddDbChat(this ModelBuilderWrapper modelBuilder)
+    public static ModelBuilderWrapper AddProviders(this ModelBuilderWrapper modelBuilder)
     {
-        modelBuilder.Entity<DbChat>().Navigation(x => x.Messages).AutoInclude(false);
-        modelBuilder.Entity<DbChat>().Navigation(e => e.Tenant).AutoInclude(false);
-        
-        modelBuilder.Add(MySqlAddDbChatSession, Provider.MySql);
+        modelBuilder.Entity<DbAiProvider>().Navigation(e => e.Tenant).AutoInclude(false);
+        modelBuilder.Add(AddMySqlModelsProviders, Provider.MySql);
         
         return modelBuilder;
     }
 
-    private static void MySqlAddDbChatSession(ModelBuilder modelBuilder)
+    public static void AddMySqlModelsProviders(this ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbChat>(entity =>
+        modelBuilder.Entity<DbAiProvider>(entity =>
         {
-            entity.ToTable("ai_chat")
+            entity.ToTable("ai_providers")
                 .HasCharSet("utf8");
-            
+
             entity.HasKey(e => e.Id)
                 .HasName("PRIMARY");
             
             entity.Property(e => e.Id)
                 .HasColumnName("id")
-                .HasColumnType("char(36)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                .ValueGeneratedOnAdd();
             
             entity.Property(e => e.TenantId)
                 .HasColumnName("tenant_id");
             
-            entity.Property(e => e.RoomId)
-                .HasColumnName("room_id");
+            entity.Property(e => e.Type)
+                .HasColumnName("type");
             
             entity.Property(e => e.Title)
                 .HasColumnName("title")
                 .HasColumnType("varchar(255)")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
-            
-            entity.Property(e => e.UserId)
-                .HasColumnName("user_id")
-                .HasColumnType("char(36)")
+
+            entity.Property(e => e.Url)
+                .HasColumnName("url")
+                .HasColumnType("text")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
-
+            
+            entity.Property(e => e.Key)
+                .HasColumnName("key")
+                .HasColumnType("text")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
+            
             entity.Property(e => e.CreatedOn)
                 .HasColumnName("created_on")
                 .HasColumnType("datetime");
@@ -100,9 +101,6 @@ public static class DbChatSessionExtensions
             entity.Property(e => e.ModifiedOn)
                 .HasColumnName("modified_on")
                 .HasColumnType("datetime");
-            
-            entity.HasIndex(e => new { e.RoomId, e.UserId, e.ModifiedOn })
-                .HasDatabaseName("idx_room_id_user_id_modified_on");
         });
     }
 }
