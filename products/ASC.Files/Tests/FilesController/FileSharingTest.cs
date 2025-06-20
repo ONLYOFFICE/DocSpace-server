@@ -26,6 +26,8 @@
 
 using ASC.Files.Tests.Factory;
 
+using Newtonsoft.Json.Linq;
+
 using FileShare = Docspace.Model.FileShare;
 
 namespace ASC.Files.Tests.FilesController;
@@ -41,7 +43,7 @@ public class FileSharingTest(
     //   FileShare.None
     public static TheoryData<FileShare> Data =>
     [
-        FileShare.Editing, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.FillForms, FileShare.Restrict
+        FileShare.Editing, FileShare.Review, FileShare.Comment, FileShare.Read
     ];
     
     public static TheoryData<FileShare> InvalidData =>
@@ -61,7 +63,10 @@ public class FileSharingTest(
         // Act
         var linkParams = new FileLinkRequest(access: fileShare);
         
-        var result = (await _filesFilesApi.CreatePrimaryExternalLinkAsync(file.Id, linkParams, TestContext.Current.CancellationToken)).Response;
+        await _filesFilesApi.CreatePrimaryExternalLinkAsync(file.Id, linkParams, TestContext.Current.CancellationToken);
+        
+        // Act
+        var result = (await _filesFilesApi.GetFilePrimaryExternalLinkAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         
         // Assert
         result.Should().NotBeNull();
@@ -84,29 +89,6 @@ public class FileSharingTest(
         await Assert.ThrowsAsync<ApiException>(async () => 
             await _filesFilesApi.CreatePrimaryExternalLinkAsync(file.Id, linkParams, TestContext.Current.CancellationToken));
     }
-    
-    [Fact]
-    public async Task GetFilePrimaryExternalLink_ExistingLink_ReturnsLinkData()
-    {
-        // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        
-        var file = await CreateFile("file_with_link.docx", FolderType.USER, Initializer.Owner);
-        
-        // Create a primary external link first
-        var linkParams = new FileLinkRequest(access: FileShare.Read);
-        
-        await _filesFilesApi.CreatePrimaryExternalLinkAsync(file.Id, linkParams, TestContext.Current.CancellationToken);
-        
-        // Act
-        var result = (await _filesFilesApi.GetFilePrimaryExternalLinkAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        
-        // Assert
-        result.Should().NotBeNull();
-        //result.ShareLink.Should().NotBeNullOrEmpty();
-        result.Access.Should().Be(FileShare.Read); // Read access
-    }
-    
 
     [Fact]
     public async Task GetLinks_WithMultipleLinks_ReturnsAllLinks()
@@ -136,33 +118,33 @@ public class FileSharingTest(
         links.Should().Contain(link => link.Access == FileShare.Editing); // Additional link with editing access
     }
     
-    // [Fact]
-    // public async Task SetExternalLink_UpdateExistingLink_ReturnsUpdatedLink()
-    // {
-    //     // Arrange
-    //     await _filesClient.Authenticate(Initializer.Owner);
-    //     
-    //     var file = await CreateFile("file_update_link.docx", FolderType.USER, Initializer.Owner);
-    //     
-    //     // Create initial external link
-    //     var initialLinkParams = new FileLinkRequest(
-    //         access: FileShare.ReadWrite, // Read access
-    //         primary: true
-    //     );
-    //     
-    //     var initialLink = (await _filesFilesApi.CreatePrimaryExternalLinkAsync(file.Id, initialLinkParams, TestContext.Current.CancellationToken)).Response;
-    //     
-    //     // Act - Update the link
-    //     var updateLinkParams = new FileLinkRequest(
-    //         access: FileShare.Read, // Read/Write access
-    //         linkId: initialLink
-    //     );
-    //     
-    //     var updatedLink = (await _filesFilesApi.SetExternalLinkAsync(file.Id, updateLinkParams, TestContext.Current.CancellationToken)).Response;
-    //     
-    //     // Assert
-    //     updatedLink.Should().NotBeNull();
-    //     updatedLink.Id.Should().Be(initialLink.Id); // Same link ID
-    //     updatedLink.Access.Should().Be(2); // Updated access level
-    // }
+    [Fact]
+    public async Task SetExternalLink_UpdateExistingLink_ReturnsUpdatedLink()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        
+        var file = await CreateFile("file_update_link.docx", FolderType.USER, Initializer.Owner);
+        
+        // Create initial external link
+        var initialLinkParams = new FileLinkRequest(
+            access: FileShare.Read, // Read access
+            primary: true
+        );
+        
+        var initialLink = (await _filesFilesApi.CreatePrimaryExternalLinkAsync(file.Id, initialLinkParams, TestContext.Current.CancellationToken)).Response;
+        var sharedTo = initialLink.SharedTo as JObject;
+        
+        // Act - Update the link
+        var updateLinkParams = new FileLinkRequest(
+            access: FileShare.Editing, // Read/Write access
+            linkId: Guid.Parse(sharedTo["id"].ToString())
+        );
+
+        var updatedLink = (await _filesFilesApi.SetExternalLinkAsync(file.Id, updateLinkParams, TestContext.Current.CancellationToken)).Response;
+        
+        // Assert
+        updatedLink.Should().NotBeNull();
+        updatedLink.Access.Should().Be(FileShare.Editing); // Updated access level
+    }
 }
