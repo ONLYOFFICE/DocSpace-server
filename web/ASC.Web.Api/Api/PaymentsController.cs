@@ -250,6 +250,11 @@ public class PaymentController(
 
         if (inDto.ProductQuantityType is ProductQuantityType.Set)
         {
+            if (productQty.HasValue && productQty.Value < 100) // min value 100Gb
+            {
+                return false;
+            }
+
             // saving null value is equivalent to resetting to default
             var updated = await tariffService.UpdateNextQuantityAsync(tenant.Id, tariff, quota.TenantId, productQty);
 
@@ -264,6 +269,12 @@ public class PaymentController(
         // inDto.ProductQuantityType === ProductQuantityType.Add
 
         if (!productQty.HasValue || productQty <= 0)
+        {
+            return false;
+        }
+
+        var hasActiveWalletQuota = tariff.Quotas.Any(q => q.Id == quota.TenantId && q.State == QuotaState.Active);
+        if (!hasActiveWalletQuota && productQty < 100) // min value 100Gb
         {
             return false;
         }
@@ -551,7 +562,11 @@ public class PaymentController(
         var hasCustomer = await HasCustomer(tenant);
         if (hasCustomer)
         {
-            return null;
+            var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+            if (customerInfo != null && customerInfo.PaymentMethodStatus == PaymentMethodStatus.Set)
+            {
+                return null;
+            }
         }
 
         var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
