@@ -599,6 +599,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             result.IsSubmitOnly = true;
             result.FillingSessionId = FileConstant.AnonFillingSession + Guid.NewGuid();
             result.EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
+            result.DisableEmbeddedConfig = true;
             return result;
         }
 
@@ -627,6 +628,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         result.CanFill = true;
         result.EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
+        result.DisableEmbeddedConfig = true;
         result.Draft = formDraft;
         result.FillingSessionId = $"{formDraft.Id}_{securityContext.CurrentAccount.ID}";
 
@@ -639,7 +641,8 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             CanEdit = false,
             CanFill = true,
             FillingSessionId = $"{file.Id}_{securityContext.CurrentAccount.ID}",
-            EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded
+            EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded,
+            DisableEmbeddedConfig = true
         };
     }
     public FormOpenSetup<T> GetFormOpenSetupForFolderDone<T>(EditorType editorType)
@@ -648,7 +651,8 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         {
             CanEdit = false,
             CanFill = false,
-            EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded
+            EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded,
+            DisableEmbeddedConfig = true
         };
     }
     public async Task<FormOpenSetup<T>> GetFormOpenSetupForVirtualDataRoomAsync<T>(File<T> file, EditorType editorType)
@@ -685,6 +689,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
                 result.RoleName = role.RoleName;
             }
             result.EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
+            result.DisableEmbeddedConfig = true;
         }
         else
         {

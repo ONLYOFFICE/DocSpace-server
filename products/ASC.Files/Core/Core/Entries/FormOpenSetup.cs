@@ -76,4 +76,9 @@ public record FormOpenSetup<T>
     /// </summary>
     public Folder<T> RootFolder { get; set; }
 
+    /// <summary>
+    /// Disable embedded config
+    /// </summary>
+    public bool DisableEmbeddedConfig { get; set; }
+
 }
