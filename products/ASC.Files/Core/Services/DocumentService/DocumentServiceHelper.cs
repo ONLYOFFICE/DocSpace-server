@@ -45,7 +45,10 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         ExternalShare externalShare,
         IHttpContextAccessor httpContextAccessor,
         AuthContext authContext,
-        SecurityContext securityContext)
+        SecurityContext securityContext,
+        SettingsManager settingsManager,
+        IQuotaService quotaService,
+        TenantManager tenantManager)
     {
 
     public async Task<(File<T> File, bool LastVersion)> GetCurFileInfoAsync<T>(T fileId, int version)
@@ -89,6 +92,52 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         var (file, lastVersion) = await GetCurFileInfoAsync(fileId, version);
 
         return await GetParamsAsync(file, lastVersion, true, true, editPossible, tryEdit, tryCoAuthoring, fillFormsPossible);
+    }
+
+    public async Task<bool> CheckCustomQuota<T>(Folder<T> rootFolder)
+    {
+        var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
+        if (tenantQuotaSetting.EnableQuota)
+        {
+            var usedSize = (await tenantManager.FindTenantQuotaRowsAsync(tenantManager.GetCurrentTenant().Id))
+               .Where(r => !string.IsNullOrEmpty(r.Tag) && new Guid(r.Tag) != Guid.Empty)
+               .Sum(r => r.Counter);
+            if (tenantQuotaSetting.Quota < usedSize)
+            {
+                return false;
+            }
+        }
+        if (DocSpaceHelper.IsRoom(rootFolder.FolderType))
+        {
+            var quotaRoomSettings = await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+            if (quotaRoomSettings.EnableQuota)
+            {
+                var roomQuotaLimit = rootFolder.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaRoomSettings.DefaultQuota : rootFolder.SettingsQuota;
+                if (roomQuotaLimit != TenantEntityQuotaSettings.NoQuota && roomQuotaLimit <= rootFolder.Counter)
+                {
+                    return false;
+                }
+            }
+        }
+        else
+        {
+            var quotaUserSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
+            if (quotaUserSettings.EnableQuota)
+            {
+                var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+                var userQuotaData = await settingsManager.LoadAsync<UserQuotaSettings>(user);
+                var userQuotaLimit = userQuotaData.UserQuota == userQuotaData.GetDefault().UserQuota ? quotaUserSettings.DefaultQuota : userQuotaData.UserQuota;
+                if (userQuotaLimit != UserQuotaSettings.NoQuota)
+                {
+                    var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(user.TenantId, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
+                    if (userQuotaLimit <= userUsedSpace)
+                    {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     private async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(File<T> file, bool lastVersion, bool rightToRename,
