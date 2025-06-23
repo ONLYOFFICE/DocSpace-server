@@ -562,7 +562,11 @@ public class PaymentController(
         var hasCustomer = await HasCustomer(tenant);
         if (hasCustomer)
         {
-            return null;
+            var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+            if (customerInfo != null && customerInfo.PaymentMethodStatus == PaymentMethodStatus.Set)
+            {
+                return null;
+            }
         }
 
         var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
