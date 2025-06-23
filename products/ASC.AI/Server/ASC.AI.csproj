@@ -2,7 +2,18 @@
 
     <PropertyGroup>
         <TargetFramework>net9.0</TargetFramework>
+        <IsPackable>false</IsPackable>
+        <DefaultItemExcludes>$(DefaultItemExcludes);</DefaultItemExcludes>
+        <RazorCompileOnBuild>false</RazorCompileOnBuild>
+        <GenerateMvcApplicationPartsAssemblyAttributes>false</GenerateMvcApplicationPartsAssemblyAttributes>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
         <Nullable>enable</Nullable>
+        <AssemblyTitle>ASC.AI</AssemblyTitle>
+        <Company>Ascensio System SIA</Company>
+        <Product>ASC.AI</Product>
+        <Copyright>(c) Ascensio System SIA. All rights reserved</Copyright>
+        <GenerateDocumentationFile>True</GenerateDocumentationFile>
+        <NoWarn>1701;1702;1591</NoWarn>
         <ImplicitUsings>enable</ImplicitUsings>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
