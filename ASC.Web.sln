@@ -93,6 +93,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASC.Migrations.Core", "comm
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASC.Migrations.PostgreSql.SaaS", "migrations\postgre\SaaS\ASC.Migrations.PostgreSql.SaaS.csproj", "{1A086922-36A5-4E1D-9CC7-96232126DFB7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASC.AI.Core", "products\ASC.AI\Core\ASC.AI.Core.csproj", "{C1A27301-B158-472A-B9C8-F98ABCB4AEAD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASC.AI", "products\ASC.AI\Server\ASC.AI.csproj", "{1F2AEF6E-12EB-4E8E-8A13-D12F711F51A9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -259,6 +263,14 @@ Global
 		{1A086922-36A5-4E1D-9CC7-96232126DFB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1A086922-36A5-4E1D-9CC7-96232126DFB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1A086922-36A5-4E1D-9CC7-96232126DFB7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1A27301-B158-472A-B9C8-F98ABCB4AEAD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1A27301-B158-472A-B9C8-F98ABCB4AEAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1A27301-B158-472A-B9C8-F98ABCB4AEAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1A27301-B158-472A-B9C8-F98ABCB4AEAD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F2AEF6E-12EB-4E8E-8A13-D12F711F51A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F2AEF6E-12EB-4E8E-8A13-D12F711F51A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F2AEF6E-12EB-4E8E-8A13-D12F711F51A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F2AEF6E-12EB-4E8E-8A13-D12F711F51A9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

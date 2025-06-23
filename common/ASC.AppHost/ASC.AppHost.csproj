@@ -20,6 +20,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\products\ASC.AI\Server\ASC.AI.csproj" />
       <ProjectReference Include="..\services\ASC.ApiSystem\ASC.ApiSystem.csproj" />
       <ProjectReference Include="..\services\ASC.ClearEvents\ASC.ClearEvents.csproj" />
       <ProjectReference Include="..\services\ASC.Data.Backup.BackgroundTasks\ASC.Data.Backup.BackgroundTasks.csproj" />

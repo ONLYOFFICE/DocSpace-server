@@ -42,6 +42,7 @@ const int webApiPort = 5000;
 const int apiSystemPort = 5010;
 const int backupPort = 5012;
 const int webstudioPort = 5003;
+const int aiPort = 5157;
 const string hostDockerInternal = "host.docker.internal";
 const string openRestyContainer = "asc-openresty";
 
@@ -144,6 +145,7 @@ if (isDocker)
     AddProjectDocker<ASC_Files_Service>(5009);
     AddProjectDocker<ASC_Studio_Notify>(5006);
     AddProjectDocker<ASC_Web_Studio>(webstudioPort);
+    AddProjectDocker<ASC_AI>(aiPort);
 
     var socketIoResourceBuilder = builder
         .AddDockerfile(ascSocketio, "../ASC.Socket.IO/")
@@ -193,6 +195,7 @@ else
     AddProjectWithDefaultConfiguration<ASC_Files_Service>();
     AddProjectWithDefaultConfiguration<ASC_Studio_Notify>();
     AddProjectWithDefaultConfiguration<ASC_Web_Studio>();
+    AddProjectWithDefaultConfiguration<ASC_AI>();
 
     builder.AddNpmApp(ascSocketio, "../ASC.Socket.IO/", "start:build")
         .WithEnvironment("Redis:Hosts:0:Host", () => redisHost ?? string.Empty)
@@ -275,6 +278,7 @@ var dict = new Dictionary<string, string>
     {"api_system_env", isDocker ? $"http://{GetProjectName<ASC_ApiSystem>()}:{apiSystemPort}" : $"http://{hostDockerInternal}:{apiSystemPort}"},
     {"backup_service_env", isDocker ? $"http://{GetProjectName<ASC_Data_Backup>()}:{backupPort}" : $"http://{hostDockerInternal}:{backupPort}"},
     {"webstudio_service_env", isDocker ? $"http://{GetProjectName<ASC_Web_Studio>()}:{webstudioPort}" : $"http://{hostDockerInternal}:{webstudioPort}"},
+    {"ai_service_env", isDocker ? $"http://{GetProjectName<ASC_AI>()}:{aiPort}" : $"http://{hostDockerInternal}:{aiPort}"},
     {"sockjs_node_env", $"http://{hostDockerInternal}:5001"},
     {"plugins_service_env", $"http://{hostDockerInternal}:5014"},
     {"clients_service_env", $"http://{ascIdentityRegistration}:{identityRegistrationPort}"},
