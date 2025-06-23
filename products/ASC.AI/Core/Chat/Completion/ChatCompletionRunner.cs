@@ -33,7 +33,8 @@ public class ChatCompletionRunner(
     ExecutionContextProvider contextProvider, 
     IHttpClientFactory httpClientFactory,
     IDaoFactory daoFactory,
-    FileSecurity fileSecurity)
+    FileSecurity fileSecurity,
+    TenantManager tenantManager)
 {
     private static readonly ChatMessage _systemMessage = new(ChatRole.System, "You are a helpful assistant."); // TODO: move to prompt file
     
@@ -44,7 +45,7 @@ public class ChatCompletionRunner(
         var clientTask = CreateClientAsync();
 
         var userMessage = new ChatMessage(ChatRole.User, message);
-        var chat = await chatHistory.AddChatAsync(roomId, authContext.CurrentAccount.ID, userMessage);
+        var chat = await chatHistory.AddChatAsync(tenantManager.GetCurrentTenantId(), roomId, authContext.CurrentAccount.ID, userMessage);
         
         var messages = new List<ChatMessage>
         {

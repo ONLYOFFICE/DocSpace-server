@@ -29,7 +29,7 @@ namespace ASC.AI.Core.Chat;
 [Scope]
 public class ChatHistory(DbChatDao chatDao)
 {
-    public Task<ChatSession> AddChatAsync(int roomId, Guid userId, ChatMessage message)
+    public Task<ChatSession> AddChatAsync(int tenantId, int roomId, Guid userId, ChatMessage message)
     {
         const string suffix = "...";
         const int maxTitleLength = 255;
@@ -40,7 +40,7 @@ public class ChatHistory(DbChatDao chatDao)
             title = title[..(maxTitleLength - suffix.Length)].TrimEnd() + suffix;
         }
 
-        return chatDao.AddChatAsync(roomId, userId, title,
+        return chatDao.AddChatAsync(tenantId, roomId, userId, title,
             new Message(MessageType.UserMessage, [new TextMessageContent(message.Text)], DateTime.UtcNow));
     }
 

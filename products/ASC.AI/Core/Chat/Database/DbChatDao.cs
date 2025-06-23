@@ -31,7 +31,7 @@ namespace ASC.AI.Core.Chat.Database;
 [Scope]
 public class DbChatDao(IDbContextFactory<ChatDbContext> dbContextFactory, IMapper mapper)
 {
-    public async Task<ChatSession> AddChatAsync(int roomId, Guid userId, string title, Message message)
+    public async Task<ChatSession> AddChatAsync(int tenantId, int roomId, Guid userId, string title, Message message)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
@@ -49,6 +49,7 @@ public class DbChatDao(IDbContextFactory<ChatDbContext> dbContextFactory, IMappe
             chat = new DbChat
             {
                 Id = id,
+                TenantId = tenantId,
                 RoomId = roomId, 
                 UserId = userId,
                 Title = title,
