@@ -1119,7 +1119,7 @@ public class TariffService(
 
         var retryPolicy = Policy
             .HandleResult<bool>(result => result == false)
-            .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
+            .WaitAndRetryAsync(15, retryAttempt => TimeSpan.FromSeconds(1));
 
         var updated = await retryPolicy.ExecuteAsync(async () =>
         {

@@ -250,7 +250,7 @@ public class PaymentController(
 
         if (inDto.ProductQuantityType is ProductQuantityType.Set)
         {
-            if (productQty.HasValue && productQty.Value < 100) // min value 100Gb
+            if (productQty.HasValue && productQty.Value != 0 && productQty.Value < 100) // min value 100Gb
             {
                 return false;
             }
@@ -798,6 +798,7 @@ public class PaymentController(
             foreach (var operation in result.Collection)
             {
                 operation.Description = GetServiceDesc(operation.Service);
+                operation.Date = tenantUtil.DateTimeFromUtc(operation.Date);
             }
         }
 
