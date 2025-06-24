@@ -24,10 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Tests.Factory;
-
-using User = ASC.Files.Tests.Data.User;
-
 namespace ASC.Files.Tests.FilesController;
 
 [Collection("Test Collection")]
@@ -106,12 +102,16 @@ public class BaseTest(
         return (await _foldersApi.CreateFolderAsync(folderId, new CreateFolder(folderName), TestContext.Current.CancellationToken)).Response;
     }
     
-    protected async Task<FolderDtoInteger> CreateVirtualRoom(string roomTitle, User user)
+    protected async Task<FolderDtoInteger> CreateVirtualRoom(string roomTitle, bool indexing = true)
     {
-        await _filesClient.Authenticate(user);
-        
         return (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto(roomTitle, indexing: true, roomType: RoomType.VirtualDataRoom), TestContext.Current.CancellationToken)).Response;
     }
+    
+    protected async Task<FolderDtoInteger> CreateCustomRoom(string roomTitle)
+    {
+        return (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto(roomTitle, roomType: RoomType.CustomRoom), TestContext.Current.CancellationToken)).Response;
+    }
+    
     protected async Task<List<FileOperationDto>?> WaitLongOperation()
     {
         List<FileOperationDto>? statuses;

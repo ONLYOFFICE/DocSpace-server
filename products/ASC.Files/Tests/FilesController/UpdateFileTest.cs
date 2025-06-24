@@ -24,10 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using FileShare = Docspace.Model.FileShare;
-
-using ASC.Files.Tests.Factory;
-
 namespace ASC.Files.Tests.FilesController;
 
 [Collection("Test Collection")]
@@ -111,7 +107,7 @@ public class UpdateFileTest(
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         
-        var createdRoom = await CreateVirtualRoom("room_to_lock", Initializer.Owner);
+        var createdRoom = await CreateVirtualRoom("room_to_lock");
         var createdFile = await CreateFile("file_to_lock.docx", createdRoom.Id);
         
         // Act
@@ -144,7 +140,7 @@ public class UpdateFileTest(
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         
-        var createdRoom = await CreateVirtualRoom("room_to_lock", Initializer.Owner);
+        var createdRoom = await CreateVirtualRoom("room_to_lock");
         var roomAdmin = await Initializer.InviteContact(EmployeeType.RoomAdmin);
         
         await _roomsApi.SetRoomSecurityAsync(createdRoom.Id, new RoomInvitationRequest
@@ -188,7 +184,7 @@ public class UpdateFileTest(
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         
-        var createdRoom = await CreateVirtualRoom("room_to_lock", Initializer.Owner);
+        var createdRoom = await CreateVirtualRoom("room_to_lock");
         var roomAdmin = await Initializer.InviteContact(EmployeeType.RoomAdmin);
         
         await _roomsApi.SetRoomSecurityAsync(createdRoom.Id, new RoomInvitationRequest
@@ -213,7 +209,7 @@ public class UpdateFileTest(
     {
         await _filesClient.Authenticate(Initializer.Owner);
         
-        var createdRoom = await CreateVirtualRoom("room_to_lock", Initializer.Owner);
+        var createdRoom = await CreateVirtualRoom("room_to_lock");
         var roomAdmin1 = await Initializer.InviteContact(EmployeeType.RoomAdmin);
         var roomAdmin2 = await Initializer.InviteContact(EmployeeType.RoomAdmin);
         
@@ -246,7 +242,7 @@ public class UpdateFileTest(
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         
-        var createdRoom = await CreateVirtualRoom("room_to_lock", Initializer.Owner);
+        var createdRoom = await CreateVirtualRoom("room_to_lock");
         var roomAdmin1 = await Initializer.InviteContact(EmployeeType.RoomAdmin);
         var roomAdmin2 = await Initializer.InviteContact(EmployeeType.RoomAdmin);
         

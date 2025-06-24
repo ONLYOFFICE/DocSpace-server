@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Tests.Factory;
-
 namespace ASC.Files.Tests.FilesController;
 
 [Collection("Test Collection")]
@@ -56,7 +54,7 @@ public class FileCustomizationTest(
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         
-        var createdRoom = await CreateVirtualRoom("room_for_custom_filter", Initializer.Owner); 
+        var createdRoom = await CreateVirtualRoom("room_for_custom_filter"); 
         var file = await CreateFile("file_for_custom_filter.xlsx", createdRoom.Id);
         
         // Act
@@ -76,7 +74,7 @@ public class FileCustomizationTest(
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         
-        var createdRoom = await CreateVirtualRoom("room_for_custom_filter", Initializer.Owner); 
+        var createdRoom = await CreateVirtualRoom("room_for_custom_filter"); 
         var file = await CreateFile("file_for_custom_filter_disable.xlsx", createdRoom.Id);
         
         // First enable custom filter

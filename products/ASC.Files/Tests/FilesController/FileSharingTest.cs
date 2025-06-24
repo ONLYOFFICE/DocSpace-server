@@ -24,12 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Tests.Factory;
+using System.Text.Json;
 
-using Newtonsoft.Json.Linq;
-
-using FileShare = Docspace.Model.FileShare;
-using User = ASC.Files.Tests.Data.User;
+using ASC.Files.Core.ApiModels.ResponseDto;
 
 namespace ASC.Files.Tests.FilesController;
 
@@ -41,8 +38,6 @@ public class FileSharingTest(
     FilesServiceFactory filesServiceProgram) 
     : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
 {
-    private readonly WepApiFactory _apiFactory = apiFactory;
-
     //   FileShare.None
     public static TheoryData<FileShare> Data =>
     [
@@ -136,12 +131,13 @@ public class FileSharingTest(
         );
         
         var initialLink = (await _filesApi.CreatePrimaryExternalLinkAsync(file.Id, initialLinkParams, TestContext.Current.CancellationToken)).Response;
-        var sharedTo = initialLink.SharedTo as JObject;
+        var sharedToJObject = initialLink.SharedTo as JObject;
+        var sharedTo = JsonSerializer.Deserialize<FileShareLink>(sharedToJObject.ToString(), JsonSerializerOptions.Web);
         
         // Act - Update the link
         var updateLinkParams = new FileLinkRequest(
             access: FileShare.Editing, // Read/Write access
-            linkId: Guid.Parse(sharedTo["id"].ToString())
+            linkId: sharedTo.Id
         );
 
         var updatedLink = (await _filesApi.SetExternalLinkAsync(file.Id, updateLinkParams, TestContext.Current.CancellationToken)).Response;
@@ -242,15 +238,9 @@ public class FileSharingTest(
         
         var initialLink = (await _filesApi.CreatePrimaryExternalLinkAsync(file.Id, initialLinkParams, TestContext.Current.CancellationToken)).Response;
         var sharedTo = initialLink.SharedTo as JObject;
+        var fileShareLink = JsonSerializer.Deserialize<FileShareLink>(sharedTo.ToString(), JsonSerializerOptions.Web);
         
-        // Act
-        var link = sharedTo["shareLink"].ToString();
-        await _apiFactory.HttpClient.Authenticate(Initializer.Owner);
-        var fullLink = await _apiFactory.HttpClient.GetAsync(link, TestContext.Current.CancellationToken);
-        var query = fullLink.RequestMessage?.RequestUri?.Query.Substring(1);
-        var parsedQuery = HttpUtility.ParseQueryString(query);
-        
-        return (parsedQuery["share"], file.Id);
+        return (fileShareLink.RequestToken, file.Id);
     }
     
     private async Task<FileDtoInteger?> TryOpenEditAsync(string share, int fileId, User? user = null, bool throwException = false)
@@ -264,17 +254,17 @@ public class FileSharingTest(
             _filesClient.DefaultRequestHeaders.Authorization = null;
         }
 
-        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation("Request-Token", share);
+        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, share);
         
         if (throwException)
         {
             await Assert.ThrowsAsync<ApiException>(async () => await _filesApi.OpenEditFileAsync(fileId, cancellationToken: TestContext.Current.CancellationToken));
-            _filesClient.DefaultRequestHeaders.Remove("Request-Token");
+            _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
             return null;
         }
 
         var openEditResult = (await _filesApi.OpenEditFileAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        _filesClient.DefaultRequestHeaders.Remove("Request-Token");
+        _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
         return openEditResult.File;
     }
 }
