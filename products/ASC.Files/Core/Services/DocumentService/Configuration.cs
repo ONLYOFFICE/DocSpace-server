@@ -1117,6 +1117,11 @@ public class LogoConfig(
                 : commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(WhiteLabelLogoType.DocsEditor));
     }
 
+    public async Task<string> GetImageLight()
+    {
+        return commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(WhiteLabelLogoType.DocsEditorEmbed));
+    }
+
     public async Task<string> GetImageDark()
     {
         return commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(WhiteLabelLogoType.DocsEditor));
