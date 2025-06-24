@@ -34,7 +34,8 @@ public class ChatCompletionRunner(
     IHttpClientFactory httpClientFactory,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
-    TenantManager tenantManager)
+    TenantManager tenantManager,
+    ToolsProvider toolsProvider)
 {
     private static readonly ChatMessage _systemMessage = new(ChatRole.System, "You are a helpful assistant."); // TODO: move to prompt file
     
@@ -42,35 +43,37 @@ public class ChatCompletionRunner(
     {
         await ChekRoomAsync(roomId);
         
+        var tenantId = tenantManager.GetCurrentTenantId();
+        
         var clientTask = CreateClientAsync();
+        var toolsTask = toolsProvider.GetToolsAsync(tenantId, roomId);
 
         var userMessage = new ChatMessage(ChatRole.User, message);
-        var chat = await chatHistory.AddChatAsync(tenantManager.GetCurrentTenantId(), roomId, authContext.CurrentAccount.ID, userMessage);
+        var chat = await chatHistory.AddChatAsync(tenantId, roomId, authContext.CurrentAccount.ID, userMessage);
         
         var messages = new List<ChatMessage>
         {
             _systemMessage,
             userMessage
         };
+
+        var metadata = new Metadata { ChatId = chat.Id };
         
-        return new ChatCompletionGenerator(chat.Id, chatHistory, await clientTask, messages);
+        return new ChatCompletionGenerator(chat.Id, chatHistory, await clientTask, messages, await toolsTask, metadata);
     }
 
     public async Task<ChatCompletionGenerator> StartChatAsync(Guid chatId, string message)
     {
         var chat = await chatHistory.GetChatAsync(chatId);
-        if (chat == null)
+        if (chat == null || chat.UserId != authContext.CurrentAccount.ID)
         {
             throw new ItemNotFoundException("Chat not found");
         }
-        
-        if (chat.UserId != authContext.CurrentAccount.ID)
-        {
-            throw new SecurityException("Access denied");
-        }
 
         await ChekRoomAsync(chat.RoomId);
+        
         var clientTask = CreateClientAsync();
+        var toolsTask = toolsProvider.GetToolsAsync(tenantManager.GetCurrentTenantId(), chat.RoomId);
 
         var history = await chatHistory.GetMessagesAsync(chatId).ToListAsync();
         var userMessage = new ChatMessage(ChatRole.User, message);
@@ -81,9 +84,7 @@ public class ChatCompletionRunner(
         messages.AddRange(history);
         messages.Add(userMessage);
 
-        string CreateRoom(string title) => "Room created: " + title + "";
-
-        return new ChatCompletionGenerator(chatId, chatHistory, await clientTask, messages, [AIFunctionFactory.Create(CreateRoom, "create_room", "Creating room by title")]);
+        return new ChatCompletionGenerator(chatId, chatHistory, await clientTask, messages, await toolsTask);
     }
 
     private async Task<IChatClient> CreateClientAsync()

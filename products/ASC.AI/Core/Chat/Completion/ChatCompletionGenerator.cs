@@ -32,7 +32,8 @@ public class ChatCompletionGenerator(
     ChatHistory chatHistory,
     IChatClient client,
     List<ChatMessage> messages, 
-    List<AITool>? tools = null)
+    List<AITool>? tools = null,
+    Metadata? metadata = null)
 {
     private static readonly JsonSerializerOptions _serializerOptions = new()
     {
@@ -53,6 +54,12 @@ public class ChatCompletionGenerator(
                 ToolMode = ChatToolMode.Auto,
                 AllowMultipleToolCalls = true
             };
+        }
+
+        if (metadata != null)
+        {
+            yield return new ChatCompletion(EventType.Metadata, 
+                JsonSerializer.Serialize(metadata, _serializerOptions));
         }
         
         var responses = new List<ChatResponseUpdate>();

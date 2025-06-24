@@ -24,24 +24,21 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Chat.Models;
+namespace ASC.AI.Core.Common;
 
-public enum EventType
+[Scope]
+public class ToolsProvider
 {
-    NewToken,
-    ToolCall,
-    ToolResult,
-    Metadata
-}
-
-public static class EventTypeExtensions
-{
-    public static string ToText(this EventType type) => type switch
+    // TODO: Fake function for debug, once no longer needed, it must be removed
+    private static readonly Delegate _createRoom = (string title) => "Room created: " + title + "";
+    
+    public ValueTask<List<AITool>> GetToolsAsync(int tenantId, int roomId)
     {
-        EventType.NewToken => "new_token",
-        EventType.ToolCall => "tool_call",
-        EventType.ToolResult => "tool_result",
-        EventType.Metadata => "metadata",
-        _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
-    };
+        var tools = new List<AITool>
+        {
+            AIFunctionFactory.Create(_createRoom, "create_room", "Creating room by title")
+        };
+        
+        return ValueTask.FromResult(tools);
+    }
 }

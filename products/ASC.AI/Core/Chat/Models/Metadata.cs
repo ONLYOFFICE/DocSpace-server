@@ -26,22 +26,7 @@
 
 namespace ASC.AI.Core.Chat.Models;
 
-public enum EventType
+public class Metadata
 {
-    NewToken,
-    ToolCall,
-    ToolResult,
-    Metadata
-}
-
-public static class EventTypeExtensions
-{
-    public static string ToText(this EventType type) => type switch
-    {
-        EventType.NewToken => "new_token",
-        EventType.ToolCall => "tool_call",
-        EventType.ToolResult => "tool_result",
-        EventType.Metadata => "metadata",
-        _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
-    };
+    public Guid ChatId { get; init; }
 }
