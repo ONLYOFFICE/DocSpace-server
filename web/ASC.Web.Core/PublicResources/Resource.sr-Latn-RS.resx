@@ -1176,4 +1176,13 @@
   <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
     <value>Skladišni prostor iskorišćen:</value>
   </data>
+  <data name="AccountingCustomerOperationDescription" xml:space="preserve">
+    <value>Opis</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Prostor na disku</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Dopuna stanja</value>
+  </data>
 </root>

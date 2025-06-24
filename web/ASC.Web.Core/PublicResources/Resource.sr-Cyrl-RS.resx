@@ -1176,4 +1176,13 @@
   <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
     <value>Складишни простор искоришћен:</value>
   </data>
+  <data name="AccountingCustomerOperationDescription" xml:space="preserve">
+    <value>Опис</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Простор на диску</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Допуна стања</value>
+  </data>
 </root>

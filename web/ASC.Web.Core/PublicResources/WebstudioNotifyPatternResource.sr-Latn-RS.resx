@@ -2000,4 +2000,38 @@ $TrulyYours</value>
   <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Predstojeća uplata pretplate za vaš ${LetterLogoText} DocSpace</value>
   </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Idi na usluge</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Idi na podešavanje novčanika</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Zdravo, $UserName!
+
+Obaveštavamo vas da automatska obnova vaše kupljene usluge nije uspešno izvršena.
+
+Ljubazno vas molimo da ručno obnovite trenutni plan usluge (ili kupite novi).
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Zdravo, $UserName!
+
+Obaveštavamo vas da automatska dopuna stanja u vašem DocSpace novčaniku nije uspela.
+
+Ljubazno vas molimo da ručno proverite i ažurirate stanje u novčaniku.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Potrebna akcija: Nije moguće automatski obnoviti plan usluge u vašem ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Potrebna akcija: Nije moguće automatski dopuniti stanje novčanika u vašem ${LetterLogoText} DocSpace</value>
+  </data>
 </root>
