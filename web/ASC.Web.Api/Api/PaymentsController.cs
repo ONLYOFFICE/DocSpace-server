@@ -798,6 +798,7 @@ public class PaymentController(
             foreach (var operation in result.Collection)
             {
                 operation.Description = GetServiceDesc(operation.Service);
+                operation.Date = tenantUtil.DateTimeFromUtc(operation.Date);
             }
         }
 
