@@ -1081,4 +1081,49 @@
   <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
     <value>URL-адрес вебхука недоступен. Не приходит статус 200 в ответ на http-запрос с методом HEAD.</value>
   </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>Кредит</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>Валюта</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>Дата и время</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>Количество</value>
+  </data>
+  <data name="AccountingCustomerOperationService" xml:space="preserve">
+    <value>Название услуги</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>Единица измерения</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>Отчет об операциях клиента ({0}-{1})</value>
+  </data>
+  <data name="AccountingCustomerOperationWithdrawal" xml:space="preserve">
+    <value>Снятие</value>
+  </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>Группа не найдена</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>Дополнительное дисковое хранилище</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>Настройте необходимый объем хранилища.</value>
+  </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
+    <value>Используемое дисковое пространство:</value>
+  </data>
+  <data name="AccountingCustomerOperationDescription" xml:space="preserve">
+    <value>Описание</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Место на диске</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Пополнение баланса</value>
+  </data>
 </root>

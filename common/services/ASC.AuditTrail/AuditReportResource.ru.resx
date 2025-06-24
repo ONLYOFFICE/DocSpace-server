@@ -925,4 +925,19 @@
   <data name="LdapSync" xml:space="preserve">
     <value>Синхронизация LDAP выполнена</value>
   </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Операция клиента выполнена</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Отчет об операциях клиента загружен</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Подписка клиента обновлена: {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Кошелек клиента пополнен: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Настройки пополнения кошелька клиента обновлены</value>
+  </data>
 </root>

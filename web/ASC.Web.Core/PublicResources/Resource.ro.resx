@@ -1176,4 +1176,13 @@
   <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
     <value>Spaţiul de stocare utilizat:</value>
   </data>
+  <data name="AccountingCustomerOperationDescription" xml:space="preserve">
+    <value>Descriere</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Spațiu disc</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Alimentare cont</value>
+  </data>
 </root>

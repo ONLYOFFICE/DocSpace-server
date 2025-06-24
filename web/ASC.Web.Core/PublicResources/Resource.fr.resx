@@ -1117,4 +1117,13 @@
   <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
     <value>Espace de stockage utilisé :</value>
   </data>
+  <data name="AccountingCustomerOperationDescription" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Espace disque</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Rechargement du solde</value>
+  </data>
 </root>

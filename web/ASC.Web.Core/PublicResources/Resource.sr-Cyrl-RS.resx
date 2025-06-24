@@ -1140,4 +1140,40 @@
   <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
     <value>URL адреса Webhook-а није доступна. HEAD захтев није вратио HTTP статус 200.</value>
   </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>Кредит</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>Валута</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>Датум и време</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>Колицина</value>
+  </data>
+  <data name="AccountingCustomerOperationService" xml:space="preserve">
+    <value>Назив услуге</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>Јединица мере</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>Извештај о корисничким операцијама ({0}-{1})</value>
+  </data>
+  <data name="AccountingCustomerOperationWithdrawal" xml:space="preserve">
+    <value>Исплата</value>
+  </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>Група није пронађена</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>Додатни простор на диску</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>Поставите простор за складиштење на тачну количину коју вам је потребна.</value>
+  </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
+    <value>Складишни простор искоришћен:</value>
+  </data>
 </root>

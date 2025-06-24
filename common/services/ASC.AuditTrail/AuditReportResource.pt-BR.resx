@@ -913,4 +913,31 @@
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Webhook atualizado: {0}</value>
   </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>O link de autorização foi ativado</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Operação do cliente realizada</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Relatório de operações do cliente baixado</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Assinatura do cliente atualizada: {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Carteira do cliente recarregada: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Configurações de recarga da carteira do cliente atualizadas</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>Autenticação LDAP desativada</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>Autenticação LDAP ativada</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>Sincronização LDAP concluída</value>
+  </data>
 </root>

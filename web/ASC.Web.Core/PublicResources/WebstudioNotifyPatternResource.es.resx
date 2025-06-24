@@ -1939,4 +1939,16 @@ $TrulyYours</value>
   <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Próximo pago de suscripción para su ${LetterLogoText} DocSpace</value>
   </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Acción requerida: No se puede renovar automáticamente el plan de servicio en su ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Acción requerida: No se puede recargar automáticamente el saldo del Monedero en su ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Ir a Servicios</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Ir a la configuración del Monedero</value>
+  </data>
 </root>
