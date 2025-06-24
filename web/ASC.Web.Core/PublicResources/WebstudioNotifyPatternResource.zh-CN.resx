@@ -1962,4 +1962,38 @@ $TrulyYours</value>
   <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>您的 ${LetterLogoText} 协作空间即将支付的订阅费用</value>
   </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>前往服务</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>前往钱包设置</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>您好，$UserName！
+
+温馨提示，您已购买的服务计划未能自动续订。
+
+请您手动续订当前服务计划（或购买新计划）。
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>您好，$UserName！
+
+温馨提示，协作空间钱包自动充值未成功。
+
+请及时处理您的钱包余额。
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>需要操作：无法自动续订您的${LetterLogoText}协作空间中的服务套餐</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>需要操作：无法自动为您的${LetterLogoText}协作空间中的钱包余额充值</value>
+  </data>
 </root>

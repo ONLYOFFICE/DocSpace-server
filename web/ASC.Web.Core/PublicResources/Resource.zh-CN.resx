@@ -1117,4 +1117,13 @@
   <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
     <value>已使用储存空间：</value>
   </data>
+  <data name="AccountingCustomerOperationDescription" xml:space="preserve">
+    <value>描述</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>磁盘空间</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>余额充值</value>
+  </data>
 </root>
