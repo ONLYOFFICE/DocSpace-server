@@ -30,12 +30,11 @@ namespace ASC.AI.Core.Chat.Completion;
 public class ChatCompletionRunner(
     AuthContext authContext,
     ChatHistory chatHistory,
-    ExecutionContextProvider contextProvider, 
-    IHttpClientFactory httpClientFactory,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
     TenantManager tenantManager,
-    ToolsProvider toolsProvider)
+    ToolsProvider toolsProvider,
+    ChatClientFactory chatClientFactory)
 {
     private static readonly ChatMessage _systemMessage = new(ChatRole.System, "You are a helpful assistant."); // TODO: move to prompt file
     
@@ -44,12 +43,11 @@ public class ChatCompletionRunner(
         await ChekRoomAsync(roomId);
         
         var tenantId = tenantManager.GetCurrentTenantId();
-        
-        var clientTask = CreateClientAsync();
-        var toolsTask = toolsProvider.GetToolsAsync(tenantId, roomId);
 
         var userMessage = new ChatMessage(ChatRole.User, message);
         var chat = await chatHistory.AddChatAsync(tenantId, roomId, authContext.CurrentAccount.ID, userMessage);
+        
+        var client = await CreateClientAsync(tenantId, roomId, chat.Id);
         
         var messages = new List<ChatMessage>
         {
@@ -59,7 +57,7 @@ public class ChatCompletionRunner(
 
         var metadata = new Metadata { ChatId = chat.Id };
         
-        return new ChatCompletionGenerator(chat.Id, chatHistory, await clientTask, messages, await toolsTask, metadata);
+        return new ChatCompletionGenerator(chat.Id, chatHistory, client, messages, metadata);
     }
 
     public async Task<ChatCompletionGenerator> StartChatAsync(Guid chatId, string message)
@@ -72,8 +70,7 @@ public class ChatCompletionRunner(
 
         await ChekRoomAsync(chat.RoomId);
         
-        var clientTask = CreateClientAsync();
-        var toolsTask = toolsProvider.GetToolsAsync(tenantManager.GetCurrentTenantId(), chat.RoomId);
+        var clientTask = CreateClientAsync(tenantManager.GetCurrentTenantId(), chat.RoomId, chatId);
 
         var history = await chatHistory.GetMessagesAsync(chatId).ToListAsync();
         var userMessage = new ChatMessage(ChatRole.User, message);
@@ -84,24 +81,29 @@ public class ChatCompletionRunner(
         messages.AddRange(history);
         messages.Add(userMessage);
 
-        return new ChatCompletionGenerator(chatId, chatHistory, await clientTask, messages, await toolsTask);
+        return new ChatCompletionGenerator(chatId, chatHistory, await clientTask, messages);
     }
 
-    private async Task<IChatClient> CreateClientAsync()
+    private async Task<IChatClient> CreateClientAsync(int tenantId, int roomId, Guid chatId)
     {
-        var context = await contextProvider.GetExecutionContextAsync();
+        var toolsTask = toolsProvider.GetToolsAsync(tenantId, roomId);
+        var client = await chatClientFactory.CreateAsync();
         
-        return new ChatClientBuilder(new OpenAIClient(
-                    new ApiKeyCredential(context.Key),
-                    new OpenAIClientOptions
-                    { 
-                        Endpoint = context.Endpoint,
-                        Transport = new HttpClientPipelineTransport(httpClientFactory.CreateClient())
-                    })
-                .GetChatClient(context.Model)
-                .AsIChatClient())
-            .UseFunctionInvocation()
-            .Build();
+        var builder = client.AsBuilder();
+        builder.ConfigureOptions(x => x.ConversationId = chatId.ToString());
+        
+        var tools = await toolsTask;
+        if (tools is { Count: > 0 })
+        {
+            builder.ConfigureOptions(x =>
+            {
+                x.Tools = tools;
+                x.ToolMode = ChatToolMode.Auto;
+                x.AllowMultipleToolCalls = true;
+            }).UseFunctionInvocation();
+        }
+        
+        return builder.Build();
     }
     
     private async Task ChekRoomAsync(int roomId)

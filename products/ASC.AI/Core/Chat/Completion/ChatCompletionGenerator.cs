@@ -31,8 +31,7 @@ public class ChatCompletionGenerator(
     Guid chatId,
     ChatHistory chatHistory,
     IChatClient client,
-    List<ChatMessage> messages, 
-    List<AITool>? tools = null,
+    List<ChatMessage> messages,
     Metadata? metadata = null)
 {
     private static readonly JsonSerializerOptions _serializerOptions = new()
@@ -44,18 +43,6 @@ public class ChatCompletionGenerator(
     
     public async IAsyncEnumerable<ChatCompletion> GenerateCompletionAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        ChatOptions? options = null;
-        
-        if (tools != null && tools.Count != 0)
-        {
-            options = new ChatOptions
-            {
-                Tools = tools, 
-                ToolMode = ChatToolMode.Auto,
-                AllowMultipleToolCalls = true
-            };
-        }
-
         if (metadata != null)
         {
             yield return new ChatCompletion(EventType.Metadata, 
@@ -66,8 +53,7 @@ public class ChatCompletionGenerator(
 
         try
         {
-            await foreach (var response in client.GetStreamingResponseAsync(messages, options,
-                               cancellationToken: cancellationToken))
+            await foreach (var response in client.GetStreamingResponseAsync(messages, cancellationToken: cancellationToken))
             {
                 responses.Add(response);
 

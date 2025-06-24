@@ -35,6 +35,7 @@ public class DbAiProvider : BaseEntity
     public string Title { get; set; }
     public string? Url { get; set; }
     public string Key { get; set; }
+
     public DateTime CreatedOn { get; set; }
     public DateTime ModifiedOn { get; set; }
     

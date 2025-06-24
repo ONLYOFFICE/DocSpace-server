@@ -24,16 +24,32 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Common;
+namespace ASC.AI.Core.Chat;
 
-[Scope]
-public class ExecutionContextProvider
+[Singleton]
+public class ChatClientFactory(IHttpClientFactory httpClientFactory, IConfiguration configuration)
 {
-    public Task<ExecutionContext> GetExecutionContextAsync()
+    public Task<IChatClient> CreateAsync()
     {
-        var context = new ExecutionContext(LLMProvider.OpenAI, "gpt-4.1", new Uri("https://api.openai.com/v1"), "");
-        return Task.FromResult(context);
+        var config = configuration.GetSection("ai:test").Get<TestConfig>()!;
+        
+        var credential = new ApiKeyCredential(config.Key);
+        var options = new OpenAIClientOptions
+        {
+            Endpoint = new Uri(config.Endpoint),
+            Transport = new HttpClientPipelineTransport(httpClientFactory.CreateClient())
+        };
+        
+        var openAiClient = new OpenAIClient(credential, options);
+        var chatClient = openAiClient.GetChatClient(config.Model);
+        
+        return Task.FromResult(chatClient.AsIChatClient());
+    }
+
+    private class TestConfig
+    {
+        public required string Endpoint { get; init; }
+        public required string Key { get; init; }
+        public required string Model { get; init; }
     }
 }
-
-public record ExecutionContext(LLMProvider Provider, string Model, Uri Endpoint, string Key);

@@ -26,11 +26,15 @@
 
 namespace ASC.AI.Core.Common;
 
-[Scope]
+[Singleton]
 public class ToolsProvider
 {
     // TODO: Fake function for debug, once no longer needed, it must be removed
-    private static readonly Delegate _createRoom = (string title) => "Room created: " + title + "";
+    private static readonly Delegate _createRoom = (string title) => new
+    {
+        Id = Random.Shared.Next(1, Int32.MaxValue),
+        Title = title
+    };
     
     public ValueTask<List<AITool>> GetToolsAsync(int tenantId, int roomId)
     {
