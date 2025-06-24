@@ -50,7 +50,7 @@ public class FileHistoryTest(
         await UpdateFileContent(file.Id, "Updated content 2");
         
         // Act
-        var versions = (await _filesFilesApi.GetFileVersionInfoAsync(file.Id, TestContext.Current.CancellationToken)).Response;
+        var versions = (await _filesApi.GetFileVersionInfoAsync(file.Id, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         versions.Should().NotBeNull();
@@ -78,18 +78,18 @@ public class FileHistoryTest(
         await UpdateFileContent(file.Id, "Updated content 2");
         
         // Get the latest version
-        var versions = (await _filesFilesApi.GetFileVersionInfoAsync(file.Id, TestContext.Current.CancellationToken)).Response;
+        var versions = (await _filesApi.GetFileVersionInfoAsync(file.Id, TestContext.Current.CancellationToken)).Response;
         var latestVersion = versions.First().VarVersion;
         
         // Act
         var changeHistoryParams = new ChangeHistory(latestVersion, true);
-        var result = (await _filesFilesApi.ChangeVersionHistoryAsync(file.Id, changeHistoryParams, TestContext.Current.CancellationToken)).Response;
+        var result = (await _filesApi.ChangeVersionHistoryAsync(file.Id, changeHistoryParams, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         result.Should().NotBeNull();
         
         // Check that version groups have been updated
-        var updatedVersions = (await _filesFilesApi.GetFileVersionInfoAsync(file.Id, TestContext.Current.CancellationToken)).Response;
+        var updatedVersions = (await _filesApi.GetFileVersionInfoAsync(file.Id, TestContext.Current.CancellationToken)).Response;
         var updatedLatestVersion = updatedVersions.First();
         
         updatedLatestVersion.VarVersion.Should().Be(latestVersion);
@@ -107,11 +107,11 @@ public class FileHistoryTest(
         await UpdateFileContent(file.Id, "Updated content 1");
         
         // Get the versions to identify the first version number
-        var versions = (await _filesFilesApi.GetFileVersionInfoAsync(file.Id, TestContext.Current.CancellationToken)).Response;
+        var versions = (await _filesApi.GetFileVersionInfoAsync(file.Id, TestContext.Current.CancellationToken)).Response;
         var firstVersion = versions.Last().VarVersion;
         
         // Act
-        var specificVersion = (await _filesFilesApi.GetFileInfoAsync(file.Id, version: firstVersion, TestContext.Current.CancellationToken)).Response;
+        var specificVersion = (await _filesApi.GetFileInfoAsync(file.Id, version: firstVersion, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         specificVersion.Should().NotBeNull();
@@ -132,6 +132,6 @@ public class FileHistoryTest(
         var fileName = "updated_file.docx";
         
         var fileData = new FileParameter(fileName, contentType, stream);
-        await _filesFilesApi.SaveEditingFileFromFormAsync(fileId, file: new FileParameter(fileName, contentType, stream), cancellationToken: TestContext.Current.CancellationToken);
+        await _filesApi.SaveEditingFileFromFormAsync(fileId, file: new FileParameter(fileName, contentType, stream), cancellationToken: TestContext.Current.CancellationToken);
     }
 }

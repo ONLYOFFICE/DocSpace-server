@@ -66,7 +66,7 @@ public class DeleteFileTest(
     {
         var createdFile = await CreateFile("test.docx", FolderType.USER, Initializer.Owner);
         
-        var fileToDelete = (await _filesFilesApi.DeleteFileAsync(createdFile.Id, new Delete { Immediately = true }, TestContext.Current.CancellationToken)).Response;
+        var fileToDelete = (await _filesApi.DeleteFileAsync(createdFile.Id, new Delete { Immediately = true }, TestContext.Current.CancellationToken)).Response;
         
         if (fileToDelete.Any(r => !r.Finished))
         {
@@ -77,7 +77,7 @@ public class DeleteFileTest(
         
         // Verify file no longer exists or has been moved to trash
         await Assert.ThrowsAsync<ApiException>(async () => 
-            await _filesFilesApi.GetFileInfoAsync(createdFile.Id, cancellationToken: TestContext.Current.CancellationToken));
+            await _filesApi.GetFileInfoAsync(createdFile.Id, cancellationToken: TestContext.Current.CancellationToken));
     }
     
     // [Fact]

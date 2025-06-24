@@ -46,7 +46,7 @@ public class FormFilesTest(
         var regularPdfFile = await CreateFile("regular.pdf", FolderType.USER, Initializer.Owner);
 
         // Act
-        var isFormResult = (await _filesFilesApi.IsFormPDFAsync(regularPdfFile.Id, TestContext.Current.CancellationToken)).Response;
+        var isFormResult = (await _filesApi.IsFormPDFAsync(regularPdfFile.Id, TestContext.Current.CancellationToken)).Response;
 
         // Assert
         // Created PDF files are not forms
@@ -66,7 +66,7 @@ public class FormFilesTest(
         // Act & Assert
         try
         {
-            var roles = (await _filesFilesApi.GetAllFormRolesAsync(file.Id, TestContext.Current.CancellationToken)).Response;
+            var roles = (await _filesApi.GetAllFormRolesAsync(file.Id, TestContext.Current.CancellationToken)).Response;
 
             // If the file is properly recognized as a form, we can check its roles
             roles.Should().NotBeNull();
@@ -93,7 +93,7 @@ public class FormFilesTest(
         try
         {
             var checkParams = new CheckFillFormDraft();
-            var result = (await _filesFilesApi.CheckFillFormDraftAsync(file.Id, checkParams, TestContext.Current.CancellationToken)).Response;
+            var result = (await _filesApi.CheckFillFormDraftAsync(file.Id, checkParams, TestContext.Current.CancellationToken)).Response;
 
             // If the file is properly recognized as a form draft, we'll get a session ID
             result.Should().NotBeNull();
@@ -121,7 +121,7 @@ public class FormFilesTest(
         {
             // Attempt to manage form filling (e.g., start a filling process)
             var manageParams = new ManageFormFillingDtoInteger(file.Id, FormFillingManageAction.Resume);
-            await _filesFilesApi.ManageFormFillingAsync(file.Id.ToString(), manageParams, TestContext.Current.CancellationToken);
+            await _filesApi.ManageFormFillingAsync(file.Id.ToString(), manageParams, TestContext.Current.CancellationToken);
 
             // If successful, get the file to check its status
             var updatedFile = await GetFile(file.Id);

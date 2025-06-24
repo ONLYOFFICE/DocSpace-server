@@ -106,7 +106,7 @@ public class CreateFolderTest(
         
         // Act & Assert
         await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesFoldersApi.CreateFolderAsync(
+            async () => await _foldersApi.CreateFolderAsync(
                 Random.Shared.Next(10000, 20000), 
                 folderRequest, 
                 cancellationToken: TestContext.Current.CancellationToken));
@@ -132,7 +132,7 @@ public class CreateFolderTest(
         
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesFoldersApi.CreateFolderAsync(
+            async () => await _foldersApi.CreateFolderAsync(
                 await GetFolderIdAsync(FolderType.USER, Initializer.Owner), 
                 folderRequest, 
                 cancellationToken: TestContext.Current.CancellationToken));

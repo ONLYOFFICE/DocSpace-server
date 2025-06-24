@@ -59,14 +59,14 @@ public class FileOrderTest(
         var orderRequest = new OrdersRequestDtoInteger(orderItems);
         
         // Act
-        var result = (await _filesFilesApi.SetFilesOrderAsync(orderRequest, TestContext.Current.CancellationToken)).Response;
+        var result = (await _filesApi.SetFilesOrderAsync(orderRequest, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         result.Should().NotBeNull();
         result.Should().HaveCount(3);
         
         // Verify folder content to ensure ordering is applied
-        var folderContent = (await _filesFoldersApi.GetFolderByFolderIdAsync(virtualRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var folderContent = (await _foldersApi.GetFolderByFolderIdAsync(virtualRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         
         // Files should be ordered according to our specification
         // The first file in the list should be file2 (order 1)
@@ -87,14 +87,14 @@ public class FileOrderTest(
         
         // Act
         var orderParams = new OrderRequestDto(newOrder);
-        var result = (await _filesFilesApi.SetFileOrderAsync(file.Id, orderParams, TestContext.Current.CancellationToken)).Response;
+        var result = (await _filesApi.SetFileOrderAsync(file.Id, orderParams, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         result.Should().NotBeNull();
         result.Id.Should().Be(file.Id);
         
         // Get folder content to verify order
-        var folderContent = (await _filesFoldersApi.GetFolderByFolderIdAsync(virtualRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var folderContent = (await _foldersApi.GetFolderByFolderIdAsync(virtualRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         
         // Find our file in the folder content
         var updatedFile = folderContent.Files.FirstOrDefault(f => f.Title == file.Title);
@@ -129,14 +129,14 @@ public class FileOrderTest(
         var orderRequest = new OrdersRequestDtoInteger(orderItems);
         
         // Act
-        var result = (await _filesFilesApi.SetFilesOrderAsync(orderRequest, TestContext.Current.CancellationToken)).Response;
+        var result = (await _filesApi.SetFilesOrderAsync(orderRequest, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         result.Should().NotBeNull();
         result.Should().HaveCount(4);
         
         // Verify folder content to ensure ordering is applied
-        var folderContent = (await _filesFoldersApi.GetFolderByFolderIdAsync(virtualRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var folderContent = (await _foldersApi.GetFolderByFolderIdAsync(virtualRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         
         // Check file ordering
         folderContent.Files.Should().HaveCount(2);
@@ -171,7 +171,7 @@ public class FileOrderTest(
         
         // Act & Assert
         await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesFilesApi.SetFilesOrderAsync(
+            async () => await _filesApi.SetFilesOrderAsync(
                 orderRequest, 
                 TestContext.Current.CancellationToken));
     }

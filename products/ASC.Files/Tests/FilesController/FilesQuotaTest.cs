@@ -58,7 +58,7 @@ public class FilesQuotaTest(
         };
         
         // Act
-        var result = (await _filesQuotaApi.ResetRoomQuotaAsync(resetRequest, TestContext.Current.CancellationToken)).Response;
+        var result = (await _quotaApi.ResetRoomQuotaAsync(resetRequest, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         result.Should().NotBeNull();
@@ -89,7 +89,7 @@ public class FilesQuotaTest(
             RoomIds = [new(room1.Id), new(room2.Id)]
         };
         // Act
-        var result = (await _filesQuotaApi.ResetRoomQuotaAsync(resetRequest, TestContext.Current.CancellationToken)).Response;
+        var result = (await _quotaApi.ResetRoomQuotaAsync(resetRequest, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         result.Should().NotBeNull();
@@ -124,7 +124,7 @@ public class FilesQuotaTest(
         };
         
         // Act
-        var result = (await _filesQuotaApi.UpdateRoomsQuotaAsync(updateRequest, TestContext.Current.CancellationToken)).Response;
+        var result = (await _quotaApi.UpdateRoomsQuotaAsync(updateRequest, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         result.Should().NotBeNull();
@@ -160,7 +160,7 @@ public class FilesQuotaTest(
         };
         
         // Act
-        var result = (await _filesQuotaApi.UpdateRoomsQuotaAsync(updateRequest, TestContext.Current.CancellationToken)).Response;
+        var result = (await _quotaApi.UpdateRoomsQuotaAsync(updateRequest, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         result.Should().NotBeNull();
@@ -192,7 +192,7 @@ public class FilesQuotaTest(
         };
         
         // Act
-        var result = (await _filesQuotaApi.UpdateRoomsQuotaAsync(updateRequest, TestContext.Current.CancellationToken)).Response;
+        var result = (await _quotaApi.UpdateRoomsQuotaAsync(updateRequest, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         result.Should().NotBeNull();
@@ -222,7 +222,7 @@ public class FilesQuotaTest(
             Quota = quotaLimit
         };
         
-        var updateResult = (await _filesQuotaApi.UpdateRoomsQuotaAsync(updateRequest, TestContext.Current.CancellationToken)).Response;
+        var updateResult = (await _quotaApi.UpdateRoomsQuotaAsync(updateRequest, TestContext.Current.CancellationToken)).Response;
         updateResult[0].Id.Should().Be(room.Id);
         updateResult[0].QuotaLimit.Should().Be(quotaLimit);
         
@@ -232,7 +232,7 @@ public class FilesQuotaTest(
             RoomIds = [new(room.Id)]
         };
         
-        var resetResult = (await _filesQuotaApi.ResetRoomQuotaAsync(resetRequest, TestContext.Current.CancellationToken)).Response;
+        var resetResult = (await _quotaApi.ResetRoomQuotaAsync(resetRequest, TestContext.Current.CancellationToken)).Response;
         resetResult[0].Id.Should().Be(room.Id);
         resetResult[0].QuotaLimit.Should().Be(defaultQuotaLimit);
     }
@@ -256,7 +256,7 @@ public class FilesQuotaTest(
         _ = await CreateFile(fileName, createdRoom.Id);
         
         // Verify a file exists in the room's contents
-        var roomFiles = (await _filesFoldersApi.GetFolderByFolderIdAsync(
+        var roomFiles = (await _foldersApi.GetFolderByFolderIdAsync(
             createdRoom.Id,
             cancellationToken: TestContext.Current.CancellationToken)).Response;
             
@@ -287,7 +287,7 @@ public class FilesQuotaTest(
         _ = await CreateFile(fileName, createdRoom.Id);
         
         // Verify a file exists in the room's contents
-        var roomFiles = (await _filesFoldersApi.GetFolderByFolderIdAsync(
+        var roomFiles = (await _foldersApi.GetFolderByFolderIdAsync(
             createdRoom.Id,
             cancellationToken: TestContext.Current.CancellationToken)).Response;
             

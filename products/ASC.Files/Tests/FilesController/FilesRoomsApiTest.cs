@@ -397,7 +397,7 @@ public class FilesRoomsApiTest(
         file.FileExst.Should().Be(".docx");
         
         // Verify a file exists in the room's contents
-        var roomFiles = (await _filesFoldersApi.GetFolderByFolderIdAsync(
+        var roomFiles = (await _foldersApi.GetFolderByFolderIdAsync(
             createdRoom.Id,
             cancellationToken: TestContext.Current.CancellationToken)).Response;
             

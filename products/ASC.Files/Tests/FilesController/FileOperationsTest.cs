@@ -49,7 +49,7 @@ public class FileOperationsTest(
         var file = await CreateFile("file_for_download.docx", FolderType.USER, Initializer.Owner);
         
         // Act
-        var downloadUrl = (await _filesFilesApi.GetPresignedUriAsync(file.Id, TestContext.Current.CancellationToken)).Response;
+        var downloadUrl = (await _filesApi.GetPresignedUriAsync(file.Id, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         downloadUrl.Should().NotBeNull();

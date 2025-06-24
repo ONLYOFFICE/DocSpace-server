@@ -48,7 +48,7 @@ public class UpdateFolderTest(
         
         // Act
         var renameParams = new CreateFolder(newFolderName);
-        var renamedFolder = (await _filesFoldersApi.RenameFolderAsync(folder.Id, renameParams, TestContext.Current.CancellationToken)).Response;
+        var renamedFolder = (await _foldersApi.RenameFolderAsync(folder.Id, renameParams, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         renamedFolder.Should().NotBeNull();
@@ -68,7 +68,7 @@ public class UpdateFolderTest(
         
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesFoldersApi.RenameFolderAsync(
+            async () => await _foldersApi.RenameFolderAsync(
                 createdFolder.Id, 
                 updateParams, 
                 cancellationToken: TestContext.Current.CancellationToken));
@@ -88,7 +88,7 @@ public class UpdateFolderTest(
         
         // Act
         var deleteParams = new DeleteFolder(deleteAfter: false, immediately: true);
-        var results = (await _filesFoldersApi.DeleteFolderAsync(folder.Id, deleteParams, TestContext.Current.CancellationToken)).Response;
+        var results = (await _foldersApi.DeleteFolderAsync(folder.Id, deleteParams, TestContext.Current.CancellationToken)).Response;
         
         if (results.Any(r => !r.Finished))
         {
@@ -100,7 +100,7 @@ public class UpdateFolderTest(
         
         // Verify folder no longer exists or has been moved to trash
         await Assert.ThrowsAsync<ApiException>(async () => 
-            await _filesFoldersApi.GetFolderInfoAsync(folder.Id, TestContext.Current.CancellationToken));
+            await _foldersApi.GetFolderInfoAsync(folder.Id, TestContext.Current.CancellationToken));
     }
     
     [Fact]
@@ -119,7 +119,7 @@ public class UpdateFolderTest(
         await CreateFile("file2.docx", parentFolder.Id);
         
         // Act
-        var folderContent = (await _filesFoldersApi.GetFolderByFolderIdAsync(parentFolder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var folderContent = (await _foldersApi.GetFolderByFolderIdAsync(parentFolder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         
         // Assert
         folderContent.Should().NotBeNull();

@@ -66,10 +66,10 @@ public class FileSharingTest(
         // Act
         var linkParams = new FileLinkRequest(access: fileShare);
         
-        await _filesFilesApi.CreatePrimaryExternalLinkAsync(file.Id, linkParams, TestContext.Current.CancellationToken);
+        await _filesApi.CreatePrimaryExternalLinkAsync(file.Id, linkParams, TestContext.Current.CancellationToken);
         
         // Act
-        var result = (await _filesFilesApi.GetFilePrimaryExternalLinkAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var result = (await _filesApi.GetFilePrimaryExternalLinkAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         
         // Assert
         result.Should().NotBeNull();
@@ -90,7 +90,7 @@ public class FileSharingTest(
         var linkParams = new FileLinkRequest(access: fileShare);
 
         await Assert.ThrowsAsync<ApiException>(async () => 
-            await _filesFilesApi.CreatePrimaryExternalLinkAsync(file.Id, linkParams, TestContext.Current.CancellationToken));
+            await _filesApi.CreatePrimaryExternalLinkAsync(file.Id, linkParams, TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -104,15 +104,15 @@ public class FileSharingTest(
         // Create a primary external link
         var primaryLinkParams = new FileLinkRequest(access: FileShare.Read);
         
-        await _filesFilesApi.CreatePrimaryExternalLinkAsync(file.Id, primaryLinkParams, TestContext.Current.CancellationToken);
+        await _filesApi.CreatePrimaryExternalLinkAsync(file.Id, primaryLinkParams, TestContext.Current.CancellationToken);
         
         // Create an additional external link
         var additionalLinkParams = new FileLinkRequest(access: FileShare.Editing);
         
-        await _filesFilesApi.SetExternalLinkAsync(file.Id, additionalLinkParams, TestContext.Current.CancellationToken);
+        await _filesApi.SetExternalLinkAsync(file.Id, additionalLinkParams, TestContext.Current.CancellationToken);
         
         // Act
-        var links = (await _filesFilesApi.GetFileLinksAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var links = (await _filesApi.GetFileLinksAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         
         // Assert
         links.Should().NotBeNull();
@@ -135,7 +135,7 @@ public class FileSharingTest(
             primary: true
         );
         
-        var initialLink = (await _filesFilesApi.CreatePrimaryExternalLinkAsync(file.Id, initialLinkParams, TestContext.Current.CancellationToken)).Response;
+        var initialLink = (await _filesApi.CreatePrimaryExternalLinkAsync(file.Id, initialLinkParams, TestContext.Current.CancellationToken)).Response;
         var sharedTo = initialLink.SharedTo as JObject;
         
         // Act - Update the link
@@ -144,7 +144,7 @@ public class FileSharingTest(
             linkId: Guid.Parse(sharedTo["id"].ToString())
         );
 
-        var updatedLink = (await _filesFilesApi.SetExternalLinkAsync(file.Id, updateLinkParams, TestContext.Current.CancellationToken)).Response;
+        var updatedLink = (await _filesApi.SetExternalLinkAsync(file.Id, updateLinkParams, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         updatedLink.Should().NotBeNull();
@@ -240,7 +240,7 @@ public class FileSharingTest(
             initialLinkParams.ExpirationDate = new ApiDateTime { UtcTime = expirationDate.Value };
         }
         
-        var initialLink = (await _filesFilesApi.CreatePrimaryExternalLinkAsync(file.Id, initialLinkParams, TestContext.Current.CancellationToken)).Response;
+        var initialLink = (await _filesApi.CreatePrimaryExternalLinkAsync(file.Id, initialLinkParams, TestContext.Current.CancellationToken)).Response;
         var sharedTo = initialLink.SharedTo as JObject;
         
         // Act
@@ -268,12 +268,12 @@ public class FileSharingTest(
         
         if (throwException)
         {
-            await Assert.ThrowsAsync<ApiException>(async () => await _filesFilesApi.OpenEditFileAsync(fileId, cancellationToken: TestContext.Current.CancellationToken));
+            await Assert.ThrowsAsync<ApiException>(async () => await _filesApi.OpenEditFileAsync(fileId, cancellationToken: TestContext.Current.CancellationToken));
             _filesClient.DefaultRequestHeaders.Remove("Request-Token");
             return null;
         }
 
-        var openEditResult = (await _filesFilesApi.OpenEditFileAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var openEditResult = (await _filesApi.OpenEditFileAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
         _filesClient.DefaultRequestHeaders.Remove("Request-Token");
         return openEditResult.File;
     }

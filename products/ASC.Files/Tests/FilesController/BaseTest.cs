@@ -39,12 +39,12 @@ public class BaseTest(
     ) : IAsyncLifetime
 {
     protected readonly HttpClient _filesClient = filesFactory.HttpClient;
-    protected readonly FilesFoldersApi _filesFoldersApi = filesFactory.FilesFoldersApi;
-    protected readonly FilesFilesApi _filesFilesApi = filesFactory.FilesFilesApi;
+    protected readonly FilesFoldersApi _foldersApi = filesFactory.FilesFoldersApi;
+    protected readonly FilesFilesApi _filesApi = filesFactory.FilesFilesApi;
     protected readonly FilesOperationsApi _filesOperationsApi = filesFactory.FilesOperationsApi;
     protected readonly RoomsApi _roomsApi = filesFactory.RoomsApi;
     protected readonly FilesSettingsApi _filesSettingsApi = filesFactory.FilesSettingsApi;
-    protected readonly FilesQuotaApi _filesQuotaApi = filesFactory.FilesQuotaApi;
+    protected readonly FilesQuotaApi _quotaApi = filesFactory.FilesQuotaApi;
     protected readonly SettingsQuotaApi _settingsQuotaApi = apiFactory.SettingsQuotaApi;
     private readonly Func<Task> _resetDatabase = filesFactory.ResetDatabaseAsync;
 
@@ -60,14 +60,14 @@ public class BaseTest(
 
     protected async Task<FileDtoInteger> GetFile(int fileId)
     {
-        return (await _filesFilesApi.GetFileInfoAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        return (await _filesApi.GetFileInfoAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
     }
     
     protected async Task<int> GetFolderIdAsync(FolderType folderType, User user)
     {
         await _filesClient.Authenticate(user);
         
-        var rootFolder = (await _filesFoldersApi.GetRootFoldersAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var rootFolder = (await _foldersApi.GetRootFoldersAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
         var folderId = rootFolder.FirstOrDefault(r => r.Current.RootFolderType.HasValue && r.Current.RootFolderType.Value == folderType)!.Current.Id;
         
         return folderId;
@@ -89,7 +89,7 @@ public class BaseTest(
     
     protected async Task<FileDtoInteger> CreateFile(string fileName, int folderId)
     {
-        return (await _filesFilesApi.CreateFileAsync(folderId, new CreateFileJsonElement(fileName))).Response;
+        return (await _filesApi.CreateFileAsync(folderId, new CreateFileJsonElement(fileName))).Response;
     }
     
     protected async Task<FolderDtoInteger> CreateFolder(string folderName, FolderType folderType, User user)
@@ -103,7 +103,7 @@ public class BaseTest(
     
     protected async Task<FolderDtoInteger> CreateFolder(string folderName, int folderId)
     {
-        return (await _filesFoldersApi.CreateFolderAsync(folderId, new CreateFolder(folderName), TestContext.Current.CancellationToken)).Response;
+        return (await _foldersApi.CreateFolderAsync(folderId, new CreateFolder(folderName), TestContext.Current.CancellationToken)).Response;
     }
     
     protected async Task<FolderDtoInteger> CreateVirtualRoom(string roomTitle, User user)

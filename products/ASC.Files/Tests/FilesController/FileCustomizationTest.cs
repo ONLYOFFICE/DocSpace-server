@@ -47,7 +47,7 @@ public class FileCustomizationTest(
         // Act
         var customFilterParams = new CustomFilterParameters(enabled: true);
         await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesFilesApi.SetCustomFilterTagAsync(file.Id, customFilterParams, TestContext.Current.CancellationToken));
+            async () => await _filesApi.SetCustomFilterTagAsync(file.Id, customFilterParams, TestContext.Current.CancellationToken));
     }
     
     [Fact]
@@ -61,7 +61,7 @@ public class FileCustomizationTest(
         
         // Act
         var customFilterParams = new CustomFilterParameters(enabled: true);
-        var result = (await _filesFilesApi.SetCustomFilterTagAsync(file.Id, customFilterParams, TestContext.Current.CancellationToken)).Response;
+        var result = (await _filesApi.SetCustomFilterTagAsync(file.Id, customFilterParams, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         result.Should().NotBeNull();
@@ -81,11 +81,11 @@ public class FileCustomizationTest(
         
         // First enable custom filter
         var enableParams = new CustomFilterParameters(enabled: true);
-        await _filesFilesApi.SetCustomFilterTagAsync(file.Id, enableParams, TestContext.Current.CancellationToken);
+        await _filesApi.SetCustomFilterTagAsync(file.Id, enableParams, TestContext.Current.CancellationToken);
         
         // Then disable it
         var disableParams = new CustomFilterParameters(enabled: false);
-        var result = (await _filesFilesApi.SetCustomFilterTagAsync(file.Id, disableParams, TestContext.Current.CancellationToken)).Response;
+        var result = (await _filesApi.SetCustomFilterTagAsync(file.Id, disableParams, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         result.Should().NotBeNull();
