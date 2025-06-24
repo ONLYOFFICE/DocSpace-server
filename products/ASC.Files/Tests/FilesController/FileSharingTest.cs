@@ -29,6 +29,7 @@ using ASC.Files.Tests.Factory;
 using Newtonsoft.Json.Linq;
 
 using FileShare = Docspace.Model.FileShare;
+using User = ASC.Files.Tests.Data.User;
 
 namespace ASC.Files.Tests.FilesController;
 
@@ -55,7 +56,7 @@ public class FileSharingTest(
 
     [Theory]
     [MemberData(nameof(Data))]
-    public async Task CreatePrimaryExternalLink_ValidFile_ReturnsLinkData(FileShare fileShare)
+    public async Task CreatePrimaryExternalLink_ValidFileShare_ReturnsLinkData(FileShare fileShare)
     {
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
@@ -78,7 +79,7 @@ public class FileSharingTest(
 
     [Theory]
     [MemberData(nameof(InvalidData))]
-    public async Task CreatePrimaryExternalLink_ValidFile_ReturnsError(FileShare fileShare)
+    public async Task CreatePrimaryExternalLink_InvalidFileShare_ReturnsError(FileShare fileShare)
     {
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
@@ -155,81 +156,74 @@ public class FileSharingTest(
     [MemberData(nameof(Data))]
     public async Task PrimaryExternalLink_ExternalUsers_ReturnsFileData(FileShare fileShare)
     {
-        // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        
-        var file = await CreateFile("file_update_link.docx", FolderType.USER, Initializer.Owner);
-        
-        // Create initial external link
-        var initialLinkParams = new FileLinkRequest(
-            access: fileShare,
-            primary: true,
-            varInternal: false
-        );
-        
-        var initialLink = (await _filesFilesApi.CreatePrimaryExternalLinkAsync(file.Id, initialLinkParams, TestContext.Current.CancellationToken)).Response;
-        var sharedTo = initialLink.SharedTo as JObject;
-        
-        // Act
-        var link = sharedTo["shareLink"].ToString();
-        await _apiFactory.HttpClient.Authenticate(Initializer.Owner);
-        var fullLink = await _apiFactory.HttpClient.GetAsync(link, TestContext.Current.CancellationToken);
-        var query = fullLink.RequestMessage?.RequestUri?.Query.Substring(1);
-        var parsedQuery = HttpUtility.ParseQueryString(query);
-        
-        _filesClient.DefaultRequestHeaders.Authorization = null;
-        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation("Request-Token", parsedQuery["share"]);
-        var openEditResult = (await _filesFilesApi.OpenEditFileAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        _filesClient.DefaultRequestHeaders.Remove("Request-Token");
+        // Arrange and Act
+        var (share, fileId) = await CreateFileAndShare(fileShare);
+        var openEditResult = await TryOpenEditAsync(share, fileId);
         
         // Assert
-        openEditResult.File.Access.Should().Be(fileShare);
-        openEditResult.File.Shared.Should().Be(true);
+        openEditResult.Should().NotBeNull();
+        openEditResult.Access.Should().Be(fileShare);
+        openEditResult.Shared.Should().Be(true);
     }
-    
+
     [Theory]
     [MemberData(nameof(Data))]
     public async Task PrimaryExternalLink_InternalUsers_ReturnsFileData(FileShare fileShare)
     {
-        // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        
-        var file = await CreateFile("file_update_link.docx", FolderType.USER, Initializer.Owner);
-        
-        // Create initial external link
-        var initialLinkParams = new FileLinkRequest(
-            access: fileShare,
-            primary: true,
-            varInternal: false
-        );
-        
-        var initialLink = (await _filesFilesApi.CreatePrimaryExternalLinkAsync(file.Id, initialLinkParams, TestContext.Current.CancellationToken)).Response;
-        var sharedTo = initialLink.SharedTo as JObject;
-        
-        var user = await Initializer.InviteContact(EmployeeType.User);
-        
-        // Act
-        var link = sharedTo["shareLink"].ToString();
-        await _apiFactory.HttpClient.Authenticate(Initializer.Owner);
-        var fullLink = await _apiFactory.HttpClient.GetAsync(link, TestContext.Current.CancellationToken);
-        var query = fullLink.RequestMessage?.RequestUri?.Query.Substring(1);
-        var parsedQuery = HttpUtility.ParseQueryString(query);
-
-        await _filesClient.Authenticate(user);
-        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation("Request-Token", parsedQuery["share"]);
-        var openEditResult = (await _filesFilesApi.OpenEditFileAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        _filesClient.DefaultRequestHeaders.Remove("Request-Token");
+        // Arrange and Act
+        var (share, fileId) = await CreateFileAndShare(fileShare);
         
         // Assert
-        openEditResult.File.Access.Should().Be(fileShare);
-        openEditResult.File.Shared.Should().Be(true);
+        var user = await Initializer.InviteContact(EmployeeType.User);
+        var openEditResult = await TryOpenEditAsync(share, fileId, user);
+        
+        // Assert
+        openEditResult.Should().NotBeNull();
+        openEditResult.Access.Should().Be(fileShare);
+        openEditResult.Shared.Should().Be(true);
     }
     
     [Theory]
     [MemberData(nameof(Data))]
     public async Task PrimaryInternalLink_ExternalUsers_ReturnsError(FileShare fileShare)
+    {        
+        // Arrange and Act
+        var (share, fileId) = await CreateFileAndShare(fileShare, varInternal: true);
+        
+        // Assert
+        await TryOpenEditAsync(share, fileId, throwException: true);
+    }
+    
+    [Fact]
+    public async Task PrimaryExternalLink_WithDateNotExpired_ReturnsFileData()
     {
-        // Arrange
+        const FileShare fileShare = FileShare.Read;
+        // Arrange and Act
+        var (share, fileId) = await CreateFileAndShare(fileShare, expirationDate: DateTime.UtcNow.AddDays(1));
+        
+        // Assert
+        var openEditResult = await TryOpenEditAsync(share, fileId);
+
+        // Assert
+        openEditResult.Should().NotBeNull();
+        openEditResult.Access.Should().Be(fileShare);
+        openEditResult.Shared.Should().Be(true);
+    }
+    
+    [Fact]
+    public async Task PrimaryExternalLink_WithDateExpired_ReturnsFileData()
+    {
+        // Arrange and Act
+        const int seconds = 1;
+        var (share, fileId) = await CreateFileAndShare(FileShare.Read, expirationDate: DateTime.UtcNow.AddSeconds(seconds));
+        await Task.Delay(TimeSpan.FromSeconds(seconds), TestContext.Current.CancellationToken);
+        
+        // Assert
+        await TryOpenEditAsync(share, fileId, throwException: true);
+    }
+    
+    private async Task<(string, int)> CreateFileAndShare(FileShare fileShare, bool primary = true, bool varInternal = false, DateTime? expirationDate = null)
+    {
         await _filesClient.Authenticate(Initializer.Owner);
         
         var file = await CreateFile("file_update_link.docx", FolderType.USER, Initializer.Owner);
@@ -237,9 +231,14 @@ public class FileSharingTest(
         // Create initial external link
         var initialLinkParams = new FileLinkRequest(
             access: fileShare,
-            primary: true,
-            varInternal: true
+            primary: primary,
+            varInternal: varInternal
         );
+
+        if (expirationDate != null)
+        {
+            initialLinkParams.ExpirationDate = new ApiDateTime { UtcTime = expirationDate.Value };
+        }
         
         var initialLink = (await _filesFilesApi.CreatePrimaryExternalLinkAsync(file.Id, initialLinkParams, TestContext.Current.CancellationToken)).Response;
         var sharedTo = initialLink.SharedTo as JObject;
@@ -250,12 +249,32 @@ public class FileSharingTest(
         var fullLink = await _apiFactory.HttpClient.GetAsync(link, TestContext.Current.CancellationToken);
         var query = fullLink.RequestMessage?.RequestUri?.Query.Substring(1);
         var parsedQuery = HttpUtility.ParseQueryString(query);
-                
-        // Assert
-        _filesClient.DefaultRequestHeaders.Authorization = null;
-        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation("Request-Token", parsedQuery["share"]);
-        await Assert.ThrowsAsync<ApiException>(async () => await _filesFilesApi.OpenEditFileAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken));
-        _filesClient.DefaultRequestHeaders.Remove("Request-Token");
+        
+        return (parsedQuery["share"], file.Id);
+    }
+    
+    private async Task<FileDtoInteger?> TryOpenEditAsync(string share, int fileId, User? user = null, bool throwException = false)
+    {
+        if (user != null)
+        {
+            await _filesClient.Authenticate(user);
+        }
+        else
+        {
+            _filesClient.DefaultRequestHeaders.Authorization = null;
+        }
 
+        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation("Request-Token", share);
+        
+        if (throwException)
+        {
+            await Assert.ThrowsAsync<ApiException>(async () => await _filesFilesApi.OpenEditFileAsync(fileId, cancellationToken: TestContext.Current.CancellationToken));
+            _filesClient.DefaultRequestHeaders.Remove("Request-Token");
+            return null;
+        }
+
+        var openEditResult = (await _filesFilesApi.OpenEditFileAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        _filesClient.DefaultRequestHeaders.Remove("Request-Token");
+        return openEditResult.File;
     }
 }
