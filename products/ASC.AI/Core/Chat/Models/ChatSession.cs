@@ -29,6 +29,7 @@ namespace ASC.AI.Core.Chat.Models;
 public class ChatSession : IMapFrom<DbChat>
 {
     public Guid Id { get; init; }
+    public int TenantId { get; init; }
     public Guid UserId { get; init; }
     public int RoomId { get; init; }
     public required string Title { get; set; }

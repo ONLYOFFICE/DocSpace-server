@@ -62,7 +62,9 @@ public class ChatCompletionRunner(
 
     public async Task<ChatCompletionGenerator> StartChatAsync(Guid chatId, string message)
     {
-        var chat = await chatHistory.GetChatAsync(chatId);
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        var chat = await chatHistory.GetChatAsync(tenantId, chatId);
         if (chat == null || chat.UserId != authContext.CurrentAccount.ID)
         {
             throw new ItemNotFoundException("Chat not found");
@@ -70,12 +72,12 @@ public class ChatCompletionRunner(
 
         await ChekRoomAsync(chat.RoomId);
         
-        var clientTask = CreateClientAsync(tenantManager.GetCurrentTenantId(), chat.RoomId, chatId);
+        var clientTask = CreateClientAsync(tenantId, chat.RoomId, chatId);
 
         var history = await chatHistory.GetMessagesAsync(chatId).ToListAsync();
         var userMessage = new ChatMessage(ChatRole.User, message);
         
-        await chatHistory.UpdateChatAsync(chatId, userMessage);
+        await chatHistory.UpdateChatAsync(tenantId, chatId, userMessage);
 
         var messages = new List<ChatMessage> { _systemMessage };
         messages.AddRange(history);

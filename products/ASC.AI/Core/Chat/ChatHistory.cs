@@ -44,15 +44,15 @@ public class ChatHistory(DbChatDao chatDao)
             new Message(MessageType.UserMessage, [new TextMessageContent(message.Text)], DateTime.UtcNow));
     }
 
-    public Task UpdateChatAsync(Guid chatId, ChatMessage message)
+    public Task UpdateChatAsync(int tenantId, Guid chatId, ChatMessage message)
     {
-        return chatDao.UpdateChatAsync(chatId, new Message(MessageType.UserMessage, 
+        return chatDao.UpdateChatAsync(tenantId, chatId, new Message(MessageType.UserMessage, 
             [new TextMessageContent(message.Text)], DateTime.UtcNow));
     }
 
-    public Task<ChatSession?> GetChatAsync(Guid chatId)
+    public Task<ChatSession?> GetChatAsync(int tenantId, Guid chatId)
     {
-        return chatDao.GetChatAsync(chatId);
+        return chatDao.GetChatAsync(tenantId, chatId);
     }
     
     public Task AddMessagesAsync(Guid chatId, IEnumerable<ChatMessage> chatMessages)

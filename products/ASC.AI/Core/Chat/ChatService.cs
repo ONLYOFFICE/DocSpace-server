@@ -31,23 +31,16 @@ public class ChatService(
     DbChatDao chatDao, 
     AuthContext authContext,
     IDaoFactory daoFactory,
-    FileSecurity fileSecurity)
+    FileSecurity fileSecurity,
+    TenantManager tenantManager)
 {
     public async Task<ChatSession> RenameChatAsync(Guid chatId, string title)
     {
-        var chat = await chatDao.GetChatAsync(chatId);
-        if (chat == null)
-        {
-            throw new ItemNotFoundException("Chat not found");
-        }
-        
-        if (chat.UserId != authContext.CurrentAccount.ID)
-        {
-            throw new SecurityException("Access denied");
-        }
+        var chat = await GetChatAsync(chatId);
         
         chat.Title = title;
         chat.ModifiedOn = DateTime.UtcNow;
+        
         await chatDao.UpdateChatAsync(chat);
         
         return chat; 
@@ -68,10 +61,16 @@ public class ChatService(
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFolder);
         }
 
-        await foreach (var chat in chatDao.GetChatsAsync(roomId, authContext.CurrentAccount.ID, offset, limit))
+        await foreach (var chat in chatDao.GetChatsAsync(tenantManager.GetCurrentTenantId(), roomId, 
+                           authContext.CurrentAccount.ID, offset, limit))
         {
             yield return chat;
         }
+    }
+    
+    public Task<int> GetChatsTotalCountAsync(int roomId)
+    {
+        return chatDao.GetChatsTotalCountAsync(tenantManager.GetCurrentTenantId(), roomId, authContext.CurrentAccount.ID);
     }
 
     public async IAsyncEnumerable<Message> GetMessagesAsync(Guid chatId, int offset, int limit)
@@ -84,25 +83,25 @@ public class ChatService(
         }
     }
 
+    public Task<int> GetMessagesTotalCountAsync(Guid chatId)
+    {
+        return chatDao.GetMessagesTotalCountAsync(chatId);
+    }
+
     public async Task DeleteChatAsync(Guid chatId)
     {
         var chat = await GetChatAsync(chatId);
-        await chatDao.DeleteChatsAsync([chat.Id]);
+        await chatDao.DeleteChatsAsync(tenantManager.GetCurrentTenantId(), [chat.Id]);
     }
 
     private async Task<ChatSession> GetChatAsync(Guid chatId)
     {
-        var chat = await chatDao.GetChatAsync(chatId);
-        if (chat == null)
+        var chat = await chatDao.GetChatAsync(tenantManager.GetCurrentTenantId(), chatId);
+        if (chat == null || chat.UserId != authContext.CurrentAccount.ID)
         {
             throw new ItemNotFoundException("Chat not found");
         }
-
-        if (chat.UserId != authContext.CurrentAccount.ID)
-        {
-            throw new SecurityException("Access denied");
-        }
-
+        
         return chat;
     }
 }

@@ -27,7 +27,7 @@
 
 namespace ASC.AI.Core.Chat.Database;
 
-public class ChatDbContext(DbContextOptions<ChatDbContext> options) : BaseDbContext(options)
+public partial class ChatDbContext(DbContextOptions<ChatDbContext> options) : BaseDbContext(options)
 {
     public DbSet<DbChat> Chats { get; set; }
     public DbSet<DbChatMessage> Messages { get; set; }

@@ -34,7 +34,8 @@ public class ChatController(
     ChatCompletionRunner chatCompletionRunner, 
     ChatService chatService,
     EmployeeDtoHelper employeeDtoHelper,
-    ApiDateTimeHelper apiDateTimeHelper) : ControllerBase
+    ApiDateTimeHelper apiDateTimeHelper,
+    ApiContext apiContext) : ControllerBase
 {
     [HttpPost("rooms/{roomId}/chats")]
     public async Task<IActionResult> StartNewChatAsync(StartNewChatRequestDto inDto)
@@ -79,18 +80,28 @@ public class ChatController(
     [HttpGet("rooms/{roomId}/chats")]
     public async Task<List<ChatDto>> GetChatsAsync(GetChatsRequestDto inDto)
     {
+        var totalCountTask = chatService.GetChatsTotalCountAsync(inDto.RoomId);
+        
         var chats = chatService.GetChatsAsync(inDto.RoomId, inDto.StartIndex, inDto.Count);
-
-        return await chats.SelectAwait(async x => await x.ToDtoAsync(employeeDtoHelper, apiDateTimeHelper))
+        var chatsDto = await chats.SelectAwait(async x => await x.ToDtoAsync(employeeDtoHelper, apiDateTimeHelper))
             .ToListAsync();
+        
+        apiContext.SetCount(chatsDto.Count).SetTotalCount(await totalCountTask);
+        
+        return chatsDto;       
     }
     
     [HttpGet("chats/{chatId}/messages")]
     public async Task<List<MessageDto>> GetMessagesAsync(GetMessagesRequestDto inDto)
     {
-        var messages = chatService.GetMessagesAsync(inDto.ChatId, inDto.StartIndex, inDto.Count);
+        var totalCountTask = chatService.GetMessagesTotalCountAsync(inDto.ChatId);
         
-        return await messages.Select(x => x.ToMessageDto(apiDateTimeHelper)).ToListAsync();
+        var messages = chatService.GetMessagesAsync(inDto.ChatId, inDto.StartIndex, inDto.Count);
+        var messagesDto = await messages.Select(x => x.ToMessageDto(apiDateTimeHelper)).ToListAsync();
+        
+        apiContext.SetCount(messagesDto.Count).SetTotalCount(await totalCountTask);
+        
+        return messagesDto;
     }
 
     [HttpDelete("chats/{chatId}")]
