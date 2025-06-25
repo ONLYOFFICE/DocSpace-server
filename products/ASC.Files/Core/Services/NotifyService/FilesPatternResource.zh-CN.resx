@@ -73,7 +73,7 @@
 
 此电邮通知旨在告知您：您已请求发送$MailsCount信息，且该流程现已完成。 $Message
 
-成功发送的邮件信息可在您的“邮件”模块的"Sent":"$__VirtualRootPath/addons/mail/#sent"文件夹中查找。</value>
+成功发送的邮件信息可在您的"邮件"模块的"Sent":"$__VirtualRootPath/addons/mail/#sent"文件夹中查找。</value>
   </data>
   <data name="pattern_ShareDocument" xml:space="preserve">
     <value>h1.获得文档访问权限: "$DocumentTitle":"$DocumentURL"
@@ -237,6 +237,6 @@ $OrangeButton
     <value>协作空间通知。</value>
   </data>
   <data name="pattern_InvitedToRoom_push" xml:space="preserve">
-    <value>您已被邀请加入房间“$RoomTitle”</value>
+    <value>您已被邀请加入房间"$RoomTitle"</value>
   </data>
 </root>

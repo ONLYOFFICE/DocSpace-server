@@ -1100,7 +1100,7 @@
     <value>計測単位</value>
   </data>
   <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
-    <value>顧客操作レポート（{0}-{1}）</value>
+    <value>顧客操作レポート({0}-{1})</value>
   </data>
   <data name="AccountingCustomerOperationWithdrawal" xml:space="preserve">
     <value>出金</value>

@@ -1959,13 +1959,13 @@ $TrulyYours</value>
   </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>$UserName 様
- 
+
 ご契約の自動更新に伴い、3日後にご登録いただいている決済方法より料金が自動的に引き落とされますことをお知らせいたします。
- 
+
 スムーズなお支払いのため、決済方法に十分な残高があることをご確認ください。
- 
-ご不明な点やお困りのことがございましたら、"サポートチーム":"${__SupportLink}"までお気軽にご連絡ください。
- 
+
+ご不明な点やお困りのことがございましたら、"サポートチーム":"${__SupportLink}" までお気軽にご連絡ください。
+
 $TrulyYours</value>
   </data>
   <data name="pattern_top_up_wallet_error" xml:space="preserve">
