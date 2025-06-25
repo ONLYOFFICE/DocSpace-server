@@ -794,7 +794,7 @@ public class PaymentController(
         var utcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate);
         var report = await tariffService.GetCustomerOperationsAsync(tenant.Id, utcStartDate, utcEndDate, inDto.Credit, inDto.Withdrawal, inDto.Offset, inDto.Limit);
 
-        return new ReportDto(report, apiDateTimeHelper);
+        return report == null ? null : new ReportDto(report, apiDateTimeHelper);
     }
 
     /// <summary>
