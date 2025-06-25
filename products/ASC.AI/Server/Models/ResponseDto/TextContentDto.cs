@@ -26,29 +26,8 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
-public class MessageDto(MessageType messageType, IEnumerable<MessageContentDto> contents, ApiDateTime createdOn)
+public class TextContentDto : MessageContentDto, IMapFrom<TextMessageContent>
 {
-    public MessageType MessageType { get; } = messageType;
-    public IEnumerable<MessageContentDto> Contents { get; } = contents;
-    public ApiDateTime CreatedOn { get; } = createdOn;
-}
-
-public static class MessageDtoExtensions
-{
-    public static MessageDto ToMessageDto(this Message message, IMapper mapper, ApiDateTimeHelper dateTimeHelper)
-    {
-        var createdOn = dateTimeHelper.Get(message.CreatedOn);
-
-        var contents = message.Contents.Select(x =>
-        {
-            return x switch
-            {
-                TextMessageContent text => mapper.Map<TextContentDto>(text),
-                ToolCallMessageContent tool => mapper.Map<ToolContentDto>(tool) as MessageContentDto,
-                _ => throw new ArgumentOutOfRangeException(nameof(x))
-            };
-        });
-        
-        return new MessageDto(message.MessageType, contents, createdOn);
-    }
+    public override ContentType Type => ContentType.Text;
+    public string? Text { get; init; }
 }

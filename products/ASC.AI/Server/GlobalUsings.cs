@@ -37,6 +37,7 @@ global using ASC.AI.Models.ResponseDto;
 global using ASC.AI.Models.RequestDto;
 
 global using ASC.Common;
+global using ASC.Common.Mapping;
 
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Model.Chat;
@@ -46,6 +47,8 @@ global using ASC.Files.Core.EF;
 
 global using ASC.Web.Api.Models;
 global using ASC.Web.Api.Routing;
+
+global using AutoMapper;
 
 global using Microsoft.AspNetCore.Mvc;
 

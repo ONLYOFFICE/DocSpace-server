@@ -35,7 +35,8 @@ public class ChatController(
     ChatService chatService,
     EmployeeDtoHelper employeeDtoHelper,
     ApiDateTimeHelper apiDateTimeHelper,
-    ApiContext apiContext) : ControllerBase
+    ApiContext apiContext,
+    IMapper mapper) : ControllerBase
 {
     [HttpPost("rooms/{roomId}/chats")]
     public async Task<IActionResult> StartNewChatAsync(StartNewChatRequestDto inDto)
@@ -97,7 +98,7 @@ public class ChatController(
         var totalCountTask = chatService.GetMessagesTotalCountAsync(inDto.ChatId);
         
         var messages = chatService.GetMessagesAsync(inDto.ChatId, inDto.StartIndex, inDto.Count);
-        var messagesDto = await messages.Select(x => x.ToMessageDto(apiDateTimeHelper)).ToListAsync();
+        var messagesDto = await messages.Select(x => x.ToMessageDto(mapper, apiDateTimeHelper)).ToListAsync();
         
         apiContext.SetCount(messagesDto.Count).SetTotalCount(await totalCountTask);
         

@@ -24,31 +24,19 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Text.Json.Serialization;
+
 namespace ASC.AI.Models.ResponseDto;
 
-public class MessageDto(MessageType messageType, IEnumerable<MessageContentDto> contents, ApiDateTime createdOn)
+public enum ContentType
 {
-    public MessageType MessageType { get; } = messageType;
-    public IEnumerable<MessageContentDto> Contents { get; } = contents;
-    public ApiDateTime CreatedOn { get; } = createdOn;
+    Text,
+    Tool
 }
 
-public static class MessageDtoExtensions
+[JsonDerivedType(typeof(TextContentDto))]
+[JsonDerivedType(typeof(ToolContentDto))]
+public abstract class MessageContentDto
 {
-    public static MessageDto ToMessageDto(this Message message, IMapper mapper, ApiDateTimeHelper dateTimeHelper)
-    {
-        var createdOn = dateTimeHelper.Get(message.CreatedOn);
-
-        var contents = message.Contents.Select(x =>
-        {
-            return x switch
-            {
-                TextMessageContent text => mapper.Map<TextContentDto>(text),
-                ToolCallMessageContent tool => mapper.Map<ToolContentDto>(tool) as MessageContentDto,
-                _ => throw new ArgumentOutOfRangeException(nameof(x))
-            };
-        });
-        
-        return new MessageDto(message.MessageType, contents, createdOn);
-    }
+    public abstract ContentType Type { get; }
 }
