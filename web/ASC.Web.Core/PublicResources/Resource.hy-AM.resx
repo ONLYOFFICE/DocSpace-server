@@ -1140,4 +1140,40 @@
   <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
     <value>Webhook URL-ը հասանելի չէ։ HEAD հարցումը չի վերադարձնում 200 HTTP կարգավիճակ։</value>
   </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>Կրեդիտ</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>Արտարժույթ</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>Ամսաթիվ և ժամ</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>Քանակ</value>
+  </data>
+  <data name="AccountingCustomerOperationService" xml:space="preserve">
+    <value>Ծառայության անվանում</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>Չափման միավոր</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>Հաճախորդների գործունեության հաշվետվություն ({0}-{1})</value>
+  </data>
+  <data name="AccountingCustomerOperationWithdrawal" xml:space="preserve">
+    <value>Հեռացում</value>
+  </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>Խումբը չհաջողվեց գտնել</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>Լրացուցիչ սկավառակի պահեստ</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>Կարգավորեք պահեստավորման ծավալը ձեզ անհրաժեշտ ճշգրիտ քանակին համապատասխան։</value>
+  </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
+    <value>Օգտագործված պահեստային տարածք:</value>
+  </data>
 </root>

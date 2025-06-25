@@ -2528,7 +2528,7 @@ $TrulyYours</value>
     <value>Your DocSpace user type has changed</value>
   </data>
   <data name="ButtonGoToServices" xml:space="preserve">
-    <value>Go to services</value>
+    <value>Go to Services</value>
   </data>
   <data name="ButtonGoToWalletSettings" xml:space="preserve">
     <value>Go to Wallet settings</value>
