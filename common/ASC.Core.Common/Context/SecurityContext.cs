@@ -135,7 +135,7 @@ public class SecurityContext(
 
             var claims = new List<Claim>
             {
-                AuthConstants.Claim_ScopeRootWrite
+                AuthConstants.Claim_ScopeGlobalWrite
             };
 
             await AuthenticateMeWithoutCookieAsync(new UserAccount(new UserInfo { Id = userid }, tenant, userFormatter), claims);

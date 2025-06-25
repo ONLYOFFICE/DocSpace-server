@@ -376,7 +376,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Go to services.
+        ///   Looks up a localized string similar to Go to Services.
         /// </summary>
         public static string ButtonGoToServices {
             get {

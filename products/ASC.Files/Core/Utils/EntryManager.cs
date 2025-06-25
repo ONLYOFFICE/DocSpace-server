@@ -1315,7 +1315,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
                 var resultFolder = await folderDao.GetFolderAsync(properties.FormFilling.ToFolderId);
 
-                if (Equals(properties.FormFilling.ResultsFileID, default(T)))
+                if (Equals(properties.FormFilling.ResultsFolderId, default(T)))
                 {
                     var initFormFillingProperties = await InitFormFillingProperties(folderIfNew.Id, sourceTitle, sourceFile.Id, inProcessFormFolderId, readyFormFolderId, folderIfNew.CreateBy, properties, fileDao, folderDao);
                     linkedFile.ParentId = initFormFillingProperties.FormFilling.ToFolderId;
@@ -1587,7 +1587,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
             if(file.IsForm && file.IsCompletedForm && fileForceSave != ForcesaveType.None)
             {
-                await fileDao.UpdateCategoryAsync(file.Id, file.Version, (int)FilterType.Pdf, ForcesaveType.None);
+                await fileDao.UpdateCategoryAsync(file.Id, file.Version, (int)FilterType.PdfForm, ForcesaveType.None);
                 return file;
             }
 
@@ -2162,7 +2162,6 @@ public class EntryManager(IDaoFactory daoFactory,
             pdfFile.Title = $"{origProperties.FormFilling.ResultFormNumber} - {sourceTitle} ({tenantUtil.DateTimeNow():dd-MM-yyyy H-mm}){ext}";
             pdfFile.ParentId = origProperties.FormFilling.ResultsFolderId;
             pdfFile.Comment = string.IsNullOrEmpty(comment) ? null : comment;
-            pdfFile.Category = (int)FilterType.Pdf;
             pdfFile.IsCompletedForm = true;
 
             File<T> result;

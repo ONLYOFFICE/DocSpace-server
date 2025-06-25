@@ -571,4 +571,10 @@
   <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
     <value>Սկսել լրացնելը</value>
   </data>
+  <data name="RoleEnum_Guest" xml:space="preserve">
+    <value>Հյուր</value>
+  </data>
+  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
+    <value>Սենյակի Ադմինիստրատոր</value>
+  </data>
 </root>
