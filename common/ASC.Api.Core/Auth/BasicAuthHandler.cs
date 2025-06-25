@@ -67,7 +67,7 @@ public partial class BasicAuthHandler(
 
             var claims = new List<Claim>
             {
-                AuthConstants.Claim_ScopeRootWrite
+                AuthConstants.Claim_ScopeGlobalWrite
             };
 
             await securityContext.AuthenticateMeAsync(userInfo.Email, passwordHash, null, claims);

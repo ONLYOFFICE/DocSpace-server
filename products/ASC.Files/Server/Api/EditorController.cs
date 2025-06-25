@@ -160,7 +160,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                 FolderType.FillingFormsRoom => await documentServiceHelper.GetFormOpenSetupForFillingRoomAsync(file, rootFolder, inDto.EditorType, inDto.Edit, entryManager),
                 FolderType.FormFillingFolderInProgress => documentServiceHelper.GetFormOpenSetupForFolderInProgress(file, inDto.EditorType),
                 FolderType.FormFillingFolderDone => documentServiceHelper.GetFormOpenSetupForFolderDone<T>(inDto.EditorType),
-                FolderType.VirtualDataRoom => await documentServiceHelper.GetFormOpenSetupForVirtualDataRoomAsync(file, inDto.EditorType),
+                FolderType.VirtualDataRoom => await documentServiceHelper.GetFormOpenSetupForVirtualDataRoomAsync(file, rootFolder, inDto.EditorType),
                 FolderType.USER => await documentServiceHelper.GetFormOpenSetupForUserFolderAsync(file, inDto.EditorType, inDto.Edit, inDto.Fill),
                 _ => new FormOpenSetup<T>
                 {
@@ -174,7 +174,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         var docParams = await documentServiceHelper.GetParamsAsync(
             formOpenSetup is { Draft: not null } ? formOpenSetup.Draft : file, 
             lastVersion,
-            formOpenSetup?.CanEdit ?? !file.IsCompletedForm,
+            await documentServiceHelper.CheckCustomQuota(rootFolder) && (formOpenSetup?.CanEdit ?? !file.IsCompletedForm),
             !inDto.View, 
             true, formOpenSetup == null || formOpenSetup.CanFill,
             formOpenSetup?.EditorType ?? inDto.EditorType,
@@ -197,6 +197,12 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
         }
 
         var result = await configurationConverter.Convert(configuration, file);
+
+        if (formOpenSetup != null && formOpenSetup.DisableEmbeddedConfig && result.EditorConfig.Embedded != null)
+        {
+            result.EditorConfig.Embedded.EmbedUrl = "";
+            result.EditorConfig.Embedded.ShareUrl = "";
+        }
 
         if (authContext.IsAuthenticated && !file.Encrypted && !file.ProviderEntry 
             && result.File.Security.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canRead) && canRead)
@@ -221,6 +227,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
                 result.StartFilling = file.Security[FileSecurity.FilesSecurityActions.StartFilling];
                 result.StartFillingMode = StartFillingMode.StartFilling;
                 result.Document.ReferenceData.RoomId = formOpenSetup.RootFolder.Id.ToString();
+                result.Document.ReferenceData.CanEditRoom = formOpenSetup.CanEditRoom;
 
                 result.EditorConfig.Customization.StartFillingForm = new StartFillingForm { Text = FilesCommonResource.StartFillingModeEnum_StartFilling };
                 if (!string.IsNullOrEmpty(formOpenSetup.RoleName))

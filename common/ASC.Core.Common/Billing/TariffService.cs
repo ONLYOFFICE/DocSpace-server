@@ -1101,7 +1101,16 @@ public class TariffService(
             oldBalanceAmount = oldBalance?.SubAccounts?.FirstOrDefault(x => x.Currency == currency)?.Amount;
         }
 
-        var result = await billingClient.TopUpDepositAsync(portalId, amount, currency);
+        var result = false;
+
+        try
+        {
+            result = await billingClient.TopUpDepositAsync(portalId, amount, currency);
+        }
+        catch (Exception error)
+        {
+            logger.ErrorWithException(error);
+        }
 
         if (!result || !waitForChanges)
         {
@@ -1110,7 +1119,7 @@ public class TariffService(
 
         var retryPolicy = Policy
             .HandleResult<bool>(result => result == false)
-            .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
+            .WaitAndRetryAsync(15, retryAttempt => TimeSpan.FromSeconds(1));
 
         var updated = await retryPolicy.ExecuteAsync(async () =>
         {

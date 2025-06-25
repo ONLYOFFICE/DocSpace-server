@@ -53,6 +53,7 @@ public class PaymentController(
     StudioNotifyService studioNotifyService,
     PermissionContext permissionContext,
     TenantUtil tenantUtil,
+    ApiDateTimeHelper apiDateTimeHelper,
     TempStream tempStream,
     CsvFileHelper csvFileHelper,
     CsvFileUploader csvFileUploader)
@@ -250,6 +251,11 @@ public class PaymentController(
 
         if (inDto.ProductQuantityType is ProductQuantityType.Set)
         {
+            if (productQty.HasValue && productQty.Value != 0 && productQty.Value < 100) // min value 100Gb
+            {
+                return false;
+            }
+
             // saving null value is equivalent to resetting to default
             var updated = await tariffService.UpdateNextQuantityAsync(tenant.Id, tariff, quota.TenantId, productQty);
 
@@ -264,6 +270,12 @@ public class PaymentController(
         // inDto.ProductQuantityType === ProductQuantityType.Add
 
         if (!productQty.HasValue || productQty <= 0)
+        {
+            return false;
+        }
+
+        var hasActiveWalletQuota = tariff.Quotas.Any(q => q.Id == quota.TenantId && q.State == QuotaState.Active);
+        if (!hasActiveWalletQuota && productQty < 100) // min value 100Gb
         {
             return false;
         }
@@ -551,7 +563,11 @@ public class PaymentController(
         var hasCustomer = await HasCustomer(tenant);
         if (hasCustomer)
         {
-            return null;
+            var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+            if (customerInfo != null && customerInfo.PaymentMethodStatus == PaymentMethodStatus.Set)
+            {
+                return null;
+            }
         }
 
         var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
@@ -757,7 +773,7 @@ public class PaymentController(
     [SwaggerResponse(200, "The customer operations", typeof(Report))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("customer/operations")]
-    public async Task<Report> GetCustomerOperations(CustomerOperationsRequestDto inDto)
+    public async Task<ReportDto> GetCustomerOperations(CustomerOperationsRequestDto inDto)
     {
         await DemandAdminAsync();
 
@@ -776,17 +792,9 @@ public class PaymentController(
 
         var utcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate);
         var utcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate);
-        var result = await tariffService.GetCustomerOperationsAsync(tenant.Id, utcStartDate, utcEndDate, inDto.Credit, inDto.Withdrawal, inDto.Offset, inDto.Limit);
+        var report = await tariffService.GetCustomerOperationsAsync(tenant.Id, utcStartDate, utcEndDate, inDto.Credit, inDto.Withdrawal, inDto.Offset, inDto.Limit);
 
-        if (result?.Collection != null)
-        {
-            foreach (var operation in result.Collection)
-            {
-                operation.Description = GetServiceDesc(operation.Service);
-            }
-        }
-
-        return result;
+        return report == null ? null : new ReportDto(report, apiDateTimeHelper);
     }
 
     /// <summary>
@@ -855,7 +863,7 @@ public class PaymentController(
 
             foreach (var operation in report.Collection)
             {
-                operation.Description = GetServiceDesc(operation.Service);
+                operation.Description = OperationDto.GetServiceDesc(operation.Service);
                 operation.Date = tenantUtil.DateTimeFromUtc(operation.Date);
 
                 if (string.IsNullOrEmpty(operation.Service))
@@ -873,17 +881,6 @@ public class PaymentController(
 
             offset += limit;
         }
-    }
-
-    private static string GetServiceDesc(string serviceName)
-    {
-        // for testing purposes
-        if (serviceName != null && serviceName.StartsWith("disk-storage"))
-        {
-            serviceName = "disk-storage";
-        }
-
-        return Resource.ResourceManager.GetString("AccountingCustomerOperationServiceDesc_" + (serviceName ?? "top-up"));
     }
 
     internal class OperationMap : ClassMap<Operation>

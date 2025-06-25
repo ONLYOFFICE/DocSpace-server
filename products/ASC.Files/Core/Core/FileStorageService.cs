@@ -5055,6 +5055,15 @@ public class FileStorageService //: IFileStorageService
             await filesMessageService.SendAsync(actions[SubjectType.ExternalLink][eventType], entry, ace.FileShareOptions?.Title);
         }
 
+        if (entry is Folder<T> folderEntry)
+        {
+            await socketManager.UpdateFolderAsync(folderEntry);
+        }
+        else  if (entry is File<T> fileEntry)
+        {
+            await socketManager.UpdateFileAsync(fileEntry);
+        }
+        
         return (await fileSharing.GetPureSharesAsync(entry, [linkId]).FirstOrDefaultAsync());
     }
 
