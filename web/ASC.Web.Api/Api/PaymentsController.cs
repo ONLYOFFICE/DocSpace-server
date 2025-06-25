@@ -87,7 +87,11 @@ public class PaymentController(
         var hasCustomer = await HasCustomer(tenant);
         if (hasCustomer)
         {
-            return null;
+            var tariff = await tariffService.GetTariffAsync(tenant.Id);
+            if (tariff.State == TariffState.Paid)
+            {
+                return null;
+            }
         }
 
         var monthQuotas = (await quotaService.GetTenantQuotasAsync())
