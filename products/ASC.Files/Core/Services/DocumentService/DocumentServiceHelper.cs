@@ -599,7 +599,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             result.IsSubmitOnly = true;
             result.FillingSessionId = FileConstant.AnonFillingSession + Guid.NewGuid();
             result.EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
-            result.DisableEmbeddedConfig = true;
+            result.DisableEmbeddedConfig = editorType != EditorType.Mobile;
             return result;
         }
 
@@ -628,7 +628,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         result.CanFill = true;
         result.EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
-        result.DisableEmbeddedConfig = true;
+        result.DisableEmbeddedConfig = editorType != EditorType.Mobile;
         result.Draft = formDraft;
         result.FillingSessionId = $"{formDraft.Id}_{securityContext.CurrentAccount.ID}";
 
@@ -642,7 +642,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             CanFill = true,
             FillingSessionId = $"{file.Id}_{securityContext.CurrentAccount.ID}",
             EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded,
-            DisableEmbeddedConfig = true
+            DisableEmbeddedConfig = editorType != EditorType.Mobile
         };
     }
     public FormOpenSetup<T> GetFormOpenSetupForFolderDone<T>(EditorType editorType)
@@ -652,7 +652,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             CanEdit = false,
             CanFill = false,
             EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded,
-            DisableEmbeddedConfig = true
+            DisableEmbeddedConfig = editorType != EditorType.Mobile
         };
     }
     public async Task<FormOpenSetup<T>> GetFormOpenSetupForVirtualDataRoomAsync<T>(File<T> file, EditorType editorType)
@@ -688,9 +688,9 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
                 role = myRoles.LastOrDefault();
                 result.RoleName = role.RoleName;
             }
-            result.EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
-            result.DisableEmbeddedConfig = true;
-        }
+                result.EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
+                result.DisableEmbeddedConfig = editorType != EditorType.Mobile;
+            }
         else
         {
             result.CanEdit = true;

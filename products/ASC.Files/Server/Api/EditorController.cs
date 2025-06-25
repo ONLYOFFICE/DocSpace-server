@@ -198,7 +198,7 @@ public abstract class EditorController<T>(FileStorageService fileStorageService,
 
         var result = await configurationConverter.Convert(configuration, file);
 
-        if (formOpenSetup != null && formOpenSetup.DisableEmbeddedConfig)
+        if (formOpenSetup != null && formOpenSetup.DisableEmbeddedConfig && result.EditorConfig.Embedded != null)
         {
             result.EditorConfig.Embedded.EmbedUrl = "";
             result.EditorConfig.Embedded.ShareUrl = "";
