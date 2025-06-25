@@ -102,6 +102,9 @@ public static class ModelsProviderExtension
             entity.Property(e => e.ModifiedOn)
                 .HasColumnName("modified_on")
                 .HasColumnType("datetime");
+
+            entity.HasIndex(e => new { e.TenantId, e.Id })
+                .HasDatabaseName("IX_tenant_id_id");
         });
     }
 }
