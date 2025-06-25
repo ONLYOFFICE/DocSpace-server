@@ -27,9 +27,9 @@
 using System.Text.Json;
 
 using ASC.Files.Core.ApiModels.ResponseDto;
-using ASC.Web.Core;
 
 using LinkType = Docspace.Model.LinkType;
+using Task = System.Threading.Tasks.Task;
 
 namespace ASC.Files.Tests.FilesController;
 
@@ -41,8 +41,13 @@ public class RoomSharingTest(
     FilesServiceFactory filesServiceProgram) 
     : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
 {
+    public static TheoryData<RoomType> Data =>
+    [
+        RoomType.EditingRoom, RoomType.VirtualDataRoom
+    ];
+    
     [Fact]
-    public async Task CreatePrimaryExternalLink_Default_ReturnsLinkData()
+    public async Task CreatePrimaryExternalLink_CustomRoom_ReturnsLinkData()
     {
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
@@ -66,6 +71,18 @@ public class RoomSharingTest(
         
         roomInfo.Should().NotBeNull();
         roomInfo.Current.Should().NotBeNull();
+    }
+    
+    [Theory]
+    [MemberData(nameof(Data))]
+    public async Task CreatePrimaryExternalLink_RestrictedRoomType_ReturnsError(RoomType roomType)
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var customRoom = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("room", roomType: roomType), TestContext.Current.CancellationToken)).Response;
+        
+        // Act
+        await Assert.ThrowsAsync<ApiException>(async () => await _roomsApi.GetRoomsPrimaryExternalLinkAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken));
     }
     
     [Fact]
