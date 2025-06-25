@@ -123,6 +123,10 @@ public class MigrationContext : DbContext
 
     public DbSet<IdentityShedlock> IdentityShedlocks { get; set; }
     public DbSet<DbUserRelation> UserRelations { get; set; }
+    
+    public DbSet<DbChat> Chats { get; set; }
+    public DbSet<DbChatMessage> ChatMessages { get; set; }
+    public DbSet<DbAiProvider> AiProviders { get; set; }
 
     public MigrationContext(DbContextOptions<MigrationContext> options) : base(options) { }
 
@@ -198,6 +202,9 @@ public class MigrationContext : DbContext
             .AddIdentityScope()
             .AddIdentityShedlock()
             .AddUserRelation()
+            .AddDbChat()
+            .AddDbChatMessages()
+            .AddProviders()
             .AddDbFunctions();
     }
 }
