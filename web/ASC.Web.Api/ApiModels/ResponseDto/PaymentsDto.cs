@@ -126,7 +126,7 @@ public class OperationDto
         Withdrawal = operation.Withdrawal;
     }
 
-    private static string GetServiceDesc(string serviceName)
+    public static string GetServiceDesc(string serviceName)
     {
         // for testing purposes
         if (serviceName != null && serviceName.StartsWith("disk-storage"))
@@ -138,19 +138,3 @@ public class OperationDto
     }
 }
 
-internal class OperationMap : ClassMap<OperationDto>
-{
-    public OperationMap()
-    {
-        Map(item => item.Date).TypeConverter<CsvFileHelper.CsvDateTimeConverter>();
-
-        Map(item => item.Date).Name(Resource.AccountingCustomerOperationDate);
-        Map(item => item.Description).Name(Resource.AccountingCustomerOperationDescription);
-        Map(item => item.Service).Name(Resource.AccountingCustomerOperationService);
-        Map(item => item.ServiceUnit).Name(Resource.AccountingCustomerOperationServiceUnit);
-        Map(item => item.Quantity).Name(Resource.AccountingCustomerOperationQuantity);
-        Map(item => item.Currency).Name(Resource.AccountingCustomerOperationCurrency);
-        Map(item => item.Credit).Name(Resource.AccountingCustomerOperationCredit);
-        Map(item => item.Withdrawal).Name(Resource.AccountingCustomerOperationWithdrawal);
-    }
-}

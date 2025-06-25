@@ -846,7 +846,7 @@ public class PaymentController(
         return result;
     }
 
-    private async IAsyncEnumerable<List<OperationDto>> GetCustomerOperationsReportDataAsync(int tenantId, DateTime utcStartDate, DateTime utcEndDate, bool? credit, bool? withdrawal)
+    private async IAsyncEnumerable<List<Operation>> GetCustomerOperationsReportDataAsync(int tenantId, DateTime utcStartDate, DateTime utcEndDate, bool? credit, bool? withdrawal)
     {
         var offset = 0;
         var limit = 1000;
@@ -861,17 +861,18 @@ public class PaymentController(
                 break;
             }
 
-            var reportDto = new ReportDto(report, apiDateTimeHelper);
-
-            foreach (var operation in reportDto.Collection)
+            foreach (var operation in report.Collection)
             {
+                operation.Description = OperationDto.GetServiceDesc(operation.Service);
+                operation.Date = tenantUtil.DateTimeFromUtc(operation.Date);
+
                 if (string.IsNullOrEmpty(operation.Service))
                 {
                     operation.Quantity = 0;
                 }
             }
 
-            yield return reportDto.Collection;
+            yield return report.Collection;
 
             if (report.CurrentPage == report.TotalPage)
             {
@@ -879,6 +880,23 @@ public class PaymentController(
             }
 
             offset += limit;
+        }
+    }
+
+    internal class OperationMap : ClassMap<Operation>
+    {
+        public OperationMap()
+        {
+            Map(item => item.Date).TypeConverter<CsvFileHelper.CsvDateTimeConverter>();
+
+            Map(item => item.Date).Name(Resource.AccountingCustomerOperationDate);
+            Map(item => item.Description).Name(Resource.AccountingCustomerOperationDescription);
+            Map(item => item.Service).Name(Resource.AccountingCustomerOperationService);
+            Map(item => item.ServiceUnit).Name(Resource.AccountingCustomerOperationServiceUnit);
+            Map(item => item.Quantity).Name(Resource.AccountingCustomerOperationQuantity);
+            Map(item => item.Currency).Name(Resource.AccountingCustomerOperationCurrency);
+            Map(item => item.Credit).Name(Resource.AccountingCustomerOperationCredit);
+            Map(item => item.Withdrawal).Name(Resource.AccountingCustomerOperationWithdrawal);
         }
     }
 
