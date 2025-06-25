@@ -651,8 +651,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         {
             CanEdit = false,
             CanFill = false,
-            EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded,
-            DisableEmbeddedConfig = editorType != EditorType.Mobile
+            EditorType = editorType
         };
     }
     public async Task<FormOpenSetup<T>> GetFormOpenSetupForVirtualDataRoomAsync<T>(File<T> file, EditorType editorType)
@@ -688,9 +687,16 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
                 role = myRoles.LastOrDefault();
                 result.RoleName = role.RoleName;
             }
+            if (file.IsCompletedForm)
+            {
+                result.EditorType = editorType;
+            }
+            else
+            {
                 result.EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
                 result.DisableEmbeddedConfig = editorType != EditorType.Mobile;
             }
+        }
         else
         {
             result.CanEdit = true;
