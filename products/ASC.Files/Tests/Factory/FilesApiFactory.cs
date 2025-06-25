@@ -49,6 +49,7 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
     public RoomsApi RoomsApi { get; private set;} = null!;
     public FilesSettingsApi FilesSettingsApi { get; private set;} = null!;
     public FilesQuotaApi  FilesQuotaApi { get; private set;} = null!;
+    public FilesSharingApi  FilesSharingApi { get; private set;} = null!;
     public SettingsQuotaApi  SettingsQuotaApi { get; private set;} = null!;
     
     public FilesApiFactory()
@@ -170,6 +171,7 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
         RoomsApi = new RoomsApi(HttpClient, configuration);
         FilesSettingsApi = new FilesSettingsApi(HttpClient, configuration);
         FilesQuotaApi = new FilesQuotaApi(HttpClient, configuration);
+        FilesSharingApi = new FilesSharingApi(HttpClient, configuration);
         SettingsQuotaApi = new SettingsQuotaApi(HttpClient, configuration);
         
         var tablesToIgnore = _tablesToIgnore.Select(t => new Table(t)).ToList();

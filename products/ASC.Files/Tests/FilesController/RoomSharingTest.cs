@@ -138,4 +138,107 @@ public class RoomSharingTest(
         file.Should().NotBeNull();
         file.Security.Download.Should().BeFalse();
     }
+    
+    [Fact]
+    public async Task ExternalLinkWithPassword_ExternalUser_ReturnsError()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var customRoom = await CreateCustomRoom("custom room");
+        var file = await CreateFile("file_to_share.docx", customRoom.Id);
+        
+        // Act
+        var externalLink = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var sharedTo = JsonSerializer.Deserialize<FileShareLink>((externalLink.SharedTo as JObject).ToString(), JsonSerializerOptions.Web);
+        
+        var data = new RoomLinkRequest(sharedTo.Id, FileShare.Editing, linkType: LinkType.External, password: "11111111");
+        var updatedExternalLink = (await _roomsApi.SetRoomLinkAsync(customRoom.Id, data, TestContext.Current.CancellationToken)).Response;
+        var updatedSharedTo = JsonSerializer.Deserialize<FileShareLink>((updatedExternalLink.SharedTo as JObject).ToString(), JsonSerializerOptions.Web);
+        
+        await _filesClient.Authenticate(null);
+        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, updatedSharedTo.RequestToken);
+        await Assert.ThrowsAsync<ApiException>(async () => await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken));
+        _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
+    }
+    
+    [Fact]
+    public async Task ExternalLinkWithPassword_ExternalUserRequirePassword_ReturnsError()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var customRoom = await CreateCustomRoom("custom room");
+        
+        // Act
+        var externalLink = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var sharedTo = JsonSerializer.Deserialize<FileShareLink>((externalLink.SharedTo as JObject).ToString(), JsonSerializerOptions.Web);
+        
+        var data = new RoomLinkRequest(sharedTo.Id, FileShare.Editing, linkType: LinkType.External, password: "11111111");
+        var updatedExternalLink = (await _roomsApi.SetRoomLinkAsync(customRoom.Id, data, TestContext.Current.CancellationToken)).Response;
+        var updatedSharedTo = JsonSerializer.Deserialize<FileShareLink>((updatedExternalLink.SharedTo as JObject).ToString(), JsonSerializerOptions.Web);
+        
+        await _filesClient.Authenticate(null);
+        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, updatedSharedTo.RequestToken);
+        var externalShareData = (await _filesSharingApi.GetExternalShareDataAsync(updatedSharedTo.RequestToken, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
+
+        externalShareData.Status.Should().Be(Status.RequiredPassword);
+    }
+    
+    [Fact]
+    public async Task ExternalLinkWithPassword_CheckPassword_ReturnsOk()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var customRoom = await CreateCustomRoom("custom room");
+        
+        // Act
+        var externalLink = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var sharedTo = JsonSerializer.Deserialize<FileShareLink>((externalLink.SharedTo as JObject).ToString(), JsonSerializerOptions.Web);
+
+        var password = "11111111";
+        var data = new RoomLinkRequest(sharedTo.Id, FileShare.Editing, linkType: LinkType.External, password: password);
+        var updatedExternalLink = (await _roomsApi.SetRoomLinkAsync(customRoom.Id, data, TestContext.Current.CancellationToken)).Response;
+        var updatedSharedTo = JsonSerializer.Deserialize<FileShareLink>((updatedExternalLink.SharedTo as JObject).ToString(), JsonSerializerOptions.Web);
+        
+        await _filesClient.Authenticate(null);
+        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, updatedSharedTo.RequestToken);
+        var externalShareDataWrongPassword = (await _filesSharingApi.ApplyExternalSharePasswordAsync(updatedSharedTo.RequestToken, new ExternalShareRequestParam { Password = password + "1" }, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var externalShareData = (await _filesSharingApi.ApplyExternalSharePasswordAsync(updatedSharedTo.RequestToken, new ExternalShareRequestParam { Password = password }, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
+
+        externalShareDataWrongPassword.Status.Should().Be(Status.InvalidPassword);
+        externalShareData.Status.Should().Be(Status.Ok);
+    }
+    
+    [Fact]
+    public async Task ExternalLinkWithPassword_ExternalUserWithPassword_ReturnsFileData()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var customRoom = await CreateCustomRoom("custom room");
+        var file = await CreateFile("file_to_share.docx", customRoom.Id);
+        
+        // Act
+        var externalLink = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var sharedTo = JsonSerializer.Deserialize<FileShareLink>((externalLink.SharedTo as JObject).ToString(), JsonSerializerOptions.Web);
+
+        var password = "11111111";
+        var data = new RoomLinkRequest(sharedTo.Id, FileShare.Editing, linkType: LinkType.External, password: password);
+        var updatedExternalLink = (await _roomsApi.SetRoomLinkAsync(customRoom.Id, data, TestContext.Current.CancellationToken)).Response;
+        var updatedSharedTo = JsonSerializer.Deserialize<FileShareLink>((updatedExternalLink.SharedTo as JObject).ToString(), JsonSerializerOptions.Web);
+        
+        await _filesClient.Authenticate(null);
+        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, updatedSharedTo.RequestToken);
+        var externalShareDataWithHttpInfo = await _filesSharingApi.ApplyExternalSharePasswordWithHttpInfoAsync(updatedSharedTo.RequestToken, new ExternalShareRequestParam { Password = password }, cancellationToken: TestContext.Current.CancellationToken);
+        var setCookie = externalShareDataWithHttpInfo.Headers.ToDictionary()["Set-Cookie"];
+        var anonymousSessionKey = setCookie.First();
+       
+        _filesClient.DefaultRequestHeaders.Add("Cookie", anonymousSessionKey);
+        var createdFile = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        _filesClient.DefaultRequestHeaders.Remove("Cookie");
+        _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
+        
+        file.Should().NotBeNull();
+        createdFile.Title.Should().Be(file.Title);
+    }
 }

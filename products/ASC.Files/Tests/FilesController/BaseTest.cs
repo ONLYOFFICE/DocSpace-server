@@ -41,6 +41,7 @@ public class BaseTest(
     protected readonly RoomsApi _roomsApi = filesFactory.RoomsApi;
     protected readonly FilesSettingsApi _filesSettingsApi = filesFactory.FilesSettingsApi;
     protected readonly FilesQuotaApi _quotaApi = filesFactory.FilesQuotaApi;
+    protected readonly FilesSharingApi _filesSharingApi = filesFactory.FilesSharingApi;
     protected readonly SettingsQuotaApi _settingsQuotaApi = apiFactory.SettingsQuotaApi;
     private readonly Func<Task> _resetDatabase = filesFactory.ResetDatabaseAsync;
 
