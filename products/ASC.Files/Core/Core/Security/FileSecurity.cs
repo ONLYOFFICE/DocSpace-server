@@ -1011,7 +1011,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                     return false;
                 }
                 
-                if (action is FilesSecurityActions.Pin or FilesSecurityActions.EditAccess or FilesSecurityActions.Mute or FilesSecurityActions.ChangeOwner && !isRoom)
+                if (action is FilesSecurityActions.Pin or FilesSecurityActions.Mute or FilesSecurityActions.ChangeOwner && !isRoom)
                 {
                     return false;
                 }

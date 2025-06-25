@@ -91,9 +91,14 @@ public class BaseTest(
     
     protected async Task<FolderDtoInteger> CreateFolder(string folderName, FolderType folderType, User user)
     {
-        await _filesClient.Authenticate(user);
-        
         var folderId = await GetFolderIdAsync(folderType, user);
+        
+        return await CreateFolder(folderName, folderId);
+    }
+    
+    protected async Task<FolderDtoInteger> CreateFolderInMy(string folderName, User user)
+    {
+        var folderId = await GetFolderIdAsync(FolderType.USER, user);
         
         return await CreateFolder(folderName, folderId);
     }
@@ -105,7 +110,7 @@ public class BaseTest(
     
     protected async Task<FolderDtoInteger> CreateVirtualRoom(string roomTitle, bool indexing = true)
     {
-        return (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto(roomTitle, indexing: true, roomType: RoomType.VirtualDataRoom), TestContext.Current.CancellationToken)).Response;
+        return (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto(roomTitle, indexing: indexing, roomType: RoomType.VirtualDataRoom), TestContext.Current.CancellationToken)).Response;
     }
     
     protected async Task<FolderDtoInteger> CreateCustomRoom(string roomTitle)

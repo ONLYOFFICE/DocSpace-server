@@ -71,7 +71,9 @@ public class FileSharingAceHelper(
         }
 
         var handledAces = new List<ProcessedItem<T>>(aceWrappers.Count);
-        var room = entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType) ? folder : null;
+        var folder = entry as Folder<T>;
+        var room = folder != null && DocSpaceHelper.IsRoom(folder.FolderType) ? folder : null;
+        
         var roomUrl = room != null ? pathProvider.GetRoomsUrl(room.Id.ToString(), false) : null;
         var entryType = entry.FileEntryType;
         var recipients = new Dictionary<Guid, FileShare>();
@@ -138,9 +140,9 @@ public class FileSharingAceHelper(
                 }
             }
 
-            if (room != null)
+            if (folder != null)
             {
-                if (room.RootId is int root && root == await globalFolderHelper.FolderRoomTemplatesAsync)
+                if (folder.RootId is int root && root == await globalFolderHelper.FolderRoomTemplatesAsync)
                 {
                     if (w.Access != FileShare.Read && w.Access != FileShare.None || w.SubjectType != SubjectType.User && w.SubjectType != SubjectType.Group)
                     {
@@ -149,13 +151,13 @@ public class FileSharingAceHelper(
                 }
                 else
                 {
-                    if (!FileSecurity.AvailableRoomAccesses.TryGetValue(room.FolderType, out var subjectAccesses)
-                    || !subjectAccesses.TryGetValue(w.SubjectType, out var accesses) || !accesses.Contains(w.Access))
+                    if (!FileSecurity.AvailableRoomAccesses.TryGetValue(folder.FolderType, out var subjectAccesses)
+                        || !subjectAccesses.TryGetValue(w.SubjectType, out var accesses) || !accesses.Contains(w.Access))
                     {
                         throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
                     }
                 }
-
+                
                 if (w.FileShareOptions != null)
                 {
                     if (w.SubjectType == SubjectType.PrimaryExternalLink)
@@ -167,19 +169,23 @@ public class FileSharingAceHelper(
                     {
                         w.FileShareOptions.Internal = false;
                     }
-                    
-                    if (!string.IsNullOrEmpty(w.FileShareOptions.Password))
-                    {
-                        if (eventType != EventType.Remove)
-                        {
-                            var settings = await settingsManager.LoadAsync<PasswordSettings>();
-                            passwordSettingsManager.CheckPassword(w.FileShareOptions.Password, settings);
-                        }
-            
-                        w.FileShareOptions.Password = await externalShare.CreatePasswordKeyAsync(w.FileShareOptions.Password);
-                    }
                 }
             }
+
+
+
+            if (!string.IsNullOrEmpty(w.FileShareOptions.Password))
+            {
+                if (eventType != EventType.Remove)
+                {
+                    var settings = await settingsManager.LoadAsync<PasswordSettings>();
+                    passwordSettingsManager.CheckPassword(w.FileShareOptions.Password, settings);
+                }
+
+                w.FileShareOptions.Password = await externalShare.CreatePasswordKeyAsync(w.FileShareOptions.Password);
+            }
+
+
 
             if (room != null && !w.IsLink && (existedShare == null || (!existedShare.IsLink && existedShare.SubjectType != SubjectType.Group)))
             {
@@ -460,11 +466,6 @@ public class FileSharingHelper(
         }
 
         if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
-        {
-            return false;
-        }
-
-        if (entry.RootFolderType == FolderType.USER && Equals(entry.RootId, await globalFolderHelper.FolderMyAsync))
         {
             return false;
         }

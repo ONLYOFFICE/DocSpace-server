@@ -318,6 +318,34 @@ public abstract class FoldersController<T>(
 
         return await fileShareDtoHelper.Get(linkAce);
     }
+    
+    /// <summary>
+    /// Sets the room external or invitation link with the ID specified in the request.
+    /// </summary>
+    /// <short>Set the folder external or invitation link</short>
+    /// <path>api/2.0/files/folder/{id}/links</path>
+    [Tags("Rooms")]
+    [SwaggerResponse(200, "Room security information", typeof(FileShareDto))]
+    [HttpPut("{id}/links")]
+    public async Task<FileShareDto> SetFolderPrimaryExternalLink(FolderLinkRequestDto<T> inDto)
+    {
+        var linkAce = await fileStorageService.SetExternalLinkAsync(inDto.Id, FileEntryType.Folder, inDto.FolderLink.LinkId, inDto.FolderLink.Title,
+            inDto.FolderLink.Access, inDto.FolderLink.ExpirationDate, inDto.FolderLink.Password?.Trim(), inDto.FolderLink.DenyDownload);
+
+        if (linkAce == null)
+        {
+            return null;
+        }
+        
+        var result =  await fileShareDtoHelper.Get(linkAce);
+
+        if (inDto.FolderLink.LinkId != Guid.Empty && linkAce.Id != inDto.FolderLink.LinkId && result.SharedTo is FileShareLink link)
+        {
+            link.RequestToken = null;
+        }
+        
+        return result;
+    }
 }
 
 public class FoldersControllerCommon(
