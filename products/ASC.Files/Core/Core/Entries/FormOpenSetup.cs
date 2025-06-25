@@ -81,4 +81,9 @@ public record FormOpenSetup<T>
     /// </summary>
     public bool DisableEmbeddedConfig { get; set; }
 
+    /// <summary>
+    /// Specifies if the room can be edited out or not.
+    /// </summary>
+    public bool CanEditRoom { get; set; }
+
 }

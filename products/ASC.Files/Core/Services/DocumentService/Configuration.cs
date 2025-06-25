@@ -812,6 +812,11 @@ public class FileReferenceData
     /// Room ID
     /// </summary>
     public string RoomId { get; set; }
+
+    /// <summary>
+    /// Specifies if the room can be edited out or not.
+    /// </summary>
+    public bool CanEditRoom { get; set; }
 }
 
 #endregion Nested Classes

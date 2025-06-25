@@ -654,7 +654,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             EditorType = editorType
         };
     }
-    public async Task<FormOpenSetup<T>> GetFormOpenSetupForVirtualDataRoomAsync<T>(File<T> file, EditorType editorType)
+    public async Task<FormOpenSetup<T>> GetFormOpenSetupForVirtualDataRoomAsync<T>(File<T> file, Folder<T> room, EditorType editorType)
     {
         var fileDao = daoFactory.GetFileDao<T>();
         var (currentStep, myRoles) = await fileDao.GetUserFormRoles(file.Id, securityContext.CurrentAccount.ID);
@@ -662,7 +662,8 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         var result = new FormOpenSetup<T>
         {
             CanEdit = false,
-            CanFill = true
+            CanFill = true,
+            CanEditRoom = await fileSecurity.CanEditRoomAsync(room)
         };
 
         if (currentStep != -1)
