@@ -79,8 +79,8 @@ public class ShareFolderTest(
         var sharedToJObject = result.SharedTo as JObject;
         var sharedTo = JsonSerializer.Deserialize<FileShareLink>(sharedToJObject.ToString(), JsonSerializerOptions.Web);
 
-        var data = new RoomLinkRequest(sharedTo.Id, FileShare.Editing, new ApiDateTime { UtcTime = DateTime.UtcNow.AddDays(1) }, folder.Title + " updated", LinkType.External, "11111111", true);
-        var updatedExternalLink = (await _roomsApi.SetRoomLinkAsync(folder.Id, data, TestContext.Current.CancellationToken)).Response;
+        var data = new FolderLinkRequest(sharedTo.Id, FileShare.Editing, new ApiDateTime { UtcTime = DateTime.UtcNow.AddDays(1) }, folder.Title + " updated", "11111111", true);
+        var updatedExternalLink = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, data, TestContext.Current.CancellationToken)).Response;
         var updatedSharedTo = JsonSerializer.Deserialize<FileShareLink>((updatedExternalLink.SharedTo as JObject).ToString(), JsonSerializerOptions.Web);
 
         // Assert

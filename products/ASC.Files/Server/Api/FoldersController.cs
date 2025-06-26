@@ -320,13 +320,13 @@ public abstract class FoldersController<T>(
     }
     
     /// <summary>
-    /// Sets the room external or invitation link with the ID specified in the request.
+    /// Sets the folder external link with the ID specified in the request.
     /// </summary>
-    /// <short>Set the folder external or invitation link</short>
+    /// <short>Set the folder external link</short>
     /// <path>api/2.0/files/folder/{id}/links</path>
-    [Tags("Rooms")]
-    [SwaggerResponse(200, "Room security information", typeof(FileShareDto))]
-    [HttpPut("{id}/links")]
+    [Tags("Files / Folders")]
+    [SwaggerResponse(200, "Folder information", typeof(FileShareDto))]
+    [HttpPut("folder/{id}/links")]
     public async Task<FileShareDto> SetFolderPrimaryExternalLink(FolderLinkRequestDto<T> inDto)
     {
         var linkAce = await fileStorageService.SetExternalLinkAsync(inDto.Id, FileEntryType.Folder, inDto.FolderLink.LinkId, inDto.FolderLink.Title,
