@@ -142,22 +142,25 @@ public class FileSharingAceHelper(
 
             if (folder != null)
             {
-                if (folder.RootId is int root && root == await globalFolderHelper.FolderRoomTemplatesAsync)
+                if (room != null)
                 {
-                    if (w.Access != FileShare.Read && w.Access != FileShare.None || w.SubjectType != SubjectType.User && w.SubjectType != SubjectType.Group)
+                    if (folder.RootId is int root && root == await globalFolderHelper.FolderRoomTemplatesAsync)
                     {
-                        throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
+                        if (w.Access != FileShare.Read && w.Access != FileShare.None || w.SubjectType != SubjectType.User && w.SubjectType != SubjectType.Group)
+                        {
+                            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
+                        }
+                    }
+                    else
+                    {
+                        if (!FileSecurity.AvailableRoomAccesses.TryGetValue(folder.FolderType, out var subjectAccesses)
+                            || !subjectAccesses.TryGetValue(w.SubjectType, out var accesses) || !accesses.Contains(w.Access))
+                        {
+                            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
+                        }
                     }
                 }
-                else
-                {
-                    if (!FileSecurity.AvailableRoomAccesses.TryGetValue(folder.FolderType, out var subjectAccesses)
-                        || !subjectAccesses.TryGetValue(w.SubjectType, out var accesses) || !accesses.Contains(w.Access))
-                    {
-                        throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
-                    }
-                }
-                
+
                 if (w.FileShareOptions != null)
                 {
                     if (w.SubjectType == SubjectType.PrimaryExternalLink)
@@ -172,9 +175,7 @@ public class FileSharingAceHelper(
                 }
             }
 
-
-
-            if (!string.IsNullOrEmpty(w.FileShareOptions.Password))
+            if (!string.IsNullOrEmpty(w.FileShareOptions?.Password))
             {
                 if (eventType != EventType.Remove)
                 {
@@ -184,8 +185,6 @@ public class FileSharingAceHelper(
 
                 w.FileShareOptions.Password = await externalShare.CreatePasswordKeyAsync(w.FileShareOptions.Password);
             }
-
-
 
             if (room != null && !w.IsLink && (existedShare == null || (!existedShare.IsLink && existedShare.SubjectType != SubjectType.Group)))
             {
