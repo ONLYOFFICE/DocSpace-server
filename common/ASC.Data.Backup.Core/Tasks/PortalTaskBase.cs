@@ -174,6 +174,7 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
                 throw new ArgumentOutOfRangeException(nameof(value));
             case 100:
                 await SetStepCompleted();
+                await SetProgress(100);
                 break;
             default:
                 await SetProgress((100 * _stepsCompleted + value) / _stepsCount);

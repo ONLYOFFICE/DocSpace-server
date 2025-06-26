@@ -178,6 +178,7 @@ public class BackupProgressItem : BaseBackupProgressItem
 
 
             IsCompleted = true;
+            await socketManager.BackupProgressAsync((int)Percentage, Dump);
             await PublishChanges();
         }
         catch (Exception error)
