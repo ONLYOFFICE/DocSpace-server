@@ -60,6 +60,8 @@ public class MyCSharpCodegen extends CSharpClientCodegen {
 
     @Override
     public ModelsMap postProcessModels(ModelsMap objs) {
+		super.postProcessModels(objs);
+		
         for (ModelMap mo : objs.getModels()) {
             CodegenModel model = mo.getModel();
             if ("ApiDateTime".equals(model.classname)) {
