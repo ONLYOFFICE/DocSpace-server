@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Common.Log;
+using ASC.FederatedLogin.Profile;
 
 namespace ASC.Site.Core.Controllers;
 
@@ -32,18 +33,21 @@ namespace ASC.Site.Core.Controllers;
 [ApiController]
 [Route("[controller]")]
 public class MultiRegionController(
-        //MultiRegionHostedSolution multiRegionHostedSolution,
+        CoreSettings coreSettings,
         MultiRegionPrivider multiRegionPrivider,
+        LoginProfileTransport loginProfileTransport,
+        CommonLinkUtility commonLinkUtility,
         ILogger<MultiRegionController> logger)
     : ControllerBase
 {
     public record FindByEmailRequestDto(string Email);
-    public record FindByEmailResponseDto(List<Tenant> Tenants);
+    public record FindBySocialRequestDto(string Tranfer);
+    public record TenantLinksDto(string PortalUrl, string AuthUrl);
 
 
-    [HttpPost("find")]
+    [HttpPost("findbyemail")]
     [AllowAnonymous]
-    public async Task<FindByEmailResponseDto> FindByEmail(FindByEmailRequestDto inDto)
+    public async Task<IEnumerable<TenantLinksDto>> FindByEmail(FindByEmailRequestDto inDto)
     {
         try
         {
@@ -52,15 +56,75 @@ public class MultiRegionController(
                 return null;
             }
 
-            var tenants = await multiRegionPrivider.FindTenantsAsync(inDto.Email);
-            //var hostedSolutiontenants = await multiRegionHostedSolution.FindTenantsAsync(inDto.Email);
+            var baseDomain = coreSettings.BaseDomain;
+            var tenantUsers = await multiRegionPrivider.FindTenantsByEmailAsync(inDto.Email);
 
-            return new FindByEmailResponseDto(tenants);
+            var tenantLinks = tenantUsers
+                .Select(tenantUser =>
+                {
+                    var portalUrl = GetAbsolutePortalUrl(baseDomain, tenantUser.TenantAlias, tenantUser.TenantMappedDomain);
+                    var authUrl = GetRelativeAuthUrl(tenantUser.TenantId, tenantUser.UserEmail, false);
+                    return new TenantLinksDto(portalUrl, authUrl);
+                });
+
+            return tenantLinks;
         }
         catch (Exception ex)
         {
             logger.ErrorWithException(ex);
             throw;
         }
+    }
+
+    [HttpPost("findbysocial")]
+    [AllowAnonymous]
+    public async Task<IEnumerable<TenantLinksDto>> FindBySocial(FindBySocialRequestDto inDto)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(inDto?.Tranfer))
+            {
+                return null;
+            }
+
+            var loginProfile = await loginProfileTransport.FromPureTransport(inDto.Tranfer);
+
+            if (loginProfile == null)
+            {
+                return null;
+            }
+
+            var baseDomain = coreSettings.BaseDomain;
+            var tenantUsers = await multiRegionPrivider.FindTenantsBySocialAsync(loginProfile);
+
+            var tenantLinks = tenantUsers
+                .Select(tenantUser =>
+                {
+                    var portalUrl = GetAbsolutePortalUrl(baseDomain, tenantUser.TenantAlias, tenantUser.TenantMappedDomain);
+                    var authUrl = GetRelativeAuthUrl(tenantUser.TenantId, tenantUser.UserEmail, true);
+                    return new TenantLinksDto(portalUrl, authUrl);
+                });
+
+            return tenantLinks;
+        }
+        catch (Exception ex)
+        {
+            logger.ErrorWithException(ex);
+            throw;
+        }
+    }
+
+
+    public string GetRelativeAuthUrl(int tenantId, string email, bool social = false)
+    {
+        var authLink = commonLinkUtility.GetConfirmationUrlRelative(tenantId, email, ConfirmType.Auth);
+        var socialParameters = social ? "&social=true" : "";
+
+        return $"/{authLink}{socialParameters}";
+    }
+
+    public string GetAbsolutePortalUrl(string baseDomain, string tenantAlias, string tenantMappedDomain)
+    {
+        return string.IsNullOrEmpty(tenantMappedDomain) ? $"https://{tenantAlias}.{baseDomain}" : $"https://{tenantMappedDomain}";
     }
 }
