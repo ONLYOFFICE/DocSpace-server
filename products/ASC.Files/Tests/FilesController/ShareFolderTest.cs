@@ -46,7 +46,8 @@ public class ShareFolderTest(
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         var folder = await CreateFolderInMy("folder", Initializer.Owner);
-
+        var file = await CreateFile("file", folder.Id);
+        
         // Act
         var result = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         var sharedToJObject = result.SharedTo as JObject;
@@ -55,6 +56,7 @@ public class ShareFolderTest(
         await _filesClient.Authenticate(null);
         _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, sharedTo.RequestToken);
         var folderInfo = (await _foldersApi.GetFolderByFolderIdAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var fileInfo = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
 
         // Assert
@@ -65,6 +67,10 @@ public class ShareFolderTest(
 
         folderInfo.Should().NotBeNull();
         folderInfo.Current.Should().NotBeNull();
+        folderInfo.Current.Title.Should().Be(folder.Title);
+        
+        fileInfo.Should().NotBeNull();
+        fileInfo.Title.Should().Be(file.Title);
     }
 
     [Fact]
@@ -73,7 +79,7 @@ public class ShareFolderTest(
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         var folder = await CreateFolderInMy("folder", Initializer.Owner);
-
+        
         // Act
         var result = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         var sharedToJObject = result.SharedTo as JObject;
@@ -95,6 +101,52 @@ public class ShareFolderTest(
     }
     
     [Fact]
+    public async Task ExternalLinkDenyDownload_InternalUser_ReturnsOk()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var folder = await CreateFolderInMy("folder", Initializer.Owner);
+        var file = await CreateFile("file_to_share.docx", folder.Id);
+        
+        // Act
+        var externalLink =  (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var sharedTo = JsonSerializer.Deserialize<FileShareLink>((externalLink.SharedTo as JObject).ToString(), JsonSerializerOptions.Web);
+        
+        var data = new FolderLinkRequest(sharedTo.Id, FileShare.Editing, denyDownload: true);
+        await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, data, TestContext.Current.CancellationToken);
+        
+        file = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        file.Should().NotBeNull();
+        file.FolderId.Should().Be(folder.Id);
+        file.Security.Download.Should().BeTrue();
+    }
+    
+    [Fact]
+    public async Task ExternalLinkDenyDownload_ExternalUser_ReturnsError()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var folder = await CreateFolderInMy("folder", Initializer.Owner);
+        var file = await CreateFile("file_to_share.docx", folder.Id);
+        
+        // Act
+        var externalLink =  (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var sharedTo = JsonSerializer.Deserialize<FileShareLink>((externalLink.SharedTo as JObject).ToString(), JsonSerializerOptions.Web);
+        
+        var data = new FolderLinkRequest(sharedTo.Id, FileShare.Editing, denyDownload: true);
+        var updatedExternalLink = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, data, TestContext.Current.CancellationToken)).Response;
+        var updatedSharedTo = JsonSerializer.Deserialize<FileShareLink>((updatedExternalLink.SharedTo as JObject).ToString(), JsonSerializerOptions.Web);
+        
+        await _filesClient.Authenticate(null);
+        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, updatedSharedTo.RequestToken);
+        file = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
+        
+        file.Should().NotBeNull();
+        file.Security.Download.Should().BeFalse();
+    }
+    
+    [Fact]
     public async Task CreatePrimaryExternalLink_FolderWithFileInMyByOwner_ReturnsError()
     {
         // Arrange
@@ -112,7 +164,57 @@ public class ShareFolderTest(
         
         await _filesClient.Authenticate(null);
         _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, sharedTo.RequestToken);
+        await Assert.ThrowsAsync<ApiException>(async () => await _filesApi.GetFileInfoAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken));
         await Assert.ThrowsAsync<ApiException>(async () => await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken));
         _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
+    }
+    
+    [Fact]
+    public async Task ExternalLinkWithPassword_ExternalUserRequirePassword_ReturnsRequiredPassword()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var folder = await CreateFolderInMy("folder", Initializer.Owner);
+        
+        // Act
+        var externalLink = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var sharedTo = JsonSerializer.Deserialize<FileShareLink>((externalLink.SharedTo as JObject).ToString(), JsonSerializerOptions.Web);
+        
+        var data = new FolderLinkRequest(sharedTo.Id, FileShare.Editing, password: "11111111");
+        var updatedExternalLink = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, data, TestContext.Current.CancellationToken)).Response;
+        var updatedSharedTo = JsonSerializer.Deserialize<FileShareLink>((updatedExternalLink.SharedTo as JObject).ToString(), JsonSerializerOptions.Web);
+        
+        await _filesClient.Authenticate(null);
+        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, updatedSharedTo.RequestToken);
+        var externalShareData = (await _filesSharingApi.GetExternalShareDataAsync(updatedSharedTo.RequestToken, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
+
+        externalShareData.Status.Should().Be(Status.RequiredPassword);
+    }
+    
+    [Fact]
+    public async Task ExternalLinkWithPassword_CheckPassword_ReturnsOk()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var folder = await CreateFolderInMy("folder", Initializer.Owner);
+        
+        // Act
+        var externalLink = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var sharedTo = JsonSerializer.Deserialize<FileShareLink>((externalLink.SharedTo as JObject).ToString(), JsonSerializerOptions.Web);
+
+        var password = "11111111";
+        var data = new FolderLinkRequest(sharedTo.Id, FileShare.Editing, password: password);
+        var updatedExternalLink = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, data, TestContext.Current.CancellationToken)).Response;
+        var updatedSharedTo = JsonSerializer.Deserialize<FileShareLink>((updatedExternalLink.SharedTo as JObject).ToString(), JsonSerializerOptions.Web);
+        
+        await _filesClient.Authenticate(null);
+        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, updatedSharedTo.RequestToken);
+        var externalShareDataWrongPassword = (await _filesSharingApi.ApplyExternalSharePasswordAsync(updatedSharedTo.RequestToken, new ExternalShareRequestParam { Password = password + "1" }, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var externalShareData = (await _filesSharingApi.ApplyExternalSharePasswordAsync(updatedSharedTo.RequestToken, new ExternalShareRequestParam { Password = password }, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
+
+        externalShareDataWrongPassword.Status.Should().Be(Status.InvalidPassword);
+        externalShareData.Status.Should().Be(Status.Ok);
     }
 }
