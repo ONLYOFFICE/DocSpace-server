@@ -130,7 +130,7 @@ public class EmailValidationKeyProvider
         return result;
     }
 
-    private ValidationResult ValidateEmailKey(string email, string key, TimeSpan validInterval, int tenantId)
+    public ValidationResult ValidateEmailKey(string email, string key, TimeSpan validInterval, int tenantId)
     {
         ArgumentException.ThrowIfNullOrEmpty(email);
         ArgumentNullException.ThrowIfNull(key);
