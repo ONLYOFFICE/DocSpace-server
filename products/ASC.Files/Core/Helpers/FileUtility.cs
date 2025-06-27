@@ -578,7 +578,8 @@ public class FileUtility(
                 ".doct", ".docy",
                 ".gdoc",
                 ".drawio",
-                ".md", ".markdown"
+                ".md", ".markdown",
+                ".oform"
             }.ToImmutableList();
 
     public static readonly ImmutableList<string> ExtsPdf = new List<string>
