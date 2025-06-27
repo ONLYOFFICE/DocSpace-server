@@ -55,6 +55,7 @@ public class PaymentController(
     TenantUtil tenantUtil,
     ApiDateTimeHelper apiDateTimeHelper,
     TempStream tempStream,
+    EmployeeDtoHelper employeeWrapperHelper,
     CsvFileHelper csvFileHelper,
     CsvFileUploader csvFileUploader)
     : ControllerBase
@@ -594,10 +595,10 @@ public class PaymentController(
     /// </short>
     /// <path>api/2.0/portal/payment/customerinfo</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The customer info", typeof(CustomerInfo))]
+    [SwaggerResponse(200, "The customer info", typeof(CustomerInfoDto))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("customerinfo")]
-    public async Task<CustomerInfo> GetCustomerInfo(PaymentInformationRequestDto inDto)
+    public async Task<CustomerInfoDto> GetCustomerInfo(PaymentInformationRequestDto inDto)
     {
         await DemandAdminAsync();
 
@@ -608,7 +609,21 @@ public class PaymentController(
 
         var tenant = tenantManager.GetCurrentTenant();
 
-        var result = await tariffService.GetCustomerInfoAsync(tenant.Id, inDto.Refresh);
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id, inDto.Refresh);
+
+        if (customerInfo == null)
+        {
+            return null;
+        }
+
+        var payerUserInfo = await userManager.GetUserByEmailAsync(customerInfo.Email);
+
+        var payerDto = payerUserInfo.Id == ASC.Core.Users.Constants.LostUser.Id
+                ? null
+                : await employeeWrapperHelper.GetAsync(payerUserInfo);
+
+        var result = new CustomerInfoDto(customerInfo, payerDto);
+
         return result;
     }
 
@@ -767,7 +782,7 @@ public class PaymentController(
     /// </short>
     /// <path>api/2.0/portal/payment/customer/operations</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The customer operations", typeof(Report))]
+    [SwaggerResponse(200, "The customer operations", typeof(ReportDto))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("customer/operations")]
     public async Task<ReportDto> GetCustomerOperations(CustomerOperationsRequestDto inDto)
