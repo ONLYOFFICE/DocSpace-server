@@ -92,6 +92,13 @@ public class DocumentServiceLicense(ICache cache,
                 return new LicenseValidationResult(true, null);
             }
 
+            if (commandResponse.Error == ErrorTypes.ParseError)
+            {
+                // Try again if there is no license file and commandResponse.license.end_date is null
+                // The JSON value could not be converted to System.DateTime
+                return null;
+            }
+
             if (commandResponse.Error != ErrorTypes.NoError)
             {
                 return new LicenseValidationResult(false, commandResponse.ErrorString);
