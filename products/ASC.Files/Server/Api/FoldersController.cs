@@ -38,7 +38,8 @@ public class FoldersControllerInternal(
     PermissionContext permissionContext,
     FileShareDtoHelper fileShareDtoHelper,
     HistoryApiHelper historyApiHelper,
-    FormFillingReportCreator formFillingReportCreator)
+    FormFillingReportCreator formFillingReportCreator,
+    ApiContext apiContext)
     : FoldersController<int>(
         breadCrumbsManager,
         folderContentDtoHelper,
@@ -48,7 +49,8 @@ public class FoldersControllerInternal(
         folderDtoHelper,
         fileDtoHelper,
         permissionContext,
-        fileShareDtoHelper)
+        fileShareDtoHelper,
+        apiContext)
 {
     /// <summary>
     /// Returns the activity history of a folder with a specified identifier.
@@ -94,7 +96,8 @@ public class FoldersControllerThirdparty(
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     PermissionContext permissionContext,
-    FileShareDtoHelper fileShareDtoHelper)
+    FileShareDtoHelper fileShareDtoHelper,
+    ApiContext apiContext)
     : FoldersController<string>(breadCrumbsManager,
         folderContentDtoHelper,
         fileStorageService,
@@ -103,7 +106,8 @@ public class FoldersControllerThirdparty(
         folderDtoHelper,
         fileDtoHelper,
         permissionContext,
-        fileShareDtoHelper);
+        fileShareDtoHelper,
+        apiContext);
 
 public abstract class FoldersController<T>(
     BreadCrumbsManager breadCrumbsManager,
@@ -114,7 +118,8 @@ public abstract class FoldersController<T>(
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
     PermissionContext permissionContext,
-    FileShareDtoHelper fileShareDtoHelper)
+    FileShareDtoHelper fileShareDtoHelper,
+    ApiContext apiContext)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -345,6 +350,53 @@ public abstract class FoldersController<T>(
         }
         
         return result;
+    }
+    
+    /// <summary>
+    /// Returns the links of the folder with the ID specified in the request.
+    /// </summary>
+    /// <short>Get the folder links</short>
+    /// <path>api/2.0/files/folder/{id}/links</path>
+    /// <collection>list</collection>
+    [Tags("Files / Folders")]
+    [SwaggerResponse(200, "Folder security information", typeof(IAsyncEnumerable<FileShareDto>))]
+    [HttpGet("folder/{id}/links")]
+    public async IAsyncEnumerable<FileShareDto> GetFolderLinks(GetFolderLinksRequestDto<T> inDto)
+    {
+        var counter = 0;
+
+        await foreach (var ace in fileStorageService.GetPureSharesAsync(inDto.Id, FileEntryType.Folder, ShareFilterType.ExternalLink, null, 0, 100))
+        {
+            counter++;
+
+            yield return await fileShareDtoHelper.Get(ace);
+        }
+
+        apiContext.SetCount(counter);
+    }
+    
+    /// <summary>
+    /// Returns the access rights of a folder with the ID specified in the request.
+    /// </summary>
+    /// <short>Get the folder access rights</short>
+    /// <path>api/2.0/files/folder/{id}/share</path>
+    /// <collection>list</collection>
+    [Tags("Files / Folders")]
+    [SwaggerResponse(200, "Security information of folder files", typeof(IAsyncEnumerable<FileShareDto>))]
+    [HttpGet("folder/{id}/share")]
+    public async IAsyncEnumerable<FileShareDto> GetFolderSecurityInfo(FolderSecurityInfoRequestDto<T> inDto)
+    {
+        var offset = inDto.StartIndex;
+        var count = inDto.Count;
+        var text = inDto.Text;
+
+        var totalCountTask = await fileStorageService.GetPureSharesCountAsync(inDto.Id, FileEntryType.Folder, ShareFilterType.Link, text);
+        apiContext.SetCount(Math.Min(totalCountTask - offset, count)).SetTotalCount(totalCountTask);
+
+        await foreach (var ace in fileStorageService.GetPureSharesAsync(inDto.Id, FileEntryType.Folder, ShareFilterType.Link, text, offset, count))
+        {
+            yield return await fileShareDtoHelper.Get(ace);
+        }
     }
 }
 

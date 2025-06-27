@@ -447,7 +447,16 @@ public abstract class FilesController<T>(
     [HttpPost("file/{id}/link")]
     public async Task<FileShareDto> CreatePrimaryExternalLink(FileLinkRequestDto<T> inDto)
     {
-        var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(inDto.Id, FileEntryType.File, inDto.File.Access, expirationDate: inDto.File.ExpirationDate, requiredAuth: inDto.File.Internal, allowUnlimitedDate: true);
+        var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(
+            inDto.Id, 
+            FileEntryType.File, 
+            inDto.File.Access, 
+            expirationDate: inDto.File.ExpirationDate, 
+            requiredAuth: inDto.File.Internal, 
+            allowUnlimitedDate: true,
+            denyDownload: inDto.File.DenyDownload, 
+            password: inDto.File.Password);
+        
         return await fileShareDtoHelper.Get(linkAce);
     }
 

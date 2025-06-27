@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,62 +27,13 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The external link request parameters.
+/// The request parameters for getting the folder links.
 /// </summary>
-public class FileLinkRequest
+public class GetFolderLinksRequestDto<T>
 {
     /// <summary>
-    /// The external link ID.
-    /// </summary>
-    public Guid LinkId { get; set; }
-
-    /// <summary>
-    /// The link sharing rights.
-    /// </summary>
-    public FileShare Access { get; set; }
-
-    /// <summary>
-    /// The link expiration date.
-    /// </summary>
-    public ApiDateTime ExpirationDate { get; set; }
-
-    /// <summary>
-    /// The link scope, whether it is internal or not.
-    /// </summary>
-    public bool Internal { get; set; }
-
-    /// <summary>
-    /// Specifies whether the file link is primary or not.
-    /// </summary>
-    public bool Primary { get; set; }
-    
-    /// <summary>
-    /// Specifies whether to deny downloading the file or not.
-    /// </summary>
-    public bool DenyDownload { get; set; }
-    
-    /// <summary>
-    /// Password for access via link.
-    /// </summary>
-    [StringLength(255)]
-    public string Password { get; set; }
-}
-
-
-/// <summary>
-/// The external link generic request parameters.
-/// </summary>
-public class FileLinkRequestDto<T>
-{
-    /// <summary>
-    /// The file ID.
+    /// The folder ID.
     /// </summary>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
-
-    /// <summary>
-    /// The file external link parameters.
-    /// </summary>
-    [FromBody]
-    public FileLinkRequest File { get; set; }
 }

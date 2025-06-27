@@ -27,62 +27,32 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The external link request parameters.
+/// The folder security request parameters.
 /// </summary>
-public class FileLinkRequest
+public class FolderSecurityInfoRequestDto<T>
 {
     /// <summary>
-    /// The external link ID.
-    /// </summary>
-    public Guid LinkId { get; set; }
-
-    /// <summary>
-    /// The link sharing rights.
-    /// </summary>
-    public FileShare Access { get; set; }
-
-    /// <summary>
-    /// The link expiration date.
-    /// </summary>
-    public ApiDateTime ExpirationDate { get; set; }
-
-    /// <summary>
-    /// The link scope, whether it is internal or not.
-    /// </summary>
-    public bool Internal { get; set; }
-
-    /// <summary>
-    /// Specifies whether the file link is primary or not.
-    /// </summary>
-    public bool Primary { get; set; }
-    
-    /// <summary>
-    /// Specifies whether to deny downloading the file or not.
-    /// </summary>
-    public bool DenyDownload { get; set; }
-    
-    /// <summary>
-    /// Password for access via link.
-    /// </summary>
-    [StringLength(255)]
-    public string Password { get; set; }
-}
-
-
-/// <summary>
-/// The external link generic request parameters.
-/// </summary>
-public class FileLinkRequestDto<T>
-{
-    /// <summary>
-    /// The file ID.
+    /// The folder ID.
     /// </summary>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 
     /// <summary>
-    /// The file external link parameters.
+    /// The number of items to be retrieved or processed.
     /// </summary>
-    [FromBody]
-    public FileLinkRequest File { get; set; }
+    [FromQuery(Name = "count")]
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
+
+    /// <summary>
+    /// The starting index of the items to retrieve in a paginated request.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
+
+    /// <summary>
+    /// The text filter value used for filtering room security information.
+    /// </summary>
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
 }
