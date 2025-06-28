@@ -132,12 +132,6 @@ public class FileSharingAceHelper(
                 {
                     continue;
                 }
-
-                if (w.FileShareOptions != null && w.SubjectType is SubjectType.PrimaryExternalLink or SubjectType.ExternalLink)
-                {
-                    w.FileShareOptions.Password = null;
-                    w.FileShareOptions.DenyDownload = false;
-                }
             }
 
             if (folder != null)
