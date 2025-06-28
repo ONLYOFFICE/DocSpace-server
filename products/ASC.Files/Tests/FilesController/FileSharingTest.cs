@@ -115,6 +115,54 @@ public class FileSharingTest(
         links.Should().Contain(link => link.Access == FileShare.Read); // Primary link with read access
         links.Should().Contain(link => link.Access == FileShare.Editing); // Additional link with editing access
     }
+
+    [Fact]
+    public async Task CreateMultipleLinks_ForFile_ReturnsAllLinks()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var file = await CreateFile("file_with_multiple_links.docx", FolderType.USER, Initializer.Owner);
+
+        // Create primary link
+        var primaryLinkParams = new FileLinkRequest(
+            access: FileShare.Read,
+            //title: "Primary Link",
+            primary: true);
+        await _filesApi.CreatePrimaryExternalLinkAsync(file.Id, primaryLinkParams, TestContext.Current.CancellationToken);
+
+        // Create additional links with different permissions
+        var additionalLink1 = new FileLinkRequest(
+            access: FileShare.Comment
+            //title: "Comment Link"
+            );
+
+        var additionalLink2 = new FileLinkRequest(
+            access: FileShare.Editing
+            //title: "Editing Link"
+            );
+
+        var additionalLink3 = new FileLinkRequest(
+            access: FileShare.Review
+            //title: "Review Link"
+            );
+
+        await _filesApi.SetExternalLinkAsync(file.Id, additionalLink1, TestContext.Current.CancellationToken);
+        await _filesApi.SetExternalLinkAsync(file.Id, additionalLink2, TestContext.Current.CancellationToken);
+        await _filesApi.SetExternalLinkAsync(file.Id, additionalLink3, TestContext.Current.CancellationToken);
+
+        // Act - Get all links
+        var links = (await _filesApi.GetFileLinksAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        links.Should().NotBeNull();
+        links.Should().HaveCountGreaterThanOrEqualTo(4); // Primary + 3 additional links
+
+        // Verify each access type is present
+        links.Should().Contain(link => link.Access == FileShare.Read);
+        links.Should().Contain(link => link.Access == FileShare.Comment);
+        links.Should().Contain(link => link.Access == FileShare.Editing);
+        links.Should().Contain(link => link.Access == FileShare.Review);
+    }
     
     [Fact]
     public async Task SetExternalLink_UpdateExistingLink_ReturnsUpdatedLink()
@@ -131,8 +179,7 @@ public class FileSharingTest(
         );
         
         var initialLink = (await _filesApi.CreatePrimaryExternalLinkAsync(file.Id, initialLinkParams, TestContext.Current.CancellationToken)).Response;
-        var sharedToJObject = initialLink.SharedTo as JObject;
-        var sharedTo = JsonSerializer.Deserialize<FileShareLink>(sharedToJObject.ToString(), JsonSerializerOptions.Web);
+        var sharedTo = DeserializeSharedToLink(initialLink);
         
         // Act - Update the link
         var updateLinkParams = new FileLinkRequest(
@@ -145,6 +192,75 @@ public class FileSharingTest(
         // Assert
         updatedLink.Should().NotBeNull();
         updatedLink.Access.Should().Be(FileShare.Editing); // Updated access level
+    }
+
+    [Fact]
+    public async Task UpdateMultipleLinks_ForFile_ReturnsUpdatedLinks()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var file = await CreateFile("file_with_links_to_update.docx", FolderType.USER, Initializer.Owner);
+
+        // Create multiple links
+        var link1Request = new FileLinkRequest(
+            access: FileShare.Read
+            //title: "Link to Update 1"
+            );
+
+        var link2Request = new FileLinkRequest(
+            access: FileShare.Read
+            //title: "Link to Update 2"
+            );
+
+        var link1Response = (await _filesApi.SetExternalLinkAsync(file.Id, link1Request, TestContext.Current.CancellationToken)).Response;
+        var link2Response = (await _filesApi.SetExternalLinkAsync(file.Id, link2Request, TestContext.Current.CancellationToken)).Response;
+
+        var link1SharedTo = DeserializeSharedToLink(link1Response);
+        var link2SharedTo = DeserializeSharedToLink(link2Response);
+
+        // Act - Update both links with different properties
+        var updateLink1Request = new FileLinkRequest(
+            linkId: link1SharedTo.Id,
+            access: FileShare.Editing,
+            //title: "Updated Link 1",
+            expirationDate: new ApiDateTime { UtcTime = DateTime.UtcNow.AddDays(5) });
+
+        var updateLink2Request = new FileLinkRequest(
+            linkId: link2SharedTo.Id,
+            access: FileShare.Comment,
+            //: "Updated Link 2",
+            password: "testpassword");
+
+        var updatedLink1Response = (await _filesApi.SetExternalLinkAsync(file.Id, updateLink1Request, TestContext.Current.CancellationToken)).Response;
+        var updatedLink2Response = (await _filesApi.SetExternalLinkAsync(file.Id, updateLink2Request, TestContext.Current.CancellationToken)).Response;
+
+        // Get all links after updates
+        var allLinks = (await _filesApi.GetFileLinksAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        var updatedLink1SharedTo = DeserializeSharedToLink(updatedLink1Response);
+        var updatedLink2SharedTo = DeserializeSharedToLink(updatedLink2Response);
+
+        // Verify first link updates
+        updatedLink1SharedTo.Id.Should().Be(link1SharedTo.Id);
+        //updatedLink1SharedTo.Title.Should().Be("Updated Link 1");
+        updatedLink1Response.Access.Should().Be(FileShare.Editing);
+        updatedLink1SharedTo.ExpirationDate.Should().NotBeNull();
+
+        // Verify second link updates
+        updatedLink2SharedTo.Id.Should().Be(link2SharedTo.Id);
+        //updatedLink2SharedTo.Title.Should().Be("Updated Link 2");
+        updatedLink2Response.Access.Should().Be(FileShare.Comment);
+        updatedLink2SharedTo.Password.Should().Be("testpassword");
+
+        // Verify links in the complete list
+        allLinks.Should().Contain(link => 
+            //DeserializeSharedToLink(link).Title == "Updated Link 1" && 
+            link.Access == FileShare.Editing);
+
+        allLinks.Should().Contain(link => 
+            //DeserializeSharedToLink(link).Title == "Updated Link 2" && 
+            link.Access == FileShare.Comment);
     }
     
     
@@ -217,6 +333,73 @@ public class FileSharingTest(
         // Assert
         await TryOpenEditAsync(share, fileId, throwException: true);
     }
+
+    [Fact]
+    public async Task AccessFileWithMultipleLinks_DifferentPermissions_ReturnsCorrectAccess()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var file = await CreateFile("file_with_multiple_access_links.docx", FolderType.USER, Initializer.Owner);
+
+        // Create multiple links with different permissions
+        var readOnlyLink = new FileLinkRequest(
+            access: FileShare.Read
+            //title: "Read Only Link"
+            );
+
+        var editingLink = new FileLinkRequest(
+            access: FileShare.Editing
+            //title: "Editing Link"
+            );
+
+        var commentLink = new FileLinkRequest(
+            access: FileShare.Comment
+            //title: "Comment Link"
+            );
+
+        var readOnlyResponse = (await _filesApi.SetExternalLinkAsync(file.Id, readOnlyLink, TestContext.Current.CancellationToken)).Response;
+        var editingResponse = (await _filesApi.SetExternalLinkAsync(file.Id, editingLink, TestContext.Current.CancellationToken)).Response;
+        var commentResponse = (await _filesApi.SetExternalLinkAsync(file.Id, commentLink, TestContext.Current.CancellationToken)).Response;
+
+        var readOnlySharedTo = DeserializeSharedToLink(readOnlyResponse);
+        var editingSharedTo = DeserializeSharedToLink(editingResponse);
+        var commentSharedTo = DeserializeSharedToLink(commentResponse);
+
+        // Act - Access with read-only link
+        await _filesClient.Authenticate(null);
+        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, readOnlySharedTo.RequestToken);
+        var readOnlyAccess = (await _filesApi.OpenEditFileAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response.File;
+        _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
+
+        // Act - Access with editing link
+        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, editingSharedTo.RequestToken);
+        var editingAccess = (await _filesApi.OpenEditFileAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response.File;
+        _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
+
+        // Act - Access with comment link
+        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, commentSharedTo.RequestToken);
+        var commentAccess = (await _filesApi.OpenEditFileAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response.File;
+        _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
+
+        // Assert
+        // Read-only permissions
+        readOnlyAccess.Should().NotBeNull();
+        readOnlyAccess.Security.Edit.Should().BeFalse();
+        readOnlyAccess.Security.Comment.Should().BeFalse();
+        readOnlyAccess.Access.Should().Be(FileShare.Read);
+
+        // Editing permissions
+        editingAccess.Should().NotBeNull();
+        editingAccess.Security.Edit.Should().BeTrue();
+        editingAccess.Security.Comment.Should().BeTrue();
+        editingAccess.Access.Should().Be(FileShare.Editing);
+
+        // Comment permissions
+        commentAccess.Should().NotBeNull();
+        commentAccess.Security.Edit.Should().BeFalse();
+        commentAccess.Security.Comment.Should().BeTrue();
+        commentAccess.Access.Should().Be(FileShare.Comment);
+    }
     
     private async Task<(string, int)> CreateFileAndShare(FileShare fileShare, bool primary = true, bool varInternal = false, DateTime? expirationDate = null)
     {
@@ -237,8 +420,7 @@ public class FileSharingTest(
         }
         
         var initialLink = (await _filesApi.CreatePrimaryExternalLinkAsync(file.Id, initialLinkParams, TestContext.Current.CancellationToken)).Response;
-        var sharedTo = initialLink.SharedTo as JObject;
-        var fileShareLink = JsonSerializer.Deserialize<FileShareLink>(sharedTo.ToString(), JsonSerializerOptions.Web);
+        var fileShareLink = DeserializeSharedToLink(initialLink);
         
         return (fileShareLink.RequestToken, file.Id);
     }
@@ -266,5 +448,68 @@ public class FileSharingTest(
         var openEditResult = (await _filesApi.OpenEditFileAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
         _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
         return openEditResult.File;
+    }
+
+    [Fact]
+    public async Task FileWithMultipleLinks_PasswordProtectedAndUnrestricted_WorksCorrectly()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var file = await CreateFile("file_with_mixed_links.docx", FolderType.USER, Initializer.Owner);
+
+        // Create one link with password and one without
+        var unrestrictedLink = new FileLinkRequest(
+            access: FileShare.Read
+            //title: "Unrestricted Link"
+            );
+
+        var passwordProtectedLink = new FileLinkRequest(
+            access: FileShare.Editing,
+            //title: "Password Protected Link",
+            password: "securepassword123"
+            );
+
+        var unrestrictedResponse = (await _filesApi.SetExternalLinkAsync(file.Id, unrestrictedLink, TestContext.Current.CancellationToken)).Response;
+        var passwordProtectedResponse = (await _filesApi.SetExternalLinkAsync(file.Id, passwordProtectedLink, TestContext.Current.CancellationToken)).Response;
+
+        var unrestrictedSharedTo = DeserializeSharedToLink(unrestrictedResponse);
+        var passwordProtectedSharedTo = DeserializeSharedToLink(passwordProtectedResponse);
+
+        // Act & Assert - First try unrestricted link
+        await _filesClient.Authenticate(null);
+        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, unrestrictedSharedTo.RequestToken);
+        var fileWithUnrestrictedAccess = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
+
+        fileWithUnrestrictedAccess.Should().NotBeNull();
+        fileWithUnrestrictedAccess.Title.Should().Be(file.Title);
+
+        // Then try password-protected link without providing password
+        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, passwordProtectedSharedTo.RequestToken);
+        await Assert.ThrowsAsync<ApiException>(async () => await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken));
+
+        // Get external share data to verify password is required
+        var externalShareData = (await _filesSharingApi.GetExternalShareDataAsync(passwordProtectedSharedTo.RequestToken, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        externalShareData.Status.Should().Be(Status.RequiredPassword);
+
+        // Now provide correct password
+        var password = "securepassword123";
+        var externalShareDataWithHttpInfo = await _filesSharingApi.ApplyExternalSharePasswordWithHttpInfoAsync(
+            passwordProtectedSharedTo.RequestToken, 
+            new ExternalShareRequestParam { Password = password }, 
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        var setCookie = externalShareDataWithHttpInfo.Headers.ToDictionary()["Set-Cookie"];
+        var anonymousSessionKey = setCookie.First();
+
+        _filesClient.DefaultRequestHeaders.Add("Cookie", anonymousSessionKey);
+        var fileWithPasswordProtectedAccess = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        _filesClient.DefaultRequestHeaders.Remove("Cookie");
+        _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
+
+        // Verify the file is accessible with correct password
+        fileWithPasswordProtectedAccess.Should().NotBeNull();
+        //fileWithPasswordProtectedAccess.Title.Should().Be(file.Title);
+        fileWithPasswordProtectedAccess.Security.Edit.Should().BeTrue(); // Should have editing permissions
     }
 }

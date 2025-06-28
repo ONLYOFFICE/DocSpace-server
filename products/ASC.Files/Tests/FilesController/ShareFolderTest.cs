@@ -50,8 +50,7 @@ public class ShareFolderTest(
         
         // Act
         var result = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var sharedToJObject = result.SharedTo as JObject;
-        var sharedTo = JsonSerializer.Deserialize<FileShareLink>(sharedToJObject.ToString(), JsonSerializerOptions.Web);
+        var sharedTo = DeserializeSharedToLink(result);
 
         await _filesClient.Authenticate(null);
         _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, sharedTo.RequestToken);
@@ -82,12 +81,11 @@ public class ShareFolderTest(
         
         // Act
         var result = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var sharedToJObject = result.SharedTo as JObject;
-        var sharedTo = JsonSerializer.Deserialize<FileShareLink>(sharedToJObject.ToString(), JsonSerializerOptions.Web);
+        var sharedTo = DeserializeSharedToLink(result);
 
         var data = new FolderLinkRequest(sharedTo.Id, FileShare.Editing, new ApiDateTime { UtcTime = DateTime.UtcNow.AddDays(1) }, folder.Title + " updated", "11111111", true);
         var updatedExternalLink = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, data, TestContext.Current.CancellationToken)).Response;
-        var updatedSharedTo = JsonSerializer.Deserialize<FileShareLink>((updatedExternalLink.SharedTo as JObject).ToString(), JsonSerializerOptions.Web);
+        var updatedSharedTo = DeserializeSharedToLink(updatedExternalLink);
 
         // Assert
         updatedExternalLink.Should().NotBeNull();
@@ -110,7 +108,7 @@ public class ShareFolderTest(
         
         // Act
         var externalLink =  (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var sharedTo = JsonSerializer.Deserialize<FileShareLink>((externalLink.SharedTo as JObject).ToString(), JsonSerializerOptions.Web);
+        var sharedTo = DeserializeSharedToLink(externalLink);
         
         var data = new FolderLinkRequest(sharedTo.Id, FileShare.Editing, denyDownload: true);
         await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, data, TestContext.Current.CancellationToken);
@@ -131,11 +129,11 @@ public class ShareFolderTest(
         
         // Act
         var externalLink =  (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var sharedTo = JsonSerializer.Deserialize<FileShareLink>((externalLink.SharedTo as JObject).ToString(), JsonSerializerOptions.Web);
+        var sharedTo = DeserializeSharedToLink(externalLink);
         
         var data = new FolderLinkRequest(sharedTo.Id, FileShare.Editing, denyDownload: true);
         var updatedExternalLink = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, data, TestContext.Current.CancellationToken)).Response;
-        var updatedSharedTo = JsonSerializer.Deserialize<FileShareLink>((updatedExternalLink.SharedTo as JObject).ToString(), JsonSerializerOptions.Web);
+        var updatedSharedTo = DeserializeSharedToLink(updatedExternalLink);
         
         await _filesClient.Authenticate(null);
         _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, updatedSharedTo.RequestToken);
@@ -156,8 +154,7 @@ public class ShareFolderTest(
         
         // Act
         var result = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var sharedToJObject = result.SharedTo as JObject;
-        var sharedTo = JsonSerializer.Deserialize<FileShareLink>(sharedToJObject.ToString(), JsonSerializerOptions.Web);
+        var sharedTo = DeserializeSharedToLink(result);
 
         var data = new FolderLinkRequest(sharedTo.Id, password: "11111111");
         await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, data, TestContext.Current.CancellationToken);
@@ -178,11 +175,11 @@ public class ShareFolderTest(
         
         // Act
         var externalLink = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var sharedTo = JsonSerializer.Deserialize<FileShareLink>((externalLink.SharedTo as JObject).ToString(), JsonSerializerOptions.Web);
+        var sharedTo = DeserializeSharedToLink(externalLink);
         
         var data = new FolderLinkRequest(sharedTo.Id, FileShare.Editing, password: "11111111");
         var updatedExternalLink = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, data, TestContext.Current.CancellationToken)).Response;
-        var updatedSharedTo = JsonSerializer.Deserialize<FileShareLink>((updatedExternalLink.SharedTo as JObject).ToString(), JsonSerializerOptions.Web);
+        var updatedSharedTo = DeserializeSharedToLink(updatedExternalLink);
         
         await _filesClient.Authenticate(null);
         _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, updatedSharedTo.RequestToken);
@@ -201,12 +198,12 @@ public class ShareFolderTest(
         
         // Act
         var externalLink = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var sharedTo = JsonSerializer.Deserialize<FileShareLink>((externalLink.SharedTo as JObject).ToString(), JsonSerializerOptions.Web);
+        var sharedTo = DeserializeSharedToLink(externalLink);
 
         var password = "11111111";
         var data = new FolderLinkRequest(sharedTo.Id, FileShare.Editing, password: password);
         var updatedExternalLink = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, data, TestContext.Current.CancellationToken)).Response;
-        var updatedSharedTo = JsonSerializer.Deserialize<FileShareLink>((updatedExternalLink.SharedTo as JObject).ToString(), JsonSerializerOptions.Web);
+        var updatedSharedTo = DeserializeSharedToLink(updatedExternalLink);
         
         await _filesClient.Authenticate(null);
         _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, updatedSharedTo.RequestToken);

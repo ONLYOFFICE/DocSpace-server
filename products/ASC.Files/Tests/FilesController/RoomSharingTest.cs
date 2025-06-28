@@ -86,6 +86,118 @@ public class RoomSharingTest(
     }
     
     [Fact]
+    public async Task CreateMultipleLinks_InRoom_ReturnsAllLinks()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var customRoom = await CreateCustomRoom("room with multiple links");
+
+        // Act - Get primary external link
+        await _roomsApi.GetRoomsPrimaryExternalLinkAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken);
+
+        // Create additional links
+        var additionalLink1 = new RoomLinkRequest(
+            access: FileShare.Read,
+            title: "Additional Link 1",
+            linkType: LinkType.External);
+
+        var additionalLink2 = new RoomLinkRequest(
+            access: FileShare.Editing,
+            title: "Additional Link 2",
+            linkType: LinkType.External);
+
+       await _roomsApi.SetRoomLinkAsync(customRoom.Id, additionalLink1, TestContext.Current.CancellationToken);
+       await _roomsApi.SetRoomLinkAsync(customRoom.Id, additionalLink2, TestContext.Current.CancellationToken);
+
+        // Get all links
+        var allLinks = (await _roomsApi.GetRoomLinksAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        allLinks.Should().NotBeNull();
+        allLinks.Should().HaveCountGreaterThanOrEqualTo(3); // Primary + 2 additional links
+
+        // Verify links by title and access level
+        allLinks.Should().Contain(link => 
+            DeserializeSharedToLink(link).Title == "Additional Link 1" && 
+            link.Access == FileShare.Read);
+
+        allLinks.Should().Contain(link => 
+            DeserializeSharedToLink(link).Title == "Additional Link 2" && 
+            link.Access == FileShare.Editing);
+    }
+
+    [Fact]
+    public async Task UpdateMultipleLinks_InRoom_ReturnsUpdatedLinks()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var customRoom = await CreateCustomRoom("room with links to update");
+
+        // Create two additional links
+        var link1Request = new RoomLinkRequest(
+            access: FileShare.Read,
+            title: "Link to Update 1",
+            linkType: LinkType.External);
+
+        var link2Request = new RoomLinkRequest(
+            access: FileShare.Read,
+            title: "Link to Update 2",
+            linkType: LinkType.External);
+
+        var link1Response = (await _roomsApi.SetRoomLinkAsync(customRoom.Id, link1Request, TestContext.Current.CancellationToken)).Response;
+        var link2Response = (await _roomsApi.SetRoomLinkAsync(customRoom.Id, link2Request, TestContext.Current.CancellationToken)).Response;
+
+        var link1SharedTo = DeserializeSharedToLink(link1Response);
+        var link2SharedTo = DeserializeSharedToLink(link2Response);
+
+        // Act - Update both links
+        var updateLink1Request = new RoomLinkRequest(
+            linkId: link1SharedTo.Id,
+            access: FileShare.Editing,
+            title: "Updated Link 1",
+            linkType: LinkType.External,
+            expirationDate: new ApiDateTime { UtcTime = DateTime.UtcNow.AddDays(5) });
+
+        var updateLink2Request = new RoomLinkRequest(
+            linkId: link2SharedTo.Id,
+            access: FileShare.Comment,
+            title: "Updated Link 2",
+            linkType: LinkType.External,
+            password: "testpassword");
+
+        var updatedLink1Response = (await _roomsApi.SetRoomLinkAsync(customRoom.Id, updateLink1Request, TestContext.Current.CancellationToken)).Response;
+        var updatedLink2Response = (await _roomsApi.SetRoomLinkAsync(customRoom.Id, updateLink2Request, TestContext.Current.CancellationToken)).Response;
+
+        // Get all links after updates
+        var allLinks = (await _roomsApi.GetRoomLinksAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        var updatedLink1SharedTo = DeserializeSharedToLink(updatedLink1Response);
+        var updatedLink2SharedTo = DeserializeSharedToLink(updatedLink2Response);
+
+        // Verify first link updates
+        updatedLink1SharedTo.Id.Should().Be(link1SharedTo.Id);
+        updatedLink1SharedTo.Title.Should().Be("Updated Link 1");
+        updatedLink1Response.Access.Should().Be(FileShare.Editing);
+        updatedLink1SharedTo.ExpirationDate.Should().NotBeNull();
+
+        // Verify second link updates
+        updatedLink2SharedTo.Id.Should().Be(link2SharedTo.Id);
+        updatedLink2SharedTo.Title.Should().Be("Updated Link 2");
+        updatedLink2Response.Access.Should().Be(FileShare.Comment);
+        updatedLink2SharedTo.Password.Should().Be("testpassword");
+
+        // Verify links in the complete list
+        allLinks.Should().Contain(link => 
+                DeserializeSharedToLink(link).Title == "Updated Link 1" && 
+                link.Access == FileShare.Editing);
+
+        allLinks.Should().Contain(link => 
+            DeserializeSharedToLink(link).Title == "Updated Link 2" && 
+            link.Access == FileShare.Comment);
+    }
+    
+    [Fact]
     public async Task UpdatePrimaryExternalLink_ValidFileShare_ReturnsLinkData()
     {
         // Arrange
@@ -94,11 +206,11 @@ public class RoomSharingTest(
         
         // Act
         var externalLink = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var sharedTo = JsonSerializer.Deserialize<FileShareLink>((externalLink.SharedTo as JObject).ToString(), JsonSerializerOptions.Web);
+        var sharedTo = DeserializeSharedToLink(externalLink);
         
         var data = new RoomLinkRequest(sharedTo.Id, FileShare.Editing, new ApiDateTime { UtcTime = DateTime.UtcNow.AddDays(1) }, customRoom.Title + " updated", LinkType.External, "11111111", true);
         var updatedExternalLink = (await _roomsApi.SetRoomLinkAsync(customRoom.Id, data, TestContext.Current.CancellationToken)).Response;
-        var updatedSharedTo = JsonSerializer.Deserialize<FileShareLink>((updatedExternalLink.SharedTo as JObject).ToString(), JsonSerializerOptions.Web);
+        var updatedSharedTo = DeserializeSharedToLink(updatedExternalLink);
         
         // Assert
         updatedExternalLink.Should().NotBeNull();
@@ -121,7 +233,7 @@ public class RoomSharingTest(
         
         // Act
         var externalLink = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var sharedTo = JsonSerializer.Deserialize<FileShareLink>((externalLink.SharedTo as JObject).ToString(), JsonSerializerOptions.Web);
+        var sharedTo = DeserializeSharedToLink(externalLink);
         
         var data = new RoomLinkRequest(sharedTo.Id, FileShare.Editing, linkType: LinkType.External, denyDownload: true);
         await _roomsApi.SetRoomLinkAsync(customRoom.Id, data, TestContext.Current.CancellationToken);
@@ -141,11 +253,11 @@ public class RoomSharingTest(
         
         // Act
         var externalLink = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var sharedTo = JsonSerializer.Deserialize<FileShareLink>((externalLink.SharedTo as JObject).ToString(), JsonSerializerOptions.Web);
+        var sharedTo = DeserializeSharedToLink(externalLink);
         
         var data = new RoomLinkRequest(sharedTo.Id, FileShare.Editing, linkType: LinkType.External, denyDownload: true);
         var updatedExternalLink = (await _roomsApi.SetRoomLinkAsync(customRoom.Id, data, TestContext.Current.CancellationToken)).Response;
-        var updatedSharedTo = JsonSerializer.Deserialize<FileShareLink>((updatedExternalLink.SharedTo as JObject).ToString(), JsonSerializerOptions.Web);
+        var updatedSharedTo = DeserializeSharedToLink(updatedExternalLink);
         
         await _filesClient.Authenticate(null);
         _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, updatedSharedTo.RequestToken);
@@ -166,11 +278,11 @@ public class RoomSharingTest(
         
         // Act
         var externalLink = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var sharedTo = JsonSerializer.Deserialize<FileShareLink>((externalLink.SharedTo as JObject).ToString(), JsonSerializerOptions.Web);
+        var sharedTo = DeserializeSharedToLink(externalLink);
         
         var data = new RoomLinkRequest(sharedTo.Id, FileShare.Editing, linkType: LinkType.External, password: "11111111");
         var updatedExternalLink = (await _roomsApi.SetRoomLinkAsync(customRoom.Id, data, TestContext.Current.CancellationToken)).Response;
-        var updatedSharedTo = JsonSerializer.Deserialize<FileShareLink>((updatedExternalLink.SharedTo as JObject).ToString(), JsonSerializerOptions.Web);
+        var updatedSharedTo = DeserializeSharedToLink(updatedExternalLink);
         
         await _filesClient.Authenticate(null);
         _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, updatedSharedTo.RequestToken);
@@ -187,11 +299,11 @@ public class RoomSharingTest(
         
         // Act
         var externalLink = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var sharedTo = JsonSerializer.Deserialize<FileShareLink>((externalLink.SharedTo as JObject).ToString(), JsonSerializerOptions.Web);
+        var sharedTo = DeserializeSharedToLink(externalLink);
         
         var data = new RoomLinkRequest(sharedTo.Id, FileShare.Editing, linkType: LinkType.External, password: "11111111");
         var updatedExternalLink = (await _roomsApi.SetRoomLinkAsync(customRoom.Id, data, TestContext.Current.CancellationToken)).Response;
-        var updatedSharedTo = JsonSerializer.Deserialize<FileShareLink>((updatedExternalLink.SharedTo as JObject).ToString(), JsonSerializerOptions.Web);
+        var updatedSharedTo = DeserializeSharedToLink(updatedExternalLink);
         
         await _filesClient.Authenticate(null);
         _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, updatedSharedTo.RequestToken);
@@ -210,12 +322,12 @@ public class RoomSharingTest(
         
         // Act
         var externalLink = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var sharedTo = JsonSerializer.Deserialize<FileShareLink>((externalLink.SharedTo as JObject).ToString(), JsonSerializerOptions.Web);
+        var sharedTo = DeserializeSharedToLink(externalLink);
 
         var password = "11111111";
         var data = new RoomLinkRequest(sharedTo.Id, FileShare.Editing, linkType: LinkType.External, password: password);
         var updatedExternalLink = (await _roomsApi.SetRoomLinkAsync(customRoom.Id, data, TestContext.Current.CancellationToken)).Response;
-        var updatedSharedTo = JsonSerializer.Deserialize<FileShareLink>((updatedExternalLink.SharedTo as JObject).ToString(), JsonSerializerOptions.Web);
+        var updatedSharedTo = DeserializeSharedToLink(updatedExternalLink);
         
         await _filesClient.Authenticate(null);
         _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, updatedSharedTo.RequestToken);
@@ -237,12 +349,12 @@ public class RoomSharingTest(
         
         // Act
         var externalLink = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var sharedTo = JsonSerializer.Deserialize<FileShareLink>((externalLink.SharedTo as JObject).ToString(), JsonSerializerOptions.Web);
+        var sharedTo = DeserializeSharedToLink(externalLink);
 
         var password = "11111111";
         var data = new RoomLinkRequest(sharedTo.Id, FileShare.Editing, linkType: LinkType.External, password: password);
         var updatedExternalLink = (await _roomsApi.SetRoomLinkAsync(customRoom.Id, data, TestContext.Current.CancellationToken)).Response;
-        var updatedSharedTo = JsonSerializer.Deserialize<FileShareLink>((updatedExternalLink.SharedTo as JObject).ToString(), JsonSerializerOptions.Web);
+        var updatedSharedTo = DeserializeSharedToLink(updatedExternalLink);
         
         await _filesClient.Authenticate(null);
         _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, updatedSharedTo.RequestToken);
@@ -257,5 +369,50 @@ public class RoomSharingTest(
         
         file.Should().NotBeNull();
         createdFile.Title.Should().Be(file.Title);
+    }
+
+    [Fact]
+    public async Task AccessRoomWithMultipleLinks_DifferentPermissions_ReturnsCorrectAccess()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var customRoom = await CreateCustomRoom("room with multiple access links");
+        var file = await CreateFile("file_in_room.docx", customRoom.Id);
+
+        // Create multiple links with different permissions
+        var readOnlyLink = new RoomLinkRequest(
+            access: FileShare.Read,
+            title: "Read Only Link",
+            linkType: LinkType.External);
+
+        var editingLink = new RoomLinkRequest(
+            access: FileShare.Editing,
+            title: "Editing Link",
+            linkType: LinkType.External);
+
+        var readOnlyResponse = (await _roomsApi.SetRoomLinkAsync(customRoom.Id, readOnlyLink, TestContext.Current.CancellationToken)).Response;
+        var editingResponse = (await _roomsApi.SetRoomLinkAsync(customRoom.Id, editingLink, TestContext.Current.CancellationToken)).Response;
+
+        var readOnlySharedTo = DeserializeSharedToLink(readOnlyResponse);
+        var editingSharedTo = DeserializeSharedToLink(editingResponse);
+
+        // Act - Access with read-only link
+        await _filesClient.Authenticate(null);
+        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, readOnlySharedTo.RequestToken);
+        var readOnlyAccess = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
+
+        // Act - Access with editing link
+        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, editingSharedTo.RequestToken);
+        var editingAccess = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
+
+        // Assert
+        readOnlyAccess.Should().NotBeNull();
+        readOnlyAccess.Security.EditHistory.Should().BeFalse(); // Read-only shouldn't allow editing history
+        readOnlyAccess.Security.Edit.Should().BeFalse(); // Read-only shouldn't allow editing
+
+        editingAccess.Should().NotBeNull();
+        editingAccess.Security.Edit.Should().BeTrue(); // Editing link should allow editing
     }
 }

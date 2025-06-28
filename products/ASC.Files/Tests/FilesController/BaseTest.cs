@@ -24,6 +24,12 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Text.Json;
+
+using ASC.Files.Core.ApiModels.ResponseDto;
+
+using FileShareDto = Docspace.Model.FileShareDto;
+
 namespace ASC.Files.Tests.FilesController;
 
 [Collection("Test Collection")]
@@ -139,5 +145,10 @@ public class BaseTest(
         }
 
         return statuses;
+    }
+    
+    protected static FileShareLink? DeserializeSharedToLink(FileShareDto updatedLink1Response)
+    {
+        return JsonSerializer.Deserialize<FileShareLink>((updatedLink1Response.SharedTo as JObject).ToString(), JsonSerializerOptions.Web);
     }
 }
