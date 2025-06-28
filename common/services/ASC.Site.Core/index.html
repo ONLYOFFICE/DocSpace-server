@@ -1,0 +1,164 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+    <title>Example</title>
+</head>
+<body>
+    <h1>SignIn Example</h1>
+    <button id="signInButton">SignIn</button>
+    <br />
+    <br />
+    <div id="signInResult"></div>
+
+    <h1>SignUp Example</h1>
+    <button id="signUpButton">SignUp</button>
+    <br />
+    <br />
+    <div id="signUpResult"></div>
+
+    <h1>Send Email Example</h1>
+    <input type="text" id="email" placeholder="Email" />
+    <button id="sendEmailButton">Send Email</button>
+
+    <script type="text/javascript">
+
+        var modalDialog;
+        var interval;
+
+        document.getElementById('signInButton').onclick = function () {
+            modalDialog = window.open(location.href + "/login.ashx?auth=google&mode=popup&callback=SignInByGoogle", "signup", "width=800,height=500,status=no,toolbar=no,menubar=no,resizable=yes,scrollbars=no");
+            interval = setInterval(checkSignInCode, 500);
+            return false;
+        };
+
+        function checkSignInCode(data) {
+            const code = localStorage.getItem("code");
+            if (code) {
+                localStorage.removeItem("code");
+                clearInterval(interval);
+
+                providerName = "google";
+
+                const token = window.btoa(
+                    JSON.stringify({
+                        auth: providerName,
+                        mode: "popup",
+                        callback: "SignInByGoogle",
+                    }),
+                );
+
+                modalDialog.location.href = location.href + `/login.ashx?p=${token}&code=${code}`;
+            }
+        }
+
+        function SignInByGoogle(data) {
+            try {
+                console.log(JSON.stringify(data));
+
+                fetch("/multiregion/findbysocial", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ transport: data })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(JSON.stringify(data));
+                    document.getElementById('signInResult').innerText = JSON.stringify(data);
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                });
+
+            } catch (error) {
+                console.log(JSON.stringify(error.response ? error.response.data : error.message));
+            }
+        }
+
+
+
+        document.getElementById('signUpButton').onclick = function () {
+            modalDialog = window.open(location.href + "/login.ashx?auth=google&mode=popup&callback=SignUpByGoogle", "signup", "width=800,height=500,status=no,toolbar=no,menubar=no,resizable=yes,scrollbars=no");
+            interval = setInterval(checkSignUpCode, 500);
+            return false;
+        };
+
+        function checkSignUpCode(data) {
+            const code = localStorage.getItem("code");
+            if (code) {
+                localStorage.removeItem("code");
+                clearInterval(interval);
+
+                providerName = "google";
+
+                const token = window.btoa(
+                    JSON.stringify({
+                        auth: providerName,
+                        mode: "popup",
+                        callback: "SignUpByGoogle",
+                    }),
+                );
+
+                modalDialog.location.href = location.href + `/login.ashx?p=${token}&code=${code}`;
+            }
+        }
+
+        function SignUpByGoogle(data) {
+            try {
+                console.log(JSON.stringify(data));
+
+                fetch("/thirdparty/register", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": ""
+                    },
+                    body: JSON.stringify({ thirdPartyProfile: data })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(JSON.stringify(data));
+                    document.getElementById('signUpResult').innerText = JSON.stringify(data);
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                });
+
+            } catch (error) {
+                console.log(JSON.stringify(error.response ? error.response.data : error.message));
+            }
+        }
+
+
+
+        document.getElementById('sendEmailButton').onclick = function () {
+            const email = document.getElementById('email').value;
+
+            const body = {
+                "Email": email,
+                "Subject": "subject",
+                "Body": "body"
+            };
+
+            fetch("/email/send", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(body)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(JSON.stringify(data));
+                    alert("Email sent successfully");
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                });
+
+            return false;
+        };
+    </script>
+</body>
+</html>

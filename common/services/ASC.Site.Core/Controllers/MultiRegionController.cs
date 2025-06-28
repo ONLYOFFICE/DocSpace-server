@@ -41,7 +41,7 @@ public class MultiRegionController(
     : ControllerBase
 {
     public record FindByEmailRequestDto(string Email);
-    public record FindBySocialRequestDto(string Tranfer);
+    public record FindBySocialRequestDto(string Transport);
     public record TenantLinksDto(string PortalUrl, string AuthUrl);
 
 
@@ -82,12 +82,12 @@ public class MultiRegionController(
     {
         try
         {
-            if (string.IsNullOrEmpty(inDto?.Tranfer))
+            if (string.IsNullOrEmpty(inDto?.Transport))
             {
                 return null;
             }
 
-            var loginProfile = await loginProfileTransport.FromPureTransport(inDto.Tranfer);
+            var loginProfile = await loginProfileTransport.FromPureTransport(inDto.Transport);
 
             if (loginProfile == null)
             {

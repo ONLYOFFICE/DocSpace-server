@@ -24,6 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Autofac;
+using ASC.Common.DependencyInjection;
+
 var options = new WebApplicationOptions
 {
     Args = args,
@@ -54,6 +57,11 @@ try
     var startup = new Startup(builder.Configuration, builder.Environment);
 
     await startup.ConfigureServices(builder);
+
+    builder.Host.ConfigureContainer<ContainerBuilder>((context, containerBuilder) =>
+    {
+        containerBuilder.Register(context.Configuration);
+    });
 
     var app = builder.Build();
 
