@@ -38,19 +38,8 @@ public class FileSharingTest(
     FilesServiceFactory filesServiceProgram) 
     : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
 {
-    //   FileShare.None
-    public static TheoryData<FileShare> Data =>
-    [
-        FileShare.Editing, FileShare.Review, FileShare.Comment, FileShare.Read
-    ];
-    
-    public static TheoryData<FileShare> InvalidData =>
-    [
-        FileShare.None, FileShare.ReadWrite, FileShare.Varies, FileShare.RoomManager, FileShare.ContentCreator
-    ];
-
     [Theory]
-    [MemberData(nameof(Data))]
+    [MemberData(nameof(ValidFileShare))]
     public async Task CreatePrimaryExternalLink_ValidFileShare_ReturnsLinkData(FileShare fileShare)
     {
         // Arrange
@@ -73,7 +62,7 @@ public class FileSharingTest(
     }
 
     [Theory]
-    [MemberData(nameof(InvalidData))]
+    [MemberData(nameof(InvalidFileShare))]
     public async Task CreatePrimaryExternalLink_InvalidFileShare_ReturnsError(FileShare fileShare)
     {
         // Arrange
@@ -265,7 +254,7 @@ public class FileSharingTest(
     
     
     [Theory]
-    [MemberData(nameof(Data))]
+    [MemberData(nameof(ValidFileShare))]
     public async Task PrimaryExternalLink_ExternalUsers_ReturnsFileData(FileShare fileShare)
     {
         // Arrange and Act
@@ -279,7 +268,7 @@ public class FileSharingTest(
     }
 
     [Theory]
-    [MemberData(nameof(Data))]
+    [MemberData(nameof(ValidFileShare))]
     public async Task PrimaryExternalLink_InternalUsers_ReturnsFileData(FileShare fileShare)
     {
         // Arrange and Act
@@ -296,7 +285,7 @@ public class FileSharingTest(
     }
     
     [Theory]
-    [MemberData(nameof(Data))]
+    [MemberData(nameof(ValidFileShare))]
     public async Task PrimaryInternalLink_ExternalUsers_ReturnsError(FileShare fileShare)
     {        
         // Arrange and Act

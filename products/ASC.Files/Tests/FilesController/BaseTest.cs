@@ -61,6 +61,17 @@ public class BaseTest(
         await _resetDatabase();
     }
 
+    //   FileShare.None
+    public static TheoryData<FileShare> ValidFileShare =>
+    [
+        FileShare.Editing, FileShare.Review, FileShare.Comment, FileShare.Read
+    ];
+    
+    public static TheoryData<FileShare> InvalidFileShare =>
+    [
+        FileShare.None, FileShare.ReadWrite, FileShare.Varies, FileShare.RoomManager, FileShare.ContentCreator
+    ];
+    
     protected async Task<FileDtoInteger> GetFile(int fileId)
     {
         return (await _filesApi.GetFileInfoAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;

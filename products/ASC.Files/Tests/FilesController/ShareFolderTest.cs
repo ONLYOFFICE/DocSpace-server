@@ -24,12 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Text.Json;
-
-using ASC.Files.Core.ApiModels.ResponseDto;
-
-using LinkType = Docspace.Model.LinkType;
-
 namespace ASC.Files.Tests.FilesController;
 
 [Collection("Test Collection")]
@@ -92,7 +86,7 @@ public class ShareFolderTest(
         updatedExternalLink.Access.Should().Be(data.Access);
 
         updatedSharedTo.Id.Should().Be(data.LinkId);
-        //updatedSharedTo.ExpirationDate.UtcTime.Should().Be(data.ExpirationDate.UtcTime);
+        updatedSharedTo.ExpirationDate.UtcTime.Should().Be(data.ExpirationDate.UtcTime);
         updatedSharedTo.Title.Should().Be(data.Title);
         updatedSharedTo.Password.Should().Be(data.Password);
         updatedSharedTo.DenyDownload.Should().Be(data.DenyDownload);

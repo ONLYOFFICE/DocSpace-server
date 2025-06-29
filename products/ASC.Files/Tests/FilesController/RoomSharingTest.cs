@@ -197,8 +197,9 @@ public class RoomSharingTest(
             link.Access == FileShare.Comment);
     }
     
-    [Fact]
-    public async Task UpdatePrimaryExternalLink_ValidFileShare_ReturnsLinkData()
+    [Theory]
+    [MemberData(nameof(ValidFileShare))]
+    public async Task UpdatePrimaryExternalLink_ValidFileShare_ReturnsLinkData(FileShare fileShare)
     {
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
@@ -208,7 +209,7 @@ public class RoomSharingTest(
         var externalLink = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         var sharedTo = DeserializeSharedToLink(externalLink);
         
-        var data = new RoomLinkRequest(sharedTo.Id, FileShare.Editing, new ApiDateTime { UtcTime = DateTime.UtcNow.AddDays(1) }, customRoom.Title + " updated", LinkType.External, "11111111", true);
+        var data = new RoomLinkRequest(sharedTo.Id, fileShare, new ApiDateTime { UtcTime = DateTime.UtcNow.AddDays(1) }, customRoom.Title + " updated", LinkType.External, "11111111", true);
         var updatedExternalLink = (await _roomsApi.SetRoomLinkAsync(customRoom.Id, data, TestContext.Current.CancellationToken)).Response;
         var updatedSharedTo = DeserializeSharedToLink(updatedExternalLink);
         
