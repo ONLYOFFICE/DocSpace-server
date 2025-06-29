@@ -76,6 +76,19 @@ public class FileSecurity(IDaoFactory daoFactory,
                     [FileShare.Editing, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.FillForms, FileShare.Restrict, FileShare.None]
                 }
             }.ToFrozenDictionary()
+        },
+        {
+            FolderType.VirtualRooms, new Dictionary<SubjectType, HashSet<FileShare>>
+            {
+                { 
+                    SubjectType.ExternalLink, 
+                    [FileShare.Editing, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.FillForms, FileShare.Restrict, FileShare.None]
+                },
+                { 
+                    SubjectType.PrimaryExternalLink, 
+                    [FileShare.Editing, FileShare.CustomFilter, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.FillForms, FileShare.Restrict, FileShare.None]
+                }
+            }.ToFrozenDictionary()
         }
     }.ToFrozenDictionary();
 

@@ -122,7 +122,7 @@ public class FileSharingAceHelper(
             if (entryType == FileEntryType.File)
             {
                 if ((w.Access is not (FileShare.Read or FileShare.Restrict or FileShare.None) && !fileUtility.CanWebView(entry.Title))
-                    || entry.RootFolderType != FolderType.USER)
+                    || (entry.RootFolderType != FolderType.USER && entry.RootFolderType != FolderType.VirtualRooms))
                 {
                     continue;
                 }
@@ -132,6 +132,8 @@ public class FileSharingAceHelper(
                 {
                     continue;
                 }
+                
+                //
             }
 
             if (folder != null)
@@ -153,19 +155,23 @@ public class FileSharingAceHelper(
                             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
                         }
                     }
+                    
+                    if (w.FileShareOptions != null)
+                    {
+                        if (w.SubjectType == SubjectType.PrimaryExternalLink)
+                        {
+                            w.FileShareOptions.ExpirationDate = default;
+                        }
+
+                        if (w.SubjectType is SubjectType.PrimaryExternalLink or SubjectType.ExternalLink)
+                        {
+                            w.FileShareOptions.Internal = false;
+                        }
+                    }
                 }
-
-                if (w.FileShareOptions != null)
+                else
                 {
-                    if (w.SubjectType == SubjectType.PrimaryExternalLink)
-                    {
-                        w.FileShareOptions.ExpirationDate = default;
-                    }
-
-                    if (w.SubjectType is SubjectType.PrimaryExternalLink or SubjectType.ExternalLink)
-                    {
-                        w.FileShareOptions.Internal = false;
-                    }
+                    
                 }
             }
 
@@ -447,7 +453,7 @@ public class FileSharingHelper(
             return true;
         }
 
-        if ((entry.RootFolderType is FolderType.VirtualRooms or FolderType.Archive) 
+        if ((entry.RootFolderType is FolderType.Archive) 
             && (entry is not IFolder folder || !DocSpaceHelper.IsRoom(folder.FolderType)))
         {
             return false;
