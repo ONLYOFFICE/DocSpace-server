@@ -55,8 +55,8 @@ public class ShareFolderTest(
         // Assert
         result.Should().NotBeNull();
         result.Access.Should().Be(FileShare.Read);
-        result.CanEditAccess.Should().Be(false);
-        result.IsOwner.Should().Be(false);
+        result.CanEditAccess.Should().BeFalse();
+        result.IsOwner.Should().BeFalse();
 
         folderInfo.Should().NotBeNull();
         folderInfo.Current.Should().NotBeNull();

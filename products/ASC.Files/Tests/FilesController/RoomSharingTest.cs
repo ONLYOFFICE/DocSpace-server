@@ -46,6 +46,19 @@ public class RoomSharingTest(
         RoomType.EditingRoom, RoomType.VirtualDataRoom
     ];
     
+    public static TheoryData<RoomType, FileShare> DataWithFileShare =>
+    [
+        (RoomType.EditingRoom, FileShare.Read),
+        (RoomType.EditingRoom, FileShare.Editing),
+        (RoomType.EditingRoom, FileShare.Comment),
+        (RoomType.EditingRoom, FileShare.Review),
+        (RoomType.VirtualDataRoom, FileShare.Read),
+        (RoomType.VirtualDataRoom, FileShare.Editing),
+        (RoomType.VirtualDataRoom, FileShare.Comment),
+        (RoomType.VirtualDataRoom, FileShare.Review)
+    ];
+
+    
     [Fact]
     public async Task CreatePrimaryExternalLink_CustomRoom_ReturnsLinkData()
     {
@@ -66,8 +79,8 @@ public class RoomSharingTest(
         // Assert
         result.Should().NotBeNull();
         result.Access.Should().Be(FileShare.Read);
-        result.CanEditAccess.Should().Be(false);
-        result.IsOwner.Should().Be(false);
+        result.CanEditAccess.Should().BeFalse();
+        result.IsOwner.Should().BeFalse();
         
         roomInfo.Should().NotBeNull();
         roomInfo.Current.Should().NotBeNull();
@@ -82,7 +95,30 @@ public class RoomSharingTest(
         var customRoom = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("room", roomType: roomType), TestContext.Current.CancellationToken)).Response;
         
         // Act
-        await Assert.ThrowsAsync<ApiException>(async () => await _roomsApi.GetRoomsPrimaryExternalLinkAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken));
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomsApi.GetRoomsPrimaryExternalLinkAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken));
+        
+        // Verify error
+        exception.ErrorCode.Should().Be(403);
+    }
+    
+    [Theory]
+    [MemberData(nameof(DataWithFileShare))]
+    public async Task CreateExternalLink_RestrictedRoomType_ReturnsError(RoomType roomType, FileShare fileShare)
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var customRoom = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("room", roomType: roomType), TestContext.Current.CancellationToken)).Response;
+        
+        var additionalLink = new RoomLinkRequest(
+            access: fileShare,
+            title: "Additional Link 1",
+            linkType: LinkType.External);
+        
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomsApi.SetRoomLinkAsync(customRoom.Id, additionalLink, TestContext.Current.CancellationToken));
+        
+        // Verify error
+        exception.ErrorCode.Should().Be(403);
     }
     
     [Fact]

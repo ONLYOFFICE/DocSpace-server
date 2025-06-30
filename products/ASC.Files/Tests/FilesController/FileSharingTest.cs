@@ -60,6 +60,28 @@ public class FileSharingTest(
         //result.ShareLink.Should().NotBeNullOrEmpty();
         result.Access.Should().Be(fileShare); // Read access
     }
+    
+    [Fact]
+    public async Task CreatePrimaryExternalLink_ByDefault_ReturnsLinkData()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        
+        var file = await CreateFile("file_to_share.docx", FolderType.USER, Initializer.Owner);
+        
+        // Act
+        var result = (await _filesApi.GetFilePrimaryExternalLinkAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var sharedTo = DeserializeSharedToLink(result);
+        
+        // Assert
+        result.Should().NotBeNull();
+        //result.ShareLink.Should().NotBeNullOrEmpty();
+        result.Access.Should().Be(FileShare.Read);
+        result.CanEditAccess.Should().BeFalse();
+        sharedTo.DenyDownload.Should().BeFalse();
+        sharedTo.ExpirationDate.Should().BeNull();
+        sharedTo.Internal.Should().BeFalse();
+    }
 
     [Theory]
     [MemberData(nameof(InvalidFileShare))]
@@ -264,7 +286,7 @@ public class FileSharingTest(
         // Assert
         openEditResult.Should().NotBeNull();
         openEditResult.Access.Should().Be(fileShare);
-        openEditResult.Shared.Should().Be(true);
+        openEditResult.Shared.Should().BeTrue();
     }
 
     [Theory]
@@ -281,7 +303,7 @@ public class FileSharingTest(
         // Assert
         openEditResult.Should().NotBeNull();
         openEditResult.Access.Should().Be(fileShare);
-        openEditResult.Shared.Should().Be(true);
+        openEditResult.Shared.Should().BeTrue();
     }
     
     [Theory]
@@ -308,7 +330,7 @@ public class FileSharingTest(
         // Assert
         openEditResult.Should().NotBeNull();
         openEditResult.Access.Should().Be(fileShare);
-        openEditResult.Shared.Should().Be(true);
+        openEditResult.Shared.Should().BeTrue();
     }
     
     [Fact]
