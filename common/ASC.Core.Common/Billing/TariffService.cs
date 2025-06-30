@@ -582,6 +582,11 @@ public class TariffService(
             .Select(p => new { ProductId = p, Prices = new Dictionary<string, decimal>() })
             .ToDictionary(e => e.ProductId, e => e.Prices);
 
+        if (productIds.Length == 0)
+        {
+            return def;
+        }
+
         if (billingClient.Configured)
         {
             try
