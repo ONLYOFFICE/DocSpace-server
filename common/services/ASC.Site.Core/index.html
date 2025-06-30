@@ -4,14 +4,23 @@
     <title>Example</title>
 </head>
 <body>
-    <h1>SignIn Example</h1>
-    <button id="signInButton">SignIn</button>
+    <h1>Sign In Example</h1>
+    <button id="signInByGoogleButton">Sign In By Google</button>
+    <br />
+    <br />
+    <input type="text" id="signInEmail" placeholder="Email" />
+    <input type="password" id="signInPassword" placeholder="Password" />
+    <button id="signInButton">Sign In</button>
     <br />
     <br />
     <div id="signInResult"></div>
 
-    <h1>SignUp Example</h1>
-    <button id="signUpButton">SignUp</button>
+    <h1>Sign Up Example</h1>
+    <button id="signUpByGoogleButton">Sign Up By Google</button>
+    <br />
+    <br />
+    <input type="text" id="signUpEmail" placeholder="Email" />
+    <button id="signUpButton">Sign Up</button>
     <br />
     <br />
     <div id="signUpResult"></div>
@@ -25,7 +34,8 @@
         var modalDialog;
         var interval;
 
-        document.getElementById('signInButton').onclick = function () {
+
+        document.getElementById('signInByGoogleButton').onclick = function () {
             modalDialog = window.open(location.href + "/login.ashx?auth=google&mode=popup&callback=SignInByGoogle", "signup", "width=800,height=500,status=no,toolbar=no,menubar=no,resizable=yes,scrollbars=no");
             interval = setInterval(checkSignInCode, 500);
             return false;
@@ -62,6 +72,34 @@
                     },
                     body: JSON.stringify({ transport: data })
                 })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(JSON.stringify(data));
+                        document.getElementById('signInResult').innerText = JSON.stringify(data);
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                    });
+
+            } catch (error) {
+                console.log(JSON.stringify(error.response ? error.response.data : error.message));
+            }
+        }
+
+
+        document.getElementById('signInButton').onclick = function () {
+            const email = document.getElementById('signInEmail').value;
+            const password = document.getElementById('signInPassword').value;
+            const passwordHash = null;
+            const body = { email, password, passwordHash };
+
+            fetch("/multiregion/findbyemailpassword", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(body)
+            })
                 .then(response => response.json())
                 .then(data => {
                     console.log(JSON.stringify(data));
@@ -71,14 +109,11 @@
                     console.error("Error:", error);
                 });
 
-            } catch (error) {
-                console.log(JSON.stringify(error.response ? error.response.data : error.message));
-            }
-        }
+            return false;
+        };
 
 
-
-        document.getElementById('signUpButton').onclick = function () {
+        document.getElementById('signUpByGoogleButton').onclick = function () {
             modalDialog = window.open(location.href + "/login.ashx?auth=google&mode=popup&callback=SignUpByGoogle", "signup", "width=800,height=500,status=no,toolbar=no,menubar=no,resizable=yes,scrollbars=no");
             interval = setInterval(checkSignUpCode, 500);
             return false;
@@ -111,11 +146,35 @@
                 fetch("/thirdparty/register", {
                     method: "POST",
                     headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": ""
+                        "Content-Type": "application/json"
                     },
                     body: JSON.stringify({ thirdPartyProfile: data })
                 })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(JSON.stringify(data));
+                        document.getElementById('signUpResult').innerText = JSON.stringify(data);
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                    });
+
+            } catch (error) {
+                console.log(JSON.stringify(error.response ? error.response.data : error.message));
+            }
+        }
+
+
+        document.getElementById('signUpButton').onclick = function () {
+            const email = document.getElementById('signUpEmail').value;
+
+            fetch("/thirdparty/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ email })
+            })
                 .then(response => response.json())
                 .then(data => {
                     console.log(JSON.stringify(data));
@@ -125,11 +184,8 @@
                     console.error("Error:", error);
                 });
 
-            } catch (error) {
-                console.log(JSON.stringify(error.response ? error.response.data : error.message));
-            }
-        }
-
+            return false;
+        };
 
 
         document.getElementById('sendEmailButton').onclick = function () {
