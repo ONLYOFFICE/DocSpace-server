@@ -69,7 +69,10 @@ public static class DbAiSettingsExtensions
                 .HasColumnName("tenant_id");
             
             entity.Property(e => e.UserId)
-                .HasColumnName("user_id");
+                .HasColumnName("user_id")
+                .HasColumnType("char(36)")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
             
             entity.Property(e => e.Scope)
                 .HasColumnName("scope");
