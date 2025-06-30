@@ -35,7 +35,7 @@ public partial class AiDbContext
     }
     
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, SettingsScope.Chat, null])]
-    public Task<int> UpdateSettingsAsync(int tenantId, Guid userId, SettingsScope scope, int providerId, RunSettings settings)
+    public Task<int> UpdateSettingsAsync(int tenantId, Guid userId, SettingsScope scope, int providerId, RunParameters settings)
     {
         return Queries.UpdateSettingsAsync(this, tenantId, userId, scope, providerId, settings);
     }
@@ -55,13 +55,13 @@ static file class Queries
                 ctx.Settings
                     .FirstOrDefault(x => x.TenantId == tenantId && x.UserId == userId && x.Scope == scope));
     
-    public static readonly Func<AiDbContext, int, Guid, SettingsScope, int, RunSettings, Task<int>> UpdateSettingsAsync =
+    public static readonly Func<AiDbContext, int, Guid, SettingsScope, int, RunParameters, Task<int>> UpdateSettingsAsync =
         EF.CompileAsyncQuery(
-            (AiDbContext ctx, int tenantId, Guid userId, SettingsScope scope, int providerId, RunSettings settings) => 
+            (AiDbContext ctx, int tenantId, Guid userId, SettingsScope scope, int providerId, RunParameters settings) => 
                 ctx.Settings
                     .Where(x => x.TenantId == tenantId && x.UserId == userId && x.Scope == scope)
                     .ExecuteUpdate(x => 
-                        x.SetProperty(y => y.RunSettings, settings)
+                        x.SetProperty(y => y.RunParameters, settings)
                             .SetProperty(y => y.ProviderId, providerId)));
 
     public static readonly Func<AiDbContext, int, IEnumerable<int>, Task<int>> DeleteSettingsAsync =

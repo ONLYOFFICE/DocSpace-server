@@ -33,7 +33,7 @@ public class AiSettingsService(
     TenantManager tenantManager, 
     AuthContext authContext)
 {
-    public async Task<AiSettings<T>> SetSettingsAsync<T>(int providerId, SettingsScope scope, T runSettings) where T: RunSettings
+    public async Task<AiSettings> SetSettingsAsync(int providerId, SettingsScope scope, RunParameters runParameters)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
         
@@ -45,21 +45,21 @@ public class AiSettingsService(
 
         var userId = authContext.CurrentAccount.ID;
 
-        var settings = await settingsDao.GetSettingsAsync<T>(tenantId, userId, scope);
+        var settings = await settingsDao.GetSettingsAsync(tenantId, userId, scope);
         if (settings == null)
         {
-            return await settingsDao.AddSettingsAsync(tenantId, providerId, userId, scope, runSettings);
+            return await settingsDao.AddSettingsAsync(tenantId, providerId, userId, scope, runParameters);
         }
 
         settings.ProviderId = providerId;
-        settings.RunSettings = runSettings;
+        settings.Parameters = runParameters;
 
         return await settingsDao.UpdateSettingsAsync(settings);
     }
     
-    public async Task<AiSettings<T>> GetSettingsAsync<T>(SettingsScope scope) where T: RunSettings
+    public async Task<AiSettings> GetSettingsAsync(SettingsScope scope)
     {
-        var settings = await settingsDao.GetSettingsAsync<T>(tenantManager.GetCurrentTenantId(), authContext.CurrentAccount.ID, scope);
+        var settings = await settingsDao.GetSettingsAsync(tenantManager.GetCurrentTenantId(), authContext.CurrentAccount.ID, scope);
         if (settings == null)
         {
             throw new ItemNotFoundException("Settings not found");

@@ -112,7 +112,7 @@ public class ChatController(
         return NoContent();
     }
 
-    [HttpPut("chats/settings")]
+    [HttpPut("configuration/chat")]
     public async Task<ChatSettingsDto> SetChatSettingsAsync(SetChatSettingsRequestDto inDto)
     {
         var settings = await chatService.SetChatSettingsAsync(inDto.ProviderId, inDto.ModelId);
@@ -120,11 +120,11 @@ public class ChatController(
         return new ChatSettingsDto
         {
             ProviderId = settings.ProviderId,
-            ModelId = settings.RunSettings.ModelId
+            ModelId = settings.Parameters.ModelId
         };
     }
     
-    [HttpGet("chats/settings")]
+    [HttpGet("configuration/chat")]
     public async Task<ChatSettingsDto> GetChatSettingsAsync()
     {
         var settings = await chatService.GetChatSettingsAsync();
@@ -132,7 +132,7 @@ public class ChatController(
         return new ChatSettingsDto
         {
             ProviderId = settings.ProviderId,
-            ModelId = settings.RunSettings.ModelId
+            ModelId = settings.Parameters.ModelId
         };
     }
 }

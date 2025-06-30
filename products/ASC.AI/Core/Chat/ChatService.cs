@@ -97,16 +97,16 @@ public class ChatService(
         await chatDao.DeleteChatsAsync(tenantManager.GetCurrentTenantId(), [chat.Id]);
     }
 
-    public async Task<AiSettings<ChatSettings>> SetChatSettingsAsync(int providerId, string modelId)
+    public async Task<AiSettings> SetChatSettingsAsync(int providerId, string modelId)
     {
-        var chatSettings = new ChatSettings { ModelId = modelId };
+        var chatSettings = new ChatParameters { ModelId = modelId };
 
         return await aiSettingsService.SetSettingsAsync(providerId, SettingsScope.Chat, chatSettings);
     }
 
-    public async Task<AiSettings<ChatSettings>> GetChatSettingsAsync()
+    public async Task<AiSettings> GetChatSettingsAsync()
     {
-        return await aiSettingsService.GetSettingsAsync<ChatSettings>(SettingsScope.Chat);
+        return await aiSettingsService.GetSettingsAsync(SettingsScope.Chat);
     }
 
     private async Task<ChatSession> GetChatAsync(Guid chatId)

@@ -36,9 +36,9 @@ public class ProviderController(
     ApiContext apiContext) : ControllerBase
 {
     [HttpPost("providers")]
-    public async Task<ProviderDto> AddProviderAsync(CreateProviderRequestDto inRequestDto)
+    public async Task<ProviderDto> AddProviderAsync(CreateProviderRequestDto inDto)
     {
-        var provider = await providerService.AddProviderAsync(inRequestDto.Title, inRequestDto.Url, inRequestDto.Key, inRequestDto.Type);
+        var provider = await providerService.AddProviderAsync(inDto.Title, inDto.Url, inDto.Key, inDto.Type);
 
         return provider.ToDto(apiDateTimeHelper);
     }

@@ -29,7 +29,7 @@ namespace ASC.AI.Core.Common.Database;
 [Scope]
 public class AiSettingsDao(IDbContextFactory<AiDbContext> dbContextFactory, IMapper mapper)
 {
-    public async Task<AiSettings<T>> AddSettingsAsync<T>(int tenantId, int providerId, Guid userId, SettingsScope scope, T runSettings) where T: RunSettings
+    public async Task<AiSettings> AddSettingsAsync(int tenantId, int providerId, Guid userId, SettingsScope scope, RunParameters runParameters)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
@@ -46,26 +46,26 @@ public class AiSettingsDao(IDbContextFactory<AiDbContext> dbContextFactory, IMap
                 ProviderId = providerId,
                 UserId = userId,
                 Scope = scope,
-                RunSettings = runSettings
+                RunParameters = runParameters
             };
 
             await context.Settings.AddAsync(dbSettings);
             await context.SaveChangesAsync();
         });
 
-        return mapper.Map<DbAiSettings, AiSettings<T>>(dbSettings);
+        return mapper.Map<DbAiSettings, AiSettings>(dbSettings);
     }
 
-    public async Task<AiSettings<T>?> GetSettingsAsync<T>(int tenantId, Guid userId, SettingsScope scope) where T: RunSettings
+    public async Task<AiSettings?> GetSettingsAsync(int tenantId, Guid userId, SettingsScope scope)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
         var dbSettings = await dbContext.GetSettingsAsync(tenantId, userId, scope);
 
-        return dbSettings != null ? mapper.Map<DbAiSettings, AiSettings<T>>(dbSettings) : null;
+        return dbSettings != null ? mapper.Map<DbAiSettings, AiSettings>(dbSettings) : null;
     }
 
-    public async Task<AiSettings<T>> UpdateSettingsAsync<T>(AiSettings<T> settings) where T: RunSettings
+    public async Task<AiSettings> UpdateSettingsAsync(AiSettings settings)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         
@@ -75,7 +75,7 @@ public class AiSettingsDao(IDbContextFactory<AiDbContext> dbContextFactory, IMap
         {
             await using var context = await dbContextFactory.CreateDbContextAsync();
 
-            await context.UpdateSettingsAsync(settings.TenantId, settings.UserId, settings.Scope, settings.ProviderId, settings.RunSettings);
+            await context.UpdateSettingsAsync(settings.TenantId, settings.UserId, settings.Scope, settings.ProviderId, settings.Parameters);
             await context.SaveChangesAsync();
         });
 

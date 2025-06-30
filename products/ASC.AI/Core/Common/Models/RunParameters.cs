@@ -26,4 +26,9 @@
 
 namespace ASC.AI.Core.Common.Models;
 
-public class ChatSettings : RunSettings;
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
+[JsonDerivedType(typeof(ChatParameters), "chat")]
+public class RunParameters
+{
+    public required string ModelId { get; set; }
+}
