@@ -26,7 +26,8 @@
 
 namespace ASC.AI.Models.RequestDto;
 
-public class RemoveProviderRequestDto
+public class SetChatSettingsRequestDto
 {
-    public required List<int> Ids { get; set; }
+    public int ProviderId { get; set; }
+    public required string ModelId { get; set; }
 }

@@ -24,9 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Models.RequestDto;
+namespace ASC.AI.Core.Common.Models;
 
-public class RemoveProviderRequestDto
+public class AiSettings<T> : IMapFrom<DbAiSettings> where T : RunSettings
 {
-    public required List<int> Ids { get; set; }
+    public int ProviderId { get; set; }
+    public Guid UserId { get; set; }
+    public int TenantId { get; set; }
+    public SettingsScope Scope { get; set; }
+    public required T RunSettings { get; set; }
 }

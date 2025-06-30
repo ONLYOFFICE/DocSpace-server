@@ -204,7 +204,8 @@ public class MigrationContext : DbContext
             .AddUserRelation()
             .AddDbChat()
             .AddDbChatMessages()
-            .AddProviders()
+            .AddAiProviders()
+            .AddAiSettings()
             .AddDbFunctions();
     }
 }

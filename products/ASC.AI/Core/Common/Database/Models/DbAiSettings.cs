@@ -26,85 +26,62 @@
 
 namespace ASC.AI.Core.Common.Database.Models;
 
-public class DbAiProvider : BaseEntity
+public class DbAiSettings : BaseEntity
 {
-    public int Id { get; set; }
+    public int ProviderId { get; set; }
+    public Guid UserId { get; set; }
     public int TenantId { get; set; }
-    public ProviderType Type { get; set; }
-    [MaxLength(255)]
-    public string Title { get; set; }
-    public string? Url { get; set; }
-    public string Key { get; set; }
-
-    public DateTime CreatedOn { get; set; }
-    public DateTime ModifiedOn { get; set; }
+    public SettingsScope Scope { get; set; }
+    public required RunSettings RunSettings { get; set; }
     
     public DbTenant Tenant { get; set; }
     
     public override object[] GetKeys()
     {
-        return [Id];
+        return [TenantId, ProviderId, UserId, Scope];
     }
 }
 
-public static class ModelsProviderExtension
+public static class DbAiSettingsExtensions
 {
-    public static ModelBuilderWrapper AddAiProviders(this ModelBuilderWrapper modelBuilder)
+    public static ModelBuilderWrapper AddAiSettings(this ModelBuilderWrapper modelBuilder)
     {
-        modelBuilder.Entity<DbAiProvider>().Navigation(e => e.Tenant).AutoInclude(false);
-        modelBuilder.Add(AddMySqlModelsProviders, Provider.MySql);
+        modelBuilder.Entity<DbAiSettings>().Navigation(e => e.Tenant).AutoInclude(false);
+        modelBuilder.Add(AddMySqlAiSettings, Provider.MySql);
         
         return modelBuilder;
     }
 
-    public static void AddMySqlModelsProviders(this ModelBuilder modelBuilder)
+    private static void AddMySqlAiSettings(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbAiProvider>(entity =>
+        modelBuilder.Entity<DbAiSettings>(entity =>
         {
-            entity.ToTable("ai_providers")
+            entity.ToTable("ai_settings")
                 .HasCharSet("utf8");
-
-            entity.HasKey(e => e.Id)
+            
+            entity.HasKey(e => new { e.TenantId, e.UserId, e.Scope, e.ProviderId })
                 .HasName("PRIMARY");
             
-            entity.Property(e => e.Id)
-                .HasColumnName("id")
-                .ValueGeneratedOnAdd();
+            entity.Property(e => e.ProviderId)
+                .HasColumnName("provider_id");
             
             entity.Property(e => e.TenantId)
                 .HasColumnName("tenant_id");
             
-            entity.Property(e => e.Type)
-                .HasColumnName("type");
+            entity.Property(e => e.UserId)
+                .HasColumnName("user_id");
             
-            entity.Property(e => e.Title)
-                .HasColumnName("title")
-                .HasColumnType("varchar(255)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+            entity.Property(e => e.Scope)
+                .HasColumnName("scope");
 
-            entity.Property(e => e.Url)
-                .HasColumnName("url")
-                .HasColumnType("text")
+            entity.Property(e => e.RunSettings)
+                .HasColumnName("run_settings")
+                .HasColumnType("json")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
             
-            entity.Property(e => e.Key)
-                .HasColumnName("key")
-                .HasColumnType("text")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
-            
-            entity.Property(e => e.CreatedOn)
-                .HasColumnName("created_on")
-                .HasColumnType("datetime");
-            
-            entity.Property(e => e.ModifiedOn)
-                .HasColumnName("modified_on")
-                .HasColumnType("datetime");
-
-            entity.HasIndex(e => new { e.TenantId, e.Id })
-                .HasDatabaseName("IX_tenant_id_id");
+            entity.HasIndex(e => new { e.TenantId, e.ProviderId})
+                .HasDatabaseName("IX_tenant_id_provider_id");
         });
     }
 }

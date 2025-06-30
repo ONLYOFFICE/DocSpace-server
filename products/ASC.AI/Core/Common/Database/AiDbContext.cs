@@ -29,13 +29,15 @@ namespace ASC.AI.Core.Common.Database;
 public partial class AiDbContext(DbContextOptions<AiDbContext> options) : BaseDbContext(options)
 {
     public DbSet<DbAiProvider> Providers { get; set; }
+    public DbSet<DbAiSettings> Settings { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         ModelBuilderWrapper
             .From(modelBuilder, Database)
             .AddDbTenant()
-            .AddProviders()
+            .AddAiProviders()
+            .AddAiSettings()
             .AddDbFunctions();
     }
 }

@@ -111,4 +111,28 @@ public class ChatController(
         await chatService.DeleteChatAsync(inDto.ChatId);
         return NoContent();
     }
+
+    [HttpPut("chats/settings")]
+    public async Task<ChatSettingsDto> SetChatSettingsAsync(SetChatSettingsRequestDto inDto)
+    {
+        var settings = await chatService.SetChatSettingsAsync(inDto.ProviderId, inDto.ModelId);
+        
+        return new ChatSettingsDto
+        {
+            ProviderId = settings.ProviderId,
+            ModelId = settings.RunSettings.ModelId
+        };
+    }
+    
+    [HttpGet("chats/settings")]
+    public async Task<ChatSettingsDto> GetChatSettingsAsync()
+    {
+        var settings = await chatService.GetChatSettingsAsync();
+
+        return new ChatSettingsDto
+        {
+            ProviderId = settings.ProviderId,
+            ModelId = settings.RunSettings.ModelId
+        };
+    }
 }

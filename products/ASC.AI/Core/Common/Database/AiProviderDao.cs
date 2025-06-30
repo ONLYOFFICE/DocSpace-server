@@ -109,7 +109,7 @@ public class AiProviderDao(
         return provider;
     }
     
-    public async Task DeleteProviders(int tenantId, IEnumerable<int> ids)
+    public async Task DeleteProviders(int tenantId, List<int> ids)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
@@ -117,10 +117,13 @@ public class AiProviderDao(
         await strategy.ExecuteAsync(async () =>
         {
             await using var context = await dbContextFactory.CreateDbContextAsync();
+            var transaction = await context.Database.BeginTransactionAsync();
             
             await context.DeleteProvidersAsync(tenantId, ids);
+            await context.DeleteSettingsAsync(tenantId, ids);
             
             await context.SaveChangesAsync();
+            await transaction.CommitAsync();
         });
     }
 

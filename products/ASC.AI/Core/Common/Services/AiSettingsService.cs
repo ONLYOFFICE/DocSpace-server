@@ -24,9 +24,47 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Models.RequestDto;
+namespace ASC.AI.Core.Common.Services;
 
-public class RemoveProviderRequestDto
+[Scope]
+public class AiSettingsService(
+    AiSettingsDao settingsDao, 
+    AiProviderDao providerDao, 
+    TenantManager tenantManager, 
+    AuthContext authContext)
 {
-    public required List<int> Ids { get; set; }
+    public async Task<AiSettings<T>> SetSettingsAsync<T>(int providerId, SettingsScope scope, T runSettings) where T: RunSettings
+    {
+        var tenantId = tenantManager.GetCurrentTenantId();
+        
+        var provider = await providerDao.GetProviderAsync(tenantId, providerId);
+        if (provider == null)
+        {
+            throw new ItemNotFoundException("Provider not found");
+        }
+
+        var userId = authContext.CurrentAccount.ID;
+
+        var settings = await settingsDao.GetSettingsAsync<T>(tenantId, userId, scope);
+        if (settings == null)
+        {
+            return await settingsDao.AddSettingsAsync(tenantId, providerId, userId, scope, runSettings);
+        }
+
+        settings.ProviderId = providerId;
+        settings.RunSettings = runSettings;
+
+        return await settingsDao.UpdateSettingsAsync(settings);
+    }
+    
+    public async Task<AiSettings<T>> GetSettingsAsync<T>(SettingsScope scope) where T: RunSettings
+    {
+        var settings = await settingsDao.GetSettingsAsync<T>(tenantManager.GetCurrentTenantId(), authContext.CurrentAccount.ID, scope);
+        if (settings == null)
+        {
+            throw new ItemNotFoundException("Settings not found");
+        }
+
+        return settings;
+    }
 }

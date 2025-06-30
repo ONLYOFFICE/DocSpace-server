@@ -24,9 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Models.RequestDto;
+namespace ASC.AI.Core.Common.Models;
 
-public class RemoveProviderRequestDto
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
+[JsonDerivedType(typeof(ChatSettings), "chat")]
+public class RunSettings
 {
-    public required List<int> Ids { get; set; }
+    public required string ModelId { get; set; }
 }

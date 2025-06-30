@@ -24,9 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Models.RequestDto;
+namespace ASC.AI.Models.ResponseDto;
 
-public class RemoveProviderRequestDto
+public class ChatSettingsDto
 {
-    public required List<int> Ids { get; set; }
+    public int ProviderId { get; set; }
+    public required string ModelId { get; set; }
 }

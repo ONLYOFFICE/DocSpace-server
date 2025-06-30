@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.AI.Core.Common.Services;
+
 namespace ASC.AI.Core.Chat;
 
 [Scope]
@@ -32,7 +34,8 @@ public class ChatService(
     AuthContext authContext,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
-    TenantManager tenantManager)
+    TenantManager tenantManager,
+    AiSettingsService aiSettingsService)
 {
     public async Task<ChatSession> RenameChatAsync(Guid chatId, string title)
     {
@@ -92,6 +95,18 @@ public class ChatService(
     {
         var chat = await GetChatAsync(chatId);
         await chatDao.DeleteChatsAsync(tenantManager.GetCurrentTenantId(), [chat.Id]);
+    }
+
+    public async Task<AiSettings<ChatSettings>> SetChatSettingsAsync(int providerId, string modelId)
+    {
+        var chatSettings = new ChatSettings { ModelId = modelId };
+
+        return await aiSettingsService.SetSettingsAsync(providerId, SettingsScope.Chat, chatSettings);
+    }
+
+    public async Task<AiSettings<ChatSettings>> GetChatSettingsAsync()
+    {
+        return await aiSettingsService.GetSettingsAsync<ChatSettings>(SettingsScope.Chat);
     }
 
     private async Task<ChatSession> GetChatAsync(Guid chatId)
