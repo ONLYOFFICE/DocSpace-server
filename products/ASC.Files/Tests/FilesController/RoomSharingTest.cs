@@ -184,6 +184,32 @@ public class RoomSharingTest(
             link.Access == FileShare.Editing);
     }
     
+    [Fact]
+    public async Task CreateMaximumFiveLinks_InRoom_ReturnsError()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var customRoom =  (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("room with multiple links", roomType: RoomType.CustomRoom), TestContext.Current.CancellationToken)).Response;
+
+        // Act - Get a primary external link
+        await _roomsApi.GetRoomsPrimaryExternalLinkAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken);
+
+        // Create additional links
+        var additionalLink1 = new RoomLinkRequest(
+            access: FileShare.Read,
+            title: "Additional Link 1",
+            linkType: LinkType.External);
+        
+       for (var i = 0; i < 5; i++)
+       {
+           await _roomsApi.SetRoomLinkAsync(customRoom.Id, additionalLink1, TestContext.Current.CancellationToken);
+       }
+       
+       var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomsApi.SetRoomLinkAsync(customRoom.Id, additionalLink1, TestContext.Current.CancellationToken));
+       
+       exception.ErrorCode.Should().Be(403);
+    }
+    
 
     [Theory]
     [MemberData(nameof(InvalidFileShareFillingForms))]
