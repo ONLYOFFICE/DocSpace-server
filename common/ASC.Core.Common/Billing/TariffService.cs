@@ -1057,7 +1057,7 @@ public class TariffService(
 
         if (customerInfo != null)
         {
-            return customerInfo;
+            return customerInfo.IsDefault() ? null : customerInfo;
         }
 
         await using (await distributedLockProvider.TryAcquireLockAsync($"{cacheKey}_lock"))
@@ -1066,7 +1066,7 @@ public class TariffService(
 
             if (customerInfo != null)
             {
-                return customerInfo;
+                return customerInfo.IsDefault() ? null : customerInfo;
             }
 
             if (billingClient.Configured)
@@ -1075,14 +1075,13 @@ public class TariffService(
                 {
                     var portalId = await coreSettings.GetKeyAsync(tenantId);
                     customerInfo = await billingClient.GetCustomerInfoAsync(portalId);
+                    await hybridCache.SetAsync(cacheKey, customerInfo, TimeSpan.FromMinutes(10));
                 }
                 catch (Exception error)
                 {
-                    customerInfo = new CustomerInfo();
                     LogError(error, tenantId.ToString());
+                    await hybridCache.SetAsync(cacheKey, new CustomerInfo(), TimeSpan.FromMinutes(10));
                 }
-
-                await hybridCache.SetAsync(cacheKey, customerInfo, TimeSpan.FromMinutes(10));
             }
         }
 
@@ -1148,7 +1147,7 @@ public class TariffService(
 
         if (balance != null)
         {
-            return balance.AccountNumber == 0 ? null : balance;
+            return balance.IsDefault() ? null : balance;
         }
 
         await using (await distributedLockProvider.TryAcquireLockAsync($"{cacheKey}_lock"))
@@ -1157,7 +1156,7 @@ public class TariffService(
 
             if (balance != null)
             {
-                return balance.AccountNumber == 0 ? null : balance;
+                return balance.IsDefault() ? null : balance;
             }
 
             if (accountingClient.Configured)
