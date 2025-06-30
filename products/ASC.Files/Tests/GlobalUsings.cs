@@ -6,9 +6,11 @@ global using System.Data.Common;
 global using System.Net;
 global using System.Net.Http.Headers;
 global using System.Text;
+global using System.Text.Json;
 global using System.Web;
 
 global using ASC.Core.Common.EF;
+global using ASC.Files.Core.ApiModels.ResponseDto;
 global using ASC.Files.Tests.Data;
 global using ASC.Files.Tests.Factory;
 global using ASC.Migrations;
@@ -44,6 +46,7 @@ global using Respawn;
 global using Respawn.Graph;
 
 global using Testcontainers.MySql;
+global using Testcontainers.OpenSearch;
 global using Testcontainers.PostgreSql;
 global using Testcontainers.RabbitMq;
 global using Testcontainers.Redis;

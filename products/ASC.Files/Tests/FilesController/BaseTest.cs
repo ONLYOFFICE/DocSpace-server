@@ -24,10 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Text.Json;
-
-using ASC.Files.Core.ApiModels.ResponseDto;
-
 using FileShareDto = Docspace.Model.FileShareDto;
 
 namespace ASC.Files.Tests.FilesController;
@@ -70,6 +66,11 @@ public class BaseTest(
     public static TheoryData<FileShare> InvalidFileShare =>
     [
         FileShare.None, FileShare.ReadWrite, FileShare.Varies, FileShare.RoomManager, FileShare.ContentCreator
+    ];
+    
+    public static TheoryData<FileShare> InvalidFileShareFillingForms =>
+    [
+        FileShare.ReadWrite, FileShare.Varies, FileShare.RoomManager, FileShare.ContentCreator,  FileShare.Editing, FileShare.Review, FileShare.Comment //, FileShare.Read
     ];
     
     protected async Task<FileDtoInteger> GetFile(int fileId)

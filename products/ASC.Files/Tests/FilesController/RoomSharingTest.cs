@@ -24,10 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Text.Json;
-
-using ASC.Files.Core.ApiModels.ResponseDto;
-
 using LinkType = Docspace.Model.LinkType;
 using Task = System.Threading.Tasks.Task;
 
@@ -41,30 +37,28 @@ public class RoomSharingTest(
     FilesServiceFactory filesServiceProgram) 
     : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
 {
+    public static TheoryData<RoomType> ValidRoomTypesForShare =>
+    [
+        RoomType.CustomRoom, RoomType.PublicRoom
+    ];
+    
     public static TheoryData<RoomType> Data =>
     [
         RoomType.EditingRoom, RoomType.VirtualDataRoom
     ];
     
-    public static TheoryData<RoomType, FileShare> DataWithFileShare =>
-    [
-        (RoomType.EditingRoom, FileShare.Read),
-        (RoomType.EditingRoom, FileShare.Editing),
-        (RoomType.EditingRoom, FileShare.Comment),
-        (RoomType.EditingRoom, FileShare.Review),
-        (RoomType.VirtualDataRoom, FileShare.Read),
-        (RoomType.VirtualDataRoom, FileShare.Editing),
-        (RoomType.VirtualDataRoom, FileShare.Comment),
-        (RoomType.VirtualDataRoom, FileShare.Review)
-    ];
-
+    public static TheoryData<RoomType, FileShare> DataWithFileShare => new MatrixTheoryData<RoomType, FileShare>(
+        [RoomType.EditingRoom, RoomType.VirtualDataRoom],
+        [FileShare.Read, FileShare.Editing, FileShare.Comment, FileShare.Review]
+    );
     
-    [Fact]
-    public async Task CreatePrimaryExternalLink_CustomRoom_ReturnsLinkData()
+    [Theory]
+    [MemberData(nameof(ValidRoomTypesForShare))]
+    public async Task CreatePrimaryExternalLink_ValidRoomType_ReturnsLinkData(RoomType roomType)
     {
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
-        var customRoom = await CreateCustomRoom("custom room");
+        var customRoom = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("room title", roomType: roomType), TestContext.Current.CancellationToken)).Response;
         
         // Act
         var result = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
@@ -79,6 +73,33 @@ public class RoomSharingTest(
         // Assert
         result.Should().NotBeNull();
         result.Access.Should().Be(FileShare.Read);
+        result.CanEditAccess.Should().BeFalse();
+        result.IsOwner.Should().BeFalse();
+        
+        roomInfo.Should().NotBeNull();
+        roomInfo.Current.Should().NotBeNull();
+    }
+    
+    [Fact]
+    public async Task CreatePrimaryExternalLink_FillingForm_ReturnsLinkData()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var customRoom = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("filling form room title", roomType: RoomType.FillingFormsRoom), TestContext.Current.CancellationToken)).Response;
+        
+        // Act
+        var result = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var sharedToJObject = result.SharedTo as JObject;
+        var sharedTo = JsonSerializer.Deserialize<FileShareLink>(sharedToJObject.ToString(), JsonSerializerOptions.Web);
+        
+        await _filesClient.Authenticate(null);
+        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, sharedTo.RequestToken);
+        var roomInfo = (await _foldersApi.GetFolderByFolderIdAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
+        
+        // Assert
+        result.Should().NotBeNull();
+        result.Access.Should().Be(FileShare.FillForms);
         result.CanEditAccess.Should().BeFalse();
         result.IsOwner.Should().BeFalse();
         
@@ -121,14 +142,15 @@ public class RoomSharingTest(
         exception.ErrorCode.Should().Be(403);
     }
     
-    [Fact]
-    public async Task CreateMultipleLinks_InRoom_ReturnsAllLinks()
+    [Theory]
+    [MemberData(nameof(ValidRoomTypesForShare))]
+    public async Task CreateMultipleLinks_InRoom_ReturnsAllLinks(RoomType roomType)
     {
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
-        var customRoom = await CreateCustomRoom("room with multiple links");
+        var customRoom =  (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("room with multiple links", roomType: roomType), TestContext.Current.CancellationToken)).Response;
 
-        // Act - Get primary external link
+        // Act - Get a primary external link
         await _roomsApi.GetRoomsPrimaryExternalLinkAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken);
 
         // Create additional links
@@ -160,6 +182,29 @@ public class RoomSharingTest(
         allLinks.Should().Contain(link => 
             DeserializeSharedToLink(link).Title == "Additional Link 2" && 
             link.Access == FileShare.Editing);
+    }
+    
+
+    [Theory]
+    [MemberData(nameof(InvalidFileShareFillingForms))]
+    public async Task CreateMultipleLinks_InFormFillingRoom_ReturnsError(FileShare fileShare)
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var customRoom =  (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("room with multiple links", roomType: RoomType.FillingFormsRoom), TestContext.Current.CancellationToken)).Response;
+
+        // Act - Get a primary external link
+        await _roomsApi.GetRoomsPrimaryExternalLinkAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken);
+
+        // Create additional links
+        var additionalLink1 = new RoomLinkRequest(
+            access: fileShare,
+            title: "Additional Link 1",
+            linkType: LinkType.External);
+        
+       var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomsApi.SetRoomLinkAsync(customRoom.Id, additionalLink1, TestContext.Current.CancellationToken));
+       
+       exception.ErrorCode.Should().Be(403);
     }
 
     [Fact]
@@ -323,8 +368,10 @@ public class RoomSharingTest(
         
         await _filesClient.Authenticate(null);
         _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, updatedSharedTo.RequestToken);
-        await Assert.ThrowsAsync<ApiException>(async () => await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken));
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken));
         _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
+        
+        exception.ErrorCode.Should().Be(403);
     }
     
     [Fact]
@@ -351,7 +398,7 @@ public class RoomSharingTest(
     }
     
     [Fact]
-    public async Task ExternalLinkWithPassword_CheckPassword_ReturnsOk()
+    public async Task ExternalLinkWithPassword_CheckInvalidPassword_ReturnsOk()
     {
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
@@ -406,6 +453,65 @@ public class RoomSharingTest(
         
         file.Should().NotBeNull();
         createdFile.Title.Should().Be(file.Title);
+    }
+
+    [Fact]
+    public async Task SetRoomLinkAsync_PublicRoomWithNoneAccess_ReturnsNewLink()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var publicRoom = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("Public Room Test", roomType: RoomType.PublicRoom), TestContext.Current.CancellationToken)).Response;
+
+        // Get the primary external link
+        var primaryLink = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(publicRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var originalSharedTo = DeserializeSharedToLink(primaryLink);
+
+        // Act - Set the link with FileShare.None
+        var updateRequest = new RoomLinkRequest(
+            linkId: originalSharedTo.Id, 
+            access: FileShare.None, 
+            linkType: LinkType.External);
+
+        var updatedLink = (await _roomsApi.SetRoomLinkAsync(publicRoom.Id, updateRequest, TestContext.Current.CancellationToken)).Response;
+        var updatedSharedTo = DeserializeSharedToLink(updatedLink);
+
+        // Assert
+        updatedLink.Should().NotBeNull();
+        updatedSharedTo.Should().NotBeNull();
+
+        // Verify that a new link is returned
+        updatedSharedTo.Id.Should().NotBe(originalSharedTo.Id);
+        updatedSharedTo.RequestToken.Should().NotBe(originalSharedTo.RequestToken);
+
+        // Get all links to make sure both exist
+        var allLinks = (await _roomsApi.GetRoomLinksAsync(publicRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        allLinks.Should().HaveCount(1); // The original link should be replaced
+    }
+    
+    [Fact]
+    public async Task SetRoomLinkAsync_CustomRoomWithNoneAccess_ReturnsNull()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var customRoom = await CreateCustomRoom("Public Room Test");
+
+        // Get the primary external link
+        var primaryLink = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var originalSharedTo = DeserializeSharedToLink(primaryLink);
+
+        // Act - Set the link with FileShare.None
+        var updateRequest = new RoomLinkRequest(
+            linkId: originalSharedTo.Id, 
+            access: FileShare.None, 
+            linkType: LinkType.External);
+
+        var updatedLink = (await _roomsApi.SetRoomLinkAsync(customRoom.Id, updateRequest, TestContext.Current.CancellationToken)).Response;
+        
+        // Assert
+        updatedLink.Should().BeNull();
+        
+        var allLinks = (await _roomsApi.GetRoomLinksAsync(customRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        allLinks.Should().BeEmpty(); 
     }
 
     [Fact]
