@@ -1176,6 +1176,15 @@
   <data name="ErrorGroupNotFound" xml:space="preserve">
     <value>The group could not be found</value>
   </data>
+  <data name="AccountingCustomerOperationDescription" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Disk space</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Balance top-up</value>
+  </data>
   <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
     <value>Date</value>
   </data>

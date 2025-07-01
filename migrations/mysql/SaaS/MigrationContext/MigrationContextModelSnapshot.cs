@@ -829,7 +829,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Description = "since 10.02.2025",
                             Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,year",
                             Name = "adminyear",
-                            Price = 200m,
+                            Price = 220m,
                             ProductId = "1009",
                             Visible = true,
                             Wallet = false
@@ -839,7 +839,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             TenantId = -11,
                             Features = "total_size:1073741824",
                             Name = "storage",
-                            Price = 0.0322m,
+                            Price = 0.14m,
                             ProductId = "1011",
                             Visible = true,
                             Wallet = true
@@ -6698,8 +6698,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("date");
 
                     b.Property<string>("DescriptionRaw")
-                        .HasMaxLength(20000)
-                        .HasColumnType("varchar")
+                        .HasColumnType("text")
                         .HasColumnName("description")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -6719,7 +6718,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("Page")
-                        .HasMaxLength(300)
+                        .HasMaxLength(4096)
                         .HasColumnType("varchar")
                         .HasColumnName("page")
                         .UseCollation("utf8_general_ci")
@@ -6807,7 +6806,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("Page")
-                        .HasMaxLength(300)
+                        .HasMaxLength(4096)
                         .HasColumnType("varchar")
                         .HasColumnName("page")
                         .UseCollation("utf8_general_ci")

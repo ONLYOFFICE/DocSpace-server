@@ -26,16 +26,17 @@
 
 using Amazon;
 
+using ASC.Data.Backup.Services;
 using ASC.Data.Storage.Encryption.IntegrationEvents.Events;
 
 namespace ASC.Web.Api.Controllers.Settings;
 
-public class StorageController(ILoggerProvider option,
+public class StorageController(
+    ILoggerProvider option,
         ServiceClient serviceClient,
         MessageService messageService,
         SecurityContext securityContext,
         StudioNotifyService studioNotifyService,
-        ApiContext apiContext,
         TenantManager tenantManager,
         PermissionContext permissionContext,
         SettingsManager settingsManager,
@@ -48,13 +49,12 @@ public class StorageController(ILoggerProvider option,
         IFusionCache fusionCache,
         IEventBus eventBus,
         EncryptionSettingsHelper encryptionSettingsHelper,
-        BackupAjaxHandler backupAjaxHandler,
+        BackupService backupService,
         ICacheNotify<DeleteSchedule> cacheDeleteSchedule,
         EncryptionWorker encryptionWorker,
-        IHttpContextAccessor httpContextAccessor, 
         IDistributedLockProvider distributedLockProvider,
         TenantExtra tenantExtra)
-    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(fusionCache, webItemManager)
 {
     private readonly ILogger _log = option.CreateLogger("ASC.Api");
 
@@ -68,7 +68,7 @@ public class StorageController(ILoggerProvider option,
     [SwaggerResponse(200, "List of storages with the following parameters", typeof(List<StorageDto>))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("storage")]
-    public async Task<List<StorageDto>> GetAllStoragesAsync()
+    public async Task<List<StorageDto>> GetAllStorages()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -93,7 +93,7 @@ public class StorageController(ILoggerProvider option,
     [SwaggerResponse(200, "Storage progress", typeof(double))]
     [AllowNotPayment]
     [HttpGet("storage/progress")]
-    public async Task<double> GetStorageProgressAsync()
+    public async Task<double> GetStorageProgress()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -117,7 +117,7 @@ public class StorageController(ILoggerProvider option,
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(405, "Method not allowed")]
     [HttpPost("encryption/start")]
-    public async Task<bool> StartStorageEncryptionAsync(StorageEncryptionRequestsDto inDto)
+    public async Task<bool> StartStorageEncryption(StorageEncryptionRequestsDto inDto)
     {
         if (coreBaseSettings.CustomMode)
         {
@@ -153,14 +153,14 @@ public class StorageController(ILoggerProvider option,
 
         await tenantExtra.DemandAccessSpacePermissionAsync();
 
-        var storages = await GetAllStoragesAsync();
+        var storages = await GetAllStorages();
 
         if (storages.Exists(s => s.Current))
         {
             throw new NotSupportedException();
         }
 
-        var cdnStorages = await GetAllCdnStoragesAsync();
+        var cdnStorages = await GetAllCdnStorages();
 
         if (cdnStorages.Exists(s => s.Current))
         {
@@ -171,7 +171,7 @@ public class StorageController(ILoggerProvider option,
 
         foreach (var tenant in tenants)
         {
-            var progress = await backupAjaxHandler.GetBackupProgressAsync(tenant.Id);
+            var progress = await backupService.GetBackupProgressAsync(tenant.Id);
             if (progress is { IsCompleted: false })
             {
                 throw new Exception();
@@ -248,7 +248,7 @@ public class StorageController(ILoggerProvider option,
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(405, "Method not allowed")]
     [HttpGet("encryption/settings")]
-    public async Task<EncryptionSettings> GetStorageEncryptionSettingsAsync()
+    public async Task<EncryptionSettings> GetStorageEncryptionSettings()
     {
         try
         {
@@ -318,7 +318,7 @@ public class StorageController(ILoggerProvider option,
     [SwaggerResponse(400, "Module")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("storage")]
-    public async Task<StorageSettings> UpdateStorageAsync(StorageRequestsDto inDto)
+    public async Task<StorageSettings> UpdateStorage(StorageRequestsDto inDto)
     {
         try
         {
@@ -360,7 +360,7 @@ public class StorageController(ILoggerProvider option,
     [SwaggerResponse(200, "Ok")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpDelete("storage")]
-    public async Task ResetStorageToDefaultAsync()
+    public async Task ResetStorageToDefault()
     {
         try
         {
@@ -393,7 +393,7 @@ public class StorageController(ILoggerProvider option,
     [SwaggerResponse(200, "List of the CDN storages with the following parameters", typeof(List<StorageDto>))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("storage/cdn")]
-    public async Task<List<StorageDto>> GetAllCdnStoragesAsync()
+    public async Task<List<StorageDto>> GetAllCdnStorages()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -419,7 +419,7 @@ public class StorageController(ILoggerProvider option,
     [SwaggerResponse(400, "Module")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("storage/cdn")]
-    public async Task<CdnStorageSettings> UpdateCdnAsync(StorageRequestsDto inDto)
+    public async Task<CdnStorageSettings> UpdateCdnStorage(StorageRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -463,7 +463,7 @@ public class StorageController(ILoggerProvider option,
     [SwaggerResponse(200, "Ok")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpDelete("storage/cdn")]
-    public async Task ResetCdnToDefaultAsync()
+    public async Task ResetCdnToDefault()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -486,7 +486,7 @@ public class StorageController(ILoggerProvider option,
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var schedule = await backupAjaxHandler.GetScheduleAsync(dto.Dump);
+        var schedule = await backupService.GetScheduleAsync(dto.Dump);
         var current = new StorageSettings();
 
         if (schedule is { StorageType: BackupStorageType.ThirdPartyConsumer })

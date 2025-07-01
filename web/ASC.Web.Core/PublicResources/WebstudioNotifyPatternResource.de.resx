@@ -200,7 +200,9 @@ Die Konfiguration der Authentifizierungs-App, mit der Sie sich bei ${LetterLogoT
 
 Klicken Sie auf die Schaltfläche unten, um zur Portal-Anmeldeseite zu wechseln und die Authentifizierungs-App zu konfigurieren:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.Änderung des "${__VirtualRootPath}":"${__VirtualRootPath}" Portalbesitzers
@@ -1936,5 +1938,39 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Bevorstehende Abonnementzahlung für Ihren ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Zu den Diensten</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Zu den Wallet-Einstellungen</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Hallo, $UserName!
+
+Wir möchten Sie darüber informieren, dass die automatische Verlängerung Ihres erworbenen Serviceplans nicht abgeschlossen werden konnte.
+
+Wir bitten Sie, Ihren aktuellen Serviceplan manuell zu verlängern (oder einen neuen zu erwerben).
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Hallo, $UserName!
+
+Wir möchten Sie darüber informieren, dass die automatische Aufladung des DocSpace Wallet-Guthabens nicht erfolgreich war.
+
+Wir bitten Sie, Ihr Wallet-Guthaben manuell zu überprüfen und zu aktualisieren.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Erforderliche Aktion: Der Serviceplan in Ihrem ${LetterLogoText} DocSpace kann nicht automatisch verlängert werden</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Erforderliche Aktion: Das Wallet-Guthaben in Ihrem ${LetterLogoText} DocSpace kann nicht automatisch aufgeladen werden</value>
   </data>
 </root>

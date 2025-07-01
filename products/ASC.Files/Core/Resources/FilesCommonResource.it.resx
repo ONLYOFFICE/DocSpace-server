@@ -512,4 +512,10 @@ Massima compatibilità con docx, xlsx, pptx.</value>
   <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
     <value>Inizia a compilare</value>
   </data>
+  <data name="RoleEnum_Guest" xml:space="preserve">
+    <value>Ospite</value>
+  </data>
+  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
+    <value>Amministratore della stanza</value>
+  </data>
 </root>

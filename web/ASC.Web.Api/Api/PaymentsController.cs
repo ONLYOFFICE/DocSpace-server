@@ -26,6 +26,8 @@
 
 using ASC.Files.Core.Utils;
 
+using Microsoft.AspNetCore.RateLimiting;
+
 namespace ASC.Web.Api.Controllers;
 
 ///<summary>
@@ -51,6 +53,7 @@ public class PaymentController(
     StudioNotifyService studioNotifyService,
     PermissionContext permissionContext,
     TenantUtil tenantUtil,
+    ApiDateTimeHelper apiDateTimeHelper,
     TempStream tempStream,
     CsvFileHelper csvFileHelper,
     CsvFileUploader csvFileUploader)
@@ -70,7 +73,7 @@ public class PaymentController(
     [SwaggerResponse(200, "The URL to the payment page", typeof(Uri))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("url")]
-    public async Task<Uri> GetPaymentUrlAsync(PaymentUrlRequestsDto inDto)
+    public async Task<Uri> GetPaymentUrl(PaymentUrlRequestsDto inDto)
     {
         await DemandAdminAsync();
 
@@ -123,7 +126,8 @@ public class PaymentController(
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("update")]
-    public async Task<bool> PaymentUpdateAsync(QuantityRequestDto inDto)
+    [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
+    public async Task<bool> UpdatePayment(QuantityRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
         {
@@ -137,6 +141,8 @@ public class PaymentController(
         {
             return false;
         }
+
+        await DemandPayerAsync(tenant);
 
         // TODO: Temporary restriction.
         // Possibility to buy only one product per transaction.
@@ -171,7 +177,9 @@ public class PaymentController(
             return false;
         }
 
-        var result = await tariffService.PaymentChangeAsync(tenant.Id, inDto.Quantity, ProductQuantityType.Set);
+        var currency = await regionHelper.GetCurrencyFromRequestAsync();
+
+        var result = await tariffService.PaymentChangeAsync(tenant.Id, inDto.Quantity, ProductQuantityType.Set, currency, true);
 
         if (result)
         {
@@ -192,7 +200,8 @@ public class PaymentController(
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("updatewallet")]
-    public async Task<bool> PaymentUpdateWalletAsync(WalletQuantityRequestDto inDto)
+    [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
+    public async Task<bool> UpdateWalletPayment(WalletQuantityRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
         {
@@ -211,6 +220,8 @@ public class PaymentController(
         {
             return false;
         }
+
+        await DemandPayerAsync(tenant);
 
         // TODO: Temporary restriction.
         // Possibility to buy only one product per transaction.
@@ -231,9 +242,19 @@ public class PaymentController(
             return false;
         }
 
+        var tariff = await tariffService.GetTariffAsync(tenant.Id);
+
+        if (tariff.State > TariffState.Paid)
+        {
+            return false;
+        }
+
         if (inDto.ProductQuantityType is ProductQuantityType.Set)
         {
-            var tariff = await tariffService.GetTariffAsync(tenant.Id);
+            if (productQty.HasValue && productQty.Value != 0 && productQty.Value < 100) // min value 100Gb
+            {
+                return false;
+            }
 
             // saving null value is equivalent to resetting to default
             var updated = await tariffService.UpdateNextQuantityAsync(tenant.Id, tariff, quota.TenantId, productQty);
@@ -253,6 +274,12 @@ public class PaymentController(
             return false;
         }
 
+        var hasActiveWalletQuota = tariff.Quotas.Any(q => q.Id == quota.TenantId && q.State == QuotaState.Active);
+        if (!hasActiveWalletQuota && productQty < 100) // min value 100Gb
+        {
+            return false;
+        }
+
         var balance = await tariffService.GetCustomerBalanceAsync(tenant.Id);
         if (balance == null)
         {
@@ -260,20 +287,16 @@ public class PaymentController(
         }
 
         // TODO: support other currencies
-        var subAccount = balance.SubAccounts.FirstOrDefault(x => x.Currency == "USD");
+        var defaultCurrency = tariffService.GetSupportedAccountingCurrencies().First();
+        var subAccount = balance.SubAccounts.FirstOrDefault(x => x.Currency == defaultCurrency);
         if (subAccount == null)
-        {
-            return false;
-        }
-
-        if (subAccount.Amount < productQty * quota.Price)
         {
             return false;
         }
 
         var quantity = new Dictionary<string, int> { { productName, productQty.Value } };
 
-        var result = await tariffService.PaymentChangeAsync(tenant.Id, quantity, inDto.ProductQuantityType);
+        var result = await tariffService.PaymentChangeAsync(tenant.Id, quantity, inDto.ProductQuantityType, defaultCurrency, false);
 
         if (result)
         {
@@ -294,7 +317,7 @@ public class PaymentController(
     [SwaggerResponse(200, "Payment calculation", typeof(PaymentCalculation))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("calculatewallet")]
-    public async Task<PaymentCalculation> PaymentCalculateWalletAsync(WalletQuantityRequestDto inDto)
+    public async Task<PaymentCalculation> CalculateWalletPayment(WalletQuantityRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
         {
@@ -313,6 +336,8 @@ public class PaymentController(
         {
             return null;
         }
+
+        await DemandPayerAsync(tenant);
 
         // TODO: Temporary restriction.
         // Possibility to buy only one product per transaction.
@@ -345,7 +370,8 @@ public class PaymentController(
         }
 
         // TODO: support other currencies
-        var subAccount = balance.SubAccounts.FirstOrDefault(x => x.Currency == "USD");
+        var defaultCurrency = tariffService.GetSupportedAccountingCurrencies().First();
+        var subAccount = balance.SubAccounts.FirstOrDefault(x => x.Currency == defaultCurrency);
         if (subAccount == null)
         {
             return null;
@@ -353,7 +379,7 @@ public class PaymentController(
 
         var quantity = new Dictionary<string, int> { { productName, productQty.Value } };
 
-        var result = await tariffService.PaymentCalculateAsync(tenant.Id, quantity, inDto.ProductQuantityType);
+        var result = await tariffService.PaymentCalculateAsync(tenant.Id, quantity, inDto.ProductQuantityType, defaultCurrency);
 
         return result;
     }
@@ -369,7 +395,7 @@ public class PaymentController(
     [SwaggerResponse(200, "The URL to the payment account", typeof(string))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("account")]
-    public async Task<string> GetPaymentAccountAsync(PaymentUrlRequestDto inDto)
+    public async Task<string> GetPaymentAccount(PaymentUrlRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
         {
@@ -400,7 +426,7 @@ public class PaymentController(
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "List of available portal prices", typeof(object))]
     [HttpGet("prices")]
-    public async Task<object> GetPricesAsync()
+    public async Task<object> GetPortalPrices()
     {
         var currency = await regionHelper.GetCurrencyFromRequestAsync();
         var result = (await tenantManager.GetProductPriceInfoAsync())
@@ -420,7 +446,7 @@ public class PaymentController(
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "List of available portal currencies", typeof(IAsyncEnumerable<CurrenciesDto>))]
     [HttpGet("currencies")]
-    public async IAsyncEnumerable<CurrenciesDto> GetCurrenciesAsync()
+    public async IAsyncEnumerable<CurrenciesDto> GetPaymentCurrencies()
     {
         var defaultRegion = regionHelper.GetDefaultRegionInfo();
         var currentRegion = await regionHelper.GetCurrentRegionInfoAsync();
@@ -444,7 +470,7 @@ public class PaymentController(
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "List of available portal quotas", typeof(IEnumerable<QuotaDto>))]
     [HttpGet("quotas")]
-    public async Task<IEnumerable<QuotaDto>> GetQuotasAsync(QuotasRequestDto inDto)
+    public async Task<IEnumerable<QuotaDto>> GetPaymentQuotas(QuotasRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -471,7 +497,7 @@ public class PaymentController(
     [SwaggerResponse(200, "Payment information about the current portal quota", typeof(QuotaDto))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("quota")]
-    public async Task<QuotaDto> GetQuotaInformationAsync(PaymentInformationRequestDto inDto)
+    public async Task<QuotaDto> GetQuotaPaymentInformation(PaymentInformationRequestDto inDto)
     {
         if (await userManager.IsGuestAsync(securityContext.CurrentAccount.ID))
         {
@@ -493,7 +519,7 @@ public class PaymentController(
     [SwaggerResponse(400, "Incorrect email or message text is empty")]
     [SwaggerResponse(429, "Request limit is exceeded")]
     [HttpPost("request")]
-    public async Task SendSalesRequestAsync(SalesRequestsDto inDto)
+    public async Task SendPaymentRequest(SalesRequestsDto inDto)
     {
         if (!inDto.Email.TestEmailRegex())
         {
@@ -513,17 +539,17 @@ public class PaymentController(
 
 
     /// <summary>
-    /// Returns the URL to the chechout setup page.
+    /// Returns the URL to the checkout setup page.
     /// </summary>
     /// <short>
-    /// Get the chechout setup page URL
+    /// Get the checkout setup page URL
     /// </short>
     /// <path>api/2.0/portal/payment/chechoutsetupurl</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The URL to the chechout setup page", typeof(Uri))]
+    [SwaggerResponse(200, "The URL to the checkout setup page", typeof(Uri))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("chechoutsetupurl")]
-    public async Task<Uri> GetChechoutSetupUrlAsync(ChechoutSetupUrlRequestsDto inDto)
+    public async Task<Uri> GetCheckoutSetupUrl(CheckoutSetupUrlRequestsDto inDto)
     {
         await DemandAdminAsync();
 
@@ -537,7 +563,13 @@ public class PaymentController(
         var hasCustomer = await HasCustomer(tenant);
         if (hasCustomer)
         {
-            return null;
+            await DemandPayerAsync(tenant);
+
+            var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+            if (customerInfo != null && customerInfo.PaymentMethodStatus == PaymentMethodStatus.Set)
+            {
+                return null;
+            }
         }
 
         var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
@@ -566,7 +598,7 @@ public class PaymentController(
     [SwaggerResponse(200, "The customer info", typeof(CustomerInfo))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("customerinfo")]
-    public async Task<CustomerInfo> GetCustomerInfoAsync(PaymentInformationRequestDto inDto)
+    public async Task<CustomerInfo> GetCustomerInfo(PaymentInformationRequestDto inDto)
     {
         await DemandAdminAsync();
 
@@ -589,14 +621,21 @@ public class PaymentController(
     /// </short>
     /// <path>api/2.0/portal/payment/deposit</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "Success status", typeof(string))]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("deposit")]
-    public async Task<string> TopUpDepositAsync(TopUpDepositRequestDto inDto)
+    [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
+    public async Task<bool> TopUpDeposit(TopUpDepositRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
         {
-            return null;
+            return false;
+        }
+
+        var supportedCurrencies = tariffService.GetSupportedAccountingCurrencies();
+        if (!supportedCurrencies.Contains(inDto.Currency))
+        {
+            return false;
         }
 
         var tenant = tenantManager.GetCurrentTenant();
@@ -604,14 +643,24 @@ public class PaymentController(
         var hasCustomer = await HasCustomer(tenant);
         if (!hasCustomer)
         {
-            return null;
+            return false;
+        }
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo == null || customerInfo.PaymentMethodStatus != PaymentMethodStatus.Set)
+        {
+            return false;
         }
 
         await DemandPayerAsync(tenant);
 
         var result = await tariffService.TopUpDepositAsync(tenant.Id, inDto.Amount, inDto.Currency, true);
 
-        messageService.Send(MessageAction.CustomerWalletToppedUp);
+        if (result)
+        {
+            var description = $"{inDto.Amount} {inDto.Currency}";
+            messageService.Send(MessageAction.CustomerWalletToppedUp, description);
+        }
 
         return result;
     }
@@ -627,7 +676,7 @@ public class PaymentController(
     [SwaggerResponse(200, "The customer balance", typeof(Balance))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("customer/balance")]
-    public async Task<Balance> GetCustomerBalanceAsync(PaymentInformationRequestDto inDto)
+    public async Task<Balance> GetCustomerBalance(PaymentInformationRequestDto inDto)
     {
         await DemandAdminAsync();
 
@@ -659,7 +708,7 @@ public class PaymentController(
     [SwaggerResponse(200, "The customer session", typeof(Session))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("customer/opensession")]
-    public async Task<Session> OpenCustomerSessionAsync(OpenCustomerSessionRequestDto inDto)
+    public async Task<Session> OpenCustomerSession(OpenCustomerSessionRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
         {
@@ -691,7 +740,7 @@ public class PaymentController(
     [SwaggerResponse(200, "Boolean value: true if the operation is succesfully provided", typeof(bool))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("customer/performoperation")]
-    public async Task<bool> PerformCustomerOperationAsync(PerformCustomerOperationRequestDto inDto)
+    public async Task<bool> PerformCustomerOperation(PerformCustomerOperationRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
         {
@@ -726,7 +775,7 @@ public class PaymentController(
     [SwaggerResponse(200, "The customer operations", typeof(Report))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("customer/operations")]
-    public async Task<Report> GetCustomerOperationsAsync(CustomerOperationsRequestDto inDto)
+    public async Task<ReportDto> GetCustomerOperations(CustomerOperationsRequestDto inDto)
     {
         await DemandAdminAsync();
 
@@ -745,8 +794,9 @@ public class PaymentController(
 
         var utcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate);
         var utcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate);
-        var result = await tariffService.GetCustomerOperationsAsync(tenant.Id, utcStartDate, utcEndDate, inDto.Credit, inDto.Withdrawal, inDto.Offset, inDto.Limit);
-        return result;
+        var report = await tariffService.GetCustomerOperationsAsync(tenant.Id, utcStartDate, utcEndDate, inDto.Credit, inDto.Withdrawal, inDto.Offset, inDto.Limit);
+
+        return report == null ? null : new ReportDto(report, apiDateTimeHelper);
     }
 
     /// <summary>
@@ -759,7 +809,7 @@ public class PaymentController(
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "URL to the csv report file", typeof(string))]
     [HttpPost("customer/operationsreport")]
-    public async Task<string> CreateCustomerOperationsReportAsync(CustomerOperationsReportDto inDto)
+    public async Task<string> CreateCustomerOperationsReport(CustomerOperationsReportRequestDto inDto)
     {
         await DemandAdminAsync();
 
@@ -776,7 +826,7 @@ public class PaymentController(
             return null;
         }
 
-        inDto = inDto ?? new CustomerOperationsReportDto();
+        inDto = inDto ?? new CustomerOperationsReportRequestDto();
 
         var utcStartDate = inDto.StartDate != null ? tenantUtil.DateTimeToUtc(inDto.StartDate.Value) : tenant.CreationDateTime;
         var utcEndDate = inDto.EndDate != null ? tenantUtil.DateTimeToUtc(inDto.EndDate.Value) : DateTime.UtcNow;
@@ -807,6 +857,23 @@ public class PaymentController(
         {
             var report = await tariffService.GetCustomerOperationsAsync(tenantId, utcStartDate, utcEndDate, credit, withdrawal, offset, limit);
 
+            if (report?.Collection == null)
+            {
+                yield return null;
+                break;
+            }
+
+            foreach (var operation in report.Collection)
+            {
+                operation.Description = OperationDto.GetServiceDesc(operation.Service);
+                operation.Date = tenantUtil.DateTimeFromUtc(operation.Date);
+
+                if (string.IsNullOrEmpty(operation.Service))
+                {
+                    operation.Quantity = 0;
+                }
+            }
+
             yield return report.Collection;
 
             if (report.CurrentPage == report.TotalPage)
@@ -825,6 +892,7 @@ public class PaymentController(
             Map(item => item.Date).TypeConverter<CsvFileHelper.CsvDateTimeConverter>();
 
             Map(item => item.Date).Name(Resource.AccountingCustomerOperationDate);
+            Map(item => item.Description).Name(Resource.AccountingCustomerOperationDescription);
             Map(item => item.Service).Name(Resource.AccountingCustomerOperationService);
             Map(item => item.ServiceUnit).Name(Resource.AccountingCustomerOperationServiceUnit);
             Map(item => item.Quantity).Name(Resource.AccountingCustomerOperationQuantity);
@@ -845,7 +913,7 @@ public class PaymentController(
     [SwaggerResponse(200, "The list of currencies", typeof(List<Currency>))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("accounting/currencies")]
-    public async Task<List<Currency>> GetAllCurrenciesAsync()
+    public async Task<List<Currency>> GetAccountingCurrencies()
     {
         if (!tariffService.IsConfigured())
         {
@@ -854,8 +922,11 @@ public class PaymentController(
 
         await DemandAdminAsync();
 
-        var result = await tariffService.GetAllCurrenciesAsync();
-        return result;
+        var supportedCurrencies = tariffService.GetSupportedAccountingCurrencies();
+
+        var allCurrencies = await tariffService.GetAllAccountingCurrenciesAsync();
+
+        return allCurrencies.Where(x=> supportedCurrencies.Contains(x.Code)).ToList();
     }
 
     /// <summary>
@@ -869,7 +940,7 @@ public class PaymentController(
     [SwaggerResponse(200, "The wallet auto top up settings", typeof(TenantWalletSettings))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("topupsettings")]
-    public async Task<TenantWalletSettings> GetTenantWalletSettingsAsync()
+    public async Task<TenantWalletSettings> GetTenantWalletSettings()
     {
         var tenant = tenantManager.GetCurrentTenant();
 
@@ -890,7 +961,7 @@ public class PaymentController(
     [SwaggerResponse(200, "The wallet auto top up settings", typeof(TenantWalletSettings))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("topupsettings")]
-    public async Task<TenantWalletSettings> SetTenantWalletSettingsAsync(TenantWalletSettingsWrapper inDto)
+    public async Task<TenantWalletSettings> SetTenantWalletSettings(TenantWalletSettingsWrapper inDto)
     {
         if (!tariffService.IsConfigured())
         {

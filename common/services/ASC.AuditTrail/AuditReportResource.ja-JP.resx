@@ -925,4 +925,19 @@
   <data name="AuthLinkActivated" xml:space="preserve">
     <value>認証リンクが有効化されました</value>
   </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>顧客操作が実行されました</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>顧客操作レポートがダウンロードされました</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>顧客サブスクリプションが更新されました: {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>顧客ウォレットがチャージされました: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>顧客ウォレットチャージ設定が更新されました</value>
+  </data>
 </root>

@@ -88,6 +88,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Description.
+        /// </summary>
+        public static string AccountingCustomerOperationDescription {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Quantity.
         /// </summary>
         public static string AccountingCustomerOperationQuantity {
@@ -102,6 +111,24 @@ namespace ASC.Web.Core.PublicResources {
         public static string AccountingCustomerOperationService {
             get {
                 return ResourceManager.GetString("AccountingCustomerOperationService", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Disk space.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceDesc_disk_storage {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceDesc_disk-storage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Balance top-up.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceDesc_top_up {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceDesc_top-up", resourceCulture);
             }
         }
         

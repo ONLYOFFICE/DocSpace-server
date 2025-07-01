@@ -525,7 +525,9 @@ Authenticator հավելվածի կազմաձևումը, որն օգտագործ
 
 Խնդրում ենք սեղմել ստորև բերված կոճակը՝ պորտալի մուտքի էջ գնալու և իսկորոշիչի հավելվածը կարգավորելու համար.
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_change_password_v115" xml:space="preserve">
     <value>Ցանկանու՞մ եք փոխել ձեր ${LetterLogoText} հաշվի գաղտնաբառը: Հաստատելու համար սեղմեք ստորև բերված կոճակը:
@@ -1996,5 +1998,39 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Ձեր ${LetterLogoText} DocSpace-ի բաժանորդագրության առաջիկա վճարումը</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Անցնել՝ ծառայություններ</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Անցնել դրամապանակի կարգավորումներ</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Ողջույն, $UserName!
+
+Կապվում ենք ձեզ հետ՝ տեղեկացնելու, որ ձեր գնած ծառայությունների փաթեթի ավտոմատ երկարաձգումը չի կարող ավարտվել։
+
+Խնդրում ենք երկարաձգել ձեր ներկայիս ծառայությունների փաթեթը (կամ գնել նորը)։
+
+$OrangeButton
+ 
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Ողջույն, $UserName!
+
+Տեղեկացնում ենք, որ DocSpace Wallet-ի մնացորդի ավտոմատ լիցքավորումը չի հաջողվել։ 
+
+Խնդրում ենք ստուգել և թարմացնել ձեր դրամապանակի մնացորդը։
+
+$OrangeButton
+ 
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Պահանջվող գործողություն՝ հնարավոր չէ ավտոմատ կերպով երկարաձգել սպասարկման սակագինը ձեր ${LetterLogoText} DocSpace-ում։</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Պահանջվող գործողություն՝ հնարավոր չէ ավտոմատ կերպով լիցքավորել դրամապանակի մնացորդը ձեր ${LetterLogoText} DocSpace-ում։</value>
   </data>
 </root>

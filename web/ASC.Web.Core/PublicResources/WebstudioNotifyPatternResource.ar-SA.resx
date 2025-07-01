@@ -602,7 +602,9 @@ $OrangeButton
 
 يرجى النقر فوق الزر أدناه للانتقال إلى صفحة تسجيل الدخول إلى البوابة وتكوين تطبيق المصادقة:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.تغيير مالك البوابة الإلكترونية "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -2068,5 +2070,20 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt; إذا رغبتم في الاستمرار باستخدام مساحة DocSpace الخاصة بكم، ما عليكم سوى الدخول إليها والقيام بأي إجراء.&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>انتقل إلى الخدمات</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>انتقل إلى إعدادات المحفظة</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>الإجراء المطلوب: غير قادر على تعبئة رصيد المحفظة تلقائيًا في ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>دفعة الاشتراك القادمة لـ ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>الإجراء المطلوب: غير قادر على تجديد خطة الخدمة تلقائيًا في ${LetterLogoText} DocSpace</value>
   </data>
 </root>

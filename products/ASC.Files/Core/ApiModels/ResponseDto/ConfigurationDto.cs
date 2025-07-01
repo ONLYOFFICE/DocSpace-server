@@ -288,6 +288,11 @@ public class LogoConfigDto
     public string ImageDark { get; set; }
 
     /// <summary>
+    /// The light image of the logo.
+    /// </summary>
+    public string ImageLight { get; set; }
+
+    /// <summary>
     /// The embedded image of the logo.
     /// </summary>
     public string ImageEmbedded { get; set; }
@@ -554,7 +559,7 @@ public class CustomizationConfigConverter<T>(
 
         var result = new CustomizationConfigDto
         {
-            About = source.About,
+            About = await source.IsAboutPageVisible(),
             Customer = coreBaseSettings.Standalone ? await customerConfigConverter.Convert(source.Customer) : null,
             Feedback = await source.GetFeedback(),
             Forcesave = source.GetForceSave(file),
@@ -587,6 +592,7 @@ public class LogoConfigConverter<T>
         {
             Image = await source.GetImage(configuration.EditorType),
             ImageDark = await source.GetImageDark(),
+            ImageLight = await source.GetImageLight(),
             ImageEmbedded = await source.GetImageEmbedded(configuration.EditorType),
             Url = source.Url,
             Visible = source.GetVisible(configuration.EditorType)

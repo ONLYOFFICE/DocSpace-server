@@ -54,9 +54,9 @@ namespace ASC.Files.Tests.FilesController;
 [Collection("Test Collection")]
 public class DeleteFileTest(
     FilesApiFactory filesFactory, 
-    WebApplicationFactory<WebApiProgram> apiFactory, 
-    WebApplicationFactory<PeopleProgram> peopleFactory,
-    WebApplicationFactory<FilesServiceProgram> filesServiceProgram) 
+    WepApiFactory apiFactory, 
+    PeopleFactory peopleFactory,
+    FilesServiceFactory filesServiceProgram) 
     : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
 {
     [Fact]
@@ -64,7 +64,7 @@ public class DeleteFileTest(
     {
         var createdFile = await CreateFile("test.docx", FolderType.USER, Initializer.Owner);
         
-        var fileToDelete = (await _filesFilesApi.DeleteFileAsync(createdFile.Id, new Delete { Immediately = true }, TestContext.Current.CancellationToken)).Response;
+        var fileToDelete = (await _filesApi.DeleteFileAsync(createdFile.Id, new Delete { Immediately = true }, TestContext.Current.CancellationToken)).Response;
         
         if (fileToDelete.Any(r => !r.Finished))
         {
@@ -74,8 +74,8 @@ public class DeleteFileTest(
         fileToDelete.Should().NotContain(x => !string.IsNullOrEmpty(x.Error));
         
         // Verify file no longer exists or has been moved to trash
-        await Assert.ThrowsAsync<Docspace.Client.ApiException>(async () => 
-            await _filesFilesApi.GetFileInfoAsync(createdFile.Id, cancellationToken: TestContext.Current.CancellationToken));
+        await Assert.ThrowsAsync<ApiException>(async () => 
+            await _filesApi.GetFileInfoAsync(createdFile.Id, cancellationToken: TestContext.Current.CancellationToken));
     }
     
     // [Fact]

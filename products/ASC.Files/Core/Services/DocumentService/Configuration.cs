@@ -812,6 +812,11 @@ public class FileReferenceData
     /// Room ID
     /// </summary>
     public string RoomId { get; set; }
+
+    /// <summary>
+    /// Specifies if the room can be edited out or not.
+    /// </summary>
+    public bool CanEditRoom { get; set; }
 }
 
 #endregion Nested Classes
@@ -842,6 +847,7 @@ public class CustomerConfig(
 [Transient(GenericArguments = [typeof(string)])]
 public class CustomizationConfig<T>(
     CoreBaseSettings coreBaseSettings,
+    TenantManager tenantManager,
     SettingsManager settingsManager,
     FileUtility fileUtility,
     FilesSettingsHelper filesSettingsHelper,
@@ -853,12 +859,29 @@ public class CustomizationConfig<T>(
     CustomerConfig customerConfig,
     LogoConfig logoConfig,
     FileSharing fileSharing,
-    CommonLinkUtility commonLinkUtility)
+    CommonLinkUtility commonLinkUtility,
+    ExternalShare externalShare,
+    ExternalLinkHelper externalLinkHelper)
 {
     [JsonIgnore]
     public string GobackUrl;
 
-    public bool About => !coreBaseSettings.Standalone && !coreBaseSettings.CustomMode;
+    public async Task<bool> IsAboutPageVisible()
+    {
+        if (!coreBaseSettings.Standalone && !coreBaseSettings.CustomMode)
+        {
+            return true;
+        }
+
+        var quota = await tenantManager.GetCurrentTenantQuotaAsync();
+        if (!quota.Branding)
+        {
+            return true;
+        }
+
+        var companyWhiteLabelSettings = await settingsManager.LoadForDefaultTenantAsync<CompanyWhiteLabelSettings>();
+        return !companyWhiteLabelSettings.HideAbout;
+    }
 
     public CustomerConfig Customer { get; set; } = customerConfig;
 
@@ -895,11 +918,7 @@ public class CustomizationConfig<T>(
         {
             return null;
         }
-
-        if (!authContext.IsAuthenticated)
-        {
-            return null;
-        }
+        
         if (GobackUrl != null)
         {
             return new GobackConfig
@@ -907,11 +926,27 @@ public class CustomizationConfig<T>(
                 Url = GobackUrl
             };
         }
-
+        
+        Folder<T> parent;
         var folderDao = daoFactory.GetFolderDao<T>();
+        var (shareRight, key) = await CheckLinkAsync(file);
+        
+        if (!authContext.IsAuthenticated)
+        {
+            if (shareRight != FileShare.Restrict && !string.IsNullOrEmpty(key))
+            {           
+                parent = await folderDao.GetFolderAsync(file.ParentId);
+                return new GobackConfig
+                {
+                    Url = pathProvider.GetFolderUrl(parent, key)
+                };
+            }
+        }
+        
         try
         {
-            var parent = await folderDao.GetFolderAsync(file.ParentId);
+
+            parent = await folderDao.GetFolderAsync(file.ParentId);
             if (file.RootFolderType == FolderType.USER && 
                 !Equals(file.RootId, await globalFolderHelper.FolderMyAsync) && 
                 !await fileSecurity.CanReadAsync(parent))
@@ -920,7 +955,7 @@ public class CustomizationConfig<T>(
                 {
                     return new GobackConfig
                     {
-                        Url = await pathProvider.GetFolderUrlByIdAsync(await globalFolderHelper.FolderShareAsync)
+                        Url = await pathProvider.GetFolderUrlByIdAsync(await globalFolderHelper.FolderRecentAsync, key)
                     };
                 }
 
@@ -936,7 +971,7 @@ public class CustomizationConfig<T>(
 
             return new GobackConfig
             {
-                Url = await pathProvider.GetFolderUrlAsync(parent)
+                Url =  pathProvider.GetFolderUrl(parent, key)
             };
         }
         catch (Exception)
@@ -952,7 +987,7 @@ public class CustomizationConfig<T>(
     {
         return authContext.IsAuthenticated
                && !file.Encrypted
-               && await FileSharing.CanSetAccessAsync(file);
+               && await fileSharing.CanSetAccessAsync(file);
     }
 
     public string GetReviewDisplay(bool modeWrite)
@@ -969,8 +1004,30 @@ public class CustomizationConfig<T>(
             ResultMessage = ""
         };
     }
+    
+    private async Task<(FileShare, string)> CheckLinkAsync(File<T> file)
+    {
+        var linkRight = FileShare.Restrict;
 
-    private FileSharing FileSharing { get; } = fileSharing;
+        var key = externalShare.GetKey();
+        if (string.IsNullOrEmpty(key))
+        {
+            return (linkRight, key);
+        }
+
+        var result = await externalLinkHelper.ValidateAsync(key);
+        if (result.Access == FileShare.Restrict)
+        {
+            return (linkRight, key);
+        }
+
+        if (file != null && await fileSecurity.CanDownloadAsync(file))
+        {
+            linkRight = result.Access;
+        }
+
+        return (linkRight, key);
+    }
 }
 
 /// <summary>
@@ -979,10 +1036,19 @@ public class CustomizationConfig<T>(
 [Transient]
 public class EmbeddedConfig(BaseCommonLinkUtility baseCommonLinkUtility, FilesLinkUtility filesLinkUtility)
 {
+    private string _embedUrl;
+    private string _shareUrl;
     /// <summary>
     /// The absolute URL to the document serving as a source file for the document embedded into the web page.
     /// </summary>
-    public string EmbedUrl => ShareLinkParam != null && ShareLinkParam.Contains(FilesLinkUtility.ShareKey, StringComparison.Ordinal) ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=embedded" + ShareLinkParam) : null;
+    public string EmbedUrl
+    {
+        get
+        {
+            return _embedUrl ?? (ShareLinkParam != null && ShareLinkParam.Contains(FilesLinkUtility.ShareKey, StringComparison.Ordinal) ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=embedded" + ShareLinkParam) : null);
+        }
+        set => _embedUrl = value;
+    }
 
     /// <summary>
     /// The absolute URL that will allow the document to be saved onto the user personal computer.
@@ -997,8 +1063,14 @@ public class EmbeddedConfig(BaseCommonLinkUtility baseCommonLinkUtility, FilesLi
     /// <summary>
     /// The absolute URL that will allow other users to share this document.
     /// </summary>
-    public string ShareUrl => ShareLinkParam != null && ShareLinkParam.Contains(FilesLinkUtility.ShareKey) ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=view" + ShareLinkParam) : null;
-
+    public string ShareUrl
+    {
+        get
+        {
+            return _shareUrl ?? (ShareLinkParam != null && ShareLinkParam.Contains(FilesLinkUtility.ShareKey) ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=view" + ShareLinkParam) : null);
+        }
+        set => _shareUrl = value;
+    }
     /// <summary>
     /// The place for the embedded viewer toolbar, can be either "top" or "bottom".
     /// </summary>
@@ -1064,6 +1136,11 @@ public class LogoConfig(
         return editorType == EditorType.Embedded
                 ? commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(WhiteLabelLogoType.DocsEditorEmbed))
                 : commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(WhiteLabelLogoType.DocsEditor));
+    }
+
+    public async Task<string> GetImageLight()
+    {
+        return commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(WhiteLabelLogoType.DocsEditorEmbed));
     }
 
     public async Task<string> GetImageDark()

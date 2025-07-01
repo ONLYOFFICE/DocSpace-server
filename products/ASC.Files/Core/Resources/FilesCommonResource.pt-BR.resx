@@ -512,4 +512,10 @@
   <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
     <value>Comece a encher</value>
   </data>
+  <data name="RoleEnum_Guest" xml:space="preserve">
+    <value>Hóspede</value>
+  </data>
+  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
+    <value>Administrador da sala</value>
+  </data>
 </root>

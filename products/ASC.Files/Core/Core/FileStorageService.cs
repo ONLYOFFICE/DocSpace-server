@@ -1966,18 +1966,7 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ViewTrashItem);
         }
 
-        var tags = tagDao.GetTagsAsync(file.Id, FileEntryType.File, TagType.Locked);
-        var tagLocked = await tags.FirstOrDefaultAsync();
-
-        if (tagLocked != null)
-        {
-            if (tagLocked.Owner != authContext.CurrentAccount.ID
-                && file.Access != FileShare.RoomManager
-                && !await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
-            {
-                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_LockedFile);
-            }
-        }
+        var tagLocked = await tagDao.GetTagsAsync(file.Id, FileEntryType.File, TagType.Locked).FirstOrDefaultAsync();
 
         if (lockfile)
         {
@@ -5066,6 +5055,15 @@ public class FileStorageService //: IFileStorageService
             await filesMessageService.SendAsync(actions[SubjectType.ExternalLink][eventType], entry, ace.FileShareOptions?.Title);
         }
 
+        if (entry is Folder<T> folderEntry)
+        {
+            await socketManager.UpdateFolderAsync(folderEntry);
+        }
+        else  if (entry is File<T> fileEntry)
+        {
+            await socketManager.UpdateFileAsync(fileEntry);
+        }
+        
         return (await fileSharing.GetPureSharesAsync(entry, [linkId]).FirstOrDefaultAsync());
     }
 

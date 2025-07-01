@@ -31,8 +31,20 @@ namespace ASC.Core.Billing;
 /// </summary>
 public class PaymentCalculation
 {
+    /// <summary>
+    /// Unique identifier of the operation.
+    /// </summary>
     public long OperationId { get; set; }
+    /// <summary>
+    /// The amount of the payment calculation.
+    /// </summary>
     public decimal Amount { get; set; }
+    /// <summary>
+    /// The three-character ISO 4217 currency symbol of the payment calculation.
+    /// </summary>
     public string Currency { get; set; }
+    /// <summary>
+    /// The quantity associated with the payment calculation.
+    /// </summary>
     public int Quantity { get; set; }
 }

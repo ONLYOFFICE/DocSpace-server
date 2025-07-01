@@ -78,4 +78,18 @@ public class WebhookLogsRequestDto
     /// </summary>
     [FromQuery(Name = "trigger")]
     public WebhookTrigger? Trigger { get; set; }
+
+    /// <summary>
+    /// The maximum number of webhook log records to return in the query response.
+    /// </summary>
+    [FromQuery(Name = "count")]
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
+
+    /// <summary>
+    /// Specifies the starting index for retrieving webhook logs.
+    /// Used for pagination in the webhook delivery log queries.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
 }

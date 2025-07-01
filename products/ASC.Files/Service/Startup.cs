@@ -46,8 +46,9 @@ public class Startup : BaseWorkerStartup
 
     public override async Task ConfigureServices(WebApplicationBuilder builder)
     {
-        var services = builder.Services;
         await base.ConfigureServices(builder);
+        
+        var services = builder.Services;
         services.AddHttpClient();
 
         
@@ -75,6 +76,7 @@ public class Startup : BaseWorkerStartup
             services.AddActivePassiveHostedService<AutoDeactivateExpiredApiKeysService>(Configuration);
             services.AddActivePassiveHostedService<DeleteExpiredService>(Configuration);
             services.AddActivePassiveHostedService<CleanupLifetimeExpiredService>(Configuration);
+            services.AddActivePassiveHostedService<FrozenThumbnailProcessingService>(Configuration);
 
             services.AddSingleton(typeof(INotifyQueueManager<>), typeof(RoomNotifyQueueManager<>));
 

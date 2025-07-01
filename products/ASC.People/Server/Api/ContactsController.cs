@@ -26,15 +26,18 @@
 
 namespace ASC.People.Api;
 
-public class ContactsController(UserManager userManager,
-        PermissionContext permissionContext,
-        ApiContext apiContext,
-        UserPhotoManager userPhotoManager,
-        IHttpClientFactory httpClientFactory,
-        EmployeeFullDtoHelper employeeFullDtoHelper,
-        IHttpContextAccessor httpContextAccessor)
+public class ContactsController(
+    UserManager userManager,
+    PermissionContext permissionContext,
+    ApiContext apiContext,
+    UserPhotoManager userPhotoManager,
+    IHttpClientFactory httpClientFactory,
+    EmployeeFullDtoHelper employeeFullDtoHelper,
+    TenantManager tenantManager,
+    AuthContext authContext,
+    IHttpContextAccessor httpContextAccessor)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
-    {
+{
     /// <summary>
     /// Deletes the contacts of the user with the ID specified in the request from the portal.
     /// </summary>
@@ -77,7 +80,11 @@ public class ContactsController(UserManager userManager,
     public async Task<EmployeeFullDto> SetMemberContacts(ContactsRequestDto inDto)
     {
         var user = await GetUserInfoAsync(inDto.UserId);
-
+        
+        if (user.Id == tenantManager.GetCurrentTenant().OwnerId && user.Id != authContext.CurrentAccount.ID)
+        {
+            throw new SecurityException();
+        }
         if (_userManager.IsSystemUser(user.Id))
         {
             throw new SecurityException();
@@ -105,7 +112,12 @@ public class ContactsController(UserManager userManager,
     public async Task<EmployeeFullDto> UpdateMemberContacts(ContactsRequestDto inDto)
     {
         var user = await GetUserInfoAsync(inDto.UserId);
-
+        
+        if (user.Id == tenantManager.GetCurrentTenant().OwnerId && user.Id != authContext.CurrentAccount.ID)
+        {
+            throw new SecurityException();
+        }
+        
         if (_userManager.IsSystemUser(user.Id))
         {
             throw new SecurityException();

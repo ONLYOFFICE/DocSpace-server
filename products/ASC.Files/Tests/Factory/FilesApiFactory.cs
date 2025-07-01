@@ -25,51 +25,32 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 extern alias ASCFiles;
-using ASC.Core.Common.EF;
+using Testcontainers.OpenSearch;
 
-using Docspace.Client;
-
-using DotNet.Testcontainers.Builders;
-
-using Npgsql;
-
-using Testcontainers.PostgreSql;
-
-namespace ASC.Files.Tests;
+namespace ASC.Files.Tests.Factory;
 
 public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetime
 {
-    class FakePass { public string Password { get; set; } }
-    
-    private static readonly Faker<FakePass> _fakerPassword = new Faker<FakePass>()
-        .RuleFor(x => x.Password, f => f.Internet.Password(10, 12, true, true, true));
-    
     private readonly MySqlContainer _mySqlContainer;
-    
     private readonly PostgreSqlContainer _postgresSqlContainer;
-    
     private readonly RedisContainer _redisContainer;
-    
     private readonly RabbitMqContainer _rabbitMqContainer;
-    
-    private readonly IContainer _openSearchContainer;
-    
+    private readonly OpenSearchContainer _openSearchContainer;
+    private readonly CustomProviderInfo _providerInfo;
     private DbConnection _dbconnection = null!;
     private Respawner _respawner = null!;
-    readonly List<string> _tablesToBackup = ["files_folder", "files_folder_tree", "core_user", "core_usersecurity", "files_bunch_objects" ];
-    readonly List<string> _tablesToIgnore = ["core_acl", "core_settings", "core_subscription", "core_subscriptionmethod", "core_usergroup", "login_events", "tenants_tenants", "tenants_quota", "webstudio_settings" ];
+    private readonly List<string> _tablesToBackup = ["files_folder", "files_folder_tree", "core_user", "core_usersecurity", "files_bunch_objects" ];
+    private readonly List<string> _tablesToIgnore = ["core_acl", "core_settings", "core_subscription", "core_subscriptionmethod", "core_usergroup", "login_events", "tenants_tenants", "tenants_quota", "webstudio_settings" ];
     
-    public string RedisConnectionString => _redisContainer.GetConnectionString(); 
-    public string RabbitMqConnectionString => _rabbitMqContainer.GetConnectionString(); 
-    public string OpenSearchConnectionString => $"{_openSearchContainer.Hostname}:{_openSearchContainer.GetMappedPublicPort(9200)}"; 
     public HttpClient HttpClient { get; private set;} = null!;
     public FilesFoldersApi FilesFoldersApi { get; private set;} = null!;
     public FilesFilesApi FilesFilesApi { get; private set;} = null!;
     public FilesOperationsApi FilesOperationsApi { get; private set;} = null!;
-    public FilesRoomsApi FilesRoomsApi { get; private set;} = null!;
+    public RoomsApi RoomsApi { get; private set;} = null!;
     public FilesSettingsApi FilesSettingsApi { get; private set;} = null!;
-
-    public readonly CustomProviderInfo ProviderInfo;
+    public FilesQuotaApi  FilesQuotaApi { get; private set;} = null!;
+    public FilesSharingApi  FilesSharingApi { get; private set;} = null!;
+    public SettingsQuotaApi  SettingsQuotaApi { get; private set;} = null!;
     
     public FilesApiFactory()
     {        
@@ -119,13 +100,9 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
             Tag = "2.18.0"
         };
         
-        _openSearchContainer = new ContainerBuilder()
+        _openSearchContainer = new OpenSearchBuilder()
             .WithImage($"{openSearchContainer.Image}:{openSearchContainer.Tag}")
-            .WithPortBinding(9200, true)
-            .WithEnvironment("OPENSEARCH_INITIAL_ADMIN_PASSWORD", _fakerPassword.Generate().Password)
-            .WithEnvironment("discovery.type", "single-node")
-            .WithEnvironment("plugins.security.disabled", "true")
-            .WithWaitStrategy(Wait.ForUnixContainer().UntilHttpRequestIsSucceeded(r => r.ForPort(9200)))
+            .WithSecurityEnabled(false)
             .Build();
 
         var mysqlContainer = containers.FirstOrDefault(r => r.Name == "mysql") ?? new Container
@@ -139,14 +116,15 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
             .WithImage($"{mysqlContainer.Image}:{mysqlContainer.Tag}")
             .Build();
         
-        ProviderInfo = GetProviderInfo(config.GetValue<Provider>("dbProviderType"));
+        _providerInfo = GetProviderInfo(config.GetValue<Provider>("dbProviderType"));
     }
     
     protected override IHost CreateHost(IHostBuilder builder)
     {
         builder.ConfigureHostConfiguration(configBuilder =>
         {
-            configBuilder.AddInMemoryCollection(Initializer.GetSettings(ProviderInfo, RedisConnectionString, RabbitMqConnectionString, OpenSearchConnectionString)); 
+            Initializer.InitSettings(_providerInfo, _redisContainer.GetConnectionString(), _rabbitMqContainer.GetConnectionString(), $"{_openSearchContainer.Hostname}:{_openSearchContainer.GetMappedPublicPort(9200)}");
+            configBuilder.AddInMemoryCollection(Initializer.GlobalSettings);
         });
         
         return base.CreateHost(builder);
@@ -169,7 +147,7 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
     {
         await _respawner.ResetAsync(_dbconnection);
         
-        var script = ProviderInfo.Provider switch
+        var script = _providerInfo.Provider switch
         {
             Provider.MySql => "INSERT INTO {0} SELECT * FROM {1};",
             Provider.PostgreSql => "INSERT INTO {0} SELECT * FROM {1};SELECT setval('{0}_id_seq', (SELECT MAX(id) FROM {0})+1);",
@@ -181,16 +159,20 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
 
     public async ValueTask InitializeAsync()
     {
-        await StartAllContainersAsync(ProviderInfo.Provider == Provider.MySql ? _mySqlContainer : _postgresSqlContainer, _redisContainer, _rabbitMqContainer, _openSearchContainer);
+        await StartAllContainersAsync(_providerInfo.Provider == Provider.MySql ? _mySqlContainer : _postgresSqlContainer, _redisContainer, _rabbitMqContainer, _openSearchContainer);
         
-        _dbconnection =  ProviderInfo.Provider == Provider.MySql ?  new MySqlConnection(_mySqlContainer.GetConnectionString()) : new NpgsqlConnection(_postgresSqlContainer.GetConnectionString());
+        _dbconnection =  _providerInfo.Provider == Provider.MySql ?  new MySqlConnection(_mySqlContainer.GetConnectionString()) : new NpgsqlConnection(_postgresSqlContainer.GetConnectionString());
 
         HttpClient = CreateClient();
-        FilesFoldersApi = new FilesFoldersApi(HttpClient, new Configuration { BasePath = HttpClient.BaseAddress!.ToString().TrimEnd('/') });
-        FilesFilesApi = new FilesFilesApi(HttpClient, new Configuration { BasePath = HttpClient.BaseAddress!.ToString().TrimEnd('/') });
-        FilesOperationsApi = new FilesOperationsApi(HttpClient, new Configuration { BasePath = HttpClient.BaseAddress!.ToString().TrimEnd('/') });
-        FilesRoomsApi = new FilesRoomsApi(HttpClient, new Configuration { BasePath = HttpClient.BaseAddress!.ToString().TrimEnd('/') });
-        FilesSettingsApi = new FilesSettingsApi(HttpClient, new Configuration { BasePath = HttpClient.BaseAddress!.ToString().TrimEnd('/') });
+        var configuration = new Configuration { BasePath = HttpClient.BaseAddress!.ToString().TrimEnd('/') };
+        FilesFoldersApi = new FilesFoldersApi(HttpClient, configuration);
+        FilesFilesApi = new FilesFilesApi(HttpClient, configuration);
+        FilesOperationsApi = new FilesOperationsApi(HttpClient, configuration);
+        RoomsApi = new RoomsApi(HttpClient, configuration);
+        FilesSettingsApi = new FilesSettingsApi(HttpClient, configuration);
+        FilesQuotaApi = new FilesQuotaApi(HttpClient, configuration);
+        FilesSharingApi = new FilesSharingApi(HttpClient, configuration);
+        SettingsQuotaApi = new SettingsQuotaApi(HttpClient, configuration);
         
         var tablesToIgnore = _tablesToIgnore.Select(t => new Table(t)).ToList();
         tablesToIgnore.AddRange(_tablesToBackup.Select(r=> new Table(MakeCopyTableName(r))));
@@ -198,7 +180,7 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
         await _dbconnection.OpenAsync();
         _respawner = await Respawner.CreateAsync(_dbconnection, new RespawnerOptions
         {
-            DbAdapter = ProviderInfo.Provider == Provider.MySql ? DbAdapter.MySql : DbAdapter.Postgres,
+            DbAdapter = _providerInfo.Provider == Provider.MySql ? DbAdapter.MySql : DbAdapter.Postgres,
             TablesToIgnore = tablesToIgnore.ToArray(),
             WithReseed = true
         });
@@ -206,7 +188,7 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
 
     internal async Task BackupTables()
     {
-        var script = ProviderInfo.Provider switch
+        var script = _providerInfo.Provider switch
         {
             Provider.MySql => "CREATE TABLE IF NOT EXISTS {1} LIKE {0}; \nREPLACE INTO {1} SELECT * FROM {0};",
             Provider.PostgreSql => "CREATE TABLE IF NOT EXISTS {1} (LIKE {0} INCLUDING ALL);\n DELETE FROM {1}; \nINSERT INTO {1} SELECT * FROM {0};",
@@ -228,7 +210,7 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
             backupScript.AppendFormat(scriptTemplate, table, MakeCopyTableName(table));
         }
 
-        if (ProviderInfo.Provider == Provider.MySql)
+        if (_providerInfo.Provider == Provider.MySql)
         {
             await _mySqlContainer.ExecScriptAsync(backupScript.ToString());
         }

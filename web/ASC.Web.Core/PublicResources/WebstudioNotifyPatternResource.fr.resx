@@ -200,7 +200,9 @@ Les paramètres de l'application d'authentification que vous utilisez pour accé
 
 Cliquez sur ce lien pour passer à la page de connexion du portail et configurer l'application d'authentification :
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.Changement du propriétaire du portail "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -1936,5 +1938,39 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Paiement à venir de l'abonnement pour votre ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Aller aux Services</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Aller dans les paramètres de Wallet</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Bonjour, $UserName !
+
+Nous vous informons que le renouvellement automatique de votre plan de service n'a pas pu être effectué.
+
+Nous vous demandons de renouveler manuellement votre plan de service actuel (ou d'en acheter un nouveau).
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Bonjour, $UserName !
+
+Nous vous informons que le rechargement automatique du solde du Wallet de DocSpace a échoué.
+
+Nous vous demandons de vérifier et de mettre à jour manuellement le solde de votre Wallet.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Action requise : Impossible de renouveler automatiquement le plan de service dans votre ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Action requise : Impossible de recharger automatiquement le solde de Wallet dans votre ${LetterLogoText} DocSpace</value>
   </data>
 </root>
