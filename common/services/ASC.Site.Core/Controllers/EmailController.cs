@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Common.Log;
-
 namespace ASC.Site.Core.Controllers;
 
 [Scope]
@@ -36,12 +34,8 @@ public class EmailController(
         ILogger<EmailController> logger)
     : ControllerBase
 {
-    public record SendEmailRequestDto(string Email, string Subject, string Body);
-    public record SendEmailResponseDto(bool Success);
-
-
     [HttpPost("send")]
-    [AllowAnonymous]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
     public async Task<SendEmailResponseDto> SendEmail(SendEmailRequestDto inDto)
     {
         try

@@ -24,17 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Site.Core.Classes;
+namespace ASC.Site.Core.Dtos;
 
-[Singleton]
-public class CommonConstants(IConfiguration configuration, CoreSettings coreSettings)
-{
-    public string ApiSystemUrl { get; } = configuration["apisystem:url"];
-    public string NotifyFrom { get; } = configuration["core:notify:from"];
-
-    public string BaseDomain { get; } = coreSettings.BaseDomain;
-
-    public string NotifyFromTag { get; } = "MessageFrom";
-    public string NotifySenderName { get; } = "email.sender";
-    public string NotifyContentType { get; } = "html";
-}
+public record SendEmailRequestDto(string Email, string Subject, string Body);
+public record SendEmailResponseDto(bool Success);

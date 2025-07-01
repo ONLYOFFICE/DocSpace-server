@@ -24,16 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Reflection;
-
 namespace ASC.Site.Core.Controllers;
 
 [Scope]
 [ApiController]
 [Route("[controller]")]
-public class ThirdPartyController(IHttpClientFactory clientFactory, ApiSystemHelper apiSystemHelper) : ControllerBase
+public class ThirdPartyController(
+    IHttpClientFactory clientFactory,
+    CommonConstants commonConstants,
+    ApiSystemHelper apiSystemHelper) : ControllerBase
 {
-    /// <path>/thirdparty</path>
     [HttpGet("")]
     [AllowAnonymous]
     public ContentResult IndexHtml()
@@ -47,8 +47,6 @@ public class ThirdPartyController(IHttpClientFactory clientFactory, ApiSystemHel
         return Content(html, "text/html");
     }
 
-    /// <path>/thirdparty/{provider}/code</path>
-    [SwaggerResponse(400, "Error")]
     [HttpGet("{provider}/code")]
     [AllowAnonymous]
     public ContentResult GetThirdPartyProviderCode()
@@ -62,11 +60,17 @@ public class ThirdPartyController(IHttpClientFactory clientFactory, ApiSystemHel
         return Content(html, "text/html"); 
     }
 
+    [HttpGet("authtoken")]
+    [AllowAnonymous]
+    public string GetAuthToken()
+    {
+        return CreateAuthToken();
+    }
+
     public record RegisterDto(string ThirdPartyProfile, string Email);
 
-    /// <path>/thirdparty/register</path>
     [HttpPost("register")]
-    [AllowAnonymous]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
     public async Task<string> RegisterAsync(RegisterDto inDto)
     {
         if (string.IsNullOrEmpty(inDto.ThirdPartyProfile) && string.IsNullOrEmpty(inDto.Email))
@@ -76,14 +80,11 @@ public class ThirdPartyController(IHttpClientFactory clientFactory, ApiSystemHel
 
         var request = new HttpRequestMessage
         {
-            RequestUri = new Uri("http://localhost:8092/apisystem/portal/registerbyemail"),
+            RequestUri = new Uri($"{commonConstants.ApiSystemUrl}/portal/registerbyemail"),
             Method = HttpMethod.Post
         };
 
-        var auth = apiSystemHelper.CreateAuthToken(Guid.NewGuid().ToString());
-        auth = auth.Substring(0, auth.Length - 1);
-
-        request.Headers.Add("Authorization", auth);
+        request.Headers.Add("Authorization", CreateAuthToken());
         request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
         var data = System.Text.Json.JsonSerializer.Serialize(inDto);
@@ -94,5 +95,11 @@ public class ThirdPartyController(IHttpClientFactory clientFactory, ApiSystemHel
         using var response = await httpClient.SendAsync(request);
 
         return await response.Content.ReadAsStringAsync();
+    }
+
+    private string CreateAuthToken()
+    {
+        var auth = apiSystemHelper.CreateAuthToken(Guid.NewGuid().ToString());
+        return auth.Substring(0, auth.Length - 1); // remove hack
     }
 }

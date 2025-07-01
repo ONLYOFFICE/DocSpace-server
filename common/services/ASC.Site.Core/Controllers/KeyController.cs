@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Common.Log;
-
 namespace ASC.Site.Core.Controllers;
 
 [Scope]
@@ -36,12 +34,8 @@ public class KeyController(
         ILogger<KeyController> logger)
     : ControllerBase
 {
-    public record GenerateKeysRequestDto(string Email);
-    public record GenerateKeysResponseDto(string EmailKey, string LinkKey);
-
-
     [HttpPost("generate")]
-    [AllowAnonymous]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
     public async Task<GenerateKeysResponseDto> GenerateKeys(GenerateKeysRequestDto inDto)
     {
         try
@@ -64,12 +58,8 @@ public class KeyController(
         }
     }
 
-
-    public record ValideteKeysRequestDto(string EmailKey, string LinkKey, string Page);
-    public record ValideteKeysResponseDto(string Email, bool Valid);
-
     [HttpPost("validate")]
-    [AllowAnonymous]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
     public async Task<ValideteKeysResponseDto> ValideteKeys(ValideteKeysRequestDto inDto)
     {
         try

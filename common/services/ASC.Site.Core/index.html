@@ -4,7 +4,32 @@
     <title>Example</title>
 </head>
 <body>
-    <h1>Sign In Example</h1>
+    <h1>Auth token</h1>
+    <button id="getAuthTokenButton">Get Auth Token</button>
+    <br />
+    <br />
+    <div id="getAuthTokenResult"></div>
+
+
+    <h1>Generate Keys</h1>
+    <input type="text" id="generateKeysEmail" placeholder="Email" />
+    <button id="generateKeysButton">Generate Keys</button>
+    <br />
+    <br />
+    <div id="generateKeysResult"></div>
+
+
+    <h1>Validate Keys</h1>
+    <input type="text" id="validateKeysEmailKey" placeholder="EmailKey" />
+    <input type="text" id="validateKeysLinkKey" placeholder="LinkKey" />
+    <input type="text" id="validateKeysPage" placeholder="Page" />
+    <button id="validateKeysButton">Validate Keys</button>
+    <br />
+    <br />
+    <div id="validateKeysResult"></div>
+
+
+    <h1>Sign In</h1>
     <button id="signInByGoogleButton">Sign In By Google</button>
     <br />
     <br />
@@ -15,7 +40,7 @@
     <br />
     <div id="signInResult"></div>
 
-    <h1>Sign Up Example</h1>
+    <h1>Sign Up</h1>
     <button id="signUpByGoogleButton">Sign Up By Google</button>
     <br />
     <br />
@@ -25,18 +50,31 @@
     <br />
     <div id="signUpResult"></div>
 
-    <h1>Send Email Example</h1>
+    <h1>Find Portal</h1>
+    <input type="text" id="findPortalDomain" placeholder="Domain" />
+    <button id="findPortalButton">Find Portal</button>
+    <br />
+    <br />
+    <div id="findPortalResult"></div>
+
+    <h1>Send Email</h1>
     <input type="text" id="email" placeholder="Email" />
     <button id="sendEmailButton">Send Email</button>
+    <br />
+    <br />
+    <div id="sendEmailResult"></div>
+    <br />
+    <br />
 
     <script type="text/javascript">
 
-        var modalDialog;
-        var interval;
+        var modalDialog = null;
+        var interval = null;
+        var authToken = null;
 
 
         document.getElementById('signInByGoogleButton').onclick = function () {
-            modalDialog = window.open(location.href + "/login.ashx?auth=google&mode=popup&callback=SignInByGoogle", "signup", "width=800,height=500,status=no,toolbar=no,menubar=no,resizable=yes,scrollbars=no");
+            modalDialog = window.open(location.href + "/login?auth=google&mode=popup&callback=SignInByGoogle", "signup", "width=800,height=500,status=no,toolbar=no,menubar=no,resizable=yes,scrollbars=no");
             interval = setInterval(checkSignInCode, 500);
             return false;
         };
@@ -57,7 +95,7 @@
                     }),
                 );
 
-                modalDialog.location.href = location.href + `/login.ashx?p=${token}&code=${code}`;
+                modalDialog.location.href = location.href + `/login?p=${token}&code=${code}`;
             }
         }
 
@@ -68,7 +106,8 @@
                 fetch("/multiregion/findbysocial", {
                     method: "POST",
                     headers: {
-                        "Content-Type": "application/json"
+                        "Content-Type": "application/json",
+                        Authorization: authToken
                     },
                     body: JSON.stringify({ transport: data })
                 })
@@ -96,7 +135,8 @@
             fetch("/multiregion/findbyemailpassword", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    Authorization: authToken
                 },
                 body: JSON.stringify(body)
             })
@@ -114,7 +154,7 @@
 
 
         document.getElementById('signUpByGoogleButton').onclick = function () {
-            modalDialog = window.open(location.href + "/login.ashx?auth=google&mode=popup&callback=SignUpByGoogle", "signup", "width=800,height=500,status=no,toolbar=no,menubar=no,resizable=yes,scrollbars=no");
+            modalDialog = window.open(location.href + "/login?auth=google&mode=popup&callback=SignUpByGoogle", "signup", "width=800,height=500,status=no,toolbar=no,menubar=no,resizable=yes,scrollbars=no");
             interval = setInterval(checkSignUpCode, 500);
             return false;
         };
@@ -135,7 +175,7 @@
                     }),
                 );
 
-                modalDialog.location.href = location.href + `/login.ashx?p=${token}&code=${code}`;
+                modalDialog.location.href = location.href + `/login?p=${token}&code=${code}`;
             }
         }
 
@@ -146,7 +186,8 @@
                 fetch("/thirdparty/register", {
                     method: "POST",
                     headers: {
-                        "Content-Type": "application/json"
+                        "Content-Type": "application/json",
+                        Authorization: authToken
                     },
                     body: JSON.stringify({ thirdPartyProfile: data })
                 })
@@ -171,7 +212,8 @@
             fetch("/thirdparty/register", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    Authorization: authToken
                 },
                 body: JSON.stringify({ email })
             })
@@ -179,6 +221,30 @@
                 .then(data => {
                     console.log(JSON.stringify(data));
                     document.getElementById('signUpResult').innerText = JSON.stringify(data);
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                });
+
+            return false;
+        };
+
+
+        document.getElementById('findPortalButton').onclick = function () {
+            const domain = document.getElementById('findPortalDomain').value;
+
+            fetch("/multiregion/findbydomain", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: authToken
+                },
+                body: JSON.stringify({ domain })
+            })
+                .then(response => response.text())
+                .then(data => {
+                    console.log(data);
+                    document.getElementById('findPortalResult').innerText = data || "not found";
                 })
                 .catch(error => {
                     console.error("Error:", error);
@@ -200,14 +266,83 @@
             fetch("/email/send", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    Authorization: authToken
                 },
                 body: JSON.stringify(body)
             })
                 .then(response => response.json())
                 .then(data => {
                     console.log(JSON.stringify(data));
-                    alert("Email sent successfully");
+                    document.getElementById('sendEmailResult').innerText = JSON.stringify(data);
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                });
+
+            return false;
+        };
+
+        document.getElementById('generateKeysButton').onclick = function () {
+            const email = document.getElementById('generateKeysEmail').value;
+
+            fetch("/key/generate", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: authToken
+                },
+                body: JSON.stringify({ email })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(JSON.stringify(data));
+                    document.getElementById('generateKeysResult').innerText = JSON.stringify(data);
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                });
+
+            return false;
+        };
+
+        document.getElementById('validateKeysButton').onclick = function () {
+            const emailKey = document.getElementById('validateKeysEmailKey').value;
+            const linkKey = document.getElementById('validateKeysLinkKey').value;
+            const page = document.getElementById('validateKeysPage').value;
+
+            fetch("/key/validate", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: authToken
+                },
+                body: JSON.stringify({ emailKey, linkKey, page })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(JSON.stringify(data));
+                    document.getElementById('validateKeysResult').innerText = JSON.stringify(data);
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                });
+
+            return false;
+        };
+
+        document.getElementById('getAuthTokenButton').onclick = function () {
+            fetch("/thirdparty/authtoken", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })
+                .then(response => response.text())
+                .then(data => {
+                    console.log(data);
+                    document.getElementById('getAuthTokenResult').innerText = data;
+                    authToken = data;
                 })
                 .catch(error => {
                     console.error("Error:", error);

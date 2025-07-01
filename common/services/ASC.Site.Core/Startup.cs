@@ -24,12 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Threading.Channels;
-
-using ASC.Core.Common.EF;
-using ASC.Core.Notify.Socket;
-using ASC.FederatedLogin;
-
 namespace ASC.Site.Core;
 
 public class Startup
@@ -46,17 +40,12 @@ public class Startup
         _hostEnvironment = hostEnvironment;
         _diHelper = new DIHelper();
         _corsOrigin = _configuration["core:cors"];
-        //if (String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
-        //{
-        //    configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
-        //}
     }
 
     public async Task ConfigureServices(WebApplicationBuilder builder)
     {        
         var services = builder.Services;
 
-        //services.AddCustomHealthCheck(_configuration);
         services.AddHttpContextAccessor();
         services.AddMemoryCache();
         services.AddHttpClient();
@@ -68,16 +57,8 @@ public class Startup
         services.AddBaseDbContextPool<CoreDbContext>();
         services.AddBaseDbContextPool<TenantDbContext>();
         services.AddBaseDbContextPool<UserDbContext>();
-        //services.AddBaseDbContextPool<TelegramDbContext>();
-        //services.AddBaseDbContextPool<FirebaseDbContext>();
         services.AddBaseDbContextPool<CustomDbContext>();
-        //services.AddBaseDbContextPool<UrlShortenerDbContext>();
         services.AddBaseDbContextPool<WebstudioDbContext>();
-        //services.AddBaseDbContextPool<InstanceRegistrationContext>();
-        //services.AddBaseDbContextPool<IntegrationEventLogContext>();
-        //services.AddBaseDbContextPool<MessagesContext>();
-        //services.AddBaseDbContextPool<WebhooksDbContext>();
-        //services.AddBaseDbContextPool<FilesDbContext>();
 
 
         services.AddBaseDbContextPool<EuUserDbContext>(region: "eu", nameConnectionString: "default");
@@ -127,7 +108,6 @@ public class Startup
         services.AddHybridCache(connectionMultiplexer)
                 .AddMemoryCache(connectionMultiplexer)
                 .AddEventBus(_configuration)
-                //.AddDistributedTaskQueue()
                 .AddDistributedLock(_configuration)
                 .AddCacheNotify(_configuration);
 
@@ -148,17 +128,13 @@ public class Startup
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
-        //app.UseExceptionHandler();
+        app.UseExceptionHandler();
         app.UseRouting();
 
-        //if (_configuration.GetValue<bool>("openApi:enable"))
-        //{
-        //    app.UseOpenApi();
-        //}
         app.UseSynchronizationContextMiddleware();
 
         //app.UseTenantMiddleware();
-        
+
         if (!string.IsNullOrEmpty(_corsOrigin))
         { 
             app.UseCors(CustomCorsPolicyName);
@@ -174,7 +150,7 @@ public class Startup
         });
 
         app.MapWhen(
-            context => context.Request.Path.ToString().EndsWith("login.ashx"),
+            context => context.Request.Path.ToString().EndsWith("/login"),
             appBranch =>
             {
                 appBranch.UseLoginHandler();

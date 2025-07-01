@@ -24,16 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Common.Log;
-using ASC.FederatedLogin.Profile;
-
 namespace ASC.Site.Core.Controllers;
 
 [Scope]
 [ApiController]
 [Route("[controller]")]
 public class MultiRegionController(
-        CoreSettings coreSettings,
+        CommonConstants commonConstants,
         MultiRegionPrivider multiRegionPrivider,
         LoginProfileTransport loginProfileTransport,
         CommonLinkUtility commonLinkUtility,
@@ -41,16 +38,8 @@ public class MultiRegionController(
         ILogger<MultiRegionController> logger)
     : ControllerBase
 {
-    public record FindByDomainRequestDto(string Domain);
-    public record FindByEmailRequestDto(string Email);
-    public record FindBySocialRequestDto(string Transport);
-    public record FindByEmailPasswordRequestDto(string Email, string Password, string PasswordHash);
-
-    public record TenantLinksDto(string PortalUrl, string AuthUrl);
-
-
     [HttpPost("findbydomain")]
-    [AllowAnonymous]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
     public async Task<string> FindByDomain(FindByDomainRequestDto inDto)
     {
         try
@@ -60,14 +49,21 @@ public class MultiRegionController(
                 return null;
             }
 
-            var tenant = await multiRegionPrivider.FindTenantByDomainAsync(inDto.Domain.ToLowerInvariant());
+            var domain = inDto.Domain.ToLowerInvariant();
+
+            if (!string.IsNullOrEmpty(commonConstants.BaseDomain) && domain.EndsWith(commonConstants.BaseDomain))
+            {
+                domain = domain.Replace(commonConstants.BaseDomain, "").TrimEnd('.');
+            }
+
+            var tenant = await multiRegionPrivider.FindTenantByDomainAsync(domain);
 
             if (tenant == null)
             {
                 return null;
             }
 
-            var portalUrl = GetAbsolutePortalUrl(coreSettings.BaseDomain, tenant.Alias, tenant.MappedDomain);
+            var portalUrl = GetAbsolutePortalUrl(commonConstants.BaseDomain, tenant.Alias, tenant.MappedDomain);
 
             return portalUrl;
         }
@@ -79,7 +75,7 @@ public class MultiRegionController(
     }
 
     [HttpPost("findbyemail")]
-    [AllowAnonymous]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
     public async Task<IEnumerable<TenantLinksDto>> FindByEmail(FindByEmailRequestDto inDto)
     {
         try
@@ -89,13 +85,12 @@ public class MultiRegionController(
                 return null;
             }
 
-            var baseDomain = coreSettings.BaseDomain;
             var tenantUsers = await multiRegionPrivider.FindTenantsByEmailAsync(inDto.Email);
 
             var tenantLinks = tenantUsers
                 .Select(tenantUser =>
                 {
-                    var portalUrl = GetAbsolutePortalUrl(baseDomain, tenantUser.TenantAlias, tenantUser.TenantMappedDomain);
+                    var portalUrl = GetAbsolutePortalUrl(commonConstants.BaseDomain, tenantUser.TenantAlias, tenantUser.TenantMappedDomain);
                     var authUrl = GetRelativeAuthUrl(tenantUser.TenantId, tenantUser.UserEmail, false);
                     return new TenantLinksDto(portalUrl, authUrl);
                 });
@@ -110,7 +105,7 @@ public class MultiRegionController(
     }
 
     [HttpPost("findbyemailpassword")]
-    [AllowAnonymous]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
     public async Task<IEnumerable<TenantLinksDto>> FindByEmailPassword(FindByEmailPasswordRequestDto inDto)
     {
         try
@@ -122,13 +117,12 @@ public class MultiRegionController(
 
             var passwordHash = inDto.PasswordHash ?? passwordHasher.GetClientPassword(inDto.Password);
 
-            var baseDomain = coreSettings.BaseDomain;
             var tenantUsers = await multiRegionPrivider.FindTenantsByEmailPasswordAsync(inDto.Email, passwordHash);
 
             var tenantLinks = tenantUsers
                 .Select(tenantUser =>
                 {
-                    var portalUrl = GetAbsolutePortalUrl(baseDomain, tenantUser.TenantAlias, tenantUser.TenantMappedDomain);
+                    var portalUrl = GetAbsolutePortalUrl(commonConstants.BaseDomain, tenantUser.TenantAlias, tenantUser.TenantMappedDomain);
                     var authUrl = GetRelativeAuthUrl(tenantUser.TenantId, tenantUser.UserEmail, false);
                     return new TenantLinksDto(portalUrl, authUrl);
                 });
@@ -143,7 +137,7 @@ public class MultiRegionController(
     }
 
     [HttpPost("findbysocial")]
-    [AllowAnonymous]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
     public async Task<IEnumerable<TenantLinksDto>> FindBySocial(FindBySocialRequestDto inDto)
     {
         try
@@ -160,13 +154,12 @@ public class MultiRegionController(
                 return null;
             }
 
-            var baseDomain = coreSettings.BaseDomain;
             var tenantUsers = await multiRegionPrivider.FindTenantsBySocialAsync(loginProfile);
 
             var tenantLinks = tenantUsers
                 .Select(tenantUser =>
                 {
-                    var portalUrl = GetAbsolutePortalUrl(baseDomain, tenantUser.TenantAlias, tenantUser.TenantMappedDomain);
+                    var portalUrl = GetAbsolutePortalUrl(commonConstants.BaseDomain, tenantUser.TenantAlias, tenantUser.TenantMappedDomain);
                     var authUrl = GetRelativeAuthUrl(tenantUser.TenantId, tenantUser.UserEmail, true);
                     return new TenantLinksDto(portalUrl, authUrl);
                 });

@@ -24,44 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Site.Core.Models;
+namespace ASC.Site.Core.Dtos;
 
-/// <summary>
-/// The request parameters for managing portal settings.
-/// </summary>
-public class SettingsModel : IModel
-{
-    /// <summary>
-    /// The portal name.
-    /// </summary>
-    [StringLength(255)]
-    public string PortalName { get; set; }
+public record FindByDomainRequestDto(string Domain);
+public record FindByEmailRequestDto(string Email);
+public record FindBySocialRequestDto(string Transport);
+public record FindByEmailPasswordRequestDto(string Email, string Password, string PasswordHash);
 
-    /// <summary>
-    /// The tenant ID.
-    /// </summary>
-    public int? TenantId { get; set; }
-
-    /// <summary>
-    /// The settings parameter key.
-    /// </summary>
-    [StringLength(255)]
-    public string Key { get; set; }
-
-    /// <summary>
-    /// The settings parameter value.
-    /// </summary>
-    public string Value { get; set; }
-}
-
-/// <summary>
-/// The request parameters for checking domain names.
-/// </summary>
-public class DomainModel
-{
-    /// <summary>
-    /// The host name.
-    /// </summary>
-    [StringLength (255)]
-    public string HostName { get; set; }
-}
+public record TenantLinksDto(string PortalUrl, string AuthUrl);

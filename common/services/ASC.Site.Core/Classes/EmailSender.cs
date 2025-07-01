@@ -24,12 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Notify.Engine;
-using ASC.Notify.Messages;
-using ASC.Notify.Patterns;
-using ASC.Notify.Recipients;
-using ASC.Web.Studio.Core.Notify;
-
 namespace ASC.Site.Core.Classes
 {
     [Singleton]
@@ -51,8 +45,8 @@ namespace ASC.Site.Core.Classes
 
     [Scope]
     public class EmailSender(
-        IConfiguration configuration,
         IServiceScopeFactory scopeFactory,
+        CommonConstants commonConstants,
         NotifyConfigurator notifyConfigurator,
         DispatchEngine dispatchEngine)
     {
@@ -64,13 +58,13 @@ namespace ASC.Site.Core.Classes
 
             var to = new DirectRecipient(Guid.NewGuid().ToString(), addresses.FirstOrDefault(), addresses);
 
-            var message = new NoticeMessage(to, subject, body, "html");
+            var message = new NoticeMessage(to, subject, body, commonConstants.NotifyContentType);
 
-            message.AddArgument(new TagValue("MessageFrom", configuration["core:notify:from"] ?? ""));
+            message.AddArgument(new TagValue(commonConstants.NotifyFromTag, commonConstants.NotifyFrom ?? ""));
 
             var scope = scopeFactory.CreateAsyncScope();
 
-            var sendResponse = await dispatchEngine.Dispatch(message, "email.sender", scope);
+            var sendResponse = await dispatchEngine.Dispatch(message, commonConstants.NotifySenderName, scope);
 
             return sendResponse.Result == SendResult.OK || sendResponse.Result == SendResult.Inprogress;
         }

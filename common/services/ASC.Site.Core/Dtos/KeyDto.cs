@@ -24,10 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Site.Core.Interfaces;
+namespace ASC.Site.Core.Dtos;
 
-public interface IModel
-{
-    string PortalName { get; set; }
-    int? TenantId { get; set; }
-}
+public record GenerateKeysRequestDto(string Email);
+public record GenerateKeysResponseDto(string EmailKey, string LinkKey);
+
+public record ValideteKeysRequestDto(string EmailKey, string LinkKey, string Page);
+public record ValideteKeysResponseDto(string Email, bool Valid);

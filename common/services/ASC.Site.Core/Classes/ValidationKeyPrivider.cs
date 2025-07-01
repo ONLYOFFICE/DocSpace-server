@@ -24,14 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Common.Caching;
-
-using Microsoft.AspNetCore.WebUtilities;
-
 namespace ASC.Site.Core.Classes
 {
     [Scope]
-    public class ValidationKeyProvider(ICache cache, InstanceCrypto instanceCrypto, EmailValidationKeyProvider emailValidationKeyProvider)
+    public class ValidationKeyProvider(
+        ICache cache,
+        InstanceCrypto instanceCrypto,
+        EmailValidationKeyProvider emailValidationKeyProvider)
     {
         private static readonly TimeSpan _validInterval = TimeSpan.FromHours(1);
 
