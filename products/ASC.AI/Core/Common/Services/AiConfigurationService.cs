@@ -33,36 +33,37 @@ public class AiConfigurationService(
     TenantManager tenantManager, 
     AuthContext authContext,
     ProviderSettings providerSettings,
-    UserManager userManager)
+    UserManager userManager,
+    ModelClientFactory modelClientFactory)
 {
     public async Task<AiProvider> AddProviderAsync(string? title, string? url, string key, ProviderType type)
     {
         await ThrowIfNotAccessAsync();
         
         var settings = providerSettings.Get(type);
-        if (settings == null)
+        if (settings == null || settings.Internal)
         {
             throw new ArgumentException("Provider not supported");
         }
         
-        if (string.IsNullOrEmpty(key))
-        {
-            throw new ArgumentException("Key can not be empty");
-        }
+        ArgumentException.ThrowIfNullOrEmpty(key, nameof(key));
 
         Uri? uri;
 
-        if (!string.IsNullOrEmpty(settings.Url))
+        switch (type)
         {
-            uri = null;
-        }
-        else if (!string.IsNullOrEmpty(url))
-        {
-            uri = new Uri(url);
-        }
-        else
-        {
-            throw new ArgumentException("Provider must have url");
+            case ProviderType.OpenAiCompatible:
+                ArgumentException.ThrowIfNullOrEmpty(url, nameof(url));
+                uri = new Uri(url);
+                await ThrowIfNotValidAsync(url, key, type);
+                break;
+            case ProviderType.OpenAi:
+            case ProviderType.TogetherAi:
+                uri = null;
+                await ThrowIfNotValidAsync(settings.Url!, key, type);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(type), type, null);
         }
 
         var provider = new AiProvider
@@ -91,14 +92,24 @@ public class AiConfigurationService(
             provider.Title = title;
         }
 
+        var needCheck = false;
+
         if (provider.Type == ProviderType.OpenAiCompatible && !string.IsNullOrEmpty(url))
         {
             provider.Url = new Uri(url).ToString();
+            needCheck = true;
         }
 
         if (!string.IsNullOrEmpty(key))
         {
             provider.Key = key;
+            needCheck = true;
+        }
+
+        if (needCheck)
+        {
+            var endpoint = provider.Url ?? providerSettings.Get(provider.Type)?.Url;
+            await ThrowIfNotValidAsync(endpoint!, provider.Key, provider.Type);
         }
         
         return await providerDao.UpdateProviderAsync(provider);
@@ -192,6 +203,16 @@ public class AiConfigurationService(
         if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
         {
             throw new SecurityException("Access denied");       
+        }
+    }
+
+    private async Task ThrowIfNotValidAsync(string url, string key, ProviderType type)
+    {
+        var modelClient = modelClientFactory.Create(type);
+        var models = await modelClient.GetModelsAsync(url, key);
+        if (models.Count == 0)
+        {
+            throw new ArgumentException("Invalid provider");
         }
     }
 }

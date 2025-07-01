@@ -24,50 +24,38 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-global using ASC.AI.Core.Chat.Database;
-global using ASC.AI.Core.Chat.Extensions;
-global using ASC.AI.Core.Chat.Models;
-global using ASC.AI.Core.Common;
-global using ASC.AI.Core.Common.Clients;
-global using ASC.AI.Core.Common.Clients.Providers;
-global using ASC.AI.Core.Common.Models;
-global using ASC.AI.Core.Common.Database;
-global using ASC.AI.Core.Common.Database.Models;
-global using ASC.AI.Core.Common.Services;
-global using ASC.AI.Core.Settings;
+namespace ASC.AI.Core.Common.Clients.Providers;
 
-global using ASC.Common;
-global using ASC.Common.Mapping;
-global using ASC.Common.Web;
+public class OpenAiModelClient(HttpClient client) : IModelClient
+{
+    private const string EndpointPart = "models";
+    private const string AuthScheme = "Bearer";
+    
+    public async Task<List<Model>> GetModelsAsync(string endpoint, string apiKey, IReadOnlyDictionary<string, string>? headers = null)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, $"{endpoint.TrimEnd('/')}/{EndpointPart}");
+        request.Headers.Authorization = new AuthenticationHeaderValue(AuthScheme, apiKey);
 
-global using ASC.Core;
-global using ASC.Core.Common.EF;
-global using ASC.Core.Common.EF.Model;
-global using ASC.Core.Common.EF.Model.Chat;
-global using ASC.Core.Users;
+        if (headers is { Count: > 0 })
+        {
+            foreach (var (key, value) in headers)
+            {
+                request.Headers.Add(key, value);
+            }
+        }
 
-global using ASC.Files.Core;
-global using ASC.Files.Core.Resources;
-global using ASC.Files.Core.Security;
+        var response = (await client.SendAsync(request)).EnsureSuccessStatusCode();
+        return await GetContentAsync(response);
+    }
 
-global using ASC.Security.Cryptography;
-
-global using AutoMapper;
-
-global using Microsoft.EntityFrameworkCore;
-global using Microsoft.Extensions.AI;
-global using Microsoft.Extensions.Configuration;
-
-global using OpenAI;
-
-global using System.ClientModel;
-global using System.ClientModel.Primitives;
-global using System.Collections.Frozen;
-global using System.ComponentModel.DataAnnotations;
-global using System.Net.Http.Headers;
-global using System.Net.Http.Json;
-global using System.Runtime.CompilerServices;
-global using System.Security;
-global using System.Text.Encodings.Web;
-global using System.Text.Json;
-global using System.Text.Json.Serialization;
+    protected virtual async Task<List<Model>> GetContentAsync(HttpResponseMessage response)
+    {
+        var content = await response.Content.ReadFromJsonAsync<Response>();
+        return content?.Data ?? [];
+    }
+    
+    private class Response
+    {
+        public required List<Model> Data { get; init; }
+    }
+}

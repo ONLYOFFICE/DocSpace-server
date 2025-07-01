@@ -31,4 +31,5 @@ public class ProviderSettingsData
     public required string Name { get; init; }
     public ProviderType Type { get; init; }
     public string? Url { get; init; }
+    public bool Internal => Type == ProviderType.DocSpaceAi;
 }
