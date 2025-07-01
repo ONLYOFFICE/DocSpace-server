@@ -112,7 +112,12 @@ public class ContactsController(
     public async Task<EmployeeFullDto> UpdateMemberContacts(ContactsRequestDto inDto)
     {
         var user = await GetUserInfoAsync(inDto.UserId);
-
+        
+        if (user.Id == tenantManager.GetCurrentTenant().OwnerId && user.Id != authContext.CurrentAccount.ID)
+        {
+            throw new SecurityException();
+        }
+        
         if (_userManager.IsSystemUser(user.Id))
         {
             throw new SecurityException();

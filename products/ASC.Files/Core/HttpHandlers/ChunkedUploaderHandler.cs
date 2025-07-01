@@ -111,7 +111,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                     {
                         var resumedSession = await fileUploader.UploadChunkAsync<T>(request.UploadId, await request.ChunkStream(), await request.ChunkSize());
                         await chunkedUploadSessionHolder.StoreSessionAsync(resumedSession);
-                        
+
                         var transferredBytes = await fileUploader.GetTransferredBytesCountAsync(resumedSession);
                         if (transferredBytes == resumedSession.BytesTotal || !resumedSession.UseChunks)
                         {
@@ -119,13 +119,13 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                             {
                                 resumedSession = await fileUploader.FinalizeUploadSessionAsync<T>(request.UploadId);
                             }
-                            
+
                             await fileUploader.DeleteLinkAndMarkAsync(resumedSession.File);
 
                             await WriteSuccess(context, await ToResponseObject(resumedSession.File), (int)HttpStatusCode.Created);
 
-                            await filesMessageService.SendAsync(resumedSession.File.Version > 1 
-                                ? MessageAction.FileUploadedWithOverwriting 
+                            await filesMessageService.SendAsync(resumedSession.File.Version > 1
+                                ? MessageAction.FileUploadedWithOverwriting
                                 : MessageAction.FileUploaded, resumedSession.File, resumedSession.File.Title);
 
                             await webhookManager.PublishAsync(WebhookTrigger.FileUploaded, resumedSession.File);
@@ -145,11 +145,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                                         ? new RoomNotifyIntegrationData<string> { RoomId = srId, FileId = sfId }
                                         : null;
 
-                                    var evt = new RoomNotifyIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenant().Id)
-                                    {
-                                        Data = data,
-                                        ThirdPartyData = thirdPartyData
-                                    };
+                                    var evt = new RoomNotifyIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenant().Id) { Data = data, ThirdPartyData = thirdPartyData };
 
                                     await eventBus.PublishAsync(evt);
 
@@ -178,7 +174,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                         {
                             headersLength += h.Value.Sum(r => r.Length) + h.Key.Length + "\n\n".Length;
                         }
-                       
+
                         var resumedSession = await fileUploader.UploadChunkAsync<T>(request.UploadId, section.Body, context.Request.ContentLength.Value - headersLength - boundaryLength * 2 - 6, request.ChunkNumber);
                         await chunkedUploadSessionHolder.StoreSessionAsync(resumedSession);
                         await WriteSuccess(context,
@@ -195,9 +191,9 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                     await fileUploader.DeleteLinkAndMarkAsync(session.File);
 
                     await WriteSuccess(context, await ToResponseObject(session.File), (int)HttpStatusCode.Created);
-                    
-                    await filesMessageService.SendAsync(session.File.Version > 1 
-                        ? MessageAction.FileUploadedWithOverwriting 
+
+                    await filesMessageService.SendAsync(session.File.Version > 1
+                        ? MessageAction.FileUploadedWithOverwriting
                         : MessageAction.FileUploaded, session.File, session.File.Title);
 
                     await webhookManager.PublishAsync(WebhookTrigger.FileUploaded, session.File);
@@ -217,15 +213,12 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                                 ? new RoomNotifyIntegrationData<string> { RoomId = srId, FileId = sfId }
                                 : null;
 
-                            var evt = new RoomNotifyIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenant().Id)
-                            {
-                                Data = data,
-                                ThirdPartyData = thirdPartyData
-                            };
+                            var evt = new RoomNotifyIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenant().Id) { Data = data, ThirdPartyData = thirdPartyData };
 
                             await eventBus.PublishAsync(evt);
                         }
                     }
+
                     return;
             }
         }
@@ -237,6 +230,10 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
         {
             logger.ErrorChunkedUploaderHandlerService(error);
             await WriteError(context, FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+        catch (InvalidCastException e) when(e.Message.Contains($"'{typeof(ChunkedUploadSession<string>)}'") && e.Message.Contains($"'{typeof(ChunkedUploadSession<int>)}'"))
+        {
+            throw;
         }
         catch (Exception error)
         {

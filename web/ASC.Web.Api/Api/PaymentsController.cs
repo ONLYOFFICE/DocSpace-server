@@ -53,7 +53,9 @@ public class PaymentController(
     StudioNotifyService studioNotifyService,
     PermissionContext permissionContext,
     TenantUtil tenantUtil,
+    ApiDateTimeHelper apiDateTimeHelper,
     TempStream tempStream,
+    EmployeeDtoHelper employeeWrapperHelper,
     CsvFileHelper csvFileHelper,
     CsvFileUploader csvFileUploader)
     : ControllerBase
@@ -83,10 +85,14 @@ public class PaymentController(
 
         var tenant = tenantManager.GetCurrentTenant();
 
-        var hasCustomer = await HasCustomer(tenant);
-        if (hasCustomer)
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo != null)
         {
-            return null;
+            var tariff = await tariffService.GetTariffAsync(tenant.Id);
+            if (tariff.State == TariffState.Paid)
+            {
+                return null;
+            }
         }
 
         var monthQuotas = (await quotaService.GetTenantQuotasAsync())
@@ -125,7 +131,7 @@ public class PaymentController(
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("update")]
-    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
+    [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<bool> UpdatePayment(QuantityRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
@@ -135,13 +141,13 @@ public class PaymentController(
 
         var tenant = tenantManager.GetCurrentTenant();
 
-        var hasCustomer = await HasCustomer(tenant);
-        if (!hasCustomer)
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo == null)
         {
             return false;
         }
 
-        await DemandPayerAsync(tenant);
+        await DemandPayerAsync(customerInfo);
 
         // TODO: Temporary restriction.
         // Possibility to buy only one product per transaction.
@@ -178,7 +184,7 @@ public class PaymentController(
 
         var currency = await regionHelper.GetCurrencyFromRequestAsync();
 
-        var result = await tariffService.PaymentChangeAsync(tenant.Id, inDto.Quantity, ProductQuantityType.Set, currency);
+        var result = await tariffService.PaymentChangeAsync(tenant.Id, inDto.Quantity, ProductQuantityType.Set, currency, true);
 
         if (result)
         {
@@ -199,7 +205,7 @@ public class PaymentController(
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("updatewallet")]
-    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
+    [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<bool> UpdateWalletPayment(WalletQuantityRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
@@ -214,13 +220,13 @@ public class PaymentController(
 
         var tenant = tenantManager.GetCurrentTenant();
 
-        var hasCustomer = await HasCustomer(tenant);
-        if (!hasCustomer)
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo == null)
         {
             return false;
         }
 
-        await DemandPayerAsync(tenant);
+        await DemandPayerAsync(customerInfo);
 
         // TODO: Temporary restriction.
         // Possibility to buy only one product per transaction.
@@ -241,9 +247,19 @@ public class PaymentController(
             return false;
         }
 
+        var tariff = await tariffService.GetTariffAsync(tenant.Id);
+
+        if (tariff.State > TariffState.Paid)
+        {
+            return false;
+        }
+
         if (inDto.ProductQuantityType is ProductQuantityType.Set)
         {
-            var tariff = await tariffService.GetTariffAsync(tenant.Id);
+            if (productQty.HasValue && productQty.Value != 0 && productQty.Value < 100) // min value 100Gb
+            {
+                return false;
+            }
 
             // saving null value is equivalent to resetting to default
             var updated = await tariffService.UpdateNextQuantityAsync(tenant.Id, tariff, quota.TenantId, productQty);
@@ -259,6 +275,12 @@ public class PaymentController(
         // inDto.ProductQuantityType === ProductQuantityType.Add
 
         if (!productQty.HasValue || productQty <= 0)
+        {
+            return false;
+        }
+
+        var hasActiveWalletQuota = tariff.Quotas.Any(q => q.Id == quota.TenantId && q.State == QuotaState.Active);
+        if (!hasActiveWalletQuota && productQty < 100) // min value 100Gb
         {
             return false;
         }
@@ -279,7 +301,7 @@ public class PaymentController(
 
         var quantity = new Dictionary<string, int> { { productName, productQty.Value } };
 
-        var result = await tariffService.PaymentChangeAsync(tenant.Id, quantity, inDto.ProductQuantityType, defaultCurrency);
+        var result = await tariffService.PaymentChangeAsync(tenant.Id, quantity, inDto.ProductQuantityType, defaultCurrency, false);
 
         if (result)
         {
@@ -314,13 +336,13 @@ public class PaymentController(
 
         var tenant = tenantManager.GetCurrentTenant();
 
-        var hasCustomer = await HasCustomer(tenant);
-        if (!hasCustomer)
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo == null)
         {
             return null;
         }
 
-        await DemandPayerAsync(tenant);
+        await DemandPayerAsync(customerInfo);
 
         // TODO: Temporary restriction.
         // Possibility to buy only one product per transaction.
@@ -387,13 +409,13 @@ public class PaymentController(
 
         var tenant = tenantManager.GetCurrentTenant();
 
-        var hasCustomer = await HasCustomer(tenant);
-        if (!hasCustomer)
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo == null)
         {
             return null;
         }
 
-        await DemandPayerOrOwnerAsync(tenant);
+        await DemandPayerOrOwnerAsync(tenant, customerInfo);
 
         var result = "payment.ashx";
         return !string.IsNullOrEmpty(inDto.BackUrl) ? $"{result}?backUrl={inDto.BackUrl}" : result;
@@ -543,10 +565,15 @@ public class PaymentController(
 
         var tenant = tenantManager.GetCurrentTenant();
 
-        var hasCustomer = await HasCustomer(tenant);
-        if (hasCustomer)
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo != null)
         {
-            return null;
+            await DemandPayerAsync(customerInfo);
+
+            if (customerInfo.PaymentMethodStatus == PaymentMethodStatus.Set)
+            {
+                return null;
+            }
         }
 
         var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
@@ -572,10 +599,10 @@ public class PaymentController(
     /// </short>
     /// <path>api/2.0/portal/payment/customerinfo</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The customer info", typeof(CustomerInfo))]
+    [SwaggerResponse(200, "The customer info", typeof(CustomerInfoDto))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("customerinfo")]
-    public async Task<CustomerInfo> GetCustomerInfo(PaymentInformationRequestDto inDto)
+    public async Task<CustomerInfoDto> GetCustomerInfo(PaymentInformationRequestDto inDto)
     {
         await DemandAdminAsync();
 
@@ -586,7 +613,21 @@ public class PaymentController(
 
         var tenant = tenantManager.GetCurrentTenant();
 
-        var result = await tariffService.GetCustomerInfoAsync(tenant.Id, inDto.Refresh);
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id, inDto.Refresh);
+
+        if (customerInfo == null)
+        {
+            return null;
+        }
+
+        var payerUserInfo = await userManager.GetUserByEmailAsync(customerInfo.Email);
+
+        var payerDto = payerUserInfo.Id == ASC.Core.Users.Constants.LostUser.Id
+                ? null
+                : await employeeWrapperHelper.GetAsync(payerUserInfo);
+
+        var result = new CustomerInfoDto(customerInfo, payerDto);
+
         return result;
     }
 
@@ -601,7 +642,7 @@ public class PaymentController(
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("deposit")]
-    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
+    [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<bool> TopUpDeposit(TopUpDepositRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
@@ -617,13 +658,13 @@ public class PaymentController(
 
         var tenant = tenantManager.GetCurrentTenant();
 
-        var hasCustomer = await HasCustomer(tenant);
-        if (!hasCustomer)
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo == null || customerInfo.PaymentMethodStatus != PaymentMethodStatus.Set)
         {
             return false;
         }
 
-        await DemandPayerAsync(tenant);
+        await DemandPayerAsync(customerInfo);
 
         var result = await tariffService.TopUpDepositAsync(tenant.Id, inDto.Amount, inDto.Currency, true);
 
@@ -658,8 +699,8 @@ public class PaymentController(
 
         var tenant = tenantManager.GetCurrentTenant();
 
-        var hasCustomer = await HasCustomer(tenant);
-        if (!hasCustomer)
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo == null)
         {
             return null;
         }
@@ -675,6 +716,7 @@ public class PaymentController(
     /// Open customer session
     /// </short>
     /// <path>api/2.0/portal/payment/customer/opensession</path>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The customer session", typeof(Session))]
     [SwaggerResponse(403, "No permissions to perform this action")]
@@ -688,13 +730,13 @@ public class PaymentController(
 
         var tenant = tenantManager.GetCurrentTenant();
 
-        var hasCustomer = await HasCustomer(tenant);
-        if (!hasCustomer)
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo == null)
         {
             return null;
         }
 
-        await DemandPayerAsync(tenant);
+        await DemandPayerAsync(customerInfo);
 
         var result = await tariffService.OpenCustomerSessionAsync(tenant.Id, inDto.ServiceAccount, inDto.ExternalRef, inDto.Quantity);
         return result;
@@ -707,6 +749,7 @@ public class PaymentController(
     /// Perform customer operation
     /// </short>
     /// <path>api/2.0/portal/payment/customer/performoperation</path>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Boolean value: true if the operation is succesfully provided", typeof(bool))]
     [SwaggerResponse(403, "No permissions to perform this action")]
@@ -720,13 +763,13 @@ public class PaymentController(
 
         var tenant = tenantManager.GetCurrentTenant();
 
-        var hasCustomer = await HasCustomer(tenant);
-        if (!hasCustomer)
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo == null)
         {
             return false;
         }
 
-        await DemandPayerAsync(tenant);
+        await DemandPayerAsync(customerInfo);
 
         var result = await tariffService.PerformCustomerOperationAsync(tenant.Id, inDto.ServiceAccount, inDto.SessionId, inDto.Quantity);
 
@@ -743,10 +786,10 @@ public class PaymentController(
     /// </short>
     /// <path>api/2.0/portal/payment/customer/operations</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The customer operations", typeof(Report))]
+    [SwaggerResponse(200, "The customer operations", typeof(ReportDto))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("customer/operations")]
-    public async Task<Report> GetCustomerOperations(CustomerOperationsRequestDto inDto)
+    public async Task<ReportDto> GetCustomerOperations(CustomerOperationsRequestDto inDto)
     {
         await DemandAdminAsync();
 
@@ -757,25 +800,17 @@ public class PaymentController(
 
         var tenant = tenantManager.GetCurrentTenant();
 
-        var hasCustomer = await HasCustomer(tenant);
-        if (!hasCustomer)
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo == null)
         {
             return null;
         }
 
         var utcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate);
         var utcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate);
-        var result = await tariffService.GetCustomerOperationsAsync(tenant.Id, utcStartDate, utcEndDate, inDto.Credit, inDto.Withdrawal, inDto.Offset, inDto.Limit);
+        var report = await tariffService.GetCustomerOperationsAsync(tenant.Id, utcStartDate, utcEndDate, inDto.Credit, inDto.Withdrawal, inDto.Offset, inDto.Limit);
 
-        if (result?.Collection != null)
-        {
-            foreach (var operation in result.Collection)
-            {
-                operation.Description = GetServiceDesc(operation.Service);
-            }
-        }
-
-        return result;
+        return report == null ? null : new ReportDto(report, apiDateTimeHelper);
     }
 
     /// <summary>
@@ -799,8 +834,8 @@ public class PaymentController(
 
         var tenant = tenantManager.GetCurrentTenant();
 
-        var hasCustomer = await HasCustomer(tenant);
-        if (!hasCustomer)
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo == null)
         {
             return null;
         }
@@ -844,7 +879,13 @@ public class PaymentController(
 
             foreach (var operation in report.Collection)
             {
-                operation.Description = GetServiceDesc(operation.Service);
+                operation.Description = OperationDto.GetServiceDesc(operation.Service);
+                operation.Date = tenantUtil.DateTimeFromUtc(operation.Date);
+
+                if (string.IsNullOrEmpty(operation.Service))
+                {
+                    operation.Quantity = 0;
+                }
             }
 
             yield return report.Collection;
@@ -856,17 +897,6 @@ public class PaymentController(
 
             offset += limit;
         }
-    }
-
-    private static string GetServiceDesc(string serviceName)
-    {
-        // for testing purposes
-        if (serviceName != null && serviceName.StartsWith("disk-storage"))
-        {
-            serviceName = "disk-storage";
-        }
-
-        return Resource.ResourceManager.GetString("AccountingCustomerOperationServiceDesc_" + (serviceName ?? "top-up"));
     }
 
     internal class OperationMap : ClassMap<Operation>
@@ -893,6 +923,7 @@ public class PaymentController(
     /// Get list of currencies
     /// </short>
     /// <path>api/2.0/portal/payment/accounting/currencies</path>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The list of currencies", typeof(List<Currency>))]
     [SwaggerResponse(403, "No permissions to perform this action")]
@@ -926,8 +957,6 @@ public class PaymentController(
     [HttpGet("topupsettings")]
     public async Task<TenantWalletSettings> GetTenantWalletSettings()
     {
-        var tenant = tenantManager.GetCurrentTenant();
-
         await DemandAdminAsync();
 
         var result = await settingsManager.LoadAsync<TenantWalletSettings>();
@@ -954,8 +983,8 @@ public class PaymentController(
 
         var tenant = tenantManager.GetCurrentTenant();
 
-        var hasCustomer = await HasCustomer(tenant);
-        if (!hasCustomer)
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo == null)
         {
             return null;
         }
@@ -966,7 +995,7 @@ public class PaymentController(
             return null;
         }
 
-        await DemandPayerAsync(tenant);
+        await DemandPayerAsync(customerInfo);
 
         var settings = inDto?.Settings ?? new TenantWalletSettings();
 
@@ -977,19 +1006,6 @@ public class PaymentController(
         return settings;
     }
 
-    private async Task<bool> HasCustomer(Tenant tenant)
-    {
-        var hasPayments = (await tariffService.GetPaymentsAsync(tenant.Id)).Any();
-        if (hasPayments)
-        {
-            return true;
-        }
-
-        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
-
-        return customerInfo != null && customerInfo.PaymentMethodStatus != PaymentMethodStatus.None;
-    }
-
     private async Task DemandAdminAsync()
     {
         if (!await userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID))
@@ -998,38 +1014,26 @@ public class PaymentController(
         }
     }
 
-    private async Task DemandPayerAsync(Tenant tenant)
+    private async Task DemandPayerAsync(CustomerInfo customerInfo)
     {
-        var payerId = (await tariffService.GetTariffAsync(tenant.Id)).CustomerId;
-
-        if (string.IsNullOrEmpty(payerId))
-        {
-            payerId = (await tariffService.GetCustomerInfoAsync(tenant.Id)).Email;
-        }
-
-        var payer = await userManager.GetUserByEmailAsync(payerId);
+        var payer = await userManager.GetUserByEmailAsync(customerInfo?.Email);
 
         if (securityContext.CurrentAccount.ID != payer.Id)
         {
-            throw new SecurityException($"payerEmail {payerId}, payerId {payer.Id}, currentId {securityContext.CurrentAccount.ID}");
+            throw new SecurityException($"payerEmail {customerInfo?.Email}, payerId {payer.Id}, currentId {securityContext.CurrentAccount.ID}");
         }
     }
 
-    private async Task DemandPayerOrOwnerAsync(Tenant tenant)
+    private async Task DemandPayerOrOwnerAsync(Tenant tenant, CustomerInfo customerInfo)
     {
-        var payerId = (await tariffService.GetTariffAsync(tenant.Id)).CustomerId;
-
-        if (string.IsNullOrEmpty(payerId))
+        if (securityContext.CurrentAccount.ID != tenant.OwnerId)
         {
-            payerId = (await tariffService.GetCustomerInfoAsync(tenant.Id)).Email;
-        }
+            var payer = await userManager.GetUserByEmailAsync(customerInfo?.Email);
 
-        var payer = await userManager.GetUserByEmailAsync(payerId);
-
-        if (securityContext.CurrentAccount.ID != payer.Id &&
-            securityContext.CurrentAccount.ID != tenant.OwnerId)
-        {
-            throw new SecurityException();
+            if (securityContext.CurrentAccount.ID != payer.Id)
+            {
+                throw new SecurityException($"payerEmail {customerInfo?.Email}, payerId {payer.Id}, ownerId {tenant.OwnerId}, currentId {securityContext.CurrentAccount.ID}");
+            }
         }
     }
 

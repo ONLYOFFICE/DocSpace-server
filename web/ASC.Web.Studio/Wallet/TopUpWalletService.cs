@@ -30,6 +30,7 @@ using ASC.Core;
 using ASC.Core.Billing;
 using ASC.Core.Common.EF.Context;
 using ASC.Core.Common.Hosting;
+using ASC.Core.Common.Settings;
 using ASC.Core.Tenants;
 using ASC.Core.Users;
 using ASC.MessagingSystem.Core;
@@ -90,6 +91,7 @@ public class TopUpWalletService(
     {
         UserInfo payer = null;
         UserInfo owner = null;
+        TenantWalletSettings settings = null;
 
         try
         {
@@ -102,7 +104,7 @@ public class TopUpWalletService(
                 return;
             }
 
-            var settings = JsonSerializer.Deserialize<TenantWalletSettings>(data.Setting, _options);
+            settings = JsonSerializer.Deserialize<TenantWalletSettings>(data.Setting, _options);
             if (!settings.Enabled)
             {
                 return;
@@ -114,10 +116,10 @@ public class TopUpWalletService(
             var tariffService = scope.ServiceProvider.GetRequiredService<ITariffService>();
             var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
 
-            var payerEmail = (await tariffService.GetCustomerInfoAsync(data.TenantId)).Email;
-            if (!string.IsNullOrEmpty(payerEmail))
+            var customerInfo = await tariffService.GetCustomerInfoAsync(data.TenantId);
+            if (!string.IsNullOrEmpty(customerInfo?.Email))
             {
-                payer = await userManager.GetUserByEmailAsync(payerEmail);
+                payer = await userManager.GetUserByEmailAsync(customerInfo.Email);
             }
 
             if (payer != null && payer.Id != ASC.Core.Users.Constants.LostUser.Id)
@@ -163,10 +165,10 @@ public class TopUpWalletService(
             logger.ErrorWithException(ex);
         }
 
-        await SendTopUpWalletErrorAsync(data.TenantId, payer, owner);
+        await SendTopUpWalletErrorAsync(data.TenantId, payer, owner, settings);
     }
 
-    private async Task SendTopUpWalletErrorAsync(int tenantId, UserInfo payer, UserInfo owner)
+    private async Task SendTopUpWalletErrorAsync(int tenantId, UserInfo payer, UserInfo owner, TenantWalletSettings settings)
     {
         try
         {
@@ -177,8 +179,20 @@ public class TopUpWalletService(
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
             var tenant = await tenantManager.SetCurrentTenantAsync(tenantId);
 
+            var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
+            await securityContext.AuthenticateMeWithoutCookieAsync(tenantId, owner.Id);
+
             var studioNotifyService = scope.ServiceProvider.GetRequiredService<StudioNotifyService>();
             await studioNotifyService.SendTopUpWalletErrorAsync(payer, owner);
+
+            var messageService = scope.ServiceProvider.GetRequiredService<MessageService>();
+            var settingsManager = scope.ServiceProvider.GetRequiredService<SettingsManager>();
+
+            settings ??= new TenantWalletSettings();
+            settings.Enabled = false;
+            await settingsManager.SaveAsync(settings, tenantId);
+
+            messageService.Send(MessageInitiator.PaymentService, MessageAction.CustomerWalletTopUpSettingsUpdated);
         }
         catch (Exception ex)
         {

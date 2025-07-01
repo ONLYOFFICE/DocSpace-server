@@ -61,7 +61,7 @@ public class ConfirmAuthHandler(
 
         var claims = new List<Claim>
         {
-            new(ClaimTypes.Role, emailValidationKeyModel.Type.Value.ToStringFast()),AuthConstants.Claim_ScopeRootWrite
+            new(ClaimTypes.Role, emailValidationKeyModel.Type.Value.ToStringFast()),AuthConstants.Claim_ScopeGlobalWrite
         };
         
         if (checkKeyResult == EmailValidationKeyProvider.ValidationResult.Ok)

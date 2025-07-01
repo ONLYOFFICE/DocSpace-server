@@ -76,4 +76,14 @@ public record FormOpenSetup<T>
     /// </summary>
     public Folder<T> RootFolder { get; set; }
 
+    /// <summary>
+    /// Disable embedded config
+    /// </summary>
+    public bool DisableEmbeddedConfig { get; set; }
+
+    /// <summary>
+    /// Specifies if the room can be edited out or not.
+    /// </summary>
+    public bool CanEditRoom { get; set; }
+
 }

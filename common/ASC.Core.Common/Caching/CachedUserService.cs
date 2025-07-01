@@ -147,9 +147,10 @@ public class CachedUserService : IUserService
 
     public async Task<UserInfo> SaveUserAsync(int tenant, UserInfo user)
     {
+        var tag = CacheExtention.GetUserTag(tenant, user.Id);
+
         user = await _service.SaveUserAsync(tenant, user);
 
-        var tag = CacheExtention.GetUserTag(tenant, user.Id);
         await _cache.RemoveByTagAsync(tag);
 
         return user;
@@ -324,7 +325,7 @@ public class CachedUserService : IUserService
         {
             var users = await _service.GetUsersAsync(tenant);
 
-            ctx.Tags = users.Select(u => CacheExtention.GetUserTag(tenant, u.Id)).ToArray();
+            ctx.Tags = [CacheExtention.GetUserTag(tenant, Guid.Empty), .. users.Select(u => CacheExtention.GetUserTag(tenant, u.Id))];
 
             return ctx.Modified(users);
         }, _cacheExpiration);

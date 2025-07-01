@@ -324,6 +324,24 @@ public abstract class BaseStartup
                 return RateLimitPartition.Get(partitionKey, LimitterFactory);
             });
 
+            options.AddPolicy(RateLimiterPolicy.PaymentsApi, httpContext =>
+            {
+                var userId = httpContext?.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value ??
+                             httpContext?.Connection.RemoteIpAddress.ToInvariantString();
+
+                var permitLimit = 10;
+                var path = httpContext?.Request.Path.ToString();
+                var partitionKey = $"{RateLimiterPolicy.PaymentsApi}_{userId}|{path}";
+                var remoteIpAddress = httpContext?.Connection.RemoteIpAddress;
+
+                if (EnableNoLimiter(remoteIpAddress))
+                {
+                    return RateLimitPartition.GetNoLimiter("no_limiter");
+                }
+
+                return RedisRateLimitPartition.GetSlidingWindowRateLimiter(partitionKey, _ => new RedisSlidingWindowRateLimiterOptions { PermitLimit = permitLimit, Window = TimeSpan.FromMinutes(1), ConnectionMultiplexerFactory = () => connectionMultiplexer });
+            });
+
             options.OnRejected = (context, ct) => RateLimitMetadata.OnRejected(context.HttpContext, context.Lease, ct);
         });
 

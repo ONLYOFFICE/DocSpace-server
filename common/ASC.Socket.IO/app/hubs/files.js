@@ -503,7 +503,7 @@ module.exports = (io) => {
       }
       else
       {
-        var room = `${tenantId}-backup`;
+        var room = getRoom(`backup`);
       }
     filesIO.to(room).emit("s:backup-progress", result);
   }
@@ -515,7 +515,7 @@ module.exports = (io) => {
       }
       else
       {
-        var room = `${tenantId}-restore`;
+        var room = getRoom(`restore`);
       }
     filesIO.to(room).emit("s:restore-progress", result);
   }
