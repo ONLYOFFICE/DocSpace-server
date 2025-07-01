@@ -173,4 +173,53 @@ public class BaseTest(
     {
         return JsonSerializer.Deserialize<FileShareLink>((updatedLink1Response.SharedTo as JObject).ToString(), JsonSerializerOptions.Web);
     }
+    
+    protected async Task<(string, int)> CreateFileAndShare(FileShare fileShare, bool primary = true, bool varInternal = false, DateTime? expirationDate = null)
+    {
+        await _filesClient.Authenticate(Initializer.Owner);
+        
+        var file = await CreateFile("file_update_link.docx", FolderType.USER, Initializer.Owner);
+        
+        // Create initial external link
+        var initialLinkParams = new FileLinkRequest(
+            access: fileShare,
+            primary: primary,
+            varInternal: varInternal
+        );
+
+        if (expirationDate != null)
+        {
+            initialLinkParams.ExpirationDate = new ApiDateTime { UtcTime = expirationDate.Value };
+        }
+        
+        var initialLink = (await _filesApi.CreatePrimaryExternalLinkAsync(file.Id, initialLinkParams, TestContext.Current.CancellationToken)).Response;
+        var fileShareLink = DeserializeSharedToLink(initialLink);
+        
+        return (fileShareLink.RequestToken, file.Id);
+    }
+    
+    protected async Task<FileDtoInteger?> TryOpenEditAsync(string share, int fileId, User? user = null, bool throwException = false)
+    {
+        if (user != null)
+        {
+            await _filesClient.Authenticate(user);
+        }
+        else
+        {
+            _filesClient.DefaultRequestHeaders.Authorization = null;
+        }
+
+        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, share);
+        
+        if (throwException)
+        {
+            await Assert.ThrowsAsync<ApiException>(async () => await _filesApi.OpenEditFileAsync(fileId, cancellationToken: TestContext.Current.CancellationToken));
+            _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
+            return null;
+        }
+
+        var openEditResult = (await _filesApi.OpenEditFileAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
+        return openEditResult.File;
+    }
 }
