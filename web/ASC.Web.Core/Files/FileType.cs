@@ -59,5 +59,8 @@ public enum FileType
     Document = 7,
 
     [SwaggerEnum("Pdf")]
-    Pdf = 10
+    Pdf = 10,
+
+    [SwaggerEnum("Diagram")]
+    Diagram = 11
 }
