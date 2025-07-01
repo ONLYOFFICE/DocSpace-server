@@ -35,7 +35,7 @@ public class ChatService(
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
     TenantManager tenantManager,
-    AiSettingsService aiSettingsService)
+    AiConfigurationService aiConfigurationService)
 {
     public async Task<ChatSession> RenameChatAsync(Guid chatId, string title)
     {
@@ -97,16 +97,16 @@ public class ChatService(
         await chatDao.DeleteChatsAsync(tenantManager.GetCurrentTenantId(), [chat.Id]);
     }
 
-    public async Task<AiSettings> SetChatSettingsAsync(int providerId, string modelId)
+    public async Task<ModelConfiguration> SetChatSettingsAsync(int providerId, string modelId)
     {
         var chatSettings = new ChatParameters { ModelId = modelId };
 
-        return await aiSettingsService.SetSettingsAsync(providerId, SettingsScope.Chat, chatSettings);
+        return await aiConfigurationService.SetConfigurationAsync(providerId, ConfigurationScope.Chat, chatSettings);
     }
 
-    public async Task<AiSettings> GetChatSettingsAsync()
+    public async Task<ModelConfiguration> GetChatSettingsAsync()
     {
-        return await aiSettingsService.GetSettingsAsync(SettingsScope.Chat);
+        return await aiConfigurationService.GetConfigurationAsync(ConfigurationScope.Chat);
     }
 
     private async Task<ChatSession> GetChatAsync(Guid chatId)

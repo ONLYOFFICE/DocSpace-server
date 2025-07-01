@@ -26,11 +26,10 @@
 
 namespace ASC.AI.Core.Common.Models;
 
-public class AiSettings : IMapFrom<DbAiSettings>
+public class RunConfiguration
 {
-    public int ProviderId { get; set; }
-    public Guid UserId { get; set; }
-    public int TenantId { get; set; }
-    public SettingsScope Scope { get; set; }
-    public required RunParameters Parameters { get; set; }
+    public ProviderType ProviderType { get; init; }
+    public Uri? Endpoint { get; init; }
+    public required string Key { get; init; }
+    public required RunParameters Parameters { get; init; }
 }

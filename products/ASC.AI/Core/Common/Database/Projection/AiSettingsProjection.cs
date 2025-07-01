@@ -24,47 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Common.Services;
+namespace ASC.AI.Core.Common.Database.Projection;
 
-[Scope]
-public class AiSettingsService(
-    AiSettingsDao settingsDao, 
-    AiProviderDao providerDao, 
-    TenantManager tenantManager, 
-    AuthContext authContext)
+public class AiSettingsProjection
 {
-    public async Task<AiSettings> SetSettingsAsync(int providerId, SettingsScope scope, RunParameters runParameters)
-    {
-        var tenantId = tenantManager.GetCurrentTenantId();
-        
-        var provider = await providerDao.GetProviderAsync(tenantId, providerId);
-        if (provider == null)
-        {
-            throw new ItemNotFoundException("Provider not found");
-        }
-
-        var userId = authContext.CurrentAccount.ID;
-
-        var settings = await settingsDao.GetSettingsAsync(tenantId, userId, scope);
-        if (settings == null)
-        {
-            return await settingsDao.AddSettingsAsync(tenantId, providerId, userId, scope, runParameters);
-        }
-
-        settings.ProviderId = providerId;
-        settings.Parameters = runParameters;
-
-        return await settingsDao.UpdateSettingsAsync(settings);
-    }
-    
-    public async Task<AiSettings> GetSettingsAsync(SettingsScope scope)
-    {
-        var settings = await settingsDao.GetSettingsAsync(tenantManager.GetCurrentTenantId(), authContext.CurrentAccount.ID, scope);
-        if (settings == null)
-        {
-            throw new ItemNotFoundException("Settings not found");
-        }
-
-        return settings;
-    }
+    public required DbAiSettings Settings { get; init; }
+    public required DbAiProvider Provider { get; init; }
 }

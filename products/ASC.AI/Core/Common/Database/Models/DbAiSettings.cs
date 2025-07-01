@@ -31,7 +31,7 @@ public class DbAiSettings : BaseEntity
     public int ProviderId { get; set; }
     public Guid UserId { get; set; }
     public int TenantId { get; set; }
-    public SettingsScope Scope { get; set; }
+    public ConfigurationScope Scope { get; set; }
     public required RunParameters RunParameters { get; set; }
     
     public DbTenant Tenant { get; set; }

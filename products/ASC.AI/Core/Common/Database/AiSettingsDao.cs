@@ -27,9 +27,14 @@
 namespace ASC.AI.Core.Common.Database;
 
 [Scope]
-public class AiSettingsDao(IDbContextFactory<AiDbContext> dbContextFactory, IMapper mapper)
+public class AiSettingsDao(
+    IDbContextFactory<AiDbContext> dbContextFactory, 
+    IMapper mapper,
+    InstanceCrypto crypto,
+    ProviderSettings providerSettings)
 {
-    public async Task<AiSettings> AddSettingsAsync(int tenantId, int providerId, Guid userId, SettingsScope scope, RunParameters runParameters)
+    public async Task<ModelConfiguration> AddSettingsAsync(int tenantId, int providerId, Guid userId, ConfigurationScope scope, 
+        RunParameters runParameters)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
@@ -53,19 +58,43 @@ public class AiSettingsDao(IDbContextFactory<AiDbContext> dbContextFactory, IMap
             await context.SaveChangesAsync();
         });
 
-        return mapper.Map<DbAiSettings, AiSettings>(dbSettings);
+        return mapper.Map<DbAiSettings, ModelConfiguration>(dbSettings);
     }
 
-    public async Task<AiSettings?> GetSettingsAsync(int tenantId, Guid userId, SettingsScope scope)
+    public async Task<ModelConfiguration?> GetSettingsAsync(int tenantId, Guid userId, ConfigurationScope scope)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
         var dbSettings = await dbContext.GetSettingsAsync(tenantId, userId, scope);
 
-        return dbSettings != null ? mapper.Map<DbAiSettings, AiSettings>(dbSettings) : null;
+        return dbSettings != null ? mapper.Map<DbAiSettings, ModelConfiguration>(dbSettings) : null;
     }
 
-    public async Task<AiSettings> UpdateSettingsAsync(AiSettings settings)
+    public async Task<RunConfiguration?> GetExecutionSettingsAsync(int tenantId, Guid userId, ConfigurationScope scope)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        
+        var settingsProviderProjection = await dbContext.GetProviderSettingsAsync(tenantId, userId, scope);
+        if (settingsProviderProjection == null)
+        {
+            return null;
+        }
+
+        var settings = providerSettings.Get(settingsProviderProjection.Provider.Type);
+        var url = !string.IsNullOrEmpty(settingsProviderProjection.Provider.Url) 
+            ? settingsProviderProjection.Provider.Url 
+            : settings?.Url;
+            
+        return new RunConfiguration
+        {
+            ProviderType = settingsProviderProjection.Provider.Type,
+            Parameters = settingsProviderProjection.Settings.RunParameters,
+            Key = await crypto.DecryptAsync(settingsProviderProjection.Provider.Key),
+            Endpoint = !string.IsNullOrEmpty(url) ? new Uri(url) : null
+        };
+    }
+
+    public async Task<ModelConfiguration> UpdateSettingsAsync(ModelConfiguration configuration)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         
@@ -75,10 +104,10 @@ public class AiSettingsDao(IDbContextFactory<AiDbContext> dbContextFactory, IMap
         {
             await using var context = await dbContextFactory.CreateDbContextAsync();
 
-            await context.UpdateSettingsAsync(settings.TenantId, settings.UserId, settings.Scope, settings.ProviderId, settings.Parameters);
+            await context.UpdateSettingsAsync(configuration.TenantId, configuration.UserId, configuration.Scope, configuration.ProviderId, configuration.Parameters);
             await context.SaveChangesAsync();
         });
 
-        return settings;
+        return configuration;
     }
 }

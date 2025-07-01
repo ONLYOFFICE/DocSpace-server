@@ -26,7 +26,11 @@
 
 namespace ASC.AI.Core.Common.Models;
 
-public enum SettingsScope
+public class ModelConfiguration : IMapFrom<DbAiSettings>
 {
-    Chat
+    public int ProviderId { get; set; }
+    public Guid UserId { get; set; }
+    public int TenantId { get; set; }
+    public ConfigurationScope Scope { get; set; }
+    public required RunParameters Parameters { get; set; }
 }

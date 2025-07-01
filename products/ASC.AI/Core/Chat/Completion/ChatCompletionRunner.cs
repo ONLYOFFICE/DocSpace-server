@@ -72,7 +72,7 @@ public class ChatCompletionRunner(
 
         await ChekRoomAsync(chat.RoomId);
         
-        var clientTask = CreateClientAsync(tenantId, chat.RoomId, chatId);
+        var clientTask = await CreateClientAsync(tenantId, chat.RoomId, chatId);
 
         var history = await chatHistory.GetMessagesAsync(chatId).ToListAsync();
         var userMessage = new ChatMessage(ChatRole.User, message);
@@ -83,7 +83,7 @@ public class ChatCompletionRunner(
         messages.AddRange(history);
         messages.Add(userMessage);
 
-        return new ChatCompletionGenerator(chatId, chatHistory, await clientTask, messages);
+        return new ChatCompletionGenerator(chatId, chatHistory, clientTask, messages);
     }
 
     private async Task<IChatClient> CreateClientAsync(int tenantId, int roomId, Guid chatId)

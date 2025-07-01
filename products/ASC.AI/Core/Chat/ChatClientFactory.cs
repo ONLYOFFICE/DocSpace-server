@@ -26,30 +26,25 @@
 
 namespace ASC.AI.Core.Chat;
 
-[Singleton]
-public class ChatClientFactory(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+[Scope]
+public class ChatClientFactory(
+    IHttpClientFactory httpClientFactory,
+    AiConfigurationService configurationService)
 {
-    public Task<IChatClient> CreateAsync()
+    public async Task<IChatClient> CreateAsync()
     {
-        var config = configuration.GetSection("ai:test").Get<TestConfig>()!;
+        var runConfig = await configurationService.GetRunConfigurationAsync(ConfigurationScope.Chat);
         
-        var credential = new ApiKeyCredential(config.Key);
+        var credential = new ApiKeyCredential(runConfig.Key);
         var options = new OpenAIClientOptions
         {
-            Endpoint = new Uri(config.Endpoint),
+            Endpoint = runConfig.Endpoint,
             Transport = new HttpClientPipelineTransport(httpClientFactory.CreateClient())
         };
         
         var openAiClient = new OpenAIClient(credential, options);
-        var chatClient = openAiClient.GetChatClient(config.Model);
+        var chatClient = openAiClient.GetChatClient(runConfig.Parameters.ModelId);
         
-        return Task.FromResult(chatClient.AsIChatClient());
-    }
-
-    private class TestConfig
-    {
-        public required string Endpoint { get; init; }
-        public required string Key { get; init; }
-        public required string Model { get; init; }
+        return chatClient.AsIChatClient();
     }
 }
