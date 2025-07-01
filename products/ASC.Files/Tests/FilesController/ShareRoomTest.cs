@@ -30,7 +30,7 @@ using Task = System.Threading.Tasks.Task;
 namespace ASC.Files.Tests.FilesController;
 
 [Collection("Test Collection")]
-public class RoomSharingTest(
+public class ShareRoomTest(
     FilesApiFactory filesFactory, 
     WepApiFactory apiFactory, 
     PeopleFactory peopleFactory,

@@ -27,7 +27,7 @@
 namespace ASC.Files.Tests.FilesController;
 
 [Collection("Test Collection")]
-public class FileSharingTest(
+public class ShareFileTest(
     FilesApiFactory filesFactory, 
     WepApiFactory apiFactory, 
     PeopleFactory peopleFactory,

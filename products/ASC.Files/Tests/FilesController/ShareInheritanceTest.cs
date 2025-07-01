@@ -29,7 +29,7 @@ using LinkType = Docspace.Model.LinkType;
 namespace ASC.Files.Tests.FilesController;
 
 [Collection("Test Collection")]
-public class LinkInheritanceTest(
+public class ShareInheritanceTest(
     FilesApiFactory filesFactory,
     WepApiFactory apiFactory,
     PeopleFactory peopleFactory,
