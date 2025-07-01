@@ -391,6 +391,7 @@ public class EditorConfiguration<T>(
             FileType.Pdf => FilterType.Pdf,
             FileType.Spreadsheet => FilterType.SpreadsheetsOnly,
             FileType.Presentation => FilterType.PresentationsOnly,
+            FileType.Diagram => FilterType.DiagramsOnly,
             _ => FilterType.FilesOnly
         };
 
@@ -433,6 +434,7 @@ public class EditorConfiguration<T>(
                 FileType.Pdf => FilterType.Pdf,
                 FileType.Spreadsheet => FilterType.SpreadsheetsOnly,
                 FileType.Presentation => FilterType.PresentationsOnly,
+                FileType.Diagram => FilterType.DiagramsOnly,
                 _ => FilterType.FilesOnly
             };
 
