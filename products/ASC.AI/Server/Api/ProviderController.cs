@@ -31,14 +31,14 @@ namespace ASC.AI.Api;
 [ApiController]
 [ControllerName("ai")]
 public class ProviderController(
-    AiProviderService providerService, 
+    AiConfigurationService configurationService, 
     ApiDateTimeHelper apiDateTimeHelper,
     ApiContext apiContext) : ControllerBase
 {
     [HttpPost("providers")]
     public async Task<ProviderDto> AddProviderAsync(CreateProviderRequestDto inDto)
     {
-        var provider = await providerService.AddProviderAsync(inDto.Title, inDto.Url, inDto.Key, inDto.Type);
+        var provider = await configurationService.AddProviderAsync(inDto.Title, inDto.Url, inDto.Key, inDto.Type);
 
         return provider.ToDto(apiDateTimeHelper);
     }
@@ -46,9 +46,9 @@ public class ProviderController(
     [HttpGet("providers")]
     public async Task<List<ProviderDto>> GetProvidersAsync(PaginatedRequestDto inDto)
     {
-        var totalCountTask = providerService.GetProvidersTotalCountAsync();
+        var totalCountTask = configurationService.GetProvidersTotalCountAsync();
         
-        var providers = await providerService.GetProvidersAsync(inDto.StartIndex, inDto.Count)
+        var providers = await configurationService.GetProvidersAsync(inDto.StartIndex, inDto.Count)
             .Select(x => x.ToDto(apiDateTimeHelper))
             .ToListAsync();
 
@@ -62,7 +62,7 @@ public class ProviderController(
     [HttpPut("providers/{id}")]
     public async Task<ProviderDto> UpdateProviderAsync(UpdateProviderRequestDto inDto)
     {
-        var provider = await providerService.UpdateProviderAsync(inDto.Id, inDto.Title, inDto.Url, inDto.Key);
+        var provider = await configurationService.UpdateProviderAsync(inDto.Id, inDto.Body.Title, inDto.Body.Url, inDto.Body.Key);
 
         return provider.ToDto(apiDateTimeHelper);
     }
@@ -70,7 +70,7 @@ public class ProviderController(
     [HttpDelete("providers")]
     public async Task<NoContentResult> DeleteProvidersAsync(RemoveProviderRequestDto inDto)
     {
-        await providerService.DeleteProvidersAsync(inDto.Ids);
+        await configurationService.DeleteProvidersAsync(inDto.Ids);
 
         return NoContent();
     }

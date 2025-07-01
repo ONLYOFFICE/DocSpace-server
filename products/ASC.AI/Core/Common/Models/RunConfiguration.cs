@@ -29,7 +29,7 @@ namespace ASC.AI.Core.Common.Models;
 public class RunConfiguration
 {
     public ProviderType ProviderType { get; init; }
-    public Uri? Endpoint { get; init; }
-    public required string Key { get; init; }
+    public string? Url { get; set; }
+    public required string Key { get; set; }
     public required RunParameters Parameters { get; init; }
 }

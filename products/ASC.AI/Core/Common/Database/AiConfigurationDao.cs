@@ -27,13 +27,12 @@
 namespace ASC.AI.Core.Common.Database;
 
 [Scope]
-public class AiSettingsDao(
+public class AiConfigurationDao(
     IDbContextFactory<AiDbContext> dbContextFactory, 
     IMapper mapper,
-    InstanceCrypto crypto,
-    ProviderSettings providerSettings)
+    InstanceCrypto crypto)
 {
-    public async Task<ModelConfiguration> AddSettingsAsync(int tenantId, int providerId, Guid userId, ConfigurationScope scope, 
+    public async Task<ModelConfiguration> AddConfigurationAsync(int tenantId, int providerId, Guid userId, ConfigurationScope scope, 
         RunParameters runParameters)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
@@ -61,7 +60,7 @@ public class AiSettingsDao(
         return mapper.Map<DbAiSettings, ModelConfiguration>(dbSettings);
     }
 
-    public async Task<ModelConfiguration?> GetSettingsAsync(int tenantId, Guid userId, ConfigurationScope scope)
+    public async Task<ModelConfiguration?> GetConfigurationAsync(int tenantId, Guid userId, ConfigurationScope scope)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
@@ -70,31 +69,23 @@ public class AiSettingsDao(
         return dbSettings != null ? mapper.Map<DbAiSettings, ModelConfiguration>(dbSettings) : null;
     }
 
-    public async Task<RunConfiguration?> GetExecutionSettingsAsync(int tenantId, Guid userId, ConfigurationScope scope)
+    public async Task<RunConfiguration?> GetRunConfiguration(
+        int tenantId, Guid userId, ConfigurationScope scope)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         
-        var settingsProviderProjection = await dbContext.GetProviderSettingsAsync(tenantId, userId, scope);
-        if (settingsProviderProjection == null)
+        var configuration = await dbContext.GetRunConfigurationAsync(tenantId, userId, scope);
+        if (configuration == null)
         {
             return null;
         }
+        
+        configuration.Key = await crypto.DecryptAsync(configuration.Key);
 
-        var settings = providerSettings.Get(settingsProviderProjection.Provider.Type);
-        var url = !string.IsNullOrEmpty(settingsProviderProjection.Provider.Url) 
-            ? settingsProviderProjection.Provider.Url 
-            : settings?.Url;
-            
-        return new RunConfiguration
-        {
-            ProviderType = settingsProviderProjection.Provider.Type,
-            Parameters = settingsProviderProjection.Settings.RunParameters,
-            Key = await crypto.DecryptAsync(settingsProviderProjection.Provider.Key),
-            Endpoint = !string.IsNullOrEmpty(url) ? new Uri(url) : null
-        };
+        return configuration;
     }
 
-    public async Task<ModelConfiguration> UpdateSettingsAsync(ModelConfiguration configuration)
+    public async Task<ModelConfiguration> UpdateConfigurationAsync(ModelConfiguration configuration)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         

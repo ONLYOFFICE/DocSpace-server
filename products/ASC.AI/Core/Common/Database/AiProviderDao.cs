@@ -30,7 +30,7 @@ namespace ASC.AI.Core.Common.Database;
 public class AiProviderDao(
     IDbContextFactory<AiDbContext> dbContextFactory, 
     InstanceCrypto crypto,
-    ProviderSettings settings)
+    IMapper mapper)
 {
     public async Task<AiProvider> AddProviderAsync(int tenantId, AiProvider provider)
     {
@@ -38,18 +38,17 @@ public class AiProviderDao(
         var strategy = dbContext.Database.CreateExecutionStrategy();
         
         DbAiProvider dbProvider = null!;
+        var now = DateTime.UtcNow;
 
         await strategy.ExecuteAsync(async () =>
         {
             await using var context = await dbContextFactory.CreateDbContextAsync();
-            
-            var now = DateTime.UtcNow;
 
             dbProvider = new DbAiProvider
             {
                 TenantId = tenantId,
                 Type = provider.Type,
-                Url = provider.Url?.ToString(),
+                Url = provider.Url,
                 Key = await crypto.EncryptAsync(provider.Key),
                 Title = provider.Title,
                 CreatedOn = now,
@@ -61,6 +60,9 @@ public class AiProviderDao(
         });
         
         provider.Id = dbProvider.Id;
+        provider.CreatedOn = now;
+        provider.ModifiedOn = now;
+        
         return provider;
     }
 
@@ -73,8 +75,10 @@ public class AiProviderDao(
         {
             return null;
         }
-
-        return await ToProviderAsync(provider);
+        
+        provider.Key = await crypto.DecryptAsync(provider.Key);
+        
+        return mapper.Map<DbAiProvider, AiProvider>(provider);
     }
     
     public async IAsyncEnumerable<AiProvider> GetProvidersAsync(int tenantId, int offset, int limit)
@@ -82,7 +86,8 @@ public class AiProviderDao(
         var dbContext = await dbContextFactory.CreateDbContextAsync();
         await foreach (var provider in dbContext.GetProvidersAsync(tenantId, offset, limit))
         {
-            yield return await ToProviderAsync(provider);
+            provider.Key = await crypto.DecryptAsync(provider.Key);
+            yield return mapper.Map<DbAiProvider, AiProvider>(provider);
         }
     }
 
@@ -96,16 +101,20 @@ public class AiProviderDao(
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
+        
+        var key = await crypto.EncryptAsync(provider.Key);
+        var now = DateTime.UtcNow;
 
         await strategy.ExecuteAsync(async () =>
         {
             await using var context = await dbContextFactory.CreateDbContextAsync();
             
-            await context.UpdateProviderAsync(provider.Id, provider.Title, provider.Url?.ToString(), provider.Key, provider.ModifiedOn);
+            await context.UpdateProviderAsync(provider.Id, provider.Title, provider.Url, key, now);
             
             await context.SaveChangesAsync();
         });
-        
+
+        provider.ModifiedOn = now;
         return provider;
     }
     
@@ -125,22 +134,5 @@ public class AiProviderDao(
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
         });
-    }
-
-    private async Task<AiProvider> ToProviderAsync(DbAiProvider provider)
-    {
-        var providerSettings = settings.Get(provider.Type);
-        var url = !string.IsNullOrEmpty(provider.Url) ? provider.Url : providerSettings?.Url;
-
-        return new AiProvider
-        {
-            Id = provider.Id,
-            Type = provider.Type,
-            Url = !string.IsNullOrEmpty(url) ? new Uri(url) : null,
-            Key = await crypto.DecryptAsync(provider.Key),
-            Title = provider.Title,
-            CreatedOn = provider.CreatedOn,
-            ModifiedOn = provider.ModifiedOn
-        };
     }
 }

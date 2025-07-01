@@ -28,11 +28,108 @@ namespace ASC.AI.Core.Common.Services;
 
 [Scope]
 public class AiConfigurationService(
-    AiSettingsDao settingsDao, 
+    AiConfigurationDao configurationDao, 
     AiProviderDao providerDao, 
     TenantManager tenantManager, 
-    AuthContext authContext)
+    AuthContext authContext,
+    ProviderSettings providerSettings,
+    UserManager userManager)
 {
+    public async Task<AiProvider> AddProviderAsync(string? title, string? url, string key, ProviderType type)
+    {
+        await ThrowIfNotAccessAsync();
+        
+        var settings = providerSettings.Get(type);
+        if (settings == null)
+        {
+            throw new ArgumentException("Provider not supported");
+        }
+        
+        if (string.IsNullOrEmpty(key))
+        {
+            throw new ArgumentException("Key can not be empty");
+        }
+
+        Uri? uri;
+
+        if (!string.IsNullOrEmpty(settings.Url))
+        {
+            uri = null;
+        }
+        else if (!string.IsNullOrEmpty(url))
+        {
+            uri = new Uri(url);
+        }
+        else
+        {
+            throw new ArgumentException("Provider must have url");
+        }
+
+        var provider = new AiProvider
+        {
+            Title = !string.IsNullOrEmpty(title) ? title : settings.Name,
+            Url = uri?.ToString(),
+            Key = key,
+            Type = type
+        };
+        
+        return await providerDao.AddProviderAsync(tenantManager.GetCurrentTenantId(), provider);
+    }
+    
+    public async Task<AiProvider> UpdateProviderAsync(int id, string? title, string? url, string? key)
+    {
+        await ThrowIfNotAccessAsync();
+
+        var provider = await providerDao.GetProviderAsync(tenantManager.GetCurrentTenantId(), id);
+        if (provider == null)
+        {
+            throw new ItemNotFoundException("Provider not found");
+        }
+
+        if (!string.IsNullOrEmpty(title))
+        {
+            provider.Title = title;
+        }
+
+        if (provider.Type == ProviderType.OpenAiCompatible && !string.IsNullOrEmpty(url))
+        {
+            provider.Url = new Uri(url).ToString();
+        }
+
+        if (!string.IsNullOrEmpty(key))
+        {
+            provider.Key = key;
+        }
+        
+        return await providerDao.UpdateProviderAsync(provider);
+    }
+    
+    public async IAsyncEnumerable<AiProvider> GetProvidersAsync(int offset, int limit)
+    {
+        await ThrowIfNotAccessAsync();
+
+        await foreach (var provider in providerDao.GetProvidersAsync(tenantManager.GetCurrentTenantId(), offset, limit))
+        {
+            provider.Url ??= ResolveEndpoint(provider.Type);
+
+            yield return provider;
+        }
+    }
+
+    public async Task<int> GetProvidersTotalCountAsync()
+    {
+        await ThrowIfNotAccessAsync();
+
+        return await providerDao.GetProvidersTotalCountAsync(tenantManager.GetCurrentTenantId());
+    }
+
+    public async Task DeleteProvidersAsync(List<int> ids)
+    {
+        await ThrowIfNotAccessAsync();
+        
+        await providerDao.DeleteProviders(tenantManager.GetCurrentTenantId(), ids);
+    }
+    
     public async Task<ModelConfiguration> SetConfigurationAsync(int providerId, ConfigurationScope scope, RunParameters parameters)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
@@ -45,22 +142,22 @@ public class AiConfigurationService(
 
         var userId = authContext.CurrentAccount.ID;
 
-        var settings = await settingsDao.GetSettingsAsync(tenantId, userId, scope);
+        var settings = await configurationDao.GetConfigurationAsync(tenantId, userId, scope);
         if (settings == null)
         {
-            return await settingsDao.AddSettingsAsync(tenantId, providerId, userId, scope, parameters);
+            return await configurationDao.AddConfigurationAsync(tenantId, providerId, userId, scope, parameters);
         }
 
         settings.ProviderId = providerId;
         settings.Parameters = parameters;
 
-        return await settingsDao.UpdateSettingsAsync(settings);
+        return await configurationDao.UpdateConfigurationAsync(settings);
     }
     
     public async Task<ModelConfiguration> GetConfigurationAsync(ConfigurationScope scope)
     {
-        var settings = await settingsDao.GetSettingsAsync(
-            tenantManager.GetCurrentTenantId(), authContext.CurrentAccount.ID, scope);
+        var settings = await configurationDao.GetConfigurationAsync(tenantManager.GetCurrentTenantId(), 
+            authContext.CurrentAccount.ID, scope);
         if (settings == null)
         {
             throw new ItemNotFoundException("Model configuration not found");
@@ -71,13 +168,30 @@ public class AiConfigurationService(
 
     public async Task<RunConfiguration> GetRunConfigurationAsync(ConfigurationScope scope)
     {
-        var settings = await settingsDao.GetExecutionSettingsAsync(
+        var config = await configurationDao.GetRunConfiguration(
             tenantManager.GetCurrentTenantId(), authContext.CurrentAccount.ID, scope);
-        if (settings == null)
-        {
+        
+        if (config == null)
+        { 
             throw new ItemNotFoundException("Model configuration not found");
         }
         
-        return settings;
+        config.Url ??= ResolveEndpoint(config.ProviderType);
+
+        return config;
+    }
+    
+    private string? ResolveEndpoint(ProviderType type)
+    {
+        var settings = providerSettings.Get(type);
+        return settings?.Url;
+    }
+    
+    private async Task ThrowIfNotAccessAsync()
+    {
+        if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
+        {
+            throw new SecurityException("Access denied");       
+        }
     }
 }

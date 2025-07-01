@@ -31,7 +31,6 @@ global using ASC.AI.Core.Common;
 global using ASC.AI.Core.Common.Models;
 global using ASC.AI.Core.Common.Database;
 global using ASC.AI.Core.Common.Database.Models;
-global using ASC.AI.Core.Common.Database.Projection;
 global using ASC.AI.Core.Common.Services;
 global using ASC.AI.Core.Settings;
 

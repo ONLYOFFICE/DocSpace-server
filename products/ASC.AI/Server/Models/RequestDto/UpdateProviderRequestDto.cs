@@ -28,7 +28,15 @@ namespace ASC.AI.Models.RequestDto;
 
 public class UpdateProviderRequestDto
 {
+    [FromRoute(Name = "id")]
     public int Id { get; set; }
+    
+    [FromBody]
+    public required UpdateProviderBody Body { get; set; }
+}
+
+public class UpdateProviderBody
+{
     public string? Title { get; set; }
     public string? Url { get; set; }
     public string? Key { get; set; }

@@ -34,11 +34,16 @@ public class ChatClientFactory(
     public async Task<IChatClient> CreateAsync()
     {
         var runConfig = await configurationService.GetRunConfigurationAsync(ConfigurationScope.Chat);
+
+        if (string.IsNullOrEmpty(runConfig.Url))
+        {
+            throw new ArgumentException("Endpoint is not configured");
+        }
         
         var credential = new ApiKeyCredential(runConfig.Key);
         var options = new OpenAIClientOptions
         {
-            Endpoint = runConfig.Endpoint,
+            Endpoint = new Uri(runConfig.Url),
             Transport = new HttpClientPipelineTransport(httpClientFactory.CreateClient())
         };
         

@@ -26,12 +26,12 @@
 
 namespace ASC.AI.Core.Common.Models;
 
-public class AiProvider
+public class AiProvider : IMapFrom<DbAiProvider>
 {
     public int Id { get; set; }
     public required string Title { get; set; }
     public required string Key { get; set; }
-    public Uri? Url { get; set; }
+    public string? Url { get; set; }
     public ProviderType Type { get; set; }
     public DateTime CreatedOn { get; set; }
     public DateTime ModifiedOn { get; set; }

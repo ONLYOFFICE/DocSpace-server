@@ -47,7 +47,7 @@ public partial class AiDbContext
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, ConfigurationScope.Chat])]
-    public Task<AiSettingsProjection?> GetProviderSettingsAsync(int tenantId, Guid userId, ConfigurationScope scope)
+    public Task<RunConfiguration?> GetRunConfigurationAsync(int tenantId, Guid userId, ConfigurationScope scope)
     {
         return Queries.GetProviderSettingsAsync(this, tenantId, userId, scope);
     }
@@ -76,15 +76,17 @@ static file class Queries
                 .Where(x => x.TenantId == tenantId && providersIds.Contains(x.ProviderId))
                 .ExecuteDelete());
     
-    public static readonly Func<AiDbContext, int, Guid, ConfigurationScope, Task<AiSettingsProjection?>> GetProviderSettingsAsync =
+    public static readonly Func<AiDbContext, int, Guid, ConfigurationScope, Task<RunConfiguration?>> GetProviderSettingsAsync =
         EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, Guid userId, ConfigurationScope scope) =>
             ctx.Settings
                 .Where(x => x.TenantId == tenantId && x.UserId == userId && x.Scope == scope)
                 .Join(ctx.Providers, x => x.ProviderId, y => y.Id, (x, y) => 
-                    new AiSettingsProjection 
+                    new RunConfiguration 
                     { 
-                        Settings = x, 
-                        Provider = y 
+                        ProviderType = y.Type,
+                        Url = y.Url,
+                        Key = y.Key,
+                        Parameters = x.RunParameters
                     })
                 .FirstOrDefault());
 }
