@@ -27,16 +27,16 @@
 namespace ASC.Core.Tenants;
 
 /// <summary>
-/// The Developer Tools access settings.
+/// The promotional banners visibility settings.
 /// </summary>
 [Scope]
 [Serializable]
-public class TenantDevToolsAccessSettings : ISettings<TenantDevToolsAccessSettings>
+public class TenantBannerSettings : ISettings<TenantBannerSettings>
 {
     /// <summary>
-    /// Specifies if the Developer Tools access are limited for users or not.
+    /// The banners visibility flag.
     /// </summary>
-    public bool LimitedAccessForUsers { get; set; }
+    public bool Hidden { get; set; }
 
     /// <summary>
     /// The settings ID.
@@ -44,14 +44,14 @@ public class TenantDevToolsAccessSettings : ISettings<TenantDevToolsAccessSettin
     [JsonIgnore]
     public Guid ID
     {
-        get { return new Guid("{739F1C35-1688-4EEB-B46B-6E413FBCE834}"); }
+        get { return new Guid("{89763892-F2B1-40A2-B2E3-B397FAA7B88A}"); }
     }
 
-    public TenantDevToolsAccessSettings GetDefault()
+    public TenantBannerSettings GetDefault()
     {
-        return new TenantDevToolsAccessSettings
+        return new TenantBannerSettings
         {
-            LimitedAccessForUsers = false
+            Hidden = false
         };
     }
 
