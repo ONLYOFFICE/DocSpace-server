@@ -36,6 +36,7 @@
     <input type="text" id="signInEmail" placeholder="Email" />
     <input type="password" id="signInPassword" placeholder="Password" />
     <button id="signInButton">Sign In</button>
+    <button id="findByEmailButton">Find by Email</button>
     <button id="passwordButton">Reset Password</button>
     <br />
     <br />
@@ -140,6 +141,29 @@
                     Authorization: authToken
                 },
                 body: JSON.stringify(body)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(JSON.stringify(data));
+                    document.getElementById('signInResult').innerText = JSON.stringify(data);
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                });
+
+            return false;
+        };
+
+        document.getElementById('findByEmailButton').onclick = function () {
+            const email = document.getElementById('signInEmail').value;
+
+            fetch("/multiregion/findbyemail", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: authToken
+                },
+                body: JSON.stringify({ email })
             })
                 .then(response => response.json())
                 .then(data => {

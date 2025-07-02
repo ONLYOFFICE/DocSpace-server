@@ -63,7 +63,7 @@ public class MultiRegionController(
                 return null;
             }
 
-            var portalUrl = GetAbsolutePortalUrl(commonConstants.BaseDomain, tenant.Alias, tenant.MappedDomain);
+            var portalUrl = GetPortalDomain(commonConstants.BaseDomain, tenant.Alias, tenant.MappedDomain);
 
             return portalUrl;
         }
@@ -76,7 +76,7 @@ public class MultiRegionController(
 
     [HttpPost("findbyemail")]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
-    public async Task<IEnumerable<TenantLinksDto>> FindByEmail(FindByEmailRequestDto inDto)
+    public async Task<IEnumerable<TenantLinksResponseDto>> FindByEmail(FindByEmailRequestDto inDto)
     {
         try
         {
@@ -90,9 +90,9 @@ public class MultiRegionController(
             var tenantLinks = tenantUsers
                 .Select(tenantUser =>
                 {
-                    var portalUrl = GetAbsolutePortalUrl(commonConstants.BaseDomain, tenantUser.TenantAlias, tenantUser.TenantMappedDomain);
-                    var authUrl = GetRelativeAuthUrl(tenantUser.TenantId, tenantUser.UserEmail, false);
-                    return new TenantLinksDto(portalUrl, authUrl);
+                    var portalDomain = GetPortalDomain(commonConstants.BaseDomain, tenantUser.TenantAlias, tenantUser.TenantMappedDomain);
+                    var authPath = GetAuthPath(tenantUser.TenantId, tenantUser.UserEmail, false);
+                    return new TenantLinksResponseDto(portalDomain, authPath);
                 });
 
             return tenantLinks;
@@ -106,7 +106,7 @@ public class MultiRegionController(
 
     [HttpPost("findbyemailpassword")]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
-    public async Task<IEnumerable<TenantLinksDto>> FindByEmailPassword(FindByEmailPasswordRequestDto inDto)
+    public async Task<IEnumerable<TenantLinksResponseDto>> FindByEmailPassword(FindByEmailPasswordRequestDto inDto)
     {
         try
         {
@@ -122,9 +122,9 @@ public class MultiRegionController(
             var tenantLinks = tenantUsers
                 .Select(tenantUser =>
                 {
-                    var portalUrl = GetAbsolutePortalUrl(commonConstants.BaseDomain, tenantUser.TenantAlias, tenantUser.TenantMappedDomain);
-                    var authUrl = GetRelativeAuthUrl(tenantUser.TenantId, tenantUser.UserEmail, false);
-                    return new TenantLinksDto(portalUrl, authUrl);
+                    var portalDomain = GetPortalDomain(commonConstants.BaseDomain, tenantUser.TenantAlias, tenantUser.TenantMappedDomain);
+                    var authPath = GetAuthPath(tenantUser.TenantId, tenantUser.UserEmail, false);
+                    return new TenantLinksResponseDto(portalDomain, authPath);
                 });
 
             return tenantLinks;
@@ -138,7 +138,7 @@ public class MultiRegionController(
 
     [HttpPost("findbysocial")]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
-    public async Task<IEnumerable<TenantLinksDto>> FindBySocial(FindBySocialRequestDto inDto)
+    public async Task<FindBySocialResponseDto> FindBySocial(FindBySocialRequestDto inDto)
     {
         try
         {
@@ -159,12 +159,12 @@ public class MultiRegionController(
             var tenantLinks = tenantUsers
                 .Select(tenantUser =>
                 {
-                    var portalUrl = GetAbsolutePortalUrl(commonConstants.BaseDomain, tenantUser.TenantAlias, tenantUser.TenantMappedDomain);
-                    var authUrl = GetRelativeAuthUrl(tenantUser.TenantId, tenantUser.UserEmail, true);
-                    return new TenantLinksDto(portalUrl, authUrl);
+                    var portalDomain = GetPortalDomain(commonConstants.BaseDomain, tenantUser.TenantAlias, tenantUser.TenantMappedDomain);
+                    var authPath = GetAuthPath(tenantUser.TenantId, tenantUser.UserEmail, true);
+                    return new TenantLinksResponseDto(portalDomain, authPath);
                 });
 
-            return tenantLinks;
+            return new FindBySocialResponseDto(loginProfile.EMail, tenantLinks);
         }
         catch (Exception ex)
         {
@@ -175,7 +175,7 @@ public class MultiRegionController(
 
     [HttpPost("resetpassword")]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
-    public async Task<IEnumerable<TenantLinksDto>> ResetPassword(FindByEmailRequestDto inDto)
+    public async Task<IEnumerable<TenantLinksResponseDto>> ResetPassword(FindByEmailRequestDto inDto)
     {
         try
         {
@@ -186,14 +186,14 @@ public class MultiRegionController(
 
             var tenantUsers = await multiRegionPrivider.FindTenantsByEmailAsync(inDto.Email);
 
-            var result = new List<TenantLinksDto>();
+            var result = new List<TenantLinksResponseDto>();
 
             foreach (var tenantUser in tenantUsers)
             {
                 var passwordStamp = await multiRegionPrivider.GetUserPasswordStampAsync(tenantUser.TenantRegion, tenantUser.TenantId, tenantUser.UserId);
-                var portalUrl = GetAbsolutePortalUrl(commonConstants.BaseDomain, tenantUser.TenantAlias, tenantUser.TenantMappedDomain);
-                var authUrl = GetRelativePasswordUrl(tenantUser.TenantId, tenantUser.UserEmail, tenantUser.UserId, passwordStamp.ToString("s"));
-                result.Add(new TenantLinksDto(portalUrl, authUrl));
+                var portalDomain = GetPortalDomain(commonConstants.BaseDomain, tenantUser.TenantAlias, tenantUser.TenantMappedDomain);
+                var passwordPath = GetPasswordPath(tenantUser.TenantId, tenantUser.UserEmail, tenantUser.UserId, passwordStamp.ToString("s"));
+                result.Add(new TenantLinksResponseDto(portalDomain, passwordPath));
             }
 
             return result;
@@ -205,7 +205,7 @@ public class MultiRegionController(
         }
     }
 
-    private string GetRelativeAuthUrl(int tenantId, string email, bool social = false)
+    private string GetAuthPath(int tenantId, string email, bool social = false)
     {
         var authLink = commonLinkUtility.GetConfirmationUrlRelative(tenantId, email, ConfirmType.Auth);
         var socialParameters = social ? "&social=true" : "";
@@ -213,14 +213,14 @@ public class MultiRegionController(
         return $"/{authLink}{socialParameters}";
     }
 
-    private string GetRelativePasswordUrl(int tenantId, string email, Guid userID, string hash)
+    private string GetPasswordPath(int tenantId, string email, Guid userID, string hash)
     {
         var passwordLink = commonLinkUtility.GetConfirmationUrlRelative(tenantId, email, ConfirmType.PasswordChange, hash, userID);
 
         return $"/{passwordLink}";
     }
 
-    private string GetAbsolutePortalUrl(string baseDomain, string tenantAlias, string tenantMappedDomain)
+    private string GetPortalDomain(string baseDomain, string tenantAlias, string tenantMappedDomain)
     {
         return string.IsNullOrEmpty(tenantMappedDomain) ? $"https://{tenantAlias}.{baseDomain}" : $"https://{tenantMappedDomain}";
     }

@@ -31,4 +31,5 @@ public record FindByEmailRequestDto(string Email);
 public record FindBySocialRequestDto(string Transport);
 public record FindByEmailPasswordRequestDto(string Email, string Password, string PasswordHash);
 
-public record TenantLinksDto(string PortalUrl, string AuthUrl);
+public record TenantLinksResponseDto(string Domain, string Path);
+public record FindBySocialResponseDto(string Email, IEnumerable<TenantLinksResponseDto> Tenants);
