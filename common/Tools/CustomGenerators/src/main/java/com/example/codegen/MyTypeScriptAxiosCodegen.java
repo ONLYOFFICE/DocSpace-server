@@ -1,6 +1,7 @@
 package com.example.codegen;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -8,13 +9,22 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.Map.Entry;
 import java.util.List;
+import org.openapitools.codegen.CodegenConfig;
 import org.openapitools.codegen.model.OperationMap;
 import org.openapitools.codegen.model.OperationsMap;
 import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.ModelsMap;
 import org.openapitools.codegen.languages.TypeScriptAxiosClientCodegen;
+import io.swagger.v3.oas.models.Operation;
 import org.openapitools.codegen.CodegenOperation;
+import org.openapitools.codegen.CodegenModel;
+import org.openapitools.codegen.CodegenParameter;
+import org.openapitools.codegen.CodegenResponse;
+import org.openapitools.codegen.model.OperationMap;
+import org.openapitools.codegen.model.OperationsMap;
 import java.util.Arrays;
 
+import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.servers.ServerVariables;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.servers.ServerVariable;
@@ -31,10 +41,6 @@ public class MyTypeScriptAxiosCodegen extends TypeScriptAxiosClientCodegen {
         this.templateDir = "templates/typescript-axios";
         this.embeddedTemplateDir = "typescript-axios";
 
-        supportingFiles.removeIf(f -> f.getTemplateFile().equals("git_push.sh.mustache") || 
-            f.getDestinationFilename().equals(".openapi-generator-ignore")
-        );
-
         additionalProperties.put("apiDocPath", apiDocPath);
         additionalProperties.put("modelDocPath", modelDocPath);
         modelDocTemplateFiles.put("model_doc.mustache", ".md");
@@ -45,6 +51,7 @@ public class MyTypeScriptAxiosCodegen extends TypeScriptAxiosClientCodegen {
     public void processOpts() {
         super.processOpts();
 
+        String baseURL = openAPI.getServers().get(0).getUrl();
         if (openAPI.getServers() != null && !openAPI.getServers().isEmpty()) {
             Server server = openAPI.getServers().get(0);
             ServerVariables serverVars = server.getVariables();
@@ -55,6 +62,10 @@ public class MyTypeScriptAxiosCodegen extends TypeScriptAxiosClientCodegen {
                 }
             }
         }
+
+        supportingFiles.removeIf(f -> f.getTemplateFile().equals("git_push.sh.mustache") || 
+            f.getDestinationFilename().equals(".openapi-generator-ignore")
+        );
     }
 
     @Override
@@ -98,6 +109,16 @@ public class MyTypeScriptAxiosCodegen extends TypeScriptAxiosClientCodegen {
         return objs;
     }
 
+    
+    public Map<String, Object> postProcessSupportingFileData(Map<String, Object> objs) {
+        super.postProcessSupportingFileData(objs);
+
+        objs.put("x-authorizationUrl", "{{authBaseUrl}}/oauth2/authorize");
+        objs.put("x-tokenUrl", "{{authBaseUrl}}/oauth2/token");
+        objs.put("x-openIdConnectUrl", "{{authBaseUrl}}/.well-known/openid-configuration");
+
+        return objs;
+    }
 
     private String toDashCase(String input) {
         return input.replaceAll("([a-z0-9])([A-Z])", "$1-$2")

@@ -4,13 +4,10 @@
   "generator-cli": {
     "version": "7.13.0"
   },
-  "generatorName": "my-csharp",
+  "generatorName": "my-python-custom",
   "inputSpec": "./tools/api-docs.json",
-  "outputDir": "ClientNet",
+  "outputDir": " python-test",
   "additionalProperties": {
-	"packageName": "DocSpace.Sdk",
-	"library": "httpclient",
-    "licenseName": "Apache-2.0",
-	"targetFramework": "net9.0"
+	"packageName": "docspace-api-python"
   }
 }

@@ -1,34 +1,29 @@
 # {{projectName}}
 
-{{moduleName}} - JavaScript client for {{projectName}}
-{{#appDescriptionWithNewLines}}
-{{{.}}}
-{{/appDescriptionWithNewLines}}
+The ONLYOFFICE DocSpace SDK for JavaScript is a library that provides tools for integrating and managing DocSpace features within your applications. It simplifies interaction with the DocSpace TypeScript API by offering ready-to-use methods and models.
 
 - API version: {{appVersion}}
 - Package version: {{projectVersion}}
-{{^hideGenerationTimestamp}}
-- Build date: {{generatedDate}}
-{{/hideGenerationTimestamp}}
+
 {{#infoUrl}}
 For more information, please visit [{{{infoUrl}}}]({{{infoUrl}}})
 {{/infoUrl}}
 
 ## Installation
 
-### For [Node.js](https://nodejs.org/)
+### Using [Node.js](https://nodejs.org/)
 
 #### npm
 
-To publish the library as a [npm](https://www.npmjs.com/), please follow the procedure in ["Publishing npm packages"](https://docs.npmjs.com/getting-started/publishing-npm-packages).
+To publish the library as an [npm](https://www.npmjs.com/) package, please follow the instructions ["here"](https://docs.npmjs.com/getting-started/publishing-npm-packages).
 
-Then install it via:
+To install the package, run:
 
 ```shell
 npm install {{{projectName}}} --save
 ```
 
-Finally, you need to build the module:
+Finally, build the module:
 
 ```shell
 npm run build
@@ -36,56 +31,68 @@ npm run build
 
 ##### Local development
 
-To use the library locally without publishing to a remote npm registry, first install the dependencies by changing into the directory containing `package.json` (and this README). Let's call this `JAVASCRIPT_CLIENT_DIR`. Then run:
+To use the library locally without publishing it to a remote npm registry:
+
+1. Navigate to the directory containing `package.json` (and this `README.md` file). Let's refer to this path as `JAVASCRIPT_CLIENT_DIR`.
+
+2. Install dependencies:
 
 ```shell
 npm install
 ```
 
-Next, [link](https://docs.npmjs.com/cli/link) it globally in npm with the following, also from `JAVASCRIPT_CLIENT_DIR`:
+3. Link the package globally:
 
 ```shell
 npm link
 ```
 
-To use the link you just defined in your project, switch to the directory you want to use your {{{projectName}}} from, and run:
+4. Switch to the directory you want to use your {{{projectName}}} from.
+
+5. To use the link defined in your project, run:
 
 ```shell
 npm link /path/to/<JAVASCRIPT_CLIENT_DIR>
 ```
 
-Finally, you need to build the module:
+6. Build the module:
 
 ```shell
 npm run build
 ```
 
-#### git
+#### Git
 
-If the library is hosted at a git repository, e.g.https://github.com/{{gitUserId}}{{^gitUserId}}YOUR_USERNAME{{/gitUserId}}/{{gitRepoId}}{{^gitRepoId}}{{projectName}}{{/gitRepoId}}
-then install it via:
+If the library is hosted in a Git repository (e.g., https://github.com/{{gitUserId}}{{^gitUserId}}YOUR_USERNAME{{/gitUserId}}/{{gitRepoId}}{{^gitRepoId}}{{projectName}}{{/gitRepoId}}), you can install it directly:
 
 ```shell
     npm install {{gitUserId}}{{^gitUserId}}YOUR_USERNAME{{/gitUserId}}/{{gitRepoId}}{{^gitRepoId}}{{projectName}}{{/gitRepoId}} --save
 ```
 
-### For browser
+### Using browser
 
-The library also works in the browser environment via npm and [browserify](http://browserify.org/). After following
-the above steps with Node.js and installing browserify with `npm install -g browserify`,
-perform the following (assuming *main.js* is your entry file):
+The library also works in the browser environment via npm and [Browserify](http://browserify.org/):
+
+1. Follow the instructions from the [Using Node.js](https://nodejs.org/en) section. 
+
+2. Install Browserify:
+
+```shell
+npm install -g browserify
+```
+
+3. Assuming `main.js` is your entry file, bundle the code:
 
 ```shell
 browserify main.js > bundle.js
 ```
 
-Then include *bundle.js* in the HTML pages.
+4. Include `bundle.js` in the HTML pages.
 
 ### Webpack Configuration
 
-Using Webpack you may encounter the following error: "Module not found: Error:
-Cannot resolve module", most certainly you should disable AMD loader. Add/merge
-the following section to your webpack config:
+When using Webpack you may encounter the following error: "Module not found: Error: Cannot resolve module". You should probably disable the AMD loader. Add/merge
+the following section to your Webpack configuration:
 
 ```javascript
 module: {
@@ -198,7 +205,7 @@ Class | Method | HTTP request | Description
 
 - **Type**: API key
 - **API key parameter name**: {{keyParamName}}
-- **Location**: {{#isKeyInQuery}}URL query string{{/isKeyInQuery}}{{#isKeyInHeader}}HTTP header{{/isKeyInHeader}}
+- **Location**: {{#isKeyInQuery}}URL query string{{/isKeyInQuery}}{{#isKeyInHeader}}HTTP header{{/isKeyInHeader}}{{#isKeyInCookie}}Cookie{{/isKeyInCookie}}
 {{/isApiKey}}
 {{#isBasic}}
 {{#isBasicBasic}}
@@ -212,13 +219,19 @@ Class | Method | HTTP request | Description
 {{/isHttpSignature}}
 {{/isBasic}}
 {{#isOAuth}}
-
 - **Type**: OAuth
 - **Flow**: {{flow}}
-- **Authorization URL**: {{authorizationUrl}}
+- **Authorization URL**: {{x-authorizationUrl}}
+- **Token Url**: {{x-tokenUrl}}
 - **Scopes**: {{^scopes}}N/A{{/scopes}}
 {{#scopes}}  - {{scope}}: {{description}}
 {{/scopes}}
 {{/isOAuth}}
+{{#isOpenId}}
+- **Type**: OpenId Connect
+- **OpenId Connect URL**: {{x-openIdConnectUrl}}
+{{#scopes}}  - {{scope}}: {{description}}
+{{/scopes}}
+{{/isOpenId}}
 
 {{/authMethods}}
