@@ -337,26 +337,6 @@ public class PortalController(
     [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
     public async ValueTask<IActionResult> RegisterByEmailAsync(TenantModel model)
     {
-        LoginProfile loginProfile = null;
-        if (!string.IsNullOrEmpty(model.ThirdPartyProfile))
-        {
-            try
-            {
-                var profile = await loginProfileTransport.FromPureTransport(model.ThirdPartyProfile);
-                if (profile != null && string.IsNullOrEmpty(profile.AuthorizationError))
-                {
-                    loginProfile = profile;
-                    model.Email = loginProfile.EMail;
-                    model.FirstName = loginProfile.FirstName;
-                    model.LastName = loginProfile.LastName;
-                }
-            }
-            catch (Exception e)
-            {
-                option.LogError(e, "");
-            }
-        }
-
         if (string.IsNullOrEmpty(model?.Email))
         {
             return BadRequest(new
@@ -400,6 +380,25 @@ public class PortalController(
             }
 
             model.PasswordHash = passwordHasher.GetClientPassword(model.Password);
+        }
+
+        LoginProfile loginProfile = null;
+        if (!string.IsNullOrEmpty(model.ThirdPartyProfile))
+        {
+            try
+            {
+                var profile = await loginProfileTransport.FromPureTransport(model.ThirdPartyProfile);
+                if (profile != null && string.IsNullOrEmpty(profile.AuthorizationError))
+                {
+                    loginProfile = profile;
+                    model.FirstName = loginProfile.FirstName;
+                    model.LastName = loginProfile.LastName;
+                }
+            }
+            catch (Exception e)
+            {
+                option.LogError(e, "");
+            }
         }
 
         model.FirstName = (model.FirstName ?? "").Trim();
