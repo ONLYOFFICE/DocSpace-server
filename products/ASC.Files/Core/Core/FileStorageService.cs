@@ -4983,12 +4983,20 @@ public class FileStorageService //: IFileStorageService
 
         linkId = ace.Id;
 
+        var folder = entry as Folder<T>;
+        var isRoom = folder != null && DocSpaceHelper.IsRoom(folder.FolderType);
+
+        if (folder != null && !isRoom || entry is File<T>)
+        {
+            folder = await daoFactory.GetCacheFolderDao<T>().GetFirstParentTypeFromFileEntryAsync(entry);
+        }
+        
         if (eventType == EventType.Remove && ace.SubjectType == SubjectType.PrimaryExternalLink &&
-            (entry is Folder<T> { FolderType: FolderType.PublicRoom or FolderType.FillingFormsRoom } room))
+            (folder is { FolderType: FolderType.PublicRoom or FolderType.FillingFormsRoom }))
         {
             linkId = Guid.NewGuid();
 
-            var (defaultTitle, defaultAccess) = room.FolderType switch
+            var (defaultTitle, defaultAccess) = folder.FolderType switch
             {
                 FolderType.PublicRoom => (FilesCommonResource.DefaultExternalLinkTitle, FileShare.Read),
                 FolderType.FillingFormsRoom => (FilesCommonResource.FillOutExternalLinkTitle, FileShare.FillForms),
@@ -5002,8 +5010,6 @@ public class FileStorageService //: IFileStorageService
 
             return (await fileSharing.GetPureSharesAsync(entry, [linkId]).FirstOrDefaultAsync());
         }
-
-        var isRoom = entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType);
 
         if (eventType is EventType.Update)
         {
