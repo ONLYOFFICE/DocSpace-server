@@ -661,6 +661,58 @@ public class ShareInheritanceTest(
     }
     
     [Fact]
+    public async Task SetFileInRoomLinkAsync_PublicRoomWithFileExpiration_ReturnsNoExpiration()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var publicRoom = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("Public Room Test", roomType: RoomType.PublicRoom), TestContext.Current.CancellationToken)).Response;
+        var file = await CreateFile("File in Public Room", publicRoom.Id);
+        
+        // Get the primary external link
+        var primaryLink = (await _filesApi.GetFilePrimaryExternalLinkAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var originalSharedTo = DeserializeSharedToLink(primaryLink);
+
+        // Act - Set the link with FileShare.None
+        var updateRequest = new FileLinkRequest(
+            linkId: originalSharedTo.Id, 
+            expirationDate: new ApiDateTime { UtcTime = DateTime.UtcNow.AddDays(1)});
+
+        var updatedLink = (await _filesApi.SetExternalLinkAsync(file.Id, updateRequest, TestContext.Current.CancellationToken)).Response;
+        var updatedSharedTo = DeserializeSharedToLink(updatedLink);
+
+        // Assert
+        updatedLink.Should().NotBeNull();
+        updatedSharedTo.Should().NotBeNull();
+        updatedSharedTo.ExpirationDate.Should().BeNull();
+    }
+    
+    [Fact]
+    public async Task SetFileInRoomLinkAsync_PublicRoomWithFileInternal_ReturnsExternal()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var publicRoom = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("Public Room Test", roomType: RoomType.PublicRoom), TestContext.Current.CancellationToken)).Response;
+        var file = await CreateFile("File in Public Room", publicRoom.Id);
+        
+        // Get the primary external link
+        var primaryLink = (await _filesApi.GetFilePrimaryExternalLinkAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var originalSharedTo = DeserializeSharedToLink(primaryLink);
+
+        // Act - Set the link with FileShare.None
+        var updateRequest = new FileLinkRequest(
+            linkId: originalSharedTo.Id, 
+            varInternal: true);
+
+        var updatedLink = (await _filesApi.SetExternalLinkAsync(file.Id, updateRequest, TestContext.Current.CancellationToken)).Response;
+        var updatedSharedTo = DeserializeSharedToLink(updatedLink);
+
+        // Assert
+        updatedLink.Should().NotBeNull();
+        updatedSharedTo.Should().NotBeNull();
+        updatedSharedTo.Internal.Should().BeFalse();
+    }
+    
+    [Fact]
     public async Task SetFolderLinkAsync_FolderWithNoneAccessPublicRoom_ReturnsNewLink()
     {
         // Arrange

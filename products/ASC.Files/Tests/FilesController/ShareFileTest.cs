@@ -190,15 +190,25 @@ public class ShareFileTest(
         
         // Act - Update the link
         var updateLinkParams = new FileLinkRequest(
-            access: FileShare.Editing, // Read/Write access
-            linkId: sharedTo.Id
+            linkId: sharedTo.Id,
+            access: FileShare.Editing,
+            expirationDate: new ApiDateTime { UtcTime = DateTime.UtcNow.AddDays(1)},
+            varInternal: true,
+            denyDownload: true,
+            password: "testpassword"
         );
 
         var updatedLink = (await _filesApi.SetExternalLinkAsync(file.Id, updateLinkParams, TestContext.Current.CancellationToken)).Response;
+        var updatedSharedTo = DeserializeSharedToLink(updatedLink);
         
         // Assert
         updatedLink.Should().NotBeNull();
-        updatedLink.Access.Should().Be(FileShare.Editing); // Updated access level
+        updatedLink.Access.Should().Be(updateLinkParams.Access);
+        updatedSharedTo.ExpirationDate.Should().NotBeNull();
+        updatedSharedTo.ExpirationDate.UtcTime.Should().Be(updateLinkParams.ExpirationDate.UtcTime);
+        updatedSharedTo.Internal.Should().Be(updateLinkParams.Internal);
+        updatedSharedTo.DenyDownload.Should().Be(updateLinkParams.DenyDownload);
+        updatedSharedTo.Password.Should().Be(updateLinkParams.Password);
     }
 
     [Fact]
@@ -253,6 +263,7 @@ public class ShareFileTest(
         //updatedLink1SharedTo.Title.Should().Be("Updated Link 1");
         updatedLink1Response.Access.Should().Be(FileShare.Editing);
         updatedLink1SharedTo.ExpirationDate.Should().NotBeNull();
+        updatedLink1SharedTo.ExpirationDate.UtcTime.Should().Be(updateLink1Request.ExpirationDate.UtcTime);
 
         // Verify second link updates
         updatedLink2SharedTo.Id.Should().Be(link2SharedTo.Id);

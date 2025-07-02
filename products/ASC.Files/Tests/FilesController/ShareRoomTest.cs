@@ -503,6 +503,32 @@ public class ShareRoomTest(
         var allLinks = (await _roomsApi.GetRoomLinksAsync(publicRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         allLinks.Should().HaveCount(1); // The original link should be replaced
     }
+
+    [Fact]
+    public async Task SetRoomLinkAsync_PublicRoomWithExpiration_ReturnsOldLink()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var publicRoom = await CreatePublicRoom("Public Room Test");
+
+        // Get the primary external link
+        var primaryLink = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(publicRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var originalSharedTo = DeserializeSharedToLink(primaryLink);
+
+        // Act - Set the link with FileShare.None
+        var updateRequest = new RoomLinkRequest(
+            linkId: originalSharedTo.Id, 
+            expirationDate: new ApiDateTime { UtcTime = DateTime.UtcNow.AddDays(1)}, 
+            linkType: LinkType.External);
+
+        var updatedLink = (await _roomsApi.SetRoomLinkAsync(publicRoom.Id, updateRequest, TestContext.Current.CancellationToken)).Response;
+        var updatedSharedTo = DeserializeSharedToLink(updatedLink);
+
+        // Assert
+        updatedLink.Should().NotBeNull();
+        updatedSharedTo.Should().NotBeNull();
+        updatedSharedTo.ExpirationDate.Should().BeNull();
+    }
     
     [Fact]
     public async Task SetRoomLinkAsync_CustomRoomWithNoneAccess_ReturnsNull()
