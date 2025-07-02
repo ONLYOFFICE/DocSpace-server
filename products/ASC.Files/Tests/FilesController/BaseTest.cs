@@ -179,9 +179,9 @@ public class BaseTest(
         return statuses;
     }
     
-    protected static FileShareLink? DeserializeSharedToLink(FileShareDto updatedLink1Response)
+    protected static FileShareLink DeserializeSharedToLink(FileShareDto updatedLink1Response)
     {
-        return JsonSerializer.Deserialize<FileShareLink>((updatedLink1Response.SharedTo as JObject).ToString(), JsonSerializerOptions.Web);
+        return JsonSerializer.Deserialize<FileShareLink>((updatedLink1Response.SharedTo as JObject)!.ToString(), JsonSerializerOptions.Web)!;
     }
     
     protected async Task<(string, int)> CreateFileAndShare(FileShare fileShare, bool primary = true, bool varInternal = false, DateTime? expirationDate = null)
@@ -208,7 +208,7 @@ public class BaseTest(
         return (fileShareLink.RequestToken, file.Id);
     }
     
-    protected async Task<FileDtoInteger?> TryOpenEditAsync(string share, int fileId, User? user = null, bool throwException = false)
+    protected async Task<FileDtoInteger> TryOpenEditAsync(string share, int fileId, User? user = null, bool throwException = false)
     {
         if (user != null)
         {
@@ -225,7 +225,7 @@ public class BaseTest(
         {
             await Assert.ThrowsAsync<ApiException>(async () => await _filesApi.OpenEditFileAsync(fileId, cancellationToken: TestContext.Current.CancellationToken));
             _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
-            return null;
+            return null!;
         }
 
         var openEditResult = (await _filesApi.OpenEditFileAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
