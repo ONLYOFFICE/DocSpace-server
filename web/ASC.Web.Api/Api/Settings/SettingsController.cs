@@ -1191,7 +1191,7 @@ public partial class SettingsController(
     [HttpPost("banner")]
     public async Task<TenantBannerSettings> SetTenantBannerSettings(TenantBannerSettingsDto inDto)
     {
-        if (!coreBaseSettings.Standalone)
+        if (!tenantExtra.Enterprise)
         {
             throw new NotSupportedException("Not available.");
         }
