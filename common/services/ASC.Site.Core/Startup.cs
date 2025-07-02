@@ -61,8 +61,8 @@ public class Startup
         services.AddBaseDbContextPool<WebstudioDbContext>();
 
 
-        services.AddBaseDbContextPool<EuUserDbContext>(region: "eu", nameConnectionString: "default");
-        services.AddBaseDbContextPool<UsUserDbContext>(region: "us", nameConnectionString: "default");
+        services.AddBaseDbContextPool<EuRegionDbContext>(region: "eu", nameConnectionString: "default");
+        services.AddBaseDbContextPool<UsRegionDbContext>(region: "us", nameConnectionString: "default");
 
 
         services.AddSession();

@@ -29,16 +29,16 @@ namespace ASC.Site.Core.Classes
     [Scope]
     public class MultiRegionPrivider(
         MachinePseudoKeys machinePseudoKeys,
-        IDbContextFactory<EuUserDbContext> euUserDbContextFactory,
-        IDbContextFactory<UsUserDbContext> usUserDbContextFactory)
+        IDbContextFactory<EuRegionDbContext> euRegionDbContextFactory,
+        IDbContextFactory<UsRegionDbContext> usRegionDbContextFactory)
     {
         public async Task<DbTenant> FindTenantByDomainAsync(string domain)
         {
-            await using var euUserDbContext = await euUserDbContextFactory.CreateDbContextAsync();
-            var euTask = GetTenantByDomainAsync(euUserDbContext, domain);
+            await using var euRegionDbContext = await euRegionDbContextFactory.CreateDbContextAsync();
+            var euTask = GetTenantByDomainAsync(euRegionDbContext, domain);
 
-            await using var usUserDbContext = await usUserDbContextFactory.CreateDbContextAsync();
-            var usTask = GetTenantByDomainAsync(usUserDbContext, domain);
+            await using var usRegionDbContext = await usRegionDbContextFactory.CreateDbContextAsync();
+            var usTask = GetTenantByDomainAsync(usRegionDbContext, domain);
 
             await Task.WhenAll(euTask, usTask);
 
@@ -49,11 +49,11 @@ namespace ASC.Site.Core.Classes
         {
             var result = new List<TenantUser>();
 
-            await using var euUserDbContext = await euUserDbContextFactory.CreateDbContextAsync();
-            var euTask = GetTenantsByEmailAsync(euUserDbContext, email);
+            await using var euRegionDbContext = await euRegionDbContextFactory.CreateDbContextAsync();
+            var euTask = GetTenantsByEmailAsync(euRegionDbContext, email);
 
-            await using var usUserDbContext = await usUserDbContextFactory.CreateDbContextAsync();
-            var usTask = GetTenantsByEmailAsync(usUserDbContext, email);
+            await using var usRegionDbContext = await usRegionDbContextFactory.CreateDbContextAsync();
+            var usTask = GetTenantsByEmailAsync(usRegionDbContext, email);
 
             await Task.WhenAll(euTask, usTask);
 
@@ -62,11 +62,11 @@ namespace ASC.Site.Core.Classes
 
         public async Task<List<TenantUser>> FindTenantsByEmailPasswordAsync(string email, string passwordHash)
         {
-            await using var euUserDbContext = await euUserDbContextFactory.CreateDbContextAsync();
-            var euTask = GetTenantsByEmailPasswordAsync(euUserDbContext, email, passwordHash);
+            await using var euRegionDbContext = await euRegionDbContextFactory.CreateDbContextAsync();
+            var euTask = GetTenantsByEmailPasswordAsync(euRegionDbContext, email, passwordHash);
 
-            await using var usUserDbContext = await usUserDbContextFactory.CreateDbContextAsync();
-            var usTask = GetTenantsByEmailPasswordAsync(usUserDbContext, email, passwordHash);
+            await using var usRegionDbContext = await usRegionDbContextFactory.CreateDbContextAsync();
+            var usTask = GetTenantsByEmailPasswordAsync(usRegionDbContext, email, passwordHash);
 
             await Task.WhenAll(euTask, usTask);
 
@@ -75,11 +75,11 @@ namespace ASC.Site.Core.Classes
 
         public async Task<List<TenantUser>> FindTenantsBySocialAsync(LoginProfile loginProfile)
         {
-            await using var euUserDbContext = await euUserDbContextFactory.CreateDbContextAsync();
-            var euTask = GetTenantsBySocialAsync(euUserDbContext, loginProfile);
+            await using var euRegionDbContext = await euRegionDbContextFactory.CreateDbContextAsync();
+            var euTask = GetTenantsBySocialAsync(euRegionDbContext, loginProfile);
 
-            await using var usUserDbContext = await usUserDbContextFactory.CreateDbContextAsync();
-            var usTask = GetTenantsBySocialAsync(usUserDbContext, loginProfile);
+            await using var usRegionDbContext = await usRegionDbContextFactory.CreateDbContextAsync();
+            var usTask = GetTenantsBySocialAsync(usRegionDbContext, loginProfile);
 
             await Task.WhenAll(euTask, usTask);
 
@@ -90,15 +90,15 @@ namespace ASC.Site.Core.Classes
         {
             if (tenantRegion == TenantRegion.Eu)
             {
-                await using var euUserDbContext = await euUserDbContextFactory.CreateDbContextAsync();
-                return await GetUserPasswordStampAsync(euUserDbContext, tenantId, userId);
+                await using var euRegionDbContext = await euRegionDbContextFactory.CreateDbContextAsync();
+                return await GetUserPasswordStampAsync(euRegionDbContext, tenantId, userId);
             }
 
-            await using var usUserDbContext = await usUserDbContextFactory.CreateDbContextAsync();
-            return await GetUserPasswordStampAsync(usUserDbContext, tenantId, userId);
+            await using var usRegionDbContext = await usRegionDbContextFactory.CreateDbContextAsync();
+            return await GetUserPasswordStampAsync(usRegionDbContext, tenantId, userId);
         }
 
-        private static Task<DbTenant> GetTenantByDomainAsync(RegionUserDbContext userDbContext, string domain)
+        private static Task<DbTenant> GetTenantByDomainAsync(HostedRegionDbContext userDbContext, string domain)
         {
             return userDbContext.Tenants
                 .Where(t => t.Alias == domain || t.MappedDomain == domain)
@@ -108,9 +108,9 @@ namespace ASC.Site.Core.Classes
                 .FirstOrDefaultAsync();
         }
 
-        private static Task<List<TenantUser>> GetTenantsByEmailAsync(RegionUserDbContext userDbContext, string email)
+        private static Task<List<TenantUser>> GetTenantsByEmailAsync(HostedRegionDbContext userDbContext, string email)
         {
-            var region = userDbContext is EuUserDbContext ? TenantRegion.Eu : TenantRegion.Us;
+            var region = userDbContext is EuRegionDbContext ? TenantRegion.Eu : TenantRegion.Us;
 
             return userDbContext.Tenants
                 .Where(t => t.Status == TenantStatus.Active)
@@ -139,9 +139,9 @@ namespace ASC.Site.Core.Classes
             return Hasher.Base64Hash(password + userId + Encoding.UTF8.GetString(machinePseudoKeys.GetMachineConstant()), HashAlg.SHA512);
         }
 
-        private async Task<List<TenantUser>> GetTenantsByEmailPasswordAsync(RegionUserDbContext userDbContext, string email, string passwordHash)
+        private async Task<List<TenantUser>> GetTenantsByEmailPasswordAsync(HostedRegionDbContext userDbContext, string email, string passwordHash)
         {
-            var region = userDbContext is EuUserDbContext ? TenantRegion.Eu : TenantRegion.Us;
+            var region = userDbContext is EuRegionDbContext ? TenantRegion.Eu : TenantRegion.Us;
 
             var usersQuery = await userDbContext.Tenants
                 .Where(r => r.Status == TenantStatus.Active)
@@ -185,9 +185,9 @@ namespace ASC.Site.Core.Classes
                 .ToListAsync();
         }
 
-        private static Task<List<TenantUser>> GetTenantsBySocialAsync(RegionUserDbContext userDbContext, LoginProfile loginProfile)
+        private static Task<List<TenantUser>> GetTenantsBySocialAsync(HostedRegionDbContext userDbContext, LoginProfile loginProfile)
         {
-            var region = userDbContext is EuUserDbContext ? TenantRegion.Eu : TenantRegion.Us;
+            var region = userDbContext is EuRegionDbContext ? TenantRegion.Eu : TenantRegion.Us;
 
             return userDbContext.Users
                  .Join(userDbContext.Tenants, u => u.TenantId, t => t.Id, (user, tenant) => new
@@ -218,7 +218,7 @@ namespace ASC.Site.Core.Classes
                  .ToListAsync();
         }
 
-        private static async Task<DateTime> GetUserPasswordStampAsync(RegionUserDbContext userDbContext, int tenantId, Guid userId)
+        private static async Task<DateTime> GetUserPasswordStampAsync(HostedRegionDbContext userDbContext, int tenantId, Guid userId)
         {
             var target = userId.ToString();
 
@@ -257,11 +257,11 @@ namespace ASC.Site.Core.Classes
         public TenantRegion TenantRegion { get; set; }
     }
 
-    public partial class EuUserDbContext(DbContextOptions<EuUserDbContext> dbContextOptions) : RegionUserDbContext(dbContextOptions) { }
+    public partial class EuRegionDbContext(DbContextOptions<EuRegionDbContext> dbContextOptions) : HostedRegionDbContext(dbContextOptions) { }
 
-    public partial class UsUserDbContext(DbContextOptions<UsUserDbContext> dbContextOptions) : RegionUserDbContext(dbContextOptions) { }
+    public partial class UsRegionDbContext(DbContextOptions<UsRegionDbContext> dbContextOptions) : HostedRegionDbContext(dbContextOptions) { }
 
-    public class RegionUserDbContext(DbContextOptions options): BaseDbContext(options)
+    public class HostedRegionDbContext(DbContextOptions options): BaseDbContext(options)
     {
         public DbSet<DbTenant> Tenants { get; set; }
         public DbSet<User> Users { get; set; }
