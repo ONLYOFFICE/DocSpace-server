@@ -173,6 +173,37 @@ public class MultiRegionController(
         }
     }
 
+    [HttpPost("resetpassword")]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
+    public async Task<IEnumerable<TenantLinksDto>> ResetPassword(FindByEmailRequestDto inDto)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(inDto?.Email))
+            {
+                return null;
+            }
+
+            var tenantUsers = await multiRegionPrivider.FindTenantsByEmailAsync(inDto.Email);
+
+            var result = new List<TenantLinksDto>();
+
+            foreach (var tenantUser in tenantUsers)
+            {
+                var passwordStamp = await multiRegionPrivider.GetUserPasswordStampAsync(tenantUser.TenantRegion, tenantUser.TenantId, tenantUser.UserId);
+                var portalUrl = GetAbsolutePortalUrl(commonConstants.BaseDomain, tenantUser.TenantAlias, tenantUser.TenantMappedDomain);
+                var authUrl = GetRelativePasswordUrl(tenantUser.TenantId, tenantUser.UserEmail, tenantUser.UserId, passwordStamp.ToString("s"));
+                result.Add(new TenantLinksDto(portalUrl, authUrl));
+            }
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            logger.ErrorWithException(ex);
+            throw;
+        }
+    }
 
     private string GetRelativeAuthUrl(int tenantId, string email, bool social = false)
     {
@@ -180,6 +211,13 @@ public class MultiRegionController(
         var socialParameters = social ? "&social=true" : "";
 
         return $"/{authLink}{socialParameters}";
+    }
+
+    private string GetRelativePasswordUrl(int tenantId, string email, Guid userID, string hash)
+    {
+        var passwordLink = commonLinkUtility.GetConfirmationUrlRelative(tenantId, email, ConfirmType.PasswordChange, hash, userID);
+
+        return $"/{passwordLink}";
     }
 
     private string GetAbsolutePortalUrl(string baseDomain, string tenantAlias, string tenantMappedDomain)

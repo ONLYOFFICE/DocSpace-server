@@ -51,6 +51,8 @@ global using ASC.Core.Users;
 global using ASC.FederatedLogin;
 global using ASC.FederatedLogin.Profile;
 global using ASC.Files.Core.Core;
+global using ASC.MessagingSystem.Core;
+global using ASC.MessagingSystem.EF.Model;
 global using ASC.Notify.Engine;
 global using ASC.Notify.Messages;
 global using ASC.Notify.Patterns;

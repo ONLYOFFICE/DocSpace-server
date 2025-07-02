@@ -86,6 +86,17 @@ namespace ASC.Site.Core.Classes
             return [.. euTask.Result, .. usTask.Result];
         }
 
+        public async Task<DateTime> GetUserPasswordStampAsync(TenantRegion tenantRegion, int tenantId, Guid userId)
+        {
+            if (tenantRegion == TenantRegion.Eu)
+            {
+                await using var euUserDbContext = await euUserDbContextFactory.CreateDbContextAsync();
+                return await GetUserPasswordStampAsync(euUserDbContext, tenantId, userId);
+            }
+
+            await using var usUserDbContext = await usUserDbContextFactory.CreateDbContextAsync();
+            return await GetUserPasswordStampAsync(usUserDbContext, tenantId, userId);
+        }
 
         private static Task<DbTenant> GetTenantByDomainAsync(RegionUserDbContext userDbContext, string domain)
         {
@@ -99,6 +110,8 @@ namespace ASC.Site.Core.Classes
 
         private static Task<List<TenantUser>> GetTenantsByEmailAsync(RegionUserDbContext userDbContext, string email)
         {
+            var region = userDbContext is EuUserDbContext ? TenantRegion.Eu : TenantRegion.Us;
+
             return userDbContext.Tenants
                 .Where(t => t.Status == TenantStatus.Active)
                 .Join(userDbContext.Users, t => t.Id, u => u.TenantId, (tenant, user) => new
@@ -115,7 +128,8 @@ namespace ASC.Site.Core.Classes
                     UserLastName = r.user.LastName,
                     TenantId = r.tenant.Id,
                     TenantAlias = r.tenant.Alias,
-                    TenantMappedDomain = r.tenant.MappedDomain
+                    TenantMappedDomain = r.tenant.MappedDomain,
+                    TenantRegion = region
                 })
                 .ToListAsync();
         }
@@ -127,6 +141,8 @@ namespace ASC.Site.Core.Classes
 
         private async Task<List<TenantUser>> GetTenantsByEmailPasswordAsync(RegionUserDbContext userDbContext, string email, string passwordHash)
         {
+            var region = userDbContext is EuUserDbContext ? TenantRegion.Eu : TenantRegion.Us;
+
             var usersQuery = await userDbContext.Tenants
                 .Where(r => r.Status == TenantStatus.Active)
                 .Join(userDbContext.Users, r => r.Id, r => r.TenantId, (tenant, user) => new
@@ -163,13 +179,16 @@ namespace ASC.Site.Core.Classes
                      UserLastName = r.User.LastName,
                      TenantId = r.DbTenant.Id,
                      TenantAlias = r.DbTenant.Alias,
-                     TenantMappedDomain = r.DbTenant.MappedDomain
+                     TenantMappedDomain = r.DbTenant.MappedDomain,
+                     TenantRegion = region
                  })
                 .ToListAsync();
         }
 
         private static Task<List<TenantUser>> GetTenantsBySocialAsync(RegionUserDbContext userDbContext, LoginProfile loginProfile)
         {
+            var region = userDbContext is EuUserDbContext ? TenantRegion.Eu : TenantRegion.Us;
+
             return userDbContext.Users
                  .Join(userDbContext.Tenants, u => u.TenantId, t => t.Id, (user, tenant) => new
                  {
@@ -193,12 +212,38 @@ namespace ASC.Site.Core.Classes
                      UserLastName = r.user.LastName,
                      TenantId = r.tenant.Id,
                      TenantAlias = r.tenant.Alias,
-                     TenantMappedDomain = r.tenant.MappedDomain
+                     TenantMappedDomain = r.tenant.MappedDomain,
+                     TenantRegion = region
                  })
                  .ToListAsync();
         }
+
+        private static async Task<DateTime> GetUserPasswordStampAsync(RegionUserDbContext userDbContext, int tenantId, Guid userId)
+        {
+            var target = userId.ToString();
+
+            var auditEvent = await userDbContext.AuditEvents
+                .Where(a => a.TenantId == tenantId && a.Target == target && a.Action == (int)MessageAction.UserSentPasswordChangeInstructions)
+                .OrderByDescending(a => a.Id)
+                .FirstOrDefaultAsync();
+
+            var auditDate = auditEvent?.Date ?? DateTime.MinValue;
+
+            var securityDate = await userDbContext.UserSecurity
+                .Where(us => us.TenantId == tenantId && us.UserId == userId)
+                .Select(us => us.LastModified)
+                .FirstAsync();
+
+            return auditDate.CompareTo(securityDate.Value) > 0 ? auditDate : securityDate.Value;
+        }
     }
 
+
+    public enum TenantRegion
+    {
+        Eu = 0,
+        Us = 1
+    }
 
     public class TenantUser
     {
@@ -209,6 +254,7 @@ namespace ASC.Site.Core.Classes
         public int TenantId { get; set; }
         public string TenantAlias { get; set; }
         public string TenantMappedDomain { get; set; }
+        public TenantRegion TenantRegion { get; set; }
     }
 
     public partial class EuUserDbContext(DbContextOptions<EuUserDbContext> dbContextOptions) : RegionUserDbContext(dbContextOptions) { }
@@ -221,6 +267,8 @@ namespace ASC.Site.Core.Classes
         public DbSet<User> Users { get; set; }
         public DbSet<UserSecurity> UserSecurity { get; set; }
         public DbSet<AccountLinks> AccountLinks { get; set; }
+        public DbSet<DbAuditEvent> AuditEvents { get; set; }
+        public DbSet<DbFilesAuditReference> FilesAuditReferences { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -230,7 +278,9 @@ namespace ASC.Site.Core.Classes
                .AddDbTenant()
                .AddUser()
                .AddUserSecurity()
-               .AddAccountLinks();
+               .AddAccountLinks()
+               .AddAuditEvent()
+               .AddFilesAuditReference();
         }
     }
 }
