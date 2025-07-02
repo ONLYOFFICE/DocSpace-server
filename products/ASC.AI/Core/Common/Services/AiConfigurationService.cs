@@ -141,7 +141,7 @@ public class AiConfigurationService(
         await providerDao.DeleteProviders(tenantManager.GetCurrentTenantId(), ids);
     }
     
-    public async Task<ModelConfiguration> SetConfigurationAsync(int providerId, ConfigurationScope scope, RunParameters parameters)
+    public async Task<ModelConfiguration> SetConfigurationAsync(int providerId, Scope scope, RunParameters parameters)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
         
@@ -165,7 +165,7 @@ public class AiConfigurationService(
         return await configurationDao.UpdateConfigurationAsync(settings);
     }
     
-    public async Task<ModelConfiguration> GetConfigurationAsync(ConfigurationScope scope)
+    public async Task<ModelConfiguration> GetConfigurationAsync(Scope scope)
     {
         var settings = await configurationDao.GetConfigurationAsync(tenantManager.GetCurrentTenantId(), 
             authContext.CurrentAccount.ID, scope);
@@ -177,7 +177,7 @@ public class AiConfigurationService(
         return settings;
     }
 
-    public async Task<RunConfiguration> GetRunConfigurationAsync(ConfigurationScope scope)
+    public async Task<RunConfiguration> GetRunConfigurationAsync(Scope scope)
     {
         var config = await configurationDao.GetRunConfiguration(
             tenantManager.GetCurrentTenantId(), authContext.CurrentAccount.ID, scope);
@@ -191,11 +191,65 @@ public class AiConfigurationService(
 
         return config;
     }
-    
+
+    public async Task<IEnumerable<Model>> GetModelsAsync(Scope scope)
+    {
+        var providers = await GetProvidersAsync(0, 10).ToListAsync();
+
+        var tasks = providers.Select(p => 
+            Task.Run(async () => 
+            { 
+                try
+                {
+                    return await GetProviderModelsAsync(p);
+                }
+                catch
+                {
+                    // TODO: add logging
+                }
+
+                return []; 
+            }));
+
+        var result = await Task.WhenAll(tasks);
+        
+        return result.SelectMany(x => x);
+    }
+
+    public async Task<IEnumerable<Model>> GetModelsAsync(int providerId, Scope scope)
+    {
+        var provider = await providerDao.GetProviderAsync(tenantManager.GetCurrentTenantId(), providerId);
+        if (provider == null)
+        {
+            return [];
+        }
+        
+        var client = modelClientFactory.Create(provider.Type);
+        var models = await client.GetModelsAsync(provider.Url!, provider.Key);
+
+        return models.Select(x => new Model
+        {
+            Provider = provider,
+            ModelId = x.Id
+        });
+    }
+
     private string? ResolveEndpoint(ProviderType type)
     {
         var settings = providerSettings.Get(type);
         return settings?.Url;
+    }
+    
+    private async Task<IEnumerable<Model>> GetProviderModelsAsync(AiProvider p)
+    {
+        var client = modelClientFactory.Create(p.Type);
+        var models = await client.GetModelsAsync(p.Url!, p.Key);
+
+        return models.Select(m => new Model
+        {
+            Provider = p,
+            ModelId = m.Id
+        });
     }
     
     private async Task ThrowIfNotAccessAsync()

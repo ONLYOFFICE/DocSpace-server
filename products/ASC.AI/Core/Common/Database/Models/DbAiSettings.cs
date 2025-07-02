@@ -31,8 +31,8 @@ public class DbAiSettings : BaseEntity
     public int ProviderId { get; set; }
     public Guid UserId { get; set; }
     public int TenantId { get; set; }
-    public ConfigurationScope Scope { get; set; }
-    public required RunParameters RunParameters { get; set; }
+    public Scope Scope { get; set; }
+    public required RunParameters Parameters { get; set; }
     
     public DbTenant Tenant { get; set; }
     
@@ -77,7 +77,7 @@ public static class DbAiSettingsExtensions
             entity.Property(e => e.Scope)
                 .HasColumnName("scope");
 
-            entity.Property(e => e.RunParameters)
+            entity.Property(e => e.Parameters)
                 .HasColumnName("run_settings")
                 .HasColumnType("json")
                 .HasCharSet("utf8")

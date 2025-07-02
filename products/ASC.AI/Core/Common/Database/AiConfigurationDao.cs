@@ -32,7 +32,7 @@ public class AiConfigurationDao(
     IMapper mapper,
     InstanceCrypto crypto)
 {
-    public async Task<ModelConfiguration> AddConfigurationAsync(int tenantId, int providerId, Guid userId, ConfigurationScope scope, 
+    public async Task<ModelConfiguration> AddConfigurationAsync(int tenantId, int providerId, Guid userId, Scope scope, 
         RunParameters runParameters)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
@@ -50,7 +50,7 @@ public class AiConfigurationDao(
                 ProviderId = providerId,
                 UserId = userId,
                 Scope = scope,
-                RunParameters = runParameters
+                Parameters = runParameters
             };
 
             await context.Settings.AddAsync(dbSettings);
@@ -60,7 +60,7 @@ public class AiConfigurationDao(
         return mapper.Map<DbAiSettings, ModelConfiguration>(dbSettings);
     }
 
-    public async Task<ModelConfiguration?> GetConfigurationAsync(int tenantId, Guid userId, ConfigurationScope scope)
+    public async Task<ModelConfiguration?> GetConfigurationAsync(int tenantId, Guid userId, Scope scope)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
@@ -70,7 +70,7 @@ public class AiConfigurationDao(
     }
 
     public async Task<RunConfiguration?> GetRunConfiguration(
-        int tenantId, Guid userId, ConfigurationScope scope)
+        int tenantId, Guid userId, Scope scope)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         

@@ -28,9 +28,9 @@ namespace ASC.AI.Core.Common.Clients.Providers;
 
 public class TogetherAiModelClient(HttpClient client) : OpenAiModelClient(client)
 {
-    protected override async Task<List<Model>> GetContentAsync(HttpResponseMessage response)
+    protected override async Task<List<ModelInfo>> GetContentAsync(HttpResponseMessage response)
     {
-        var content = await response.Content.ReadFromJsonAsync<List<Model>>();
+        var content = await response.Content.ReadFromJsonAsync<List<ModelInfo>>();
         return content ?? [];
     }
 }

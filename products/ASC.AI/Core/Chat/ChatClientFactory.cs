@@ -33,7 +33,7 @@ public class ChatClientFactory(
 {
     public async Task<IChatClient> CreateAsync()
     {
-        var runConfig = await configurationService.GetRunConfigurationAsync(ConfigurationScope.Chat);
+        var runConfig = await configurationService.GetRunConfigurationAsync(Scope.Chat);
 
         if (string.IsNullOrEmpty(runConfig.Url))
         {

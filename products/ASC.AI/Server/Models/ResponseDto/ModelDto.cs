@@ -24,9 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Common.Clients;
+namespace ASC.AI.Models.ResponseDto;
 
-public interface IModelClient
+public class ModelDto : IMapFrom<Model>
 {
-    public Task<List<ModelInfo>> GetModelsAsync(string endpoint, string apiKey, IReadOnlyDictionary<string, string>? headers = null);
+    public int ProviderId { get; init; }
+    public required string ProviderTitle { get; init; }
+    public required string ModelId { get; init; }
 }

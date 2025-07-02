@@ -31,7 +31,7 @@ public class OpenAiModelClient(HttpClient client) : IModelClient
     private const string EndpointPart = "models";
     private const string AuthScheme = "Bearer";
     
-    public async Task<List<Model>> GetModelsAsync(string endpoint, string apiKey, IReadOnlyDictionary<string, string>? headers = null)
+    public async Task<List<ModelInfo>> GetModelsAsync(string endpoint, string apiKey, IReadOnlyDictionary<string, string>? headers = null)
     {
         var request = new HttpRequestMessage(HttpMethod.Get, $"{endpoint.TrimEnd('/')}/{EndpointPart}");
         request.Headers.Authorization = new AuthenticationHeaderValue(AuthScheme, apiKey);
@@ -48,7 +48,7 @@ public class OpenAiModelClient(HttpClient client) : IModelClient
         return await GetContentAsync(response);
     }
 
-    protected virtual async Task<List<Model>> GetContentAsync(HttpResponseMessage response)
+    protected virtual async Task<List<ModelInfo>> GetContentAsync(HttpResponseMessage response)
     {
         var content = await response.Content.ReadFromJsonAsync<Response>();
         return content?.Data ?? [];
@@ -56,6 +56,6 @@ public class OpenAiModelClient(HttpClient client) : IModelClient
     
     private class Response
     {
-        public required List<Model> Data { get; init; }
+        public required List<ModelInfo> Data { get; init; }
     }
 }

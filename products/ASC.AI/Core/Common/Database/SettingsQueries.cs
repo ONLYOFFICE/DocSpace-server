@@ -28,14 +28,14 @@ namespace ASC.AI.Core.Common.Database;
 
 public partial class AiDbContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, ConfigurationScope.Chat])]
-    public Task<DbAiSettings?> GetSettingsAsync(int tenantId, Guid userId, ConfigurationScope scope)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, Scope.Chat])]
+    public Task<DbAiSettings?> GetSettingsAsync(int tenantId, Guid userId, Scope scope)
     {
         return Queries.GetSettingsAsync(this, tenantId, userId, scope);
     }
     
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, ConfigurationScope.Chat, null])]
-    public Task<int> UpdateSettingsAsync(int tenantId, Guid userId, ConfigurationScope scope, int providerId, RunParameters settings)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, Scope.Chat, null])]
+    public Task<int> UpdateSettingsAsync(int tenantId, Guid userId, Scope scope, int providerId, RunParameters settings)
     {
         return Queries.UpdateSettingsAsync(this, tenantId, userId, scope, providerId, settings);
     }
@@ -46,8 +46,8 @@ public partial class AiDbContext
         return Queries.DeleteSettingsAsync(this, tenantId, providersIds);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, ConfigurationScope.Chat])]
-    public Task<RunConfiguration?> GetRunConfigurationAsync(int tenantId, Guid userId, ConfigurationScope scope)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, Scope.Chat])]
+    public Task<RunConfiguration?> GetRunConfigurationAsync(int tenantId, Guid userId, Scope scope)
     {
         return Queries.GetProviderSettingsAsync(this, tenantId, userId, scope);
     }
@@ -55,19 +55,19 @@ public partial class AiDbContext
 
 static file class Queries
 {
-    public static readonly Func<AiDbContext, int, Guid, ConfigurationScope, Task<DbAiSettings?>> GetSettingsAsync =
+    public static readonly Func<AiDbContext, int, Guid, Scope, Task<DbAiSettings?>> GetSettingsAsync =
         EF.CompileAsyncQuery(
-            (AiDbContext ctx, int tenantId, Guid userId, ConfigurationScope scope) => 
+            (AiDbContext ctx, int tenantId, Guid userId, Scope scope) => 
                 ctx.Settings
                     .FirstOrDefault(x => x.TenantId == tenantId && x.UserId == userId && x.Scope == scope));
     
-    public static readonly Func<AiDbContext, int, Guid, ConfigurationScope, int, RunParameters, Task<int>> UpdateSettingsAsync =
+    public static readonly Func<AiDbContext, int, Guid, Scope, int, RunParameters, Task<int>> UpdateSettingsAsync =
         EF.CompileAsyncQuery(
-            (AiDbContext ctx, int tenantId, Guid userId, ConfigurationScope scope, int providerId, RunParameters settings) => 
+            (AiDbContext ctx, int tenantId, Guid userId, Scope scope, int providerId, RunParameters settings) => 
                 ctx.Settings
                     .Where(x => x.TenantId == tenantId && x.UserId == userId && x.Scope == scope)
                     .ExecuteUpdate(x => 
-                        x.SetProperty(y => y.RunParameters, settings)
+                        x.SetProperty(y => y.Parameters, settings)
                             .SetProperty(y => y.ProviderId, providerId)));
 
     public static readonly Func<AiDbContext, int, IEnumerable<int>, Task<int>> DeleteSettingsAsync =
@@ -76,8 +76,8 @@ static file class Queries
                 .Where(x => x.TenantId == tenantId && providersIds.Contains(x.ProviderId))
                 .ExecuteDelete());
     
-    public static readonly Func<AiDbContext, int, Guid, ConfigurationScope, Task<RunConfiguration?>> GetProviderSettingsAsync =
-        EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, Guid userId, ConfigurationScope scope) =>
+    public static readonly Func<AiDbContext, int, Guid, Scope, Task<RunConfiguration?>> GetProviderSettingsAsync =
+        EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, Guid userId, Scope scope) =>
             ctx.Settings
                 .Where(x => x.TenantId == tenantId && x.UserId == userId && x.Scope == scope)
                 .Join(ctx.Providers, x => x.ProviderId, y => y.Id, (x, y) => 
@@ -86,7 +86,7 @@ static file class Queries
                         ProviderType = y.Type,
                         Url = y.Url,
                         Key = y.Key,
-                        Parameters = x.RunParameters
+                        Parameters = x.Parameters
                     })
                 .FirstOrDefault());
 }

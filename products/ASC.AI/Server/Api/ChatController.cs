@@ -112,27 +112,34 @@ public class ChatController(
         return NoContent();
     }
 
-    [HttpPut("configuration/chat")]
+    [HttpPut("chats/configuration")]
     public async Task<ChatSettingsDto> SetChatSettingsAsync(SetChatSettingsRequestDto inDto)
     {
-        var settings = await chatService.SetChatSettingsAsync(inDto.ProviderId, inDto.ModelId);
+        var config = await chatService.SetChatConfigurationAsync(inDto.ProviderId, inDto.ModelId);
         
         return new ChatSettingsDto
         {
-            ProviderId = settings.ProviderId,
-            ModelId = settings.Parameters.ModelId
+            ProviderId = config.ProviderId,
+            ModelId = config.Parameters.ModelId
         };
     }
     
-    [HttpGet("configuration/chat")]
+    [HttpGet("chats/configuration")]
     public async Task<ChatSettingsDto> GetChatSettingsAsync()
     {
-        var settings = await chatService.GetChatSettingsAsync();
+        var config = await chatService.GetChatConfigurationAsync();
 
         return new ChatSettingsDto
         {
-            ProviderId = settings.ProviderId,
-            ModelId = settings.Parameters.ModelId
+            ProviderId = config.ProviderId,
+            ModelId = config.Parameters.ModelId
         };
+    }
+
+    [HttpGet("chats/models")]
+    public async Task<IEnumerable<ModelDto>> GetChatModelsAsync()
+    {
+        var models = await chatService.GetModelsAsync();
+        return mapper.Map<IEnumerable<Model>, IEnumerable<ModelDto>>(models);
     }
 }

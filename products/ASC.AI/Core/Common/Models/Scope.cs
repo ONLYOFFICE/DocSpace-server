@@ -26,7 +26,7 @@
 
 namespace ASC.AI.Core.Common.Models;
 
-public enum ConfigurationScope
+public enum Scope
 {
     Chat
 }
