@@ -1193,7 +1193,7 @@ public partial class SettingsController(
     {
         if (!tenantExtra.Enterprise)
         {
-            throw new NotSupportedException("Not available.");
+            throw new BillingException(Resource.ErrorNotAllowedOption);
         }
 
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
