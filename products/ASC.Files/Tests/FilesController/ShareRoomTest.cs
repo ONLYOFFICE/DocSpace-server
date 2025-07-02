@@ -37,16 +37,6 @@ public class ShareRoomTest(
     FilesServiceFactory filesServiceProgram) 
     : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
 {
-    public static TheoryData<RoomType> ValidRoomTypesForShare =>
-    [
-        RoomType.CustomRoom, RoomType.PublicRoom
-    ];
-    
-    public static TheoryData<RoomType> Data =>
-    [
-        RoomType.EditingRoom, RoomType.VirtualDataRoom
-    ];
-    
     public static TheoryData<RoomType, FileShare> DataWithFileShare => new MatrixTheoryData<RoomType, FileShare>(
         [RoomType.EditingRoom, RoomType.VirtualDataRoom],
         [FileShare.Read, FileShare.Editing, FileShare.Comment, FileShare.Review]
@@ -108,7 +98,7 @@ public class ShareRoomTest(
     }
     
     [Theory]
-    [MemberData(nameof(Data))]
+    [MemberData(nameof(InValidRoomTypesForShare))]
     public async Task CreatePrimaryExternalLink_RestrictedRoomType_ReturnsError(RoomType roomType)
     {
         // Arrange

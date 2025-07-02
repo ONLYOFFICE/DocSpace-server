@@ -47,16 +47,6 @@ public class BaseTest(
     protected readonly SettingsQuotaApi _settingsQuotaApi = apiFactory.SettingsQuotaApi;
     private readonly Func<Task> _resetDatabase = filesFactory.ResetDatabaseAsync;
 
-    public async ValueTask InitializeAsync()
-    {
-        await Initializer.InitializeAsync(filesFactory, apiFactory, peopleFactory, filesServiceProgram);
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        await _resetDatabase();
-    }
-
     //   FileShare.None
     public static TheoryData<FileShare> ValidFileShare =>
     [
@@ -72,6 +62,26 @@ public class BaseTest(
     [
         FileShare.ReadWrite, FileShare.Varies, FileShare.RoomManager, FileShare.ContentCreator,  FileShare.Editing, FileShare.Review, FileShare.Comment //, FileShare.Read
     ];
+    
+    public static TheoryData<RoomType> ValidRoomTypesForShare =>
+    [
+        RoomType.CustomRoom, RoomType.PublicRoom
+    ];
+    
+    public static TheoryData<RoomType> InValidRoomTypesForShare =>
+    [
+        RoomType.EditingRoom, RoomType.VirtualDataRoom
+    ];
+    
+    public async ValueTask InitializeAsync()
+    {
+        await Initializer.InitializeAsync(filesFactory, apiFactory, peopleFactory, filesServiceProgram);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _resetDatabase();
+    }
     
     protected async Task<FileDtoInteger> GetFile(int fileId)
     {

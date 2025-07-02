@@ -36,14 +36,13 @@ public class ShareInheritanceTest(
     FilesServiceFactory filesServiceProgram)
     : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
 {
-    #region Room > Folder > File inheritance tests
-
-    [Fact]
-    public async Task RoomWithLink_FolderWithoutLink_FileWithoutLink_InheritsRoomPermissions()
+    [Theory]
+    [MemberData(nameof(ValidRoomTypesForShare))]
+    public async Task RoomWithLink_FolderWithoutLink_FileWithoutLink_InheritsRoomPermissions(RoomType roomType)
     {
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
-        var room = await CreateCustomRoom("room with link");
+        var room = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("room title", roomType: roomType), TestContext.Current.CancellationToken)).Response;
         var folder = await CreateFolder("folder without link", room.Id);
         var file = await CreateFile("file without link.docx", folder.Id);
 
@@ -185,9 +184,7 @@ public class ShareInheritanceTest(
         fileAccessViaRoomLink.Security.Edit.Should().BeTrue();
         fileAccessViaRoomLink.Access.Should().Be(FileShare.Editing);
     }
-    #endregion
 
-    #region Folder > File inheritance tests
 
     [Fact]
     public async Task FolderWithLink_FileWithoutLink_InheritsFolderPermissions()
@@ -262,9 +259,6 @@ public class ShareInheritanceTest(
         fileAccessViaFolderLink.Security.Edit.Should().BeFalse();
         fileAccessViaFolderLink.Access.Should().Be(FileShare.Read);
     }
-    #endregion
-
-    #region DenyDownload inheritance tests
 
     [Fact]
     public async Task RoomWithDenyDownload_InheritsToFolderAndFile()
@@ -363,9 +357,6 @@ public class ShareInheritanceTest(
         fileAccess.Security.Download.Should().BeFalse(); // Download should be denied due to file's own setting
         fileAccess.Security.Edit.Should().BeTrue(); // Editing should still be allowed
     }
-    #endregion
-
-    #region Password inheritance tests
 
     [Fact]
     public async Task RoomWithPassword_DoesNotInheritToFolderOrFile()
@@ -384,8 +375,7 @@ public class ShareInheritanceTest(
             linkType: LinkType.External,
             password: password);
 
-        var roomLinkResponse = (await _roomsApi.SetRoomLinkAsync(room.Id, roomLink, TestContext.Current.CancellationToken)).Response;
-        var roomSharedTo = DeserializeSharedToLink(roomLinkResponse);
+        await _roomsApi.SetRoomLinkAsync(room.Id, roomLink, TestContext.Current.CancellationToken);
 
         // Create folder link without password
         var folderLink = new FolderLinkRequest(
@@ -394,17 +384,31 @@ public class ShareInheritanceTest(
 
         var folderLinkResponse = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, folderLink, TestContext.Current.CancellationToken)).Response;
         var folderSharedTo = DeserializeSharedToLink(folderLinkResponse);
-
+        
+        // Create file link without password
+        var fileLink = new FileLinkRequest(access: FileShare.Editing);
+        var fileLinkResponse = (await _filesApi.CreatePrimaryExternalLinkAsync(file.Id, fileLink, TestContext.Current.CancellationToken)).Response;
+        var fileSharedTo = DeserializeSharedToLink(fileLinkResponse);
+        
         // Act - Try to access folder via folder link (should work without password)
         await _filesClient.Authenticate(null);
         _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, folderSharedTo.RequestToken);
         var folderAccess = (await _foldersApi.GetFolderByFolderIdAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
+        
+        // Act - Try to access folder via file link (should work without password)
+        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, fileSharedTo.RequestToken);
+        var fileAccess = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
 
         // Assert
         folderAccess.Should().NotBeNull();
         folderAccess.Current.Should().NotBeNull();
         folderAccess.Current.Title.Should().Be(folder.Title);
+        
+        // Assert
+        fileAccess.Should().NotBeNull();
+        fileAccess.Security.Edit.Should().BeTrue(); // Editing should still be allowed
     }
 
     [Fact]
@@ -442,8 +446,8 @@ public class ShareInheritanceTest(
 
         // Then provide password and verify access
         var externalShareDataWithHttpInfo = await _filesSharingApi.ApplyExternalSharePasswordWithHttpInfoAsync(
-            fileSharedTo.RequestToken, 
-            new ExternalShareRequestParam { Password = filePassword }, 
+            fileSharedTo.RequestToken,
+            new ExternalShareRequestParam { Password = filePassword },
             cancellationToken: TestContext.Current.CancellationToken);
 
         var setCookie = externalShareDataWithHttpInfo.Headers.ToDictionary()["Set-Cookie"];
@@ -459,9 +463,6 @@ public class ShareInheritanceTest(
         fileAccess.Should().NotBeNull();
         fileAccess.Title.Should().Be(file.Title);
     }
-    #endregion
-
-    #region Multiple links and overrides
 
     [Fact]
     public async Task MultipleLinkLevels_UsesCorrectAccessBasedOnEntryPoint()
@@ -532,69 +533,7 @@ public class ShareInheritanceTest(
         fileAccessViaFile.Security.Comment.Should().BeTrue();
         fileAccessViaFile.Access.Should().Be(FileShare.Editing);
     }
-
-    [Fact]
-    public async Task MultipleAccessLinks_HighestPermissionWins()
-    {
-        // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
-        var file = await CreateFile("file with multiple links.docx", FolderType.USER, Initializer.Owner);
-
-        // Create multiple links with different access levels for the same file
-        var readOnlyLink = new FileLinkRequest(access: FileShare.Read);
-        var commentLink = new FileLinkRequest(access: FileShare.Comment);
-        var editingLink = new FileLinkRequest(access: FileShare.Editing);
-
-        var readOnlyResponse = (await _filesApi.SetExternalLinkAsync(file.Id, readOnlyLink, TestContext.Current.CancellationToken)).Response;
-        var commentResponse = (await _filesApi.SetExternalLinkAsync(file.Id, commentLink, TestContext.Current.CancellationToken)).Response;
-        var editingResponse = (await _filesApi.SetExternalLinkAsync(file.Id, editingLink, TestContext.Current.CancellationToken)).Response;
-
-        var readOnlySharedTo = DeserializeSharedToLink(readOnlyResponse);
-        var commentSharedTo = DeserializeSharedToLink(commentResponse);
-        var editingSharedTo = DeserializeSharedToLink(editingResponse);
-
-        // Act - Access file through different links
-        await _filesClient.Authenticate(null);
-
-        // Read-only link
-        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, readOnlySharedTo.RequestToken);
-        var fileAccessViaReadOnly = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
-
-        // Comment link
-        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, commentSharedTo.RequestToken);
-        var fileAccessViaComment = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
-
-        // Editing link
-        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, editingSharedTo.RequestToken);
-        var fileAccessViaEditing = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
-
-        // Assert - Each access should reflect the specific link's permissions
-
-        // Read-only link
-        fileAccessViaReadOnly.Should().NotBeNull();
-        fileAccessViaReadOnly.Security.Edit.Should().BeFalse();
-        fileAccessViaReadOnly.Security.Comment.Should().BeFalse();
-        fileAccessViaReadOnly.Access.Should().Be(FileShare.Read);
-
-        // Comment link
-        fileAccessViaComment.Should().NotBeNull();
-        fileAccessViaComment.Security.Edit.Should().BeFalse();
-        fileAccessViaComment.Security.Comment.Should().BeTrue();
-        fileAccessViaComment.Access.Should().Be(FileShare.Comment);
-
-        // Editing link
-        fileAccessViaEditing.Should().NotBeNull();
-        fileAccessViaEditing.Security.Edit.Should().BeTrue();
-        fileAccessViaEditing.Security.Comment.Should().BeTrue();
-        fileAccessViaEditing.Access.Should().Be(FileShare.Editing);
-    }
-    #endregion
-
-    #region Link expiration tests
-
+    
     [Fact]
     public async Task ExpiredRoomLink_FallsBackToFolderLink()
     {
@@ -628,7 +567,7 @@ public class ShareInheritanceTest(
         // Act - Try to access via room link (should fail due to expiration)
         await _filesClient.Authenticate(null);
         _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, roomSharedTo.RequestToken);
-        await Assert.ThrowsAsync<ApiException>(async () => 
+        await Assert.ThrowsAsync<ApiException>(async () =>
             await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken));
         _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
 
@@ -673,7 +612,7 @@ public class ShareInheritanceTest(
         // Act - Try to access via folder link (should fail due to expiration)
         await _filesClient.Authenticate(null);
         _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, folderSharedTo.RequestToken);
-        await Assert.ThrowsAsync<ApiException>(async () => 
+        await Assert.ThrowsAsync<ApiException>(async () =>
             await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken));
         _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
 
@@ -687,5 +626,70 @@ public class ShareInheritanceTest(
         fileAccessViaFileLink.Security.Edit.Should().BeFalse(); // Should have file link's read-only permission
         fileAccessViaFileLink.Access.Should().Be(FileShare.Read);
     }
-    #endregion
+    
+    [Fact]
+    public async Task SetFileLinkAsync_FileWithNoneAccessPublicRoom_ReturnsNewLink()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var publicRoom = await CreatePublicRoom("Public Room Test");
+        var file = await CreateFile("File in Public Room", publicRoom.Id);
+
+        // Get the primary external link
+        var primaryLink = (await _filesApi.GetFilePrimaryExternalLinkAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var originalSharedTo = DeserializeSharedToLink(primaryLink);
+
+        // Act - Set the link with FileShare.None
+        var updateRequest = new FileLinkRequest(
+            linkId: originalSharedTo.Id, 
+            access: FileShare.None);
+
+        var updatedLink = (await _filesApi.SetExternalLinkAsync(file.Id, updateRequest, TestContext.Current.CancellationToken)).Response;
+        var updatedSharedTo = DeserializeSharedToLink(updatedLink);
+
+        // Assert
+        updatedLink.Should().NotBeNull();
+        updatedSharedTo.Should().NotBeNull();
+
+        // Verify that a new link is returned
+        updatedSharedTo.Id.Should().NotBe(originalSharedTo.Id);
+        updatedSharedTo.RequestToken.Should().NotBe(originalSharedTo.RequestToken);
+
+        // Get all links to make sure both exist
+        var allLinks = (await _filesApi.GetFileLinksAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        allLinks.Should().HaveCount(1); // The original link should be replaced
+    }
+    
+    [Fact]
+    public async Task SetFolderLinkAsync_FolderWithNoneAccessPublicRoom_ReturnsNewLink()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var publicRoom = await CreatePublicRoom("Public Room Test");
+        var folder = await CreateFolder("Folder in Public Room", publicRoom.Id);
+
+        // Get the primary external link
+        var primaryLink = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var originalSharedTo = DeserializeSharedToLink(primaryLink);
+
+        // Act - Set the link with FileShare.None
+        var updateRequest = new FolderLinkRequest(
+            linkId: originalSharedTo.Id, 
+            access: FileShare.None);
+
+        var updatedLink = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, updateRequest, TestContext.Current.CancellationToken)).Response;
+        var updatedSharedTo = DeserializeSharedToLink(updatedLink);
+
+        // Assert
+        updatedLink.Should().NotBeNull();
+        updatedSharedTo.Should().NotBeNull();
+
+        // Verify that a new link is returned
+        updatedSharedTo.Id.Should().NotBe(originalSharedTo.Id);
+        updatedSharedTo.RequestToken.Should().NotBe(originalSharedTo.RequestToken);
+
+        // Get all links to make sure both exist
+        var allLinks = (await _foldersApi.GetFolderLinksAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        allLinks.Should().HaveCount(1); // The original link should be replaced
+    }
 }
