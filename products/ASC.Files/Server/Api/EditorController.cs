@@ -207,6 +207,7 @@ public abstract class EditorController<T>(
         {
             result.EditorConfig.Embedded.EmbedUrl = "";
             result.EditorConfig.Embedded.ShareUrl = "";
+            result.EditorConfig.Customization.Goback = await configuration.EditorConfig?.Customization.GetGoBack(inDto.EditorType, file);
         }
 
         if (authContext.IsAuthenticated && !file.Encrypted && !file.ProviderEntry 

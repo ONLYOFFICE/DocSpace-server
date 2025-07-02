@@ -2071,4 +2071,19 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>انتقل إلى الخدمات</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>انتقل إلى إعدادات المحفظة</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>الإجراء المطلوب: غير قادر على تعبئة رصيد المحفظة تلقائيًا في ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>دفعة الاشتراك القادمة لـ ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>الإجراء المطلوب: غير قادر على تجديد خطة الخدمة تلقائيًا في ${LetterLogoText} DocSpace</value>
+  </data>
 </root>

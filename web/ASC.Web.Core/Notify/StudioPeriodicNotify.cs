@@ -469,7 +469,8 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                 if (topayer)
                 {
-                    var payer = await userManager.GetUserByEmailAsync(tariff.CustomerId);
+                    var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+                    var payer = await userManager.GetUserByEmailAsync(customerInfo?.Email);
 
                     if (payer.Id != Constants.LostUser.Id && !users.Any(u => u.Id == payer.Id))
                     {

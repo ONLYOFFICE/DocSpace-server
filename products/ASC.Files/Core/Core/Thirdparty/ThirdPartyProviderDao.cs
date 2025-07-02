@@ -518,6 +518,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(
             FilterType.SpreadsheetsOnly or
             FilterType.ArchiveOnly or
             FilterType.MediaOnly or
+            FilterType.DiagramsOnly or
             FilterType.Pdf or
             FilterType.PdfForm;
     }

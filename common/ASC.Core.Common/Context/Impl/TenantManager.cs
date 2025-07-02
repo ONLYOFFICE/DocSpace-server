@@ -337,22 +337,19 @@ public class TenantManager(
         return defaultQuota;
     }
 
-    public async Task<IDictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync()
+    public async Task<IDictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(bool all = false, bool wallet = false)
     {
-        var quotas = (await GetTenantQuotasAsync(false, false))
+        var quotas = (await GetTenantQuotasAsync(all, wallet))
             .Where(q => !string.IsNullOrEmpty(q.ProductId))
             .DistinctBy(q => q.ProductId)
             .ToList();
 
         var tenant = GetCurrentTenant(false);
 
-        var prices = await tariffService.GetProductPriceInfoAsync(tenant?.PartnerId, false, quotas.Where(p => !p.Wallet).Select(p => p.ProductId).ToArray());
+        var prices = await tariffService.GetProductPriceInfoAsync(tenant?.PartnerId, wallet, quotas.Select(p => p.ProductId).ToArray());
         var result = prices.ToDictionary(price => quotas.First(quota => quota.ProductId == price.Key).Name, price => price.Value);
 
-        var walletPrices = await tariffService.GetProductPriceInfoAsync(tenant?.PartnerId, true, quotas.Where(p => p.Wallet).Select(p => p.ProductId).ToArray());
-        var walletResult = walletPrices.ToDictionary(price => quotas.First(quota => quota.ProductId == price.Key).Name, price => price.Value);
-
-        return result.Concat(walletResult).ToDictionary(k => k.Key, v => v.Value);
+        return result;
     }
 
     public Dictionary<string, decimal> GetProductPriceInfo(string productId, bool wallet)

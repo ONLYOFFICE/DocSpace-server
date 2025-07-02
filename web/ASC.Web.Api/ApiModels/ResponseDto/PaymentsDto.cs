@@ -138,3 +138,28 @@ public class OperationDto
     }
 }
 
+/// <summary>
+/// The customer information.
+/// </summary>
+public class CustomerInfoDto(CustomerInfo customerInfo, EmployeeDto employeeDto)
+{
+    /// <summary>
+    /// The portal ID.
+    /// </summary>
+    public string PortalId { get; private set; } = customerInfo.PortalId;
+
+    /// <summary>
+    /// The customer's payment method.
+    /// </summary>
+    public PaymentMethodStatus PaymentMethodStatus { get; private set; } = customerInfo.PaymentMethodStatus;
+
+    /// <summary>
+    /// The email address of the customer.
+    /// </summary>
+    public string Email { get; private set; } = customerInfo.Email;
+
+    /// <summary>
+    /// The paying user.
+    /// </summary>
+    public EmployeeDto Payer { get; private set; } = employeeDto;
+}

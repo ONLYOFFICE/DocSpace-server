@@ -137,6 +137,7 @@ public partial class SettingsController(
             settings.SocketUrl = configuration["web:hub:url"] ?? "";
             settings.LimitedAccessSpace = (await settingsManager.LoadAsync<TenantAccessSpaceSettings>()).LimitedAccessSpace;
             settings.LimitedAccessDevToolsForUsers = (await settingsManager.LoadAsync<TenantDevToolsAccessSettings>()).LimitedAccessForUsers;
+            settings.DisplayBanners = coreBaseSettings.Standalone ? !(await settingsManager.LoadAsync<TenantBannerSettings>()).Hidden : true;
 
             settings.Firebase = new FirebaseDto
             {
@@ -1159,6 +1160,49 @@ public partial class SettingsController(
         await settingsManager.SaveAsync(settings);
 
         messageService.Send(MessageAction.DevToolsAccessSettingsChanged);
+
+        return settings;
+    }
+
+    /// <summary>
+    /// Returns the promotional banners visibility settings settings for the portal.
+    /// </summary>
+    /// <short>
+    /// Get the promotional banners visibility settings
+    /// </short>
+    /// <path>api/2.0/settings/banner</path>
+    [Tags("Settings / Banners visibility")]
+    [SwaggerResponse(200, "Promotional banners visibility settings", typeof(TenantBannerSettings))]
+    [HttpGet("banner")]
+    public async Task<TenantBannerSettings> GetTenantBannerSettings()
+    {
+        return await settingsManager.LoadAsync<TenantBannerSettings>();
+    }
+
+    /// <summary>
+    /// Sets the promotional banners visibility settings settings for the portal.
+    /// </summary>
+    /// <short>
+    /// Set the promotional banners visibility settings
+    /// </short>
+    /// <path>api/2.0/settings/banner</path>
+    [Tags("Security / Banners visibility")]
+    [SwaggerResponse(200, "Promotional banners visibility settings", typeof(TenantBannerSettings))]
+    [HttpPost("banner")]
+    public async Task<TenantBannerSettings> SetTenantBannerSettings(TenantBannerSettingsDto inDto)
+    {
+        if (!tenantExtra.Enterprise)
+        {
+            throw new BillingException(Resource.ErrorNotAllowedOption);
+        }
+
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        var settings = new TenantBannerSettings { Hidden = inDto.Hidden };
+
+        await settingsManager.SaveAsync(settings);
+
+        messageService.Send(MessageAction.BannerSettingsChanged);
 
         return settings;
     }

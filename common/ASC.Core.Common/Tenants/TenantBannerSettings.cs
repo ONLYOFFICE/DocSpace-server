@@ -24,70 +24,36 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core;
+namespace ASC.Core.Tenants;
 
 /// <summary>
-/// The file filter type.
+/// The promotional banners visibility settings.
 /// </summary>
-public enum FilterType
+[Scope]
+[Serializable]
+public class TenantBannerSettings : ISettings<TenantBannerSettings>
 {
-    [SwaggerEnum("None")]
-    [EnumMember] None = 0,
+    /// <summary>
+    /// The banners visibility flag.
+    /// </summary>
+    public bool Hidden { get; set; }
 
-    [SwaggerEnum("Files  only")]
-    [EnumMember] FilesOnly = 1,
+    /// <summary>
+    /// The settings ID.
+    /// </summary>
+    [JsonIgnore]
+    public Guid ID
+    {
+        get { return new Guid("{89763892-F2B1-40A2-B2E3-B397FAA7B88A}"); }
+    }
 
-    [SwaggerEnum("Folders only")]
-    [EnumMember] FoldersOnly = 2,
+    public TenantBannerSettings GetDefault()
+    {
+        return new TenantBannerSettings
+        {
+            Hidden = false
+        };
+    }
 
-    [SwaggerEnum("Documents only")]
-    [EnumMember] DocumentsOnly = 3,
-
-    [SwaggerEnum("Presentations only")]
-    [EnumMember] PresentationsOnly = 4,
-
-    [SwaggerEnum("Spreadsheets only")]
-    [EnumMember] SpreadsheetsOnly = 5,
-
-    [SwaggerEnum("Images only")]
-    [EnumMember] ImagesOnly = 7,
-
-    [SwaggerEnum("By user")]
-    [EnumMember] ByUser = 8,
-
-    [SwaggerEnum("By department")]
-    [EnumMember] ByDepartment = 9,
-
-    [SwaggerEnum("Archive only")]
-    [EnumMember] ArchiveOnly = 10,
-
-    [SwaggerEnum("By extension")]
-    [EnumMember] ByExtension = 11,
-
-    [SwaggerEnum("Media only")]
-    [EnumMember] MediaOnly = 12,
-
-    [SwaggerEnum("Filling forms rooms")]
-    [EnumMember] FillingFormsRooms = 13,
-
-    [SwaggerEnum("Editing rooms")]
-    [EnumMember] EditingRooms = 14,
-
-    [SwaggerEnum("Custom rooms")]
-    [EnumMember] CustomRooms = 17,
-
-    [SwaggerEnum("Public rooms")]
-    [EnumMember] PublicRooms = 20,
-
-    [SwaggerEnum("Pdf")]
-    [EnumMember] Pdf = 22,
-
-    [SwaggerEnum("Pdf form")]
-    [EnumMember] PdfForm = 23,
-
-    [SwaggerEnum("Virtual data rooms")]
-    [EnumMember] VirtualDataRooms = 24,
-
-    [SwaggerEnum("Diagrams only")]
-    [EnumMember] DiagramsOnly = 25
+    public DateTime LastModified { get; set; }
 }

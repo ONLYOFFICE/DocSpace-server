@@ -96,3 +96,14 @@ public class TenantDevToolsAccessSettingsDto
     /// </summary>
     public bool LimitedAccessForUsers { get; set; }
 }
+
+/// <summary>
+/// The request parameters for managing the promotional banners visibility settings for the current tenant.
+/// </summary>
+public class TenantBannerSettingsDto
+{
+    /// <summary>
+    /// The banners visibility flag.
+    /// </summary>
+    public bool Hidden { get; set; }
+}
