@@ -1321,10 +1321,11 @@ public class UserController(
                     continue;
                 }
 
-                var link = commonLinkUtility.GetInvitationLink(user.Email, type, authContext.CurrentAccount.ID, user.GetCulture()?.Name);
+                var culture = user.GetCulture()?.Name;
+                var link = commonLinkUtility.GetInvitationLink(user.Email, type, authContext.CurrentAccount.ID, culture);
                 var shortenLink = await urlShortener.GetShortenLinkAsync(link);
                 messageService.Send(MessageAction.SendJoinInvite, MessageTarget.Create(user.Id), currentUser.DisplayUserName(displayUserSettingsHelper), user.Email);
-                await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink);
+                await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, culture);
             }
             else
             {
