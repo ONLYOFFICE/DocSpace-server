@@ -577,10 +577,6 @@ public class UserController(
             {
                 throw new ArgumentException(ex.Message);
             }
-            catch (Exception)
-            {
-                throw;
-            }
         }
 
         return await employeeFullDtoHelper.GetFullAsync(await GetUserInfoAsync(inDto.UserId.ToString()));
