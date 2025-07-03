@@ -28,5 +28,5 @@ namespace ASC.AI.Core.Common.Clients;
 
 public interface IModelClient
 {
-    public Task<List<ModelInfo>> GetModelsAsync(string endpoint, string apiKey, IReadOnlyDictionary<string, string>? headers = null);
+    public Task<List<ModelInfo>> GetModelsAsync(string endpoint, string apiKey, Scope? scope, IReadOnlyDictionary<string, string>? headers = null);
 }

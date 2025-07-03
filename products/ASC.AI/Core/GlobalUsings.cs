@@ -37,6 +37,7 @@ global using ASC.AI.Core.Common.Services;
 global using ASC.AI.Core.Settings;
 
 global using ASC.Common;
+global using ASC.Common.Log;
 global using ASC.Common.Mapping;
 global using ASC.Common.Web;
 
@@ -57,6 +58,7 @@ global using AutoMapper;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.AI;
 global using Microsoft.Extensions.Configuration;
+global using Microsoft.Extensions.Logging;
 
 global using OpenAI;
 

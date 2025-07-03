@@ -137,9 +137,9 @@ public class ChatController(
     }
 
     [HttpGet("chats/models")]
-    public async Task<IEnumerable<ModelDto>> GetChatModelsAsync()
+    public async Task<IEnumerable<ModelDto>> GetChatModelsAsync(GetChatModelsRequestDto inDto)
     {
-        var models = await chatService.GetModelsAsync();
+        var models = await chatService.GetModelsAsync(inDto.ProviderId);
         return mapper.Map<IEnumerable<Model>, IEnumerable<ModelDto>>(models);
     }
 }

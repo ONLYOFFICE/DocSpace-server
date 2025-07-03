@@ -34,7 +34,8 @@ public class AiConfigurationService(
     AuthContext authContext,
     ProviderSettings providerSettings,
     UserManager userManager,
-    ModelClientFactory modelClientFactory)
+    ModelClientFactory modelClientFactory,
+    ILogger<AiConfigurationService> logger)
 {
     public async Task<AiProvider> AddProviderAsync(string? title, string? url, string key, ProviderType type)
     {
@@ -129,26 +130,22 @@ public class AiConfigurationService(
     {
         var tenantId = tenantManager.GetCurrentTenantId();
         
-        var provider = await providerDao.GetProviderAsync(tenantId, providerId);
-        if (provider == null)
-        {
-            throw new ItemNotFoundException("Provider not found");
-        }
+        var provider = await GetProviderAsync(tenantId, providerId);
 
         var userId = authContext.CurrentAccount.ID;
 
         var settings = await configurationDao.GetConfigurationAsync(tenantId, userId, scope);
         if (settings == null)
         {
-            return await configurationDao.AddConfigurationAsync(tenantId, providerId, userId, scope, parameters);
+            return await configurationDao.AddConfigurationAsync(tenantId, provider.Id, userId, scope, parameters);
         }
 
-        settings.ProviderId = providerId;
+        settings.ProviderId = provider.Id;
         settings.Parameters = parameters;
 
         return await configurationDao.UpdateConfigurationAsync(settings);
     }
-    
+
     public async Task<ModelConfiguration> GetConfigurationAsync(Scope scope)
     {
         var settings = await configurationDao.GetConfigurationAsync(tenantManager.GetCurrentTenantId(), 
@@ -174,8 +171,14 @@ public class AiConfigurationService(
         return config;
     }
 
-    public async Task<IEnumerable<Model>> GetModelsAsync(Scope scope)
+    public async Task<IEnumerable<Model>> GetModelsAsync(int? providerId, Scope? scope)
     {
+        if (providerId.HasValue)
+        {
+            var provider = await GetProviderAsync(tenantManager.GetCurrentTenantId(), providerId.Value);
+            return await GetProviderModelsAsync(provider, scope);
+        }
+        
         var providers = await GetProvidersAsync(0, 10).ToListAsync();
 
         var tasks = providers.Select(p => 
@@ -183,11 +186,11 @@ public class AiConfigurationService(
             { 
                 try
                 {
-                    return await GetProviderModelsAsync(p);
+                    return await GetProviderModelsAsync(p, scope);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // TODO: add logging
+                    logger.ErrorWithException(ex);
                 }
 
                 return []; 
@@ -197,29 +200,22 @@ public class AiConfigurationService(
         
         return result.SelectMany(x => x);
     }
-
-    public async Task<IEnumerable<Model>> GetModelsAsync(int providerId, Scope scope)
+    
+    private async Task<AiProvider> GetProviderAsync(int tenantId, int providerId)
     {
-        var provider = await providerDao.GetProviderAsync(tenantManager.GetCurrentTenantId(), providerId);
+        var provider = await providerDao.GetProviderAsync(tenantId, providerId);
         if (provider == null)
         {
-            return [];
+            throw new ItemNotFoundException("Provider not found");
         }
-        
-        var client = modelClientFactory.Create(provider.Type);
-        var models = await client.GetModelsAsync(provider.Url!, provider.Key);
 
-        return models.Select(x => new Model
-        {
-            Provider = provider,
-            ModelId = x.Id
-        });
+        return provider;
     }
     
-    private async Task<IEnumerable<Model>> GetProviderModelsAsync(AiProvider p)
+    private async Task<IEnumerable<Model>> GetProviderModelsAsync(AiProvider p, Scope? scope)
     {
         var client = modelClientFactory.Create(p.Type);
-        var models = await client.GetModelsAsync(p.Url!, p.Key);
+        var models = await client.GetModelsAsync(p.Url, p.Key, scope);
 
         return models.Select(m => new Model
         {
@@ -239,7 +235,7 @@ public class AiConfigurationService(
     private async Task ThrowIfNotValidAsync(string url, string key, ProviderType type)
     {
         var modelClient = modelClientFactory.Create(type);
-        var models = await modelClient.GetModelsAsync(url, key);
+        var models = await modelClient.GetModelsAsync(url, key, null);
         if (models.Count == 0)
         {
             throw new ArgumentException("Invalid provider");
