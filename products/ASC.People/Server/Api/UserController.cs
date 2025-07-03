@@ -529,7 +529,7 @@ public class UserController(
         var tenant = tenantManager.GetCurrentTenant();
         if (user.IsOwner(tenant) && viewer.Id != user.Id)
         {
-            throw new Exception(Resource.ErrorAccessDenied);
+            throw new SecurityException(Resource.ErrorAccessDenied);
         }
         
         if (!string.IsNullOrEmpty(inDto.MemberBase.Email))
@@ -538,7 +538,7 @@ public class UserController(
 
             if (!email.TestEmailRegex())
             {
-                throw new Exception(Resource.ErrorNotCorrectEmail);
+                throw new ArgumentException(Resource.ErrorNotCorrectEmail);
             }
             
             var address = new MailAddress(inDto.MemberBase.Email);
@@ -565,11 +565,18 @@ public class UserController(
 
         if (!string.IsNullOrEmpty(inDto.MemberBase.PasswordHash))
         {
-            await securityContext.SetUserPasswordHashAsync(inDto.UserId, inDto.MemberBase.PasswordHash);
-            messageService.Send(MessageAction.UserUpdatedPassword);
+            try
+            {
+                await securityContext.SetUserPasswordHashAsync(inDto.UserId, inDto.MemberBase.PasswordHash);
+                messageService.Send(MessageAction.UserUpdatedPassword);
 
-            await cookiesManager.ResetUserCookieAsync(inDto.UserId, false);
-            messageService.Send(MessageAction.CookieSettingsUpdated);
+                await cookiesManager.ResetUserCookieAsync(inDto.UserId, false);
+                messageService.Send(MessageAction.CookieSettingsUpdated);
+            }
+            catch (SecurityContext.PasswordException ex)
+            {
+                throw new ArgumentException(ex.Message);
+            }
         }
 
         return await employeeFullDtoHelper.GetFullAsync(await GetUserInfoAsync(inDto.UserId.ToString()));
