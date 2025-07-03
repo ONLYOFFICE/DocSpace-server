@@ -456,13 +456,20 @@ public class PortalController(
         var messageDate = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second, DateTimeKind.Utc);
         if (!string.Equals(newAlias, oldAlias, StringComparison.InvariantCultureIgnoreCase))
         {
-            if (!string.IsNullOrEmpty(apiSystemHelper.ApiSystemUrl))
+            try
             {
-                await apiSystemHelper.ValidatePortalNameAsync(newAlias, user.Id);
+                if (!string.IsNullOrEmpty(apiSystemHelper.ApiSystemUrl))
+                {
+                    await apiSystemHelper.ValidatePortalNameAsync(newAlias, user.Id);
+                }
+                else
+                {
+                    await tenantManager.CheckTenantAddressAsync(newAlias.Trim());
+                }
             }
-            else
+            catch (Exception ex)
             {
-                await tenantManager.CheckTenantAddressAsync(newAlias.Trim());
+                throw new ArgumentException(ex.Message, nameof(alias));
             }
 
             var oldDomain = tenant.GetTenantDomain(coreSettings);
