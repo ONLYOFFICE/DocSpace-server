@@ -538,11 +538,6 @@ public class InfoConfig<T>(
 public class PermissionsConfig
 {
     /// <summary>
-    /// Specifies whether to display the "Restore" button when using the "onRequestRestore" event.
-    /// </summary>
-    public bool ChangeHistory { get; set; }
-
-    /// <summary>
     /// Defines if the document can be commented or not.
     /// </summary>
     public bool Comment { get; set; } = true;
