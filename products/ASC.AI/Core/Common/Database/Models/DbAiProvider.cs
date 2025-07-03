@@ -32,9 +32,9 @@ public class DbAiProvider : BaseEntity
     public int TenantId { get; set; }
     public ProviderType Type { get; set; }
     [MaxLength(255)]
-    public string Title { get; set; }
-    public string? Url { get; set; }
-    public string Key { get; set; }
+    public required string Title { get; set; }
+    public required string Url { get; set; }
+    public required string Key { get; set; }
 
     public DateTime CreatedOn { get; set; }
     public DateTime ModifiedOn { get; set; }

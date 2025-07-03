@@ -41,35 +41,22 @@ public class AiConfigurationService(
         await ThrowIfNotAccessAsync();
         
         var settings = providerSettings.Get(type);
-        if (settings == null || settings.Internal)
+        if (settings == null)
         {
-            throw new ArgumentException("Provider not supported");
+            throw new ArgumentException("Incorrect provider type");
         }
         
+        ArgumentException.ThrowIfNullOrEmpty(title, nameof(title));
         ArgumentException.ThrowIfNullOrEmpty(key, nameof(key));
-
-        Uri? uri;
-
-        switch (type)
-        {
-            case ProviderType.OpenAiCompatible:
-                ArgumentException.ThrowIfNullOrEmpty(url, nameof(url));
-                uri = new Uri(url);
-                await ThrowIfNotValidAsync(url, key, type);
-                break;
-            case ProviderType.OpenAi:
-            case ProviderType.TogetherAi:
-                uri = null;
-                await ThrowIfNotValidAsync(settings.Url!, key, type);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(type), type, null);
-        }
+        
+        url = string.IsNullOrEmpty(url) ? settings.Url : new Uri(url).ToString();
+        
+        await ThrowIfNotValidAsync(url, key, type);
 
         var provider = new AiProvider
         {
-            Title = !string.IsNullOrEmpty(title) ? title : settings.Name,
-            Url = uri?.ToString(),
+            Title = title,
+            Url = url,
             Key = key,
             Type = type
         };
@@ -108,8 +95,7 @@ public class AiConfigurationService(
 
         if (needCheck)
         {
-            var endpoint = provider.Url ?? providerSettings.Get(provider.Type)?.Url;
-            await ThrowIfNotValidAsync(endpoint!, provider.Key, provider.Type);
+            await ThrowIfNotValidAsync(provider.Url, provider.Key, provider.Type);
         }
         
         return await providerDao.UpdateProviderAsync(provider);
@@ -121,8 +107,6 @@ public class AiConfigurationService(
 
         await foreach (var provider in providerDao.GetProvidersAsync(tenantManager.GetCurrentTenantId(), offset, limit))
         {
-            provider.Url ??= ResolveEndpoint(provider.Type);
-
             yield return provider;
         }
     }
@@ -186,8 +170,6 @@ public class AiConfigurationService(
         { 
             throw new ItemNotFoundException("Model configuration not found");
         }
-        
-        config.Url ??= ResolveEndpoint(config.ProviderType);
 
         return config;
     }
@@ -232,12 +214,6 @@ public class AiConfigurationService(
             Provider = provider,
             ModelId = x.Id
         });
-    }
-
-    private string? ResolveEndpoint(ProviderType type)
-    {
-        var settings = providerSettings.Get(type);
-        return settings?.Url;
     }
     
     private async Task<IEnumerable<Model>> GetProviderModelsAsync(AiProvider p)

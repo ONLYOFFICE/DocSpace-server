@@ -31,8 +31,8 @@ public class AiProvider : IMapFrom<DbAiProvider>
     public int Id { get; set; }
     public required string Title { get; set; }
     public required string Key { get; set; }
-    public string? Url { get; set; }
-    public ProviderType Type { get; set; }
+    public required string Url { get; set; }
+    public ProviderType Type { get; init; }
     public DateTime CreatedOn { get; set; }
     public DateTime ModifiedOn { get; set; }
 }

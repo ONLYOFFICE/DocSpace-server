@@ -29,7 +29,7 @@ namespace ASC.AI.Models.RequestDto;
 public class CreateProviderRequestDto
 {
     public ProviderType Type { get; set; }
-    public string? Title { get; set; }
+    public required string Title { get; set; }
     public string? Url { get; set; }
     public required string Key { get; set; }
 }
