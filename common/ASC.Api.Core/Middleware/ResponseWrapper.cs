@@ -49,6 +49,10 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
                 status = HttpStatusCode.NotFound;
                 message = e.Message;
                 break;
+            case FileNotFoundException e:
+                status = HttpStatusCode.NotFound;
+                message = e.Message;
+                break;
             case ArgumentException e:
                 status = HttpStatusCode.BadRequest;
                 message = e.Message;
