@@ -116,7 +116,15 @@ public class PortalController(
     [SwaggerResponse(200, "User information", typeof(UserInfo))]
     [HttpGet("users/{userID:guid}")]
     public async Task<UserInfo> GetUserById(UserIDRequestDto inDto)
-    {
+    {        
+        var user = await userManager.GetUsersAsync(inDto.Id);
+        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+
+        if (!await userManager.CanUserViewAnotherUserAsync(currentUser, user))
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+        
         return await userManager.GetUsersAsync(inDto.Id);
     }
 
