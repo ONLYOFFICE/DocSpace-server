@@ -75,7 +75,6 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
                 status = HttpStatusCode.Forbidden;
                 break;
             case TenantQuotaException:
-            case BillingNotFoundException:
             case BillingException:
                 status = HttpStatusCode.PaymentRequired;
                 break;
