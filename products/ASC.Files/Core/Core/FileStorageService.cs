@@ -3652,6 +3652,13 @@ public class FileStorageService //: IFileStorageService
 
         entry.NotFoundIfNull();
 
+        var currentTenantId = tenantManager.GetCurrentTenantId();
+        var externalLinksProhobited = (await tenantManager.GetTenantQuotaAsync(currentTenantId)).Free;
+        if (externalLinksProhobited)
+        {
+            return null;
+        }
+
         if ((entry is File<T> || entry is Folder<T> folder && !DocSpaceHelper.IsRoom(folder.FolderType)) && entry.RootFolderType == FolderType.VirtualRooms)
         {
             var room = await DocSpaceHelper.GetParentRoom(entry, folderDao);
@@ -4978,6 +4985,13 @@ public class FileStorageService //: IFileStorageService
     private async Task<AceWrapper> SetExternalLinkAsync<T>(FileEntry<T> entry, Guid linkId, FileShare share, string title, DateTime expirationDate = default,
         string password = null, bool denyDownload = false, bool primary = false, bool requiredAuth = false)
     {
+        var currentTenantId = tenantManager.GetCurrentTenantId();
+        var externalLinksProhobited = (await tenantManager.GetTenantQuotaAsync(currentTenantId)).Free;
+        if (externalLinksProhobited)
+        {
+            return null;
+        }
+
         var options = new FileShareOptions { Title = !string.IsNullOrEmpty(title) ? title : FilesCommonResource.DefaultExternalLinkTitle, DenyDownload = denyDownload, Internal = requiredAuth };
 
         var expirationDateUtc = tenantUtil.DateTimeToUtc(expirationDate);

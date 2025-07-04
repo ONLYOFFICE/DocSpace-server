@@ -766,7 +766,9 @@ public class FileSecurity(IDaoFactory daoFactory,
         var isAuthenticated =  authContext.IsAuthenticated;
         var isDocSpaceAdmin = userType is EmployeeType.DocSpaceAdmin;
         var isUser = userType is EmployeeType.User;
-        
+
+        var isExternalLinksProhobited = (await tenantManager.GetTenantQuotaAsync(user.TenantId)).Free;
+
         await foreach (var entry in entries)
         {
             if (entry.Security != null)
@@ -779,7 +781,7 @@ public class FileSecurity(IDaoFactory daoFactory,
             
             foreach (var action in Enum.GetValues<FilesSecurityActions>().Where(r => _securityEntries[entry.FileEntryType].Contains(r)))
             {
-                var result = await FilterEntryAsync(entry, action, userId, null, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders);
+                var result = await FilterEntryAsync(entry, action, userId, null, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, isExternalLinksProhobited, parentFolders);
                 security[action] = result;
             }
 
@@ -845,8 +847,10 @@ public class FileSecurity(IDaoFactory daoFactory,
 
         var accessSnapshot = entry.Access;
         var parentFolders = await GetFileParentFolders(entry.ParentId);
-        
-        var haveAccess = await FilterEntryAsync(entry, action, userId, shares, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders);
+
+        var isExternalLinksProhobited = (await tenantManager.GetTenantQuotaAsync(user.TenantId)).Free;
+
+        var haveAccess = await FilterEntryAsync(entry, action, userId, shares, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, isExternalLinksProhobited, parentFolders);
 
         if (!setEntryAccess)
         {
@@ -873,8 +877,13 @@ public class FileSecurity(IDaoFactory daoFactory,
     }
 
     private async Task<bool> FilterEntryAsync<T>(FileEntry<T> e, FilesSecurityActions action, Guid userId, IEnumerable<FileShareRecord<T>> shares, bool isOutsider, bool isGuest, 
-        bool isAuthenticated, bool isDocSpaceAdmin, bool isUser, List<Folder<T>> parentFolders)
+        bool isAuthenticated, bool isDocSpaceAdmin, bool isUser, bool isExternalLinksProhobited, List<Folder<T>> parentFolders)
     {
+        if (isExternalLinksProhobited && (action is FilesSecurityActions.CopySharedLink or FilesSecurityActions.CopyLink))
+        {
+            return false;
+        }
+
         var file = e as File<T>;
         var folder = e as Folder<T>;
         var isRoom = folder != null && DocSpaceHelper.IsRoom(folder.FolderType);

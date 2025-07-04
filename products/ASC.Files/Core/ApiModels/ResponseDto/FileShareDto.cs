@@ -145,6 +145,11 @@ public class FileShareDtoHelper(
 {
     public async Task<FileShareDto> Get(AceWrapper aceWrapper)
     {
+        if (aceWrapper == null)
+        {
+            return null;
+        }
+
         var result = new FileShareDto
         {
             IsOwner = aceWrapper.Owner,
