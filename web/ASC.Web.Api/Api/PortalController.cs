@@ -116,7 +116,15 @@ public class PortalController(
     [SwaggerResponse(200, "User information", typeof(UserInfo))]
     [HttpGet("users/{userID:guid}")]
     public async Task<UserInfo> GetUserById(UserIDRequestDto inDto)
-    {
+    {        
+        var user = await userManager.GetUsersAsync(inDto.Id);
+        var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+
+        if (!await userManager.CanUserViewAnotherUserAsync(currentUser, user))
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+        
         return await userManager.GetUsersAsync(inDto.Id);
     }
 
@@ -456,13 +464,20 @@ public class PortalController(
         var messageDate = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second, DateTimeKind.Utc);
         if (!string.Equals(newAlias, oldAlias, StringComparison.InvariantCultureIgnoreCase))
         {
-            if (!string.IsNullOrEmpty(apiSystemHelper.ApiSystemUrl))
+            try
             {
-                await apiSystemHelper.ValidatePortalNameAsync(newAlias, user.Id);
+                if (!string.IsNullOrEmpty(apiSystemHelper.ApiSystemUrl))
+                {
+                    await apiSystemHelper.ValidatePortalNameAsync(newAlias, user.Id);
+                }
+                else
+                {
+                    await tenantManager.CheckTenantAddressAsync(newAlias.Trim());
+                }
             }
-            else
+            catch (Exception ex)
             {
-                await tenantManager.CheckTenantAddressAsync(newAlias.Trim());
+                throw new ArgumentException(ex.Message, nameof(alias));
             }
 
             var oldDomain = tenant.GetTenantDomain(coreSettings);

@@ -131,10 +131,10 @@ public class RenewSubscriptionService(
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager>();
             owner = await userManager.GetUsersAsync(tenant.OwnerId);
 
-            var payerEmail = (await tariffService.GetCustomerInfoAsync(data.TenantId)).Email;
-            if (!string.IsNullOrEmpty(payerEmail))
+            var customerInfo = await tariffService.GetCustomerInfoAsync(data.TenantId);
+            if (!string.IsNullOrEmpty(customerInfo?.Email))
             {
-                payer = await userManager.GetUserByEmailAsync(payerEmail);
+                payer = await userManager.GetUserByEmailAsync(customerInfo.Email);
             }
 
             var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();

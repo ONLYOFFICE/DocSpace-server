@@ -264,12 +264,8 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             rightToComment = commentPossible = false;
         }
 
-        var rightChangeHistory = rightToEdit && !file.Encrypted;
-
         if (await fileTracker.IsEditingAsync(file.Id))
         {
-            rightChangeHistory = false;
-
             bool canCoAuthoring;
             if ((editPossible || reviewPossible || fillFormsPossible || commentPossible)
                 && tryCoAuthoring
@@ -315,7 +311,6 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             Review = rightToReview && lastVersion,
             FillForms = rightToFillForms && lastVersion,
             Comment = rightToComment && lastVersion,
-            ChangeHistory = rightChangeHistory,
             ModifyFilter = rightModifyFilter,
             Print = rightToDownload,
             Download = rightToDownload && noWatermark,

@@ -70,11 +70,18 @@ Class | Method | HTTP request | Description
 {{#isOAuth}}
 - **Type**: OAuth
 - **Flow**: {{{flow}}}
-- **Authorization URL**: {{{authorizationUrl}}}
+- **Authorization URL**: {{x-authorizationUrl}}
+- **Token Url**: {{x-tokenUrl}}
 - **Scopes**: {{^scopes}}N/A{{/scopes}}
 {{#scopes}} - **{{{scope}}}**: {{{description}}}
 {{/scopes}}
 {{/isOAuth}}
+{{#isOpenId}}
+- **Type**: OpenId Connect
+- **OpenId Connect URL**: {{x-openIdConnectUrl}}
+{{#scopes}}  - {{scope}}: {{description}}
+{{/scopes}}
+{{/isOpenId}}
 
 {{/authMethods}}
 

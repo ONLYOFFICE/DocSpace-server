@@ -4,14 +4,14 @@
   "generator-cli": {
     "version": "7.13.0"
   },
-  "generatorName": "my-typescript-axios",
+  "generatorName": "my-javascript",
   "inputSpec": "./tools/api-docs.json",
-  "outputDir": "typescript-sdk",
+  "outputDir": "javascript-sdk",
   "additionalProperties": {
 	"withSeparateModelsAndApi": true,
     "modelPackage": "models",
     "apiPackage": "api",
-    "npmName": "@onlyoffice/docspace-api-typescript",
+	"projectName": "docspace-api-javascript",
     "licenseName": "Apache-2.0"
   }
 }

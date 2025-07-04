@@ -243,6 +243,7 @@ internal class FileDao(
             case FilterType.SpreadsheetsOnly:
             case FilterType.ArchiveOnly:
             case FilterType.MediaOnly:
+            case FilterType.DiagramsOnly:
                 query = query.Where(r => r.Category == (int)filterType);
                 break;
             case FilterType.ByExtension:
@@ -1711,6 +1712,7 @@ internal class FileDao(
             case FilterType.SpreadsheetsOnly:
             case FilterType.ArchiveOnly:
             case FilterType.MediaOnly:
+            case FilterType.DiagramsOnly:
             case FilterType.PdfForm:
             case FilterType.Pdf:
                 q = q.Where(r => r.Category == (int)filterType);
@@ -2090,6 +2092,7 @@ internal class FileDao(
                 case FilterType.SpreadsheetsOnly:
                 case FilterType.ArchiveOnly:
                 case FilterType.MediaOnly:
+                case FilterType.DiagramsOnly:
                     result.Where(r => r.Category, (int)filterType);
                     break;
             }
@@ -2443,6 +2446,7 @@ internal class FileDao(
             case FilterType.SpreadsheetsOnly:
             case FilterType.ArchiveOnly:
             case FilterType.MediaOnly:
+            case FilterType.DiagramsOnly:
             case FilterType.PdfForm:
             case FilterType.Pdf:
                 q = q.Where(r => r.Category == (int)filterType);
@@ -2549,6 +2553,7 @@ internal class FileDao(
             case FilterType.SpreadsheetsOnly:
             case FilterType.ArchiveOnly:
             case FilterType.MediaOnly:
+            case FilterType.DiagramsOnly:
             case FilterType.Pdf:
             case FilterType.PdfForm:
                 q = q.Where(r => r.Entry.Category == (int)filterType);

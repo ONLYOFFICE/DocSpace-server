@@ -337,12 +337,12 @@ public class PortalController(
     [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
     public async ValueTask<IActionResult> RegisterByEmailAsync(TenantModel model)
     {
-        if (string.IsNullOrEmpty(model?.Email))
+        if (model == null)
         {
             return BadRequest(new
             {
-                error = "emailEmpty",
-                message = "Email is required"
+                error = "params",
+                message = "Model is null"
             });
         }
 
@@ -358,7 +358,45 @@ public class PortalController(
             return BadRequest(new
             {
                 error = "params",
-                message = JsonSerializer.Serialize(message.ToArray())
+                message = JsonSerializer.Serialize(message)
+            });
+        }
+
+        LoginProfile loginProfile = null;
+        if (!string.IsNullOrEmpty(model.ThirdPartyProfile))
+        {
+            try
+            {
+                var profile = await loginProfileTransport.FromPureTransport(model.ThirdPartyProfile);
+                if (profile != null && string.IsNullOrEmpty(profile.AuthorizationError))
+                {
+                    loginProfile = profile;
+                    if (!string.IsNullOrEmpty(loginProfile.EMail))
+                    {
+                        model.Email = loginProfile.EMail;
+                    }
+                    if (!string.IsNullOrEmpty(loginProfile.FirstName))
+                    {
+                        model.FirstName = loginProfile.FirstName;
+                    }
+                    if (!string.IsNullOrEmpty(loginProfile.LastName))
+                    {
+                        model.LastName = loginProfile.LastName;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                option.LogError(e, e.Message);
+            }
+        }
+
+        if (string.IsNullOrEmpty(model.Email))
+        {
+            return BadRequest(new
+            {
+                error = "emailEmpty",
+                message = "Email is required"
             });
         }
 
@@ -380,25 +418,6 @@ public class PortalController(
             }
 
             model.PasswordHash = passwordHasher.GetClientPassword(model.Password);
-        }
-
-        LoginProfile loginProfile = null;
-        if (!string.IsNullOrEmpty(model.ThirdPartyProfile))
-        {
-            try
-            {
-                var profile = await loginProfileTransport.FromPureTransport(model.ThirdPartyProfile);
-                if (profile != null && string.IsNullOrEmpty(profile.AuthorizationError))
-                {
-                    loginProfile = profile;
-                    model.FirstName = loginProfile.FirstName;
-                    model.LastName = loginProfile.LastName;
-                }
-            }
-            catch (Exception e)
-            {
-                option.LogError(e, "");
-            }
         }
 
         model.FirstName = (model.FirstName ?? "").Trim();

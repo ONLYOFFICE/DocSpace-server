@@ -129,7 +129,8 @@ public class Configuration<T>(
         { FileType.Document, "word" },
         { FileType.Spreadsheet, "cell" },
         { FileType.Presentation, "slide" },
-        { FileType.Pdf, "pdf" }
+        { FileType.Pdf, "pdf" },
+        { FileType.Diagram, "diagram" }
     };
 
     /// <summary>
@@ -390,6 +391,7 @@ public class EditorConfiguration<T>(
             FileType.Pdf => FilterType.Pdf,
             FileType.Spreadsheet => FilterType.SpreadsheetsOnly,
             FileType.Presentation => FilterType.PresentationsOnly,
+            FileType.Diagram => FilterType.DiagramsOnly,
             _ => FilterType.FilesOnly
         };
 
@@ -432,6 +434,7 @@ public class EditorConfiguration<T>(
                 FileType.Pdf => FilterType.Pdf,
                 FileType.Spreadsheet => FilterType.SpreadsheetsOnly,
                 FileType.Presentation => FilterType.PresentationsOnly,
+                FileType.Diagram => FilterType.DiagramsOnly,
                 _ => FilterType.FilesOnly
             };
 
@@ -534,11 +537,6 @@ public class InfoConfig<T>(
 /// </summary>
 public class PermissionsConfig
 {
-    /// <summary>
-    /// Specifies whether to display the "Restore" button when using the "onRequestRestore" event.
-    /// </summary>
-    public bool ChangeHistory { get; set; }
-
     /// <summary>
     /// Defines if the document can be commented or not.
     /// </summary>

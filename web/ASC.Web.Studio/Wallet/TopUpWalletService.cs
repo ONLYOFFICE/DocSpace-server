@@ -116,10 +116,10 @@ public class TopUpWalletService(
             var tariffService = scope.ServiceProvider.GetRequiredService<ITariffService>();
             var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
 
-            var payerEmail = (await tariffService.GetCustomerInfoAsync(data.TenantId)).Email;
-            if (!string.IsNullOrEmpty(payerEmail))
+            var customerInfo = await tariffService.GetCustomerInfoAsync(data.TenantId);
+            if (!string.IsNullOrEmpty(customerInfo?.Email))
             {
-                payer = await userManager.GetUserByEmailAsync(payerEmail);
+                payer = await userManager.GetUserByEmailAsync(customerInfo.Email);
             }
 
             if (payer != null && payer.Id != ASC.Core.Users.Constants.LostUser.Id)

@@ -1,13 +1,23 @@
 package com.example.codegen;
+
 import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.ModelsMap;
 import org.openapitools.codegen.languages.JavascriptClientCodegen;
+import org.openapitools.codegen.SupportingFile;
+import org.openapitools.codegen.CodegenModel;
+import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.servers.ServerVariables;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.servers.ServerVariable;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Map;
 import java.util.List;
+import java.util.HashMap;
 import org.openapitools.codegen.model.OperationsMap;
 import org.openapitools.codegen.model.OperationMap;
 import org.openapitools.codegen.CodegenOperation;
+import org.openapitools.codegen.CodegenProperty;
 
 public class MyJavaScriptCodegen extends JavascriptClientCodegen {
 
@@ -17,15 +27,14 @@ public class MyJavaScriptCodegen extends JavascriptClientCodegen {
         this.templateDir = "templates/javascript";
         this.embeddedTemplateDir = "javascript";
 
-        supportingFiles.removeIf(f -> f.getTemplateFile().equals("git_push.sh.mustache") || 
-            f.getDestinationFilename().equals(".openapi-generator-ignore")
-        );
+        supportingFiles.add(new SupportingFile("example.mustache", "", "example.js"));
     }
 
     @Override
     public void processOpts() {
         super.processOpts();
 
+        String baseURL = openAPI.getServers().get(0).getUrl();
         if (openAPI.getServers() != null && !openAPI.getServers().isEmpty()) {
             Server server = openAPI.getServers().get(0);
             ServerVariables serverVars = server.getVariables();
@@ -36,6 +45,10 @@ public class MyJavaScriptCodegen extends JavascriptClientCodegen {
                 }
             }
         }
+
+        supportingFiles.removeIf(f -> f.getTemplateFile().equals("git_push.sh.mustache") || 
+            f.getDestinationFilename().equals(".openapi-generator-ignore")
+        );
     }
 
     @Override

@@ -55,7 +55,7 @@ public class FileUploader(
     {
         if (contentLength <= 0)
         {
-            throw new Exception(FilesCommonResource.ErrorMessage_EmptyFile);
+            throw new ArgumentException(FilesCommonResource.ErrorMessage_EmptyFile);
         }
 
         var file = await VerifyFileUploadAsync(folderId, title, contentLength, !createNewIfExist);

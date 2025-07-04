@@ -403,7 +403,7 @@ namespace {{packageName}}.{{apiPackage}}
             {{/items}}
             {{/isDeepObject}}
             {{^isDeepObject}}
-            localVarRequestOptions.QueryParameters.Add(ParameterToMultiMap("{{collectionFormat}}", "{{baseName}}", {{paramName}}));
+            localVarRequestOptions.QueryParameters.Add(ClientUtils.ParameterToMultiMap("{{collectionFormat}}", "{{baseName}}", {{paramName}}));
             {{/isDeepObject}}
             {{/required}}
             {{^required}}
@@ -617,29 +617,29 @@ namespace {{packageName}}.{{apiPackage}}
             {{#constantParams}}
             {{#isQueryParam}}
             // Set client side default value of Query Param "{{baseName}}".
-            localVarRequestOptions.QueryParameters.Add("{{baseName}}", {{packageName}}.Client.ClientUtils.ParameterToString({{#_enum}}"{{{.}}}"{{/_enum}})); // Constant query parameter
+            localVarRequestOptions.QueryParameters.Add("{{baseName}}", ClientUtils.ParameterToString({{#_enum}}"{{{.}}}"{{/_enum}})); // Constant query parameter
             {{/isQueryParam}}
             {{/constantParams}}            
             {{#queryParams}}
             {{#required}}
-            localVarRequestOptions.QueryParameters.Add({{packageName}}.Client.ClientUtils.ParameterToMultiMap("{{collectionFormat}}", "{{baseName}}", {{paramName}}));
+            localVarRequestOptions.QueryParameters.Add(ClientUtils.ParameterToMultiMap("{{collectionFormat}}", "{{baseName}}", {{paramName}}));
             {{/required}}
             {{^required}}
             if ({{paramName}} != null)
             {
-                localVarRequestOptions.QueryParameters.Add({{packageName}}.Client.ClientUtils.ParameterToMultiMap("{{collectionFormat}}", "{{baseName}}", {{paramName}}));
+                localVarRequestOptions.QueryParameters.Add(ClientUtils.ParameterToMultiMap("{{collectionFormat}}", "{{baseName}}", {{paramName}}));
             }
             {{/required}}
             {{/queryParams}}
             {{#constantParams}}
             {{#isHeaderParam}}
             // Set client side default value of Header Param "{{baseName}}".
-            localVarRequestOptions.HeaderParameters.Add("{{baseName}}", {{packageName}}.Client.ClientUtils.ParameterToString({{#_enum}}"{{{.}}}"{{/_enum}})); // Constant header parameter
+            localVarRequestOptions.HeaderParameters.Add("{{baseName}}", ClientUtils.ParameterToString({{#_enum}}"{{{.}}}"{{/_enum}})); // Constant header parameter
             {{/isHeaderParam}}
             {{/constantParams}}
             {{#headerParams}}
             {{#required}}
-            localVarRequestOptions.HeaderParameters.Add("{{baseName}}", {{packageName}}.Client.ClientUtils.ParameterToString({{paramName}})); // header parameter
+            localVarRequestOptions.HeaderParameters.Add("{{baseName}}", ClientUtils.ParameterToString({{paramName}})); // header parameter
             {{/required}}
             {{^required}}
             if ({{paramName}} != null)
@@ -692,7 +692,7 @@ namespace {{packageName}}.{{apiPackage}}
             {{#isKeyInQuery}}
             if (!string.IsNullOrEmpty(this.Configuration.GetApiKeyWithPrefix("{{keyParamName}}")))
             {
-                localVarRequestOptions.QueryParameters.Add({{packageName}}.Client.ClientUtils.ParameterToMultiMap("", "{{keyParamName}}", this.Configuration.GetApiKeyWithPrefix("{{keyParamName}}")));
+                localVarRequestOptions.QueryParameters.Add(ClientUtils.ParameterToMultiMap("", "{{keyParamName}}", this.Configuration.GetApiKeyWithPrefix("{{keyParamName}}")));
             }
             {{/isKeyInQuery}}
             {{/isApiKey}}
