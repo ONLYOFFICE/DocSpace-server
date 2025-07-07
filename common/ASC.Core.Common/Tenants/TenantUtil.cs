@@ -30,7 +30,21 @@ namespace ASC.Core.Tenants;
 public class TenantUtil(TenantManager tenantManager, TimeZoneConverter timeZoneConverter)
 {
     private TimeZoneInfo _timeZoneInfo;
-    private TimeZoneInfo TimeZoneInfo => _timeZoneInfo ??= timeZoneConverter.GetTimeZone(tenantManager.GetCurrentTenant().TimeZone);
+    private string _timeZoneName;
+
+    public TimeZoneInfo TimeZoneInfo
+    {
+        get
+        {
+            var tenantTimeZone = tenantManager.GetCurrentTenant().TimeZone;
+            if (_timeZoneInfo == null || _timeZoneName != tenantTimeZone)
+            {
+                _timeZoneName = tenantTimeZone;
+                _timeZoneInfo = timeZoneConverter.GetTimeZone(tenantTimeZone);
+            }
+            return _timeZoneInfo;
+        }
+    }
 
     public DateTime DateTimeFromUtc(DateTime utc)
     {
