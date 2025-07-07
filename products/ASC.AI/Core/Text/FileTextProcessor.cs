@@ -45,17 +45,13 @@ public class FileTextProcessor(IFileDao<int> fileDao, ITextExtractor textExtract
     public async Task<List<string>> GetTextChunksAsync(File<int> file, SplitterSettings settings)
     {
         await using var stream = await fileDao.GetFileStreamAsync(file);
-
-        var buffer = ArrayPool<byte>.Shared.Rent((int)stream.Length);
         
-        await using var memoryStream = new MemoryStream(buffer);
+        await using var memoryStream = new MemoryStream();
         await stream.CopyToAsync(memoryStream);
         
-        var memory = new Memory<byte>(buffer, 0, (int)memoryStream.Length);
+        var memory = new Memory<byte>(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
         
         var text = await textExtractor.ExtractAsync(memory);
-        
-        ArrayPool<byte>.Shared.Return(buffer);
         
         return string.IsNullOrEmpty(text) 
             ? [] 
