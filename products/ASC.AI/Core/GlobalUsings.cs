@@ -47,6 +47,8 @@ global using ASC.Core.Common.EF.Model;
 global using ASC.Core.Common.EF.Model.Chat;
 global using ASC.Core.Users;
 
+global using ASC.ElasticSearch;
+
 global using ASC.Files.Core;
 global using ASC.Files.Core.Resources;
 global using ASC.Files.Core.Security;
@@ -59,8 +61,11 @@ global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.AI;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.Logging;
+global using Microsoft.SemanticKernel.Text;
 
 global using OpenAI;
+
+global using OpenSearch.Client;
 
 global using System.ClientModel;
 global using System.ClientModel.Primitives;
