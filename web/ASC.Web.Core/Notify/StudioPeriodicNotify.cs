@@ -531,7 +531,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
             }
             catch (Exception err)
             {
-                _log.ErrorSendSaasLettersAsync(err);
+                _log.ErrorSendSaasLettersAsync(tenant.Id, err);
             }
         }
 
