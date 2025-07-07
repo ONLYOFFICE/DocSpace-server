@@ -238,7 +238,7 @@ public class LicenseController(
 
             if (!inDto.Files.Any())
             {
-                throw new Exception(Resource.ErrorEmptyUploadFileSelected);
+                throw new ArgumentException(Resource.ErrorEmptyUploadFileSelected);
             }
 
             var licenseFile = inDto.Files.First();
@@ -260,6 +260,11 @@ public class LicenseController(
             throw;
         }
         catch (NotSupportedException ex)
+        {
+            _log.ErrorLicenseUpload(ex);
+            throw;
+        }
+        catch (ArgumentException ex)
         {
             _log.ErrorLicenseUpload(ex);
             throw;

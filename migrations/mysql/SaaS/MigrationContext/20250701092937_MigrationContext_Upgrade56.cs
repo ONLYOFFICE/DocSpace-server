@@ -128,6 +128,17 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     { ".vstx", ".pdfa" },
                     { ".vstx", ".png" }
                 });
+
+            migrationBuilder.Sql(
+                @"UPDATE files_file f
+                    SET f.category = 25
+                    WHERE title LIKE '%.vsdm'
+                       OR title LIKE '%.vsdx'
+                       OR title LIKE '%.vssm'
+                       OR title LIKE '%.vssx'
+                       OR title LIKE '%.vstm'
+                       OR title LIKE '%.vstx';"
+            );
         }
 
         /// <inheritdoc />

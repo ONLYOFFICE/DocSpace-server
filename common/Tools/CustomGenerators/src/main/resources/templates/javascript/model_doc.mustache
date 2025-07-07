@@ -1,4 +1,5 @@
 {{#models}}{{#model}}{{#isEnum}}# {{moduleName}}.{{classname}}
+{{#description}}{{.}}{{/description}}
 
 ## Enum
 
@@ -6,6 +7,7 @@
 * `{{name}}` (value: `{{{value}}}`)
 {{/enumVars}}{{/allowableValues}}
 {{/isEnum}}{{^isEnum}}# {{moduleName}}.{{classname}}
+{{#description}}{{.}}{{/description}}
 
 ## Properties
 

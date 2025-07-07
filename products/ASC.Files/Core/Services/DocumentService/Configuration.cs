@@ -538,11 +538,6 @@ public class InfoConfig<T>(
 public class PermissionsConfig
 {
     /// <summary>
-    /// Specifies whether to display the "Restore" button when using the "onRequestRestore" event.
-    /// </summary>
-    public bool ChangeHistory { get; set; }
-
-    /// <summary>
     /// Defines if the document can be commented or not.
     /// </summary>
     public bool Comment { get; set; } = true;
@@ -977,9 +972,9 @@ public class CustomizationConfig<T>(
                && await fileSharing.CanSetAccessAsync(file);
     }
 
-    public string GetReviewDisplay(bool modeWrite)
+    public ReviewConfig GetReview(bool modeWrite)
     {
-        return modeWrite ? null : "markup";
+        return modeWrite ? null : new ReviewConfig { ReviewDisplayEnum = ReviewDisplayEnum.Markup };
     }
 
     public async Task<SubmitForm> GetSubmitForm(File<T> file)
@@ -1110,6 +1105,23 @@ public class GobackConfig
     /// The absolute URL to the website address which will be opened when clicking the "Open file location" menu button.
     /// </summary>
     public string Url { get; set; }
+}
+
+public class ReviewConfig
+{
+    public string ReviewDisplay { get; private set; }
+    
+    [JsonIgnore]
+    public ReviewDisplayEnum ReviewDisplayEnum { set => ReviewDisplay = value.ToStringLowerFast(); }
+}
+
+[EnumExtensions]
+public enum ReviewDisplayEnum
+{
+    Markup,
+    Simple,
+    Final,
+    Original
 }
 
 [Transient]
