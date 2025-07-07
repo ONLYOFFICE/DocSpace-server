@@ -26,10 +26,12 @@
 
 namespace ASC.Site.Core.Dtos;
 
+public record ValidateAliasRequestDto(string Alias);
 public record FindByDomainRequestDto(string Domain);
 public record FindByEmailRequestDto(string Email);
 public record FindBySocialRequestDto(string Transport);
 public record FindByEmailPasswordRequestDto(string Email, string Password, string PasswordHash);
 
+public record ValidateAliasResponseDto(bool Valid, string Error);
 public record TenantLinksResponseDto(string Domain, string Path);
 public record FindBySocialResponseDto(string Email, IEnumerable<TenantLinksResponseDto> Tenants);

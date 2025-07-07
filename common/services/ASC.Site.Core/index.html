@@ -54,6 +54,7 @@
 
     <h1>Find Portal</h1>
     <input type="text" id="findPortalDomain" placeholder="Domain" />
+    <button id="validateAliasButton">Validate Alias</button>
     <button id="findPortalButton">Find Portal</button>
     <br />
     <br />
@@ -277,6 +278,28 @@
             return false;
         };
 
+        document.getElementById('validateAliasButton').onclick = function () {
+            const alias = document.getElementById('findPortalDomain').value;
+
+            fetch("/multiregion/validatealias", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: authToken
+                },
+                body: JSON.stringify({ alias })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(JSON.stringify(data));
+                    document.getElementById('findPortalResult').innerText = JSON.stringify(data);
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                });
+
+            return false;
+        };
 
         document.getElementById('findPortalButton').onclick = function () {
             const domain = document.getElementById('findPortalDomain').value;
@@ -300,7 +323,6 @@
 
             return false;
         };
-
 
         document.getElementById('sendEmailButton').onclick = function () {
             const email = document.getElementById('email').value;

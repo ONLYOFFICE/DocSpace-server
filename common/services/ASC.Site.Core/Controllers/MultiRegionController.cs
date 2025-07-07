@@ -32,12 +32,57 @@ namespace ASC.Site.Core.Controllers;
 public class MultiRegionController(
         CommonConstants commonConstants,
         MultiRegionPrivider multiRegionPrivider,
+        TenantDomainValidator tenantDomainValidator,
+        HostedSolution hostedSolution,
         LoginProfileTransport loginProfileTransport,
         CommonLinkUtility commonLinkUtility,
         PasswordHasher passwordHasher,
+        ApiSystemHelper apiSystemHelper,
         ILogger<MultiRegionController> logger)
     : ControllerBase
 {
+    [HttpPost("validatealias")]
+    [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
+    public async Task<ValidateAliasResponseDto> ValidateAlias(ValidateAliasRequestDto inDto)
+    {
+        try
+        {
+            if (!apiSystemHelper.ApiCacheEnable)
+            {
+                throw new InvalidOperationException("ApiCache is not enabled.");
+            }
+
+            var alias = inDto?.Alias?.Trim()?.ToLowerInvariant();
+
+            if (string.IsNullOrEmpty(alias))
+            {
+                throw new ArgumentException("Alias is empty.");
+            }
+
+            tenantDomainValidator.ValidateDomainLength(alias);
+
+            tenantDomainValidator.ValidateDomainCharacters(alias);
+
+            var forbidden = await hostedSolution.IsForbiddenDomainAsync(alias);
+
+            var sameAliasTenants = forbidden ? [alias] : await apiSystemHelper.FindTenantsInCacheAsync(alias);
+
+            if (sameAliasTenants != null)
+            {
+                throw new ArgumentException("Address busy.");
+            }
+
+            return new ValidateAliasResponseDto(true, null);
+        }
+        catch (Exception ex)
+        {
+            logger.ErrorWithException(ex);
+
+            return new ValidateAliasResponseDto(false, ex.Message);
+        }
+    }
+
+
     [HttpPost("findbydomain")]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
     public async Task<string> FindByDomain(FindByDomainRequestDto inDto)
