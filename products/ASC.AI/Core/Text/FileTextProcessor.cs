@@ -53,9 +53,9 @@ public class FileTextProcessor(IFileDao<int> fileDao, ITextExtractor textExtract
         
         var memory = new Memory<byte>(buffer, 0, (int)memoryStream.Length);
         
-        ArrayPool<byte>.Shared.Return(buffer);
-        
         var text = await textExtractor.ExtractAsync(memory);
+        
+        ArrayPool<byte>.Shared.Return(buffer);
         
         return string.IsNullOrEmpty(text) 
             ? [] 
