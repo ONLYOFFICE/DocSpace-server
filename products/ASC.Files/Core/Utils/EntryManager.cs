@@ -1440,17 +1440,17 @@ public class EntryManager(IDaoFactory daoFactory,
 
         if (checkRight && await lockerManager.FileLockedForMeAsync(file.Id))
         {
-            throw new Exception(FilesCommonResource.ErrorMessage_LockedFile);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_LockedFile);
         }
 
         if (checkRight && forceSave is null or ForcesaveType.None && await fileTracker.IsEditingAsync(file.Id))
         {
-            throw new Exception(FilesCommonResource.ErrorMessage_SecurityException_UpdateEditingFile);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_UpdateEditingFile);
         }
 
         if (file.RootFolderType == FolderType.TRASH)
         {
-            throw new Exception(FilesCommonResource.ErrorMessage_ViewTrashItem);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ViewTrashItem);
         }
 
         var currentExt = file.ConvertedExtension;
