@@ -449,8 +449,21 @@ public abstract class VirtualRoomsController<T>(
             return result;
         }
 
-        if (inDto.RoomInvitation.Invitations.Any(i => !string.IsNullOrEmpty(i.Email) && i.Access != FileShare.None) || 
-            await inDto.RoomInvitation.Invitations.Where(r => r.Id != Guid.Empty && r.Access != FileShare.None).ToAsyncEnumerable().AnyAwaitAsync(async i => await userManager.IsGuestAsync(i.Id)))
+        var guestsInvited =
+            inDto.RoomInvitation.Invitations.Any(i => !string.IsNullOrEmpty(i.Email) && i.Access != FileShare.None) ||
+            await inDto.RoomInvitation.Invitations
+                .Where(r => r.Id != Guid.Empty && r.Access != FileShare.None)
+                .ToAsyncEnumerable()
+                .AnyAwaitAsync(async i => await userManager.IsGuestAsync(i.Id));
+        
+        var usersInvited =
+            inDto.RoomInvitation.Invitations.Any(i => !string.IsNullOrEmpty(i.Email) && i.Access != FileShare.None) ||
+            await inDto.RoomInvitation.Invitations
+                .Where(r => r.Id != Guid.Empty && r.Access != FileShare.None)
+                .ToAsyncEnumerable()
+                .AnyAwaitAsync(async i => await userManager.IsUserAsync(i.Id));
+        
+        if (guestsInvited)
         {
             var invitationSettings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
             if (!invitationSettings.AllowInvitingGuests)
@@ -461,8 +474,9 @@ public abstract class VirtualRoomsController<T>(
 
         var room = await _fileStorageService.GetFolderAsync(inDto.Id).NotFoundIfNull("Folder not found");
 
-        if (room.RootId is int root && root == await globalFolderHelper.FolderRoomTemplatesAsync
-                                    && inDto.RoomInvitation.Invitations.Any(i => i.Access != FileShare.None && i.Access != FileShare.Read))
+        if (room.RootId is int root && 
+            root == await globalFolderHelper.FolderRoomTemplatesAsync && 
+            (inDto.RoomInvitation.Invitations.Any(i => i.Access != FileShare.None && i.Access != FileShare.Read) || guestsInvited || usersInvited))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
         }
