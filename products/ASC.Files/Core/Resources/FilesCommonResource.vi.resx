@@ -512,4 +512,10 @@ Khả năng tương thích cao nhất với docx, xlsx, pptx.</value>
   <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
     <value>Bắt đầu điền</value>
   </data>
+  <data name="RoleEnum_Guest" xml:space="preserve">
+    <value>Khách</value>
+  </data>
+  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
+    <value>Quản Trị Viên Phòng</value>
+  </data>
 </root>

@@ -1926,4 +1926,52 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Doties uz Pakalpojumiem</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Doties uz Maka iestatījumiem</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Sveiki, $UserName!
+
+Mēs vēlamies Jūs informēt, ka Jūsu iegādātā pakalpojumu plāna automātiskā atjaunošana neizdevās.
+
+Lūdzu, atjaunojiet savu pašreizējo pakalpojumu plānu manuāli (vai iegādājieties jaunu).
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Sveiki, $UserName!
+
+Mēs vēlamies Jūs informēt, ka Jūsu abonementa maksa tiks automātiski ieturēta no Jūsu konta pēc 3 dienām.
+
+Lai darījums noritētu veiksmīgi, lūdzu, pārliecinieties, ka Jūsu maksājuma metodē ir pietiekami daudz naudas.
+
+Ja Jums ir kādi jautājumi vai nepieciešama palīdzība, lūdzu, sazinieties ar mūsu "atbalsta komandu":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Sveiki, $UserName!
+
+Ar šo sazināmies, lai informētu jūs, ka DocSpace maka atlikuma automātiskā papildināšana neizdevās.
+
+Lūdzam jūs manuāli pārbaudīt un atjaunināt maka atlikumu.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Nepieciešama darbība: Neizdevās automātiski atjaunot pakalpojumu plānu Jūsu ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Gaidāmais abonementa maksājums par Jūsu ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Nepieciešama darbība: Neizdevās automātiski papildināt Maka atlikumu Jūsu ${LetterLogoText} DocSpace</value>
+  </data>
 </root>
