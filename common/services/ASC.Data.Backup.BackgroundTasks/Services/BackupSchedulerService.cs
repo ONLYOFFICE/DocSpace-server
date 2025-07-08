@@ -71,6 +71,8 @@ public sealed class BackupSchedulerService(
 
             try
             {
+                tenantManager.SetCurrentTenant(new ASC.Core.Tenants.Tenant(schedule.TenantId, String.Empty));
+
                 if (coreBaseSettings.Standalone || (await tenantManager.GetTenantQuotaAsync(schedule.TenantId)).AutoBackupRestore)
                 {
                     var tariff = await tariffService.GetTariffAsync(schedule.TenantId);
