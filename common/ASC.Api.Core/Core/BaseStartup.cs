@@ -477,7 +477,8 @@ public abstract class BaseStartup
                         {
                             return JwtBearerDefaults.AuthenticationScheme;
                         }
-                        else if (token.StartsWith("sk-"))
+
+                        if (token.StartsWith("sk-"))
                         {
                             return ApiKeyBearerDefaults.AuthenticationScheme;
                         }
