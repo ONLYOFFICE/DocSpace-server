@@ -55,9 +55,14 @@ public class PortalController(
         QuotaUsageManager quotaUsageManager,
         PasswordSettingsManager passwordSettingsManager,
         LoginProfileTransport loginProfileTransport,
-        AccountLinker accountLinker)
+        AccountLinker accountLinker,
+        ShortUrl shortUrl)
     : ControllerBase
 {
+    private readonly char[] _alphabetArray = Enumerable.Range('a', 26).Union(Enumerable.Range('0', 10)).Select(x => (char)x).ToArray();
+    private const string DefaultPrefix = "docspace";
+    private const int DefaultRandomLength = 6;
+    
     #region For TEST api
 
     /// <summary>
@@ -337,12 +342,12 @@ public class PortalController(
     [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
     public async ValueTask<IActionResult> RegisterByEmailAsync(TenantModel model)
     {
-        if (string.IsNullOrEmpty(model?.Email))
+        if (model == null)
         {
             return BadRequest(new
             {
-                error = "emailEmpty",
-                message = "Email is required"
+                error = "params",
+                message = "Model is null"
             });
         }
 
@@ -358,7 +363,45 @@ public class PortalController(
             return BadRequest(new
             {
                 error = "params",
-                message = JsonSerializer.Serialize(message.ToArray())
+                message = JsonSerializer.Serialize(message)
+            });
+        }
+
+        LoginProfile loginProfile = null;
+        if (!string.IsNullOrEmpty(model.ThirdPartyProfile))
+        {
+            try
+            {
+                var profile = await loginProfileTransport.FromPureTransport(model.ThirdPartyProfile);
+                if (profile != null && string.IsNullOrEmpty(profile.AuthorizationError))
+                {
+                    loginProfile = profile;
+                    if (!string.IsNullOrEmpty(loginProfile.EMail))
+                    {
+                        model.Email = loginProfile.EMail;
+                    }
+                    if (!string.IsNullOrEmpty(loginProfile.FirstName))
+                    {
+                        model.FirstName = loginProfile.FirstName;
+                    }
+                    if (!string.IsNullOrEmpty(loginProfile.LastName))
+                    {
+                        model.LastName = loginProfile.LastName;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                option.LogError(e, e.Message);
+            }
+        }
+
+        if (string.IsNullOrEmpty(model.Email))
+        {
+            return BadRequest(new
+            {
+                error = "emailEmpty",
+                message = "Email is required"
             });
         }
 
@@ -382,25 +425,6 @@ public class PortalController(
             model.PasswordHash = passwordHasher.GetClientPassword(model.Password);
         }
 
-        LoginProfile loginProfile = null;
-        if (!string.IsNullOrEmpty(model.ThirdPartyProfile))
-        {
-            try
-            {
-                var profile = await loginProfileTransport.FromPureTransport(model.ThirdPartyProfile);
-                if (profile != null && string.IsNullOrEmpty(profile.AuthorizationError))
-                {
-                    loginProfile = profile;
-                    model.FirstName = loginProfile.FirstName;
-                    model.LastName = loginProfile.LastName;
-                }
-            }
-            catch (Exception e)
-            {
-                option.LogError(e, "");
-            }
-        }
-
         model.FirstName = (model.FirstName ?? "").Trim();
         model.LastName = (model.LastName ?? "").Trim();
 
@@ -417,13 +441,23 @@ public class PortalController(
                 option.LogDebug("CheckValidName failed: {0}; Elapsed ms.: {1}", fullName, sw.ElapsedMilliseconds);
             }
         }
+        
+        var prefix = configuration["web:alias:prefix"] ?? DefaultPrefix;
+        var randomLength = int.Parse(configuration["web:alias:random-length"] ?? DefaultRandomLength.ToString());
 
-        var emailPart = Regex.Replace(model.Email.Split('@')[0], @"[^a-z0-9\-]", "", RegexOptions.IgnoreCase).Trim('-');
-        var portalName = (model.PortalName ?? $"{emailPart}{DateTime.UtcNow.ToString("yyMMddHHmm")}").Trim();
+        if (prefix.Length + randomLength > tenantDomainValidator.MaxLength || prefix.Length + randomLength < tenantDomainValidator.MinLength)
+        {
+            prefix = DefaultPrefix;
+            randomLength = DefaultRandomLength;
+        }
+        
+        var random = new Random();
+        random.Shuffle(_alphabetArray);
+        
+        var alphabet = new string(_alphabetArray);
+        var portalName = (model.PortalName ?? $"{prefix}-{shortUrl.GenerateRandomKey(randomLength, alphabet)}").Trim();
 
         model.PortalName = portalName;
-
-        var attempt = 0;
 
         while (true)
         {
@@ -433,17 +467,15 @@ public class PortalController(
             {
                 break;
             }
+
+            if (error.GetType().GetProperty("error")?.GetValue(error).ToString() == "portalNameExist")
+            {
+                model.PortalName = $"{prefix}-{shortUrl.GenerateRandomKey(randomLength, alphabet)}";
+            }
             else
             {
-                if (error.GetType().GetProperty("error")?.GetValue(error).ToString() == "portalNameExist")
-                {
-                    model.PortalName = $"{portalName}-{++attempt}";
-                }
-                else
-                {
-                    sw.Stop();
-                    return BadRequest(error);
-                }
+                sw.Stop();
+                return BadRequest(error);
             }
         }
 

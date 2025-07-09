@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Api.Core.Auth;
+using ASC.Common.Security.Authorizing;
 using ASC.Core.Common.EF.Model;
 
 using AutoMapper;
@@ -108,7 +109,13 @@ public class ApiKeysController(
     {
         var scopes = AuthorizationExtension.ScopesMap;
 
-        return scopes.AllKeys.SelectMany(key => scopes[key]?.Split(',')).Distinct().Order();
+        var globalScopes = new List<string>
+        {
+            AuthConstants.Claim_ScopeGlobalRead.Value, 
+            AuthConstants.Claim_ScopeGlobalWrite.Value
+        };
+        
+        return scopes.Keys.SelectMany(key => scopes[key]).Union(globalScopes).Distinct().Order();
     }
 
 
@@ -245,18 +252,14 @@ public class ApiKeysController(
         return result;
     }
 
-    private static bool IsValidPermission(List<string> permission)
+    private bool IsValidPermission(List<string> permission)
     {
         if (permission == null || permission.Count == 0)
         {
             return true;
         }
 
-        var scopes = AuthorizationExtension.ScopesMap;
-        var orderedScopes = scopes.AllKeys.SelectMany(key => scopes[key]?.Split(','))
-                                                                 .Concat(["*"])
-                                                                 .Distinct()
-                                                                 .Order();
+        var orderedScopes = GetAllPermissions().Union(new List<string> {"*"});
 
         return permission.All(x => orderedScopes.Contains(x));
     }

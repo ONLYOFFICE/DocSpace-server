@@ -58,6 +58,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
     EmailValidationKeyProvider emailValidationKeyProvider,
     GlobalFolderHelper globalFolderHelper,
     PathProvider pathProvider,
+    TenantManager tenantManager,
     UserManager userManager,
     DocumentServiceTrackerHelper documentServiceTrackerHelper,
     FilesMessageService filesMessageService,
@@ -78,6 +79,12 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
 {
     public async Task InvokeAsync(HttpContext context)
     {
+        var currentTenant = tenantManager.GetCurrentTenant(false);
+        if (currentTenant == null)
+        {
+            throw new ItemNotFoundException("tenant");
+        }
+
         if (await tenantExtra.IsNotPaidAsync())
         {
             context.Response.StatusCode = (int)HttpStatusCode.PaymentRequired;
@@ -1230,7 +1237,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         }
 
         var canCreate = await fileSecurity.CanCreateAsync(folder);
-        if (!canCreate || (folder.RootFolderType == FolderType.RoomTemplates && FileUtility.GetFileExtension(fileTitle) != ".pdf"))
+        if (!canCreate || (folder.FolderType == FolderType.FillingFormsRoom && folder.RootFolderType == FolderType.RoomTemplates && FileUtility.GetFileExtension(fileTitle) != ".pdf"))
         {
             throw new HttpException((int)HttpStatusCode.Forbidden, FilesCommonResource.ErrorMessage_SecurityException_Create);
         }

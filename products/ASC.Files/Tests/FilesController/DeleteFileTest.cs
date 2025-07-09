@@ -49,8 +49,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Tests.Factory;
-
 namespace ASC.Files.Tests.FilesController;
 
 [Collection("Test Collection")]
@@ -66,7 +64,7 @@ public class DeleteFileTest(
     {
         var createdFile = await CreateFile("test.docx", FolderType.USER, Initializer.Owner);
         
-        var fileToDelete = (await _filesFilesApi.DeleteFileAsync(createdFile.Id, new Delete { Immediately = true }, TestContext.Current.CancellationToken)).Response;
+        var fileToDelete = (await _filesApi.DeleteFileAsync(createdFile.Id, new Delete { Immediately = true }, TestContext.Current.CancellationToken)).Response;
         
         if (fileToDelete.Any(r => !r.Finished))
         {
@@ -77,7 +75,7 @@ public class DeleteFileTest(
         
         // Verify file no longer exists or has been moved to trash
         await Assert.ThrowsAsync<ApiException>(async () => 
-            await _filesFilesApi.GetFileInfoAsync(createdFile.Id, cancellationToken: TestContext.Current.CancellationToken));
+            await _filesApi.GetFileInfoAsync(createdFile.Id, cancellationToken: TestContext.Current.CancellationToken));
     }
     
     // [Fact]

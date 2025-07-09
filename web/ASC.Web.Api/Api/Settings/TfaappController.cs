@@ -178,7 +178,7 @@ public class TfaappController(
     public async Task<bool> UpdateTfaSettings(TfaRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-
+        
         var result = false;
 
         MessageAction action;
@@ -269,13 +269,20 @@ public class TfaappController(
     /// <summary>
     /// Returns the confirmation email URL for updating TFA settings.
     /// </summary>
-    /// <short>Get confirmation email for updating TFA settings</short>
+    /// <short>Get a confirmation email for updating TFA settings</short>
     /// <path>api/2.0/settings/tfaappwithlink</path>
     [Tags("Settings / TFA settings")]
     [SwaggerResponse(200, "Confirmation email URL", typeof(string))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(405, "SMS settings are not available/TFA application settings are not available")]
     [HttpPut("tfaappwithlink")]
     public async Task<string> UpdateTfaSettingsLink(TfaRequestsDto inDto)
     {
+        if (inDto.Id == tenantManager.GetCurrentTenant().OwnerId && inDto.Id != authContext.CurrentAccount.ID)
+        {
+            throw new Exception(Resource.ErrorAccessDenied);
+        }
+        
         if (await UpdateTfaSettings(inDto))
         {
             return await GetTfaConfirmUrl();

@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Tests.Factory;
-
 namespace ASC.Files.Tests.FilesController;
 
 [Collection("Test Collection")]
@@ -69,11 +67,11 @@ public class MoveFolderTest(
         results.Should().NotContain(x => !string.IsNullOrEmpty(x.Error));
         
         // Verify both folders exist
-        var sourceFolderInfo = (await _filesFoldersApi.GetFolderInfoAsync(sourceFolder.Id, TestContext.Current.CancellationToken)).Response;
+        var sourceFolderInfo = (await _foldersApi.GetFolderInfoAsync(sourceFolder.Id, TestContext.Current.CancellationToken)).Response;
         sourceFolderInfo.Should().NotBeNull();
         
         // Find the copied folder in the target directory
-        var targetFolderContent = (await _filesFoldersApi.GetFolderByFolderIdAsync(targetFolderId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var targetFolderContent = (await _foldersApi.GetFolderByFolderIdAsync(targetFolderId, cancellationToken: TestContext.Current.CancellationToken)).Response;
         var copiedFolder = targetFolderContent.Folders.FirstOrDefault(f => f.Title == sourceFolder.Title);
         
         copiedFolder.Should().NotBeNull();
@@ -113,7 +111,7 @@ public class MoveFolderTest(
         results.Should().NotContain(x => !string.IsNullOrEmpty(x.Error));
         
         // Verify folder was moved
-        var movedFolder = (await _filesFoldersApi.GetFolderInfoAsync(sourceFolder.Id, TestContext.Current.CancellationToken)).Response;
+        var movedFolder = (await _foldersApi.GetFolderInfoAsync(sourceFolder.Id, TestContext.Current.CancellationToken)).Response;
         movedFolder.Should().NotBeNull();
         movedFolder.ParentId.Should().Be(targetFolder.Id);
     }

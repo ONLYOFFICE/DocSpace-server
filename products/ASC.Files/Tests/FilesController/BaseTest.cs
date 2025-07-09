@@ -24,10 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Tests.Factory;
-
-using User = ASC.Files.Tests.Data.User;
-
 namespace ASC.Files.Tests.FilesController;
 
 [Collection("Test Collection")]
@@ -39,12 +35,13 @@ public class BaseTest(
     ) : IAsyncLifetime
 {
     protected readonly HttpClient _filesClient = filesFactory.HttpClient;
-    protected readonly FilesFoldersApi _filesFoldersApi = filesFactory.FilesFoldersApi;
-    protected readonly FilesFilesApi _filesFilesApi = filesFactory.FilesFilesApi;
+    protected readonly FilesFoldersApi _foldersApi = filesFactory.FilesFoldersApi;
+    protected readonly FilesFilesApi _filesApi = filesFactory.FilesFilesApi;
     protected readonly FilesOperationsApi _filesOperationsApi = filesFactory.FilesOperationsApi;
     protected readonly RoomsApi _roomsApi = filesFactory.RoomsApi;
     protected readonly FilesSettingsApi _filesSettingsApi = filesFactory.FilesSettingsApi;
-    protected readonly FilesQuotaApi _filesQuotaApi = filesFactory.FilesQuotaApi;
+    protected readonly FilesQuotaApi _quotaApi = filesFactory.FilesQuotaApi;
+    protected readonly FilesSharingApi _filesSharingApi = filesFactory.FilesSharingApi;
     protected readonly SettingsQuotaApi _settingsQuotaApi = apiFactory.SettingsQuotaApi;
     private readonly Func<Task> _resetDatabase = filesFactory.ResetDatabaseAsync;
 
@@ -60,14 +57,14 @@ public class BaseTest(
 
     protected async Task<FileDtoInteger> GetFile(int fileId)
     {
-        return (await _filesFilesApi.GetFileInfoAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        return (await _filesApi.GetFileInfoAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
     }
     
     protected async Task<int> GetFolderIdAsync(FolderType folderType, User user)
     {
         await _filesClient.Authenticate(user);
         
-        var rootFolder = (await _filesFoldersApi.GetRootFoldersAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var rootFolder = (await _foldersApi.GetRootFoldersAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
         var folderId = rootFolder.FirstOrDefault(r => r.Current.RootFolderType.HasValue && r.Current.RootFolderType.Value == folderType)!.Current.Id;
         
         return folderId;
@@ -89,7 +86,7 @@ public class BaseTest(
     
     protected async Task<FileDtoInteger> CreateFile(string fileName, int folderId)
     {
-        return (await _filesFilesApi.CreateFileAsync(folderId, new CreateFileJsonElement(fileName))).Response;
+        return (await _filesApi.CreateFileAsync(folderId, new CreateFileJsonElement(fileName))).Response;
     }
     
     protected async Task<FolderDtoInteger> CreateFolder(string folderName, FolderType folderType, User user)
@@ -103,15 +100,24 @@ public class BaseTest(
     
     protected async Task<FolderDtoInteger> CreateFolder(string folderName, int folderId)
     {
-        return (await _filesFoldersApi.CreateFolderAsync(folderId, new CreateFolder(folderName), TestContext.Current.CancellationToken)).Response;
+        return (await _foldersApi.CreateFolderAsync(folderId, new CreateFolder(folderName), TestContext.Current.CancellationToken)).Response;
     }
     
-    protected async Task<FolderDtoInteger> CreateVirtualRoom(string roomTitle, User user)
+    protected async Task<FolderDtoInteger> CreateVirtualRoom(string roomTitle, bool indexing = true)
     {
-        await _filesClient.Authenticate(user);
-        
         return (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto(roomTitle, indexing: true, roomType: RoomType.VirtualDataRoom), TestContext.Current.CancellationToken)).Response;
     }
+    
+    protected async Task<FolderDtoInteger> CreateCustomRoom(string roomTitle)
+    {
+        return (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto(roomTitle, roomType: RoomType.CustomRoom), TestContext.Current.CancellationToken)).Response;
+    }
+    
+    protected async Task<FolderDtoInteger> CreateCollaborationRoom(string roomTitle)
+    {
+        return (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto(roomTitle, roomType: RoomType.EditingRoom), TestContext.Current.CancellationToken)).Response;
+    }
+    
     protected async Task<List<FileOperationDto>?> WaitLongOperation()
     {
         List<FileOperationDto>? statuses;

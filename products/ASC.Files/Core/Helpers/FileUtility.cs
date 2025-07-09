@@ -216,6 +216,11 @@ public class FileUtility(
             return FileType.Video;
         }
 
+        if (ExtsDiagram.Contains(extension))
+        {
+            return FileType.Diagram;
+        }
+
         return FileType.Unknown;
     }
 
@@ -578,7 +583,8 @@ public class FileUtility(
                 ".doct", ".docy",
                 ".gdoc",
                 ".drawio",
-                ".md", ".markdown"
+                ".md", ".markdown",
+                ".oform"
             }.ToImmutableList();
 
     public static readonly ImmutableList<string> ExtsPdf = new List<string>
@@ -593,6 +599,12 @@ public class FileUtility(
                 ".xlt", ".xltm", ".xltx",
                 ".pot", ".potm", ".potx"
     }.ToImmutableList();
+
+    public static readonly ImmutableList<string> ExtsDiagram = new List<string>
+    {
+                ".vsdm", ".vsdx", ".vssm",
+                ".vssx", ".vstm", ".vstx"
+            }.ToImmutableList();
 
     public const string WatermarkedDocumentExt = ".pdf";
 

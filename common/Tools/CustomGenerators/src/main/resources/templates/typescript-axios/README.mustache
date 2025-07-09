@@ -1,0 +1,118 @@
+## {{npmName}}@{{npmVersion}}
+
+The ONLYOFFICE DocSpace SDK for TypeScript is a library that provides tools for integrating and managing DocSpace features within your applications. It simplifies interaction with the DocSpace API by offering ready-to-use methods and models.
+
+- API version: {{appVersion}}
+- SDK version: {{packageVersion}}
+
+{{#infoUrl}}
+For more information, please visit [{{{infoUrl}}}]({{{infoUrl}}})
+{{/infoUrl}}
+
+This SDK utilizes axios for HTTP communication. The resulting Node module can be used in various environments:
+
+* [Node.js](https://nodejs.org/en)
+* [Webpack](https://webpack.js.org/)
+* [Browserify](https://browserify.org/)
+
+#### Language levels
+* ES5 - you must have a Promises/A+ library installed
+* ES6
+
+#### Module systems
+* CommonJS
+* ES6 module system
+
+This SDK can be used in both TypeScript and JavaScript projects. In TypeScript, definitions are automatically resolved via `package.json`. ([Reference](https://www.typescriptlang.org/docs/handbook/declaration-files/consumption.html))
+
+### Building
+
+To build and compile the TypeScript sources to JavaScript, use the following commands:
+
+```bash
+npm install
+npm run build
+```
+
+### Publishing
+
+To publish the package to the npm registry:
+
+```bash
+npm publish
+```
+
+### Consuming
+
+To use the SDK in your project, navigate to the root folder of your consuming project and run one of the following commands:
+
+#### From published package (recommended)
+
+```bash
+npm install {{npmName}}@{{npmVersion}} --save
+```
+
+#### From local build (not recommended)
+
+```bash
+npm install PATH_TO_GENERATED_PACKAGE --save
+```
+
+<a id="documentation-for-authorization"></a>
+## Documentation For Authorization
+
+{{^authMethods}}Endpoints do not require authorization.{{/authMethods}}
+{{#hasAuthMethods}}Authentication schemes defined for the API:{{/hasAuthMethods}}
+{{#authMethods}}
+<a id="{{name}}"></a>
+### {{{name}}}
+
+{{#isApiKey}}
+- **Type**: API key
+- **API key parameter name**: {{keyParamName}}
+- **Location**: {{#isKeyInQuery}}URL query string{{/isKeyInQuery}}{{#isKeyInHeader}}HTTP header{{/isKeyInHeader}}{{#isKeyInCookie}}Cookie{{/isKeyInCookie}}
+{{/isApiKey}}
+{{#isBasic}}
+{{#isBasicBasic}}
+- **Type**: HTTP basic authentication
+{{/isBasicBasic}}
+{{#isBasicBearer}}
+- **Type**: Bearer authentication{{#bearerFormat}} ({{{.}}}){{/bearerFormat}}
+{{/isBasicBearer}}
+{{#isHttpSignature}}
+- **Type**: HTTP signature authentication
+{{/isHttpSignature}}
+{{/isBasic}}
+{{#isOAuth}}
+- **Type**: OAuth
+- **Flow**: {{{flow}}}
+- **Authorization URL**: {{x-authorizationUrl}}
+- **Token Url**: {{x-tokenUrl}}
+- **Scopes**: {{^scopes}}N/A{{/scopes}}
+{{#scopes}} - **{{{scope}}}**: {{{description}}}
+{{/scopes}}
+{{/isOAuth}}
+{{#isOpenId}}
+- **Type**: OpenId Connect
+- **OpenId Connect URL**: {{x-openIdConnectUrl}}
+{{#scopes}}  - {{scope}}: {{description}}
+{{/scopes}}
+{{/isOpenId}}
+
+
+{{/authMethods}}
+
+### Documentation for API Endpoints
+
+All URIs are relative to *{{{basePath}}}*
+
+Class | Method | HTTP request | Description
+------------ | ------------- | ------------- | -------------
+{{#apiInfo}}{{#apis}}{{#operations}}{{#operation}}*{{classname}}* | [**{{operationId}}**]({{apiDocPath}}{{classname}}.md#{{operationIdLowerCase}}) | **{{httpMethod}}** {{path}} | {{summary}}
+{{/operation}}{{/operations}}{{/apis}}{{/apiInfo}}
+
+### Documentation For Models
+
+{{#models}}{{#model}} - [{{{classname}}}]({{modelDocPath}}{{{classname}}}.md)
+{{/model}}{{/models}}
+

@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Tests.Factory;
-
 using QuotaSettingsRequestsDto = Docspace.Model.QuotaSettingsRequestsDto;
 
 namespace ASC.Files.Tests.FilesController;
@@ -49,7 +47,7 @@ public class FilesQuotaTest(
         
         // Create a test room
         var roomTitle = "Room for Quota Reset Test " + Guid.NewGuid().ToString()[..8];
-        var room = await CreateVirtualRoom(roomTitle, Initializer.Owner);
+        var room = await CreateVirtualRoom(roomTitle);
         
         // Set up request to reset quota for the room
         var resetRequest = new UpdateRoomsRoomIdsRequestDtoInteger
@@ -58,7 +56,7 @@ public class FilesQuotaTest(
         };
         
         // Act
-        var result = (await _filesQuotaApi.ResetRoomQuotaAsync(resetRequest, TestContext.Current.CancellationToken)).Response;
+        var result = (await _quotaApi.ResetRoomQuotaAsync(resetRequest, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         result.Should().NotBeNull();
@@ -80,8 +78,8 @@ public class FilesQuotaTest(
         var roomTitle1 = "Room 1 for Multi Quota Reset " + Guid.NewGuid().ToString()[..8];
         var roomTitle2 = "Room 2 for Multi Quota Reset " + Guid.NewGuid().ToString()[..8];
         
-        var room1 = await CreateVirtualRoom(roomTitle1, Initializer.Owner);
-        var room2 = await CreateVirtualRoom(roomTitle2, Initializer.Owner);
+        var room1 = await CreateVirtualRoom(roomTitle1);
+        var room2 = await CreateVirtualRoom(roomTitle2);
         
         // Set up request to reset quota for multiple rooms
         var resetRequest = new UpdateRoomsRoomIdsRequestDtoInteger
@@ -89,7 +87,7 @@ public class FilesQuotaTest(
             RoomIds = [new(room1.Id), new(room2.Id)]
         };
         // Act
-        var result = (await _filesQuotaApi.ResetRoomQuotaAsync(resetRequest, TestContext.Current.CancellationToken)).Response;
+        var result = (await _quotaApi.ResetRoomQuotaAsync(resetRequest, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         result.Should().NotBeNull();
@@ -111,7 +109,7 @@ public class FilesQuotaTest(
 
         // Create a test room
         var roomTitle = "Room for Quota Update Test " + Guid.NewGuid().ToString()[..8];
-        var room = await CreateVirtualRoom(roomTitle, Initializer.Owner);
+        var room = await CreateVirtualRoom(roomTitle);
         
         // Define a quota limit (in bytes)
         var quotaLimit = 2147483648; // 2 GB
@@ -124,7 +122,7 @@ public class FilesQuotaTest(
         };
         
         // Act
-        var result = (await _filesQuotaApi.UpdateRoomsQuotaAsync(updateRequest, TestContext.Current.CancellationToken)).Response;
+        var result = (await _quotaApi.UpdateRoomsQuotaAsync(updateRequest, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         result.Should().NotBeNull();
@@ -146,8 +144,8 @@ public class FilesQuotaTest(
         var roomTitle1 = "Room 1 for Multi Quota Update " + Guid.NewGuid().ToString()[..8];
         var roomTitle2 = "Room 2 for Multi Quota Update " + Guid.NewGuid().ToString()[..8];
         
-        var room1 = await CreateVirtualRoom(roomTitle1, Initializer.Owner);
-        var room2 = await CreateVirtualRoom(roomTitle2, Initializer.Owner);
+        var room1 = await CreateVirtualRoom(roomTitle1);
+        var room2 = await CreateVirtualRoom(roomTitle2);
         
         // Define a quota limit (in bytes)
         var quotaLimit = 2147483648; // 2 GB
@@ -160,7 +158,7 @@ public class FilesQuotaTest(
         };
         
         // Act
-        var result = (await _filesQuotaApi.UpdateRoomsQuotaAsync(updateRequest, TestContext.Current.CancellationToken)).Response;
+        var result = (await _quotaApi.UpdateRoomsQuotaAsync(updateRequest, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         result.Should().NotBeNull();
@@ -182,7 +180,7 @@ public class FilesQuotaTest(
 
         // Create a test room
         var roomTitle = "Room for Zero Quota Test " + Guid.NewGuid().ToString()[..8];
-        var room = await CreateVirtualRoom(roomTitle, Initializer.Owner);
+        var room = await CreateVirtualRoom(roomTitle);
         
         // Set up a request with zero quotas (should be the same as reset)
         var updateRequest = new UpdateRoomsQuotaRequestDtoInteger
@@ -192,7 +190,7 @@ public class FilesQuotaTest(
         };
         
         // Act
-        var result = (await _filesQuotaApi.UpdateRoomsQuotaAsync(updateRequest, TestContext.Current.CancellationToken)).Response;
+        var result = (await _quotaApi.UpdateRoomsQuotaAsync(updateRequest, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         result.Should().NotBeNull();
@@ -212,7 +210,7 @@ public class FilesQuotaTest(
 
         // Create a test room
         var roomTitle = "Room for Quota Lifecycle Test " + Guid.NewGuid().ToString()[..8];
-        var room = await CreateVirtualRoom(roomTitle, Initializer.Owner);
+        var room = await CreateVirtualRoom(roomTitle);
         
         // Step 1: Set a quota
         var quotaLimit = 5368709120; // 5 GB
@@ -222,7 +220,7 @@ public class FilesQuotaTest(
             Quota = quotaLimit
         };
         
-        var updateResult = (await _filesQuotaApi.UpdateRoomsQuotaAsync(updateRequest, TestContext.Current.CancellationToken)).Response;
+        var updateResult = (await _quotaApi.UpdateRoomsQuotaAsync(updateRequest, TestContext.Current.CancellationToken)).Response;
         updateResult[0].Id.Should().Be(room.Id);
         updateResult[0].QuotaLimit.Should().Be(quotaLimit);
         
@@ -232,7 +230,7 @@ public class FilesQuotaTest(
             RoomIds = [new(room.Id)]
         };
         
-        var resetResult = (await _filesQuotaApi.ResetRoomQuotaAsync(resetRequest, TestContext.Current.CancellationToken)).Response;
+        var resetResult = (await _quotaApi.ResetRoomQuotaAsync(resetRequest, TestContext.Current.CancellationToken)).Response;
         resetResult[0].Id.Should().Be(room.Id);
         resetResult[0].QuotaLimit.Should().Be(defaultQuotaLimit);
     }
@@ -256,7 +254,7 @@ public class FilesQuotaTest(
         _ = await CreateFile(fileName, createdRoom.Id);
         
         // Verify a file exists in the room's contents
-        var roomFiles = (await _filesFoldersApi.GetFolderByFolderIdAsync(
+        var roomFiles = (await _foldersApi.GetFolderByFolderIdAsync(
             createdRoom.Id,
             cancellationToken: TestContext.Current.CancellationToken)).Response;
             
@@ -287,7 +285,7 @@ public class FilesQuotaTest(
         _ = await CreateFile(fileName, createdRoom.Id);
         
         // Verify a file exists in the room's contents
-        var roomFiles = (await _filesFoldersApi.GetFolderByFolderIdAsync(
+        var roomFiles = (await _foldersApi.GetFolderByFolderIdAsync(
             createdRoom.Id,
             cancellationToken: TestContext.Current.CancellationToken)).Response;
             

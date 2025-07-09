@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Tests.Factory;
-
 namespace ASC.Files.Tests.FilesController;
 
 [Collection("Test Collection")]
@@ -54,7 +52,7 @@ public class CopyFileTest(
             destFolderId: new CopyAsJsonElementDestFolderId(targetFolder.Id)
         );
         
-        var copiedFile = (await _filesFilesApi.CopyFileAsAsync(sourceFile.Id, copyParams, TestContext.Current.CancellationToken)).Response;
+        var copiedFile = (await _filesApi.CopyFileAsAsync(sourceFile.Id, copyParams, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         copiedFile.Should().NotBeNull();
@@ -63,7 +61,7 @@ public class CopyFileTest(
         // copiedFile.FolderId.Should().Be(targetFolderId);
         
         // Verify the copied file exists in the destination folder
-        var folderContent = (await _filesFoldersApi.GetFolderByFolderIdAsync(targetFolder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var folderContent = (await _foldersApi.GetFolderByFolderIdAsync(targetFolder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         folderContent.Files.Should().Contain(f => f.Title == sourceFile.Title);
     }
     
@@ -86,7 +84,7 @@ public class CopyFileTest(
             destFolderId: new CopyAsJsonElementDestFolderId(targetFolderId)
         );
         
-        var copiedFile = (await _filesFilesApi.CopyFileAsAsync(sourceFile.Id, copyParams, TestContext.Current.CancellationToken)).Response;
+        var copiedFile = (await _filesApi.CopyFileAsAsync(sourceFile.Id, copyParams, TestContext.Current.CancellationToken)).Response;
         
         // Assert
         copiedFile.Should().NotBeNull();

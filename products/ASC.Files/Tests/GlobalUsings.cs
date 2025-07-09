@@ -10,6 +10,7 @@ global using System.Web;
 
 global using ASC.Core.Common.EF;
 global using ASC.Files.Tests.Data;
+global using ASC.Files.Tests.Factory;
 global using ASC.Migrations;
 global using ASC.Migrations.Core;
 
@@ -35,6 +36,8 @@ global using Microsoft.Extensions.Hosting;
 
 global using MySql.Data.MySqlClient;
 
+global using Newtonsoft.Json.Linq;
+
 global using Npgsql;
 
 global using Respawn;
@@ -48,8 +51,10 @@ global using Testcontainers.Redis;
 global using Xunit;
 
 global using FileOperationDto = Docspace.Model.FileOperationDto;
+global using FileShare = Docspace.Model.FileShare;
 global using WebApiProgram = ASCWebApi::Program;
 global using FilesProgram = ASCFiles::Program;
 global using PeopleProgram = ASCPeople::Program;
 global using FilesServiceProgram = ASCFilesService::Program;
 global using FolderType = Docspace.Model.FolderType;
+global using User = ASC.Files.Tests.Data.User;

@@ -570,6 +570,8 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                             {
                                 await filesMessageService.SendAsync(MessageAction.RoomCopied, newFolder, _headers, newFolder.Title);
                                 await webhookManager.PublishAsync(WebhookTrigger.RoomCopied, newFolder);
+                                var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<CountRoomFeature, int>();
+                                _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
                             }
                             else
                             {

@@ -1081,4 +1081,40 @@
   <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
     <value>La URL del webhook no está disponible. La solicitud HEAD no responde al estado 200 http.</value>
   </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>Crédito</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>Moneda</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>Fecha y hora</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>Cantidad</value>
+  </data>
+  <data name="AccountingCustomerOperationService" xml:space="preserve">
+    <value>Nombre del servicio</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>Unidad de medida</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>Informe sobre las operaciones del cliente ({0}-{1})</value>
+  </data>
+  <data name="AccountingCustomerOperationWithdrawal" xml:space="preserve">
+    <value>Retirada</value>
+  </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>El grupo no se ha podido encontrar</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>Almacenamiento adicional</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>Ajuste el almacenamiento a la cantidad exacta que necesite.</value>
+  </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
+    <value>Espacio de almacenamiento utilizado:</value>
+  </data>
 </root>
