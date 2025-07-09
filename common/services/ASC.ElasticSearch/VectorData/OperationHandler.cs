@@ -24,38 +24,35 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-global using System.Collections;
-global using System.Collections.Concurrent;
-global using System.Globalization;
-global using System.Linq.Expressions;
-global using System.Reflection;
-global using System.Runtime.CompilerServices;
-global using System.Text;
+namespace ASC.ElasticSearch.VectorData;
 
-global using ASC.Common;
-global using ASC.Common.Caching;
-global using ASC.Common.Log;
-global using ASC.Common.Utils;
-global using ASC.Core;
-global using ASC.Core.Common.EF;
-global using ASC.Core.Common.EF.Context;
-global using ASC.Core.Common.EF.Model;
-global using ASC.Core.Common.Settings;
-global using ASC.Core.Tenants;
-global using ASC.ElasticSearch.Core;
-global using ASC.ElasticSearch.Log;
-global using ASC.ElasticSearch.Service;
-
-global using Microsoft.EntityFrameworkCore;
-global using Microsoft.Extensions.DependencyInjection;
-global using Microsoft.Extensions.Hosting;
-global using Microsoft.Extensions.Logging;
-
-global using NetEscapades.EnumGenerators;
-
-
-
-global using OpenSearch.Client;
-global using OpenSearch.Net;
-
-global using LogLevel = Microsoft.Extensions.Logging.LogLevel;
+internal static class OperationHandler
+{
+    public static async Task<TResult> RunAsync<TResult, TException>(
+        string collectionName,
+        string operationName,
+        Func<Task<TResult>> operation)
+        where TException : Exception
+    {
+        try
+        {
+            return await operation.Invoke().ConfigureAwait(false);
+        }
+        catch (AggregateException exception) when (exception.InnerException is TException innerException)
+        {
+            throw new VectorStoreException("Vector store operation failed.", innerException)
+            {
+                OperationName = operationName, 
+                CollectionName = collectionName
+            };
+        }
+        catch (TException exception)
+        {
+            throw new VectorStoreException("Vector store operation failed.", exception)
+            {
+                OperationName = operationName, 
+                CollectionName = collectionName
+            };
+        }
+    }
+}
