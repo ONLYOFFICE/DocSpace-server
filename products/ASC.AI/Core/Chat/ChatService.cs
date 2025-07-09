@@ -114,7 +114,7 @@ public class ChatService(
         return aiConfigurationService.GetModelsAsync(providerId, Scope.Chat);
     }
 
-    private async Task<ChatSession> GetChatAsync(Guid chatId)
+    public async Task<ChatSession> GetChatAsync(Guid chatId)
     {
         var chat = await chatDao.GetChatAsync(tenantManager.GetCurrentTenantId(), chatId);
         if (chat == null || chat.UserId != authContext.CurrentAccount.ID)

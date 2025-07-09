@@ -78,6 +78,13 @@ public class ChatController(
         return await chat.ToDtoAsync(employeeDtoHelper, apiDateTimeHelper);
     }
 
+    [HttpGet("chats/{chatId}")]
+    public async Task<ChatDto> GetChatAsync(GetChatRequestDto inDto)
+    {
+        var chat = await chatService.GetChatAsync(inDto.ChatId);
+        return await chat.ToDtoAsync(employeeDtoHelper, apiDateTimeHelper);
+    }
+
     [HttpGet("rooms/{roomId}/chats")]
     public async Task<List<ChatDto>> GetChatsAsync(GetChatsRequestDto inDto)
     {
