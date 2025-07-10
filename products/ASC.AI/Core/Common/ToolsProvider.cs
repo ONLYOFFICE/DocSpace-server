@@ -28,12 +28,10 @@ using ModelContextProtocol.Client;
 
 namespace ASC.AI.Core.Common;
 
-public class StdMcpSettings
+public class SseMcpSettings
 {
-    public string? Name { get; set; }
-    public required string Command { get; set; }
-    public IList<string>? Args { get; set; }
-    public Dictionary<string, string?>? Env { get; set; }
+    public required string Name { get; init; }
+    public required string Endpoint { get; init; }
 }
 
 [Singleton]
@@ -49,19 +47,17 @@ public class ToolsProvider(IConfiguration configuration) : IAsyncDisposable
             return;
         }
         
-        var options = configuration.GetSection("ai:mcp").Get<StdMcpSettings>();
+        var options = configuration.GetSection("ai:mcp").Get<SseMcpSettings>();
         if (options == null)
         {
             _initialized = true;
             return;
         }
         
-        var client = await McpClientFactory.CreateAsync(new StdioClientTransport(new StdioClientTransportOptions
+        var client = await McpClientFactory.CreateAsync(new SseClientTransport(new SseClientTransportOptions
         {
             Name = options.Name,
-            Command = options.Command,
-            Arguments = options.Args,
-            EnvironmentVariables = options.Env
+            Endpoint = new Uri(options.Endpoint),
         }));
 
         try
