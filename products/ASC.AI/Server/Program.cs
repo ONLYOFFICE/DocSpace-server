@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.AI;
+using ASC.AI.Core.Common;
 using ASC.Api.Core.Extensions;
 
 using Autofac;
@@ -53,6 +54,8 @@ var logger = LogManager.Setup()
                             .LoadConfiguration(builder.Configuration, builder.Environment)
                             .GetLogger(typeof(Startup).Namespace);
 
+ToolsProvider toolsProvider = null!;
+
 try
 {
     logger.Info("Configuring web host ({applicationContext})...", AppName);
@@ -69,6 +72,9 @@ try
 
     startup.Configure(app, app.Environment);
 
+    toolsProvider = app.Services.GetRequiredService<ToolsProvider>();
+    await toolsProvider.InitializeAsync();
+
     logger.Info("Starting web host ({applicationContext})...", AppName);
 
     await app.RunWithTasksAsync();
@@ -83,6 +89,7 @@ finally
 {
     // Ensure to flush and stop internal timers/threads before application-exit (Avoid segmentation fault on Linux)
     LogManager.Shutdown();
+    await toolsProvider.DisposeAsync();
 }
 
 public partial class Program

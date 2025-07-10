@@ -24,25 +24,75 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ModelContextProtocol.Client;
+
 namespace ASC.AI.Core.Common;
 
-[Singleton]
-public class ToolsProvider
+public class StdMcpSettings
 {
-    // TODO: Fake function for debug, once no longer needed, it must be removed
-    private static readonly Delegate _createRoom = (string title) => new
+    public string? Name { get; set; }
+    public required string Command { get; set; }
+    public IList<string>? Args { get; set; }
+    public Dictionary<string, string?>? Env { get; set; }
+}
+
+[Singleton]
+public class ToolsProvider(IConfiguration configuration) : IAsyncDisposable
+{
+    private IMcpClient? _client;
+    private bool _initialized;
+
+    public async Task InitializeAsync()
     {
-        Id = Random.Shared.Next(1, Int32.MaxValue),
-        Title = title
-    };
-    
-    public ValueTask<List<AITool>> GetToolsAsync(int tenantId, int roomId)
-    {
-        var tools = new List<AITool>
+        if (_initialized)
         {
-            AIFunctionFactory.Create(_createRoom, "create_room", "Creating room by title")
-        };
+            return;
+        }
         
-        return ValueTask.FromResult(tools);
+        var options = configuration.GetSection("ai:mcp").Get<StdMcpSettings>();
+        if (options == null)
+        {
+            _initialized = true;
+            return;
+        }
+        
+        var client = await McpClientFactory.CreateAsync(new StdioClientTransport(new StdioClientTransportOptions
+        {
+            Name = options.Name,
+            Command = options.Command,
+            Arguments = options.Args,
+            EnvironmentVariables = options.Env
+        }));
+
+        try
+        {
+            await client.PingAsync();
+            _client = client;
+            _initialized = true;
+        }
+        catch
+        {
+            _initialized = false;
+        }
+    }
+
+    public async Task<List<AITool>> GetToolsAsync(int tenantId, int roomId)
+    {
+        if (_client == null)
+        {
+            return [];
+        }
+        
+        var tools = await _client.ListToolsAsync();
+
+        return tools.OfType<AITool>().ToList();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_client != null)
+        {
+            await _client.DisposeAsync();
+        }
     }
 }

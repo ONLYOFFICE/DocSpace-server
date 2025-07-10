@@ -36,7 +36,41 @@ public class ChatCompletionRunner(
     ToolsProvider toolsProvider,
     ChatClientFactory chatClientFactory)
 {
-    private static readonly ChatMessage _systemMessage = new(ChatRole.System, "You are a helpful assistant."); // TODO: move to prompt file
+    // TODO: move to file
+    const string Prompt = 
+        """
+        You are an intelligent AI agent.
+        Your task is to call the specified function(s) to fulfill the user's request.
+        If a function call fails or returns an error, analyze the error message and attempt to correct your input or approach.
+        Make up to three additional attempts, each time adjusting your function call based on the feedback or error details.
+        After each failed attempt, clearly explain your reasoning for the next correction.
+        If you are unable to succeed after several attempts, summarize the errors and provide a clear explanation of why the task could not be completed.
+        
+        Important: All your reasoning, explanations, and answers must be in the same language as the user's original question.
+        
+        Instructions:
+          - Carefully read the function documentation and input requirements.
+          - On each attempt:
+              -- Adjust parameters, data types, or formatting as needed based on the error message.
+              -- Avoid repeating the same mistake.
+              -- Document each step and correction in your response.
+              -- Stop retrying after three failed attempts, and report the final outcome.
+          
+        Example Structure
+            Initial Attempt:
+              - Describe your initial function call and reasoning.
+            If Error Occurs:
+             - Quote the error message.
+             - Explain how you will adjust the next attempt.
+             - Retry with revised parameters.
+            Repeat up to Three Corrections:
+              - For each, document the error and your new approach.
+            Final Outcome:
+              - If successful, explain what worked.
+              - If unsuccessful, summarize the errors and possible solutions.
+        """;
+    
+    private static readonly ChatMessage _systemMessage = new(ChatRole.System, Prompt);
     
     public async Task<ChatCompletionGenerator> StartNewChatAsync(int roomId, string message)
     {
