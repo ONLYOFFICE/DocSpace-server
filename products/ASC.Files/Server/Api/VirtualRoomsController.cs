@@ -401,9 +401,10 @@ public abstract class VirtualRoomsController<T>(
         var destFolder = JsonSerializer.SerializeToElement(await globalFolderHelper.FolderArchiveAsync);
         var movableRoom = JsonSerializer.SerializeToElement(inDto.Id);
 
-        await fileMoveCopyOperationsManager.Publish([movableRoom], [], destFolder, false, FileConflictResolveType.Skip, !inDto.ArchiveRoom.DeleteAfter, false);
+        var taskId = await fileMoveCopyOperationsManager.Publish([movableRoom], [], destFolder, false, FileConflictResolveType.Skip, !inDto.ArchiveRoom.DeleteAfter, false);
+        var tasks = await fileMoveCopyOperationsManager.GetOperationResults(id: taskId);
 
-        return await fileOperationDtoHelper.GetAsync((await fileMoveCopyOperationsManager.GetOperationResults()).FirstOrDefault());
+        return await fileOperationDtoHelper.GetAsync(tasks.FirstOrDefault());
     }
 
     /// <summary>
@@ -425,8 +426,10 @@ public abstract class VirtualRoomsController<T>(
         var destFolder = JsonSerializer.SerializeToElement(await globalFolderHelper.FolderVirtualRoomsAsync);
         var movableRoom = JsonSerializer.SerializeToElement(inDto.Id);
 
-        await fileMoveCopyOperationsManager.Publish([movableRoom], [], destFolder, false, FileConflictResolveType.Skip, !inDto.ArchiveRoom.DeleteAfter, false);
-        return await fileOperationDtoHelper.GetAsync((await fileMoveCopyOperationsManager.GetOperationResults()).FirstOrDefault());
+        var taskId = await fileMoveCopyOperationsManager.Publish([movableRoom], [], destFolder, false, FileConflictResolveType.Skip, !inDto.ArchiveRoom.DeleteAfter, false);
+        var tasks = await fileMoveCopyOperationsManager.GetOperationResults(id: taskId);
+        
+        return await fileOperationDtoHelper.GetAsync(tasks.FirstOrDefault());
     }
 
     /// <summary>
