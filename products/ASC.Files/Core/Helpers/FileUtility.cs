@@ -558,7 +558,8 @@ public class FileUtility(
                 ".ods", ".fods", ".ots", ".csv",
                 ".sxc", ".et", ".ett",
                 ".xlst", ".xlsy", ".xlsb",
-                ".gsheet"
+                ".gsheet",
+                ".numbers"
             }.ToImmutableList();
 
     public static readonly ImmutableList<string> ExtsPresentation = new List<string>
@@ -569,7 +570,8 @@ public class FileUtility(
                 ".odp", ".fodp", ".otp",
                 ".dps", ".dpt", ".sxi",
                 ".pptt", ".ppty",
-                ".gslides"
+                ".gslides",
+                ".key", ".odg"
             }.ToImmutableList();
 
     public static readonly ImmutableList<string> ExtsDocument = new List<string>
@@ -584,7 +586,8 @@ public class FileUtility(
                 ".gdoc",
                 ".drawio",
                 ".md", ".markdown",
-                ".oform"
+                ".oform",
+                ".pages", ".hwp", ".hwpx"
             }.ToImmutableList();
 
     public static readonly ImmutableList<string> ExtsPdf = new List<string>

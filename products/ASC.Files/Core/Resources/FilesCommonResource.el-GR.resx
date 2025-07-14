@@ -512,4 +512,10 @@
   <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
     <value>Έναρξη συμπλήρωσης</value>
   </data>
+  <data name="RoleEnum_Guest" xml:space="preserve">
+    <value>Επισκέπτης</value>
+  </data>
+  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
+    <value>Διαχειριστής δωματίου</value>
+  </data>
 </root>

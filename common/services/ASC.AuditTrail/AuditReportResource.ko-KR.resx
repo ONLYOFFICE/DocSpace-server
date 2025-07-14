@@ -972,4 +972,31 @@
   <data name="WebhookUpdated" xml:space="preserve">
     <value>웹훅이 업데이트되었습니다: {0}</value>
   </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>승인 링크가 활성화되었습니다</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>고객 작업이 수행되었습니다</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>고객 작업 보고서가 다운로드되었습니다</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>고객 구독이 업데이트되었습니다: {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>고객 지갑이 충전되었습니다: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>고객 지갑 충전 설정이 업데이트되었습니다</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>LDAP 인증이 비활성화되었습니다</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>LDAP 인증이 활성화되었습니다</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>LDAP 동기화가 완료되었습니다</value>
+  </data>
 </root>

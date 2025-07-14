@@ -2086,4 +2086,37 @@ $TrulyYours</value>
   <data name="subject_renew_subscription_error" xml:space="preserve">
     <value>الإجراء المطلوب: غير قادر على تجديد خطة الخدمة تلقائيًا في ${LetterLogoText} DocSpace</value>
   </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>مرحباً، $UserName!
+
+نتواصل معكم لإبلاغكم بأن التجديد التلقائي لخطة الخدمة التي قمتم بشرائها قد فشل.
+
+نرجو منكم تجديد خطة الخدمة الحالية يدوياً (أو شراء خطة جديدة).
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>مرحباً، $UserName!
+
+نتواصل معكم لإبلاغكم بأن دفعة اشتراككم سيتم خصمها تلقائياً من حسابكم بعد 3 أيام.
+
+لضمان إجراء المعاملة بسلاسة، يرجى التأكد من توفر رصيد كافٍ في وسيلة الدفع الخاصة بكم.
+
+إذا كان لديكم أي استفسارات أو تحتاجون إلى مساعدة، لا تترددوا في التواصل مع "فريق الدعم":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>مرحباً، $UserName!
+
+نتواصل معكم لإبلاغكم بأن التعبئة التلقائية لرصيد DocSpace Wallet لم تتم بنجاح.
+
+نرجو منكم التحقق يدوياً من رصيد محفظتكم وتحديثه.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
 </root>

@@ -443,6 +443,11 @@ public class PortalController(
             throw new BillingException(Resource.ErrorNotAllowedOption);
         }
 
+        if (!coreBaseSettings.Standalone && !(await tenantManager.GetCurrentTenantQuotaAsync()).Customization)
+        {
+            throw new BillingException(Resource.ErrorNotAllowedOption);
+        }
+        
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var alias = inDto.Alias;
