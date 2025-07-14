@@ -41,7 +41,7 @@ public class ChatController(
     [HttpPost("rooms/{roomId}/chats")]
     public async Task<IActionResult> StartNewChatAsync(StartNewChatRequestDto inDto)
     {
-        var generator = await chatCompletionRunner.StartNewChatAsync(inDto.RoomId, inDto.Body.Message);
+        var generator = await chatCompletionRunner.StartNewChatAsync(inDto.RoomId, inDto.Body.Message, inDto.Body.ContextFolderId);
         
         Response.Headers.ContentType = "text/event-stream";
 
@@ -57,7 +57,7 @@ public class ChatController(
     [HttpPost("chats/{chatId}/messages")]
     public async Task<IActionResult> ContinueChatAsync(ContinueChatRequestDto inDto)
     {
-        var generator = await chatCompletionRunner.StartChatAsync(inDto.ChatId, inDto.Body.Message);
+        var generator = await chatCompletionRunner.StartChatAsync(inDto.ChatId, inDto.Body.Message, inDto.Body.ContextFolderId);
         
         Response.Headers.ContentType = "text/event-stream";
 

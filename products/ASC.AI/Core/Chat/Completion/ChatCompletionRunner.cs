@@ -36,8 +36,7 @@ public class ChatCompletionRunner(
     ToolsProvider toolsProvider,
     ChatClientFactory chatClientFactory)
 {
-    // TODO: move to file
-    const string Prompt = 
+    private const string PromptTemplate =
         """
         You are an intelligent AI agent.
         Your task is to call the specified function(s) to fulfill the user's request.
@@ -46,12 +45,16 @@ public class ChatCompletionRunner(
         After each failed attempt, clearly explain your reasoning for the next correction.
         If you are unable to succeed after several attempts, summarize the errors and provide a clear explanation of why the task could not be completed.
         
-        Important: All your reasoning, explanations, and answers must be in the same language as the user's original question.
+        Important: 
+            All your reasoning, explanations, and answers must be in the same language as the user's original question.
+            You operate within the context of a specific folder, identified by {0}.
+            If you call a function that requires a folder identifier and the user has not provided one, automatically use the {0} from your current context.
         
         Instructions:
           - Carefully read the function documentation and input requirements.
           - On each attempt:
               -- Adjust parameters, data types, or formatting as needed based on the error message.
+              -- If a required folder identifier is missing, use the contextual {0}.
               -- Avoid repeating the same mistake.
               -- Document each step and correction in your response.
               -- Stop retrying after three failed attempts, and report the final outcome.
@@ -69,10 +72,8 @@ public class ChatCompletionRunner(
               - If successful, explain what worked.
               - If unsuccessful, summarize the errors and possible solutions.
         """;
-    
-    private static readonly ChatMessage _systemMessage = new(ChatRole.System, Prompt);
-    
-    public async Task<ChatCompletionGenerator> StartNewChatAsync(int roomId, string message)
+
+    public async Task<ChatCompletionGenerator> StartNewChatAsync(int roomId, string message, int? contextFolderId = null)
     {
         await ChekRoomAsync(roomId);
         
@@ -83,9 +84,11 @@ public class ChatCompletionRunner(
         
         var client = await CreateClientAsync(tenantId, roomId, chat.Id);
         
+        var folderId = contextFolderId ?? roomId;
+        
         var messages = new List<ChatMessage>
         {
-            _systemMessage,
+            new(ChatRole.System, string.Format(PromptTemplate, folderId)),
             userMessage
         };
 
@@ -94,7 +97,7 @@ public class ChatCompletionRunner(
         return new ChatCompletionGenerator(chat.Id, chatHistory, client, messages, metadata);
     }
 
-    public async Task<ChatCompletionGenerator> StartChatAsync(Guid chatId, string message)
+    public async Task<ChatCompletionGenerator> StartChatAsync(Guid chatId, string message, int? contextFolderId = null)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
 
@@ -112,8 +115,14 @@ public class ChatCompletionRunner(
         var userMessage = new ChatMessage(ChatRole.User, message);
         
         await chatHistory.UpdateChatAsync(tenantId, chatId, userMessage);
+        
+        var folderId = contextFolderId ?? chat.RoomId;
 
-        var messages = new List<ChatMessage> { _systemMessage };
+        var messages = new List<ChatMessage>
+        {
+            new(ChatRole.System, string.Format(PromptTemplate, folderId))
+        };
+        
         messages.AddRange(history);
         messages.Add(userMessage);
 

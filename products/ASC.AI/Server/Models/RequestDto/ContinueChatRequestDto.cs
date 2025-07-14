@@ -38,4 +38,5 @@ public class ContinueChatRequestDto
 public class ContinueChatBody
 {
     public required string Message { get; set; }
+    public int ContextFolderId { get; set; }
 }
