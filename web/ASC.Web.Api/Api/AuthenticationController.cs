@@ -227,7 +227,7 @@ public class AuthenticationController(
             
             if (tfaExpired || !await TfaAppUserSettings.EnableForUserAsync(settingsManager, user.Id))
             {
-                var (urlActivation, keyActivation) = commonLinkUtility.GetConfirmationUrlAndKey(user.Email, ConfirmType.TfaActivation);
+                var (urlActivation, keyActivation) = commonLinkUtility.GetConfirmationUrlAndKey(user.Id, ConfirmType.TfaActivation);
                 await cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, keyActivation, true, $"_{ConfirmType.TfaActivation}");
                 return new AuthenticationTokenDto
                 {
@@ -237,7 +237,7 @@ public class AuthenticationController(
                 };
             }
 
-            var (urlAuth, keyAuth) = commonLinkUtility.GetConfirmationUrlAndKey(user.Email, ConfirmType.TfaAuth);
+            var (urlAuth, keyAuth) = commonLinkUtility.GetConfirmationUrlAndKey(user.Id, ConfirmType.TfaAuth);
             await cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, keyAuth, true, $"_{ConfirmType.TfaAuth}");
             return new AuthenticationTokenDto
             {

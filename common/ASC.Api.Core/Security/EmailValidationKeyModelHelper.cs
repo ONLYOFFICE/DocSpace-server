@@ -206,10 +206,14 @@ public class EmailValidationKeyModelHelper(
 
             case ConfirmType.PhoneActivation:
             case ConfirmType.PhoneAuth:
-            case ConfirmType.TfaActivation:
-            case ConfirmType.TfaAuth:
                 checkKeyResult = provider.ValidateEmailKey(email + type + first, key, provider.ValidAuthKeyInterval);
                 break;
+
+            case ConfirmType.TfaActivation:
+            case ConfirmType.TfaAuth:
+                checkKeyResult = provider.ValidateEmailKey(uiD?.ToString() + type + first, key, provider.ValidAuthKeyInterval);
+                break;
+
             case ConfirmType.Auth:
                 var validInterval = DateTime.UtcNow.Add(-provider.ValidAuthKeyInterval);
                 var authLinkActivatedEvent = (await loginEventsRepository.GetByFilterAsync(action: MessageAction.AuthLinkActivated, fromDate: validInterval))
