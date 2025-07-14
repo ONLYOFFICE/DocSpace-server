@@ -28,6 +28,7 @@
 namespace ASC.AI.Core.Chat.Completion;
 
 public class ChatCompletionGenerator(
+    ILogger<ChatCompletionGenerator> logger,
     Guid chatId,
     ChatHistory chatHistory,
     IChatClient client,
@@ -50,12 +51,40 @@ public class ChatCompletionGenerator(
         }
         
         var responses = new List<ChatResponseUpdate>();
+        var enumerator = client.GetStreamingResponseAsync(messages, cancellationToken: cancellationToken)
+            .GetAsyncEnumerator(cancellationToken);
 
         try
         {
-            await foreach (var response in client.GetStreamingResponseAsync(messages, cancellationToken: cancellationToken))
+            while (true)
             {
-                responses.Add(response);
+                ChatResponseUpdate response;
+                var errorCaptured = false;
+
+                try
+                {
+                    if (!await enumerator.MoveNextAsync())
+                    {
+                        break;
+                    }
+
+                    response = enumerator.Current;
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+                catch (Exception e)
+                {
+                    logger.ErrorWithException(e);
+                    response = new ChatResponseUpdate(ChatRole.Assistant, [new ErrorContent(e.Message)]);
+                    errorCaptured = true;
+                }
+
+                if (!errorCaptured)
+                { 
+                    responses.Add(response);
+                }
 
                 foreach (var content in response.Contents)
                 {
@@ -73,12 +102,23 @@ public class ChatCompletionGenerator(
                             yield return new ChatCompletion(EventType.ToolResult,
                                 JsonSerializer.Serialize(functionResult, _serializerOptions));
                             break;
+                        case ErrorContent error:
+                            yield return new ChatCompletion(EventType.Error, 
+                                JsonSerializer.Serialize(error, _serializerOptions));
+                            break;
                     }
+                }
+
+                if (errorCaptured)
+                {
+                    break;
                 }
             }
         }
         finally
         {
+            await enumerator.DisposeAsync();
+            
             var chatResponse = responses.ToChatResponse();
             if (chatResponse.Messages.Count > 0)
             {

@@ -34,7 +34,8 @@ public class ChatCompletionRunner(
     FileSecurity fileSecurity,
     TenantManager tenantManager,
     ToolsProvider toolsProvider,
-    ChatClientFactory chatClientFactory)
+    ChatClientFactory chatClientFactory,
+    ILogger<ChatCompletionGenerator> logger)
 {
     private const string PromptTemplate =
         """
@@ -94,7 +95,7 @@ public class ChatCompletionRunner(
 
         var metadata = new Metadata { ChatId = chat.Id };
         
-        return new ChatCompletionGenerator(chat.Id, chatHistory, client, messages, metadata);
+        return new ChatCompletionGenerator(logger, chat.Id, chatHistory, client, messages, metadata);
     }
 
     public async Task<ChatCompletionGenerator> StartChatAsync(Guid chatId, string message, int? contextFolderId = null)
@@ -126,7 +127,7 @@ public class ChatCompletionRunner(
         messages.AddRange(history);
         messages.Add(userMessage);
 
-        return new ChatCompletionGenerator(chatId, chatHistory, clientTask, messages);
+        return new ChatCompletionGenerator(logger, chatId, chatHistory, clientTask, messages);
     }
 
     private async Task<IChatClient> CreateClientAsync(int tenantId, int roomId, Guid chatId)

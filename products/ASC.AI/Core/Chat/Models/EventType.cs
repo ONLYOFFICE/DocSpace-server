@@ -31,7 +31,8 @@ public enum EventType
     NewToken,
     ToolCall,
     ToolResult,
-    Metadata
+    Metadata,
+    Error
 }
 
 public static class EventTypeExtensions
@@ -42,6 +43,7 @@ public static class EventTypeExtensions
         EventType.ToolCall => "tool_call",
         EventType.ToolResult => "tool_result",
         EventType.Metadata => "metadata",
+        EventType.Error => "error",
         _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
     };
 }
