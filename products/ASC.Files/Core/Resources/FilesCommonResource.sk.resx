@@ -512,4 +512,10 @@
   <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
     <value>Začať vyplňovanie</value>
   </data>
+  <data name="RoleEnum_Guest" xml:space="preserve">
+    <value>Hosť</value>
+  </data>
+  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
+    <value>Administrátor miestnosti</value>
+  </data>
 </root>

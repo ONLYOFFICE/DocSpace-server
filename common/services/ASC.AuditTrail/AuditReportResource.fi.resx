@@ -913,4 +913,31 @@
   <data name="FileCustomFilterEnabled" xml:space="preserve">
     <value>Tiedosto: {0}. Mukautettu suodatin käytössä</value>
   </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>Valtuutuslinkki on aktivoitu</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Asiakkaan suorittama toiminto</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Asiakastoimintojen raportti ladattu</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Asiakkaan tilaus päivitetty: {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Asiakkaan lompakko ladattu: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Asiakkaan lompakon latausasetukset päivitetty</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>LDAP-todennus poistettu käytöstä</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>LDAP-todennus käytössä</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>LDAP-synkronointi valmis</value>
+  </data>
 </root>

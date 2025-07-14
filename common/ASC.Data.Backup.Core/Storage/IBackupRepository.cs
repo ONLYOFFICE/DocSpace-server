@@ -36,7 +36,7 @@ public interface IBackupRepository
     Task<List<BackupRecord>> GetScheduledBackupRecordsAsync();
     Task<List<BackupSchedule>> GetBackupSchedulesAsync();
     Task DeleteBackupRecordAsync(Guid id);
-    Task DeleteBackupScheduleAsync(int tenantId);
+    Task DeleteBackupScheduleAsync(int tenantId, string storageBasePath);
     Task SaveBackupRecordAsync(BackupRecord backupRecord);
     Task SaveBackupScheduleAsync(BackupSchedule schedule);
 }

@@ -133,6 +133,6 @@
     <value>Đã xảy ra lỗi khi khôi phục bản sao lưu. Vui lòng thử khôi phục lại hoặc liên hệ với bộ phận hỗ trợ.</value>
   </data>
   <data name="BackupInvalid" xml:space="preserve">
-    <value>Tập tin sao lưu không hợp lệ. </value>
+    <value>Tập tin sao lưu không hợp lệ.</value>
   </data>
 </root>
