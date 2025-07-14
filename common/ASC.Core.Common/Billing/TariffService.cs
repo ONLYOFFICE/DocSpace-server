@@ -162,7 +162,19 @@ public class TariffService(
 
                         if (asynctariff.Quotas.All(q => q.Wallet))
                         {
+                            if (tariff.Id != 0 && tariff.State >= TariffState.Paid && !await IsFreeTariffAsync(tariff))
+                            {
+                                throw new BillingNotFoundException($"Payment {tariff.Id} not found. Only wallet payments available");
+                            }
+                            else
+                            {
                             await AddInitialQuotaAsync(asynctariff, tenantId);
+                        }
+                        }
+
+                        if (asynctariff.Id == tariff.Id)
+                        {
+                            asynctariff.OverdueQuotas = tariff.OverdueQuotas;
                         }
 
                         TenantQuota updatedQuota = null;
@@ -265,9 +277,13 @@ public class TariffService(
 
         var tariff = await GetTariffAsync(tenantId);
 
+        var quotas = tariff.Quotas
+            .Where(quota => !quota.DueDate.HasValue || quota.DueDate.Value > DateTime.UtcNow)
+            .ToList();
+
         // update the quantity of present quotas
         TenantQuota updatedQuota = null;
-        foreach (var tariffRow in tariff.Quotas)
+        foreach (var tariffRow in quotas)
         {
             var quotaId = tariffRow.Id;
             var qty = tariffRow.Quantity;
@@ -288,7 +304,7 @@ public class TariffService(
         }
 
         // add new quotas
-        var addedQuotas = newQuotas.Where(q => !tariff.Quotas.Exists(t => t.Id == q.TenantId));
+        var addedQuotas = newQuotas.Where(q => !quotas.Exists(t => t.Id == q.TenantId));
         foreach (var addedQuota in addedQuotas)
         {
             var qty = quantity[addedQuota.Name];
@@ -310,18 +326,27 @@ public class TariffService(
         return productIds;
     }
 
-    public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency)
+    private async Task<IEnumerable<string>> GetProductIds(Dictionary<string, int> quantity)
+    {
+        var productIds = (await quotaService.GetTenantQuotasAsync())
+            .Where(q => !string.IsNullOrEmpty(q.ProductId) && quantity.ContainsKey(q.Name))
+            .Select(q => q.ProductId);
+
+        return productIds;
+    }
+
+    public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency, bool checkQuota)
     {
         if (quantity == null || quantity.Count == 0 || !billingClient.Configured)
         {
             return false;
         }
 
-        var productIds = await CheckQuotaAndGetProductIds(tenantId, quantity);
+        var productIds = checkQuota ? await CheckQuotaAndGetProductIds(tenantId, quantity) : await GetProductIds(quantity);
 
         try
         {
-            var changed = await billingClient.ChangePaymentAsync(await coreSettings.GetKeyAsync(tenantId), productIds.ToArray(), quantity.Values.ToArray(), productQuantityType, currency);
+            var changed = await billingClient.ChangePaymentAsync(await coreSettings.GetKeyAsync(tenantId), productIds, quantity.Values, productQuantityType, currency);
 
             if (!changed)
             {
@@ -347,11 +372,11 @@ public class TariffService(
             return null;
         }
 
-        var productIds = await CheckQuotaAndGetProductIds(tenantId, quantity);
+        var productIds = await GetProductIds(quantity);
 
         try
         {
-            var response = await billingClient.CalculatePaymentAsync(await coreSettings.GetKeyAsync(tenantId), productIds.ToArray(), quantity.Values.ToArray(), productQuantityType, currency);
+            var response = await billingClient.CalculatePaymentAsync(await coreSettings.GetKeyAsync(tenantId), productIds, quantity.Values, productQuantityType, currency);
 
             return response;
         }
@@ -558,6 +583,11 @@ public class TariffService(
             .Select(p => new { ProductId = p, Prices = new Dictionary<string, decimal>() })
             .ToDictionary(e => e.ProductId, e => e.Prices);
 
+        if (productIds.Length == 0)
+        {
+            return def;
+        }
+
         if (billingClient.Configured)
         {
             try
@@ -616,7 +646,21 @@ public class TariffService(
         tariff.Id = r.Id;
         tariff.DueDate = r.Stamp.Year < 9999 ? r.Stamp : DateTime.MaxValue;
         tariff.CustomerId = r.CustomerId;
-        tariff.Quotas = await coreDbContext.QuotasAsync(r.TenantId, r.Id).ToListAsync();
+
+        var quotas = await coreDbContext.QuotasAsync(r.TenantId, r.Id).ToListAsync();
+
+        foreach (var q in quotas)
+        {
+            if (q.State.HasValue && q.State.Value == QuotaState.Overdue)
+            {
+                tariff.OverdueQuotas ??= [];
+                tariff.OverdueQuotas.Add(q);
+            }
+            else
+            {
+                tariff.Quotas.Add(q);
+            }
+        }
 
         if (tariff.Quotas.All(q => q.Wallet))
         {
@@ -1019,7 +1063,7 @@ public class TariffService(
 
         if (customerInfo != null)
         {
-            return customerInfo;
+            return customerInfo.IsDefault() ? null : customerInfo;
         }
 
         await using (await distributedLockProvider.TryAcquireLockAsync($"{cacheKey}_lock"))
@@ -1028,7 +1072,7 @@ public class TariffService(
 
             if (customerInfo != null)
             {
-                return customerInfo;
+                return customerInfo.IsDefault() ? null : customerInfo;
             }
 
             if (billingClient.Configured)
@@ -1037,21 +1081,20 @@ public class TariffService(
                 {
                     var portalId = await coreSettings.GetKeyAsync(tenantId);
                     customerInfo = await billingClient.GetCustomerInfoAsync(portalId);
+                    await hybridCache.SetAsync(cacheKey, customerInfo, TimeSpan.FromMinutes(10));
                 }
                 catch (Exception error)
                 {
-                    customerInfo = new CustomerInfo();
                     LogError(error, tenantId.ToString());
+                    await hybridCache.SetAsync(cacheKey, new CustomerInfo(), TimeSpan.FromMinutes(10));
                 }
-
-                await hybridCache.SetAsync(cacheKey, customerInfo, TimeSpan.FromMinutes(10));
             }
         }
 
         return customerInfo;
     }
 
-    public async Task<string> TopUpDepositAsync(int tenantId, decimal amount, string currency, bool waitForChanges = false)
+    public async Task<bool> TopUpDepositAsync(int tenantId, decimal amount, string currency, bool waitForChanges = false)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
 
@@ -1063,9 +1106,18 @@ public class TariffService(
             oldBalanceAmount = oldBalance?.SubAccounts?.FirstOrDefault(x => x.Currency == currency)?.Amount;
         }
 
-        var result = await billingClient.TopUpDepositAsync(portalId, amount, currency);
+        var result = false;
 
-        if (!waitForChanges)
+        try
+        {
+            result = await billingClient.TopUpDepositAsync(portalId, amount, currency);
+        }
+        catch (Exception error)
+        {
+            logger.ErrorWithException(error);
+        }
+
+        if (!result || !waitForChanges)
         {
             return result;
         }
@@ -1099,7 +1151,7 @@ public class TariffService(
 
         if (balance != null)
         {
-            return balance.AccountNumber == 0 ? null : balance;
+            return balance.IsDefault() ? null : balance;
         }
 
         await using (await distributedLockProvider.TryAcquireLockAsync($"{cacheKey}_lock"))
@@ -1108,7 +1160,7 @@ public class TariffService(
 
             if (balance != null)
             {
-                return balance.AccountNumber == 0 ? null : balance;
+                return balance.IsDefault() ? null : balance;
             }
 
             if (accountingClient.Configured)

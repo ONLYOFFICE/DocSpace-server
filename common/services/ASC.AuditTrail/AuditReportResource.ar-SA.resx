@@ -972,4 +972,31 @@
   <data name="FileCustomFilterEnabled" xml:space="preserve">
     <value>الملف: {0}. تم تمكين الفلتر المخصص</value>
   </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>تم تفعيل رابط التفويض</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>يتم تنفيذ عملية العميل</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>تم تنزيل تقرير عمليات العملاء</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>تم تحديث اشتراك العميل: {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>تم تعبئة محفظة العميل: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>تم تحديث إعدادات تعبئة محفظة العميل</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>تم تعطيل مصادقة LDAP</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>تم تمكين مصادقة LDAP</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>اكتملت مزامنة LDAP</value>
+  </data>
 </root>

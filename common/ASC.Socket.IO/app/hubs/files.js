@@ -421,14 +421,17 @@ module.exports = (io) => {
 
   function backupProgress({ tenantId, dump, percentage } = {}) 
   {
+    var room;
+    
     if(dump)
     {
-      var room = `backup`;
+      room = `backup`;
     }
     else
     {
-      var room = `${tenantId}-backup`;
+      room = `${tenantId}-backup`;
     }
+    
     filesIO.to(room).emit("s:backup-progress", {progress: percentage});
   }
   
@@ -497,14 +500,16 @@ module.exports = (io) => {
 
   function endBackup({ tenantId, dump, result } = {})
   {
+
     if(dump)
-      {
-        var room = `backup`;
-      }
-      else
-      {
-        var room = `${tenantId}-backup`;
-      }
+    {
+      var room = `backup`;
+    }
+    else
+    {
+      var room = `${tenantId}-backup`;
+    }
+    
     filesIO.to(room).emit("s:backup-progress", result);
   }
 

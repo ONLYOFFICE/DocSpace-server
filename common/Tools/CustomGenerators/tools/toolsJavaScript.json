@@ -1,0 +1,17 @@
+{
+  "$schema": "./node_modules/@openapitools/openapi-generator-cli/config.schema.json",
+  "spaces": 2,
+  "generator-cli": {
+    "version": "7.13.0"
+  },
+  "generatorName": "my-javascript",
+  "inputSpec": "./tools/api-docs.json",
+  "outputDir": "javascript-sdk",
+  "additionalProperties": {
+	"withSeparateModelsAndApi": true,
+    "modelPackage": "models",
+    "apiPackage": "api",
+	"projectName": "docspace-api-javascript",
+    "licenseName": "Apache-2.0"
+  }
+}

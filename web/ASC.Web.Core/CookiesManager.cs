@@ -299,6 +299,11 @@ public class CookiesManager(
         return GetCookiesName(CookiesType.ConfirmKey);
     }
     
+    public static string GetAnonymousSessionKeyCookiesName()
+    {
+        return GetCookiesName(CookiesType.AnonymousSessionKey);
+    }
+    
     private string GetFullCookiesName(CookiesType type, string itemId = null)
     {
         var name = GetCookiesName(type);
@@ -311,7 +316,7 @@ public class CookiesManager(
         return name;
     }
 
-    private string GetCookiesName(CookiesType type)
+    private static string GetCookiesName(CookiesType type)
     {
         var result = type switch
         {

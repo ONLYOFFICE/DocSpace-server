@@ -24,10 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Tests.Factory;
-
-using FileShare = Docspace.Model.FileShare;
-
 namespace ASC.Files.Tests.FilesController;
 
 [Collection("Test Collection")]
@@ -79,6 +75,24 @@ public class FilesRoomsApiTest(
         roomInfo.Should().NotBeNull();
         roomInfo.Id.Should().Be(createdRoom.Id);
         roomInfo.Title.Should().Be(roomTitle);
+    }
+    
+    [Fact]
+    public async Task SearchRoom_ExistingRoom_ReturnsRoom()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var roomTitle = "Room for Info " + Guid.NewGuid().ToString()[..8];
+        var createdRoom = (await _roomsApi.CreateRoomAsync(
+            new CreateRoomRequestDto(roomTitle, indexing: true, roomType: RoomType.CustomRoom), 
+            TestContext.Current.CancellationToken)).Response;
+        
+        // Act
+        var rooms = (await _roomsApi.GetRoomsFolderAsync(filterValue: roomTitle, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        
+        // Assert
+        rooms.Should().NotBeNull();
+        rooms.Folders.Should().Contain(r => r.Title == createdRoom.Title);
     }
     
     [Fact]
@@ -379,7 +393,7 @@ public class FilesRoomsApiTest(
         file.FileExst.Should().Be(".docx");
         
         // Verify a file exists in the room's contents
-        var roomFiles = (await _filesFoldersApi.GetFolderByFolderIdAsync(
+        var roomFiles = (await _foldersApi.GetFolderByFolderIdAsync(
             createdRoom.Id,
             cancellationToken: TestContext.Current.CancellationToken)).Response;
             

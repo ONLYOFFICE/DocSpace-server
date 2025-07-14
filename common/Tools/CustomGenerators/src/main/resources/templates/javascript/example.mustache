@@ -1,0 +1,174 @@
+// Import the SDK
+const Api = require('./dist/index');
+
+// Main function
+function main() {
+  // Configure API client
+  const basePath = 'BaseUrl'; // Your DocSpace URL
+  
+  // Initialize API client
+  const apiClient = new Api.ApiClient(basePath);
+  
+  // Initialize API instances
+  const authApi = new Api.AuthenticationApi(apiClient);
+  const folderApi = new Api.FilesFoldersApi(apiClient);
+  const backupApi = new Api.BackupApi(apiClient);
+  
+  // Create authentication request
+  const authRequestData = new Api.AuthRequestsDto();
+  authRequestData.password = "11111111";
+  authRequestData.userName = "example@onlyoffice.com";
+  
+  // Authenticate using callback pattern
+  const opts = {
+    'authRequestsDto': authRequestData
+  };
+  authApi.authenticateMe(opts, function(error, data, response) {
+    if (error) {
+      console.error("Authentication error:", error);
+      return;
+    }
+    
+    const token = data.response.token;
+    // Set up options for API calls
+    const opts = {
+      'asc_auth_key': token
+    };
+    
+    // Get My folder information
+    console.log("Getting My folder...");
+    folderApi.getMyFolder(opts, function(error, data, response) {
+      if (error) {
+        console.error("Error getting My folder:", error);
+        return;
+      }
+      
+      const folderMyId = data.response.current.id;
+      console.log("My folder ID:", folderMyId);
+      
+      // Create a new folder
+      console.log("Creating a new folder...");
+      const folderData = new Api.CreateFolder();
+      folderData.title = "TestTitle";
+      
+      // Prepare options for createFolder
+      const createFolderOpts = {
+        'createFolder': folderData
+      };
+      
+      // Call with correct parameter order: folderId, opts, callback
+      folderApi.createFolder(folderMyId, createFolderOpts, function(error, data, response) {
+        if (error) {
+          console.error("Error creating folder:", error);
+          return;
+        }
+        
+        const newFolderId = data.response.id;
+        console.log("New folder ID:", newFolderId);
+        
+        // Get folder information by ID
+        console.log("Getting folder information...");
+        const getFolderOpts = {
+          'asc_auth_key': token
+        };
+        
+        folderApi.getFolderByFolderId(newFolderId, getFolderOpts, function(error, data, response) {
+          if (error) {
+            console.error("Error getting folder information:", error);
+            return;
+          }
+          
+          console.log("Folder status code:", response.statusCode);
+          
+          // Update folder title
+          console.log("Updating folder title...");
+          const newFolderData = new Api.CreateFolder();
+          newFolderData.title = "Updated_title";
+          
+          const renameFolderOpts = {
+            'createFolder': newFolderData
+          };
+          
+          folderApi.renameFolder(newFolderId, renameFolderOpts, function(error, data, response) {
+            if (error) {
+              console.error("Error updating folder:", error);
+              return;
+            }
+            
+            console.log("Update status code:", response.statusCode);
+            
+            // Delete the folder
+            console.log("Deleting folder...");
+            const deleteFolderData = new Api.DeleteFolder();
+            deleteFolderData.deleteAfter = false;
+            deleteFolderData.immediately = true;
+            
+            const deleteFolderOpts = {
+              'deleteFolder': deleteFolderData
+            };
+            
+            folderApi.deleteFolder(newFolderId, deleteFolderOpts, function(error, data, response) {
+              if (error) {
+                console.error("Error deleting folder:", error);
+                return;
+              }
+              
+              console.log("Delete status code:", response.statusCode);
+              
+              // Start a backup operation
+              console.log("Starting backup...");
+              const backupData = new Api.BackupDto();
+              backupData.dump = false;
+              backupData.storageType = 4; 
+              
+              const startBackupOpts = {
+                'backupDto': backupData
+              };
+              
+              backupApi.startBackup(startBackupOpts, function(error, data, response) {
+                if (error) {
+                  console.error("Error starting backup:", error);
+                  return;
+                }
+                
+                if (response.statusCode === 200) {
+                  console.log("Backup started");
+                  
+                  // Check backup progress
+                  checkBackupProgress();
+                }
+              });
+              
+              // Function to check backup progress
+              function checkBackupProgress() {
+                const progressOpts = {
+                  'asc_auth_key': token
+                };
+                
+                backupApi.getBackupProgress(progressOpts, function(error, data, response) {
+                  if (error) {
+                    console.error("Error checking backup progress:", error);
+                    return;
+                  }
+                  
+                  console.log(`Backup progress: ${data.response.progress}%`);
+                  console.log("Is backup completed:", data.response.isCompleted);
+                  
+                  if (data.response.isCompleted) {
+                    console.log("Backup completed");
+                  } else {
+                    // Check again after 1 second
+                    setTimeout(checkBackupProgress, 1000);
+                  }
+                });
+              }
+            });
+          });
+        });
+      });
+    });
+  });
+}
+
+// Execute the main function
+main();

@@ -571,4 +571,10 @@
   <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
     <value>ابدأوا التعبئة</value>
   </data>
+  <data name="RoleEnum_Guest" xml:space="preserve">
+    <value>ضيف</value>
+  </data>
+  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
+    <value>مسؤول الغرفة</value>
+  </data>
 </root>

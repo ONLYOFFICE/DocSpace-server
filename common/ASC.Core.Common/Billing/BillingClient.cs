@@ -138,9 +138,10 @@ public class BillingClient
         return customerInfo;
     }
 
-    public async Task<string> TopUpDepositAsync(string portalId, decimal amount, string currency)
+    public async Task<bool> TopUpDepositAsync(string portalId, decimal amount, string currency)
     {
-        return await RequestAsync("Deposit", portalId, [Tuple.Create("Amount", amount.ToString(CultureInfo.InvariantCulture)), Tuple.Create("Currency", currency)]);
+        var result = await RequestAsync("Deposit", portalId, [Tuple.Create("Amount", amount.ToString(CultureInfo.InvariantCulture)), Tuple.Create("Currency", currency)]);
+        return result == "\"ok\"";
     }
 
     public async Task<bool> ChangePaymentAsync(string portalId, IEnumerable<string> products, IEnumerable<int> quantity, ProductQuantityType productQuantityType, string currency)

@@ -157,7 +157,7 @@ public static class DbQuotaExtension
                     Name = "adminyear",
                     Description = "since 10.02.2025",
                     Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,year",
-                    Price = 200,
+                    Price = 220,
                     ProductId = "1009",
                     Visible = true
                 },

@@ -216,6 +216,11 @@ public class FileUtility(
             return FileType.Video;
         }
 
+        if (ExtsDiagram.Contains(extension))
+        {
+            return FileType.Diagram;
+        }
+
         return FileType.Unknown;
     }
 
@@ -553,7 +558,8 @@ public class FileUtility(
                 ".ods", ".fods", ".ots", ".csv",
                 ".sxc", ".et", ".ett",
                 ".xlst", ".xlsy", ".xlsb",
-                ".gsheet"
+                ".gsheet",
+                ".numbers"
             }.ToImmutableList();
 
     public static readonly ImmutableList<string> ExtsPresentation = new List<string>
@@ -564,7 +570,8 @@ public class FileUtility(
                 ".odp", ".fodp", ".otp",
                 ".dps", ".dpt", ".sxi",
                 ".pptt", ".ppty",
-                ".gslides"
+                ".gslides",
+                ".key", ".odg"
             }.ToImmutableList();
 
     public static readonly ImmutableList<string> ExtsDocument = new List<string>
@@ -578,7 +585,9 @@ public class FileUtility(
                 ".doct", ".docy",
                 ".gdoc",
                 ".drawio",
-                ".md", ".markdown"
+                ".md", ".markdown",
+                ".oform",
+                ".pages", ".hwp", ".hwpx"
             }.ToImmutableList();
 
     public static readonly ImmutableList<string> ExtsPdf = new List<string>
@@ -593,6 +602,12 @@ public class FileUtility(
                 ".xlt", ".xltm", ".xltx",
                 ".pot", ".potm", ".potx"
     }.ToImmutableList();
+
+    public static readonly ImmutableList<string> ExtsDiagram = new List<string>
+    {
+                ".vsdm", ".vsdx", ".vssm",
+                ".vssx", ".vstm", ".vstx"
+            }.ToImmutableList();
 
     public const string WatermarkedDocumentExt = ".pdf";
 

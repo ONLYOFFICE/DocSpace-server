@@ -26,8 +26,6 @@
 
 extern alias ASCWebApi;
 extern alias ASCPeople;
-using ASC.Files.Tests.Factory;
-
 using MemberRequestDto = ASCPeople::ASC.People.ApiModels.RequestDto.MemberRequestDto;
 using PasswordHasher = ASC.Security.Cryptography.PasswordHasher;
 using WizardRequestsDto = Docspace.Model.WizardRequestsDto;
@@ -192,8 +190,14 @@ public static class Initializer
         };
     }
 
-    public static async Task Authenticate(this HttpClient client, User user)
-    {        
+    public static async ValueTask Authenticate(this HttpClient client, User? user)
+    {
+        if (user == null)
+        {
+            client.DefaultRequestHeaders.Authorization = null;
+            return;
+        }
+        
         var authMe = await _apiFactory.AuthenticationApi.AuthenticateMeAsync(new AuthRequestsDto
         {
             UserName = user.Email,
@@ -202,8 +206,8 @@ public static class Initializer
         
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authMe.Response.Token);
     }
-    
-    internal static string Password(
+
+    private static string Password(
         this Internet internet,
         int minLength,
         int maxLength,

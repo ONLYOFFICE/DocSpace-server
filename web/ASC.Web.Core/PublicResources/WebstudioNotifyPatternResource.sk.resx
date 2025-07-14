@@ -1926,4 +1926,10 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Prejsť na Služby</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Prejsť na Nastavenia peňaženky</value>
+  </data>
 </root>

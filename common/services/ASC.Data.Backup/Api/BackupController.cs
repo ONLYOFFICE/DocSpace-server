@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Api.Core.Convention;
+using ASC.Data.Storage;
 using ASC.Data.Backup.Services;
 
 using Swashbuckle.AspNetCore.Annotations;
@@ -152,7 +153,7 @@ public class BackupController(
     [SwaggerResponse(404, "The required folder was not found")]
     [AllowNotPayment]
     [HttpPost("startbackup")]
-    public async Task<BackupProgress> StartBackup(BackupDto inDto)
+    public async Task<BackupProgress> StartBackup(BackupDto inDto, [FromServices] TenantQuotaController quotaController)
     {
         if (inDto.Dump)
         {
@@ -180,6 +181,11 @@ public class BackupController(
 
         if (storageType is BackupStorageType.Documents or BackupStorageType.ThridpartyDocuments)
         {
+            if (storageType is BackupStorageType.Documents)
+            {
+                quotaController.Init(tenantManager.GetCurrentTenantId());
+                await quotaController.QuotaUsedCheckAsync(0, authContext.CurrentAccount.ID);
+            }
 
             if (int.TryParse(storageParams["folderId"], out var fId))
             {

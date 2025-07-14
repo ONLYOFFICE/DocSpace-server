@@ -30,21 +30,36 @@ namespace ASC.Api.Core.Auth;
 
 public static class AuthorizationExtension
 {
-    public static readonly NameValueCollection ScopesMap = new()
+    
+    public static readonly Dictionary<string, string[]> ScopesMap = new()
     {
-        { "GET api/[0-9].[0-9]/files/rooms", "rooms:read" },
-        { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/files/rooms", "rooms:read,rooms:write" },
-        { "GET api/[0-9].[0-9]/files", "files:read" },
-        { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/files", "files:read,files:write" },
-        { "GET api/[0-9].[0-9]/people/@self", "accounts.self:read" },
-        { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/people/@self", "accounts.self:read,accounts.self:write" },
-        { "GET api/[0-9].[0-9]/people", "accounts:read" },
-        { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/people", "accounts:read,accounts:write" }
+        { "GET api/[0-9].[0-9]/files/rooms", [ "rooms:read", "rooms:write" ] },
+        { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/files/rooms", [ "rooms:write" ] },
+        { "GET api/[0-9].[0-9]/files", [ "files:read", "files:write" ] },
+        { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/files", [ "files:write" ] },
+        { "GET api/[0-9].[0-9]/people/@self", [ "accounts.self:read", "accounts.self:write" ] },
+        { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/people/@self", [ "accounts.self:write" ] },
+        { "GET api/[0-9].[0-9]/people", [ "accounts:read", "accounts:write" ] },
+        { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/people", [ "accounts:write" ] },
+        { "(GET|POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/keys(/.*)?", [ "*" ] },
     };
-
+    
     private static string GetAuthorizePolicy(string routePattern, string httpMethod)
     {
-        foreach (var regexPattern in ScopesMap.AllKeys)
+        string[] globalScopes;
+
+        if (httpMethod == "GET")
+        {
+            globalScopes = [ AuthConstants.Claim_ScopeGlobalRead.Value, AuthConstants.Claim_ScopeGlobalWrite.Value ];
+        }
+        else
+        {
+            globalScopes = [ AuthConstants.Claim_ScopeGlobalWrite.Value ];
+        }
+
+        string[] localScopes = [];
+
+        foreach (var regexPattern in ScopesMap.Keys)
         {
             var regex = new Regex(regexPattern);
 
@@ -53,12 +68,19 @@ public static class AuthorizationExtension
                 continue;
             }
 
-            var scopes = ScopesMap[regexPattern];
+            localScopes = ScopesMap[regexPattern];
 
-            return scopes;
+            if (localScopes.Length == 1 && localScopes[0] == "*")
+            {
+                localScopes = ScopesMap.SelectMany(r => r.Value).Except(["*"]).ToArray();
+            }
+            
+            break;
         }
 
-        return AuthConstants.Claim_ScopeRootWrite.Value;
+        var scopes = globalScopes.Concat(localScopes).Distinct().ToArray();
+        
+        return string.Join(",", scopes);
     }
 
     public static IServiceCollection AddJwtBearerAuthentication(this IServiceCollection services)

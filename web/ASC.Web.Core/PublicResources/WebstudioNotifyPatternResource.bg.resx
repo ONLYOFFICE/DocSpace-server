@@ -1921,4 +1921,52 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Отидете в Услуги</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Отидете в Настройки на портфейл</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Здравейте, $UserName!
+
+Свързваме се с вас, за да ви информираме, че автоматичното подновяване на закупения от вас план за обслужване не можа да бъде завършено.
+
+Учтиво ви молим да подновите ръчно текущия си план за обслужване (или да закупите нов).
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Здравейте, $UserName!
+
+Свързваме се с вас, за да ви информираме, че плащането за абонамент ще бъде автоматично дебитирано от сметката ви след 3 дни.
+
+За да осигурите безпроблемна трансакция, моля, потвърдете, че имате достатъчно налични средства в метода си на плащане.
+
+Ако имате въпроси или се нуждаете от помощ, не се колебайте да се свържете с нашия "екип за поддръжка":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Здравейте, $UserName!
+
+Свързваме се с вас, за да ви информираме, че автоматичното попълване на баланса на портфейла на DocSpace не беше успешно.
+
+Молим ви ръчно да проверите и актуализирате баланса на портфейла си.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Изисква се действие: Не може да се поднови автоматично планът за обслужване във вашия ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Предстоящо плащане за абонамент за вашия ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Изисква се действие: Не може да се зареди автоматично балансът на портфейла във вашия ${LetterLogoText} DocSpace</value>
+  </data>
 </root>
