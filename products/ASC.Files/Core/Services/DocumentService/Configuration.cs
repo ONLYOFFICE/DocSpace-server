@@ -579,11 +579,6 @@ public class PermissionsConfig
     public bool Print { get; set; } = true;
 
     /// <summary>
-    /// Specifies whether to display the "Rename..." button when using the "onRequestRename" event.
-    /// </summary>
-    public bool Rename { get; set; }
-
-    /// <summary>
     /// Defines if the document can be reviewed or not.
     /// </summary>
     public bool Review { get; set; } = true;
