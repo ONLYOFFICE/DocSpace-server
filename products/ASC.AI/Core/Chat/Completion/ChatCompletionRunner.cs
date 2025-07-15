@@ -35,7 +35,8 @@ public class ChatCompletionRunner(
     TenantManager tenantManager,
     ToolsProvider toolsProvider,
     ChatClientFactory chatClientFactory,
-    ILogger<ChatCompletionGenerator> logger)
+    ILogger<ChatCompletionGenerator> logger,
+    AiConfigurationService configurationService)
 {
     private const string PromptTemplate =
         """
@@ -83,13 +84,12 @@ public class ChatCompletionRunner(
         var userMessage = new ChatMessage(ChatRole.User, message);
         var chat = await chatHistory.AddChatAsync(tenantId, roomId, authContext.CurrentAccount.ID, userMessage);
         
-        var client = await CreateClientAsync(tenantId, roomId, chat.Id);
-        
-        var folderId = contextFolderId ?? roomId;
+        var config = await configurationService.GetRunConfigurationAsync(Scope.Chat);
+        var client = await CreateClientAsync(tenantId, roomId, chat.Id, config);
         
         var messages = new List<ChatMessage>
         {
-            new(ChatRole.System, string.Format(PromptTemplate, folderId)),
+            new(ChatRole.System, string.Format(PromptTemplate, contextFolderId ?? roomId)),
             userMessage
         };
 
@@ -110,30 +110,31 @@ public class ChatCompletionRunner(
 
         await ChekRoomAsync(chat.RoomId);
         
-        var clientTask = await CreateClientAsync(tenantId, chat.RoomId, chatId);
+        var config = await configurationService.GetRunConfigurationAsync(Scope.Chat);
+        var client = await CreateClientAsync(tenantId, chat.RoomId, chatId, config);
 
-        var history = await chatHistory.GetMessagesAsync(chatId).ToListAsync();
+        var historyAdapter = HistoryHelper.GetAdapter(config.ProviderType);
+        var history = await chatHistory.GetMessagesAsync(chatId, historyAdapter).ToListAsync();
+        
         var userMessage = new ChatMessage(ChatRole.User, message);
         
         await chatHistory.UpdateChatAsync(tenantId, chatId, userMessage);
         
-        var folderId = contextFolderId ?? chat.RoomId;
-
-        var messages = new List<ChatMessage>
+        var messages = new List<ChatMessage>(history.Count + 2)
         {
-            new(ChatRole.System, string.Format(PromptTemplate, folderId))
+            new(ChatRole.System, string.Format(PromptTemplate, contextFolderId ?? chat.RoomId))
         };
         
         messages.AddRange(history);
         messages.Add(userMessage);
 
-        return new ChatCompletionGenerator(logger, chatId, chatHistory, clientTask, messages);
+        return new ChatCompletionGenerator(logger, chatId, chatHistory, client, messages);
     }
 
-    private async Task<IChatClient> CreateClientAsync(int tenantId, int roomId, Guid chatId)
+    private async Task<IChatClient> CreateClientAsync(int tenantId, int roomId, Guid chatId, RunConfiguration config)
     {
         var toolsTask = toolsProvider.GetToolsAsync(tenantId, roomId);
-        var client = await chatClientFactory.CreateAsync();
+        var client = chatClientFactory.Create(config);
         
         var builder = client.AsBuilder();
         builder.ConfigureOptions(x => x.ConversationId = chatId.ToString());

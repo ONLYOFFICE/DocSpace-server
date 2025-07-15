@@ -24,11 +24,20 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Chat.Models;
+namespace ASC.AI.Core.Chat.History;
 
-public class Message(Role role, List<MessageContent> contents, DateTime createdOn)
+public static class HistoryHelper
 {
-    public Role Role { get; } = role;
-    public List<MessageContent> Contents { get; } = contents;
-    public DateTime CreatedOn { get; } = createdOn;
+    private static readonly OpenAiHistoryAdapter _openAiHistoryAdapter = new();
+    private static readonly AnthropicHistoryAdapter _anthropicHistoryAdapter = new();
+    
+    public static HistoryAdapter GetAdapter(ProviderType providerType)
+    {
+        if (providerType == ProviderType.Anthropic)
+        {
+            return _anthropicHistoryAdapter;
+        }
+
+        return _openAiHistoryAdapter;
+    }
 }

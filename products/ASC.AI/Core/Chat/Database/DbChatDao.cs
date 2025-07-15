@@ -48,7 +48,7 @@ public class DbChatDao(IDbContextFactory<ChatDbContext> dbContextFactory, IMappe
             var dbMessage = new DbChatMessage
             {
                 ChatId = id,
-                MessageType = message.MessageType,
+                Role = message.Role,
                 Content = JsonSerializer.Serialize(message.Contents, AiUtils.SerializerOptions),
                 CreatedOn = now
             };
@@ -87,7 +87,7 @@ public class DbChatDao(IDbContextFactory<ChatDbContext> dbContextFactory, IMappe
             var dbMessage = new DbChatMessage
             {
                 ChatId = chatId, 
-                MessageType = message.MessageType, 
+                Role = message.Role, 
                 Content = JsonSerializer.Serialize(message.Contents, AiUtils.SerializerOptions),
                 CreatedOn = DateTime.UtcNow
             };
@@ -167,7 +167,7 @@ public class DbChatDao(IDbContextFactory<ChatDbContext> dbContextFactory, IMappe
                 new DbChatMessage 
                 { 
                     ChatId = chatId,
-                    MessageType = msg.MessageType,
+                    Role = msg.Role,
                     Content = JsonSerializer.Serialize(msg.Contents, AiUtils.SerializerOptions),
                     CreatedOn = now
                 });
@@ -186,7 +186,7 @@ public class DbChatDao(IDbContextFactory<ChatDbContext> dbContextFactory, IMappe
         await foreach (var msg in messages.AsAsyncEnumerable())
         {
             yield return new Message(
-                msg.MessageType, 
+                msg.Role, 
                 JsonSerializer.Deserialize<List<MessageContent>>(msg.Content, AiUtils.SerializerOptions)!,
                 msg.CreatedOn);
         }
@@ -201,7 +201,7 @@ public class DbChatDao(IDbContextFactory<ChatDbContext> dbContextFactory, IMappe
         await foreach (var msg in messages.AsAsyncEnumerable())
         {
             yield return new Message(
-                msg.MessageType, 
+                msg.Role, 
                 JsonSerializer.Deserialize<List<MessageContent>>(msg.Content, AiUtils.SerializerOptions)!,
                 msg.CreatedOn);
         }

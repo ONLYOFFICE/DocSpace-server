@@ -24,7 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Chat;
+using Role = ASC.Core.Common.EF.Model.Chat.Role;
+
+namespace ASC.AI.Core.Chat.History;
 
 [Scope]
 public class ChatHistory(DbChatDao chatDao)
@@ -41,12 +43,12 @@ public class ChatHistory(DbChatDao chatDao)
         }
 
         return chatDao.AddChatAsync(tenantId, roomId, userId, title,
-            new Message(MessageType.UserMessage, [new TextMessageContent(message.Text)], DateTime.UtcNow));
+            new Message(Role.User, [new TextMessageContent(message.Text)], DateTime.UtcNow));
     }
 
     public Task UpdateChatAsync(int tenantId, Guid chatId, ChatMessage message)
     {
-        return chatDao.UpdateChatAsync(tenantId, chatId, new Message(MessageType.UserMessage, 
+        return chatDao.UpdateChatAsync(tenantId, chatId, new Message(Role.User, 
             [new TextMessageContent(message.Text)], DateTime.UtcNow));
     }
 
@@ -59,11 +61,13 @@ public class ChatHistory(DbChatDao chatDao)
     {
         var messages = new List<Message>();
         var toolCalls = new Dictionary<string, ToolCallMessageContent>();
+
+        Message? lastProcessedMessage = null;
         
         foreach (var message in chatMessages)
         {
             var contents = new List<MessageContent>();
-            var type = message.Role.ToMessageType();
+            var role = message.Role.ToMessageType();
             
             foreach (var content in message.Contents)
             {
@@ -84,7 +88,6 @@ public class ChatHistory(DbChatDao chatDao)
                         }
                     case FunctionResultContent functionResultContent:
                         {
-                            type = MessageType.ToolCall;
                             var tool = toolCalls.GetValueOrDefault(functionResultContent.CallId);
                             if (tool == null)
                             {
@@ -102,51 +105,29 @@ public class ChatHistory(DbChatDao chatDao)
             {
                 continue;
             }
+
+            if (lastProcessedMessage != null && lastProcessedMessage.Role == role)
+            {
+                lastProcessedMessage.Contents.AddRange(contents);
+                continue;
+            }
+
+            var msg = new Message(role, contents, DateTime.UtcNow);
+            messages.Add(msg);
             
-            messages.Add(new Message(type, contents, DateTime.UtcNow));
+            lastProcessedMessage = msg;
         }
 
         return chatDao.AddMessagesAsync(chatId, messages);
     }
 
-    public async IAsyncEnumerable<ChatMessage> GetMessagesAsync(Guid chatId)
+    public async IAsyncEnumerable<ChatMessage> GetMessagesAsync(Guid chatId, HistoryAdapter adapter)
     {
-        await foreach (var msg in chatDao.GetMessagesAsync(chatId))
+        var history = chatDao.GetMessagesAsync(chatId);
+        
+        await foreach (var msg in adapter.AdaptHistoryAsync(history))
         {
-            var aiContents = new List<AIContent>();
-            var functionResults = new List<AIContent>();
-            
-            foreach (var content in msg.Contents)
-            {
-                switch (content)
-                {
-                    case TextMessageContent textContent:
-                        var text = new TextContent(textContent.Text);
-                        aiContents.Add(text);
-                        continue;
-                    case ToolCallMessageContent toolContent:
-                        var functionCall = new FunctionCallContent(toolContent.CallId, toolContent.Name, toolContent.Arguments);
-                        aiContents.Add(functionCall);
-                        
-                        if (toolContent.Result != null)
-                        {
-                            functionResults.Add(new FunctionResultContent(toolContent.CallId, toolContent.Result));
-                        }
-                        continue;
-                }
-            }
-
-            var message = new ChatMessage { Role = msg.MessageType.ToChatRole(), Contents = aiContents };
-            yield return message;
-
-            if (functionResults.Count == 0)
-            {
-                continue;
-            }
-            
-            var resultMessage = new ChatMessage { Role = ChatRole.Assistant, Contents = functionResults };
-            
-            yield return resultMessage;
+            yield return msg;
         }
     }
 }

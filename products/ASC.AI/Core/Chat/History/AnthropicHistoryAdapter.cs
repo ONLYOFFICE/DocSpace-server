@@ -24,11 +24,46 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Chat.Models;
+using Message = ASC.AI.Core.Chat.Models.Message;
+using TextContent = Microsoft.Extensions.AI.TextContent;
 
-public class Message(Role role, List<MessageContent> contents, DateTime createdOn)
+namespace ASC.AI.Core.Chat.History;
+
+public class AnthropicHistoryAdapter : HistoryAdapter
 {
-    public Role Role { get; } = role;
-    public List<MessageContent> Contents { get; } = contents;
-    public DateTime CreatedOn { get; } = createdOn;
+    protected override IEnumerable<ChatMessage> AdaptAssistantMessage(Message message)
+    {
+        foreach (var content in message.Contents)
+        {
+            switch (content)
+            {
+                case TextMessageContent textContent:
+                    yield return new ChatMessage
+                    {
+                        Role = ChatRole.Assistant, 
+                        Contents = [
+                            new TextContent(textContent.Text)
+                        ]
+                    };
+                    break;
+                case ToolCallMessageContent toolCallContent:
+                    yield return new ChatMessage
+                    {
+                        Role = ChatRole.Assistant, 
+                        Contents = [
+                            new FunctionCallContent(toolCallContent.CallId, toolCallContent.Name, toolCallContent.Arguments)
+                        ]
+                    };
+                
+                    yield return new ChatMessage
+                    {
+                        Role = ChatRole.User, 
+                        Contents = [
+                            new FunctionResultContent(toolCallContent.CallId, toolCallContent.Result)
+                        ]
+                    };
+                    break;
+            }
+        }
+    }
 }

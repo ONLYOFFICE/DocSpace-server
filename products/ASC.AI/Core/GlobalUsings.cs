@@ -26,6 +26,7 @@
 
 global using ASC.AI.Core.Chat.Database;
 global using ASC.AI.Core.Chat.Extensions;
+global using ASC.AI.Core.Chat.History;
 global using ASC.AI.Core.Chat.Models;
 global using ASC.AI.Core.Common;
 global using ASC.AI.Core.Common.Clients;

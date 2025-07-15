@@ -28,34 +28,18 @@ namespace ASC.AI.Core.Chat.Extensions;
 
 public static class MessageTypeExtensions
 {
-    public static ChatRole ToChatRole(this MessageType messageType)
-    {
-        return messageType switch
-        {
-            MessageType.UserMessage => ChatRole.User,
-            MessageType.AssistantMessage => ChatRole.Assistant,
-            MessageType.ToolCall => ChatRole.Tool,
-            _ => throw new ArgumentOutOfRangeException(nameof(messageType))
-        };
-    }
-
-    public static MessageType ToMessageType(this ChatRole role)
+    public static Role ToMessageType(this ChatRole role)
     {
         if (role == ChatRole.User)
         {
-            return MessageType.UserMessage;
+            return Role.User;
         }
 
-        if (role == ChatRole.Assistant)
+        if (role == ChatRole.Assistant || role == ChatRole.Tool)
         {
-            return MessageType.AssistantMessage;
+            return Role.Assistant;
         }
 
-        if (role == ChatRole.Tool)
-        {
-            return MessageType.ToolCall;
-        }
-        
         throw new ArgumentOutOfRangeException(nameof(role));
     }
 }

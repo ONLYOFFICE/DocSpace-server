@@ -26,18 +26,17 @@
 
 namespace ASC.Core.Common.EF.Model.Chat;
 
-public enum MessageType
+public enum Role
 {
-    UserMessage,
-    AssistantMessage,
-    ToolCall
+    User,
+    Assistant
 }
 
 public class DbChatMessage : BaseEntity
 {
     public int Id { get; set; }
     public Guid ChatId { get; set; }
-    public MessageType MessageType { get; set; }
+    public Role Role { get; set; }
     public required string Content { get; set; }
     public DateTime CreatedOn { get; set; }
     
@@ -79,7 +78,7 @@ public static class DbChatMessageExtensions
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
             
-            entity.Property(e => e.MessageType)
+            entity.Property(e => e.Role)
                 .HasColumnName("role");
 
             entity.Property(e => e.Content)

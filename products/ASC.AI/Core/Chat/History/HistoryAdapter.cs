@@ -24,11 +24,50 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Chat.Models;
+namespace ASC.AI.Core.Chat.History;
 
-public class Message(Role role, List<MessageContent> contents, DateTime createdOn)
+public abstract class HistoryAdapter
 {
-    public Role Role { get; } = role;
-    public List<MessageContent> Contents { get; } = contents;
-    public DateTime CreatedOn { get; } = createdOn;
+    public async IAsyncEnumerable<ChatMessage> AdaptHistoryAsync(IAsyncEnumerable<Message> messages)
+    {
+        await foreach (var message in messages)
+        {
+            switch (message.Role)
+            {
+                case Role.User:
+                    yield return AdaptUserMessage(message);
+                    break;
+                case Role.Assistant:
+                    {
+                        foreach (var assistantMessage in AdaptAssistantMessage(message))
+                        {
+                            yield return assistantMessage;
+                        }
+
+                        break;
+                    }
+                default:
+                    continue;
+            }
+        }
+    }
+    
+    protected abstract IEnumerable<ChatMessage> AdaptAssistantMessage(Message message);
+
+    private static ChatMessage AdaptUserMessage(Message message)
+    {
+        var contents = new List<AIContent>(message.Contents.Count);
+
+        foreach (var content in message.Contents)
+        {
+            switch (content)
+            {
+                case TextMessageContent textMessageContent:
+                    contents.Add(new TextContent(textMessageContent.Text));
+                    continue;
+            }
+        }
+                    
+        return new ChatMessage { Role = ChatRole.User, Contents = contents };
+    }
 }

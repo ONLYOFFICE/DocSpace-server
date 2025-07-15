@@ -27,14 +27,12 @@
 namespace ASC.AI.Core.Chat;
 
 [Scope]
-public class ChatClientFactory(
-    IHttpClientFactory httpClientFactory,
-    AiConfigurationService configurationService)
+public class ChatClientFactory(IHttpClientFactory httpClientFactory)
 {
-    public async Task<IChatClient> CreateAsync()
+    public IChatClient Create(RunConfiguration runConfig)
     {
-        var runConfig = await configurationService.GetRunConfigurationAsync(Scope.Chat);
-
+        ArgumentNullException.ThrowIfNull(runConfig);
+        
         if (string.IsNullOrEmpty(runConfig.Url))
         {
             throw new ArgumentException("Endpoint is not configured");
