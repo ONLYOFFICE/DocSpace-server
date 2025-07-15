@@ -55,6 +55,8 @@ global using ASC.Files.Core.Security;
 
 global using ASC.Security.Cryptography;
 
+global using Anthropic.SDK;
+
 global using AutoMapper;
 
 global using Microsoft.EntityFrameworkCore;

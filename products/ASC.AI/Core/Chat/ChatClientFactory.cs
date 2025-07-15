@@ -39,6 +39,20 @@ public class ChatClientFactory(
         {
             throw new ArgumentException("Endpoint is not configured");
         }
+
+        if (runConfig.ProviderType == ProviderType.Anthropic)
+        {
+            var client = new AnthropicClient(
+                new APIAuthentication(runConfig.Key), httpClientFactory.CreateClient()).Messages;
+
+            return client.AsBuilder()
+                .ConfigureOptions(x =>
+                {
+                    x.ModelId = runConfig.Parameters.ModelId;
+                    x.MaxOutputTokens = 4096;
+                })
+                .Build();
+        }
         
         var credential = new ApiKeyCredential(runConfig.Key);
         var options = new OpenAIClientOptions

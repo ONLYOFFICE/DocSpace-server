@@ -37,6 +37,8 @@ public class ModelClientFactory(IHttpClientFactory httpClientFactory)
                 new OpenAiModelClient(httpClientFactory.CreateClient()),
             ProviderType.TogetherAi => 
                 new TogetherAiModelClient(httpClientFactory.CreateClient()),
+            ProviderType.Anthropic =>
+                new AnthropicModelClient(httpClientFactory.CreateClient()),
             _ => throw new ArgumentOutOfRangeException(nameof(type))
         };
     }

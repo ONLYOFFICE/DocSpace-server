@@ -24,13 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Common.Models;
+namespace ASC.AI.Core.Common.Clients.Providers;
 
-public enum ProviderType
+public class AnthropicModelClient(HttpClient httpClient) : IModelClient
 {
-    DocSpaceAi = 0,
-    OpenAi = 1,
-    TogetherAi = 2,
-    OpenAiCompatible = 3,
-    Anthropic = 4,
+    public async Task<List<ModelInfo>> GetModelsAsync(string endpoint, string apiKey, Scope? scope, IReadOnlyDictionary<string, string>? headers = null)
+    {
+        var client = new AnthropicClient(new APIAuthentication(apiKey), httpClient);
+        
+        var response = await client.Models.ListModelsAsync();
+        
+        return response.Models.Select(x => new ModelInfo { Id = x.Id }).ToList();
+    }
 }
