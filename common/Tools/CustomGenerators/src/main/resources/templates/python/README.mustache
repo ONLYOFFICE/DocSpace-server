@@ -1,44 +1,51 @@
 # {{{projectName}}}
-{{#appDescriptionWithNewLines}}
-{{{.}}}
-{{/appDescriptionWithNewLines}}
+
+The ONLYOFFICE DocSpace SDK for Python is a library that provides tools for integrating and managing DocSpace features within your applications. It simplifies interaction with the DocSpace API by offering ready-to-use methods and models.
 
 - API version: {{appVersion}}
 - Package version: {{packageVersion}}
-{{^hideGenerationTimestamp}}
-- Build date: {{generatedDate}}
-{{/hideGenerationTimestamp}}
+
 {{#infoUrl}}
 For more information, please visit [{{{infoUrl}}}]({{{infoUrl}}})
 {{/infoUrl}}
 
-## Requirements.
+## Requirements
 
 Python {{{generatorLanguageVersion}}}
 
 ## Installation & Usage
-### pip install
+### Using pip
 
-If the python package is hosted on a repository, you can install directly using:
+If the Python package is hosted in a repository, you can install it directly using:
 
 ```sh
 pip install git+https://{{gitHost}}/{{{gitUserId}}}/{{{gitRepoId}}}.git
 ```
-(you may need to run `pip` with root permission: `sudo pip install git+https://{{gitHost}}/{{{gitUserId}}}/{{{gitRepoId}}}.git`)
+
+If required, run with root permissions:
+
+```bash
+sudo pip install git+https://{{gitHost}}/{{{gitUserId}}}/{{{gitRepoId}}}.git
+```
 
 Then import the package:
 ```python
 import {{{packageName}}}
 ```
 
-### Setuptools
+### Using setuptools
 
-Install via [Setuptools](http://pypi.python.org/pypi/setuptools).
+Alternatively, you can install the package using [setuptools](http://pypi.python.org/pypi/setuptools):
 
 ```sh
 python setup.py install --user
 ```
-(or `sudo python setup.py install` to install the package for all users)
+
+To install the package for all users, run the following command:
+
+```bash
+sudo python setup.py install
+```
 
 Then import the package:
 ```python

@@ -1,16 +1,12 @@
 # {{packageName}} - the C# library for the {{appName}}
 
-{{#appDescriptionWithNewLines}}
-{{{.}}}
-{{/appDescriptionWithNewLines}}
+The ONLYOFFICE DocSpace SDK for C# is a library that provides tools for integrating and managing DocSpace features within your applications. It simplifies interaction with the DocSpace API by offering ready-to-use methods and models.
 
 - API version: {{appVersion}}
 - SDK version: {{packageVersion}}
-{{^hideGenerationTimestamp}}
-- Build date: {{generatedDate}}
-{{/hideGenerationTimestamp}}
+
 {{#infoUrl}}
-    For more information, please visit [{{{infoUrl}}}]({{{infoUrl}}})
+For more information, please visit [{{{infoUrl}}}]({{{infoUrl}}})
 {{/infoUrl}}
 
 <a id="dependencies"></a>
@@ -29,7 +25,7 @@
 {{/validatable}}
 
 The DLLs included in the package may not be the latest version. We recommend using [NuGet](https://docs.nuget.org/consume/installing-nuget) to obtain the latest version of the packages:
-```
+```powershell
 {{#useRestSharp}}
 Install-Package RestSharp
 {{/useRestSharp}}
@@ -54,8 +50,8 @@ NOTE: RestSharp for .Net Core creates a new socket for each api call, which can 
 Generate the DLL using your preferred tool (e.g. `dotnet build`)
 {{/netStandard}}
 {{^netStandard}}
-Run the following command to generate the DLL
-- [Mac/Linux] `/bin/sh build.sh`
+Run the following command to generate the DLL:
+- [macOS/Linux] `/bin/sh build.sh`
 - [Windows] `build.bat`
 {{/netStandard}}
 
@@ -69,21 +65,21 @@ using {{packageName}}.{{modelPackage}};
 <a id="packaging"></a>
 ## Packaging
 
-A `.nuspec` is included with the project. You can follow the Nuget quickstart to [create](https://docs.microsoft.com/en-us/nuget/quickstart/create-and-publish-a-package#create-the-package) and [publish](https://docs.microsoft.com/en-us/nuget/quickstart/create-and-publish-a-package#publish-the-package) packages.
+A `.nuspec` is included with the project. You can follow the NuGet quickstart to [create](https://docs.microsoft.com/en-us/nuget/quickstart/create-and-publish-a-package#create-the-package) and [publish](https://docs.microsoft.com/en-us/nuget/quickstart/create-and-publish-a-package#publish-the-package) packages.
 
 This `.nuspec` uses placeholders from the `.csproj`, so build the `.csproj` directly:
 
-```
+```powershell
 nuget pack -Build -OutputDirectory out {{packageName}}.csproj
 ```
 
-Then, publish to a [local feed](https://docs.microsoft.com/en-us/nuget/hosting-packages/local-feeds) or [other host](https://docs.microsoft.com/en-us/nuget/hosting-packages/overview) and consume the new package via Nuget as usual.
+Then, publish to a [local feed](https://docs.microsoft.com/en-us/nuget/hosting-packages/local-feeds) or [other host](https://docs.microsoft.com/en-us/nuget/hosting-packages/overview), and consume it via NuGet as usual.
 
 {{/netStandard}}
 <a id="usage"></a>
 ## Usage
 
-To use the API client with a HTTP proxy, setup a `System.Net.WebProxy`
+To use the API client with a HTTP proxy, set up a `System.Net.WebProxy` as follows:
 ```csharp
 Configuration c = new Configuration();
 System.Net.WebProxy webProxy = new System.Net.WebProxy("http://myProxyUrl:80/");
@@ -93,9 +89,9 @@ c.Proxy = webProxy;
 {{#useHttpClient}}
 
 ### Connections
-Each ApiClass (properly the ApiClient inside it) will create an instance of HttpClient. It will use that for the entire lifecycle and dispose it when called the Dispose method.
+Each API class (specifically the API client within it) will create an instance of HttpClient. This instance is used throughout the class lifecycle and is disposed of when the Dispose method is called.
 
-To better manager the connections it's a common practice to reuse the HttpClient and HttpClientHandler (see [here](https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests#issues-with-the-original-httpclient-class-available-in-net) for details). To use your own HttpClient instance just pass it to the ApiClass constructor.
+To better manage connections, it is common practice to reuse the HttpClient and HttpClientHandler (see [here](https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests#issues-with-the-original-httpclient-class-available-in-net) for details). To use your own HttpClient instance, just pass it to the API class constructor:
 
 ```csharp
 HttpClientHandler yourHandler = new HttpClientHandler();
@@ -103,15 +99,15 @@ HttpClient yourHttpClient = new HttpClient(yourHandler);
 var api = new YourApiClass(yourHttpClient, yourHandler);
 ```
 
-If you want to use an HttpClient and don't have access to the handler, for example in a DI context in Asp.net Core when using IHttpClientFactory.
+If you want to use an HttpClient but do not have access to its handler (for example, when using IHttpClientFactory in the ASP.NET Core DI context), you can create and configure your HttpClient instance separately and then pass it to the API class constructor:
 
 ```csharp
 HttpClient yourHttpClient = new HttpClient();
 var api = new YourApiClass(yourHttpClient);
 ```
-You'll loose some configuration settings, the features affected are: Setting and Retrieving Cookies, Client Certificates, Proxy settings. You need to either manually handle those in your setup of the HttpClient or they won't be available.
+If you want to use an HttpClient but do not have access to its handler (for example, when using IHttpClientFactory in the ASP.NET Core DI context), you can create and configure your HttpClient instance separately and then pass it to the API class constructor:
 
-Here an example of DI setup in a sample web project:
+Here is an example of DI setup in a sample web project:
 
 ```csharp
 services.AddHttpClient<YourApiClass>(httpClient =>
@@ -236,7 +232,7 @@ No model defined in this package
 
 {{#isApiKey}}- **Type**: API key
 - **API key parameter name**: {{keyParamName}}
-- **Location**: {{#isKeyInQuery}}URL query string{{/isKeyInQuery}}{{#isKeyInHeader}}HTTP header{{/isKeyInHeader}}
+- **Location**: {{#isKeyInQuery}}URL query string{{/isKeyInQuery}}{{#isKeyInHeader}}HTTP header{{/isKeyInHeader}}{{#isKeyInCookie}}Cookie{{/isKeyInCookie}}
 {{/isApiKey}}
 {{#isBasicBasic}}- **Type**: HTTP basic authentication
 {{/isBasicBasic}}
@@ -246,10 +242,17 @@ No model defined in this package
 {{/isHttpSignature}}
 {{#isOAuth}}- **Type**: OAuth
 - **Flow**: {{flow}}
-- **Authorization URL**: {{authorizationUrl}}
+- **Authorization URL**: {{x-authorizationUrl}}
+- **Token Url**: {{x-tokenUrl}}
 - **Scopes**: {{^scopes}}N/A{{/scopes}}
 {{#scopes}}  - {{scope}}: {{description}}
 {{/scopes}}
 {{/isOAuth}}
+{{#isOpenId}}
+- **Type**: OpenId Connect
+- **OpenId Connect URL**: {{x-openIdConnectUrl}}
+{{#scopes}}  - {{scope}}: {{description}}
+{{/scopes}}
+{{/isOpenId}}
 
 {{/authMethods}}

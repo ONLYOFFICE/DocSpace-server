@@ -133,6 +133,13 @@ public abstract class BaseStorage(TempStream tempStream,
         vpath = string.Format(vpath, tenant);
         var virtualPath = new Uri(vpath + "/", UriKind.RelativeOrAbsolute);
 
+        var fileName = Path.GetFileName(path);
+
+        if (!string.IsNullOrEmpty(fileName))
+        {
+            path = path.Replace(fileName, Uri.EscapeDataString(fileName));
+        }
+
         var uri = virtualPath.IsAbsoluteUri ?
                       new MonoUri(virtualPath, virtualPath.LocalPath.TrimEnd('/') + EnsureLeadingSlash(path.Replace('\\', '/')) + query) :
                       new MonoUri(virtualPath.ToString().TrimEnd('/') + EnsureLeadingSlash(path.Replace('\\', '/')) + query, UriKind.Relative);

@@ -999,4 +999,7 @@
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Customer subscription updated: {0}</value>
   </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Promotional banners visibility settings changed</value>
+  </data>
 </root>

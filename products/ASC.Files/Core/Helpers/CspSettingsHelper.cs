@@ -62,10 +62,7 @@ public class CspSettingsHelper(
             var domainsKey = $"{GetKey(domain)}:keys";
             if (httpContextAccessor.HttpContext != null)
             {
-                var keys = new HashSet<string>
-                {
-                    GetKey(Tenant.HostName)
-                };
+                var keys = new HashSet<string> { GetKey(Tenant.HostName) };
 
                 var ips = await Dns.GetHostAddressesAsync(Dns.GetHostName(), AddressFamily.InterNetwork);
 
@@ -86,7 +83,7 @@ public class CspSettingsHelper(
                 headerKeys.UnionWith(keys);
             }
             else
-            {                    
+            {
                 string domainsValue;
 
                 var oldScheme = false;
@@ -104,7 +101,7 @@ public class CspSettingsHelper(
                 {
                     await hybridCache.SetAsync(domainsKey, domainsValue);
                 }
-                
+
                 if (!string.IsNullOrEmpty(domainsValue))
                 {
                     headerKeys.UnionWith(domainsValue.Split(';'));
@@ -113,6 +110,11 @@ public class CspSettingsHelper(
         }
 
         var headerValue = await CreateHeaderAsync(domains);
+        var defaultOptions = configuration.GetSection("csp:default").Get<CspOptions>();
+        if (!string.IsNullOrEmpty(headerValue) && Encoding.UTF8.GetByteCount(headerValue) > defaultOptions.MaxSize)
+        {
+            throw new InvalidOperationException($"CSP header size exceeds maximum allowed size of {defaultOptions.MaxSize} bytes.");
+        }
 
         if (!string.IsNullOrEmpty(headerValue))
         {
@@ -142,9 +144,9 @@ public class CspSettingsHelper(
     public async Task RenameDomain(string oldDomain, string newDomain)
     {
         var oldKey = GetKey(oldDomain);
-        
+
         string val;
-                
+
         try
         {
             val = await hybridCache.GetOrDefaultAsync<string>(oldKey);
@@ -153,7 +155,7 @@ public class CspSettingsHelper(
         {
             val = await distributedCache.GetStringAsync(oldKey);
         }
-        
+
         if (!string.IsNullOrEmpty(val))
         {
             await hybridCache.RemoveAsync(oldKey);
@@ -179,7 +181,7 @@ public class CspSettingsHelper(
         var domain = tenantWithoutAlias.GetTenantDomain(coreSettings);
 
         string val;
-                
+
         try
         {
             val = await hybridCache.GetOrDefaultAsync<string>(GetKey(domain));
@@ -188,7 +190,7 @@ public class CspSettingsHelper(
         {
             val = await distributedCache.GetStringAsync(GetKey(domain));
         }
-        
+
         await hybridCache.SetAsync(GetKey(baseDomain), val);
     }
 
@@ -226,15 +228,10 @@ public class CspSettingsHelper(
         options.Add(defaultOptions);
 
         var docServiceUrl = filesLinkUtility.GetDocServiceUrl();
-        
+
         if (Uri.IsWellFormedUriString(docServiceUrl, UriKind.Absolute))
         {
-            options.Add(new CspOptions
-            {
-                Script = [docServiceUrl],
-                Frame = [docServiceUrl],
-                Connect = [docServiceUrl]
-            });
+            options.Add(new CspOptions { Script = [docServiceUrl], Frame = [docServiceUrl], Connect = [docServiceUrl] });
         }
 
         var firebaseDomain = configuration["firebase:authDomain"];
@@ -338,9 +335,10 @@ public class CspOptions
     public List<string> Connect { get; set; } = [];
     public List<string> Media { get; set; } = [];
 
+    public int MaxSize { get; set; } = 15 * 1024;
+    
     public CspOptions()
     {
-
     }
 
     public CspOptions(string domain)

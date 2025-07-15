@@ -35,9 +35,16 @@ public class LogoHandler
     public async Task Invoke
         (HttpContext context,
         CommonLinkUtility commonLinkUtility,
+        TenantManager tenantManager,
         SettingsManager settingsManager,
         TenantWhiteLabelSettingsHelper tenantWhiteLabelSettingsHelper)
     {
+        var currentTenant = tenantManager.GetCurrentTenant(false);
+        if (currentTenant == null)
+        {
+            throw new ItemNotFoundException("tenant");
+        }
+
         string logoTypeStr = context.Request.Query["logotype"];
         if (!Enum.TryParse(logoTypeStr, out WhiteLabelLogoType logoType))
         {

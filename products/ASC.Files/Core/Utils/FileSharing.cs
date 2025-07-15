@@ -513,7 +513,7 @@ public class FileSharing(
 
         if (!await fileSecurity.CanReadAsync(entry))
         {
-            logger.ErrorUserCanTGetSharedInfo(authContext.CurrentAccount.ID, entry.FileEntryType, entry.Id.ToString()!);
+            logger.InfoUserCanTGetSharedInfo(authContext.CurrentAccount.ID, entry.FileEntryType, entry.Id.ToString()!, FileSecurity.FilesSecurityActions.Read.ToString());
 
             yield break;
         }
@@ -541,7 +541,7 @@ public class FileSharing(
 
         if (!canAccess)
         {
-            logger.ErrorUserCanTGetSharedInfo(authContext.CurrentAccount.ID, entry.FileEntryType, entry.Id.ToString()!);
+            logger.InfoUserCanTGetSharedInfo(authContext.CurrentAccount.ID, entry.FileEntryType, entry.Id.ToString()!, filterType.ToString());
 
             yield break;
         }
@@ -574,7 +574,7 @@ public class FileSharing(
 
         if (!await CheckAccessAsync(entry, filterType))
         {
-            logger.ErrorUserCanTGetSharedInfo(authContext.CurrentAccount.ID, entry.FileEntryType, entry.Id.ToString()!);
+            logger.InfoUserCanTGetSharedInfo(authContext.CurrentAccount.ID, entry.FileEntryType, entry.Id.ToString()!, filterType.ToString());
 
             return 0;
         }
@@ -594,7 +594,7 @@ public class FileSharing(
 
         if (!await fileSecurity.CanReadAsync(entry))
         {
-            logger.ErrorUserCanTGetSharedInfo(authContext.CurrentAccount.ID, entry.FileEntryType, entry.Id.ToString());
+            logger.InfoUserCanTGetSharedInfo(authContext.CurrentAccount.ID, entry.FileEntryType, entry.Id.ToString()!, FileSecurity.FilesSecurityActions.Read.ToString());
 
             return [];
         }

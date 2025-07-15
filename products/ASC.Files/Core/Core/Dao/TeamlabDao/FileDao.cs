@@ -243,6 +243,7 @@ internal class FileDao(
             case FilterType.SpreadsheetsOnly:
             case FilterType.ArchiveOnly:
             case FilterType.MediaOnly:
+            case FilterType.DiagramsOnly:
                 query = query.Where(r => r.Category == (int)filterType);
                 break;
             case FilterType.ByExtension:
@@ -1070,10 +1071,16 @@ internal class FileDao(
                 
                 if (trashId.Equals(toFolderId))
                 {
+                    await q.ExecuteUpdateAsync(f => f
+                        .SetProperty(p => p.ParentId, toFolderId)
+                        .SetProperty(p => p.ModifiedBy, _authContext.CurrentAccount.ID)
+                        .SetProperty(p => p.ModifiedOn, DateTime.UtcNow));
+
                     await DeleteCustomOrder(filesDbContext, fileId);
                 }
                 else
                 {
+                    await q.ExecuteUpdateAsync(f => f.SetProperty(p => p.ParentId, toFolderId));
                     await SetCustomOrder(filesDbContext, fileId, toFolderId);
                 }
 
@@ -1711,6 +1718,7 @@ internal class FileDao(
             case FilterType.SpreadsheetsOnly:
             case FilterType.ArchiveOnly:
             case FilterType.MediaOnly:
+            case FilterType.DiagramsOnly:
             case FilterType.PdfForm:
             case FilterType.Pdf:
                 q = q.Where(r => r.Category == (int)filterType);
@@ -2090,6 +2098,7 @@ internal class FileDao(
                 case FilterType.SpreadsheetsOnly:
                 case FilterType.ArchiveOnly:
                 case FilterType.MediaOnly:
+                case FilterType.DiagramsOnly:
                     result.Where(r => r.Category, (int)filterType);
                     break;
             }
@@ -2443,6 +2452,7 @@ internal class FileDao(
             case FilterType.SpreadsheetsOnly:
             case FilterType.ArchiveOnly:
             case FilterType.MediaOnly:
+            case FilterType.DiagramsOnly:
             case FilterType.PdfForm:
             case FilterType.Pdf:
                 q = q.Where(r => r.Category == (int)filterType);
@@ -2549,6 +2559,7 @@ internal class FileDao(
             case FilterType.SpreadsheetsOnly:
             case FilterType.ArchiveOnly:
             case FilterType.MediaOnly:
+            case FilterType.DiagramsOnly:
             case FilterType.Pdf:
             case FilterType.PdfForm:
                 q = q.Where(r => r.Entry.Category == (int)filterType);

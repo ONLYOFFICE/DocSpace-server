@@ -75,7 +75,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
     public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(File<T> file, bool lastVersion, bool editPossible, bool tryEdit,
         bool tryCoauth, bool fillFormsPossible, EditorType editorType, bool isSubmitOnly = false)
     {
-        var docParams = await GetParamsAsync(file, lastVersion, true, editPossible, editPossible, tryEdit, tryCoauth, fillFormsPossible);
+        var docParams = await GetParamsAsync(file, lastVersion, editPossible, editPossible, tryEdit, tryCoauth, fillFormsPossible);
         docParams.Configuration.EditorType = editorType;
 
         if (isSubmitOnly)
@@ -91,7 +91,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
     {
         var (file, lastVersion) = await GetCurFileInfoAsync(fileId, version);
 
-        return await GetParamsAsync(file, lastVersion, true, true, editPossible, tryEdit, tryCoAuthoring, fillFormsPossible);
+        return await GetParamsAsync(file, lastVersion, true, editPossible, tryEdit, tryCoAuthoring, fillFormsPossible);
     }
 
     public async Task<bool> CheckCustomQuota<T>(Folder<T> rootFolder)
@@ -140,7 +140,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         return true;
     }
 
-    private async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(File<T> file, bool lastVersion, bool rightToRename,
+    private async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(File<T> file, bool lastVersion,
         bool rightToEdit, bool editPossible, bool tryEdit, bool tryCoAuthoring, bool fillFormsPossible)
     {
 
@@ -171,7 +171,6 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         }
 
         rightModifyFilter = rightModifyFilter && await fileSecurity.CanEditAsync(file) && !await customFilterManager.CustomFilterEnabledForMeAsync(file);
-        rightToRename = rightToRename && rightToEdit && await fileSecurity.CanRenameAsync(file);
 
         rightToReview = rightToReview && await fileSecurity.CanReviewAsync(file);
         if (reviewPossible && !rightToReview)
@@ -214,7 +213,6 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
                 strError = FilesCommonResource.ErrorMessage_LockedFile;
             }
 
-            rightToRename = false;
             rightToEdit = editPossible = false;
             rightToReview = reviewPossible = false;
             rightToFillForms = fillFormsPossible = false;
@@ -264,12 +262,8 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             rightToComment = commentPossible = false;
         }
 
-        var rightChangeHistory = rightToEdit && !file.Encrypted;
-
         if (await fileTracker.IsEditingAsync(file.Id))
         {
-            rightChangeHistory = false;
-
             bool canCoAuthoring;
             if ((editPossible || reviewPossible || fillFormsPossible || commentPossible)
                 && tryCoAuthoring
@@ -311,11 +305,9 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         configuration.Document.Permissions = new PermissionsConfig
         {
             Edit = rightToEdit && lastVersion,
-            Rename = rightToRename && lastVersion && !file.ProviderEntry,
             Review = rightToReview && lastVersion,
             FillForms = rightToFillForms && lastVersion,
             Comment = rightToComment && lastVersion,
-            ChangeHistory = rightChangeHistory,
             ModifyFilter = rightModifyFilter,
             Print = rightToDownload,
             Download = rightToDownload && noWatermark,

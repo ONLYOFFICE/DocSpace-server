@@ -2,13 +2,13 @@
   "$schema": "./node_modules/@openapitools/openapi-generator-cli/config.schema.json",
   "spaces": 2,
   "generator-cli": {
-    "version": "7.12.0"
+    "version": "7.13.0"
   },
   "generatorName": "my-csharp",
   "inputSpec": "./tools/api-docs.json",
   "outputDir": "ClientNet",
   "additionalProperties": {
-	"packageName": "Docspace",
+	"packageName": "DocSpace.Sdk",
 	"library": "httpclient",
     "licenseName": "Apache-2.0",
 	"targetFramework": "net9.0"

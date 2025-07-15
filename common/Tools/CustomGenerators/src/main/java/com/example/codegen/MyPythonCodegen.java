@@ -1,10 +1,20 @@
 package com.example.codegen;
 
+import com.samskivert.mustache.Mustache.Lambda;
+import com.samskivert.mustache.Mustache;
+import com.samskivert.mustache.Template;
+
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Map;
+import java.util.List;
+
 import org.openapitools.codegen.model.ModelMap;
 import org.openapitools.codegen.model.ModelsMap;
 import org.openapitools.codegen.languages.PythonClientCodegen;
 import org.openapitools.codegen.SupportingFile;
 import org.openapitools.codegen.CodegenModel;
+import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.servers.ServerVariables;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.servers.ServerVariable;
@@ -16,18 +26,15 @@ public class MyPythonCodegen extends PythonClientCodegen {
         this.outputFolder = "generated-code/my-python-custom";
         this.templateDir = "templates/python";
         this.embeddedTemplateDir = "python";
-        
-        supportingFiles.removeIf(f -> f.getTemplateFile().equals("git_push.sh.mustache") || 
-            f.getDestinationFilename().equals(".openapi-generator-ignore")
-        );
 
         supportingFiles.add(new SupportingFile("main.mustache", "", "main.py"));
     }
 
-    @Override
+        @Override
     public void processOpts() {
         super.processOpts();
 
+        String baseURL = openAPI.getServers().get(0).getUrl();
         if (openAPI.getServers() != null && !openAPI.getServers().isEmpty()) {
             Server server = openAPI.getServers().get(0);
             ServerVariables serverVars = server.getVariables();
@@ -42,6 +49,8 @@ public class MyPythonCodegen extends PythonClientCodegen {
 
     @Override
     public ModelsMap postProcessModels(ModelsMap objs) {
+        super.postProcessModels(objs);
+
         for (ModelMap mo : objs.getModels()) {
             CodegenModel model = mo.getModel();
             if ("ApiDateTime".equals(model.classname)) {

@@ -1920,4 +1920,52 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Hizmetlere git</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Cüzdan ayarlarına git</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Merhaba, $UserName!
+
+Satın aldığınız hizmet planınızın otomatik yenileme işlemi tamamlanamadığını bildirmek için sizinle iletişime geçiyoruz.
+
+Mevcut hizmet planınızı manuel olarak yenilemenizi (veya yeni bir plan satın almanızı) rica ediyoruz.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Merhaba, $UserName!
+
+Abonelik ödemenizin 3 gün içinde hesabınızdan otomatik olarak tahsil edileceğini bildirmek için sizinle iletişime geçiyoruz.
+
+İşlemin sorunsuz gerçekleşebilmesi için ödeme yönteminizde yeterli bakiye bulunduğundan emin olmanızı rica ediyoruz.
+
+Herhangi bir sorunuz varsa veya yardıma ihtiyaç duyarsanız, "destek ekibimizle":"${__SupportLink}" iletişime geçebilirsiniz.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Merhaba, $UserName!
+
+DocSpace Cüzdan bakiyesinin otomatik olarak yüklenmesinin başarısız olduğunu bildirmek için size ulaşıyoruz.
+
+Cüzdan bakiyenizi manuel olarak kontrol etmenizi ve güncellemenizi rica ediyoruz.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Eylem Gerekiyor: ${LetterLogoText} DocSpace alanınızdaki hizmet planınız otomatik olarak yenilenemedi</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace alanınız için yaklaşan abonelik ödemesi</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Eylem Gerekiyor: ${LetterLogoText} DocSpace cüzdan bakiyeniz otomatik olarak yüklenemedi</value>
+  </data>
 </root>

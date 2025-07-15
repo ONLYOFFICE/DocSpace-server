@@ -255,6 +255,11 @@ public class CustomerInfo
     /// The email address of the customer.
     /// </summary>
     public string Email { get; init; }
+
+    public bool IsDefault()
+    {
+        return PortalId == null && PaymentMethodStatus == PaymentMethodStatus.None && Email == null;
+    }
 }
 
 /// <summary>
@@ -270,6 +275,11 @@ public class Balance
     /// A list of sub-accounts.
     /// </summary>
     public List<SubAccount> SubAccounts { get; init; }
+
+    public bool IsDefault()
+    {
+        return AccountNumber == 0 && SubAccounts == null;
+    }
 }
 
 /// <summary>

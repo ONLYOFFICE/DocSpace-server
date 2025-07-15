@@ -512,4 +512,10 @@ Paras yhteensopivuus docx:n, xlsx:n, pptx:n kanssa.</value>
   <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
     <value>Aloita täyttäminen</value>
   </data>
+  <data name="RoleEnum_Guest" xml:space="preserve">
+    <value>Vieras</value>
+  </data>
+  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
+    <value>Huoneen pääkäyttäjä</value>
+  </data>
 </root>

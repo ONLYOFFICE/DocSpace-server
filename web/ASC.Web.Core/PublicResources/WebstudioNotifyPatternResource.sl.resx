@@ -1985,4 +1985,52 @@ $TrulyYours</value>
   <data name="subject_user_type_changed" xml:space="preserve">
     <value>Vaša vrsta uporabnika DocSpace se je spremenila</value>
   </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Pojdi na Storitve</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Pojdi v nastavitve Denarnice</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Pozdravljen, $UserName!
+
+Obveščamo vas, da samodejne obnove vašega naročniškega paketa ni bilo mogoče izvesti.
+
+Vljudno vas prosimo, da ročno obnovite svoj trenutni naročniški paket (ali kupite novega).
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Pozdravljen, $UserName!
+
+Obveščamo vas, da bo plačilo vaše naročnine samodejno odtegnjeno z vašega računa v 3 dneh.
+
+Za zagotovitev nemotenega poteka transakcije vas prosimo, da potrdite, da je na vašem plačilnem računu na voljo dovolj sredstev.
+
+Če imate kakršna koli vprašanja ali potrebujete pomoč, se obrnite na našo "ekipo za podporo":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Pozdravljen, $UserName!
+
+Obveščamo vas, da samodejno polnjenje stanja denarnice DocSpace ni bilo uspešno.
+
+Vljudno vas prosimo, da stanje v denarnici preverite in posodobite ročno.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Zahtevano dejanje: Samodejno podaljšanje naročniškega paketa v vašem ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Prihajajoče plačilo naročnine za vaš ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Zahtevano dejanje: Stanja v denarnici ${LetterLogoText} v vašem DocSpace ni mogoče samodejno napolniti.</value>
+  </data>
 </root>
