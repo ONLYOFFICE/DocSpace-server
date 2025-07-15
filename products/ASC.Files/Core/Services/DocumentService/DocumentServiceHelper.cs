@@ -712,7 +712,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         {
             result = new FormOpenSetup<T>
             {
-                CanEdit = edit,
+                CanEdit = !fill,
                 CanFill = fill || canFill,
                 CanStartFilling = true,
                 EditorType = editorType
