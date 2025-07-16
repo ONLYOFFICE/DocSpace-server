@@ -62,6 +62,16 @@ public class FolderLinkRequest
     /// Specifies if downloading the file from the link is disabled or not.
     /// </summary>
     public bool DenyDownload { get; set; }
+    
+    /// <summary>
+    /// The link scope, whether it is internal or not.
+    /// </summary>
+    public bool Internal { get; set; }
+    
+    /// <summary>
+    /// Specifies whether the folder link is primary or not.
+    /// </summary>
+    public bool Primary { get; set; }
 }
 
 /// <summary>

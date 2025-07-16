@@ -19,11 +19,10 @@ global using ASC.Migrations.Core;
 global using Bogus;
 global using Bogus.DataSets;
 
-global using Docspace.Api;
-global using Docspace.Client;
-global using Docspace.Model;
+global using DocSpace.Sdk.Api;
+global using DocSpace.Sdk.Client;
+global using DocSpace.Sdk.Model;
 
-global using DotNet.Testcontainers.Builders;
 global using DotNet.Testcontainers.Containers;
 
 global using FluentAssertions;
@@ -53,11 +52,20 @@ global using Testcontainers.Redis;
 
 global using Xunit;
 
-global using FileOperationDto = Docspace.Model.FileOperationDto;
-global using FileShare = Docspace.Model.FileShare;
+global using ApiDateTime = DocSpace.Sdk.Model.ApiDateTime;
+global using CreateFolder = DocSpace.Sdk.Model.CreateFolder;
+global using CreateRoomRequestDto = DocSpace.Sdk.Model.CreateRoomRequestDto;
+global using ExternalShareRequestParam = DocSpace.Sdk.Model.ExternalShareRequestParam;
+global using FileLinkRequest = DocSpace.Sdk.Model.FileLinkRequest;
+global using FileOperationDto = DocSpace.Sdk.Model.FileOperationDto;
+global using FileShare = DocSpace.Sdk.Model.FileShare;
+global using FileShareDto = DocSpace.Sdk.Model.FileShareDto;
+global using FolderLinkRequest = DocSpace.Sdk.Model.FolderLinkRequest;
+global using FolderType = DocSpace.Sdk.Model.FolderType;
+global using RoomType = DocSpace.Sdk.Model.RoomType;
+global using User = ASC.Files.Tests.Data.User;
+
 global using WebApiProgram = ASCWebApi::Program;
 global using FilesProgram = ASCFiles::Program;
 global using PeopleProgram = ASCPeople::Program;
 global using FilesServiceProgram = ASCFilesService::Program;
-global using FolderType = Docspace.Model.FolderType;
-global using User = ASC.Files.Tests.Data.User;

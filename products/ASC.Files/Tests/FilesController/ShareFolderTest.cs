@@ -57,6 +57,9 @@ public class ShareFolderTest(
         result.Access.Should().Be(FileShare.Read);
         result.CanEditAccess.Should().BeFalse();
         result.IsOwner.Should().BeFalse();
+        sharedTo.DenyDownload.Should().BeFalse();
+        sharedTo.ExpirationDate.Should().BeNull();
+        sharedTo.Internal.Should().BeFalse();
 
         folderInfo.Should().NotBeNull();
         folderInfo.Current.Should().NotBeNull();
@@ -77,16 +80,17 @@ public class ShareFolderTest(
         var result = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         var sharedTo = DeserializeSharedToLink(result);
 
-        var data = new FolderLinkRequest(sharedTo.Id, FileShare.Editing, new ApiDateTime { UtcTime = DateTime.UtcNow.AddDays(1) }, folder.Title + " updated", "11111111", true);
+        var data = new FolderLinkRequest(sharedTo.Id, FileShare.Editing, new ApiDateTime { UtcTime = DateTime.UtcNow.AddDays(1) }, folder.Title + " updated", "11111111", true, true);
         var updatedExternalLink = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, data, TestContext.Current.CancellationToken)).Response;
         var updatedSharedTo = DeserializeSharedToLink(updatedExternalLink);
 
         // Assert
         updatedExternalLink.Should().NotBeNull();
         updatedExternalLink.Access.Should().Be(data.Access);
-
         updatedSharedTo.Id.Should().Be(data.LinkId);
+        updatedSharedTo.ExpirationDate.Should().NotBeNull();
         updatedSharedTo.ExpirationDate.UtcTime.Should().Be(data.ExpirationDate.UtcTime);
+        updatedSharedTo.Internal.Should().Be(data.Internal);
         updatedSharedTo.Title.Should().Be(data.Title);
         updatedSharedTo.Password.Should().Be(data.Password);
         updatedSharedTo.DenyDownload.Should().Be(data.DenyDownload);

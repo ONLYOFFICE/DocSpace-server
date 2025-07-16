@@ -204,6 +204,7 @@ public class ShareFileTest(
         // Assert
         updatedLink.Should().NotBeNull();
         updatedLink.Access.Should().Be(updateLinkParams.Access);
+        updatedSharedTo.Id.Should().Be(updateLinkParams.LinkId);
         updatedSharedTo.ExpirationDate.Should().NotBeNull();
         updatedSharedTo.ExpirationDate.UtcTime.Should().Be(updateLinkParams.ExpirationDate.UtcTime);
         updatedSharedTo.Internal.Should().Be(updateLinkParams.Internal);

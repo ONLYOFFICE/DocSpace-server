@@ -319,7 +319,7 @@ public abstract class FoldersController<T>(
     [HttpGet("folder/{id}/link")]
     public async Task<FileShareDto> GetFolderPrimaryExternalLink(FolderPrimaryIdRequestDto<T> inDto)
     {
-        var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(inDto.Id, FileEntryType.Folder);
+        var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(inDto.Id, FileEntryType.Folder, allowUnlimitedDate: true);
 
         return await fileShareDtoHelper.Get(linkAce);
     }
@@ -334,8 +334,17 @@ public abstract class FoldersController<T>(
     [HttpPut("folder/{id}/links")]
     public async Task<FileShareDto> SetFolderPrimaryExternalLink(FolderLinkRequestDto<T> inDto)
     {
-        var linkAce = await fileStorageService.SetExternalLinkAsync(inDto.Id, FileEntryType.Folder, inDto.FolderLink.LinkId, inDto.FolderLink.Title,
-            inDto.FolderLink.Access, inDto.FolderLink.ExpirationDate, inDto.FolderLink.Password?.Trim(), inDto.FolderLink.DenyDownload);
+        var linkAce = await fileStorageService.SetExternalLinkAsync(
+            inDto.Id,
+            FileEntryType.Folder,
+            inDto.FolderLink.LinkId,
+            inDto.FolderLink.Title,
+            inDto.FolderLink.Access,
+            inDto.FolderLink.ExpirationDate,
+            inDto.FolderLink.Password?.Trim(),
+            inDto.FolderLink.DenyDownload,
+            inDto.FolderLink.Internal,
+            inDto.FolderLink.Primary);
 
         if (linkAce == null)
         {
