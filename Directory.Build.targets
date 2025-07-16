@@ -1,0 +1,15 @@
+<Project>
+    <Target Name="_Microsoft_Extensions_Telemetry_AbstractionsRemoveAnalyzers" BeforeTargets="ResolveReferences">
+        <PropertyGroup>
+            <DisableMicrosoftExtensionsLoggingSourceGenerator>false</DisableMicrosoftExtensionsLoggingSourceGenerator>
+        </PropertyGroup>
+        <ItemGroup>
+            <_Microsoft_Extensions_Telemetry_AbstractionsAnalyzer
+                Include="@(Analyzer)"
+                Condition="'%(Analyzer.NuGetPackageId)' == 'Microsoft.Extensions.Telemetry.Abstractions'" />
+        </ItemGroup>
+        <ItemGroup>
+            <Analyzer Remove="@(_Microsoft_Extensions_Telemetry_AbstractionsAnalyzer)" />
+        </ItemGroup>
+    </Target>
+</Project>
