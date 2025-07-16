@@ -43,11 +43,16 @@ public class TelegramController(
     /// <short>Check the Telegram connection</short>
     /// <path>api/2.0/settings/telegram/check</path>
     [Tags("Settings / Telegram")]
-    [SwaggerResponse(200, "Status if user is linked or not", typeof(TelegramHelper.RegStatus))]
+    [SwaggerResponse(200, "Status if user is linked or not", typeof(TelegramStatusDto))]
     [HttpGet("telegram/check")]
-    public async Task<TelegramHelper.RegStatus> CheckTelegram()
+    public async Task<TelegramStatusDto> CheckTelegram()
     {
-        return await telegramHelper.UserIsConnectedAsync(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId());
+        var status = await telegramHelper.GetTelegramUserStatus(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId());
+        return new TelegramStatusDto()
+        {
+            Status = status.Item1,
+            Username = status.Item2,
+        };
     }
 
     /// <summary>
