@@ -69,11 +69,7 @@ public class AiConfigurationService(
     {
         await ThrowIfNotAccessAsync();
 
-        var provider = await providerDao.GetProviderAsync(tenantManager.GetCurrentTenantId(), id);
-        if (provider == null)
-        {
-            throw new ItemNotFoundException("Provider not found");
-        }
+        var provider = await GetProviderAsync(id);
 
         if (!string.IsNullOrEmpty(title))
         {
@@ -101,7 +97,7 @@ public class AiConfigurationService(
         
         return await providerDao.UpdateProviderAsync(provider);
     }
-    
+
     public async IAsyncEnumerable<AiProvider> GetProvidersAsync(int offset, int limit)
     {
         await ThrowIfNotAccessAsync();
@@ -130,7 +126,7 @@ public class AiConfigurationService(
     {
         var tenantId = tenantManager.GetCurrentTenantId();
         
-        var provider = await GetProviderAsync(tenantId, providerId);
+        var provider = await GetProviderAsync(providerId);
 
         var userId = authContext.CurrentAccount.ID;
 
@@ -175,7 +171,7 @@ public class AiConfigurationService(
     {
         if (providerId.HasValue)
         {
-            var provider = await GetProviderAsync(tenantManager.GetCurrentTenantId(), providerId.Value);
+            var provider = await GetProviderAsync(providerId.Value);
             return await GetProviderModelsAsync(provider, scope);
         }
         
@@ -201,9 +197,9 @@ public class AiConfigurationService(
         return result.SelectMany(x => x);
     }
     
-    private async Task<AiProvider> GetProviderAsync(int tenantId, int providerId)
+    public async Task<AiProvider> GetProviderAsync(int providerId)
     {
-        var provider = await providerDao.GetProviderAsync(tenantId, providerId);
+        var provider = await providerDao.GetProviderAsync(tenantManager.GetCurrentTenantId(), providerId);
         if (provider == null)
         {
             throw new ItemNotFoundException("Provider not found");

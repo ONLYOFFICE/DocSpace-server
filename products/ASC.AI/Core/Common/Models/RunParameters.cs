@@ -31,4 +31,5 @@ namespace ASC.AI.Core.Common.Models;
 public class RunParameters
 {
     public required string ModelId { get; set; }
+    public string? Prompt { get; set; }
 }

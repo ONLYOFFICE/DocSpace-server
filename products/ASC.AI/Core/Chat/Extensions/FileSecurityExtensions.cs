@@ -35,6 +35,11 @@ public static class FileSecurityExtensions
             return false;
         }
 
+        if (room.FolderType != FolderType.AiRoom)
+        {
+            return false;
+        }
+
         return room.ShareRecord is not { IsLink: true };
     }
 }

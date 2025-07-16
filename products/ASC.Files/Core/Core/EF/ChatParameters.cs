@@ -24,25 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Core.EF;
+namespace ASC.Files.Core.EF;
 
-namespace ASC.AI.Core.Common.Database;
-
-public partial class AiDbContext(DbContextOptions<AiDbContext> options) : BaseDbContext(options)
+public record ChatParameters : IMapFrom<ChatSettings>
 {
-    public DbSet<DbAiProvider> Providers { get; set; }
-    public DbSet<DbAiSettings> Settings { get; set; }
-    
-    public DbSet<DbRoomSettings> RoomSettings { get; set; }
-    
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        ModelBuilderWrapper
-            .From(modelBuilder, Database)
-            .AddDbTenant()
-            .AddAiProviders()
-            .AddAiSettings()
-            .AddDbRoomSettings().
-            AddDbFunctions();
-    }
+    public string ModelId { get; init; }
+    public string Prompt { get; init; }
 }

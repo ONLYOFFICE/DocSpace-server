@@ -476,7 +476,9 @@ internal class FolderDao(
                     DenyDownload = folder.SettingsDenyDownload,
                     Watermark = mapper.Map<WatermarkSettings, DbRoomWatermark>(folder.SettingsWatermark),
                     Quota = folder.SettingsQuota,
-                    Lifetime = mapper.Map<RoomDataLifetime, DbRoomDataLifetime>(folder.SettingsLifetime)
+                    Lifetime = mapper.Map<RoomDataLifetime, DbRoomDataLifetime>(folder.SettingsLifetime),
+                    ChatProviderId = folder.SettingsChatProviderId,
+                    ChatParameters = folder.SettingsChatParameters
                 };
             }
 
@@ -519,7 +521,9 @@ internal class FolderDao(
                     DenyDownload = folder.SettingsDenyDownload,
                     Watermark = mapper.Map<WatermarkSettings, DbRoomWatermark>(folder.SettingsWatermark),
                     Quota = folder.SettingsQuota,
-                    Lifetime = mapper.Map<RoomDataLifetime, DbRoomDataLifetime>(folder.SettingsLifetime)
+                    Lifetime = mapper.Map<RoomDataLifetime, DbRoomDataLifetime>(folder.SettingsLifetime),
+                    ChatProviderId = folder.SettingsChatProviderId,
+                    ChatParameters = folder.SettingsChatParameters
                 };
             }
             
@@ -972,7 +976,7 @@ internal class FolderDao(
         return folder.Id;
     }
 
-    public async Task<int> UpdateFolderAsync(Folder<int> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark, string color, string cover)
+    public async Task<int> UpdateFolderAsync(Folder<int> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark, string color, string cover, ChatSettings chatSettings = null)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
@@ -988,6 +992,12 @@ internal class FolderDao(
         toUpdate.ModifiedBy = _authContext.CurrentAccount.ID;
         toUpdate.Settings.Indexing = indexing;
         toUpdate.Settings.DenyDownload = denyDownload;
+
+        if (chatSettings != null)
+        {
+            toUpdate.Settings.ChatProviderId = chatSettings.ProviderId;
+            toUpdate.Settings.ChatParameters = mapper.Map<ChatSettings, ChatParameters>(chatSettings);
+        }
         
         if (lifeTime != null)
         {

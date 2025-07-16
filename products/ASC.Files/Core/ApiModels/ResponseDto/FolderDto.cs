@@ -158,6 +158,8 @@ public class FolderDto<T> : FileEntryDto<T>
     /// The file entry type of the folder.
     /// </summary>
     public override FileEntryType FileEntryType { get => FileEntryType.Folder; }
+    
+    public ChatSettings ChatSettings { get; set; }
 }
 
 [Scope]
@@ -280,6 +282,16 @@ public class FolderDtoHelper(
         }
 
         result.Lifetime = mapper.Map<RoomDataLifetime, RoomDataLifetimeDto>(folder.SettingsLifetime);
+
+        if (folder.SettingsChatParameters != null)
+        {
+            result.ChatSettings = new ChatSettings
+            {
+                ProviderId = folder.SettingsChatProviderId,
+                ModelId = folder.SettingsChatProviderId > 0 ? folder.SettingsChatParameters.ModelId : null,
+                Prompt = folder.SettingsChatParameters.Prompt,
+            };
+        }
         
         return result;
     }

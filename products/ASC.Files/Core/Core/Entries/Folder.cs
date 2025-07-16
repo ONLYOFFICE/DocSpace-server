@@ -236,6 +236,9 @@ public class Folder<T> : FileEntry<T>, IFolder
     /// </summary>
     public RoomDataLifetime SettingsLifetime { get; set; }
     
+    public int SettingsChatProviderId { get; set; }
+    public ChatParameters SettingsChatParameters { get; set; }
+    
     /// <summary>
     /// Specifies if the files can be downloaded from this folder or not.
     /// </summary>

@@ -51,6 +51,12 @@ public partial class AiDbContext
     {
         return Queries.GetProviderSettingsAsync(this, tenantId, userId, scope);
     }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    public Task<int> UpdateRoomSettingsAsync(int tenantId, IEnumerable<int> providersIds)
+    {
+        return Queries.UpdateRoomSettingsAsync(this, tenantId, providersIds);
+    }
 }
 
 static file class Queries
@@ -89,4 +95,11 @@ static file class Queries
                         Parameters = x.Parameters
                     })
                 .FirstOrDefault());
+
+    public static readonly Func<AiDbContext, int, IEnumerable<int>, Task<int>> UpdateRoomSettingsAsync =
+        EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, IEnumerable<int> providersIds) =>
+            ctx.RoomSettings
+                .Where(x => x.TenantId == tenantId && providersIds.Contains(x.ChatProviderId))
+                .ExecuteUpdate(x => 
+                    x.SetProperty(y => y.ChatProviderId, 0)));
 }

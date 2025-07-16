@@ -476,7 +476,7 @@ public class FileStorageService //: IFileStorageService
         return folder;
     }
 
-    public async Task<Folder<int>> CreateRoomAsync(string title, RoomType roomType, bool privacy, bool? indexing, IEnumerable<FileShareParams> share, long? quota, RoomDataLifetime lifetime, bool? denyDownload, WatermarkRequestDto watermark, string color, string cover, IEnumerable<string> tags, LogoRequest logo)
+    public async Task<Folder<int>> CreateRoomAsync(string title, RoomType roomType, bool privacy, bool? indexing, IEnumerable<FileShareParams> share, long? quota, RoomDataLifetime lifetime, bool? denyDownload, WatermarkRequestDto watermark, string color, string cover, IEnumerable<string> tags, LogoRequest logo, ChatSettings chatSettings = null)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
         var parentId = await globalFolderHelper.GetFolderVirtualRooms();
@@ -486,7 +486,7 @@ public class FileStorageService //: IFileStorageService
             await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetRoomsCountCheckKey(tenantId)))
             {
                 await countRoomChecker.CheckAppend();
-                return await InternalCreateFolderAsync(parentId, title, DocSpaceHelper.MapToFolderType(roomType), privacy, indexing, quota, lifetime, denyDownload, watermark, color, cover, tags, logo);
+                return await InternalCreateFolderAsync(parentId, title, DocSpaceHelper.MapToFolderType(roomType), privacy, indexing, quota, lifetime, denyDownload, watermark, color, cover, tags, logo, chatSettings);
             }
         }, privacy, share);
     }
@@ -737,7 +737,7 @@ public class FileStorageService //: IFileStorageService
         return folder;
     }
 
-    private async Task<Folder<T>> InternalCreateFolderAsync<T>(T parentId, string title, FolderType folderType = FolderType.DEFAULT, bool privacy = false, bool? indexing = false, long? quota = TenantEntityQuotaSettings.DefaultQuotaValue, RoomDataLifetime lifetime = null, bool? denyDownload = false, WatermarkRequestDto watermark = null, string color = null, string cover = null, IEnumerable<string> names = null, LogoRequest logo = null)
+    private async Task<Folder<T>> InternalCreateFolderAsync<T>(T parentId, string title, FolderType folderType = FolderType.DEFAULT, bool privacy = false, bool? indexing = false, long? quota = TenantEntityQuotaSettings.DefaultQuotaValue, RoomDataLifetime lifetime = null, bool? denyDownload = false, WatermarkRequestDto watermark = null, string color = null, string cover = null, IEnumerable<string> names = null, LogoRequest logo = null, ChatSettings chatSettings = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(title);
         ArgumentNullException.ThrowIfNull(parentId);
@@ -814,6 +814,19 @@ public class FileStorageService //: IFileStorageService
             if (quota.HasValue)
             {
                 newFolder.SettingsQuota = quota.Value;
+            }
+
+            if (chatSettings != null)
+            {
+                ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(
+                    chatSettings.ProviderId, 
+                    0, 
+                    nameof(chatSettings.ProviderId));
+                
+                ArgumentException.ThrowIfNullOrEmpty(chatSettings.ModelId);
+                
+                newFolder.SettingsChatProviderId = chatSettings.ProviderId;
+                newFolder.SettingsChatParameters = mapper.Map<ChatSettings, ChatParameters>(chatSettings);
             }
 
             newFolder.SettingsLifetime = lifetime;
@@ -1011,12 +1024,23 @@ public class FileStorageService //: IFileStorageService
         var watermarkChanged = updateData.Watermark != null;
         var colorChanged = updateData.Color != null && folder.SettingsColor != updateData.Color;
         var coverChanged = updateData.Cover != null && folder.SettingsCover != updateData.Cover;
+        var chatSettingsChanged = updateData.ChatSettings != null;
 
-        if (titleChanged || quotaChanged || indexingChanged || denyDownloadChanged || lifetimeChanged || watermarkChanged || colorChanged || coverChanged)
+        if (titleChanged || quotaChanged || indexingChanged || denyDownloadChanged || lifetimeChanged || watermarkChanged || colorChanged || coverChanged || chatSettingsChanged)
         {
             var oldTitle = folder.Title;
             WatermarkSettings watermark = null;
             RoomDataLifetime lifetime = null;
+
+            if (chatSettingsChanged)
+            {
+                ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(
+                    updateData.ChatSettings.ProviderId, 
+                    0, 
+                    nameof(updateData.ChatSettings.ProviderId));
+                
+                ArgumentException.ThrowIfNullOrEmpty(updateData.ChatSettings.ModelId);
+            }
 
             if (watermarkChanged)
             {
@@ -1039,7 +1063,8 @@ public class FileStorageService //: IFileStorageService
                 lifetimeChanged ? lifetime : folder.SettingsLifetime,
                 watermarkChanged ? (updateData.Watermark.Enabled.HasValue && !updateData.Watermark.Enabled.Value ? null : watermark) : folder.SettingsWatermark,
                 colorChanged ? updateData.Color : folder.SettingsColor,
-                coverChanged ? updateData.Cover : folder.SettingsCover);
+                coverChanged ? updateData.Cover : folder.SettingsCover,
+                chatSettingsChanged ? updateData.ChatSettings : null);
 
             folder = await folderDao.GetFolderAsync(newFolderId);
 

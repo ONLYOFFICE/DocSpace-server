@@ -83,6 +83,8 @@ public class UpdateRoomRequest
     /// </summary>
     [StringLength(50)]
     public string Cover { get; set; }
+    
+    public ChatSettings ChatSettings { get; set; }
 }
 
 /// <summary>

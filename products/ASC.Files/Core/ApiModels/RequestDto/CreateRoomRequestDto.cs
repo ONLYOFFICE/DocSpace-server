@@ -146,4 +146,6 @@ public class CreateRoomRequestDto
     /// The collection of sharing parameters.
     /// </summary>
     public IEnumerable<FileShareParams> Share { get; set; }
+    
+    public ChatSettings ChatSettings { get; set; }
 }

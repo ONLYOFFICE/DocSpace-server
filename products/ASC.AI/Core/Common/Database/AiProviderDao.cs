@@ -129,7 +129,7 @@ public class AiProviderDao(
             var transaction = await context.Database.BeginTransactionAsync();
             
             await context.DeleteProvidersAsync(tenantId, ids);
-            await context.DeleteSettingsAsync(tenantId, ids);
+            await context.UpdateRoomSettingsAsync(tenantId, ids);
             
             await context.SaveChangesAsync();
             await transaction.CommitAsync();

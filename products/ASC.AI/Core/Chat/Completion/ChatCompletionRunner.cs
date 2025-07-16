@@ -38,58 +38,20 @@ public class ChatCompletionRunner(
     ILogger<ChatCompletionGenerator> logger,
     AiConfigurationService configurationService)
 {
-    private const string PromptTemplate =
-        """
-        You are an intelligent AI agent.
-        Your task is to call the specified function(s) to fulfill the user's request.
-        If a function call fails or returns an error, analyze the error message and attempt to correct your input or approach.
-        Make up to three additional attempts, each time adjusting your function call based on the feedback or error details.
-        After each failed attempt, clearly explain your reasoning for the next correction.
-        If you are unable to succeed after several attempts, summarize the errors and provide a clear explanation of why the task could not be completed.
-        
-        Important: 
-            All your reasoning, explanations, and answers must be in the same language as the user's original question.
-            You operate within the context of a specific folder, identified by {0}.
-            If you call a function that requires a folder identifier and the user has not provided one, automatically use the {0} from your current context.
-        
-        Instructions:
-          - Carefully read the function documentation and input requirements.
-          - On each attempt:
-              -- Adjust parameters, data types, or formatting as needed based on the error message.
-              -- If a required folder identifier is missing, use the contextual {0}.
-              -- Avoid repeating the same mistake.
-              -- Document each step and correction in your response.
-              -- Stop retrying after three failed attempts, and report the final outcome.
-          
-        Example Structure
-            Initial Attempt:
-              - Describe your initial function call and reasoning.
-            If Error Occurs:
-             - Quote the error message.
-             - Explain how you will adjust the next attempt.
-             - Retry with revised parameters.
-            Repeat up to Three Corrections:
-              - For each, document the error and your new approach.
-            Final Outcome:
-              - If successful, explain what worked.
-              - If unsuccessful, summarize the errors and possible solutions.
-        """;
-
     public async Task<ChatCompletionGenerator> StartNewChatAsync(int roomId, string message, int? contextFolderId = null)
     {
-        await ChekRoomAsync(roomId);
+        var config = await GetRungConfigAsync(roomId);
         
         var tenantId = tenantManager.GetCurrentTenantId();
 
         var userMessage = new ChatMessage(ChatRole.User, message);
         var chat = await chatHistory.AddChatAsync(tenantId, roomId, authContext.CurrentAccount.ID, userMessage);
         
-        var config = await configurationService.GetRunConfigurationAsync(Scope.Chat);
-        var client = await CreateClientAsync(tenantId, roomId, chat.Id, config);
+        var client = await InitializeClientAsync(tenantId, roomId, chat.Id, config);
         
         var messages = new List<ChatMessage>
         {
-            new(ChatRole.System, string.Format(PromptTemplate, contextFolderId ?? roomId)),
+            new(ChatRole.System, ChatPromptTemplate.GetPrompt(config.Parameters.Prompt, contextFolderId ?? roomId, roomId)),
             userMessage
         };
 
@@ -108,10 +70,9 @@ public class ChatCompletionRunner(
             throw new ItemNotFoundException("Chat not found");
         }
 
-        await ChekRoomAsync(chat.RoomId);
-        
-        var config = await configurationService.GetRunConfigurationAsync(Scope.Chat);
-        var client = await CreateClientAsync(tenantId, chat.RoomId, chatId, config);
+        var config = await GetRungConfigAsync(chat.RoomId);
+
+        var client = await InitializeClientAsync(tenantId, chat.RoomId, chatId, config);
 
         var historyAdapter = HistoryHelper.GetAdapter(config.ProviderType);
         var history = await chatHistory.GetMessagesAsync(chatId, historyAdapter).ToListAsync();
@@ -122,7 +83,7 @@ public class ChatCompletionRunner(
         
         var messages = new List<ChatMessage>(history.Count + 2)
         {
-            new(ChatRole.System, string.Format(PromptTemplate, contextFolderId ?? chat.RoomId))
+            new(ChatRole.System, ChatPromptTemplate.GetPrompt(config.Parameters.Prompt, contextFolderId ?? chat.RoomId, chat.RoomId))
         };
         
         messages.AddRange(history);
@@ -131,15 +92,33 @@ public class ChatCompletionRunner(
         return new ChatCompletionGenerator(logger, chatId, chatHistory, client, messages);
     }
 
-    private async Task<IChatClient> CreateClientAsync(int tenantId, int roomId, Guid chatId, RunConfiguration config)
+    private async Task<RunConfiguration> GetRungConfigAsync(int roomId)
     {
-        var toolsTask = toolsProvider.GetToolsAsync(tenantId, roomId);
+        var room = await GetRoomAsync(roomId);
+        var provider = await configurationService.GetProviderAsync(room.SettingsChatProviderId);
+
+        var config = new RunConfiguration
+        {
+            Url = provider.Url,
+            Key = provider.Key,
+            ProviderType = provider.Type,
+            Parameters = new ChatParameters
+            {
+                ModelId = room.SettingsChatParameters.ModelId, 
+                Prompt = room.SettingsChatParameters.Prompt
+            }
+        };
+        return config;
+    }
+
+    private async Task<IChatClient> InitializeClientAsync(int tenantId, int roomId, Guid chatId, RunConfiguration config)
+    {
+        var tools = await toolsProvider.GetToolsAsync(tenantId, roomId);
         var client = chatClientFactory.Create(config);
         
         var builder = client.AsBuilder();
         builder.ConfigureOptions(x => x.ConversationId = chatId.ToString());
         
-        var tools = await toolsTask;
         if (tools is { Count: > 0 })
         {
             builder.ConfigureOptions(x =>
@@ -153,7 +132,7 @@ public class ChatCompletionRunner(
         return builder.Build();
     }
     
-    private async Task ChekRoomAsync(int roomId)
+    private async Task<Folder<int>> GetRoomAsync(int roomId)
     {
         var folderDao = daoFactory.GetFolderDao<int>();
         var room = await folderDao.GetFolderAsync(roomId);
@@ -166,5 +145,7 @@ public class ChatCompletionRunner(
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFolder);
         }
+
+        return room;
     }
 }

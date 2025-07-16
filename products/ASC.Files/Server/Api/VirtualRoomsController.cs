@@ -83,7 +83,9 @@ public class VirtualRoomsInternalController(
             lifetime.StartDate = DateTime.UtcNow;
         }
 
-        var room = await _fileStorageService.CreateRoomAsync(inDto.Title, inDto.RoomType, inDto.Private, inDto.Indexing, inDto.Share, inDto.Quota, lifetime, inDto.DenyDownload, inDto.Watermark, inDto.Color, inDto.Cover, inDto.Tags, inDto.Logo);
+        var room = await _fileStorageService.CreateRoomAsync(inDto.Title, inDto.RoomType, inDto.Private, 
+            inDto.Indexing, inDto.Share, inDto.Quota, lifetime, inDto.DenyDownload, inDto.Watermark, inDto.Color, inDto.Cover, 
+            inDto.Tags, inDto.Logo, inDto.ChatSettings);
 
         return await _folderDtoHelper.GetAsync(room);
     }
