@@ -290,7 +290,7 @@ public class BillingClient
     }
 }
 
-public static class BillingHttplClientExtension
+public static class BillingHttpClientExtension
 {
     public static void AddBillingHttpClient(this IServiceCollection services)
     {

@@ -405,7 +405,7 @@ public class Currency
     public string Code { get; init; }
 }
 
-public static class AccountingHttplClientExtension
+public static class AccountingHttpClientExtension
 {
     public static void AddAccountingHttpClient(this IServiceCollection services)
     {
