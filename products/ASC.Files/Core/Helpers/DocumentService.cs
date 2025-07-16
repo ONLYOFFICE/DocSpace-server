@@ -1064,6 +1064,7 @@ public static class DocumentServiceHttpClientExtension
                         ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
                             .Handle<HttpRequestException>()
                             .Handle<TaskCanceledException>()
+                            .Handle<TimeoutRejectedException>()
                             .HandleResult(response => !response.IsSuccessStatusCode),
 
                         DelayGenerator = (args) =>
@@ -1093,6 +1094,7 @@ public static class DocumentServiceHttpClientExtension
                         ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
                             .Handle<HttpRequestException>()
                             .Handle<TaskCanceledException>()
+                            .Handle<TimeoutRejectedException>()
                             .HandleResult(response => !response.IsSuccessStatusCode),
 
                         DelayGenerator = (args) =>
