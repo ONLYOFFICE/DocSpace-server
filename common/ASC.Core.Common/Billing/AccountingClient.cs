@@ -429,9 +429,9 @@ public static class AccountingHttplClientExtension
         {
             pipelineBuilder.AddRetry(new RetryStrategyOptions<bool>()
             {
-                MaxRetryAttempts = 3,
+                MaxRetryAttempts = 15,
                 Delay = TimeSpan.FromSeconds(1),
-                BackoffType = DelayBackoffType.Exponential,
+                BackoffType = DelayBackoffType.Constant,
                 ShouldHandle = new PredicateBuilder<bool>().HandleResult(result => result == false)
             });
         });
