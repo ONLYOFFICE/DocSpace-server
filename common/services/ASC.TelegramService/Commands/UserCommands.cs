@@ -56,10 +56,11 @@ public class UserCommands(TelegramDao telegramDao, IDistributedCache distributed
             var portalUserId = Guid.Parse(split[0]);
             var tenantId = int.Parse(split[1]);
             var telegramUserId = Context.User.Id;
+            var telegramUsername = Context.User.Username;
 
             if (tenantId == TenantId)
             {
-                await telegramDao.RegisterUserAsync(portalUserId, tenantId, telegramUserId);
+                await telegramDao.RegisterUserAsync(portalUserId, tenantId, telegramUserId, telegramUsername);
 
                 await ReplyAsync("Ok!");
 

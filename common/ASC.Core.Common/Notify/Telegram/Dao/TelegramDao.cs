@@ -29,13 +29,14 @@ namespace ASC.Core.Common.Notify.Telegram;
 [Scope]
 public class TelegramDao(IDbContextFactory<TelegramDbContext> dbContextFactory)
 {
-    public async Task RegisterUserAsync(Guid userId, int tenantId, long telegramId)
+    public async Task RegisterUserAsync(Guid userId, int tenantId, long telegramId, string telegramUsername)
     {
         var user = new TelegramUser
         {
             PortalUserId = userId,
             TenantId = tenantId,
-            TelegramUserId = telegramId
+            TelegramUserId = telegramId,
+            TelegramUsername = telegramUsername,
         };
 
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();

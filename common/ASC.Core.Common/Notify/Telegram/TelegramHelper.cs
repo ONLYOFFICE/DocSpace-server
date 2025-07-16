@@ -73,11 +73,12 @@ public class TelegramHelper(ConsumerFactory consumerFactory,
         return false;
     }
 
-    public async Task<RegStatus> UserIsConnectedAsync(Guid userId, int tenantId)
+    public async Task<(RegStatus, string)> GetTelegramUserStatus(Guid userId, int tenantId)
     {
-        return await telegramDao.GetUserAsync(userId, tenantId) != null
-            ? RegStatus.linked
-            : IsAwaitingRegistration(userId, tenantId) ? RegStatus.linking : RegStatus.unlinked;
+        var tgUser = await telegramDao.GetUserAsync(userId, tenantId);
+        return tgUser == null
+            ? (IsAwaitingRegistration(userId, tenantId) ? RegStatus.linking : RegStatus.unlinked, null)
+            : (RegStatus.linked, tgUser.TelegramUsername);
     }
 
     public string CurrentRegistrationLink(Guid userId, int tenantId)
