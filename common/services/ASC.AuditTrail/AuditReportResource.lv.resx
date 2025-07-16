@@ -913,4 +913,31 @@
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Tīmekļa aizķere atjaunināta: {0}</value>
   </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>Autorizācijas saite ir aktivizēta</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Klienta darbība veikta</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Klienta darbību ziņojums lejupielādēts</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Klienta abonements atjaunināts: {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Klienta maks papildināts: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Klienta maka papildināšanas iestatījumi atjaunināti</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>LDAP autentifikācija ir atspējota</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>LDAP autentifikācija ir iespējota</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>LDAP sinhronizācija pabeigta</value>
+  </data>
 </root>

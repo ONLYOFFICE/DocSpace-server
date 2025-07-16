@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Api.Core.Convention;
+using ASC.Data.Storage;
 using ASC.Data.Backup.Services;
 
 using Swashbuckle.AspNetCore.Annotations;
@@ -82,7 +83,7 @@ public class BackupController(
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [SwaggerResponse(404, "The required folder was not found")]
     [HttpPost("createbackupschedule")]
-    public async Task<bool> CreateBackupScheduleAsync(BackupScheduleDto inDto)
+    public async Task<bool> CreateBackupSchedule(BackupScheduleDto inDto)
     {
         if (inDto.Dump) 
         {
@@ -152,7 +153,7 @@ public class BackupController(
     [SwaggerResponse(404, "The required folder was not found")]
     [AllowNotPayment]
     [HttpPost("startbackup")]
-    public async Task<BackupProgress> StartBackupAsync(BackupDto inDto)
+    public async Task<BackupProgress> StartBackup(BackupDto inDto, [FromServices] TenantQuotaController quotaController)
     {
         if (inDto.Dump)
         {
@@ -180,6 +181,11 @@ public class BackupController(
 
         if (storageType is BackupStorageType.Documents or BackupStorageType.ThridpartyDocuments)
         {
+            if (storageType is BackupStorageType.Documents)
+            {
+                quotaController.Init(tenantManager.GetCurrentTenantId());
+                await quotaController.QuotaUsedCheckAsync(0, authContext.CurrentAccount.ID);
+            }
 
             if (int.TryParse(storageParams["folderId"], out var fId))
             {
@@ -226,7 +232,7 @@ public class BackupController(
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [AllowNotPayment]
     [HttpGet("getbackupprogress")]
-    public async Task<BackupProgress> GetBackupProgressAsync(DumpDto dto)
+    public async Task<BackupProgress> GetBackupProgress(DumpDto dto)
     {
         if (dto.Dump)
         {
@@ -300,7 +306,7 @@ public class BackupController(
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [SwaggerResponse(404, "The required file or folder was not found")]
     [HttpPost("startrestore")]
-    public async Task<BackupProgress> StartBackupRestoreAsync(BackupRestoreDto inDto)
+    public async Task<BackupProgress> StartBackupRestore(BackupRestoreDto inDto)
     {
         if (inDto.Dump)
         {
@@ -362,7 +368,7 @@ public class BackupController(
     [HttpGet("getrestoreprogress")]  //NOTE: this method doesn't check payment!!!
     [AllowAnonymous]
     [AllowNotPayment]
-    public async Task<BackupProgress> GetRestoreProgressAsync(RestoreDto dto)
+    public async Task<BackupProgress> GetRestoreProgress(RestoreDto dto)
     {
         return await backupService.GetRestoreProgressAsync(dto.Dump);
     }

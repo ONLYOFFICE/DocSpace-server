@@ -257,3 +257,4 @@ global using Tag = ASC.Files.Core.Tag;
 global using Thumbnail = ASC.Files.Core.Thumbnail;
 global using Token = ASC.Web.Files.ThirdPartyApp.Token;
 global using UserInfo = ASC.Core.Users.UserInfo;
+global using SortOrder = ASC.Api.Core.Core.SortOrder;

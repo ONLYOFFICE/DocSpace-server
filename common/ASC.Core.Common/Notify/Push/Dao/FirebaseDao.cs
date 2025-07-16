@@ -111,11 +111,12 @@ static file class Queries
         FireBaseSubscribedUsersAsync = Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FirebaseDbContext ctx, int tenantId, Guid userId, string application) =>
                 ctx.Users
-                    
                     .Where(r => r.UserId == userId)
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.IsSubscribed == true)
-                    .Where(r => r.Application == application));
+                    .Where(r => r.Application == application)
+                    .GroupBy(r => r.FirebaseDeviceToken)
+                    .Select(g => g.First()));
 
     public static readonly Func<FirebaseDbContext, int, Guid, string, Task<int>> DeleteFireBaseUserTokenAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

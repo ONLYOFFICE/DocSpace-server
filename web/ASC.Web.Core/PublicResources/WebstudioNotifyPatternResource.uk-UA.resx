@@ -1155,7 +1155,9 @@ $OrangeButton
 
 Натисніть кнопку нижче, щоб перейти на сторінку входу до порталу й настроїти застосунок для аутентифікації:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
     <value>h1. Приєднайтеся до &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace
@@ -1928,5 +1930,53 @@ $TrulyYours</value>
   </data>
   <data name="subject_user_type_changed" xml:space="preserve">
     <value>Ваш тип користувача DocSpace змінився</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Перейти до сервісів</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Перейти до параметрів гаманця</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Вітаємо, $UserName!
+
+Повідомляємо вас про те, що не вдалося виконати автоматичне поновлення придбаного вами сервісного плану.
+
+Просимо вас поновити поточний сервісний план вручну (або придбати новий).
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Вітаємо, $UserName!
+
+Повідомляємо вас про те, що оплату підписки буде автоматично списано з вашого рахунку через 3 дні.
+
+Щоб забезпечити успішне проведення транзакції, переконайтеся, що на рахунку вибраного вами методу оплати достатньо коштів.
+
+Якщо у вас виникли запитання або потрібна допомога, зв'яжіться з нами на сторінці "служби підтримки":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Вітаємо, $UserName!
+
+Повідомляємо Вас про невдале автоматичне поповнення балансу гаманця DocSpace.
+
+Просимо Вас перевірити та оновити баланс Вашого гаманця вручну.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Потрібна дія: не вдається автоматично поновити сервісний план у вашому ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Наступний платіж за підписку на ваш ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Потрібна дія: не вдається автоматично поповнити баланс гаманця у вашому ${LetterLogoText} DocSpace</value>
   </data>
 </root>

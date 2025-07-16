@@ -1426,7 +1426,9 @@ Cấu hình của ứng dụng xác thực mà bạn sử dụng để vào ${Le
 
 Vui lòng nhấp vào nút bên dưới để truy cập trang đăng nhập cổng thông tin và định cấu hình ứng dụng xác thực:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_change_email_v115" xml:space="preserve">
     <value>Có phải bạn muốn thay đổi email cho tài khoản ${LetterLogoText} của mình?
@@ -1924,5 +1926,53 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Nếu bạn muốn tiếp tục sử dụng DocSpace ${LetterLogoText} của mình, chỉ cần truy cập nó và thực hiện bất kỳ hành động nào.&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Vào mục Dịch vụ</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Vào phần cài đặt Ví</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Chúng tôi liên hệ để thông báo cho bạn rằng việc tự động gia hạn gói dịch vụ bạn đã mua chưa được hoàn thành.
+
+Chúng tôi mong bạn tự thao tác gia hạn lại gói dịch vụ hiện tại của mình (hoặc mua gói mới).
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Chúng tôi liên hệ để thông báo rằng khoản thanh toán gói dịch vụ của bạn sẽ tự động được ghi nợ từ tài khoản của bạn sau 3 ngày.
+
+Để đảm bảo giao dịch diễn ra suôn sẻ, xin vui lòng kiểm tra và chắc chắn rằng có đủ tiền trong tài khoản thanh toán của bạn.
+
+Nếu bạn có bất kỳ câu hỏi nào hoặc cần hỗ trợ, xin hãy liên hệ với "nhóm hỗ trợ":"${__SupportLink}" của chúng tôi.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Chúng tôi đang liên hệ để thông báo với bạn rằng việc nạp tiền tự động vào số dư Ví DocSpace đã không thành công.
+
+Chúng tôi vui lòng yêu cầu bạn kiểm tra và cập nhật số dư ví của mình theo cách thủ công.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Cần hành động: Không thể tự động gia hạn gói dịch vụ trong DocSpace ${LetterLogoText} của bạn</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Thanh toán gói dịch vụ sắp tới cho DocSpace ${LetterLogoText} của bạn</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Cần hành động: Không thể tự động nạp tiền vào số dư Ví trong DocSpace ${LetterLogoText} của bạn</value>
   </data>
 </root>

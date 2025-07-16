@@ -1081,4 +1081,49 @@
   <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
     <value>Η διεύθυνση URL Webhook δεν είναι διαθέσιμη. Το αίτημα HEAD δεν απαντά σε κατάσταση 200 http.</value>
   </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>Πίστωση</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>Νόμισμα</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>Ημερομηνία και ώρα</value>
+  </data>
+  <data name="AccountingCustomerOperationDescription" xml:space="preserve">
+    <value>Περιγραφή</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>Ποσότητα</value>
+  </data>
+  <data name="AccountingCustomerOperationService" xml:space="preserve">
+    <value>Όνομα υπηρεσίας</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Χώρος αποθήκευσης στον δίσκο</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Ανανέωση ποσού υπολοίπου</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>Μονάδα μέτρησης</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>Αναφορά λειτουργιών πελάτη ({0}-{1})</value>
+  </data>
+  <data name="AccountingCustomerOperationWithdrawal" xml:space="preserve">
+    <value>Ανάληψη</value>
+  </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>Δεν βρέθηκε η ομάδα</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>Πρόσθετος χώρος αποθήκευσης στον δίσκο</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>Προσαρμόστε τον χώρο αποθήκευσης στο ακριβές ποσό που χρειάζεστε.</value>
+  </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
+    <value>Αποθηκευτικός χώρος που χρησιμοποιήθηκε:</value>
+  </data>
 </root>

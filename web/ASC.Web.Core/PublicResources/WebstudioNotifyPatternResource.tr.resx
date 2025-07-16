@@ -1017,7 +1017,9 @@ ${LetterLogoText} portalına girmek için kullandığınız kimlik doğrulama uy
 
 Portal oturum açma sayfasına gitmek ve kimlik doğrulayıcı uygulamasını yapılandırmak için lütfen aşağıdaki butona tıklayın:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
     <value>h1. &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace’e katılın
@@ -1917,5 +1919,53 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;${LetterLogoText} DocSpace’inizi kullanmaya devam etmek istiyorsanız, sadece giriş yapıp herhangi bir işlem yapmanız yeterlidir.&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Hizmetlere git</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Cüzdan ayarlarına git</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Merhaba, $UserName!
+
+Satın aldığınız hizmet planınızın otomatik yenileme işlemi tamamlanamadığını bildirmek için sizinle iletişime geçiyoruz.
+
+Mevcut hizmet planınızı manuel olarak yenilemenizi (veya yeni bir plan satın almanızı) rica ediyoruz.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Merhaba, $UserName!
+
+Abonelik ödemenizin 3 gün içinde hesabınızdan otomatik olarak tahsil edileceğini bildirmek için sizinle iletişime geçiyoruz.
+
+İşlemin sorunsuz gerçekleşebilmesi için ödeme yönteminizde yeterli bakiye bulunduğundan emin olmanızı rica ediyoruz.
+
+Herhangi bir sorunuz varsa veya yardıma ihtiyaç duyarsanız, "destek ekibimizle":"${__SupportLink}" iletişime geçebilirsiniz.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Merhaba, $UserName!
+
+DocSpace Cüzdan bakiyesinin otomatik olarak yüklenmesinin başarısız olduğunu bildirmek için size ulaşıyoruz.
+
+Cüzdan bakiyenizi manuel olarak kontrol etmenizi ve güncellemenizi rica ediyoruz.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Eylem Gerekiyor: ${LetterLogoText} DocSpace alanınızdaki hizmet planınız otomatik olarak yenilenemedi</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace alanınız için yaklaşan abonelik ödemesi</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Eylem Gerekiyor: ${LetterLogoText} DocSpace cüzdan bakiyeniz otomatik olarak yüklenemedi</value>
   </data>
 </root>

@@ -1091,7 +1091,9 @@ De configuratie van de authenticator app die u gebruikt om de ${LetterLogoText} 
 
 Klik op de knop hieronder om naar de aanmeldingspagina van het portaal te gaan en de authenticator app te configureren:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
     <value>h1. Aanmelden bij &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace
@@ -1923,5 +1925,53 @@ $TrulyYours</value>
   </data>
   <data name="subject_user_role_changed" xml:space="preserve">
     <value>Uw rol in een DocSpace kamer is gewijzigd</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Ga naar Diensten</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Ga naar Wallet instellingen</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Hallo, $UserName!
+
+Wij nemen contact met u op om u te laten weten dat de automatische verlenging van uw aangeschafte diensten abonnement niet kon worden uitgevoerd.
+
+Wij verzoeken u vriendelijk om uw huidige dienst handmatig te verlengen (of een nieuwe aan te schaffen).
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Hallo, $UserName!
+
+Wij willen u erop wijzen dat uw abonnement binnen drie dagen automatisch van uw rekening wordt afgeschreven.
+
+Om een vlotte transactie te garanderen, verzoeken wij u te controleren of er voldoende saldo beschikbaar is op uw betaalmethode.
+
+Indien u vragen heeft of hulp nodig heeft, kunt u contact opnemen met ons "ondersteuningsteam":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Hallo, $UserName!
+
+We nemen contact met u op om u te laten weten dat het automatisch opwaarderen van het DocSpace Wallet-saldo niet is gelukt.
+
+We verzoeken u vriendelijk om uw wallet-saldo handmatig te controleren en bij te werken.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Vereiste actie: het is niet mogelijk om het diensten abonnement in uw ${LetterLogoText} DocSpace automatisch te verlengen</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Aankomende betaling voor uw abonnement op ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Actie vereist: het is niet mogelijk om het saldo van uw Wallet automatisch op te laden in uw ${LetterLogoText} DocSpace</value>
   </data>
 </root>

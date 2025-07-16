@@ -119,7 +119,7 @@ public class SocketManager(
                 new {
                     room,
                     folderId = g.Key,
-                    userIds = g.Select(r=> new { owner = r.Owner, count = r.Count}).ToList()
+                    userIds = g.Select(r=> new { owner = r.Owner, count = r.Count }).DistinctBy(r => r.owner).ToList()
                 });
         }
         

@@ -45,7 +45,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             migrationBuilder.InsertData(
                 table: "tenants_quota",
                 columns: new[] { "tenant", "description", "features", "name", "price", "product_id", "visible", "wallet" },
-                values: new object[] { -11, null, "total_size:1073741824", "storage", 0.0322m, "1011", true, true });
+                values: new object[] { -11, null, "total_size:1073741824", "storage", 0.14m, "1011", true, true });
         }
 
         /// <inheritdoc />

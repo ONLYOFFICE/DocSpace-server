@@ -198,7 +198,9 @@ A configuração do aplicativo autenticador que você usa para entrar no portal 
 
 Clique no botão abaixo para ir para a página de login do portal e configurar o aplicativo autenticador:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.Alteração do proprietário do portal "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -1942,5 +1944,39 @@ Para garantir uma transação tranquila, confirme se há fundos suficientes disp
 Caso tenha alguma dúvida ou precise de ajuda, sinta-se à vontade para entrar em contato com nossa "equipe de suporte":"${__SupportLink}".
 
 $TrulyYours</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Acessar serviços</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Acessar configurações da Carteira</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Olá, $UserName!
+
+Estamos entrando em contato para informar que a renovação automática do plano de serviço adquirido não pôde ser concluída.
+
+Pedimos gentilmente que você renove manualmente seu plano de serviço atual (ou adquira um novo).
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Olá, $UserName!
+
+Estamos entrando em contato para informar que a recarga automática do saldo da Carteira DocSpace não foi bem-sucedida.
+
+Pedimos que você verifique e atualize manualmente o saldo da sua carteira.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Ação necessária: Não é possível renovar automaticamente o plano de serviço no seu ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Ação necessária: Não é possível recarregar automaticamente o saldo da Carteira no seu ${LetterLogoText} DocSpace</value>
   </data>
 </root>

@@ -972,4 +972,31 @@
   <data name="ApiKeyUpdated" xml:space="preserve">
     <value>Ажуриран кориснички Api кључ: {0}</value>
   </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Извршена је корисничка операција</value>
+  </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>Линк за ауторизацију је активиран</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Извештај о корисничким операцијама преузет</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Претплата корисника је ажурирана: {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Кориснички новчаник је допуњен: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Подешавања допуне корисничког новчаника су ажурирана</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>LDAP аутентификација онемогућена</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>LDAP аутентификација омогућена</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>LDAP синхронизација завршена</value>
+  </data>
 </root>

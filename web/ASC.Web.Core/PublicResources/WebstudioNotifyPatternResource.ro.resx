@@ -949,7 +949,9 @@ Configurația aplicației de autentificare pe care o utilizați pentru a accesa 
 
 Faceți clic pe butonul de mai jos pentru a accesa pagina de conectare la portal și pentru a configura aplicația de autentificare:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.Schimbarea proprietarului de portal "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -1996,5 +1998,39 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Următoarea dată de facturare a abonamentului dvs ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Acces servicii</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Acces configurare Portofel</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Stimate, $UserName!
+
+Vă informăm că reînnoirea automată a abonamentului la serviciile conectate a eșuat.
+
+Vă rugăm să reînnoiți manual abonamentul la serviciile conectate actual (sau procurați un abonament nou).
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Stimate, $UserName!
+
+Vă informăm că alimentarea automată a contului dvs de Portofel DocSpace nu a fost finalizată cu succes.
+
+Vă rugăm să verificați și să alimentați contul de portofel dvs manual.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Acțiune necesară: Problema de reînnoire automată a abonamentului la servicii conectate din DocSpace ${LetterLogoText}</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Acțiune necesară: Problema de alimentare automată a contului de Portofel dvs din DocSpace ${LetterLogoText}</value>
   </data>
 </root>

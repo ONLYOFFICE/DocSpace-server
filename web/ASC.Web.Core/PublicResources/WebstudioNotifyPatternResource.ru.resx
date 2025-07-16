@@ -201,7 +201,9 @@ $OrangeButton
 
 Пожалуйста, нажмите кнопку ниже, чтобы перейти на страницу входа на портал и настроить приложение для аутентификации:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.Смена владельца портала "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -1937,5 +1939,39 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Предстоящий платеж за подписку на ваш ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Перейти к Сервисам</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Перейти к настройкам кошелька</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Здравствуйте, $UserName!
+
+Сообщаем вам, что автоматическое продление приобретенного вами тарифного плана не может быть завершено.
+
+Просим вручную продлить ваш текущий тарифный план (или приобрести новый).
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Здравствуйте, $UserName!
+
+Сообщаем вам, что не удалось произвести автоматическое пополнение кошелька DocSpace.
+
+Просим вручную проверить и обновить баланс вашего кошелька.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Необходимое действие: невозможно автоматически продлить тарифный план в вашем ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Необходимое действие: Невозможно автоматически пополнить баланс кошелька в вашем ${LetterLogoText} DocSpace</value>
   </data>
 </root>

@@ -218,7 +218,9 @@ $Message</value>
 
 مقدم النموذج: "$FromUserName":"$FromUserLink"
 
-OrangeButton$</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_FormSubmitted" xml:space="preserve">
     <value>1h. لقد ملأت النموذج $Message
@@ -227,7 +229,9 @@ OrangeButton$</value>
 
 المدير: "$ToUserName":"$ToUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
     <value>إشعار DocSpace. تم تعبئة النموذج</value>

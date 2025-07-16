@@ -76,7 +76,7 @@ public class OrdersRequestDto<T>
 /// <summary>
 /// The JSON converter for handling order values in different formats.
 /// </summary>
-public class OrderRequestDtoConverter : System.Text.Json.Serialization.JsonConverter<int>
+public class OrderRequestDtoConverter : JsonConverter<int>
 {
     public override int Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {

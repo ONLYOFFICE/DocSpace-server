@@ -112,7 +112,14 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
                 return true;
             }
 
-            logger.ErrorDocServiceCommandResponse(commandResponse.Error, commandResponse.ErrorString);
+            if (commandResponse.Error == ErrorTypes.DocumentIdError)
+            {
+                logger.InfoDocServiceCommandResponse(commandResponse.Error, commandResponse.ErrorString);
+            }
+            else
+            {
+                logger.ErrorDocServiceCommandResponse(commandResponse.Error, commandResponse.ErrorString);
+            }
         }
         catch (Exception e)
         {

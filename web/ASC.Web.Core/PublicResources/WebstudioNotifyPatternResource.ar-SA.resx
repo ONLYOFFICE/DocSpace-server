@@ -602,7 +602,9 @@ $OrangeButton
 
 يرجى النقر فوق الزر أدناه للانتقال إلى صفحة تسجيل الدخول إلى البوابة وتكوين تطبيق المصادقة:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.تغيير مالك البوابة الإلكترونية "{white-space: nowrap}${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -2066,6 +2068,54 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt; نقدّر مشاركتكم لنا سبب التوقف عن استخدام مساحة DocSpace ${LetterLogoText}&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt; إذا رغبتم في الاستمرار باستخدام مساحة DocSpace الخاصة بكم، ما عليكم سوى الدخول إليها والقيام بأي إجراء.&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>انتقل إلى الخدمات</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>انتقل إلى إعدادات المحفظة</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>الإجراء المطلوب: غير قادر على تعبئة رصيد المحفظة تلقائيًا في ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>دفعة الاشتراك القادمة لـ ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>الإجراء المطلوب: غير قادر على تجديد خطة الخدمة تلقائيًا في ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>مرحباً، $UserName!
+
+نتواصل معكم لإبلاغكم بأن التجديد التلقائي لخطة الخدمة التي قمتم بشرائها قد فشل.
+
+نرجو منكم تجديد خطة الخدمة الحالية يدوياً (أو شراء خطة جديدة).
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>مرحباً، $UserName!
+
+نتواصل معكم لإبلاغكم بأن دفعة اشتراككم سيتم خصمها تلقائياً من حسابكم بعد 3 أيام.
+
+لضمان إجراء المعاملة بسلاسة، يرجى التأكد من توفر رصيد كافٍ في وسيلة الدفع الخاصة بكم.
+
+إذا كان لديكم أي استفسارات أو تحتاجون إلى مساعدة، لا تترددوا في التواصل مع "فريق الدعم":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>مرحباً، $UserName!
+
+نتواصل معكم لإبلاغكم بأن التعبئة التلقائية لرصيد DocSpace Wallet لم تتم بنجاح.
+
+نرجو منكم التحقق يدوياً من رصيد محفظتكم وتحديثه.
+
+$OrangeButton
 
 $TrulyYours</value>
   </data>

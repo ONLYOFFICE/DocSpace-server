@@ -200,7 +200,9 @@ ${LetterLogoText} portalına daxil olmaq üçün istifadə etdiyiniz autentifika
 
 Portala giriş səhifəsinə keçmək və autentifikasiya proqramını konfiqurasiya etmək üçün bu linkə klikləyin:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1. "${__VirtualRootPath}":"${__VirtualRootPath}" portalının sahibinin dəyişdirilməsi

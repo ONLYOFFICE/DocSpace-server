@@ -189,7 +189,7 @@ public class ConnectionsController(
     [SwaggerResponse(200, "Ok")]
     [SwaggerResponse(403, "Method not available")]
     [HttpPut("logoutall/{userId:guid}")]
-    public async Task LogOutAllActiveConnectionsForUserAsync(UserIdRequestDto inDto)
+    public async Task LogOutAllActiveConnectionsForUser(UserIdRequestDto inDto)
     {
         var currentUserId = securityContext.CurrentAccount.ID;
         if (!await userManager.IsDocSpaceAdminAsync(currentUserId) && 
