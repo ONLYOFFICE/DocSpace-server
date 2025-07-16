@@ -34,8 +34,31 @@ public class ShareFolderTest(
     FilesServiceFactory filesServiceProgram)
     : BaseTest(filesFactory, apiFactory, peopleFactory, filesServiceProgram)
 {
+    [Theory]
+    [MemberData(nameof(ValidFileShare))]
+    public async Task CreatePrimaryExternalLink_ValidFileShare_ReturnsLinkData(FileShare fileShare)
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        
+        var folder = await CreateFolderInMy("folder", Initializer.Owner);
+        
+        // Act
+        var linkParams = new FolderLinkRequest(access: fileShare);
+        
+        await _foldersApi.CreateFolderPrimaryExternalLinkAsync(folder.Id, linkParams, TestContext.Current.CancellationToken);
+        
+        // Act
+        var result = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        
+        // Assert
+        result.Should().NotBeNull();
+        //result.ShareLink.Should().NotBeNullOrEmpty();
+        result.Access.Should().Be(fileShare);
+    }
+    
     [Fact]
-    public async Task CreatePrimaryExternalLink_FolderInMy_ReturnsLinkData()
+    public async Task CreatePrimaryExternalLink_ByDefault_ReturnsLinkData()
     {
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
@@ -68,7 +91,23 @@ public class ShareFolderTest(
         fileInfo.Should().NotBeNull();
         fileInfo.Title.Should().Be(file.Title);
     }
+    
+    [Theory]
+    [MemberData(nameof(InvalidFileShare))]
+    public async Task CreatePrimaryExternalLink_InvalidFileShare_ReturnsError(FileShare fileShare)
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        
+        var folder = await CreateFolderInMy("folder", Initializer.Owner);
+        
+        // Act
+        var linkParams = new FolderLinkRequest(access: fileShare);
 
+        await Assert.ThrowsAsync<ApiException>(async () => 
+            await _foldersApi.CreateFolderPrimaryExternalLinkAsync(folder.Id, linkParams, TestContext.Current.CancellationToken));
+    }
+    
     [Fact]
     public async Task UpdatePrimaryExternalLink_ValidData_ReturnsLinkData()
     {

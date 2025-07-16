@@ -4969,7 +4969,7 @@ public class FileStorageService //: IFileStorageService
         {
             options.Password = password;
         }
-
+//TODO: folders
         var actions = entry.FileEntryType == FileEntryType.File
             ? _fileMessageActions
             : _roomMessageActions;

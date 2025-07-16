@@ -46,7 +46,7 @@ public class ShareFileTest(
         // Act
         var linkParams = new FileLinkRequest(access: fileShare);
         
-        await _filesApi.CreatePrimaryExternalLinkAsync(file.Id, linkParams, TestContext.Current.CancellationToken);
+        await _filesApi.CreateFilePrimaryExternalLinkAsync(file.Id, linkParams, TestContext.Current.CancellationToken);
         
         // Act
         var result = (await _filesApi.GetFilePrimaryExternalLinkAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
@@ -92,7 +92,7 @@ public class ShareFileTest(
         var linkParams = new FileLinkRequest(access: fileShare);
 
         await Assert.ThrowsAsync<ApiException>(async () => 
-            await _filesApi.CreatePrimaryExternalLinkAsync(file.Id, linkParams, TestContext.Current.CancellationToken));
+            await _filesApi.CreateFilePrimaryExternalLinkAsync(file.Id, linkParams, TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -106,12 +106,12 @@ public class ShareFileTest(
         // Create a primary external link
         var primaryLinkParams = new FileLinkRequest(access: FileShare.Read);
         
-        await _filesApi.CreatePrimaryExternalLinkAsync(file.Id, primaryLinkParams, TestContext.Current.CancellationToken);
+        await _filesApi.CreateFilePrimaryExternalLinkAsync(file.Id, primaryLinkParams, TestContext.Current.CancellationToken);
         
         // Create an additional external link
         var additionalLinkParams = new FileLinkRequest(access: FileShare.Editing);
         
-        await _filesApi.SetExternalLinkAsync(file.Id, additionalLinkParams, TestContext.Current.CancellationToken);
+        await _filesApi.SetFileExternalLinkAsync(file.Id, additionalLinkParams, TestContext.Current.CancellationToken);
         
         // Act
         var links = (await _filesApi.GetFileLinksAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
@@ -135,7 +135,7 @@ public class ShareFileTest(
             access: FileShare.Read,
             //title: "Primary Link",
             primary: true);
-        await _filesApi.CreatePrimaryExternalLinkAsync(file.Id, primaryLinkParams, TestContext.Current.CancellationToken);
+        await _filesApi.CreateFilePrimaryExternalLinkAsync(file.Id, primaryLinkParams, TestContext.Current.CancellationToken);
 
         // Create additional links with different permissions
         var additionalLink1 = new FileLinkRequest(
@@ -153,9 +153,9 @@ public class ShareFileTest(
             //title: "Review Link"
             );
 
-        await _filesApi.SetExternalLinkAsync(file.Id, additionalLink1, TestContext.Current.CancellationToken);
-        await _filesApi.SetExternalLinkAsync(file.Id, additionalLink2, TestContext.Current.CancellationToken);
-        await _filesApi.SetExternalLinkAsync(file.Id, additionalLink3, TestContext.Current.CancellationToken);
+        await _filesApi.SetFileExternalLinkAsync(file.Id, additionalLink1, TestContext.Current.CancellationToken);
+        await _filesApi.SetFileExternalLinkAsync(file.Id, additionalLink2, TestContext.Current.CancellationToken);
+        await _filesApi.SetFileExternalLinkAsync(file.Id, additionalLink3, TestContext.Current.CancellationToken);
 
         // Act - Get all links
         var links = (await _filesApi.GetFileLinksAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
@@ -185,7 +185,7 @@ public class ShareFileTest(
             primary: true
         );
         
-        var initialLink = (await _filesApi.CreatePrimaryExternalLinkAsync(file.Id, initialLinkParams, TestContext.Current.CancellationToken)).Response;
+        var initialLink = (await _filesApi.CreateFilePrimaryExternalLinkAsync(file.Id, initialLinkParams, TestContext.Current.CancellationToken)).Response;
         var sharedTo = DeserializeSharedToLink(initialLink);
         
         // Act - Update the link
@@ -198,7 +198,7 @@ public class ShareFileTest(
             password: "testpassword"
         );
 
-        var updatedLink = (await _filesApi.SetExternalLinkAsync(file.Id, updateLinkParams, TestContext.Current.CancellationToken)).Response;
+        var updatedLink = (await _filesApi.SetFileExternalLinkAsync(file.Id, updateLinkParams, TestContext.Current.CancellationToken)).Response;
         var updatedSharedTo = DeserializeSharedToLink(updatedLink);
         
         // Assert
@@ -230,8 +230,8 @@ public class ShareFileTest(
             //title: "Link to Update 2"
             );
 
-        var link1Response = (await _filesApi.SetExternalLinkAsync(file.Id, link1Request, TestContext.Current.CancellationToken)).Response;
-        var link2Response = (await _filesApi.SetExternalLinkAsync(file.Id, link2Request, TestContext.Current.CancellationToken)).Response;
+        var link1Response = (await _filesApi.SetFileExternalLinkAsync(file.Id, link1Request, TestContext.Current.CancellationToken)).Response;
+        var link2Response = (await _filesApi.SetFileExternalLinkAsync(file.Id, link2Request, TestContext.Current.CancellationToken)).Response;
 
         var link1SharedTo = DeserializeSharedToLink(link1Response);
         var link2SharedTo = DeserializeSharedToLink(link2Response);
@@ -249,8 +249,8 @@ public class ShareFileTest(
             //: "Updated Link 2",
             password: "testpassword");
 
-        var updatedLink1Response = (await _filesApi.SetExternalLinkAsync(file.Id, updateLink1Request, TestContext.Current.CancellationToken)).Response;
-        var updatedLink2Response = (await _filesApi.SetExternalLinkAsync(file.Id, updateLink2Request, TestContext.Current.CancellationToken)).Response;
+        var updatedLink1Response = (await _filesApi.SetFileExternalLinkAsync(file.Id, updateLink1Request, TestContext.Current.CancellationToken)).Response;
+        var updatedLink2Response = (await _filesApi.SetFileExternalLinkAsync(file.Id, updateLink2Request, TestContext.Current.CancellationToken)).Response;
 
         // Get all links after updates
         var allLinks = (await _filesApi.GetFileLinksAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
@@ -376,9 +376,9 @@ public class ShareFileTest(
             //title: "Comment Link"
             );
 
-        var readOnlyResponse = (await _filesApi.SetExternalLinkAsync(file.Id, readOnlyLink, TestContext.Current.CancellationToken)).Response;
-        var editingResponse = (await _filesApi.SetExternalLinkAsync(file.Id, editingLink, TestContext.Current.CancellationToken)).Response;
-        var commentResponse = (await _filesApi.SetExternalLinkAsync(file.Id, commentLink, TestContext.Current.CancellationToken)).Response;
+        var readOnlyResponse = (await _filesApi.SetFileExternalLinkAsync(file.Id, readOnlyLink, TestContext.Current.CancellationToken)).Response;
+        var editingResponse = (await _filesApi.SetFileExternalLinkAsync(file.Id, editingLink, TestContext.Current.CancellationToken)).Response;
+        var commentResponse = (await _filesApi.SetFileExternalLinkAsync(file.Id, commentLink, TestContext.Current.CancellationToken)).Response;
 
         var readOnlySharedTo = DeserializeSharedToLink(readOnlyResponse);
         var editingSharedTo = DeserializeSharedToLink(editingResponse);
@@ -439,8 +439,8 @@ public class ShareFileTest(
             password: "securepassword123"
             );
 
-        var unrestrictedResponse = (await _filesApi.SetExternalLinkAsync(file.Id, unrestrictedLink, TestContext.Current.CancellationToken)).Response;
-        var passwordProtectedResponse = (await _filesApi.SetExternalLinkAsync(file.Id, passwordProtectedLink, TestContext.Current.CancellationToken)).Response;
+        var unrestrictedResponse = (await _filesApi.SetFileExternalLinkAsync(file.Id, unrestrictedLink, TestContext.Current.CancellationToken)).Response;
+        var passwordProtectedResponse = (await _filesApi.SetFileExternalLinkAsync(file.Id, passwordProtectedLink, TestContext.Current.CancellationToken)).Response;
 
         var unrestrictedSharedTo = DeserializeSharedToLink(unrestrictedResponse);
         var passwordProtectedSharedTo = DeserializeSharedToLink(passwordProtectedResponse);

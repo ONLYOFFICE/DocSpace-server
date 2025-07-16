@@ -307,6 +307,30 @@ public abstract class FoldersController<T>(
     }
 
     /// <summary>
+    /// Creates a primary external link by the identifier specified in the request.
+    /// </summary>
+    /// <short>Create primary external link</short>
+    /// <path>api/2.0/files/folder/{id}/link</path>
+    [Tags("Files / Folders")]
+    [SwaggerResponse(200, "Folders security information", typeof(FileShareDto))]
+    [SwaggerResponse(404, "Not Found")]
+    [HttpPost("folder/{id}/link")]
+    public async Task<FileShareDto> CreateFolderPrimaryExternalLink(FolderLinkRequestDto<T> inDto)
+    {
+        var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(
+            inDto.Id, 
+            FileEntryType.Folder, 
+            inDto.FolderLink.Access, 
+            expirationDate: inDto.FolderLink.ExpirationDate, 
+            requiredAuth: inDto.FolderLink.Internal, 
+            allowUnlimitedDate: true,
+            denyDownload: inDto.FolderLink.DenyDownload, 
+            password: inDto.FolderLink.Password);
+        
+        return await fileShareDtoHelper.Get(linkAce);
+    }
+    
+    /// <summary>
     /// Returns the primary external link by the identifier specified in the request.
     /// </summary>
     /// <short>Get primary external link</short>

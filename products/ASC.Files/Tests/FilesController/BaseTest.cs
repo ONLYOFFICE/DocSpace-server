@@ -110,6 +110,13 @@ public class BaseTest(
         return await CreateFile(fileName, folderId);
     }
     
+    protected async Task<FileDtoInteger> CreateFileInMy(string fileName, User user)
+    {
+        var folderId = await GetFolderIdAsync(FolderType.USER, user);
+        
+        return await CreateFile(fileName, folderId);
+    }
+    
     protected async Task<FileDtoInteger> CreateFile(string fileName, int folderId)
     {
         return (await _filesApi.CreateFileAsync(folderId, new CreateFileJsonElement(fileName))).Response;
@@ -200,7 +207,7 @@ public class BaseTest(
             initialLinkParams.ExpirationDate = new ApiDateTime { UtcTime = expirationDate.Value };
         }
         
-        var initialLink = (await _filesApi.CreatePrimaryExternalLinkAsync(file.Id, initialLinkParams, TestContext.Current.CancellationToken)).Response;
+        var initialLink = (await _filesApi.CreateFilePrimaryExternalLinkAsync(file.Id, initialLinkParams, TestContext.Current.CancellationToken)).Response;
         var fileShareLink = DeserializeSharedToLink(initialLink);
         
         return (fileShareLink.RequestToken, file.Id);
