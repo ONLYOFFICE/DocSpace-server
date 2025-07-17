@@ -24,27 +24,48 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Common.Database;
+namespace ASC.AI.Core.Chat.MCP;
 
-public partial class AiDbContext(DbContextOptions<AiDbContext> options) : BaseDbContext(options)
+[Singleton]
+public class PredefinedMcpSource
 {
-    public DbSet<DbAiProvider> Providers { get; set; }
-    public DbSet<DbAiSettings> Settings { get; set; }
-    public DbSet<DbRoomSettings> RoomSettings { get; set; }
+    private readonly FrozenDictionary<string, Guid> _mcpNameIdMap =
+        new Dictionary<string, Guid>
+        {
+            {"onlyoffice-docspace", new Guid("883da87d-5ae0-49fd-8cb9-2cb82181667e")}
+        }.ToFrozenDictionary();
     
-    public DbSet<McpToolsSettings> McpSettings { get; set; }
+    private readonly Dictionary<Guid, IMcpServerOptionsBuilder> _servers = [];
+    public IEnumerable<IMcpServerOptionsBuilder> Servers => _servers.Values;
     
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    public PredefinedMcpSource(IConfiguration configuration)
     {
-        ModelBuilderWrapper
-            .From(modelBuilder, Database)
-            .AddDbTenant()
-            .AddDbFolder()
-            .AddUser()
-            .AddAiProviders()
-            .AddAiSettings()
-            .AddDbRoomSettings()
-            .AddMcpToolsSettings()
-            .AddDbFunctions();
+        var settings = configuration.GetSection("ai:mcp").Get<List<SseMcpSettings>>();
+        if (settings == null)
+        {
+            return;
+        }
+
+        var list = new Dictionary<Guid, IMcpServerOptionsBuilder>();
+
+        foreach (var item in settings)
+        {
+            if (string.IsNullOrEmpty(item.Endpoint) || !_mcpNameIdMap.TryGetValue(item.Name, out var id))
+            {
+                continue;
+            }
+
+            var builder = new DocspaceMcpOptionsBuilder(id, item.Name, item.Endpoint);
+            
+            list.Add(id, builder);
+        }
+
+        _servers = list;
+    }
+
+    public IMcpServerOptionsBuilder? GetServerDataBuilder(Guid serverId)
+    {
+        return _servers.GetValueOrDefault(serverId);
     }
 }
+

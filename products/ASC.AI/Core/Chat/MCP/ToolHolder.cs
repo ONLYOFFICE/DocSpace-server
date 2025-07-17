@@ -24,27 +24,17 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Common.Database;
+namespace ASC.AI.Core.Chat.MCP;
 
-public partial class AiDbContext(DbContextOptions<AiDbContext> options) : BaseDbContext(options)
+public class ToolHolder(IEnumerable<IMcpClient> clients, List<AITool>? tools) : IAsyncDisposable
 {
-    public DbSet<DbAiProvider> Providers { get; set; }
-    public DbSet<DbAiSettings> Settings { get; set; }
-    public DbSet<DbRoomSettings> RoomSettings { get; set; }
+    public List<AITool> Tools => tools ?? [];
     
-    public DbSet<McpToolsSettings> McpSettings { get; set; }
-    
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    public async ValueTask DisposeAsync()
     {
-        ModelBuilderWrapper
-            .From(modelBuilder, Database)
-            .AddDbTenant()
-            .AddDbFolder()
-            .AddUser()
-            .AddAiProviders()
-            .AddAiSettings()
-            .AddDbRoomSettings()
-            .AddMcpToolsSettings()
-            .AddDbFunctions();
+        foreach (var client in clients)
+        {
+            await client.DisposeAsync();
+        }
     }
 }

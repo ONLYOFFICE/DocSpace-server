@@ -24,71 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ModelContextProtocol.Client;
+namespace ASC.AI.Models.RequestDto;
 
-namespace ASC.AI.Core.Common;
-
-public class SseMcpSettings
+public class GetMcpToolsRequestDto
 {
-    public required string Name { get; init; }
-    public required string Endpoint { get; init; }
-}
-
-[Singleton]
-public class ToolsProvider(IConfiguration configuration) : IAsyncDisposable
-{
-    private IMcpClient? _client;
-    private bool _initialized;
-
-    public async Task InitializeAsync()
-    {
-        if (_initialized)
-        {
-            return;
-        }
-        
-        var options = configuration.GetSection("ai:mcp").Get<SseMcpSettings>();
-        if (options == null)
-        {
-            _initialized = true;
-            return;
-        }
-        
-        var client = await McpClientFactory.CreateAsync(new SseClientTransport(new SseClientTransportOptions
-        {
-            Name = options.Name,
-            Endpoint = new Uri(options.Endpoint),
-        }));
-
-        try
-        {
-            await client.PingAsync();
-            _client = client;
-            _initialized = true;
-        }
-        catch
-        {
-            _initialized = false;
-        }
-    }
-
-    public async Task<List<AITool>> GetToolsAsync(int tenantId, int roomId)
-    {
-        if (_client == null)
-        {
-            return [];
-        }
-        
-        var tools = await _client.ListToolsAsync();
-
-        return tools.OfType<AITool>().ToList();
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (_client != null)
-        {
-            await _client.DisposeAsync();
-        }
-    }
+    [FromRoute(Name = "roomId")]
+    public int RoomId { get; init; }
+    
+    [FromRoute(Name = "serverId")]
+    public Guid ServerId { get; init; }
 }

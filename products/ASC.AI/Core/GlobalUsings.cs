@@ -27,8 +27,8 @@
 global using ASC.AI.Core.Chat.Database;
 global using ASC.AI.Core.Chat.Extensions;
 global using ASC.AI.Core.Chat.History;
+global using ASC.AI.Core.Chat.MCP;
 global using ASC.AI.Core.Chat.Models;
-global using ASC.AI.Core.Common;
 global using ASC.AI.Core.Common.Clients;
 global using ASC.AI.Core.Common.Clients.Providers;
 global using ASC.AI.Core.Common.Models;
@@ -51,15 +51,22 @@ global using ASC.Core.Users;
 global using ASC.ElasticSearch;
 
 global using ASC.Files.Core;
+global using ASC.Files.Core.EF;
 global using ASC.Files.Core.Resources;
 global using ASC.Files.Core.Security;
 
 global using ASC.Security.Cryptography;
 
+global using ASC.Web.Core;
+global using ASC.Web.Studio.Utility;
+
 global using Anthropic.SDK;
 
 global using AutoMapper;
 
+global using ModelContextProtocol.Client;
+
+global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.AI;
 global using Microsoft.Extensions.Configuration;

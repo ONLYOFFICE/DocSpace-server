@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ChatParameters = ASC.AI.Core.Common.Models.ChatParameters;
+
 namespace ASC.AI.Core.Chat.Completion;
 
 [Scope]
@@ -33,7 +35,7 @@ public class ChatCompletionRunner(
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
     TenantManager tenantManager,
-    ToolsProvider toolsProvider,
+    McpService mcpService,
     ChatClientFactory chatClientFactory,
     ILogger<ChatCompletionGenerator> logger,
     AiConfigurationService configurationService)
@@ -46,8 +48,9 @@ public class ChatCompletionRunner(
 
         var userMessage = new ChatMessage(ChatRole.User, message);
         var chat = await chatHistory.AddChatAsync(tenantId, roomId, authContext.CurrentAccount.ID, userMessage);
+        var toolSet = await mcpService.GetToolsAsync(roomId);
         
-        var client = await InitializeClientAsync(tenantId, roomId, chat.Id, config);
+        var client = InitializeClient(chat.Id, config, toolSet.Tools);
         
         var messages = new List<ChatMessage>
         {
@@ -57,7 +60,7 @@ public class ChatCompletionRunner(
 
         var metadata = new Metadata { ChatId = chat.Id };
         
-        return new ChatCompletionGenerator(logger, chat.Id, chatHistory, client, messages, metadata);
+        return new ChatCompletionGenerator(logger, chat.Id, chatHistory, client, messages, toolSet, metadata);
     }
 
     public async Task<ChatCompletionGenerator> StartChatAsync(Guid chatId, string message, int? contextFolderId = null)
@@ -71,8 +74,9 @@ public class ChatCompletionRunner(
         }
 
         var config = await GetRungConfigAsync(chat.RoomId);
-
-        var client = await InitializeClientAsync(tenantId, chat.RoomId, chatId, config);
+        var toolSet = await mcpService.GetToolsAsync(chat.RoomId);
+        
+        var client = InitializeClient(chatId, config, toolSet.Tools);
 
         var historyAdapter = HistoryHelper.GetAdapter(config.ProviderType);
         var history = await chatHistory.GetMessagesAsync(chatId, historyAdapter).ToListAsync();
@@ -89,7 +93,7 @@ public class ChatCompletionRunner(
         messages.AddRange(history);
         messages.Add(userMessage);
 
-        return new ChatCompletionGenerator(logger, chatId, chatHistory, client, messages);
+        return new ChatCompletionGenerator(logger, chatId, chatHistory, client, messages, toolSet);
     }
 
     private async Task<RunConfiguration> GetRungConfigAsync(int roomId)
@@ -111,15 +115,14 @@ public class ChatCompletionRunner(
         return config;
     }
 
-    private async Task<IChatClient> InitializeClientAsync(int tenantId, int roomId, Guid chatId, RunConfiguration config)
+    private IChatClient InitializeClient(Guid chatId, RunConfiguration config, List<AITool> tools)
     {
-        var tools = await toolsProvider.GetToolsAsync(tenantId, roomId);
         var client = chatClientFactory.Create(config);
         
         var builder = client.AsBuilder();
         builder.ConfigureOptions(x => x.ConversationId = chatId.ToString());
         
-        if (tools is { Count: > 0 })
+        if (tools.Count > 0)
         {
             builder.ConfigureOptions(x =>
             {

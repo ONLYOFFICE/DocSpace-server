@@ -24,27 +24,36 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Common.Database;
+using ASC.AI.Core.Chat.MCP;
 
-public partial class AiDbContext(DbContextOptions<AiDbContext> options) : BaseDbContext(options)
+namespace ASC.AI.Api;
+
+[Scope]
+[DefaultRoute]
+[ApiController]
+[ControllerName("ai")]
+public class McpController(McpService mcpService)
 {
-    public DbSet<DbAiProvider> Providers { get; set; }
-    public DbSet<DbAiSettings> Settings { get; set; }
-    public DbSet<DbRoomSettings> RoomSettings { get; set; }
-    
-    public DbSet<McpToolsSettings> McpSettings { get; set; }
-    
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    [HttpPut("rooms/{roomId}/mcp/{serverId}/tools")]
+    public async Task<List<McpToolDto>> SetToolsAsync(SetMcpToolsRequestDto inDto)
     {
-        ModelBuilderWrapper
-            .From(modelBuilder, Database)
-            .AddDbTenant()
-            .AddDbFolder()
-            .AddUser()
-            .AddAiProviders()
-            .AddAiSettings()
-            .AddDbRoomSettings()
-            .AddMcpToolsSettings()
-            .AddDbFunctions();
+        var tools = await mcpService.SetToolsSettingsAsync(inDto.RoomId, inDto.ServerId, 
+            inDto.Body.DisabledTools);
+        return tools.Select(x => new McpToolDto
+        {
+            Name = x.Key,
+            Enabled = x.Value
+        }).ToList();
+    }
+
+    [HttpGet("rooms/{roomId}/mcp/{serverId}/tools")]
+    public async Task<List<McpToolDto>> GetToolsAsync(GetMcpToolsRequestDto inDto)
+    {
+        var tools = await mcpService.GetToolsAsync(inDto.RoomId, inDto.ServerId);
+        return tools.Select(x => new McpToolDto
+        {
+            Name = x.Key,
+            Enabled = x.Value
+        }).ToList();
     }
 }

@@ -24,27 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Common.Database;
+namespace ASC.AI.Models.ResponseDto;
 
-public partial class AiDbContext(DbContextOptions<AiDbContext> options) : BaseDbContext(options)
+public class McpToolDto
 {
-    public DbSet<DbAiProvider> Providers { get; set; }
-    public DbSet<DbAiSettings> Settings { get; set; }
-    public DbSet<DbRoomSettings> RoomSettings { get; set; }
-    
-    public DbSet<McpToolsSettings> McpSettings { get; set; }
-    
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        ModelBuilderWrapper
-            .From(modelBuilder, Database)
-            .AddDbTenant()
-            .AddDbFolder()
-            .AddUser()
-            .AddAiProviders()
-            .AddAiSettings()
-            .AddDbRoomSettings()
-            .AddMcpToolsSettings()
-            .AddDbFunctions();
-    }
+    public required string Name { get; init; }
+    public bool Enabled { get; init; }
 }

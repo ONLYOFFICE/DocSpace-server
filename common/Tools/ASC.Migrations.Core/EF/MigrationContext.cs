@@ -206,6 +206,7 @@ public class MigrationContext : DbContext
             .AddDbChatMessages()
             .AddAiProviders()
             .AddAiSettings()
+            .AddMcpToolsSettings()
             .AddDbFunctions();
     }
 }

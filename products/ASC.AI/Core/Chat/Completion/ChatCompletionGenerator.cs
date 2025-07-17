@@ -33,6 +33,7 @@ public class ChatCompletionGenerator(
     ChatHistory chatHistory,
     IChatClient client,
     List<ChatMessage> messages,
+    ToolHolder toolHolder,
     Metadata? metadata = null)
 {
     private static readonly JsonSerializerOptions _serializerOptions = new()
@@ -118,6 +119,7 @@ public class ChatCompletionGenerator(
         finally
         {
             await enumerator.DisposeAsync();
+            await toolHolder.DisposeAsync();
             
             var chatResponse = responses.ToChatResponse();
             if (chatResponse.Messages.Count > 0)

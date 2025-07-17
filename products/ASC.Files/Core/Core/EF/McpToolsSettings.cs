@@ -24,69 +24,77 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Common.Database.Models;
+using User = ASC.Core.Common.EF.User;
 
-public class DbAiSettings : BaseEntity
-{
-    public int ProviderId { get; set; }
-    public Guid UserId { get; set; }
+namespace ASC.Files.Core.EF;
+
+public class McpToolsSettings : BaseEntity
+{ 
     public int TenantId { get; set; }
-    public Scope Scope { get; set; }
-    public required RunParameters Parameters { get; set; }
+    public Guid ServerId { get; set; }
+    public int RoomId { get; set; }
+    public Guid UserId { get; set; }
+    public Tools Tools { get; set; }
     
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     public DbTenant Tenant { get; set; }
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+    public DbFolder Room { get; set; }
+    public User User { get; set; }
     
     public override object[] GetKeys()
     {
-        return [TenantId, ProviderId, UserId, Scope];
+        return [TenantId, RoomId, UserId, ServerId];
     }
 }
 
-public static class DbAiSettingsExtensions
+public class Tools
 {
-    public static ModelBuilderWrapper AddAiSettings(this ModelBuilderWrapper modelBuilder)
+    public required HashSet<string> Excluded { get; set; }
+}
+
+public static class DbMcpToolsSettingsExtensions 
+{
+    public static ModelBuilderWrapper AddMcpToolsSettings(this ModelBuilderWrapper modelBuilder)
     {
-        modelBuilder.Entity<DbAiSettings>().Navigation(e => e.Tenant).AutoInclude(false);
-        modelBuilder.Add(AddMySqlAiSettings, Provider.MySql);
+        modelBuilder.Entity<McpToolsSettings>().Navigation(e => e.Tenant).AutoInclude(false);
+        modelBuilder.Entity<McpToolsSettings>().Navigation(e => e.Room).AutoInclude(false);
+        modelBuilder.Entity<McpToolsSettings>().Navigation(e => e.User).AutoInclude(false);
         
-        return modelBuilder;
+        return modelBuilder.Add(MySqlAddMcpToolsSettings, Provider.MySql);
     }
 
-    private static void AddMySqlAiSettings(ModelBuilder modelBuilder)
+    private static void MySqlAddMcpToolsSettings(this ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbAiSettings>(entity =>
+        modelBuilder.Entity<McpToolsSettings>(entity =>
         {
-            entity.ToTable("ai_settings")
+            entity.ToTable("ai_mcp_tools")
                 .HasCharSet("utf8");
             
-            entity.HasKey(e => new { e.TenantId, e.UserId, e.Scope, e.ProviderId })
+            entity.HasKey(e => new { e.TenantId, e.RoomId, e.UserId, e.ServerId } )
                 .HasName("PRIMARY");
-            
-            entity.Property(e => e.ProviderId)
-                .HasColumnName("provider_id");
-            
+
             entity.Property(e => e.TenantId)
                 .HasColumnName("tenant_id");
+
+            entity.Property(e => e.RoomId)
+                .HasColumnName("room_id");
             
             entity.Property(e => e.UserId)
                 .HasColumnName("user_id")
                 .HasColumnType("char(36)")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
-            
-            entity.Property(e => e.Scope)
-                .HasColumnName("scope");
 
-            entity.Property(e => e.Parameters)
-                .HasColumnName("run_settings")
-                .HasColumnType("json")
+            entity.Property(e => e.ServerId)
+                .HasColumnName("server_id")
+                .HasColumnType("char(36)")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
             
-            entity.HasIndex(e => new { e.TenantId, e.ProviderId})
-                .HasDatabaseName("IX_tenant_id_provider_id");
+            entity.Property(e => e.Tools)
+                .HasColumnName("tools")
+                .HasColumnType("json")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
         });
     }
 }
