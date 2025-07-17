@@ -15,7 +15,7 @@ For more information, please visit [{{{infoUrl}}}]({{{infoUrl}}})
 
 #### npm
 
-To publish the library as an [npm](https://www.npmjs.com/) package, please follow the instructions ["here"](https://docs.npmjs.com/getting-started/publishing-npm-packages).
+To publish the library as an [npm](https://www.npmjs.com/) package, please follow the instructions [here](https://docs.npmjs.com/getting-started/publishing-npm-packages).
 
 To install the package, run:
 
@@ -106,6 +106,48 @@ module: {
 }
 ```
 
+## Documentation for Authorization
+
+{{^authMethods}}Endpoints do not require authorization.{{/authMethods}}
+{{#hasAuthMethods}}Authentication schemes defined for the API:{{/hasAuthMethods}}
+{{#authMethods}}
+### {{name}}
+
+{{#isApiKey}}
+
+- **Type**: API key
+- **API key parameter name**: {{keyParamName}}
+- **Location**: {{#isKeyInQuery}}URL query string{{/isKeyInQuery}}{{#isKeyInHeader}}HTTP header{{/isKeyInHeader}}{{#isKeyInCookie}}Cookie{{/isKeyInCookie}}
+{{/isApiKey}}
+{{#isBasic}}
+{{#isBasicBasic}}
+- **Type**: HTTP basic authentication
+{{/isBasicBasic}}
+{{#isBasicBearer}}
+- **Type**: Bearer authentication{{#bearerFormat}} ({{{.}}}){{/bearerFormat}}
+{{/isBasicBearer}}
+{{#isHttpSignature}}
+- **Type**: HTTP signature authentication
+{{/isHttpSignature}}
+{{/isBasic}}
+{{#isOAuth}}
+- **Type**: OAuth
+- **Flow**: {{flow}}
+- **Authorization URL**: {{x-authorizationUrl}}
+- **Token Url**: {{x-tokenUrl}}
+- **Scopes**: {{^scopes}}N/A{{/scopes}}
+{{#scopes}}  - {{scope}}: {{description}}
+{{/scopes}}
+{{/isOAuth}}
+{{#isOpenId}}
+- **Type**: OpenId Connect
+- **OpenId Connect URL**: {{x-openIdConnectUrl}}
+{{#scopes}}  - {{scope}}: {{description}}
+{{/scopes}}
+{{/isOpenId}}
+
+{{/authMethods}}
+
 ## Getting Started
 
 Please follow the [installation](#installation) instruction and execute the following JS code:
@@ -193,45 +235,3 @@ Class | Method | HTTP request | Description
 
 {{#models}}{{#model}} - [{{moduleName}}.{{classname}}]({{modelDocPath}}{{classname}}.md)
 {{/model}}{{/models}}
-
-## Documentation for Authorization
-
-{{^authMethods}}Endpoints do not require authorization.{{/authMethods}}
-{{#hasAuthMethods}}Authentication schemes defined for the API:{{/hasAuthMethods}}
-{{#authMethods}}
-### {{name}}
-
-{{#isApiKey}}
-
-- **Type**: API key
-- **API key parameter name**: {{keyParamName}}
-- **Location**: {{#isKeyInQuery}}URL query string{{/isKeyInQuery}}{{#isKeyInHeader}}HTTP header{{/isKeyInHeader}}{{#isKeyInCookie}}Cookie{{/isKeyInCookie}}
-{{/isApiKey}}
-{{#isBasic}}
-{{#isBasicBasic}}
-- **Type**: HTTP basic authentication
-{{/isBasicBasic}}
-{{#isBasicBearer}}
-- **Type**: Bearer authentication{{#bearerFormat}} ({{{.}}}){{/bearerFormat}}
-{{/isBasicBearer}}
-{{#isHttpSignature}}
-- **Type**: HTTP signature authentication
-{{/isHttpSignature}}
-{{/isBasic}}
-{{#isOAuth}}
-- **Type**: OAuth
-- **Flow**: {{flow}}
-- **Authorization URL**: {{x-authorizationUrl}}
-- **Token Url**: {{x-tokenUrl}}
-- **Scopes**: {{^scopes}}N/A{{/scopes}}
-{{#scopes}}  - {{scope}}: {{description}}
-{{/scopes}}
-{{/isOAuth}}
-{{#isOpenId}}
-- **Type**: OpenId Connect
-- **OpenId Connect URL**: {{x-openIdConnectUrl}}
-{{#scopes}}  - {{scope}}: {{description}}
-{{/scopes}}
-{{/isOpenId}}
-
-{{/authMethods}}

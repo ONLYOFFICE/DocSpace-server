@@ -65,15 +65,13 @@ using {{packageName}}.{{modelPackage}};
 <a id="packaging"></a>
 ## Packaging
 
-A `.nuspec` is included with the project. You can follow the NuGet quickstart to [create](https://docs.microsoft.com/en-us/nuget/quickstart/create-and-publish-a-package#create-the-package) and [publish](https://docs.microsoft.com/en-us/nuget/quickstart/create-and-publish-a-package#publish-the-package) packages.
+A `.nuspec` is included with the project. You can follow the NuGet quickstart to [create](https://docs.microsoft.com/en-us/nuget/quickstart/create-and-publish-a-package#create-the-package) packages.
 
 This `.nuspec` uses placeholders from the `.csproj`, so build the `.csproj` directly:
 
 ```powershell
 nuget pack -Build -OutputDirectory out {{packageName}}.csproj
 ```
-
-Then, publish to a [local feed](https://docs.microsoft.com/en-us/nuget/hosting-packages/local-feeds) or [other host](https://docs.microsoft.com/en-us/nuget/hosting-packages/overview), and consume it via NuGet as usual.
 
 {{/netStandard}}
 <a id="usage"></a>
@@ -115,6 +113,42 @@ services.AddHttpClient<YourApiClass>(httpClient =>
 ```
 
 {{/useHttpClient}}
+
+<a id="documentation-for-authorization"></a>
+## Documentation for Authorization
+
+{{^authMethods}}Endpoints do not require authorization.{{/authMethods}}
+{{#hasAuthMethods}}Authentication schemes defined for the API:{{/hasAuthMethods}}
+{{#authMethods}}
+<a id="{{name}}"></a>
+### {{name}}
+
+{{#isApiKey}}- **Type**: API key
+- **API key parameter name**: {{keyParamName}}
+- **Location**: {{#isKeyInQuery}}URL query string{{/isKeyInQuery}}{{#isKeyInHeader}}HTTP header{{/isKeyInHeader}}{{#isKeyInCookie}}Cookie{{/isKeyInCookie}}
+{{/isApiKey}}
+{{#isBasicBasic}}- **Type**: HTTP basic authentication
+{{/isBasicBasic}}
+{{#isBasicBearer}}- **Type**: Bearer Authentication
+{{/isBasicBearer}}
+{{#isHttpSignature}}- **Type**: HTTP signature authentication
+{{/isHttpSignature}}
+{{#isOAuth}}- **Type**: OAuth
+- **Flow**: {{flow}}
+- **Authorization URL**: {{x-authorizationUrl}}
+- **Token Url**: {{x-tokenUrl}}
+- **Scopes**: {{^scopes}}N/A{{/scopes}}
+{{#scopes}}  - {{scope}}: {{description}}
+{{/scopes}}
+{{/isOAuth}}
+{{#isOpenId}}
+- **Type**: OpenId Connect
+- **OpenId Connect URL**: {{x-openIdConnectUrl}}
+{{#scopes}}  - {{scope}}: {{description}}
+{{/scopes}}
+{{/isOpenId}}
+
+{{/authMethods}}
 
 <a id="getting-started"></a>
 ## Getting Started
@@ -220,39 +254,3 @@ Class | Method | HTTP request | Description
 {{^modelPackage}}
 No model defined in this package
 {{/modelPackage}}
-
-<a id="documentation-for-authorization"></a>
-## Documentation for Authorization
-
-{{^authMethods}}Endpoints do not require authorization.{{/authMethods}}
-{{#hasAuthMethods}}Authentication schemes defined for the API:{{/hasAuthMethods}}
-{{#authMethods}}
-<a id="{{name}}"></a>
-### {{name}}
-
-{{#isApiKey}}- **Type**: API key
-- **API key parameter name**: {{keyParamName}}
-- **Location**: {{#isKeyInQuery}}URL query string{{/isKeyInQuery}}{{#isKeyInHeader}}HTTP header{{/isKeyInHeader}}{{#isKeyInCookie}}Cookie{{/isKeyInCookie}}
-{{/isApiKey}}
-{{#isBasicBasic}}- **Type**: HTTP basic authentication
-{{/isBasicBasic}}
-{{#isBasicBearer}}- **Type**: Bearer Authentication
-{{/isBasicBearer}}
-{{#isHttpSignature}}- **Type**: HTTP signature authentication
-{{/isHttpSignature}}
-{{#isOAuth}}- **Type**: OAuth
-- **Flow**: {{flow}}
-- **Authorization URL**: {{x-authorizationUrl}}
-- **Token Url**: {{x-tokenUrl}}
-- **Scopes**: {{^scopes}}N/A{{/scopes}}
-{{#scopes}}  - {{scope}}: {{description}}
-{{/scopes}}
-{{/isOAuth}}
-{{#isOpenId}}
-- **Type**: OpenId Connect
-- **OpenId Connect URL**: {{x-openIdConnectUrl}}
-{{#scopes}}  - {{scope}}: {{description}}
-{{/scopes}}
-{{/isOpenId}}
-
-{{/authMethods}}

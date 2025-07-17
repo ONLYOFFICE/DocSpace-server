@@ -34,14 +34,6 @@ npm install
 npm run build
 ```
 
-### Publishing
-
-To publish the package to the npm registry:
-
-```bash
-npm publish
-```
-
 ### Consuming
 
 To use the SDK in your project, navigate to the root folder of your consuming project and run one of the following commands:
@@ -99,7 +91,6 @@ npm install PATH_TO_GENERATED_PACKAGE --save
 {{/scopes}}
 {{/isOpenId}}
 
-
 {{/authMethods}}
 
 ### Documentation for API Endpoints
@@ -115,4 +106,3 @@ Class | Method | HTTP request | Description
 
 {{#models}}{{#model}} - [{{{classname}}}]({{modelDocPath}}{{{classname}}}.md)
 {{/model}}{{/models}}
-
