@@ -1,23 +1,19 @@
 package com.example.codegen;
 
 import org.openapitools.codegen.model.ModelMap;
-import org.openapitools.codegen.model.ModelsMap;
 import org.openapitools.codegen.languages.JavascriptClientCodegen;
 import org.openapitools.codegen.SupportingFile;
-import org.openapitools.codegen.CodegenModel;
-import io.swagger.v3.oas.models.media.Schema;
-import io.swagger.v3.oas.models.servers.ServerVariables;
-import io.swagger.v3.oas.models.servers.Server;
-import io.swagger.v3.oas.models.servers.ServerVariable;
-import java.io.IOException;
-import java.io.Writer;
-import java.util.Map;
-import java.util.List;
-import java.util.HashMap;
 import org.openapitools.codegen.model.OperationsMap;
 import org.openapitools.codegen.model.OperationMap;
 import org.openapitools.codegen.CodegenOperation;
-import org.openapitools.codegen.CodegenProperty;
+import org.openapitools.codegen.CodegenParameter;
+
+import io.swagger.v3.oas.models.servers.ServerVariables;
+import io.swagger.v3.oas.models.servers.Server;
+import io.swagger.v3.oas.models.servers.ServerVariable;
+
+import java.util.List;
+
 
 public class MyJavaScriptCodegen extends JavascriptClientCodegen {
 
@@ -28,6 +24,19 @@ public class MyJavaScriptCodegen extends JavascriptClientCodegen {
         this.embeddedTemplateDir = "javascript";
 
         supportingFiles.add(new SupportingFile("example.mustache", "", "example.js"));
+        
+        supportingFiles.add(new SupportingFile(
+            "AUTHORS.mustache", "", "AUTHORS.md"
+        ));
+
+        supportingFiles.add(new SupportingFile(
+            "LICENSE.mustache", "", "LICENSE"
+        ));
+
+        
+        supportingFiles.removeIf(f -> f.getTemplateFile().equals("git_push.sh.mustache") || 
+            f.getDestinationFilename().equals(".openapi-generator-ignore")
+        );
     }
 
     @Override
@@ -45,10 +54,6 @@ public class MyJavaScriptCodegen extends JavascriptClientCodegen {
                 }
             }
         }
-
-        supportingFiles.removeIf(f -> f.getTemplateFile().equals("git_push.sh.mustache") || 
-            f.getDestinationFilename().equals(".openapi-generator-ignore")
-        );
     }
 
     @Override
@@ -64,6 +69,30 @@ public class MyJavaScriptCodegen extends JavascriptClientCodegen {
                         String dashedId = toDashCase(op.operationId);
                         String seealsoUrl = "https://api.onlyoffice.com/docspace/api-backend/usage-api/" + dashedId + "/";
                         op.vendorExtensions.put("x-seealsoUrl", seealsoUrl);
+                    }
+
+                    if ("GET".equalsIgnoreCase(op.httpMethod)) {
+                        boolean allAreQueryParams = op.allParams.stream()
+                            .allMatch(p -> Boolean.TRUE.equals(p.isQueryParam));
+
+                        boolean hasCountParam = op.allParams.stream()
+                            .anyMatch(p -> "count".equals(p.baseName));
+
+                        if (allAreQueryParams && hasCountParam) {
+                            CodegenParameter fieldsParam = new CodegenParameter();
+                            fieldsParam.baseName = "fields";
+                            fieldsParam.paramName = "fields";
+                            fieldsParam.dataType = "string";
+                            fieldsParam.description = "Comma-separated list of fields to include in the response";
+                            fieldsParam.required = false;
+                            fieldsParam.isQueryParam = true;
+                            fieldsParam.isPrimitiveType = true;
+                            fieldsParam.isNullable = true;
+                            fieldsParam.collectionFormat = "csv";
+
+                            op.allParams.add(fieldsParam);
+                            op.queryParams.add(fieldsParam);
+                        }
                     }
                 }
             }

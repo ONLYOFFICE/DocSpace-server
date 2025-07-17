@@ -12,6 +12,8 @@
     "modelPackage": "models",
     "apiPackage": "api",
 	"projectName": "docspace-api-javascript",
-    "licenseName": "Apache-2.0"
+    "licenseName": "Apache-2.0",
+    "packageVersion": "1.0.0",
+    "npmRepository": "git+https://github.com/ONLYOFFICE/docspace-javascript-sdk"
   }
 }

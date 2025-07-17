@@ -1,7 +1,6 @@
 package com.example.codegen;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -9,22 +8,16 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.Map.Entry;
 import java.util.List;
-import org.openapitools.codegen.CodegenConfig;
+import java.util.Arrays;
+
 import org.openapitools.codegen.model.OperationMap;
 import org.openapitools.codegen.model.OperationsMap;
 import org.openapitools.codegen.model.ModelMap;
-import org.openapitools.codegen.model.ModelsMap;
 import org.openapitools.codegen.languages.TypeScriptAxiosClientCodegen;
-import io.swagger.v3.oas.models.Operation;
 import org.openapitools.codegen.CodegenOperation;
-import org.openapitools.codegen.CodegenModel;
+import org.openapitools.codegen.SupportingFile;
 import org.openapitools.codegen.CodegenParameter;
-import org.openapitools.codegen.CodegenResponse;
-import org.openapitools.codegen.model.OperationMap;
-import org.openapitools.codegen.model.OperationsMap;
-import java.util.Arrays;
 
-import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.servers.ServerVariables;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.servers.ServerVariable;
@@ -45,13 +38,20 @@ public class MyTypeScriptAxiosCodegen extends TypeScriptAxiosClientCodegen {
         additionalProperties.put("modelDocPath", modelDocPath);
         modelDocTemplateFiles.put("model_doc.mustache", ".md");
         apiDocTemplateFiles.put("api_doc.mustache", ".md");
+
+        supportingFiles.add(new SupportingFile(
+            "AUTHORS.mustache", "", "AUTHORS.md"
+        ));
+
+        supportingFiles.add(new SupportingFile(
+            "LICENSE.mustache", "", "LICENSE"
+        ));
     }
     
     @Override
     public void processOpts() {
         super.processOpts();
 
-        String baseURL = openAPI.getServers().get(0).getUrl();
         if (openAPI.getServers() != null && !openAPI.getServers().isEmpty()) {
             Server server = openAPI.getServers().get(0);
             ServerVariables serverVars = server.getVariables();
@@ -102,6 +102,30 @@ public class MyTypeScriptAxiosCodegen extends TypeScriptAxiosClientCodegen {
                     String dashedId = toDashCase(op.operationId);
                     String seealsoUrl = "https://api.onlyoffice.com/docspace/api-backend/usage-api/" + dashedId + "/";
                     op.vendorExtensions.put("x-seealsoUrl", seealsoUrl);
+                }
+
+                if ("GET".equalsIgnoreCase(op.httpMethod)) {
+                    boolean allAreQueryParams = op.allParams.stream()
+                        .allMatch(p -> Boolean.TRUE.equals(p.isQueryParam));
+
+                    boolean hasCountParam = op.allParams.stream()
+                        .anyMatch(p -> "count".equals(p.baseName));
+
+                    if (allAreQueryParams && hasCountParam) {
+                        CodegenParameter fieldsParam = new CodegenParameter();
+                        fieldsParam.baseName = "fields";
+                        fieldsParam.paramName = "fields";
+                        fieldsParam.dataType = "string";
+                        fieldsParam.description = "Comma-separated list of fields to include in the response";
+                        fieldsParam.required = false;
+                        fieldsParam.isQueryParam = true;
+                        fieldsParam.isPrimitiveType = true;
+                        fieldsParam.isNullable = true;
+                        fieldsParam.collectionFormat = "csv";
+
+                        op.allParams.add(fieldsParam);
+                        op.queryParams.add(fieldsParam);
+                    }
                 }
             }
         }
@@ -200,7 +224,9 @@ public class MyTypeScriptAxiosCodegen extends TypeScriptAxiosClientCodegen {
                 currentFolderName = uniqueTag;
             }
         }
-        currentFolderName = convertToHyphenatedFormat(currentFolderName);
+        if (!"ThirdParty".equalsIgnoreCase(currentFolderName)) {
+            currentFolderName = convertToHyphenatedFormat(currentFolderName);
+        }
         return apiFileFolder() + File.separator + toApiFilename(fileName) + suffix;
     }
 
@@ -228,7 +254,7 @@ public class MyTypeScriptAxiosCodegen extends TypeScriptAxiosClientCodegen {
                 case "TFASettings":
                     return "tfa-settings-api";
                 case "ThirdParty":
-                    return "third-party-api";
+                    return "thirdparty-api";
                 default:
                     return super.toApiFilename(name).replaceAll("([a-z0-9])([A-Z])", "$1-$2").toLowerCase(Locale.ROOT);
             }

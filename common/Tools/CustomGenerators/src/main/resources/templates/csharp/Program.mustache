@@ -55,6 +55,14 @@ public class Program
             var deleteFolder = await folderInstance.DeleteFolderAsync(createdFolderId, deleteRequestSettings);
             Console.WriteLine(deleteFolder.StatusCode);
 
+            var roomInstance = new RoomsApi(config);
+
+            var sort = SortedByType.DateAndTime;
+
+            var getRoom = await roomInstance.GetRoomsFolderAsync(null, null, 0, null, null, null, null, null, null, null, 100, null, sort.ToString(), SortOrder.Descending, null, "current.security,folders.id");
+
+            Console.WriteLine(getRoom.Response);
+
             var backupInstance = new BackupApi(config);
 
             var startBackupSettings = new BackupDto

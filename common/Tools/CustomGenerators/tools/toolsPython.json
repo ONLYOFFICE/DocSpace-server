@@ -6,8 +6,10 @@
   },
   "generatorName": "my-python-custom",
   "inputSpec": "./tools/api-docs.json",
-  "outputDir": " python-test",
+  "outputDir": "python-sdk",
   "additionalProperties": {
-	"packageName": "docspace-api-python"
+    "packageName": "docspace-api-python",
+    "packageVersion": "1.0.0",
+    "repositoryUrl": "https://github.com/ONLYOFFICE/docspace-python-sdk"
   }
 }

@@ -490,7 +490,7 @@ namespace {{packageName}}.Client
                 return null;
             }
 
-            StringBuilder sb = new StringBuilder(pemstr);
+            var sb = new StringBuilder(pemstr);
             sb.Replace(pemprivheader, "");
             sb.Replace(pemprivfooter, "");
             string pvkstr = sb.ToString().Trim();

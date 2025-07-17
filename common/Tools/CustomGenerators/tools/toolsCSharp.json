@@ -8,9 +8,11 @@
   "inputSpec": "./tools/api-docs.json",
   "outputDir": "ClientNet",
   "additionalProperties": {
-	"packageName": "DocSpace.Sdk",
-	"library": "httpclient",
+    "packageName": "DocSpace.Sdk",
+    "library": "httpclient",
     "licenseName": "Apache-2.0",
-	"targetFramework": "net9.0"
+    "targetFramework": "net9.0",
+    "packageVersion": "1.0.0",
+    "repositoryUrl": "https://github.com/ONLYOFFICE/docspace-dotnet-sdk"
   }
 }

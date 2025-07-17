@@ -1,47 +1,9 @@
 {{>partial_header}}
-
+ 
+ using DocSpace.Sdk.Client;
+ 
 {{#models}}
 {{#model}}
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.IO;
-{{#vendorExtensions.x-com-visible}}
-using System.Runtime.InteropServices;
-{{/vendorExtensions.x-com-visible}}
-using System.Runtime.Serialization;
-using System.Text;
-using System.Text.RegularExpressions;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using Newtonsoft.Json.Linq;
-{{#discriminator}}
-using JsonSubTypes;
-{{/discriminator}}
-{{/model}}
-{{/models}}
-{{#validatable}}
-using System.ComponentModel.DataAnnotations;
-{{/validatable}}
-using FileParameter = {{packageName}}.Client.FileParameter;
-using OpenAPIDateConverter = {{packageName}}.Client.OpenAPIDateConverter;
-{{#useCompareNetObjects}}
-using OpenAPIClientUtils = {{packageName}}.Client.ClientUtils;
-{{/useCompareNetObjects}}
-{{#models}}
-{{#model}}
-{{#oneOf}}
-{{#-first}}
-using System.Reflection;
-{{/-first}}
-{{/oneOf}}
-{{#anyOf}}
-{{#-first}}
-using System.Reflection;
-{{/-first}}
-{{/anyOf}}
 
 namespace {{packageName}}.{{modelPackage}}
 {
