@@ -24,28 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Common.Clients.Providers;
+namespace ASC.AI.Core.ProviderModels;
 
-public class TogetherAiModelClient(HttpClient client) : OpenAiModelClient(client)
+public interface IModelClient
 {
-    protected override async Task<List<ModelInfo>> GetModelsDataAsync(HttpResponseMessage response, Scope? scope)
-    {
-        var content = await response.Content.ReadFromJsonAsync<IEnumerable<TogetherModel>>();
-        if (content == null)
-        {
-            return [];
-        }
-
-        if (scope is Scope.Chat)
-        {
-            content = content.Where(x => x.Type == "chat");
-        }
-
-        return content.OfType<ModelInfo>().ToList();
-    }
-
-    private class TogetherModel : ModelInfo
-    {
-        public required string Type { get; init; }
-    }
+    public Task<List<ModelInfo>> GetModelsAsync(string endpoint, string apiKey, Scope? scope, IReadOnlyDictionary<string, string>? headers = null);
 }

@@ -24,12 +24,38 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Chat.MCP;
+namespace ASC.AI.Core.ProviderModels.Clients;
 
-public class McpServerOptions
+public class OpenAiModelClient(HttpClient client) : IModelClient
 {
-    public Guid Id { get; init; }
-    public required string Name { get; init; }
-    public required Uri Endpoint { get; init; }
-    public Dictionary<string, string>? Headers { get; init; }
+    private const string EndpointPart = "models";
+    private const string AuthScheme = "Bearer";
+    
+    public async Task<List<ModelInfo>> GetModelsAsync(string endpoint, string apiKey, Scope? scope, IReadOnlyDictionary<string, string>? headers = null)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, $"{endpoint.TrimEnd('/')}/{EndpointPart}");
+        request.Headers.Authorization = new AuthenticationHeaderValue(AuthScheme, apiKey);
+
+        if (headers is { Count: > 0 })
+        {
+            foreach (var (key, value) in headers)
+            {
+                request.Headers.Add(key, value);
+            }
+        }
+
+        var response = (await client.SendAsync(request)).EnsureSuccessStatusCode();
+        return await GetModelsDataAsync(response, scope);
+    }
+
+    protected virtual async Task<List<ModelInfo>> GetModelsDataAsync(HttpResponseMessage response, Scope? scope)
+    {
+        var content = await response.Content.ReadFromJsonAsync<Response>();
+        return content?.Data ?? [];
+    }
+    
+    private class Response
+    {
+        public required List<ModelInfo> Data { get; init; }
+    }
 }

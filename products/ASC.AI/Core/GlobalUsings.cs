@@ -24,17 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-global using ASC.AI.Core.Chat.Database;
 global using ASC.AI.Core.Chat.Extensions;
 global using ASC.AI.Core.Chat.History;
-global using ASC.AI.Core.Chat.MCP;
 global using ASC.AI.Core.Chat.Models;
-global using ASC.AI.Core.Common.Clients;
-global using ASC.AI.Core.Common.Clients.Providers;
 global using ASC.AI.Core.Common.Models;
 global using ASC.AI.Core.Common.Database;
 global using ASC.AI.Core.Common.Database.Models;
 global using ASC.AI.Core.Common.Services;
+global using ASC.AI.Core.MCP;
+global using ASC.AI.Core.ProviderModels;
+global using ASC.AI.Core.ProviderModels.Clients;
 global using ASC.AI.Core.Settings;
 
 global using ASC.Common;

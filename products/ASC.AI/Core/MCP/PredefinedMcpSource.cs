@@ -24,27 +24,48 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Chat.MCP;
+namespace ASC.AI.Core.MCP;
 
-public class DocspaceMcpOptionsBuilder(Guid id, string name, string endpoint) : IMcpServerOptionsBuilder
+[Singleton]
+public class PredefinedMcpSource
 {
-    public McpServerOptions Build(IServiceProvider serviceProvider)
-    {
-        var commonLinkUtility = serviceProvider.GetRequiredService<CommonLinkUtility>();
-        var cookieManager = serviceProvider.GetRequiredService<CookiesManager>();
-
-        var options = new McpServerOptions
+    private readonly FrozenDictionary<string, Guid> _mcpNameIdMap =
+        new Dictionary<string, Guid>
         {
-            Id = id,
-            Name = name,
-            Endpoint = new Uri(endpoint),
-            Headers = new Dictionary<string, string>
-            {
-                {"Referer", commonLinkUtility.GetFullAbsolutePath(string.Empty)}, 
-                {"Authorization", cookieManager.GetCookies(CookiesType.AuthKey)}
-            }
-        };
+            {"onlyoffice-docspace", new Guid("883da87d-5ae0-49fd-8cb9-2cb82181667e")}
+        }.ToFrozenDictionary();
+    
+    private readonly Dictionary<Guid, IMcpServerOptionsBuilder> _servers = [];
+    public IEnumerable<IMcpServerOptionsBuilder> Servers => _servers.Values;
+    
+    public PredefinedMcpSource(IConfiguration configuration)
+    {
+        var settings = configuration.GetSection("ai:mcp").Get<List<SseMcpSettings>>();
+        if (settings == null)
+        {
+            return;
+        }
 
-        return options;
+        var list = new Dictionary<Guid, IMcpServerOptionsBuilder>();
+
+        foreach (var item in settings)
+        {
+            if (string.IsNullOrEmpty(item.Endpoint) || !_mcpNameIdMap.TryGetValue(item.Name, out var id))
+            {
+                continue;
+            }
+
+            var builder = new DocspaceMcpOptionsBuilder(id, item.Name, item.Endpoint);
+            
+            list.Add(id, builder);
+        }
+
+        _servers = list;
+    }
+
+    public IMcpServerOptionsBuilder? GetServerDataBuilder(Guid serverId)
+    {
+        return _servers.GetValueOrDefault(serverId);
     }
 }
+

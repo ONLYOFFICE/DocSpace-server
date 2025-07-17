@@ -28,10 +28,11 @@ namespace ASC.AI.Core.Common.Database;
 
 public partial class AiDbContext(DbContextOptions<AiDbContext> options) : BaseDbContext(options)
 {
+    public DbSet<DbChat> Chats { get; set; }
+    public DbSet<DbChatMessage> Messages { get; set; }
     public DbSet<DbAiProvider> Providers { get; set; }
     public DbSet<DbAiSettings> Settings { get; set; }
     public DbSet<DbRoomSettings> RoomSettings { get; set; }
-    
     public DbSet<McpToolsSettings> McpSettings { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -41,6 +42,8 @@ public partial class AiDbContext(DbContextOptions<AiDbContext> options) : BaseDb
             .AddDbTenant()
             .AddDbFolder()
             .AddUser()
+            .AddDbChat()
+            .AddDbChatMessages()
             .AddAiProviders()
             .AddAiSettings()
             .AddDbRoomSettings()

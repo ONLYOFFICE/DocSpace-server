@@ -24,22 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Common.Clients;
+namespace ASC.AI.Core.ProviderModels;
 
-[Scope]
-public class ModelClientFactory(IHttpClientFactory httpClientFactory)
+public class ModelInfo
 {
-    public IModelClient Create(ProviderType type)
-    {
-        return type switch
-        {
-            ProviderType.OpenAi or ProviderType.OpenAiCompatible or ProviderType.DocSpaceAi => 
-                new OpenAiModelClient(httpClientFactory.CreateClient()),
-            ProviderType.TogetherAi => 
-                new TogetherAiModelClient(httpClientFactory.CreateClient()),
-            ProviderType.Anthropic =>
-                new AnthropicModelClient(httpClientFactory.CreateClient()),
-            _ => throw new ArgumentOutOfRangeException(nameof(type))
-        };
-    }
+    public required string Id { get; init; }
 }

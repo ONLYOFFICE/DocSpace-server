@@ -24,11 +24,17 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Common;
+namespace ASC.AI.Core.MCP;
 
-public enum LLMProvider
+public class ToolHolder(IEnumerable<IMcpClient> clients, List<AITool>? tools) : IAsyncDisposable
 {
-    OpenAI,
-    OpenAICompatible,
-    TogetherAI,
+    public List<AITool> Tools => tools ?? [];
+    
+    public async ValueTask DisposeAsync()
+    {
+        foreach (var client in clients)
+        {
+            await client.DisposeAsync();
+        }
+    }
 }

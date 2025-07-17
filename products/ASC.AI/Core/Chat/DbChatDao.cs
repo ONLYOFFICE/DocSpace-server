@@ -26,10 +26,10 @@
 
 using Message = ASC.AI.Core.Chat.Models.Message;
 
-namespace ASC.AI.Core.Chat.Database;
+namespace ASC.AI.Core.Chat;
 
 [Scope]
-public class DbChatDao(IDbContextFactory<ChatDbContext> dbContextFactory, IMapper mapper)
+public class DbChatDao(IDbContextFactory<AiDbContext> dbContextFactory, IMapper mapper)
 {
     public async Task<ChatSession> AddChatAsync(int tenantId, int roomId, Guid userId, string title, Message message)
     {

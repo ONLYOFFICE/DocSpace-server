@@ -24,9 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Chat.Database;
+namespace ASC.AI.Core.Common.Database;
 
-public partial class ChatDbContext
+public partial class AiDbContext
 {
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
     public Task<DbChat?> GetChatAsync(int tenantId, Guid chatId)
@@ -81,67 +81,65 @@ public partial class ChatDbContext
     {
         return Queries.DeleteChatsAsync(this, tenantId, chatIds);
     }
-
-    
 }
 
 static file class Queries
 {
-    public static readonly Func<ChatDbContext, int, Guid, Task<DbChat?>> GetChatAsync =
+    public static readonly Func<AiDbContext, int, Guid, Task<DbChat?>> GetChatAsync =
         EF.CompileAsyncQuery(
-            (ChatDbContext ctx, int tenantId, Guid chatId) => 
+            (AiDbContext ctx, int tenantId, Guid chatId) => 
                 ctx.Chats.FirstOrDefault(x => x.TenantId == tenantId && x.Id == chatId));
     
-    public static readonly Func<ChatDbContext, int, int, Guid, int, int, IAsyncEnumerable<DbChat>> GetChatsAsync =
+    public static readonly Func<AiDbContext, int, int, Guid, int, int, IAsyncEnumerable<DbChat>> GetChatsAsync =
         EF.CompileAsyncQuery(
-            (ChatDbContext ctx, int tenantId, int roomId, Guid userId, int offset, int limit) => 
+            (AiDbContext ctx, int tenantId, int roomId, Guid userId, int offset, int limit) => 
                 ctx.Chats
                     .Where(x => x.TenantId == tenantId && x.RoomId == roomId && x.UserId == userId)
                     .OrderByDescending(x => x.ModifiedOn)
                     .Skip(offset)
                     .Take(limit));
     
-    public static readonly Func<ChatDbContext, int, int, Guid, Task<int>> GetChatsTotalCountAsync =
+    public static readonly Func<AiDbContext, int, int, Guid, Task<int>> GetChatsTotalCountAsync =
         EF.CompileAsyncQuery(
-            (ChatDbContext ctx, int tenantId, int roomId, Guid userId) => 
+            (AiDbContext ctx, int tenantId, int roomId, Guid userId) => 
                 ctx.Chats.Count(x => x.TenantId == tenantId && x.RoomId == roomId && x.UserId == userId));
 
-    public static readonly Func<ChatDbContext, int, Guid, DateTime, Task<int>> UpdateChatDateAsync =
-        EF.CompileAsyncQuery((ChatDbContext ctx, int tenantId, Guid chatId, DateTime date) =>
+    public static readonly Func<AiDbContext, int, Guid, DateTime, Task<int>> UpdateChatDateAsync =
+        EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, Guid chatId, DateTime date) =>
             ctx.Chats.Where(x => x.TenantId == tenantId && x.Id == chatId)
                 .ExecuteUpdate(x =>
                     x.SetProperty(y => y.ModifiedOn, date)));
     
-    public static readonly Func<ChatDbContext, int, Guid, string, DateTime, Task<int>> UpdateChatAsync =
-        EF.CompileAsyncQuery((ChatDbContext ctx, int tenantId, Guid chatId, string title, DateTime date) =>
+    public static readonly Func<AiDbContext, int, Guid, string, DateTime, Task<int>> UpdateChatAsync =
+        EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, Guid chatId, string title, DateTime date) =>
             ctx.Chats.Where(x => x.TenantId == tenantId && x.Id == chatId)
                 .ExecuteUpdate(x =>
                     x.SetProperty(y => y.ModifiedOn, date)
                         .SetProperty(y => y.Title, title)));
     
-    public static readonly Func<ChatDbContext, Guid, int, int, IAsyncEnumerable<DbChatMessage>> GetMessagesAsync =
+    public static readonly Func<AiDbContext, Guid, int, int, IAsyncEnumerable<DbChatMessage>> GetMessagesAsync =
         EF.CompileAsyncQuery(
-            (ChatDbContext ctx, Guid chatId, int offset, int limit) => 
+            (AiDbContext ctx, Guid chatId, int offset, int limit) => 
                 ctx.Messages
                     .Where(x => x.ChatId == chatId)
                     .OrderByDescending(x => x.Id)
                     .Skip(offset)
                     .Take(limit));
 
-    public static readonly Func<ChatDbContext, Guid, IAsyncEnumerable<DbChatMessage>> GetAllMessagesAsync =
-        EF.CompileAsyncQuery((ChatDbContext ctx, Guid chatId) =>
+    public static readonly Func<AiDbContext, Guid, IAsyncEnumerable<DbChatMessage>> GetAllMessagesAsync =
+        EF.CompileAsyncQuery((AiDbContext ctx, Guid chatId) =>
             ctx.Messages
                 .Where(x => x.ChatId == chatId)
                 .OrderBy(x => x.Id)
                 .Select(x => x));
     
-    public static readonly Func<ChatDbContext, Guid, Task<int>> GetMessagesTotalCountAsync =
+    public static readonly Func<AiDbContext, Guid, Task<int>> GetMessagesTotalCountAsync =
         EF.CompileAsyncQuery(
-            (ChatDbContext ctx, Guid chatId) => 
+            (AiDbContext ctx, Guid chatId) => 
                 ctx.Messages.Count(x => x.ChatId == chatId));
     
-    public static readonly Func<ChatDbContext, int, IEnumerable<Guid>, Task<int>> DeleteChatsAsync =
+    public static readonly Func<AiDbContext, int, IEnumerable<Guid>, Task<int>> DeleteChatsAsync =
         EF.CompileAsyncQuery(
-            (ChatDbContext ctx, int tenantId, IEnumerable<Guid> chatIds) => 
+            (AiDbContext ctx, int tenantId, IEnumerable<Guid> chatIds) => 
                 ctx.Chats.Where(x => x.TenantId == tenantId && chatIds.Contains(x.Id)).ExecuteDelete());
 }

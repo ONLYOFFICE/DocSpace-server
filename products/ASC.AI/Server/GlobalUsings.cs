@@ -30,12 +30,12 @@ global using ASC.Api.Core.Convention;
 global using ASC.AI.Core.Common.Database;
 global using ASC.AI.Core.Common.Models;
 global using ASC.AI.Core.Chat;
-global using ASC.AI.Core.Chat.Database;
 global using ASC.AI.Core.Chat.Completion;
 global using ASC.AI.Core.Chat.Models;
 global using ASC.AI.Models.ResponseDto;
 global using ASC.AI.Models.RequestDto;
 global using ASC.AI.Core.Common.Services;
+global using ASC.AI.Core.MCP;
 
 global using ASC.Common;
 global using ASC.Common.Mapping;

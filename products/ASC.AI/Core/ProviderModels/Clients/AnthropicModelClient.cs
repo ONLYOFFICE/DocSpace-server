@@ -24,48 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Chat.MCP;
+namespace ASC.AI.Core.ProviderModels.Clients;
 
-[Singleton]
-public class PredefinedMcpSource
+public class AnthropicModelClient(HttpClient httpClient) : IModelClient
 {
-    private readonly FrozenDictionary<string, Guid> _mcpNameIdMap =
-        new Dictionary<string, Guid>
-        {
-            {"onlyoffice-docspace", new Guid("883da87d-5ae0-49fd-8cb9-2cb82181667e")}
-        }.ToFrozenDictionary();
-    
-    private readonly Dictionary<Guid, IMcpServerOptionsBuilder> _servers = [];
-    public IEnumerable<IMcpServerOptionsBuilder> Servers => _servers.Values;
-    
-    public PredefinedMcpSource(IConfiguration configuration)
+    public async Task<List<ModelInfo>> GetModelsAsync(string endpoint, string apiKey, Scope? scope, IReadOnlyDictionary<string, string>? headers = null)
     {
-        var settings = configuration.GetSection("ai:mcp").Get<List<SseMcpSettings>>();
-        if (settings == null)
-        {
-            return;
-        }
-
-        var list = new Dictionary<Guid, IMcpServerOptionsBuilder>();
-
-        foreach (var item in settings)
-        {
-            if (string.IsNullOrEmpty(item.Endpoint) || !_mcpNameIdMap.TryGetValue(item.Name, out var id))
-            {
-                continue;
-            }
-
-            var builder = new DocspaceMcpOptionsBuilder(id, item.Name, item.Endpoint);
-            
-            list.Add(id, builder);
-        }
-
-        _servers = list;
-    }
-
-    public IMcpServerOptionsBuilder? GetServerDataBuilder(Guid serverId)
-    {
-        return _servers.GetValueOrDefault(serverId);
+        var client = new AnthropicClient(new APIAuthentication(apiKey), httpClient);
+        
+        var response = await client.Models.ListModelsAsync();
+        
+        return response.Models.Select(x => new ModelInfo { Id = x.Id }).ToList();
     }
 }
-

@@ -24,21 +24,27 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+namespace ASC.AI.Core.MCP;
 
-namespace ASC.AI.Core.Chat.Database;
-
-public partial class ChatDbContext(DbContextOptions<ChatDbContext> options) : BaseDbContext(options)
+public class DocspaceMcpOptionsBuilder(Guid id, string name, string endpoint) : IMcpServerOptionsBuilder
 {
-    public DbSet<DbChat> Chats { get; set; }
-    public DbSet<DbChatMessage> Messages { get; set; }
-    
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    public McpServerOptions Build(IServiceProvider serviceProvider)
     {
-        ModelBuilderWrapper
-            .From(modelBuilder, Database)
-            .AddDbTenant()
-            .AddDbChat()
-            .AddDbChatMessages()
-            .AddDbFunctions();
+        var commonLinkUtility = serviceProvider.GetRequiredService<CommonLinkUtility>();
+        var cookieManager = serviceProvider.GetRequiredService<CookiesManager>();
+
+        var options = new McpServerOptions
+        {
+            Id = id,
+            Name = name,
+            Endpoint = new Uri(endpoint),
+            Headers = new Dictionary<string, string>
+            {
+                {"Referer", commonLinkUtility.GetFullAbsolutePath(string.Empty)}, 
+                {"Authorization", cookieManager.GetCookies(CookiesType.AuthKey)}
+            }
+        };
+
+        return options;
     }
 }

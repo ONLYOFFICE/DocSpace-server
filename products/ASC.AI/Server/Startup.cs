@@ -45,8 +45,7 @@ public class Startup : BaseStartup
         services.AddMemoryCache();
 
         await base.ConfigureServices(builder);
-
-        services.AddBaseDbContextPool<ChatDbContext>();
+        
         services.AddBaseDbContextPool<AiDbContext>();
         services.AddBaseDbContextPool<FilesDbContext>();
         
