@@ -68,9 +68,15 @@ public class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationD
     {
         DaoOperation = new FileDownloadOperation<int>(_serviceProvider, Data);
         ThirdPartyOperation = new FileDownloadOperation<string>(_serviceProvider, ThirdPartyData);
-
+        
         await base.RunJob(cancellationToken);
 
+        if(!string.IsNullOrEmpty(DaoOperation.Err) || !string.IsNullOrEmpty(ThirdPartyOperation.Err))
+        {
+            await PublishChanges();
+            return;
+        }
+        
         await using var scope = await ThirdPartyOperation.CreateScopeAsync();
         var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
         var instanceCrypto = scope.ServiceProvider.GetRequiredService<InstanceCrypto>();
