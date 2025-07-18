@@ -11,7 +11,7 @@
     "packageName": "DocSpace.API.SDK",
     "packageVersion": "1.0.0",
     "licenseName": "Apache-2.0",
-    "repositoryUrl": "https://github.com/ONLYOFFICE/docspace-dotnet-sdk",
+    "repositoryUrl": "https://github.com/ONLYOFFICE/docspace-api-sdk-csharp",
     "library": "httpclient",
     "targetFramework": "net9.0"
   }

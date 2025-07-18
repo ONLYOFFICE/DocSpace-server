@@ -11,7 +11,7 @@
     "packageName": "@onlyoffice/docspace-api-sdk",
     "packageVersion": "1.0.0",
     "licenseName": "Apache-2.0",
-    "repositoryUrl": "https://github.com/ONLYOFFICE/docspace-typescript-sdk",
+    "repositoryUrl": "https://github.com/ONLYOFFICE/docspace-api-sdk-typescript",
     "withSeparateModelsAndApi": true,
     "modelPackage": "models",
     "apiPackage": "api"
