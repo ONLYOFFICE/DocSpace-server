@@ -24,18 +24,18 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Text.Json.Serialization;
-
 namespace ASC.AI.Models.ResponseDto;
 
 public enum ContentType
 {
     Text,
-    Tool
+    Tool,
+    Attachment
 }
 
 [JsonDerivedType(typeof(TextContentDto))]
 [JsonDerivedType(typeof(ToolContentDto))]
+[JsonDerivedType(typeof(AttachmentContentDto))]
 public abstract class MessageContentDto
 {
     public abstract ContentType Type { get; }

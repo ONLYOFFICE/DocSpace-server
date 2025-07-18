@@ -28,13 +28,11 @@
 namespace ASC.AI.Core.Chat.Completion;
 
 public class ChatCompletionGenerator(
-    ILogger<ChatCompletionGenerator> logger,
-    Guid chatId,
-    ChatHistory chatHistory,
     IChatClient client,
+    ILogger<ChatCompletionGenerator> logger,
     List<ChatMessage> messages,
     ToolHolder toolHolder,
-    Metadata? metadata = null)
+    IHistoryWriterFactory historyWriterFactory)
 {
     private static readonly JsonSerializerOptions _serializerOptions = new()
     {
@@ -45,11 +43,7 @@ public class ChatCompletionGenerator(
     
     public async IAsyncEnumerable<ChatCompletion> GenerateCompletionAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        if (metadata != null)
-        {
-            yield return new ChatCompletion(EventType.Metadata, 
-                JsonSerializer.Serialize(metadata, _serializerOptions));
-        }
+        HistoryWriter? historyWriter = null;
         
         var responses = new List<ChatResponseUpdate>();
         var enumerator = client.GetStreamingResponseAsync(messages, cancellationToken: cancellationToken)
@@ -83,7 +77,17 @@ public class ChatCompletionGenerator(
                 }
 
                 if (!errorCaptured)
-                { 
+                {
+                    if (historyWriter == null)
+                    {
+                        historyWriter = await historyWriterFactory.CreateAsync();
+                        if (historyWriter.IsNew)
+                        {
+                            yield return new ChatCompletion(EventType.Metadata, 
+                                JsonSerializer.Serialize(new Metadata { ChatId = historyWriter.ChatId }, _serializerOptions));
+                        }
+                    }
+                    
                     responses.Add(response);
                 }
 
@@ -122,9 +126,10 @@ public class ChatCompletionGenerator(
             await toolHolder.DisposeAsync();
             
             var chatResponse = responses.ToChatResponse();
-            if (chatResponse.Messages.Count > 0)
+            
+            if (historyWriter != null)
             {
-                await chatHistory.AddMessagesAsync(chatId, chatResponse.Messages);
+                await historyWriter.WriteAsync(chatResponse.Messages);
             }
         }
     }

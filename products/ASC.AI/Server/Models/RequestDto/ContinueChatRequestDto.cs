@@ -39,4 +39,5 @@ public class ContinueChatBody
 {
     public required string Message { get; set; }
     public int ContextFolderId { get; set; }
+    public IEnumerable<JsonElement>? Files { get; set; }
 }

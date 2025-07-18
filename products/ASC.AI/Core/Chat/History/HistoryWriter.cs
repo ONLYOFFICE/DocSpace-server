@@ -24,32 +24,53 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Models.ResponseDto;
+namespace ASC.AI.Core.Chat.History;
 
-public class MessageDto(Role role, IEnumerable<MessageContentDto> contents, ApiDateTime createdOn)
+public interface IHistoryWriterFactory
 {
-    public Role Role { get; } = role;
-    public IEnumerable<MessageContentDto> Contents { get; } = contents;
-    public ApiDateTime CreatedOn { get; } = createdOn;
+    public Task<HistoryWriter> CreateAsync();
 }
 
-public static class MessageDtoExtensions
+public class HistoryWriter(Guid chatId, ChatHistory chatHistory, bool isNew)
 {
-    public static MessageDto ToMessageDto(this Message message, IMapper mapper, ApiDateTimeHelper dateTimeHelper)
+    public Guid ChatId => chatId;
+    public bool IsNew => isNew;
+    
+    public async Task WriteAsync(IList<ChatMessage> messages)
     {
-        var createdOn = dateTimeHelper.Get(message.CreatedOn);
-
-        var contents = message.Contents.Select(x =>
+        if (messages.Count > 0)
         {
-            return x switch
-            {
-                TextMessageContent text => mapper.Map<TextContentDto>(text),
-                ToolCallMessageContent tool => mapper.Map<ToolContentDto>(tool) as MessageContentDto,
-                AttachmentMessageContent attachment => mapper.Map<AttachmentContentDto>(attachment),
-                _ => throw new ArgumentOutOfRangeException(nameof(x))
-            };
-        });
-        
-        return new MessageDto(message.Role, contents, createdOn);
+            await chatHistory.AddMessagesAsync(chatId, messages);
+        }
+    }
+}
+
+public class StartHistoryWriterFactory(
+    int tenantId,
+    int roomId,
+    Guid userId,
+    string message,
+    List<AttachmentMessageContent> attachments,
+    ChatHistory chatHistory) : IHistoryWriterFactory
+{
+    public async Task<HistoryWriter> CreateAsync()
+    {
+        var chat = await chatHistory.AddChatAsync(tenantId, roomId, userId, message, attachments);
+        return new HistoryWriter(chat.Id, chatHistory, true);
+    }
+}
+
+public class ContinueHistoryWriterFactory(
+    int tenantId,
+    Guid chatId,
+    string message,
+    List<AttachmentMessageContent> attachments,
+    ChatHistory chatHistory) : IHistoryWriterFactory
+{
+    
+    public async Task<HistoryWriter> CreateAsync()
+    {
+        await chatHistory.UpdateChatAsync(tenantId, chatId, message, attachments);
+        return new HistoryWriter(chatId, chatHistory, false);
     }
 }

@@ -26,30 +26,10 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
-public class MessageDto(Role role, IEnumerable<MessageContentDto> contents, ApiDateTime createdOn)
+public class AttachmentContentDto : MessageContentDto, IMapFrom<AttachmentMessageContent>
 {
-    public Role Role { get; } = role;
-    public IEnumerable<MessageContentDto> Contents { get; } = contents;
-    public ApiDateTime CreatedOn { get; } = createdOn;
-}
-
-public static class MessageDtoExtensions
-{
-    public static MessageDto ToMessageDto(this Message message, IMapper mapper, ApiDateTimeHelper dateTimeHelper)
-    {
-        var createdOn = dateTimeHelper.Get(message.CreatedOn);
-
-        var contents = message.Contents.Select(x =>
-        {
-            return x switch
-            {
-                TextMessageContent text => mapper.Map<TextContentDto>(text),
-                ToolCallMessageContent tool => mapper.Map<ToolContentDto>(tool) as MessageContentDto,
-                AttachmentMessageContent attachment => mapper.Map<AttachmentContentDto>(attachment),
-                _ => throw new ArgumentOutOfRangeException(nameof(x))
-            };
-        });
-        
-        return new MessageDto(message.Role, contents, createdOn);
-    }
+    public override ContentType Type => ContentType.Attachment;
+    public required JsonElement Id { get; init; }
+    public required string Title { get; init; }
+    public required string Extension { get; init; }
 }

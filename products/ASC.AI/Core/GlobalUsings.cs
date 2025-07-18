@@ -35,6 +35,7 @@ global using ASC.AI.Core.MCP;
 global using ASC.AI.Core.ProviderModels;
 global using ASC.AI.Core.ProviderModels.Clients;
 global using ASC.AI.Core.Settings;
+global using ASC.AI.Core.Text;
 
 global using ASC.Common;
 global using ASC.Common.Log;
@@ -51,12 +52,14 @@ global using ASC.ElasticSearch;
 
 global using ASC.Files.Core;
 global using ASC.Files.Core.EF;
+global using ASC.Files.Core.Helpers;
 global using ASC.Files.Core.Resources;
 global using ASC.Files.Core.Security;
 
 global using ASC.Security.Cryptography;
 
 global using ASC.Web.Core;
+global using ASC.Web.Files.Services.WCFService.FileOperations;
 global using ASC.Web.Studio.Utility;
 
 global using Anthropic.SDK;

@@ -31,25 +31,29 @@ namespace ASC.AI.Core.Chat.History;
 [Scope]
 public class ChatHistory(DbChatDao chatDao)
 {
-    public Task<ChatSession> AddChatAsync(int tenantId, int roomId, Guid userId, ChatMessage message)
+    public Task<ChatSession> AddChatAsync(int tenantId, int roomId, Guid userId, string message, 
+        List<AttachmentMessageContent> attachments)
     {
         const string suffix = "...";
         const int maxTitleLength = 255;
         
-        var title = message.Text.Trim();
+        var title = message.TrimEnd();
         if (title.Length > maxTitleLength)
         {
             title = title[..(maxTitleLength - suffix.Length)].TrimEnd() + suffix;
         }
 
+        var contents = new List<MessageContent>(attachments) { new TextMessageContent(message) };
+
         return chatDao.AddChatAsync(tenantId, roomId, userId, title,
-            new Message(Role.User, [new TextMessageContent(message.Text)], DateTime.UtcNow));
+            new Message(Role.User, contents, DateTime.UtcNow));
     }
 
-    public Task UpdateChatAsync(int tenantId, Guid chatId, ChatMessage message)
+    public Task UpdateChatAsync(int tenantId, Guid chatId, string message, List<AttachmentMessageContent> attachments)
     {
-        return chatDao.UpdateChatAsync(tenantId, chatId, new Message(Role.User, 
-            [new TextMessageContent(message.Text)], DateTime.UtcNow));
+        var contents = new List<MessageContent>(attachments) { new TextMessageContent(message) };
+        
+        return chatDao.UpdateChatAsync(tenantId, chatId, new Message(Role.User, contents, DateTime.UtcNow));
     }
 
     public Task<ChatSession?> GetChatAsync(int tenantId, Guid chatId)

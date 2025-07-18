@@ -38,32 +38,39 @@ public class ChatCompletionRunner(
     McpService mcpService,
     ChatClientFactory chatClientFactory,
     ILogger<ChatCompletionGenerator> logger,
-    AiConfigurationService configurationService)
+    AiConfigurationService configurationService,
+    AttachmentHandler attachmentHandler)
 {
-    public async Task<ChatCompletionGenerator> StartNewChatAsync(int roomId, string message, int? contextFolderId = null)
+    public async Task<ChatCompletionGenerator> StartNewChatAsync(
+        int roomId, string message, int? contextFolderId = null, IEnumerable<JsonElement>? files = null)
     {
         var config = await GetRungConfigAsync(roomId);
         
+        var attachmentsTask = GetAttachmentsAsync(files).ToListAsync();
+        
         var tenantId = tenantManager.GetCurrentTenantId();
-
-        var userMessage = new ChatMessage(ChatRole.User, message);
-        var chat = await chatHistory.AddChatAsync(tenantId, roomId, authContext.CurrentAccount.ID, userMessage);
+        
         var toolSet = await mcpService.GetToolsAsync(roomId);
         
-        var client = InitializeClient(chat.Id, config, toolSet.Tools);
+        var client = InitializeClient(config, toolSet.Tools);
+        
+        var attachments = await attachmentsTask;
+        var userMessage = FormatUserMessage(message, attachments);
         
         var messages = new List<ChatMessage>
         {
             new(ChatRole.System, ChatPromptTemplate.GetPrompt(config.Parameters.Prompt, contextFolderId ?? roomId, roomId)),
             userMessage
         };
-
-        var metadata = new Metadata { ChatId = chat.Id };
         
-        return new ChatCompletionGenerator(logger, chat.Id, chatHistory, client, messages, toolSet, metadata);
+        var writerFactory = new StartHistoryWriterFactory(
+            tenantId, roomId, authContext.CurrentAccount.ID, message, attachments, chatHistory);
+        
+        return new ChatCompletionGenerator(client, logger, messages, toolSet, writerFactory);
     }
 
-    public async Task<ChatCompletionGenerator> StartChatAsync(Guid chatId, string message, int? contextFolderId = null)
+    public async Task<ChatCompletionGenerator> StartChatAsync(
+        Guid chatId, string message, int? contextFolderId = null, IEnumerable<JsonElement>? files = null)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
 
@@ -74,16 +81,19 @@ public class ChatCompletionRunner(
         }
 
         var config = await GetRungConfigAsync(chat.RoomId);
-        var toolSet = await mcpService.GetToolsAsync(chat.RoomId);
         
-        var client = InitializeClient(chatId, config, toolSet.Tools);
+        var attachmentsTask = GetAttachmentsAsync(files).ToListAsync();
+        
+        var toolHolder = await mcpService.GetToolsAsync(chat.RoomId);
+        
+        var client = InitializeClient(config, toolHolder.Tools);
 
         var historyAdapter = HistoryHelper.GetAdapter(config.ProviderType);
         var history = await chatHistory.GetMessagesAsync(chatId, historyAdapter).ToListAsync();
         
-        var userMessage = new ChatMessage(ChatRole.User, message);
+        var attachments = await attachmentsTask;
         
-        await chatHistory.UpdateChatAsync(tenantId, chatId, userMessage);
+        var userMessage = FormatUserMessage(message, attachments);
         
         var messages = new List<ChatMessage>(history.Count + 2)
         {
@@ -93,7 +103,14 @@ public class ChatCompletionRunner(
         messages.AddRange(history);
         messages.Add(userMessage);
 
-        return new ChatCompletionGenerator(logger, chatId, chatHistory, client, messages, toolSet);
+        foreach (var attachment in attachments)
+        { 
+            userMessage.Contents.Add(attachment);
+        }
+
+        var writerFactory = new ContinueHistoryWriterFactory(tenantId, chatId, message, attachments, chatHistory);
+
+        return new ChatCompletionGenerator(client, logger, messages, toolHolder, writerFactory);
     }
 
     private async Task<RunConfiguration> GetRungConfigAsync(int roomId)
@@ -115,12 +132,11 @@ public class ChatCompletionRunner(
         return config;
     }
 
-    private IChatClient InitializeClient(Guid chatId, RunConfiguration config, List<AITool> tools)
+    private IChatClient InitializeClient(RunConfiguration config, List<AITool> tools)
     {
         var client = chatClientFactory.Create(config);
         
         var builder = client.AsBuilder();
-        builder.ConfigureOptions(x => x.ConversationId = chatId.ToString());
         
         if (tools.Count > 0)
         {
@@ -150,5 +166,31 @@ public class ChatCompletionRunner(
         }
 
         return room;
+    }
+
+    private IAsyncEnumerable<AttachmentMessageContent> GetAttachmentsAsync(IEnumerable<JsonElement>? files)
+    {
+        if (files == null)
+        {
+            return AsyncEnumerable.Empty<AttachmentMessageContent>();
+        }
+        
+        var (ids, thirdPartyIds) = FileOperationsManager.GetIds(files);
+
+        return attachmentHandler.HandleAsync(ids, thirdPartyIds);
+    }
+    
+    private static ChatMessage FormatUserMessage(string message, List<AttachmentMessageContent> attachments)
+    {
+        if (attachments.Count == 0)
+        {
+            return new ChatMessage(ChatRole.User, message);
+        }
+
+        var contents = new List<AIContent>(attachments.Count + 1);
+        contents.AddRange(attachments.Select(attachment => (AIContent)attachment));
+        contents.Add(new TextContent(message));
+
+        return new ChatMessage { Role = ChatRole.User, Contents = contents };
     }
 }

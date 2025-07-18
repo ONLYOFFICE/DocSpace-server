@@ -29,4 +29,5 @@ namespace ASC.AI.Core.Chat.Models;
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
 [JsonDerivedType(typeof(TextMessageContent), "text")]
 [JsonDerivedType(typeof(ToolCallMessageContent), "tool")]
+[JsonDerivedType(typeof(AttachmentMessageContent), "attachment")]
 public class MessageContent;

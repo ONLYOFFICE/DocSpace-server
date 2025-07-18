@@ -42,9 +42,11 @@ var options = new WebApplicationOptions
 
 var builder = WebApplication.CreateBuilder(options);
 
-builder.Configuration.AddDefaultConfiguration(builder.Environment)
-                     .AddEnvironmentVariables()
-                     .AddCommandLine(args);
+builder.Configuration
+    .AddDefaultConfiguration(builder.Environment)
+    .AddJsonFile("elastic.json", optional: false, reloadOnChange: true)
+    .AddEnvironmentVariables()
+    .AddCommandLine(args);
 
 var logger = LogManager.Setup()
                             .SetupExtensions(s =>
