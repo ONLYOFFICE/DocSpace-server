@@ -10,6 +10,7 @@
   "additionalProperties": {
     "packageName": "docspace-api-python",
     "packageVersion": "1.0.0",
+    "licenseName": "Apache-2.0",
     "repositoryUrl": "https://github.com/ONLYOFFICE/docspace-python-sdk"
   }
 }
