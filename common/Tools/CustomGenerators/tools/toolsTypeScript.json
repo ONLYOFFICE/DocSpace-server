@@ -8,12 +8,12 @@
   "inputSpec": "./tools/api-docs.json",
   "outputDir": "typescript-sdk",
   "additionalProperties": {
-	"withSeparateModelsAndApi": true,
-    "modelPackage": "models",
-    "apiPackage": "api",
-    "npmName": "@onlyoffice/docspace-api-typescript",
-    "licenseName": "Apache-2.0",
+    "packageName": "@onlyoffice/docspace-api-typescript",
     "packageVersion": "1.0.0",
-    "npmRepository": "git+https://github.com/ONLYOFFICE/docspace-typescript-sdk"
+    "licenseName": "Apache-2.0",
+    "repositoryUrl": "https://github.com/ONLYOFFICE/docspace-typescript-sdk",
+    "withSeparateModelsAndApi": true,
+    "modelPackage": "models",
+    "apiPackage": "api"
   }
 }
