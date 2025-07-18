@@ -9,10 +9,10 @@
   "outputDir": "ClientNet",
   "additionalProperties": {
     "packageName": "DocSpace.Sdk",
-    "library": "httpclient",
-    "licenseName": "Apache-2.0",
-    "targetFramework": "net9.0",
     "packageVersion": "1.0.0",
-    "repositoryUrl": "https://github.com/ONLYOFFICE/docspace-dotnet-sdk"
+    "licenseName": "Apache-2.0",
+    "repositoryUrl": "https://github.com/ONLYOFFICE/docspace-dotnet-sdk",
+    "library": "httpclient",
+    "targetFramework": "net9.0"
   }
 }
