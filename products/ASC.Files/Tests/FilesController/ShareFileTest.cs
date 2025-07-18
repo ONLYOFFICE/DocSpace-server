@@ -50,11 +50,13 @@ public class ShareFileTest(
         
         // Act
         var result = (await _filesApi.GetFilePrimaryExternalLinkAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var fileInfo = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         
         // Assert
         result.Should().NotBeNull();
         //result.ShareLink.Should().NotBeNullOrEmpty();
-        result.Access.Should().Be(fileShare); // Read access
+        result.Access.Should().Be(fileShare);
+        fileInfo.Shared.Should().BeTrue();
     }
     
     [Fact]

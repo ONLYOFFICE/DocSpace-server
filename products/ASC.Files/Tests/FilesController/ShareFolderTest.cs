@@ -40,15 +40,11 @@ public class ShareFolderTest(
     {
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
-        
         var folder = await CreateFolderInMy("folder", Initializer.Owner);
         
         // Act
         var linkParams = new FolderLinkRequest(access: fileShare);
-        
         await _foldersApi.CreateFolderPrimaryExternalLinkAsync(folder.Id, linkParams, TestContext.Current.CancellationToken);
-        
-        // Act
         var result = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         
         // Assert
@@ -56,6 +52,22 @@ public class ShareFolderTest(
         //result.ShareLink.Should().NotBeNullOrEmpty();
         result.Access.Should().Be(fileShare);
     }
+    
+    // [Fact]
+    // public async Task PrimaryExternalLink_ShortLink_ReturnsOk()
+    // {
+    //     // Arrange
+    //     await _filesClient.Authenticate(Initializer.Owner);
+    //     var folder = await CreateFolderInMy("folder", Initializer.Owner);
+    //     var linkParams = new FolderLinkRequest(access: FileShare.Read);
+    //     
+    //     // Act
+    //     var externalLink =  (await _foldersApi.CreateFolderPrimaryExternalLinkAsync(folder.Id, linkParams, TestContext.Current.CancellationToken)).Response;
+    //     var sharedTo = DeserializeSharedToLink(externalLink);
+    //
+    //     var result = await apiFactory.HttpClient.GetAsync(sharedTo.ShareLink, TestContext.Current.CancellationToken);
+    //     result.StatusCode.Should().Be(HttpStatusCode.OK);
+    // }
     
     [Fact]
     public async Task CreatePrimaryExternalLink_ByDefault_ReturnsLinkData()
@@ -87,9 +99,11 @@ public class ShareFolderTest(
         folderInfo.Should().NotBeNull();
         folderInfo.Current.Should().NotBeNull();
         folderInfo.Current.Title.Should().Be(folder.Title);
+        folderInfo.Current.Shared.Should().BeTrue();
         
         fileInfo.Should().NotBeNull();
         fileInfo.Title.Should().Be(file.Title);
+        fileInfo.Shared.Should().BeTrue();
     }
     
     [Theory]
@@ -250,5 +264,33 @@ public class ShareFolderTest(
 
         externalShareDataWrongPassword.Status.Should().Be(Status.InvalidPassword);
         externalShareData.Status.Should().Be(Status.Ok);
+    }
+    
+    [Fact]
+    public async Task SetFolderLinkAsync_NoneAccess_ReturnsOk()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        
+        var folder = await CreateFolderInMy("folder", Initializer.Owner);
+        var file = await CreateFile("file", folder.Id);
+        
+        var linkParams = new FolderLinkRequest(access: FileShare.Read);
+        var externalLink = (await _foldersApi.CreateFolderPrimaryExternalLinkAsync(folder.Id, linkParams, TestContext.Current.CancellationToken)).Response;
+        var sharedTo = DeserializeSharedToLink(externalLink);
+        
+        // Act
+        var data = new FolderLinkRequest(sharedTo.Id, FileShare.None);
+        var updatedExternalLink = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, data, TestContext.Current.CancellationToken)).Response;
+        var folderInfo = (await _foldersApi.GetFolderInfoAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var fileInfo = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        
+        // Assert
+        updatedExternalLink.Should().BeNull();
+        folderInfo.Shared.Should().BeFalse();
+        fileInfo.Shared.Should().BeFalse();
+        
+        var allLinks = (await _foldersApi.GetFolderLinksAsync(folderInfo.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        allLinks.Should().BeEmpty(); 
     }
 }
