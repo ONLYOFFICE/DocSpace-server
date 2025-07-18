@@ -8,7 +8,7 @@
   "inputSpec": "./tools/api-docs.json",
   "outputDir": "javascript-sdk",
   "additionalProperties": {
-    "packageName": "docspace-api-javascript",
+    "packageName": "@onlyoffice/docspace-api-sdk-javascript",
     "packageVersion": "1.0.0",
     "licenseName": "Apache-2.0",
     "repositoryUrl": "https://github.com/ONLYOFFICE/docspace-javascript-sdk",
