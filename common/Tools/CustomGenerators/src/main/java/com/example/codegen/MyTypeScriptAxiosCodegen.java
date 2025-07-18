@@ -66,6 +66,17 @@ public class MyTypeScriptAxiosCodegen extends TypeScriptAxiosClientCodegen {
         supportingFiles.removeIf(f -> f.getTemplateFile().equals("git_push.sh.mustache") || 
             f.getDestinationFilename().equals(".openapi-generator-ignore")
         );
+
+        if (additionalProperties.containsKey(NPM_REPOSITORY)) {
+            this.setNpmRepository(additionalProperties.get(NPM_REPOSITORY).toString());
+        }
+
+        supportingFiles.add(new SupportingFile("README.mustache", "", "README.md"));
+        supportingFiles.add(new SupportingFile("package.mustache", "", "package.json"));
+        supportingFiles.add(new SupportingFile("tsconfig.mustache", "", "tsconfig.json"));
+        if (supportsES6) {
+            supportingFiles.add(new SupportingFile("tsconfig.esm.mustache", "", "tsconfig.esm.json"));
+        }
     }
 
     @Override
