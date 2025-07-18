@@ -1,14 +1,26 @@
 {
-  "name": "{{{projectName}}}",
-  "version": "{{{projectVersion}}}",
-  "description": "OpenAPI client for {{npmName}}",
-  "license": "{{licenseName}}",
+  "name": "{{packageName}}",
+  "version": "{{packageVersion}}",
+  "description": "Simple integration JavaScript API SDK for ONLYOFFICE DocSpace",
   "homepage": "https://www.onlyoffice.com",
   "author": "Ascensio System SIA <integration@onlyoffice.com> (https://www.onlyoffice.com)",
+  "maintainers": [
+    "Ascensio System SIA <integration@onlyoffice.com> (https://www.onlyoffice.com)"
+  ],
   "repository": {
     "type": "git",
-    "url": "{{npmRepository}}"
+    "url": "git+{{repositoryUrl}}.git"
   },
+  "bugs": {
+    "url": "{{repositoryUrl}}/issues",
+    "email": "support@onlyoffice.com"
+  },
+  "keywords": [
+    "onlyoffice",
+    "docspace",
+    "sdk"
+  ],
+  "license": "{{licenseName}}",
   "main": "dist{{#invokerPackage}}/{{.}}{{/invokerPackage}}/index.js",
   "scripts": {
     "build": "babel src -d dist",
@@ -18,11 +30,6 @@
   "browser": {
     "fs": false
   },
-{{#npmRepository}}
-  "publishConfig":{
-    "registry":"{{npmRepository}}"
-  },
-{{/npmRepository}}
   "dependencies": {
     "@babel/cli": "^7.0.0",
     "apollo-datasource-rest": "^3.6.1",

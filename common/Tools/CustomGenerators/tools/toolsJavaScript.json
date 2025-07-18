@@ -8,12 +8,12 @@
   "inputSpec": "./tools/api-docs.json",
   "outputDir": "javascript-sdk",
   "additionalProperties": {
-	"withSeparateModelsAndApi": true,
-    "modelPackage": "models",
-    "apiPackage": "api",
-	"projectName": "docspace-api-javascript",
-    "licenseName": "Apache-2.0",
+    "packageName": "docspace-api-javascript",
     "packageVersion": "1.0.0",
-    "npmRepository": "git+https://github.com/ONLYOFFICE/docspace-javascript-sdk"
+    "licenseName": "Apache-2.0",
+    "repositoryUrl": "https://github.com/ONLYOFFICE/docspace-javascript-sdk",
+    "withSeparateModelsAndApi": true,
+    "modelPackage": "models",
+    "apiPackage": "api"
   }
 }
