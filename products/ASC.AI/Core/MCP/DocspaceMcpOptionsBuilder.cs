@@ -40,7 +40,7 @@ public class DocspaceMcpOptionsBuilder(Guid id, string name, string endpoint) : 
             Endpoint = new Uri(endpoint),
             Headers = new Dictionary<string, string>
             {
-                {"Referer", commonLinkUtility.GetFullAbsolutePath(string.Empty)}, 
+                {"Referer", commonLinkUtility.GetFullAbsolutePath(string.Empty).TrimEnd('/') + "/"}, 
                 {"Authorization", cookieManager.GetCookies(CookiesType.AuthKey)}
             }
         };
