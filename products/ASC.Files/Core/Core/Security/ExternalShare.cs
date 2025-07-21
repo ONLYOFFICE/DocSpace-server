@@ -66,7 +66,7 @@ public class ExternalShare(Global global,
             case Folder<T> folder when DocSpaceHelper.IsRoom(folder.FolderType):
                 url = string.Format(RoomLinkPattern, key);
                 break;
-            case Folder<T> folder when DocSpaceHelper.IsRoom(folder.RootFolderType):
+            case Folder<T> { RootFolderType: FolderType.VirtualRooms } folder:
                 url = QueryHelpers.AddQueryString(string.Format(RoomLinkPattern, key), "folder", HttpUtility.UrlEncode(folder.Id.ToString()!));
                 break;
             case Folder<T> { RootFolderType: FolderType.USER } folder:

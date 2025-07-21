@@ -58,7 +58,8 @@ public class ShareFolderTest(
     // {
     //     // Arrange
     //     await _filesClient.Authenticate(Initializer.Owner);
-    //     var folder = await CreateFolderInMy("folder", Initializer.Owner);
+    //     var room = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("room title", roomType: RoomType.CustomRoom), TestContext.Current.CancellationToken)).Response;
+    //     var folder = await CreateFolder("folder",  room.Id);
     //     var linkParams = new FolderLinkRequest(access: FileShare.Read);
     //     
     //     // Act
