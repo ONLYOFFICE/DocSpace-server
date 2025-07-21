@@ -19,7 +19,7 @@ public class MyPythonCodegen extends PythonClientCodegen {
 
     public MyPythonCodegen() {
         super();
-        this.outputFolder = "generated-code/my-python-custom";
+        this.outputFolder = "generated-code/my-python";
         this.templateDir = "templates/python";
         this.embeddedTemplateDir = "python";
 
@@ -48,9 +48,13 @@ public class MyPythonCodegen extends PythonClientCodegen {
                 }
             }
         }
+
+        supportingFiles.removeIf(f -> f.getTemplateFile().equals("git_push.sh.mustache") || 
+            f.getDestinationFilename().equals(".openapi-generator-ignore")
+        );
     }
 
-        @Override
+    @Override
     public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List<ModelMap> allModels) {
         super.postProcessOperationsWithModels(objs, allModels);
 
@@ -105,7 +109,7 @@ public class MyPythonCodegen extends PythonClientCodegen {
 
     @Override
     public String getName() {
-        return "my-python-custom";
+        return "my-python";
     }
 
     @Override

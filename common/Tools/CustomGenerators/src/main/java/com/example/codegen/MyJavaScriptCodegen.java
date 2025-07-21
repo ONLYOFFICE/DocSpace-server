@@ -32,11 +32,6 @@ public class MyJavaScriptCodegen extends JavascriptClientCodegen {
         supportingFiles.add(new SupportingFile(
             "LICENSE.mustache", "", "LICENSE"
         ));
-
-        
-        supportingFiles.removeIf(f -> f.getTemplateFile().equals("git_push.sh.mustache") || 
-            f.getDestinationFilename().equals(".openapi-generator-ignore")
-        );
     }
 
     @Override
@@ -54,6 +49,10 @@ public class MyJavaScriptCodegen extends JavascriptClientCodegen {
                 }
             }
         }
+
+        supportingFiles.removeIf(f -> f.getTemplateFile().equals("git_push.sh.mustache") || 
+            f.getDestinationFilename().equals(".openapi-generator-ignore")
+        );
     }
 
     @Override
