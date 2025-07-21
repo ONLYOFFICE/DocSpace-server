@@ -47,12 +47,7 @@ public class ChatCompletionRunner(
         var config = await GetRungConfigAsync(roomId);
         
         var attachmentsTask = GetAttachmentsAsync(files).ToListAsync();
-        
-        var tenantId = tenantManager.GetCurrentTenantId();
-        
-        var toolSet = await mcpService.GetToolsAsync(roomId);
-        
-        var client = InitializeClient(config, toolSet.Tools);
+        var toolTask = mcpService.GetToolsAsync(roomId);
         
         var attachments = await attachmentsTask;
         var userMessage = FormatUserMessage(message, attachments);
@@ -64,9 +59,18 @@ public class ChatCompletionRunner(
         };
         
         var writerFactory = new StartHistoryWriterFactory(
-            tenantId, roomId, authContext.CurrentAccount.ID, message, attachments, chatHistory);
+            tenantManager.GetCurrentTenantId(), 
+            roomId, 
+            authContext.CurrentAccount.ID, 
+            message, 
+            attachments, 
+            chatHistory);
         
-        return new ChatCompletionGenerator(client, logger, messages, toolSet, writerFactory);
+        var toolHolder = await toolTask;
+        
+        var client = chatClientFactory.Create(config, toolHolder.Tools);
+        
+        return new ChatCompletionGenerator(client, logger, messages, toolHolder, writerFactory);
     }
 
     public async Task<ChatCompletionGenerator> StartChatAsync(
@@ -83,10 +87,7 @@ public class ChatCompletionRunner(
         var config = await GetRungConfigAsync(chat.RoomId);
         
         var attachmentsTask = GetAttachmentsAsync(files).ToListAsync();
-        
-        var toolHolder = await mcpService.GetToolsAsync(chat.RoomId);
-        
-        var client = InitializeClient(config, toolHolder.Tools);
+        var toolsTask = mcpService.GetToolsAsync(chat.RoomId);
 
         var historyAdapter = HistoryHelper.GetAdapter(config.ProviderType);
         var history = await chatHistory.GetMessagesAsync(chatId, historyAdapter).ToListAsync();
@@ -103,12 +104,11 @@ public class ChatCompletionRunner(
         messages.AddRange(history);
         messages.Add(userMessage);
 
-        foreach (var attachment in attachments)
-        { 
-            userMessage.Contents.Add(attachment);
-        }
-
         var writerFactory = new ContinueHistoryWriterFactory(tenantId, chatId, message, attachments, chatHistory);
+        
+        var toolHolder = await toolsTask;
+        
+        var client = chatClientFactory.Create(config, toolHolder.Tools);
 
         return new ChatCompletionGenerator(client, logger, messages, toolHolder, writerFactory);
     }
@@ -130,25 +130,6 @@ public class ChatCompletionRunner(
             }
         };
         return config;
-    }
-
-    private IChatClient InitializeClient(RunConfiguration config, List<AITool> tools)
-    {
-        var client = chatClientFactory.Create(config);
-        
-        var builder = client.AsBuilder();
-        
-        if (tools.Count > 0)
-        {
-            builder.ConfigureOptions(x =>
-            {
-                x.Tools = tools;
-                x.ToolMode = ChatToolMode.Auto;
-                x.AllowMultipleToolCalls = true;
-            }).UseFunctionInvocation();
-        }
-        
-        return builder.Build();
     }
     
     private async Task<Folder<int>> GetRoomAsync(int roomId)

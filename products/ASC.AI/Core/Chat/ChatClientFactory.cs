@@ -29,7 +29,7 @@ namespace ASC.AI.Core.Chat;
 [Scope]
 public class ChatClientFactory(IHttpClientFactory httpClientFactory)
 {
-    public IChatClient Create(RunConfiguration runConfig)
+    public IChatClient Create(RunConfiguration runConfig, List<AITool>? tools = null)
     {
         ArgumentNullException.ThrowIfNull(runConfig);
         
@@ -38,30 +38,45 @@ public class ChatClientFactory(IHttpClientFactory httpClientFactory)
             throw new ArgumentException("Endpoint is not configured");
         }
 
+        ChatClientBuilder builder;
+
         if (runConfig.ProviderType == ProviderType.Anthropic)
         {
             var client = new AnthropicClient(
                 new APIAuthentication(runConfig.Key), httpClientFactory.CreateClient()).Messages;
 
-            return client.AsBuilder()
+            builder = client.AsBuilder()
                 .ConfigureOptions(x =>
                 {
                     x.ModelId = runConfig.Parameters.ModelId;
                     x.MaxOutputTokens = 4096;
-                })
-                .Build();
+                });
         }
-        
-        var credential = new ApiKeyCredential(runConfig.Key);
-        var options = new OpenAIClientOptions
+        else
         {
-            Endpoint = new Uri(runConfig.Url),
-            Transport = new HttpClientPipelineTransport(httpClientFactory.CreateClient())
-        };
+            var credential = new ApiKeyCredential(runConfig.Key);
+            var options = new OpenAIClientOptions
+            {
+                Endpoint = new Uri(runConfig.Url),
+                Transport = new HttpClientPipelineTransport(httpClientFactory.CreateClient())
+            };
         
-        var openAiClient = new OpenAIClient(credential, options);
-        var chatClient = openAiClient.GetChatClient(runConfig.Parameters.ModelId);
+            var openAiClient = new OpenAIClient(credential, options);
+            var chatClient = openAiClient.GetChatClient(runConfig.Parameters.ModelId);
         
-        return chatClient.AsIChatClient();
+            builder = chatClient.AsIChatClient().AsBuilder();
+        }
+
+        if (tools is { Count: > 0 })
+        {
+            builder.ConfigureOptions(x =>
+            {
+                x.Tools = tools;
+                x.ToolMode = ChatToolMode.Auto;
+                x.AllowMultipleToolCalls = true;
+            }).UseFunctionInvocation();
+        }
+
+        return builder.Build();
     }
 }
