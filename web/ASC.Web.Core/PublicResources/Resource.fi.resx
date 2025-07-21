@@ -1081,4 +1081,49 @@
   <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
     <value>Webhook URL ei ole saatavilla. HEAD-pyyntö ei vastaa 200 http statusta.</value>
   </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>Luotto</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>Valuutta</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>Päivämäärä ja aika</value>
+  </data>
+  <data name="AccountingCustomerOperationDescription" xml:space="preserve">
+    <value>Kuvaus</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>Määrä</value>
+  </data>
+  <data name="AccountingCustomerOperationService" xml:space="preserve">
+    <value>Palvelun nimi</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Levytila</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Saldon latuas</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>Mittayksikkö</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>Asiakastoimintojen raportti ({0}-{1})</value>
+  </data>
+  <data name="AccountingCustomerOperationWithdrawal" xml:space="preserve">
+    <value>Nosto</value>
+  </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>Ryhmää ei löydy</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>Lisälevytila</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>Säädä säilytystilaa juuri tarvitsemasi määrän mukaan.</value>
+  </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
+    <value>Käytetty muistin tila:</value>
+  </data>
 </root>

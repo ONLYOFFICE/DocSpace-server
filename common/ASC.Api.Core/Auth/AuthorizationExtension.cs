@@ -30,6 +30,7 @@ namespace ASC.Api.Core.Auth;
 
 public static class AuthorizationExtension
 {
+    
     public static readonly Dictionary<string, string[]> ScopesMap = new()
     {
         { "GET api/[0-9].[0-9]/files/rooms", [ "rooms:read", "rooms:write" ] },
@@ -40,8 +41,9 @@ public static class AuthorizationExtension
         { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/people/@self", [ "accounts.self:write" ] },
         { "GET api/[0-9].[0-9]/people", [ "accounts:read", "accounts:write" ] },
         { "(POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/people", [ "accounts:write" ] },
+        { "(GET|POST|PUT|DELETE|UPDATE) api/[0-9].[0-9]/keys(/.*)?", [ "*" ] },
     };
-
+    
     private static string GetAuthorizePolicy(string routePattern, string httpMethod)
     {
         string[] globalScopes;
@@ -68,6 +70,11 @@ public static class AuthorizationExtension
 
             localScopes = ScopesMap[regexPattern];
 
+            if (localScopes.Length == 1 && localScopes[0] == "*")
+            {
+                localScopes = ScopesMap.SelectMany(r => r.Value).Except(["*"]).ToArray();
+            }
+            
             break;
         }
 

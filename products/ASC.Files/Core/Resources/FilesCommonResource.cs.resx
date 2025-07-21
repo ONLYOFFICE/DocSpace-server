@@ -512,4 +512,10 @@ Je garantována 100% kompatibilita s MS Office formáty.</value>
   <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
     <value>Začněte plnit</value>
   </data>
+  <data name="RoleEnum_Guest" xml:space="preserve">
+    <value>Host</value>
+  </data>
+  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
+    <value>Správce místnosti</value>
+  </data>
 </root>

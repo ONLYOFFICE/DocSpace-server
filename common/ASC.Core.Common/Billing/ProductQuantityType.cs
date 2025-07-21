@@ -31,8 +31,15 @@ namespace ASC.Core.Billing;
 /// </summary>
 public enum ProductQuantityType
 {
+    [SwaggerEnum("Set")]
     Set = 0,
+
+    [SwaggerEnum("Add")]
     Add = 1,
+
+    [SwaggerEnum("Sub")]
     Sub = 2,
+
+    [SwaggerEnum("Renew")]
     Renew = 3
 }

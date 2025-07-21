@@ -1081,4 +1081,49 @@
   <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
     <value>Webhook URL is niet beschikbaar. HEAD verzoek reageert niet 200 http status.</value>
   </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>Tegoed</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>Valuta</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>Datum en tijd</value>
+  </data>
+  <data name="AccountingCustomerOperationDescription" xml:space="preserve">
+    <value>Beschrijving</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>Aantal</value>
+  </data>
+  <data name="AccountingCustomerOperationService" xml:space="preserve">
+    <value>Naam van de dienst</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Schijfruimte</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Tegoed opladen</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>Meeteenheid</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>Klantactiviteitenverslag ({0}-{1})</value>
+  </data>
+  <data name="AccountingCustomerOperationWithdrawal" xml:space="preserve">
+    <value>Opname</value>
+  </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>De groep kon niet worden gevonden.</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>Extra schijfopslagruimte</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>Pas de opslag aan tot de exacte benodigde hoeveelheid.</value>
+  </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
+    <value>Opslagruimte gebruikt:</value>
+  </data>
 </root>

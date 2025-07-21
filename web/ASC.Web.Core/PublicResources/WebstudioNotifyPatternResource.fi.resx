@@ -1926,4 +1926,32 @@ $TrulyYours</value>
   <data name="subject_user_role_changed" xml:space="preserve">
     <value>Roolisi Docspace-huoneessa on muuttunut</value>
   </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Mene Palveluihin</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Mene Lompakon asetuksiin</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Hei, $UserName!
+
+Otamme sinuun yhteyttä ilmoittaaksemme, että ostamasi palvelupaketin automaattista uusimista ei voitu suorittaa.
+
+Pyydämme sinua ystävällisesti uusimaan nykyisen palvelupakettisi manuaalisesti (tai ostamaan uuden).
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Hei, $UserName!
+
+Haluamme ilmoittaa, että tilausmaksusi veloitetaan automaattisesti tililtäsi 3 päivän kuluttua.
+
+Varmistaaksesi sujuvan maksutapahtuman, varmista, että maksutavallasi on riittävästi katetta.
+
+Jos sinulla on kysyttävää tai tarvitse apua, ota rohkeasti yhteyttä "tukitiimiimme":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
 </root>

@@ -913,4 +913,31 @@
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Webhook bijgewerkt: {0}</value>
   </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>De autorisatielink is geactiveerd</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Klantenhandeling uitgevoerd</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Klantactiviteitenverslag gedownload</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Klantabonnement bijgewerkt: {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Klant wallet opgeladen: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Instellingen voor het opladen van klant wallet bijgewerkt</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>LDAP-authenticatie uitgeschakeld</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>LDAP-authenticatie ingeschakeld</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>LDAP-synchronisatie voltooid</value>
+  </data>
 </root>

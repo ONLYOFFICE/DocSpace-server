@@ -512,4 +512,10 @@ Het beste geschikt voor docx, xlsx, pptx.</value>
   <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
     <value>Begin met invullen</value>
   </data>
+  <data name="RoleEnum_Guest" xml:space="preserve">
+    <value>Gast</value>
+  </data>
+  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
+    <value>Kamerbeheerder</value>
+  </data>
 </root>

@@ -2677,7 +2677,7 @@ public class FileStorageService //: IFileStorageService
         return folder;
     }
 
-    public async ValueTask<string> DeleteThirdPartyAsync(string providerId)
+    public async ValueTask<IProviderInfo> DeleteThirdPartyAsync(string providerId)
     {
         var providerDao = daoFactory.ProviderDao;
         if (providerDao == null)
@@ -2687,7 +2687,7 @@ public class FileStorageService //: IFileStorageService
 
         var curProviderId = Convert.ToInt32(providerId);
         var providerInfo = await providerDao.GetProviderInfoAsync(curProviderId);
-
+        
         var folder = entryManager.GetFakeThirdpartyFolder(providerInfo);
         if (!await fileSecurity.CanDeleteAsync(folder))
         {
@@ -2700,9 +2700,10 @@ public class FileStorageService //: IFileStorageService
         }
 
         await providerDao.RemoveProviderInfoAsync(folder.ProviderId);
+        
         await filesMessageService.SendAsync(MessageAction.ThirdPartyDeleted, folder, folder.Id, providerInfo.ProviderKey);
 
-        return folder.Id;
+        return providerInfo;
     }
 
     public async Task<bool> SaveDocuSignAsync(string code)
