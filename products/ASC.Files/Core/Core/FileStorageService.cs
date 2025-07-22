@@ -3676,7 +3676,7 @@ public class FileStorageService //: IFileStorageService
                 password: password);
         }
 
-        if (link.FileShareOptions.IsExpired && entry.RootFolderType == FolderType.USER && entry.FileEntryType == FileEntryType.File)
+        if (link.FileShareOptions.IsExpired && entry.RootFolderType == FolderType.USER)
         {
             return await SetExternalLinkAsync(entry, link.Id, link.Access, FilesCommonResource.DefaultExternalLinkTitle,
                 DateTime.UtcNow.Add(filesLinkUtility.DefaultLinkLifeTime), requiredAuth: link.FileShareOptions.Internal, primary: true);

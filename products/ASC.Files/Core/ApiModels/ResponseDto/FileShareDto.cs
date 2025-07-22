@@ -58,6 +58,11 @@ public class FileShareDto
     public bool CanEditAccess { get; set; }
 
     /// <summary>
+    /// Determines whether the user has permission to modify the deny download setting for the file share.
+    /// </summary>
+    public bool CanEditDenyDownload { get; set; }
+
+    /// <summary>
     /// The subject type.
     /// </summary>
     public SubjectType SubjectType { get; set; }
@@ -150,6 +155,7 @@ public class FileShareDtoHelper(
             IsOwner = aceWrapper.Owner,
             IsLocked = aceWrapper.LockedRights,
             CanEditAccess = aceWrapper.CanEditAccess,
+            CanEditDenyDownload = aceWrapper.CanEditDenyDownload,
             SubjectType = aceWrapper.SubjectType
         };
 

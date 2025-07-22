@@ -166,6 +166,11 @@ public class BaseTest(
         return (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto(roomTitle, roomType: RoomType.PublicRoom), TestContext.Current.CancellationToken)).Response;
     }
     
+    protected async Task<FolderDtoInteger> CreateVDRRoom(string roomTitle)
+    {
+        return (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto(roomTitle, roomType: RoomType.VirtualDataRoom), TestContext.Current.CancellationToken)).Response;
+    }
+    
     protected async Task<List<FileOperationDto>?> WaitLongOperation()
     {
         List<FileOperationDto>? statuses;

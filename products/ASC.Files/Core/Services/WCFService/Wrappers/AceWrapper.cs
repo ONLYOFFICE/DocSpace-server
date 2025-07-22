@@ -88,6 +88,11 @@ public class AceWrapper : IMapFrom<RoomInvitation>
     public bool CanEditAccess { get; set; }
 
     /// <summary>
+    /// Determines whether the user has permission to modify the deny download setting for the file share.
+    /// </summary>
+    public bool CanEditDenyDownload { get; set; } = true;
+    
+    /// <summary>
     /// The subject name.
     /// </summary>
     [JsonPropertyName("title")]
@@ -126,7 +131,7 @@ public class AceWrapper : IMapFrom<RoomInvitation>
     /// </summary>
     [JsonPropertyName("disable_remove")]
     public bool DisableRemove { get; set; }
-
+    
     /// <summary>
     /// The request token of the access rights.
     /// </summary>

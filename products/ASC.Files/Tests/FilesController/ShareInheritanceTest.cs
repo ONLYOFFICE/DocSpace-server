@@ -744,4 +744,45 @@ public class ShareInheritanceTest(
         var allLinks = (await _foldersApi.GetFolderLinksAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         allLinks.Should().HaveCount(1); // The original link should be replaced
     }
+    
+    [Fact]
+    public async Task CreateFolderFileLink_VDRRoom_ReturnsNewLink()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var vdrRoom = await CreateVDRRoom("VDR Room Test");
+        var folder = await CreateFolder("Folder in VDR Room", vdrRoom.Id);
+        
+        // Act - Set the link with FileShare.None
+        var primaryLink = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var originalSharedTo = DeserializeSharedToLink(primaryLink);
+        
+        // Assert
+        primaryLink.Should().NotBeNull();
+        originalSharedTo.Internal.Should().BeTrue();
+    }
+    
+    [Fact]
+    public async Task ChangeInternalSettingLink_FileFolder_VDRRoom_ReturnsError()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var vdrRoom = await CreateVDRRoom("VDR Room Test");
+        var folder = await CreateFolder("Folder in VDR Room", vdrRoom.Id);
+        var file = await CreateFile("File in VDR Room", vdrRoom.Id);
+
+        // Get the primary external link
+        var primaryFolderLink = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var originalFolderSharedTo = DeserializeSharedToLink(primaryFolderLink);
+
+        var primaryFileLink = (await _filesApi.GetFilePrimaryExternalLinkAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var originalFileSharedTo = DeserializeSharedToLink(primaryFileLink);
+
+        // Act - Set the link with FileShare.None
+        var updateFolderRequest = new FolderLinkRequest(linkId: originalFolderSharedTo.Id, varInternal: false);
+        var updateFileRequest = new FileLinkRequest(linkId: originalFileSharedTo.Id, varInternal: false);
+
+        await Assert.ThrowsAsync<ApiException>(async () => await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, updateFolderRequest, TestContext.Current.CancellationToken));
+        await Assert.ThrowsAsync<ApiException>(async () => await _filesApi.SetFileExternalLinkAsync(folder.Id, updateFileRequest, TestContext.Current.CancellationToken));
+    }
 }
