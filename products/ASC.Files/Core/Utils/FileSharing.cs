@@ -168,6 +168,13 @@ public class FileSharingAceHelper(
                 {
                     continue;
                 }
+                
+                var entryRoom = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(folder != null ? folder.Id : entry.ParentId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+
+                if (entryRoom is { FolderType: FolderType.VirtualDataRoom})
+                {
+                    w.FileShareOptions.Internal = true;
+                }
             }
             
             if (!string.IsNullOrEmpty(w.FileShareOptions?.Password))

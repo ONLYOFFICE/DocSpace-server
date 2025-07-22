@@ -114,10 +114,11 @@ public class ShareFolderTest(
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         
+        //Assert
         var folder = await CreateFolderInMy("folder", Initializer.Owner);
+        var linkParams = new FolderLinkRequest(access: fileShare);
         
         // Act
-        var linkParams = new FolderLinkRequest(access: fileShare);
 
         await Assert.ThrowsAsync<ApiException>(async () => 
             await _foldersApi.CreateFolderPrimaryExternalLinkAsync(folder.Id, linkParams, TestContext.Current.CancellationToken));

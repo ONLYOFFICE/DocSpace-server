@@ -779,10 +779,20 @@ public class ShareInheritanceTest(
         var originalFileSharedTo = DeserializeSharedToLink(primaryFileLink);
 
         // Act - Set the link with FileShare.None
-        var updateFolderRequest = new FolderLinkRequest(linkId: originalFolderSharedTo.Id, varInternal: false);
-        var updateFileRequest = new FileLinkRequest(linkId: originalFileSharedTo.Id, varInternal: false);
+        var updateFolderRequest = new FolderLinkRequest(linkId: originalFolderSharedTo.Id, varInternal: false, access: primaryFolderLink.Access);
+        var updateFileRequest = new FileLinkRequest(linkId: originalFileSharedTo.Id, varInternal: false, access: primaryFolderLink.Access);
 
-        await Assert.ThrowsAsync<ApiException>(async () => await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, updateFolderRequest, TestContext.Current.CancellationToken));
-        await Assert.ThrowsAsync<ApiException>(async () => await _filesApi.SetFileExternalLinkAsync(folder.Id, updateFileRequest, TestContext.Current.CancellationToken));
+        var updatedFolderLink = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, updateFolderRequest, TestContext.Current.CancellationToken)).Response;
+        var updatedFolderSharedTo = DeserializeSharedToLink(updatedFolderLink);
+        
+        var updatedFileLink = (await _filesApi.SetFileExternalLinkAsync(file.Id, updateFileRequest, TestContext.Current.CancellationToken)).Response;
+        var updatedFileSharedTo = DeserializeSharedToLink(updatedFileLink);
+        
+        // Assert
+        updatedFolderLink.Should().NotBeNull();
+        updatedFolderSharedTo.Internal.Should().BeTrue();
+        
+        updatedFileLink.Should().NotBeNull();
+        updatedFileSharedTo.Internal.Should().BeTrue();
     }
 }
