@@ -48,7 +48,7 @@ public class ChatController(
 
         await foreach (var completion in generator.GenerateCompletionAsync(Request.HttpContext.RequestAborted))
         {
-            await Response.WriteAsync($"event: {completion.Type.ToText()}{Environment.NewLine}data: {completion.Content}{Environment.NewLine}{Environment.NewLine}");
+            await Response.WriteAsync($"event: {completion.Type.ToText()}\ndata: {completion.Content}\n\n");
             await Response.Body.FlushAsync();
         }
         
@@ -65,7 +65,7 @@ public class ChatController(
 
         await foreach (var completion in generator.GenerateCompletionAsync(Request.HttpContext.RequestAborted))
         {
-            await Response.WriteAsync($"event: {completion.Type.ToText()}{Environment.NewLine}data: {completion.Content}{Environment.NewLine}{Environment.NewLine}");
+            await Response.WriteAsync($"event: {completion.Type.ToText()}\ndata: {completion.Content}\n\n");
             await Response.Body.FlushAsync();
         }
         
