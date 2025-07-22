@@ -227,6 +227,7 @@ api.{{{operationId}}}({{#requiredParams}}{{{paramName}}}{{^-last}}, {{/-last}}{{
 All URIs are relative to *{{basePath}}*
 
 <details><summary>API Endoints table</summary>
+
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
 {{#apiInfo}}{{#apis}}{{#operations}}{{#operation}}*{{moduleName}}.{{classname}}* | [**{{operationId}}**]({{apiDocPath}}{{classname}}.md#{{operationId}}) | **{{httpMethod}}** {{path}} | {{summary}}
@@ -236,6 +237,7 @@ Class | Method | HTTP request | Description
 ## Documentation for Models
 
 <details><summary>Models list</summary>
+
 {{#models}}{{#model}} - [{{moduleName}}.{{classname}}]({{modelDocPath}}{{classname}}.md)
 {{/model}}{{/models}}
 </details>
