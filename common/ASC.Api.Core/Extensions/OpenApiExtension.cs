@@ -54,6 +54,8 @@ public static class OpenApiExtension
             c.SwaggerDoc("common", new OpenApiInfo { Title = "Api", Version = "3.2.0" });
             c.SchemaFilter<SwaggerSchemaCustomFilter>();
             c.DocumentFilter<LowercaseDocumentFilter>();
+            c.OperationFilter<OneOfResponseFilter>();
+            c.SchemaFilter<DerivedSchemaFilter>();
             c.DocumentFilter<HideRouteDocumentFilter>("/api/2.0/capabilities.json");
             c.DocumentFilter<TagDescriptionsDocumentFilter>();
             c.OperationFilter<SwaggerCustomOperationFilter>();
