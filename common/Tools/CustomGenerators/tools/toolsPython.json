@@ -4,7 +4,7 @@
   "generator-cli": {
     "version": "7.13.0"
   },
-  "generatorName": "my-python-custom",
+  "generatorName": "my-python",
   "inputSpec": "./tools/api-docs.json",
   "outputDir": "python-sdk",
   "additionalProperties": {
