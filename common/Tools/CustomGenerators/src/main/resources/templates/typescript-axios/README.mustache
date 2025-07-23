@@ -98,9 +98,9 @@ npm install PATH_TO_GENERATED_PACKAGE --save
 Please follow the [building](#building) instruction and execute the following TS code:
 
 ```typescript
-import {{{moduleName}}} from '{{{packageName}}}';
-
 {{#apiInfo}}{{#apis}}{{#-first}}{{#operations}}{{#operation}}{{#-first}}
+import { Configuration, {{{classname}}} } from '{{{packageName}}}';
+
 const config = new Configuration ({
     basePath: "YOUR SERVER URL",
     {{#authMethods}}

@@ -14,6 +14,7 @@ import org.openapitools.codegen.CodegenParameter;
 import org.openapitools.codegen.CodegenOperation;
 
 import java.util.List;
+import java.util.Map;
 
 public class MyPythonCodegen extends PythonClientCodegen {
 
@@ -108,6 +109,16 @@ public class MyPythonCodegen extends PythonClientCodegen {
                 model.vendorExtensions.put("isApiDateTime", true);
             }
         }
+        return objs;
+    }
+
+    public Map<String, Object> postProcessSupportingFileData(Map<String, Object> objs) {
+        super.postProcessSupportingFileData(objs);
+
+        objs.put("x-authorizationUrl", "{{authBaseUrl}}/oauth2/authorize");
+        objs.put("x-tokenUrl", "{{authBaseUrl}}/oauth2/token");
+        objs.put("x-openIdConnectUrl", "{{authBaseUrl}}/.well-known/openid-configuration");
+
         return objs;
     }
 

@@ -13,7 +13,7 @@ import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.servers.ServerVariable;
 
 import java.util.List;
-
+import java.util.Map;
 
 public class MyJavaScriptCodegen extends JavascriptClientCodegen {
 
@@ -100,6 +100,16 @@ public class MyJavaScriptCodegen extends JavascriptClientCodegen {
                 }
             }
         }
+
+        return objs;
+    }
+
+    public Map<String, Object> postProcessSupportingFileData(Map<String, Object> objs) {
+        super.postProcessSupportingFileData(objs);
+
+        objs.put("x-authorizationUrl", "{{authBaseUrl}}/oauth2/authorize");
+        objs.put("x-tokenUrl", "{{authBaseUrl}}/oauth2/token");
+        objs.put("x-openIdConnectUrl", "{{authBaseUrl}}/.well-known/openid-configuration");
 
         return objs;
     }
