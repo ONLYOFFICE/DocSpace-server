@@ -43,9 +43,9 @@ public class ChatCompletionRunner(
     ChatSocketClient chatSocketClient)
 {
     public async Task<ChatCompletionGenerator> StartNewChatAsync(
-        int roomId, string message, int? contextFolderId = null, IEnumerable<JsonElement>? files = null)
+        int roomId, string message, IEnumerable<JsonElement>? files = null)
     {
-        var config = await GetRungConfigAsync(roomId);
+        var (config, contextFolderId) = await GetRungConfigAsync(roomId);
         
         var attachmentsTask = GetAttachmentsAsync(files).ToListAsync();
         var toolTask = mcpService.GetToolsAsync(roomId);
@@ -55,7 +55,7 @@ public class ChatCompletionRunner(
         
         var messages = new List<ChatMessage>
         {
-            new(ChatRole.System, ChatPromptTemplate.GetPrompt(config.Parameters.Prompt, contextFolderId ?? roomId, roomId)),
+            new(ChatRole.System, ChatPromptTemplate.GetPrompt(config.Parameters.Prompt, contextFolderId, roomId)),
             userMessage
         };
         
@@ -75,7 +75,7 @@ public class ChatCompletionRunner(
     }
 
     public async Task<ChatCompletionGenerator> StartChatAsync(
-        Guid chatId, string message, int? contextFolderId = null, IEnumerable<JsonElement>? files = null)
+        Guid chatId, string message, IEnumerable<JsonElement>? files = null)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
 
@@ -85,7 +85,7 @@ public class ChatCompletionRunner(
             throw new ItemNotFoundException("Chat not found");
         }
 
-        var config = await GetRungConfigAsync(chat.RoomId);
+        var (config, contextFolderId) = await GetRungConfigAsync(chat.RoomId);
         
         var attachmentsTask = GetAttachmentsAsync(files).ToListAsync();
         var toolsTask = mcpService.GetToolsAsync(chat.RoomId);
@@ -99,7 +99,7 @@ public class ChatCompletionRunner(
         
         var messages = new List<ChatMessage>(history.Count + 2)
         {
-            new(ChatRole.System, ChatPromptTemplate.GetPrompt(config.Parameters.Prompt, contextFolderId ?? chat.RoomId, chat.RoomId))
+            new(ChatRole.System, ChatPromptTemplate.GetPrompt(config.Parameters.Prompt, contextFolderId, chat.RoomId))
         };
         
         messages.AddRange(history);
@@ -114,9 +114,13 @@ public class ChatCompletionRunner(
         return new ChatCompletionGenerator(client, logger, chatSocketClient, messages, toolHolder, writerFactory);
     }
 
-    private async Task<RunConfiguration> GetRungConfigAsync(int roomId)
+    private async Task<(RunConfiguration config, int contextFolderId)> GetRungConfigAsync(int roomId)
     {
-        var room = await GetRoomAsync(roomId);
+        var folderDao = daoFactory.GetFolderDao<int>();
+        
+        var room = await GetRoomAsync(folderDao, roomId);
+        var resultStorage = await folderDao.GetFoldersAsync(room.Id, FolderType.ResultStorage).FirstAsync();
+        
         var provider = await configurationService.GetProviderAsync(room.SettingsChatProviderId);
 
         var config = new RunConfiguration
@@ -130,12 +134,11 @@ public class ChatCompletionRunner(
                 Prompt = room.SettingsChatParameters.Prompt
             }
         };
-        return config;
+        return (config, resultStorage.Id);
     }
     
-    private async Task<Folder<int>> GetRoomAsync(int roomId)
+    private async Task<Folder<int>> GetRoomAsync(IFolderDao<int> folderDao, int roomId)
     {
-        var folderDao = daoFactory.GetFolderDao<int>();
         var room = await folderDao.GetFolderAsync(roomId);
         if (room == null)
         {

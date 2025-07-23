@@ -111,18 +111,18 @@ public static class ChatPromptTemplate
         
         ### User Instructions
         {0}
-        """;
-
-        public static string GetPrompt(string? instruction, int contextFolderId, int contextRoomId)
+        """; 
+    
+    public static string GetPrompt(string? instruction, int contextFolderId, int contextRoomId) 
+    { 
+        var date = DateTime.UtcNow.ToString("D");
+        
+        if (string.IsNullOrEmpty(instruction))
         {
-            var date = DateTime.UtcNow.ToString("D");
-            
-            if (string.IsNullOrEmpty(instruction))
-            {
-                return string.Format(SystemPromptTemplate, date, contextFolderId, contextRoomId, string.Empty);
-            }
-
-            var userPrompt = string.Format(UserPromptTemplate, instruction);
-            return string.Format(SystemPromptTemplate, date, contextFolderId, contextRoomId, userPrompt);
+            return string.Format(SystemPromptTemplate, date, contextFolderId, contextRoomId, string.Empty);
         }
+
+        var userPrompt = string.Format(UserPromptTemplate, instruction);
+        return string.Format(SystemPromptTemplate, date, contextFolderId, contextRoomId, userPrompt);
+    }
 }

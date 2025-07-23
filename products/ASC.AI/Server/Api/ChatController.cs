@@ -46,7 +46,7 @@ public class ChatController(
     public async Task<IActionResult> StartNewChatAsync(StartNewChatRequestDto inDto)
     {
         var generator = await chatCompletionRunner.StartNewChatAsync(
-            inDto.RoomId, inDto.Body.Message, inDto.Body.ContextFolderId, inDto.Body.Files);
+            inDto.RoomId, inDto.Body.Message, inDto.Body.Files);
         
         Response.Headers.ContentType = "text/event-stream";
 
@@ -63,7 +63,7 @@ public class ChatController(
     public async Task<IActionResult> ContinueChatAsync(ContinueChatRequestDto inDto)
     {
         var generator = await chatCompletionRunner.StartChatAsync(
-            inDto.ChatId, inDto.Body.Message, inDto.Body.ContextFolderId, inDto.Body.Files);
+            inDto.ChatId, inDto.Body.Message, inDto.Body.Files);
         
         Response.Headers.ContentType = "text/event-stream";
 
