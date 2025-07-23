@@ -200,6 +200,11 @@ internal class SharePointFolderDao(
         }
     }
 
+    public Task<string> SaveFolderAsync(Folder<string> folder, IEnumerable<Folder<string>> children)
+    {
+        throw new NotSupportedException();
+    }
+
     public async Task<string> SaveFolderAsync(Folder<string> folder)
     {
         if (folder.Id != null)

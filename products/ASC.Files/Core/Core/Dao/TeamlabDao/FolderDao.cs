@@ -400,6 +400,31 @@ internal class FolderDao(
         }
     }
 
+    public async Task<int> SaveFolderAsync(Folder<int> folder, IEnumerable<Folder<int>> children)
+    {
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var strategy = filesDbContext.Database.CreateExecutionStrategy();
+        
+        var folderId = folder.Id;
+        
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var tx = await filesDbContext.Database.BeginTransactionAsync();
+
+            folderId = await InternalSaveFolderToDbAsync(filesDbContext, folder);
+
+            foreach (var child in children)
+            {
+                child.ParentId = folderId;
+                await InternalSaveFolderToDbAsync(filesDbContext, child);
+            }
+
+            await tx.CommitAsync();
+        });
+        
+        return folderId;
+    }
+
     public Task<int> SaveFolderAsync(Folder<int> folder)
     {
         return SaveFolderAsync(folder, null, null);

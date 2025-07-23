@@ -130,6 +130,9 @@ public interface IFolderDao<T>
     /// <param name="folder"></param>
     /// <returns></returns>
     Task<T> SaveFolderAsync(Folder<T> folder);
+
+    Task<T> SaveFolderAsync(Folder<T> folder, IEnumerable<Folder<T>> children);
+    
     /// <summary>
     ///     delete folder
     /// </summary>

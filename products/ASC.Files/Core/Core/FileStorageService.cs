@@ -221,6 +221,18 @@ public class FileStorageService //: IFileStorageService
 
                 parent.ParentRoomType = parentRoom.FolderType;
             }
+
+            if (parent.FolderType == FolderType.AiRoom)
+            {
+                parent = searchArea switch
+                {
+                    SearchArea.Knowledge => await folderDao.GetFoldersAsync(parent.Id, FolderType.Knowledge)
+                        .FirstOrDefaultAsync(),
+                    SearchArea.ResultStorage => await folderDao.GetFoldersAsync(parent.Id, FolderType.ResultStorage)
+                        .FirstOrDefaultAsync(),
+                    _ => parent
+                };
+            }
         }
         catch (Exception e)
         {
@@ -833,7 +845,21 @@ public class FileStorageService //: IFileStorageService
             _ = RoomLogoManager.ColorChanged(color, newFolder);
             _ = await RoomLogoManager.CoverChanged(cover, newFolder);
 
-            var folderId = await folderDao.SaveFolderAsync(newFolder);
+            T folderId;
+            
+            if (folderType == FolderType.AiRoom)
+            {
+                var resultStorage = serviceProvider.GetService<Folder<T>>();
+                resultStorage.Title = "Result storage";
+                resultStorage.FolderType = FolderType.ResultStorage;
+                
+                folderId = await folderDao.SaveFolderAsync(newFolder, [resultStorage]);
+            }
+            else
+            {
+                folderId = await folderDao.SaveFolderAsync(newFolder);
+            }
+            
             if (watermark != null)
             {
                 try

@@ -223,6 +223,11 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         }
     }
 
+    public Task<string> SaveFolderAsync(Folder<string> folder, IEnumerable<Folder<string>> children)
+    {
+        throw new NotSupportedException();
+    }
+
     public async Task<string> SaveFolderAsync(Folder<string> folder)
     {
         ArgumentNullException.ThrowIfNull(folder);

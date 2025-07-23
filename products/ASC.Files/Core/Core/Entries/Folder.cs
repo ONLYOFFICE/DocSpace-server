@@ -105,6 +105,12 @@ public enum FolderType
     
     [SwaggerEnum(Description = "AI Room")]
     AiRoom = 31,
+    
+    [SwaggerEnum(Description = "Knowledge")]
+    Knowledge = 32,
+    
+    [SwaggerEnum(Description = "Result storage")]
+    ResultStorage = 33
 }
 
 /// <summary>
