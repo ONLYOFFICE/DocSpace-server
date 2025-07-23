@@ -521,17 +521,26 @@ public class ShareInheritanceTest(
         fileAccessViaRoom.Security.Comment.Should().BeFalse();
         fileAccessViaRoom.Access.Should().Be(FileShare.Read);
 
+        var linkFromRoom = await apiFactory.HttpClient.GetAsync(fileAccessViaRoom.ShortWebUrl, TestContext.Current.CancellationToken);
+        linkFromRoom.Headers.Location?.OriginalString.Should().Contain(roomSharedTo.RequestToken);
+        
         // Folder link access (comment)
         fileAccessViaFolder.Should().NotBeNull();
         fileAccessViaFolder.Security.Edit.Should().BeFalse();
         fileAccessViaFolder.Security.Comment.Should().BeTrue();
         fileAccessViaFolder.Access.Should().Be(FileShare.Comment);
 
+        var linkFromFolder = await apiFactory.HttpClient.GetAsync(fileAccessViaFolder.ShortWebUrl, TestContext.Current.CancellationToken);
+        linkFromFolder.Headers.Location?.OriginalString.Should().Contain(folderSharedTo.RequestToken);
+
         // File link access (editing)
         fileAccessViaFile.Should().NotBeNull();
         fileAccessViaFile.Security.Edit.Should().BeTrue();
         fileAccessViaFile.Security.Comment.Should().BeTrue();
         fileAccessViaFile.Access.Should().Be(FileShare.Editing);
+        
+        var linkFromFile = await apiFactory.HttpClient.GetAsync(fileAccessViaFile.ShortWebUrl, TestContext.Current.CancellationToken);
+        linkFromFile.Headers.Location?.OriginalString.Should().Contain(fileSharedTo.RequestToken);
     }
     
     [Fact]
