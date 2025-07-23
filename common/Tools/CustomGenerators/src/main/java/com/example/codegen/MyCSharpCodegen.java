@@ -72,6 +72,10 @@ public class MyCSharpCodegen extends CSharpClientCodegen {
             "LICENSE.mustache", "", "LICENSE"
         ));
 
+        supportingFiles.add(new SupportingFile(
+            "CHANGELOG.mustache", "", "CHANGELOG.md"
+        ));
+
     }
 
     @Override

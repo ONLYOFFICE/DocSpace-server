@@ -46,6 +46,10 @@ public class MyTypeScriptAxiosCodegen extends TypeScriptAxiosClientCodegen {
         supportingFiles.add(new SupportingFile(
             "LICENSE.mustache", "", "LICENSE"
         ));
+
+        supportingFiles.add(new SupportingFile(
+            "CHANGELOG.mustache", "", "CHANGELOG.md"
+        ));
     }
     
     @Override

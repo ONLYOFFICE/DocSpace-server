@@ -93,6 +93,57 @@ npm install PATH_TO_GENERATED_PACKAGE --save
 
 {{/authMethods}}
 
+## Getting Started
+
+Please follow the [building](#building) instruction and execute the following TS code:
+
+```typescript
+import {{{moduleName}}} from '{{{packageName}}}';
+
+{{#apiInfo}}{{#apis}}{{#-first}}{{#operations}}{{#operation}}{{#-first}}
+const config = new Configuration ({
+    basePath: "YOUR SERVER URL",
+    {{#authMethods}}
+    {{#isBasic}}
+    {{#isBasicBasic}}
+    // Configure HTTP basic authorization: {{{name}}}
+    username: "YOUR USERNAME",
+    password: "YOUR PASSWORD",
+    {{/isBasicBasic}}
+    {{#isBasicBearer}}
+    // Configure Bearer{{#bearerFormat}} ({{{.}}}){{/bearerFormat}} access token for authorization: {{{name}}}
+    accessToken: "YOUR ACCESS TOKEN",
+    {{/isBasicBearer}}
+    {{/isBasic}}
+    {{#isApiKey}}
+    // Configure API key authorization: {{{name}}}
+    apiKey: "YOUR API KEY"
+    {{/isApiKey}}
+    {{/authMethods}}
+});
+
+const apiInstance = new {{{classname}}}(config);
+
+{{#hasParams}}
+{{#requiredParams}}const {{{paramName}}}: {{{dataType}}} = {{{example}}}; // {{{description}}}
+{{/requiredParams}}
+{{#optionalParams}}const opts: any = {
+{{#-first}}  {{/-first}}'{{{paramName}}}': {{{example}}}{{^-last}},{{/-last}} // {{{description}}}
+{{#-last}}};{{/-last}}
+{{/optionalParams}}
+{{/hasParams}}
+try {
+    const result = await apiInstance.{{{operationId}}}(
+      {{#hasParams}}{{#requiredParams}}{{{paramName}}}{{^-last}}, {{/-last}}{{/requiredParams}}{{#optionalParams}}{{#-last}}{{#hasRequiredParams}}, {{/hasRequiredParams}}opts{{/-last}}{{/optionalParams}}{{/hasParams}}
+    );
+    console.log('API called successfully. Returned data: ', result.data);
+  } catch (error) {
+    console.error(error);
+}
+
+{{/-first}}{{/operation}}{{/operations}}{{/-first}}{{/apis}}{{/apiInfo}}
+```
+
 ### Documentation for API Endpoints
 
 All URIs are relative to *{{{basePath}}}*

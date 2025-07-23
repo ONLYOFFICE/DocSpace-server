@@ -32,6 +32,10 @@ public class MyPythonCodegen extends PythonClientCodegen {
         supportingFiles.add(new SupportingFile(
             "LICENSE.mustache", "", "LICENSE"
         ));
+
+        supportingFiles.add(new SupportingFile(
+            "CHANGELOG.mustache", "", "CHANGELOG.md"
+        ));
     }
 
     @Override

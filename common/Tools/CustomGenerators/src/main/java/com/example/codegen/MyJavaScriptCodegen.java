@@ -32,6 +32,10 @@ public class MyJavaScriptCodegen extends JavascriptClientCodegen {
         supportingFiles.add(new SupportingFile(
             "LICENSE.mustache", "", "LICENSE"
         ));
+
+        supportingFiles.add(new SupportingFile(
+            "CHANGELOG.mustache", "", "CHANGELOG.md"
+        ));
     }
 
     @Override
