@@ -530,6 +530,11 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:encryption-progress", { percentage, error });
   }
 
+  function commitChatMessage({ room, messageId }) {
+    logger.info(`commit chat message ${messageId} in room ${room}`);
+    filesIO.to(room).emit("s:commit-chat-message", { messageId });
+  }
+
   return {
     startEdit,
     stopEdit,
@@ -562,6 +567,7 @@ module.exports = (io) => {
     restoreProgress,
     endBackup,
     endRestore,
-    encryptionProgress
+    encryptionProgress,
+    commitChatMessage
   };
 };

@@ -187,5 +187,10 @@ module.exports = (files) => {
     res.end();
   });
 
+  router.post("/commit-chat-message", (req, res) => {
+    files.commitChatMessage(req.body);
+    res.end();
+  });
+
   return router;
 };

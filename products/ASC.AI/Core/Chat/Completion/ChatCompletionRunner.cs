@@ -39,7 +39,8 @@ public class ChatCompletionRunner(
     ChatClientFactory chatClientFactory,
     ILogger<ChatCompletionGenerator> logger,
     AiConfigurationService configurationService,
-    AttachmentHandler attachmentHandler)
+    AttachmentHandler attachmentHandler,
+    ChatSocketClient chatSocketClient)
 {
     public async Task<ChatCompletionGenerator> StartNewChatAsync(
         int roomId, string message, int? contextFolderId = null, IEnumerable<JsonElement>? files = null)
@@ -70,7 +71,7 @@ public class ChatCompletionRunner(
         
         var client = chatClientFactory.Create(config, toolHolder.Tools);
         
-        return new ChatCompletionGenerator(client, logger, messages, toolHolder, writerFactory);
+        return new ChatCompletionGenerator(client, logger, chatSocketClient, messages, toolHolder, writerFactory);
     }
 
     public async Task<ChatCompletionGenerator> StartChatAsync(
@@ -104,13 +105,13 @@ public class ChatCompletionRunner(
         messages.AddRange(history);
         messages.Add(userMessage);
 
-        var writerFactory = new ContinueHistoryWriterFactory(tenantId, chatId, message, attachments, chatHistory);
+        var writerFactory = new ContinueHistoryWriterFactory(tenantId, chat, message, attachments, chatHistory);
         
         var toolHolder = await toolsTask;
         
         var client = chatClientFactory.Create(config, toolHolder.Tools);
 
-        return new ChatCompletionGenerator(client, logger, messages, toolHolder, writerFactory);
+        return new ChatCompletionGenerator(client, logger, chatSocketClient, messages, toolHolder, writerFactory);
     }
 
     private async Task<RunConfiguration> GetRungConfigAsync(int roomId)

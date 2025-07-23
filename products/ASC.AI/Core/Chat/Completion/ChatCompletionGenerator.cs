@@ -30,6 +30,7 @@ namespace ASC.AI.Core.Chat.Completion;
 public class ChatCompletionGenerator(
     IChatClient client,
     ILogger<ChatCompletionGenerator> logger,
+    ChatSocketClient chatSocketClient,
     List<ChatMessage> messages,
     ToolHolder toolHolder,
     IHistoryWriterFactory historyWriterFactory)
@@ -48,89 +49,90 @@ public class ChatCompletionGenerator(
         var responses = new List<ChatResponseUpdate>();
         var enumerator = client.GetStreamingResponseAsync(messages, cancellationToken: cancellationToken)
             .GetAsyncEnumerator(cancellationToken);
-
-        try
+        
+        while (true)
         {
-            while (true)
+            ChatResponseUpdate response;
+            var errorCaptured = false;
+
+            try
             {
-                ChatResponseUpdate response;
-                var errorCaptured = false;
-
-                try
-                {
-                    if (!await enumerator.MoveNextAsync())
-                    {
-                        break;
-                    }
-
-                    response = enumerator.Current;
-                }
-                catch (OperationCanceledException)
+                if (!await enumerator.MoveNextAsync())
                 {
                     break;
                 }
-                catch (Exception e)
-                {
-                    logger.ErrorWithException(e);
-                    response = new ChatResponseUpdate(ChatRole.Assistant, [new ErrorContent(e.Message)]);
-                    errorCaptured = true;
-                }
 
-                if (!errorCaptured)
+                response = enumerator.Current;
+            }
+            catch (OperationCanceledException)
+            {
+                break;
+            }
+            catch (Exception e)
+            {
+                logger.ErrorWithException(e);
+                response = new ChatResponseUpdate(ChatRole.Assistant, [new ErrorContent(e.Message)]);
+                errorCaptured = true;
+            }
+
+            if (!errorCaptured)
+            {
+                if (historyWriter == null)
                 {
-                    if (historyWriter == null)
+                    historyWriter = await historyWriterFactory.CreateAsync();
+                    if (historyWriter.IsNew)
                     {
-                        historyWriter = await historyWriterFactory.CreateAsync();
-                        if (historyWriter.IsNew)
-                        {
-                            yield return new ChatCompletion(EventType.Metadata, 
-                                JsonSerializer.Serialize(new Metadata { ChatId = historyWriter.ChatId }, _serializerOptions));
-                        }
+                        yield return new ChatCompletion(EventType.Metadata, 
+                            JsonSerializer.Serialize(new Metadata { ChatId = historyWriter.Chat.Id }, _serializerOptions));
                     }
+                }
                     
-                    responses.Add(response);
-                }
+                responses.Add(response);
+            }
 
-                foreach (var content in response.Contents)
+            foreach (var content in response.Contents)
+            {
+                switch (content)
                 {
-                    switch (content)
-                    {
-                        case TextContent textContent:
-                            yield return new ChatCompletion(EventType.NewToken,
-                                JsonSerializer.Serialize(textContent, _serializerOptions));
-                            break;
-                        case FunctionCallContent functionCall:
-                            yield return new ChatCompletion(EventType.ToolCall,
-                                JsonSerializer.Serialize(functionCall, _serializerOptions));
-                            break;
-                        case FunctionResultContent functionResult:
-                            yield return new ChatCompletion(EventType.ToolResult,
-                                JsonSerializer.Serialize(functionResult, _serializerOptions));
-                            break;
-                        case ErrorContent error:
-                            yield return new ChatCompletion(EventType.Error, 
-                                JsonSerializer.Serialize(error, _serializerOptions));
-                            break;
-                    }
+                    case TextContent textContent:
+                        yield return new ChatCompletion(EventType.NewToken,
+                            JsonSerializer.Serialize(textContent, _serializerOptions));
+                        break;
+                    case FunctionCallContent functionCall:
+                        yield return new ChatCompletion(EventType.ToolCall,
+                            JsonSerializer.Serialize(functionCall, _serializerOptions));
+                        break;
+                    case FunctionResultContent functionResult:
+                        yield return new ChatCompletion(EventType.ToolResult,
+                            JsonSerializer.Serialize(functionResult, _serializerOptions));
+                        break;
+                    case ErrorContent error:
+                        yield return new ChatCompletion(EventType.Error, 
+                            JsonSerializer.Serialize(error, _serializerOptions));
+                        break;
                 }
+            }
 
-                if (errorCaptured)
-                {
-                    break;
-                }
+            if (errorCaptured)
+            {
+                break;
             }
         }
-        finally
+        
+        await enumerator.DisposeAsync();
+        await toolHolder.DisposeAsync();
+        
+        var chatResponse = responses.ToChatResponse();
+
+        if (historyWriter == null)
         {
-            await enumerator.DisposeAsync();
-            await toolHolder.DisposeAsync();
-            
-            var chatResponse = responses.ToChatResponse();
-            
-            if (historyWriter != null)
-            {
-                await historyWriter.WriteAsync(chatResponse.Messages);
-            }
+            yield break;
+        }
+
+        var messageId = await historyWriter.WriteAsync(chatResponse.Messages);
+        if (messageId > 0)
+        {
+            await chatSocketClient.CommitMessageAsync(historyWriter.Chat.Id, messageId);
         }
     }
 }
