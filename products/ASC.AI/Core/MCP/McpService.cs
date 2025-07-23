@@ -65,7 +65,7 @@ public class McpService(
         var dataBuilder = predefinedMcpSource.GetServerDataBuilder(serverId);
         if (dataBuilder == null)
         {
-            throw new ItemNotFoundException();
+            throw new ItemNotFoundException("MCP Server not found");
         }
         
         var settings = await mcpDao.GetToolsSettings(
