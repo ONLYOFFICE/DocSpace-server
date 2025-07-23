@@ -221,18 +221,6 @@ public class FileStorageService //: IFileStorageService
 
                 parent.ParentRoomType = parentRoom.FolderType;
             }
-
-            if (parent.FolderType == FolderType.AiRoom)
-            {
-                parent = searchArea switch
-                {
-                    SearchArea.Knowledge => await folderDao.GetFoldersAsync(parent.Id, FolderType.Knowledge)
-                        .FirstOrDefaultAsync(),
-                    SearchArea.ResultStorage => await folderDao.GetFoldersAsync(parent.Id, FolderType.ResultStorage)
-                        .FirstOrDefaultAsync(),
-                    _ => parent
-                };
-            }
         }
         catch (Exception e)
         {
