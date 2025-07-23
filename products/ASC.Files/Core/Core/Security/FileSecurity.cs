@@ -977,6 +977,12 @@ public class FileSecurity(IDaoFactory daoFactory,
                 return false;
             }
 
+            if (folder.FolderType == FolderType.ResultStorage 
+                && action is FilesSecurityActions.Rename or FilesSecurityActions.Delete or FilesSecurityActions.Copy or FilesSecurityActions.Move or FilesSecurityActions.Duplicate)
+            {
+                return false;
+            }
+
             if (folder.FolderType == FolderType.Recent)
             {
                 if (isGuest)
