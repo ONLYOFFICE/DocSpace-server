@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.ApiModels.ResponseDto;
+
 namespace ASC.AI.Api;
 
 [Scope]
@@ -37,7 +39,8 @@ public class ChatController(
     ApiDateTimeHelper apiDateTimeHelper,
     ApiContext apiContext,
     IMapper mapper,
-    MessageExporter exporter) : ControllerBase
+    MessageExporter exporter,
+    FileDtoHelper fileDtoHelper) : ControllerBase
 {
     [HttpPost("rooms/{roomId}/chats")]
     public async Task<IActionResult> StartNewChatAsync(StartNewChatRequestDto inDto)
@@ -121,19 +124,12 @@ public class ChatController(
         await chatService.DeleteChatAsync(inDto.ChatId);
         return NoContent();
     }
-
-    [HttpPost("messages/{messageId}/export")]
-    public async Task<CreatedResult> ExportMessageAsync(ExportMessageRequestDto inDto)
-    {
-        await exporter.ExportMessageAsync(inDto.Body.FolderId, inDto.Body.Title, inDto.MessageId);
-        return Created();
-    }
     
     [HttpPost("chats/{chatId}/messages/export")]
-    public async Task<CreatedResult> ExportChatAsync(ExportChatRequestDto inDto)
+    public async Task<FileDto<int>> ExportChatAsync(ExportChatRequestDto inDto)
     {
-        await exporter.ExportMessagesAsync(inDto.ChatId);
-        return Created();
+        var file = await exporter.ExportMessagesAsync(inDto.ChatId);
+        return await fileDtoHelper.GetAsync(file);
     }
 
     [HttpGet("chats/models")]

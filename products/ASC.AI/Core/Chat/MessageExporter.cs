@@ -42,7 +42,7 @@ public class MessageExporter(
     AuthContext authContext,
     TenantManager tenantManager)
 {
-    public async Task ExportMessageAsync<T>(T folderId, string title, int messageId)
+    public async Task<File<T>> ExportMessageAsync<T>(T folderId, string title, int messageId)
     {
         var message = await chatDao.GetMessageAsync(messageId, authContext.CurrentAccount.ID);
         if (message == null)
@@ -68,10 +68,10 @@ public class MessageExporter(
 
         await using var ms = new MemoryStream(bytes);
 
-        await CreateFileAsync(folderId, ms, $"{title}.txt");
+        return await CreateFileAsync(folderId, ms, $"{title}.txt");
     }
 
-    public async Task ExportMessagesAsync(Guid chatId)
+    public async Task<File<int>> ExportMessagesAsync(Guid chatId)
     {
         var chat = await chatDao.GetChatAsync(tenantManager.GetCurrentTenantId(), chatId);
         if (chat == null || chat.UserId != authContext.CurrentAccount.ID)
@@ -106,10 +106,10 @@ public class MessageExporter(
 
         await using var ms = new MemoryStream(bytes);
 
-        await CreateFileAsync(resultStorage.Id, ms, $"{chat.Title}.txt");
+        return await CreateFileAsync(resultStorage.Id, ms, $"{chat.Title.Trim()}.txt");
     }
 
-    private async Task CreateFileAsync<T>(T parentId, Stream content, string title)
+    private async Task<File<T>> CreateFileAsync<T>(T parentId, Stream content, string title)
     {
         var file = serviceProvider.GetService<File<T>>()!;
         file.ParentId = parentId;
@@ -117,7 +117,9 @@ public class MessageExporter(
         file.Title = title;
         
         var fileDao = daoFactory.GetFileDao<T>();
-        await fileDao.SaveFileAsync(file, content);
+        var savedFile = await fileDao.SaveFileAsync(file, content);
         await socketManager.CreateFileAsync(file);
+        
+        return savedFile;
     }
 }

@@ -24,19 +24,20 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Models.RequestDto;
+using ASC.Files.Core.ApiModels.ResponseDto;
 
-public class ExportMessageRequestDto<T>
-{
-    [FromRoute(Name = "messageId")]
-    public int MessageId { get; init; }
-    
-    [FromBody]
-    public required ExportMessageRequestBody<T> Body { get; init; }
-}
+namespace ASC.AI.Api;
 
-public class ExportMessageRequestBody<T>
+[Scope]
+[DefaultRoute]
+[ApiController]
+[ControllerName("ai")]
+public class MessageController(MessageExporter exporter, FileDtoHelper fileDtoHelper) : ControllerBase
 {
-    public required T FolderId { get; init; }
-    public required string Title { get; init; }
+    [HttpPost("messages/{messageId}/export")]
+    public async Task<FileDto<int>> ExportMessageAsync(ExportMessageRequestDto<int> inDto)
+    {
+        var file = await exporter.ExportMessageAsync(inDto.Body.FolderId, inDto.Body.Title, inDto.MessageId);
+        return await fileDtoHelper.GetAsync(file);
+    }
 }
