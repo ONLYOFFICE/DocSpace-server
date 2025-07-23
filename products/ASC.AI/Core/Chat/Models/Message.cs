@@ -24,11 +24,32 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Text;
+
+using ASC.Core.Tenants;
+
 namespace ASC.AI.Core.Chat.Models;
 
-public class Message(Role role, List<MessageContent> contents, DateTime createdOn)
+public class Message(int id, Role role, List<MessageContent> contents, DateTime createdOn)
 {
+    public int Id { get; } = id;
     public Role Role { get; } = role;
     public List<MessageContent> Contents { get; } = contents;
     public DateTime CreatedOn { get; } = createdOn;
+    
+    public string ToMarkdown(TenantUtil tenantUtil)
+    {
+        var builder = new StringBuilder();
+
+        builder.Append($"## [{Role.ToStringFast()}] {tenantUtil.DateTimeFromUtc(CreatedOn).ToString("g")}");
+        builder.Append("\n\n");
+        
+        foreach (var content in Contents)
+        {
+            builder.Append($"{content.ToMarkdown()}");
+            builder.Append("\n\n");
+        }
+        
+        return builder.ToString();
+    }
 }

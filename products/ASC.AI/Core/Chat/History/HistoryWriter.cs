@@ -31,17 +31,19 @@ public interface IHistoryWriterFactory
     public Task<HistoryWriter> CreateAsync();
 }
 
-public class HistoryWriter(Guid chatId, ChatHistory chatHistory, bool isNew)
+public class HistoryWriter(ChatSession chat, ChatHistory chatHistory, bool isNew)
 {
-    public Guid ChatId => chatId;
+    public ChatSession Chat => chat;
     public bool IsNew => isNew;
     
-    public async Task WriteAsync(IList<ChatMessage> messages)
+    public async Task<int> WriteAsync(IList<ChatMessage> messages)
     {
         if (messages.Count > 0)
         {
-            await chatHistory.AddMessagesAsync(chatId, messages);
+            return await chatHistory.AddAssistantMessagesAsync(chat.Id, messages);
         }
+
+        return 0;
     }
 }
 
@@ -56,13 +58,13 @@ public class StartHistoryWriterFactory(
     public async Task<HistoryWriter> CreateAsync()
     {
         var chat = await chatHistory.AddChatAsync(tenantId, roomId, userId, message, attachments);
-        return new HistoryWriter(chat.Id, chatHistory, true);
+        return new HistoryWriter(chat, chatHistory, true);
     }
 }
 
 public class ContinueHistoryWriterFactory(
     int tenantId,
-    Guid chatId,
+    ChatSession chat,
     string message,
     List<AttachmentMessageContent> attachments,
     ChatHistory chatHistory) : IHistoryWriterFactory
@@ -70,7 +72,7 @@ public class ContinueHistoryWriterFactory(
     
     public async Task<HistoryWriter> CreateAsync()
     {
-        await chatHistory.UpdateChatAsync(tenantId, chatId, message, attachments);
-        return new HistoryWriter(chatId, chatHistory, false);
+        await chatHistory.UpdateChatAsync(tenantId, chat.Id, message, attachments);
+        return new HistoryWriter(chat, chatHistory, false);
     }
 }

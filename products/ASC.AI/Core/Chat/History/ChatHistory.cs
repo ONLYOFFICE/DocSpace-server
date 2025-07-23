@@ -46,14 +46,14 @@ public class ChatHistory(DbChatDao chatDao)
         var contents = new List<MessageContent>(attachments) { new TextMessageContent(message) };
 
         return chatDao.AddChatAsync(tenantId, roomId, userId, title,
-            new Message(Role.User, contents, DateTime.UtcNow));
+            new Message(0, Role.User, contents, DateTime.UtcNow));
     }
 
     public Task UpdateChatAsync(int tenantId, Guid chatId, string message, List<AttachmentMessageContent> attachments)
     {
         var contents = new List<MessageContent>(attachments) { new TextMessageContent(message) };
         
-        return chatDao.UpdateChatAsync(tenantId, chatId, new Message(Role.User, contents, DateTime.UtcNow));
+        return chatDao.UpdateChatAsync(tenantId, chatId, new Message(0, Role.User, contents, DateTime.UtcNow));
     }
 
     public Task<ChatSession?> GetChatAsync(int tenantId, Guid chatId)
@@ -61,18 +61,13 @@ public class ChatHistory(DbChatDao chatDao)
         return chatDao.GetChatAsync(tenantId, chatId);
     }
     
-    public Task AddMessagesAsync(Guid chatId, IEnumerable<ChatMessage> chatMessages)
+    public Task<int> AddAssistantMessagesAsync(Guid chatId, IEnumerable<ChatMessage> chatMessages)
     {
-        var messages = new List<Message>();
+        var contents = new List<MessageContent>();
         var toolCalls = new Dictionary<string, ToolCallMessageContent>();
-
-        Message? lastProcessedMessage = null;
         
         foreach (var message in chatMessages)
         {
-            var contents = new List<MessageContent>();
-            var role = message.Role.ToMessageType();
-            
             foreach (var content in message.Contents)
             {
                 switch (content)
@@ -104,25 +99,16 @@ public class ChatHistory(DbChatDao chatDao)
                         }
                 }
             }
-
-            if (contents.Count == 0)
-            {
-                continue;
-            }
-
-            if (lastProcessedMessage != null && lastProcessedMessage.Role == role)
-            {
-                lastProcessedMessage.Contents.AddRange(contents);
-                continue;
-            }
-
-            var msg = new Message(role, contents, DateTime.UtcNow);
-            messages.Add(msg);
-            
-            lastProcessedMessage = msg;
         }
+        
+        if (contents.Count == 0)
+        {
+            return Task.FromResult(0);
+        }
+        
+        var msg = new Message(0, Role.Assistant, contents, DateTime.UtcNow);
 
-        return chatDao.AddMessagesAsync(chatId, messages);
+        return chatDao.AddMessageAsync(chatId, msg);
     }
 
     public async IAsyncEnumerable<ChatMessage> GetMessagesAsync(Guid chatId, HistoryAdapter adapter)

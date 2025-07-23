@@ -81,6 +81,12 @@ public partial class AiDbContext
     {
         return Queries.DeleteChatsAsync(this, tenantId, chatIds);
     }
+    
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    public Task<DbChatMessage?> GetMessageAsync(int messageId, Guid userId)
+    {
+        return Queries.GetMessageAsync(this, messageId, userId);
+    }
 }
 
 static file class Queries
@@ -142,4 +148,11 @@ static file class Queries
         EF.CompileAsyncQuery(
             (AiDbContext ctx, int tenantId, IEnumerable<Guid> chatIds) => 
                 ctx.Chats.Where(x => x.TenantId == tenantId && chatIds.Contains(x.Id)).ExecuteDelete());
+    
+    public static readonly Func<AiDbContext, int, Guid, Task<DbChatMessage?>> GetMessageAsync =
+        EF.CompileAsyncQuery(
+            (AiDbContext ctx, int messageId, Guid userId) => 
+                ctx.Messages.Where(x => x.Id == messageId)
+                    .Join(ctx.Chats, x => x.ChatId, y => y.Id, (x, y) => x)
+                    .FirstOrDefault());
 }

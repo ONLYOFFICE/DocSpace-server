@@ -36,7 +36,8 @@ public class ChatController(
     EmployeeDtoHelper employeeDtoHelper,
     ApiDateTimeHelper apiDateTimeHelper,
     ApiContext apiContext,
-    IMapper mapper) : ControllerBase
+    IMapper mapper,
+    MessageExporter exporter) : ControllerBase
 {
     [HttpPost("rooms/{roomId}/chats")]
     public async Task<IActionResult> StartNewChatAsync(StartNewChatRequestDto inDto)
@@ -121,28 +122,18 @@ public class ChatController(
         return NoContent();
     }
 
-    [HttpPut("chats/configuration")]
-    public async Task<ChatSettingsDto> SetChatSettingsAsync(SetChatSettingsRequestDto inDto)
+    [HttpPost("messages/{messageId}/export")]
+    public async Task<CreatedResult> ExportMessageAsync(ExportMessageRequestDto inDto)
     {
-        var config = await chatService.SetChatConfigurationAsync(inDto.ProviderId, inDto.ModelId);
-        
-        return new ChatSettingsDto
-        {
-            ProviderId = config.ProviderId,
-            ModelId = config.Parameters.ModelId
-        };
+        await exporter.ExportMessageAsync(inDto.Body.FolderId, inDto.Body.Title, inDto.MessageId);
+        return Created();
     }
     
-    [HttpGet("chats/configuration")]
-    public async Task<ChatSettingsDto> GetChatSettingsAsync()
+    [HttpPost("chats/{chatId}/messages/export")]
+    public async Task<CreatedResult> ExportChatAsync(ExportChatRequestDto inDto)
     {
-        var config = await chatService.GetChatConfigurationAsync();
-
-        return new ChatSettingsDto
-        {
-            ProviderId = config.ProviderId,
-            ModelId = config.Parameters.ModelId
-        };
+        await exporter.ExportMessagesAsync(inDto.ChatId);
+        return Created();
     }
 
     [HttpGet("chats/models")]

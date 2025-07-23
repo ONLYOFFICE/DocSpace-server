@@ -24,16 +24,19 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Chat.Models;
+namespace ASC.AI.Models.RequestDto;
 
-public sealed class TextMessageContent(string? text = null) : MessageContent
+public class ExportMessageRequestDto
 {
-    public string? Text { get; init; } = text;
+    [FromRoute(Name = "messageId")]
+    public int MessageId { get; init; }
     
-    public override string ToString() => this.Text ?? string.Empty;
-    
-    public override string ToMarkdown()
-    {
-        return this.Text ?? string.Empty;
-    }
+    [FromBody]
+    public required ExportMessageRequestBody Body { get; init; }
+}
+
+public class ExportMessageRequestBody
+{
+    public int FolderId { get; init; }
+    public required string Title { get; init; }
 }

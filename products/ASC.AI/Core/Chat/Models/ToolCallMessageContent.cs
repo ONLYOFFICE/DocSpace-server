@@ -24,14 +24,61 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Text;
+
 namespace ASC.AI.Core.Chat.Models;
 
 [method: JsonConstructor]
-public class ToolCallMessageContent(string callId, string name, IDictionary<string, object?>? arguments = null, object? result = null)
+public class ToolCallMessageContent(
+    string callId,
+    string name,
+    IDictionary<string, object?>? arguments = null,
+    object? result = null)
     : MessageContent
 {
     public string CallId { get; } = callId;
     public string Name { get; } = name;
     public IDictionary<string, object?>? Arguments { get; } = arguments;
     public object? Result { get; set; } = result;
+
+    private static readonly JsonSerializerOptions _options = 
+        new() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+
+    public override string ToMarkdown()
+    {
+        var builder = new StringBuilder();
+        builder.Append($"### Tool Call: *{Name}*\n\n");
+        
+        if (Arguments != null)
+        {
+            builder.Append("**Arguments:**\n");
+            foreach (var argument in Arguments)
+            {
+                builder.Append($"- {argument.Key}: {argument.Value}\n");
+            }
+        }
+
+        if (Result == null)
+        {
+            return builder.ToString();
+        }
+
+        builder.Append('\n');
+        builder.Append("**Result:**\n\n");
+        builder.Append($"{FormatResult(Result)}");
+
+        return builder.ToString();
+    }
+
+    private static string? FormatResult(object value)
+    {
+        try
+        {
+            return JsonSerializer.Serialize(value, options: _options);
+        }
+        catch
+        {
+            return value.ToString();
+        }
+    }
 }

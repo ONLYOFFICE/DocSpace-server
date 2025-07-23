@@ -26,6 +26,7 @@
 
 namespace ASC.Core.Common.EF.Model.Chat;
 
+[EnumExtensions]
 public enum Role
 {
     User,

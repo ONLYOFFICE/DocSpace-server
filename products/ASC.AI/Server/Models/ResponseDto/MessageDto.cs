@@ -26,8 +26,9 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
-public class MessageDto(Role role, IEnumerable<MessageContentDto> contents, ApiDateTime createdOn)
+public class MessageDto(int id,Role role, IEnumerable<MessageContentDto> contents, ApiDateTime createdOn)
 {
+    public int Id { get; } = id;
     public Role Role { get; } = role;
     public IEnumerable<MessageContentDto> Contents { get; } = contents;
     public ApiDateTime CreatedOn { get; } = createdOn;
@@ -50,6 +51,6 @@ public static class MessageDtoExtensions
             };
         });
         
-        return new MessageDto(message.Role, contents, createdOn);
+        return new MessageDto(message.Id, message.Role, contents, createdOn);
     }
 }

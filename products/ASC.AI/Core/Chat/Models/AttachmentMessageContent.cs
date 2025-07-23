@@ -28,6 +28,16 @@ namespace ASC.AI.Core.Chat.Models;
 
 public class AttachmentMessageContent : MessageContent
 {
+    private const string Pattern = 
+        """
+        ### Attachment:
+        
+        **Title**: {0}
+        
+        **Content**: 
+        {1}
+        """;
+    
     public required JsonElement Id { get; init; }
     public required string Title { get; init; }
     public required string Extension { get; init; }
@@ -36,5 +46,10 @@ public class AttachmentMessageContent : MessageContent
     public static implicit operator AIContent(AttachmentMessageContent attachment)
     {
         return new TextContent(attachment.Content);
+    }
+
+    public override string ToMarkdown()
+    {
+        return string.Format(Pattern, Title, Content);
     }
 }

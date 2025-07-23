@@ -152,29 +152,33 @@ public class DbChatDao(IDbContextFactory<AiDbContext> dbContextFactory, IMapper 
         });
     }
 
-    public async Task AddMessagesAsync(Guid chatId, IEnumerable<Message> messages)
+    public async Task<int> AddMessageAsync(Guid chatId, Message message)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
         
         var now = DateTime.UtcNow;
+        var id = 0;
 
         await strategy.ExecuteAsync(async () =>
         {
             await using var context = await dbContextFactory.CreateDbContextAsync();
             
-            var dbMessages = messages.Select(msg => 
-                new DbChatMessage 
-                { 
-                    ChatId = chatId,
-                    Role = msg.Role,
-                    Content = JsonSerializer.Serialize(msg.Contents, AiUtils.SerializerOptions),
-                    CreatedOn = now
-                });
+            var dbMessage = new DbChatMessage 
+            { 
+                ChatId = chatId,
+                Role = message.Role,
+                Content = JsonSerializer.Serialize(message.Contents, AiUtils.SerializerOptions),
+                CreatedOn = now
+            };
 
-            await context.Messages.AddRangeAsync(dbMessages);
+            await context.Messages.AddAsync(dbMessage);
             await context.SaveChangesAsync();
+            
+            id = dbMessage.Id;
         });
+
+        return id;
     }
     
     public async IAsyncEnumerable<Message> GetMessagesAsync(Guid chatId)
@@ -186,10 +190,28 @@ public class DbChatDao(IDbContextFactory<AiDbContext> dbContextFactory, IMapper 
         await foreach (var msg in messages.AsAsyncEnumerable())
         {
             yield return new Message(
+                msg.Id,
                 msg.Role, 
                 JsonSerializer.Deserialize<List<MessageContent>>(msg.Content, AiUtils.SerializerOptions)!,
                 msg.CreatedOn);
         }
+    }
+
+    public async Task<Message?> GetMessageAsync(int messageId, Guid userId)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        var message = await dbContext.GetMessageAsync(messageId, userId);
+
+        if (message == null)
+        {
+            return null;
+        }
+
+        return new Message(
+            message.Id,
+            message.Role,
+            JsonSerializer.Deserialize<List<MessageContent>>(message.Content, AiUtils.SerializerOptions)!,
+            message.CreatedOn);
     }
 
     public async IAsyncEnumerable<Message> GetMessagesAsync(Guid chatId, int offset, int limit)
@@ -201,6 +223,7 @@ public class DbChatDao(IDbContextFactory<AiDbContext> dbContextFactory, IMapper 
         await foreach (var msg in messages.AsAsyncEnumerable())
         {
             yield return new Message(
+                msg.Id,
                 msg.Role, 
                 JsonSerializer.Deserialize<List<MessageContent>>(msg.Content, AiUtils.SerializerOptions)!,
                 msg.CreatedOn);
