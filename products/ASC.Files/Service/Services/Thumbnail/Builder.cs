@@ -67,7 +67,9 @@ public class Builder<T>(
 
             tenantManager.SetCurrentTenant(tenant);
 
-            await securityContext.AuthenticateMeWithoutCookieAsync(fileData.CreatedBy);
+            var account = ASC.Core.Configuration.Constants.Guest.ID == fileData.CreatedBy ? tenant.OwnerId : fileData.CreatedBy;
+
+            await securityContext.AuthenticateMeWithoutCookieAsync(account);
 
             _dataStore = await storageFactory.GetStorageAsync(fileData.TenantId, FileConstant.StorageModule, (IQuotaController)null);
 

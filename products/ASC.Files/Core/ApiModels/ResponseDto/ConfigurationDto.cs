@@ -219,6 +219,11 @@ public class CustomizationConfigDto
     /// The go back configuration of the customization.
     /// </summary>
     public GobackConfig Goback { get; set; }
+    
+    /// <summary>
+    /// The review configuration of the customization.
+    /// </summary>
+    public ReviewConfig Review { get; set; }
 
     /// <summary>
     /// The logo of the customization.
@@ -229,11 +234,6 @@ public class CustomizationConfigDto
     /// Specifies if the share should be mentioned.
     /// </summary>
     public bool MentionShare { get; set; }
-
-    /// <summary>
-    /// The review display of the customization.
-    /// </summary>
-    public string ReviewDisplay { get; set; }
 
     /// <summary>
     /// The "Complete &amp; Submit" button settings.
@@ -286,6 +286,11 @@ public class LogoConfigDto
     /// The dark image of the logo.
     /// </summary>
     public string ImageDark { get; set; }
+
+    /// <summary>
+    /// The light image of the logo.
+    /// </summary>
+    public string ImageLight { get; set; }
 
     /// <summary>
     /// The embedded image of the logo.
@@ -561,7 +566,7 @@ public class CustomizationConfigConverter<T>(
             Goback = await source.GetGoBack(configuration.EditorType, file),
             Logo = await configConverter.Convert(configuration),
             MentionShare = await source.GetMentionShare(file),
-            ReviewDisplay = source.GetReviewDisplay(configuration.EditorConfig.ModeWrite),
+            Review = source.GetReview(configuration.EditorConfig.ModeWrite),
             SubmitForm = await source.GetSubmitForm(file),
             Anonymous = anonymousConfigConverter.Convert(configuration)
         };
@@ -587,6 +592,7 @@ public class LogoConfigConverter<T>
         {
             Image = await source.GetImage(configuration.EditorType),
             ImageDark = await source.GetImageDark(),
+            ImageLight = await source.GetImageLight(),
             ImageEmbedded = await source.GetImageEmbedded(configuration.EditorType),
             Url = source.Url,
             Visible = source.GetVisible(configuration.EditorType)

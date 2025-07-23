@@ -134,20 +134,23 @@ public class CardDavAddressbook(ILogger<CardDavAddressbook> logger,
     public async Task Delete(string uri, Guid userID, string email, int tenantId = 0)
     {
         var authorization = await GetSystemAuthorizationAsync();
-        var deleteUrlBook = GetRadicaleUrl(uri, email.ToLower(), true, true);
-        var davRequest = new DavRequest
+        if (authorization != null)
         {
-            Url = deleteUrlBook,
-            Authorization = authorization
-        };
-        try
-        {
-            await radicaleClient.RemoveAsync(davRequest);
-            await dbRadicale.RemoveCardDavUserAsync(tenantId, userID);
-        }
-        catch (Exception ex)
-        {
-            logger.ErrorWithException(ex);
+            var deleteUrlBook = GetRadicaleUrl(uri, email.ToLower(), true, true);
+            var davRequest = new DavRequest
+            {
+                Url = deleteUrlBook,
+                Authorization = authorization
+            };
+            try
+            {
+                await radicaleClient.RemoveAsync(davRequest);
+                await dbRadicale.RemoveCardDavUserAsync(tenantId, userID);
+            }
+            catch (Exception ex)
+            {
+                logger.ErrorWithException(ex);
+            }
         }
     }
 

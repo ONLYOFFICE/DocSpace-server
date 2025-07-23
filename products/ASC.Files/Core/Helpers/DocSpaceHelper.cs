@@ -169,6 +169,6 @@ public static class DocSpaceHelper
         }
 
         var roles = await cacheFileDao.GetFormRoles(file.Id).ToListAsync();
-        return roles.Any() && roles.All(r => r.Submitted);
+        return roles.Count != 0 && roles.All(r => r.Submitted);
     }
 }

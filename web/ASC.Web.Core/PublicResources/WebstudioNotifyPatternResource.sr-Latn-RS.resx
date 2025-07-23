@@ -426,9 +426,6 @@
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Grejs period za vaš ${LetterLogoText} DocSpace aktiviran</value>
   </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Vaša ${LetterLogoText} DocSpace pretplata uskoro ističe</value>
-  </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Grejs period za vaš ${LetterLogoText} DocSpace je istekao</value>
   </data>
@@ -561,7 +558,9 @@ Konfiguracija aplikacije za autentifikaciju koju koristite za ulazak na portal $
 
 Kliknite na dugme ispod da biste otišli na stranicu za prijavu na portal i konfigurisali aplikaciju za autentifikaciju:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.Promena "${__VirtualRootPath}":"${__VirtualRootPath}" vlasnika portala
@@ -901,18 +900,6 @@ $TrulyYours</value>
 Uzmite u obzir da je grejs period od $PaymentDelay dana za vaš ${LetterLogoText} DocSpace aktiviran.
 
 Obavezno platite svoju Poslovnu pretplatu pre isteka grejs perioda. Tako ćete moći dalje da koristite sve prednosti vašeg ${LetterLogoText} DocSpace-a.
-
-$OrangeButton
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Zdravo, $UserName!
-
-Imajte u vidu da vaša ${LetterLogoText} DocSpace pretplata ističe za tri dana. Nakon toga, grejs period od $PaymentDelay dana će biti aktiviran.
-
-Preporučujemo da sada platite svoju Poslovnu pretplatu i nastavite da koristite sve prednosti svog ${LetterLogoText} DocSpace-a.
-
 
 $OrangeButton
 
@@ -1998,5 +1985,53 @@ $TrulyYours</value>
   </data>
   <data name="subject_user_type_changed" xml:space="preserve">
     <value>Vaš tip korisnika u DocSpace-u je promenjen</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Zdravo, $UserName!
+
+Obaveštavamo vas da će uplata za vašu pretplatu biti automatski naplaćena sa vašeg računa za 3 dana.
+
+Kako bi transakcija protekla bez problema, molimo vas da proverite da li na odabranoj platnoj metodi imate dovoljno sredstava.
+
+Ukoliko imate bilo kakva pitanja ili vam je potrebna pomoć, slobodno kontaktirajte naš "tim za podršku":"${__SupportLink}.
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Predstojeća uplata pretplate za vaš ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Idi na usluge</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Idi na podešavanje novčanika</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Zdravo, $UserName!
+
+Obaveštavamo vas da automatska obnova vaše kupljene usluge nije uspešno izvršena.
+
+Ljubazno vas molimo da ručno obnovite trenutni plan usluge (ili kupite novi).
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Zdravo, $UserName!
+
+Obaveštavamo vas da automatska dopuna stanja u vašem DocSpace novčaniku nije uspela.
+
+Ljubazno vas molimo da ručno proverite i ažurirate stanje u novčaniku.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Potrebna akcija: Nije moguće automatski obnoviti plan usluge u vašem ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Potrebna akcija: Nije moguće automatski dopuniti stanje novčanika u vašem ${LetterLogoText} DocSpace</value>
   </data>
 </root>

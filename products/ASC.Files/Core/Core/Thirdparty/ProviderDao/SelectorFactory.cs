@@ -78,12 +78,7 @@ internal class SelectorFactory(IServiceProvider serviceProvider)
     {
         var groups = ids.GroupBy(Match);
         groups = groups.Where(g => g.Key != "");
-        var dict = new Dictionary<IDaoSelector, List<string>>();
-        foreach (var group in groups)
-        {
-            dict.Add(GetSelectorInternal(group.Key), group.ToList());
-        }
-        return dict;
+        return groups.ToDictionary(group => GetSelectorInternal(group.Key), group => group.ToList());
     }
 
     private string Match(string id)

@@ -972,4 +972,31 @@
   <data name="FileCustomFilterEnabled" xml:space="preserve">
     <value>Ֆայլ՝ {0}։ Հատուկ ֆիլտրը միացված է</value>
   </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>Հաստատման հղումը ակտիվացված է</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Հաճախորդի գործողությունը կատարվել է</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Հաճախորդի գործառնությունների հաշվետվությունը ներբեռնվել է</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Հաճախորդի բաժանորդագրությունը թարմացվել է՝ {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Հաճախորդի դրամապանակը լիցքավորվել է՝ {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Հաճախորդի դրամապանակի լիցքավորման կարգավորումները թարմացվեցին</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>LDAP նույնականացումը անջատված է</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>LDAP նույնականացումը միացված է</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>LDAP սինխրոնիզացիան ավարտվեց</value>
+  </data>
 </root>

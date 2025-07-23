@@ -34,8 +34,8 @@ public record FileDownloadOperationData<T> : FileOperationData<T>
         
     }
     
-    public FileDownloadOperationData(IEnumerable<T> folders,
-        IEnumerable<FilesDownloadOperationItem<T>> filesDownload,
+    public FileDownloadOperationData(List<T> folders,
+        List<FilesDownloadOperationItem<T>> filesDownload,
         int tenantId,        
         Guid userId,
         IDictionary<string, string> headers,
@@ -68,9 +68,15 @@ public class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationD
     {
         DaoOperation = new FileDownloadOperation<int>(_serviceProvider, Data);
         ThirdPartyOperation = new FileDownloadOperation<string>(_serviceProvider, ThirdPartyData);
-
+        
         await base.RunJob(cancellationToken);
 
+        if(!string.IsNullOrEmpty(DaoOperation.Err) || !string.IsNullOrEmpty(ThirdPartyOperation.Err))
+        {
+            await PublishChanges();
+            return;
+        }
+        
         await using var scope = await ThirdPartyOperation.CreateScopeAsync();
         var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
         var instanceCrypto = scope.ServiceProvider.GetRequiredService<InstanceCrypto>();
@@ -91,8 +97,8 @@ public class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationD
         var thirdPartyOperation = ThirdPartyOperation as FileDownloadOperation<string>;
         var daoOperation = DaoOperation as FileDownloadOperation<int>;
         
-        var thirdPartyFileOnly = thirdPartyOperation.Files.Count == 1 && thirdPartyOperation.Folders.Count == 0;
-        var daoFileOnly = daoOperation.Files.Count == 1 && daoOperation.Folders.Count == 0;
+        var thirdPartyFileOnly = thirdPartyOperation?.Files.Count == 1 && thirdPartyOperation.Folders.Count == 0;
+        var daoFileOnly = daoOperation?.Files.Count == 1 && daoOperation.Folders.Count == 0;
         var compress = !((thirdPartyFileOnly || daoFileOnly) && (thirdPartyFileOnly != daoFileOnly));
 
         string archiveExtension;
@@ -124,8 +130,8 @@ public class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationD
             stream.Position = 0;
             string fileName;
 
-            var thirdPartyFolderOnly = thirdPartyOperation.Folders.Count == 1 && thirdPartyOperation.Files.Count == 0;
-            var daoFolderOnly = daoOperation.Folders.Count == 1 && daoOperation.Files.Count == 0;
+            var thirdPartyFolderOnly = thirdPartyOperation?.Folders.Count == 1 && thirdPartyOperation.Files.Count == 0;
+            var daoFolderOnly = daoOperation?.Folders.Count == 1 && daoOperation.Files.Count == 0;
             if ((thirdPartyFolderOnly || daoFolderOnly) && (thirdPartyFolderOnly != daoFolderOnly))
             {
                 fileName = $@"{(thirdPartyFolderOnly ?

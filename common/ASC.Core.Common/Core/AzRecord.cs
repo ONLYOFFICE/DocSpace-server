@@ -26,22 +26,16 @@
 
 namespace ASC.Core;
 
-[ProtoContract]
 public class AzRecord : IMapFrom<Acl>
 {
-    [ProtoMember(1)]
     public Guid Subject { get; set; }
     
-    [ProtoMember(2)]
     public Guid Action { get; set; }
     
-    [ProtoMember(3)]
     public string Object { get; set; }
     
-    [ProtoMember(4)]
     public AceType AceType { get; set; }
     
-    [ProtoMember(5)]
     public int TenantId { get; set; }
 
     public AzRecord() { }
@@ -57,46 +51,6 @@ public class AzRecord : IMapFrom<Acl>
     public AzRecord(Guid subjectId, Guid actionId, AceType reaction, ISecurityObjectId objectId)
     : this(subjectId, actionId, reaction, AzObjectIdHelper.GetFullObjectId(objectId))
     {
-    }
-
-    public static implicit operator AzRecord(AzRecordCache cache)
-    {
-        var result = new AzRecord
-        {
-            TenantId = cache.Tenant
-        };
-
-
-        if (Guid.TryParse(cache.SubjectId, out var subjectId))
-        {
-            result.Subject = subjectId;
-        }
-
-        if (Guid.TryParse(cache.ActionId, out var actionId))
-        {
-            result.Action = actionId;
-        }
-
-        result.Object = cache.ObjectId;
-
-        if (AceTypeExtensions.TryParse(cache.Reaction, out var reaction))
-        {
-            result.AceType = reaction;
-        }
-
-        return result;
-    }
-
-    public static implicit operator AzRecordCache(AzRecord cache)
-    {
-        return new AzRecordCache
-        {
-            SubjectId = cache.Subject.ToString(),
-            ActionId = cache.Action.ToString(),
-            ObjectId = cache.Object,
-            Reaction = cache.AceType.ToStringFast(),
-            Tenant = cache.TenantId
-        };
     }
 
     public override bool Equals(object obj)

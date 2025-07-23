@@ -74,19 +74,23 @@ public class RoomNotifyQueue<T> : IRoomNotifyQueue<T>
         {
             return;
         }
+        var userIDs = (await _fileSecurity.WhoCanReadAsync(_room, true)).ToList();
 
-        var whoCanRead = await _fileSecurity.WhoCanReadAsync(_room, true);
+        if (_room.CreateBy != _currentAccountId)
+        {
+            userIDs.Add(_room.CreateBy);
+        }
 
         if (count <= 3)
         {
             while (_messages.Count > 0)
             {
-                await _notifyClient.SendDocumentUploadedToRoom(whoCanRead, _messages.Dequeue(), _room, _currentAccountId);
+                await _notifyClient.SendDocumentUploadedToRoom(userIDs, _messages.Dequeue(), _room, _currentAccountId);
             }
         }
         else
         {
-            await _notifyClient.SendDocumentsUploadedToRoom(whoCanRead, count, _room, _currentAccountId);
+            await _notifyClient.SendDocumentsUploadedToRoom(userIDs, count, _room, _currentAccountId);
             _messages.Clear();
         }
 

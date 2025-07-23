@@ -57,7 +57,8 @@ internal class ProviderAccountDao(
     {
         var providersInfo = GetProvidersInfoInternalAsync(linkId);
 
-        return providersInfo.SingleAsync().AsTask();
+        var allproviders = providersInfo.ToListAsync().Result;
+        return Task.FromResult(allproviders.Single());
     }
 
     public async Task<IProviderInfo> GetProviderInfoByEntryIdAsync(string entryId)

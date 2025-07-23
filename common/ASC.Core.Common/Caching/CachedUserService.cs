@@ -26,91 +26,30 @@
 
 namespace ASC.Core.Caching;
 
-[Singleton]
-public class UserServiceCache
+
+[Scope(typeof(IUserService))]
+public class CachedUserService : IUserService
 {
+    private readonly EFUserService _service;
+    private readonly IFusionCache _cache;
+
+    private readonly TimeSpan _cacheExpiration;
+    private readonly TimeSpan _photoExpiration;
+
+    public CachedUserService(
+        EFUserService service,
+        IFusionCacheProvider cacheProvider)
+    {
+        _service = service;
+        _cache = cacheProvider.GetMemoryCache();
+        _cacheExpiration = TimeSpan.FromMinutes(20);
+        _photoExpiration = TimeSpan.FromMinutes(10);
+    }
+
     private const string Users = "users";
     private const string Refs = "refs";
     private const string Groups = "groups";
     private const string Relations = "relations";
-    private const string RelationsByTarget = "relationsByTarget";
-
-    internal readonly ICache Cache;
-    internal readonly ICacheNotify<UserInfoCacheItem> CacheUserInfoItem;
-    internal readonly ICacheNotify<UserPhotoCacheItem> CacheUserPhotoItem;
-    internal readonly ICacheNotify<GroupCacheItem> CacheGroupCacheItem;
-    internal readonly ICacheNotify<UserGroupRefCacheItem> CacheUserGroupRefItem;
-    internal readonly ICacheNotify<UserRelationCacheItem> CacheUserRelationItem;
-
-    public UserServiceCache(
-        ICacheNotify<UserInfoCacheItem> cacheUserInfoItem,
-        ICacheNotify<UserPhotoCacheItem> cacheUserPhotoItem,
-        ICacheNotify<GroupCacheItem> cacheGroupCacheItem,
-        ICacheNotify<UserGroupRefCacheItem> cacheUserGroupRefItem,
-        ICacheNotify<UserRelationCacheItem> cacheUserRelationItem,
-        ICache cache)
-    {
-        Cache = cache;
-        CacheUserInfoItem = cacheUserInfoItem;
-        CacheUserPhotoItem = cacheUserPhotoItem;
-        CacheGroupCacheItem = cacheGroupCacheItem;
-        CacheUserGroupRefItem = cacheUserGroupRefItem;
-        CacheUserRelationItem = cacheUserRelationItem;
-
-        cacheUserInfoItem.Subscribe(InvalidateCache, CacheNotifyAction.Any);
-        cacheUserPhotoItem.Subscribe(p => Cache.Remove(p.Key), CacheNotifyAction.Remove);
-        cacheGroupCacheItem.Subscribe(InvalidateCache, CacheNotifyAction.Any);
-
-        cacheUserGroupRefItem.Subscribe(r => UpdateUserGroupRefCache(r), CacheNotifyAction.Remove);
-        cacheUserGroupRefItem.Subscribe(r => UpdateUserGroupRefCache(r), CacheNotifyAction.InsertOrUpdate);
-        
-        cacheUserRelationItem.Subscribe(r => Cache.Remove(GetRelationCacheKey(r.TenantId, r.SourceUserId)), CacheNotifyAction.Any);
-    }
-
-    private void InvalidateCache(UserInfoCacheItem userInfo)
-    {
-        if (userInfo != null)
-        {
-            var key = GetUserCacheKey(userInfo.Tenant);
-            Cache.Remove(key);
-
-            if (Guid.TryParse(userInfo.Id, out var userId))
-            {
-                var userKey = GetUserCacheKey(userInfo.Tenant, userId);
-                Cache.Remove(userKey);
-            }
-        }
-    }
-    private void InvalidateCache(GroupCacheItem groupCacheItem)
-    {
-        if (groupCacheItem == null)
-        {
-            return;
-        }
-
-        Cache.Remove(GetGroupCacheKey(groupCacheItem.Tenant, new Guid(groupCacheItem.Id)));
-        Cache.Remove(GetGroupCacheKey(groupCacheItem.Tenant));
-    }
-
-    private void UpdateUserGroupRefCache(UserGroupRef r)
-    {
-        var key = GetRefCacheKey(r.TenantId);
-        var usersRefs = Cache.Get<UserGroupRefStore>(key);
-        if (usersRefs != null)
-        {
-            lock (usersRefs)
-            {
-                usersRefs[r.CreateKey()] = r;
-            }
-        }
-
-        var groupRef = GetRefCacheKey(r.TenantId, r.GroupId, r.RefType);
-
-        if (groupRef != null && r.Removed)
-        {
-            Cache.Remove(groupRef);
-        }
-    }
 
     public static string GetUserPhotoCacheKey(int tenant, Guid userId)
     {
@@ -145,48 +84,10 @@ public class UserServiceCache
     {
         return tenant + Users + userId;
     }
-    
+
     public static string GetRelationCacheKey(int tenant, string sourceUserId)
     {
         return tenant + Relations + sourceUserId;
-    }
-    
-    public static string GetRelationByTargetCacheKey(int tenant, string sourceUserId)
-    {
-        return tenant + RelationsByTarget + sourceUserId;
-    }
-}
-
-[Scope(typeof(IUserService))]
-public class CachedUserService : IUserService, ICachedService
-{
-    private readonly EFUserService _service;
-    private readonly ICache _cache;
-    private readonly ICacheNotify<UserInfoCacheItem> _cacheUserInfoItem;
-    private readonly ICacheNotify<UserPhotoCacheItem> _cacheUserPhotoItem;
-    private readonly ICacheNotify<GroupCacheItem> _cacheGroupCacheItem;
-    private readonly ICacheNotify<UserGroupRefCacheItem> _cacheUserGroupRefItem;
-    private readonly ICacheNotify<UserRelationCacheItem> _cacheUserRelationItem;
-
-    private readonly TimeSpan _cacheExpiration;
-    private readonly TimeSpan _photoExpiration;
-
-    public CachedUserService(
-        EFUserService service,
-        UserServiceCache userServiceCache,
-        ICacheNotify<GroupCacheItem> cacheGroupCacheItem
-        )
-    {
-        _service = service;
-        _cacheExpiration = TimeSpan.FromMinutes(20);
-        _photoExpiration = TimeSpan.FromMinutes(10);
-        _cacheGroupCacheItem = cacheGroupCacheItem;
-        _cache = userServiceCache.Cache;
-        _cacheUserInfoItem = userServiceCache.CacheUserInfoItem;
-        _cacheUserPhotoItem = userServiceCache.CacheUserPhotoItem;
-        _cacheGroupCacheItem = userServiceCache.CacheGroupCacheItem;
-        _cacheUserGroupRefItem = userServiceCache.CacheUserGroupRefItem;
-        _cacheUserRelationItem = userServiceCache.CacheUserRelationItem;
     }
 
     public Task<int> GetUsersCountAsync(UserQueryFilter filter)
@@ -201,36 +102,26 @@ public class CachedUserService : IUserService, ICachedService
 
     public async Task<UserInfo> GetUserAsync(int tenant, Guid id)
     {
-        var key = UserServiceCache.GetUserCacheKey(tenant, id);
-        var user = _cache.Get<UserInfo>(key);
-
-        if (user == null)
+        var key = GetUserCacheKey(tenant, id);
+        var user = await _cache.GetOrSetAsync<UserInfo>(key, async (ctx, token) =>
         {
-            user = await _service.GetUserAsync(tenant, id);
+            var user = await _service.GetUserAsync(tenant, id);
 
-            if (user != null)
-            {
-                _cache.Insert(key, user, _cacheExpiration);
-            }
-        }
+            return ctx.Modified(user);
+        }, _cacheExpiration, [CacheExtention.GetUserTag(tenant, id)]);
 
         return user;
     }
 
     public UserInfo GetUser(int tenant, Guid id)
     {
-        var key = UserServiceCache.GetUserCacheKey(tenant, id);
-        var user = _cache.Get<UserInfo>(key);
-
-        if (user == null)
+        var key = GetUserCacheKey(tenant, id);
+        var user = _cache.GetOrSet<UserInfo>(key, (ctx, token) =>
         {
-            user = _service.GetUser(tenant, id);
+            var user = _service.GetUser(tenant, id);
 
-            if (user != null)
-            {
-                _cache.Insert(key, user, _cacheExpiration);
-            }
-        }
+            return ctx.Modified(user, lastModified: DateTime.UtcNow);
+        }, _cacheExpiration, [CacheExtention.GetUserTag(tenant, id)]);
 
         return user;
     }
@@ -256,71 +147,68 @@ public class CachedUserService : IUserService, ICachedService
 
     public async Task<UserInfo> SaveUserAsync(int tenant, UserInfo user)
     {
+        var tag = CacheExtention.GetUserTag(tenant, user.Id);
+
         user = await _service.SaveUserAsync(tenant, user);
-        await _cacheUserInfoItem.PublishAsync(new UserInfoCacheItem { Id = user.Id.ToString(), Tenant = tenant }, CacheNotifyAction.Any);
+
+        await _cache.RemoveByTagAsync(tag);
 
         return user;
     }
-    
+
     public async Task RemoveUserAsync(int tenant, Guid id, bool immediate = false)
     {
         await _service.RemoveUserAsync(tenant, id, immediate);
-        await _cacheUserInfoItem.PublishAsync(new UserInfoCacheItem { Tenant = tenant, Id = id.ToString() }, CacheNotifyAction.Any);
+
+        var tag = CacheExtention.GetUserTag(tenant, id);
+        await _cache.RemoveByTagAsync(tag);
     }
 
     public async Task<byte[]> GetUserPhotoAsync(int tenant, Guid id)
     {
-        var photo = _cache.Get<byte[]>(UserServiceCache.GetUserPhotoCacheKey(tenant, id));
-        if (photo == null)
+        var key = GetUserPhotoCacheKey(tenant, id);
+        var photo = await _cache.GetOrSetAsync<byte[]>(key, async (ctx, token) =>
         {
-            photo = await _service.GetUserPhotoAsync(tenant, id);
-            _cache.Insert(UserServiceCache.GetUserPhotoCacheKey(tenant, id), photo, _photoExpiration);
-        }
+            var photo = await _service.GetUserPhotoAsync(tenant, id);
 
+            return ctx.Modified(photo);
+        }, _photoExpiration, [CacheExtention.GetUserPhotoTag(tenant, id)]);
         return photo;
     }
 
     public async Task SetUserPhotoAsync(int tenant, Guid id, byte[] photo)
     {
         await _service.SetUserPhotoAsync(tenant, id, photo);
-        await _cacheUserPhotoItem.PublishAsync(new UserPhotoCacheItem { Key = UserServiceCache.GetUserPhotoCacheKey(tenant, id) }, CacheNotifyAction.Remove);
-        await _cacheUserInfoItem.PublishAsync(new UserInfoCacheItem { Id = id.ToString(), Tenant = tenant }, CacheNotifyAction.Any);
+
+        var tag = CacheExtention.GetUserPhotoTag(tenant, id);
+        await _cache.RemoveAsync(tag);
     }
 
     public async Task SaveUsersRelationAsync(int tenantId, Guid sourceUserId, Guid targetUserId)
     {
         await _service.SaveUsersRelationAsync(tenantId, sourceUserId, targetUserId);
-        await _cacheUserRelationItem.PublishAsync(new UserRelationCacheItem { TenantId = tenantId, SourceUserId = sourceUserId.ToString() }, CacheNotifyAction.Any);
+
+        var tag = CacheExtention.GetRelationTag(tenantId, sourceUserId);
+        await _cache.RemoveByTagAsync(tag);
     }
 
     public async Task<Dictionary<Guid, UserRelation>> GetUserRelationsAsync(int tenantId, Guid sourceUserId)
     {
-        var key = UserServiceCache.GetRelationCacheKey(tenantId, sourceUserId.ToString());
-        var relations = _cache.Get<Dictionary<Guid, UserRelation>>(key);
+        var key = GetRelationCacheKey(tenantId, sourceUserId.ToString());
 
-        if (relations != null)
+        var relations = await _cache.GetOrSetAsync<Dictionary<Guid, UserRelation>>(key, async (ctx, token) =>
         {
-            return relations;
-        }
+            var relations = await _service.GetUserRelationsAsync(tenantId, sourceUserId);
 
-        relations = await _service.GetUserRelationsAsync(tenantId, sourceUserId);
-        _cache.Insert(key, relations, _cacheExpiration);
+            return ctx.Modified(relations);
+        }, _cacheExpiration, [CacheExtention.GetRelationTag(tenantId, sourceUserId)]);
 
         return relations;
     }
 
     public async Task<Dictionary<Guid, UserRelation>> GetUserRelationsByTargetAsync(int tenantId, Guid targetUserId)
     {
-        var key = UserServiceCache.GetRelationByTargetCacheKey(tenantId, targetUserId.ToString());
-        var relations = _cache.Get<Dictionary<Guid, UserRelation>>(key);
-
-        if (relations != null)
-        {
-            return relations;
-        }
-
-        relations = await _service.GetUserRelationsByTargetAsync(tenantId, targetUserId);
-        _cache.Insert(key, relations, _cacheExpiration);
+        var relations = await _service.GetUserRelationsByTargetAsync(tenantId, targetUserId);
 
         return relations;
     }
@@ -328,7 +216,9 @@ public class CachedUserService : IUserService, ICachedService
     public async Task DeleteUserRelationAsync(int tenantId, Guid sourceUserId, Guid targetUserId)
     {
         await _service.DeleteUserRelationAsync(tenantId, sourceUserId, targetUserId);
-        await _cacheUserRelationItem.PublishAsync(new UserRelationCacheItem { TenantId = tenantId, SourceUserId = sourceUserId.ToString() }, CacheNotifyAction.Any);
+
+        var tag = CacheExtention.GetRelationTag(tenantId, sourceUserId);
+        await _cache.RemoveByTagAsync(tag);
     }
 
     public async Task<DateTime> GetUserPasswordStampAsync(int tenant, Guid id)
@@ -343,18 +233,14 @@ public class CachedUserService : IUserService, ICachedService
 
     public async Task<Group> GetGroupAsync(int tenant, Guid id)
     {
-        var key = UserServiceCache.GetGroupCacheKey(tenant, id);
-        var group = _cache.Get<Group>(key);
+        var key = GetGroupCacheKey(tenant, id);
 
-        if (group == null)
+        var group = await _cache.GetOrSetAsync<Group>(key, async (ctx, token) =>
         {
-            group = await _service.GetGroupAsync(tenant, id);
+            var group = await _service.GetGroupAsync(tenant, id);
 
-            if (group != null)
-            {
-                _cache.Insert(key, group, _cacheExpiration);
-            }
-        }
+            return ctx.Modified(group);
+        }, _cacheExpiration, [CacheExtention.GetGroupTag(tenant, id)]);
 
         return group;
     }
@@ -362,7 +248,9 @@ public class CachedUserService : IUserService, ICachedService
     public async Task<Group> SaveGroupAsync(int tenant, Group group)
     {
         group = await _service.SaveGroupAsync(tenant, group);
-        await _cacheGroupCacheItem.PublishAsync(new GroupCacheItem { Id = group.Id.ToString(), Tenant = tenant }, CacheNotifyAction.Any);
+
+        var tag = CacheExtention.GetGroupTag(tenant, group.Id);
+        await _cache.RemoveByTagAsync(tag);
 
         return group;
     }
@@ -370,36 +258,40 @@ public class CachedUserService : IUserService, ICachedService
     public async Task RemoveGroupAsync(int tenant, Guid id)
     {
         await _service.RemoveGroupAsync(tenant, id);
-        await _cacheGroupCacheItem.PublishAsync(new GroupCacheItem { Id = id.ToString(), Tenant = tenant }, CacheNotifyAction.Any);
+
+        var tag = CacheExtention.GetGroupTag(tenant, id);
+        await _cache.RemoveByTagAsync(tag);
     }
 
 
     public async Task<IDictionary<string, UserGroupRef>> GetUserGroupRefsAsync(int tenant)
     {
-        var key = UserServiceCache.GetRefCacheKey(tenant);
-        if (_cache.Get<UserGroupRefStore>(key) is not IDictionary<string, UserGroupRef> refs)
+        var key = GetRefCacheKey(tenant);
+
+        var refs = await _cache.GetOrSetAsync<UserGroupRefStore>(key, async (ctx, token) =>
         {
-            refs = await _service.GetUserGroupRefsAsync(tenant);
-            _cache.Insert(key, new UserGroupRefStore(refs), _cacheExpiration);
-        }
+            var refs = await _service.GetUserGroupRefsAsync(tenant);
+
+            ctx.Tags = [CacheExtention.GetGroupRefsTag(tenant)];
+
+            return ctx.Modified(new UserGroupRefStore(refs));
+        }, _cacheExpiration);
 
         return refs;
     }
 
     public async Task<UserGroupRef> GetUserGroupRefAsync(int tenant, Guid groupId, UserGroupRefType refType)
     {
-        var key = UserServiceCache.GetRefCacheKey(tenant, groupId, refType);
-        var groupRef = _cache.Get<UserGroupRef>(key);
+        var key = GetRefCacheKey(tenant, groupId, refType);
 
-        if (groupRef == null)
+        var groupRef = await _cache.GetOrSetAsync<UserGroupRef>(key, async (ctx, token) =>
         {
-            groupRef = await _service.GetUserGroupRefAsync(tenant, groupId, refType);
+            var groupRef = await _service.GetUserGroupRefAsync(tenant, groupId, refType);
 
-            if (groupRef != null)
-            {
-                _cache.Insert(key, groupRef, _cacheExpiration);
-            }
-        }
+            ctx.Tags = [CacheExtention.GetGroupRefsTag(tenant)];
+
+            return ctx.Modified(groupRef, lastModified: DateTime.UtcNow);
+        }, _cacheExpiration);
 
         return groupRef;
     }
@@ -407,7 +299,9 @@ public class CachedUserService : IUserService, ICachedService
     public async Task<UserGroupRef> SaveUserGroupRefAsync(int tenant, UserGroupRef r)
     {
         r = await _service.SaveUserGroupRefAsync(tenant, r);
-        await _cacheUserGroupRefItem.PublishAsync(r, CacheNotifyAction.InsertOrUpdate);
+
+        var tag = CacheExtention.GetGroupRefsTag(tenant);
+        await _cache.RemoveByTagAsync(tag);
 
         return r;
     }
@@ -417,33 +311,39 @@ public class CachedUserService : IUserService, ICachedService
         await _service.RemoveUserGroupRefAsync(tenant, userId, groupId, refType);
 
         var r = new UserGroupRef(userId, groupId, refType) { TenantId = tenant, Removed = true };
-        await _cacheUserGroupRefItem.PublishAsync(r, CacheNotifyAction.Remove);
+
+        var tag = CacheExtention.GetGroupRefsTag(tenant);
+        await _cache.RemoveByTagAsync(tag);
     }
 
 
     public async Task<IEnumerable<UserInfo>> GetUsersAsync(int tenant)
     {
-        var key = UserServiceCache.GetUserCacheKey(tenant);
-        var users = _cache.Get<IEnumerable<UserInfo>>(key);
-        if (users == null)
-        {
-            users = await _service.GetUsersAsync(tenant);
+        var key = GetUserCacheKey(tenant);
 
-            _cache.Insert(key, users, _cacheExpiration);
-        }
+        var users = await _cache.GetOrSetAsync<IEnumerable<UserInfo>>(key, async (ctx, token) =>
+        {
+            var users = await _service.GetUsersAsync(tenant);
+
+            ctx.Tags = [CacheExtention.GetUserTag(tenant, Guid.Empty), .. users.Select(u => CacheExtention.GetUserTag(tenant, u.Id))];
+
+            return ctx.Modified(users);
+        }, _cacheExpiration);
 
         return users;
     }
 
     public async Task<IEnumerable<Group>> GetGroupsAsync(int tenant)
     {
-        var key = UserServiceCache.GetGroupCacheKey(tenant);
-        var groups = _cache.Get<IEnumerable<Group>>(key);
-        if (groups == null)
+        var key = GetGroupCacheKey(tenant);
+
+        var groups = await _cache.GetOrSetAsync<IEnumerable<Group>>(key, async (ctx, token) =>
         {
-            groups = await _service.GetGroupsAsync(tenant);
-            _cache.Insert(key, groups, _cacheExpiration);
-        }
+            var groups = await _service.GetGroupsAsync(tenant);
+            ctx.Tags = groups.Select(g => CacheExtention.GetGroupTag(tenant, g.Id)).ToArray();
+
+            return ctx.Modified(groups);
+        }, _cacheExpiration);
 
         return groups;
     }
@@ -456,10 +356,6 @@ public class CachedUserService : IUserService, ICachedService
     public Task<int> GetGroupsCountAsync(int tenant, string text, Guid userId, bool manager)
     {
         return _service.GetGroupsCountAsync(tenant, text, userId, manager);
-    }
-
-    public void InvalidateCache()
-    {
     }
 
     public async Task<UserInfo> GetUserAsync(int tenant, Guid id, Expression<Func<User, UserInfo>> exp)

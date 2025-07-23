@@ -571,4 +571,10 @@ Najviša kompatibilnost sa docx, xlsx, pptx.</value>
   <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
     <value>Započni popunjavanje</value>
   </data>
+  <data name="RoleEnum_Guest" xml:space="preserve">
+    <value>Gost</value>
+  </data>
+  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
+    <value>Administrator sobe</value>
+  </data>
 </root>

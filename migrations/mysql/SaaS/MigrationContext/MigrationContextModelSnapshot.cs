@@ -703,7 +703,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.Property<decimal>("Price")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("decimal(10,2)")
+                        .HasColumnType("decimal(10,4)")
                         .HasColumnName("price")
                         .HasDefaultValueSql("'0.00'");
 
@@ -720,6 +720,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("visible")
                         .HasDefaultValueSql("'0'");
 
+                    b.Property<bool>("Wallet")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("wallet")
+                        .HasDefaultValueSql("'0'");
+
                     b.HasKey("TenantId")
                         .HasName("PRIMARY");
 
@@ -734,7 +740,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Features = "trial,audit,ldap,sso,customization,thirdparty,restore,oauth,total_size:107374182400,file_size:100,manager:1,statistic",
                             Name = "trial",
                             Price = 0m,
-                            Visible = false
+                            Visible = false,
+                            Wallet = false
                         },
                         new
                         {
@@ -744,7 +751,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Name = "admin",
                             Price = 15m,
                             ProductId = "1002",
-                            Visible = false
+                            Visible = false,
+                            Wallet = false
                         },
                         new
                         {
@@ -752,7 +760,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Features = "free,oauth,total_size:2147483648,manager:3,room:12",
                             Name = "startup",
                             Price = 0m,
-                            Visible = false
+                            Visible = false,
+                            Wallet = false
                         },
                         new
                         {
@@ -761,7 +770,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Name = "disk",
                             Price = 0m,
                             ProductId = "1004",
-                            Visible = false
+                            Visible = false,
+                            Wallet = false
                         },
                         new
                         {
@@ -770,7 +780,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Name = "admin1",
                             Price = 0m,
                             ProductId = "1005",
-                            Visible = false
+                            Visible = false,
+                            Wallet = false
                         },
                         new
                         {
@@ -779,7 +790,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Name = "subscription",
                             Price = 0m,
                             ProductId = "1001",
-                            Visible = false
+                            Visible = false,
+                            Wallet = false
                         },
                         new
                         {
@@ -788,7 +800,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Name = "nonprofit",
                             Price = 0m,
                             ProductId = "1007",
-                            Visible = false
+                            Visible = false,
+                            Wallet = false
                         },
                         new
                         {
@@ -796,7 +809,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Features = "free,oauth,total_size:107374182400,manager:100,room:100",
                             Name = "zoom",
                             Price = 0m,
-                            Visible = false
+                            Visible = false,
+                            Wallet = false
                         },
                         new
                         {
@@ -806,7 +820,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Name = "admin",
                             Price = 20m,
                             ProductId = "1006",
-                            Visible = true
+                            Visible = true,
+                            Wallet = false
                         },
                         new
                         {
@@ -814,9 +829,20 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Description = "since 10.02.2025",
                             Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,year",
                             Name = "adminyear",
-                            Price = 200m,
+                            Price = 220m,
                             ProductId = "1009",
-                            Visible = true
+                            Visible = true,
+                            Wallet = false
+                        },
+                        new
+                        {
+                            TenantId = -11,
+                            Features = "total_size:1073741824",
+                            Name = "storage",
+                            Price = 0.14m,
+                            ProductId = "1011",
+                            Visible = true,
+                            Wallet = true
                         });
                 });
 
@@ -1226,6 +1252,18 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Property<int>("Quota")
                         .HasColumnType("int")
                         .HasColumnName("quota");
+
+                    b.Property<DateTime?>("DueDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("due_date")
+                        .HasDefaultValueSql("NULL");
+
+                    b.Property<int?>("NextQuantity")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("next_quantity")
+                        .HasDefaultValueSql("NULL");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int")
@@ -2943,6 +2981,231 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         },
                         new
                         {
+                            Input = ".hwp",
+                            Output = ".docx"
+                        },
+                        new
+                        {
+                            Input = ".hwp",
+                            Output = ".odt"
+                        },
+                        new
+                        {
+                            Input = ".hwp",
+                            Output = ".pdf"
+                        },
+                        new
+                        {
+                            Input = ".hwp",
+                            Output = ".rtf"
+                        },
+                        new
+                        {
+                            Input = ".hwp",
+                            Output = ".txt"
+                        },
+                        new
+                        {
+                            Input = ".hwp",
+                            Output = ".docm"
+                        },
+                        new
+                        {
+                            Input = ".hwp",
+                            Output = ".dotm"
+                        },
+                        new
+                        {
+                            Input = ".hwp",
+                            Output = ".dotx"
+                        },
+                        new
+                        {
+                            Input = ".hwp",
+                            Output = ".epub"
+                        },
+                        new
+                        {
+                            Input = ".hwp",
+                            Output = ".fb2"
+                        },
+                        new
+                        {
+                            Input = ".hwp",
+                            Output = ".html"
+                        },
+                        new
+                        {
+                            Input = ".hwp",
+                            Output = ".ott"
+                        },
+                        new
+                        {
+                            Input = ".hwpx",
+                            Output = ".docx"
+                        },
+                        new
+                        {
+                            Input = ".hwpx",
+                            Output = ".odt"
+                        },
+                        new
+                        {
+                            Input = ".hwpx",
+                            Output = ".pdf"
+                        },
+                        new
+                        {
+                            Input = ".hwpx",
+                            Output = ".rtf"
+                        },
+                        new
+                        {
+                            Input = ".hwpx",
+                            Output = ".txt"
+                        },
+                        new
+                        {
+                            Input = ".hwpx",
+                            Output = ".docm"
+                        },
+                        new
+                        {
+                            Input = ".hwpx",
+                            Output = ".dotm"
+                        },
+                        new
+                        {
+                            Input = ".hwpx",
+                            Output = ".dotx"
+                        },
+                        new
+                        {
+                            Input = ".hwpx",
+                            Output = ".epub"
+                        },
+                        new
+                        {
+                            Input = ".hwpx",
+                            Output = ".fb2"
+                        },
+                        new
+                        {
+                            Input = ".hwpx",
+                            Output = ".html"
+                        },
+                        new
+                        {
+                            Input = ".hwpx",
+                            Output = ".ott"
+                        },
+                        new
+                        {
+                            Input = ".key",
+                            Output = ".odp"
+                        },
+                        new
+                        {
+                            Input = ".key",
+                            Output = ".pdf"
+                        },
+                        new
+                        {
+                            Input = ".key",
+                            Output = ".pptx"
+                        },
+                        new
+                        {
+                            Input = ".key",
+                            Output = ".otp"
+                        },
+                        new
+                        {
+                            Input = ".key",
+                            Output = ".potm"
+                        },
+                        new
+                        {
+                            Input = ".key",
+                            Output = ".potx"
+                        },
+                        new
+                        {
+                            Input = ".key",
+                            Output = ".ppsm"
+                        },
+                        new
+                        {
+                            Input = ".key",
+                            Output = ".ppsx"
+                        },
+                        new
+                        {
+                            Input = ".key",
+                            Output = ".pptm"
+                        },
+                        new
+                        {
+                            Input = ".md",
+                            Output = ".docx"
+                        },
+                        new
+                        {
+                            Input = ".md",
+                            Output = ".odt"
+                        },
+                        new
+                        {
+                            Input = ".md",
+                            Output = ".pdf"
+                        },
+                        new
+                        {
+                            Input = ".md",
+                            Output = ".rtf"
+                        },
+                        new
+                        {
+                            Input = ".md",
+                            Output = ".txt"
+                        },
+                        new
+                        {
+                            Input = ".md",
+                            Output = ".docm"
+                        },
+                        new
+                        {
+                            Input = ".md",
+                            Output = ".dotm"
+                        },
+                        new
+                        {
+                            Input = ".md",
+                            Output = ".dotx"
+                        },
+                        new
+                        {
+                            Input = ".md",
+                            Output = ".epub"
+                        },
+                        new
+                        {
+                            Input = ".md",
+                            Output = ".fb2"
+                        },
+                        new
+                        {
+                            Input = ".md",
+                            Output = ".html"
+                        },
+                        new
+                        {
+                            Input = ".md",
+                            Output = ".ott"
+                        },
+                        new
+                        {
                             Input = ".mht",
                             Output = ".docx"
                         },
@@ -3060,6 +3323,91 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         {
                             Input = ".mhtml",
                             Output = ".txt"
+                        },
+                        new
+                        {
+                            Input = ".numbers",
+                            Output = ".csv"
+                        },
+                        new
+                        {
+                            Input = ".numbers",
+                            Output = ".ods"
+                        },
+                        new
+                        {
+                            Input = ".numbers",
+                            Output = ".pdf"
+                        },
+                        new
+                        {
+                            Input = ".numbers",
+                            Output = ".xlsx"
+                        },
+                        new
+                        {
+                            Input = ".numbers",
+                            Output = ".xlsm"
+                        },
+                        new
+                        {
+                            Input = ".numbers",
+                            Output = ".xltm"
+                        },
+                        new
+                        {
+                            Input = ".numbers",
+                            Output = ".xltx"
+                        },
+                        new
+                        {
+                            Input = ".numbers",
+                            Output = ".ots"
+                        },
+                        new
+                        {
+                            Input = ".odg",
+                            Output = ".odp"
+                        },
+                        new
+                        {
+                            Input = ".odg",
+                            Output = ".pdf"
+                        },
+                        new
+                        {
+                            Input = ".odg",
+                            Output = ".pptx"
+                        },
+                        new
+                        {
+                            Input = ".odg",
+                            Output = ".otp"
+                        },
+                        new
+                        {
+                            Input = ".odg",
+                            Output = ".potm"
+                        },
+                        new
+                        {
+                            Input = ".odg",
+                            Output = ".potx"
+                        },
+                        new
+                        {
+                            Input = ".odg",
+                            Output = ".ppsm"
+                        },
+                        new
+                        {
+                            Input = ".odg",
+                            Output = ".ppsx"
+                        },
+                        new
+                        {
+                            Input = ".odg",
+                            Output = ".pptm"
                         },
                         new
                         {
@@ -3384,6 +3732,66 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             Input = ".oxps",
+                            Output = ".txt"
+                        },
+                        new
+                        {
+                            Input = ".pages",
+                            Output = ".docm"
+                        },
+                        new
+                        {
+                            Input = ".pages",
+                            Output = ".docx"
+                        },
+                        new
+                        {
+                            Input = ".pages",
+                            Output = ".dotm"
+                        },
+                        new
+                        {
+                            Input = ".pages",
+                            Output = ".dotx"
+                        },
+                        new
+                        {
+                            Input = ".pages",
+                            Output = ".epub"
+                        },
+                        new
+                        {
+                            Input = ".pages",
+                            Output = ".fb2"
+                        },
+                        new
+                        {
+                            Input = ".pages",
+                            Output = ".html"
+                        },
+                        new
+                        {
+                            Input = ".pages",
+                            Output = ".odt"
+                        },
+                        new
+                        {
+                            Input = ".pages",
+                            Output = ".ott"
+                        },
+                        new
+                        {
+                            Input = ".pages",
+                            Output = ".pdf"
+                        },
+                        new
+                        {
+                            Input = ".pages",
+                            Output = ".rtf"
+                        },
+                        new
+                        {
+                            Input = ".pages",
                             Output = ".txt"
                         },
                         new
@@ -4135,6 +4543,186 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         {
                             Input = ".txt",
                             Output = ".ott"
+                        },
+                        new
+                        {
+                            Input = ".vsdm",
+                            Output = ".bmp"
+                        },
+                        new
+                        {
+                            Input = ".vsdm",
+                            Output = ".gif"
+                        },
+                        new
+                        {
+                            Input = ".vsdm",
+                            Output = ".jpg"
+                        },
+                        new
+                        {
+                            Input = ".vsdm",
+                            Output = ".pdf"
+                        },
+                        new
+                        {
+                            Input = ".vsdm",
+                            Output = ".pdfa"
+                        },
+                        new
+                        {
+                            Input = ".vsdm",
+                            Output = ".png"
+                        },
+                        new
+                        {
+                            Input = ".vsdx",
+                            Output = ".bmp"
+                        },
+                        new
+                        {
+                            Input = ".vsdx",
+                            Output = ".gif"
+                        },
+                        new
+                        {
+                            Input = ".vsdx",
+                            Output = ".jpg"
+                        },
+                        new
+                        {
+                            Input = ".vsdx",
+                            Output = ".pdf"
+                        },
+                        new
+                        {
+                            Input = ".vsdx",
+                            Output = ".pdfa"
+                        },
+                        new
+                        {
+                            Input = ".vsdx",
+                            Output = ".png"
+                        },
+                        new
+                        {
+                            Input = ".vssm",
+                            Output = ".bmp"
+                        },
+                        new
+                        {
+                            Input = ".vssm",
+                            Output = ".gif"
+                        },
+                        new
+                        {
+                            Input = ".vssm",
+                            Output = ".jpg"
+                        },
+                        new
+                        {
+                            Input = ".vssm",
+                            Output = ".pdf"
+                        },
+                        new
+                        {
+                            Input = ".vssm",
+                            Output = ".pdfa"
+                        },
+                        new
+                        {
+                            Input = ".vssm",
+                            Output = ".png"
+                        },
+                        new
+                        {
+                            Input = ".vssx",
+                            Output = ".bmp"
+                        },
+                        new
+                        {
+                            Input = ".vssx",
+                            Output = ".gif"
+                        },
+                        new
+                        {
+                            Input = ".vssx",
+                            Output = ".jpg"
+                        },
+                        new
+                        {
+                            Input = ".vssx",
+                            Output = ".pdf"
+                        },
+                        new
+                        {
+                            Input = ".vssx",
+                            Output = ".pdfa"
+                        },
+                        new
+                        {
+                            Input = ".vssx",
+                            Output = ".png"
+                        },
+                        new
+                        {
+                            Input = ".vstm",
+                            Output = ".bmp"
+                        },
+                        new
+                        {
+                            Input = ".vstm",
+                            Output = ".gif"
+                        },
+                        new
+                        {
+                            Input = ".vstm",
+                            Output = ".jpg"
+                        },
+                        new
+                        {
+                            Input = ".vstm",
+                            Output = ".pdf"
+                        },
+                        new
+                        {
+                            Input = ".vstm",
+                            Output = ".pdfa"
+                        },
+                        new
+                        {
+                            Input = ".vstm",
+                            Output = ".png"
+                        },
+                        new
+                        {
+                            Input = ".vstx",
+                            Output = ".bmp"
+                        },
+                        new
+                        {
+                            Input = ".vstx",
+                            Output = ".gif"
+                        },
+                        new
+                        {
+                            Input = ".vstx",
+                            Output = ".jpg"
+                        },
+                        new
+                        {
+                            Input = ".vstx",
+                            Output = ".pdf"
+                        },
+                        new
+                        {
+                            Input = ".vstx",
+                            Output = ".pdfa"
+                        },
+                        new
+                        {
+                            Input = ".vstx",
+                            Output = ".png"
                         },
                         new
                         {
@@ -6660,8 +7248,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("date");
 
                     b.Property<string>("DescriptionRaw")
-                        .HasMaxLength(20000)
-                        .HasColumnType("varchar")
+                        .HasColumnType("text")
                         .HasColumnName("description")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -6681,7 +7268,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("Page")
-                        .HasMaxLength(300)
+                        .HasMaxLength(4096)
                         .HasColumnType("varchar")
                         .HasColumnName("page")
                         .UseCollation("utf8_general_ci")
@@ -6769,7 +7356,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("Page")
-                        .HasMaxLength(300)
+                        .HasMaxLength(4096)
                         .HasColumnType("varchar")
                         .HasColumnName("page")
                         .UseCollation("utf8_general_ci")

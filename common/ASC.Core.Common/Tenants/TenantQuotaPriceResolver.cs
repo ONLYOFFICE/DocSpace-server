@@ -31,20 +31,23 @@ internal class TenantQuotaPriceResolver(TenantManager tenantManager, RegionHelpe
 {
     public decimal Resolve(DbQuota source, TenantQuota destination, decimal destMember, ResolutionContext context)
     {
-        var priceInfo = tenantManager.GetProductPriceInfo(source.ProductId);
+        var priceInfo = tenantManager.GetProductPriceInfo(source.ProductId, source.Wallet);
 
         if (priceInfo != null)
         {
             var currentRegion = regionHelper.GetCurrentRegionInfoAsync(new Dictionary<string, Dictionary<string, decimal>> { { source.ProductId, priceInfo } }).Result;
-            
+
             if (priceInfo.TryGetValue(currentRegion.ISOCurrencySymbol, out var resolve))
-            {            
+            {
                 destination.PriceCurrencySymbol = currentRegion.CurrencySymbol;
+                destination.PriceISOCurrencySymbol = currentRegion.ISOCurrencySymbol;
                 return resolve;
             }
         }
-        
-        destination.PriceCurrencySymbol = regionHelper.GetDefaultRegionInfo().CurrencySymbol;
+
+        var defaultRegion = regionHelper.GetDefaultRegionInfo();
+        destination.PriceCurrencySymbol = defaultRegion.CurrencySymbol;
+        destination.PriceISOCurrencySymbol = defaultRegion.ISOCurrencySymbol;
         return source.Price;
     }
 }

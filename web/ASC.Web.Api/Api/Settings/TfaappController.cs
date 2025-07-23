@@ -31,7 +31,6 @@ namespace ASC.Web.Api.Controllers.Settings;
 public class TfaappController(
     MessageService messageService,
     StudioNotifyService studioNotifyService,
-    ApiContext apiContext,
     UserManager userManager,
     AuthContext authContext,
     CookiesManager cookiesManager,
@@ -48,11 +47,10 @@ public class TfaappController(
     InstanceCrypto instanceCrypto,
     Signature signature,
     SecurityContext securityContext,
-    IHttpContextAccessor httpContextAccessor,
     TenantManager tenantManager,
     AuditEventsRepository auditEventsRepository,
     UserSocketManager userSocketManager)
-    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <summary>
     /// Returns the current two-factor authentication settings.
@@ -63,7 +61,7 @@ public class TfaappController(
     [Tags("Settings / TFA settings")]
     [SwaggerResponse(200, "TFA settings", typeof(IEnumerable<TfaSettingsDto>))]
     [HttpGet("tfaapp")]
-    public async Task<IEnumerable<TfaSettingsDto>> GetTfaSettingsAsync()
+    public async Task<IEnumerable<TfaSettingsDto>> GetTfaSettings()
     {
         var result = new List<TfaSettingsDto>();
 
@@ -115,9 +113,9 @@ public class TfaappController(
     [HttpPost("tfaapp/validate")]
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "TfaActivation,TfaAuth,Everyone")]
-    public async Task<bool> TfaValidateAuthCodeAsync(TfaValidateRequestsDto inDto)
+    public async Task<bool> TfaValidateAuthCode(TfaValidateRequestsDto inDto)
     {
-        await ApiContext.AuthByClaimAsync();
+        await securityContext.AuthByClaimAsync();
         var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
         securityContext.Logout();
 
@@ -139,7 +137,7 @@ public class TfaappController(
     [Tags("Settings / TFA settings")]
     [SwaggerResponse(200, "Confirmation email URL", typeof(string))]
     [HttpGet("tfaapp/confirm")]
-    public async Task<string> TfaConfirmUrlAsync()
+    public async Task<string> GetTfaConfirmUrl()
     {
         var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
@@ -177,10 +175,10 @@ public class TfaappController(
     [SwaggerResponse(200, "True if the operation is successful", typeof(bool))]
     [SwaggerResponse(405, "SMS settings are not available/TFA application settings are not available")]
     [HttpPut("tfaapp")]
-    public async Task<bool> TfaSettingsAsync(TfaRequestsDto inDto)
+    public async Task<bool> UpdateTfaSettings(TfaRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-
+        
         var result = false;
 
         MessageAction action;
@@ -271,16 +269,23 @@ public class TfaappController(
     /// <summary>
     /// Returns the confirmation email URL for updating TFA settings.
     /// </summary>
-    /// <short>Get confirmation email for updating TFA settings</short>
+    /// <short>Get a confirmation email for updating TFA settings</short>
     /// <path>api/2.0/settings/tfaappwithlink</path>
     [Tags("Settings / TFA settings")]
     [SwaggerResponse(200, "Confirmation email URL", typeof(string))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(405, "SMS settings are not available/TFA application settings are not available")]
     [HttpPut("tfaappwithlink")]
-    public async Task<string> TfaSettingsLink(TfaRequestsDto inDto)
+    public async Task<string> UpdateTfaSettingsLink(TfaRequestsDto inDto)
     {
-        if (await TfaSettingsAsync(inDto))
+        if (inDto.Id == tenantManager.GetCurrentTenant().OwnerId && inDto.Id != authContext.CurrentAccount.ID)
         {
-            return await TfaConfirmUrlAsync();
+            throw new Exception(Resource.ErrorAccessDenied);
+        }
+        
+        if (await UpdateTfaSettings(inDto))
+        {
+            return await GetTfaConfirmUrl();
         }
 
         return string.Empty;
@@ -296,9 +301,9 @@ public class TfaappController(
     [SwaggerResponse(405, "TFA application settings are not available")]
     [HttpGet("tfaapp/setup")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "TfaActivation")]
-    public async Task<SetupCode> TfaAppGenerateSetupCodeAsync()
+    public async Task<SetupCode> TfaAppGenerateSetupCode()
     {
-        await ApiContext.AuthByClaimAsync();
+        await securityContext.AuthByClaimAsync();
         var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
         if (!tfaAppAuthSettingsHelper.IsVisibleSettings ||
@@ -326,7 +331,7 @@ public class TfaappController(
     [SwaggerResponse(200, "List of TFA application codes", typeof(IEnumerable<object>))]
     [SwaggerResponse(405, "TFA application settings are not available")]
     [HttpGet("tfaappcodes")]
-    public async Task<IEnumerable<object>> TfaAppGetCodesAsync()
+    public async Task<IEnumerable<object>> GetTfaAppCodes()
     {
         var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
@@ -355,7 +360,7 @@ public class TfaappController(
     [SwaggerResponse(200, "New backup codes", typeof(IEnumerable<object>))]
     [SwaggerResponse(405, "TFA application settings are not available")]
     [HttpPut("tfaappnewcodes")]
-    public async Task<IEnumerable<object>> TfaAppRequestNewCodesAsync()
+    public async Task<IEnumerable<object>> UpdateTfaAppCodes()
     {
         var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
@@ -384,7 +389,7 @@ public class TfaappController(
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(405, "TFA application settings are not available")]
     [HttpPut("tfaappnewapp")]
-    public async Task<string> TfaAppNewAppAsync(TfaRequestsDto inDto)
+    public async Task<string> UnlinkTfaApp(TfaRequestsDto inDto)
     {
         var id = inDto?.Id ?? Guid.Empty;
         var isMe = id.Equals(Guid.Empty) || id.Equals(authContext.CurrentAccount.ID);
@@ -407,7 +412,7 @@ public class TfaappController(
             throw new Exception(Resource.TfaAppNotAvailable);
         }
 
-        if (await userManager.IsOutsiderAsync(user))
+        if (await userManager.IsOutsiderAsync(user) || user.Status == EmployeeStatus.Terminated)
         {
             throw new NotSupportedException("Not available.");
         }

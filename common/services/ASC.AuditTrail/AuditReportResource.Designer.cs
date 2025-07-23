@@ -214,6 +214,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Promotional banners visibility settings changed.
+        /// </summary>
+        public static string BannerSettingsChanged {
+            get {
+                return ResourceManager.GetString("BannerSettingsChanged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Browser.
         /// </summary>
         public static string BrowserCol {
@@ -300,6 +309,51 @@ namespace ASC.AuditTrail {
         public static string CreateClient {
             get {
                 return ResourceManager.GetString("CreateClient", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Customer operation performed.
+        /// </summary>
+        public static string CustomerOperationPerformed {
+            get {
+                return ResourceManager.GetString("CustomerOperationPerformed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Customer operations report downloaded.
+        /// </summary>
+        public static string CustomerOperationsReportDownloaded {
+            get {
+                return ResourceManager.GetString("CustomerOperationsReportDownloaded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Customer subscription updated: {0}.
+        /// </summary>
+        public static string CustomerSubscriptionUpdated {
+            get {
+                return ResourceManager.GetString("CustomerSubscriptionUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Customer wallet topped up: {0}.
+        /// </summary>
+        public static string CustomerWalletToppedUp {
+            get {
+                return ResourceManager.GetString("CustomerWalletToppedUp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Customer wallet top up settings updated.
+        /// </summary>
+        public static string CustomerWalletTopUpSettingsUpdated {
+            get {
+                return ResourceManager.GetString("CustomerWalletTopUpSettingsUpdated", resourceCulture);
             }
         }
         

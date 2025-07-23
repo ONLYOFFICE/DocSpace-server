@@ -45,9 +45,13 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
 
         switch (exception)
         {
-            case ItemNotFoundException:
+            case ItemNotFoundException e:
                 status = HttpStatusCode.NotFound;
-                message = "The record could not be found";
+                message = e.Message;
+                break;
+            case FileNotFoundException e:
+                status = HttpStatusCode.NotFound;
+                message = e.Message;
                 break;
             case ArgumentException e:
                 status = HttpStatusCode.BadRequest;
@@ -71,7 +75,7 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
                 status = HttpStatusCode.Forbidden;
                 break;
             case TenantQuotaException:
-            case BillingNotFoundException:
+            case BillingException:
                 status = HttpStatusCode.PaymentRequired;
                 break;
             case CustomHttpException httpException:

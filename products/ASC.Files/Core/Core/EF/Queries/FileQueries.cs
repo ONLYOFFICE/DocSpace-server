@@ -342,6 +342,12 @@ public partial class FilesDbContext
         return FileQueries.FilesFormRoleAsyncAsync(this, tenantId, formId, roleName, userId);
     }
 
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt,PreCompileQuery.DefaultInt,PreCompileQuery.DefaultInt,PreCompileQuery.DefaultInt])]
+    public Task<int> UpdateDbFilesCategoryForcesaveAsync(int tenantId,int fileId,int fileVersion,int category, ForcesaveType forcesave)
+    {
+        return FileQueries.UpdateDbFilesCategoryForcesaveAsync(this, tenantId, fileId, fileVersion, category, forcesave);
+    }
+
 }
 
 static file class FileQueries
@@ -1011,4 +1017,15 @@ static file class FileQueries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int formId, string roleName, Guid userId) =>
                 ctx.FilesFormRoleMapping.FirstOrDefault(r => r.TenantId == tenantId && r.FormId == formId && r.RoleName == roleName && r.UserId == userId));
+
+    public static readonly Func<FilesDbContext, int, int, int, int, ForcesaveType, Task<int>> UpdateDbFilesCategoryForcesaveAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int fileId, int fileVersion, int category, ForcesaveType forcesave) =>
+                ctx.Files
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => r.Id == fileId)
+                    .Where(r => r.Version == fileVersion)
+                    .ExecuteUpdate(f => f
+                        .SetProperty(p => p.Category, category)
+                        .SetProperty(p => p.Forcesave, forcesave)));
 }

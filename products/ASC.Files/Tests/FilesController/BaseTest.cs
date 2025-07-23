@@ -24,10 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Tests.Data;
-using ASC.Files.Tests.Models;
-using ASC.Web.Files.Services.WCFService.FileOperations;
-
 namespace ASC.Files.Tests.FilesController;
 
 [Collection("Test Collection")]
@@ -39,48 +35,84 @@ public class BaseTest(
     ) : IAsyncLifetime
 {
     protected readonly HttpClient _filesClient = filesFactory.HttpClient;
+    protected readonly FilesFoldersApi _filesFoldersApi = filesFactory.FilesFoldersApi;
+    protected readonly FilesFilesApi _filesFilesApi = filesFactory.FilesFilesApi;
+    protected readonly FilesOperationsApi _filesOperationsApi = filesFactory.FilesOperationsApi;
+    protected readonly RoomsApi _roomsApi = filesFactory.RoomsApi;
+    protected readonly FilesSettingsApi _filesSettingsApi = filesFactory.FilesSettingsApi;
     private readonly Func<Task> _resetDatabase = filesFactory.ResetDatabaseAsync;
-    protected readonly FilesApiFactory _filesFactory = filesFactory;
 
     public async ValueTask InitializeAsync()
     {
-        await Initializer.InitializeAsync(_filesFactory, apiFactory, peopleFactory, filesServiceProgram);
+        await Initializer.InitializeAsync(filesFactory, apiFactory, peopleFactory, filesServiceProgram);
     }
 
     public async ValueTask DisposeAsync()
     {
         await _resetDatabase();
     }
+
+    protected async Task<FileDtoInteger> GetFile(int fileId)
+    {
+        return (await _filesFilesApi.GetFileInfoAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+    }
     
-    protected async Task<FileDto<int>> CreateFile(string? fileName, FolderType folderType, User user)
+    protected async Task<int> GetFolderIdAsync(FolderType folderType, User user)
     {
         await _filesClient.Authenticate(user);
         
-        var response = await _filesClient.GetAsync("@root", TestContext.Current.CancellationToken);
-        var rootFolder = await HttpClientHelper.ReadFromJson<IEnumerable<FolderContentDto>>(response);
-        var folderId = rootFolder.FirstOrDefault(r => r.Current.RootFolderType == folderType)!.Current.Id;
+        var rootFolder = (await _filesFoldersApi.GetRootFoldersAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var folderId = rootFolder.FirstOrDefault(r => r.Current.RootFolderType.HasValue && r.Current.RootFolderType.Value == folderType)!.Current.Id;
+        
+        return folderId;
+    }
+    
+    protected async Task<int> GetUserFolderIdAsync(User user)
+    {
+        return await GetFolderIdAsync(FolderType.USER, user);
+    }
+    
+    protected async Task<FileDtoInteger> CreateFile(string fileName, FolderType folderType, User user)
+    {
+        await _filesClient.Authenticate(user);
+        
+        var folderId = await GetFolderIdAsync(folderType, user);
         
         return await CreateFile(fileName, folderId);
     }
     
-    protected async Task<FileDto<int>> CreateFile(string? fileName, int folderId)
+    protected async Task<FileDtoInteger> CreateFile(string fileName, int folderId)
     {
-        var file = new CreateFile<JsonElement> { Title = fileName };
-        
-        var response = await _filesClient.PostAsJsonAsync($"{folderId}/file", file, _filesFactory.JsonRequestSerializerOptions);
-        var createdFile = await HttpClientHelper.ReadFromJson<FileDto<int>>(response);
-        
-        return createdFile;
+        return (await _filesFilesApi.CreateFileAsync(folderId, new CreateFileJsonElement(fileName))).Response;
     }
     
-    protected async Task<List<FileOperationResult>?> WaitLongOperation()
+    protected async Task<FolderDtoInteger> CreateFolder(string folderName, FolderType folderType, User user)
     {
-        List<FileOperationResult>? statuses;
+        await _filesClient.Authenticate(user);
+        
+        var folderId = await GetFolderIdAsync(folderType, user);
+        
+        return await CreateFolder(folderName, folderId);
+    }
+    
+    protected async Task<FolderDtoInteger> CreateFolder(string folderName, int folderId)
+    {
+        return (await _filesFoldersApi.CreateFolderAsync(folderId, new CreateFolder(folderName), TestContext.Current.CancellationToken)).Response;
+    }
+    
+    protected async Task<FolderDtoInteger> CreateVirtualRoom(string roomTitle, User user)
+    {
+        await _filesClient.Authenticate(user);
+        
+        return (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto(roomTitle, indexing: true, roomType: RoomType.VirtualDataRoom), TestContext.Current.CancellationToken)).Response;
+    }
+    protected async Task<List<FileOperationDto>?> WaitLongOperation()
+    {
+        List<FileOperationDto>? statuses;
 
         while (true)
         {
-            var response = await _filesClient.GetAsync("fileops", TestContext.Current.CancellationToken);
-            statuses = await HttpClientHelper.ReadFromJson<List<FileOperationResult>>(response);
+            statuses = (await _filesOperationsApi.GetOperationStatusesAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
 
             if (statuses.TrueForAll(r => r.Finished) || TestContext.Current.CancellationToken.IsCancellationRequested)
             {

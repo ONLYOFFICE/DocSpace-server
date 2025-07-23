@@ -25,9 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Common.Mapping;
-using ASC.Core.Common.EF.Model;
-
-using AutoMapper;
 
 namespace ASC.People.ApiModels.ResponseDto;
 

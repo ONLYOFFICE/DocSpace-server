@@ -1081,4 +1081,7 @@
   <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
     <value>O URL do webhook não está disponível. O pedido HEAD não está a responder ao estado 200 http.</value>
   </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
+    <value>Armazenamento utilizado:</value>
+  </data>
 </root>

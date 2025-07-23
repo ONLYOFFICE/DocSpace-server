@@ -401,6 +401,12 @@ public class GetMemberByEmailRequestDto
     [EmailAddress]
     [StringLength(255)]
     public string Email { get; set; }
+
+    /// <summary>
+    /// Culture
+    /// </summary>
+    [FromQuery(Name = "culture")]
+    public string Culture { get; set; }
 }
 
 /// <summary>
@@ -413,6 +419,18 @@ public class GetMemberByQueryRequestDto
     /// </summary>
     [FromRoute(Name = "query")]
     public required string Query { get; set; }
+
+    /// <summary>
+    /// Specifies a filter criteria for the user search query.
+    /// </summary>
+    [FromQuery(Name = "filterBy")]
+    public string FilterBy { get; set; }
+
+    /// <summary>
+    /// The value used for filtering users, allowing additional constraints for the query.
+    /// </summary>
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
 }
 
 /// <summary>

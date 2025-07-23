@@ -512,4 +512,10 @@ Sicherheit durch garantierte 100%ige Kompatibilität mit docx, xslx und pptx For
   <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
     <value>Ausfüllen beginnen</value>
   </data>
+  <data name="RoleEnum_Guest" xml:space="preserve">
+    <value>Gast</value>
+  </data>
+  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
+    <value>Raumadministrator</value>
+  </data>
 </root>

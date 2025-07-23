@@ -63,8 +63,7 @@ public class ScopesAuthorizationHandler : AuthorizationHandler<ScopesRequirement
                                                              .Select(c => c.Value)
                                                              .ToList();
 
-        if (userScopes.Contains(AuthConstants.Claim_ScopeRootWrite.Value) ||
-            expectedRequirements.All(x => userScopes.Contains(x)))
+        if (expectedRequirements.Any(x => userScopes.Contains(x)))
         {
             context.Succeed(requirement);
         } 

@@ -93,6 +93,7 @@ public enum FolderType
 
     [SwaggerEnum(Description = "Form filling folder done")]
     FormFillingFolderDone = 27,
+    
     [SwaggerEnum(Description = "Form filling folder in progress")]
     FormFillingFolderInProgress = 28,
 

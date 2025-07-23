@@ -60,7 +60,7 @@ public abstract class PeopleControllerBase(
 
         if (user == null || user.Id == Constants.LostUser.Id)
         {
-            throw new ItemNotFoundException("user not found");
+            throw new ItemNotFoundException(Resource.ErrorUserNotFound);
         }
 
         return user;

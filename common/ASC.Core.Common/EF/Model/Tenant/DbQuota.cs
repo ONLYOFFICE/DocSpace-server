@@ -40,7 +40,7 @@ public class DbQuota : BaseEntity, IMapFrom<TenantQuota>
     [MaxLength(128)]
     public string ProductId { get; set; }
     public bool Visible { get; set; }
-
+    public bool Wallet { get; set; }
     public override object[] GetKeys()
     {
         return [TenantId];
@@ -157,9 +157,20 @@ public static class DbQuotaExtension
                     Name = "adminyear",
                     Description = "since 10.02.2025",
                     Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,year",
-                    Price = 200,
+                    Price = 220,
                     ProductId = "1009",
                     Visible = true
+                },
+                new DbQuota
+                {
+                    TenantId = -11,
+                    Name = "storage",
+                    Description = null,
+                    Features = "total_size:1073741824",
+                    Price = 0.14m,
+                    ProductId = "1011",
+                    Visible = true,
+                    Wallet = true
                 }
                 );
         return modelBuilder;
@@ -204,10 +215,15 @@ public static class DbQuotaExtension
             entity.Property(e => e.Price)
                 .HasColumnName("price")
                 .HasDefaultValueSql("'0.00'")
-                .HasColumnType("decimal(10,2)");
+                .HasColumnType("decimal(10,4)");
 
             entity.Property(e => e.Visible)
                 .HasColumnName("visible")
+                .HasColumnType("tinyint(1)")
+                .HasDefaultValueSql("'0'");
+
+            entity.Property(e => e.Wallet)
+                .HasColumnName("wallet")
                 .HasColumnType("tinyint(1)")
                 .HasDefaultValueSql("'0'");
         });
@@ -243,10 +259,15 @@ public static class DbQuotaExtension
             entity.Property(e => e.Price)
                 .HasColumnName("price")
                 .HasDefaultValue(0.00m)
-                .HasColumnType("decimal(10,2)");
+                .HasColumnType("decimal(10,4)");
 
             entity.Property(e => e.Visible)
                 .HasColumnName("visible")
+                .HasColumnType("boolean")
+                .HasDefaultValue(false);
+
+            entity.Property(e => e.Wallet)
+                .HasColumnName("wallet")
                 .HasColumnType("boolean")
                 .HasDefaultValue(false);
         });

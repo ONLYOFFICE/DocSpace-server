@@ -324,6 +324,24 @@ public abstract class BaseStartup
                 return RateLimitPartition.Get(partitionKey, LimitterFactory);
             });
 
+            options.AddPolicy(RateLimiterPolicy.PaymentsApi, httpContext =>
+            {
+                var userId = httpContext?.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value ??
+                             httpContext?.Connection.RemoteIpAddress.ToInvariantString();
+
+                var permitLimit = 10;
+                var path = httpContext?.Request.Path.ToString();
+                var partitionKey = $"{RateLimiterPolicy.PaymentsApi}_{userId}|{path}";
+                var remoteIpAddress = httpContext?.Connection.RemoteIpAddress;
+
+                if (EnableNoLimiter(remoteIpAddress))
+                {
+                    return RateLimitPartition.GetNoLimiter("no_limiter");
+                }
+
+                return RedisRateLimitPartition.GetSlidingWindowRateLimiter(partitionKey, _ => new RedisSlidingWindowRateLimiterOptions { PermitLimit = permitLimit, Window = TimeSpan.FromMinutes(1), ConnectionMultiplexerFactory = () => connectionMultiplexer });
+            });
+
             options.OnRejected = (context, ct) => RateLimitMetadata.OnRejected(context.HttpContext, context.Lease, ct);
         });
 
@@ -351,17 +369,10 @@ public abstract class BaseStartup
         }
 
         DIHelper.Configure(services);
+        
+        services.ConfigureOptions<ConfigureJsonOptions>();
 
-        Action<JsonOptions> jsonOptions = options =>
-        {
-            options.JsonSerializerOptions.WriteIndented = false;
-            options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-            options.JsonSerializerOptions.NumberHandling = JsonNumberHandling.AllowReadingFromString;
-        };
-
-        services.AddControllers().AddJsonOptions(jsonOptions);
-
-        services.AddSingleton(jsonOptions);
+        services.AddControllers();
         
         DIHelper.Scan();
 
@@ -396,6 +407,7 @@ public abstract class BaseStartup
 
 
         services.AddHybridCache(connectionMultiplexer)
+            .AddMemoryCache(connectionMultiplexer)
             .AddEventBus(_configuration)
             .AddDistributedTaskQueue()
             .AddCacheNotify(_configuration)
@@ -465,7 +477,8 @@ public abstract class BaseStartup
                         {
                             return JwtBearerDefaults.AuthenticationScheme;
                         }
-                        else if (token.StartsWith("sk-"))
+
+                        if (token.StartsWith("sk-"))
                         {
                             return ApiKeyBearerDefaults.AuthenticationScheme;
                         }
@@ -481,6 +494,7 @@ public abstract class BaseStartup
         services.AddAutoMapper(GetAutoMapperProfileAssemblies());
 
         services.AddBillingHttpClient();
+        services.AddAccountingHttpClient();
 
         services.AddSingleton(Channel.CreateUnbounded<NotifyRequest>());
         services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Reader);

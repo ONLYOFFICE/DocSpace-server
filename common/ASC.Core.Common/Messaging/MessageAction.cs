@@ -803,10 +803,24 @@ public enum MessageAction
 
     [SwaggerEnum("Start storage decryption")]
     StartStorageDecryption = 5053,
-    
- 
 
-  
+    [SwaggerEnum("Customer wallet topped up")]
+    CustomerWalletToppedUp = 6061,
+
+    [SwaggerEnum("Customer operation performed")]
+    CustomerOperationPerformed = 6062,
+
+    [SwaggerEnum("Customer operations report downloaded")]
+    CustomerOperationsReportDownloaded = 6063,
+
+    [SwaggerEnum("Customer wallet top up settings updated")]
+    CustomerWalletTopUpSettingsUpdated = 6064,
+
+    [SwaggerEnum("Customer subscription updated")]
+    CustomerSubscriptionUpdated = 6065,
+
+    [SwaggerEnum("Promotional banners visibility settings changed")]
+    BannerSettingsChanged = 6066,
 
     #endregion
 

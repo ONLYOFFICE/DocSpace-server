@@ -165,7 +165,9 @@ V místnosti "$RoomTitle":"$RoomURL" je vyplněn nový formulář "$DocumentTitl
  
 Odesílatel formuláře: "$FromUserName":"$FromUserLink"
  
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_FormSubmitted" xml:space="preserve">
     <value>h1. Vyplnili jste formulář $Message
@@ -174,7 +176,9 @@ Vyplnili jste formulář "$DocumentTitle":"$DocumentURL" v místnosti "$RoomTitl
  
 Manažer: "$ToUserName":"$ToUserLink"
  
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_FormStartedFilling" xml:space="preserve">
     <value>

@@ -75,6 +75,12 @@ public class Tariff
     [ProtoMember(7)]
     public List<Quota> Quotas { get; set; }
 
+    /// <summary>
+    /// The list of overdue tariff quotas.
+    /// </summary>
+    [ProtoMember(7)]
+    public List<Quota> OverdueQuotas { get; set; }
+
     public override int GetHashCode()
     {
         return DueDate.GetHashCode();
@@ -113,9 +119,38 @@ public class Quota : IEquatable<Quota>
     [ProtoMember(2)]
     public int Quantity { get; set; }
 
+    /// <summary>
+    /// The quota applies to the wallet or not
+    /// </summary>
+    [ProtoMember(3)]
+    public bool Wallet { get; set; }
+
+    /// <summary>
+    /// The quota due date.
+    /// </summary>
+    [ProtoMember(4)]
+    public DateTime? DueDate { get; set; }
+
+    /// <summary>
+    /// The quota next quantity.
+    /// </summary>
+    [ProtoMember(5)]
+    public int? NextQuantity { get; set; }
+
+    /// <summary>
+    /// The quota state.
+    /// </summary>
+    [ProtoMember(6)]
+    public QuotaState? State
+    {
+        get
+        {
+            return DueDate.HasValue ? DueDate.Value < DateTime.UtcNow ? QuotaState.Overdue : QuotaState.Active : null;
+        }
+    }
+
     public Quota()
     {
-        
     }
 
     public Quota(int id, int quantity)
@@ -124,8 +159,29 @@ public class Quota : IEquatable<Quota>
         Quantity = quantity;
     }
 
+    public Quota(int id, int quantity, bool wallet, DateTime? dueDate, int? nextQuantity)
+    {
+        Id = id;
+        Quantity = quantity;
+        Wallet = wallet;
+        DueDate = dueDate;
+        NextQuantity = nextQuantity;
+    }
+
     public bool Equals(Quota other)
     {
-        return other != null && other.Id == Id && other.Quantity == Quantity;
+        return other != null && other.Id == Id && other.Quantity == Quantity && other.Wallet == Wallet && other.DueDate == DueDate && other.NextQuantity == NextQuantity;
     }
+}
+
+/// <summary>
+/// The quota state.
+/// </summary>
+public enum QuotaState
+{
+    [SwaggerEnum("Active")]
+    Active,
+
+    [SwaggerEnum("Overdue")]
+    Overdue
 }

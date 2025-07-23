@@ -52,3 +52,48 @@ public class QuantityRequestDto
     /// </summary>
     public Dictionary<string, int> Quantity { get; set; }
 }
+
+/// <summary>
+/// The request parameters for the wallet payment quantity specifications.
+/// </summary>
+public class WalletQuantityRequestDto
+{
+    /// <summary>
+    /// The mapping of item identifiers with their respective quantities in the payment.
+    /// </summary>
+    public Dictionary<string, int?> Quantity { get; set; }
+
+    /// <summary>
+    /// The type of action performed on a quantity of product.
+    /// </summary>
+    public ProductQuantityType ProductQuantityType { get; set; }
+}
+
+/// <summary>
+/// Chechout setup URL request parameters
+/// </summary>
+public class CheckoutSetupUrlRequestsDto
+{
+    /// <summary>
+    /// Back URL
+    /// </summary>
+    [FromQuery]
+    public string BackUrl { get; set; }
+}
+
+/// <summary>
+/// Put money on deposit request parameters
+/// </summary>
+public class TopUpDepositRequestDto
+{
+    /// <summary>
+    /// Amount
+    /// </summary>
+    [Range(1, 999999)]
+    public int Amount { get; set; }
+
+    /// <summary>
+    /// The three-character ISO 4217 currency symbol
+    /// </summary>
+    public string Currency { get; set; }
+}

@@ -33,7 +33,6 @@ public class SecurityController(
     TenantExtra tenantExtra,
     CoreBaseSettings coreBaseSettings,
     MessageService messageService,
-    ApiContext apiContext,
     UserManager userManager,
     AuthContext authContext,
     WebItemSecurity webItemSecurity,
@@ -45,10 +44,9 @@ public class SecurityController(
     EmployeeDtoHelper employeeWrapperHelper,
     IFusionCache fusionCache,
     IMapper mapper,
-    IHttpContextAccessor httpContextAccessor,
     PasswordSettingsConverter passwordSettingsConverter,
     PasswordSettingsManager passwordSettingsManager)
-    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <summary>
     /// Returns the security settings for the modules specified in the request.
@@ -68,7 +66,7 @@ public class SecurityController(
             inDto.Ids = WebItemManager.GetItemsAll().Select(i => i.ID.ToString());
         }
 
-        var subItemList = WebItemManager.GetItemsAll().Where(item => item.IsSubItem()).Select(i => i.ID.ToString());
+        var subItemList = WebItemManager.GetItemsAll().Where(item => item.IsSubItem()).Select(i => i.ID.ToString()).ToList();
 
         foreach (var r in inDto.Ids)
         {
@@ -107,7 +105,7 @@ public class SecurityController(
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "Boolean value: true - module is enabled, false - module is disabled", typeof(bool))]
     [HttpGet("{id:guid}")]
-    public async Task<bool> GetWebItemSecurityInfoAsync(IdRequestDto<Guid> inDto)
+    public async Task<bool> GetWebItemSecurityInfo(IdRequestDto<Guid> inDto)
     {
         var module = WebItemManager[inDto.Id];
 
@@ -126,11 +124,11 @@ public class SecurityController(
     [HttpGet("modules")]
     public object GetEnabledModules()
     {
-        var EnabledModules = webItemManagerSecurity.GetItems(WebZoneType.All)
+        var enabledModules = webItemManagerSecurity.GetItems(WebZoneType.All)
                                     .Where(item => !item.IsSubItem() && item.Visible)
             .Select(item => new { id = item.ProductClassName.HtmlEncode(), title = item.Name.HtmlEncode() });
 
-        return EnabledModules;
+        return enabledModules;
     }
 
     /// <summary>
@@ -145,7 +143,7 @@ public class SecurityController(
     [HttpGet("password")]
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Everyone")]
-    public async Task<PasswordSettingsDto> GetPasswordSettingsAsync()
+    public async Task<PasswordSettingsDto> GetPasswordSettings()
     {        
         var settings = await settingsManager.LoadAsync<PasswordSettings>(HttpContext.GetIfModifiedSince());
         
@@ -163,7 +161,7 @@ public class SecurityController(
     [SwaggerResponse(200, "Password settings", typeof(PasswordSettingsDto))]
     [SwaggerResponse(400, "MinLength")]
     [HttpPut("password")]
-    public async Task<PasswordSettingsDto> UpdatePasswordSettingsAsync(PasswordSettingsRequestsDto inDto)
+    public async Task<PasswordSettingsDto> UpdatePasswordSettings(PasswordSettingsRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -307,6 +305,7 @@ public class SecurityController(
     [HttpGet("administrator/{productid:guid}")]
     public async IAsyncEnumerable<EmployeeDto> GetProductAdministrators(ProductIdRequestDto inDto)
     {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var admins = await webItemSecurity.GetProductAdministratorsAsync(inDto.ProductId);
 
         foreach (var a in admins)
@@ -325,8 +324,9 @@ public class SecurityController(
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "Object with the user security information: product ID, user ID, administrator or not", typeof(ProductAdministratorDto))]
     [HttpGet("administrator")]
-    public async Task<ProductAdministratorDto> IsProductAdministratorAsync(UserProductIdsRequestDto inDto)
-    {
+    public async Task<ProductAdministratorDto> GetIsProductAdministrator(UserProductIdsRequestDto inDto)
+    {        
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var result = await webItemSecurity.IsProductAdministratorAsync(inDto.ProductId, inDto.UserId);
         return new ProductAdministratorDto { ProductId = inDto.ProductId, UserId = inDto.UserId, Administrator = result };
     }
@@ -341,6 +341,7 @@ public class SecurityController(
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "Object with the user security information: product ID, user ID, administrator or not", typeof(ProductAdministratorDto))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(403, "Only portal owner can set user as administrator")]
     [HttpPut("administrator")]
     public async Task<ProductAdministratorDto> SetProductAdministrator(SecurityRequestsDto inDto)
     {
@@ -387,7 +388,7 @@ public class SecurityController(
     [Tags("Settings / Login settings")]
     [SwaggerResponse(200, "Updated login settings", typeof(LoginSettingsDto))]
     [HttpPut("loginSettings")]
-    public async Task<LoginSettingsDto> UpdateLoginSettingsAsync(LoginSettingsRequestDto inDto)
+    public async Task<LoginSettingsDto> UpdateLoginSettings(LoginSettingsRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -413,7 +414,7 @@ public class SecurityController(
     [Tags("Settings / Login settings")]
     [SwaggerResponse(200, "Login settings", typeof(LoginSettingsDto))]
     [HttpGet("loginSettings")]
-    public async Task<LoginSettingsDto> GetLoginSettingsAsync()
+    public async Task<LoginSettingsDto> GetLoginSettings()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -432,7 +433,7 @@ public class SecurityController(
     [Tags("Settings / Login settings")]
     [SwaggerResponse(200, "Login settings", typeof(LoginSettingsDto))]
     [HttpDelete("loginSettings")]
-    public async Task<LoginSettingsDto> SetDefaultLoginSettingsAsync()
+    public async Task<LoginSettingsDto> SetDefaultLoginSettings()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 

@@ -44,14 +44,14 @@ public static class OpenApiExtension
             c.ResolveConflictingActions(a => a.First());
             c.CustomOperationIds(r =>
             {
-                var actionName = r.ActionDescriptor.RouteValues["action"];
-
-                return (char.ToLower(actionName[0]) + actionName.Substring(1));
+                return r.ActionDescriptor.RouteValues.TryGetValue("action", out var actionName)
+                    ? char.ToLower(actionName[0]) + actionName.Substring(1)
+                    : string.Empty;
             });
 
             c.CustomSchemaIds(CustomSchemaId);
 
-            c.SwaggerDoc("common", new OpenApiInfo { Title = "Api", Version = "3.1.0" });
+            c.SwaggerDoc("common", new OpenApiInfo { Title = "Api", Version = "3.2.0" });
             c.SchemaFilter<SwaggerSchemaCustomFilter>();
             c.DocumentFilter<LowercaseDocumentFilter>();
             c.DocumentFilter<HideRouteDocumentFilter>("/api/2.0/capabilities.json");
@@ -308,17 +308,17 @@ public static class OpenApiExtension
             //}
         }
 
-        private void ApplyAuthorizeAttribute(StringBuilder authorizationDescription, IEnumerable<string> policySelector, IEnumerable<string> schemaSelector, IEnumerable<string> rolesSelector)
+        private void ApplyAuthorizeAttribute(StringBuilder authorizationDescription, List<string> policySelector, List<string> schemaSelector, List<string> rolesSelector)
         {
-            if (policySelector.Any())
+            if (policySelector.Count != 0)
             {
                 authorizationDescription.Append($" Policy: {string.Join(", ", policySelector)};");
             }
-            if (schemaSelector.Any())
+            if (schemaSelector.Count != 0)
             {
                 authorizationDescription.Append($" Schema: {string.Join(", ", schemaSelector)};");
             }
-            if (rolesSelector.Any())
+            if (rolesSelector.Count != 0)
             {
                 authorizationDescription.Append($" Roles: {string.Join(", ", rolesSelector)};");
             }

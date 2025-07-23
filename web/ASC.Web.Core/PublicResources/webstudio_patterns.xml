@@ -724,4 +724,16 @@ $activity.Key
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_user_role_changed|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
+  <!-- top up wallet error -->
+  <pattern id="top_up_wallet_error">
+    <subject resource="|subject_top_up_wallet_error|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_top_up_wallet_error|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+
+  <!-- renew subscription rror -->
+  <pattern id="renew_subscription_error">
+    <subject resource="|subject_renew_subscription_error|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_renew_subscription_error|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+
 </patterns>

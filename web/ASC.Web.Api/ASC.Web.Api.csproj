@@ -40,6 +40,7 @@
       <EmbeddedResource Include="img\room.svg" />
       <EmbeddedResource Include="img\sso.svg" />
       <EmbeddedResource Include="img\thirdparty.svg" />
+      <EmbeddedResource Include="img\total_size_wallet.svg" />
       <EmbeddedResource Include="img\total_size.svg" />
       <EmbeddedResource Include="img\users.svg" />
       <EmbeddedResource Include="img\customization.svg" />
@@ -112,6 +113,9 @@
       <DependentUpon>AuditResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="Core\AuditResource.sl.resx">
+      <DependentUpon>AuditResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Core\AuditResource.sq-AL.resx">
       <DependentUpon>AuditResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="Core\AuditResource.sr-Cyrl-RS.resx">

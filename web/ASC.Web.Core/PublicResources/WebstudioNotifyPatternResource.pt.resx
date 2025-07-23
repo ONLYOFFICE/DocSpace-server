@@ -451,17 +451,6 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Olá, $UserName!
-
-Por favor, tenha em consideração que a sua subscrição do ${LetterLogoText} DocSpace expira dentro de três dias. Depois disso, será atviado o período de tolerância de $PaymentDelay dias.
-
-Recomendamos que pague a sua subscrição Business agora e continue a utilizar todos os benefícios do seu ${LetterLogoText} DocSpace.
-
-$OrangeButton
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Olá, $UserName!
 
@@ -810,9 +799,6 @@ $TrulyYours</value>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>O Período de tolerância para o seu ${LetterLogoText} DocSpace foi ativado</value>
   </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>A sua subscrição para o ${LetterLogoText} DocSpace está prestes a expirar</value>
-  </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>O Período de tolerância para o seu ${LetterLogoText} DocSpace expirou</value>
   </data>
@@ -923,7 +909,9 @@ A configuração da app autenticadora que utiliza para entrar no portal ${Letter
 
 Por favor, clique no link abaixo para ir para a página de login do portal e configure a aplicação autenticadora:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.Alteração do proprietário do portal portal "${__VirtualRootPath}":"${__VirtualRootPath}"

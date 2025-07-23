@@ -70,23 +70,31 @@ public class OrdersRequestDto<T>
     /// <summary>
     /// The list of items with their ordering information.
     /// </summary>
-    public IEnumerable<OrdersItemRequestDto<T>> Items { get; set; }
+    public List<OrdersItemRequestDto<T>> Items { get; set; }
 }
 
 /// <summary>
 /// The JSON converter for handling order values in different formats.
 /// </summary>
-public class OrderRequestDtoConverter : System.Text.Json.Serialization.JsonConverter<int>
+public class OrderRequestDtoConverter : JsonConverter<int>
 {
     public override int Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        var orderString = reader.GetString();
-        if (!string.IsNullOrEmpty(orderString))
+        if (reader.TokenType == JsonTokenType.Number && reader.TryGetInt32(out var order))
         {
-            var path = orderString.Split('.');
-            if (int.TryParse(path.Last(), out var pathOrder))
+            return order;
+        }
+
+        if (reader.TokenType == JsonTokenType.String)
+        {
+            var orderString = reader.GetString();
+            if (!string.IsNullOrEmpty(orderString))
             {
-                return pathOrder;
+                var path = orderString.Split('.');
+                if (int.TryParse(path.Last(), out var pathOrder))
+                {
+                    return pathOrder;
+                }
             }
         }
 

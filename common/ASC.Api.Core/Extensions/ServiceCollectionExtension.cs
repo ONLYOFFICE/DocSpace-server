@@ -103,6 +103,43 @@ public static class ServiceCollectionExtension
         return services;
     }
 
+    public static IServiceCollection AddMemoryCache(this IServiceCollection services, IConnectionMultiplexer connection)
+    {
+        var cacheBuilder = services
+            .AddFusionCache("memory")
+            .WithSystemTextJsonSerializer(new JsonSerializerOptions
+            {
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+                WriteIndented = true
+            })
+            .WithOptions(new FusionCacheOptions
+            {
+                CacheName = "memory",
+                DistributedCacheKeyModifierMode = CacheKeyModifierMode.None,
+                DefaultEntryOptions = new FusionCacheEntryOptions
+                {
+                    Duration = TimeSpan.MaxValue,
+                    SkipDistributedCacheRead = true,
+                    SkipDistributedCacheWrite = true
+                }
+            })
+            .WithMemoryCache(new MemoryCache(new MemoryCacheOptions()))
+            .WithRegisteredLogger();
+
+        if (connection != null)
+        {        
+            cacheBuilder.WithBackplane(new RedisBackplane(new RedisBackplaneOptions { ConnectionMultiplexerFactory = () => Task.FromResult(connection) }));
+        }
+        else
+        {            
+            services.AddDistributedMemoryCache();
+        }
+        
+        cacheBuilder.WithRegisteredDistributedCache(false);
+        
+        return services;
+    }
+
     public static IServiceCollection AddDistributedLock(this IServiceCollection services, IConfiguration configuration)
     {
         var redisConfiguration = configuration.GetSection("Redis").Get<RedisConfiguration>();

@@ -58,6 +58,11 @@ internal class BoxDaoBase(
         return item.Id;
     }
 
+    public bool IsFile(BoxItem item)
+    {
+        return item is BoxFile;
+    }
+
     public string MakeThirdId(object entryId)
     {
         var id = Convert.ToString(entryId, CultureInfo.InvariantCulture);
@@ -260,7 +265,7 @@ internal class BoxDaoBase(
     public async Task<List<BoxItem>> GetItemsAsync(string parentId, bool? folder = null)
     {
         var boxFolderId = MakeThirdId(parentId);
-        var items = await _providerInfo.GetItemsAsync(boxFolderId);
+        var items = await _providerInfo.GetItemsAsync(boxFolderId, GetId, IsFile);
 
         if (!folder.HasValue)
         {

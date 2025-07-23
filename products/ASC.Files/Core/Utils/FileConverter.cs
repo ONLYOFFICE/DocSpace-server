@@ -132,7 +132,7 @@ public class FileConverterQueue(IFusionCache hybridCache, IDistributedLockProvid
         return queueTasks;
     }
 
-    public async Task SetAllTask<T>(IEnumerable<FileConverterOperationResult> queueTasks)
+    public async Task SetAllTask<T>(List<FileConverterOperationResult> queueTasks)
     {
         var cacheKey = GetCacheKey<T>();
         await SaveToCacheAsync(queueTasks, cacheKey);
@@ -206,9 +206,9 @@ public class FileConverterQueue(IFusionCache hybridCache, IDistributedLockProvid
         return listTasks;
     }
 
-    private async Task SaveToCacheAsync(IEnumerable<FileConverterOperationResult> queueTasks, string cacheKey)
+    private async Task SaveToCacheAsync(List<FileConverterOperationResult> queueTasks, string cacheKey)
     {
-        if (!queueTasks.Any())
+        if (queueTasks.Count == 0)
         {
             await hybridCache.RemoveAsync(cacheKey);
 
@@ -370,7 +370,7 @@ public class FileConverter(
 
         var fileUri = pathProvider.GetFileStreamUrl(file);
         var fileExtension = file.ConvertedExtension;
-        var toExtension = fileUtility.GetInternalExtension(file.Title);
+        var toExtension = fileUtility.GetInternalConvertExtension(file.Title);
         if (!string.IsNullOrEmpty(outputType)  && await EnableConvertAsync(file, outputType, false))
         {
             toExtension = outputType;

@@ -159,7 +159,9 @@ Telpā "$RoomTitle":"$RoomURL" ir aizpildīta jauna veidlapa "$DocumentTitle":"$
 
 Veidlapas iesniedzējs: "$FromUserName":"$FromUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_FormSubmitted" xml:space="preserve">
     <value>h1. Jūs aizpildījāt veidlapu $Message
@@ -168,7 +170,9 @@ Jūs aizpildījāt veidlapu "$DocumentTitle":"$DocumentURL" telpā "$RoomTitle":
 
 Pārvaldnieks: "$ToUserName":"$ToUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
     <value>DocSpace paziņojums. Veidlapa ir aizpildīta</value>

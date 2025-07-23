@@ -83,7 +83,7 @@ public class UnhandledExceptionMiddleware(RequestDelegate next)
                 status = HttpStatusCode.Forbidden;
                 break;
             case TenantQuotaException:
-            case BillingNotFoundException:
+            case BillingException:
                 status = HttpStatusCode.PaymentRequired;
                 break;
         }
