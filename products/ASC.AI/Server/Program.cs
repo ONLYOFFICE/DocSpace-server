@@ -62,6 +62,11 @@ try
 
     builder.Host.ConfigureDefault();
     
+    builder.WebHost.ConfigureDefaultKestrel((_, serverOptions) =>
+    {
+        serverOptions.Limits.MinResponseDataRate = null;
+    });
+    
     var startup = new Startup(builder.Configuration);
 
     await startup.ConfigureServices(builder);
