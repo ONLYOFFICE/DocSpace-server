@@ -198,7 +198,7 @@ public class BaseTest(
     {
         await _filesClient.Authenticate(Initializer.Owner);
         
-        var file = await CreateFile("file_update_link.docx", FolderType.USER, Initializer.Owner);
+        var file = await CreateFileInMy("file_update_link.docx", Initializer.Owner);
         
         // Create initial external link
         var initialLinkParams = new FileLinkRequest(

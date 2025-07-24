@@ -804,4 +804,37 @@ public class ShareInheritanceTest(
         updatedFileLink.Should().NotBeNull();
         updatedFileSharedTo.Internal.Should().BeTrue();
     }
+
+    [Fact]
+    public async Task CheckExternalRightsFile_FillingFormRoom_ReturnFormFilling()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var fillingForm = await CreateFillingFormsRoom("VDR Room Test");
+        var file = await CreateFile("File in VDR Room.pdf", fillingForm.Id);
+        
+        // Get the primary external link
+        await _filesApi.GetFilePrimaryExternalLinkAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken);
+        
+        var fileInfo = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        
+        fileInfo.AvailableExternalRights.Should().HaveCount(3);
+        fileInfo.AvailableExternalRights.Where(r => r.Value).Should().ContainKeys(nameof(FileShare.FillForms), nameof(FileShare.Restrict), nameof(FileShare.None));
+    }
+
+    [Fact]
+    public async Task CheckExternalRightsFile_Documents_ReturnFormFilling()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var file = await CreateFileInMy("File in VDR Room.pdf", Initializer.Owner);
+        
+        // Get the primary external link
+        await _filesApi.GetFilePrimaryExternalLinkAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken);
+        
+        var fileInfo = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        
+        fileInfo.AvailableExternalRights.Should().HaveCount(4);
+        fileInfo.AvailableExternalRights.Where(r => r.Value).Should().ContainKeys(nameof(FileShare.Editing), nameof(FileShare.FillForms), nameof(FileShare.Restrict), nameof(FileShare.None));
+    }
 }

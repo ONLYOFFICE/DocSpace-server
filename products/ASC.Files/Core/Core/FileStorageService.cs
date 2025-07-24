@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Amazon.CloudFront.Model;
+
 namespace ASC.Web.Files.Services.WCFService;
 
 [Scope]
@@ -3656,10 +3658,13 @@ public class FileStorageService //: IFileStorageService
         var link = await fileSharing.GetPureSharesAsync(entry, ShareFilterType.PrimaryExternalLink, null, null, 0, 1).FirstOrDefaultAsync();
         if (link == null)
         {
-            if (entry is File<T> { IsForm: true } && share == FileShare.Read)
+            share = entry switch
             {
-                share = FileShare.Editing;
-            }
+                File<T> { IsForm: true, RootFolderType: FolderType.USER } when share !=  FileShare.Editing && share != FileShare.FillForms => FileShare.Editing,
+                File<T> { IsForm: true, RootFolderType: FolderType.VirtualRooms } when share != FileShare.FillForms => FileShare.FillForms,
+                _ => share
+            };
+
             return await SetExternalLinkAsync(
                 entry,
                 Guid.NewGuid(),

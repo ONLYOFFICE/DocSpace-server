@@ -2734,15 +2734,19 @@ public class FileSecurity(IDaoFactory daoFactory,
 
             switch (s)
             {
-                case FileShare.Editing when canEdit:
+                case FileShare.Editing when file.RootFolderType == FolderType.USER && canEdit:
                 case FileShare.FillForms when file.IsForm:
-                case FileShare.CustomFilter when canCustomFiltering:
+                case FileShare.CustomFilter when !file.IsForm && canCustomFiltering:
                 case FileShare.Comment when !file.IsForm && canComment:
-                case FileShare.Review when canReview:
+                case FileShare.Review when !file.IsForm && canReview:
                     result.Add(s.ToStringFast(), true);
                     break;
                 default:
-                    result.Add(s.ToStringFast(), false);
+                    if (!file.IsForm)
+                    {
+                        result.Add(s.ToStringFast(), false);
+                    }
+
                     break;
             }
         }

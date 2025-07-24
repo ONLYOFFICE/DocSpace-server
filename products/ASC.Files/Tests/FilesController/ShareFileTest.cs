@@ -41,7 +41,7 @@ public class ShareFileTest(
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         
-        var file = await CreateFile("file_to_share.docx", FolderType.USER, Initializer.Owner);
+        var file = await CreateFileInMy("file_to_share.docx", Initializer.Owner);
         
         // Act
         var linkParams = new FileLinkRequest(access: fileShare);
@@ -65,7 +65,7 @@ public class ShareFileTest(
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         
-        var file = await CreateFile("file_to_share.docx", FolderType.USER, Initializer.Owner);
+        var file = await CreateFileInMy("file_to_share.docx", Initializer.Owner);
         
         // Act
         var result = (await _filesApi.GetFilePrimaryExternalLinkAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
@@ -88,7 +88,7 @@ public class ShareFileTest(
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         
-        var file = await CreateFile("file_to_share.docx", FolderType.USER, Initializer.Owner);
+        var file = await CreateFileInMy("file_to_share.docx", Initializer.Owner);
         
         // Act
         var linkParams = new FileLinkRequest(access: fileShare);
@@ -103,7 +103,7 @@ public class ShareFileTest(
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         
-        var file = await CreateFile("file_with_multiple_links.docx", FolderType.USER, Initializer.Owner);
+        var file = await CreateFileInMy("file_with_multiple_links.docx", Initializer.Owner);
         
         // Create a primary external link
         var primaryLinkParams = new FileLinkRequest(access: FileShare.Read);
@@ -130,7 +130,7 @@ public class ShareFileTest(
     {
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
-        var file = await CreateFile("file_with_multiple_links.docx", FolderType.USER, Initializer.Owner);
+        var file = await CreateFileInMy("file_with_multiple_links.docx", Initializer.Owner);
 
         // Create primary link
         var primaryLinkParams = new FileLinkRequest(
@@ -179,7 +179,7 @@ public class ShareFileTest(
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
         
-        var file = await CreateFile("file_update_link.docx", FolderType.USER, Initializer.Owner);
+        var file = await CreateFileInMy("file_update_link.docx", Initializer.Owner);
         
         // Create initial external link
         var initialLinkParams = new FileLinkRequest(
@@ -219,7 +219,7 @@ public class ShareFileTest(
     {
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
-        var file = await CreateFile("file_with_links_to_update.docx", FolderType.USER, Initializer.Owner);
+        var file = await CreateFileInMy("file_with_links_to_update.docx", Initializer.Owner);
 
         // Create multiple links
         var link1Request = new FileLinkRequest(
@@ -360,7 +360,7 @@ public class ShareFileTest(
     {
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
-        var file = await CreateFile("file_with_multiple_access_links.docx", FolderType.USER, Initializer.Owner);
+        var file = await CreateFileInMy("file_with_multiple_access_links.docx", Initializer.Owner);
 
         // Create multiple links with different permissions
         var readOnlyLink = new FileLinkRequest(
@@ -427,7 +427,7 @@ public class ShareFileTest(
     {
         // Arrange
         await _filesClient.Authenticate(Initializer.Owner);
-        var file = await CreateFile("file_with_mixed_links.docx", FolderType.USER, Initializer.Owner);
+        var file = await CreateFileInMy("file_with_mixed_links.docx", Initializer.Owner);
 
         // Create one link with password and one without
         var unrestrictedLink = new FileLinkRequest(
