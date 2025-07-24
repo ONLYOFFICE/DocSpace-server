@@ -126,6 +126,7 @@ public class MessageExporter(
         file.ParentId = parentId;
         file.Comment = FilesCommonResource.CommentCreate;
         file.Title = title;
+        file.ContentLength = content.Length;
         
         var fileDao = daoFactory.GetFileDao<T>();
         var savedFile = await fileDao.SaveFileAsync(file, content);
