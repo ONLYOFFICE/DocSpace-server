@@ -35,9 +35,9 @@ public class ChatHistory(DbChatDao chatDao)
         List<AttachmentMessageContent> attachments)
     {
         const string suffix = "...";
-        const int maxTitleLength = 255;
-        
-        var title = message.TrimEnd();
+        const int maxTitleLength = 50;
+
+        var title = message.Replace("\n", " ").Replace("\r", " ").Trim();
         if (title.Length > maxTitleLength)
         {
             title = title[..(maxTitleLength - suffix.Length)].TrimEnd() + suffix;
