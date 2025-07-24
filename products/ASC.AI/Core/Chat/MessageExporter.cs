@@ -58,6 +58,17 @@ public class MessageExporter(
             throw new ItemNotFoundException("Folder not found");
         }
 
+        if (folder.FolderType is FolderType.AiRoom)
+        {
+            folder = await folderDao.GetFoldersAsync(folder.Id, FolderType.ResultStorage)
+                .FirstOrDefaultAsync();
+            
+            if (folder == null)
+            {
+                throw new ItemNotFoundException("Folder not found");
+            }
+        }
+
         if (!await fileSecurity.CanCreateAsync(folder))
         {
             throw new SecurityException("Access denied");
@@ -68,7 +79,7 @@ public class MessageExporter(
 
         await using var ms = new MemoryStream(bytes);
 
-        return await CreateFileAsync(folderId, ms, $"{title}.txt");
+        return await CreateFileAsync(folder.Id, ms, $"{title}.txt");
     }
 
     public async Task<File<int>> ExportMessagesAsync(Guid chatId)
