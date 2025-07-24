@@ -30,7 +30,7 @@ public static class FileSecurityExtensions
 {
     public static async Task<bool> CanUseChatsAsync<T>(this FileSecurity fileSecurity, Folder<T> room)
     {
-        if (!await fileSecurity.CanCreateAsync(room))
+        if (!await fileSecurity.CanReadAsync(room))
         {
             return false;
         }
@@ -40,6 +40,6 @@ public static class FileSecurityExtensions
             return false;
         }
 
-        return room.ShareRecord is not { IsLink: true };
+        return true;
     }
 }

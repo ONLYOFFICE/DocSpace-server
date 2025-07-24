@@ -41,9 +41,14 @@ public class McpService(
     public async Task<IReadOnlyDictionary<string, bool>> SetToolsSettingsAsync(int roomId, Guid serverId, List<string> disabledTools)
     {
         var room = await folderDao.GetFolderAsync(roomId);
-        if (room == null || !await fileSecurity.CanUseChatsAsync(room))
+        if (room == null)
         {
-            throw new ItemNotFoundException();
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
+        if (!await fileSecurity.CanUseChatsAsync(room))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
         
         var dataBuilder = predefinedMcpSource.GetServerDataBuilder(serverId);
@@ -62,6 +67,17 @@ public class McpService(
 
     public async Task<IReadOnlyDictionary<string, bool>> GetToolsAsync(int roomId, Guid serverId)
     {
+        var room = await folderDao.GetFolderAsync(roomId);
+        if (room == null)
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
+        if (!await fileSecurity.CanUseChatsAsync(room))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+        
         var dataBuilder = predefinedMcpSource.GetServerDataBuilder(serverId);
         if (dataBuilder == null)
         {
