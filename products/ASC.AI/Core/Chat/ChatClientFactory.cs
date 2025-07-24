@@ -49,7 +49,7 @@ public class ChatClientFactory(IHttpClientFactory httpClientFactory)
                 .ConfigureOptions(x =>
                 {
                     x.ModelId = runConfig.Parameters.ModelId;
-                    x.MaxOutputTokens = 4096;
+                    x.MaxOutputTokens = 6144;
                 });
         }
         else
