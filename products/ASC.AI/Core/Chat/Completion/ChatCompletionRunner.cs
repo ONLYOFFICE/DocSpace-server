@@ -45,6 +45,8 @@ public class ChatCompletionRunner(
     public async Task<ChatCompletionGenerator> StartNewChatAsync(
         int roomId, string message, IEnumerable<JsonElement>? files = null)
     {
+        ArgumentException.ThrowIfNullOrEmpty(message);
+        
         var (config, contextFolderId) = await GetRungConfigAsync(roomId);
         
         var attachmentsTask = GetAttachmentsAsync(files).ToListAsync();
@@ -77,6 +79,8 @@ public class ChatCompletionRunner(
     public async Task<ChatCompletionGenerator> StartChatAsync(
         Guid chatId, string message, IEnumerable<JsonElement>? files = null)
     {
+        ArgumentException.ThrowIfNullOrEmpty(message);
+        
         var tenantId = tenantManager.GetCurrentTenantId();
 
         var chat = await chatHistory.GetChatAsync(tenantId, chatId);
