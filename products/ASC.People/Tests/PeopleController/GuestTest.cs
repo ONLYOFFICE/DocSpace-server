@@ -39,7 +39,7 @@ public class GuestTest(PeopleFactory peopleFactory, WepApiFactory apiFactory) : 
         var fakeMember = Initializer.FakerMember.Generate();
         
         // Act
-        var shortLink = (await _portalUsersApi.GeInviteLinkAsync(EmployeeType.Guest, TestContext.Current.CancellationToken)).Response;
+        var shortLink = (await _portalUsersApi.GetInvitationLinkAsync(EmployeeType.Guest, TestContext.Current.CancellationToken)).Response;
         var fullLink = await _apiClient.GetAsync(shortLink, TestContext.Current.CancellationToken);
         var confirmHeader = fullLink.RequestMessage?.RequestUri?.Query.Substring(1);
         

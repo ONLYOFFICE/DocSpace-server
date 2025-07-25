@@ -28,7 +28,7 @@ using System.Text.Json;
 
 using ASC.Files.Core.ApiModels.ResponseDto;
 
-using LinkType = Docspace.Model.LinkType;
+using LinkType = DocSpace.API.SDK.Model.LinkType;
 using Task = System.Threading.Tasks.Task;
 
 namespace ASC.Files.Tests.FilesController;

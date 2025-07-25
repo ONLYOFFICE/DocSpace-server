@@ -1,18 +1,5 @@
 {{>partial_header}}
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.Text;
-using System.Text.RegularExpressions;
-{{#useCompareNetObjects}}
-using KellermanSoftware.CompareNetObjects;
-{{/useCompareNetObjects}}
-
 namespace {{packageName}}.Client
 {
     /// <summary>
@@ -143,7 +130,7 @@ namespace {{packageName}}.Client
         /// <returns>Serialized string.</returns>
         public static string Serialize(object obj)
         {
-            return obj != null ? Newtonsoft.Json.JsonConvert.SerializeObject(obj) : null;
+            return obj != null ? JsonSerializer.Serialize(obj) : null;
         }
 
         /// <summary>
