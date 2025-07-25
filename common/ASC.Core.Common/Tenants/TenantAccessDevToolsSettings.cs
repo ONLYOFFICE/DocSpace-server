@@ -39,7 +39,7 @@ public class TenantDevToolsAccessSettings : ISettings<TenantDevToolsAccessSettin
     public bool LimitedAccessForUsers { get; set; }
 
     /// <summary>
-    /// The tenant ID.
+    /// The settings ID.
     /// </summary>
     [JsonIgnore]
     public Guid ID

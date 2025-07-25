@@ -24,7 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
@@ -48,7 +47,8 @@ public class VirtualRoomsInternalController(
     AuthContext authContext,
     TenantManager tenantManager,
     IEventBus eventBus,
-    RoomTemplatesWorker roomTemplatesWorker)
+    RoomTemplatesWorker roomTemplatesWorker,
+    UserManager userManager)
     : VirtualRoomsController<int>(globalFolderHelper,
         fileOperationDtoHelper,
         customTagsService,
@@ -64,8 +64,9 @@ public class VirtualRoomsInternalController(
         apiContext,
         filesMessageService,
         settingsManager,
-        apiDateTimeHelper)
-    {
+        apiDateTimeHelper,
+        userManager)
+{
     /// <summary>
     /// Creates a room in the "Rooms" section.
     /// </summary>
@@ -113,13 +114,7 @@ public class VirtualRoomsInternalController(
         RoomLifetime lifetime = null;
         if (dto.Lifetime != null)
         {
-            lifetime = new RoomLifetime
-            {
-                DeletePermanently = dto.Lifetime.DeletePermanently,
-                Enabled = dto.Lifetime.Enabled,
-                Period = dto.Lifetime.Period,
-                Value = dto.Lifetime.Value
-            };
+            lifetime = new RoomLifetime { DeletePermanently = dto.Lifetime.DeletePermanently, Enabled = dto.Lifetime.Enabled, Period = dto.Lifetime.Period, Value = dto.Lifetime.Value };
         }
 
         WatermarkRequest watermark = null;
@@ -139,20 +134,20 @@ public class VirtualRoomsInternalController(
         }
 
         var taskId = await roomTemplatesWorker.StartCreateRoomAsync(tenantManager.GetCurrentTenantId(), authContext.CurrentAccount.ID,
-          dto.TemplateId,
-          dto.Title,
-          logo,
-          dto.CopyLogo,
-          dto.Tags,
-          dto.Cover,
-          dto.Color,
-          dto.Quota,
-          dto.Indexing,
-          dto.DenyDownload,
-          lifetime,
-          watermark,
-          dto.Private,
-          false);
+            dto.TemplateId,
+            dto.Title,
+            logo,
+            dto.CopyLogo,
+            dto.Tags,
+            dto.Cover,
+            dto.Color,
+            dto.Quota,
+            dto.Indexing,
+            dto.DenyDownload,
+            lifetime,
+            watermark,
+            dto.Private,
+            false);
 
         await eventBus.PublishAsync(new CreateRoomFromTemplateIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId())
         {
@@ -189,20 +184,14 @@ public class VirtualRoomsInternalController(
             var status = await roomTemplatesWorker.GetStatusRoomCreatingAsync(tenantManager.GetCurrentTenantId());
             if (status != null)
             {
-                var result = new RoomFromTemplateStatusDto
-                {
-                    Progress = status.Percentage,
-                    Error = status.Exception != null ? status.Exception.Message : "",
-                    IsCompleted = status.IsCompleted,
-                    RoomId = status.RoomId
-                };
+                var result = new RoomFromTemplateStatusDto { Progress = status.Percentage, Error = status.Exception != null ? status.Exception.Message : "", IsCompleted = status.IsCompleted, RoomId = status.RoomId };
                 return result;
             }
         }
         catch
         {
-
         }
+
         return null;
     }
 }
@@ -223,7 +212,8 @@ public class VirtualRoomsThirdPartyController(
     ApiContext apiContext,
     FilesMessageService filesMessageService,
     SettingsManager settingsManager,
-    ApiDateTimeHelper apiDateTimeHelper)
+    ApiDateTimeHelper apiDateTimeHelper,
+    UserManager userManager)
     : VirtualRoomsController<string>(globalFolderHelper,
         fileOperationDtoHelper,
         customTagsService,
@@ -239,8 +229,9 @@ public class VirtualRoomsThirdPartyController(
         apiContext,
         filesMessageService,
         settingsManager,
-        apiDateTimeHelper)
-    {
+        apiDateTimeHelper,
+        userManager)
+{
     /// <summary>
     /// Creates a room in the "Rooms" section stored in a third-party storage.
     /// </summary>
@@ -274,11 +265,11 @@ public abstract class VirtualRoomsController<T>(
     ApiContext apiContext,
     FilesMessageService filesMessageService,
     SettingsManager settingsManager,
-    ApiDateTimeHelper apiDateTimeHelper)
+    ApiDateTimeHelper apiDateTimeHelper,
+    UserManager userManager)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
-    {
+{
     protected readonly FileStorageService _fileStorageService = fileStorageService;
-    protected readonly FilesMessageService _filesMessageService = filesMessageService;
     protected readonly IMapper _mapper = mapper;
 
     /// <summary>
@@ -289,6 +280,7 @@ public abstract class VirtualRoomsController<T>(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
+    [SwaggerResponse(200, "Room information", typeof(FolderDto<string>))]
     [AllowAnonymous]
     [HttpGet("{id}")]
     public async Task<FolderDto<T>> GetRoomInfo(RoomIdRequestDto<T> inDto)
@@ -305,6 +297,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Updated room information", typeof(FolderDto<int>))]
+    [SwaggerResponse(200, "Updated room information", typeof(FolderDto<string>))]
     [HttpPut("{id}")]
     public async Task<FolderDto<T>> UpdateRoom(UpdateRoomRequestDto<T> inDto)
     {
@@ -339,14 +332,12 @@ public abstract class VirtualRoomsController<T>(
 
         if (inDto.Quota >= 0)
         {
-            _filesMessageService.Send(MessageAction.CustomQuotaPerRoomChanged, inDto.Quota.ToString(), folderTitles.ToArray());
+            filesMessageService.Send(MessageAction.CustomQuotaPerRoomChanged, inDto.Quota.ToString(), folderTitles.ToArray());
         }
         else
         {
-            _filesMessageService.Send(MessageAction.CustomQuotaPerRoomDisabled, string.Join(", ", folderTitles.ToArray()));
+            filesMessageService.Send(MessageAction.CustomQuotaPerRoomDisabled, string.Join(", ", folderTitles.ToArray()));
         }
-
-
     }
 
     /// <summary>
@@ -374,7 +365,7 @@ public abstract class VirtualRoomsController<T>(
             yield return await _folderDtoHelper.GetAsync(room);
         }
 
-        _filesMessageService.Send(MessageAction.CustomQuotaPerRoomDefault, quotaRoomSettings.DefaultQuota.ToString(), folderTitles.ToArray());
+        filesMessageService.Send(MessageAction.CustomQuotaPerRoomDefault, quotaRoomSettings.DefaultQuota.ToString(), folderTitles.ToArray());
     }
 
 
@@ -389,7 +380,7 @@ public abstract class VirtualRoomsController<T>(
     public async Task<FileOperationDto> DeleteRoom(DeleteRoomRequestDto<T> inDto)
     {
         await fileDeleteOperationsManager.Publish([inDto.Id], [], false, !inDto.DeleteRoom.DeleteAfter, true);
-        
+
         return await fileOperationDtoHelper.GetAsync((await fileDeleteOperationsManager.GetOperationResults()).FirstOrDefault());
     }
 
@@ -411,10 +402,11 @@ public abstract class VirtualRoomsController<T>(
 
         var destFolder = JsonSerializer.SerializeToElement(await globalFolderHelper.FolderArchiveAsync);
         var movableRoom = JsonSerializer.SerializeToElement(inDto.Id);
-        
-        await fileMoveCopyOperationsManager.Publish([movableRoom], [], destFolder, false, FileConflictResolveType.Skip, !inDto.ArchiveRoom.DeleteAfter, false);
-        
-        return await fileOperationDtoHelper.GetAsync((await fileMoveCopyOperationsManager.GetOperationResults()).FirstOrDefault());
+
+        var taskId = await fileMoveCopyOperationsManager.Publish([movableRoom], [], destFolder, false, FileConflictResolveType.Skip, !inDto.ArchiveRoom.DeleteAfter, false);
+        var tasks = await fileMoveCopyOperationsManager.GetOperationResults(id: taskId);
+
+        return await fileOperationDtoHelper.GetAsync(tasks.FirstOrDefault());
     }
 
     /// <summary>
@@ -436,8 +428,10 @@ public abstract class VirtualRoomsController<T>(
         var destFolder = JsonSerializer.SerializeToElement(await globalFolderHelper.FolderVirtualRoomsAsync);
         var movableRoom = JsonSerializer.SerializeToElement(inDto.Id);
 
-        await fileMoveCopyOperationsManager.Publish([movableRoom], [], destFolder, false, FileConflictResolveType.Skip, !inDto.ArchiveRoom.DeleteAfter, false);
-        return await fileOperationDtoHelper.GetAsync((await fileMoveCopyOperationsManager.GetOperationResults()).FirstOrDefault());
+        var taskId = await fileMoveCopyOperationsManager.Publish([movableRoom], [], destFolder, false, FileConflictResolveType.Skip, !inDto.ArchiveRoom.DeleteAfter, false);
+        var tasks = await fileMoveCopyOperationsManager.GetOperationResults(id: taskId);
+        
+        return await fileOperationDtoHelper.GetAsync(tasks.FirstOrDefault());
     }
 
     /// <summary>
@@ -460,7 +454,21 @@ public abstract class VirtualRoomsController<T>(
             return result;
         }
 
-        if (inDto.RoomInvitation.Invitations.Any(i => !string.IsNullOrEmpty(i.Email)))
+        var guestsInvited =
+            inDto.RoomInvitation.Invitations.Any(i => !string.IsNullOrEmpty(i.Email) && i.Access != FileShare.None) ||
+            await inDto.RoomInvitation.Invitations
+                .Where(r => r.Id != Guid.Empty && r.Access != FileShare.None)
+                .ToAsyncEnumerable()
+                .AnyAwaitAsync(async i => await userManager.IsGuestAsync(i.Id));
+        
+        var usersInvited =
+            inDto.RoomInvitation.Invitations.Any(i => !string.IsNullOrEmpty(i.Email) && i.Access != FileShare.None) ||
+            await inDto.RoomInvitation.Invitations
+                .Where(r => r.Id != Guid.Empty && r.Access != FileShare.None)
+                .ToAsyncEnumerable()
+                .AnyAwaitAsync(async i => await userManager.IsUserAsync(i.Id));
+        
+        if (guestsInvited)
         {
             var invitationSettings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
             if (!invitationSettings.AllowInvitingGuests)
@@ -471,13 +479,14 @@ public abstract class VirtualRoomsController<T>(
 
         var room = await _fileStorageService.GetFolderAsync(inDto.Id).NotFoundIfNull("Folder not found");
 
-        if (room.RootId is int root && root == await globalFolderHelper.FolderRoomTemplatesAsync 
-            && inDto.RoomInvitation.Invitations.Any(i=> i.Access != FileShare.None && i.Access != FileShare.Read))
+        if (room.RootId is int root && 
+            root == await globalFolderHelper.FolderRoomTemplatesAsync && 
+            (inDto.RoomInvitation.Invitations.Any(i => i.Access != FileShare.None && i.Access != FileShare.Read) || guestsInvited || usersInvited))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
         }
 
-        foreach(var invitation in inDto.RoomInvitation.Invitations)
+        foreach (var invitation in inDto.RoomInvitation.Invitations)
         {
             if (invitation.Access == FileShare.None && !inDto.RoomInvitation.Force)
             {
@@ -491,13 +500,7 @@ public abstract class VirtualRoomsController<T>(
 
         var wrappers = _mapper.Map<IEnumerable<RoomInvitation>, List<AceWrapper>>(inDto.RoomInvitation.Invitations);
 
-        var aceCollection = new AceCollection<T>
-        {
-            Files = [],
-            Folders = [inDto.Id],
-            Aces = wrappers,
-            Message = inDto.RoomInvitation.Message
-        };
+        var aceCollection = new AceCollection<T> { Files = [], Folders = [inDto.Id], Aces = wrappers, Message = inDto.RoomInvitation.Message };
 
         result.Warning = await _fileStorageService.SetAceObjectAsync(aceCollection, inDto.RoomInvitation.Notify, inDto.RoomInvitation.Culture);
         result.Members = await _fileStorageService.GetRoomSharedInfoAsync(inDto.Id, inDto.RoomInvitation.Invitations.Select(s => s.Id))
@@ -553,14 +556,14 @@ public abstract class VirtualRoomsController<T>(
         {
             return null;
         }
-        
-        var result =  await fileShareDtoHelper.Get(linkAce);
+
+        var result = await fileShareDtoHelper.Get(linkAce);
 
         if (inDto.RoomLink.LinkId != Guid.Empty && linkAce.Id != inDto.RoomLink.LinkId && result.SharedTo is FileShareLink link)
         {
             link.RequestToken = null;
         }
-        
+
         return result;
     }
 
@@ -575,12 +578,13 @@ public abstract class VirtualRoomsController<T>(
     [HttpGet("{id}/links")]
     public async IAsyncEnumerable<FileShareDto> GetRoomLinks(GetRoomLinksRequestDto<T> inDto)
     {
-        var filterType = inDto.Type.HasValue ? inDto.Type.Value switch
-        {
-            LinkType.Invitation => ShareFilterType.InvitationLink,
-            LinkType.External => ShareFilterType.ExternalLink,
-            _ => ShareFilterType.Link
-        }
+        var filterType = inDto.Type.HasValue
+            ? inDto.Type.Value switch
+            {
+                LinkType.Invitation => ShareFilterType.InvitationLink,
+                LinkType.External => ShareFilterType.ExternalLink,
+                _ => ShareFilterType.Link
+            }
             : ShareFilterType.Link;
         var counter = 0;
 
@@ -633,6 +637,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/tags</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
+    [SwaggerResponse(200, "Room information", typeof(FolderDto<string>))]
     [SwaggerResponse(403, "You don't have permission to edit the room")]
     [HttpDelete("{id}/tags")]
     public async Task<FolderDto<T>> DeleteRoomTags(BatchTagsRequestDto<T> inDto)
@@ -642,7 +647,7 @@ public abstract class VirtualRoomsController<T>(
         return await _folderDtoHelper.GetAsync(room);
     }
 
-    
+
     /// <summary>
     /// Creates a logo for a room with the ID specified in the request.
     /// </summary>
@@ -650,6 +655,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/logo</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
+    [SwaggerResponse(200, "Room information", typeof(FolderDto<string>))]
     [SwaggerResponse(404, "The required room was not found")]
     [HttpPost("{id}/logo")]
     public async Task<FolderDto<T>> CreateRoomLogo(LogoRequest<T> inDto)
@@ -668,6 +674,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/cover</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Room cover", typeof(FolderDto<int>))]
+    [SwaggerResponse(200, "Room cover", typeof(FolderDto<string>))]
     [SwaggerResponse(403, "You don't have permission to change cover")]
     [SwaggerResponse(404, "The required room was not found")]
     [HttpPost("{id}/cover")]
@@ -704,6 +711,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/logo</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
+    [SwaggerResponse(200, "Room information", typeof(FolderDto<string>))]
     [HttpDelete("{id}/logo")]
     public async Task<FolderDto<T>> DeleteRoomLogo(RoomIdRequestDto<T> inDto)
     {
@@ -721,6 +729,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/pin</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
+    [SwaggerResponse(200, "Room information", typeof(FolderDto<string>))]
     [HttpPut("{id}/pin")]
     public async Task<FolderDto<T>> PinRoom(RoomIdRequestDto<T> inDto)
     {
@@ -736,6 +745,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/unpin</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
+    [SwaggerResponse(200, "Room information", typeof(FolderDto<string>))]
     [HttpPut("{id}/unpin")]
     public async Task<FolderDto<T>> UnpinRoom(RoomIdRequestDto<T> inDto)
     {
@@ -750,6 +760,7 @@ public abstract class VirtualRoomsController<T>(
     /// <short>Resend the room invitations</short>
     /// <path>api/2.0/files/rooms/{id}/resend</path>
     [Tags("Rooms")]
+    [SwaggerResponse(200, "Ok")]
     [HttpPost("{id}/resend")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task ResendEmailInvitations(UserInvitationRequestDto<T> inDto)
@@ -764,11 +775,12 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/reorder</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Room information", typeof(FolderDto<int>))]
+    [SwaggerResponse(200, "Room information", typeof(FolderDto<string>))]
     [HttpPut("{id}/reorder")]
     public async Task<FolderDto<T>> ReorderRoom(RoomIdRequestDto<T> inDto)
     {
         var room = await _fileStorageService.ReOrderAsync(inDto.Id);
-        await _filesMessageService.SendAsync(MessageAction.FolderIndexReordered, room, room.Title);
+        await filesMessageService.SendAsync(MessageAction.FolderIndexReordered, room, room.Title);
 
         return await _folderDtoHelper.GetAsync(room);
     }
@@ -786,7 +798,7 @@ public abstract class VirtualRoomsController<T>(
     {
         var newItems = await _fileStorageService.GetNewRoomFilesAsync(inDto.Id);
         var result = new List<NewItemsDto<FileEntryDto>>();
-        
+
         foreach (var (date, entries) in newItems)
         {
             var apiDateTime = apiDateTimeHelper.Get(date);
@@ -796,7 +808,7 @@ public abstract class VirtualRoomsController<T>(
             {
                 items.Add(await GetFileEntryWrapperAsync(en));
             }
-            
+
             result.Add(new NewItemsDto<FileEntryDto> { Date = apiDateTime, Items = items });
         }
 
@@ -804,21 +816,22 @@ public abstract class VirtualRoomsController<T>(
     }
 }
 
-public class VirtualRoomsCommonController(FileStorageService fileStorageService,
-        FolderContentDtoHelper folderContentDtoHelper,
-        GlobalFolderHelper globalFolderHelper,
-        CustomTagsService customTagsService,
-        RoomLogoManager roomLogoManager,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper,
-        AuthContext authContext,
-        DocumentBuilderTaskManager<RoomIndexExportTask, int, RoomIndexExportTaskData> documentBuilderTaskManager,
-        TenantManager tenantManager,
-        IEventBus eventBus,
-        UserManager userManager,
-        IServiceProvider serviceProvider,
-        ApiDateTimeHelper apiDateTimeHelper,
-        RoomNewItemsDtoHelper roomNewItemsDtoHelper)
+public class VirtualRoomsCommonController(
+    FileStorageService fileStorageService,
+    FolderContentDtoHelper folderContentDtoHelper,
+    GlobalFolderHelper globalFolderHelper,
+    CustomTagsService customTagsService,
+    RoomLogoManager roomLogoManager,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper,
+    AuthContext authContext,
+    DocumentBuilderTaskManager<RoomIndexExportTask, int, RoomIndexExportTaskData> documentBuilderTaskManager,
+    TenantManager tenantManager,
+    IEventBus eventBus,
+    UserManager userManager,
+    IServiceProvider serviceProvider,
+    ApiDateTimeHelper apiDateTimeHelper,
+    RoomNewItemsDtoHelper roomNewItemsDtoHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -841,8 +854,8 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
 
         var filter = RoomTypeExtensions.MapToFilterType(inDto.Type);
 
-        var tagNames = !string.IsNullOrEmpty(inDto.Tags) 
-            ? JsonSerializer.Deserialize<IEnumerable<string>>(inDto.Tags) 
+        var tagNames = !string.IsNullOrEmpty(inDto.Tags)
+            ? JsonSerializer.Deserialize<IEnumerable<string>>(inDto.Tags)
             : null;
 
         OrderBy orderBy = null;
@@ -982,7 +995,7 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
     {
         var room = await fileStorageService.GetFolderAsync(inDto.Id).NotFoundIfNull("Folder not found");
 
-        if (room.RootId is int root && root == await globalFolderHelper.FolderRoomTemplatesAsync)
+        if (room.RootId == await globalFolderHelper.FolderRoomTemplatesAsync)
         {
             throw new ItemNotFoundException();
         }
@@ -1011,9 +1024,9 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         task.Init(baseUri, tenantId, userId, null);
 
         var taskProgress = await documentBuilderTaskManager.StartTask(task, false);
-        
+
         var headers = MessageSettings.GetHttpHeaders(Request);
-        var evt = new RoomIndexExportIntegrationEvent(userId, tenantId, inDto.Id, baseUri, headers: headers != null 
+        var evt = new RoomIndexExportIntegrationEvent(userId, tenantId, inDto.Id, baseUri, headers: headers != null
             ? headers.ToDictionary(x => x.Key, x => x.Value.ToString())
             : []);
 
@@ -1075,16 +1088,16 @@ public class VirtualRoomsCommonController(FileStorageService fileStorageService,
         {
             var date = apiDateTimeHelper.Get(key);
             var items = new List<RoomNewItemsDto>();
-            
+
             foreach (var (k, v) in value)
             {
                 var item = await roomNewItemsDtoHelper.GetAsync(k, v);
                 items.Add(item);
             }
-            
+
             result.Add(new NewItemsDto<RoomNewItemsDto> { Date = date, Items = items });
         }
-        
+
         return result;
     }
 }

@@ -1925,4 +1925,10 @@ $TrulyYours</value>
   <data name="subject_user_type_changed" xml:space="preserve">
     <value>Váš typ uživatele DocSpace se změnil</value>
   </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Přejděte do části Služby</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Přejděte do nastavení peněženky</value>
+  </data>
 </root>

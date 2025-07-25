@@ -8,7 +8,7 @@ from setuptools import setup, find_packages  # noqa: H301
 #
 # prerequisite: setuptools
 # http://pypi.python.org/pypi/setuptools
-NAME = "{{{projectName}}}"
+NAME = "{{{packageName}}}"
 VERSION = "{{packageVersion}}"
 PYTHON_REQUIRES = ">= 3.9"
 REQUIRES = [
@@ -32,18 +32,18 @@ REQUIRES = [
 setup(
     name=NAME,
     version=VERSION,
-    description="{{appName}}",
-    author="{{infoName}}{{^infoName}}OpenAPI Generator community{{/infoName}}",
-    author_email="{{infoEmail}}{{^infoEmail}}team@openapitools.org{{/infoEmail}}",
-    url="{{packageUrl}}",
-    keywords=["OpenAPI", "OpenAPI-Generator", "{{{appName}}}"],
+    description="A simple Python SDK for integrating with the ONLYOFFICE DocSpace API",
+    author="Ascensio System SIA <integration@onlyoffice.com> (https://www.onlyoffice.com)",
+    author_email="support@onlyoffice.com",
+    url="{{repositoryUrl}}",
+    keywords=["onlyoffice", 'docspace', "sdk"],
     install_requires=REQUIRES,
     packages=find_packages(exclude=["test", "tests"]),
     include_package_data=True,
-    {{#licenseInfo}}license="{{.}}",
-    {{/licenseInfo}}long_description_content_type='text/markdown',
+    license="{{licenseName}}",
+    long_description_content_type='text/markdown',
     long_description="""\
-    {{appDescription}}
+    The ONLYOFFICE DocSpace SDK for Python is a library that provides tools for integrating and managing DocSpace features within your applications. It simplifies interaction with the DocSpace API by offering ready-to-use methods and models.
     """,  # noqa: E501
     package_data={"{{{packageName}}}": ["py.typed"]},
 )

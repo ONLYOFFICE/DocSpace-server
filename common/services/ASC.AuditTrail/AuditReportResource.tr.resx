@@ -913,4 +913,31 @@
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Webhook güncellendi: {0}</value>
   </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>Yetkilendirme bağlantısı etkinleştirildi</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Müşteri işlemi gerçekleştirildi</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Müşteri işlemleri raporu indirildi</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Müşteri aboneliği güncellendi: {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Müşteri cüzdanına para yüklendi: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Müşteri cüzdanına para yükleme ayarları güncellendi</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>LDAP kimlik doğrulaması devre dışı bırakıldı</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>LDAP kimlik doğrulaması etkinleştirildi</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>LDAP senkronizasyonu tamamlandı</value>
+  </data>
 </root>

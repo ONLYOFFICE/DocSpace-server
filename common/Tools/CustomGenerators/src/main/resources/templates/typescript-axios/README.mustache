@@ -1,47 +1,49 @@
-## {{npmName}}@{{npmVersion}}
+# {{packageName}}
 
-This generator creates TypeScript/JavaScript client that utilizes [axios](https://github.com/axios/axios). The generated Node module can be used in the following environments:
+The ONLYOFFICE DocSpace SDK for TypeScript is a library that provides tools for integrating and managing DocSpace features within your applications. It simplifies interaction with the DocSpace API by offering ready-to-use methods and models.
 
-Environment
-* Node.js
-* Webpack
-* Browserify
+{{#infoUrl}}
+For more information, please visit [{{{infoUrl}}}]({{{infoUrl}}})
+{{/infoUrl}}
 
-Language level
+This SDK utilizes axios for HTTP communication. The resulting Node module can be used in various environments:
+
+* [Node.js](https://nodejs.org/en)
+* [Webpack](https://webpack.js.org/)
+* [Browserify](https://browserify.org/)
+
+#### Language levels
 * ES5 - you must have a Promises/A+ library installed
 * ES6
 
-Module system
+#### Module systems
 * CommonJS
 * ES6 module system
 
-It can be used in both TypeScript and JavaScript. In TypeScript, the definition will be automatically resolved via `package.json`. ([Reference](https://www.typescriptlang.org/docs/handbook/declaration-files/consumption.html))
+This SDK can be used in both TypeScript and JavaScript projects. In TypeScript, definitions are automatically resolved via `package.json`. ([Reference](https://www.typescriptlang.org/docs/handbook/declaration-files/consumption.html))
 
 ### Building
 
-To build and compile the typescript sources to javascript use:
-```
+To build and compile the TypeScript sources to JavaScript, use the following commands:
+
+```bash
 npm install
 npm run build
 ```
 
-### Publishing
-
-First build the package then run `npm publish`
-
 ### Consuming
 
-navigate to the folder of your consuming project and run one of the following commands.
+To use the SDK in your project, navigate to the root folder of your consuming project and run one of the following commands:
 
-_published:_
+#### From published package (recommended)
 
+```bash
+npm install {{packageName}} --save
 ```
-npm install {{npmName}}@{{npmVersion}} --save
-```
 
-_unPublished (not recommended):_
+#### From local build (not recommended)
 
-```
+```bash
 npm install PATH_TO_GENERATED_PACKAGE --save
 ```
 
@@ -73,32 +75,88 @@ npm install PATH_TO_GENERATED_PACKAGE --save
 {{#isOAuth}}
 - **Type**: OAuth
 - **Flow**: {{{flow}}}
-- **Authorization URL**: {{{authorizationUrl}}}
+- **Authorization URL**: {{x-authorizationUrl}}
+- **Token Url**: {{x-tokenUrl}}
 - **Scopes**: {{^scopes}}N/A{{/scopes}}
 {{#scopes}} - **{{{scope}}}**: {{{description}}}
 {{/scopes}}
 {{/isOAuth}}
 {{#isOpenId}}
 - **Type**: OpenId Connect
-- **OpenId Connect URL**: {{openIdConnectUrl}}
+- **OpenId Connect URL**: {{x-openIdConnectUrl}}
 {{#scopes}}  - {{scope}}: {{description}}
 {{/scopes}}
 {{/isOpenId}}
 
-
 {{/authMethods}}
+
+## Getting Started
+
+Please follow the [building](#building) instruction and execute the following TS code:
+
+```typescript
+{{#apiInfo}}{{#apis}}{{#-first}}{{#operations}}{{#operation}}{{#-first}}
+import { Configuration, {{{classname}}} } from '{{{packageName}}}';
+
+const config = new Configuration ({
+    basePath: "YOUR SERVER URL",
+    {{#authMethods}}
+    {{#isBasic}}
+    {{#isBasicBasic}}
+    // Configure HTTP basic authorization: {{{name}}}
+    username: "YOUR USERNAME",
+    password: "YOUR PASSWORD",
+    {{/isBasicBasic}}
+    {{#isBasicBearer}}
+    // Configure Bearer{{#bearerFormat}} ({{{.}}}){{/bearerFormat}} access token for authorization: {{{name}}}
+    accessToken: "YOUR ACCESS TOKEN",
+    {{/isBasicBearer}}
+    {{/isBasic}}
+    {{#isApiKey}}
+    // Configure API key authorization: {{{name}}}
+    apiKey: "YOUR API KEY"
+    {{/isApiKey}}
+    {{/authMethods}}
+});
+
+const apiInstance = new {{{classname}}}(config);
+
+{{#hasParams}}
+{{#requiredParams}}const {{{paramName}}}: {{{dataType}}} = {{{example}}}; // {{{description}}}
+{{/requiredParams}}
+{{#optionalParams}}const opts: any = {
+{{#-first}}  {{/-first}}'{{{paramName}}}': {{{example}}}{{^-last}},{{/-last}} // {{{description}}}
+{{#-last}}};{{/-last}}
+{{/optionalParams}}
+{{/hasParams}}
+try {
+    const result = await apiInstance.{{{operationId}}}(
+      {{#hasParams}}{{#requiredParams}}{{{paramName}}}{{^-last}}, {{/-last}}{{/requiredParams}}{{#optionalParams}}{{#-last}}{{#hasRequiredParams}}, {{/hasRequiredParams}}opts{{/-last}}{{/optionalParams}}{{/hasParams}}
+    );
+    console.log('API called successfully. Returned data: ', result.data);
+  } catch (error) {
+    console.error(error);
+}
+
+{{/-first}}{{/operation}}{{/operations}}{{/-first}}{{/apis}}{{/apiInfo}}
+```
 
 ### Documentation for API Endpoints
 
 All URIs are relative to *{{{basePath}}}*
 
+<details><summary>API Endoints table</summary>
+
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
 {{#apiInfo}}{{#apis}}{{#operations}}{{#operation}}*{{classname}}* | [**{{operationId}}**]({{apiDocPath}}{{classname}}.md#{{operationIdLowerCase}}) | **{{httpMethod}}** {{path}} | {{summary}}
 {{/operation}}{{/operations}}{{/apis}}{{/apiInfo}}
+</details>
 
 ### Documentation For Models
 
+<details><summary>Models list</summary>
+
 {{#models}}{{#model}} - [{{{classname}}}]({{modelDocPath}}{{{classname}}}.md)
 {{/model}}{{/models}}
-
+</details>

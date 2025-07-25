@@ -202,6 +202,11 @@ public class SettingsDto
     public bool LimitedAccessDevToolsForUsers { get; set; }
 
     /// <summary>
+    /// Specifies whether to display the promotional banners.
+    /// </summary>
+    public bool DisplayBanners { get; set; }
+
+    /// <summary>
     /// The user name validation regex.
     /// </summary>
     public string UserNameRegex { get; set; }

@@ -1,44 +1,48 @@
-# {{{projectName}}}
-{{#appDescriptionWithNewLines}}
-{{{.}}}
-{{/appDescriptionWithNewLines}}
+# {{{packageName}}}
 
-- API version: {{appVersion}}
-- Package version: {{packageVersion}}
-{{^hideGenerationTimestamp}}
-- Build date: {{generatedDate}}
-{{/hideGenerationTimestamp}}
+The ONLYOFFICE DocSpace SDK for Python is a library that provides tools for integrating and managing DocSpace features within your applications. It simplifies interaction with the DocSpace API by offering ready-to-use methods and models.
+
 {{#infoUrl}}
 For more information, please visit [{{{infoUrl}}}]({{{infoUrl}}})
 {{/infoUrl}}
 
-## Requirements.
+## Requirements
 
 Python {{{generatorLanguageVersion}}}
 
 ## Installation & Usage
-### pip install
+### Using pip
 
-If the python package is hosted on a repository, you can install directly using:
+If the Python package is hosted in a repository, you can install it directly using:
 
 ```sh
-pip install git+https://{{gitHost}}/{{{gitUserId}}}/{{{gitRepoId}}}.git
+pip install git+{{repositoryUrl}}.git
 ```
-(you may need to run `pip` with root permission: `sudo pip install git+https://{{gitHost}}/{{{gitUserId}}}/{{{gitRepoId}}}.git`)
+
+If required, run with root permissions:
+
+```bash
+sudo pip install git+{{repositoryUrl}}.git
+```
 
 Then import the package:
 ```python
 import {{{packageName}}}
 ```
 
-### Setuptools
+### Using setuptools
 
-Install via [Setuptools](http://pypi.python.org/pypi/setuptools).
+Alternatively, you can install the package using [setuptools](http://pypi.python.org/pypi/setuptools):
 
 ```sh
 python setup.py install --user
 ```
-(or `sudo python setup.py install` to install the package for all users)
+
+To install the package for all users, run the following command:
+
+```bash
+sudo python setup.py install
+```
 
 Then import the package:
 ```python
@@ -48,6 +52,49 @@ import {{{packageName}}}
 ### Tests
 
 Execute `pytest` to run the tests.
+
+<a id="documentation-for-authorization"></a>
+## Documentation For Authorization
+
+{{^authMethods}}Endpoints do not require authorization.{{/authMethods}}
+{{#hasAuthMethods}}Authentication schemes defined for the API:{{/hasAuthMethods}}
+{{#authMethods}}
+<a id="{{name}}"></a>
+### {{{name}}}
+
+{{#isApiKey}}
+- **Type**: API key
+- **API key parameter name**: {{{keyParamName}}}
+- **Location**: {{#isKeyInQuery}}URL query string{{/isKeyInQuery}}{{#isKeyInHeader}}HTTP header{{/isKeyInHeader}}
+{{/isApiKey}}
+{{#isBasic}}
+{{#isBasicBasic}}
+- **Type**: HTTP basic authentication
+{{/isBasicBasic}}
+{{#isBasicBearer}}
+- **Type**: Bearer authentication{{#bearerFormat}} ({{{.}}}){{/bearerFormat}}
+{{/isBasicBearer}}
+{{#isHttpSignature}}
+- **Type**: HTTP signature authentication
+{{/isHttpSignature}}
+{{/isBasic}}
+{{#isOAuth}}
+- **Type**: OAuth
+- **Flow**: {{{flow}}}
+- **Authorization URL**: {{x-authorizationUrl}}
+- **Token Url**: {{x-tokenUrl}}
+- **Scopes**: {{^scopes}}N/A{{/scopes}}
+{{#scopes}} - **{{{scope}}}**: {{{description}}}
+{{/scopes}}
+{{/isOAuth}}
+{{#isOpenId}}
+- **Type**: OpenId Connect
+- **OpenId Connect URL**: {{x-openIdConnectUrl}}
+{{#scopes}}  - {{scope}}: {{description}}
+{{/scopes}}
+{{/isOpenId}}
+
+{{/authMethods}}
 
 ## Getting Started
 

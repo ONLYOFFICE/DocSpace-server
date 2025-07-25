@@ -24,13 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Api.Core.Auth;
-using ASC.Common.Security.Authorizing;
-using ASC.Core.Common.EF.Model;
-
-using AutoMapper;
-
-
 namespace ASC.People.Api;
 
 [Scope]
@@ -164,7 +157,6 @@ public class ApiKeysController(
     [Tags("Api keys")]
     [SwaggerResponse(200, "List of api keys for user", typeof(ApiKeyResponseDto))]
     [HttpGet("@self")]
-    [Authorize(AuthenticationSchemes = ApiKeyBearerDefaults.AuthenticationScheme)]
     public async Task<ApiKeyResponseDto> GetApiKey()
     {
         var token = httpContextAccessor?.HttpContext?.Request.Headers.Authorization.ToString()["Bearer ".Length..];

@@ -8,12 +8,15 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.Map.Entry;
 import java.util.List;
+import java.util.Arrays;
+
 import org.openapitools.codegen.model.OperationMap;
 import org.openapitools.codegen.model.OperationsMap;
 import org.openapitools.codegen.model.ModelMap;
 import org.openapitools.codegen.languages.TypeScriptAxiosClientCodegen;
 import org.openapitools.codegen.CodegenOperation;
-import java.util.Arrays;
+import org.openapitools.codegen.SupportingFile;
+import org.openapitools.codegen.CodegenParameter;
 
 import io.swagger.v3.oas.models.servers.ServerVariables;
 import io.swagger.v3.oas.models.servers.Server;
@@ -31,14 +34,22 @@ public class MyTypeScriptAxiosCodegen extends TypeScriptAxiosClientCodegen {
         this.templateDir = "templates/typescript-axios";
         this.embeddedTemplateDir = "typescript-axios";
 
-        supportingFiles.removeIf(f -> f.getTemplateFile().equals("git_push.sh.mustache") || 
-            f.getDestinationFilename().equals(".openapi-generator-ignore")
-        );
-
         additionalProperties.put("apiDocPath", apiDocPath);
         additionalProperties.put("modelDocPath", modelDocPath);
         modelDocTemplateFiles.put("model_doc.mustache", ".md");
         apiDocTemplateFiles.put("api_doc.mustache", ".md");
+
+        supportingFiles.add(new SupportingFile(
+            "AUTHORS.mustache", "", "AUTHORS.md"
+        ));
+
+        supportingFiles.add(new SupportingFile(
+            "LICENSE.mustache", "", "LICENSE"
+        ));
+
+        supportingFiles.add(new SupportingFile(
+            "CHANGELOG.mustache", "", "CHANGELOG.md"
+        ));
     }
     
     @Override
@@ -54,6 +65,21 @@ public class MyTypeScriptAxiosCodegen extends TypeScriptAxiosClientCodegen {
                     baseUrlVar.setDefault("http://localhost:8092/");
                 }
             }
+        }
+
+        supportingFiles.removeIf(f -> f.getTemplateFile().equals("git_push.sh.mustache") || 
+            f.getDestinationFilename().equals(".openapi-generator-ignore")
+        );
+
+        if (additionalProperties.containsKey(NPM_REPOSITORY)) {
+            this.setNpmRepository(additionalProperties.get(NPM_REPOSITORY).toString());
+        }
+
+        supportingFiles.add(new SupportingFile("README.mustache", "", "README.md"));
+        supportingFiles.add(new SupportingFile("package.mustache", "", "package.json"));
+        supportingFiles.add(new SupportingFile("tsconfig.mustache", "", "tsconfig.json"));
+        if (supportsES6) {
+            supportingFiles.add(new SupportingFile("tsconfig.esm.mustache", "", "tsconfig.esm.json"));
         }
     }
 
@@ -92,12 +118,46 @@ public class MyTypeScriptAxiosCodegen extends TypeScriptAxiosClientCodegen {
                     String seealsoUrl = "https://api.onlyoffice.com/docspace/api-backend/usage-api/" + dashedId + "/";
                     op.vendorExtensions.put("x-seealsoUrl", seealsoUrl);
                 }
+
+                if ("GET".equalsIgnoreCase(op.httpMethod)) {
+                    boolean allAreQueryParams = op.allParams.stream()
+                        .allMatch(p -> Boolean.TRUE.equals(p.isQueryParam));
+
+                    boolean hasCountParam = op.allParams.stream()
+                        .anyMatch(p -> "count".equals(p.baseName));
+
+                    if (allAreQueryParams && hasCountParam) {
+                        CodegenParameter fieldsParam = new CodegenParameter();
+                        fieldsParam.baseName = "fields";
+                        fieldsParam.paramName = "fields";
+                        fieldsParam.dataType = "string";
+                        fieldsParam.description = "Comma-separated list of fields to include in the response";
+                        fieldsParam.required = false;
+                        fieldsParam.isQueryParam = true;
+                        fieldsParam.isPrimitiveType = true;
+                        fieldsParam.isNullable = true;
+                        fieldsParam.collectionFormat = "csv";
+
+                        op.allParams.add(fieldsParam);
+                        op.queryParams.add(fieldsParam);
+                    }
+                }
             }
         }
 
         return objs;
     }
 
+    
+    public Map<String, Object> postProcessSupportingFileData(Map<String, Object> objs) {
+        super.postProcessSupportingFileData(objs);
+
+        objs.put("x-authorizationUrl", "{{authBaseUrl}}/oauth2/authorize");
+        objs.put("x-tokenUrl", "{{authBaseUrl}}/oauth2/token");
+        objs.put("x-openIdConnectUrl", "{{authBaseUrl}}/.well-known/openid-configuration");
+
+        return objs;
+    }
 
     private String toDashCase(String input) {
         return input.replaceAll("([a-z0-9])([A-Z])", "$1-$2")
@@ -179,7 +239,9 @@ public class MyTypeScriptAxiosCodegen extends TypeScriptAxiosClientCodegen {
                 currentFolderName = uniqueTag;
             }
         }
-        currentFolderName = convertToHyphenatedFormat(currentFolderName);
+        if (!"ThirdParty".equalsIgnoreCase(currentFolderName)) {
+            currentFolderName = convertToHyphenatedFormat(currentFolderName);
+        }
         return apiFileFolder() + File.separator + toApiFilename(fileName) + suffix;
     }
 
@@ -207,7 +269,7 @@ public class MyTypeScriptAxiosCodegen extends TypeScriptAxiosClientCodegen {
                 case "TFASettings":
                     return "tfa-settings-api";
                 case "ThirdParty":
-                    return "third-party-api";
+                    return "thirdparty-api";
                 default:
                     return super.toApiFilename(name).replaceAll("([a-z0-9])([A-Z])", "$1-$2").toLowerCase(Locale.ROOT);
             }

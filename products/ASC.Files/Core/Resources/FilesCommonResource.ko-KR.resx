@@ -512,4 +512,10 @@ docx, xlsx, pptx와 최고의 호환성이 보장됩니다.</value>
   <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
     <value>작성 시작</value>
   </data>
+  <data name="RoleEnum_Guest" xml:space="preserve">
+    <value>게스트</value>
+  </data>
+  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
+    <value>룸 관리자</value>
+  </data>
 </root>

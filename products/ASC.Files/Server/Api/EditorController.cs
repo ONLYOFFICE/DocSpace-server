@@ -82,6 +82,7 @@ public abstract class EditorController<T>(
     /// <path>api/2.0/files/file/{fileId}/saveediting</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Saved file parameters", typeof(FileDto<int>))]
+    [SwaggerResponse(200, "Saved file parameters", typeof(FileDto<string>))]
     [SwaggerResponse(400, "No file id or folder id toFolderId determine provider")]
     [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
     [HttpPut("{fileId}/saveediting")]
@@ -114,6 +115,7 @@ public abstract class EditorController<T>(
     /// <path>api/2.0/files/file/{fileId}/startfilling</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File information", typeof(FileDto<int>))]
+    [SwaggerResponse(200, "File information", typeof(FileDto<string>))]
     [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
     [HttpPut("{fileId}/startfilling")]
     public async Task<FileDto<T>> StartFillingFile(StartFillingRequestDto<T> inDto)
@@ -147,6 +149,7 @@ public abstract class EditorController<T>(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Configuration parameters", typeof(ConfigurationDto<int>))]
+    [SwaggerResponse(200, "Configuration parameters", typeof(ConfigurationDto<string>))]
     [SwaggerResponse(403, "You don't have enough permission to view the file")]
     [AllowAnonymous]
     [AllowNotPayment]

@@ -214,6 +214,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Promotional banners visibility settings changed.
+        /// </summary>
+        public static string BannerSettingsChanged {
+            get {
+                return ResourceManager.GetString("BannerSettingsChanged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Browser.
         /// </summary>
         public static string BrowserCol {

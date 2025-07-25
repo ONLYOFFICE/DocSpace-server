@@ -913,4 +913,31 @@
   <data name="FileCustomFilterEnabled" xml:space="preserve">
     <value>Файл: {0}. Потребителският филтър е разрешен</value>
   </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>Активиран линк за оторизация</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Изпълнява се потребителска операция</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Изтеглен отчет за потребителски операции</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Актуализиран потребителски абонамент: {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Зареден потребителски портфейл: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Актуализирани настройки за зареждане на потребителски портфейл</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>LDAP удостоверяването е деактивирано</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>LDAP удостоверяването е активирано</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>LDAP синхронизацията е завършена</value>
+  </data>
 </root>

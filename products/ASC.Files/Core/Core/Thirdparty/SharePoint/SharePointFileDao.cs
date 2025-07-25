@@ -137,6 +137,9 @@ internal class SharePointFileDao(
                     return fileType is FileType.Audio or FileType.Video;
                 });
                 break;
+            case FilterType.DiagramsOnly:
+                files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Diagram);
+                break;
             case FilterType.ByExtension:
                 if (!string.IsNullOrEmpty(searchText))
                 {
@@ -218,6 +221,9 @@ internal class SharePointFileDao(
 
                     return fileType is FileType.Audio or FileType.Video;
                 });
+                break;
+            case FilterType.DiagramsOnly:
+                files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Diagram);
                 break;
             case FilterType.ByExtension:
                 if (!string.IsNullOrEmpty(searchText))

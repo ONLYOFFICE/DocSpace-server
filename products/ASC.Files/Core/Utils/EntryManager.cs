@@ -561,7 +561,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 var filesOffset = Math.Max(folders.Count > 0 ? 0 : from - await allFoldersCountTask, 0);
                 
                 var filesTask = fileDao.GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders,
-                excludeSubject, filesOffset, filesCount, roomId, withShared, containingMyFiles && withSubfolders, parent.FolderType, formsItemDto);
+                excludeSubject, filesOffset, filesCount, roomId, withShared, containingMyFiles && withSubfolders, parent.FolderType, formsItemDto, applyFormStepFilter: room is { FolderType: FolderType.VirtualDataRoom } && parent.ShareRecord is { Share: FileShare.FillForms });
 
                 if (parent.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
                 {
@@ -980,6 +980,7 @@ public class EntryManager(IDaoFactory daoFactory,
             case FilterType.ArchiveOnly:
             case FilterType.FilesOnly:
             case FilterType.MediaOnly:
+            case FilterType.DiagramsOnly:
             case FilterType.Pdf:
             case FilterType.PdfForm:
                 where = f => f.FileEntryType == FileEntryType.File && (((File<T>)f).FilterType == filter || filter == FilterType.FilesOnly);
@@ -1439,17 +1440,17 @@ public class EntryManager(IDaoFactory daoFactory,
 
         if (checkRight && await lockerManager.FileLockedForMeAsync(file.Id))
         {
-            throw new Exception(FilesCommonResource.ErrorMessage_LockedFile);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_LockedFile);
         }
 
         if (checkRight && forceSave is null or ForcesaveType.None && await fileTracker.IsEditingAsync(file.Id))
         {
-            throw new Exception(FilesCommonResource.ErrorMessage_SecurityException_UpdateEditingFile);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_UpdateEditingFile);
         }
 
         if (file.RootFolderType == FolderType.TRASH)
         {
-            throw new Exception(FilesCommonResource.ErrorMessage_ViewTrashItem);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ViewTrashItem);
         }
 
         var currentExt = file.ConvertedExtension;

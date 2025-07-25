@@ -19,27 +19,7 @@ All URIs are relative to *{{basePath}}*
 {{{notes}}}
 {{/notes}}
 
-### Example
-
-```typescript
-import {
-    {{classname}},
-    Configuration{{#allParams}}{{#isModel}},
-    {{{dataType}}}{{/isModel}}{{/allParams}}
-} from '{{#npmName}}{{.}}{{/npmName}}{{^npmName}}./api{{/npmName}}';
-
-const configuration = new Configuration();
-const apiInstance = new {{classname}}(configuration);
-{{#hasParams}}{{#allParams}}
-let {{paramName}}: {{{dataType}}}; //{{{description}}}{{^required}} (optional){{/required}}{{#defaultValue}} (default to {{{.}}}){{/defaultValue}}{{/allParams}}
-
-const { status, data } = await apiInstance.{{{operationId}}}({{#allParams}}
-    {{paramName}}{{^-last}},{{/-last}}{{/allParams}}
-);
-{{/hasParams}}{{^hasParams}}
-const { status, data } = await apiInstance.{{{operationId}}}();
-{{/hasParams}}
-```
+For more information, see [api.onlyoffice.com]({{vendorExtensions.x-seealsoUrl}}).
 
 ### Parameters
 {{^hasParams}}This endpoint does not have any parameters.{{/hasParams}}{{#allParams}}{{#-last}}
@@ -56,6 +36,28 @@ const { status, data } = await apiInstance.{{{operationId}}}();
 ### Authorization
 
 {{^authMethods}}No authorization required{{/authMethods}}{{#authMethods}}[{{{name}}}](../README.md#{{{name}}}){{^-last}}, {{/-last}}{{/authMethods}}
+
+### Example
+
+```typescript
+import {
+    {{classname}},
+    Configuration{{#allParams}}{{#isModel}},
+    {{{dataType}}}{{/isModel}}{{/allParams}}
+} from '{{#packageName}}{{.}}{{/packageName}}{{^packageName}}./api{{/packageName}}';
+
+const configuration = new Configuration();
+const apiInstance = new {{classname}}(configuration);
+{{#hasParams}}{{#allParams}}
+let {{paramName}}: {{{dataType}}}; //{{{description}}}{{^required}} (optional){{/required}}{{#defaultValue}} (default to {{{.}}}){{/defaultValue}}{{/allParams}}
+
+const { status, data } = await apiInstance.{{{operationId}}}({{#allParams}}
+    {{paramName}}{{^-last}},{{/-last}}{{/allParams}}
+);
+{{/hasParams}}{{^hasParams}}
+const { status, data } = await apiInstance.{{{operationId}}}();
+{{/hasParams}}
+```
 
 ### HTTP request headers
 

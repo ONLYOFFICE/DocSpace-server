@@ -370,7 +370,7 @@ public class FileConverter(
 
         var fileUri = pathProvider.GetFileStreamUrl(file);
         var fileExtension = file.ConvertedExtension;
-        var toExtension = fileUtility.GetInternalExtension(file.Title);
+        var toExtension = fileUtility.GetInternalConvertExtension(file.Title);
         if (!string.IsNullOrEmpty(outputType)  && await EnableConvertAsync(file, outputType, false))
         {
             toExtension = outputType;

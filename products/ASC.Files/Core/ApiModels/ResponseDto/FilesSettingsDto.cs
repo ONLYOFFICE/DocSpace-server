@@ -137,6 +137,11 @@ public class FilesSettingsDto
     public ImmutableList<string> ExtsDocument { get; set; }
 
     /// <summary>
+    /// The list of the diagram extensions.
+    /// </summary>
+    public ImmutableList<string> ExtsDiagram { get; set; }
+
+    /// <summary>
     /// The internal file formats.
     /// </summary>
     public Dictionary<FileType, string> InternalFormats { get; set; }
@@ -358,6 +363,7 @@ public class FilesSettingsDtoConverter(
             ExtsSpreadsheet = FileUtility.ExtsSpreadsheet,
             ExtsPresentation = FileUtility.ExtsPresentation,
             ExtsDocument = FileUtility.ExtsDocument,
+            ExtsDiagram = FileUtility.ExtsDiagram,
             InternalFormats = fileUtility.InternalExtension,
             MasterFormExtension = fileUtility.MasterFormExtension,
             ParamVersion = FilesLinkUtility.Version,
