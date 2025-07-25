@@ -49,6 +49,8 @@ public class ChatController(
             inDto.RoomId, inDto.Body.Message, inDto.Body.Files);
         
         Response.Headers.ContentType = "text/event-stream";
+        Response.Headers.CacheControl = "no-cache";
+        Response.Headers.KeepAlive = "keep-alive";
 
         await foreach (var completion in generator.GenerateCompletionAsync(Request.HttpContext.RequestAborted))
         {
@@ -66,6 +68,8 @@ public class ChatController(
             inDto.ChatId, inDto.Body.Message, inDto.Body.Files);
         
         Response.Headers.ContentType = "text/event-stream";
+        Response.Headers.CacheControl = "no-cache";
+        Response.Headers.KeepAlive = "keep-alive";
 
         await foreach (var completion in generator.GenerateCompletionAsync(Request.HttpContext.RequestAborted))
         {
