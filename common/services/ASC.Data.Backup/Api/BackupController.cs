@@ -281,7 +281,7 @@ public class BackupController(
     /// <short>Delete the backup history</short>
     /// <path>api/2.0/backup/deletebackuphistory</path>
     [Tags("Backup")]
-    [SwaggerResponse(200, "Boolean value: true if the operation is successful")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpDelete("deletebackuphistory")]
     public async Task<bool> DeleteBackupHistory(DumpDto dto)
