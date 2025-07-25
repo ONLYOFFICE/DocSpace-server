@@ -17,9 +17,9 @@ global using ASC.Migrations.Core;
 global using Bogus;
 global using Bogus.DataSets;
 
-global using Docspace.Api;
-global using Docspace.Client;
-global using Docspace.Model;
+global using DocSpace.API.SDK.Api;
+global using DocSpace.API.SDK.Client;
+global using DocSpace.API.SDK.Model;
 
 global using DotNet.Testcontainers.Builders;
 global using DotNet.Testcontainers.Containers;
@@ -50,11 +50,11 @@ global using Testcontainers.Redis;
 
 global using Xunit;
 
-global using FileOperationDto = Docspace.Model.FileOperationDto;
-global using FileShare = Docspace.Model.FileShare;
+global using FileOperationDto = DocSpace.API.SDK.Model.FileOperationDto;
+global using FileShare = DocSpace.API.SDK.Model.FileShare;
 global using WebApiProgram = ASCWebApi::Program;
 global using FilesProgram = ASCFiles::Program;
 global using PeopleProgram = ASCPeople::Program;
 global using FilesServiceProgram = ASCFilesService::Program;
-global using FolderType = Docspace.Model.FolderType;
+global using FolderType = DocSpace.API.SDK.Model.FolderType;
 global using User = ASC.Files.Tests.Data.User;
