@@ -9,7 +9,7 @@
   "outputDir": "ClientNet",
   "additionalProperties": {
     "packageName": "DocSpace.API.SDK",
-    "packageVersion": "1.0.0",
+    "packageVersion": "3.2.1-preview.1",
     "licenseName": "Apache-2.0",
     "repositoryUrl": "https://github.com/ONLYOFFICE/docspace-api-sdk-csharp",
     "library": "httpclient",

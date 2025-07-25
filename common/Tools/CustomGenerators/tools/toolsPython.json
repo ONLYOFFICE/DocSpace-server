@@ -9,7 +9,7 @@
   "outputDir": "python-sdk",
   "additionalProperties": {
     "packageName": "docspace-api-sdk",
-    "packageVersion": "1.0.0",
+    "packageVersion": "3.2.1-preview.1",
     "licenseName": "Apache-2.0",
     "repositoryUrl": "https://github.com/ONLYOFFICE/docspace-api-sdk-python"
   }

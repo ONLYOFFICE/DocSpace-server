@@ -2,76 +2,10 @@
 
 The ONLYOFFICE DocSpace SDK for C# is a library that provides tools for integrating and managing DocSpace features within your applications. It simplifies interaction with the DocSpace API by offering ready-to-use methods and models.
 
-- API version: {{appVersion}}
-- SDK version: {{packageVersion}}
-
 {{#infoUrl}}
 For more information, please visit [{{{infoUrl}}}]({{{infoUrl}}})
 {{/infoUrl}}
 
-<a id="dependencies"></a>
-## Dependencies
-
-{{#useRestSharp}}
-- [RestSharp](https://www.nuget.org/packages/RestSharp) - 112.0.0 or later
-{{/useRestSharp}}
-- [JsonSubTypes](https://www.nuget.org/packages/JsonSubTypes/) - 1.8.0 or later
-{{#useCompareNetObjects}}
-- [CompareNETObjects](https://www.nuget.org/packages/CompareNETObjects) - 4.61.0 or later
-{{/useCompareNetObjects}}
-{{#validatable}}
-- [System.ComponentModel.Annotations](https://www.nuget.org/packages/System.ComponentModel.Annotations) - 5.0.0 or later
-{{/validatable}}
-
-The DLLs included in the package may not be the latest version. We recommend using [NuGet](https://docs.nuget.org/consume/installing-nuget) to obtain the latest version of the packages:
-```powershell
-{{#useRestSharp}}
-Install-Package RestSharp
-{{/useRestSharp}}
-Install-Package JsonSubTypes
-{{#validatable}}
-Install-Package System.ComponentModel.Annotations
-{{/validatable}}
-{{#useCompareNetObjects}}
-Install-Package CompareNETObjects
-{{/useCompareNetObjects}}
-```
-{{#useRestSharp}}
-
-NOTE: RestSharp versions greater than 105.1.0 have a bug which causes file uploads to fail. See [RestSharp#742](https://github.com/restsharp/RestSharp/issues/742).
-NOTE: RestSharp for .Net Core creates a new socket for each api call, which can lead to a socket exhaustion problem. See [RestSharp#1406](https://github.com/restsharp/RestSharp/issues/1406).
-
-{{/useRestSharp}}
-<a id="installation"></a>
-## Installation
-{{#netStandard}}
-Generate the DLL using your preferred tool (e.g. `dotnet build`)
-{{/netStandard}}
-{{^netStandard}}
-Run the following command to generate the DLL:
-- [macOS/Linux] `/bin/sh build.sh`
-- [Windows] `build.bat`
-{{/netStandard}}
-
-Then include the DLL (under the `bin` folder) in the C# project, and use the namespaces:
-```csharp
-using {{packageName}}.{{apiPackage}};
-using {{packageName}}.Client;
-using {{packageName}}.{{modelPackage}};
-```
-{{^netStandard}}
-<a id="packaging"></a>
-## Packaging
-
-A `.nuspec` is included with the project. You can follow the NuGet quickstart to [create](https://docs.microsoft.com/en-us/nuget/quickstart/create-and-publish-a-package#create-the-package) packages.
-
-This `.nuspec` uses placeholders from the `.csproj`, so build the `.csproj` directly:
-
-```powershell
-nuget pack -Build -OutputDirectory out {{packageName}}.csproj
-```
-
-{{/netStandard}}
 <a id="usage"></a>
 ## Usage
 
