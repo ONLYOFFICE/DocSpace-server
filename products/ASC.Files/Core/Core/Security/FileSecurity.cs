@@ -219,8 +219,8 @@ public class FileSecurity(IDaoFactory daoFactory,
                     FilesSecurityActions.FillingStatus,
                     FilesSecurityActions.ResetFilling,
                     FilesSecurityActions.StopFilling,
-                    FilesSecurityActions.OpenForm
-
+                    FilesSecurityActions.OpenForm,
+                    FilesSecurityActions.EditAccess
                 }
             },
             {
@@ -1164,7 +1164,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                 {
                     return false;
                 }
-
+                
                 if (isDocSpaceAdmin)
                 {
                     if (action == FilesSecurityActions.Download)
@@ -1202,7 +1202,10 @@ public class FileSecurity(IDaoFactory daoFactory,
                             return true;
                     }
 
-                    if (isRoom && action is FilesSecurityActions.Move or FilesSecurityActions.Pin or FilesSecurityActions.ChangeOwner or
+                    if (isRoom && action is 
+                            FilesSecurityActions.Move or 
+                            FilesSecurityActions.Pin or 
+                            FilesSecurityActions.ChangeOwner or
                             FilesSecurityActions.IndexExport)
                     {
                         return true;

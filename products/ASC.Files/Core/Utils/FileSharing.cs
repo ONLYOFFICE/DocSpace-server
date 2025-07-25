@@ -918,11 +918,18 @@ public class FileSharing(
             SubjectGroup = false,
             Access = record.Share,
             FileShareOptions = record.Options,
-            SubjectType = record.SubjectType
+            SubjectType = record.SubjectType,
+            CanEditAccess = canEditAccess
         };
 
-        w.CanEditAccess = authContext.CurrentAccount.ID != w.Id && w.SubjectType is SubjectType.User or SubjectType.Group && canEditAccess;
-
+        if (w.SubjectType is SubjectType.User or SubjectType.Group)
+        {
+            w.CanEditAccess = w.CanEditAccess && authContext.CurrentAccount.ID != w.Id;
+        } else if ( entry is Folder<T> { FolderType: not FolderType.CustomRoom})
+        {
+            w.CanEditAccess = false;
+        }
+        
         if (!record.IsLink)
         {
             if (w.SubjectType == SubjectType.Group)
@@ -963,7 +970,6 @@ public class FileSharing(
         w.SubjectName = record.Options.Title;
         w.Link = await urlShortener.GetShortenLinkAsync(link);
         w.SubjectGroup = true;
-        w.CanEditAccess = false;
         w.FileShareOptions.Password = await externalShare.GetPasswordAsync(w.FileShareOptions.Password);
         w.SubjectType = record.SubjectType;
         var room = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(entry is Folder<T> folder ? folder.Id : entry.ParentId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));

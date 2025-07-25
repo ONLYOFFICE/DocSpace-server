@@ -295,4 +295,64 @@ public class ShareFolderTest(
         var allLinks = (await _foldersApi.GetFolderLinksAsync(folderInfo.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         allLinks.Should().BeEmpty(); 
     }
+    
+    [Fact]
+    public async Task CheckEditAccess_VDR_ReturnsFalse()
+    {
+        await _filesClient.Authenticate(Initializer.Owner);
+        var room = await CreateVDRRoom("room title");
+        var folder = await CreateFolder("folder title", room.Id);
+        
+        // Get the primary external link
+        var primaryLink = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var sharedToLink = DeserializeSharedToLink(primaryLink);
+        
+        sharedToLink.Internal.Should().BeTrue();
+        primaryLink.CanEditAccess.Should().BeFalse();
+        
+        var updatedLink = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, new FolderLinkRequest(sharedToLink.Id, varInternal: false), TestContext.Current.CancellationToken)).Response;
+        updatedLink.Should().BeNull();
+    }
+    
+    [Fact]
+    public async Task CheckEditAccess_PublicRoom_ReturnsFalse()
+    {
+        await _filesClient.Authenticate(Initializer.Owner);
+        var room = await CreatePublicRoom("room title");
+        var folder = await CreateFolder("folder title", room.Id);
+        
+        // Get the primary external link
+        var primaryLink = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var sharedToLink = DeserializeSharedToLink(primaryLink);
+        
+        sharedToLink.Internal.Should().BeFalse();
+        primaryLink.CanEditAccess.Should().BeFalse();
+        
+        var updatedLink = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, new FolderLinkRequest(sharedToLink.Id, varInternal: true), TestContext.Current.CancellationToken)).Response;
+        var updatedSharedToLink = DeserializeSharedToLink(updatedLink);
+        updatedSharedToLink.Internal.Should().BeFalse();
+    }
+    
+    [Theory]
+    [InlineData(RoomType.CustomRoom)]
+    [InlineData(RoomType.FillingFormsRoom)]
+    [InlineData(RoomType.EditingRoom)]
+    public async Task CheckEditAccess_ValidRoomType_ReturnsTrue(RoomType roomType)
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var room = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("room title", roomType: roomType), TestContext.Current.CancellationToken)).Response;
+        var folder = await CreateFolder("folder title", room.Id);
+        
+        // Get the primary external link
+        var primaryLink = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var sharedToLink = DeserializeSharedToLink(primaryLink);
+        
+        sharedToLink.Internal.Should().BeFalse();
+        primaryLink.CanEditAccess.Should().BeTrue();
+        
+        var updatedLink = (await _foldersApi.SetFolderPrimaryExternalLinkAsync(folder.Id, new FolderLinkRequest(sharedToLink.Id, varInternal: true), TestContext.Current.CancellationToken)).Response;
+        var updatedSharedToLink = DeserializeSharedToLink(updatedLink);
+        updatedSharedToLink.Internal.Should().BeTrue();
+    }
 }

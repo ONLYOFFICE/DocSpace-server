@@ -598,4 +598,32 @@ public class ShareRoomTest(
         editingAccess.Should().NotBeNull();
         editingAccess.Security.Edit.Should().BeTrue(); // Editing link should allow editing
     }
+    
+    [Theory]
+    [InlineData(RoomType.PublicRoom)]
+    public async Task CheckEditAccess_InvalidRoomType_ReturnsFalse(RoomType roomType)
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var room = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("room title", roomType: roomType), TestContext.Current.CancellationToken)).Response;
+        
+        // Get the primary external link
+        var primaryLink = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        primaryLink.CanEditAccess.Should().BeFalse();
+    }
+    
+    [Theory]
+    [InlineData(RoomType.CustomRoom)]
+    public async Task CheckEditAccess_ValidRoomType_ReturnsTrue(RoomType roomType)
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var room = (await _roomsApi.CreateRoomAsync(new CreateRoomRequestDto("room title", roomType: roomType), TestContext.Current.CancellationToken)).Response;
+        
+        // Get the primary external link
+        var primaryLink = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        primaryLink.CanEditAccess.Should().BeTrue();
+    }
 }
