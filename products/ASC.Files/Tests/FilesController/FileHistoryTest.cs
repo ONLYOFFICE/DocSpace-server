@@ -53,7 +53,7 @@ public class FileHistoryTest(
         // Assert
         versions.Should().NotBeNull();
         versions.Should().HaveCountGreaterThanOrEqualTo(3); // Original + 2 updates
-        versions.Should().BeInDescendingOrder(v => v.VarVersion);
+        versions.Should().BeInDescendingOrder(v => v.Version);
         
         // Check that each version has the correct properties
         foreach (var version in versions)
@@ -77,7 +77,7 @@ public class FileHistoryTest(
         
         // Get the latest version
         var versions = (await _filesApi.GetFileVersionInfoAsync(file.Id, TestContext.Current.CancellationToken)).Response;
-        var latestVersion = versions.First().VarVersion;
+        var latestVersion = versions.First().Version;
         
         // Act
         var changeHistoryParams = new ChangeHistory(latestVersion, true);
@@ -90,7 +90,7 @@ public class FileHistoryTest(
         var updatedVersions = (await _filesApi.GetFileVersionInfoAsync(file.Id, TestContext.Current.CancellationToken)).Response;
         var updatedLatestVersion = updatedVersions.First();
         
-        updatedLatestVersion.VarVersion.Should().Be(latestVersion);
+        updatedLatestVersion.Version.Should().Be(latestVersion);
         updatedLatestVersion.VersionGroup.Should().Be(latestVersion); // New version group starts at 1
     }
     
@@ -106,7 +106,7 @@ public class FileHistoryTest(
         
         // Get the versions to identify the first version number
         var versions = (await _filesApi.GetFileVersionInfoAsync(file.Id, TestContext.Current.CancellationToken)).Response;
-        var firstVersion = versions.Last().VarVersion;
+        var firstVersion = versions.Last().Version;
         
         // Act
         var specificVersion = (await _filesApi.GetFileInfoAsync(file.Id, version: firstVersion, TestContext.Current.CancellationToken)).Response;
@@ -114,7 +114,7 @@ public class FileHistoryTest(
         // Assert
         specificVersion.Should().NotBeNull();
         specificVersion.Id.Should().Be(file.Id);
-        specificVersion.VarVersion.Should().Be(firstVersion);
+        specificVersion.Version.Should().Be(firstVersion);
     }
     
     private async Task UpdateFileContent(int fileId, string content)

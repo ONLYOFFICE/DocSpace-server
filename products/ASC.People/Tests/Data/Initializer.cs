@@ -30,7 +30,7 @@ using ASC.People.Tests.Factory;
 
 using MemberRequestDto = ASCPeople::ASC.People.ApiModels.RequestDto.MemberRequestDto;
 using PasswordHasher = ASC.Security.Cryptography.PasswordHasher;
-using WizardRequestsDto = DocSpace.Sdk.Model.WizardRequestsDto;
+using WizardRequestsDto = DocSpace.API.SDK.Model.WizardRequestsDto;
 
 namespace ASC.People.Tests.Data;
 
@@ -156,7 +156,7 @@ public static class Initializer
         
         var fakeMember = FakerMember.Generate();
         
-        var createMemberResponse = await _peopleFactory.PeopleProfilesApi.AddMemberWithHttpInfoAsync(new DocSpace.Sdk.Model.MemberRequestDto
+        var createMemberResponse = await _peopleFactory.PeopleProfilesApi.AddMemberWithHttpInfoAsync(new DocSpace.API.SDK.Model.MemberRequestDto
         {
             FromInviteLink = true,
             CultureName = "en-US",

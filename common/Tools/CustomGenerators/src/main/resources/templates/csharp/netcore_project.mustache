@@ -9,18 +9,19 @@
     <OutputType>Library</OutputType>
     <Authors>Ascensio System SIA &lt;integration@onlyoffice.com&gt; (https://www.onlyoffice.com)</Authors>
     <Company>Ascensio System SIA &lt;integration@onlyoffice.com&gt; (https://www.onlyoffice.com)</Company>
-    <AssemblyTitle>{{packageTitle}}</AssemblyTitle>
-    <Description>OpenAPI client for {{packageName}}</Description>
+    <AssemblyTitle>{{packageName}}</AssemblyTitle>
+    <Description>A simple C# SDK for integrating with the ONLYOFFICE DocSpace API</Description>
     <RootNamespace>{{packageName}}</RootNamespace>
     <Version>{{packageVersion}}</Version>
-    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\{{packageName}}.xml</DocumentationFile>{{#licenseId}}
-    <PackageLicenseExpression>{{.}}</PackageLicenseExpression>{{/licenseId}}
-    <RepositoryUrl>https://github.com/ONLYOFFICE/docspace-dotnet-sdk</RepositoryUrl>
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\{{packageName}}.xml</DocumentationFile>
+    <PackageLicenseExpression>{{licenseName}}</PackageLicenseExpression>
+    <RepositoryUrl>{{repositoryUrl}}</RepositoryUrl>
     <RepositoryType>git</RepositoryType>{{#releaseNote}}
     <PackageReleaseNotes>{{.}}</PackageReleaseNotes>{{/releaseNote}}{{#packageTags}}
     <PackageTags>{{{.}}}</PackageTags>{{/packageTags}}{{#nrt}}
     <Nullable>{{#useGenericHost}}enable{{/useGenericHost}}{{^useGenericHost}}annotations{{/useGenericHost}}</Nullable>{{/nrt}}
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,7 +30,6 @@
     {{/useCompareNetObjects}}
     {{^useGenericHost}}
     <PackageReference Include="JsonSubTypes" Version="2.0.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     {{/useGenericHost}}
     {{#useRestSharp}}
     <PackageReference Include="RestSharp" Version="112.0.0" />

@@ -10,7 +10,7 @@ using {{packageName}}.{{modelPackage}};
 using {{packageName}}.{{clientPackage}};
 using System.Reflection;
 {{^useGenericHost}}
-using Newtonsoft.Json;
+using System.Text.Json;
 {{/useGenericHost}}
 
 {{#models}}
@@ -58,7 +58,7 @@ namespace {{packageName}}.Test.Model
         public void {{classname}}DeserializeFrom{{parent}}Test()
         {
             // TODO uncomment below to test deserialize a {{classname}} from type {{parent}}
-            //Assert.IsType<{{parent}}>(JsonConvert.DeserializeObject<{{parent}}>(new {{classname}}().ToJson()));
+            //Assert.IsType<{{parent}}>(JsonSerializer.Deserialize<{{parent}}>(new {{classname}}().ToJson()));
         }
 
         {{/children}}

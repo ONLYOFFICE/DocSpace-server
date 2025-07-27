@@ -9,15 +9,16 @@
     {{/vendorExtensions.x-com-visible}}
     [DataContract(Name = "{{{name}}}")]
     {{#vendorExtensions.isApiDateTime}}
-    [JsonConverter(typeof(ApiDateTimeConverter))]
+    [System.Text.Json.Serialization.JsonConverter(typeof(ApiDateTimeConverter))]
     {{/vendorExtensions.isApiDateTime}}
     {{^useUnityWebRequest}}
     {{#discriminator}}
     {{#mappedModels.size}}
-    [JsonConverter(typeof(JsonSubtypes), "{{{discriminatorName}}}")]
+    [System.Text.Json.Serialization.JsonConverter(typeof(JsonPolymorphicConverter<{{classname}}>))]
+    [System.Text.Json.Serialization.JsonPolymorphicType(typeof({{{modelName}}}), "{{{discriminatorName}}}")]
     {{/mappedModels.size}}
     {{#mappedModels}}
-    [JsonSubtypes.KnownSubType(typeof({{{modelName}}}), "{{^vendorExtensions.x-discriminator-value}}{{{mappingName}}}{{/vendorExtensions.x-discriminator-value}}{{#vendorExtensions.x-discriminator-value}}{{{.}}}{{/vendorExtensions.x-discriminator-value}}")]
+    [System.Text.Json.Serialization.JsonPolymorphicType(typeof({{{modelName}}}), "{{^vendorExtensions.x-discriminator-value}}{{{mappingName}}}{{/vendorExtensions.x-discriminator-value}}{{#vendorExtensions.x-discriminator-value}}{{{.}}}{{/vendorExtensions.x-discriminator-value}}")]
     {{/mappedModels}}
     {{/discriminator}}
     {{/useUnityWebRequest}}
@@ -115,6 +116,8 @@
         {{/conditionalSerialization}}
         {{/isEnum}}
         {{/vars}}
+    
+    {{^vendorExtensions.isApiDateTime}}
     {{#hasRequired}}
     {{^hasOnlyReadOnly}}
         /// <summary>
@@ -132,6 +135,7 @@
         {{/isAdditionalPropertiesTrue}}
     {{/hasOnlyReadOnly}}
     {{/hasRequired}}
+    {{/vendorExtensions.isApiDateTime}}
         /// <summary>
         /// Initializes a new instance of the <see cref="{{classname}}" /> class.
         /// </summary>
@@ -143,6 +147,7 @@
     {{/hasOnlyReadOnly}}
         public {{classname}}({{#readWriteVars}}{{{datatypeWithEnum}}}{{#isEnum}}{{^isContainer}}{{^required}}?{{/required}}{{/isContainer}}{{/isEnum}} {{#lambda.camelcase_sanitize_param}}{{name}}{{/lambda.camelcase_sanitize_param}} = {{#defaultValue}}{{^isDateTime}}{{#isString}}{{^isEnum}}@{{/isEnum}}{{/isString}}{{{defaultValue}}}{{/isDateTime}}{{#isDateTime}}default{{/isDateTime}}{{/defaultValue}}{{^defaultValue}}default{{/defaultValue}}{{^-last}}, {{/-last}}{{/readWriteVars}}){{#parent}} : base({{#parentVars}}{{#lambda.camelcase_sanitize_param}}{{name}}{{/lambda.camelcase_sanitize_param}}{{^-last}}, {{/-last}}{{/parentVars}}){{/parent}}
         {
+            {{^vendorExtensions.isApiDateTime}}
             {{#vars}}
             {{^isInherited}}
             {{^isReadOnly}}
@@ -211,6 +216,7 @@
             {{#isAdditionalPropertiesTrue}}
             this.AdditionalProperties = new Dictionary<string, object>();
             {{/isAdditionalPropertiesTrue}}
+            {{/vendorExtensions.isApiDateTime}}
         }
 
         {{#vars}}
@@ -229,7 +235,7 @@
         [DataMember(Name = "{{baseName}}"{{#required}}, IsRequired = true{{/required}}, EmitDefaultValue = {{#vendorExtensions.x-emit-default-value}}true{{/vendorExtensions.x-emit-default-value}}{{^vendorExtensions.x-emit-default-value}}{{#required}}true{{/required}}{{^required}}{{#isBoolean}}true{{/isBoolean}}{{^isBoolean}}{{#isNullable}}true{{/isNullable}}{{^isNullable}}false{{/isNullable}}{{/isBoolean}}{{/required}}{{/vendorExtensions.x-emit-default-value}})]
         {{#isDate}}
         {{^supportsDateOnly}}
-        [JsonConverter(typeof(OpenAPIDateConverter))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(OpenAPIDateConverter))]
         {{/supportsDateOnly}}
         {{/isDate}}
         {{#deprecated}}
@@ -252,7 +258,7 @@
         {{#isReadOnly}}
         [DataMember(Name = "{{baseName}}"{{#required}}, IsRequired = true{{/required}}, EmitDefaultValue = {{#vendorExtensions.x-emit-default-value}}true{{/vendorExtensions.x-emit-default-value}}{{^vendorExtensions.x-emit-default-value}}{{#required}}true{{/required}}{{^required}}{{#isBoolean}}true{{/isBoolean}}{{^isBoolean}}{{#isNullable}}true{{/isNullable}}{{^isNullable}}false{{/isNullable}}{{/isBoolean}}{{/required}}{{/vendorExtensions.x-emit-default-value}})]
         {{#isDate}}
-        [JsonConverter(typeof(OpenAPIDateConverter))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(OpenAPIDateConverter))]
         {{/isDate}}
         {{#deprecated}}
         [Obsolete]
@@ -270,7 +276,7 @@
         {{/isReadOnly}}
         {{^isReadOnly}}
         {{#isDate}}
-        [JsonConverter(typeof(OpenAPIDateConverter))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(OpenAPIDateConverter))]
         {{/isDate}}
         [DataMember(Name = "{{baseName}}"{{#required}}, IsRequired = true{{/required}}, EmitDefaultValue = {{#vendorExtensions.x-emit-default-value}}true{{/vendorExtensions.x-emit-default-value}}{{^vendorExtensions.x-emit-default-value}}{{#required}}true{{/required}}{{^required}}{{#isBoolean}}true{{/isBoolean}}{{^isBoolean}}{{#isNullable}}true{{/isNullable}}{{^isNullable}}false{{/isNullable}}{{/isBoolean}}{{/required}}{{/vendorExtensions.x-emit-default-value}})]
         {{#deprecated}}
@@ -305,7 +311,7 @@
         /// <summary>
         /// Gets or Sets additional properties
         /// </summary>
-        [JsonExtensionData]
+        [System.Text.Json.Serialization.JsonExtensionData]
         public IDictionary<string, object> AdditionalProperties { get; set; }
 
         {{/isAdditionalPropertiesTrue}}
@@ -315,7 +321,7 @@
         /// <returns>String presentation of the object</returns>
         public override string ToString()
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             sb.Append("class {{classname}} {\n");
             {{#parent}}
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
@@ -336,7 +342,7 @@
         /// <returns>JSON string presentation of the object</returns>
         public {{#parent}}{{^isArray}}{{^isMap}}override {{/isMap}}{{/isArray}}{{/parent}}{{^parent}}virtual {{/parent}}string ToJson()
         {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
+            return JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true });
         }
         {{#equatable}}
 
@@ -437,9 +443,9 @@
     {{#vendorExtensions.isApiDateTime}}
     public class ApiDateTimeConverter : JsonConverter<ApiDateTime>
     {
-        public override ApiDateTime ReadJson(JsonReader reader, Type objectType, ApiDateTime existingValue, bool hasExistingValue, Newtonsoft.Json.JsonSerializer serializer)
+        public override ApiDateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            var jsonString = reader.Value.ToString();
+            var jsonString = reader.GetString();
 
             if (DateTimeOffset.TryParse(jsonString, out var dateTimeOffset))
             {
@@ -451,13 +457,13 @@
             }
             else
             {
-                throw new JsonSerializationException($"Unable to parse datetime: {jsonString}");
+                throw new JsonException($"Unable to parse datetime: {jsonString}");
             }
         }
 
-        public override void WriteJson(JsonWriter writer, ApiDateTime value, Newtonsoft.Json.JsonSerializer serializer)
+        public override void Write(Utf8JsonWriter writer, ApiDateTime value, JsonSerializerOptions options)
         {
-            writer.WriteValue(value.UtcTime.ToString("o"));
+            writer.WriteStringValue(value.UtcTime.ToString("o"));
         }
     }
     {{/vendorExtensions.isApiDateTime}}

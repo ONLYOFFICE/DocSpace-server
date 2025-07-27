@@ -129,6 +129,7 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/folder/{folderId}</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "New folder parameters", typeof(FolderDto<int>))]
+    [SwaggerResponse(200, "New folder parameters", typeof(FolderDto<string>))]
     [HttpPost("folder/{folderId}")]
     public async Task<FolderDto<T>> CreateFolder(CreateFolderRequestDto<T> inDto)
     {
@@ -164,6 +165,8 @@ public abstract class FoldersController<T>(
     /// </short>
     /// <path>api/2.0/files/folder/{folderId}/order</path>
     [Tags("Files / Folders")]
+    [SwaggerResponse(200, "List of file operations", typeof(FolderDto<int>))]
+    [SwaggerResponse(200, "List of file operations", typeof(FolderDto<string>))]
     [HttpPut("folder/{folderId}/order")]
     public async Task<FolderDto<T>> SetFolderOrder(OrderFolderRequestDto<T> inDto)
     {
@@ -182,6 +185,7 @@ public abstract class FoldersController<T>(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Folder contents", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(200, "Folder contents", typeof(FolderContentDto<string>))]
     [SwaggerResponse(403, "You don't have enough permission to view the folder content")]
     [SwaggerResponse(404, "The required folder was not found")]
     [AllowAnonymous]
@@ -282,6 +286,7 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/folder/{folderId}</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Folder parameters", typeof(FolderDto<int>))]
+    [SwaggerResponse(200, "Folder parameters", typeof(FolderDto<string>))]
     [SwaggerResponse(403, "You don't have enough permission to rename the folder")]
     [HttpPut("folder/{folderId}")]
     public async Task<FolderDto<T>> RenameFolder(CreateFolderRequestDto<T> inDto)

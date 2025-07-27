@@ -19,9 +19,9 @@ global using ASC.Migrations.Core;
 global using Bogus;
 global using Bogus.DataSets;
 
-global using DocSpace.Sdk.Api;
-global using DocSpace.Sdk.Client;
-global using DocSpace.Sdk.Model;
+global using DocSpace.API.SDK.Api;
+global using DocSpace.API.SDK.Client;
+global using DocSpace.API.SDK.Model;
 
 global using DotNet.Testcontainers.Containers;
 
@@ -52,17 +52,17 @@ global using Testcontainers.Redis;
 
 global using Xunit;
 
-global using ApiDateTime = DocSpace.Sdk.Model.ApiDateTime;
-global using CreateFolder = DocSpace.Sdk.Model.CreateFolder;
-global using CreateRoomRequestDto = DocSpace.Sdk.Model.CreateRoomRequestDto;
-global using ExternalShareRequestParam = DocSpace.Sdk.Model.ExternalShareRequestParam;
-global using FileLinkRequest = DocSpace.Sdk.Model.FileLinkRequest;
-global using FileOperationDto = DocSpace.Sdk.Model.FileOperationDto;
-global using FileShare = DocSpace.Sdk.Model.FileShare;
-global using FileShareDto = DocSpace.Sdk.Model.FileShareDto;
-global using FolderLinkRequest = DocSpace.Sdk.Model.FolderLinkRequest;
-global using FolderType = DocSpace.Sdk.Model.FolderType;
-global using RoomType = DocSpace.Sdk.Model.RoomType;
+global using ApiDateTime = DocSpace.API.SDK.Model.ApiDateTime;
+global using CreateFolder = DocSpace.API.SDK.Model.CreateFolder;
+global using CreateRoomRequestDto = DocSpace.API.SDK.Model.CreateRoomRequestDto;
+global using ExternalShareRequestParam = DocSpace.API.SDK.Model.ExternalShareRequestParam;
+global using FileLinkRequest = DocSpace.API.SDK.Model.FileLinkRequest;
+global using FileOperationDto = DocSpace.API.SDK.Model.FileOperationDto;
+global using FileShare = DocSpace.API.SDK.Model.FileShare;
+global using FileShareDto = DocSpace.API.SDK.Model.FileShareDto;
+global using FolderLinkRequest =DocSpace.API.SDK.Model.FolderLinkRequest;
+global using FolderType = DocSpace.API.SDK.Model.FolderType;
+global using RoomType = DocSpace.API.SDK.Model.RoomType;
 global using User = ASC.Files.Tests.Data.User;
 
 global using WebApiProgram = ASCWebApi::Program;

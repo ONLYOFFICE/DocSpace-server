@@ -356,6 +356,10 @@ public class EditorConfiguration<T>(
                 title = FilesJSResource.TitleNewFilePresentation;
                 break;
 
+            case FileType.Pdf:
+                title = FilesJSResource.TitleNewFilePdfFormText;
+                break;
+
             default:
                 return null;
         }
