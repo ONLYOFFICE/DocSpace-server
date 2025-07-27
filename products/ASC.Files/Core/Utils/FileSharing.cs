@@ -520,10 +520,10 @@ public class FileSharing(
         }
 
         var canEditAccess = await fileSecurity.CanEditAccessAsync(entry);
-
+        var canEditInternal = await fileSecurity.CanEditInternalAsync(entry);
         await foreach (var record in fileSecurity.GetPureSharesAsync(entry, subjects))
         {
-            yield return await ToAceAsync(entry, record, canEditAccess);
+            yield return await ToAceAsync(entry, record, canEditAccess, canEditInternal);
         }
     }
 
@@ -535,7 +535,8 @@ public class FileSharing(
         }
 
         var canEditAccess = await fileSecurity.CanEditAccessAsync(entry);
-
+        var canEditInternal = await fileSecurity.CanEditInternalAsync(entry);
+        
         var canAccess = entry is Folder<T> folder && DocSpaceHelper.IsRoom(folder.FolderType)
             ? await CheckAccessAsync(entry, filterType)
             : canEditAccess;
@@ -562,7 +563,7 @@ public class FileSharing(
 
         await foreach (var record in records)
         {
-            yield return await ToAceAsync(entry, record, canEditAccess);
+            yield return await ToAceAsync(entry, record, canEditAccess, canEditInternal);
         }
     }
 
@@ -603,6 +604,7 @@ public class FileSharing(
         var result = new List<AceWrapper>();
         var shares = await fileSecurity.GetSharesAsync(entry);
         var canEditAccess = await fileSecurity.CanEditAccessAsync(entry);
+        var canEditInternal = await fileSecurity.CanEditInternalAsync(entry);
         var canReadLinks = await fileSecurity.CanReadLinksAsync(entry);
         
         var records = shares
@@ -623,7 +625,7 @@ public class FileSharing(
                 continue;
             }
 
-            var ace = await ToAceAsync(entry, r, canEditAccess);
+            var ace = await ToAceAsync(entry, r, canEditAccess, canEditInternal);
             
             if (ace.SubjectType == SubjectType.Group && ace.Id == Constants.LostGroupInfo.ID)
             {
@@ -910,7 +912,7 @@ public class FileSharing(
         yield return owner;
     }
 
-    private async Task<AceWrapper> ToAceAsync<T>(FileEntry<T> entry, FileShareRecord<T> record, bool canEditAccess)
+    private async Task<AceWrapper> ToAceAsync<T>(FileEntry<T> entry, FileShareRecord<T> record, bool canEditAccess, bool canEditInternal)
     {
         var w = new AceWrapper
         {
@@ -919,16 +921,10 @@ public class FileSharing(
             Access = record.Share,
             FileShareOptions = record.Options,
             SubjectType = record.SubjectType,
-            CanEditAccess = canEditAccess
+            CanEditInternal = canEditInternal
         };
-
-        if (w.SubjectType is SubjectType.User or SubjectType.Group)
-        {
-            w.CanEditAccess = w.CanEditAccess && authContext.CurrentAccount.ID != w.Id;
-        } else if ( entry is Folder<T> { FolderType: not FolderType.CustomRoom})
-        {
-            w.CanEditAccess = false;
-        }
+        
+        w.CanEditAccess = authContext.CurrentAccount.ID != w.Id && w.SubjectType is SubjectType.User or SubjectType.Group && canEditAccess;
         
         if (!record.IsLink)
         {
@@ -970,6 +966,7 @@ public class FileSharing(
         w.SubjectName = record.Options.Title;
         w.Link = await urlShortener.GetShortenLinkAsync(link);
         w.SubjectGroup = true;
+        w.CanEditAccess = false;
         w.FileShareOptions.Password = await externalShare.GetPasswordAsync(w.FileShareOptions.Password);
         w.SubjectType = record.SubjectType;
         var room = await daoFactory.GetCacheFolderDao<T>().GetParentFoldersAsync(entry is Folder<T> folder ? folder.Id : entry.ParentId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));

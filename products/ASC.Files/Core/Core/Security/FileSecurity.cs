@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel;
+
 using Actions = ASC.Web.Studio.Core.Notify.Actions;
 
 namespace ASC.Files.Core.Security;
@@ -219,8 +221,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                     FilesSecurityActions.FillingStatus,
                     FilesSecurityActions.ResetFilling,
                     FilesSecurityActions.StopFilling,
-                    FilesSecurityActions.OpenForm,
-                    FilesSecurityActions.EditAccess
+                    FilesSecurityActions.OpenForm
                 }
             },
             {
@@ -481,6 +482,11 @@ public class FileSecurity(IDaoFactory daoFactory,
     public async Task<bool> CanEditAccessAsync<T>(FileEntry<T> entry)
     {
         return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.EditAccess);
+    }
+
+    public async Task<bool> CanEditInternalAsync<T>(FileEntry<T> entry)
+    {
+        return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.EditInternal);
     }
 
     public async Task<bool> CanEditHistoryAsync<T>(FileEntry<T> entry)
@@ -1049,10 +1055,15 @@ public class FileSecurity(IDaoFactory daoFactory,
                     return false;
                 }
 
+                if (action == FilesSecurityActions.EditInternal && folder.FolderType is FolderType.VirtualRooms or FolderType.VirtualDataRoom)
+                {
+                    return false;
+                }
+                
                 if (!isGuest)
                 {
                     if (folder.FolderType == FolderType.USER)
-                    {
+                    {                
                         return folder.CreateBy == userId && action is FilesSecurityActions.Create or FilesSecurityActions.CopyTo or FilesSecurityActions.MoveTo or FilesSecurityActions.FillForms;
                     }
 
@@ -1144,7 +1155,6 @@ public class FileSecurity(IDaoFactory daoFactory,
                     return true;
                 }
                 break;
-
             case FolderType.RoomTemplates:
                 if (action is FilesSecurityActions.FillForms 
                     or FilesSecurityActions.EditHistory 
@@ -1787,6 +1797,7 @@ public class FileSecurity(IDaoFactory daoFactory,
                         break;
                 }
                 break;
+            case FilesSecurityActions.EditInternal:
             case FilesSecurityActions.EditAccess:
             case FilesSecurityActions.ReadLinks:
                 switch (e.RootFolderType)
@@ -3017,6 +3028,9 @@ public class FileSecurity(IDaoFactory daoFactory,
         StopFilling,
 
         [SwaggerEnum("Open form")]
-        OpenForm
+        OpenForm,
+        
+        [Description("Edit internal")]
+        EditInternal
     }
 }

@@ -88,6 +88,11 @@ public class AceWrapper : IMapFrom<RoomInvitation>
     public bool CanEditAccess { get; set; }
 
     /// <summary>
+    /// Determines whether internal access can be edited.
+    /// </summary>
+    public bool CanEditInternal { get; set; }
+
+    /// <summary>
     /// Determines whether the user has permission to modify the deny download setting for the file share.
     /// </summary>
     public bool CanEditDenyDownload { get; set; } = true;

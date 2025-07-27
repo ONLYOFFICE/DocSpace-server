@@ -58,6 +58,11 @@ public class FileShareDto
     public bool CanEditAccess { get; set; }
 
     /// <summary>
+    /// Indicates whether internal editing permissions are granted.
+    /// </summary>
+    public bool CanEditInternal { get; set; }
+
+    /// <summary>
     /// Determines whether the user has permission to modify the deny download setting for the file share.
     /// </summary>
     public bool CanEditDenyDownload { get; set; }
@@ -155,6 +160,7 @@ public class FileShareDtoHelper(
             IsOwner = aceWrapper.Owner,
             IsLocked = aceWrapper.LockedRights,
             CanEditAccess = aceWrapper.CanEditAccess,
+            CanEditInternal = aceWrapper.CanEditInternal,
             CanEditDenyDownload = aceWrapper.CanEditDenyDownload,
             SubjectType = aceWrapper.SubjectType
         };
