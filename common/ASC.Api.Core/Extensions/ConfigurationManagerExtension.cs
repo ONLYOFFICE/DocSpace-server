@@ -61,7 +61,8 @@ public static class ConfigurationManagerExtension
             .AddJsonFile("redis.json", optional: true, reloadOnChange: true)
             .AddJsonFile($"redis.{env.EnvironmentName}.json", optional: true, reloadOnChange: true)
             .AddJsonFile("zookeeper.json", optional: true, reloadOnChange: true)
-            .AddJsonFile($"zookeeper.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
+            .AddJsonFile($"zookeeper.{env.EnvironmentName}.json", optional: true, reloadOnChange: true)
+            .AddJsonFile(Path.Combine($"document-formats", "onlyoffice-docs-formats.json"));
 
         return config;
     }

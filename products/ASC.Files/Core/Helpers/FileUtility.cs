@@ -27,32 +27,77 @@
 namespace ASC.Files.Core.Helpers;
 
 [Singleton]
-public class FileUtilityConfiguration(IConfiguration configuration)
+public class FileUtilityConfiguration
 {
-    public readonly List<string> ExtsIndexing = configuration.GetSection("files:index").Get<List<string>>() ?? [];
-    public readonly List<string> ExtsImagePreviewed  = configuration.GetSection("files:viewed-images").Get<List<string>>() ?? [];
-    public readonly List<string> ExtsMediaPreviewed = configuration.GetSection("files:viewed-media").Get<List<string>>() ?? [];
-    public readonly List<string> ExtsWebPreviewed = configuration.GetSection("files:docservice:viewed-docs").Get<List<string>>() ?? [];
-    public readonly List<string> ExtsWebEdited = configuration.GetSection("files:docservice:edited-docs").Get<List<string>>() ?? [];
-    public readonly List<string> ExtsWebEncrypt = configuration.GetSection("files:docservice:encrypted-docs").Get<List<string>>() ?? [];
-    public readonly List<string> ExtsWebReviewed  = configuration.GetSection("files:docservice:reviewed-docs").Get<List<string>>() ?? [];
-    public readonly List<string> ExtsWebCustomFilterEditing = configuration.GetSection("files:docservice:customfilter-docs").Get<List<string>>() ?? [];
-    public readonly List<string> ExtsWebRestrictedEditing  = configuration.GetSection("files:docservice:formfilling-docs").Get<List<string>>() ?? [];
-    public readonly List<string> ExtsWebCommented = configuration.GetSection("files:docservice:commented-docs").Get<List<string>>() ?? [];
-    public readonly List<string> ExtsWebTemplate = configuration.GetSection("files:docservice:template-docs").Get<List<string>>() ?? [];
-    public readonly List<string> ExtsMustConvert = configuration.GetSection("files:docservice:convert-docs").Get<List<string>>() ?? [];
-    public readonly List<string> ExtsCoAuthoring = configuration.GetSection("files:docservice:coauthor-docs").Get<List<string>>() ?? [];
-    public readonly string MasterFormExtension = configuration["files:docservice:internal-form"] ?? ".docxf";
-    public readonly List<LogoColor> LogoColors = configuration.GetSection("logocolors").Get<List<LogoColor>>() ?? [];
-    private readonly string _forceSave = configuration["files:docservice:forcesave"];
-    public readonly int MaxPinnedRooms = int.Parse(configuration["files:pin"] ?? "10");
-    public readonly Dictionary<FileType, string> InternalExtension = new()
+    public readonly List<FileFormatConfig> Formats;
+    public readonly List<string> ExtsIndexing;
+    public readonly List<string> ExtsImagePreviewed;
+    public readonly List<string> ExtsMediaPreviewed;
+    public readonly List<string> ExtsWebPreviewed;
+    public readonly List<string> ExtsWebEdited;
+    public readonly List<string> ExtsWebEncrypt;
+    public readonly List<string> ExtsWebReviewed;
+    public readonly List<string> ExtsWebCustomFilterEditing;
+    public readonly List<string> ExtsWebRestrictedEditing;
+    public readonly List<string> ExtsWebCommented;
+    public readonly List<string> ExtsWebTemplate;
+    public readonly List<string> ExtsMustConvert;
+    public readonly List<string> ExtsCoAuthoring;
+    public readonly string MasterFormExtension;
+    public readonly List<LogoColor> LogoColors;
+    private readonly string _forceSave;
+    public readonly int MaxPinnedRooms;
+    public readonly Dictionary<FileType, string> InternalExtension;
+
+    public FileUtilityConfiguration(IConfiguration configuration)
+    {
+        Formats = configuration.GetSection("formats").Get<List<FileFormatConfig>>() ?? [];
+        ExtsMustConvert = [];
+        ExtsWebEdited = [];
+        ExtsWebPreviewed = [];
+        
+        foreach (var format in Formats)
         {
-                { FileType.Document, configuration["files:docservice:internal-doc"] ?? ".docx" },
-                { FileType.Spreadsheet, configuration["files:docservice:internal-xls"] ?? ".xlsx" },
-                { FileType.Presentation, configuration["files:docservice:internal-ppt"] ?? ".pptx" },
-                { FileType.Pdf, configuration["files:docservice:internal-pdf"] ?? ".pdf" }
+            if(format.Actions.Contains("auto-convert"))
+            {
+                ExtsMustConvert.Add(format.Name);
+            }
+            
+            if(format.Actions.Contains("edit"))
+            {
+                ExtsWebEdited.Add(format.Name);
+            }
+            
+            if(format.Actions.Contains("view"))
+            {
+                ExtsWebPreviewed.Add(format.Name);
+            }
+        }
+        
+        ExtsWebEncrypt = configuration.GetSection("files:docservice:encrypted-docs").Get<List<string>>() ?? [];
+        ExtsWebReviewed = configuration.GetSection("files:docservice:reviewed-docs").Get<List<string>>() ?? [];
+        ExtsWebCustomFilterEditing = configuration.GetSection("files:docservice:customfilter-docs").Get<List<string>>() ?? [];
+        ExtsWebRestrictedEditing = configuration.GetSection("files:docservice:formfilling-docs").Get<List<string>>() ?? [];
+        ExtsWebCommented = configuration.GetSection("files:docservice:commented-docs").Get<List<string>>() ?? [];
+        ExtsWebTemplate = configuration.GetSection("files:docservice:template-docs").Get<List<string>>() ?? [];
+        ExtsCoAuthoring = configuration.GetSection("files:docservice:coauthor-docs").Get<List<string>>() ?? [];
+        MasterFormExtension = configuration["files:docservice:internal-form"] ?? ".docxf";
+        
+        ExtsIndexing = configuration.GetSection("files:index").Get<List<string>>() ?? [];
+        ExtsImagePreviewed = configuration.GetSection("files:viewed-images").Get<List<string>>() ?? [];
+        ExtsMediaPreviewed = configuration.GetSection("files:viewed-media").Get<List<string>>() ?? [];
+        
+        LogoColors = configuration.GetSection("logocolors").Get<List<LogoColor>>() ?? [];
+        _forceSave = configuration["files:docservice:forcesave"];
+        MaxPinnedRooms = int.Parse(configuration["files:pin"] ?? "10");
+        InternalExtension = new Dictionary<FileType, string>
+        {
+            { FileType.Document, configuration["files:docservice:internal-doc"] ?? ".docx" },
+            { FileType.Spreadsheet, configuration["files:docservice:internal-xls"] ?? ".xlsx" },
+            { FileType.Presentation, configuration["files:docservice:internal-ppt"] ?? ".pptx" },
+            { FileType.Pdf, configuration["files:docservice:internal-pdf"] ?? ".pdf" }
         };
+    }
 
     internal bool GetCanForcesave()
     {
@@ -110,9 +155,8 @@ public enum Accessibility
 public class FileUtility(
         FileUtilityConfiguration fileUtilityConfiguration,
         FilesLinkUtility filesLinkUtility,
-        IDbContextFactory<FilesDbContext> dbContextFactory,
         DaoFactory daoFactory)
-    {
+{
     #region method
 
     public static string GetFileExtension(string fileName)
@@ -359,30 +403,24 @@ public class FileUtility(
             return _extsConvertible;
         }
         
-        List<FilesConverts> list;
-        
-        await using (var filesDbContext = await dbContextFactory.CreateDbContextAsync())
+        foreach (var inputFormat in fileUtilityConfiguration.Formats)
         {
-            list = await filesDbContext.FilesConvertsAsync().ToListAsync();
-        }
-
-        foreach (var item in list)
-        {
-            var input = item.Input;
-            var output = item.Output;
-            if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(output))
+            foreach (var output in inputFormat.Convert)
             {
-                continue;
-            }
+                var input = inputFormat.Name.ToLower();
+                
+                if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(output))
+                {
+                    continue;
+                }
+                
+                if (!_extsConvertible.ContainsKey(input))
+                {
+                    _extsConvertible[input] = [];
+                }
 
-            input = input.ToLower().Trim();
-            output = output.ToLower().Trim();
-            if (!_extsConvertible.ContainsKey(input))
-            {
-                _extsConvertible[input] = [];
+                _extsConvertible[input].Add(output);
             }
-
-            _extsConvertible[input].Add(output);
         }
 
         _semaphoreSlim.Release();
