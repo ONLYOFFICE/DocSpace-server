@@ -156,7 +156,15 @@ public class FileSharingAceHelper(
 
                     if (w.SubjectType is SubjectType.PrimaryExternalLink or SubjectType.ExternalLink)
                     {
-                        w.FileShareOptions.Internal = false;
+                        if (room is { FolderType: FolderType.VirtualDataRoom})
+                        {
+                            w.FileShareOptions.Internal = true;
+                        }
+                        
+                        if (room is { FolderType: FolderType.PublicRoom})
+                        {
+                            w.FileShareOptions.Internal = false;
+                        }
                     }
                 }
             } 
