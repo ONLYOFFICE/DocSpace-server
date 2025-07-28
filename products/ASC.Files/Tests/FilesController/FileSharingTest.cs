@@ -228,7 +228,7 @@ public class FileSharingTest(
         var initialLinkParams = new FileLinkRequest(
             access: fileShare,
             primary: primary,
-            varInternal: varInternal
+            @internal: varInternal
         );
 
         if (expirationDate != null)

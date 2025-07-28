@@ -1,9 +1,6 @@
-## {{npmName}}@{{npmVersion}}
+# {{packageName}}
 
 The ONLYOFFICE DocSpace SDK for TypeScript is a library that provides tools for integrating and managing DocSpace features within your applications. It simplifies interaction with the DocSpace API by offering ready-to-use methods and models.
-
-- API version: {{appVersion}}
-- SDK version: {{packageVersion}}
 
 {{#infoUrl}}
 For more information, please visit [{{{infoUrl}}}]({{{infoUrl}}})
@@ -34,14 +31,6 @@ npm install
 npm run build
 ```
 
-### Publishing
-
-To publish the package to the npm registry:
-
-```bash
-npm publish
-```
-
 ### Consuming
 
 To use the SDK in your project, navigate to the root folder of your consuming project and run one of the following commands:
@@ -49,7 +38,7 @@ To use the SDK in your project, navigate to the root folder of your consuming pr
 #### From published package (recommended)
 
 ```bash
-npm install {{npmName}}@{{npmVersion}} --save
+npm install {{packageName}} --save
 ```
 
 #### From local build (not recommended)
@@ -99,20 +88,75 @@ npm install PATH_TO_GENERATED_PACKAGE --save
 {{/scopes}}
 {{/isOpenId}}
 
-
 {{/authMethods}}
+
+## Getting Started
+
+Please follow the [building](#building) instruction and execute the following TS code:
+
+```typescript
+{{#apiInfo}}{{#apis}}{{#-first}}{{#operations}}{{#operation}}{{#-first}}
+import { Configuration, {{{classname}}} } from '{{{packageName}}}';
+
+const config = new Configuration ({
+    basePath: "YOUR SERVER URL",
+    {{#authMethods}}
+    {{#isBasic}}
+    {{#isBasicBasic}}
+    // Configure HTTP basic authorization: {{{name}}}
+    username: "YOUR USERNAME",
+    password: "YOUR PASSWORD",
+    {{/isBasicBasic}}
+    {{#isBasicBearer}}
+    // Configure Bearer{{#bearerFormat}} ({{{.}}}){{/bearerFormat}} access token for authorization: {{{name}}}
+    accessToken: "YOUR ACCESS TOKEN",
+    {{/isBasicBearer}}
+    {{/isBasic}}
+    {{#isApiKey}}
+    // Configure API key authorization: {{{name}}}
+    apiKey: "YOUR API KEY"
+    {{/isApiKey}}
+    {{/authMethods}}
+});
+
+const apiInstance = new {{{classname}}}(config);
+
+{{#hasParams}}
+{{#requiredParams}}const {{{paramName}}}: {{{dataType}}} = {{{example}}}; // {{{description}}}
+{{/requiredParams}}
+{{#optionalParams}}const opts: any = {
+{{#-first}}  {{/-first}}'{{{paramName}}}': {{{example}}}{{^-last}},{{/-last}} // {{{description}}}
+{{#-last}}};{{/-last}}
+{{/optionalParams}}
+{{/hasParams}}
+try {
+    const result = await apiInstance.{{{operationId}}}(
+      {{#hasParams}}{{#requiredParams}}{{{paramName}}}{{^-last}}, {{/-last}}{{/requiredParams}}{{#optionalParams}}{{#-last}}{{#hasRequiredParams}}, {{/hasRequiredParams}}opts{{/-last}}{{/optionalParams}}{{/hasParams}}
+    );
+    console.log('API called successfully. Returned data: ', result.data);
+  } catch (error) {
+    console.error(error);
+}
+
+{{/-first}}{{/operation}}{{/operations}}{{/-first}}{{/apis}}{{/apiInfo}}
+```
 
 ### Documentation for API Endpoints
 
 All URIs are relative to *{{{basePath}}}*
 
+<details><summary>API Endoints table</summary>
+
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
 {{#apiInfo}}{{#apis}}{{#operations}}{{#operation}}*{{classname}}* | [**{{operationId}}**]({{apiDocPath}}{{classname}}.md#{{operationIdLowerCase}}) | **{{httpMethod}}** {{path}} | {{summary}}
 {{/operation}}{{/operations}}{{/apis}}{{/apiInfo}}
+</details>
 
 ### Documentation For Models
 
+<details><summary>Models list</summary>
+
 {{#models}}{{#model}} - [{{{classname}}}]({{modelDocPath}}{{{classname}}}.md)
 {{/model}}{{/models}}
-
+</details>
