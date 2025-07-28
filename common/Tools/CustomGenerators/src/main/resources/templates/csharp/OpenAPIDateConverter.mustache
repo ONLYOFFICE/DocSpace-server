@@ -1,21 +1,35 @@
 {{>partial_header}}
-using Newtonsoft.Json.Converters;
 
 namespace {{packageName}}.Client
 {
     /// <summary>
     /// Formatter for 'date' openapi formats ss defined by full-date - RFC3339
-    /// see https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#data-types
     /// </summary>
-    public class OpenAPIDateConverter : IsoDateTimeConverter
+    public class OpenAPIDateConverter : JsonConverter<DateTime>
     {
+        private const string DateFormat = "yyyy-MM-dd";
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="OpenAPIDateConverter" /> class.
+        /// Reads and converts the JSON to type DateTime.
         /// </summary>
-        public OpenAPIDateConverter()
+        public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            // full-date   = date-fullyear "-" date-month "-" date-mday
-            DateTimeFormat = "yyyy-MM-dd";
+            if (reader.TokenType != JsonTokenType.String)
+                throw new JsonException();
+            
+            var dateString = reader.GetString();
+            if (DateTime.TryParseExact(dateString, DateFormat, null, System.Globalization.DateTimeStyles.None, out var date))
+                return date;
+                
+            throw new JsonException($"Unable to parse date. Expected format: {DateFormat}");
+        }
+
+        /// <summary>
+        /// Writes a DateTime value to JSON.
+        /// </summary>
+        public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
+        {
+            writer.WriteStringValue(value.ToString(DateFormat));
         }
     }
 }

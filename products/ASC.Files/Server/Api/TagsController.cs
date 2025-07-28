@@ -53,6 +53,7 @@ public abstract class TagsController<T>(FileStorageService fileStorageService,
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
+    [SwaggerResponse(200, "New file information", typeof(FileDto<string>))]
     [HttpPost("file/{fileId}/recent")]
     public async Task<FileDto<T>> AddFileToRecent(FileIdRequestDto<T> inDto)
     {

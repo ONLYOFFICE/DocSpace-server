@@ -1,13 +1,5 @@
 {{>partial_header}}
 
-using Polly;
-{{#useRestSharp}}
-using RestSharp;
-{{/useRestSharp}}
-{{#useHttpClient}}
-using System.Net.Http;
-{{/useHttpClient}}
-
 namespace {{packageName}}.Client
 {
     /// <summary>

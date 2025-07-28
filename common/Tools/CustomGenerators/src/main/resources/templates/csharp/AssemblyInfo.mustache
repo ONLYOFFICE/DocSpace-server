@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("{{packageTitle}}")]
+[assembly: AssemblyTitle("{{packageName}}")]
 [assembly: AssemblyDescription("{{packageDescription}}")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("{{packageCompany}}")]
@@ -35,6 +35,5 @@ using System.Runtime.InteropServices;
 // Settings which don't support asynchronous operations rely on non-public constructors
 // This is due to how RestSharp requires the type constraint `where T : new()` in places it probably shouldn't.
 [assembly: InternalsVisibleTo("RestSharp")]
-[assembly: InternalsVisibleTo("NewtonSoft.Json")]
 [assembly: InternalsVisibleTo("JsonSubTypes")]
 {{/supportsAsync}}

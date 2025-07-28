@@ -198,7 +198,7 @@ public class UpdateFileTest(
         await _filesClient.Authenticate(roomAdmin);
         var createdFile = await CreateFile("file_to_lock.docx", createdRoom.Id);
         
-        var exception = await Assert.ThrowsAsync<Docspace.Client.ApiException>(
+        var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesApi.LockFileAsync(createdFile.Id, new LockFileParameters(true), TestContext.Current.CancellationToken));
         
         exception.ErrorCode.Should().Be(403);
@@ -230,7 +230,7 @@ public class UpdateFileTest(
         
         await _filesClient.Authenticate(roomAdmin2);
 
-        var exception = await Assert.ThrowsAsync<Docspace.Client.ApiException>(
+        var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesApi.LockFileAsync(createdFile.Id, new LockFileParameters(), TestContext.Current.CancellationToken));
         
         exception.ErrorCode.Should().Be(403);

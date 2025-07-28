@@ -1989,4 +1989,52 @@ $TrulyYours</value>
   <data name="subject_user_type_changed" xml:space="preserve">
     <value>O seu tipo de utilizador do DocSpace foi alterado</value>
   </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Ir para Serviços</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Aceda às Definições da Carteira</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Olá, $UserName!
+
+Estamos entrando em contato para informar que a renovação automática do seu plano de serviço adquirido não pôde ser concluída.
+
+Solicitamos que renove manualmente o seu plano de serviço atual (ou adquira um novo).
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Olá, $UserName!
+
+Estamos a contactá-lo para informar que o pagamento da sua subscrição será automaticamente debitado da sua conta dentro de 3 dias.
+
+Para garantir uma transação tranquila, por favor, confirme se há fundos suficientes disponíveis no seu método de pagamento.
+
+Caso tenha alguma dúvida ou necessite de assistência, entre em contacto com a nossa "equipa de suporte":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Olá, $UserName!
+
+Estamos a contactá-lo para informar que a recarga automática do saldo da DocSpace Wallet não foi bem-sucedida.
+
+Solicitamos que verifique manualmente e atualize o saldo da sua carteira.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Ação necessária: Não é possível renovar automaticamente o plano de serviço no seu ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Próximo pagamento da sua assinatura ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Ação necessária: Não é possível recarregar automaticamente o saldo da Carteira no seu ${LetterLogoText} DocSpace</value>
+  </data>
 </root>
