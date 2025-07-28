@@ -72,7 +72,7 @@ public static class ConfigurationManagerExtension
                 PropertyNameCaseInsensitive = true
             });
             
-            var memoryStream = new MemoryStream();
+            using var memoryStream = new MemoryStream();
             JsonSerializer.Serialize(memoryStream, new FileFormatConfigList { FileFormats = formats });
             memoryStream.Position = 0;
             config.AddJsonStream(memoryStream);
