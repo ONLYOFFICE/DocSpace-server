@@ -42,6 +42,7 @@ public class EmailValidationKeyModelHelper(
     AuditEventsRepository auditEventsRepository,
     LoginEventsRepository loginEventsRepository,
     TenantUtil tenantUtil,
+    InstanceCrypto instanceCrypto,
     CookiesManager cookiesManager,
     SecurityContext securityContext,
     TenantManager tenantManager)
@@ -72,6 +73,24 @@ public class EmailValidationKeyModelHelper(
         Guid.TryParse(userIdKey, out var userId);
 
         request.TryGetValue("first", out var first);
+
+        request.TryGetValue("enc", out var encryptedEmailKey);
+        bool.TryParse(encryptedEmailKey, out var encryptedEmail);
+
+        if (encryptedEmail && !string.IsNullOrEmpty(_email))
+        {
+            // Convert from URL-safe Base64 to standard Base64
+            var email = _email.ToString().Replace('-', '+').Replace('_', '/');
+
+            // Add padding if necessary
+            switch (email.Length % 4)
+            {
+                case 2: email += "=="; break;
+                case 3: email += "="; break;
+            }
+
+            _email = instanceCrypto.Decrypt(email);
+        }
 
         return new EmailValidationKeyModel
         {

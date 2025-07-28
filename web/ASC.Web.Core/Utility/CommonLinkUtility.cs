@@ -64,6 +64,7 @@ public class CommonLinkUtility(
         CoreSettings coreSettings,
         TenantManager tenantManager,
         UserManager userManager,
+        InstanceCrypto instanceCrypto,
         EmailValidationKeyProvider emailValidationKeyProvider,
         ILoggerProvider options,
         ExternalResourceSettingsHelper externalResourceSettingsHelper)
@@ -209,9 +210,9 @@ public class CommonLinkUtility(
         return (url, key);
     }
 
-    public string GetConfirmationEmailUrl(string email, ConfirmType confirmType, object postfix = null, Guid userId = default)
+    public string GetConfirmationEmailUrl(string email, ConfirmType confirmType, object postfix = null, Guid userId = default, bool encryptEmail = default)
     {
-        return GetFullAbsolutePath(GetConfirmationUrlRelative(email, confirmType, postfix, userId));
+        return GetFullAbsolutePath(GetConfirmationUrlRelative(email, confirmType, postfix, userId, encryptEmail));
     }
     
     public string GetConfirmationUrl(string key, ConfirmType confirmType, Guid userId = default)
@@ -219,14 +220,14 @@ public class CommonLinkUtility(
         return GetFullAbsolutePath(GetConfirmationUrlRelative(key, confirmType, userId));
     }
 
-    public string GetConfirmationUrlRelative(string email, ConfirmType confirmType, object postfix = null, Guid userId = default)
+    public string GetConfirmationUrlRelative(string email, ConfirmType confirmType, object postfix = null, Guid userId = default, bool encryptEmail = default)
     {
-        return GetConfirmationUrlRelative(_tenantManager.GetCurrentTenantId(), email, confirmType, postfix, userId);
+        return GetConfirmationUrlRelative(_tenantManager.GetCurrentTenantId(), email, confirmType, postfix, userId, encryptEmail);
     }
 
-    public string GetConfirmationUrlRelative(int tenantId, string email, ConfirmType confirmType, object postfix = null, Guid userId = default)
+    public string GetConfirmationUrlRelative(int tenantId, string email, ConfirmType confirmType, object postfix = null, Guid userId = default, bool encryptEmail = default)
     {
-        return $"confirm/{confirmType}?{GetToken(tenantId, email, confirmType, postfix, userId)}";
+        return $"confirm/{confirmType}?{GetToken(tenantId, email, confirmType, postfix, userId, encryptEmail)}";
     }
 
     public string GetConfirmationUrlRelative(string key, ConfirmType confirmType, Guid userId = default)
@@ -239,7 +240,7 @@ public class CommonLinkUtility(
         return $"type={confirmType}&uid={userId}";
     }
 
-    public string GetToken(int tenantId, string email, ConfirmType confirmType, object postfix = null, Guid userId = default)
+    public string GetToken(int tenantId, string email, ConfirmType confirmType, object postfix = null, Guid userId = default, bool encryptEmail = default)
     {
         var validationKey = emailValidationKeyProvider.GetEmailKey(email + confirmType + (postfix ?? ""), tenantId);
 
@@ -247,6 +248,12 @@ public class CommonLinkUtility(
 
         if (!string.IsNullOrEmpty(email))
         {
+            if (encryptEmail)
+            {
+                link += $"&enc=true";
+                email = instanceCrypto.Encrypt(email).Replace('+', '-').Replace('/', '_').Replace("=", ""); // make base64 url safe;
+            }
+
             link += $"&email={HttpUtility.UrlEncode(email)}";
         }
 

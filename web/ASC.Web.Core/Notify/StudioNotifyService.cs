@@ -97,7 +97,7 @@ public class StudioNotifyService(
 
         var hash = auditEventDate.ToString("s", CultureInfo.InvariantCulture);
 
-        var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(userInfo.Email, ConfirmType.PasswordChange, hash, userInfo.Id);
+        var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(userInfo.Email, ConfirmType.PasswordChange, hash, userInfo.Id, true);
 
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString(initialPasswordAssignment ? "ButtonSetPassword" : "ButtonChangePassword", GetCulture(userInfo));
 
@@ -1091,7 +1091,7 @@ public class StudioNotifyService(
 
         var hash = auditEventDate.ToString("s", CultureInfo.InvariantCulture);
 
-        var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(userInfo.Email, ConfirmType.PasswordChange, hash, userInfo.Id);
+        var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(userInfo.Email, ConfirmType.PasswordChange, hash, userInfo.Id, true);
 
         var cultureInfo = GetCulture(userInfo);
 
