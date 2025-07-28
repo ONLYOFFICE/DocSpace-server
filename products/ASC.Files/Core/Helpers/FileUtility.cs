@@ -51,7 +51,7 @@ public class FileUtilityConfiguration
 
     public FileUtilityConfiguration(IConfiguration configuration)
     {
-        Formats = configuration.GetSection("formats").Get<List<FileFormatConfig>>() ?? [];
+        Formats = configuration.GetSection("FileFormats").Get<List<FileFormatConfig>>() ?? [];
         ExtsMustConvert = [];
         ExtsWebEdited = [];
         ExtsWebPreviewed = [];
