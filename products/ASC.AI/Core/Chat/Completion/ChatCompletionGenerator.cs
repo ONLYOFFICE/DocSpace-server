@@ -35,13 +35,6 @@ public class ChatCompletionGenerator(
     ToolHolder toolHolder,
     IHistoryWriterFactory historyWriterFactory)
 {
-    private static readonly JsonSerializerOptions _serializerOptions = new()
-    {
-        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
-    };
-    
     public async IAsyncEnumerable<ChatCompletion> GenerateCompletionAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         HistoryWriter? historyWriter = null;
@@ -83,7 +76,7 @@ public class ChatCompletionGenerator(
                     if (historyWriter.IsNew)
                     {
                         yield return new ChatCompletion(EventType.Metadata, 
-                            JsonSerializer.Serialize(new Metadata { ChatId = historyWriter.Chat.Id }, _serializerOptions));
+                            JsonSerializer.Serialize(new Metadata { ChatId = historyWriter.Chat.Id }, JsonSerializerOptions.Web));
                     }
                 }
                     
@@ -96,19 +89,19 @@ public class ChatCompletionGenerator(
                 {
                     case TextContent textContent:
                         yield return new ChatCompletion(EventType.NewToken,
-                            JsonSerializer.Serialize(textContent, _serializerOptions));
+                            JsonSerializer.Serialize(textContent, JsonSerializerOptions.Web));
                         break;
                     case FunctionCallContent functionCall:
                         yield return new ChatCompletion(EventType.ToolCall,
-                            JsonSerializer.Serialize(functionCall, _serializerOptions));
+                            JsonSerializer.Serialize(functionCall, JsonSerializerOptions.Web));
                         break;
                     case FunctionResultContent functionResult:
                         yield return new ChatCompletion(EventType.ToolResult,
-                            JsonSerializer.Serialize(functionResult, _serializerOptions));
+                            JsonSerializer.Serialize(functionResult, JsonSerializerOptions.Web));
                         break;
                     case ErrorContent error:
                         yield return new ChatCompletion(EventType.Error, 
-                            JsonSerializer.Serialize(error, _serializerOptions));
+                            JsonSerializer.Serialize(error, JsonSerializerOptions.Web));
                         break;
                 }
             }
