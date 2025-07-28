@@ -102,15 +102,15 @@ public class EmailSenderSinkMessageCreator(TenantManager tenantManager, CoreConf
         m.Reciever = string.Join("|",to);
 
         var replyTag = message.Arguments.FirstOrDefault(x => x.Tag == "replyto");
-        if (replyTag is { Value: string value })
+        if (replyTag is { Value: string replyTagValue })
         {
             try
             {
-                m.ReplyTo = MailAddressUtils.Create(value).ToString();
+                m.ReplyTo = MailAddressUtils.Create(replyTagValue).ToString();
             }
             catch (Exception e)
             {
-                _logger.ErrorCreatingTag(replyTag.Value, e);
+                _logger.ErrorCreatingTag(replyTagValue, e);
             }
         }
 
@@ -127,16 +127,9 @@ public class EmailSenderSinkMessageCreator(TenantManager tenantManager, CoreConf
         }
 
         var autoSubmittedTag = message.Arguments.FirstOrDefault(x => x.Tag == "AutoSubmitted");
-        if (autoSubmittedTag is { Value: string })
+        if (autoSubmittedTag is { Value: string autoSubmittedTagValue })
         {
-            try
-            {
-                m.AutoSubmitted = autoSubmittedTag.Value.ToString();
-            }
-            catch (Exception e)
-            {
-                _logger.ErrorCreatingAutoSubmitted(replyTag.Value, e);
-            }
+            m.AutoSubmitted = autoSubmittedTagValue;
         }
 
         return m;

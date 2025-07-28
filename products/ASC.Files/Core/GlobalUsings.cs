@@ -76,6 +76,7 @@ global using ASC.Core.Common.Configuration;
 global using ASC.Files.Core.RoomTemplates.Events;
 
 global using ASC.Files.Core.RoomTemplates.Operations;
+global using ASC.Core.Billing;
 global using ASC.Core.Common.Core;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Context;
@@ -224,6 +225,12 @@ global using NetEscapades.EnumGenerators;
 global using Newtonsoft.Json.Linq;
 
 global using OpenSearch.Client;
+
+global using Polly;
+global using Polly.Contrib.WaitAndRetry;
+global using Polly.Registry;
+global using Polly.Retry;
+global using Polly.Timeout;
 
 global using ProtoBuf;
 
